@@ -1,4 +1,3 @@
-###THIS IS A TEST
 #### reading files ----
 
 readLinesFast = function(fname, x) {
