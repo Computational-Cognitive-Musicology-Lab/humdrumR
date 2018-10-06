@@ -1,0 +1,10 @@
+Package: MCFlow
+Title: The Musical Corpus of Flow dataset and toolkit.
+Version: 0.0.0.9000
+Authors@R: person("Nathaniel","Condit-Schultz",email="natsguitar@gmail.com",role=c("aut","cre"))
+Description: This package includes the complete Musical Corpus Flow as a data.frame data object. A set of functions for visualizing the corpus, or subsets of the corpus, is also included.
+Depends:
+    R (>= 3.2.2)
+License: GPL-3
+RoxygenNote: 5.0.0
+LazyData: true

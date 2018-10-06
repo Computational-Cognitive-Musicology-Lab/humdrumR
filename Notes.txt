@@ -1,0 +1,10 @@
+
+Features:
+
+	Collapse multiple spines to one spine with two layers
+
+	Ditto
+
+	Windowing
+
+	summary stuff

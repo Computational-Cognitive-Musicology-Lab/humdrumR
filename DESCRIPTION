@@ -1,0 +1,23 @@
+Package: humdrumR
+Title: humdrumR
+Version: 0.0.0.9000
+Authors@R: person("Nathaniel", "Condit-Schultz", email = "natsguitar@gmail.com", role = c("aut", "cre"))
+Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
+Depends: R(>= 3.2.2), composeR, stringi, stringr, data.table, lazyeval
+Imports: MASS, combinat, pander
+License: GPL-3
+LazyData: TRUE
+Encoding: UTF-8
+Collate: humdrumR.R
+         humBase.R
+         humClass.R
+         humSummary.R
+         humRead.R
+         humApply.R
+         humPlot.R
+         humInterpretations.R
+         humRegex.R
+         humValidation.R
+         humRhythm.R
+         humPitch.R
+RoxygenNote: 6.0.1
