@@ -554,9 +554,9 @@ index_withinPiece <- function(D, expr) {
             
             
 
-indexGLIM <- function(humdrumR) {
+indexGLIM <- function(humdrumR, targets = c('G', 'L', 'I', 'M', 'd')) {
   #####ReIndex GLIM tables to match indexing of D tables
-  GLIMd <- humdrumR@Humtable[c('G','L','I','M','d')]
+  GLIMd <- humdrumR@Humtable[targets]
   D     <- getD(humdrumR)
   # first add missing layers (columns)
   GLIMd <- lapply(GLIMd, 
