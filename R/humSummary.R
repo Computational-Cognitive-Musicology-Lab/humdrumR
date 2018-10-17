@@ -188,7 +188,7 @@ print.humReference <- function(refmat, showall = TRUE) {
     rowNms <- colnames(refmat)[-1:-2]
     rowNms <- padder(rowNms, max(nchar(rowNms)))
     
-    refmat <- refmat[ , lapply(.SD,  function(col) { sapply(col, collapsestr('\n\t\t')) })]
+    refmat <- refmat[ , lapply(.SD,  function(col) { sapply(col, paste, collapse = '\n\t\t') })]
     
     cat(paste(collapse = '\n\t', rowNms %str+% ': ' %str+% unlist(refmat[, -1:-2])))
   }  else {
@@ -474,4 +474,4 @@ print.humInterpretations <- function(interps, showall = TRUE) {
   }
   
 }
-  
+

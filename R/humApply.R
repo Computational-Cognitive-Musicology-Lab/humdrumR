@@ -15,7 +15,9 @@ tryform <- function(form) {
 #' @export
 setMethod('initialize', 'humFormula',
           function(.Object, formula = ~., meta = list(), pipe = list()) {
-            c('Form', 'Pipe') %<-% splitFormulaPipe(formula)
+            FormPipe <- splitFormulaPipe(formula)
+            Form <- FormPipe$Form
+            Pipe <- FormPipe$Pipe
             
             
             evaled <- tryform(Form)
@@ -221,6 +223,7 @@ setMethod('humApply',
               humfunc(humtab)
             } else {
               partApply(humtab, partition, humfunc)
+
             }
             newlayers <- newhumtab[['newlayers']]
             if (!is.null(newlayers)) newhumtab[ , newlayers := NULL]
@@ -929,4 +932,13 @@ hop <- function(vec, on = 1, off = 0) {
 #             
 #           })
 
-
+applySubstr <- function(func, regex) {
+ function(str) {
+  matches <- stringi::stri_extract_first(str, regex = regex)      
+  
+  modified <- func(matches)
+  stringi::stri_replace_first(str, regex = regex, replacement = modified)
+           
+                    
+ }
+}

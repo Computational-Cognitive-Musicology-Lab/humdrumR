@@ -1,4 +1,3 @@
-
  #' Humdrum Reference Codes (!!!).
  #' 
  #' This data frame contatains detailed information for the standard Humdrum
@@ -65,7 +64,7 @@ RErid <- function(...) {
   res <- unlist(list(...))
   
   humFunc(function(strs) {
-    for (re in res) strs <- strs %str-% re
+    for (re in res) strs <- gsub(re, '', strs)
     strs[strs == ''] <- '.'
     strs
   }) 
@@ -101,25 +100,7 @@ append2string <- function(app, sep = '') {
  humFunc(newFunc)
 }
 
-#' @export
-prepend2string <- function(prep, sep = '') {
-  newfunc <- function(str) paste(prep, sep, str, prep, collapse = '')
   
-  if (is.function(func)) body(newfunc) <- call('{', quote(prep <- prep(str)), body(newfunc))
-  
-  humFunc(newFunc)
-}
-
-#' @export
-subtract <- curriedfunction(alist(x = , from = ), {from - x})
-#' @export
-add      <- curriedfunction(alist(x = , y = ), {x + y})
-#' @export
-multiply <- curriedfunction(alist(x = , y = ), {x * y})
-#' @export
-divide   <- curriedfunction(alist(x = , by = ), {x / by})
-#' @export
-divideInt <- curriedfunction(alist(x = , by = ), {x %/% by})
 
 
 
@@ -263,15 +244,3 @@ apply2ExprAsString <- function(func, ...) {
 }
 
 
-
-#####TOOLS FOR THE COMBINE APPLIER
-
-combineTables = function(tableList) {
-  #' @export
-  stacked = unlist(cbind(tableList))
-
-  tapply(stacked, names(stacked), sum)
-}
-
-
-#

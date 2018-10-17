@@ -286,7 +286,10 @@ parseLocal = function(records) {
   measures <- lapply(measures, setNames, nm = recordn)
 
   #interpretations
-  c('exclusives', 'tandems') %<-% parseInterpretations(mat)
+  exclusivestandems <- parseInterpretations(mat)
+  exclusives <- exclusivetandems$Exclusive
+  tandems <- exclusivetandems$Tandem
+
   tandems <- setNames(unlist(tandems), names(tokens))
 
   #If there are multistops, the spines are no longer the same lengths, and have different recordns.
@@ -329,104 +332,6 @@ parseLocal = function(records) {
 
 }
 
-
-
-# parseLocal = function(records) {
-#           ###records is vector of strings
-#           ###(each string = one record)
-#           recordn <- grep('^!!', records, invert = TRUE, useBytes = TRUE)
-#           localrecords <- records[recordn]
-# 
-#           ###local is list of vectors of strings
-#           ###(each string = one record)
-#           local <- splitColumns(localrecords)
-# 
-#           #spine paths
-#           if (any(grepl('*^', localrecords, fixed = TRUE),
-#                   grepl('*v', localrecords, fixed = TRUE),
-#                   grepl('*+', localrecords, fixed = TRUE),
-#                   grepl('*-', init(localrecords), fixed = TRUE))) {
-#                     local = padSpinePaths(local)
-#           }
-# 
-#           ###mat is character matrix
-#           ###(row = record, col = spine/subspine)
-#           mat <- stri_list2matrix(local, byrow = TRUE)
-#           rownames(mat) <- recordn
-#           #sections
-#           sections <- parseSections(mat[ , 1])
-#           measures <- parseMeasures(mat[ , 1])
-# 
-#           #iterpretations
-#           c('exclusives', 'tandems') %<-% parseInterpretations(mat)
-# tandems <- rbindlist(lapply(tandems, splitTandems), use.names = TRUE, fill = TRUE)
-# 
-#           ###spines is list of vectors
-#           ###(each vector = spine/subspine)
-#           spines <- lapply(seq_len(ncol(mat)), function(j) mat[ , j])
-#           # ditto.spines <- lapply(spines, ditto)
-# 
-#           SpineNumbers <- cumsum(sapply(spines, function(spine) any(spine != 'xxx') && grepl('^\\*\\*', spine[spine != 'xxx'][1])))
-#           SpinePaths   <- unlist(tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1
-# 
-#           ####### Multistop tokens
-#           #flatten spines and get new recordns, and stopNs, for each.
-#           spines   <- lapply(spines, parseMultiStops) #outputs newspines with names in the format recordn.stopnumber (i.e., 23.01)
-#           # spines   <- lapply(spines, function(spine) `[<-`(spine, spine %in% c('.', '!', '=', '*'), NA_character_))
-# 
-#           #If there are multistops, the spines are no longer the same lengths, and have different recordns.
-#           # get rid of stuff before period, leaving only stop number
-#           stopNs   <- lapply(spines, asN %.% strrid('^.*\\.') %.% names)
-#           # get rid of stuff after period, leaving just record number
-#           recordns <- lapply(spines, strrid('\\..*$') %.% names)
-# 
-#           # expand objects to match new multistop recordn
-#           # recordns are still characters. This is necessarry, because we use them as names to index other objects.
-#           tandems     <- Map('[', tandems, recordns)
-#           # ditto.spines <- Map('[', ditto.spines, recordns) # FIX: multistops are not being dittoed separately
-# 
-#           measures    <- lapply(recordns, function(ind) lapply(measures, '[', ind))
-#           sections    <- lapply(recordns, function(ind) lapply(sections, '[', ind))
-# 
-#           # Don't need recordns to be characters anymore.
-#           recordns <- lapply(recordns, asN)
-# 
-#           ##DaTa is list of data.tables
-#           ##(each data.table = spine/subspine)
-#           Map(spines, #ditto.spines,
-#               SpineNumbers, SpinePaths,
-#               exclusives,  tandems,
-#               seq_along(spines), recordns, stopNs,
-#               measures, sections,
-#               f = function(spine, #ditto.spine,
-#                            spinenumber, spinepath,
-#                            exclusive, tandem,
-#                            colnumber, recn, stopn,
-#                            measure, section
-#                            ) {
-# 
-#                    data.table(Token = spine, # Ditto = ditto.spine,
-#                               Spine = spinenumber, Path = spinepath,
-#                               Exclusive = exclusive,  Tandem = tandem,
-#                               Column = colnumber, Record = recn, Stop = stopn,
-#                               Bar = measure$BarN,
-#                               DoubleBarline = measure$DoubleBars,
-#                               Barline = measure$Labels) -> dt
-#                    for (j in seq_along(section)) { dt[[paste0('Section', names(section)[j])]] <- section[[j]]  }
-# 
-#                    dt
-#             }
-#           ) -> DaTa
-# 
-#           DaTa <- data.table::rbindlist(DaTa)
-#           DaTa <- DaTa[Token != 'xxx'] # | is.na(Token)]
-# 
-# 
-#           # DaTa <- DaTa[!Token %in% c('.', '*', '!')]
-# 
-#           DaTa
-# 
-# }
 
 parseTokenType <- function(spine) {
   type <- rep('D', length(spine))

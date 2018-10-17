@@ -326,7 +326,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'humdrum
           function(x, i, value) {
             humtab <- getD(value)
             
-            removeLayers(value) <- colnames(humtab) %~x% 'Pipe'
+            removeLayers(value) <- grep('Pipe', colnames(humtab), value = TRUE)
             pipes <- pipeLayers(humtab)
             
             if (len0(pipes)) pipes <- activeString(value)
@@ -335,7 +335,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'humdrum
             
             colnames(humtab)[colnames(humtab) %in% pipes] <- i
             
-            if (any(colnames(humtab) %~% 'Pipe')) humtab[ , eval(colnames(humtab) %~x% 'Pipe') := NULL]
+            if (any(grepl('Pipe', colnames(humtab)))) humtab[ , eval(grep('Pipe', colnames(humtab), value = TRUE)) := NULL]
             
             putHumtab(value, drop = TRUE) <- humtab
             addLayers(value) <- i
@@ -593,7 +593,7 @@ indexGLIMd_piece <- function(humtab) {
   
   # remove all except last barline before first data record
   prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
-  if (lennot0(prebarline))   humtab <- humtab[!(Record < last(prebarline) & Type == 'M')]
+  if (lennot0(prebarline))   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
   
   #remove everything after last data record, except global stuff, '*-' or '=='
   humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
@@ -779,7 +779,7 @@ collapseRecords <- function(humdrumR, pad = FALSE, trim = NA, global = TRUE) {
   
   #collapse
   sep <- if (pad) '' else '\t'
-  humtab_rv[['Active']]  <- humtab_rv[ , sapply(Active, collapsestr(sep))]
+  humtab_rv[['Active']]  <- humtab_rv[ , sapply(Active, paste, collapse = sep)]
   
   humtab_rv
 }
@@ -842,7 +842,7 @@ print_humtab <- function(humdrumR, cutMiddle = FALSE, global = FALSE) {
   
 }
 
-local_path <- function(path) path %str-% '^.*/'
+local_path <- function(path) gsub('^.*/', '', path)
 
 print_humtab_humdrumAble <- function(humdrumR, cutMiddle = FALSE, global = FALSE) {
   humtab_rs <- collapseRecords(humdrumR, pad = TRUE, trim = 16L, global = global)
