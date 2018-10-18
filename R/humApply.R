@@ -932,13 +932,27 @@ hop <- function(vec, on = 1, off = 0) {
 #             
 #           })
 
-applySubstr <- function(func, regex) {
+#' @export
+.do2substr_inplace <- function(.func, regex) {
+          
  function(str) {
-  matches <- stringi::stri_extract_first(str, regex = regex)      
+  matches <- stringi::stri_extract_first(str = str, regex = regex)
   
-  modified <- func(matches)
-  stringi::stri_replace_first(str, regex = regex, replacement = modified)
-           
-                    
- }
+  modified <- .func(matches)
+  
+  stringi::stri_replace_first(str, regex = regex,  
+                              replacement = modified)
+  }
+}
+
+#' @export
+.do2substr <- function(.func, regex) {
+  
+  function(...) {
+     strs <- list(...)
+     matches <- lapply(strs, stringi::stri_extract_first, regex = regex)
+  
+     do.call('.func', matches)
+  }
+          
 }

@@ -79,8 +79,8 @@ reduce_fraction <- function(n ,d) {
 
 ###
 #' @export
-setMethod('as.numeric', signature = c(x = 'recip'),
-          function(x) { x@Numerator / x@Denominator })
+setMethod('as.double', signature = c(x = 'recip'),
+          function(x) { as.double(x@Numerator / x@Denominator) })
 
 #' @export
 setMethod('[', signature = c(x = 'recip'),
@@ -375,4 +375,5 @@ format.recip <- function(x, ...) {
   d[targets] <- paste0(d[targets], sapply(dots[targets], function(x) paste(rep('.', x), collapse ='')))
   
   output <- ifelse(n == 1L, d, paste0(d, '%', n))
+  output
   }

@@ -209,9 +209,13 @@ setMethod('length', signature = c('tonalInterval'),
                     length(getOctave(x))
           })
 
+setMethod('as.vector', signature = c('tonalInterval'),
+          function(x) { x })
+setMethod('is.vector', signature = c('tonalInterval'),
+          function(x) { TRUE })
 
 #' @export
-setMethod('show', signature = c(object = 'tonalInterval'), function(object) { print(as.kernpitch(object)) })
+setMethod('show', signature = c(object = 'tonalInterval'), function(object) { print(as.interval(object)) })
 
 
 
@@ -285,7 +289,7 @@ setMethod('as.interval', signature = c(x = 'tonalInterval'),
                     direction <- IfElse(fifth == 0, rep('', length(fifth)),  c('-', '+', '+')[sign(octave) + 2])
                     
                     generic <- fifth2genericinterval(fifth)
-                    octave <- abs(IfElse(octave < 0, octave + 1, octave))
+                    octave <- abs(IfElse(octave < 0, octave + 1, octave)) # problem here
                     
                     qualities <- fifth2quality(fifth, augment, diminish, major, minor)
                     
@@ -297,5 +301,73 @@ setMethod('as.interval', signature = c(x = 'tonalInterval'),
 
 
 
+#### READING TO tonalInterval
 
+lettername2fifth <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2
+accidental2fifth <- function(acc, sharp = '#', flat = '-') {
+          sharps <- stringi::stri_count_fixed(acc, pattern = sharp)
+          flats  <- stringi::stri_count_fixed(acc, pattern = flat)
+          
+          (7 * sharps) - (7 * flats)
+}
+
+# FROM kernpitch
+
+from.kernpitch2components <- function(str) {
+          letters     <- stringi::stri_extract_first(str, regex = '([A-Ga-g])\\1*')
+          
+          accidentals <- stringi::stri_extract_first(str, regex = '([#-])\\1*')
+          accidentals[is.na(accidentals)] <- ''
+          
+          nletters <- nchar(letters)
+          upper    <- is.upper(letters)
+          sciOct <- IfElse(upper, 0 - nletters, nletters - 1) + 4
+          
+          letters <- toupper(substr(letters, 0, 1))
+          
+          list(Letters = letters, 
+               Accidentals = accidentals,
+               SciOctave = sciOct)
+}
+
+from.kernpitch2sciPitch <- function(str) {
+          components <- from.kernpitch2components(str)
+          
+          components$Accidentals <- gsub('-', 'b', components$Accidentals)
+          do.call('paste0', components)
+}
+
+from.kernpitch2tonalInterval <- function(str) {
+          components <- from.kernpitch2components(str)
+          
+          fifth <- with(components, lettername2fifth(Letters) + accidental2fifth(Accidentals, flat = '-'))
+ 
+          fifthNsciOct2tonalInterval(fifth, components$SciOctave)
+         
+}
+
+fifthNsciOct2tonalInterval <- function(fifth, sciOct) {
+          tintWith0Octave <- tint(o = numeric(length(fifth)), f = fifth)
+          
+          octshift <- as.semits(tintWith0Octave %% tint(-11, 7)) %/% 12
+          
+          tint(sciOct - 4 - octshift, fifth)
+}
+
+
+## Scientific Pitch
+
+from.scipitch2tonalInterval <- function(str) {
+          letters    <- stringi::stri_extract_first(str, regex = '[A-G]')
+          accidentals <- stringi::stri_extract_first(str, regex = '([#b])\\1*')
+          accidentals[is.na(accidentals)] <- ''
+          
+          sciOct      <- as.numeric(stringi::stri_extract_first(str, regex = '[-+]?[0-9]+'))
+          if (all(is.na(sciOct))) sciOct <- rep(4, length(sciOct))
+          
+          fifth <- lettername2fifth(letters) + accidental2fifth(accidentals, flat = 'b')
+          fifthNsciOct2tonalInterval(fifth, sciOct)
+          
+          
+}
 
