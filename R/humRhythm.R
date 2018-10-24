@@ -79,7 +79,7 @@ reduce_fraction <- function(n ,d) {
 
 ###
 #' @export
-setMethod('as.double', signature = c(x = 'recip'),
+setMethod('as.numeric', signature = c(x = 'recip'),
           function(x) { as.double(x@Numerator / x@Denominator) })
 
 #' @export

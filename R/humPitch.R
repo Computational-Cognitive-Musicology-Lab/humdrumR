@@ -189,7 +189,8 @@ setMethod('<=', signature = c('tonalInterval', 'tonalInterval'),
           })
 
 
-setMethod('as.double', signature = c('tonalInterval'),
+#' @export
+setMethod('as.numeric', signature = c('tonalInterval'),
           function(x, fifthBase = 2^(19/12)) {
                     fifth <- getFifth(x)
                     oct   <- getOctave(x)
@@ -197,22 +198,56 @@ setMethod('as.double', signature = c('tonalInterval'),
                     (2 ^ oct) * (fifthBase ^ fifth)
           })
 
+#' @export
+setMethod('as.character', signature = c('tonalInterval'), function(x) as.interval(x))
+
 
 ## a few methods required to make tonalIntervals act like vectors
+#' @export
+setMethod('[', signature = c('tonalInterval', i = 'missing'),
+          function(x, i) x)    
+#' @export
 setMethod('[', signature = c('tonalInterval'),
           function(x, i) {
+            
             tint(getOctave(x)[i], getFifth(x)[i])        
           })
 
+#' @export
+setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', value = 'tonalInterval'),
+          function(x, i, value) {
+                    stopifnot(length(i) == length(value))
+                    
+                    x@Fifth[i] <- value@Fifth
+                    x@Octave[i] <- value@Octave
+                    
+                    x
+          })
+
+#' @export
+setMethod('c', signature = c('tonalInterval'),
+          function(x, ...) {
+                    durs <- list(x, ...)
+                    
+                    ns <- unlist(sapply(durs, getFifth))
+                    ds <- unlist(sapply(durs, getOctave))
+                    
+                    tint(ds, ns)
+          })
+
+#' @export
 setMethod('length', signature = c('tonalInterval'),
           function(x) {
                     length(getOctave(x))
           })
 
+#' @export
 setMethod('as.vector', signature = c('tonalInterval'),
           function(x) { x })
+#' @export
 setMethod('is.vector', signature = c('tonalInterval'),
           function(x) { TRUE })
+
 
 #' @export
 setMethod('show', signature = c(object = 'tonalInterval'), function(object) { print(as.interval(object)) })
@@ -368,6 +403,28 @@ from.scipitch2tonalInterval <- function(str) {
           fifth <- lettername2fifth(letters) + accidental2fifth(accidentals, flat = 'b')
           fifthNsciOct2tonalInterval(fifth, sciOct)
           
-          
 }
+
+
+#' @export 
+str2tonalInterval <- regexDispatch("(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = from.kernpitch2tonalInterval,
+                                      "[A-G][b#]*[-+]?[0-9][0-9]*" = from.scipitch2tonalInterval)
+                                     
+#' @export
+str2kernpitch <- as.kernpitch %.% str2tonalInterval
+
+#' @export
+substr2kernpitch <- regexDispatch(inplace = TRUE,
+                                  "(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = id,
+                                  "[A-G][b#]*[-+]?[0-9][0-9]*" = as.scipitch %.% from.scipitch2tonalInterval)
+
+#' @export
+str2scipitch <- as.scipitch %.% str2tonalInterval
+
+#' @export
+substr2scipitch <- regexDispatch(inplace = TRUE,
+                                 "(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = as.scipitch %.% from.kernpitch2tonalInterval,
+                                 "[A-G][b#]*[-+]?[0-9][0-9]*" = id)
+
+
 
