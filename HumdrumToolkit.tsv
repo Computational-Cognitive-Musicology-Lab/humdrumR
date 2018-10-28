@@ -1,0 +1,146 @@
+Toolkit	Command	humdrumR?	Status	Who	What
+Humdrum	accent	?	?	?	?
+Humdrum	assemble	PORT	Not started	Nat	humdrumR structural
+Humdrum	barks	PORT	Not started	Anybody	f(frequency) -> **barks
+Humdrum	cbr	PORT	Not started	Anybody	f(frequency) -> **cbr
+Humdrum	census	PORT	Complete	Nat	...
+Humdrum	cents	PORT	Not started	Anybody	f(semitones) -> **cents
+Humdrum	cleave	PORT	Not started	Nat	humdrumR structural
+Humdrum	cocho	PORT	Not started	Nat	frequency -> **cocho
+Humdrum	correl	base::cor	Not needed		
+Humdrum	context	PORT	In progress	Nat	...this is going to be even more powerful than context
+Humdrum	deg	PORT	In progress	Nat	...I've got it worked out
+Humdrum	degree	PORT	In progress	Nat	...I've got it worked out
+Humdrum	diss	PORT	Not started	Anybody	c(num) -> **diss
+Humdrum	ditto	PORT	In progress	Nat	
+Humdrum	dur	PORT	Not started	Anybody	f(c(humdrumR::recip), BPM) -> Seconds
+Humdrum	ekern	PORT?	Not started	Anybody	Involved
+Humdrum	extract	humdrumR::[[]]	Not needed		
+Humdrum	fields	humdrumR::[[]]	Not needed		
+Humdrum	flutedif	?	?	?	?
+Humdrum	freq	PORT	In progress	Nat	...
+Humdrum	hint	PORT	In progress	Nat	...
+Humdrum	humdrum	PORT	Not started	Anybody	humdrum file -> report
+Humdrum	humsed	humdrumR::%>%	Not needed		
+Humdrum	humver	NA	Not needed		
+Humdrum	infot	PORT+	Not started	Anybody	We can do better than infot. Write multiple info theory-related commands. Entropy for one. Margulis' algorithm?
+Humdrum	iv	PORT	Not started	Anybody	f(c(semitones)) -> iv
+Humdrum	kern	PORT	In progress	Nat	
+Humdrum	key	PORT+	Not started	Anybody	?f(tonalInterval)->key; we can do better? Maybe get multiple methods? Local key detection?
+Humdrum	melac	PORT+	Not started	Anybody	f(c(semitones), c(humdrumR::recip)) -> c(melac); we can do better? Perhaps implement a few alternate algorithms.
+Humdrum	metpos	PORT	started	Nat	...I have ideas
+Humdrum	midi	PORT	Not started	Anybody	f(c(semitones)) -> **MIDI
+Humdrum	mint	PORT	In progress	Nat	...
+Humdrum	mkern	PORT?	Not started	Anybody	
+Humdrum	ms	PORT?	Not started	Anybody	
+Humdrum	nf	PORT	Not started	Anybody	f(c(semitones)) -> **nf
+Humdrum	num	humdrumR::	In progress	Nat	...
+Humdrum	pattern	humdrumR::	In progress	Nat	...I have ideas
+Humdrum	patt	humdrumR::	In progress	Nat	...I have ideas
+Humdrum	pc	PORT	Not started	Nat	...
+Humdrum	pcset	PORT	Not started	Nat	f(c(pc)) -> **pcset
+Humdrum	pf	PORT	Not started	Anybody	
+Humdrum	pitch	PORT	Complete	Nat	
+Humdrum	proof	PORT	Not started	Nat	humdrum file -> report
+Humdrum	recode	PORT	Not started	Anybody	f(c(numeric)) -> c(xx)
+Humdrum	regexp	PORT?	Not started	Anybody	
+Humdrum	reihe	PORT	Not started	Anybody	f(c(pc)) -> ?
+Humdrum	rend	humdrumR::	In progress	Nat	...I accomplish this other ways
+Humdrum	rid	humdrumR::	Not needed		
+Humdrum	scramble	base::sample	Not needed		
+Humdrum	semits	PORT	Complete	Nat	
+Humdrum	solfa	PORT	In progress	Nat	...
+Humdrum	solfg	PORT	In progress	Nat	...
+Humdrum	specc	PORT	Not started	Anybody	f(**freq) -> **specc?
+Humdrum	spect(ra)	PORT	Not started	Anybody	f(**freq) -> **spect?
+Humdrum	strophe	PORT	Not started	Nat	This will involve humdrumR object structure
+Humdrum	synco	PORT+	Not started	Anybody	f(rhythm?) -> **synco?; I think we can do better here...
+Humdrum	text	PORT	Not started	Anybody	f(c(**silbe)) -> c(**text)
+Humdrum	thru	humdrumR::	Not started	Nat	This will involve humdrumR object structure
+Humdrum	timebase	humdrumR::	Not started	Nat	This will involve humdrumR object structure
+Humdrum	tonh	?	?	?	
+Humdrum	trans	PORT	In progress	Nat	...
+Humdrum	urrhythm	PORT?	Not started	Anybody	f(**recip, **metpos) -> **URrhythm
+Humdrum	veritas	PORT	Not started	Anybody	humdrum file -> Boolean
+Humdrum	vox	PORT	Not started	Anybody	once ditto is complete, should be very easy
+Humdrum	xdelta	base::diff	Not needed		
+Humdrum	yank	humdrumR::[[]]	Not started	Nat	...I'm working to make something easier but more powerful than yank
+Humdrum	ydelta	base::diff	Not needed		
+Extras	autodynam	PORT	Not started	Anybody	f(c(char)) -> c(char)
+Extras	autostem	PORT	Not started	Anybody	f(c(char)) -> c(char)
+Extras	barnum				
+Extras	beat				
+Extras	blank				
+Extras	chorck				
+Extras	cint				
+Extras	dittox				
+Extras	event				
+Extras	extractx				
+Extras	finalis				
+Extras	finalis-tonic				
+Extras	gettime				
+Extras	harm2kern				
+Extras	hum2abc				
+Extras	hum2enp				
+Extras	hum2gmn				
+Extras	hum2mei				
+Extras	hum2mid				
+Extras	hum2muse				
+Extras	humcat				
+Extras	hummath				
+Extras	humpdf				
+Extras	humsplit				
+Extras	humtable				
+Extras	introspect				
+Extras	kern2dm				
+Extras	kern2melisma				
+Extras	kern2skini				
+Extras	keycor				
+Extras	location				
+Extras	lofcog				
+Extras	lyrics				
+Extras	melseq				
+Extras	mid2hum				
+Extras	minrhy				
+Extras	mkeyscape				
+Extras	motion				
+Extras	mvspine				
+Extras	myank				
+Extras	notearray				
+Extras	notie				
+Extras	pae2kern				
+Extras	partinfo				
+Extras	partjoin				
+Extras	pitchmix				
+Extras	prange				
+Extras	prettystar				
+Extras	rcheck				
+Extras	ridx				
+Extras	rscale				
+Extras	runningkey				
+Extras	sample				
+Extras	satb2gs				
+Extras	satzfehler				
+Extras	scaletype				
+Extras	scordur				
+Extras	scrmono2hum				
+Extras	sdmarkov				
+Extras	serialize				
+Extras	simil				
+Extras	sonority				
+Extras	sortcount				
+Extras	spinetrace				
+Extras	swing				
+Extras	theloc				
+Extras	themax				
+Extras	thememakerx				
+Extras	thrux				
+Extras	time2matlab				
+Extras	time2tempo				
+Extras	tindex				
+Extras	tntype				
+Extras	transpose				
+Extras	tsroot				
+Extras	voicecount				
+Extras	xml2hum				
+Extras	zscores				
