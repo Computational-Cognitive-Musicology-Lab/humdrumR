@@ -110,6 +110,14 @@ setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
           })
 
 #' @export
+setMethod('sum', signature = c('tonalInterval'),
+          function(x, ..., na.rm = TRUE) {
+                    x <- list(x, ...)
+                    x <- do.call('c', x)
+                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm))
+          })
+
+#' @export
 setMethod('-', signature = c('tonalInterval', 'missing'),
           function(e1) {
                     tint(-getOctave(e1), -getFifth(e1))
@@ -122,6 +130,10 @@ setMethod('-', signature = c('tonalInterval', 'tonalInterval'),
                          getFifth(e1)  - getFifth(e2))
                     
           })
+
+
+#' @export 
+invert <- function(tint, around = tint(0,0)) around + around - tint
 
 
 
@@ -247,12 +259,33 @@ setMethod('as.vector', signature = c('tonalInterval'),
 #' @export
 setMethod('is.vector', signature = c('tonalInterval'),
           function(x) { TRUE })
+          
+#' @export
+is.atomic.tonalInterval <- function(x) TRUE
 
+#' @export
+setMethod('dim', signature = 'tonalInterval',
+          function(x) NULL) #c(length(x), 1))
 
 #' @export
 setMethod('show', signature = c(object = 'tonalInterval'), function(object) { print(as.interval(object)) })
 
 
+#' @export
+as.data.frame.tonalInterval <- function(x, row.names = NULL, optional = FALSE, ...) {
+          if (is.null(row.names)) row.names <- 1:length(x)
+          
+          value <- list(x)
+          attr(value, 'row.names') <- row.names
+          attr(value, 'names') <- 'tonalInterval'
+          class(value) <- c('data.frame')
+          value
+}
+
+#' @export
+format.tonalInterval <- function(x, ...) {
+ as.interval(x)         
+}
 
 # semitss
 

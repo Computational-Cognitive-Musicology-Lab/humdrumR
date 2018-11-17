@@ -119,7 +119,8 @@ setMethod('[<-', signature = c(x = 'recip', i = 'ANY', j = 'missing', value = 'r
 
 setMethod('dim', signature = c(x = 'recip'),
           function(x) {
-            c(length(x), 1)
+            # c(length(x), 1)
+                    NULL
           })
 
 is.atomic.recip <- function(x) TRUE
@@ -152,6 +153,10 @@ setMethod('length', signature = c(x = 'recip'),
 
 #' @export 
 setMethod('is.vector', signature = c(x = 'recip'), function(x) TRUE)
+
+#' @export 
+setMethod('as.vector', signature = c(x = 'recip'), function(x) x)
+
 
 #' @export
 setMethod('as.list', signature = c('recip'),
@@ -201,12 +206,12 @@ setMethod('+', signature = c(e1 = 'ANY', e2 = 'recip'),
 
 
 #' @export
-setMethod('sum', signature = c('recip'),
+setMethod('sum', signature = c('raecip'),
           function(x, ..., na.rm = TRUE) {
             x <- list(x, ...)
             x <- do.call('c', x)
             x <- as.numeric(x)
-            as.recip(sum(x))
+            as.recip(sum(x, na.rm = na.rm))
           })
 
 #' @export
