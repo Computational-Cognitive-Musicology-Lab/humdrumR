@@ -2,6 +2,7 @@
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 
+
 #' @export
 compose <- function(...) {
   funcs <- rev(list(...))
@@ -302,4 +303,23 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
 trimLongString <- function(strs, n = 20L) {
   strs[str_length(strs) > n] <- paste0(stri_trim_both(str_sub(strs[str_length(strs) > n], end = n)), '...')
   strs
+}
+
+closest <- function(x, where, direction = 'either', diff_func = `-`) {
+          direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
+          
+          
+          sortedwhere <- sort(where)
+          intervals <- findInterval(x, sortedwhere, )
+          hits <- ifelse(intervals == 0,
+                         if (direction %in% c(2,4)) Inf else 1,
+                         if (direction == 1) {
+                                   intervals + mapply(FUN = function(a,b) which.min(c(a,b)) - 1,
+                                                      abs(x - sortedwhere[intervals]),
+                                                      abs(x - sortedwhere[intervals + 1]))
+                         } else {
+                                   if (direction %in% c(3, 5))  intervals + 1  else intervals
+                         })
+          sortedwhere[hits]
+          
 }

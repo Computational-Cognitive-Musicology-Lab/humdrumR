@@ -19,7 +19,6 @@ setMethod('initialize', 'humFormula',
             Form <- FormPipe$Form
             Pipe <- FormPipe$Pipe
             
-            
             evaled <- tryform(Form)
             if (inherits(evaled, 'humFormula')) {
               .Object <- evaled
@@ -162,54 +161,30 @@ setMethod('show', 'humFormula',
 #### Applying to humdrumR ----
 
 
-#' @export 
-setGeneric('humApply', function(hum, humformula) standardGeneric('humApply'))
-
 
 #' @export
-setMethod('humApply',
-          signature = c(hum = 'humdrumR', humformula = 'function'),
-          function(hum, humformula) {
-            humApply(hum, humform() * humformula)
-            
-          })
-
-#' @export
-setMethod('humApply',
-          signature = c(hum = 'humdrumR', humformula = 'formula'),
-          function(hum, humformula) {
-            humApply(hum, humform() * humformula)
-            
-          })
-
-
-#' @export
-setMethod('humApply',
-          signature = c(hum = 'humdrumR', humformula = 'humFormula'),
-          function(hum, humformula) {
+humApply <- function(humdrumR, 
+                     applyTo = 'D', 
+                     partition = list(),
+                     tee = FALSE,
+                     ngrams = 1,
+                     windows = NULL,
+                     graphics = list()) {
+          
+            if (class(humdrumR) != "humdrumR") stop('humApply can only be applied to humdrumR objects.')
             
             ### meta expressions
-            types <- humformula@Meta$types
-            types <- if (len0(types))  'D' else unique(unlist(strsplit(sapply(types, deparse), split = '')))[-1]
-            humtab <- getHumtab(hum, types)
-            
-            ### 
-            tee <- lennot0(humformula@Meta$tee)
+            humtab <- getHumtab(hum, applyTo)
             
             ###
-            ngrams <- humformula@Meta$ngram
-            
-            ###
-            wind <- humformula@Meta$par
-            if (lennot0(wind)) {
+            if (lennot0(graphics)) {
               oldpar <- par(no.readonly = TRUE)
               on.exit(par(oldpar))
-              lazyeval::f_eval(humformula@Meta$par)
+              do.call('par', graphics)
             }
             
             #
-            partition <- c(hum@Partition,
-                           humformula@Meta[names(humformula@Meta) %in% c('each', 'where')])
+            partition <- c(hum@Partition, partition)
             #### main expresion
             funcform <- parseForm(humtab, humformula@Formula, hum@Active, ngrams)
             humfunc  <- exprAsFunc(funcform, captureOutput = !tee)
@@ -231,7 +206,7 @@ setMethod('humApply',
             # if we mixed record types, the newhumtab will not know
             # where to be put back
             if (any(is.na(newhumtab$Type))) {
-              newtype <- if ('D' %in% types) 'D' else types[1]
+              newtype <- if ('D' %in% applyTo) 'D' else applyTo[1]
               newhumtab$Type[is.na(newhumtab$Type)] <- newtype
             }
             
@@ -254,7 +229,7 @@ setMethod('humApply',
               humApply(hum, humformula@Pipe[[1]])
             } 
               
-          })
+          }
 
 #' @export
 exprAsFunc <- function(funcform, captureOutput = TRUE) {
@@ -770,8 +745,6 @@ setMethod('<=', c('humFormula', 'formulaModifier'),
 applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
                        padder = NA, splat = !is.null(by), ...) {
   # x is list of vectors of same length
-  # if swap = FALSE, the arity of f should match the length of vecs
-  # if swap = TRUE, the arity of f should match the (length of vecs) * n
   if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
   
   if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
@@ -833,148 +806,67 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 ###                            NextOff = on + x*n
 ###                            NextOff = prev + x*n
 
-off + 1 ~ on + 1
-#'  @export 
-applyWindow <- function(vec, form) {
- lhs <- lazyeval::f_lhs(form) 
- rhs <- lazyeval::f_rhs(form) 
- 
- lhs <- parseWinForm(lhs, TRUE)
- rhs <- parseWinForm(rhs, FALSE)
- 
- if (attr(lhs, 'independent')) {
-   browser()
-  ons <- eval(lhs)
- }
- 
- 
-}
 
-parseWinForm <- function(expr, on = TRUE, n = 1) {
-  default <-  if (on) quote(last) else quote(on)
-  if (len1(expr)) expr <- call('+', default, expr)
-  
-  if (expr %len==% 2L) {
-      expr[[3]] <- expr[[2]]
-      expr[[2]] <- default
-  }
-  
-  if (expr %len==% 3L) {
-      if (deparse(expr[[1]]) == '*') {
-        return(Recall(expr[[2]], on = on, n = expr[[3]]))
-      }
-    
-      if (deparse(expr[[3]][[1]]) == '*') {
-       n <- expr[[3]][[3]]
-       expr[[3]] <- expr[[3]][[2]]
-      }
-  }
-  direction <- deparse(expr[[1]])
-  if (!direction %in% c('+', '-') || !(is.character(expr[[3]]) || is.numeric(expr[[3]]))) stop(paste('"', deparse(expr), '" is an illegal windowing formula', sep = ''), call. = FALSE)
-  
-  if (is.character(expr[[3]])) newexpr <- call('[', call('grep', pattern = expr[[3]], quote(vec)), n)
-  if (is.numeric(expr[[3]]))   newexpr <- call('==', call('%%', quote(seq_along(vec)), 0), 0)
-  
-  list(Expr = newexpr, Direction = direction, Reference = expr[[2]])
-  # indexCall <- if (is.character(indexCall)) call('grep', pattern = indexCall, quote(vec)) else indexCall
-  
-}
-
-parseOn <- function(vec, hop) {
-  if (is.numeric(hop)) {
-   return(seq(1, to = length(vec), by = hop))
-  } 
-  if (is.character(hop)) {
-    return(grep(hop, vec))
-  }
-}
-
-parseOffgivenOn <- function(vec, ons, stop) {
-  if (is.numeric(stop)) {
-   return(ons + stop )
-  }
-  if (is.character(stop)) {
-   hits <- grep(stop, vec)
-   
-   return(closest(ons, hits, direction = 'above'))
-   
-  }
-}
-
-parseOnOff <- function(expr) {
-  x <- expr[[3]]
-  
- if (!is.character(x)) return(expr)
-  
-  ref <- expr[[2]]
-  
-  
-  expr[[3]] <- call('[', call('grep', pattern = x, 
-                    x = call('[', quote(vec), 
-                             call(':', -1, 
-                                  call('-', ref)))) , 1)
-  expr
- 
-}
-
-hop <- function(vec, on = 1, off = 0) {
-  
-}
-# setGeneric('applyWindow', function(vecs, f, hop, off, ...) standardGeneric('applyWindow'))
-# 
-# setMethod('applyWindow', 
-#           c(vecs = 'list', f = 'function', hop = 'numeric', off = 'numeric'),
-#           function(vecs, f, hop, off) {
-#             if (!allsame(lengths(vecs))) stop("You have tried to applyWindow across multiple vectors of different lengths, but this is not supported.", .call = FALSE)
-#             
-#             
-#             
-#             
-#           })
-
-#' @export
-.do2substr_inplace <- function(.func, regex) {
+windowEdges <- function(inds, start, end, type = 'exclude') {
           
- function(str) {
-  matches <- stringi::stri_extract_first(str = str, regex = regex)
-  
-  modified <- as.character(.func(matches))
-  stringi::stri_replace_first(str, regex = regex,  
-                              replacement = modified)
-  }
-}
-
-#' @export
-.do2substr <- function(.func, regex) {
-  
-  function(...) {
-     strs <- list(...)
-     matches <- lapply(strs, stringi::stri_extract_first, regex = regex)
-  
-     do.call('.func', matches)
-  }
-          
-}
-
-
-#' @export
-regexDispatch <- function(..., inplace = FALSE) {
-          .funcs <- list(...)
-          if (length(.funcs) == 0) return(id)
-          
-          regexes <- names(.funcs)
-          reFuncs <- Map(if (inplace) .do2substr_inplace else .do2substr, 
-                         .funcs, regexes)
-          function(str) {
-                    Nmatches <- sapply(regexes,  
-                                       function(re) sum(stringi::stri_detect(str, regex = re)))
-                    
-                    if (any(Nmatches > 0)) {
-                     Ncharmatches <- sapply(regexes[Nmatches > 0],
-                            function(re) sum(nchar(stringi::stri_extract_first(str, regex = re))))
-                     reFuncs[[which(Nmatches > 0)[which.max(Ncharmatches)]]](str)
-                    } else {
-                     str
-                    }
+          if (type == 'exclude') {
+                    ok <- !unlist(do.call('Map', c(`|`, lapply(inds, function(x) x < start | x > end))))
           }
+          if (type == 'trim') {
+                    inds <- lapply(inds, 
+                                  function(x) {
+                                    x[x < start] <- start
+                                    x[x > end] <- end
+                                    x
+                                  })
+                    
+                    ok <- !unlist(do.call('Map', c(`>=`, inds)))
+          }
+          return(lapply(inds, '[', ok))
+          
+          
 }
+
+#'  @export 
+setGeneric('windowIndices',  function(vec, open, close, start = 1) standardGeneric('windowIndices') )
+setMethod('windowIndices', signature = c(vec = 'vector', open = 'numeric', close = 'numeric'),
+           function(vec, open, close, start = 1) {
+                     opens <- cumsum(c(start, rep(open, length(vec) / sum(open))))
+                     
+                     closes <- opens + close
+                     
+                     list(opens, closes)
+                    
+           })
+
+setMethod('windowIndices', signature = c(vec = 'vector', open = 'numeric', close = 'character'),
+          function(vec, open, close, start = 1) {
+                    opens <- cumsum(c(start, rep(open, length(vec) / sum(open))))
+                    
+                    closes <- grep(close, vec)
+                    closes <- sapply(opens, function(o) closes[closes > o][1])
+                    list(opens, closes)
+                    
+                    
+          })
+
+setMethod('windowIndices', signature = c(vec = 'vector', open = 'character', close = 'character'),
+          function(vec, open, close, start = 1) {
+                    opens <- grep(open, vec)
+                    opens <- opens[opens >= start]
+                    
+                    closes <- grep(close, vec)
+                    closes <- sapply(opens, function(o) closes[closes > o][1])
+                    list(opens, closes)
+                    
+                   
+          })
+
+setMethod('windowIndices', signature = c(vec = 'vector', open = 'character', close = 'numeric'),
+          function(vec, open, close, start = 1) {
+                    opens <- grep(open, vec)
+                    opens <- opens[opens >= start]
+                    
+                    closes <- opens + close
+                    list(opens, closes)
+          })

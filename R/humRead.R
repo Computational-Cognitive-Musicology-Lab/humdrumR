@@ -287,8 +287,8 @@ parseLocal = function(records) {
 
   #interpretations
   exclusivestandems <- parseInterpretations(mat)
-  exclusives <- exclusivetandems$Exclusive
-  tandems <- exclusivetandems$Tandem
+  exclusives <- exclusivestandems$Exclusive
+  tandems <- exclusivestandems$Tandem
 
   tandems <- setNames(unlist(tandems), names(tokens))
 
