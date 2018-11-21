@@ -8,7 +8,7 @@ compose <- function(...) {
   funcs <- rev(list(...))
 
 
-  forms <- fargs(funcs[[1]])
+  forms <- formals(args(funcs[[1]]))
 
   bod <- call('Reduce',
               quote(function(f, arg) f(arg)),
@@ -294,6 +294,10 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
           output
 }
 
+as.arglist <- function(str) {
+ al <- alist(x=)[rep('x', length(str))]         
+ setNames(al, str)
+}
 
 `%splat|%` <- function(obj, func) {
   if (is.atomic(obj)) obj <- as.list(obj)

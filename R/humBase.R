@@ -1,14 +1,3 @@
- #' Humdrum Reference Codes (!!!).
- #' 
- #' This data frame contatains detailed information for the standard Humdrum
- #' Reference codes, as described in the Humdrum user guide.
- #' 
- #' @docType data
- #' @usage data(ReferenceCodes)
- #' @format A \code{data.frame}.
- #' @export
-"ReferenceCodes"
-
 ###Ditto
 
 
@@ -217,7 +206,7 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   # helper function
   accum <- c()
   
-  if (len1(ex)) {
+  if (length(ex) == 1) {
     return(func(ex))
   } else {
     for (i in (2 - !ignoreHead):length(ex)) {

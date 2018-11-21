@@ -1,167 +1,3 @@
-
-#### humFormula ----
-
-#' @export
-setClass('humFormula', 
-         slots = c(Meta = 'list', Formula = 'formula', Pipe = 'list')) -> humform
-
-#' @export humform
-NULL
-
-tryform <- function(form) {
-  try(lazyeval::f_eval(form), silent = TRUE)
-}
-
-#' @export
-setMethod('initialize', 'humFormula',
-          function(.Object, formula = ~., meta = list(), pipe = list()) {
-            FormPipe <- splitFormulaPipe(formula)
-            Form <- FormPipe$Form
-            Pipe <- FormPipe$Pipe
-            
-            evaled <- tryform(Form)
-            if (inherits(evaled, 'humFormula')) {
-              .Object <- evaled
-            } else {
-              .Object@Formula <- Form
-              meta <- meta[!duplicated(meta)]
-              meta <- lapply(meta, tandemsForm)
-              .Object@Meta    <- meta
-            }
-            .Object@Pipe <- if (is.null(Pipe) && len0(pipe)) {
-               list()
-            } else {
-              if (!is.null(Pipe)) {
-                evaledpipe <- tryform(Pipe)
-                if (inherits(evaledpipe, 'humFormula')) {
-                  list(evaledpipe)
-                } else {
-                  if (inherits(evaledpipe, 'function')) {
-                    list(humform() * evaledpipe)
-                  } else {
-                    list(humform(formula = Pipe, 
-                                 meta = list(), 
-                                 pipe = pipe))
-                  }
-                }
-               
-              } else {
-                 pipe 
-              }
-            }
-            
-            .Object
-          })
-
-
-
-splitFormulaPipe <- function(form) {
-  expr <- lazyeval::f_rhs(form)
-  
-  exprstr <- deparse(expr)
-  
-  if (any(grepl('\\|', exprstr))) {
-    split <- str_split(exprstr,  pattern = ' *\\| *', n = 2)[[1]]
-    form <- lazyeval::f_new(parse(text = split[[1]])[[1]], env = lazyeval::f_env(form))
-    pipe <- lazyeval::f_new(parse(text = split[[2]])[[1]], env = lazyeval::f_env(form))
-  } else {
-    pipe <- NULL
-  }
-  
-  list(Form = form, Pipe = pipe)
-  # if (expr %len>% 1L && deparse(expr[[1]]) == '|') {
-  #   list(Form = lazyeval::f_new(expr[[2]], env = lazyeval::f_env(form)),
-  #        Rest = lazyeval::f_new(expr[[3]], env = lazyeval::f_env(form)))
-  # } else {
-  #   list(Form = form, Rest = NULL)
-  # }
-}
-
-
-splitFormula <- function(form) {
-  if (is.null(form) || len1(form) || deparse(form[[1]]) !=  '~') return(form)
-  
-  form <- eval(form)  
-  
-  c(Recall(lazyeval::f_lhs(form)), 
-    Recall(lazyeval::f_rhs(form)))
-}
-
-
-
-#' @export
-setMethod('c', signature = c('humFormula'),
-          function(x, y) {
-            humform(formula = y@Formula, 
-                    meta = c(x@Meta, y@Meta),
-                    pipe = y@Pipe)
-          })
-
-#' @export
-setMethod('*', signature = c('humFormula', 'humFormula'),
-          function(e1, e2) {
-            c(e1, e2)
-          })
-#' @export
-setMethod('^', signature = c('humFormula', 'humFormula'),
-          function(e1, e2) {
-            pipe <- e2@Pipe
-            if (lennot0(pipe)) e2@Pipe <- list(e1 ^ pipe[[1]])
-            e1 * e2
-          })
-
-#' @export
-setMethod('*', signature = c('humFormula', 'function'),
-          function(e1, e2) {
-            funcform <- lazyeval::f_capture(e2)
-            
-            if (!is.symbol(lazyeval::f_rhs(funcform))) {
-              .pipefunc <- lazyeval::f_eval(funcform)
-              newform <- quote(.pipefunc(.))
-            } else {
-              newform <- as.call(c(lazyeval::f_rhs(funcform), quote(.)))
-            }
-            
-            funcform <- lazyeval::f_new(newform, 
-                                        env = lazyeval::f_env(funcform))
-      
-            e1@Formula <- funcform
-            e1
-          })
-#' @export
-setMethod('^', signature = c('humFormula', 'function'),
-          function(e1, e2) {
-            e1 * e2
-          })
-#' @export
-setMethod('*', signature = c('humFormula', 'formula'),
-          function(e1, e2) {
-            e1 * humform(e2)
-          })
-#' @export
-setMethod('^', signature = c('humFormula', 'formula'),
-          function(e1, e2) {
-            e1 ^ humform(e2)
-          })
-#' @export
-setMethod('show', 'humFormula',
-          function(object) {
-            
-            cat(' Expression:\n\t')
-            cat(paste(deparse(lazyeval::f_rhs(object@Formula)), collapse = '\n'), '\n') 
-            
-            metas <- sapply(object@Meta, function(form) deparse(lazyeval::f_rhs(form)))
-            if (lennot0(metas)) {
-              cat('\n Meta-expressions:\n\t')
-              cat((names(metas) %str+% ' = ' %str+% metas) %str*% '\n\t')
-            }
-          })
-
-
-#### Applying to humdrumR ----
-
-
-
 #' @export
 humApply <- function(humdrumR, 
                      applyTo = 'D', 
@@ -174,7 +10,7 @@ humApply <- function(humdrumR,
             if (class(humdrumR) != "humdrumR") stop('humApply can only be applied to humdrumR objects.')
             
             ### meta expressions
-            humtab <- getHumtab(hum, applyTo)
+            humtab <- getHumtab(humdrumR, applyTo)
             
             ###
             if (lennot0(graphics)) {
@@ -184,9 +20,9 @@ humApply <- function(humdrumR,
             }
             
             #
-            partition <- c(hum@Partition, partition)
+            partition <- c(humdrumR@Partition, partition)
             #### main expresion
-            funcform <- parseForm(humtab, humformula@Formula, hum@Active, ngrams)
+            funcform <- parseForm(humtab, humformula@Formula, humdrumR@Active, ngrams)
             humfunc  <- exprAsFunc(funcform, captureOutput = !tee)
             
             ##################
@@ -210,24 +46,24 @@ humApply <- function(humdrumR,
               newhumtab$Type[is.na(newhumtab$Type)] <- newtype
             }
             
-            putHumtab(hum, drop = TRUE) <- newhumtab
+            putHumtab(humdrumR, drop = TRUE) <- newhumtab
             if (!is.null(newlayers)) {
               newlayers <- unique(strsplit(newlayers[1], split = ' ')[[1]])
-              addLayers(hum) <- newlayers
+              addLayers(humdrumR)  <- newlayers
               if (any(names(partition) == 'where')) {
-                act <- ifelsecalls(partition['where'], c(lazyeval::f_rhs(hum@Active), lapply(newlayers, as.symbol)))
-                hum@Active <- lazyeval::f_new(act)
+                act <- ifelsecalls(partition['where'], c(lazyeval::f_rhs(humdrumR@Active), lapply(newlayers, as.symbol)))
+                humdrumR@Active <- lazyeval::f_new(act)
               } else {
-                hum <- setActiveString(hum, newlayers) 
+                humdrumR <- setActiveString(humdrumR, newlayers) 
               }
             }
             
             
-            if (len0(humformula@Pipe)) {
-              hum 
-            } else {
-              humApply(hum, humformula@Pipe[[1]])
-            } 
+            # if (len0(humformula@Pipe)) {
+              humdrumR 
+            # } else {
+              # humApply(humdrumR, humformula@Pipe[[1]])
+            # } 
               
           }
 
@@ -395,6 +231,46 @@ xifyForm <- function(funcform, usedInExpr) {
   
 }
 
+
+
+partApply <- function(humtab, partitions, humfunc) {
+  if (len0(partitions)) return(humfunc(humtab))
+  funccall <- if (len1(partitions)) quote(humfunc(.SD)) else call('partApply', quote(humtab), quote(partitions[-1]), quote(humfunc))
+  
+  curpart <- lazyeval::f_rhs(partitions[[1]])
+  
+  partcall <- call('[', quote(humtab), alist(i=)[[1]], funccall)
+  if (names(partitions)[1] == 'each') {
+    partcall[['by']]      <- curpart
+    partcall[['.SDcols']] <- quote(colnames(humtab))
+    # get environment from formulae
+    env <- environment()
+    parent.env(env) <- lazyeval::f_env(partitions[[1]])
+    
+    # do it!
+    output <- eval(partcall, envir = env)
+    
+    output <- output[ , !duplicated(colnames(output)), with = FALSE]
+    
+    
+    
+  } else {
+    partcall[[3]] <- curpart
+    output <- eval(partcall)
+    
+    negatecall <- partcall[1:3]
+    negatecall[[3]] <- call('!', call('(', curpart))
+    
+    rest <- eval(negatecall)
+    
+    output <- rbind(output, rest, fill = TRUE)
+  
+  }
+  
+  output
+}
+
+
 #### Reassembling ----
 #This is the hard part, putting pipeout output back into data.table
 
@@ -471,48 +347,6 @@ lengths_ <- function(ls) ifelse(sapply(ls, is.object), 1, sapply(ls, length))
 
 
 
-partApply <- function(humtab, partitions, humfunc) {
-  if (len0(partitions)) return(humfunc(humtab))
-  funccall <- if (len1(partitions)) quote(humfunc(.SD)) else call('partApply', quote(humtab), quote(partitions[-1]), quote(humfunc))
-  
-  curpart <- lazyeval::f_rhs(partitions[[1]])
-  
-  partcall <- call('[', quote(humtab), alist(i=)[[1]], funccall)
-  if (names(partitions)[1] == 'each') {
-    partcall[['by']]      <- curpart
-    partcall[['.SDcols']] <- quote(colnames(humtab))
-    # get environment from formulae
-    env <- environment()
-    parent.env(env) <- lazyeval::f_env(partitions[[1]])
-    
-    # do it!
-    output <- eval(partcall, envir = env)
-    
-    output <- output[ , !duplicated(colnames(output)), with = FALSE]
-    
-    
-    
-  } else {
-    partcall[[3]] <- curpart
-    output <- eval(partcall)
-    
-    negatecall <- partcall[1:3]
-    negatecall[[3]] <- call('!', call('(', curpart))
-    
-    rest <- eval(negatecall)
-    
-    output <- rbind(output, rest, fill = TRUE)
-  
-  }
-  
-  output
-}
-
-
-
-
-
-
 
 #' @export
 collapseHumtab <- function(dt, n = 1L) {
@@ -562,311 +396,52 @@ getTandem <- function(tandem, regex) {
 }
 
 
-####Piping ----
 
-
-
-#' @export
-setMethod('|', signature = c(e1 = 'humdrumR', e2 = 'function'),
-          function(e1, e2) {
-            funcform <- lazyeval::f_capture(e2)
-            
-            if (!is.symbol(lazyeval::f_rhs(funcform))) {
-              .pipefunc <- lazyeval::f_eval(funcform)
-              newform <- quote(.pipefunc(.))
-            } else {
-              newform <- as.call(c(lazyeval::f_rhs(funcform), quote(.)))
-            }
-            
-            funcform <- lazyeval::f_new(newform)
-            
-            
-            humApply(e1, funcform)
-          })
+####### Regex dispatch
 
 #' @export
-setMethod('|', signature = c(e1 = 'humdrumR', e2 = 'humFormula'),
-          function(e1, e2) {
-            humApply(e1, e2)
-          })
-
-#' @export
-setMethod('|', signature = c(e1 = 'humdrumR', e2 = 'formula'),
-          function(e1, e2) {
-            form <- humform(e2)  
-            humApply(e1, form)
-          })
-####humFormula building functions ----
-
-#' @export
-tee <- humform(meta = list(tee = ~TRUE))
-
-#' @export
-wind <- function(x11 = FALSE, ...) {
-  dots <- lazyeval::dots_capture(...)
-  meta <- do.call('call', quote = TRUE, 
-                  c('par',  lapply(dots, lazyeval::f_rhs)))
-  
-  if (x11) meta <- call('{', quote(X11()), meta)
-  
-  meta <- list(par = lazyeval::f_new(rhs = meta))
-  
-  
-  tee * humform(meta = meta)
-  
-}
-
-#' @export
-records <- function(x) {
-  meta <- lazyeval::f_capture(x)
-                
-  humform(meta = list(types = meta))
-}
-
-#' @export
-each <- function(...) {
-  meta <- match.call(expand.dots = TRUE)
-  
-  meta[[1]] <- quote(.)
-  meta <- lazyeval::f_new(rhs = meta, 
-                          env = parent.env(environment()))
-  humform(meta = list(each = meta))
-}
-
-#' @export
-where <- function(...) {
-  meta <- match.call(expand.dots = TRUE)
-  
-  if (meta %len>% 2L) {
-    meta[[1]] <- quote(`&`)
-    for (i in 2:length(meta)) {
-     meta[[i]] <- call('(', meta[[i]]) 
-    }
-  } else { 
-    meta <- meta[[-1]]
-  }
-  
-  meta <- lazyeval::f_new(rhs = meta, 
-                          env = parent.env(environment()))
-  humform(meta = list(where = meta))
-}
-
-#' @export
-ngram <- function(n = quote(2), pad = TRUE) {
-  meta <- lazyeval::f_capture(n)
-  humform(formula = ~ paste(., collapse = '-'), meta = list(ngram = meta))
-}
-
-#' @export
-swap <- function(...) {
-  newenv <- as.environment(lapply(dots_capture(...), f_rhs))
-  
-  func <- function(form) {
-    oldenv <- f_env(form)
-    
-    parent.env(newenv) <- oldenv
-    
-    f_env(form) <- newenv
-    
-    newform <- f_unwrap(form)
-    f_env(newform) <- oldenv
-    newform
-  } 
-  
-  new('formulaModifier', func)
-}
-
-swap. <- function(calls, form) {
-  newenv <- as.environment(calls)
-  
-  oldenv <- f_env(form)
-  
-  parent.env(newenv) <- oldenv
-  
-  f_env(form) <- newenv
-  
-  newform <- f_unwrap(form)
-  f_env(newform) <- oldenv
-  newform
-}
-
-
-#' @export
-setClass('formulaModifier', contains = 'function')
-
-#' @export
-setMethod('<=', c('formula', 'formulaModifier'),
-          function(e1, e2) {
-            e2(e1)
-          })
-
-#' @export
-setMethod('<=', c('humFormula', 'formulaModifier'),
-          function(e1, e2) {
-            e1@Formula <- e1@Formula <= e2
-            e1
-            
-          })
-
-
-#########windowing
-
-
-# apply2gram <- function(vecs, f = c, dir = 1, pad = TRUE, padder = NA, splat = FALSE, ...) {
-#   cur   <- lapply(vecs, rotate, rotation =  1 - (dir ==  1))
-#   other <- lapply(vecs, rotate, rotation = -1 + (dir == -1))
-#   
-#   
-#   if (splat) {
-#     .f <- function(...) do.call('f', unlist(list(...)))
-#     output <- Map(.f, cur, other)
-#     
-#   } else {
-#     ngs    <- Map(function(x, y) browser(), cur, other)
-#     
-#     if (!pad) { ngs <- ngs[!sapply(ngs, any %.% is.na)] } 
-#     
-#     output <- lapply(ngs, f, ...)
-#   }
-#   if (!pad) { 
-#     output <- output[!sapply(output, any %.% is.na)] 
-#   } else {
-#     if (!is.na(padder)) output <- lapply(output, f.({.[is.na(.)] <- padder; .}))
-#   }
-#   if (all(lengths(output) == 1)) output <- unlist(output)
-#   
-#   output  
-# }
-
-
-#### Windowing functions ----
-
-#' @export
-applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
-                       padder = NA, splat = !is.null(by), ...) {
-  # x is list of vectors of same length
-  if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
-  
-  if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
-  if (!allsame(lengths(vecs))) stop("You have tried to applyNgram across multiple vectors of different lengths, but this is not supported.", .call = FALSE)
-  
-  n <- n - (sign(n))
-  
-  
-  if (n == 0) { 
-    output <- do.call('Map', c(f, vecs))
-  } else {
-    
-    starts <- seq_along(vecs[[1]])
-    if (pad) {
-      vecs <- lapply(vecs, function(vec) c(rep(NA, abs(n)), vec, rep(NA, abs(n))))
-      starts <- starts + abs(n)
-    } else {
-      starts <- starts[ (starts + n) <= length(vecs[[1]]) & starts + n >= 1]
-    }
-    
-    inds   <- if (sign(n) == 1) Map(`:`, starts, starts + n) else Map(`:`, starts + n, starts)
-    
-    #
-    
-    ngs <- lapply(vecs, 
-                  function(vec) {
-                    lapply(inds, function(i) vec[i])
-                  })
-    .f <- if (splat) { 
-      function(...) {do.call('f', unlist(list(...), use.names = FALSE, recursive = FALSE)) }
-      } else {
-        f
-      }
-    output <- do.call('Map', c(.f, ngs))
-    
-    if (pad && !is.na(padder)) output <- lapply(output,
-                                                function(out) {
-                                                  if (is.character(out)) gsub('NA', padder, out) else `[<-`(out, is.na(out), padder)
-                                                })
-                                                
-  } #end of if(n == 0) else
-  
-  if (all(lengths(output) == 1)) output <- unlist(output)
-  
-  output
-  
-}
-
-
-## On
-## Last (last on)
-##
-## Off
-## Prev (prev off)
-
-### NextOn              ~      NextOff
-### NextOn = last + x*n 
-### NextOn = prev +- x*n
-###                            NextOff = on + x*n
-###                            NextOff = prev + x*n
-
-
-windowEdges <- function(inds, start, end, type = 'exclude') {
+.do2substr_inplace <- function(.func, regex) {
           
-          if (type == 'exclude') {
-                    ok <- !unlist(do.call('Map', c(`|`, lapply(inds, function(x) x < start | x > end))))
+          function(str) {
+                    matches <- stringi::stri_extract_first(str = str, regex = regex)
+                    
+                    modified <- as.character(.func(matches))
+                    stringi::stri_replace_first(str, regex = regex,  
+                                                replacement = modified)
           }
-          if (type == 'trim') {
-                    inds <- lapply(inds, 
-                                  function(x) {
-                                    x[x < start] <- start
-                                    x[x > end] <- end
-                                    x
-                                  })
-                    
-                    ok <- !unlist(do.call('Map', c(`>=`, inds)))
-          }
-          return(lapply(inds, '[', ok))
+}
+
+#' @export
+.do2substr <- function(.func, regex) {
           
+          function(...) {
+                    strs <- list(...)
+                    matches <- lapply(strs, stringi::stri_extract_first, regex = regex)
+                    
+                    do.call('.func', matches)
+          }
           
 }
 
-#'  @export 
-setGeneric('windowIndices',  function(vec, open, close, start = 1) standardGeneric('windowIndices') )
-setMethod('windowIndices', signature = c(vec = 'vector', open = 'numeric', close = 'numeric'),
-           function(vec, open, close, start = 1) {
-                     opens <- cumsum(c(start, rep(open, length(vec) / sum(open))))
-                     
-                     closes <- opens + close
-                     
-                     list(opens, closes)
-                    
-           })
 
-setMethod('windowIndices', signature = c(vec = 'vector', open = 'numeric', close = 'character'),
-          function(vec, open, close, start = 1) {
-                    opens <- cumsum(c(start, rep(open, length(vec) / sum(open))))
+#' @export
+regexDispatch <- function(..., inplace = FALSE) {
+          .funcs <- list(...)
+          if (length(.funcs) == 0) return(id)
+          
+          regexes <- names(.funcs)
+          reFuncs <- Map(if (inplace) .do2substr_inplace else .do2substr, 
+                         .funcs, regexes)
+          function(str) {
+                    Nmatches <- sapply(regexes,  
+                                       function(re) sum(stringi::stri_detect(str, regex = re)))
                     
-                    closes <- grep(close, vec)
-                    closes <- sapply(opens, function(o) closes[closes > o][1])
-                    list(opens, closes)
-                    
-                    
-          })
-
-setMethod('windowIndices', signature = c(vec = 'vector', open = 'character', close = 'character'),
-          function(vec, open, close, start = 1) {
-                    opens <- grep(open, vec)
-                    opens <- opens[opens >= start]
-                    
-                    closes <- grep(close, vec)
-                    closes <- sapply(opens, function(o) closes[closes > o][1])
-                    list(opens, closes)
-                    
-                   
-          })
-
-setMethod('windowIndices', signature = c(vec = 'vector', open = 'character', close = 'numeric'),
-          function(vec, open, close, start = 1) {
-                    opens <- grep(open, vec)
-                    opens <- opens[opens >= start]
-                    
-                    closes <- opens + close
-                    list(opens, closes)
-          })
+                    if (any(Nmatches > 0)) {
+                              Ncharmatches <- sapply(regexes[Nmatches > 0],
+                                                     function(re) sum(nchar(stringi::stri_extract_first(str, regex = re))))
+                              reFuncs[[which(Nmatches > 0)[which.max(Ncharmatches)]]](str)
+                    } else {
+                              str
+                    }
+          }
+}
