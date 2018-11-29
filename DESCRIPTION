@@ -8,7 +8,7 @@ Imports: MASS, combinat, pander
 License: GPL-3
 LazyData: TRUE
 Encoding: UTF-8
-Collate: humdrumR.R
+Collate: humdrumR-package.R
          tools.R
          humBase.R
          humClass.R
@@ -23,4 +23,4 @@ Collate: humdrumR.R
          humValidation.R
          humRhythm.R
          humPitch.R
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

@@ -1,5 +1,4 @@
-
-##Methods for Humdrum class ####
+##Methods for humdrumR class ####
 
 
 
@@ -14,12 +13,31 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 
 
 #' HumdrumR class
+#' 
+#' @slot Humtable A list of data.tables. Each data.table has the same number of columns
+#' but contains data from different types of records (e.g., interpretations, data, barlines, comments).
+#' @slot Files A list of two elements. The first, "Search", contains a single character representing
+#' the \code{pattern} used in the call to \code{\link{readHumdrum}} which created this \code{humdrumR} object.
+#' The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
+#' and were read into the \code{humdrumR} object.
+#' @slot Layers A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
+#' The fields are divided into four categories: "User", "Structure", "Tandem", and "Reference."
+#' See (\code{\link{layers}})
+#' @slot Active A formula. The right side of this formula is an expression which 
+#' extracts data from field(s) in the \code{humdrumR} data. The active expression
+#' is the "default" data which is printed be \code{\link{show}} calls, and when \code{.}
+#' is used in a call to \code{\link{humApply}}.
+#' and others.
+#' @slot Partition A list of partition expressions (see \code{\link{humApply}}). By default,
+#' this is empty, and any partitioning must be done explicitely in the call to \code{\link{humApply}}.
+#' However, if you want a \code{humdrumR} data object to be partitioned by default,
+#' this value can be set with a call to \code{\link{setPartition}}.
+#' @slot LoadTime A POSIXct value, indicating the time at which \code{\link{readHumdrum}} was
+#' called to create this \code{humdrumR} object.
 #' @export
+#' 
 setClass('humdrumR', 
          slots = c(Humtable = 'list',
-                    # D = 'data.table',
-                   # GLIM = 'data.table',
-                   # Other = 'list',
                    Files = 'list',
                    Layers = 'list',
                    Active = 'formula',

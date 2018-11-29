@@ -1,6 +1,39 @@
 #
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
+unwrapFormula <- function(form) {
+    if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
+          
+    if (!is.formula(form)) form <- eval(form)
+          
+    lhs <- Recall(lazyeval::f_lhs(form))
+    rhs <- Recall(lazyeval::f_rhs(form))
+    
+    c(unlist(lhs), unlist(rhs))
+    
+    
+    
+}
+
+
+
+swapIn <- function(calls, form) {
+          # This function takes a list of named
+          # expressions, and substitutes occurences of the name
+          # in the right hand side of form with the matching
+          # expression.
+          newenv <- as.environment(calls)
+          
+          oldenv <- f_env(form)
+          
+          parent.env(newenv) <- oldenv
+          
+          f_env(form) <- newenv
+          
+          newform <- f_unwrap(form)
+          f_env(newform) <- oldenv
+          newform
+}
 
 
 #' @export
@@ -327,3 +360,5 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
           sortedwhere[hits]
           
 }
+
+grepl_list <- function(pattern, ls) sapply(ls, function(el) any(grepl(pattern, el, useBytes = TRUE), na.rm = TRUE)) 
