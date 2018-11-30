@@ -15,6 +15,26 @@ unwrapFormula <- function(form) {
     
 }
 
+match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
+          stuff <- list(...)
+          
+          if (is.function(size.out)) {
+                    sizes <- sapply(stuff,
+                                    function(thing) {
+                                              dim <- dim(thing)
+                                              if (is.null(dim)) length(thing) else dim[margin]
+                                    })
+                    
+                    size.out <- size.out(sizes)
+          }
+          
+          output <- lapply(stuff, Repeat, length.out = size.out, margin = margin)
+          
+          if (toEnv) list2env(output[names(output != '')], envir = parent.frame(1))
+          
+          if (toEnv) invisible(output) else output
+          
+}
 
 
 swapIn <- function(calls, form) {

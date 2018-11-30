@@ -32,26 +32,32 @@ setMethod('initialize', 'recip',
           })
 
 #' @export
+setMethod('as.character', c(x = 'recip'),
+          function(x) {
+                    n <- x@Numerator
+                    d <- x@Denominator
+                    
+                    SIGN <- c('-', '', '')[2 + sign(n)]
+                    n <- abs(n)
+                    dots <- log(n + 1L, base = 2L) 
+                    dots <- dots - 1L
+                    dots[!dots %in% 1:100  & (log(d, 2) %% 1) == 0 & d != 1] <- 0L
+                    
+                    targets <- dots != 0L & (log(d, 2) %% 1) == 0 & d!= 1
+                    d[n == 0L] <- 0L
+                    n[targets | n == 0L] <- 1L
+                    
+                    d[targets] <- d[targets] / (2 ^ dots[targets])
+                    d[targets] <- paste0(d[targets], sapply(dots[targets], function(x) paste(rep('.', x), collapse ='')))
+                    d <- paste0(SIGN, d)
+                    
+                    ifelse(n == 1L, d, paste0(d, '%', n))  
+          })
+
+#' @export
 setMethod('show', signature = c(object = 'recip'), 
           function(object) {
-            n <- object@Numerator
-            d <- object@Denominator
-            
-            SIGN <- c('-', '', '')[2 + sign(n)]
-            n <- abs(n)
-            dots <- log(n + 1L, base = 2L) 
-            dots <- dots - 1L
-            dots[!dots %in% 1:100  & (log(d, 2) %% 1) == 0 & d != 1] <- 0L
-            
-            targets <- dots != 0L & (log(d, 2) %% 1) == 0 & d!= 1
-            d[n == 0L] <- 0L
-            n[targets | n == 0L] <- 1L
-            
-            d[targets] <- d[targets] / (2 ^ dots[targets])
-            d[targets] <- paste0(d[targets], sapply(dots[targets], function(x) paste(rep('.', x), collapse ='')))
-            d <- paste0(SIGN, d)
-            
-            output <- ifelse(n == 1L, d, paste0(d, '%', n))
+            output <- as.character(object)
             
             
             cat(output)
@@ -69,6 +75,7 @@ gcd <- function(x, y) {
 }
 
 
+
 #' @export
 reduce_fraction <- function(n ,d) {
   gcds <- gcd(n, d)
@@ -78,9 +85,9 @@ reduce_fraction <- function(n ,d) {
 }
 
 ###
+
 #' @export
-setMethod('as.numeric', signature = c(x = 'recip'),
-          function(x) { as.double(x@Numerator / x@Denominator) })
+as.double.recip <-  function(x) as.double(x@Numerator / x@Denominator)
 
 #' @export
 setMethod('[', signature = c(x = 'recip'),
@@ -101,14 +108,13 @@ setMethod('[[', signature = c(x = 'recip'),
             x@Numerator <- x@Numerator[i]
             x@Denominator <- x@Denominator[i]
             
-            as.numeric(x)
+            as.double(x)
           })
 
 #' @export
 setMethod('[<-', signature = c(x = 'recip', i = 'ANY', j = 'missing', value = 'recip'),
           function(x, i, value) {
             if (missing(i) || missing(value)) return(x)
-            stopifnot(length(i) == length(value))
             
             x@Numerator[i] <- value@Numerator
             x@Denominator[i] <- value@Denominator
@@ -151,8 +157,29 @@ setMethod('length', signature = c(x = 'recip'),
             length(x@Numerator)
           })
 
+#' @export
+setMethod('sort', signature = c(x = 'recip'),
+          function(x, decreasing = FALSE) {
+                    recip(1, sort(as.double(x), decreasing = decreasing))
+          })
+
 #' @export 
 setMethod('is.vector', signature = c(x = 'recip'), function(x) TRUE)
+
+#' @export
+setMethod('==', signature = c(e1 = 'recip', e2 = 'recip'),
+          function(e1, e2) {
+            e1@Numerator == e2@Numerator & e1@Denominator == e2@Denominator        
+          })
+
+#' @export
+setMethod('!=', signature = c(e1 = 'recip', e2 = 'recip'),
+          function(e1, e2) {
+                    e1@Numerator != e2@Numerator | e1@Denominator != e2@Denominator        
+          })
+
+#' @export 
+setMethod('is.numeric', signature = c(x = 'recip'), function(x) TRUE)
 
 #' @export 
 setMethod('as.vector', signature = c(x = 'recip'), function(x) x)
@@ -206,22 +233,25 @@ setMethod('+', signature = c(e1 = 'ANY', e2 = 'recip'),
 
 
 #' @export
-setMethod('sum', signature = c('raecip'),
+setMethod('sum', signature = c(x = 'recip'),
           function(x, ..., na.rm = TRUE) {
-            x <- list(x, ...)
-            x <- do.call('c', x)
-            x <- as.numeric(x)
-            as.recip(sum(x, na.rm = na.rm))
+            x <- do.call('c', list(x, ...))
+            as.recip(sum(as.double(x), na.rm = na.rm))
           })
 
 #' @export
 setMethod('cumsum', signature = c(x = 'recip'),
           function(x ) {
-            x <- as.numeric(x)
-            as.recip(cumsum(x))
+            as.recip(cumsum(as.double(x)))
           })
 
 
+
+#' @export
+setMethod('-', signature = c(e1 = 'recip', e2 = 'missing'),
+          function(e1, e2) {
+                    e1 * -1
+          })
 
 
 #' @export
@@ -261,10 +291,8 @@ setMethod('-', signature = c(e1 = 'ANY', e2 = 'recip'),
 #' @export
 setMethod('diff', signature = c('recip'),
           function(x, ..., na.rm = TRUE) {
-            x <- list(x, ...)
-            x <- do.call('c', x)
-            x <- as.numeric(x)
-            as.recip(diff(x))
+            x <- do.call('c', list(x, ...))
+            as.recip(diff(as.double(x), na.rm = na.rm))
           })
 
 
@@ -276,39 +304,29 @@ setMethod('diff', signature = c('recip'),
 #' @export
 setMethod('*', signature = c(e1 = 'recip', e2 = 'numeric'),
           function(e1, e2) {
-            stopifnot(all(e2 >= 0))
             if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            IfElse(e2 < 1, 
-                   as.recip(e1@Numerator / (e1@Denominator * 1 / e2)), 
-                   recip(e1@Denominator, 
-                         e1@Numerator * e2))
+            IfElse(abs(e2) < 1, 
+                   recip(e1@Denominator,  e1@Numerator * e2),
+                   as.recip(e1@Numerator / (e1@Denominator * 1 / e2))
+                   )
             
           })
 
 #' @export
 setMethod('*', signature = c(e1 = 'numeric', e2 = 'recip'),
           function(e1, e2) {
-            stopifnot(all(e1 >= 0))
-            
-            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            
-            IfElse(e1 < 1, 
-                   as.recip(e1@Numerator / (e1@Denominator * 1 / e1)), 
-                    recip(e2@Denominator, 
-                          e2@Numerator * e1))
-            
+                    e2 * e1
           })
 
 #' @export
 setMethod('/', signature = c(e1 = 'recip', e2 = 'numeric'),
           function(e1, e2) {
-            stopifnot(all(e2 > 0))
             
             if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            IfElse(e2 < 1, 
-                   as.recip((e1@Numerator  * 1 / e2) / e1@Denominator), 
-                    recip(e1@Denominator  * e2, 
-                          e1@Numerator))
+            IfElse(abs(e2) < 1, 
+                   recip(e1@Denominator  * e2,  e1@Numerator),
+                   as.recip((e1@Numerator  * 1 / e2) / e1@Denominator)
+                   )
           })
 
 #' @export
@@ -318,6 +336,60 @@ setMethod('/', signature = c(e1 = 'recip', e2 = 'recip'),
             
             (e1@Numerator * e2@Denominator) / (e2@Numerator * e1@Denominator)
           })
+
+
+#' @export
+setMethod('%/%', signature = c(e1 = 'recip', e2 = 'recip'),
+          function(e1, e2) {
+            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            (e1@Numerator * e2@Denominator) %/% (e2@Numerator * e1@Denominator)
+          })
+          
+#' @export
+setMethod('%%', signature = c(e1 = 'recip', e2 = 'recip'),
+          function(e1, e2) {
+                    if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+                    n <- e1@Numerator * e2@Denominator
+                    d <- e2@Numerator * e1@Denominator
+                    
+                    n <- n %% d
+                    
+                    recip(d * e2@Denominator,
+                          n * e2@Numerator)
+          })
+
+#' @export
+decompose <- function(recip, into = recip(c(1, 2, 4, 8, 16, 32))) {
+          into <- sort(into, decreasing = TRUE)
+          
+          lapply(as.list(recip), 
+                 function(rs) {
+                           divs <- rs %/% into
+                           parts <- into * divs
+                           
+                           for (i in 2:length(parts)) {
+                              parts[i] <- parts[i] - sum(parts[1:(i - 1)])       
+                           }
+                           parts
+                    }) -> decompositions
+          
+          lapply(1:length(into),
+                 function(j) {
+                    do.call('c', lapply(decompositions, '[', j))
+                 }) -> decompositions
+          
+          
+          
+          decompositions <- do.call('data.frame', decompositions)
+          colnames(decompositions) <- as.character(into)
+          rownames(decompositions) <- as.character(recip)
+          decompositions
+          
+          
+          
+          
+}
 
 #' @export
 setGeneric('as.recip', function(x) standardGeneric('as.recip'))
