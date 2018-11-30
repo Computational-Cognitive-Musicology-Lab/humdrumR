@@ -13,8 +13,9 @@ humApply(humdrumR, expression, partition = list(), tee = FALSE,
 \item{expression}{A formula (or a function). If fed a function this function
 is coerced to a formula as \code{~func(.)}.
 The expression on the right side of the formula
-is evaluated inside the humdrumR internal data.table (humtable). Any expression on the 
-left side of the formula is ignored. There are a number of useful options and syntactic
+is evaluated inside the humdrumR internal data.table (humtable). The left side of the formula
+can be use as an alternative way of specifying other arguments to humApply (see details). 
+There are a number of useful options and syntactic
 treats which make these expressions extra powerful (see details).}
 
 \item{partition}{A list of formulae in the format 
@@ -60,11 +61,11 @@ It also includes a number of special application options:
 \section{Applying expressions}{
 
 The \code{expression} argument should be a formula. The expression on the 
-right side of this formula is evaluate within the humdrumR data object 
-(the left side is ignored). The expression can, thus, refer to any field 
-in the humdrumR object (Record, Token, File, etc.). You can also include a
-\code{.} anywhere in the expression, which will be interpreted as the humdrumR 
-object's default \code{\link[dest=humdrumR]{Active}} expression.
+right side of this formula is evaluate within the humdrumR data object. The expression
+can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.). 
+You can also include a \code{.} anywhere in the expression, which will be 
+interpreted as the humdrumR object's default \code{\link[dest=humdrumR]{Active}} 
+expression.
 Examples:
 \preformatted{
 humdata <- readHumdrum('directorywithdata/*.krn') # read some data
@@ -181,6 +182,23 @@ humApply(humData,
                      Token[Spine == 3], # etc.
                      Token[Spine == 4])) 
 }
+
+#' @section Argument specification:
+If desired, all arguments to humApply except for \code{humdrumR} and \code{expression}
+can be specified in the left hand side of the \code{expression} formula.
+For this to work, the left hand side of \code{expression} must contain a list
+of formulas, each specifying a keyword (argument) and value/expression.
+For instance,
+\preformatted{
+humApply(humdata, ~table(.), partition = list(by ~ Spine))
+}
+and
+\preformatted{
+humApply(humdata, list(by ~ Spine) ~ table(.))
+}
+are equivalent.
+If arguments are specified in the formula, they supercede arguments fed to the function.
+This feature is useful for saving more complex combinations of expressions and arguments.
 }
 
 \examples{

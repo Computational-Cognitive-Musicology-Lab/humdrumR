@@ -16,7 +16,7 @@ Collate: humdrumR-package.R
          humRead.R
          humApply.R
          humWindows.R
-         humFormulae.R
+         humPiping.R
          humPlot.R
          humInterpretations.R
          humRegex.R
