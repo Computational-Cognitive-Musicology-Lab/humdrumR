@@ -227,7 +227,7 @@ humApply <- function(humdrumR,
           # read them from formula, if they are there
           formulaArgs <- lazyeval::f_eval_lhs(expression)
           if (!is.null(formulaArgs) && is.list(formulaArgs) && all(sapply(formulaArgs, is.formula))) {
-                    formulaArgs <- parsePartitionList(formulaArgs)
+                    formulaArgs <- parseArgFormulaList(formulaArgs)
                     if (any(names(formulaArgs) %in% c('by', 'where'))) {
                               partition <- formulaArgs[names(formulaArgs) %in% c('by', 'where')]
                               formulaArgs <- formulaArgs[!names(formulaArgs) %in% c('by', 'where')]
@@ -237,7 +237,6 @@ humApply <- function(humdrumR,
                      list2env(formulaArgs, envir = environment()) 
                      # remaining arguments from formula are saved into environment,
                      # overwriting any arguments (like ngrams) that might have been there).
-                              
                      ngrams <- eval(ngrams) 
                     }
           }
@@ -249,7 +248,7 @@ humApply <- function(humdrumR,
                     do.call('par', graphics)
           }
           
-          partition <- c(humdrumR@Partition, parsePartitionList(partition))
+          partition <- c(humdrumR@Partition, parseArgFormulaList(partition))
           
           #### create main expresion
           funcform <- parseForm(humtab, expression, humdrumR@Active, ngrams)
@@ -591,16 +590,16 @@ partApply <- function(humtab, partitions, humfunc) {
 
 
 
-parsePartitionList <- function(l) {
+parseArgFormulaList <- function(l) {
           # This function is simply syntactic sugar to
           # make specifying partitions in a call to humApply
           # a little bit more concise.
-          # It takes a list of formulas and applies parsePartitionFormula.
+          # It takes a list of formulas and applies parseArgFormula.
           names(l) <- NULL
-          unlist(lapply(l, parsePartitionFormula))
+          unlist(lapply(l, parseArgFormula), recursive = FALSE)
 }
 
-parsePartitionFormula <- function(form) {
+parseArgFormula <- function(form) {
           # This function is simply syntactic sugar to
           # make specifying partitions in a call to humApply
           # a little bit more concise.
@@ -608,7 +607,7 @@ parsePartitionFormula <- function(form) {
           # Keyword ~ expr1 [~ expr2 ~ expr3 ...] and translates it to a list
           # like list(Keyword = ~ .(expr1[, expr2, expr3, ...]).
           # If the keyword is missing (there is no left side of formula), it defaults to "by".
-          exprs <- unwrapFormula(form)
+          exprs <- splitFormula(form)
           
           if (length(exprs) == 1) { 
                     keyword <- quote(by) # if keyword is empty, default to 'by.'
@@ -620,8 +619,10 @@ parsePartitionFormula <- function(form) {
           if (length(keyword) != 1L || !is.name(keyword)) stop("Your partition formula (in a call to humApply) contains a 
                                                   keyword (far left side of formula) which can't be parsed as a name.")
           
-          exprs <- do.call('call', c('.', exprs), quote = TRUE)
-          setNames(list(exprs), as.character(keyword))
+          keyword <- as.character(keyword)
+          if (keyword == 'by')  exprs <- list(do.call('call', c('.', exprs), quote = TRUE))
+          
+          setNames(exprs, keyword)
           
 }
 
