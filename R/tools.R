@@ -1,18 +1,6 @@
 #
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
-splitFormula <- function(form) {
-    # Takes a formula which contains one or more formula,
-    # and separates each formula, as if the ~ symbol is a boundary.
-    if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
-          
-    if (!is.formula(form)) form <- eval(form)
-          
-    lhs <- Recall(lazyeval::f_lhs(form))
-    rhs <- Recall(lazyeval::f_rhs(form))
-    
-    c(unlist(lhs), unlist(rhs))
-}
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           stuff <- list(...)

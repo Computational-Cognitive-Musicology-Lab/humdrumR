@@ -11,6 +11,27 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
                       'BarN', 'DoubleBarN', 'BarLabel', 'Section', 
                       'NData', 'Null')
 
+#' Humdrum data table
+#' 
+#' In \code{humdrumR}, humdrum data is fundamentally stored
+#' in a data structure called a \strong{Humdrum Table}. A humdrum table
+#' is actually simply a \code{\link[data.table]{data.table}}, from the 
+#' R package of the same name. \code{\link[data.table:data.table]{data.tables}}
+#' are simply enhanced \code{\link[base:data.frame]{data.frames}}, optimized
+#' for fast grouping.
+#' 
+#' In a \strong{Humdrum Table}, each row represents a single 'token'
+#' in the original humdrum data. (Multistops (tokens within one record
+#' and one spine which are separated by spaces) are even broken into
+#' separate tokens in \code{humdrumR}). Each column represnts a single
+#' piece of information associated with the token, which we call a \strong{field}.
+#' Throughout this documentation, you should keep in mind that a "token" refers
+#' to a row in the humdrum table, while a "field" refers to a column.
+#' 
+#' 
+#' 
+#' @name humtable
+NULL
 
 #' HumdrumR class
 #' 
@@ -99,6 +120,7 @@ getD <- function(humdrumR) { humdrumR@Humtable[['D']] }
 #' @export
 getHumtab <- function(humdrumR, types = c('G', 'L', 'I', 'M', 'D', 'd')) {
   # takes a humdrumR object, extracts D and and GLIM to the environment
+  types <- unique(unlist(strsplit(types, split = '')))
   humtab <- humdrumR@Humtable[types]
   # if (!allsame(sapply(humtab, ncol))) {
    # humtab <- indexGLIM(humdrumR)@Humtable[types]
@@ -163,8 +185,7 @@ setActive <- function(humdrumR, expr) {
 putActive <- function(humdrumR, form) {
   humtab <- getD(humdrumR)
   usedInExpr <- layersInFormula(humtab, form)
-  
-  if (len0(usedInExpr)) stop("The 'active'-layer formula for a humdrumR object must refer to some layer.\n
+  if (length(usedInExpr) == 0) stop("The 'active'-layer formula for a humdrumR object must refer to some layer.\n
 Add a reference to some layer, for instance Token.", call. = FALSE)
   
   humdrumR@Active <- form

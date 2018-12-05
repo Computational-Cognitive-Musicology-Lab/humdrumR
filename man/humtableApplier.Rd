@@ -2,20 +2,20 @@
 % Please edit documentation in R/humApply.R
 \name{humtableApplier}
 \alias{humtableApplier}
-\title{This function operates within humApply.
+\title{This function operates within withinHumdrum.
 It takes an expression created by parseForm 
 and turns it into a function which can be applied 
 to a Humtable (a data.table). 
 It's second argument determines if the result of the 
-expression application is put back into the Humtable.  #' table.}
+expression application is put back into the Humtable.}
 \usage{
-humtableApplier(funcform, captureOutput = TRUE)
+humtableApplier(funcform, captureOutput = TRUE, reHumtab = TRUE)
 }
 \description{
-This function operates within humApply.
+This function operates within withinHumdrum.
 It takes an expression created by parseForm 
 and turns it into a function which can be applied 
 to a Humtable (a data.table). 
 It's second argument determines if the result of the 
-expression application is put back into the Humtable.  #' table.
+expression application is put back into the Humtable.
 }

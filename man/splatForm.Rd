@@ -7,7 +7,7 @@ and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExp
 with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
 The result is that \code{TargetExpr} is broken into a list of vectors by the
 \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
-argument. See the docementation for \code{\link{humApply}}.}
+argument. See the docementation for \code{\link{withinHumdrum}}.}
 \usage{
 splatForm(funcform)
 }
@@ -17,5 +17,5 @@ and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExp
 with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
 The result is that \code{TargetExpr} is broken into a list of vectors by the
 \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
-argument. See the docementation for \code{\link{humApply}}.
+argument. See the docementation for \code{\link{withinHumdrum}}.
 }

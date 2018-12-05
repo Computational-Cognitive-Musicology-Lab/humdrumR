@@ -2,14 +2,14 @@
 % Please edit documentation in R/humApply.R
 \name{parseForm}
 \alias{parseForm}
-\title{This is the main function used by \code{\link{humApply}} to prepare
+\title{This is the main function used by \code{\link{withinHumdrum}} to prepare
 the \code{expression} argument for application to a \code{\linkS4class{humdrumR}}
 object.}
 \usage{
-parseForm(humtab, funcform, active, ngram = NULL)
+parseForm(humtab, funcform, active, ngram = 1)
 }
 \description{
-This is the main function used by \code{\link{humApply}} to prepare
+This is the main function used by \code{\link{withinHumdrum}} to prepare
 the \code{expression} argument for application to a \code{\linkS4class{humdrumR}}
 object.
 }

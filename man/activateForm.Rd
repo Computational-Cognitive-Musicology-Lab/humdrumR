@@ -3,7 +3,7 @@
 \name{activateForm}
 \alias{activateForm}
 \title{This function takes the \code{expression} argument
-from the parent \code{\link{humApply}} call and 
+from the parent \code{\link{withinHumdrum}} call and 
 inserts the \code{Active} expression from the 
 target \code{\linkS4class{humdrumR}} object in place 
 of any \code{.} subexpressions.}
@@ -12,7 +12,7 @@ activateForm(funcform, active)
 }
 \description{
 This function takes the \code{expression} argument
-from the parent \code{\link{humApply}} call and 
+from the parent \code{\link{withinHumdrum}} call and 
 inserts the \code{Active} expression from the 
 target \code{\linkS4class{humdrumR}} object in place 
 of any \code{.} subexpressions.

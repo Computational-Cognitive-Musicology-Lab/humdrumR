@@ -11,6 +11,14 @@ humdrumR \%humApply>\% formula
 humdrumR \%hum>\% formula
 }
 \description{
-This infix operators makes it possible to use
-humApply in a pipe-like scenario.
+humApply as an infix
+}
+\examples{
+humdata <- readHumdrum('path*.krn')
+
+humdata \%humApply>\% ~table(.)
+
+humdata \%hum>\%
+     (list(by~Spine)~table(.)) \%hum>\%
+     ~barplot(.)
 }
