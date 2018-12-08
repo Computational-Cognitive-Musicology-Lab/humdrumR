@@ -11,8 +11,8 @@ HumdrumR class
 \section{Slots}{
 
 \describe{
-\item{\code{Humtable}}{A list of data.tables. Each data.table has the same number of columns
-but contains data from different types of records (e.g., interpretations, data, barlines, comments).}
+\item{\code{Humtable}}{A list of \code{\link[humtable]{humdrum tables}}, each having the same fields
+but containing data from different types of records (e.g., interpretations, data, barlines, comments).}
 
 \item{\code{Files}}{A list of two elements. The first, "Search", contains a single character representing
 the \code{pattern} used in the call to \code{\link{readHumdrum}} which created this \code{humdrumR} object.

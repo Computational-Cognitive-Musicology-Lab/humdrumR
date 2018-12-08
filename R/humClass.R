@@ -13,30 +13,141 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 
 #' Humdrum data table
 #' 
-#' In \code{humdrumR}, humdrum data is fundamentally stored
+#' In \code{humdrumR}, humdrum data is stored
 #' in a data structure called a \strong{Humdrum Table}. A humdrum table
-#' is actually simply a \code{\link[data.table]{data.table}}, from the 
+#' is actually a \code{\link[data.table]{data.table}}, from the 
 #' R package of the same name. \code{\link[data.table:data.table]{data.tables}}
-#' are simply enhanced \code{\link[base:data.frame]{data.frames}}, optimized
-#' for fast grouping.
+#' are simply enhanced R \code{\link[base:data.frame]{data.frames}}, with a few
+#' handy optimizations.
 #' 
-#' In a \strong{Humdrum Table}, each row represents a single 'token'
-#' in the original humdrum data. (Multistops (tokens within one record
-#' and one spine which are separated by spaces) are even broken into
-#' separate tokens in \code{humdrumR}). Each column represnts a single
+#' In a humdrum table, each row represents a single 'token'
+#' in the original humdrum data. (Multistops---tokens separated by spaces---are even broken into
+#' their own rows). Each column represents a single
 #' piece of information associated with the token, which we call a \strong{field}.
 #' Throughout this documentation, you should keep in mind that a "token" refers
 #' to a row in the humdrum table, while a "field" refers to a column.
 #' 
+#' @section Fields:
+#' There are five types of fields in a humdrum table: 
+#' \enumerate{
+#' \item Data fields
+#' \item Location fields
+#' \item Interpretation fields
+#' \item Section fields
+#' \item Reference fields
+#' }
+#' When first created by a call to \code{\link{readHumdrum}} every
+#' humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation 
+#' fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve location fields. Additional fields
+#' may be present depending on the content of the humdrum file(s), and even more fields can be created
+#' by users.
+#' 
+#' \strong{1. Data fields:} Data fields are used to describe individual data points
+#' in humdrum data (as opposed to groups of points). 
+#' Every humdrum table starts with a data
+#' field called \strong{Token}, which
+#' contains character strings representing the original strings read from the humdrum files. 
+#' Users can create as many additional data fields as they like. Every call to
+#' \code{\link{withinHumdrum}}---which can also be called using the 
+#' \code{\link[humdrumR:humPipe]{\%hum>\%}} piping 
+#' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
+#' (These fields can then be renamed using the \code{$<-} operator, if you want.)
+
+#' 
+#' \strong{2. Location fields:} Location fields describe where each data point
+#' came from---which file, which spine, which record, etc.
+#' Every humdrum table starts with twelve location fields, describing where
+#' the token came from:
+#' \describe{
+#' \item{File}{\code{character} - The name of the humdrum file.}
+#' \item{FullFileName}{\code{character} - The full file name, including it's path.}
+#' \item{NFile}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
+#' \item{Record}{\code{integer} - The record (i.e., line) number.}
+#' \item{NData}{\code{integer} - An enumeration of \strong{data records} specifically.}
+#' \item{Global}{\code{logical} - Did the token come from a glocal record (i.e., a record with no spine)?}
+#' \item{Type}{\code{character} - What type of record is it? \code{"D"} = non-null data; \code{"d"} = null data;
+#'    \code{"I"} = interpretation; \code{"M"} = measure/barline; \code{"L"} = local comment;
+#'    \code{"G"} = global comment.}
+#' \item{Null}{\code{logical} - Is this a null record (i.e., is the token ".", "*", "!", "!!", "!!!", or "=")?}
+#' \item{Spine}{\code{integer} - The spine. This field is \code{NA} when \code{Global == TRUE}.}
+#' \item{Path}{\code{integer} - The "spine path." Any time a \code{*^} spine path split occurs in
+#'       the humdrum data, the right side of the split becomes a new "path." The original path
+#'       is numbered \code{0}---if there are no spine path splits, the \code{Path} field is all zeros. 
+#'       This field is always \code{NA} when \code{Global == TRUE}.}
+#' \item{Column}{\code{integer} - Which column (tab-separated) in the humdrum data---irespective of Spine/Paths.}
+#' \item{Stop}{\code{integer} - Which token in a multistop token. Single tokes are numbered \code{1}.
+#'       This field is always \code{NA} when \code{Global == TRUE}.}
+#' }
 #' 
 #' 
+#' 
+#' \strong{Interpretation fields:} Interpretation fields describe interpretation metadata in the humdrum file(s).
+#' Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
+#' subsequent interpretation. 
+#' All humdrum data must have an \emph{exclusive} interpretation, marked
+#' with two asterisks ("**x")---thus, all humdrum tables have an \code{Exclusive} field indicating the
+#' exclusive interpretation associated with that token.
+#' Humdrum may or may not include \emph{tandem} interpretations. A universal rule for parsing
+#' tandem intepretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
+#' users can create their own tandem interpretation. The best we can do in all cases is 
+#' identify \emph{all} tandem interpretations that have appeared previously in the spine
+#' (counting most recent first). All these previous interpretations are encoded in a single
+#' character string in the \code{Tandem} field. Users can parse this field using the
+#' \code{\link{getTandem}} function. If no tandem interpretations occur in a file,
+#' the \code{Tandem} field is still created, but is simply full of empty strings (\code{""}).
+#' 
+#' Fortunately, many tandem interpretations are widely used and standardized, and these 
+#' interpretations are known by \code{humdrumR}. Recognized interpretations (such as "\*clef_" and "\*k[x]")
+#' are automatically parsed into their own fields by a call to \code{\link{readHumdrum}}.
+#' See the \code{\link{readHumdrum}} documentation for more details.
+#' 
+#' 
+#' \strong{Section fields:} Section fields indicate musical sections, or time windows within
+#' a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
+#' Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
+#' \eqn{N} unnamed formal marks are put into fields named \eqn{{Form1, Form2, ..., FormN}}.
+#' Named formal categories are put into a field matching their name.
+#' Hierarchical formal categories...\strong{this section under construction}.
+#' 
+#' Humdrum data may or may not also include barlines (tokens beginning \code{'='}).
+#' \code{\link{readHumdrum}} always Three section fields are 
+#' \describe{
+#'   \item{BarN}{\code{integer} - How many single barline records have passed before this token?
+#'     If no '=' tokens occur in the file, \code{BarN} is all zeros.}
+#'   \item{DoubleBarN}{\code{integer} - How many double barlines have passed before this token?
+#'      If no \code{'=='} tokens occur in the file, \code{DoubleBarN} is all zeros.}
+#'   \item{BarLabel}{\code{character} - Any characters that occur after initial \code{'='} or
+#'      \code{'=='} of previous bar token. These include the \code{"-"} in 
+#'      the \code{'=-'} pickup barline,
+#'      repeat tokens (like \code{"=:\|\|"}), and also explicit \emph{bar numbers}. Note that
+#'      the \code{BarN} field always enumerate every single \code{'='} bar record, while
+#'      measure number labels in humdrum data (which appear in the \code{BarLabel} field) may
+#'      do weird things like skipping numbers, repeating numbers, and having suffixes (e.g., "19a")
+#'      If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\code{""}).}
+#' }
+#' 
+#' \strong{Reference fields:} Reference fields describe any \emph{Reference Records}
+#' in the humdrum data. Every reference record (records beginning \code{"!!!"}) in any
+#' humdrum file in a corpus read by \code{\link{readHumdrum}} is parsed into a field named
+#' by the reference code: \code{"XXX"} in \code{"!!!XXX"}. Reference tokens are all identical throughout
+#' any humdrum piece. If a reference code appears in one file but not another, the field is
+#' \code{NA} in the file which does not have the code. If no reference records appear in any
+#' files, no Reference fields are created.
+#' 
+#' @section Philosophy:
+#' Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
+#' grid structure of the original humdrum data? The Humdrum Table structure affords
+#' maximum data analysis flexibility. Thanks to the Location fields, we can easily
+#' regroup and reform the structures of humdrum data (like spines). 
+#' 
+#' ...
 #' @name humtable
 NULL
 
 #' HumdrumR class
 #' 
-#' @slot Humtable A list of data.tables. Each data.table has the same number of columns
-#' but contains data from different types of records (e.g., interpretations, data, barlines, comments).
+#' @slot Humtable A list of \code{\link[humtable]{humdrum tables}}, each having the same fields
+#' but containing data from different types of records (e.g., interpretations, data, barlines, comments).
 #' @slot Files A list of two elements. The first, "Search", contains a single character representing
 #' the \code{pattern} used in the call to \code{\link{readHumdrum}} which created this \code{humdrumR} object.
 #' The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
@@ -275,10 +386,12 @@ layers <- function(humdrumR, tandem = TRUE, reference = TRUE, struct = TRUE) {
   classes <- sapply(D, class)
   
   if (any(lists <- classes == 'list')) {
-    classes[lists] <- 'list (of ' %str+% sapply(D[ , lists, with = FALSE],
+    classes[lists] <- paste0('list (of ',
+                             sapply(D[ , lists, with = FALSE],
                                                 function(col) {
-                                                  glue::collapse(unique(sapply(col, class)) %str+% "s", sep = ', ', last = ', and ')
-                                                }) %str+% ")"
+                                                  glue::collapse(paste0(unique(sapply(col, class)), "s"), sep = ', ', last = ', and ')
+                                                }),
+                             ")")
   }
  
   output <- data.table(Name = layers, Class = classes, Type = gsub('[0-9]*$', '', names(layers)))
@@ -292,14 +405,14 @@ showLayers <-  function(humdrumR, tandem = TRUE, reference = TRUE, struct = TRUE
   layers <- layers(humdrumR, tandem, reference, struct)
   
   activelayer <- layers$Name %in% activeString(humdrumR)
-  layers$Name <- ' ' %str+% layers$Name
+  layers$Name <- paste0(' ', layers$Name)
   layers$Name[activelayer] <- gsub('^ ', '*', layers$Name[activelayer])
   layers$Name <- str_pad(layers$Name, width = max(nchar(layers$Name)), side = 'right')
   
-  layprint <- layers$Name %str+% ' :: ' %str+% layers$Class
+  layprint <- paste0(layers$Name, ' :: ', layers$Class)
   
   
-  cat('\t\tLayers: ', layprint %str*% '\n\t\t        ', '\n', sep = '')
+  cat('\t\tLayers: ', paste(layprint, collapse = '\n\t\t        '), '\n', sep = '')
   invisible(layers)
 }
 
@@ -723,7 +836,7 @@ foldStops <- function(humdrumR, tokenize = FALSE) {
  
  expr <- ~humtab[ , X := Y, by = .(File, Spine, Record)]
  
- activecall <- call('c', actives %str+% '_new_foldstopxxx')
+ activecall <- call('c', paste0(actives, '_new_foldstopxxx'))
  
  expr <- expr <= swap(X = activecall)
  expr <- expr <= swap(Y = pasteexpr)
@@ -891,7 +1004,7 @@ print_humtab_humdrumAble <- function(humdrumR, cutMiddle = FALSE, global = FALSE
                    ifelse(grepl('^!!', records, useBytes = TRUE), ' ', '    '),
                    records, sep = '')
   
-  ellipsis <- '#' %str*% max(nchar(records))
+  ellipsis <- paste(rep('#', max(nchar(records))), collapse = '')
   FNs <- humtab_rs$File
   # if (filenames) FNs <- (' ' %str*% (max(nchar(recordn)) + 1)) %str+% (humtab_rs$FileName %str-% '^.*/') else FNs <- c()
   records <- split(records, FNs)
@@ -908,9 +1021,9 @@ print_humtab_humdrumAble <- function(humdrumR, cutMiddle = FALSE, global = FALSE
     
   }
     
-  records <- unlist(Map(append, records, ellipsis %str+% ' ' %str+% names(records), after = 0L))
+  records <- unlist(Map(append, records, paste0(ellipsis, ' ', names(records)), after = 0L))
   
-  records <- records %str+% "\n"
+  records <- paste0(records, "\n")
   
   
   cat(records, sep = '')
@@ -933,10 +1046,10 @@ print_humtab_nothumdrumAble <- function(humdrumR, cutMiddle = FALSE) {
   notact <- notact[ , sapply(notact, function(col) !all(duplicated(col)[-1]) & !any(is.na(col))), with = FALSE]
   printnotact <- nrow(notact) > 0 && nrow(notact) == length(act)
   if (printnotact) {
-    ellipsis <- '#' %str*% 4
-    collabs <- lapply(colnames(notact), function(col) gsub('File: ', '', col %str+% ": ") %str+% notact[[col]])
+    ellipsis <- '####'
+    collabs <- lapply(colnames(notact), function(col) paste0(gsub('File: ', '', paste0(col, ": ")), notact[[col]]))
     collabs <- apply(do.call('cbind',collabs), 1, 
-                     function(row) (' ' %str*% 15) %str+% ellipsis %str+% paste(row, collapse = ', ') %str+% ellipsis)
+                     function(row) paste0('               ', ellipsis, paste(row, collapse = ', '), ellipsis))
   }
   for (i in 1:nrow(humdrumR)) {
     if (printnotact) cat(collabs[i], '\n', sep = '')
@@ -1035,7 +1148,7 @@ setMethod('+', signature = c(e1 = 'character', e2 = 'humdrumR'),
           function(e1, e2) {
             humdrumR <- e2
             
-            newtokens <- e1 %str+% getActive(humdrumR)[[1]]
+            newtokens <- paste0(e1, getActive(humdrumR)[[1]])
             active(humdrumR) <- newtokens
           
             humdrumR

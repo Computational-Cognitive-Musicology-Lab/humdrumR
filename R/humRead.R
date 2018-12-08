@@ -244,7 +244,7 @@ parseReference <- function(refrecords) {
   
   
   # as.data.table(setNames(lapply(refVals, list), names(refVals)))
-  as.data.table(lapply(refVals, function(ref) if (len1(ref)) ref else list(ref)))
+  as.data.table(lapply(refVals, function(ref) if (length(ref) == 1) ref else list(ref)))
 }
 
 
@@ -276,7 +276,7 @@ parseLocal = function(records) {
 
   ## get spine and path numbers of appropriate length
   SpineNumbers <- cumsum(apply(mat, 2,  function(spine) any(spine != 'xxx') && grepl('^\\*\\*', spine[spine != 'xxx'][1])))
-  SpinePaths   <- unlist(tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1
+  SpinePaths   <- as.vector(tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
   Columns      <- seq_along(SpineNumbers)
 
   #sections
@@ -295,7 +295,7 @@ parseLocal = function(records) {
   #If there are multistops, the spines are no longer the same lengths, and have different recordns.
   tokens <- parseMultiStops(tokens)
   # get rid of stuff before period, leaving only stop number
-  stopNs <- as.numeric(gsub('^.*\\.', '', names(tokens)))
+  stopNs <- as.integer(gsub('^.*\\.', '', names(tokens)))
   # get rid of stuff after period, leaving just record number (don't make numeric yet)
   recordns <- gsub('\\..*$', '', names(tokens))
 
@@ -307,7 +307,7 @@ parseLocal = function(records) {
   spineLengths <- nrow(mat) + apply(mat[!grepl('^[*!=]', mat[ , 1]), ], 2, function(col) sum(stringi::stri_count_fixed(col, ' ')))
   Columns <- rep(Columns, spineLengths) 
   # Don't need recordns to be characters anymore.
-  recordns <- as.numeric(recordns)
+  recordns <- as.integer(recordns)
 
   DaTa <- data.table(Token = tokens,
                      Column = Columns,
@@ -423,9 +423,9 @@ parseInterpretations <- function(spinemat) {
 parseMultiStops <- function(spine) {
   nspaces <- stri_count_fixed(spine, ' ') #count multistops 
   nspaces[grepl('^[!*=]', spine)] <- 0 #except not in non-data tokens
-  if (!any(nspaces > 0)) return(setNames(spine, names(spine) %str+% '.01'))
+  if (!any(nspaces > 0)) return(setNames(spine, paste0(names(spine), '.01')))
     
-  Map(function(recn, n) {gsub('0\\.', '.', recn %str+% (.01*seq_len(n)))}, 
+  Map(function(recn, n) {gsub('0\\.', '.', paste0(recn, .01 * seq_len(n)))}, 
       names(spine), 
       nspaces + 1) -> multiRecordn
   spine[!grepl('^[!=*]', spine)] <- strsplit(spine[!grepl('^[!=*]', spine)], split = ' ')
@@ -476,8 +476,8 @@ parseSections <- function(vec) {
 
 
 parseMeasures <- function(vec) {
-  Bars = 1 + cumsum(grepl('^=', vec))
-  Doubles  = 1 + cumsum(grepl('^==', vec))
+  Bars = 1L + cumsum(grepl('^=', vec))
+  Doubles  = 1L + cumsum(grepl('^==', vec))
   
   BarLabels = str_sub(grep('^=', vec, value = TRUE), 2L)[Bars]
   

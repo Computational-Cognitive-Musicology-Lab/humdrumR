@@ -161,10 +161,12 @@ IfElse <- function(true, yes, no) {
 
 #' @export
 init <- function(x, n = 1) {
-  if (len0(x)) return(vector(mode(x)))
+  if (length(x) == 0L) return(vector(mode(x)))
 
   if (!hasdim(x)) x[1 : (length(x) - n)] else x[1 : (nrow(x) - n), , drop = FALSE]
 }
+
+hasdim <- function(x) !is.null(dim(x))
 
 
 `%len==%` <- function (x, y) 

@@ -2,8 +2,11 @@
 % Please edit documentation in R/humApply.R
 \name{with-in-Humdrum}
 \alias{with-in-Humdrum}
+\alias{with-in-Humdrum}
 \alias{withinHumdrum}
+\alias{with-in-Humdrum}
 \alias{withHumdrum}
+\alias{with-in-Humdrum}
 \alias{inHumdrum}
 \title{with(in)Humdrum}
 \usage{
@@ -26,10 +29,17 @@ must be a name/symbol. Named arguments are \link[humdrumR:interpolateNamedValues
 These are all simply appended to the \code{formulae} argument.}
 }
 \value{
-A new humdrumR data object.
+From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
+From \code{withHumdrum}, whatever value is returned by expression.
 }
 \description{
 Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
+
+withinHumdrum
+
+withHumdrum
+
+inHumdrum
 }
 \section{Overview}{
 
@@ -259,6 +269,15 @@ withinHumdrum(humdata,
               na.rm = FALSE)
 # mycommand is executed with na.rm changed to FALSE              
 }
+}
+
+\section{Piping}{
+
+For calls to \code{withinHumdrum}, the result of each \code{do} expression
+is insterted back into the \link[humtable]{humdrum table}. The results
+are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
+of the expression are shorter than the rows in the \link[humtable]{humdrum table},
+or an \code{object}, the humdrum table is shrunk to fit them.
 }
 
 \examples{

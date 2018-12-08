@@ -2,16 +2,14 @@
 % Please edit documentation in R/humPiping.R
 \name{splitExpression}
 \alias{splitExpression}
-\title{This function takes a formula
-looks for any top level | operators
-in the right hand side
-and splits the expression into pieces at these points}
+\title{This function takes an expression and
+and breaks it into separate expressions based on
+top level calls to a infix function.}
 \usage{
-splitExpression(form, on = "|")
+splitExpression(expr, on = "|")
 }
 \description{
-This function takes a formula
-looks for any top level | operators
-in the right hand side
-and splits the expression into pieces at these points
+This function takes an expression and
+and breaks it into separate expressions based on
+top level calls to a infix function.
 }

@@ -291,7 +291,6 @@ withinHumdrum <- function(humdrumR,  ...) {
           # graphics, recordtypes, doexpressions, ngrams, partitions
           # also WhichAreDo (a logical vector)
           parsedFormulae <- parseKeywords(formulae, envir = environment()) 
-          
           # graphical options
           if (length(graphics) > 0) {
                     oldpar <- par(no.readonly = TRUE)
@@ -456,7 +455,6 @@ parseKeywords <- function(formulae, envir) {
  formulargnames <- names(formulargs)
  
  #
- 
  knownKeywords <- list(doexpressions   = c('d', 'do', 'dop', 'dopl', 'doplo', 'doplot'),
                        graphics        = names(par()),
                        ngrams          = c('ngrams', 'ngram'),
