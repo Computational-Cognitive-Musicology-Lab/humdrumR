@@ -2,11 +2,8 @@
 % Please edit documentation in R/humApply.R
 \name{with-in-Humdrum}
 \alias{with-in-Humdrum}
-\alias{with-in-Humdrum}
 \alias{withinHumdrum}
-\alias{with-in-Humdrum}
 \alias{withHumdrum}
-\alias{with-in-Humdrum}
 \alias{inHumdrum}
 \title{with(in)Humdrum}
 \usage{
@@ -34,12 +31,6 @@ From \code{withHumdrum}, whatever value is returned by expression.
 }
 \description{
 Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
-
-withinHumdrum
-
-withHumdrum
-
-inHumdrum
 }
 \section{Overview}{
 

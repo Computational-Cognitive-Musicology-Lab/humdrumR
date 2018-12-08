@@ -2,9 +2,7 @@
 % Please edit documentation in R/humPiping.R
 \name{humPipe}
 \alias{humPipe}
-\alias{humPipe}
 \alias{\%hum>\%}
-\alias{humPipe}
 \alias{\%hum<\%}
 \title{Piping humdrumR data}
 \usage{
