@@ -1,4 +1,5 @@
 **kern
+*clefG2
 *>ONE
 *>Names>Exposition
 *>Letters>A
@@ -9,7 +10,7 @@
 x
 2
 *>Names>>S
-x
+x y
 *>Names>>>2
 3
 *>Names>>C
@@ -21,7 +22,7 @@ x5x
 6
 2
 x
-*Names>>Retransition
+*>Names>>Retransition
 x
 *>Names>Recap
 *>ROUNDING

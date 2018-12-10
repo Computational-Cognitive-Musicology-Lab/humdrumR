@@ -1,6 +1,18 @@
 #
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
+substituteName <- function(expr, ...) {
+  subs <- list(...)
+  if (length(list) == 0) return(expr)
+  
+  if (is.call(expr)) {
+            for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], ...)
+  } else { 
+            if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
+  }
+  expr
+          
+}
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           stuff <- list(...)
@@ -144,6 +156,19 @@ grepls <- function(patterns, string, combine = any) {
 
 }
 
+ditto <- function(spine) {
+          datainds <- grep('^[^!=*]', spine)
+          
+          data <- spine[datainds]
+          
+          notnull <- data != '.' & !is.na(data)
+          grps <- cumsum(notnull)
+          if (grps[1] == 0) grps <- grps + 1
+          
+          spine[datainds] <- data[notnull][grps]
+          spine
+          
+}
 
 #' Lazy version of base::ifelse
 

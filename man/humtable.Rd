@@ -26,7 +26,7 @@ There are five types of fields in a humdrum table:
 \item Data fields
 \item Location fields
 \item Interpretation fields
-\item Section fields
+\item Formal fields
 \item Reference fields
 }
 When first created by a call to \code{\link{readHumdrum}} every
@@ -94,12 +94,15 @@ are automatically parsed into their own fields by a call to \code{\link{readHumd
 See the \code{\link{readHumdrum}} documentation for more details.
 
 
-\strong{Section fields:} Section fields indicate musical sections, or time windows within
+\strong{Formal fields:} Formal fields indicate musical sections, or time windows within
 a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
-\eqn{N} unnamed formal marks are put into fields named \eqn{{Form1, Form2, ..., FormN}}.
-Named formal categories are put into a field matching their name.
-Hierarchical formal categories...\strong{this section under construction}.
+Classified formal marks are put into fields matching their name.
+Unclassified formal marks are placed in a field called \code{Formal} as a default.
+Nested formal categories are appended with an underscore and a number for each level of descent:
+\code{Formal_1, Formal_2, ..., Formal_N}.
+If part of a section is not given a name in a lower hierarchical level, the field is simply
+empty (\code{""}) at that point.
 
 Humdrum data may or may not also include barlines (tokens beginning \code{'='}).
 \code{\link{readHumdrum}} always Three section fields are 

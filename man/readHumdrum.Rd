@@ -4,38 +4,38 @@
 \alias{readHumdrum}
 \title{Read humdrum files into R}
 \usage{
-readHumdrum(pattern, ..., regex = FALSE, recursive = FALSE,
-  validate = FALSE, verbose = TRUE)
+readHumdrum(pattern, ..., recursive = FALSE, validate = FALSE,
+  verbose = FALSE)
 }
 \arguments{
-\item{pattern}{Chracter: Each directory (separated by '/') and the final pattern are treated as regular expressions.}
+\item{pattern}{character: One or more patterns used to identify files to read. Each pattern represents
+a file path, using normal (system appropriate) convetions (i.e., directories separated by \code{"/"}, 
+\code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.). Each directory
+and the final file pattern are treated as regular expressions. Thus, we can say things like \code{"../^A.*/.*krn"}, which would
+match any kern files in any directory beginning with a capital A, in the directory above the current working directory.}
 
-\item{recursive}{Logical: Should each search term (directories, and files) be searched for recursively through all sub directories? 
-\code{recursive = TRUE} should only be used with a simple search pattern.}
+\item{...}{Any additional arguments are interpreted as additional directory regular-expression patterns, appended to the
+\code{pattern} argument.}
 
-\item{validate}{Logical: Should each humdrum file be validated using the function \code{\link{humdrumValidate}}?}
+\item{recursive}{logical: If \code{TRUE}, the final, file search pattern is searched for recursively through all sub directories.}
+
+\item{validate}{logical: If \code{TRUE}, the function \code{\link{validateHumdrum}} is called on each file before parsing, to check
+if the files are valid humdrum.}
+
+\item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins.}
 }
 \description{
-This function reads one or more humdrum files into a humdrumR "humdrum.table" object.
+This function reads one or more humdrum files to create a \code{\link[humdrumR:humtable]{humdrum table}}
+then builds a \code{\linkS4class{humdrumR}} data object around the table.
 }
 \examples{
-readHumdrum('*krn$') # loads all files ending with 'krn' in the currect directory
+readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
 
-## UNIX style---no regexes
-readHumdrum('Composers/Be*/*/Joined/*krn') 
-# Goes inside the directory "Composers."
-# Inside "Composers" looks for directories that start with "Be".
-# If there are any "Be*" matching directories within "Composers" matches all directories within them.
-# Within these directories, looks for directories called "Joined."
-# If there are any directories that match "Joined$", loads all files (if any) that end with "krn."
-
-
-## with regexes---notice the use of ^ and $ to make sure we get exact matches
-#' readHumdrum('^Composers$/^Be|^Mo/.*/^Joined$/.*krn$') 
-# Goes inside the directory "Composers."
+readHumdrum('^Composers$/^Be|^Mo/.*/^Joined$/.*krn$') 
+# Goes inside the directory "Composers".
 # Inside "Composers" looks for directories that start with "Be" or "Mo".
-# If there are any "Be|Mo" matching directories within "Composers" matches all directories within them.
-# Within these directories, looks for directories called "Joined."
+# If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
+# Within these directories, looks for directories called "Joined".
 # If there are any directories called "Joined", loads all files (if any) that end with "krn".
 
 }

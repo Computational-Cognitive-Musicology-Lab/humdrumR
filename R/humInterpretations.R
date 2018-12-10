@@ -1,5 +1,7 @@
 
 tandemTable <- function(tandems) {
+          if (all(tandems == "")) return(NULL)
+          
           uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
           uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
           

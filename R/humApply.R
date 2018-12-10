@@ -608,7 +608,7 @@ getTandem <- function(tandem, regex) {
   regex <- paste0(',\\*', regex, '[^,]*,')
   
   matches <- stringr::str_extract(tandem, pattern = regex)
-  stringr::str_sub(matches, 2L, -2L) %>% unique
+  unique(stringr::str_sub(matches, 2L, -2L))
   
 }
 

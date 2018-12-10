@@ -8,7 +8,7 @@
 structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
                       'Record', 'Type', 'Spine', 'Path', 'Stop',
                       'Exclusive', 'Tandem', 'Column', 
-                      'BarN', 'DoubleBarN', 'BarLabel', 'Section', 
+                      'BarN', 'DoubleBarN', 'BarLabel', 
                       'NData', 'Null')
 
 #' Humdrum data table
@@ -33,7 +33,7 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' \item Data fields
 #' \item Location fields
 #' \item Interpretation fields
-#' \item Section fields
+#' \item Formal fields
 #' \item Reference fields
 #' }
 #' When first created by a call to \code{\link{readHumdrum}} every
@@ -102,12 +102,15 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' See the \code{\link{readHumdrum}} documentation for more details.
 #' 
 #' 
-#' \strong{Section fields:} Section fields indicate musical sections, or time windows within
+#' \strong{Formal fields:} Formal fields indicate musical sections, or time windows within
 #' a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 #' Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
-#' \eqn{N} unnamed formal marks are put into fields named \eqn{{Form1, Form2, ..., FormN}}.
-#' Named formal categories are put into a field matching their name.
-#' Hierarchical formal categories...\strong{this section under construction}.
+#' Classified formal marks are put into fields matching their name.
+#' Unclassified formal marks are placed in a field called \code{Formal} as a default.
+#' Nested formal categories are appended with an underscore and a number for each level of descent:
+#' \code{Formal_1, Formal_2, ..., Formal_N}.
+#' If part of a section is not given a name in a lower hierarchical level, the field is simply
+#' empty (\code{""}) at that point.
 #' 
 #' Humdrum data may or may not also include barlines (tokens beginning \code{'='}).
 #' \code{\link{readHumdrum}} always Three section fields are 
@@ -492,6 +495,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'humdrum
             putHumtab(value, drop = TRUE) <- humtab
             addLayers(value) <- i
             
+            browser()
             value@Active <- swap.(setNames(list(as.symbol(i)), pipes), value@Active)
             
             value
@@ -837,9 +841,8 @@ foldStops <- function(humdrumR, tokenize = FALSE) {
  expr <- ~humtab[ , X := Y, by = .(File, Spine, Record)]
  
  activecall <- call('c', paste0(actives, '_new_foldstopxxx'))
- 
- expr <- expr <= swap(X = activecall)
- expr <- expr <= swap(Y = pasteexpr)
+
+ expr <- substituteName(expr, X = activecall, Y = pasteexpr)
  
  suppressWarnings(lazyeval::f_eval(expr)) # inplace)
  
@@ -1040,7 +1043,7 @@ print_humtab_nothumdrumAble <- function(humdrumR, cutMiddle = FALSE) {
   
   notact <- D[ , !colnames(D) %in% activeString(humdrumR), with = FALSE ]
   notact <- notact[ , colnames(notact) %in% c(refs, 'File', 'Spine', 
-                                              'Record', 'Path', 'Section', 
+                                              'Record', 'Path', 
                                               'Exclusive', 'BarN', 'DoubleBarN'), with = FALSE]
   
   notact <- notact[ , sapply(notact, function(col) !all(duplicated(col)[-1]) & !any(is.na(col))), with = FALSE]
