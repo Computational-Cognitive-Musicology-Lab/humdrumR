@@ -334,15 +334,15 @@ withinHumdrum <- function(humdrumR,  ...) {
           ########### Update other slots in humdrumR object
           
           # Now that the Humtable is taken care of,
-          # tell the humdrumR object about the new layers and set the Active formula.
-          newlayers <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
-          if (length(newlayers) > 0) {
-                    addLayers(humdrumR)  <- newlayers
+          # tell the humdrumR object about the new fields and set the Active formula.
+          newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
+          if (length(newfields) > 0) {
+                    addFields(humdrumR)  <- newfields
                     humdrumR <- if (any(names(partitions) == 'where')) {
-                              act <- ifelsecalls(partitions['where'], c(lazyeval::f_rhs(humdrumR@Active), lapply(newlayers, as.symbol)))
+                              act <- ifelsecalls(partitions['where'], c(lazyeval::f_rhs(humdrumR@Active), lapply(newfields, as.symbol)))
                               putActive(humdrumR, lazyeval::f_new(act))
                     } else {
-                              humdrumR <- setActiveString(humdrumR, newlayers) 
+                              humdrumR <- setActiveString(humdrumR, newfields) 
                     }
           }
           
@@ -474,10 +474,11 @@ parseKeywords <- function(formulae, envir) {
  #        If they are missing, there is a default.
  #        If there are more than one, take the first.
  #        Turn the formula into an atomic value
- values$recordtypes <- if (length(values$recordtypes) == 0) 'D' else lazyeval::f_eval(values$recordtypes[[1]])
- values$ngrams      <- if (length(values$ngrams)      == 0)  1  else lazyeval::f_eval(values$ngrams[[1]])
+ values$recordtypes <- if (length(values$recordtypes) == 0) 'D'      else lazyeval::f_eval(values$recordtypes[[1]])
+ values$ngrams      <- if (length(values$ngrams)      == 0)  1       else lazyeval::f_eval(values$ngrams[[1]])
  
  # Other keywords (e.g., windows and partitions) can be of any length, including 0
+ values$graphics    <- lapply(values$graphics, lazyeval::f_eval)
  
  #
  values$WhichAreDo <- which(boolean$doexpressions)
@@ -528,11 +529,11 @@ parseForm <- function(humtab, funcform, active, ngram = 1) {
   # splats
   funcform <- splatForm(funcform)
   
-  # find what layers (if any) are used in formula
-  usedInExpr <- unique(layersInFormula(humtab, funcform))
+  # find what fields (if any) are used in formula
+  usedInExpr <- unique(fieldsInFormula(humtab, funcform))
   
-  if (len0(usedInExpr)) { stop("The humformula argument in your call to withinHumdrum doesn't reference any layers in your humdrum data.\n A
-                               dd a layer somewhere or add a dot (.), which will automatically grab the default, 'active' layer.",
+  if (len0(usedInExpr)) { stop("The humformula argument in your call to withinHumdrum doesn't reference any fields in your humdrum data.\n A
+                               dd a field somewhere or add a dot (.), which will automatically grab the default, 'active' field.",
                                 call. = FALSE)}
 
   # if the targets are lists, Map
@@ -977,12 +978,12 @@ splitFormula <- function(form) {
           if (lenvalue < nrow(humtab)) humtab <- collapseHumtab(humtab, n = lenvalue)
           
           # What will the pipes be named
-          nnewlayers   <- length(value)
-          targetlayers <- if (allnamed(value)) names(value) else paste0('Pipe', (curpipen + seq_len(nnewlayers)))
+          nnewfields   <- length(value)
+          targetfields <- if (allnamed(value)) names(value) else paste0('Pipe', (curpipen + seq_len(nnewfields)))
           
-          humtab[ , targetlayers] <- value
+          humtab[ , targetfields] <- value
           
-          #humtab[ , newlayers := paste(targetlayers, collapse = ' ')]
+          #humtab[ , newfields := paste(targetfields, collapse = ' ')]
           
           humtab
           
@@ -991,38 +992,38 @@ splitFormula <- function(form) {
 
 
 
-ifelsecalls <- function(calls, layers) {
+ifelsecalls <- function(calls, fields) {
           # function used within withinHumdrum, as part of 
           # humdrumR (re)assembly process.
           call <- call('ifelse', lazyeval::f_rhs(calls[[1]]), 
-                       quote(.), layers[[1]])
+                       quote(.), fields[[1]])
           if (len1(calls)) {
-                    call[[3]] <- layers[[2]]
+                    call[[3]] <- fields[[2]]
           } else {
-                    call[[3]] <- Recall(calls[-1], layers[-1])
+                    call[[3]] <- Recall(calls[-1], fields[-1])
           }
           
           call
 }
 
-pipeLayers <- function(humtab) {
+pipeFields <- function(humtab) {
   #' Another function used by pipeIn<-
   #' Takes a humtab and identifies the pipe fields (columns), if any,
   #' are in it.
   colnms <- colnames(humtab)
   
-  pipelayers  <- colnms[grepl('Pipe', colnms)]
+  pipefields  <- colnms[grepl('Pipe', colnms)]
   
-  if (lennot0(pipelayers)) pipelayers <- pipelayers[order(as.numeric(stringr::str_extract(pipelayers, '[0-9]+')))]
+  if (lennot0(pipefields)) pipefields <- pipefields[order(as.numeric(stringr::str_extract(pipefields, '[0-9]+')))]
   
-  pipelayers
+  pipefields
 }
 
 curPipeN <- function(humtab) {
           #' A function used by pipeIn<-
           #' identifies how many pipe fields (if any)
           #' are already in a humtable.
-          length(pipeLayers(humtab))   
+          length(pipeFields(humtab))   
           
 }
 

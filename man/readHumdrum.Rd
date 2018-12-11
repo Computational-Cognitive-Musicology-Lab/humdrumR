@@ -9,15 +9,15 @@ readHumdrum(pattern, ..., recursive = FALSE, validate = FALSE,
 }
 \arguments{
 \item{pattern}{character: One or more patterns used to identify files to read. Each pattern represents
-a file path, using normal (system appropriate) convetions (i.e., directories separated by \code{"/"}, 
+a file path, using normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
 \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.). Each directory
 and the final file pattern are treated as regular expressions. Thus, we can say things like \code{"../^A.*/.*krn"}, which would
-match any kern files in any directory beginning with a capital A, in the directory above the current working directory.}
+match any kern files in any directory beginning with a capital \code{"A"} in the directory above the current working directory.}
 
 \item{...}{Any additional arguments are interpreted as additional directory regular-expression patterns, appended to the
 \code{pattern} argument.}
 
-\item{recursive}{logical: If \code{TRUE}, the final, file search pattern is searched for recursively through all sub directories.}
+\item{recursive}{logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.}
 
 \item{validate}{logical: If \code{TRUE}, the function \code{\link{validateHumdrum}} is called on each file before parsing, to check
 if the files are valid humdrum.}

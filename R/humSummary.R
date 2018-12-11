@@ -164,7 +164,7 @@ reference.humdrumR <- function(humdrumR) {
   #' 
   #' @export
   humtab <- getHumtab(humdrumR)
-  lay <- layers(humdrumR, reference = TRUE)
+  lay <- fields(humdrumR, reference = TRUE)
   
   humtab <- humtab[ , c('NFile', 'File', lay$Name[lay$Type == 'Reference']), with = FALSE]
   # 

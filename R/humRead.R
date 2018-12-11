@@ -523,7 +523,7 @@ parseSections <- function(spine) {
                        
                        if (type == '^\\*>[^>]*$') gsub('^\\*>', '', typemat) else gsub(paste0(type, '>*'), '', typemat)
                      } )
-  as.data.frame(matrices)
+  as.data.frame(matrices, stringsAsFactors = FALSE)
 }
 
 
@@ -534,12 +534,15 @@ parseBarlines <- function(spine) {
   # It takes a character vector representing a humdrum spine
   # and returns a data.frame with three columns representing the three barline fields (BarN, DoubleBarN, BarLabel)
           
-  Singles <- 1L + cumsum(grepl('^=', spine))
-  Doubles <- 1L + cumsum(grepl('^==', spine))
+  Singles <- cumsum(grepl('^=', spine))
+  Doubles <- cumsum(grepl('^==', spine))
   
-  BarLabels <- str_sub(grep('^=', spine, value = TRUE), 2L)[Singles]
+  BarLabels <- str_sub(grep('^=', spine, value = TRUE), 2L)[Singles + 1L]
   
-  data.frame(BarN = Singles, DoubleBarN = Doubles, BarLabel = BarLabels, row.names = names(spine))
+  data.frame(BarN = Singles, 
+             DoubleBarN = Doubles, 
+             BarLabel = BarLabels, 
+             row.names = names(spine), stringsAsFactors = FALSE)
 }
 
 

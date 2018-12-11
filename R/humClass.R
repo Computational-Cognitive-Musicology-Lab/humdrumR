@@ -4,12 +4,7 @@
 
 ###
 ####################################################humdrumR Class definition ####
-###
-structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
-                      'Record', 'Type', 'Spine', 'Path', 'Stop',
-                      'Exclusive', 'Tandem', 'Column', 
-                      'BarN', 'DoubleBarN', 'BarLabel', 
-                      'NData', 'Null')
+##
 
 #' Humdrum data table
 #' 
@@ -31,14 +26,14 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' There are five types of fields in a humdrum table: 
 #' \enumerate{
 #' \item Data fields
-#' \item Location fields
+#' \item Structure fields
 #' \item Interpretation fields
-#' \item Formal fields
+#' \item Form fields
 #' \item Reference fields
 #' }
 #' When first created by a call to \code{\link{readHumdrum}} every
 #' humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation 
-#' fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve location fields. Additional fields
+#' fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve structure fields. Additional fields
 #' may be present depending on the content of the humdrum file(s), and even more fields can be created
 #' by users.
 #' 
@@ -54,9 +49,9 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' (These fields can then be renamed using the \code{$<-} operator, if you want.)
 
 #' 
-#' \strong{2. Location fields:} Location fields describe where each data point
+#' \strong{2. Structure fields:} Structure fields describe where each data point
 #' came from---which file, which spine, which record, etc.
-#' Every humdrum table starts with twelve location fields, describing where
+#' Every humdrum table starts with twelve Structure fields, describing where
 #' the token came from:
 #' \describe{
 #' \item{File}{\code{character} - The name of the humdrum file.}
@@ -102,7 +97,7 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' See the \code{\link{readHumdrum}} documentation for more details.
 #' 
 #' 
-#' \strong{Formal fields:} Formal fields indicate musical sections, or time windows within
+#' \strong{Form fields:} Form fields indicate musical sections, or time windows within
 #' a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 #' Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
 #' Classified formal marks are put into fields matching their name.
@@ -140,7 +135,7 @@ structlayernames <- c('File', 'FullFileName', 'NFile', 'Global',
 #' @section Philosophy:
 #' Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
 #' grid structure of the original humdrum data? The Humdrum Table structure affords
-#' maximum data analysis flexibility. Thanks to the Location fields, we can easily
+#' maximum data analysis flexibility. Thanks to the Structure fields, we can easily
 #' regroup and reform the structures of humdrum data (like spines). 
 #' 
 #' ...
@@ -155,9 +150,9 @@ NULL
 #' the \code{pattern} used in the call to \code{\link{readHumdrum}} which created this \code{humdrumR} object.
 #' The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
 #' and were read into the \code{humdrumR} object.
-#' @slot Layers A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
-#' The fields are divided into four categories: "User", "Structure", "Tandem", and "Reference."
-#' See (\code{\link{layers}})
+#' @slot Fields A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
+#' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."
+#' See (\code{\link{fields}})
 #' @slot Active A formula. The right side of this formula is an expression which 
 #' extracts data from field(s) in the \code{humdrumR} data. The active expression
 #' is the "default" data which is printed be \code{\link{show}} calls, and when \code{.}
@@ -174,7 +169,7 @@ NULL
 setClass('humdrumR', 
          slots = c(Humtable = 'list',
                    Files = 'list',
-                   Layers = 'list',
+                   Fields = 'list',
                    Active = 'formula',
                    Partition = 'list',
                    LoadTime = 'POSIXct'
@@ -186,13 +181,20 @@ setMethod('initialize', 'humdrumR',
             # dtab = takes a data.table of humdrum data as input
             # pattern = the original file search glob (string)
 
-            layers <- colnames(dtab)
+            fields <- colnames(dtab)
+            fieldcategories <- list(Data = 'Token',
+                                    Structure = c('File', 'FullFileName', 'NFile',
+                                                  'Column', 'Spine', 'Path', 'Stop',
+                                                  'Record', 'NData', 'Global', 'Null', 'Type'),
+                                    Interpretation   = c('Exclusive', 'Tandem',
+                                                         fields[fields %in% knownTandemInterpretations$Name]),
+                                    Formal    = c(grep('^Formal', fields, value = TRUE),
+                                                  'BarN', 'DoubleBarN', 'BarLabel'))
+            fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
+         
             
             .Object@Humtable  <- splitHumtab(dtab)        
-            .Object@Layers    <- list(User = 'Token',
-                                      Structure = structlayernames,
-                                      Tandem    = layers[layers %in% knownTandemInterpretations$Name],
-                                      Reference = layers[!layers %in% c('Token', structlayernames, knownTandemInterpretations$Name)])
+            .Object@Fields    <- fieldcategories
             .Object@Active    <- ~Token
             .Object@Files     <- list(Search = pattern, Names = unique(dtab$FullFileName))
             .Object@LoadTime  <- Sys.time()
@@ -298,9 +300,9 @@ setActive <- function(humdrumR, expr) {
 
 putActive <- function(humdrumR, form) {
   humtab <- getD(humdrumR)
-  usedInExpr <- layersInFormula(humtab, form)
-  if (length(usedInExpr) == 0) stop("The 'active'-layer formula for a humdrumR object must refer to some layer.\n
-Add a reference to some layer, for instance Token.", call. = FALSE)
+  usedInExpr <- fieldsInFormula(humtab, form)
+  if (length(usedInExpr) == 0) stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
+Add a reference to some field, for instance Token.", call. = FALSE)
   
   humdrumR@Active <- form
   
@@ -310,13 +312,13 @@ Add a reference to some layer, for instance Token.", call. = FALSE)
       || (is.list(act) && all(lengths_(act) == nrow(humtab)))) {
    return(humdrumR) 
   } else {
-    stop("The 'active-layer formula for a humdrumR object cannot be a different size from the raw layers.", call. = FALSE)
+    stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
   }
   
 }
 
 #' @export
-activeString <- function(humdrumR) layersInFormula(getD(humdrumR), humdrumR@Active)
+activeString <- function(humdrumR) fieldsInFormula(getD(humdrumR), humdrumR@Active)
 
 setActiveString <- function(humdrumR, str) {
   scall <- if (length(str) > 1) do.call('call', c(list('list'), str)) else as.symbol(str)
@@ -357,35 +359,31 @@ anyPaths <- function(humdrumR) {
  
 }
 
-####Layers ----
+####Fields ----
 
 #' This controls which humdrumR data are printed and default target for pipe.
 #' @export
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
             name <- as.character(name)
-            layers <- layers(x, struct = TRUE)$Name
-            target <- pmatch(name, layers)
-            if (is.na(target)) stop(glue::glue("No layer called '{name}'"), call. = FALSE)
+            fields <- fields(x)$Name
+            target <- pmatch(name, fields)
+            if (is.na(target)) stop(glue::glue("No field called '{name}'"), call. = FALSE)
             
-            setActiveString(x, layers[target])
+            setActiveString(x, fields[target])
           })
 
 
 
+#' List fields in a \code{\linkS4class{humdrumR} object
 #' @export
-layers <- function(humdrumR, tandem = TRUE, reference = TRUE, struct = TRUE) { 
-  
+fields <- function(humdrumR, types = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
   #
   D <- getD(humdrumR)
   
-  targets <- c('User',  
-               if (tandem) 'Tandem' else NULL,
-               if (reference) 'Reference' else NULL, 
-               if (struct) 'Structure' else NULL)
-  layers <- unlist(humdrumR@Layers[targets])
+  fields <- unlist(humdrumR@Fields[types])
   
-  D <- D[ , layers, with = FALSE]
+  D <- D[ , fields, with = FALSE]
   classes <- sapply(D, class)
   
   if (any(lists <- classes == 'list')) {
@@ -397,29 +395,36 @@ layers <- function(humdrumR, tandem = TRUE, reference = TRUE, struct = TRUE) {
                              ")")
   }
  
-  output <- data.table(Name = layers, Class = classes, Type = gsub('[0-9]*$', '', names(layers)))
-  output <- output[Type %in% targets]
+  output <- data.table(Name = fields, Class = classes, Type = gsub('[0-9]*$', '', names(fields)))
+  output <- output[Type %in% types]
   
   output
 }
 
-#' @export
-showLayers <-  function(humdrumR, tandem = TRUE, reference = TRUE, struct = TRUE) {
-  layers <- layers(humdrumR, tandem, reference, struct)
-  
-  activelayer <- layers$Name %in% activeString(humdrumR)
-  layers$Name <- paste0(' ', layers$Name)
-  layers$Name[activelayer] <- gsub('^ ', '*', layers$Name[activelayer])
-  layers$Name <- str_pad(layers$Name, width = max(nchar(layers$Name)), side = 'right')
-  
-  layprint <- paste0(layers$Name, ' :: ', layers$Class)
-  
-  
-  cat('\t\tLayers: ', paste(layprint, collapse = '\n\t\t        '), '\n', sep = '')
-  invisible(layers)
+
+showFields <-  function(humdrumR, types = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) {
+          fields <- fields(humdrumR, types)
+
+          activefield <- fields$Name %in% activeString(humdrumR)
+          fields$Name <- paste0(' ', fields$Name)
+          fields$Name[activefield] <- gsub('^ ', '*', fields$Name[activefield])
+          fields$Name <- stringr::str_pad(fields$Name, width = max(nchar(fields$Name)), side = 'right')
+
+          fields$Print <- paste0(fields$Name, ' :: ', fields$Class)
+
+          fields[ ,
+                  { cat('\t', Type[1], 'fields:', '\n\t        ')
+                    cat(Print, sep = '\n\t        ')
+                    cat('\n')
+                            }, 
+                  by = Type]
+
+          
+          # cat('\t\tFields: ', paste(fieldprint, collapse = '\n\t\t        '), '\n', sep = '')
+          invisible(fields)
 }
 
-layersInFormula <- function(humtab, form) {
+fieldsInFormula <- function(humtab, form) {
   expr  <- lazyeval::f_rhs(form)
   colnms  <- colnames(humtab)
   
@@ -435,25 +440,25 @@ layersInFormula <- function(humtab, form) {
 
 
 
-isLayer <- function(humdrumR, names) names %in% layers(humdrumR)$Name 
+isField <- function(humdrumR, names) names %in% fields(humdrumR)$Name 
 
 nulltypes <- c(G='!!', I = '*', L= '!', d = '.', D = NA, M = '=')
 
-`addLayers<-` <- function(object, value) {
- object@Layers$User <- unique(c(object@Layers$User, value))
+`addFields<-` <- function(object, value) {
+ object@Fields$Data <- unique(c(object@Fields$Data, value))
  object
 }
 
-`removeLayers<-` <- function(object, value) {
-  object@Layers$User <- object@Layers$User[!object@Layers$User %in% value]
+`removeFields<-` <- function(object, value) {
+  object@Fields$Data <- object@Fields$Data[!object@Fields$Data %in% value]
   object
 }
 
-`putLayers<-` <- function(object, copyLayer = NULL, value)  {
+`putFields<-` <- function(object, copyField = NULL, value)  {
   humtab <- object
   for (name in value) {
-    newlayer <- if (is.null(copyLayer)) nulltypes[humtab$Type] else humtab[[copyLayer]]
-    humtab[[name]] <- newlayer
+    newfield <- if (is.null(copyField)) nulltypes[humtab$Type] else humtab[[copyField]]
+    humtab[[name]] <- newfield
   }
   
   humtab
@@ -466,7 +471,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'vector'
             if (length(value) == nrow(x)) {
               x@Humtable$D[i] <- value
             } else {
-              stop(glue::glue("Can't assign this value to '{name}' layer, because it is the wrong length."))
+              stop(glue::glue("Can't assign this value to '{name}' field, because it is the wrong length."))
             }
             
             x <- setActiveString(x, i)
@@ -481,8 +486,8 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'humdrum
           function(x, i, value) {
             humtab <- getD(value)
             
-            removeLayers(value) <- grep('Pipe', colnames(humtab), value = TRUE)
-            pipes <- pipeLayers(humtab)
+            removeFields(value) <- grep('Pipe', colnames(humtab), value = TRUE)
+            pipes <- pipeFields(humtab)
             
             if (len0(pipes)) pipes <- activeString(value)
             
@@ -493,10 +498,9 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', value = 'humdrum
             if (any(grepl('Pipe', colnames(humtab)))) humtab[ , eval(grep('Pipe', colnames(humtab), value = TRUE)) := NULL]
             
             putHumtab(value, drop = TRUE) <- humtab
-            addLayers(value) <- i
+            addFields(value) <- i
             
-            browser()
-            value@Active <- swap.(setNames(list(as.symbol(i)), pipes), value@Active)
+            value@Active <- substituteName(value@Active, setNames(list(as.symbol(i)), pipes))
             
             value
           })
@@ -714,14 +718,14 @@ indexGLIM <- function(humdrumR, targets = c('G', 'L', 'I', 'M', 'd')) {
   #####ReIndex GLIM tables to match indexing of D tables
   GLIMd <- humdrumR@Humtable[targets]
   D     <- getD(humdrumR)
-  # first add missing layers (columns)
+  # first add missing fields (columns)
   GLIMd <- lapply(GLIMd, 
                   function(tab) {
-                    missinglayers <- colnames(D)[!colnames(D) %in% colnames(tab)]
+                    missingfields <- colnames(D)[!colnames(D) %in% colnames(tab)]
       
-                    if (len0(missinglayers)) return(tab)
+                    if (len0(missingfields)) return(tab)
                     
-                    putLayers(tab, 'Token') <- missinglayers
+                    putFields(tab, 'Token') <- missingfields
                     
                     tab
                   })
@@ -842,7 +846,7 @@ foldStops <- function(humdrumR, tokenize = FALSE) {
  
  activecall <- call('c', paste0(actives, '_new_foldstopxxx'))
 
- expr <- substituteName(expr, X = activecall, Y = pasteexpr)
+ expr <- substituteName(expr, subs = list(X = activecall, Y = pasteexpr))
  
  suppressWarnings(lazyeval::f_eval(expr)) # inplace)
  
@@ -1038,7 +1042,7 @@ print_humtab_nothumdrumAble <- function(humdrumR, cutMiddle = FALSE) {
   act <- getActive(humdrumR)
   D <- getD(humdrumR)
   
-  lays <- layers(humdrumR)
+  lays <- fields(humdrumR)
   refs <- lays$Name[lays$Type == 'Reference']
   
   notact <- D[ , !colnames(D) %in% activeString(humdrumR), with = FALSE ]
@@ -1075,8 +1079,8 @@ setMethod('show', signature = c(object = 'humdrumR'),
               cat('\tCorpus of ', ifelse(len <= 100, num2word(len), num2str(len)), ' humdrum files.\n', sep = '') 
             }
             
-            ## Layers
-            showLayers(object, tandem = FALSE, struct = FALSE, reference = FALSE)
+            ## Fields
+            showFields(object, 'Data')
         
           })
 
@@ -1110,7 +1114,7 @@ setMethod('-', signature = c(e1 = 'humdrumR', e2 = 'numeric'),
             } else {
               whichnot <- activeString(e1)[!sapply(getActive(e1), is.numeric)]
               plural <- if (len1(whichnot)) " is" else "s are"
-              stop(glue::glue("'{whichnot}' layer{plural} not numeric."),  call. = FALSE)
+              stop(glue::glue("'{whichnot}' field{plural} not numeric."),  call. = FALSE)
             }
           
             humdrumR
@@ -1166,7 +1170,7 @@ setMethod('+', signature = c(e1 = 'humdrumR', e2 = 'numeric'),
             if (is.numeric(oldtokens)) {
               newtokens <- oldtokens + e2
             } else {
-              stop(glue::glue("'{activeString(humdrumR)[[1]]}' layer is not numeric."),  call. = FALSE)
+              stop(glue::glue("'{activeString(humdrumR)[[1]]}' field is not numeric."),  call. = FALSE)
             }
             active(humdrumR) <- newtokens
           

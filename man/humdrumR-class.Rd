@@ -19,9 +19,9 @@ the \code{pattern} used in the call to \code{\link{readHumdrum}} which created t
 The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
 and were read into the \code{humdrumR} object.}
 
-\item{\code{Layers}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
-The fields are divided into four categories: "User", "Structure", "Tandem", and "Reference."
-See (\code{\link{layers}})}
+\item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
+The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."
+See (\code{\link{fields}})}
 
 \item{\code{Active}}{A formula. The right side of this formula is an expression which 
 extracts data from field(s) in the \code{humdrumR} data. The active expression

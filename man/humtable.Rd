@@ -24,14 +24,14 @@ to a row in the humdrum table, while a "field" refers to a column.
 There are five types of fields in a humdrum table: 
 \enumerate{
 \item Data fields
-\item Location fields
+\item Structure fields
 \item Interpretation fields
-\item Formal fields
+\item Form fields
 \item Reference fields
 }
 When first created by a call to \code{\link{readHumdrum}} every
 humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation 
-fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve location fields. Additional fields
+fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve structure fields. Additional fields
 may be present depending on the content of the humdrum file(s), and even more fields can be created
 by users.
 
@@ -46,9 +46,9 @@ Users can create as many additional data fields as they like. Every call to
 operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
 (These fields can then be renamed using the \code{$<-} operator, if you want.)
 
-\strong{2. Location fields:} Location fields describe where each data point
+\strong{2. Structure fields:} Structure fields describe where each data point
 came from---which file, which spine, which record, etc.
-Every humdrum table starts with twelve location fields, describing where
+Every humdrum table starts with twelve Structure fields, describing where
 the token came from:
 \describe{
 \item{File}{\code{character} - The name of the humdrum file.}
@@ -94,7 +94,7 @@ are automatically parsed into their own fields by a call to \code{\link{readHumd
 See the \code{\link{readHumdrum}} documentation for more details.
 
 
-\strong{Formal fields:} Formal fields indicate musical sections, or time windows within
+\strong{Form fields:} Form fields indicate musical sections, or time windows within
 a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
 Classified formal marks are put into fields matching their name.
@@ -134,7 +134,7 @@ files, no Reference fields are created.
 
 Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
 grid structure of the original humdrum data? The Humdrum Table structure affords
-maximum data analysis flexibility. Thanks to the Location fields, we can easily
+maximum data analysis flexibility. Thanks to the Structure fields, we can easily
 regroup and reform the structures of humdrum data (like spines). 
 
 ...

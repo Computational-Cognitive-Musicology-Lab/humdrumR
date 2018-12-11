@@ -1,12 +1,11 @@
 #
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
-substituteName <- function(expr, ...) {
-  subs <- list(...)
-  if (length(list) == 0) return(expr)
+substituteName <- function(expr, subs) {
+  if (length(subs) == 0) return(expr)
   
   if (is.call(expr)) {
-            for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], ...)
+            for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], subs)
   } else { 
             if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
   }
