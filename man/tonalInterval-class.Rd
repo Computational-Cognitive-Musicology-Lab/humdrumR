@@ -27,6 +27,8 @@ simplify(tint)
 
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
+\S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
+
 \S4method{*}{tonalInterval,numeric}(e1, e2)
 
 \S4method{==}{tonalInterval,tonalInterval}(e1, e2)
@@ -96,20 +98,6 @@ fifth + one octave): 19 semitones, or \deqn{3^1}.}
 \item{\code{Octave}}{An integer representing the octave offset of the interval
 (in addition to the fifth). See details for full explanation.}
 }}
-
-\section{Arithmetic}{
-
-\code{tonalInterval} objects have (some arithmetic) operations defined.
-Addition and subtraction are straightword and intuitive (i.e., \deqn{M3 + M3 = P5}).
-
-Multiplication and division are slightly more limited:
-\itemize{
-\item \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{Scalar multiplication}
-(by integers) is defined: \deqn{M2 * 3 = A4} (the result is always a new \code{tonalInterval}).
-\item Consequently, a \code{tonalInterval} and be divided by another \code{tonalInterval} to produce
-an integer: \deqn{M4 / M2 = 2L}.
-}
-}
 
 \section{Relational Operators}{
 

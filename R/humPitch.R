@@ -50,13 +50,24 @@
 #' \code{tonalInterval} objects have (some arithmetic) operations defined.
 #' Addition and subtraction are straightword and intuitive (i.e., \deqn{M3 + M3 = P5}).
 #' 
-#' Multiplication and division are slightly more limited:
-#' \itemize{
-#' \item \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{Scalar multiplication}
-#' (by integers) is defined: \deqn{M2 * 3 = A4} (the result is always a new \code{tonalInterval}).
-#' \item Consequently, a \code{tonalInterval} and be divided by another \code{tonalInterval} to produce
-#' an integer: \deqn{M4 / M2 = 2L}.
-#' }
+#' Multiplication and division are slightly more limited: 
+#' \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{Scalar multiplication}
+#' is defined \emph{for integers}: \deqn{M2 * 3 = A4} 
+#' (the result is always a new \code{tonalInterval}).
+#' Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
+#' an integer: \deqn{M4 / M2 = 2L}, but not non-integer values.
+#' This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
+#' division is possible: we divide
+#' a \code{tonalInterval} by and another \code{tonalInterval} to get \emph{both}
+#' an integer \strong{quotient} and a \code{tonalInterval} \strong{remainder}.
+#' Each of these values can be useful in different ways, 
+#' so in \code{R} they are calculated with two separate operators: 
+#' \code{\link[base:Arithmetic]{\%\% and \%/\%}}.
+#' The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
+#' useful in pitch calculations, because tonal scales can be seen as 
+#' a modulus operation (modulo 7 for diatonic). For instance,
+#' \code{tonalint %% tint(-11, 7)} will always calculate the generic 
+#' version of an interval.
 #' 
 #' @section Relational Operators:
 #' \code{tonalInnterval}s can be compared using the standard
@@ -252,11 +263,22 @@ simplify <- function(tint) {
 #' @export
 setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    
-            fifthNs <- getFifth(e1) %/% getFifth(e2)
+            f1 <- getFifth(e1)
+            f2 <- getFifth(e2)
+            fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
+            fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
             
-            tint(getOctave(e1) - (getOctave(e2) * fifthNs),
-                 getFifth(e1) %% getFifth(e2))
+            tint(getOctave(e1) - (getOctave(e2) * fifthDivs),
+                 fifthMods)
+          })
+
+#' @name tonalInterval-class
+#' @export
+setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
+          function(e1, e2) {
+                    f1 <- getFifth(e1)
+                    f2 <- getFifth(e2)
+                    ifelse(f2 == 0L, 0L, f1 %/% f2)
           })
 
 #' @name tonalInterval-class
