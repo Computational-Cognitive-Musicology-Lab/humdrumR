@@ -3,9 +3,47 @@
 \docType{class}
 \name{tonalInterval-class}
 \alias{tonalInterval-class}
+\alias{invert}
+\alias{simplify}
 \title{Representation of tonal pitch information}
+\usage{
+\S4method{as.character}{tonalInterval}(x)
+
+\S4method{+}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{sum}{tonalInterval}(x, ..., na.rm = TRUE)
+
+\S4method{cumsum}{tonalInterval}(x)
+
+\S4method{diff}{tonalInterval}(x)
+
+\S4method{-}{tonalInterval,missing}(e1)
+
+\S4method{-}{tonalInterval,tonalInterval}(e1, e2)
+
+invert(tint, around = tint(0, 0))
+
+simplify(tint)
+
+\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{*}{tonalInterval,numeric}(e1, e2)
+
+\S4method{==}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{!=}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{>}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{>=}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{<}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{<=}{tonalInterval,tonalInterval}(e1, e2)
+}
 \description{
-This \code{S4} class is the core tonal pitch representation in \code{humdrumR}.
+This \emph{S4} class is the core tonal pitch representation in the 
+\code{\link[humdrumR:humdrumR]{humdrumR package}}.
 The object is used to represent tonal pitch names ("C", "G#", "Db", etc.), tonal intervals 
 and scale degrees ("Major 3rd", "Diminished 5th", etc.), and solfege ("Do", "Re", "Fi", etc.).
 Each pitch/interval is represented as two integers: one representing octave, the other
@@ -15,10 +53,9 @@ The interval/pitch represented is the result of the Octaves and Perfect 5ths (ac
 *12ths*) in the slots added together.
 }
 \details{
-This class has all the basic methods enabled for it function like a normal R vector. (Each slot can actually hold a vector of integers representing
+This class has all the basic methods enabled for it function like a normal R vector. 
+(Each slot can actually hold a vector of integers representing
 Octaves/Fifths). This means you can apply normal vectorized commands to it.
-It also has many arithmetic methods defined: for instance you can say X + Y, where
-X and Y are each tonalIntervals.
 
 In the case of fifths, it is not difficult (for learned musicians at least) to 
 see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 
@@ -48,3 +85,39 @@ If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we
 will get equal temperement:
 \deqn{2^{-1} * {2^{\frac{19}{12}}}^1 = 2^{\frac{7}{12}}}
 }
+\section{Slots}{
+
+\describe{
+\item{\code{Fifth}}{An integer representing the intervals
+size on the circle of fifths. When considering absolute size
+these fifths are actually treated like pure \emph{12ths} (i.e., one 
+fifth + one octave): 19 semitones, or \deqn{3^1}.}
+
+\item{\code{Octave}}{An integer representing the octave offset of the interval
+(in addition to the fifth). See details for full explanation.}
+}}
+
+\section{Arithmetic}{
+
+\code{tonalInterval} objects have (some arithmetic) operations defined.
+Addition and subtraction are straightword and intuitive (i.e., \deqn{M3 + M3 = P5}).
+
+Multiplication and division are slightly more limited:
+\itemize{
+\item \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{Scalar multiplication}
+(by integers) is defined: \deqn{M2 * 3 = A4} (the result is always a new \code{tonalInterval}).
+\item Consequently, a \code{tonalInterval} and be divided by another \code{tonalInterval} to produce
+an integer: \deqn{M4 / M2 = 2L}.
+}
+}
+
+\section{Relational Operators}{
+
+\code{tonalInnterval}s can be compared using the standard
+\code{\link[base:Comparison]{relational operators}}---\code{==},
+\code{!=}, \code{>}, \code{>=}, etc.
+\code{tonalIntervals}s are equal only if their \code{Octave} and
+\code{Fifth} slots are identical. Numeric comparisons are (i.e., \code{>}, 
+\code{<=}) based on their semitone (equal temperament) size.
+}
+

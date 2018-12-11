@@ -123,6 +123,7 @@ setMethod('[<-', signature = c(x = 'recip', i = 'ANY', j = 'missing', value = 'r
           })
 
 
+
 setMethod('dim', signature = c(x = 'recip'),
           function(x) {
             # c(length(x), 1)

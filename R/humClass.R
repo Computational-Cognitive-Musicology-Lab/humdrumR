@@ -165,7 +165,6 @@ NULL
 #' @slot LoadTime A POSIXct value, indicating the time at which \code{\link{readHumdrum}} was
 #' called to create this \code{humdrumR} object.
 #' @export
-#' 
 setClass('humdrumR', 
          slots = c(Humtable = 'list',
                    Files = 'list',
