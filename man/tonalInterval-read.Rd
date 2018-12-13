@@ -2,21 +2,30 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-read}
 \alias{tonalInterval-read}
-\alias{from.kern_pitch2sciPitch}
-\alias{from.kern_pitch2tonalInterval}
-\alias{from.scipitch2tonalInterval}
-\alias{from.solfa2tonalInterval}
+\alias{read.kernPitch2sciPitch}
+\alias{read.kernPitch2tonalInterval}
+\alias{read.sciPitch2tonalInterval}
+\alias{read.interval2tonalInterval}
+\alias{read.solfa2tonalInterval}
 \title{Reading \code{\link[humdrumR:tonalInterval]{tonalIntervals}} from various representations}
 \usage{
-from.kern_pitch2sciPitch(str)
+read.kernPitch2sciPitch(str)
 
-from.kern_pitch2tonalInterval(str)
+read.kernPitch2tonalInterval(str)
 
-from.scipitch2tonalInterval(str)
+read.sciPitch2tonalInterval(str)
 
-from.solfa2tonalInterval(str)
+read.interval2tonalInterval(str)
+
+read.solfa2tonalInterval(str)
 }
 \description{
 These functions all translate other pitch representations
 into \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
+}
+\details{
+These functions all assume that thheir string input is a well-formed
+example of the target pitch representation, with no extra strings.
+(The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
+used to clean/filter inputs into these functions.
 }

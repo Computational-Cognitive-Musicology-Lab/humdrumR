@@ -9,9 +9,9 @@
 
 \S4method{as.midi}{tonalInterval}(x)
 
-\S4method{as.scipitch}{tonalInterval}(x)
+\S4method{as.sciPitch}{tonalInterval}(x)
 
-\S4method{as.kern_pitch}{tonalInterval}(x)
+\S4method{as.kernPitch}{tonalInterval}(x)
 
 \S4method{as.interval}{tonalInterval}(x, specific = TRUE,
   directed = TRUE, quality.labels = list(augment = "A", diminish = "d",

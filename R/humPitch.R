@@ -193,6 +193,13 @@ setMethod('is.vector', signature = c('tonalInterval'),
 #' @export
 is.atomic.tonalInterval <- function(x) TRUE
 
+
+#' @name tonalInterval-asvector
+#' @export
+rep.tonalInterval <- function(x, ...) {
+ tint(rep(getOctave(x), ...), rep(getFifth(x), ...))       
+}
+
 #' @name tonalInterval-asvector
 #' @export
 setMethod('dim', signature = 'tonalInterval',
@@ -200,7 +207,7 @@ setMethod('dim', signature = 'tonalInterval',
 
 #' @name tonalInterval-asvector
 #' @export
-setMethod('show', signature = c(object = 'tonalInterval'), function(object) { print(as.interval(object)) })
+setMethod('show', signature = c(object = 'tonalInterval'), function(object) { cat(as.interval(object)) })
 
 
 #' @name tonalInterval-asvector
@@ -306,6 +313,8 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
             f1 <- getFifth(e1)
             f2 <- getFifth(e2)
+            match_size(f1 = f1, f2 = f2, toEnv = TRUE)
+            
             fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
             fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
             
@@ -319,6 +328,7 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
                     f1 <- getFifth(e1)
                     f2 <- getFifth(e2)
+                    match_size(f1 = f1, f2 = f2, toEnv = TRUE)
                     ifelse(f2 == 0L, 0L, f1 %/% f2)
           })
 
@@ -465,11 +475,11 @@ sciOctave <- function(tint) {
 }
 
 #' @export
-setGeneric('as.scipitch', function(x) standardGeneric('as.scipitch'))
+setGeneric('as.sciPitch', function(x) standardGeneric('as.sciPitch'))
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.scipitch', signature = c(x = 'tonalInterval'),
+setMethod('as.sciPitch', signature = c(x = 'tonalInterval'),
           function(x) {
                     octave <- sciOctave(x)
                     paste0(fifth2tonalname(getFifth(x), kernFlats = FALSE), octave)
@@ -480,11 +490,11 @@ setMethod('as.scipitch', signature = c(x = 'tonalInterval'),
 #### As kern pitch (i.e., 'aaa', 'CC-')
 
 #' @export
-setGeneric('as.kern_pitch', function(x) standardGeneric('as.kern_pitch'))
+setGeneric('as.kernPitch', function(x) standardGeneric('as.kernPitch'))
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.kern_pitch', signature = c(x = 'tonalInterval'),
+setMethod('as.kernPitch', signature = c(x = 'tonalInterval'),
           function(x) {
                     octaves <- sciOctave(x)
                     fifths <- getFifth(x)
@@ -522,7 +532,6 @@ setMethod('as.interval', signature = c(x = 'tonalInterval'),
                     }  else {
                               ""         
                     }
-                              
                     genericints <- fifth2genericinterval(fifth)
                     octave <- abs(IfElse(octave < 0, octave + 1, octave)) # problem here?
                     octaveshift <- abs(genericints + (7 * octave))
@@ -634,6 +643,11 @@ setMethod('as.frequency', signature = c(x = 'tonalInterval'),
 #' These functions all translate other pitch representations
 #' into \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
 #' 
+#' These functions all assume that thheir string input is a well-formed
+#' example of the target pitch representation, with no extra strings.
+#' (The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
+#' used to clean/filter inputs into these functions.
+#' 
 #' @name tonalInterval-read
 NULL
 
@@ -641,6 +655,14 @@ NULL
 #### Reading from X to fifths (integers)
 ##To start we need to be able to read various things
 ##and translate them to fifths (i.e., integers on the circle-of-fifths).
+genericinterval2fifth   <- function(ints) {
+          ints[ints ==  0] <- NA
+          ints[ints == -1] <- 1
+          simpleints <- (abs(ints - sign(ints)) %% 7) # from 0
+          fifths <- c(0, 2, 4, 6, 1, 3, 5)[simpleints + 1]
+          ifelse(ints > 0, fifths, 7 - fifths) %% 7
+          
+}
 lettername2fifth <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2
 accidental2fifth <- function(acc, sharp = '#', flat = '-') {
           sharps <- stringi::stri_count_fixed(acc, pattern = sharp)
@@ -648,7 +670,6 @@ accidental2fifth <- function(acc, sharp = '#', flat = '-') {
           
           (7 * sharps) - (7 * flats)
 }
-
 solfa2fifth <- function(solfa) {
  base <- stringr::str_sub(solfa, start = 0L, end = 1L)        
  tail <- stringr::str_sub(solfa, start = 2L, end = 2L)        
@@ -656,16 +677,24 @@ solfa2fifth <- function(solfa) {
  
  basefifth <- match(base, c('f', 'd', 's', 'r', 'l', 'm', 't')) - 2L
  
- stackedbases <- solfatab[base, ]
+ stackedbases <- solfatab[base, , drop = FALSE]
+ 
  tailfifth <- (apply(cbind(tail, stackedbases), 1, function(row) which(row[-1] == row[1])) - 2) * 7
  
  accfifth <- accidental2fifth(acc, sharp = '#', flat = '-')
  unname(basefifth + tailfifth + accfifth)
 }
 
-######### FROM Kern Pitch
+fifthNsciOct2tonalInterval <- function(fifth, sciOct) {
+          tintWith0Octave <- tint(o = numeric(length(fifth)), f = fifth)
+          octshift <- as.semits(tintWith0Octave %% tint(-11, 7)) %/% 12
+          
+          tint(sciOct - 4 - octshift, fifth)
+}
 
-from.kern_pitch2components <- function(str) {
+######## From kern pitch
+
+read.kernPitch2components <- function(str) {
           letters     <- stringi::stri_extract_first(str, regex = '([A-Ga-g])\\1*')
           
           accidentals <- stringi::stri_extract_first(str, regex = '([#-])\\1*')
@@ -684,8 +713,8 @@ from.kern_pitch2components <- function(str) {
 
 #' @name tonalInterval-read
 #' @export
-from.kern_pitch2sciPitch <- function(str) {
-          components <- from.kern_pitch2components(str)
+read.kernPitch2sciPitch <- function(str) {
+          components <- read.kernPitch2components(str)
           
           components$Accidentals <- gsub('-', 'b', components$Accidentals)
           do.call('paste0', components)
@@ -693,8 +722,8 @@ from.kern_pitch2sciPitch <- function(str) {
 
 #' @name tonalInterval-read
 #' @export
-from.kern_pitch2tonalInterval <- function(str) {
-          components <- from.kern_pitch2components(str)
+read.kernPitch2tonalInterval <- function(str) {
+          components <- read.kernPitch2components(str)
           
           fifth <- with(components, lettername2fifth(Letters) + accidental2fifth(Accidentals, flat = '-'))
  
@@ -702,21 +731,15 @@ from.kern_pitch2tonalInterval <- function(str) {
          
 }
 
-fifthNsciOct2tonalInterval <- function(fifth, sciOct) {
-          tintWith0Octave <- tint(o = numeric(length(fifth)), f = fifth)
-          
-          octshift <- as.semits(tintWith0Octave %% tint(-11, 7)) %/% 12
-          
-          tint(sciOct - 4 - octshift, fifth)
-}
 
 
-###### FROM Scientific Pitch
+
+######## From scientific pitch
 
 #' @name tonalInterval-read
 #' @export
-from.scipitch2tonalInterval <- function(str) {
-          letters    <- stringi::stri_extract_first(str, regex = '[A-G]')
+read.sciPitch2tonalInterval <- function(str) {
+          letters     <- stringi::stri_extract_first(str, regex = '[A-G]')
           accidentals <- stringi::stri_extract_first(str, regex = '([#b])\\1*')
           accidentals[is.na(accidentals)] <- ''
           
@@ -729,15 +752,54 @@ from.scipitch2tonalInterval <- function(str) {
 }
 
 
-#### FROM solfa
+#### From interval
 
 #' @name tonalInterval-read
 #' @export
-from.solfa2tonalInterval <- function(str) {
+read.interval2tonalInterval <- function(str) {
+          direction <- stringi::stri_extract_first(str, regex = "^[-+]")
+          quality   <- stringi::stri_extract_first(str, regex = "[MmP]|[Ad]+")
+          generic   <- as.integer(stringi::stri_extract_first(str, regex = "[1-9][0-9]*"))
+          
+          
+          ## Fifth
+          genericfifth <- genericinterval2fifth(generic)
+          genericfifth[genericfifth == 6] <- (-1) # because P4 is -1 not 6
+          qualshift <- sapply(quality,
+                              function(qual) {
+                                        qual1 <- stringr::str_sub(qual, end = 1L)
+                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, A = 7) *  nchar(qual)
+                              }) -  ifelse(grepl('^d', quality) & genericfifth > 1, 7, 0)
+          
+          fifth <- qualshift + genericfifth
+          
+          ## Octave
+          octaveshift <- ((abs(generic) - 1) %/% 7)
+          tints <- fifthNsciOct2tonalInterval(fifth, octaveshift + 4L)
+          
+          ## Direction
+          
+          direction <- 2 * ((is.na(direction) | direction == '+') - 0.5)
+          tints * direction
+          
+          
+}
+
+
+#### From scale degree
+
+#### From solfege
+
+#' @name tonalInterval-read
+#' @export
+read.solfa2tonalInterval <- function(str) {
   fifths <- solfa2fifth(str)
   simpletint(fifths)
   
 }
+
+
+
 
 #############################################################################-
 #### Translating pitch represenations ----
@@ -758,28 +820,28 @@ from.solfa2tonalInterval <- function(str) {
 #' 
 #' @name humPitch
 #' @export 
-str2tonalInterval <- regexDispatch("(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = from.kern_pitch2tonalInterval,
-                                      "[A-G][b#]*[-+]?[0-9][0-9]*" = from.scipitch2tonalInterval)
+str2tonalInterval <- regexDispatch(inPlace = FALSE,
+                                   'Kern Pitch' = read.kernPitch2tonalInterval,
+                                   'Interval'  = read.interval2tonalInterval,
+                                   'Scientific Pitch' = read.sciPitch2tonalInterval,
+                                   'Solfege' = read.solfa2tonalInterval)
                                      
 #' @name humPitch
 #' @export
-str2kern_pitch <- as.kern_pitch %.% str2tonalInterval
+str2kernPitch <- as.kernPitch %.% str2tonalInterval
 
 #' @name humPitch
 #' @export
-substr2kern_pitch <- regexDispatch(inplace = TRUE,
-                                  "(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = id,
-                                  "[A-G][b#]*[-+]?[0-9][0-9]*" = as.scipitch %.% from.scipitch2tonalInterval)
+str2sciPitch <- as.sciPitch %.% str2tonalInterval
 
 #' @name humPitch
 #' @export
-str2scipitch <- as.scipitch %.% str2tonalInterval
+str2solfa <- as.solfa %.% str2tonalInterval
+
 
 #' @name humPitch
 #' @export
-substr2scipitch <- regexDispatch(inplace = TRUE,
-                                 "(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])" = as.scipitch %.% from.kern_pitch2tonalInterval,
-                                 "[A-G][b#]*[-+]?[0-9][0-9]*" = id)
+str2interval <- as.interval %.% str2tonalInterval
 
 
 

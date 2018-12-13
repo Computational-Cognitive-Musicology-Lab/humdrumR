@@ -38,22 +38,36 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
 
 #' @export
 compose <- function(...) {
-  funcs <- rev(list(...))
+          .args <- list(...)
+          .funcs <- Filter(is.function, .args)
+          .args  <- Filter(Negate(is.function), .args)
+          if (length(.funcs) <= 1L) stop("Can't compose on one or zero functions.")
+          
+          .funcsArgs <- lapply(.funcs, function(f) fargs(f)[-1])
 
+  newfunc <- function() {
+        for (i in 1:length(.funcs)) {
+          currentFunc <- .funcs[[i]]
+          currentArgs <- .funcsArgs[[i]]
+          # ...
+          elips <- names(currentArgs) == '...'
+          currentArgs <- lapply(names(currentArgs)[!elips], get, envir = environment())
+          currentArgs <- c(list(X), currentArgs, if (any(elips)) list(...) else list())
+          
+          X <- do.call('currentFunc', currentArgs)
+        }
+            
+        X
+  }
 
-  forms <- formals(args(funcs[[1]]))
+            
 
-  bod <- call('Reduce',
-              quote(function(f, arg) f(arg)),
-              quote(funcs),
-              init = quote(temp),
-              right = quote(TRUE))
-  bod[names(bod) == 'init'] <- list(init = as.name(names(forms)[1]))
-
-  newfunc <- function() {  }
-  body(newfunc) <- bod
-  formals(newfunc) <- forms[1]
-
+  allArgs <- c(.args, unlist(.funcsArgs))
+  names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
+  allArgs <- allArgs[!duplicated(names(allArgs))]
+  
+  formals(newfunc) <- c(alist(X = ), allArgs)
+  
   newfunc
   }
 

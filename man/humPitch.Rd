@@ -3,21 +3,22 @@
 \name{humPitch}
 \alias{humPitch}
 \alias{str2tonalInterval}
-\alias{str2kern_pitch}
-\alias{substr2kern_pitch}
-\alias{str2scipitch}
-\alias{substr2scipitch}
+\alias{str2kernPitch}
+\alias{str2sciPitch}
+\alias{str2solfa}
+\alias{str2interval}
 \title{Pitch translations}
 \usage{
-str2tonalInterval(str, str, inPlace = TRUE)
+str2tonalInterval(str, inPlace = FALSE)
 
-str2kern_pitch(x)
+str2kernPitch(X, inPlace = FALSE)
 
-substr2kern_pitch(str, inplace = TRUE, x, inPlace = TRUE)
+str2sciPitch(X, inPlace = FALSE)
 
-str2scipitch(x)
+str2solfa(X, inPlace = FALSE, key = 0L, ...)
 
-substr2scipitch(str, inplace = TRUE, x, inPlace = TRUE)
+str2interval(X, inPlace = FALSE, specific = TRUE, directed = TRUE,
+  ...)
 }
 \description{
 These functions translate various pitch representations

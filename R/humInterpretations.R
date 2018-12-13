@@ -16,21 +16,28 @@ for (i in seq_along(knownInterpretations$RE)) {
 }
 
 #' @export
-getRE <- function(names, types = c('Tandem', 'Exclusive'), strict = FALSE) {
- known <- knownInterpretations[Type %in% types]          
-          
- names <- tolower(names)
- hits <- which(names == tolower(known$Name))
- if (length(hits) == 0) hits <- pmatch(names, tolower(known$Name), nomatch = NULL)
+getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive'), strict = FALSE) {
+ known <- knownInterpretations[knownInterpretations$Type %in% types, ]          
+ if (is.null(pattern)) return(known$Name)
+ 
+ pattern <- tolower(pattern)
+ hits <- sapply(pattern,
+                function(pat) {
+                  hits <- which(pat == tolower(known$Name))
+                  if (length(hits) == 0) hits <- pmatch(pattern, tolower(known$Name))
+                  hits
+                })
 
  res <- known$RE[hits]
  
  if (strict) {
            ressplit <- strsplit(unlist(res), split = '\\|')
            
-           res <- sapply(ressplit, function(re) paste(paste0('^', REpar(re), '$'), collapse = '|'))
+           res <- sapply(ressplit, function(re) paste(paste0('^(', re, ')$'), collapse = '|'))
  }
- names(res) <- names
+ names(res) <- pattern
+ 
+ res[is.na(res)] <- pattern[is.na(res)]
  res
  
 }

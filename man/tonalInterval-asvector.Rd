@@ -4,6 +4,7 @@
 \name{tonalInterval-asvector}
 \alias{tonalInterval-asvector}
 \alias{is.atomic.tonalInterval}
+\alias{rep.tonalInterval}
 \alias{as.data.frame.tonalInterval}
 \alias{format.tonalInterval}
 \title{tonalInterval vector methods}
@@ -23,6 +24,8 @@
 \S4method{is.vector}{tonalInterval}(x)
 
 is.atomic.tonalInterval(x)
+
+\method{rep}{tonalInterval}(x, ...)
 
 \S4method{dim}{tonalInterval}(x)
 

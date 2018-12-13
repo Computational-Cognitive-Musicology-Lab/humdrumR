@@ -53,21 +53,23 @@ regexDispatch <- function(..., doRE = TRUE) {
           if (length(.funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
           
           regexes <- names(.funcs)
+          regexes <- getRE(regexes)
           if (doRE) reFuncs <- Map(do2RE, .funcs, regexes)
           reFuncsArgs <- lapply(reFuncs, function(rf) fargs(rf)[-1])
           
           genericFunc <- function() {
                     Nmatches <- sapply(regexes,  
                                        function(re) sum(stringi::stri_detect(str, regex = re)))
-                    
                     if (any(Nmatches > 0)) {
                               Ncharmatches <- sapply(regexes[Nmatches > 0],
                                                      function(re) sum(nchar(stringi::stri_extract_first(str, regex = re))))
                               dispatch <- which(Nmatches > 0)[which.max(Ncharmatches)]
                               dispatchFunc <- reFuncs[[dispatch]]
                               dispatchArgs <- reFuncsArgs[[dispatch]]
-                              dispatchArgs <- lapply(names(dispatchArgs), get, envir = environment())
-                              dispatchArgs <- c(str, dispatchArgs)
+                              # ...
+                              elips <- names(dispatchArgs) == '...'
+                              dispatchArgs <- lapply(names(dispatchArgs)[!elips], get, envir = environment())
+                              dispatchArgs <- c(list(str), dispatchArgs, if (any(elips)) list(...) else list())
                               
                               do.call('dispatchFunc', dispatchArgs)
                     } else {
@@ -75,11 +77,11 @@ regexDispatch <- function(..., doRE = TRUE) {
                     }
           }
           
-          allargs <- c(.args, unlist(reFuncsArgs))
-          names(allargs) <- gsub('^.*\\.', '', names(allargs))
-          allargs <- allargs[!duplicated(names(allargs))]
+          allArgs <- c(.args, unlist(reFuncsArgs))
+          names(allArgs) <- gsub('^.*\\.', '', names(allArgs))
+          allArgs <- allArgs[!duplicated(names(allArgs))]
           
-          formals(genericFunc) <- c(alist(str = ), allargs)
+          formals(genericFunc) <- c(alist(str = ), allArgs)
           
           genericFunc
 }
