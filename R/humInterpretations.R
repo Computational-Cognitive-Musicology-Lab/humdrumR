@@ -1,48 +1,43 @@
+### This file contains info about "known" humdrum interpretations,
+### meaning standardized exclusive and tandem interpretations like
+### **kern and *C:
+### For exclusive interpretations, we get a regular expression
+### describing the kinds of tokens we expect to see in that interpretation.
+### For tandem interpretations, we get a regular expression that indicates
+### different versions of the same tandem interpretation information:
+### for instance "*clefG2" and "*clefF4" are both examples of the same type
+### of tandem information.
 
-tandemTable <- function(tandems) {
-          if (all(tandems == "")) return(NULL)
+knownInterpretations <- data.table::fread(system.file('extdata', 'KnownInterpretations.tsv', package = 'humdrumR'))
+# Preprocess self-referential {}s in the file KnownInterperations.tsv
+for (i in seq_along(knownInterpretations$RE)) {
+          knownREs <- list2env(as.list(setNames(knownInterpretations$RE, knownInterpretations$Name)))
+          knownInterpretations$RE[i] <- glue::glue(knownInterpretations$RE[i], .envir = knownREs)         
+}
+
+#' @export
+getRE <- function(names, types = c('Tandem', 'Exclusive'), strict = FALSE) {
+ known <- knownInterpretations[Type %in% types]          
           
-          uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
-          uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
-          
-          areKnownTandems <- isKnownTandem(uniqueTandem)
-          knownTandems   <- uniqueTandem[areKnownTandems]
-          # unknownTandems <- uniqueTandem[!areKnownTandems]
-          
-          tandemPatterns <- unique(generalizeTandem(knownTandems))
-          tandemMat <- lapply(tandemPatterns,
-                              function(tan) stringr::str_match(tandems, tan)[ ,1])
-          
-          # for (t in knownTandems) tandems <- stringi::stri_replace_all_fixed(tandems, pattern = t, '')
-          # tandems <- stringi::stri_replace_all(tandems, regex = ',,*', ',')
-          # tandems[tandems %in% c(',', '')] <- NA_character_
-          
-          names(tandemMat) <- unique(idTandem(knownTandems))
-          
-          # tandemMat$Tandem <- tandems
-          
-          as.data.table(tandemMat)
+ names <- tolower(names)
+ hits <- which(names == tolower(known$Name))
+ if (length(hits) == 0) hits <- pmatch(names, tolower(known$Name), nomatch = NULL)
+
+ res <- known$RE[hits]
+ 
+ if (strict) {
+           ressplit <- strsplit(unlist(res), split = '\\|')
+           
+           res <- sapply(ressplit, function(re) paste(paste0('^', REpar(re), '$'), collapse = '|'))
+ }
+ names(res) <- names
+ res
+ 
 }
 
 
-#' @export
-knownExclusiveInterpretations = c(
-  kernpitch = '(?<=^|[^A-Ga-g#-])([A-Ga-g])\\1*((#)*\\2*|(-)*\\3*)(?=$|[^A-Ga-g#-])',
-  recip = '[1-9][0-9]*%?[1-9]?[0-9]*[.]*'
-)
-
-#' @export 
-knownTandemInterpretations <- data.frame(stringsAsFactors = FALSE,
-                                         Name      = c('Key', "KeySignature", "Clef", 
-                                                       "Time Signature", "Mensuration", "BPM", "Timebase", 
-                                                       "Instrument", "InstrumentClass", "TransposingInstrument"),
-                                         RE        = c('\\*[A-Ga-g][-#b]*:', '\\*k\\[([a-g][#-]* *)*\\]',  '\\*clef[A-G]v*[1-5]*', 
-                                                       '\\*M[1-9][0-9]*/((16)|(32)|[1248])', '\\*met\\([^)]*\\)', '\\*MM[0-9]+', '\\*tb[1-9][0-9]*',
-                                                       '\\*I[^C,]+', '\\*IC[^,]*', '\\*ITr[^,]*'),
-                                         Globish   = c("_:", "k[_]", "clef_",
-                                                       "M_/_", "met(_)", "MM_", "tb_",
-                                                       "I_", "IC_", "ITr_"))
-rownames(knownTandemInterpretations) <- knownTandemInterpretations$Name
+               
+                                     
 
 knownExclusive <- function(strs) {
   #' @export

@@ -23,9 +23,9 @@ us to use these commands in a pipe-line.
 \item To facilate the development of functions to work with humdrum tokens---which are simple
 character strings packed with information---, a useful API we call a 
 \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}.
-\item A module for representing and manipulating musical pitch information, 
+\item A \code{\link[humdrumR:humPitch]{module}} for representing and manipulating musical pitch information, 
 with a core \code{\linkS4class{tonalInterval}} \emph{S4} class to represent pitch.
-\item A module for representing and manipulating musical rhythm information,
+\item A \code{\link[humdrumR:humRhythm]{module}} for representing and manipulating musical rhythm information,
 with a core \code{\linkS4class{recip}} \emph{S4} class to represent rhythm.
 }
 }

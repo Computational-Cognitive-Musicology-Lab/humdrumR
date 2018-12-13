@@ -3,61 +3,23 @@
 \docType{class}
 \name{tonalInterval-class}
 \alias{tonalInterval-class}
-\alias{invert}
-\alias{simplify}
 \title{Representation of tonal pitch information}
-\usage{
-\S4method{as.character}{tonalInterval}(x)
-
-\S4method{+}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{sum}{tonalInterval}(x, ..., na.rm = TRUE)
-
-\S4method{cumsum}{tonalInterval}(x)
-
-\S4method{diff}{tonalInterval}(x)
-
-\S4method{-}{tonalInterval,missing}(e1)
-
-\S4method{-}{tonalInterval,tonalInterval}(e1, e2)
-
-invert(tint, around = tint(0, 0))
-
-simplify(tint)
-
-\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{*}{tonalInterval,numeric}(e1, e2)
-
-\S4method{==}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{!=}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{>}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{>=}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{<}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{<=}{tonalInterval,tonalInterval}(e1, e2)
-}
 \description{
 This \emph{S4} class is the core tonal pitch representation in the 
 \code{\link[humdrumR:humdrumR]{humdrumR package}}.
 The object is used to represent tonal pitch names ("C", "G#", "Db", etc.), tonal intervals 
 and scale degrees ("Major 3rd", "Diminished 5th", etc.), and solfege ("Do", "Re", "Fi", etc.).
 Each pitch/interval is represented as two integers: one representing octave, the other
-position on the circle of fifths. These values are held in the slots \code{@Octave} 
-and \code{@Fifth}. 
+position on the circle of fifths. These values are held in the slots \code{\@Octave} 
+and \code{\@Fifth}. 
 The interval/pitch represented is the result of the Octaves and Perfect 5ths (actually, Perfect
 *12ths*) in the slots added together.
 }
 \details{
-This class has all the basic methods enabled for it function like a normal R vector. 
-(Each slot can actually hold a vector of integers representing
-Octaves/Fifths). This means you can apply normal vectorized commands to it.
+Tonal intervals (which are rather abstract) can be translated to more concrete 
+pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}} 
+methods. Tonal intervals can also be created by reading various inputs
+using these \code{\link[humdrumR:tonalInterval-read]{xxx2tonalInterval}} functions.
 
 In the case of fifths, it is not difficult (for learned musicians at least) to 
 see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 
@@ -81,7 +43,7 @@ or the example from previous paragraph:
 which means the "Major 6" is actually a major 13th.
 More generally can also think of the two integers as exponents of two bases: \deqn{(O, F) = 2^O * ~3^F}.
 If the \code{Fifth} base is actually 3, this represents a "pure" 12th, and thus
-the resulting numbers represent *Pythagorean Tuning*.
+the resulting numbers represent \strong{Pythagorean Tuning}.
 \deqn{2^{-1} * 3^{1} = \frac{3^1}{2^1} = \frac{3}{2} = 1.5}
 If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we 
 will get equal temperement:
@@ -98,6 +60,44 @@ fifth + one octave): 19 semitones, or \deqn{3^1}.}
 \item{\code{Octave}}{An integer representing the octave offset of the interval
 (in addition to the fifth). See details for full explanation.}
 }}
+
+\section{Vectorization}{
+
+The \code{tonalInterval} class has all the \code{\link[tonalInterval-asvector]{basic vector methods}} 
+defined for it function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
+\code{\link[base]{length}}, etc.).
+(Each slot can actually hold a vector of integers representing
+Octaves/Fifths). This means you can apply normal vectorized commands to it, and even put
+them in \code{\link[base:data.frame]{data.frames}}.
+However, \code{R} is limited in this regard---users can't define
+\code{S4} classes that really act like \code{R} atomics---, so you may 
+run in to problems if you take this too far.
+}
+
+\section{Arithmetic}{
+
+\code{tonalInterval} objects have (some) arithmetic operations defined.
+Addition and subtraction are straightword and intuitive (i.e., \eqn{M3 + M3 = P5}).
+
+Multiplication and division are slightly more limited: 
+\href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
+is defined \emph{for integers}: \eqn{M2 * 3 = A4} 
+(the result is always a new \code{tonalInterval}).
+Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
+an integer: \eqn{M4 / M2 = 2L}, but not non-integer values.
+This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
+division is possible: we divide
+a \code{tonalInterval} by another \code{tonalInterval} to get \emph{both}
+an integer \strong{quotient} and a \code{tonalInterval} \strong{remainder}.
+Each of these values can be useful in different ways, 
+so in \code{R} they are calculated with two separate operators: 
+\code{\link[base:Arithmetic]{\%\% and \%/\%}}.
+The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
+useful in pitch calculations, because tonal scales can be seen as 
+a modulus operation (modulo 7 for diatonic). For instance,
+\code{tonalint \%\% tint(-11, 7)} will always calculate the generic 
+version of an interval.
+}
 
 \section{Relational Operators}{
 

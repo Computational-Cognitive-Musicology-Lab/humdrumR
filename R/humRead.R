@@ -461,6 +461,37 @@ parseInterpretations <- function(spinemat) {
        Tandems   = tandemIs)
 }
 
+tandemTable <- function(tandems) {
+          # This function takes the parsed, cummulative
+          # Tandem fields produced by parseInterpretations
+          # and, using functions from the file humInterpretations.R
+          # identifies any "known" (i.e., standard) interpretations
+          # and parses these into a table of new Interpretation fields
+          # for the humdrum table.
+          if (all(tandems == "")) return(NULL)
+          
+          uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
+          uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
+          
+          areKnownTandems <- isKnownTandem(uniqueTandem)
+          knownTandems   <- uniqueTandem[areKnownTandems]
+          # unknownTandems <- uniqueTandem[!areKnownTandems]
+          
+          tandemPatterns <- unique(generalizeTandem(knownTandems))
+          tandemMat <- lapply(tandemPatterns,
+                              function(tan) stringr::str_match(tandems, tan)[ ,1])
+          
+          # for (t in knownTandems) tandems <- stringi::stri_replace_all_fixed(tandems, pattern = t, '')
+          # tandems <- stringi::stri_replace_all(tandems, regex = ',,*', ',')
+          # tandems[tandems %in% c(',', '')] <- NA_character_
+          
+          names(tandemMat) <- unique(idTandem(knownTandems))
+          
+          # tandemMat$Tandem <- tandems
+          
+          as.data.table(tandemMat)
+}
+
 parseMultiStops <- function(spine) {
   # This function is used by parseLocal to stretch out spines 
   # containing multi stops (i.e., tokens separate by spaces) represented by their own tokens.

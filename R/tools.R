@@ -4,7 +4,7 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 substituteName <- function(expr, subs) {
   if (length(subs) == 0) return(expr)
   
-  if (is.call(expr)) {
+  if (is.call(expr) && length(expr) > 1L) {
             for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], subs)
   } else { 
             if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
@@ -34,24 +34,6 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           
 }
 
-
-swapIn <- function(calls, form) {
-          # This function takes a list of named
-          # expressions, and substitutes occurences of the name
-          # in the right hand side of form with the matching
-          # expression.
-          newenv <- as.environment(calls)
-          
-          oldenv <- f_env(form)
-          
-          parent.env(newenv) <- oldenv
-          
-          f_env(form) <- newenv
-          
-          newform <- f_unwrap(form)
-          f_env(newform) <- oldenv
-          newform
-}
 
 
 #' @export
@@ -87,6 +69,8 @@ allsame <- function(x) length(unique(x)) == 1L
 
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
+
+fargs <- function(func) formals(args(func))
 
 #' @export
 curriedfunction <- function(args, expr) {
