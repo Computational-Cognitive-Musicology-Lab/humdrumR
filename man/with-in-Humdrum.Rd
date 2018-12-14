@@ -5,7 +5,9 @@
 \alias{withinHumdrum}
 \alias{withHumdrum}
 \alias{inHumdrum}
-\title{with(in)Humdrum}
+\title{with(in)Humdrum
+a
+Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.}
 \usage{
 withinHumdrum(humdrumR, ...)
 
@@ -30,7 +32,15 @@ From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
 From \code{withHumdrum}, whatever value is returned by expression.
 }
 \description{
+with(in)Humdrum
+a
 Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
+
+withinHumdrum
+
+withHumdrum
+
+inHumdrum
 }
 \section{Overview}{
 

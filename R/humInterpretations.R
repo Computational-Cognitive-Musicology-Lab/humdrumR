@@ -48,14 +48,15 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive'), strict = FAL
 
 knownExclusive <- function(strs) {
   #' @export
-  sapply(knownExclusiveInterpretations, stringr::str_detect, string = strs)
+  sapply(knownInterpretations[knownInterpretations$Type == 'Exclusive', ], stringr::str_detect, string = strs)
 }
 
 knownTandem <- function(strs) {
   #' @export
-  output <- sapply(knownTandemInterpretations$RE, stringr::str_detect, string = strs, simplify = TRUE)
-  dim(output) <- c(length(strs), nrow(knownTandemInterpretations))
-  colnames(output) <- knownTandemInterpretations$Name
+  knownTand <- knownInterpretations[knownInterpretations$Type == 'Tandem', ]
+  output <- sapply(knownTand$RE, stringr::str_detect, string = strs, simplify = TRUE)
+  dim(output) <- c(length(strs), nrow(knownTand))
+  colnames(output) <- knownTand$Name
   rownames(output) <- strs
   output
 }
@@ -74,7 +75,7 @@ generalizeTandem <- function(strs) {
   hit.arr.ind <- which(hits[!misses, , drop = FALSE], arr.ind = TRUE)
   hit.arr.ind <- hit.arr.ind[order(hit.arr.ind[ , 'row']), , drop = FALSE ]
   
-  output <- knownTandemInterpretations$RE[hit.arr.ind[ , 'col']]
+  output <- knownInterpretations[knownInterpretations$Type == 'Tandem' , ]$RE[hit.arr.ind[ , 'col']]
   setNames(output, strs)
   
 }
@@ -88,7 +89,7 @@ idTandem <- function(strs) {
   hit.arr.ind <- which(hits[!misses, , drop = FALSE], arr.ind = TRUE)
   hit.arr.ind <- hit.arr.ind[order(hit.arr.ind[ , 'row']), , drop = FALSE ]
   
-  output[!misses] <- knownTandemInterpretations$Name[hit.arr.ind[ , 'col']]
+  output[!misses] <- knownInterpretations[knownInterpretations$Type == 'Tandem', ]$Name[hit.arr.ind[ , 'col']]
   output
 }
 

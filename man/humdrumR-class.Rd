@@ -29,11 +29,6 @@ is the "default" data which is printed be \code{\link{show}} calls, and when \co
 is used in a call to \code{\link{humApply}}.
 and others.}
 
-\item{\code{Partition}}{A list of partition expressions (see \code{\link{humApply}}). By default,
-this is empty, and any partitioning must be done explicitely in the call to \code{\link{humApply}}.
-However, if you want a \code{humdrumR} data object to be partitioned by default,
-this value can be set with a call to \code{\link{setPartition}}.}
-
 \item{\code{LoadTime}}{A POSIXct value, indicating the time at which \code{\link{readHumdrum}} was
 called to create this \code{humdrumR} object.}
 }}

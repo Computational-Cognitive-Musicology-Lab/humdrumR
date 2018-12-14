@@ -1,8 +1,10 @@
 # This file defines the functions withHumdrum and withinHumdrum, which are used to apply
 # expressions to fields in a humdrumR data object in a manner analogous to the base
-# with and within functions (as applied to data.frames).
+# with and within functions (as applied to data.frames). There is also the function humApply
+# which acts more like R lapply, but is really just using withinHumdrum.
 #
-# withHumdrum, withinHumdrum, and inHumdrum (an alias of withinHumdrum) are each exported for users to use.
+# humApply, withHumdrum, withinHumdrum, and inHumdrum (an alias of withinHumdrum) 
+# are each exported for users to use.
 # getTandem is also exported.
 # All other functions are just used by with/withinHumdrum.
 #
@@ -21,7 +23,7 @@
 
 
 #' with(in)Humdrum
-#' 
+#' a
 #' Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
 #' 
 #' @section Overview:
@@ -300,7 +302,6 @@ withinHumdrum <- function(humdrumR,  ...) {
           
           #### Preprocess humdrumR and humtab
           humtab <- getHumtab(humdrumR, recordtypes)
-          # partitions <- c(humdrumR@Partition, partitions)
           
           #### Create main expression
           currentdo <- doexpressions[[1]]
@@ -389,7 +390,6 @@ withHumdrum <- function(humdrumR,  ...) {
           }
           
           #### Preprocess humdrumR and humtab
-          # partitions <- c(humdrumR@Partition, partitions)
           #### Create main expression
           if (length(doexpressions) > 1) {
                     humdrumR <- do.call('withinHumdrum', c(humdrumR,
@@ -555,7 +555,7 @@ activateForm <- function(funcform, active) {
   #' target \code{\linkS4class{humdrumR}} object in place 
   #' of any \code{.} subexpressions.
   active <- lazyeval::f_rhs(active)
-  swapIn(list(. = active), funcform)
+  substituteName(funcform, list(. = active))
 }
 
 #### Interpretations in expressions
@@ -696,8 +696,8 @@ xifyForm <- function(expression, usedInExpr) {
           fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
           names(fargs) <- '.' %str+% tolower(usedInExpr)
           
-          expression <- swapIn(setNames(lapply(names(fargs), as.symbol), usedInExpr), 
-                               expression)
+          expression <- substituteName(expression,
+                                       setNames(lapply(names(fargs), as.symbol), usedInExpr))
           
           lambdaexpression      <- quote(function() {} )
           lambdaexpression[[2]] <- fargs
@@ -1072,4 +1072,62 @@ collapse2n <- function(x, colname, class, n = 1) {
     rep( if (length(uniqx) == 1) uniqx else as(NA, class) , n)
   }
   
+}
+
+
+################################humApply ----
+#' 
+#' \code{humApply} is just a wrapper for 
+#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
+#' included to parallel the \code{R} family of \code{\link[base:lapply]{_apply}} functions.
+#' \code{humApply} uses \href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
+#' to capture arguments fed to it without the user needing to make explicit 
+#' \code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work 
+#' in the \code{\link[base:environment]{global environment}}, so be careful. If you run into
+#' problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
+#' explicit \code{\link[base:tilde]{X~formulas}}.
+#' 
+#' @param humdrumR A humdrumR data object.
+#' @param FUN A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
+#' in the \code{humdrumR} object.
+#' @param ... Any arguments which can be fed to 
+#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum} as formulae (except for
+#' \code{do} expressions, which are replaced by the \code{FUN} argument!).
+#' However, rather that writinging formula in the format \code{Keyword ~ Expression},
+#' \code{humApply} arguments should be written as normal \code{R} arguments: 
+#' \code{Keyword = Expression}.
+#' Unnamed arguments are ignored.
+#' #' @param within A logical. If \code{TRUE} (the default), 
+#' \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the 
+#' function---meaning that the output is reconstituted into a new field in the 
+#' \code{humdrumR} object. If \code{within == FALSE},
+#' \code{\link[humdrumR:with-in-Humdrum]{withHumdrum}} is used instead,
+#' which results in the function's output being returned inprocessed.
+#' @param doplot Boolean. If \code{TRUE} the \code{FUN} argument is treated
+#' as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
+#' so the result is ignored (for plotting or side-effects purposes).
+#' @export
+humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
+          exprs <- lazyeval::lazy_dots(...)
+          keywords <- names(exprs)
+          
+          if (is.null(keywords)) exprs <- list()
+          exprs    <- exprs[keywords != '']
+          keywords <- keywords[keywords != '']
+          
+          formulae <- Map(function(ex, kw) lazyeval::f_new(rhs = ex$expr,
+                                                           lhs = as.symbol(kw), 
+                                                           env = ex$env ), exprs, keywords) 
+          formulae <- unname(formulae)
+          # do expression
+          do <- lazyeval::f_new(rhs = quote(FUN(.)),
+                                lhs = if (doplot) quote(doplot) else quote(do),
+                                env = environment())
+          
+          do.call(if (within) 'withinHumdrum' else 'withHumdrum',
+                  c(humdrumR, do, formulae))
+          
+          
+          
+          
 }

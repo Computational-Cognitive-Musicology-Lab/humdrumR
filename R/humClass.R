@@ -158,10 +158,6 @@ NULL
 #' is the "default" data which is printed be \code{\link{show}} calls, and when \code{.}
 #' is used in a call to \code{\link{humApply}}.
 #' and others.
-#' @slot Partition A list of partition expressions (see \code{\link{humApply}}). By default,
-#' this is empty, and any partitioning must be done explicitely in the call to \code{\link{humApply}}.
-#' However, if you want a \code{humdrumR} data object to be partitioned by default,
-#' this value can be set with a call to \code{\link{setPartition}}.
 #' @slot LoadTime A POSIXct value, indicating the time at which \code{\link{readHumdrum}} was
 #' called to create this \code{humdrumR} object.
 #' @export
@@ -170,7 +166,6 @@ setClass('humdrumR',
                    Files = 'list',
                    Fields = 'list',
                    Active = 'formula',
-                   Partition = 'list',
                    LoadTime = 'POSIXct'
                    )) -> makeHumdrumR
 
@@ -186,7 +181,7 @@ setMethod('initialize', 'humdrumR',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
-                                                         fields[fields %in% knownTandemInterpretations$Name]),
+                                                         fields[fields %in% knownInterpretations[knownInterpretations$Type == 'Tandem', ]$Name]),
                                     Formal    = c(grep('^Formal', fields, value = TRUE),
                                                   'BarN', 'DoubleBarN', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
@@ -197,7 +192,6 @@ setMethod('initialize', 'humdrumR',
             .Object@Active    <- ~Token
             .Object@Files     <- list(Search = pattern, Names = unique(dtab$FullFileName))
             .Object@LoadTime  <- Sys.time()
-            .Object@Partition <- list()
             .Object
           })
 
@@ -554,50 +548,6 @@ setMethod('[',
             setD(x) <- D[NFile %in% i]
             x
           })
-
-# #' @export
-# setMethod('[',  signature = c(x = 'humdrumR', i = 'missing'), 
-#           function(x, ...) {
-#             factors <- as.list(match.call(expand.dots = TRUE))[-1:-2]
-#             if (len0(factors)) return(x)
-#             
-#             if (any(sapply(factors, is.null))) {
-#               x@Partition <- list() 
-#             } else {
-#               
-#               if (lennot0(factors) && is.null(names(factors))) names(factors) <- rep('each', length(factors))
-#               names(factors) <- gsub('by|partition|split|divide|each', 'eachfile', names(factors))
-#               names(factors) <- gsub('if|when|onlyif|onlywhere|only|where', 'filewhere', names(factors))
-#               
-#               factors <- factors[names(factors) %in% c('eachfile', 'filewhere')]
-#               
-#               x@Partition <- c(x@Partition, factors)
-#             }
-#             x
-#           })
-
-##################################################[[]] ####
-
-# #' @export
-# setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'), 
-#           function(x, ...) {
-#             factors <- as.list(match.call(expand.dots = TRUE))[-1:-2]
-#             if (len0(factors)) return(x)
-#             
-#             if (any(sapply(factors, is.null))) {
-#              x@Partition <- list() 
-#             } else {
-#               
-#               if (lennot0(factors) && is.null(names(factors))) names(factors) <- rep('each', length(factors))
-#               names(factors) <- gsub('by|partition|split|divide', 'each', names(factors))
-#               names(factors) <- gsub('if|when|onlyif|onlywhere|only', 'where', names(factors))
-#               
-#               factors <- factors[names(factors) %in% c('each', 'where')]
-#               
-#               x@Partition <- c(x@Partition, factors)
-#             }
-#             x
-#             })
 
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'logical', j = 'missing'), 
