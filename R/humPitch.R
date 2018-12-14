@@ -94,15 +94,22 @@
 #' fifth + one octave): 19 semitones, or \deqn{3^1}.
 #' @slot Octave Integers representing the octave offset of the intervals
 #' (in addition to the fifth). See details for full explanation.
+#' @slot Cent Real numbers representing the cents (2^(1/1200)) offset of the interval.
 #' 
 #' @export
-setClass('tonalInterval', slots = c(Fifth = 'integer', Octave = 'integer'))
+setClass('tonalInterval', slots = c(Fifth = 'integer', Octave = 'integer', Cent = 'numeric'))
 
 setValidity('tonalInterval', 
             function(object) {
-              length(object@Fifth) == length(object@Octave) &&
-                                is.integer(object@Fifth) &&
-                                is.integer(object@Octave)
+              octaves <- object@Octave
+              fifths  <- object@Fifth
+              cents   <- object@Cent
+                      
+              length(fifths) == length(octaves) &&
+                                length(fifths) == length(cents) &&
+                                is.integer(fifths) &&
+                                is.integer(octaves) &&
+                                is.numeric(cents) 
             })
 
 ######tonalInterval constructors and accessors
@@ -110,7 +117,7 @@ setValidity('tonalInterval',
 #' The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
 #' @name tonalInterval
 #' @export
-tint <- function(o, f) new('tonalInterval', Octave = as.integer(o), Fifth = as.integer(f))
+tint <- function(o, f, c = numeric(length(o))) new('tonalInterval', Octave = as.integer(o), Fifth = as.integer(f), Cent = as.numeric(c))
 
 #' A basic constructor for simple \code{tonalIntervals}
 #' (i.e., within one octave).
@@ -125,6 +132,9 @@ getFifth  <- function(tint) tint@Fifth
 #' @name tonalInterval
 #' @export
 getOctave <- function(tint) tint@Octave
+#' @name tonalInterval
+#' @export
+getCent <- function(tint) tint@Cent
 
 
 ######tonalInterval vector (and other core) methods
@@ -146,7 +156,7 @@ NULL
 setMethod('[', signature = c('tonalInterval'),
           function(x, i) {
             if (missing(i)) return(x)
-            tint(getOctave(x)[i], getFifth(x)[i])        
+            tint(getOctave(x)[i], getFifth(x)[i], getCent(x)[i])        
           })
 
 #' @name tonalInterval-asvector
@@ -157,6 +167,7 @@ setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', va
                     
                     x@Fifth[i]  <- getFifth(value)
                     x@Octave[i] <- getOctave(value)
+                    x@Cent[i]   <- getCent(value)
                     
                     x
           })
@@ -168,12 +179,13 @@ setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', va
 #' @export
 setMethod('c', signature = c('tonalInterval'),
           function(x, ...) {
-                    durs <- list(x, ...)
+                    tints <- list(x, ...)
                     
-                    ns <- unlist(sapply(durs, getFifth))
-                    ds <- unlist(sapply(durs, getOctave))
+                    octaves <- unlist(sapply(tints, getFifth))
+                    fifths  <- unlist(sapply(tints, getOctave))
+                    cents   <- unlist(sapply(tints, getCent))
                     
-                    tint(ds, ns)
+                    tint(octaves, fifths, cents)
           })
 
 #' @name tonalInterval-asvector
@@ -267,7 +279,8 @@ setMethod('sort', signature = c(x = 'tonalInterval'),
 setMethod('==', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
                     getOctave(e1) == getOctave(e2) &  
-                    getFifth(e1)  == getFifth(e2)
+                    getFifth(e1)  == getFifth(e2) &
+                    getCent(e1)   == getCent(e2)
           })
 
 #' @name tonalInterval
@@ -275,7 +288,8 @@ setMethod('==', signature = c('tonalInterval', 'tonalInterval'),
 setMethod('!=', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
                     getOctave(e1) != getOctave(e2) |
-                              getFifth(e1)  != getFifth(e2)
+                              getFifth(e1)  != getFifth(e2) |
+                              getCent(e1) != getCent(e2)
           })
 
 #' @name tonalInterval
@@ -339,7 +353,8 @@ as.double.tonalInterval <- function(x) as.double(as.ratio(x))
 setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
                     tint(getOctave(e1) + getOctave(e2),
-                         getFifth(e1)  + getFifth(e2))
+                         getFifth(e1)  + getFifth(e2), 
+                         getCent(e1) + getCent(e2))
           })
 
 #' @name tonalInterval
@@ -348,14 +363,14 @@ setMethod('sum', signature = c('tonalInterval'),
           function(x, ..., na.rm = TRUE) {
                     x <- list(x, ...)
                     x <- do.call('c', x)
-                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm))
+                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm), sum(getCent(x), na.rm))
           })
 
 #' @name tonalInterval
 #' @export
 setMethod('cumsum', signature = c('tonalInterval'),
           function(x) {
-                    tint(cumsum(getOctave(x)), cumsum(getFifth(x)))
+                    tint(cumsum(getOctave(x)), cumsum(getFifth(x)), cumsum(getCent(x)))
           })
 
 
@@ -373,7 +388,8 @@ setMethod('-', signature = c('tonalInterval', 'missing'),
 setMethod('-', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
                     tint(getOctave(e1) - getOctave(e2),
-                         getFifth(e1)  - getFifth(e2))
+                         getFifth(e1)  - getFifth(e2),
+                         getCent(e1)   - getCent(e2))
           })
 
 
@@ -381,7 +397,7 @@ setMethod('-', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 setMethod('diff', signature = c('tonalInterval'),
           function(x) {
-                    tint(diff(getOctave(x)), diff(getFifth(x)))
+                    tint(diff(getOctave(x)), diff(getFifth(x)), diff(getCent(x)))
           })
 
 ####Multiplication
@@ -391,7 +407,8 @@ setMethod('diff', signature = c('tonalInterval'),
 setMethod('*', signature = c('tonalInterval', 'numeric'),
           function(e1, e2) {
                     tint(getOctave(e1) * e2,
-                         getFifth(e1) * e2)
+                         getFifth(e1) * e2,
+                         getCent(e1) * e2)
           })
 
 #' @name tonalInterval
@@ -399,7 +416,8 @@ setMethod('*', signature = c('tonalInterval', 'numeric'),
 setMethod('*', signature = c('numeric', 'tonalInterval'),
           function(e1, e2) {
                     tint(getOctave(e2) * e1,
-                         getFifth(e2) * e1)
+                         getFifth(e2) * e1,
+                         getCent(e2) * e1)
           })
 
 
@@ -517,7 +535,7 @@ setGeneric('as.semits', function(x, ...) standardGeneric('as.semits'))
 #' @export
 setMethod('as.semits', signature = c(x = 'tonalInterval'),
           function(x) {
-                    ((getFifth(x) * 19) + (getOctave(x) * 12)) 
+                    ((getFifth(x) * 19) + (getOctave(x) * 12)) + (getCent(x) / 100) 
             })
 
 #' @export
@@ -671,8 +689,9 @@ setMethod('as.ratio', signature = c(x = 'tonalInterval'),
           function(x, twelfth) {
                     fifth <- getFifth(x)
                     oct   <- getOctave(x)
+                    cent  <- getCent(x)
                     
-                    MASS::fractions((2 ^ oct) * (twelfth ^ fifth))
+                    MASS::fractions((2 ^ oct) * (twelfth ^ fifth) * 2^(cent / 1200))
           })
 
 #### As frequency (i.e., "440")

@@ -7,18 +7,21 @@
 \alias{simpletint}
 \alias{getFifth}
 \alias{getOctave}
+\alias{getCent}
 \alias{as.double.tonalInterval}
 \alias{invert}
 \alias{simplify}
 \title{The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.}
 \usage{
-tint(o, f)
+tint(o, f, c = numeric(length(o)))
 
 simpletint(f)
 
 getFifth(tint)
 
 getOctave(tint)
+
+getCent(tint)
 
 \S4method{==}{tonalInterval,tonalInterval}(e1, e2)
 

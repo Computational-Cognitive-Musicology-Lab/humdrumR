@@ -59,6 +59,8 @@ fifth + one octave): 19 semitones, or \deqn{3^1}.}
 
 \item{\code{Octave}}{Integers representing the octave offset of the intervals
 (in addition to the fifth). See details for full explanation.}
+
+\item{\code{Cent}}{Real numbers representing the cents (2^(1/1200)) offset of the interval.}
 }}
 
 \section{Vectorization}{
