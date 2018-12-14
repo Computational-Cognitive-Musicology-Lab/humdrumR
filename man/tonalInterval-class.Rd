@@ -52,22 +52,22 @@ will get equal temperement:
 \section{Slots}{
 
 \describe{
-\item{\code{Fifth}}{An integer representing the intervals
+\item{\code{Fifth}}{Integers representing the intervals'
 size on the circle of fifths. When considering absolute size
 these fifths are actually treated like pure \emph{12ths} (i.e., one 
 fifth + one octave): 19 semitones, or \deqn{3^1}.}
 
-\item{\code{Octave}}{An integer representing the octave offset of the interval
+\item{\code{Octave}}{Integers representing the octave offset of the intervals
 (in addition to the fifth). See details for full explanation.}
 }}
 
 \section{Vectorization}{
 
 The \code{tonalInterval} class has all the \code{\link[tonalInterval-asvector]{basic vector methods}} 
-defined for it function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
+defined for it to function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
 \code{\link[base]{length}}, etc.).
 (Each slot can actually hold a vector of integers representing
-Octaves/Fifths). This means you can apply normal vectorized commands to it, and even put
+Octaves/Fifths). This means you can apply normal vectorized commands to \code{tonalInterval}s, and even put
 them in \code{\link[base:data.frame]{data.frames}}.
 However, \code{R} is limited in this regard---users can't define
 \code{S4} classes that really act like \code{R} atomics---, so you may 
@@ -105,7 +105,8 @@ version of an interval.
 \code{\link[base:Comparison]{relational operators}}---\code{==},
 \code{!=}, \code{>}, \code{>=}, etc.
 \code{tonalIntervals}s are equal only if their \code{Octave} and
-\code{Fifth} slots are identical. Numeric comparisons are (i.e., \code{>}, 
-\code{<=}) based on their semitone (equal temperament) size.
+\code{Fifth} slots are identical. 
+Numeric comparisons (e.g., \code{>}, 
+\code{<=}) are based on their semitone (equal temperament) size.
 }
 

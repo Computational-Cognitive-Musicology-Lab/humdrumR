@@ -3,14 +3,12 @@
 \docType{methods}
 \name{tonalInterval-asvector}
 \alias{tonalInterval-asvector}
+\alias{as.data.frame.tonalInterval}
 \alias{is.atomic.tonalInterval}
 \alias{rep.tonalInterval}
-\alias{as.data.frame.tonalInterval}
 \alias{format.tonalInterval}
-\title{tonalInterval vector methods}
+\title{Methods required to make tonalIntervals act like vectors}
 \usage{
-\S4method{[}{tonalInterval,missing}(x, i)
-
 \S4method{[}{tonalInterval,ANY}(x, i)
 
 \S4method{[}{tonalInterval,ANY,missing,tonalInterval}(x, i) <- value
@@ -19,24 +17,34 @@
 
 \S4method{length}{tonalInterval}(x)
 
+\S4method{dim}{tonalInterval}(x)
+
+as.data.frame.tonalInterval(x, row.names = NULL, optional = FALSE, ...)
+
 \S4method{as.vector}{tonalInterval}(x)
 
+\S4method{as.list}{tonalInterval}(x, ...)
+
 \S4method{is.vector}{tonalInterval}(x)
+
+\S4method{is.numeric}{tonalInterval}(x)
 
 is.atomic.tonalInterval(x)
 
 \method{rep}{tonalInterval}(x, ...)
 
-\S4method{dim}{tonalInterval}(x)
+\S4method{order}{tonalInterval}(..., na.last = TRUE,
+  decreasing = FALSE, method = c("auto", "shell", "radix"))
+
+\S4method{sort}{tonalInterval}(x, decreasing = FALSE)
 
 \S4method{show}{tonalInterval}(object)
 
-as.data.frame.tonalInterval(x, row.names = NULL, optional = FALSE, ...)
-
 \method{format}{tonalInterval}(x, ...)
-
-\S4method{as.character}{tonalInterval}(x)
 }
 \description{
-tonalInterval vector methods
+These methods allow us to treat 
+\code{\link[humdrumR:tonalInterval]{tonalIntervals}}
+a lot like base \code{R} 
+\code{\link[base:vector]{atomic vectors}}.
 }

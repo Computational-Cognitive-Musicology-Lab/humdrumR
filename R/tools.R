@@ -51,13 +51,14 @@ compose <- function(...) {
           currentArgs <- .funcsArgs[[i]]
           # ...
           elips <- names(currentArgs) == '...'
-          currentArgs <- lapply(names(currentArgs)[!elips], get, envir = environment())
-          currentArgs <- c(list(X), currentArgs, if (any(elips)) list(...) else list())
+          not_elips <- names(currentArgs)[!elips]
+          currentArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
+          currentArgs <- c(list(x), currentArgs, if (any(elips)) list(...) else list())
           
-          X <- do.call('currentFunc', currentArgs)
+          x <- do.call('currentFunc', currentArgs)
         }
             
-        X
+        x
   }
 
             
@@ -66,10 +67,12 @@ compose <- function(...) {
   names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
   allArgs <- allArgs[!duplicated(names(allArgs))]
   
-  formals(newfunc) <- c(alist(X = ), allArgs)
+  formals(newfunc) <- c(alist(x = ), allArgs)
   
   newfunc
   }
+
+is.whole <- function(x) x %% 1 == 0
 
 #' @export
 `%.%` <- function(e1, e2) { compose(e2, e1) }

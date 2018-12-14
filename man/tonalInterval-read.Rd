@@ -7,6 +7,7 @@
 \alias{read.sciPitch2tonalInterval}
 \alias{read.interval2tonalInterval}
 \alias{read.solfa2tonalInterval}
+\alias{read.ratio2tonalInterval}
 \title{Reading \code{\link[humdrumR:tonalInterval]{tonalIntervals}} from various representations}
 \usage{
 read.kernPitch2sciPitch(str)
@@ -18,6 +19,8 @@ read.sciPitch2tonalInterval(str)
 read.interval2tonalInterval(str)
 
 read.solfa2tonalInterval(str)
+
+read.ratio2tonalInterval(str, twelfth = 3)
 }
 \description{
 These functions all translate other pitch representations

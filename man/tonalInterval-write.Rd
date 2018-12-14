@@ -17,13 +17,13 @@
   directed = TRUE, quality.labels = list(augment = "A", diminish = "d",
   major = "M", minor = "m", perfect = "P"))
 
-\S4method{as.solfa}{integer,integer}(x, key = 0L)
+\S4method{as.solfa}{numeric,numeric}(x, key = 0L)
 
-\S4method{as.solfa}{tonalInterval,integer}(x, key = 0L)
+\S4method{as.solfa}{tonalInterval,numeric}(x, key = 0L)
 
 \S4method{as.solfa}{ANY,tonalInterval}(x, key = tint(0, 0))
 
-\S4method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12))
+\S4method{as.ratio}{tonalInterval}(x, twelfth)
 
 \S4method{as.frequency}{tonalInterval}(x, reference.freq, reference.tint,
   twelfth)

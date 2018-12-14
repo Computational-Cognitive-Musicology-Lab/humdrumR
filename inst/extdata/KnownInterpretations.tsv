@@ -9,7 +9,7 @@ Timebase	\*tb[1-9][0-9]*	tb_	Tandem
 Instrument	\*I[^C,]+	I_	Tandem
 Instrument Class	\*IC[^,]*	IC_	Tandem
 Transposing Instrument	\*ITr[^,]*	ITr_	Tandem
-Kern Pitch	([A-Ga-g])\1*((#)*\2*|(-)*\3*)	c	Exclusive
+Kern Pitch	([A-Ga-g])\1*([#-])*\2*	c	Exclusive
 Beam 	([/\\]?(L+K*)?)|([/\\]?(J+k*)?)		Exclusive
 Melodic Signifier	[TtMmWw]R?|[TtMmWwS$O]		Exclusive
 Articulation	['`\"~I][vu]?|[vu]		Exclusive
@@ -19,3 +19,4 @@ Scientific Pitch	[A-G][b#]*[-+]?[0-9][0-9]*	C4	Exclusive
 Solfege	[sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei]	do	Exclusive
 Kern	(\[?[({{]*)?({Recip})?{`Kern Pitch`}({`Melodic Signifier`})?({Articulation})?({Beam})?([_\]]?[)}]*)?	(4c'/Jk	Exclusive
 Interval	[+-]?([MmP]|[Ad]+)[1-9][0-9]*	+P5	Exclusive
+Scale Degree	([MmP]|[Ad]+)[1-9][0-9]*	P5	Exclusive

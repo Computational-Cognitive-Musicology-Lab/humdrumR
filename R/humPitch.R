@@ -1,4 +1,3 @@
-
 ###############tonalInterval S4 class ----
 
 #' Representation of tonal pitch information
@@ -48,10 +47,10 @@
 #' 
 #' @section Vectorization:
 #' The \code{tonalInterval} class has all the \code{\link[tonalInterval-asvector]{basic vector methods}} 
-#' defined for it function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
+#' defined for it to function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
 #' \code{\link[base]{length}}, etc.).
 #' (Each slot can actually hold a vector of integers representing
-#' Octaves/Fifths). This means you can apply normal vectorized commands to it, and even put
+#' Octaves/Fifths). This means you can apply normal vectorized commands to \code{tonalInterval}s, and even put
 #' them in \code{\link[base:data.frame]{data.frames}}.
 #' However, \code{R} is limited in this regard---users can't define
 #' \code{S4} classes that really act like \code{R} atomics---, so you may 
@@ -85,14 +84,15 @@
 #' \code{\link[base:Comparison]{relational operators}}---\code{==},
 #' \code{!=}, \code{>}, \code{>=}, etc.
 #' \code{tonalIntervals}s are equal only if their \code{Octave} and
-#' \code{Fifth} slots are identical. Numeric comparisons are (i.e., \code{>}, 
-#' \code{<=}) based on their semitone (equal temperament) size.
+#' \code{Fifth} slots are identical. 
+#' Numeric comparisons (e.g., \code{>}, 
+#' \code{<=}) are based on their semitone (equal temperament) size.
 #' 
-#' @slot Fifth An integer representing the intervals
+#' @slot Fifth Integers representing the intervals'
 #' size on the circle of fifths. When considering absolute size
 #' these fifths are actually treated like pure \emph{12ths} (i.e., one 
 #' fifth + one octave): 19 semitones, or \deqn{3^1}.
-#' @slot Octave An integer representing the octave offset of the interval
+#' @slot Octave Integers representing the octave offset of the intervals
 #' (in addition to the fifth). See details for full explanation.
 #' 
 #' @export
@@ -105,9 +105,9 @@ setValidity('tonalInterval',
                                 is.integer(object@Octave)
             })
 
-######tonalInterval constructors
+######tonalInterval constructors and accessors
 
-#' The basic constructor for \code{tonalIntervals}.
+#' The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
 #' @name tonalInterval
 #' @export
 tint <- function(o, f) new('tonalInterval', Octave = as.integer(o), Fifth = as.integer(f))
@@ -127,37 +127,42 @@ getFifth  <- function(tint) tint@Fifth
 getOctave <- function(tint) tint@Octave
 
 
-#' tonalInterval vector methods
+######tonalInterval vector (and other core) methods
+
+
+#' Methods required to make tonalIntervals act like vectors
 #' 
+#' These methods allow us to treat 
+#' \code{\link[humdrumR:tonalInterval]{tonalIntervals}}
+#' a lot like base \code{R} 
+#' \code{\link[base:vector]{atomic vectors}}.
 #' @name tonalInterval-asvector
 NULL
 
-
-## a few methods required to make tonalIntervals act like vectors
-#' @name tonalInterval-asvector
-#' @export
-setMethod('[', signature = c('tonalInterval', i = 'missing'),
-          function(x, i) x)  
+####Indexing
 
 #' @name tonalInterval-asvector
 #' @export
 setMethod('[', signature = c('tonalInterval'),
           function(x, i) {
-                    
-                    tint(getOctave(x)[i], getFifth(x)[i])        
+            if (missing(i)) return(x)
+            tint(getOctave(x)[i], getFifth(x)[i])        
           })
 
 #' @name tonalInterval-asvector
 #' @export
 setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', value = 'tonalInterval'),
           function(x, i, value) {
-                    stopifnot(length(i) == length(value))
+                    if (missing(i)) return(x)
                     
-                    x@Fifth[i] <- value@Fifth
-                    x@Octave[i] <- value@Octave
+                    x@Fifth[i]  <- getFifth(value)
+                    x@Octave[i] <- getOctave(value)
                     
                     x
           })
+
+
+####Shape 
 
 #' @name tonalInterval-asvector
 #' @export
@@ -178,37 +183,12 @@ setMethod('length', signature = c('tonalInterval'),
                     length(getOctave(x))
           })
 
-
-#' @name tonalInterval-asvector
-#' @export
-setMethod('as.vector', signature = c('tonalInterval'),
-          function(x) { x })
-
-#' @name tonalInterval-asvector
-#' @export
-setMethod('is.vector', signature = c('tonalInterval'),
-          function(x) { TRUE })
-
-#' @name tonalInterval-asvector
-#' @export
-is.atomic.tonalInterval <- function(x) TRUE
-
-
-#' @name tonalInterval-asvector
-#' @export
-rep.tonalInterval <- function(x, ...) {
- tint(rep(getOctave(x), ...), rep(getFifth(x), ...))       
-}
-
 #' @name tonalInterval-asvector
 #' @export
 setMethod('dim', signature = 'tonalInterval',
-          function(x) NULL) #c(length(x), 1))
+          function(x) NULL)
 
-#' @name tonalInterval-asvector
-#' @export
-setMethod('show', signature = c(object = 'tonalInterval'), function(object) { cat(as.interval(object)) })
-
+####Is/As
 
 #' @name tonalInterval-asvector
 #' @export
@@ -224,123 +204,63 @@ as.data.frame.tonalInterval <- function(x, row.names = NULL, optional = FALSE, .
 
 #' @name tonalInterval-asvector
 #' @export
-format.tonalInterval <- function(x, ...) {
-          as.interval(x)         
-}
+setMethod('as.vector', signature = c('tonalInterval'),
+          function(x) { x })
+
+#' @name tonalInterval-asvector
+#' @export
+setMethod('as.list', signature = c('tonalInterval'),
+          function(x, ...) {
+            x <- list(x, ...)
+            x <- do.call('c', x)
+            
+            lapply(seq_along(x), function(i) x[i])
+          })
+
+#' @name tonalInterval-asvector
+#' @export
+setMethod('is.vector', signature = c('tonalInterval'),
+          function(x) { TRUE })
+
+#' @name tonalInterval-asvector
+#' @export
+setMethod('is.numeric', signature = c('tonalInterval'),
+          function(x) { TRUE })
+
+#' @name tonalInterval-asvector
+#' @export
+is.atomic.tonalInterval <- function(x) TRUE
 
 
 
 #' @name tonalInterval-asvector
 #' @export
-setMethod('as.character', signature = c('tonalInterval'), function(x) as.interval(x))
-
-
-
-#### tonalInterval arithmetic ----
-
-#' @name tonalInterval
-#' @export
-setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-                    tint(getOctave(e1) + getOctave(e2),
-                         getFifth(e1)  + getFifth(e2))
-          })
-
-#' @name tonalInterval
-#' @export
-setMethod('sum', signature = c('tonalInterval'),
-          function(x, ..., na.rm = TRUE) {
-                    x <- list(x, ...)
-                    x <- do.call('c', x)
-                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm))
-          })
-
-#' @name tonalInterval
-#' @export
-setMethod('cumsum', signature = c('tonalInterval'),
-          function(x) {
-                    tint(cumsum(getOctave(x)), cumsum(getFifth(x)))
-          })
-
-
-#' @name tonalInterval
-#' @export
-setMethod('diff', signature = c('tonalInterval'),
-          function(x) {
-                    tint(diff(getOctave(x)), diff(getFifth(x)))
-          })
-
-#' @name tonalInterval
-#' @export
-setMethod('-', signature = c('tonalInterval', 'missing'),
-          function(e1) {
-                    invert(e1, around = tint(0, 0))
-          })
-
-#' @name tonalInterval
-#' @export
-setMethod('-', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-                    tint(getOctave(e1) - getOctave(e2),
-                         getFifth(e1)  - getFifth(e2))
-                    
-          })
-
-#' @name tonalInterval
-#' @export 
-invert <- function(tint, around = tint(0,0)) around + around - tint
-
-
-#' @name tonalInterval
-#' @export
-simplify <- function(tint) {
-          simpletint(getFifth(tint))
+rep.tonalInterval <- function(x, ...) {
+ tint(rep(getOctave(x), ...), rep(getFifth(x), ...))       
 }
 
 
+######tonalInterval order/relations methods
 
-
-#' 
-#' To take the modulo of a tonalInterval, it doesn't make sense 
-#' to take the modulo of the Fifth and the Octave separately.
-#' Rather, we take the modulo of the Fifth normally, but for the octave
-#' we look at how many time the Fifth values was divided by the Fifth modulus
-#' and subtract that number multiplied by the octave modulus.
-#' That way the change applied to the Octave matches the one applied to the Fifth.
-#' @name tonalInterval
+#' @name tonalInterval-asvector
 #' @export
-setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-            f1 <- getFifth(e1)
-            f2 <- getFifth(e2)
-            match_size(f1 = f1, f2 = f2, toEnv = TRUE)
-            
-            fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
-            fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
-            
-            tint(getOctave(e1) - (getOctave(e2) * fifthDivs),
-                 fifthMods)
+setMethod('order', signature = c('tonalInterval'),
+          function(..., na.last = TRUE, decreasing = FALSE,
+                   method = c("auto", "shell", "radix")) {
+                    x <- do.call('c', list(...))
+                    order(as.semits(x), 
+ 			  na.last = na.last,
+                          decreasing = decreasing,
+                          method = method
+                          )
           })
 
-#' @name tonalInterval
+#' @name tonalInterval-asvector
 #' @export
-setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-                    f1 <- getFifth(e1)
-                    f2 <- getFifth(e2)
-                    match_size(f1 = f1, f2 = f2, toEnv = TRUE)
-                    ifelse(f2 == 0L, 0L, f1 %/% f2)
+setMethod('sort', signature = c(x = 'tonalInterval'),
+          function(x, decreasing = FALSE) {
+                    x[order(x, decreasing = decreasing)]
           })
-
-#' @name tonalInterval
-#' @export
-setMethod('*', signature = c('tonalInterval', 'numeric'),
-          function(e1, e2) {
-                    tint(getOctave(e1) * e2,
-                         getFifth(e1) * e2)
-          })
-
-####tonalInterval comparisions ----
 
 #' @name tonalInterval
 #' @export
@@ -354,7 +274,7 @@ setMethod('==', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 setMethod('!=', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    getOctave(e1) != getOctave(e2) &  
+                    getOctave(e1) != getOctave(e2) |
                               getFifth(e1)  != getFifth(e2)
           })
 
@@ -386,10 +306,154 @@ setMethod('<=', signature = c('tonalInterval', 'tonalInterval'),
                     as.semits(e1) <= as.semits(e2)
           })
 
+
+######tonalinterval formatting methods
+
+#' @name tonalInterval-asvector
+#' @export
+setMethod('show', signature = c(object = 'tonalInterval'), function(object) { cat(as.interval(object)) })
+
+
+#' @name tonalInterval-asvector
+#' @export
+format.tonalInterval <- function(x, ...) {
+          as.interval(x)         
+}
+
+
+#' @name tonalInterval
+#' @export
+setMethod('as.character', signature = c('tonalInterval'), function(x) as.interval(x))
+
+#' @name tonalInterval
+#' @export
+as.double.tonalInterval <- function(x) as.double(as.ratio(x))
+
+
+######tonalInterval arithmetic methods
+
+####Addition
+
+#' @name tonalInterval
+#' @export
+setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
+          function(e1, e2) {
+                    tint(getOctave(e1) + getOctave(e2),
+                         getFifth(e1)  + getFifth(e2))
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('sum', signature = c('tonalInterval'),
+          function(x, ..., na.rm = TRUE) {
+                    x <- list(x, ...)
+                    x <- do.call('c', x)
+                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm))
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('cumsum', signature = c('tonalInterval'),
+          function(x) {
+                    tint(cumsum(getOctave(x)), cumsum(getFifth(x)))
+          })
+
+
+####Subtraction
+
+#' @name tonalInterval
+#' @export
+setMethod('-', signature = c('tonalInterval', 'missing'),
+          function(e1) {
+                    invert(e1, around = tint(0, 0))
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('-', signature = c('tonalInterval', 'tonalInterval'),
+          function(e1, e2) {
+                    tint(getOctave(e1) - getOctave(e2),
+                         getFifth(e1)  - getFifth(e2))
+          })
+
+
+#' @name tonalInterval
+#' @export
+setMethod('diff', signature = c('tonalInterval'),
+          function(x) {
+                    tint(diff(getOctave(x)), diff(getFifth(x)))
+          })
+
+####Multiplication
+
+#' @name tonalInterval
+#' @export
+setMethod('*', signature = c('tonalInterval', 'numeric'),
+          function(e1, e2) {
+                    tint(getOctave(e1) * e2,
+                         getFifth(e1) * e2)
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('*', signature = c('numeric', 'tonalInterval'),
+          function(e1, e2) {
+                    tint(getOctave(e2) * e1,
+                         getFifth(e2) * e1)
+          })
+
+
+####Division and modulo
+
+#' @name tonalInterval
+#' @export
+setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
+	# To take the modulo of a tonalInterval, it doesn't make sense 
+	# to take the modulo of the Fifth and the Octave separately.
+	# Rather, we take the modulo of the Fifth normally, but for the octave
+	# we look at how many time the Fifth values was divided by the Fifth modulus
+	# and subtract that number multiplied by the octave modulus.
+	# That way the change applied to the Octave matches the one applied to the Fifth.
+          function(e1, e2) {
+            f1 <- getFifth(e1)
+            f2 <- getFifth(e2)
+            match_size(f1 = f1, f2 = f2, toEnv = TRUE)
+            
+            fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
+            fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
+            
+            tint(getOctave(e1) - (getOctave(e2) * fifthDivs),
+                 fifthMods)
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
+          function(e1, e2) {
+                    f1 <- getFifth(e1)
+                    f2 <- getFifth(e2)
+                    match_size(f1 = f1, f2 = f2, toEnv = TRUE)
+                    ifelse(f2 == 0L, 0L, f1 %/% f2)
+          })
+
+
+
+######Special methods
+
+#' @name tonalInterval
+#' @export 
+invert <- function(tint, around = tint(0,0)) around + around - tint
+
+
+#' @name tonalInterval
+#' @export
+simplify <- function(tint) {
+          simpletint(getFifth(tint))
+}
+
 ############################################-
 ####### Writing pitch representations ----
 ############################################-
-
 #' Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations
 #' 
 #' These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 
@@ -447,7 +511,7 @@ fifth2simpleInterval <- function(fifth, quality.labels = list(augment = 'A', dim
 ##### As semits (i.e., 0, -11)
 
 #' @export
-setGeneric('as.semits', function(x) standardGeneric('as.semits'))
+setGeneric('as.semits', function(x, ...) standardGeneric('as.semits'))
 
 #' @name tonalInterval-write
 #' @export
@@ -457,7 +521,7 @@ setMethod('as.semits', signature = c(x = 'tonalInterval'),
             })
 
 #' @export
-setGeneric('as.midi', function(x) standardGeneric('as.midi'))
+setGeneric('as.midi', function(x, ...) standardGeneric('as.midi'))
 
 #' @name tonalInterval-write
 #' @export
@@ -475,7 +539,7 @@ sciOctave <- function(tint) {
 }
 
 #' @export
-setGeneric('as.sciPitch', function(x) standardGeneric('as.sciPitch'))
+setGeneric('as.sciPitch', function(x, ...) standardGeneric('as.sciPitch'))
 
 #' @name tonalInterval-write
 #' @export
@@ -490,7 +554,7 @@ setMethod('as.sciPitch', signature = c(x = 'tonalInterval'),
 #### As kern pitch (i.e., 'aaa', 'CC-')
 
 #' @export
-setGeneric('as.kernPitch', function(x) standardGeneric('as.kernPitch'))
+setGeneric('as.kernPitch', function(x, ...) standardGeneric('as.kernPitch'))
 
 #' @name tonalInterval-write
 #' @export
@@ -514,7 +578,7 @@ setMethod('as.kernPitch', signature = c(x = 'tonalInterval'),
 #### As interval (i.e., "M3", "-P11")
 
 #' @export
-setGeneric('as.interval', function(x, specific = TRUE, directed = TRUE, ...) standardGeneric('as.interval'))
+setGeneric('as.interval', function(x, ..., specific = TRUE, directed = TRUE) standardGeneric('as.interval'))
 
 #' @name tonalInterval-write
 #' @export
@@ -559,9 +623,9 @@ solfatab <- rbind(d = c("e", "o", "i"),
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.solfa', signature = c(x = 'integer', key = 'integer'),
+setMethod('as.solfa', signature = c(x = 'numeric', key = 'numeric'),
           function(x, key = 0L) {
-          x <- x - key          
+          x <- as.integer(x) - as.integer(key)
                     
           bases <- fifth2solfabase(x)
           qualityN <- fifth2qualityN(x)
@@ -580,10 +644,10 @@ setMethod('as.solfa', signature = c(x = 'integer', key = 'integer'),
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.solfa', signature = c(x = 'tonalInterval', key = 'integer'),
+setMethod('as.solfa', signature = c(x = 'tonalInterval', key = 'numeric'),
           function(x, key = 0L) {
             fifths <- getFifth(x)        
-            as.solfa(fifths, key)
+            as.solfa(fifths, as.integer(key))
          
             
           })
@@ -599,7 +663,7 @@ setMethod('as.solfa', signature = c(x = 'ANY', key = "tonalInterval"),
 #### As ratio (i.e., "3/2")
 
 #' @export
-setGeneric('as.ratio', function(x, twelfth = 2^(19/12)) standardGeneric('as.ratio'))
+setGeneric('as.ratio', function(x, twelfth = 2^(19/12), ...) standardGeneric('as.ratio'))
 
 #' @name tonalInterval-write
 #' @export
@@ -632,7 +696,6 @@ setMethod('as.frequency', signature = c(x = 'tonalInterval'),
             reference.freq * ratio
             
           })
-
 
 
 #####################################-
@@ -788,6 +851,8 @@ read.interval2tonalInterval <- function(str) {
 
 #### From scale degree
 
+read.scaleDegree2tonalInterval <- read.interval2tonalInterval
+
 #### From solfege
 
 #' @name tonalInterval-read
@@ -797,6 +862,65 @@ read.solfa2tonalInterval <- function(str) {
   simpletint(fifths)
   
 }
+
+
+#### From ratio
+
+#' @name tonalInterval-read
+#' @export
+read.ratio2tonalInterval <- function(str, twelfth = 3) {
+          if (is.character(str)) {
+                    slashes <- grepl("[/%]", str)
+                    num <- numeric(length(str))
+                    num[!slashes] <- as.numeric(str[!slashes])
+                    num[slashes] <- sapply(str[slashes], function(s) eval(parse(text = s)))
+          } else {
+                    num <- str         
+          }
+          
+          fracs <- MASS::fractions(num)
+          fracs <- strsplit(attr(fracs, 'fracs'), split = '/')
+          numerators   <- as.integer(sapply(fracs, '[', 1))
+          denominators <- as.integer(sapply(fracs, '[', 2))
+          denominators[is.na(denominators)] <- 1L
+          
+          fracs <- cbind(numerators, denominators)
+          
+          # octaves
+          octaves    <- log(fracs, base = 2)
+          twelfths   <- log(fracs, base = twelfth)
+          octaves [ , 2] <- -octaves[ , 2]
+          twelfths[ , 2] <- -twelfths[ , 2] 
+          is.octave  <- is.whole(octaves) & octaves != 0
+          is.twelfth <- is.whole(twelfths) & twelfths != 0
+          
+          octs <- fifs <- numeric(nrow(fracs))
+          # easy "pure" matches
+          pure <- rowSums(is.whole(twelfths) | is.whole(octaves)) == 2
+          pure12 <- rowSums(is.twelfth) > 0
+          fifs[pure12] <- twelfths[pure12,][is.twelfth[pure12, ]]
+          
+          # 
+          pure8 <- rowSums(is.octave) > 0
+          octs[pure8] <- octaves[pure8,][is.octave[pure8, ]]
+          
+          # approximations
+          # round to nearest fifth value
+          if (any(!pure)) {
+            impure <- !is.twelfth & !is.octave & twelfths != 0
+            twelfths <- twelfths + log(2^(octaves), base = 3)
+            
+            fifs[rowSums(impure) > 0] <- round(twelfths[impure])
+            browser()
+          }
+          
+          tint(octs, fifs)
+}
+
+
+
+#### From frequency
+
 
 
 
@@ -820,28 +944,56 @@ read.solfa2tonalInterval <- function(str) {
 #' 
 #' @name humPitch
 #' @export 
-str2tonalInterval <- regexDispatch(inPlace = FALSE,
+as.tonalInterval <- regexDispatch(inPlace = FALSE,
                                    'Kern Pitch' = read.kernPitch2tonalInterval,
                                    'Interval'  = read.interval2tonalInterval,
                                    'Scientific Pitch' = read.sciPitch2tonalInterval,
                                    'Solfege' = read.solfa2tonalInterval)
-                                     
-#' @name humPitch
-#' @export
-str2kernPitch <- as.kernPitch %.% str2tonalInterval
+    
 
 #' @name humPitch
 #' @export
-str2sciPitch <- as.sciPitch %.% str2tonalInterval
+setMethod('as.semits', signature = c(x = 'character'),
+          as.semits %.% as.tonalInterval)
 
 #' @name humPitch
 #' @export
-str2solfa <- as.solfa %.% str2tonalInterval
+setMethod('as.midi', signature = c(x = 'character'),
+          as.midi %.% as.tonalInterval)
+
+#' @name humPitch
+#' @export
+setMethod('as.kernPitch', signature = c(x = 'character'),
+          as.kernPitch %.% as.tonalInterval)
 
 
 #' @name humPitch
 #' @export
-str2interval <- as.interval %.% str2tonalInterval
+setMethod('as.sciPitch', signature = c(x = 'character'),
+          as.sciPitch %.% as.tonalInterval)
+
+#' @name humPitch
+#' @export
+setMethod('as.interval', signature = c(x = 'character'),
+          as.interval %.% as.tonalInterval)
+
+#' @name humPitch
+#' @export
+setMethod('as.solfa', signature = c(x = 'character'),
+          as.solfa %.% as.tonalInterval)
+
+
+#' @name humPitch
+#' @export
+setMethod('as.frequency', signature = c(x = 'character'),
+          as.frequency %.% as.tonalInterval)
+
+#' @name humPitch
+#' @export
+setMethod('as.ratio', signature = c(x = 'character'),
+          as.ratio %.% as.tonalInterval)
+
+
 
 
 

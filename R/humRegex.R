@@ -15,8 +15,10 @@
 #' of functions, each with a matching regular expression,
 #' and creates a new function which applies whichever function
 #' based on which regexs it finds in its input.
+#' @name regexDispatch
 NULL
 
+#' @name regexDispatch
 #' @export
 do2RE <- function(.func, regex) {
           .funcargs <- fargs(.func)
@@ -45,6 +47,7 @@ do2RE <- function(.func, regex) {
 
 
 
+#' @name regexDispatch
 #' @export
 regexDispatch <- function(..., doRE = TRUE) {
           .args <- list(...)
@@ -68,7 +71,8 @@ regexDispatch <- function(..., doRE = TRUE) {
                               dispatchArgs <- reFuncsArgs[[dispatch]]
                               # ...
                               elips <- names(dispatchArgs) == '...'
-                              dispatchArgs <- lapply(names(dispatchArgs)[!elips], get, envir = environment())
+                              not_elips <- names(dispatchArgs)[!elips]
+                              dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
                               dispatchArgs <- c(list(str), dispatchArgs, if (any(elips)) list(...) else list())
                               
                               do.call('dispatchFunc', dispatchArgs)

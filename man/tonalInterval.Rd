@@ -7,9 +7,10 @@
 \alias{simpletint}
 \alias{getFifth}
 \alias{getOctave}
+\alias{as.double.tonalInterval}
 \alias{invert}
 \alias{simplify}
-\title{The basic constructor for \code{tonalIntervals}.}
+\title{The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.}
 \usage{
 tint(o, f)
 
@@ -18,28 +19,6 @@ simpletint(f)
 getFifth(tint)
 
 getOctave(tint)
-
-\S4method{+}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{sum}{tonalInterval}(x, ..., na.rm = TRUE)
-
-\S4method{cumsum}{tonalInterval}(x)
-
-\S4method{diff}{tonalInterval}(x)
-
-\S4method{-}{tonalInterval,missing}(e1)
-
-\S4method{-}{tonalInterval,tonalInterval}(e1, e2)
-
-invert(tint, around = tint(0, 0))
-
-simplify(tint)
-
-\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{*}{tonalInterval,numeric}(e1, e2)
 
 \S4method{==}{tonalInterval,tonalInterval}(e1, e2)
 
@@ -52,17 +31,38 @@ simplify(tint)
 \S4method{<}{tonalInterval,tonalInterval}(e1, e2)
 
 \S4method{<=}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{as.character}{tonalInterval}(x)
+
+\method{as.double}{tonalInterval}(x)
+
+\S4method{+}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{sum}{tonalInterval}(x, ..., na.rm = TRUE)
+
+\S4method{cumsum}{tonalInterval}(x)
+
+\S4method{-}{tonalInterval,missing}(e1)
+
+\S4method{-}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{diff}{tonalInterval}(x)
+
+\S4method{*}{tonalInterval,numeric}(e1, e2)
+
+\S4method{*}{numeric,tonalInterval}(e1, e2)
+
+\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
+
+invert(tint, around = tint(0, 0))
+
+simplify(tint)
 }
 \description{
-The basic constructor for \code{tonalIntervals}.
+The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
 
 A basic constructor for simple \code{tonalIntervals}
 (i.e., within one octave).
-
-To take the modulo of a tonalInterval, it doesn't make sense 
-to take the modulo of the Fifth and the Octave separately.
-Rather, we take the modulo of the Fifth normally, but for the octave
-we look at how many time the Fifth values was divided by the Fifth modulus
-and subtract that number multiplied by the octave modulus.
-That way the change applied to the Octave matches the one applied to the Fifth.
 }
