@@ -17,7 +17,8 @@ component the \code{\link[humdrumR:humtable]{Humdrum Table}}.
 \item To create \code{\linkS4class{humdrumR}} data, a sophisticated
 humdrum data parser: \code{\link{readHumdrum}}.
 \item To manipulate and modify \code{\linkS4class{humdrumR}} data,
-we have the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} functions,
+we have the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and
+\code{\link{humApply}} functions,
 as well as the \code{\link[humdrumR:humPipe]{\%hum>\%}} operator which allows
 us to use these commands in a pipe-line.
 \item To facilate the development of functions to work with humdrum tokens---which are simple
@@ -26,7 +27,7 @@ character strings packed with information---, a useful API we call a
 \item A \code{\link[humdrumR:humPitch]{module}} for representing and manipulating musical pitch information, 
 with a core \code{\linkS4class{tonalInterval}} \emph{S4} class to represent pitch.
 \item A \code{\link[humdrumR:humRhythm]{module}} for representing and manipulating musical rhythm information,
-with a core \code{\linkS4class{recip}} \emph{S4} class to represent rhythm.
+with a core \code{\linkS4class{rhythmInterval}} \emph{S4} class to represent rhythm.
 }
 }
 

@@ -16,7 +16,7 @@ withHumdrum(humdrumR, ...)
 inHumdrum(humdrumR, ...)
 }
 \arguments{
-\item{humdrumR}{A humdrumR data object.}
+\item{humdrumR}{A \code{\linkS4class{humdrumR}} data object.}
 
 \item{...}{\code{...} arguments to \code{withinHumdrum} are divided into either named or unnamed arguments.
 Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened

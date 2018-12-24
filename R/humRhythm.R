@@ -1,4 +1,6 @@
-###############rhythmInterval S4 class ----
+#######################################-
+##################rhythmInterval S4 class ####
+#######################################-
 
 #' Representation of rhythmic information
 #' 
@@ -101,7 +103,7 @@ gcd <- function(x, y) {
   ifelse(r, Recall(y, r), y)
 }
 
-######rhythmInterval constructors and accessors
+######rhythmInterval constructors and accessors ####
 
 
 #' The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
@@ -119,7 +121,7 @@ getDenominator <- function(rint) rint@Denominator
 
 
 
-######rhythmInterval vector (and other core) methods
+######rhythmInterval vector (and other core) methods ####
 
 
 #' Methods required to make rhythmIntervals act like vectors
@@ -131,7 +133,7 @@ getDenominator <- function(rint) rint@Denominator
 #' @name rhythmInterval-asvector
 NULL 
 
-####Indexing
+####Indexing ####
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -154,7 +156,7 @@ setMethod('[<-', signature = c(x = 'rhythmInterval', i = 'ANY', j = 'missing', v
           })
 
 
-####Shape
+####Shape ####
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -183,7 +185,7 @@ setMethod('dim', signature = c(x = 'rhythmInterval'),
                     NULL
           })
 
-####Is/As
+####Is/As ####
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -233,7 +235,7 @@ rep.rhythmInterval <- function(x, ...) {
 		rep(getNumerator(x), ...))
 }
 
-######rhythmInterval order/relations methods
+######rhythmInterval order/relations methods ####
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -302,7 +304,7 @@ setMethod('<=', signature = c('rhythmInterval', 'rhythmInterval'),
           })
 
 
-######rhythminterval formatting methods
+######rhythminterval formatting methods ####
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -362,7 +364,9 @@ setMethod('as.character', c(x = 'rhythmInterval'),
 #' @export
 as.double.rhythmInterval <-  function(x) as.double(getNumerator(x) / getDenominator(x))
 
-######rhythmInterval arithmetic methods
+
+
+######rhythmInterval arithmetic methods ####
 
 
 ####Addition
@@ -530,7 +534,7 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 
 
 
-######Special methods
+######Special methods ####
 
 
 #' @export

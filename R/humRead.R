@@ -16,6 +16,8 @@ pickFiles <- function(pattern, recursive = FALSE) {
  
   cursep <- .Platform$file.sep
   
+  pattern <- gsub(paste0(cursep, cursep, cursep, '*'), cursep, pattern)
+  
   dir_file <- strsplit(pattern, cursep, fixed = TRUE, 
                        useBytes = TRUE)[[1]]
   
@@ -210,7 +212,7 @@ readHumdrum = function(pattern, ..., recursive = FALSE, validate = FALSE, verbos
  
  humtab <- data.table::rbindlist(humtabs, fill = TRUE)
  humtab[ , Type := parseTokenType(Token)]
- humtab[ , Null := Token %in% c('.', '!', '*', '=')]
+ humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
  humtab[ , Global := is.na(Spine)]
  #
  tandemTab <- tandemTable(humtab$Tandem)
@@ -320,10 +322,10 @@ parseLocal <- function(records) {
   tokens   <- setNames(as.vector(mat), rep(recordn, ncol(mat)))
 
   ## get spine and path numbers of appropriate length
-  SpineNumbers <- cumsum(apply(mat, 2,  function(spine) any(spine != 'xxx') && grepl('^\\*\\*', spine[spine != 'xxx'][1])))
-  SpinePaths   <- as.vector(tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
+  SpineNumbers <- cumsum(apply(mat, 2,  function(spine) any(spine != '_P') && grepl('^\\*\\*', spine[spine != '_P'][1])))
+  SpinePaths   <- unlist(use.names = FALSE, tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
   Columns      <- seq_along(SpineNumbers)
-
+  
   #sections
   sections <- parseSections(mat[ , 1])
   barlines <- parseBarlines(mat[ , 1])
@@ -364,9 +366,8 @@ parseLocal <- function(records) {
                                  Tandem = tandems,
                                  barlines)
 
-  if (ncol(sections) > 0) humtab <- cbind(humtab, sections)
-
-  humtab <- humtab[Token != 'xxx'] # "xxx" tokens were inserted as padding by parseSpinePaths
+  if (ncol(sections) > 0L) humtab <- cbind(humtab, sections)
+  # humtab <- humtab[Token != '_P'] # "_P" tokens were inserted as padding by parseSpinePaths
 
   humtab
 
@@ -378,6 +379,7 @@ parseTokenType <- function(spine) {
   # simply categories records by spine type,
   # to create the humdrum tables Type field.
   type <- rep('D', length(spine))
+  type[spine == '_P'] <- 'P'
   type[grepl('^!'  , spine)]    <- 'L'
   type[grepl('^!!' , spine)]    <- 'G'
   type[grepl('^\\*', spine)]    <- 'I'
@@ -391,12 +393,11 @@ parseTokenType <- function(spine) {
 padSpinePaths <- function(local) {
   # Used by parseLocal to make sense of spine paths.
   # This function takes a list of character vectors (each representing a list of tokens from one record)
-  # identifies spine paths in them, and pads the records with "xxx" such that 
+  # identifies spine paths in them, and pads the records with "_P" such that 
   # subspines (spine paths) are grouped within their spine, and all rows are the same length.
   ####NEED TO ADD OPTIONS FOR ** AND *-
           
   minpath <- min(sapply(local, Position, f = function(x) x %in% c('*^', '*v', '*+', '*-')), na.rm = TRUE)
-  
   lapply(minpath:max(lengths(local)),
          function(j) {
            open  <- sapply(local, function(row) length(row) >= j && (row[j] == '*^' || row[j] == '*+'))
@@ -411,14 +412,14 @@ padSpinePaths <- function(local) {
              
              local[pad > 0] <<- Map(append, 
                                     x = local[pad > 0], 
-                                    values = lapply(pad[pad > 0], function(n) rep('xxx', n)), 
+                                    values = lapply(pad[pad > 0], function(n) rep('_P', n)), 
                                     after = j)
            }
            
            close <- sapply(local, function(row) length(row) > j && all(row[j] == '*-'))
            if (any(head(close, -1))) {
              pad <- cumsum(c(FALSE, head(close, -1)))
-             local[pad > 0] <<- Map(append, x = local[pad > 0], values = 'xxx', after = j - 1)
+             local[pad > 0] <<- Map(append, x = local[pad > 0], values = '_P', after = j - 1)
            }
          }
   )
@@ -437,12 +438,12 @@ parseInterpretations <- function(spinemat) {
   # i.e.  c("*clefF4", 
   #         "*F:,*clefF4", 
   #         "*k[b-],*F:,*clefF4")
-  spinemat[is.na(spinemat)] <- 'xxx' # Not sure why this is necassary (Nat, December 2018)
+  spinemat[is.na(spinemat)] <- '_P' # Not sure why this is necassary (Nat, December 2018)
   
   lapply(1:ncol(spinemat), 
          function(j) { 
-           if (j > 1 && any(spinemat[ , j] == 'xxx')) {
-             spinemat[spinemat[ , j] == 'xxx', j] <<- spinemat[spinemat[ , j] == 'xxx', j - 1] 
+           if (j > 1 && any(spinemat[ , j] == '_P')) {
+             spinemat[spinemat[ , j] == '_P', j] <<- spinemat[spinemat[ , j] == '_P', j - 1] 
            }
            spine <- spinemat[ , j]
            

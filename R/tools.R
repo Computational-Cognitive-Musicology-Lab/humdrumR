@@ -13,6 +13,50 @@ substituteName <- function(expr, subs) {
           
 }
 
+checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
+          if (length(sys.calls()) > 4L) return(args) 
+          
+          argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
+          callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
+          
+          if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
+          if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+          
+          
+          if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
+                    classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
+                    stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+          }
+          
+
+          
+          ill <- !args %in% valid
+          
+          
+          if (any(ill)) {
+                    case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
+                    illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
+                    legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
+                    
+                    
+                    message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
+                    
+                    do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
+          }
+          
+          args[!ill]
+}
+
+checkhumdrumR <- function(x, name) {
+ if (!is.humdrumR((x))) stop("The humdrumR argument in a call to {name} must be a humdrumR object.")         
+}
+
+`xnames<-` <- function(x, values) {
+          if (is.null(dim(x))) names(x) <- values else rownames(x) <- values
+          
+          x
+}
+
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           stuff <- list(...)
           
@@ -44,7 +88,6 @@ compose <- function(...) {
           if (length(.funcs) <= 1L) stop("Can't compose on one or zero functions.")
           
           .funcsArgs <- lapply(.funcs, function(f) fargs(f)[-1])
-
   newfunc <- function() {
         for (i in 1:length(.funcs)) {
           currentFunc <- .funcs[[i]]
@@ -61,9 +104,7 @@ compose <- function(...) {
         x
   }
 
-            
-
-  allArgs <- c(.args, unlist(.funcsArgs))
+  allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
   names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
   allArgs <- allArgs[!duplicated(names(allArgs))]
   
@@ -266,6 +307,8 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
 #' @export
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
+
+
 #' @export
 num2word <- function(num) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -286,7 +329,7 @@ num2word <- function(num) {
   out
 }
 
-padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stri_pad_left, strs, sizes))}
+padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stringi::stri_pad_left, strs, sizes))}
 
 ##Rotate
 

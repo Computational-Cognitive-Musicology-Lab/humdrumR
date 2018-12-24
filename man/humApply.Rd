@@ -15,10 +15,24 @@ explicit \code{\link[base:tilde]{X~formulas}}.}
 humApply(humdrumR, FUN, ..., within = TRUE, doplot = FALSE)
 }
 \arguments{
-\item{humdrumR}{A humdrumR data object.}
+\item{humdrumR}{A \code{\linkS4class{humdrumR}} data object.}
 
 \item{FUN}{A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
 in the \code{humdrumR} object.}
+
+\item{...}{Any arguments which can be fed to 
+\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
+\code{do} expressions, which are replaced by the \code{FUN} argument!).
+However, rather that writinging formula in the format \code{Keyword ~ Expression},
+\code{humApply} arguments should be written as normal \code{R} arguments: 
+\code{Keyword = Expression}.
+Unnamed arguments are ignored.
+#' @param within A logical. If \code{TRUE} (the default), 
+\code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the 
+function---meaning that the output is reconstituted into a new field in the 
+\code{humdrumR} object. If \code{within == FALSE},
+\code{\link[humdrumR:with-in-Humdrum]{withHumdrum}} is used instead,
+which results in the function's output being returned inprocessed.}
 
 \item{doplot}{Boolean. If \code{TRUE} the \code{FUN} argument is treated
 as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},

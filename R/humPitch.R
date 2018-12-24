@@ -1,4 +1,6 @@
-###############tonalInterval S4 class ----
+#######################################-
+##################tonalInterval S4 class ####
+#######################################-
 
 #' Representation of tonal pitch information
 #' 
@@ -112,7 +114,7 @@ setValidity('tonalInterval',
                                 is.numeric(cents) 
             })
 
-######tonalInterval constructors and accessors
+######tonalInterval constructors and accessors ####
 
 #' The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
 #' @name tonalInterval
@@ -137,7 +139,7 @@ getOctave <- function(tint) tint@Octave
 getCent <- function(tint) tint@Cent
 
 
-######tonalInterval vector (and other core) methods
+######tonalInterval vector (and other core) methods ####
 
 
 #' Methods required to make tonalIntervals act like vectors
@@ -149,7 +151,7 @@ getCent <- function(tint) tint@Cent
 #' @name tonalInterval-asvector
 NULL
 
-####Indexing
+####Indexing ####
 
 #' @name tonalInterval-asvector
 #' @export
@@ -173,7 +175,7 @@ setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', va
           })
 
 
-####Shape 
+####Shape  ####
 
 #' @name tonalInterval-asvector
 #' @export
@@ -200,7 +202,7 @@ setMethod('length', signature = c('tonalInterval'),
 setMethod('dim', signature = 'tonalInterval',
           function(x) NULL)
 
-####Is/As
+####Is/As ####
 
 #' @name tonalInterval-asvector
 #' @export
@@ -252,7 +254,7 @@ rep.tonalInterval <- function(x, ...) {
 }
 
 
-######tonalInterval order/relations methods
+######tonalInterval order/relations methods ####
 
 #' @name tonalInterval-asvector
 #' @export
@@ -321,7 +323,7 @@ setMethod('<=', signature = c('tonalInterval', 'tonalInterval'),
           })
 
 
-######tonalinterval formatting methods
+######tonalinterval formatting methods ####
 
 #' @name tonalInterval-asvector
 #' @export
@@ -344,7 +346,7 @@ setMethod('as.character', signature = c('tonalInterval'), function(x) as.interva
 as.double.tonalInterval <- function(x) as.double(as.ratio(x))
 
 
-######tonalInterval arithmetic methods
+######tonalInterval arithmetic methods ####
 
 ####Addition
 
@@ -1011,8 +1013,3 @@ setMethod('as.frequency', signature = c(x = 'character'),
 #' @export
 setMethod('as.ratio', signature = c(x = 'character'),
           as.ratio %.% as.tonalInterval)
-
-
-
-
-

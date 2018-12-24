@@ -249,7 +249,7 @@
 #' of the expression are shorter than the rows in the \link[humtable]{humdrum table},
 #' or an \code{object}, the humdrum table is shrunk to fit them.
 #'     
-#' @param humdrumR A humdrumR data object.
+#' @param humdrumR A \code{\linkS4class{humdrumR}} data object.
 #' @param ...  \code{...} arguments to \code{withinHumdrum} are divided into either named or unnamed arguments.
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
@@ -532,8 +532,8 @@ parseForm <- function(humtab, funcform, active, ngram = 1) {
   # find what fields (if any) are used in formula
   usedInExpr <- unique(fieldsInFormula(humtab, funcform))
   
-  if (len0(usedInExpr)) { stop("The humformula argument in your call to withinHumdrum doesn't reference any fields in your humdrum data.\n A
-                               dd a field somewhere or add a dot (.), which will automatically grab the default, 'active' field.",
+  if (len0(usedInExpr)) { stop("The humformula argument in your call to withinHumdrum doesn't reference any fields in your humdrum data.
+                               Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' field.",
                                 call. = FALSE)}
 
   # if the targets are lists, Map
@@ -912,7 +912,7 @@ splitFormula <- function(form) {
           # and separates each expression, as if the ~ symbol is a boundary.
           if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
           
-          if (!is.formula(form)) form <- eval(form)
+          if (!lazyeval::is_formula(form)) form <- eval(form)
           
           lhs <- Recall(lazyeval::f_lhs(form))
           rhs <- Recall(lazyeval::f_rhs(form))
@@ -1087,11 +1087,11 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
 #' explicit \code{\link[base:tilde]{X~formulas}}.
 #' 
-#' @param humdrumR A humdrumR data object.
+#' @param humdrumR A \code{\linkS4class{humdrumR}} data object.
 #' @param FUN A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
 #' in the \code{humdrumR} object.
 #' @param ... Any arguments which can be fed to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum} as formulae (except for
+#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
 #' \code{do} expressions, which are replaced by the \code{FUN} argument!).
 #' However, rather that writinging formula in the format \code{Keyword ~ Expression},
 #' \code{humApply} arguments should be written as normal \code{R} arguments: 
