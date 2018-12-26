@@ -204,6 +204,9 @@ setMethod('dim', signature = 'tonalInterval',
 
 ####Is/As ####
 
+#' @name tonalInterval
+is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
+
 #' @name tonalInterval-asvector
 #' @export
 as.data.frame.tonalInterval <- function(x, row.names = NULL, optional = FALSE, ...) {
@@ -471,6 +474,14 @@ simplify <- function(tint) {
           simpletint(getFifth(tint))
 }
 
+#' @name tonalInterval
+#' @export
+generalize <- function(tint) {
+          tint %% tint(-11,7)
+}
+
+
+
 ############################################-
 ####### Writing pitch representations ----
 ############################################-
@@ -530,25 +541,25 @@ fifth2simpleInterval <- function(fifth, quality.labels = list(augment = 'A', dim
 
 ##### As semits (i.e., 0, -11)
 
+# setGeneric('as.semits', function(x, ...) standardGeneric('as.semits'))
+
+#' @name humPitch
 #' @export
-setGeneric('as.semits', function(x, ...) standardGeneric('as.semits'))
+as.semits <- function(x, ...) UseMethod('as.semits')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.semits', signature = c(x = 'tonalInterval'),
-          function(x) {
+as.semits.tonalInterval <- function(x) {
                     ((getFifth(x) * 19) + (getOctave(x) * 12)) + (getCent(x) / 100) 
-            })
+}
 
+#' @name humPitch
 #' @export
-setGeneric('as.midi', function(x, ...) standardGeneric('as.midi'))
+as.midi <- function(x, ...) UseMethod('as.midi')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.midi', signature = c(x = 'tonalInterval'),
-          function(x) {
-                    as.semits(x) + 60L
-          })
+as.midi.tonalInterval <- function(x) as.semits(x) + 60L
 
 
 #### As scientific pitch (i.e, C4)
@@ -558,28 +569,27 @@ sciOctave <- function(tint) {
           (as.semits(generic) %/% 12) + 4L
 }
 
+#' @name humPitch
 #' @export
-setGeneric('as.sciPitch', function(x, ...) standardGeneric('as.sciPitch'))
+as.sciPitch <- function(x, ...) UseMethod('as.sciPitch')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.sciPitch', signature = c(x = 'tonalInterval'),
-          function(x) {
+as.sciPitch.tonalInterval <- function(x) {
                     octave <- sciOctave(x)
                     paste0(fifth2tonalname(getFifth(x), kernFlats = FALSE), octave)
-
-            })
+            }
 
 
 #### As kern pitch (i.e., 'aaa', 'CC-')
 
+#' @name humPitch
 #' @export
 setGeneric('as.kernPitch', function(x, ...) standardGeneric('as.kernPitch'))
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.kernPitch', signature = c(x = 'tonalInterval'),
-          function(x) {
+as.kernPitch.tonalInterval <- function(x) {
                     octaves <- sciOctave(x)
                     fifths <- getFifth(x)
                     
@@ -592,18 +602,18 @@ setMethod('as.kernPitch', signature = c(x = 'tonalInterval'),
                     repn <- IfElse(repn >= 0, repn + 1L, -repn)
                     
                     paste0(strrep(letternames, repn), accidentals)
-          })
+          }
 
 
 #### As interval (i.e., "M3", "-P11")
 
+#' @name humPitch
 #' @export
-setGeneric('as.interval', function(x, ..., specific = TRUE, directed = TRUE) standardGeneric('as.interval'))
+as.interval <- function(x, specific = TRUE, directed = TRUE, ...) UseMethod('as.interval')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.interval', signature = c(x = 'tonalInterval'),
-          function(x, specific = TRUE, directed = TRUE, 
+as.interval.tonalInterval <- function(x, specific = TRUE, directed = TRUE, 
                    quality.labels = list(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')) {
                     octave <- sciOctave(x) - 4
                     
@@ -627,11 +637,12 @@ setMethod('as.interval', signature = c(x = 'tonalInterval'),
                     }
                     
                     paste0(direction, qualities, octaveshift)
-          })
+          }
 
 ##### As solfege (i.e., "do", "si")
+#' @name humPitch
 #' @export
-setGeneric('as.solfa', function(x, key = 0L, ...) standardGeneric('as.solfa'))
+as.solfa <- function(x, key = 0L, ...) UseMethod('as.solfa')
 
 solfatab <- rbind(d = c("e", "o", "i"),
                   r = c("a", "e", "i"),
@@ -643,9 +654,9 @@ solfatab <- rbind(d = c("e", "o", "i"),
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.solfa', signature = c(x = 'numeric', key = 'numeric'),
-          function(x, key = 0L) {
-          x <- as.integer(x) - as.integer(key)
+as.solfa.numeric <- function(x, key = 0L) {
+          if (is.tonalInterval(key)) key <- getFifth(key)
+          
                     
           bases <- fifth2solfabase(x)
           qualityN <- fifth2qualityN(x)
@@ -660,63 +671,50 @@ setMethod('as.solfa', signature = c(x = 'numeric', key = 'numeric'),
           
           paste0(bases, tails, accidentals)
           
-          })
+          }
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.solfa', signature = c(x = 'tonalInterval', key = 'numeric'),
-          function(x, key = 0L) {
+as.solfa.tonalInterval <- function(x, key = 0L) {
             fifths <- getFifth(x)        
             as.solfa(fifths, as.integer(key))
-         
-            
-          })
-
-#' @name tonalInterval-write
-#' @export
-setMethod('as.solfa', signature = c(x = 'ANY', key = "tonalInterval"),
-          function(x, key = tint(0, 0)) {
-                    as.solfa(x, getFifth(key))        
-          })
+          }
 
 
 #### As ratio (i.e., "3/2")
 
+#' @name humPitch
 #' @export
-setGeneric('as.ratio', function(x, twelfth = 2^(19/12), ...) standardGeneric('as.ratio'))
+as.ratio <- function(x, twelfth = 2^(19/12), ...) UseMethod('as.ratio')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.ratio', signature = c(x = 'tonalInterval'),
-          function(x, twelfth) {
+as.ratio.tonalInterval <-  function(x, twelfth) {
                     fifth <- getFifth(x)
                     oct   <- getOctave(x)
                     cent  <- getCent(x)
                     
                     MASS::fractions((2 ^ oct) * (twelfth ^ fifth) * 2^(cent / 1200))
-          })
+          }
 
 #### As frequency (i.e., "440")
 
+#' @name humPitch
 #' @export
-setGeneric('as.frequency', function(x, 
-                                    reference.freq = 440L, 
-                                    reference.tint = tint(-4, 3), 
-                                    twelfth = 2^(19/12),
-                                    ...) standardGeneric('as.frequency'))
+as.frequency <- function(x, reference.freq = 440L, reference.tint = tint(-4,3),
+                         twelfth = 2^(19/12), ...) UseMethod('as.frequency')
 
 #' @name tonalInterval-write
 #' @export
-setMethod('as.frequency', signature = c(x = 'tonalInterval'),
-          function(x, reference.freq, reference.tint, twelfth) {
+as.frequency.tonalInterval <- function(x, reference.freq, 
+                                       reference.tint, twelfth) {
             x <- x - reference.tint
             
             ratio <- as.ratio(x, twelfth = twelfth)
             attributes(ratio) <- NULL
             
             reference.freq * ratio
-            
-          })
+          }
 
 
 #####################################-
@@ -785,7 +783,7 @@ read.kernPitch2components <- function(str) {
           accidentals[is.na(accidentals)] <- ''
           
           nletters <- nchar(letters)
-          upper    <- is.upper(letters)
+          upper    <- letters == toupper(letters)
           sciOct <- IfElse(upper, 0 - nletters, nletters - 1) + 4
           
           letters <- toupper(substr(letters, 0, 1))
@@ -974,42 +972,49 @@ as.tonalInterval <- regexDispatch(inPlace = FALSE,
 
 #' @name humPitch
 #' @export
-setMethod('as.semits', signature = c(x = 'character'),
-          as.semits %.% as.tonalInterval)
+as.semits.character <- compose(as.tonalInterval, as.semits)
 
 #' @name humPitch
 #' @export
-setMethod('as.midi', signature = c(x = 'character'),
-          as.midi %.% as.tonalInterval)
+as.midi.character <- as.midi %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-setMethod('as.kernPitch', signature = c(x = 'character'),
-          as.kernPitch %.% as.tonalInterval)
-
+as.kernPitch.character <- as.kernPitch %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-setMethod('as.sciPitch', signature = c(x = 'character'),
-          as.sciPitch %.% as.tonalInterval)
+as.sciPitch.character <- as.sciPitch %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-setMethod('as.interval', signature = c(x = 'character'),
-          as.interval %.% as.tonalInterval)
+as.interval.character <- as.interval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-setMethod('as.solfa', signature = c(x = 'character'),
-          as.solfa %.% as.tonalInterval)
+as.solfa.character <- as.solfa %.% as.tonalInterval
 
 
 #' @name humPitch
 #' @export
-setMethod('as.frequency', signature = c(x = 'character'),
-          as.frequency %.% as.tonalInterval)
+as.frequency.character <- as.frequency %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-setMethod('as.ratio', signature = c(x = 'character'),
-          as.ratio %.% as.tonalInterval)
+as.ratio.character <- as.ratio %.% as.tonalInterval
+
+
+#################################################-
+######Special pitch functions ####
+##################################################-
+
+#' @name humPitch
+#' @export
+transpose <- function(x, by = tint(0,0), generic = NULL) {
+          y <- x + by
+          if (!is.null(generic)) y <- ((y - generic - tint(-1, 1)) %% tint(-11, 7)) + generic + tint(-1, 1)
+          
+          y
+          
+          
+}

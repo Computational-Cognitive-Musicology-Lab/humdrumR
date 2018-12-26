@@ -534,37 +534,6 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 
 
 
-######Special methods ####
-
-
-#' @export
-decompose <- function(rhythmInterval, into = rhythmInterval(c(1, 2, 4, 8, 16, 32))) {
-          into <- sort(into, decreasing = TRUE)
-          
-          lapply(as.list(rhythmInterval), 
-                 function(rs) {
-                           divs <- rs %/% into
-                           parts <- into * divs
-                           
-                           for (i in 2:length(parts)) {
-                              parts[i] <- parts[i] - sum(parts[1:(i - 1)])       
-                           }
-                           parts
-                    }) -> decompositions
-          
-          lapply(1:length(into),
-                 function(j) {
-                    do.call('c', lapply(decompositions, '[', j))
-                 }) -> decompositions
-          
-          
-          
-          decompositions <- do.call('data.frame', decompositions)
-          colnames(decompositions) <- as.character(into)
-          rownames(decompositions) <- as.character(rhythmInterval)
-          decompositions
-}
-
 ############################################-
 ####### Writing rhythm representations ----
 ############################################-
@@ -627,4 +596,35 @@ setMethod('as.rhythmInterval', signature = c(x = 'character'),
           })
 
 
+#################################################
+######Special rhythm functions ####
+##################################################
+
+#' @export
+decompose <- function(rhythmInterval, into = rhythmInterval(c(1, 2, 4, 8, 16, 32))) {
+          into <- sort(into, decreasing = TRUE)
+          
+          lapply(as.list(rhythmInterval), 
+                 function(rs) {
+                           divs <- rs %/% into
+                           parts <- into * divs
+                           
+                           for (i in 2:length(parts)) {
+                                     parts[i] <- parts[i] - sum(parts[1:(i - 1)])       
+                           }
+                           parts
+                 }) -> decompositions
+          
+          lapply(1:length(into),
+                 function(j) {
+                           do.call('c', lapply(decompositions, '[', j))
+                 }) -> decompositions
+          
+          
+          
+          decompositions <- do.call('data.frame', decompositions)
+          colnames(decompositions) <- as.character(into)
+          rownames(decompositions) <- as.character(rhythmInterval)
+          decompositions
+}
 

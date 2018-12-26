@@ -8,9 +8,11 @@
 \alias{getFifth}
 \alias{getOctave}
 \alias{getCent}
+\alias{is.tonalInterval}
 \alias{as.double.tonalInterval}
 \alias{invert}
 \alias{simplify}
+\alias{generalize}
 \title{The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.}
 \usage{
 tint(o, f, c = numeric(length(o)))
@@ -22,6 +24,8 @@ getFifth(tint)
 getOctave(tint)
 
 getCent(tint)
+
+is.tonalInterval(x)
 
 \S4method{==}{tonalInterval,tonalInterval}(e1, e2)
 
@@ -62,6 +66,8 @@ getCent(tint)
 invert(tint, around = tint(0, 0))
 
 simplify(tint)
+
+generalize(tint)
 }
 \description{
 The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.

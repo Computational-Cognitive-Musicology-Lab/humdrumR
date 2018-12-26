@@ -46,6 +46,8 @@ do2RE <- function(.func, regex) {
 }
 
 
+#' @export
+setClass('regexDispatcher', contains = 'function')
 
 #' @name regexDispatch
 #' @export
@@ -87,6 +89,6 @@ regexDispatch <- function(..., doRE = TRUE) {
           
           formals(genericFunc) <- c(alist(str = ), allArgs)
           
-          genericFunc
+          new('regexDispatcher', genericFunc)
 }
 

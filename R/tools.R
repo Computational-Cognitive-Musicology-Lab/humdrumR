@@ -79,40 +79,69 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
 }
 
 
+#' @export
+setGeneric('compose', function(f1, f2, ...) standardGeneric('compose'))
 
 #' @export
-compose <- function(...) {
-          .args <- list(...)
-          .funcs <- Filter(is.function, .args)
-          .args  <- Filter(Negate(is.function), .args)
-          if (length(.funcs) <= 1L) stop("Can't compose on one or zero functions.")
-          
-          .funcsArgs <- lapply(.funcs, function(f) fargs(f)[-1])
-  newfunc <- function() {
-        for (i in 1:length(.funcs)) {
-          currentFunc <- .funcs[[i]]
-          currentArgs <- .funcsArgs[[i]]
-          # ...
-          elips <- names(currentArgs) == '...'
-          not_elips <- names(currentArgs)[!elips]
-          currentArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
-          currentArgs <- c(list(x), currentArgs, if (any(elips)) list(...) else list())
-          
-          x <- do.call('currentFunc', currentArgs)
-        }
-            
-        x
-  }
+setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),  
+          function(f1, f2, ...) {
+                    .args <- c(f1, f2, list(...))
+                    .funcs <- Filter(is.function, .args)
+                    .args  <- Filter(Negate(is.function), .args)
+                    if (length(.funcs) <= 1L) stop("Can't compose on one or zero functions.")
+                    
+                    .funcsArgs <- lapply(.funcs, function(f) fargs(f)[-1])
+                    newfunc <- function() {
+                              for (i in 1:length(.funcs)) {
+                                        currentFunc <- .funcs[[i]]
+                                        currentArgs <- .funcsArgs[[i]]
+                                        # ...
+                                        elips <- names(currentArgs) == '...'
+                                        not_elips <- names(currentArgs)[!elips]
+                                        currentArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
+                                        currentArgs <- c(list(x), currentArgs, if (any(elips)) list(...) else list())
+                                        
+                                        x <- do.call('currentFunc', currentArgs)
+                              }
+                              
+                              x
+                    }
+                    
+                    allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
+                    # names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
+                    allArgs <- allArgs[!duplicated(names(allArgs))]
+                    
+                    formals(newfunc) <- c(alist(x = ), allArgs)
+                    
+                    newfunc
+          }
+)
 
-  allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
-  # names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
-  allArgs <- allArgs[!duplicated(names(allArgs))]
-  
-  formals(newfunc) <- c(alist(x = ), allArgs)
-  
-  newfunc
-  }
+#' @export
+setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
+         function(f1, f2) {
+                  f1Env <- as.list(environment(f1))
+                  
+                  newf1Env <- new.env()
+                  
+                   
+                  newfuncs <- lapply(f1Env$reFuncs, compose, f2 = f2)
+                  
+                  f1Env$reFuncs <- newfuncs
+                  # f1Env$reFuncsArgs <- lapply(lapply(newfuncs, fargs), '[', -1)
+                  
+                  list2env(f1Env, envir = newf1Env)
+                  environment(f1) <- newf1Env
+                  
+                  # names(formals(f1))[1] <- names(formals(f2))[1]
+                  
+                  f1
+                  
+                    
+                            
+         })
 
+  
 is.whole <- function(x) x %% 1 == 0
 
 #' @export
