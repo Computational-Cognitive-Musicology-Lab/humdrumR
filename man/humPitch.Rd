@@ -21,8 +21,9 @@ as.tonalInterval(str, inPlace = FALSE)
 
 \S4method{as.solfa}{character,ANY}(x, inPlace = FALSE, key = 0L, ...)
 
-\S4method{as.frequency}{character}(x, inPlace = FALSE, freq = 440L,
-  tint = tint(-4, 3), twelfth = 2^(19/12), ...)
+\S4method{as.frequency}{character}(x, inPlace = FALSE,
+  reference.freq = 440L, reference.tint = tint(-4, 3),
+  twelfth = 2^(19/12), ...)
 
 \S4method{as.ratio}{character}(x, inPlace = FALSE, twelfth = 2^(19/12),
   ...)

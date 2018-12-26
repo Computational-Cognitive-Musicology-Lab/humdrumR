@@ -46,7 +46,7 @@ NULL
 `%hum>%` <- function(humdrumR, formula) {
           if (class(humdrumR) != 'humdrumR') stop("%hum>% pipe operator can only be called with humdrumR data on left side." )
           
-          if (is.formula(formula) && is.null(lazyeval::f_lhs(formula))) {
+          if (lazyeval::is_formula(formula) && is.null(lazyeval::f_lhs(formula))) {
            splitpipe <- splitPipe(formula)
            formula <- splitpipe$Current
            rest    <- splitpipe$Rest
@@ -72,7 +72,7 @@ NULL
           if (class(humdrumR) != 'humdrumR') stop("%hum<% pipe operator can only be called with humdrumR data on left side. \n
                                                   You will get this error if you put %hum<% anywhere but the last step of a humdrum pipe." )
           
-          if (is.formula(formula) && is.null(lazyeval::f_lhs(formula))) {
+          if (lazyeval::is_formula(formula) && is.null(lazyeval::f_lhs(formula))) {
            splitpipe <- splitPipe(formula)
            formula <- splitpipe$Current
            rest    <- splitpipe$Rest

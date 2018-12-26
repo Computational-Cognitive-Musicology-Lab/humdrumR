@@ -105,7 +105,7 @@ compose <- function(...) {
   }
 
   allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
-  names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
+  # names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
   allArgs <- allArgs[!duplicated(names(allArgs))]
   
   formals(newfunc) <- c(alist(x = ), allArgs)
@@ -125,6 +125,7 @@ allsame <- function(x) length(unique(x)) == 1L
   object
 }
 
+# removes the first class from an object
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
 
@@ -308,6 +309,13 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
 
+num2print <- function(n, label = NULL) {
+          n_str <- ifelse(n <= 100L, num2word(n), num2str(n))
+          
+          if (!is.null(label)) n_str <- paste0(n_str, ' ', label, ifelse(n > 1L, 's', ''))
+          
+          n_str
+}
 
 #' @export
 num2word <- function(num) {
