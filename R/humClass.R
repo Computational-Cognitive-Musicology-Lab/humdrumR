@@ -360,7 +360,7 @@ spliceHumtab <- function(humtab) {
 #' Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
 #' more humdrum files.
 #' In the documentation we refer to the collection of files within a \code{\linkS4class{humdrumR}} object
-#' as a "\strong{corpus}, and each file as a "\strong{piece}."
+#' as a "\strong{corpus}," and each file as a "\strong{piece}."
 #' However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
 #' files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 #' to them as "pieces."
@@ -1309,6 +1309,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
                       values <- out
             }   
             if (is.object(values)) values <- as.character(values)
+            
   }
   
   values
@@ -1511,6 +1512,29 @@ getFields <- function(humdrumR, fields = NULL, dataTypes = 'D') {
           
 }
 
+fields.as.character <- function(humdrumR, useToken = TRUE) {
+# This takes the active humdrumR fields 
+          # and coerceds them to characters, filling in ! * = . as appropriate.
+ humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+ 
+ nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
+ 
+ active <- activeFields(humdrumR)
+ humtab <- humtab[ , 
+                   Map(function(field, act) {
+                             if (!act) return(field)
+                             field <- as.character(field)
+                             na <- is.na(field)
+                             field[na] <- if (useToken) Token[na] else nulltypes[Type[na]]
+                             field
+                   }, 
+                   .SD, colnames(humtab) %in% active)]
+         
+ 
+ putHumtab(humdrumR, drop = FALSE) <- humtab
+ humdrumR
+}
+
 
 `addFields<-` <- function(object, value) {
  ## This function simply adds field names to
@@ -1530,7 +1554,7 @@ getFields <- function(humdrumR, fields = NULL, dataTypes = 'D') {
   object
 }
 
-`padGLIMfields<-` <- function(object, copyField = NULL, value)  {
+`padGLIMfields<-` <- function(object, value)  {
   # This function is used be indexGLIM
   # It is used to add empty fields to a humtable.
   # withinHumdrum (or humApply) may add new fields to the 'D' (data)
@@ -1540,10 +1564,10 @@ getFields <- function(humdrumR, fields = NULL, dataTypes = 'D') {
   # The argument copyField can be the name of another field, which is 
   # copied instead of null tokens.
   humtab <- object
-  nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
-  for (name in value) {
-    newfield <- if (is.null(copyField)) nulltypes[humtab$Type] else humtab[[copyField]]
-    humtab[[name]] <- newfield
+  # nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
+  for (name in names(value)) {
+    # newfield <- if (value[name] == 'character') nulltypes[humtab$Type] else as(NA, value[name])
+    humtab[[name]] <- as(NA, value[name])
   }
   
   humtab
@@ -1848,10 +1872,11 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
           
   GLIMDdP <- getHumtab(humdrumR, dataTypes = dataTypes)
   D     <- getD(humdrumR)
-  
   # first add missing fields (columns)
   missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
-  if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfields
+  missingfieldsTypes <- sapply(D[ , missingfields, with = FALSE], class) 
+  
+  if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
   
   GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
   
@@ -1985,6 +2010,9 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
     cat("\nEmpty humdrumR object\n")
     return(invisible(NULL))
   }
+  
+  humdrumR <- indexGLIM(humdrumR)
+  humdrumR <- fields.as.character(humdrumR)
   
   Nfiles <- length(humdrumR)          
   if (firstAndLast) humdrumR <- humdrumR[c(1, length(humdrumR))]

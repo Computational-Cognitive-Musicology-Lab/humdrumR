@@ -58,7 +58,7 @@ This \code{S4} class is the basic unit of the
 Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
 more humdrum files.
 In the documentation we refer to the collection of files within a \code{\linkS4class{humdrumR}} object
-as a "\strong{corpus}, and each file as a "\strong{piece}."
+as a "\strong{corpus}," and each file as a "\strong{piece}."
 However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
 files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 to them as "pieces."

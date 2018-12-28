@@ -343,9 +343,10 @@ withinHumdrum <- function(humdrumR,  ...) {
                               act <- ifelsecalls(partitions['where'], c(lazyeval::f_rhs(humdrumR@Active), lapply(newfields, as.symbol)))
                               putActive(humdrumR, lazyeval::f_new(act))
                     } else {
-                              humdrumR <- setActiveString(humdrumR, newfields) 
+                              humdrumR <- setActiveFields(humdrumR, newfields) 
                     }
           }
+          humdrumR <- indexGLIM(humdrumR)
           
           if (length(doexpressions) > 1) {
                     do.call('Recall', c(humdrumR,  
@@ -499,7 +500,6 @@ humtableApplier <- function(funcform, captureOutput = TRUE, reHumtab = TRUE) {
                     # output <- eval(funccall, envir = humtab)
                     output <- lazyeval::f_eval_rhs(funcform, data = humtab)
                     if (!captureOutput) return(humtab)
-                    
                     if (reHumtab) {
                               pipeIn(humtab) <- output
                               humtab
@@ -951,6 +951,7 @@ splitFormula <- function(form) {
           #' but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
           
           humtab <- object # R requires the names object and value for x<- functions
+          
           curpipen <- curPipeN(humtab) 
           
           lenvalue <- length(value)
