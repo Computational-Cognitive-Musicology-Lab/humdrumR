@@ -694,7 +694,7 @@ xifyForm <- function(expression, usedInExpr) {
           #' Map, lapply, ngramApply, etc.
           #' This is used by listifyForm and ngramifyForm.
           fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
-          names(fargs) <- '.' %str+% tolower(usedInExpr)
+          names(fargs) <- paste0('.', tolower(usedInExpr))
           
           expression <- substituteName(expression,
                                        setNames(lapply(names(fargs), as.symbol), usedInExpr))

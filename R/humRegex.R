@@ -45,50 +45,98 @@ do2RE <- function(.func, regex) {
           newfunc
 }
 
+#' @name regexDispatch
+#' @export
+applyRE <- function(x, regex, .func, inPlace = TRUE, ...) {
+          if (!is.character(x)) x <- as.character(x)
+          regex <- getRE(regex)
+          matches <- stringi::stri_extract_first(str = x, regex = regex)
+          result <- do.call(.func, c(list(matches), list(...)))
+          
+          if (inPlace) {
+                    result <- as.character(result)         
+                    result <- stringi::stri_replace_first(str = x, regex = regex, replacement = result)
+          }
+          result
+}
 
+#' @name regexDispatch
 #' @export
 setClass('regexDispatcher', contains = 'function')
 
 #' @name regexDispatch
 #' @export
-regexDispatch <- function(..., doRE = TRUE) {
-          .args <- list(...)
-          .funcs <- Filter(is.function, .args)
-          .args  <- Filter(Negate(is.function), .args)
-          if (length(.funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
+regexDispatch <- function(...) {
+          funcs <- Filter(is.function, list(...))
+          if (length(funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
           
-          regexes <- names(.funcs)
-          regexes <- getRE(regexes)
-          if (doRE) reFuncs <- Map(do2RE, .funcs, regexes)
-          reFuncsArgs <- lapply(reFuncs, function(rf) fargs(rf)[-1])
-          
+          regexes <- getRE(names(funcs))
+          funcsArgs <- lapply(funcs, function(rf) fargs(rf)[-1])
           genericFunc <- function() {
-                    Nmatches <- sapply(regexes,  
-                                       function(re) sum(stringi::stri_detect(str, regex = re)))
+                    if (!is.character(str)) return(str)
+                    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex)))
                     if (any(Nmatches > 0)) {
+                              #which function to dispatch
                               Ncharmatches <- sapply(regexes[Nmatches > 0],
-                                                     function(re) sum(nchar(stringi::stri_extract_first(str, regex = re))))
+                                                     function(re) {
+                                                               nchars <- nchar(stringi::stri_extract_first_regex(str, re))
+                                                               nchars[is.na(nchars)] <- 0L
+                                                               sum(nchars)
+                                                     })
                               dispatch <- which(Nmatches > 0)[which.max(Ncharmatches)]
-                              dispatchFunc <- reFuncs[[dispatch]]
-                              dispatchArgs <- reFuncsArgs[[dispatch]]
-                              # ...
+                              dispatchFunc <- funcs[[dispatch]]
+                              dispatchRE   <- regexes[[dispatch]]
+                              dispatchArgs <- funcsArgs[[dispatch]]
+                              # ... args
                               elips <- names(dispatchArgs) == '...'
                               not_elips <- names(dispatchArgs)[!elips]
+                              #
                               dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
-                              dispatchArgs <- c(list(str), dispatchArgs, if (any(elips)) list(...) else list())
-                              
-                              do.call('dispatchFunc', dispatchArgs)
+                              dispatchArgs <- c(x = list(str), regex = dispatchRE, .func = dispatchFunc, inPlace = inPlace,
+                                                dispatchArgs, if (any(elips)) list(...) else list())
+                              do.call('applyRE', dispatchArgs)
                     } else {
                               str
                     }
           }
           
-          allArgs <- c(.args, unlist(reFuncsArgs))
-          names(allArgs) <- gsub('^.*\\.', '', names(allArgs))
-          allArgs <- allArgs[!duplicated(names(allArgs))]
-          
-          formals(genericFunc) <- c(alist(str = ), allArgs)
+          # Assembel the new function's arguments
+          genericArgs <- do.call('c', c(funcsArgs, use.names = FALSE))
+          genericArgs <- genericArgs[!duplicated(names(genericArgs))]
+          formals(genericFunc) <- c(alist(str = , inPlace = FALSE), genericArgs)
           
           new('regexDispatcher', genericFunc)
 }
 
+
+#' @export
+setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
+          function(f1, f2) {
+                    
+                    ## get existing closure environment
+                    f1Env <- as.list(environment(f1))
+                    
+                    ## get old functions and make new functions
+                    oldfuncs <- f1Env$funcs
+                    newfuncs <- lapply(oldfuncs, compose, f2 = f2)
+                    
+                    f1Env$funcs <- newfuncs
+                    
+                    # get old formal arguments, and make new ones,
+                    # both for the top level function ,and the closure functions
+                    oldArgs   <- fargs(f1)
+                    funcsArgs <- lapply(newfuncs, function(rf) fargs(rf)[-1])
+                    
+                    f1Env$funcsArgs <- funcsArgs
+                    
+                    newArgs <- c(oldArgs, do.call('c', c(funcsArgs, use.names = FALSE)))
+                    newArgs <- newArgs[!duplicated(names(newArgs))]
+                    formals(f1) <- as.pairlist(newArgs)
+                    
+                    ## create new closure enviroment
+                    newf1Env <- new.env()
+                    list2env(f1Env, envir = newf1Env)
+                    environment(f1) <- newf1Env
+                    
+                    f1
+          })

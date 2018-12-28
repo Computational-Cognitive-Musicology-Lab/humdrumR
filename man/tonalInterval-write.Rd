@@ -19,7 +19,7 @@
 
 \method{as.sciPitch}{tonalInterval}(x)
 
-as.kernPitch.tonalInterval(x)
+\method{as.kernPitch}{tonalInterval}(x)
 
 \method{as.interval}{tonalInterval}(x, specific = TRUE,
   directed = TRUE, quality.labels = list(augment = "A", diminish = "d",
@@ -29,10 +29,10 @@ as.kernPitch.tonalInterval(x)
 
 \method{as.solfa}{tonalInterval}(x, key = 0L)
 
-\method{as.ratio}{tonalInterval}(x, twelfth)
+\method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12))
 
-\method{as.frequency}{tonalInterval}(x, reference.freq, reference.tint,
-  twelfth)
+\method{as.frequency}{tonalInterval}(x, reference.freq = 440L,
+  reference.tint = tint(-4, 3), twelfth = 2^(19/12))
 }
 \description{
 These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 

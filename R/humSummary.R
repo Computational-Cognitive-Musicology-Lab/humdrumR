@@ -118,7 +118,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
 }
 
 #' @name humCensus
-#' @usage 
+#' @usage census(humdata)[i]
 #' @export
 `[.humCensus` <- function(censusTable, i, drop = FALSE) {
   if (missing(i)) return(if (drop) popclass(censusTable) else censusTable)
@@ -146,7 +146,6 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
 
   
 #' @name humCensus
-#' @usage
 #' @export
 print.humCensus <- function(censusTable, showall = TRUE) {
    
@@ -287,13 +286,12 @@ print.humCensus <- function(censusTable, showall = TRUE) {
 #' \code{\link[data.table]{data.table}} is returned.
 #'       
 #' @name humReference
-#' @usage
 #' @export
 reference <- function(x) UseMethod('reference')
 
 
 #' @name humReference
-#' @usage
+#' @usage reference('OTL')
 #' @export
 reference.character <- function(str) {
   str <- gsub('^!*', '', str)
@@ -337,7 +335,7 @@ reference.character <- function(str) {
 }
 
 #' @name humReference
-#' @usage 
+#' @usage reference(humdata)
 #' @export
 reference.humdrumR <- function(humdrumR) {
   # This funtion simply extracts the refernence columns from a humdrumR object
@@ -358,7 +356,6 @@ reference.humdrumR <- function(humdrumR) {
   
 
 #' @name humReference
-#' @usage
 #' @export
 `[.humReference` <- function(refTable, i, j, drop = FALSE) {
   if (missing(i) && missing(j)) return(if (drop) popclass(refTable) else refTable)
@@ -396,7 +393,7 @@ reference.humdrumR <- function(humdrumR) {
 
 
 #' @name humReference
-#' @usage
+#' @usage NULL
 #' @export
 print.humReference <- function(refTable, showall = TRUE) {
           corpusName <- attr(refTable, 'corpusName')

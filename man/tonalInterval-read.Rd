@@ -18,7 +18,7 @@ read.sciPitch2tonalInterval(str)
 
 read.interval2tonalInterval(str)
 
-read.solfa2tonalInterval(str)
+read.solfa2tonalInterval(str, key = 0L)
 
 read.ratio2tonalInterval(str, twelfth = 3)
 }

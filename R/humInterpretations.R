@@ -20,22 +20,22 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive'), strict = FAL
  known <- knownInterpretations[knownInterpretations$Type %in% types, ]          
  if (is.null(pattern)) return(known$Name)
  
- pattern <- tolower(pattern)
- hits <- sapply(pattern,
+ interpPattern <- tolower(pattern)
+ hits <- sapply(interpPattern,
                 function(pat) {
                   hits <- which(pat == tolower(known$Name))
-                  if (length(hits) == 0) hits <- pmatch(pattern, tolower(known$Name))
+                  if (length(hits) == 0) hits <- pmatch(interpPattern, tolower(known$Name))
                   hits
                 })
-
  res <- known$RE[hits]
+ 
  
  if (strict) {
            ressplit <- strsplit(unlist(res), split = '\\|')
            
            res <- sapply(ressplit, function(re) paste(paste0('^(', re, ')$'), collapse = '|'))
  }
- names(res) <- pattern
+ names(res) <- interpPattern
  
  res[is.na(res)] <- pattern[is.na(res)]
  res

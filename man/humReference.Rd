@@ -11,13 +11,11 @@
 \usage{
 reference(x)
 
-\method{reference}{character}(str)
+reference('OTL')
 
-\method{reference}{humdrumR}(humdrumR)
+reference(humdata)
 
 \method{[}{humReference}(refTable, i, j, drop = FALSE)
-
-\method{print}{humReference}(refTable, showall = TRUE)
 }
 \description{
 \code{reference} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}

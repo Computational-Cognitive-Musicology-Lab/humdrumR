@@ -1,4 +1,18 @@
-#
+Repeat <- function(x, ..., margin = 2) {
+  if (is.null(dim(x))) {
+    out <- do.call('rep', list(x = x, ...))
+  } else {
+    out <- do.call('apply', list(X = x, MARGIN = margin, FUN = rep, ...))
+    if (margin == 1) out <- t(out)
+
+    if (is.data.frame(x)) out <-  as.data.frame(out, stringsAsFactors = FALSE)
+
+    if (!is.null(rownames(out)))  rownames(out) <- make.unique(rownames(out))
+    if (!is.null(colnames(out)))  colnames(out) <- make.unique(colnames(out))
+  }
+  out
+}
+
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 substituteName <- function(expr, subs) {
@@ -106,40 +120,16 @@ setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),
                               
                               x
                     }
-                    
                     allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
                     # names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
                     allArgs <- allArgs[!duplicated(names(allArgs))]
-                    
                     formals(newfunc) <- c(alist(x = ), allArgs)
                     
                     newfunc
           }
 )
 
-#' @export
-setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
-         function(f1, f2) {
-                  f1Env <- as.list(environment(f1))
-                  
-                  newf1Env <- new.env()
-                  
-                   
-                  newfuncs <- lapply(f1Env$reFuncs, compose, f2 = f2)
-                  
-                  f1Env$reFuncs <- newfuncs
-                  # f1Env$reFuncsArgs <- lapply(lapply(newfuncs, fargs), '[', -1)
-                  
-                  list2env(f1Env, envir = newf1Env)
-                  environment(f1) <- newf1Env
-                  
-                  # names(formals(f1))[1] <- names(formals(f2))[1]
-                  
-                  f1
-                  
-                    
-                            
-         })
+
 
   
 is.whole <- function(x) x %% 1 == 0

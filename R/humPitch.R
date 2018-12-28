@@ -585,11 +585,12 @@ as.sciPitch.tonalInterval <- function(x) {
 
 #' @name humPitch
 #' @export
-setGeneric('as.kernPitch', function(x, ...) standardGeneric('as.kernPitch'))
+as.kernPitch <- function(x, ...) UseMethod('as.kernPitch')
 
 #' @name tonalInterval-write
 #' @export
 as.kernPitch.tonalInterval <- function(x) {
+          
                     octaves <- sciOctave(x)
                     fifths <- getFifth(x)
                     
@@ -655,8 +656,11 @@ solfatab <- rbind(d = c("e", "o", "i"),
 #' @name tonalInterval-write
 #' @export
 as.solfa.numeric <- function(x, key = 0L) {
-          if (is.tonalInterval(key)) key <- getFifth(key)
+          # This is the function that does the real heavy lifting of the
+          # as.solfa function
+          if (!is.numeric(key)) key <- getFifth(as.tonalInterval(key))
           
+          x <- x - key
                     
           bases <- fifth2solfabase(x)
           qualityN <- fifth2qualityN(x)
@@ -677,7 +681,7 @@ as.solfa.numeric <- function(x, key = 0L) {
 #' @export
 as.solfa.tonalInterval <- function(x, key = 0L) {
             fifths <- getFifth(x)        
-            as.solfa(fifths, as.integer(key))
+            as.solfa.numeric(fifths, key)
           }
 
 
@@ -689,7 +693,7 @@ as.ratio <- function(x, twelfth = 2^(19/12), ...) UseMethod('as.ratio')
 
 #' @name tonalInterval-write
 #' @export
-as.ratio.tonalInterval <-  function(x, twelfth) {
+as.ratio.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
                     fifth <- getFifth(x)
                     oct   <- getOctave(x)
                     cent  <- getCent(x)
@@ -706,8 +710,8 @@ as.frequency <- function(x, reference.freq = 440L, reference.tint = tint(-4,3),
 
 #' @name tonalInterval-write
 #' @export
-as.frequency.tonalInterval <- function(x, reference.freq, 
-                                       reference.tint, twelfth) {
+as.frequency.tonalInterval <- function(x, reference.freq = 440L, 
+                                       reference.tint = tint(-4, 3), twelfth = 2^(19/12)) {
             x <- x - reference.tint
             
             ratio <- as.ratio(x, twelfth = twelfth)
@@ -876,8 +880,8 @@ read.scaleDegree2tonalInterval <- read.interval2tonalInterval
 
 #' @name tonalInterval-read
 #' @export
-read.solfa2tonalInterval <- function(str) {
-  fifths <- solfa2fifth(str)
+read.solfa2tonalInterval <- function(str, key = 0L) {
+  fifths <- solfa2fifth(str) + key
   simpletint(fifths)
   
 }
@@ -963,8 +967,7 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 #' 
 #' @name humPitch
 #' @export 
-as.tonalInterval <- regexDispatch(inPlace = FALSE,
-                                   'Kern Pitch' = read.kernPitch2tonalInterval,
+as.tonalInterval <- regexDispatch( 'Kern Pitch' = read.kernPitch2tonalInterval,
                                    'Interval'  = read.interval2tonalInterval,
                                    'Scientific Pitch' = read.sciPitch2tonalInterval,
                                    'Solfege' = read.solfa2tonalInterval)
@@ -972,36 +975,36 @@ as.tonalInterval <- regexDispatch(inPlace = FALSE,
 
 #' @name humPitch
 #' @export
-as.semits.character <- compose(as.tonalInterval, as.semits)
+as.semits.character <- as.semits.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.midi.character <- as.midi %.% as.tonalInterval
+as.midi.character <- as.midi.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.kernPitch.character <- as.kernPitch %.% as.tonalInterval
+as.kernPitch.character <- as.kernPitch.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.sciPitch.character <- as.sciPitch %.% as.tonalInterval
+as.sciPitch.character <- as.sciPitch.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.interval.character <- as.interval %.% as.tonalInterval
+as.interval.character <- as.interval.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.solfa.character <- as.solfa %.% as.tonalInterval
+as.solfa.character <- as.solfa.tonalInterval %.% as.tonalInterval
 
 
 #' @name humPitch
 #' @export
-as.frequency.character <- as.frequency %.% as.tonalInterval
+as.frequency.character <- as.frequency.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.ratio.character <- as.ratio %.% as.tonalInterval
+as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
 
 
 #################################################-

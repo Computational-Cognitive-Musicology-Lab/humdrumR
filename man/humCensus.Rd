@@ -9,7 +9,7 @@
 \usage{
 census(humdrumR, dataTypes = "GLIMDd")
 
-\method{[}{humCensus}(censusTable, i, drop = FALSE)
+census(humdata)[i]
 
 \method{print}{humCensus}(censusTable, showall = TRUE)
 }
