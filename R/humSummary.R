@@ -102,7 +102,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   ##ADD MULTISTOPS, MOVE BARS TO sections FUNCTION
   
   censusTable <- humtab[ , .(NFile            = unique(NFile),
-                      Records          = length(unique(Record)),
+                      Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
                       Tokens           = nrow(.SD),
                       `(unique)`       = list(unique(Token)),
                       Characters       = sum(nchar(Token)),
@@ -162,7 +162,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   }
   
   ##
-  files <- paste0("[", num2str(censusTable$NFile, pad = TRUE), "] ", censusTable$File)
+  files <- paste0(censusTable$File, " [", num2str(censusTable$NFile, pad = TRUE), "]")
   censusTable[ , c('NFile', 'File') := NULL] # in place!
   
   #
@@ -408,7 +408,7 @@ print.humReference <- function(refTable, showall = TRUE) {
           }
           
           ##
-          files <- paste0("[", num2str(refTable$NFile, pad = TRUE), "] ", refTable$File)
+          files <- paste0(refTable$File, " [", num2str(refTable$NFile, pad = TRUE), "]")
           refTable[ , c('NFile', 'File') := NULL] # in place!
           
           ######### -
@@ -423,10 +423,19 @@ print.humReference <- function(refTable, showall = TRUE) {
           if (nrow(refTable) == 1L) {
                     cat(corpusMessage)
                     cat(files, '\n', sep = '')
-                    colNames <- colnames(refTable)
-                    colNames <- padder(colNames, max(nchar(colNames)) + 2L)
+                   
+                    refTable <- refTable[ , lapply(.SD, function(col) {
+                              if (is.list(col)) { col <- do.call('paste', 
+                                                                 c(col, 
+                                                          collapse = paste0('\n\t', 
+                                                                            pander::repChar(' ', max(nchar(colnames(refTable)))),
+                                                                            '   ')))
+                              }
+                              if (is.null(col) || all(is.na(col))) NULL else col
+                    })]
                     
-                    colNames <- rep(colNames, lengths(refTable)) #some codes may appear more than once
+                    colNames <- colnames(refTable)
+                    colNames <- padder(colNames, max(nchar(colNames)) + 1L)
                     
                     cat(paste(paste0('\t', colNames, ': ', unlist(refTable))), sep = '\n')
                     return(invisible(NULL))
@@ -440,7 +449,7 @@ print.humReference <- function(refTable, showall = TRUE) {
                                              col
                                    })]
        
-          colNames <- paste0("!!!", colnames(codeCounts))
+          colNames <- colnames(codeCounts)
           
           ###Totals
           Totals <- list(`Any:` = sapply(codeCounts, function(col) num2str(sum(!is.na(col) & col > 0L))),
@@ -449,9 +458,9 @@ print.humReference <- function(refTable, showall = TRUE) {
                          
           ### Column widths
           lenCol <- do.call('pmax',
-                            list(nchar(colNames),
-                                 sapply(codeCounts, max %.% nchar),
-                                 sapply(Totals,max %.% nchar))) + 2L
+                            c(nchar(colNames),
+                              sapply(codeCounts, max %.% nchar),
+                              lapply(Totals, nchar))) + 1L # plus one to add space between lines
           
           # append filename, plus totals categories
           colNames   <- c("", colNames) # don't print "File" as a header
@@ -460,7 +469,7 @@ print.humReference <- function(refTable, showall = TRUE) {
           ## If there is only one column
           oneColumn <- ncol(codeCounts) == 1L
           if (oneColumn) {
-                    lenCol <- c(lenCol[1] + 2L, 0L)
+                    lenCol <- c(lenCol[1] + 1L, 0L)
                     files <- paste0(files, '  ')
                     names(Totals) <- paste0(names(Totals), '  ')
           }

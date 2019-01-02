@@ -878,7 +878,7 @@ isActiveVector <- function(humdrumR) {
 nrecords <- function(humdrumR, dataTypes = 'D') {
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
-          n <- humtab[ , .(NR = length(unique(Record))), by = File] 
+          n <- humtab[Stop == 1L | is.na(Stop) , .(NR = length(unique(Record))), by = File] 
           
           sum(n$NR)
 }
@@ -1116,7 +1116,7 @@ foldHumdrum <- function(humdrumR, byfields,
           newhumtab[ , eval(fieldnames) := NULL] # inplace
           colnames(newhumtab) <- gsub('_xxxfoldedxxx$', '', colnames(newhumtab))
           
-          if (!padPaths) newhumtab <- rbindlist(list(newhumtab, getHumtab(humdrumR, 'P')), use.names = TRUE)
+          if (anyPaths(humdrumR) && !padPaths) newhumtab <- rbindlist(list(newhumtab, getHumtab(humdrumR, 'P')), use.names = TRUE)
           putHumtab(humdrumR, drop = FALSE) <- newhumtab
           humdrumR
 }
@@ -1885,7 +1885,8 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
   
   # then, do indexing by piece:
   # (GLIMd and D records are combined into one table, then split by piece)
-  GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE)[ , indexGLIMd_piece(.SD), by = NFile, .SDcols = colnames(D)]
+  GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
+  GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = NFile, .SDcols = colnames(D)[colnames(D) != 'NFile']]
   
   # resplit and put back in to humdrumR object
   putHumtab(humdrumR, drop = TRUE) <- GLIMDdP
@@ -1893,7 +1894,7 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
 }
 
 
-indexGLIMd_piece <- function(humtab) {
+indexGLIM_piece <- function(humtab) {
   ###called by indexGLIM on each individual piece
   D <- humtab[Type == 'D']
   # remove missing spines
@@ -2003,7 +2004,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 
 #' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
-                         max.records.file = 40L, max.token.length = 12L) {
+                         max.records.file = 40L, max.token.length = 20L) {
   dataTypes <- checkTypes(dataTypes, 'dataTypes', "print_humtab")
   
   if (is.empty(humdrumR)) {
@@ -2011,11 +2012,11 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
     return(invisible(NULL))
   }
   
-  humdrumR <- indexGLIM(humdrumR)
-  humdrumR <- fields.as.character(humdrumR)
-  
   Nfiles <- length(humdrumR)          
   if (firstAndLast) humdrumR <- humdrumR[c(1, length(humdrumR))]
+  
+  humdrumR <- indexGLIM(humdrumR)
+  humdrumR <- fields.as.character(humdrumR)
   
   if (isActiveVector(humdrumR)) {
     print_humtab_isActiveVector(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),

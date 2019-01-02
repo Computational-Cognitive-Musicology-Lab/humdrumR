@@ -166,9 +166,11 @@ shortFileNames <- function(fns) {
 #' @param recursive 
 #' logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.
 #' 
-#' @param validate
-#' logical: If \code{TRUE}, the function \code{\link{validateHumdrum}} is called on each file before parsing, to check
-#' if the files are valid humdrum.
+#' @param errorReport.path \code{readHumdrum} always calls the function \code{\link{validateHumdrum}}
+#' on input files before attempting to parse them. Any files which contain syntax errors are automatically
+#' skipped. If you want to see specifically what errors occured, and where, specifify a directory
+#' using this argument and \code{\link{validateHumdrum}} will print an error report in that directory
+#' (see \code{\link{validateHumdrum}}'s documentation).
 #' 
 #' @param verbose
 #' logical: If \code{TRUE}, the names of matching files are printed before parsing begins.
@@ -184,11 +186,15 @@ shortFileNames <- function(fns) {
 #' # If there are any directories called "Joined", loads all files (if any) that end with "krn".
 #' 
 #' @export
-readHumdrum = function(pattern, ..., recursive = FALSE, validate = FALSE, verbose = FALSE) {
+readHumdrum = function(pattern, ..., recursive = FALSE, verbose = FALSE, errorReport.path = NULL) {
  files <- readFiles(pattern, ..., recursive = recursive, verbose = FALSE)
+ 
  if (is.null(files)) return(NULL)
  
- if (validate) Map(validateHumdrum, files, names(files))
+ #
+ files <- validateHumdrum(files = files, errorReport.path = errorReport.path)
+ if (length(files) == 0L) return(NULL)
+ 
  
  cat(paste0('Parsing ', num2str(length(names(files))), ' files...'))
  
@@ -255,7 +261,6 @@ parseGlobal <- function(records) {
           #         Reference, (also a data.table, which will fold into a humdrum table) representing the reference records.
   globalr <- grep('^!!', records, useBytes = TRUE)
   if (length(globalr) == 0) return(NA)
-  
   globalrecords <- records[globalr]
   
   types <- parseTokenType(globalrecords)
@@ -314,13 +319,12 @@ parseLocal <- function(records) {
 
   ###mat is character matrix
   ###(row = record, col = spine/subspine)
-  mat <- stringi::stri_list2matrix(local, byrow = TRUE)
- 
+  mat <- stringi::stri_list2matrix(local, byrow = TRUE, fill = '_P')
  
   #flatten spines and get recordns for each.
   rownames(mat) <- recordn
   tokens   <- setNames(as.vector(mat), rep(recordn, ncol(mat)))
-
+  
   ## get spine and path numbers of appropriate length
   SpineNumbers <- cumsum(apply(mat, 2,  function(spine) any(spine != '_P') && grepl('^\\*\\*', spine[spine != '_P'][1])))
   SpinePaths   <- unlist(use.names = FALSE, tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
@@ -334,9 +338,9 @@ parseLocal <- function(records) {
   exclusivestandems <- parseInterpretations(mat)
   exclusives <- exclusivestandems$Exclusive
   tandems    <- exclusivestandems$Tandem
-
   tandems    <- setNames(unlist(tandems), names(tokens))
 
+  ##################### tokens
   tokens <- parseMultiStops(tokens)
   #If there are multistops, the spines are no longer the same lengths, and have different recordns.
   stopNs <- as.integer(gsub('^.*\\.', '', names(tokens)))
@@ -396,7 +400,6 @@ padSpinePaths <- function(local) {
   # identifies spine paths in them, and pads the records with "_P" such that 
   # subspines (spine paths) are grouped within their spine, and all rows are the same length.
   ####NEED TO ADD OPTIONS FOR ** AND *-
-          
   minpath <- min(sapply(local, Position, f = function(x) x %in% c('*^', '*v', '*+', '*-')), na.rm = TRUE)
   lapply(minpath:max(lengths(local)),
          function(j) {
@@ -507,7 +510,7 @@ parseMultiStops <- function(spine) {
   nspaces[grepl('^[!*=]', spine)] <- 0 #except not in non-data tokens
   
   if (!any(nspaces > 0)) return(setNames(spine, paste0(names(spine), '.01'))) # if there are no multistops, just as ".01" to names
-    
+  
   Map(function(recn, n) gsub('0\\.', '.', paste0(recn, .01 * seq_len(n))), 
       names(spine), 
       nspaces + 1) -> multiRecordn
