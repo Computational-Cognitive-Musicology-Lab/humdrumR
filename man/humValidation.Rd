@@ -12,7 +12,15 @@ validateHumdrum(pattern = NULL, recursive = FALSE,
 \item{recursive}{\code{logical}. If \code{TRUE}, the final part of the serach pattern (i.e., the file search) 
 is searched for recursively through all sub directories.}
 
+\item{errorReport.path}{\code{character}. A directory path which, if not \code{NULL}, an error report is written 
+in the file \code{'humdrumR_syntaxErrorReport_date.txt'}. In addition, all files with errors
+are written to this directory (with \code{'errorMarkup'} appended to their names), with 
+errors annotated inline.}
+
 \item{files}{A list of character strings, each representing a record in a file.}
+
+\item{patterns}{\code{character} vector. Search pattern(s) for identifying files 
+(see \code{\link{readHumdrum}}).}
 }
 \description{
 This function checks files for violations of the 

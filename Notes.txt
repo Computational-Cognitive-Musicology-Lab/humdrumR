@@ -8,3 +8,11 @@ Features:
 
 	Windowing
 
+
+Windowing:
+	open		close
+	prev.open + x	open + x
+	prev.open + x	next.open + x
+	prev.close + x	open + x
+
+	prev.open + '('	open + (')' - '(')

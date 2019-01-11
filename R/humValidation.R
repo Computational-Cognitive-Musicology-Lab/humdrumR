@@ -4,11 +4,11 @@
 #' humdrum syntax.
 #' 
 #' @param patterns \code{character} vector. Search pattern(s) for identifying files 
-#' (see \code{\link{readHumdrum}).
+#' (see \code{\link{readHumdrum}}).
 #' @param recursive \code{logical}. If \code{TRUE}, the final part of the serach pattern (i.e., the file search) 
 #' is searched for recursively through all sub directories.
 #' @param errorReport.path \code{character}. A directory path which, if not \code{NULL}, an error report is written 
-#' in the file \code{'humdrumR_syntaxErrorReport_date.txt'). In addition, all files with errors
+#' in the file \code{'humdrumR_syntaxErrorReport_date.txt'}. In addition, all files with errors
 #' are written to this directory (with \code{'errorMarkup'} appended to their names), with 
 #' errors annotated inline.
 #' 
@@ -26,7 +26,7 @@ validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path 
   
   filenames <- names(files)
   
-  filevec <- rep(filenames, lengths(files))
+  filevec  <- rep(filenames, lengths(files))
   recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
   records  <- unlist(files)
           
@@ -34,12 +34,14 @@ validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path 
   
   reports <- list()
   # 
-  funcs <- list(validate_Characters,
+  funcs <- list(validate_File,
+                validate_Characters,
                 validate_Records,
                 validate_recordTypes,
                 validate_whiteSpace,
                 validate_spinePaths)
-  reports <- data.table::rbindlist(lapply(funcs, do.call, args = list(records, local, filevec)))
+  reports <- data.table::rbindlist(lapply(funcs, do.call, 
+                                          args = list(records, local, filevec)))
   
   if (nrow(reports) == 0L) {
    cat("all valid.\n")
@@ -112,10 +114,35 @@ hitsTable <- function(hits, indices, messages) {
  }
 }
 
-validate_Records <- function(records, ...){
- hits <- stringi::stri_detect_regex(records, '^$|^\\s$')
+validate_File <- function(records, local, filevec) {
+ tapply(records[local], filevec[local],
+        function(file) {
+                  opens  <- grepl('^\\*\\*', file)
+                  closes <- grepl('^\\*-', file)
+                  
+                  which(opens)[1] != 1L ||
+                  !any(opens) ||
+                            !any(closes) ||
+                            min(which(opens)) > min(which(closes)) ||
+                            max(which(opens)) > max(which(closes))
+        }) -> hits
  
- hitsTable(hits, which(hits), 'is empty')
+  firstrecs <- tapply(which(local), filevec[local], '[', i = 1)
+  
+  hitsTable(hits, firstrecs, "** and *- records in file are missing or don't add up")
+          
+}
+ 
+
+validate_Records <- function(records, ...){
+ 
+ output <- list()
+
+ # any empty lines
+ hits_empty <- stringi::stri_detect_regex(records, '^$|^\\s$')
+ output$Empty <- hitsTable(hits_empty, which(hits_empty), 'is empty')
+ 
+ data.table::rbindlist(output)
  
 }
 

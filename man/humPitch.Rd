@@ -19,7 +19,6 @@
 \alias{as.solfa.character}
 \alias{as.frequency.character}
 \alias{as.ratio.character}
-\alias{transpose}
 \title{Pitch translations}
 \usage{
 as.semits(x, ...)
@@ -39,30 +38,28 @@ as.ratio(x, twelfth = 2^(19/12), ...)
 as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
   twelfth = 2^(19/12), ...)
 
-as.tonalInterval(str, inPlace = FALSE, key = 0L)
+as.tonalInterval(str, key = 0L, inPlace = FALSE)
 
-\method{as.semits}{character}(str, inPlace = FALSE, key = 0L)
+\method{as.semits}{character}(str, key = 0L, inPlace = FALSE)
 
-\method{as.midi}{character}(str, inPlace = FALSE, key = 0L)
+\method{as.midi}{character}(str, key = 0L, inPlace = FALSE)
 
-\method{as.kernPitch}{character}(str, inPlace = FALSE, key = 0L)
+\method{as.kernPitch}{character}(str, key = 0L, inPlace = FALSE)
 
-\method{as.sciPitch}{character}(str, inPlace = FALSE, key = 0L)
+\method{as.sciPitch}{character}(str, key = 0L, inPlace = FALSE)
 
-\method{as.interval}{character}(str, inPlace = FALSE, key = 0L,
+\method{as.interval}{character}(str, key = 0L, inPlace = FALSE,
   specific = TRUE, directed = TRUE, quality.labels = list(augment =
   "A", diminish = "d", major = "M", minor = "m", perfect = "P"))
 
-\method{as.solfa}{character}(str, inPlace = FALSE, key = 0L)
+\method{as.solfa}{character}(str, key = 0L, inPlace = FALSE)
 
-\method{as.frequency}{character}(str, inPlace = FALSE, key = 0L,
+\method{as.frequency}{character}(str, key = 0L, inPlace = FALSE,
   reference.freq = 440L, reference.tint = tint(-4, 3),
   twelfth = 2^(19/12))
 
-\method{as.ratio}{character}(str, inPlace = FALSE, key = 0L,
+\method{as.ratio}{character}(str, key = 0L, inPlace = FALSE,
   twelfth = 2^(19/12))
-
-transpose(x, by = tint(0, 0), generic = NULL)
 }
 \description{
 These functions translate various pitch representations

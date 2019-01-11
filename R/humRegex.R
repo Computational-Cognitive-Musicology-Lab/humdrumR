@@ -103,7 +103,7 @@ regexDispatch <- function(...) {
           # Assembel the new function's arguments
           genericArgs <- do.call('c', c(funcsArgs, use.names = FALSE))
           genericArgs <- genericArgs[!duplicated(names(genericArgs))]
-          formals(genericFunc) <- c(alist(str = , inPlace = FALSE), genericArgs)
+          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = FALSE))
           
           new('regexDispatcher', genericFunc)
 }

@@ -151,17 +151,60 @@ findNextAfter <- function(x, after) {
  list(Open = after, Close = x[intervals])
 }
 
+group.Inits <- function(vec, pattern, start = 0L) {
+ output <- integer(length(vec))
+ if (is.character(pattern)) {
+   output[start:length(output)] <- stringi::stri_count_regex(vec[start:length(vec)], pattern)        
+ } else { 
+   output[start:length(output)] <- as.numeric(((seq_along(vec[start:length(vec)]) - 1L)  %% pattern ) == 0L)
+   
+ }
+ output
+}
+
+combine.groups <- function(vec, opens, closes, openlevels = 1, closelevels = openlevels) {
+          
+          openscum  <- cumsum(opens)
+          closescum <- head(cumsum(c(0, closes)), -1)
+          depth <- openscum - closescum
+
+          if (tail(depth, 1) != 0L && tail(closescum, 1) == 0L) stop(paste0("In your call to a function created by humdrumR::nestingWindows, 
+                                                                            the input vector does not have matching ", 
+                                                                            open, 
+                                                                            " and ", 
+                                                                            close, " tokens."))
+          
+          cdepth <- sapply(1:max(closes), function(m) (depth * (closes >= m)) - (closes > 0) * (m - 1))
+          odepth <- sapply(1:max(opens ), function(m) (depth * (opens >= m)) - (opens > 0) * (m - 1))
+          
+          lapply(1:max(depth),
+                 function(d) {
+                           cbind(opens = apply(odepth == d, 1, any),
+                                 closes = apply(cdepth == d, 1, any))
+                           
+                 }) -> hits
+          
+          out <- do.call('abind', c(hits, along = 3))
+          
+          dimnames(out) <- list(Vector = vec,
+                                Bound = c('Open', 'Close'),
+                                Depth = 1:dim(out)[3])
+          
+          list(Opens = which(out[ , 1, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'],
+               Close = which(out[ , 2, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'])
+          
+}
+
 
 nestingWindows <- function(open, close) {
           function(vec, openlevels = 1, closelevels = openlevels) {
                     opens <- stringi::stri_count_regex(vec, open)
                     closes <- stringi::stri_count_regex(vec, close)
                     
-                    openscum <- cumsum(opens)
+                    openscum  <- cumsum(opens)
                     closescum <- head(cumsum(c(0, closes)), -1)
-                    
                     depth <- openscum - closescum
-                    if (tail(depth, 1) != 0) stop(paste0("In your call to a function created by humdrumR::nestingWindows, 
+                    if (tail(depth, 1) != 0L && tail(closescum, 1) == 0L) stop(paste0("In your call to a function created by humdrumR::nestingWindows, 
                                                          the input vector does not have matching ", 
                                                          open, 
                                                          " and ", 
@@ -183,8 +226,8 @@ nestingWindows <- function(open, close) {
                                           Bound = c('Open', 'Close'),
                                           Depth = 1:dim(out)[3])
                     
-                    list(Opens = unlist(`dim<-`(apply(out[ , 1, openlevels], 2, which), NULL)),
-                         Close = unlist(`dim<-`(apply(out[ , 2, closelevels], 2, which), NULL)))
+                    list(Opens = which(out[ , 1, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'],
+                         Close = which(out[ , 2, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'])
                     
                     
           }

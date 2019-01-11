@@ -4,8 +4,8 @@
 \alias{readHumdrum}
 \title{Read humdrum files into R}
 \usage{
-readHumdrum(pattern, ..., recursive = FALSE, verbose = FALSE,
-  errorReport.path = NULL)
+readHumdrum(pattern, ..., recurse.pattern = FALSE, validate = TRUE,
+  verbose = FALSE)
 }
 \arguments{
 \item{pattern}{character: One or more patterns used to identify files to read. Each pattern represents
@@ -17,15 +17,14 @@ match any kern files in any directory beginning with a capital \code{"A"} in the
 \item{...}{Any additional arguments are interpreted as additional directory regular-expression patterns, appended to the
 \code{pattern} argument.}
 
-\item{recursive}{logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.}
+\item{validate}{\code{logical} If \code{TRUE}, \code{\link{validateHumdrum}} is called
+on matching files before they are parsed. Any files which contain syntax errors are automatically
+skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
+directly and use the \code{errorReport.path} argument.}
 
 \item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins.}
 
-\item{errorReport.path}{\code{readHumdrum} always calls the function \code{\link{validateHumdrum}}
-on input files before attempting to parse them. Any files which contain syntax errors are automatically
-skipped. If you want to see specifically what errors occured, and where, specifify a directory
-using this argument and \code{\link{validateHumdrum}} will print an error report in that directory
-(see \code{\link{validateHumdrum}}'s documentation).}
+\item{recursive.pattern}{logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.}
 }
 \description{
 This function reads one or more humdrum files to create a \code{\link[humdrumR:humtable]{humdrum table}}

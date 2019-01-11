@@ -330,7 +330,7 @@ setMethod('<=', signature = c('tonalInterval', 'tonalInterval'),
 
 #' @name tonalInterval-asvector
 #' @export
-setMethod('show', signature = c(object = 'tonalInterval'), function(object) { cat(as.interval(object)) })
+setMethod('show', signature = c(object = 'tonalInterval'), function(object) { cat(as.kernPitch(object)) })
 
 
 #' @name tonalInterval-asvector
@@ -342,7 +342,7 @@ format.tonalInterval <- function(x, ...) {
 
 #' @name tonalInterval
 #' @export
-setMethod('as.character', signature = c('tonalInterval'), function(x) as.interval(x))
+setMethod('as.character', signature = c('tonalInterval'), function(x) as.kernPitch(x))
 
 #' @name tonalInterval
 #' @export
@@ -506,8 +506,8 @@ fifth2accidental <- function(fifth, sharp = '#', flat = '-') {
           accN <- fifth2qualityN(fifth)
           
           output <- character(length(fifth)) # vector of empty strings ""
-          output <- IfElse(fifth >  5, strrep(sharp,  abs(accN)), output)
-          output <- IfElse(fifth < -1, strrep(flat,   abs(accN)), output)
+          output[fifth > 5] <- strrep(sharp,  abs(accN[fifth > 5]))
+          output[fifth < -1] <- strrep(flat,   abs(accN[fifth < -1]))
           output
 }
 fifth2tonalname <- function(fifth, kernFlats = TRUE) {
@@ -590,7 +590,6 @@ as.kernPitch <- function(x, ...) UseMethod('as.kernPitch')
 #' @name tonalInterval-write
 #' @export
 as.kernPitch.tonalInterval <- function(x) {
-          
                     octaves <- sciOctave(x)
                     fifths <- getFifth(x)
                     
@@ -601,6 +600,7 @@ as.kernPitch.tonalInterval <- function(x) {
                     
                     repn <- octaves - 4L
                     repn <- IfElse(repn >= 0, repn + 1L, -repn)
+                    repn[repn == 0L] <- 1L
                     
                     paste0(strrep(letternames, repn), accidentals)
           }
@@ -844,7 +844,7 @@ read.sciPitch2tonalInterval <- function(str) {
 #' @export
 read.interval2tonalInterval <- function(str) {
           direction <- stringi::stri_extract_first(str, regex = "^[-+]")
-          quality   <- stringi::stri_extract_first(str, regex = "[MmP]|[Ad]+")
+          quality   <- stringi::stri_extract_first(str, regex = "[MmP]|[AaDd]+")
           generic   <- as.integer(stringi::stri_extract_first(str, regex = "[1-9][0-9]*"))
           
           
@@ -854,7 +854,7 @@ read.interval2tonalInterval <- function(str) {
           qualshift <- sapply(quality,
                               function(qual) {
                                         qual1 <- stringr::str_sub(qual, end = 1L)
-                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, A = 7) *  nchar(qual)
+                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, D = -7, A = 7, a = 7) *  nchar(qual)
                               }) -  ifelse(grepl('^d', quality) & genericfifth > 1, 7, 0)
           
           fifth <- qualshift + genericfifth
@@ -1011,13 +1011,38 @@ as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
 ######Special pitch functions ####
 ##################################################-
 
-#' @name humPitch
+
+#' Transpose tonalIntervals
+#' 
+#' This function transposes tonalIntervals by other tonal intervals.
+#' By default, does real transposition.
+#' However, if a \code{key} argument is specified, tonal transposition
+#' takes place in that (major) key.
+#' @name humTranspose
 #' @export
-transpose <- function(x, by = tint(0,0), generic = NULL) {
-          y <- x + by
-          if (!is.null(generic)) y <- ((y - generic - tint(-1, 1)) %% tint(-11, 7)) + generic + tint(-1, 1)
+transpose <- function(x, interval = tint(0,0), generic = NULL, ...) UseMethod('transpose')
+
+#' @name humTranspose
+#' @export
+transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
+          if (!is.tonalInterval(interval)) interval <- as.tonalInterval(interval)
           
-          y
-          
-          
+          if (!is.null(generic)) {
+              if (!is.tonalInterval(generic)) generic <- as.tonalInterval(generic)
+              generic <- generic - tint(-1, 1)
+              inkey <- x - generic
+              chromaticshift <- simpletint(inkey %/% tint(-11, 7))
+              inkey <- inkey - chromaticshift
+              result <- (inkey + interval) %% tint(-11, 7)
+              result + generic + chromaticshift
+          } else {
+              x + interval
+          }
 }
+
+#' @name humTranspose
+#' @export
+transpose.character <- regexDispatch('Kern Pitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
+                                     'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,
+                                     'Scientific Pitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
+                                     'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval)

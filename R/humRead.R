@@ -163,14 +163,13 @@ shortFileNames <- function(fns) {
 #' @param ... Any additional arguments are interpreted as additional directory regular-expression patterns, appended to the
 #' \code{pattern} argument.
 #' 
-#' @param recursive 
+#' @param recursive.pattern
 #' logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.
 #' 
-#' @param errorReport.path \code{readHumdrum} always calls the function \code{\link{validateHumdrum}}
-#' on input files before attempting to parse them. Any files which contain syntax errors are automatically
-#' skipped. If you want to see specifically what errors occured, and where, specifify a directory
-#' using this argument and \code{\link{validateHumdrum}} will print an error report in that directory
-#' (see \code{\link{validateHumdrum}}'s documentation).
+#' @param validate \code{logical} If \code{TRUE}, \code{\link{validateHumdrum}} is called
+#' on matching files before they are parsed. Any files which contain syntax errors are automatically
+#' skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
+#' directly and use the \code{errorReport.path} argument.
 #' 
 #' @param verbose
 #' logical: If \code{TRUE}, the names of matching files are printed before parsing begins.
@@ -186,14 +185,16 @@ shortFileNames <- function(fns) {
 #' # If there are any directories called "Joined", loads all files (if any) that end with "krn".
 #' 
 #' @export
-readHumdrum = function(pattern, ..., recursive = FALSE, verbose = FALSE, errorReport.path = NULL) {
- files <- readFiles(pattern, ..., recursive = recursive, verbose = FALSE)
+readHumdrum = function(pattern, ..., recurse.pattern = FALSE, validate = TRUE, verbose = FALSE) {
+ files <- readFiles(pattern, ..., recursive = recurse.pattern, verbose = FALSE)
  
  if (is.null(files)) return(NULL)
  
  #
- files <- validateHumdrum(files = files, errorReport.path = errorReport.path)
- if (length(files) == 0L) return(NULL)
+ if (validate) {
+           files <- validateHumdrum(files = files)
+           if (length(files) == 0L) return(NULL)
+ }
  
  
  cat(paste0('Parsing ', num2str(length(names(files))), ' files...'))
