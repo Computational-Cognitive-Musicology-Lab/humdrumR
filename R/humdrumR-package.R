@@ -31,7 +31,7 @@
 #' @importFrom utils combn
 #' @importFrom glue glue
 #' @importFrom abind abind
-#' @importFrom data.table data.table rbindlist setorder setcolorder copy
+#' @importFrom data.table data.table rbindlist setorder setcolorder copy as.data.table is.data.table
 NULL
 
 # #' Parsed \code{\linkS4class{humdrumR}} data for 371 Bach chorales

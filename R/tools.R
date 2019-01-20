@@ -466,3 +466,17 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
 }
 
 grepl_list <- function(pattern, ls) sapply(ls, function(el) any(grepl(pattern, el, useBytes = TRUE), na.rm = TRUE)) 
+
+
+
+switchpatch <- function(x,  ...) {
+    funcs <- list(...)
+    predicates <- sapply(names(funcs)[names(funcs) != 'otherwise'], match.fun)
+    
+    hits <- sapply(predicates, function(f) f(x))
+    if (any(hits)) {
+              funcs[[which(hits)[1]]](x) 
+    } else {
+     funcs[['otherwise']](x)         
+    }
+}

@@ -290,7 +290,7 @@ parseReference <- function(refrecords) {
   
   
   # as.data.table(setNames(lapply(refVals, list), names(refVals)))
-  as.data.table(lapply(refVals, function(ref) if (length(ref) == 1) ref else list(ref)))
+  data.table::as.data.table(lapply(refVals, function(ref) if (length(ref) == 1) ref else list(ref)))
 }
 
 

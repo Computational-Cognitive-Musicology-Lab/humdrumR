@@ -63,7 +63,7 @@
 #' @slot Octave Integers
 #' 
 #' @export
-setClass('rhythmInterval', slots = c(Numerator = 'integer', Denominator = 'integer')) 
+setClass('rhythmInterval', slots = c(Numerator = 'integer', Denominator = 'integer'))  
 
 setValidity('rhythmInterval', 
             function(object) {
@@ -546,7 +546,7 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 NULL
 
 #####################################-
-#### Reading pitch representations ----
+#### Reading rhythm representations ----
 #######################################-
 #' Reading \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} from various representations
 #' 
@@ -586,7 +586,7 @@ setMethod('as.rhythmInterval', signature = c(x = 'character'),
             ndots <- stringr::str_count(reciptoken, '\\.')
             rhythmInterval <- gsub('\\.+', '', reciptoken)
             
-            rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', recip)], function(f) eval(parse(text = gsub('%', '/', f)))))
+            rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', reciptoken)], function(f) eval(parse(text = gsub('%', '/', f)))))
             
             rhythmInterval <- 1 / as.numeric(rhythmInterval)
             rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
@@ -596,9 +596,9 @@ setMethod('as.rhythmInterval', signature = c(x = 'character'),
           })
 
 
-#################################################
-######Special rhythm functions ####
-##################################################
+#################################################-
+######Special rhythm functions ####----
+##################################################-
 
 #' @export
 decompose <- function(rhythmInterval, into = rhythmInterval(c(1, 2, 4, 8, 16, 32))) {

@@ -1,4 +1,4 @@
-####### Regex dispatch
+####### Regex dispatch ----
 
 #' Regular expression method dispatch and function application
 #' 
@@ -140,3 +140,35 @@ setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
                     
                     f1
           })
+
+###################  Regex tools ----
+
+
+#' Match strings against regular expression
+#' 
+#' These infix functions are simply syntactic sugar for
+#' existing \code{R} regular expression matching functions.
+#' 
+#' \describe{
+#' \item{\%~l\%}{Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base]{grepl}}}
+#' \item{\%~\%}{The "default"---same as \code{\%~l\%}}
+#' \item{\%~i\%}{Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base]{grep}}}
+#' \item{\%~n\%}{Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more 
+#' than one match occurs in the same token). Shorthand for \code{\link[stringi]{stri_count_regex}}}
+#' }
+#' @export
+#' @name RegexFind
+`%~l%` <- function(x, pattern) grepl(pattern, x)
+#' @export
+#' @name RegexFind
+`%~i%` <- function(x, pattern) grepi(pattern, x)
+#' @export
+#' @name RegexFind
+`%~n%` <- function(x, pattern) stringi::stri_count_regex(x, pattern)
+#' @name RegexFind
+#' @export
+`%~%` <- function(x, pattern) grepl(pattern, x)
+
+
+
+

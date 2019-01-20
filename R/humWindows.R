@@ -59,125 +59,30 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 ## 
 ##
 
-### 
-### 
-### 
-### 
-### 
-getNames <- function(expr) {
- if (length(expr) == 1) {
-        if (is.name(expr))  return(expr) else return(list())
- }
- names <- list()
- for (i in 2:length(expr)) {
-          names <- c(names, Recall(expr[[i]]))
- }
- sapply(names, as.character)
-         
-}
 
-makeHopper <- function(hops) {
- function(vec) {
-           end <- length(vec)
-           cumsum(c(1, rep(hops, end / sum(hops))))         
- }
-}
-makeMatcher <- function(re) {
- function(vec) {
-        grep(re, vec)
- }
-}
-makeAdder <- function(sizes) {
-          function(vec, inds) {
-                 do.call('mapply', c(`+`, match_size(inds, sizes)))   
-          }
+#' @export
+#' @name humWindows
+nest <- function(vec, open, close, depth = 1) {
+          opens <- stringi::stri_count_regex(vec, open)
+          closes <- stringi::stri_count_regex(vec, close)
           
-}
-makeNexter <- function(re) {
-          matcher <- makeMatcher(re)
-          function(vec, inds) {
-                  hits <- matcher(vec)
-                  findNextAfter(hits, inds)
-          }
-          
-}
-
-
-
-
-
-
-makeFormula <- function(form, type) {
- reference <- as.character(lazyeval::f_lhs(form)         )
- val      <- lazyeval::f_eval(form)
- 
- if (type == reference) {
-  if (is.character(val)) makeMatcher(val) else makeHopper(val)         
- } else {
-  if (is.character(val)) makeNexter(val) else makeAdder(val)         
- }
- 
- 
-}
-
-windowing <- function(vec, open, close, start = 1, end = length(vec), edging = 'trim', min.length = 2) {
- openfunc <- makeFormula(open, 'open')         
- closefunc <- makeFormula(close, 'close')         
- 
- if (length(formals(openfunc)) == 1) opens <- openfunc(vec)
- 
- if (length(formals(closefunc)) == 1) closes <- closefunc(vec)
- 
- if (length(formals(openfunc)) == 2) opens <- openfunc(vec, closes)
- 
- if (length(formals(closefunc)) == 2) closes <- closefunc(vec, opens)
- 
- paired <- findNextAfter(closes, opens)
- 
- paired <- windowEdges(paired, start, end, type = edging)
- 
- paired <- do.call('cbind', paired)
- 
- paired[(apply(paired, 1, diff) + 1) >= min.length, ]
-}
-
-findNextAfter <- function(x, after) {
- x <- x[x > min(after)]
- 
- intervals <- findInterval(after, sort(x)) + 1
- # hits <- sapply(seq_along(after), function(a) x[intervals == a][1])
- 
- # list(Before = after, After = hits)
- list(Open = after, Close = x[intervals])
-}
-
-group.Inits <- function(vec, pattern, start = 0L) {
- output <- integer(length(vec))
- if (is.character(pattern)) {
-   output[start:length(output)] <- stringi::stri_count_regex(vec[start:length(vec)], pattern)        
- } else { 
-   output[start:length(output)] <- as.numeric(((seq_along(vec[start:length(vec)]) - 1L)  %% pattern ) == 0L)
-   
- }
- output
-}
-
-combine.groups <- function(vec, opens, closes, openlevels = 1, closelevels = openlevels) {
+          if (!any(opens) && !any(closes)) return(list(Open = c(), Close = c()))
           
           openscum  <- cumsum(opens)
           closescum <- head(cumsum(c(0, closes)), -1)
-          depth <- openscum - closescum
-
-          if (tail(depth, 1) != 0L && tail(closescum, 1) == 0L) stop(paste0("In your call to a function created by humdrumR::nestingWindows, 
-                                                                            the input vector does not have matching ", 
-                                                                            open, 
-                                                                            " and ", 
-                                                                            close, " tokens."))
+          depths <- openscum - closescum
+          if (tail(depths, 1) != 0L && 
+              tail(closescum, 1) == 0L) stop(call. = FALSE,
+                                             paste0("In your call to humdrumR::nest", 
+                                                    "the input vector does not have matching ", 
+                                                    open, 
+                                                    " and ", 
+                                                    close, " tokens."))
           
-          cdepth <- sapply(1:max(closes), function(m) (depth * (closes >= m)) - (closes > 0) * (m - 1))
-          odepth <- sapply(1:max(opens ), function(m) (depth * (opens >= m)) - (opens > 0) * (m - 1))
+          cdepth <- sapply(1:max(closes), function(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
+          odepth <- sapply(1:max(opens ), function(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
           
-          lapply(1:max(depth),
+          lapply(1:max(depths),
                  function(d) {
                            cbind(opens = apply(odepth == d, 1, any),
                                  closes = apply(cdepth == d, 1, any))
@@ -190,141 +95,219 @@ combine.groups <- function(vec, opens, closes, openlevels = 1, closelevels = ope
                                 Bound = c('Open', 'Close'),
                                 Depth = 1:dim(out)[3])
           
-          list(Opens = which(out[ , 1, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'],
-               Close = which(out[ , 2, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'])
+          if (!any(depth <= length(dim(out)))) return(list(Open = c(), Close = c()))
           
+          list(Open  = which(out[ , 1, depth, drop = FALSE], arr.ind = T)[ , 'Vector'],
+               Close = which(out[ , 2, depth, drop = FALSE], arr.ind = T)[ , 'Vector'])
+          
+
 }
 
 
-nestingWindows <- function(open, close) {
-          function(vec, openlevels = 1, closelevels = openlevels) {
-                    opens <- stringi::stri_count_regex(vec, open)
-                    closes <- stringi::stri_count_regex(vec, close)
-                    
-                    openscum  <- cumsum(opens)
-                    closescum <- head(cumsum(c(0, closes)), -1)
-                    depth <- openscum - closescum
-                    if (tail(depth, 1) != 0L && tail(closescum, 1) == 0L) stop(paste0("In your call to a function created by humdrumR::nestingWindows, 
-                                                         the input vector does not have matching ", 
-                                                         open, 
-                                                         " and ", 
-                                                         close, " tokens."))
-                    
-                    cdepth <- sapply(1:max(closes), function(m) (depth * (closes >= m)) - (closes > 0) * (m - 1))
-                    odepth <- sapply(1:max(opens ), function(m) (depth * (opens >= m)) - (opens > 0) * (m - 1))
-                    
-                    lapply(1:max(depth),
-                           function(d) {
-                                     cbind(opens = apply(odepth == d, 1, any),
-                                           closes = apply(cdepth == d, 1, any))
-                                     
-                           }) -> hits
-                    
-                    out <- do.call('abind', c(hits, along = 3))
-                    
-                    dimnames(out) <- list(Vector = vec,
-                                          Bound = c('Open', 'Close'),
-                                          Depth = 1:dim(out)[3])
-                    
-                    list(Opens = which(out[ , 1, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'],
-                         Close = which(out[ , 2, openlevels, drop = FALSE], arr.ind = T)[ , 'Vector'])
-                    
-                    
+
+
+
+###########################
+
+matchClose <- function(x, table, n = 1L) {
+          
+          if (n <= 0) {
+                    table <- table[table < max(x)]
+          } else {
+                    table <- table[table >= min(x)]
           }
           
+          intervals <- findInterval(x, sort(table))
+          
+          if (n == 0) {
+                    after <- intervals + 1L
+                    before <- intervals 
+                    after[after <= 0] <- length(table) + 1L
+                    before[before <= 0] <- length(table) + 1L
+                    
+                    before <- table[before]
+                    before[is.na(before)] <- Inf
+                    after <- table[after]
+                    after[is.na(after)] <- Inf
+                    output <- ifelse(abs(x - before) >= abs(x - after), after, before)
+          } else {
+          
+                    intervals <- intervals + n
+                    intervals[intervals <= 0] <- length(table) + 1L
+                    output <- table[intervals]
+          
+          }
+          # hits <- sapply(seq_along(after), function(a) x[intervals == a][1])
+          
+          # list(Before = after, After = hits)
+          list(Table = x, X = output)
 }
 
-# makeWindowFunction <- function(oform = ~open + 1, cform = ~open + 1) {
-#  ######################################
-#  oexpr <- lazyeval::f_rhs(oform)
-#  oexpr <-  windowExprRE(oexpr)
-#  onames <- getNames(oexpr)
-#  orecurs <- isRecursive(oexpr, 'open')
-#  
-#  ofunc <- function() {  }
-#  body(ofunc) <- oexpr
-#  formals(ofunc) <- as.arglist(onames)
-#  
-#  ##################################
-#  
-#  cexpr <- lazyeval::f_rhs(cform)
-#  cexpr <-  windowExprRE(cexpr)
-#  cnames <- getNames(cexpr)
-#  crecurs <- isRecursive(cexpr, 'close')
-#  
-#  
-#  cfunc <- function() {  }
-#  body(cfunc) <- cexpr
-#  formals(cfunc) <- as.arglist(cnames)
-#  
-#  
-#  
-#  ############################
-#  function(vec, start = 1, end = length(vec)) {}
-#  
-#  list(ofunc, cfunc)
-#  
-#  
-#  
-#  
-#  
-# 
-#  
-# }
-# 
-# 
-# isRecursive <- function(expr, target) {
-#  any(sapply(getNames(expr), identical, y = target))         
-# }
-# 
-# windowExprRE <- function(expr) {
-#  if (length(expr) == 1) { 
-#   val <- eval(expr)
-#   
-#   if (is.character(val)) expr <- call('grep', expr, quote(vec))
-#   
-#  } else {
-#           for (i in 2:length(expr)) {
-#            expr[[i]] <- Recall(expr[[i]])         
-#            }
-#  }
-#           
-#  expr          
-#           
-#           
-# }
-# 
-# 
-# getWindows <- function(vec, start = 1, end = length(vec), open, close, type = 'exclude') {
-#   rawinds <- windowIndices(vec, open, close)
-#   inds <- windowEdges(rawinds, start, end, type)
-#   
-#   inds <- do.call('Map', c(`:`, inds))
-#   
-#   lapply(inds, function(i) vec[i])
-#   
-# }
+pmaxmin <- function(x, min, max) pmax(1, pmin(x, max))  
+
+findAfter <- function(vec, after, pattern, npattern = 1) {
+ 
+    if (is.numeric(pattern)) {
+      pmaxmin(after + pattern, 1, length(vec))
+    } else {
+     inds <- grep(pattern, vec)      
+     matchClose(inds, after, npattern)$Close
+    }
+                   
+}
 
 
-windowEdges <- function(inds, start, end, type = 'exclude') {
-          if (type == 'exclude') {
+trans <- function(expr) {
+ if (!is.call(expr) || !deparse(expr[[1]]) %in% c('+', '-')) {
+           return(function(x) x) 
+ } else {
+  val <- expr[[3]]
+  if (is.call(val) && deparse(val[[1]]) == '*') {
+   n <- val[[3]]
+   val <- val[[2]]
+  } else {
+   n <- quote(1)         
+  }
+  
+  from <- expr[[2]]
+           
+ } 
+ 
+ .func <- function() {}
+ body(.func) <- call('findAfter', quote(vec), from, val, n)
+ 
+ formls <- alist(vec = , x = )
+ names(formls)[2] <- deparse(from)
+ 
+ formals(.func) <- formls
+ 
+ .func
+ 
+}
+
+
+
+find.anchors <- function(vec, expr) {
+  
+  if (!is.call(expr)) return(list(Hits = NULL, Expr = expr))
+          
+  hits <- list()
+  for (i in 2:length(expr)) {
+            
+                        if (is.character(expr[[i]])) {
+                                  hit <- list(grep(expr[[i]], vec))
+                                  names(hit) <- expr[[i]]
+                                  hits <- c(hits, hit)
+                                  
+                                  expr[[i]] <- as.name(expr[[i]])
+                                  
+                        } else {
+                                  recur <- Recall(vec, expr[[i]])        
+                                  hits <- c(hits, recur$Hits)
+                                  expr[[i]] <- recur$Expr
+                        }
+  }
+                   
+  list(Hits = hits, Expr = expr)
+}
+
+#' Applying functions across arbitrary windows.
+#' @export
+#' @name humWindows
+windows <- function(df, form, with = list(), ..., 
+                    start = 1L, end = nrow(df), bounds = 'exclude') {
+          if (start < 1) start <- 1L
+          if (end > nrow(df)) end <- nrow(df)
+          
+          
+ with <- c(with, list(...))
+ with[] <- lapply(with, lazyeval::f_eval_rhs, data = df)
+ with <- c(with, df)
+ 
+ open  <- parseWindowExpression(lazyeval::f_lhs(form))
+ close <- parseWindowExpression(lazyeval::f_rhs(form))
+ 
+ ##
+ for (obj in c('open', 'close')) {
+           ind <- eval(get(obj)$Expr, envir = with)
+           if (is.logical(ind))  {
+                     ind <- if (is.null(dim(ind)))  {
+                               which(ind)
+                     } else {
+                               sort(unique(which(ind, arr.ind = TRUE)[ , 'row']))
+                     }
+           }
+           assign(paste0(obj, '.ind'), value = ind, envir = environment())
+ }
+ 
+ output <- matchClose(open.ind, close.ind, n = close$N)
+ names(output) <- c("Open", "Close")
+ 
+ windowEdges(output, start, end, bounds = bounds)
+}
+
+parseWindowExpression <- function(expr) {
+ if(!is.call(expr)) return(list(Expr = expr, N = 1L))
+          
+ if (deparse(expr[[1]]) == '[') {
+        n <- eval(expr[[3]])
+        expr <- expr[[2]]
+ } else {
+           ns <- c()
+           for (i in 2:length(expr)) {
+            subexpr <-  Recall(expr[[i]])         
+            expr[[i]] <- subexpr$Expr
+            ns <- c(ns, subexpr$N)
+           }
+           n <- max(ns)
+ }
+ list(Expr = expr, N = n)
+}
+
+#' @export
+#' @name humWindows
+hop <- function(vec, pattern, start = 1L, end = length(vec), bounds = 'exclude') {
+          if (is.character(start)) start <- grep(start, vec)
+          if (is.character(end))   end <- grep(end, vec)
+          
+          interval <- sum(pattern)
+          
+          if (interval == 0L) stop("In call to humdrumR::hop, pattern argument cannot sum to zero")
+          
+          fullpattern <- rep(pattern, ceiling(length(vec) / abs(interval)))
+          ind <- if (interval > 0L) {
+                    cumsum(c(start, fullpattern))
+          } else {
+                    cumsum(c(end, fullpattern))
+          }
+          
+          beforestart <- which(ind < 1 | ind < start )
+          afterend    <- which(ind > end | end > length(vec))
+          
+          
+          
+          ind
+}
+
+
+
+windowEdges <- function(inds, start, end, bounds = 'exclude') {
+          if (pmatch(bounds, 'exclude', 0L)) {
                     ok <- !unlist(do.call('Map', c(`|`, lapply(inds, function(x) x < start | x > end | is.na(x)))))
-          }
-          if (type == 'trim') {
+          } else {
+          # if (pmatch(bounds, 'trim', 0L)) {
                     inds <- lapply(inds, 
-                                  function(x) {
-                                    x[x < start] <- start
-                                    x[x > end] <- end
-                                    x
-                                  })
+                                   function(x) {
+                                             x[x < start] <- start
+                                             x[x > end] <- end
+                                             x
+                                   })
                     inds$Open[is.na(inds$Open)] <- start
                     inds$Close[is.na(inds$Close)] <- end
                     
                     ok <- !unlist(do.call('Map', c(`>=`, inds)))
           }
-          return(lapply(inds, '[', ok))
+          return(lapply(inds, '[', ok)) 
           
           
 }
-
-
