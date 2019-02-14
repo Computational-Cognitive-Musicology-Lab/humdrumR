@@ -60,52 +60,6 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 ##
 
 
-#' @export
-#' @name humWindows
-nest <- function(vec, open, close, depth = 1) {
-          opens <- stringi::stri_count_regex(vec, open)
-          closes <- stringi::stri_count_regex(vec, close)
-          
-          if (!any(opens) && !any(closes)) return(list(Open = c(), Close = c()))
-          
-          openscum  <- cumsum(opens)
-          closescum <- head(cumsum(c(0, closes)), -1)
-          depths <- openscum - closescum
-          if (tail(depths, 1) != 0L && 
-              tail(closescum, 1) == 0L) stop(call. = FALSE,
-                                             paste0("In your call to humdrumR::nest", 
-                                                    "the input vector does not have matching ", 
-                                                    open, 
-                                                    " and ", 
-                                                    close, " tokens."))
-          
-          cdepth <- sapply(1:max(closes), function(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
-          odepth <- sapply(1:max(opens ), function(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
-          
-          lapply(1:max(depths),
-                 function(d) {
-                           cbind(opens = apply(odepth == d, 1, any),
-                                 closes = apply(cdepth == d, 1, any))
-                           
-                 }) -> hits
-          
-          out <- do.call('abind', c(hits, along = 3))
-          
-          dimnames(out) <- list(Vector = vec,
-                                Bound = c('Open', 'Close'),
-                                Depth = 1:dim(out)[3])
-          
-          if (!any(depth <= length(dim(out)))) return(list(Open = c(), Close = c()))
-          
-          list(Open  = which(out[ , 1, depth, drop = FALSE], arr.ind = T)[ , 'Vector'],
-               Close = which(out[ , 2, depth, drop = FALSE], arr.ind = T)[ , 'Vector'])
-          
-
-}
-
-
-
-
 
 ###########################
 
@@ -266,7 +220,7 @@ parseWindowExpression <- function(expr) {
 
 #' @export
 #' @name humWindows
-hop <- function(vec, pattern, start = 1L, end = length(vec), bounds = 'exclude') {
+hop <- function(vec, pattern, start = 1L, end = length(vec)) {
           if (is.character(start)) start <- grep(start, vec)
           if (is.character(end))   end <- grep(end, vec)
           
@@ -280,11 +234,6 @@ hop <- function(vec, pattern, start = 1L, end = length(vec), bounds = 'exclude')
           } else {
                     cumsum(c(end, fullpattern))
           }
-          
-          beforestart <- which(ind < 1 | ind < start )
-          afterend    <- which(ind > end | end > length(vec))
-          
-          
           
           ind
 }
@@ -308,6 +257,51 @@ windowEdges <- function(inds, start, end, bounds = 'exclude') {
                     ok <- !unlist(do.call('Map', c(`>=`, inds)))
           }
           return(lapply(inds, '[', ok)) 
+}
+
+
+#' @export
+#' @name humWindows
+nest <- function(vec, open, close, depth = 1) {
+          opens <- stringi::stri_count_regex(vec, open)
+          closes <- stringi::stri_count_regex(vec, close)
+          
+          if (!any(opens) && !any(closes)) return(list(Open = c(), Close = c()))
+          
+          openscum  <- cumsum(opens)
+          closescum <- head(cumsum(c(0, closes)), -1)
+          depths <- openscum - closescum
+          if (tail(depths, 1) != 0L && 
+              tail(closescum, 1) == 0L) stop(call. = FALSE,
+                                             paste0("In your call to humdrumR::nest", 
+                                                    "the input vector does not have matching ", 
+                                                    open, 
+                                                    " and ", 
+                                                    close, " tokens."))
+          
+          cdepth <- sapply(1:max(closes), function(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
+          odepth <- sapply(1:max(opens ), function(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
+          
+          lapply(1:max(depths),
+                 function(d) {
+                           cbind(opens = apply(odepth == d, 1, any),
+                                 closes = apply(cdepth == d, 1, any))
+                           
+                 }) -> hits
+          
+          out <- do.call('abind', c(hits, along = 3))
+          
+          dimnames(out) <- list(Vector = vec,
+                                Bound = c('Open', 'Close'),
+                                Depth = 1:dim(out)[3])
+          
+          if (!any(depth <= length(dim(out)))) return(list(Open = c(), Close = c()))
+          
+          list(Open  = which(out[ , 1, depth, drop = FALSE], arr.ind = T)[ , 'Vector'],
+               Close = which(out[ , 2, depth, drop = FALSE], arr.ind = T)[ , 'Vector'])
           
           
 }
+
+
+

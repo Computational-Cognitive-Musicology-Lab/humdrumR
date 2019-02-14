@@ -6,7 +6,12 @@
 \alias{rint}
 \alias{getNumerator}
 \alias{getDenominator}
+\alias{is.rhythmInterval}
 \alias{as.double.rhythmInterval}
+\alias{as.recip}
+\alias{as.fraction}
+\alias{as.decimal}
+\alias{as.rhythmInterval}
 \title{The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.}
 \usage{
 rint(denominator, numerator = 1L)
@@ -14,6 +19,8 @@ rint(denominator, numerator = 1L)
 getNumerator(rint)
 
 getDenominator(rint)
+
+is.rhythmInterval(x)
 
 \S4method{==}{rhythmInterval,rhythmInterval}(e1, e2)
 
@@ -30,6 +37,14 @@ getDenominator(rint)
 \S4method{as.character}{rhythmInterval}(x)
 
 \method{as.double}{rhythmInterval}(x)
+
+as.recip(...)
+
+as.fraction(...)
+
+as.decimal(...)
+
+as.rhythmInterval(...)
 }
 \description{
 The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.

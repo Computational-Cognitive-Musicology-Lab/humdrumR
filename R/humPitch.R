@@ -114,6 +114,7 @@ setValidity('tonalInterval',
                                 is.numeric(cents) 
             })
 
+
 ######tonalInterval constructors and accessors ####
 
 #' The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
@@ -128,6 +129,7 @@ tint <- function(o, f, c = numeric(length(o))) new('tonalInterval', Octave = as.
 simpletint <- function(f) {
  fifthNsciOct2tonalInterval(f, rep(4L, length(f)))         
 }
+
 #' @name tonalInterval
 #' @export
 getFifth  <- function(tint) tint@Fifth
@@ -137,6 +139,10 @@ getOctave <- function(tint) tint@Octave
 #' @name tonalInterval
 #' @export
 getCent <- function(tint) tint@Cent
+
+############# Special tonalIntervals ----
+pythagorean.comma <- tint(-19, 12)
+
 
 
 ######tonalInterval vector (and other core) methods ####
@@ -182,9 +188,8 @@ setMethod('[<-', signature = c(x = 'tonalInterval', i = 'ANY', j = 'missing', va
 setMethod('c', signature = c('tonalInterval'),
           function(x, ...) {
                     tints <- list(x, ...)
-                    
-                    octaves <- unlist(sapply(tints, getFifth))
-                    fifths  <- unlist(sapply(tints, getOctave))
+                    octaves <- unlist(sapply(tints, getOctave))
+                    fifths  <- unlist(sapply(tints, getFifth))
                     cents   <- unlist(sapply(tints, getCent))
                     
                     tint(octaves, fifths, cents)
@@ -205,6 +210,7 @@ setMethod('dim', signature = 'tonalInterval',
 ####Is/As ####
 
 #' @name tonalInterval
+#' @export
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 #' @name tonalInterval-asvector
@@ -259,18 +265,23 @@ rep.tonalInterval <- function(x, ...) {
 
 ######tonalInterval order/relations methods ####
 
+#' @export
+order <- function(x, na.last, decreasing, method, ...) UseMethod('order')
+
+#' @export
+order.default <- base::order
+
 #' @name tonalInterval-asvector
 #' @export
-setMethod('order', signature = c('tonalInterval'),
-          function(..., na.last = TRUE, decreasing = FALSE,
+order.tonalInterval <- function(x, na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
                     x <- do.call('c', list(...))
-                    order(as.semits(x), 
+                    order(as.semit(x), 
  			  na.last = na.last,
                           decreasing = decreasing,
                           method = method
                           )
-          })
+          }
 
 #' @name tonalInterval-asvector
 #' @export
@@ -301,28 +312,28 @@ setMethod('!=', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 setMethod('>', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    as.semits(e1) > as.semits(e2)
+                    as.semit(e1) > as.semit(e2)
           })
 
 #' @name tonalInterval
 #' @export
 setMethod('>=', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    as.semits(e1) >= as.semits(e2)
+                    as.semit(e1) >= as.semit(e2)
           })
 
 #' @name tonalInterval
 #' @export
 setMethod('<', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    as.semits(e1) < as.semits(e2)
+                    as.semit(e1) < as.semit(e2)
           })
 
 #' @name tonalInterval
 #' @export
 setMethod('<=', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    as.semits(e1) <= as.semits(e2)
+                    as.semit(e1) <= as.semit(e2)
           })
 
 
@@ -539,17 +550,15 @@ fifth2simpleInterval <- function(fifth, quality.labels = list(augment = 'A', dim
 }
 
 
-##### As semits (i.e., 0, -11)
-
-# setGeneric('as.semits', function(x, ...) standardGeneric('as.semits'))
+##### As semit (i.e., 0, -11)
 
 #' @name humPitch
 #' @export
-as.semits <- function(x, ...) UseMethod('as.semits')
+as.semit <- function(x, ...) UseMethod('as.semit')
 
 #' @name tonalInterval-write
 #' @export
-as.semits.tonalInterval <- function(x) {
+as.semit.tonalInterval <- function(x) {
                     ((getFifth(x) * 19) + (getOctave(x) * 12)) + (getCent(x) / 100) 
 }
 
@@ -559,14 +568,14 @@ as.midi <- function(x, ...) UseMethod('as.midi')
 
 #' @name tonalInterval-write
 #' @export
-as.midi.tonalInterval <- function(x) as.semits(x) + 60L
+as.midi.tonalInterval <- function(x) as.semit(x) + 60L
 
 
 #### As scientific pitch (i.e, C4)
 
 sciOctave <- function(tint) {
           generic <- tint %% tint(-11, 7)
-          (as.semits(generic) %/% 12) + 4L
+          (as.semit(generic) %/% 12) + 4L
 }
 
 #' @name humPitch
@@ -590,19 +599,18 @@ as.kernPitch <- function(x, ...) UseMethod('as.kernPitch')
 #' @name tonalInterval-write
 #' @export
 as.kernPitch.tonalInterval <- function(x) {
-                    octaves <- sciOctave(x)
+          
+                    octaves <- sciOctave(x) - 4L
                     fifths <- getFifth(x)
                     
                     letternames <- fifth2lettername(fifths)
                     accidentals <- fifth2accidental(fifths)
                     
-                    letternames <- IfElse(octaves >= 4, tolower(letternames), letternames)
-                    
-                    repn <- octaves - 4L
-                    repn <- IfElse(repn >= 0, repn + 1L, -repn)
+                    letternames <- IfElse(octaves >= 0L, tolower(letternames), letternames)
+                    repn <- IfElse(octaves >= 0, octaves + 1L, -octaves)
                     repn[repn == 0L] <- 1L
                     
-                    paste0(strrep(letternames, repn), accidentals)
+                    paste0(strrep(letternames, abs(repn)), accidentals)
           }
 
 
@@ -773,9 +781,53 @@ solfa2fifth <- function(solfa) {
 
 fifthNsciOct2tonalInterval <- function(fifth, sciOct) {
           tintWith0Octave <- tint(o = numeric(length(fifth)), f = fifth)
-          octshift <- as.semits(tintWith0Octave %% tint(-11, 7)) %/% 12
+          octshift <- as.semit(tintWith0Octave %% tint(-11, 7)) %/% 12
           
           tint(sciOct - 4 - octshift, fifth)
+}
+
+
+######### From semit/midi
+
+#' @name tonalInterval-read
+#' @export
+read.semit2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
+          
+          if (!is.numeric(n)) n <- as.numeric(n)
+          wholen <- round(n)
+          
+          pitchclass <- wholen %% 12
+          
+          fifths <- ifelse(pitchclass %% 2 == 0, pitchclass, pitchclass - 6)
+          octaves <- (wholen - (fifths * 19)) %/% 12
+          
+          tints <- tint(octaves, fifths)
+          
+          ##
+          if (!is.null(key)) {
+           if (is.character(key)) key <- getFifth(as.tonalInterval(key))
+           fifths <- fifths - key
+           
+           tints[fifths > 8]  <- tints[fifths > 8]  - pythagorean.comma
+           tints[fifths < -5] <- tints[fifths < -5] + pythagorean.comma
+          }
+          
+          if (melodic) {
+           chromatic <- fifths > 5 | fifths < -1
+           ints <- c(diff(tints), tint(0, 0)) # tint(0,0) is just padding
+           
+           tints[chromatic & ints == tint(-11,  7)] <- tints[chromatic & ints == tint(-11,  7)] + pythagorean.comma
+           tints[chromatic & ints == tint(11 , -7)] <- tints[chromatic & ints == tint(11 , -7)] - pythagorean.comma
+                    
+          }
+          
+          tints
+}
+
+#' @name tonalInterval-read
+#' @export
+read.midi2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
+ read.semit2tonalInterval(n - 60L, key = key, melodic = melodic)      
 }
 
 ######## From kern pitch
@@ -945,11 +997,29 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 #### From frequency
 
 
+#### From anything!
+
+#' @name tonalInterval
+#' @export 
+as.tonalInterval <- function(...) UseMethod('as.tonalInterval')
+
+#' @name tonalInterval-read
+#' @export 
+as.tonalInterval.numeric <- read.semit2tonalInterval
+
+#' @name tonalInterval-read
+#' @export 
+as.tonalInterval.character <- regexDispatch( 'Kern Pitch' = read.kernPitch2tonalInterval,
+                                             'Interval'  = read.interval2tonalInterval,
+                                             'Scientific Pitch' = read.sciPitch2tonalInterval,
+                                             'Solfege' = read.solfa2tonalInterval,
+                                             'Decimal' = read.semit2tonalInterval)
+
 
 
 
 #############################################################################-
-#### Translating pitch represenations ----
+#### Translating pitch representations ----
 ####################################################################-
 
 #' Pitch translations
@@ -963,19 +1033,12 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 #' 
 #' Under the hood, these functions use the \code{\link{humdrumR}} 
 #' \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
-#' fundamental, \emph{lingua franca} representaiton of pitch.
+#' fundamental, \emph{lingua franca} representation of pitch.
 #' 
-#' @name humPitch
-#' @export 
-as.tonalInterval <- regexDispatch( 'Kern Pitch' = read.kernPitch2tonalInterval,
-                                   'Interval'  = read.interval2tonalInterval,
-                                   'Scientific Pitch' = read.sciPitch2tonalInterval,
-                                   'Solfege' = read.solfa2tonalInterval)
-    
 
 #' @name humPitch
 #' @export
-as.semits.character <- as.semits.tonalInterval %.% as.tonalInterval
+as.semit.character <- as.semit.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
@@ -1045,4 +1108,5 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
 transpose.character <- regexDispatch('Kern Pitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
                                      'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,
                                      'Scientific Pitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
-                                     'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval)
+                                     'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval,
+                                     'Decimal' = as.semit %.% transpose.tonalInterval %.% read.semit2tonalInterval)

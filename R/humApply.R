@@ -346,7 +346,7 @@ withinHumdrum <- function(humdrumR,  ...) {
                               humdrumR <- setActiveFields(humdrumR, newfields) 
                     }
           }
-          humdrumR <- indexGLIM(humdrumR)
+          # humdrumR <- indexGLIM(humdrumR)
           
           if (length(doexpressions) > 1) {
                     do.call('Recall', c(humdrumR,  

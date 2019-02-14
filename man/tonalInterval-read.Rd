@@ -2,14 +2,22 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-read}
 \alias{tonalInterval-read}
+\alias{read.semit2tonalInterval}
+\alias{read.midi2tonalInterval}
 \alias{read.kernPitch2sciPitch}
 \alias{read.kernPitch2tonalInterval}
 \alias{read.sciPitch2tonalInterval}
 \alias{read.interval2tonalInterval}
 \alias{read.solfa2tonalInterval}
 \alias{read.ratio2tonalInterval}
+\alias{as.tonalInterval.numeric}
+\alias{as.tonalInterval.character}
 \title{Reading \code{\link[humdrumR:tonalInterval]{tonalIntervals}} from various representations}
 \usage{
+read.semit2tonalInterval(n, key = NULL, melodic = FALSE)
+
+read.midi2tonalInterval(n, key = NULL, melodic = FALSE)
+
 read.kernPitch2sciPitch(str)
 
 read.kernPitch2tonalInterval(str)
@@ -21,6 +29,11 @@ read.interval2tonalInterval(str)
 read.solfa2tonalInterval(str, key = 0L)
 
 read.ratio2tonalInterval(str, twelfth = 3)
+
+\method{as.tonalInterval}{numeric}(n, key = NULL, melodic = FALSE)
+
+\method{as.tonalInterval}{character}(str, key = 0L, melodic = FALSE,
+  inPlace = FALSE)
 }
 \description{
 These functions all translate other pitch representations

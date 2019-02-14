@@ -12,11 +12,13 @@ knownInterpretations <- data.table::fread(system.file('extdata', 'KnownInterpret
 # Preprocess self-referential {}s in the file KnownInterperations.tsv
 for (i in seq_along(knownInterpretations$RE)) {
           knownREs <- list2env(as.list(setNames(knownInterpretations$RE, knownInterpretations$Name)))
-          knownInterpretations$RE[i] <- glue::glue(knownInterpretations$RE[i], .envir = knownREs)         
+          knownInterpretations$RE[i] <- glue::glue(knownInterpretations$RE[i], 
+                                                   .envir = knownREs, 
+                                                   .open = '<<', .close = '>>')         
 }
 
 #' @export
-getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive'), strict = FALSE) {
+getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), strict = FALSE) {
  known <- knownInterpretations[knownInterpretations$Type %in% types, ]          
  if (is.null(pattern)) return(known$Name)
  
@@ -24,7 +26,7 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive'), strict = FAL
  hits <- sapply(interpPattern,
                 function(pat) {
                   hits <- which(pat == tolower(known$Name))
-                  if (length(hits) == 0) hits <- pmatch(interpPattern, tolower(known$Name))
+                  if (length(hits) == 0) hits <- pmatch(pat, tolower(known$Name))
                   hits
                 })
  res <- known$RE[hits]

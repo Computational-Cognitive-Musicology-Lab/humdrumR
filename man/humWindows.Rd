@@ -2,17 +2,17 @@
 % Please edit documentation in R/humWindows.R
 \name{humWindows}
 \alias{humWindows}
-\alias{nest}
 \alias{windows}
 \alias{hop}
+\alias{nest}
 \title{Applying functions across arbitrary windows.}
 \usage{
-nest(vec, open, close, depth = 1)
-
 windows(df, form, with = list(), ..., start = 1L, end = nrow(df),
   bounds = "exclude")
 
-hop(vec, pattern, start = 1L, end = length(vec), bounds = "exclude")
+hop(vec, pattern, start = 1L, end = length(vec))
+
+nest(vec, open, close, depth = 1)
 }
 \description{
 Applying functions across arbitrary windows.

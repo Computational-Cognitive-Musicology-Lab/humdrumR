@@ -1277,7 +1277,7 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 #' @export
 evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA)  {
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-  locnames <- humtab[ , paste(NFile, Spine, Path, Stop, Record, sep = '.')]
+  # locnames <- humtab[ , paste(NFile, Spine, Path, Stop, Record, sep = '.')]
   
   values <- lazyeval::f_eval(humdrumR@Active, data = humtab)
   
@@ -1288,7 +1288,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
     values[] <- lapply(values, 
                        function(col) {
                                  col[is.na(col) | col == '.'] <- nullAs
-                                 xnames(col) <- locnames
+                                 # xnames(col) <- locnames
                                  col
                                  })
   }
@@ -1305,7 +1305,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
                       out <- character(nrow(humtab))
                       out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, function(row) paste(unique(row), collapse = sep))
                       out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, function(row) paste(       row , collapse = sep))
-                      rownames(out) <- locnames
+                      # rownames(out) <- locnames
                       values <- out
             }   
             if (is.object(values)) values <- as.character(values)
@@ -1422,7 +1422,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
             
   fields <- unlist(humdrumR@Fields[fieldTypes])
   
-  D <- D[ , fields, with = FALSE]
+  D <- D[1L, fields, with = FALSE]
   classes <- sapply(D, class)
   
   if (any(lists <- classes == 'list')) {

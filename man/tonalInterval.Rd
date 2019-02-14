@@ -13,6 +13,7 @@
 \alias{invert}
 \alias{simplify}
 \alias{generalize}
+\alias{as.tonalInterval}
 \title{The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.}
 \usage{
 tint(o, f, c = numeric(length(o)))
@@ -68,6 +69,8 @@ invert(tint, around = tint(0, 0))
 simplify(tint)
 
 generalize(tint)
+
+as.tonalInterval(...)
 }
 \description{
 The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.

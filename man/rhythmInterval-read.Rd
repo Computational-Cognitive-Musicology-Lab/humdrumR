@@ -2,9 +2,22 @@
 % Please edit documentation in R/humRhythm.R
 \name{rhythmInterval-read}
 \alias{rhythmInterval-read}
+\alias{read.recip2rhythmInterval}
+\alias{read.numeric2rhythmInterval}
+\alias{read.fraction2rhythmInterval}
+\alias{as.rhythmInterval.numeric}
+\alias{as.rhythmInterval.character}
 \title{Reading \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} from various representations}
 \usage{
-as.rhythmInterval(x)
+read.recip2rhythmInterval(str)
+
+read.numeric2rhythmInterval(n)
+
+read.fraction2rhythmInterval(str)
+
+\method{as.rhythmInterval}{numeric}(n)
+
+\method{as.rhythmInterval}{character}(str, inPlace = FALSE)
 }
 \description{
 These functions all translate other pitch representations

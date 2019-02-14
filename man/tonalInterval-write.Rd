@@ -2,7 +2,7 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-write}
 \alias{tonalInterval-write}
-\alias{as.semits.tonalInterval}
+\alias{as.semit.tonalInterval}
 \alias{as.midi.tonalInterval}
 \alias{as.sciPitch.tonalInterval}
 \alias{as.kernPitch.tonalInterval}
@@ -13,7 +13,7 @@
 \alias{as.frequency.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
-\method{as.semits}{tonalInterval}(x)
+\method{as.semit}{tonalInterval}(x)
 
 \method{as.midi}{tonalInterval}(x)
 

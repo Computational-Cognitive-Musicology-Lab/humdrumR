@@ -4,8 +4,11 @@
 \name{rhythmInterval-asvector}
 \alias{rhythmInterval-asvector}
 \alias{as.data.frame.rhythmInterval}
+\alias{as.data.table.rhythmInterval}
 \alias{is.atomic.rhythmInterval}
 \alias{rep.rhythmInterval}
+\alias{order.rhythmInterval}
+\alias{sort.rhythmInterval}
 \alias{format.rhythmInterval}
 \title{Methods required to make rhythmIntervals act like vectors}
 \usage{
@@ -22,6 +25,9 @@
 as.data.frame.rhythmInterval(x, row.names = NULL, optional = FALSE,
   ...)
 
+\method{as.data.table}{rhythmInterval}(x, row.names = NULL,
+  optional = FALSE, ...)
+
 \S4method{as.vector}{rhythmInterval}(x)
 
 \S4method{as.list}{rhythmInterval}(x, ...)
@@ -34,10 +40,10 @@ is.atomic.rhythmInterval(x)
 
 \method{rep}{rhythmInterval}(x, ...)
 
-\S4method{order}{rhythmInterval}(..., na.last = TRUE,
-  decreasing = FALSE, method = c("auto", "shell", "radix"))
+\method{order}{rhythmInterval}(x, na.last = TRUE, decreasing = FALSE,
+  method = c("auto", "shell", "radix"))
 
-\S4method{sort}{rhythmInterval}(x, decreasing = FALSE)
+sort.rhythmInterval(x, decreasing = FALSE)
 
 \S4method{show}{rhythmInterval}(object)
 

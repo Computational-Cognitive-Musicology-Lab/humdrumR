@@ -14,7 +14,7 @@ transpose(x, interval = tint(0, 0), generic = NULL, ...)
 
 \method{transpose}{character}(str, interval = tint(0, 0),
   generic = NULL, ..., specific = TRUE, directed = TRUE, key = 0L,
-  inPlace = FALSE)
+  melodic = FALSE, inPlace = FALSE)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

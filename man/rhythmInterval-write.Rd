@@ -2,7 +2,20 @@
 % Please edit documentation in R/humRhythm.R
 \name{rhythmInterval-write}
 \alias{rhythmInterval-write}
+\alias{as.recip.rhythmInterval}
+\alias{as.fraction.numeric}
+\alias{as.fraction.rhythmInterval}
+\alias{as.decimal.rhythmInterval}
 \title{Writing \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to various representations}
+\usage{
+\method{as.recip}{rhythmInterval}(rint)
+
+\method{as.fraction}{numeric}(n)
+
+\method{as.fraction}{rhythmInterval}(rint)
+
+\method{as.decimal}{rhythmInterval}(rint)
+}
 \description{
 These functions all translate \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to 
 various representations.

@@ -240,7 +240,7 @@ ditto <- function(spine) {
 #' @export
 IfElse <- function(true, yes, no) {
   out <- no
-  if (any(true)) out[!is.na(true) && true ] <- yes[!is.na(true) && true]
+  if (any(true)) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
 

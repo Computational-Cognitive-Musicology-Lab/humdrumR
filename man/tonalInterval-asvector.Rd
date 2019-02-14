@@ -6,6 +6,7 @@
 \alias{as.data.frame.tonalInterval}
 \alias{is.atomic.tonalInterval}
 \alias{rep.tonalInterval}
+\alias{order.tonalInterval}
 \alias{format.tonalInterval}
 \title{Methods required to make tonalIntervals act like vectors}
 \usage{
@@ -33,8 +34,8 @@ is.atomic.tonalInterval(x)
 
 \method{rep}{tonalInterval}(x, ...)
 
-\S4method{order}{tonalInterval}(..., na.last = TRUE,
-  decreasing = FALSE, method = c("auto", "shell", "radix"))
+\method{order}{tonalInterval}(x, na.last = TRUE, decreasing = FALSE,
+  method = c("auto", "shell", "radix"))
 
 \S4method{sort}{tonalInterval}(x, decreasing = FALSE)
 

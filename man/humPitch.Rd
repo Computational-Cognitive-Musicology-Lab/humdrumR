@@ -2,7 +2,7 @@
 % Please edit documentation in R/humPitch.R
 \name{humPitch}
 \alias{humPitch}
-\alias{as.semits}
+\alias{as.semit}
 \alias{as.midi}
 \alias{as.sciPitch}
 \alias{as.kernPitch}
@@ -10,8 +10,7 @@
 \alias{as.solfa}
 \alias{as.ratio}
 \alias{as.frequency}
-\alias{as.tonalInterval}
-\alias{as.semits.character}
+\alias{as.semit.character}
 \alias{as.midi.character}
 \alias{as.kernPitch.character}
 \alias{as.sciPitch.character}
@@ -21,7 +20,7 @@
 \alias{as.ratio.character}
 \title{Pitch translations}
 \usage{
-as.semits(x, ...)
+as.semit(x, ...)
 
 as.midi(x, ...)
 
@@ -38,28 +37,24 @@ as.ratio(x, twelfth = 2^(19/12), ...)
 as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
   twelfth = 2^(19/12), ...)
 
-as.tonalInterval(str, key = 0L, inPlace = FALSE)
+\method{as.semit}{character}(x)
 
-\method{as.semits}{character}(str, key = 0L, inPlace = FALSE)
+\method{as.midi}{character}(x)
 
-\method{as.midi}{character}(str, key = 0L, inPlace = FALSE)
+\method{as.kernPitch}{character}(x)
 
-\method{as.kernPitch}{character}(str, key = 0L, inPlace = FALSE)
+\method{as.sciPitch}{character}(x)
 
-\method{as.sciPitch}{character}(str, key = 0L, inPlace = FALSE)
+\method{as.interval}{character}(x, specific = TRUE, directed = TRUE,
+  quality.labels = list(augment = "A", diminish = "d", major = "M", minor
+  = "m", perfect = "P"))
 
-\method{as.interval}{character}(str, key = 0L, inPlace = FALSE,
-  specific = TRUE, directed = TRUE, quality.labels = list(augment =
-  "A", diminish = "d", major = "M", minor = "m", perfect = "P"))
+\method{as.solfa}{character}(x, key = 0L)
 
-\method{as.solfa}{character}(str, key = 0L, inPlace = FALSE)
+\method{as.frequency}{character}(x, reference.freq = 440L,
+  reference.tint = tint(-4, 3), twelfth = 2^(19/12))
 
-\method{as.frequency}{character}(str, key = 0L, inPlace = FALSE,
-  reference.freq = 440L, reference.tint = tint(-4, 3),
-  twelfth = 2^(19/12))
-
-\method{as.ratio}{character}(str, key = 0L, inPlace = FALSE,
-  twelfth = 2^(19/12))
+\method{as.ratio}{character}(x, twelfth = 2^(19/12))
 }
 \description{
 These functions translate various pitch representations
@@ -72,5 +67,5 @@ if you want them to discard non-pitch parts of the string(s).
 \details{
 Under the hood, these functions use the \code{\link{humdrumR}} 
 \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
-fundamental, \emph{lingua franca} representaiton of pitch.
+fundamental, \emph{lingua franca} representation of pitch.
 }
