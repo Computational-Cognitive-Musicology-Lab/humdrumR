@@ -9,7 +9,7 @@ which uses Map to call this expression across these named objects.
 It first uses xifyForm to put the expression in the form of a 
 lambda function.}
 \usage{
-mapifyForm(expression, usedInExpr)
+mapifyForm(funcQuosure, usedInExpr, depth = 1L)
 }
 \description{
 This function takes an expression and a vector of strings representing

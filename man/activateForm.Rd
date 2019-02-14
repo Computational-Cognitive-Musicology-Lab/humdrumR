@@ -8,7 +8,7 @@ inserts the \code{Active} expression from the
 target \code{\linkS4class{humdrumR}} object in place 
 of any \code{.} subexpressions.}
 \usage{
-activateForm(funcform, active)
+activateForm(funcQuosure, active)
 }
 \description{
 This function takes the \code{expression} argument

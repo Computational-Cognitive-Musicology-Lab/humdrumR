@@ -174,12 +174,12 @@ windows <- function(df, form, with = list(), ...,
           if (end > nrow(df)) end <- nrow(df)
           
           
- with <- c(with, list(...))
- with[] <- lapply(with, lazyeval::f_eval_rhs, data = df)
+ with <- lapply(c(with, list(...)), rlang::as_quosure)
+ with[] <- lapply(with, rlang::eval_tidy, data = df)
  with <- c(with, df)
  
- open  <- parseWindowExpression(lazyeval::f_lhs(form))
- close <- parseWindowExpression(lazyeval::f_rhs(form))
+ open  <- parseWindowExpression(rlang::f_lhs(form))
+ close <- parseWindowExpression(rlang::f_rhs(form))
  
  ##
  for (obj in c('open', 'close')) {

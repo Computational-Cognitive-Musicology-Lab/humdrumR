@@ -7,9 +7,10 @@ and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExp
 with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
 The result is that \code{TargetExpr} is broken into a list of vectors by the
 \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
-argument. See the docementation for \code{\link{withinHumdrum}}.}
+argument. See the docementation for \code{\link{withinHumdrum}}.
+This does not look for \code{@} sub expression within branches of a \code{@} expression!}
 \usage{
-splatForm(funcform)
+splatForm(funcQuosure)
 }
 \description{
 This function takes an expression,
@@ -18,4 +19,5 @@ with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
 The result is that \code{TargetExpr} is broken into a list of vectors by the
 \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
 argument. See the docementation for \code{\link{withinHumdrum}}.
+This does not look for \code{@} sub expression within branches of a \code{@} expression!
 }

@@ -246,7 +246,7 @@ If we make this call
 withinHumdrum(humdata, 
          do ~ myFunction(Token@Spine))
 }
-and  there are four spines
+and there are four spines
 this is how \code{withinHumdrum} will intepret the expression:
 \preformatted{
 withinHumdrum(humData,

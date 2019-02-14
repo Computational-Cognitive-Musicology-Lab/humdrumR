@@ -3,19 +3,19 @@
 \name{humtableApplier}
 \alias{humtableApplier}
 \title{This function operates within withinHumdrum.
-It takes an expression created by parseForm 
+It takes a quosure created by prepareForm 
 and turns it into a function which can be applied 
-to a Humtable (a data.table). 
+to a Humtable (i.e., a data.table). 
 It's second argument determines if the result of the 
 expression application is put back into the Humtable.}
 \usage{
-humtableApplier(funcform, captureOutput = TRUE, reHumtab = TRUE)
+humtableApplier(funcquo, captureOutput = TRUE, reHumtab = TRUE)
 }
 \description{
 This function operates within withinHumdrum.
-It takes an expression created by parseForm 
+It takes a quosure created by prepareForm 
 and turns it into a function which can be applied 
-to a Humtable (a data.table). 
+to a Humtable (i.e., a data.table). 
 It's second argument determines if the result of the 
 expression application is put back into the Humtable.
 }

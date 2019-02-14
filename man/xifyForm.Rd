@@ -10,14 +10,10 @@ This lambda function is appropriate for calling with
 Map, lapply, ngramApply, etc.
 This is used by listifyForm and ngramifyForm.}
 \usage{
-xifyForm(expression, usedInExpr)
+xifyForm(expression, usedInExpr, depth = 1L)
 }
 \description{
-This function takes an expression and a vector of strings representing
-names used in that expression and creates an expression
-which creates an lambda function which takes those names
-as arguments and calls the expression with them.
-This lambda function is appropriate for calling with
-Map, lapply, ngramApply, etc.
-This is used by listifyForm and ngramifyForm.
+Argnames within the newly generated lambda expressions are changed
+to lower case versions of usedInExpr strings, but with depth "_" appended
+to make sure there's no accidental overlap (just a precaution).
 }

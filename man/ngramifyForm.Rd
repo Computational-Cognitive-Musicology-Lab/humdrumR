@@ -8,7 +8,7 @@ which uses applyNgram on these named objects.
 It first uses xifyForm to put the expression in the form of a 
 lambda function.}
 \usage{
-ngramifyForm(expression, n, usedInExpr)
+ngramifyForm(funcQuosure, ngramQuosure, usedInExpr, depth = 1L)
 }
 \description{
 This function takes an expression and a vector of strings representing

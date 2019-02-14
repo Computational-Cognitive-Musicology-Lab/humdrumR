@@ -219,7 +219,7 @@
 #' withinHumdrum(humdata, 
 #'          do ~ myFunction(Token@Spine))
 #' }
-#' and  there are four spines
+#' and there are four spines
 #' this is how \code{withinHumdrum} will intepret the expression:
 #' \preformatted{
 #' withinHumdrum(humData,
@@ -286,38 +286,44 @@ withinHumdrum <- function(humdrumR,  ...) {
           
           # turn  any functions into formula
           formulae <- anyfuncs2forms(formulae, parent.env(environment()))
-          if (any(sapply(formulae, Negate(lazyeval::is_formula)))) stop('In withinHumdrum(...) unnamed arguments must be formulas or functions.')
+          if (any(sapply(formulae, Negate(rlang::is_formula)))) stop('In withinHumdrum(...) unnamed arguments must be formulas or functions.')
           
           #### Processing formulae list
-          #parseKeywords creates new object in the environment: 
+          #parseKeywords returns a list with the following names:
           # graphics, recordtypes, doexpressions, ngrams, partitions
           # also WhichAreDo (a logical vector)
-          parsedFormulae <- parseKeywords(formulae, envir = environment()) 
-          # graphical options
-          if (length(graphics) > 0) {
+          parsedFormulae <- parseKeywords(formulae) 
+          
+          
+          ### graphical options
+          if (length(parsedFormulae$graphics) > 0) {
                     oldpar <- par(no.readonly = TRUE)
                     on.exit(par(oldpar))
-                    do.call('par', graphics)
+                    
+                    rlang::eval_tidy(rlang::quo(par(!!!parsedFormulae$graphics)))
           }
           
           #### Preprocess humdrumR and humtab
-          humtab <- getHumtab(humdrumR, recordtypes)
+          
+          # Getting the humtab with the right record types.
+          humtab <- rlang::eval_tidy(rlang::quo(getHumtab(humdrumR, !!parsedFormulae$recordtypes)))
           
           #### Create main expression
-          currentdo <- doexpressions[[1]]
-          lazyeval::f_rhs(currentdo) <- interpolateNamedValues(lazyeval::f_rhs(currentdo), namedArgs)
-          funcform <- parseForm(humtab, currentdo, 
-                                humdrumR@Active, ngrams)
-          humtabFunc  <- humtableApplier(funcform, 
-                                         captureOutput = !grepl('p', names(doexpressions)[1]),
+          currentdo <- parsedFormulae$doexpressions[[1]]
+          currentdo <- interpolateNamedValues(currentdo, namedArgs)
+          
+          funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
+          
+          humtabFunc  <- humtableApplier(funcQuosure, 
+                                         captureOutput = !grepl('p', names(parsedFormulae$doexpressions)[1]),
                                          reHumtab = TRUE)
           
           #### evaluate expression 
           
-          newhumtab <- if (length(partitions) == 0) {
+          newhumtab <- if (length(parsedFormulae$partitions) == 0) {
                     humtabFunc(humtab)
           } else {
-                    partApply(humtab, partitions, humtabFunc)
+                    partApply(humtab, parsedFormulae$partitions, humtabFunc)
           }
           
           
@@ -327,10 +333,9 @@ withinHumdrum <- function(humdrumR,  ...) {
           # where to be put back
           # This section should be improved (Nat, 11/29/2018)
           if (any(is.na(newhumtab$Type))) {
-                    newtype <- if ('D' %in% recordtypes) 'D' else recordtypes[1]
+                    newtype <- if ('D' %in% parsedFormulae$recordtypes) 'D' else parsedFormulae$recordtypes[1]
                     newhumtab$Type[is.na(newhumtab$Type)] <- newtype
           }
-          
           putHumtab(humdrumR, drop = TRUE) <- newhumtab
           ########### Update other slots in humdrumR object
           
@@ -338,19 +343,19 @@ withinHumdrum <- function(humdrumR,  ...) {
           # tell the humdrumR object about the new fields and set the Active formula.
           newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
           if (length(newfields) > 0) {
-                    addFields(humdrumR)  <- newfields
-                    humdrumR <- if (any(names(partitions) == 'where')) {
-                              act <- ifelsecalls(partitions['where'], c(lazyeval::f_rhs(humdrumR@Active), lapply(newfields, as.symbol)))
-                              putActive(humdrumR, lazyeval::f_new(act))
+                    addFields(humdrumR) <- newfields
+                    humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
+                              act <- ifelsecalls(parsedFormulae$partitions['where'], c(rlang::f_rhs(humdrumR@Active), lapply(newfields, as.symbol)))
+                              putActive(humdrumR, rlang::new_formula(NULL, act))
                     } else {
                               humdrumR <- setActiveFields(humdrumR, newfields) 
                     }
           }
           # humdrumR <- indexGLIM(humdrumR)
           
-          if (length(doexpressions) > 1) {
+          if (length(parsedFormulae$doexpressions) > 1) {
                     do.call('Recall', c(humdrumR,  
-                                        formulae[-WhichAreDo[1]], #remove first do expression and Recall
+                                        formulae[-parsedFormulae$WhichAreDo[1]], #remove first do expression and Recall
                                         namedArgs))
           } else {
                     humdrumR 
@@ -375,54 +380,67 @@ withHumdrum <- function(humdrumR,  ...) {
           
           # turn  any functions into formula
           formulae <- anyfuncs2forms(formulae, parent.env(environment()))
-          if (any(sapply(formulae, Negate(lazyeval::is_formula)))) stop('In withHumdrum(...) unnamed arguments must be formulas or functions.')
+          if (any(sapply(formulae, Negate(rlang::is_formula)))) stop('In withHumdrum(...) unnamed arguments must be formulas or functions.')
          
           #### Processing formulae list
-          #parseKeywords creates new object in the environment: 
+          #parseKeywords returns a list with the following names:
           # graphics, recordtypes, doexpressions, ngrams, partitions
           # also WhichAreDo (a logical vector)
-          parsedFormulae <- parseKeywords(formulae, envir = environment()) 
+          parsedFormulae <- parseKeywords(formulae) 
           
           # graphical options
-          if (length(graphics) > 0) {
+          if (length(parsedFormulae$graphics) > 0) {
                     oldpar <- par(no.readonly = TRUE)
                     on.exit(par(oldpar))
-                    do.call('par', graphics)
+                    
+                    rlang::eval_tidy(rlang::quo(par(!!!parsedFormulae$graphics)))
           }
           
           #### Preprocess humdrumR and humtab
-          #### Create main expression
-          if (length(doexpressions) > 1) {
+          # withHumdrum can't handle multiple do expressions, because it doesn't return a
+          # humdrumR object, it can't pipe the output of one do expression to the next.
+          # Instead, if there are more than one do expressions, we call all but the last do expression
+          # using withinHumdrum (which does pipe one do to the next) and only call withHumdrum on the last do expression.
+          # The call to withinHumdrum is identical to the call to withHumdrum, except missing the initial do expressions.
+          if (length(parsedFormulae$doexpressions) > 1) {
+                    
+                    formulaeSubset <- formulae[head(parsedFormulae$WhichAreDo, -1)]  #call all but last doexpression
                     humdrumR <- do.call('withinHumdrum', c(humdrumR,
-                                                           formulae[head(WhichAreDo, -1)], #call all but last doexpression
+                                                           formulaeSubset,
                                                            namedArgs))
-                    doexpressions <- tail(doexpressions, 1)       
+                    doexpressions <- tail(parsedFormulae$doexpressions, 1)       
           } 
+          
+          # Getting the humtab with the right record types.
+          humtab <- rlang::eval_tidy(rlang::quo(getHumtab(humdrumR, !!parsedFormulae$recordtypes)))
+          
+          
+          #### Create main expression
           currentdo <- doexpressions[[1]]
-          lazyeval::f_rhs(currentdo) <- interpolateNamedValues(lazyeval::f_rhs(currentdo),  namedArgs)
-          
-          humtab <- getHumtab(humdrumR, recordtypes)
-          
-          funcform <- parseForm(humtab, currentdo, 
-                                humdrumR@Active, ngrams)
+          currentdo <- interpolateNamedValues(currentdo, namedArgs)
 
-          humtabFunc  <- humtableApplier(funcform, 
+          funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
+
+          humtabFunc  <- humtableApplier(funcQuosure, 
                                          captureOutput = !grepl('p', names(doexpressions)[1]),
                                          reHumtab = FALSE)
           
           #### evaluate expression 
           
-          output <- if (length(partitions) == 0) {
+          output <- if (length(parsedFormulae$partitions) == 0) {
                     humtabFunc(humtab)
           } else {
-                    if (length(partitions) > 1) {
-                              humtabFunc_pre  <- humtableApplier(funcform, 
+                    if (length(parsedFormulae$partitions) > 1) {
+                              # If there are more than one partitions, need to run the initial ones (all but last)
+                              # first with reHumtab output = TRUE. Only with last partition do we drop the humdrumR
+                              # data format.
+                              humtabFunc_pre  <- humtableApplier(funcQuosure, 
                                                                  captureOutput = !grepl('p', names(doexpressions)[1]),
                                                                  reHumtab = TRUE)
-                              humtab <- partApply(humtab, head(partitions, -1), humtabFunc_pre)
+                              humtab <- partApply(humtab, head(parsedFormulae$partitions, -1), humtabFunc_pre)
                               
                     } 
-                    partApply(humtab, partitions[length(partitions)], humtabFunc)
+                    partApply(humtab, tail(parsedFormulae$partitions, 1), humtabFunc)
                               
           }
           
@@ -445,60 +463,110 @@ anyfuncs2forms <- function(fs, parentenv) {
                                            expenv <- list2env(list(.func = func))
                                            parent.env(expenv) <- parentenv
                                            formula <- ~ .func(.)
-                                           lazyeval::f_env(formula) <- expenv
+                                           rlang::f_env(formula) <- expenv
                                            formula
                                  }) 
           fs
 }
 
-parseKeywords <- function(formulae, envir) {
- formulargs <- parseArgFormulae(formulae) # output is named list of right sided formula
+parseKeywords <- function(formulae) {
+ formulargs <- parseArgFormulae(formulae) # output is named list of quosures
  formulargnames <- names(formulargs)
  
  #
  knownKeywords <- list(doexpressions   = c('d', 'do', 'dop', 'dopl', 'doplo', 'doplot'),
                        graphics        = names(par()),
-                       ngrams          = c('ngrams', 'ngram'),
-                       partitions      = c('by', 'where'),
+                       ngrams          = c('ngrams', 'ngram', 'ngra', 'ngr', 'ng'),
+                       partitions      = c('by', 'where', 'groupby', 'group_by'),
                        recordtypes     = c('recordtype', 'recordtypes'),
                        windows         = c('windows', 'window'))
 
  boolean <- lapply(knownKeywords, `%in%`, x = formulargnames)
  
  if (!any(boolean$doexpressions)) stop(call. = FALSE,
-                                   "The with(in)Humdrum formulae argument doesn't include any do(plot) expressions to apply to the data!
+                                   "The with(in)Humdrum formulae argument doesn't include any do[plot] expressions to apply to the data!
                                    These expressions should be either in a formula with no left hand side (~Expr) or with 'do' or 'doplot' on the left hand side (do~Expr, doplot~Expr).")
  
  values  <- lapply(boolean, function(b) formulargs[b])
+ values$WhichAreDo <- which(boolean$doexpressions)
  
- # These keywords must always have exactly one evaluated value (not an expression).
- #        If they are missing, there is a default.
+ # These keywords must always have exactly one evaluated value.
  #        If there are more than one, take the first.
- #        Turn the formula into an atomic value
- values$recordtypes <- if (length(values$recordtypes) == 0) 'D'      else lazyeval::f_eval(values$recordtypes[[1]])
- values$ngrams      <- if (length(values$ngrams)      == 0)  1       else lazyeval::f_eval(values$ngrams[[1]])
+ #        If there are none, some categories have defaults
+ values$ngrams      <- if (length(values$ngrams)      == 0) NULL else values$ngrams[[1]]
+ values$recordtypes <- if (length(values$recordtypes) == 0) rlang::quo('D') else values$recordtypes[[1]]
  
  # Other keywords (e.g., windows and partitions) can be of any length, including 0
- values$graphics    <- lapply(values$graphics, lazyeval::f_eval)
  
- #
- values$WhichAreDo <- which(boolean$doexpressions)
- list2env(values, envir = envir)
+ values
 }
+
+
+
+
+parseArgFormulae <- function(l) {
+          # This function parsed formula into [Keyword ~ Expression] pairs.
+          # It takes a list of formulas and applies parseArgFormula.
+          # Returns a named list of rlang::quosures.
+          names(l) <- NULL
+          unlist(lapply(l, parseArgFormula), recursive = FALSE)
+}
+
+parseArgFormula <- function(form) {
+          # This function parsed formula into [Keyword ~ Expression] pairs.
+          # This function takes a formula formatted
+          # Keyword ~ expr1 [~ expr2 ~ expr3 ...] and translates it to a list
+          # like list(Keyword = ~ c(expr1[, expr2, expr3, ...])).
+          # If the keyword is missing (there is no left side of formula), it defaults to "by".
+          # The function takes the input formula and turns it into a rlang::quosure.
+          exprs <- splitFormula(form) # divides formula into list of expressions
+          
+          if (grepl('^~', deparse(form))) { 
+                    keyword <- quote(do) # if keyword is empty, default to 'do'
+          } else {
+                    keyword <- exprs[[1]]
+                    exprs <- exprs[-1]
+          }
+          
+          # check that keyword is actually a single legal R name, not an expression
+          if (length(keyword) != 1L || !is.name(keyword)) stop("Your formula (in a call to withinHumdrum) contains a 
+                                                  keyword (far left side of formula) which can't be parsed as a name.")
+          
+          # collapse to one expression
+          expr <- if (length(exprs) == 1) exprs[[1]] else  rlang::expr(list(!!!exprs))
+          quosure <- rlang::new_quosure(expr, env = rlang::f_env(form))
+          
+          setNames(list(quosure), as.character(keyword))
+}
+
+
+splitFormula <- function(form) {
+          # Takes a formula which contains one or more formula,
+          # and separates each expression, as if the ~ symbol is a boundary.
+          if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
+          
+          if (!rlang::is_formula(form)) form <- eval(form)
+          
+          lhs <- Recall(rlang::f_lhs(form))
+          rhs <- Recall(rlang::f_rhs(form))
+          
+          c(unlist(lhs), unlist(rhs))
+}
+
+
 
 ###########- Applying withinHumdrum's expression to a data.table
 
-humtableApplier <- function(funcform, captureOutput = TRUE, reHumtab = TRUE) {
+humtableApplier <- function(funcquo, captureOutput = TRUE, reHumtab = TRUE) {
           #' This function operates within withinHumdrum.
-          #' It takes an expression created by parseForm 
+          #' It takes a quosure created by prepareForm 
           #' and turns it into a function which can be applied 
-          #' to a Humtable (a data.table). 
+          #' to a Humtable (i.e., a data.table). 
           #' It's second argument determines if the result of the 
           #' expression application is put back into the Humtable.  
           
           function(humtab) {
-                    # output <- eval(funccall, envir = humtab)
-                    output <- lazyeval::f_eval_rhs(funcform, data = humtab)
+                    output <- rlang::eval_tidy(funcquo, data = humtab)
                     if (!captureOutput) return(humtab)
                     if (reHumtab) {
                               pipeIn(humtab) <- output
@@ -513,72 +581,73 @@ humtableApplier <- function(funcform, captureOutput = TRUE, reHumtab = TRUE) {
 ####################- Parsing expressions fed to withinHumdrum
 
 
-parseForm <- function(humtab, funcform, active, ngram = 1) {
-  #' This is the main function used by \code{\link{withinHumdrum}} to prepare
-  #' the \code{expression} argument for application to a \code{\linkS4class{humdrumR}}
-  #' object.
-  
-  funccall <- lazyeval::f_rhs(funcform)
+prepareForm <- function(humtab, funcQuosure, active, ngram = NULL) {
+  #' This is the main function used by \code{\link{withinHumdrum}} to prepare the current
+  #' do expression argument for application to a \code{\linkS4class{humdrumR}} object.
   
   # turn . to active formula
-  funcform <- activateForm(funcform, active)
+  funcQuosure <- activateForm(funcQuosure, active)
   
   # tandem interpretations
-  funcform <- tandemsForm(funcform)
+  funcQuosure <- tandemsForm(funcQuosure)
   
   # splats
-  funcform <- splatForm(funcform)
+  funcQuosure <- splatForm(funcQuosure)
   
   # find what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInFormula(humtab, funcform))
+  usedInExpr <- unique(fieldsInFormula(humtab, funcQuosure))
   
-  if (len0(usedInExpr)) { stop("The humformula argument in your call to withinHumdrum doesn't reference any fields in your humdrum data.
-                               Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' field.",
-                                call. = FALSE)}
+  if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
+                                        Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
+                                        call. = FALSE)
 
   # if the targets are lists, Map
-  lists <- sapply(humtab[ , usedInExpr, with = FALSE], class) == 'list'
-  if (any(lists)) funcform <- mapifyForm(funcform, usedInExpr)
+  lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
+  if (any(lists)) funcQuosure <- mapifyForm(funcQuosure, usedInExpr, depth = 1L)
     
   # if ngram is present
-  if (ngram > 1) funcform <- ngramifyForm(funcform, ngram, usedInExpr)
+  if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
+            funcQuosure <- ngramifyForm(funcQuosure, 
+                                        ngram, usedInExpr, 
+                                        depth = 1L + any(lists))
+  }
   
-  funcform
+  funcQuosure
 }
 
-####################### Functions used inside parseForm
+####################### Functions used inside prepareForm
 
-activateForm <- function(funcform, active) {
+activateForm <- function(funcQuosure, active) {
   #' This function takes the \code{expression} argument
   #' from the parent \code{\link{withinHumdrum}} call and 
   #' inserts the \code{Active} expression from the 
   #' target \code{\linkS4class{humdrumR}} object in place 
   #' of any \code{.} subexpressions.
-  active <- lazyeval::f_rhs(active)
-  substituteName(funcform, list(. = active))
+  active <- rlang::f_rhs(active)
+  substituteName(funcQuosure, list(. = active))
 }
 
 #### Interpretations in expressions
 
-tandemsForm <- function(funcform) {
+tandemsForm <- function(funcQuosure) {
  # This function inserts calls to getTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
- applyExpr(lazyeval::f_rhs(funcform),
+ # If input is a quosure (it should be), it keeps the quosure intact,
+ # (i.e., keeps it's environment).
+          
+ applyExpr(funcQuosure,
            function(ex) {
              exstr <- deparse(ex)
              interp <- grepl('^\\*[^*]', exstr)
              
              if (interp) {
                regex <- stringr::str_sub(exstr, start = 2L)
-               call('getTandem', quote(Tandem), regex)
+               rlang::expr(getTandem(Tandem, !!regex))
              } else {
                ex
              }
-           }) -> newcall
-  
-  lazyeval::f_new(newcall, env = lazyeval::f_env(funcform))
-  
+           }) 
 }
 
 
@@ -629,63 +698,46 @@ getTandem <- function(tandem, regex) {
 # feed each group as an argument to a function.
 #
 
-splatForm <- function(funcform) {
+splatForm <- function(funcQuosure) {
   #' This function takes an expression,
   #' and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExpr)},
   #' with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
   #' The result is that \code{TargetExpr} is broken into a list of vectors by the
   #' \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
   #' argument. See the docementation for \code{\link{withinHumdrum}}.
-  funccall <- lazyeval::f_rhs(funcform)
+  #' This does not look for \code{@} sub expression within branches of a \code{@} expression!
+  #' 
+  if (!is.call(funcQuosure)) return(funcQuosure)
+          
+  atArgs <- vapply(funcQuosure[-1], function(ex) is.call(ex) && deparse(ex[[1]]) == '@', FUN.VALUE = logical(1))
   
-  funccall <- parseAts(funccall)
-  
-  lazyeval::f_new(funccall, env = lazyeval::f_env(funcform))
-  
+  if (!any(atArgs)) {
+           for (i in 2:length(funcQuosure)) funcQuosure[[i]] <- Recall(funcQuosure[[i]]) 
+           funcQuosure
+  } else {
+           for (i in (1L + which(atArgs))) funcQuosure[[i]] <- parseAt(funcQuosure[[i]])   
+           callname <- funcQuosure[[1]]
+           funcQuosure[[1]] <- quote(c)
+           rlang::quo(do.call(!!callname, !!funcQuosure ))
+            
+  }
+ 
 }
 
-parseAts <- function(expr) {
- #' This is used by \code{\link{splatsForm}}.
- #' It identifies subexpressions which contain \code{@}
- #' and applies \code{\link{parseAt}} appropriately.
-  if (len1(expr)) return(expr)
-  
- callhead <- deparse(expr[[1]])
-  
- if (callhead == '@') {
-   list(as.list(expr[-1]) %class% 'splat')
-   
- } else {
-   new <- list()
-   for (i in 2:length(expr)) {
-     new <- c(new,  Recall(expr[[i]]))
-   }
-   
-   names(new) <- names(as.list(expr))[-1]
-   
-   ats <- sapply(new, inherits, what = 'splat')
-   if (any(ats)) {
-     parseAt(callhead, new[ats], new[!ats])
-   } else {
-     do.call('call', c(callhead, new), quote = TRUE)
-   }
- }
-}
+parseAt <- function(atExpr) {
+ #' This function is used by splatForm
+ #' It replaces an expression of the form \code{TargetExpr@GroupingExpr}
+ #' with \code{tapply(TargetExpr, GroupingExpr, c)}.
 
-parseAt <- function(funccall, splats, otherargs) {
- #' This does the real work for \code{\link{splatForm}}.
- #' It replaces the \code{funccall(TargetExpr@GroupingExpr)} form
- #' with the \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c)} form.
- #' It also passed additional (non-splatted) arguments (\code{otherargs}) in.
-  splats <- lapply(splats,
-                   function(splat) funccall('unname', do.call('call', quote = TRUE,
-                                           c('tapply', splat, quote(c)))))
-  call('do.call', funccall, do.call('call', c('c', splats, otherargs), quote = TRUE))
- }
+ expr  <- atExpr[[2]]
+ group <- atExpr[[3]]
+ 
+ rlang::expr(tapply(!!expr, !!group, c))
+}
 
 ########## Mapping expression across list fields.
 
-xifyForm <- function(expression, usedInExpr) {
+xifyForm <- function(expression, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which creates an lambda function which takes those names
@@ -693,55 +745,58 @@ xifyForm <- function(expression, usedInExpr) {
           #' This lambda function is appropriate for calling with
           #' Map, lapply, ngramApply, etc.
           #' This is used by listifyForm and ngramifyForm.
+          #' 
+          #' Argnames within the newly generated lambda expressions are changed
+          #' to lower case versions of usedInExpr strings, but with depth "_" appended
+          #' to make sure there's no accidental overlap (just a precaution).
           fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
-          names(fargs) <- paste0('.', tolower(usedInExpr))
+          names(fargs) <- paste0('.', tolower(usedInExpr), strrep('_', depth))
           
           expression <- substituteName(expression,
                                        setNames(lapply(names(fargs), as.symbol), usedInExpr))
           
           lambdaexpression      <- quote(function() {} )
           lambdaexpression[[2]] <- fargs
-          lambdaexpression[[3]] <- lazyeval::f_rhs(expression)
+          lambdaexpression[[3]] <- rlang::quo_get_expr(expression)
           
-          lazyeval::f_new(lambdaexpression, env = lazyeval::f_env(expression))
+          rlang::quo_set_expr(expression, lambdaexpression)
           
 }
 
 
-mapifyForm <- function(expression, usedInExpr) {
+mapifyForm <- function(funcQuosure, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which uses Map to call this expression across these named objects.
           #' (It presumes that the named objects are actually lists).
           #' It first uses xifyForm to put the expression in the form of a 
           #' lambda function.
-  expression <- xifyForm(expression, usedInExpr)
+  funcQuosure <- xifyForm(funcQuosure, usedInExpr, depth)
   
-  mappedexpression <- lazyeval::f_rhs(expression)
-  mappedexpression <- do.call('call', quote = TRUE,
-                      as.list(c(list('Map', mappedexpression), 
-                                parse(text = usedInExpr))))
-  
-  lazyeval::f_new(mappedexpression, env = lazyeval::f_env(expression))
+  rlang::quo_set_expr(funcQuosure, 
+                      rlang::expr(Map(f = !!rlang::quo_get_expr(funcQuosure), 
+                                      !!!lapply(usedInExpr, rlang::sym))))
+
 }
 
-ngramifyForm <- function(expression, n, usedInExpr) {
+ngramifyForm <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which uses applyNgram on these named objects.
           #' It first uses xifyForm to put the expression in the form of a 
           #' lambda function.
-  expression <- xifyForm(expression, usedInExpr)
+          #' 
+          #' 
+  funcQuosure <- xifyForm(funcQuosure, usedInExpr, depth)
   
-  ngramexpression <- lazyeval::f_rhs(expression)
-  
-  ngramexpression <- call('applyNgram', 
-                      n, 
-                      do.call('call', quote = TRUE,
-                              c('list', lapply(usedInExpr, as.symbol))),
-                      ngramexpression)
-  
-  lazyeval::f_new(ngramexpression, env = lazyeval::f_env(expression))
+  # rlang::quo_set_expr(funcQuosure,
+                      # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
+                                             # vecs = list(!!!lapply(usedInExpr, rlang::sym)), 
+                                             # f = !!rlang::quo_get_expr(funcQuosure))))
+  rlang::quo(
+            applyNgram(n = !!ngramQuosure, 
+                       vecs = list(!!!lapply(usedInExpr, rlang::sym)),
+                       f = !!funcQuosure))
   
 }
 
@@ -751,91 +806,50 @@ ngramifyForm <- function(expression, n, usedInExpr) {
 
 
 partApply <- function(humtab, partitions, humfunc) {
-  if (len0(partitions)) return(humfunc(humtab))
+  if (length(partitions) == 0L) return(humfunc(humtab))
           
-  funccall <- if (length(partitions) == 1) quote(humfunc(.SD)) else call('partApply', quote(humtab), quote(partitions[-1]), quote(humfunc))
+  partQuosure <- if (length(partitions) == 1L) {
+                    rlang::quo(humfunc(.SD)) 
+          } else  {
+                    rlang::quo(partApply(.SD, partitions[-1], humfunc))
+          }
+  
   
   curpart <- partitions[[1]]
   curpart <- tandemsForm(curpart)
-  curpart <- lazyeval::f_rhs(curpart) # extract this formulaes environment? 
-  # Right now, if partition call refers to anything outside of the humtable, there will be an error
-  
-  partcall <- call('[', quote(humtab), alist(i = )[[1]], funccall)
-  if (names(partitions)[1] %in% c('by', 'groupby', 'each')) {
-    partcall[['by']]      <- curpart
-    partcall[['.SDcols']] <- quote(colnames(humtab))
-    # get environment from formulae
-    env <- environment()
-    # parent.env(env) <- lazyeval::f_env(partitions[[1]])
+  curpart <- rlang::eval_tidy(curpart, data = humtab) # getting part evaluated in it's own environment
+ 
+  if (names(partitions)[1] %in% c('by', 'groupby', 'group_by')) {
+    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = list(curpart), .SDcols = colnames(humtab)])
     
-    # do it!
-    output <- eval(partcall, envir = env)
+    output <- eval(rlang::quo_squash(dtcall))  # do it!
+    output[ , curpart := NULL]
     
-    # output <- output[ , !duplicated(colnames(output)), with = FALSE]
-    output
   } else {
-    partcall[[3]] <- curpart
-    output <- eval(partcall)
+            
+    dtcall <- rlang::quo(humtab[curpart, !!partQuosure])
+    output <- eval(rlang::quo_squash(dtcall))  # do it!
     
-    negatecall <- partcall[1:3]
-    negatecall[[3]] <- call('!', call('(', curpart))
-    
+    # get unchanged part
+    negatecall      <- rlang::expr(humtab[!curpart])
     rest <- eval(negatecall)
     
-    output <- rbind(output, rest, fill = TRUE)
+    rbind(output, rest, fill = TRUE)
   
   }
   
-  output
-}
-
-
-
-parseArgFormulae <- function(l) {
-          # This function is simply syntactic sugar to
-          # make specifying partitions in a call to withinHumdrum
-          # a little bit more concise.
-          # It takes a list of formulas and applies parseArgFormula.
-          names(l) <- NULL
-          unlist(lapply(l, parseArgFormula), recursive = FALSE)
-}
-
-parseArgFormula <- function(form) {
-          # This function is simply syntactic sugar to
-          # make specifying partitions in a call to withinHumdrum
-          # a little bit more concise.
-          # This function takes a formula formatted
-          # Keyword ~ expr1 [~ expr2 ~ expr3 ...] and translates it to a list
-          # like list(Keyword = ~ c(expr1[, expr2, expr3, ...])).
-          # If the keyword is missing (there is no left side of formula), it defaults to "by".
-          exprs <- splitFormula(form)
-          
-          if (grepl('^~', deparse(form))) { 
-                    keyword <- quote(do) # if keyword is empty, default to 'do'
-          } else {
-                    keyword <- exprs[[1]]
-                    exprs <- exprs[-1]
-          }
-          if (length(exprs) > 1)  exprs <- list(do.call('call', c('list', exprs), quote = TRUE))
-          # check that keyword is actually a single legal R name, not an expression
-          if (length(keyword) != 1L || !is.name(keyword)) stop("Your formula (in a call to withinHumdrum) contains a 
-                                                  keyword (far left side of formula) which can't be parsed as a name.")
-          expr <-   do.call('~', exprs)
-          lazyeval::f_env(expr) <- lazyeval::f_env(form)
-          
-          setNames(list(expr), as.character(keyword))
 }
 
 #' Change or insert values in an expression
 #' 
 #' This function can be used to modify arguments to a functions
-#' within an existing expression.
+#' within an existing expression (or quosure/formula).
 #' 
-#' \code{inerpolateNamedValues} inteprets named value in its \code{namedArgs} 
+#' \code{interpolateNamedValues} inteprets named value in its \code{namedArgs} 
 #' argument in one of two ways: If the named value is a list, it interprets
 #' the name of the list as a function call, and inserts/swaps any arguments
 #' in that list into any instances of that function call within the \code{expr}.
-#' Named arguments are insterted or substituted if already present in expression.
+#' Named arguments are inserted or substituted if already present in expression.
 #' Unnamed argmuments are simply added to the call.
 #' Examples:
 #' \preformatted{
@@ -905,19 +919,6 @@ interpolateNamedValues <- function(expr, namedArgs) {
            
  expr
  
-}
-
-splitFormula <- function(form) {
-          # Takes a formula which contains one or more formula,
-          # and separates each expression, as if the ~ symbol is a boundary.
-          if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
-          
-          if (!lazyeval::is_formula(form)) form <- eval(form)
-          
-          lhs <- Recall(lazyeval::f_lhs(form))
-          rhs <- Recall(lazyeval::f_rhs(form))
-          
-          c(unlist(lhs), unlist(rhs))
 }
 
 
@@ -996,7 +997,7 @@ splitFormula <- function(form) {
 ifelsecalls <- function(calls, fields) {
           # function used within withinHumdrum, as part of 
           # humdrumR (re)assembly process.
-          call <- call('ifelse', lazyeval::f_rhs(calls[[1]]), 
+          call <- call('ifelse', rlang::f_rhs(calls[[1]]), 
                        quote(.), fields[[1]])
           if (len1(calls)) {
                     call[[3]] <- fields[[2]]
@@ -1015,7 +1016,7 @@ pipeFields <- function(humtab) {
   
   pipefields  <- colnms[grepl('Pipe', colnms)]
   
-  if (lennot0(pipefields)) pipefields <- pipefields[order(as.numeric(stringr::str_extract(pipefields, '[0-9]+')))]
+  if (length(pipefields) != 0L) pipefields <- pipefields[order(as.numeric(stringr::str_extract(pipefields, '[0-9]+')))]
   
   pipefields
 }
@@ -1077,6 +1078,7 @@ collapse2n <- function(x, colname, class, n = 1) {
 
 
 ################################humApply ----
+# 
 #' 
 #' \code{humApply} is just a wrapper for 
 #' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
@@ -1093,7 +1095,7 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' in the \code{humdrumR} object.
 #' @param ... Any arguments which can be fed to 
 #' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
-#' \code{do} expressions, which are replaced by the \code{FUN} argument!).
+#' \code{do} expressions, which are replaced by the \code{FUN} argument!). 
 #' However, rather that writinging formula in the format \code{Keyword ~ Expression},
 #' \code{humApply} arguments should be written as normal \code{R} arguments: 
 #' \code{Keyword = Expression}.
@@ -1109,21 +1111,21 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' so the result is ignored (for plotting or side-effects purposes).
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
-          exprs <- lazyeval::lazy_dots(...)
+          exprs <- rlang::quos(...)
           keywords <- names(exprs)
           
           if (is.null(keywords)) exprs <- list()
           exprs    <- exprs[keywords != '']
           keywords <- keywords[keywords != '']
           
-          formulae <- Map(function(ex, kw) lazyeval::f_new(rhs = ex$expr,
-                                                           lhs = as.symbol(kw), 
-                                                           env = ex$env ), exprs, keywords) 
+          formulae <- Map(function(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
+                                                              lhs = as.symbol(kw), 
+                                                              env = rlang::quo_get_env(qu)), exprs, keywords) 
           formulae <- unname(formulae)
           # do expression
-          do <- lazyeval::f_new(rhs = quote(FUN(.)),
-                                lhs = if (doplot) quote(doplot) else quote(do),
-                                env = environment())
+          do <- rlang::new_formula(rhs = quote(FUN(.)),
+                                   lhs = if (doplot) quote(doplot) else quote(do),
+                                   env = environment())
           
           do.call(if (within) 'withinHumdrum' else 'withHumdrum',
                   c(humdrumR, do, formulae))

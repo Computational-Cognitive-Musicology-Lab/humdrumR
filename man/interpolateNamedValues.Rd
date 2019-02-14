@@ -13,14 +13,14 @@ interpolateNamedValues(expr, namedArgs)
 }
 \description{
 This function can be used to modify arguments to a functions
-within an existing expression.
+within an existing expression (or quosure/formula).
 }
 \details{
-\code{inerpolateNamedValues} inteprets named value in its \code{namedArgs} 
+\code{interpolateNamedValues} inteprets named value in its \code{namedArgs} 
 argument in one of two ways: If the named value is a list, it interprets
 the name of the list as a function call, and inserts/swaps any arguments
 in that list into any instances of that function call within the \code{expr}.
-Named arguments are insterted or substituted if already present in expression.
+Named arguments are inserted or substituted if already present in expression.
 Unnamed argmuments are simply added to the call.
 Examples:
 \preformatted{

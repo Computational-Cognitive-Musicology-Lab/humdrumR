@@ -126,7 +126,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   corpusName <- attr(censusTable, 'corpusName')          
   dataTypes  <- attr(censusTable, 'dataTypes')          
   
-  if (lazyeval::is_formula(i)) expr <- lazyeval::f_rhs(i)
+  if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
   if (is.character(i)) expr <- call('grepl', quote(i), quote(File))
   if (is.numeric(i)) expr <- quote(i)
   

@@ -22,7 +22,7 @@ in the \code{humdrumR} object.}
 
 \item{...}{Any arguments which can be fed to 
 \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
-\code{do} expressions, which are replaced by the \code{FUN} argument!).
+\code{do} expressions, which are replaced by the \code{FUN} argument!). 
 However, rather that writinging formula in the format \code{Keyword ~ Expression},
 \code{humApply} arguments should be written as normal \code{R} arguments: 
 \code{Keyword = Expression}.

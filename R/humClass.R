@@ -1318,7 +1318,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
 #' \code{getActive(humdata)} is simply a wrapper for \code{evalActive(humdata, dataTypes = 'D', forceVector = TRUE, nullAsDot = TRUE)}.
 #' @name humActive
 #' @export
-getActive <- function(humdrumR) lazyeval::f_rhs(humdrumR@Active)
+getActive <- function(humdrumR) rlang::f_rhs(humdrumR@Active)
 
 
 #' \code{setActive} takes a \code{\linkS4class{humdrumR}} object and a formula
@@ -1326,7 +1326,6 @@ getActive <- function(humdrumR) lazyeval::f_rhs(humdrumR@Active)
 #' @name humActive
 #' @export
 setActive <- function(humdrumR, form) {
-  # form <- lazyeval::f_capture(expr)
   putActive(humdrumR, form)
 }
 
@@ -1471,7 +1470,7 @@ fieldsInFormula <- function(humtab, form) {
   ## formula (rhs expression).
   if (is.humdrumR(humtab)) humtab <- getHumtab(humtab)          
           
-  expr  <- lazyeval::f_rhs(form)
+  expr  <- rlang::f_rhs(form)
   colnms  <- colnames(humtab)
   
   applyExpr(expr, rebuild = FALSE,
@@ -1583,7 +1582,7 @@ numericIndexCheck <- function(i) {
 }
 
 formulaIndexCheck <- function(i, humdrumR) {
-          if (!is.null(lazyeval::f_lhs(i))) warning("When indexing humdrumR objects with formulae, the left-hand side of formulae are ignored.")
+          if (!is.null(rlang::f_lhs(i))) warning("When indexing humdrumR objects with formulae, the left-hand side of formulae are ignored.")
           if (length(fieldsInFormula(humdrumR, i)) == 0L) stop("When indexing humdrumR objects with formulae, the formulae must refer to at least one field in the object.")
 }
 
@@ -1798,7 +1797,7 @@ evalIndexFormula <- function(humdrumR, form) {
           
           humtab <- getHumtab(humdrumR, 'GLIMDdP')
           
-          expr   <- lazyeval::f_rhs(form)
+          expr   <- rlang::f_rhs(form)
           humtab[ , .indhits := eval(expr)] 
 }
 

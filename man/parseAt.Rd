@@ -2,16 +2,14 @@
 % Please edit documentation in R/humApply.R
 \name{parseAt}
 \alias{parseAt}
-\title{This does the real work for \code{\link{splatForm}}.
-It replaces the \code{funccall(TargetExpr@GroupingExpr)} form
-with the \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c)} form.
-It also passed additional (non-splatted) arguments (\code{otherargs}) in.}
+\title{This function is used by splatForm
+It replaces an expression of the form \code{TargetExpr@GroupingExpr}
+with \code{tapply(TargetExpr, GroupingExpr, c)}.}
 \usage{
-parseAt(funccall, splats, otherargs)
+parseAt(atExpr)
 }
 \description{
-This does the real work for \code{\link{splatForm}}.
-It replaces the \code{funccall(TargetExpr@GroupingExpr)} form
-with the \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c)} form.
-It also passed additional (non-splatted) arguments (\code{otherargs}) in.
+This function is used by splatForm
+It replaces an expression of the form \code{TargetExpr@GroupingExpr}
+with \code{tapply(TargetExpr, GroupingExpr, c)}.
 }
