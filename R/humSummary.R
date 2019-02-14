@@ -428,7 +428,7 @@ print.humReference <- function(refTable, showall = TRUE) {
                               if (is.list(col)) { col <- do.call('paste', 
                                                                  c(col, 
                                                           collapse = paste0('\n\t', 
-                                                                            pander::repChar(' ', max(nchar(colnames(refTable)))),
+                                                                            stringr::str_dup(' ', max(nchar(colnames(refTable)))),
                                                                             '   ')))
                               }
                               if (is.null(col) || all(is.na(col))) NULL else col
@@ -580,7 +580,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
     
     if (showall) {
       cat(padder(colNames, lenCol), '\n', sep = '')
-      cat(pander::repChar('#', sum(lenCol)), '\n', sep = '')
+      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
       spinemat[ , { row <- unlist(.SD)
                     if (Columns == 0) row[4:7] <- ' '
@@ -589,7 +589,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
                 by = 1:nrow(spinemat)]$V1 -> strs
       
       cat(paste(strs, collapse = '\n'), '\n', sep = '')
-      cat(pander::repChar('#', sum(lenCol)), '\n', sep = '')
+      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
     }
   
@@ -692,7 +692,7 @@ print.humInterpretations <- function(interps, showall = TRUE) {
     if (showall) {
       cat(padder(colNames, lenCol), '\n', sep = '')
       cat(padder(colKeys, lenCol), '\n', sep = '')
-      cat(pander::repChar('#', sum(lenCol)), '\n', sep = '')
+      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
       interpmat[ , { row <- unlist(.SD)
       paste(padder(row, lenCol), collapse = '') 
@@ -700,7 +700,7 @@ print.humInterpretations <- function(interps, showall = TRUE) {
       by = 1:nrow(interpmat)]$V1 -> strs
       
       cat(paste(strs, collapse = '\n'), '\n', sep = '')
-      cat(pander::repChar('#', sum(lenCol)), '\n', sep = '')
+      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
     }
  

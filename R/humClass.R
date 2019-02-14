@@ -2072,7 +2072,7 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
   
   ## Trim an space lines
   lines <- padColumns(lines, max.token.length = max.token.length)
-  ellipsis <- pander::repChar('#', max(nchar(lines[!grepl(':   *!!', lines)])))
+  ellipsis <- stringr::str_dup('#', max(nchar(lines[!grepl(':   *!!', lines)])))
   
   
   ##
@@ -2091,7 +2091,7 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
             if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-',restRN[length(restRN)])
             restRN <- paste0("[", restRN, ']')
             
-            elips  <- pander::repChar('.', max(nchar(l[!grepl(':  *!!', l)])))
+            elips  <- stringr::str_dup('.', max(nchar(l[!grepl(':  *!!', l)])))
             elips  <- paste0(restRN, stringi::stri_sub(elips, from = nchar(restRN) + 1L)) 
             
             append(l, elips, after = if (last) 0L else length(l))
