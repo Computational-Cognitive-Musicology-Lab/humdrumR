@@ -345,10 +345,12 @@ withinHumdrum <- function(humdrumR,  ...) {
           if (length(newfields) > 0) {
                     addFields(humdrumR) <- newfields
                     humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
-                              act <- ifelsecalls(parsedFormulae$partitions['where'], c(rlang::f_rhs(humdrumR@Active), lapply(newfields, as.symbol)))
-                              putActive(humdrumR, rlang::new_formula(NULL, act))
+                              act <- ifelsecalls(parsedFormulae$partitions['where'], 
+                                                 c(humdrumR@Active, lapply(newfields, 
+                                                                           function(nf) rlang::as_quosure(as.symbol(nf), environment(humdrumR)))))
+                              putActive(humdrumR, act)
                     } else {
-                              humdrumR <- setActiveFields(humdrumR, newfields) 
+                              setActiveFields(humdrumR, newfields) 
                     }
           }
           # humdrumR <- indexGLIM(humdrumR)

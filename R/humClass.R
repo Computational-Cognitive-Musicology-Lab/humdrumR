@@ -586,9 +586,8 @@ spliceHumtab <- function(humtab) {
 #' }
 #' 
 #' @section Active field:
-#' The \code{Active} slot contains a formula, the right side of which is an expression
-#' refering to fields in the \code{\link[humdrumR:humTable]{Humtable}} (the left side
-#' of the formula is ignored). 
+#' The \code{Active} slot contains an \code{rlang::quosure} expression
+#' refering to fields in the \code{\link[humdrumR:humTable]{Humtable}.
 #' This expression is used as the "default" value in a lot of \code{humdrumR} code.
 #' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 #' i.e., whenever you return a \code{humdrumR} object in the terminal.
@@ -602,11 +601,11 @@ spliceHumtab <- function(humtab) {
 #' 
 #' The \code{Active} expression is often just the name of a 
 #' \code{\link[humdrumR:humTable]{field}}:
-#' for instance, the default value is \code{~Token}.
+#' for instance, the default value is \code{Token}.
 #' However, it can actually be any complex expression which evaluates
 #' within the \code{\link[humdrum:humTable]{humdrum table}}.
 #' For instance, the \code{Active} expression could be:
-#' \code{~paste0(Token, " ", Record)}, which would automatically 
+#' \code{paste0(Token, " ", Record)}, which would automatically 
 #' print each Token with its record number pasted to it.
 #' 
 #' @slot Humtable A list of \code{\link[humTable]{humdrum tables}}, each having the same fields
@@ -617,7 +616,7 @@ spliceHumtab <- function(humtab) {
 #' and were read into the \code{humdrumR} object.
 #' @slot Fields A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
 #' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\code{\link{fields}}).
-#' @slot Active A formula. The right side of this formula is an expression which 
+#' @slot Active A quosure expression which 
 #' extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."
 #' @slot LoadTime A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \code{\link{readHumdrum}} was
 #' called to create this \code{humdrumR} object.
@@ -631,7 +630,7 @@ setClass('humdrumR',
          slots = c(Humtable = 'list',
                    Files = 'list',
                    Fields = 'list',
-                   Active = 'formula',
+                   Active = 'quosure',
                    LoadTime = 'POSIXct'
                    )) -> makeHumdrumR
 
@@ -654,7 +653,7 @@ setMethod('initialize', 'humdrumR',
             
             .Object@Humtable  <- splitHumtab(humtab)        
             .Object@Fields    <- fieldcategories
-            .Object@Active    <- ~Token
+            .Object@Active    <- rlang::quo(Token)
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$FullFileName))
             .Object@LoadTime  <- Sys.time()
             .Object
@@ -731,7 +730,7 @@ setMethod('as.vector',
           function(x, mode = 'any') {
                     if (is.empty(x)) return(vector(mode, 0L))
                     
-                    as.vector(evalActive(x, dataTypes = dataTypes, nullAs = '.', forceVector = TRUE), mode)
+                    as.vector(evalActive(x, dataTypes = 'D', nullAs = '.', forceVector = TRUE), mode)
                     })
 
 #' @name humCoersion
@@ -768,8 +767,6 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL,
                     if (is.empty(x)) return(matrix(character(0L), ncol = 0, nrow = 0))
                     
                     if (anyStops(x)) x <- foldStops(x, foldAtomic = TRUE, sep = ' ')
-                    
-                    
                     
                     paths  <- anyPaths(x)
                     if (paths && path.fold) x <- foldPaths(x, foldAtomic = TRUE, sep = '\t')
@@ -846,7 +843,7 @@ as.data.frames <- function(humdrumR) {
 #' @export
 isActiveVector <- function(humdrumR) {
           act <- evalActive(humdrumR)
-          !is.list(act)
+          !is.object(act) && !is.list(act) 
 }
 
 
@@ -1167,42 +1164,6 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 
 
 
-# collapseRecords <- function(humdrumR, pad = FALSE, trim = NA, global = TRUE) {
-#           # takes a humdrumR object, and collapses each record to a string, returning a new data.table
-#           # this relies heavily on foldRecords
-#           
-#           humtab_rv <- foldRecords(humdrumR, global = global)
-#           
-#           #trim
-#           if (!is.na(trim)) {
-#                     humtab_rv[ , Active := Map(Vectorize(trimLongString, vectorize.args = 'strs'),
-#                                                Active,
-#                                                ifelse(global, max(80L, trim), trim))]
-#           }
-#           
-#           #pad
-#           if (pad) humtab_rv[ , Active := list(padRecords(Active, Global)), by = .(NFile)]
-#           
-#           #collapse
-#           sep <- if (pad) '' else '\t'
-#           humtab_rv[['Active']]  <- humtab_rv[ , sapply(Active, paste, collapse = sep)]
-#           
-#           humtab_rv
-# }
-
-
-# padRecords <- function(recvecs, global) {
-#           # this is a tool used by collapseRecords
-#           strlengths <- lapply(recvecs, stringr::str_length)
-#           
-#           mat <- do.call('rbind', strlengths[!global])
-#           colsizes <- apply(mat, 2, max, na.rm = TRUE) + 3
-#           
-#           recvecs[!global] <- lapply(recvecs[!global], 
-#                                      function(recvec) { stri_pad_right(recvec, colsizes) })
-#           
-#           recvecs
-# }
 
 
 #################################-
@@ -1279,7 +1240,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
   # locnames <- humtab[ , paste(NFile, Spine, Path, Stop, Record, sep = '.')]
   
-  values <- lazyeval::f_eval(humdrumR@Active, data = humtab)
+  values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
   
   
   if (is.atomic(values)) {
@@ -1315,18 +1276,18 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   values
 }
 
-#' \code{getActive(humdata)} is simply a wrapper for \code{evalActive(humdata, dataTypes = 'D', forceVector = TRUE, nullAsDot = TRUE)}.
+#' \code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.
 #' @name humActive
 #' @export
-getActive <- function(humdrumR) rlang::f_rhs(humdrumR@Active)
+getActive <- function(humdrumR) humdrumR@Active
 
 
 #' \code{setActive} takes a \code{\linkS4class{humdrumR}} object and a formula
-#' and sets that formula as the object's Active expression.
+#' and sets the right side of formula as the object's Active expression.
 #' @name humActive
 #' @export
 setActive <- function(humdrumR, form) {
-  putActive(humdrumR, form)
+  putActive(humdrumR, rlang::as_quosure(form))
 }
 
 
@@ -1339,24 +1300,23 @@ setActive <- function(humdrumR, form) {
 #' @export
 setActiveFields <- function(humdrumR, fieldnames) {
   fieldnames <- fieldMatch(humdrumR, fieldnames)
-  scall <- if (length(fieldnames) > 1) {
-            do.call('call', c('list', lapply(fieldnames, as.symbol)), quote = TRUE)
+  actquo <- if (length(fieldnames) > 1L) {
+            rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
             } else {
-                      as.symbol(fieldnames)
+            rlang::as_quosure(as.symbol(fieldnames), environment(humdrumR))
             }
-  form <- f_new(rhs = scall)
-  putActive(humdrumR, form)
+  putActive(humdrumR, actquo)
 }
 
-putActive <- function(humdrumR, form) {
+putActive <- function(humdrumR, actquo) {
           # This does the dirty work for 
-          # setActive and setActiveFields
+          # setActive and setActiveFields.
           humtab <- getD(humdrumR)
-          usedInExpr <- fieldsInFormula(humtab, form)
+          usedInExpr <- fieldsInFormula(humtab, actquo)
           if (length(usedInExpr) == 0) stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
 Add a reference to some field, for instance Token.", call. = FALSE)
           
-          humdrumR@Active <- form
+          humdrumR@Active <- actquo
           
           act <- evalActive(humdrumR)
           nrows <- nrow(humtab)
@@ -1485,7 +1445,7 @@ fieldsInFormula <- function(humtab, form) {
 activeFields <- function(humdrumR) {
           # Identifies which fields are used in
           # the current \code{Active} expression.
-          fieldsInFormula(getD(humdrumR), humdrumR@Active)
+          fieldsInFormula(getD(humdrumR), getActive(humdrumR))
 }
 
 
@@ -2082,7 +2042,7 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
             if (length(l) <= max.records.file) return(l)
             
             # lines
-            l <- do.call(if(last) tail else head, list(l, n = max.records.file))
+            l <- do.call(if (last) tail else head, list(l, n = max.records.file))
             
             # record numbers
             rn <- stringi::stri_trim_left(rn)

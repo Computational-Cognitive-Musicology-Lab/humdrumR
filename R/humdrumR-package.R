@@ -43,3 +43,7 @@ NULL
 # #' 
 # #' @source \url{http://kern.humdrum.org/search?s=t&keyword=chorale}
 # "Bach371"
+
+
+
+setOldClass('quosure')

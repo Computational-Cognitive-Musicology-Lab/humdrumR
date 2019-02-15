@@ -5,7 +5,7 @@
 \alias{getActive}
 \alias{setActive}
 \alias{setActiveFields}
-\title{\code{getActive(humdata)} is simply a wrapper for \code{evalActive(humdata, dataTypes = 'D', forceVector = TRUE, nullAsDot = TRUE)}.}
+\title{\code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.}
 \usage{
 getActive(humdrumR)
 
@@ -14,10 +14,10 @@ setActive(humdrumR, form)
 setActiveFields(humdrumR, fieldnames)
 }
 \description{
-\code{getActive(humdata)} is simply a wrapper for \code{evalActive(humdata, dataTypes = 'D', forceVector = TRUE, nullAsDot = TRUE)}.
+\code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.
 
 \code{setActive} takes a \code{\linkS4class{humdrumR}} object and a formula
-and sets that formula as the object's Active expression.
+and sets the right side of formula as the object's Active expression.
 
 \code{setActiveFields} takes a character vector of strings representing current
 \code{\link[humdrumR:humTable]{field}} names

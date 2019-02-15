@@ -93,7 +93,7 @@ and were read into the \code{humdrumR} object.}
 \item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\code{\link{fields}}).}
 
-\item{\code{Active}}{A formula. The right side of this formula is an expression which 
+\item{\code{Active}}{A quosure expression which 
 extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."}
 
 \item{\code{LoadTime}}{A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \code{\link{readHumdrum}} was
@@ -306,31 +306,5 @@ Examples:
 \preformatted{
 humdata \%hum>\% ~ as.semits(Token) -> humdata$Semits
 }
-}
-
-\section{Active field}{
-
-The \code{Active} slot contains a formula, the right side of which is an expression
-refering to fields in the \code{\link[humdrumR:humTable]{Humtable}} (the left side
-of the formula is ignored). 
-This expression is used as the "default" value in a lot of \code{humdrumR} code.
-For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
-i.e., whenever you return a \code{humdrumR} object in the terminal.
-In any expression within a call to 
-\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-\code{.} is automatically replaced with the \code{Active} expression.
-
-The active expression can be changed with the commands 
-\code{\link[humdrumR:setActive]{setActive or the $ operator}}.
-This is a handy way to quickly look at different fields in your data.
-
-The \code{Active} expression is often just the name of a 
-\code{\link[humdrumR:humTable]{field}}:
-for instance, the default value is \code{~Token}.
-However, it can actually be any complex expression which evaluates
-within the \code{\link[humdrum:humTable]{humdrum table}}.
-For instance, the \code{Active} expression could be:
-\code{~paste0(Token, " ", Record)}, which would automatically 
-print each Token with its record number pasted to it.
 }
 

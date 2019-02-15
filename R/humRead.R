@@ -107,7 +107,7 @@ readFiles <- function(patterns, ..., recursive = FALSE, verbose = TRUE) {
   filenames <- unique(unlist(lapply(patterns, pickFiles, recursive = recursive)))
   
   if (length(filenames) == 0) {
-    if (verbose) cat('\n\t', 'No files match search pattern. None loaded.\n')
+    cat('Zero files match search pattern(s). Returning NULL.\n')
     return(NULL)
   } 
   
