@@ -110,6 +110,8 @@ gcd <- function(x, y) {
 #' @export
 rint <- function(denominator, numerator = 1L)  new('rhythmInterval', Denominator = denominator, Numerator = numerator)
 
+rint_empty <- rint(1, 0)
+
 #' @name rhythmInterval
 #' @export
 getNumerator   <- function(rint) rint@Numerator
@@ -143,6 +145,14 @@ setMethod('[', signature = c(x = 'rhythmInterval'),
 
 #' @name rhythmInterval-asvector
 #' @export
+setMethod('[[', signature = c(x = 'rhythmInterval'),
+          function(x, i) {
+                    if (missing(i)) return(x)
+                    rint(getDenominator(x)[i], getNumerator(x)[i])
+          })
+
+#' @name rhythmInterval-asvector
+#' @export
 setMethod('[<-', signature = c(x = 'rhythmInterval', i = 'ANY', j = 'missing', value = 'rhythmInterval'),
           function(x, i, value) {
             if (missing(i)) return(x)
@@ -160,7 +170,7 @@ setMethod('[<-', signature = c(x = 'rhythmInterval', i = 'ANY', j = 'missing', v
 #' @export
 setMethod('c', signature = c('rhythmInterval'),
           function(x, ...) {
-            durs <- list(x, ...)
+            durs <- unlist(list(x, ...))
             
             ns <- unlist(sapply(durs, getNumerator))
             ds <- unlist(sapply(durs, getDenominator))
@@ -192,14 +202,16 @@ is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 #' @name rhythmInterval-asvector
 #' @export
-as.data.frame.rhythmInterval <- function(x, row.names = NULL, optional = FALSE, ...) {
+as.data.frame.rhythmInterval <- function(x, row.names = NULL, optional = FALSE, nm = paste(deparse(substitute(x), width.cutoff = 500L), collapse = " "), ...) {
+  force(nm)
+          
   if (is.null(row.names)) row.names <- 1:length(x)
   
+  names(x) <- NULL
   value <- list(x)
-  attr(value, 'row.names') <- row.names
-  attr(value, 'names') <- if (is.null(names(x))) 'rhythmInterval' else names(x)
-  class(value) <- c('data.frame')
-  value
+  if (!optional) names(value) <- nm
+  
+  structure(value, row.names = row.names, class = 'data.frame')
 }
 
 #' @name rhythmInterval-asvector
@@ -213,6 +225,9 @@ as.data.table.rhythmInterval <- function(x, row.names = NULL, optional = FALSE, 
           class(value) <- c('data.table')
           value
 }
+
+
+
 
 #' @name rhythmInterval-asvector
 #' @export
@@ -369,13 +384,13 @@ as.double.rhythmInterval <-  function(x) as.decimal(x)
 setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
           function(e1, e2) {
             if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-            d1 <- e1@Denominator
-            d2 <- e2@Denominator
+                    
+            d1 <- getDenominator(e1)
+            d2 <- getDenominator(e2)
             
             d3 <- d1 * d2
-            n1 <- e1@Numerator * (d3 / d1)
-            n2 <- e2@Numerator * (d3 / d2)
+            n1 <- getNumerator(e1) * (d3 / d1)
+            n2 <- getNumerator(e2) * (d3 / d2)
             
             rint(d3, n1 + n2)
           })
@@ -398,20 +413,40 @@ setMethod('+', signature = c(e1 = 'ANY', e2 = 'rhythmInterval'),
 		  e1 + e2
           })
 
-
 #' @export
-setMethod('sum', signature = c(x = 'rhythmInterval'),
-          function(x, ..., na.rm = TRUE) {
-            x <- do.call('c', list(x, ...))
-            as.rhythmInterval(sum(as.double(x), na.rm = na.rm))
+setMethod('Summary', signature = c(x = 'rhythmInterval'),
+          function(x, ...) {
+                  as.rhythmInterval(callGeneric(as.double(x), ...))
+                    
           })
 
 #' @export
+setMethod('Math', signature = c(x = 'rhythmInterval'),
+          function(x) {
+                    as.rhythmInterval(callGeneric(as.double(x)))
+                    
+          })
+
+# setMethod('sum', signature = c(x = 'rhythmInterval'),
+          # function(x, ..., na.rm = TRUE) {
+            # x <- do.call('c', list(x, ...))
+            # as.rhythmInterval(sum(as.double(x), na.rm = na.rm))
+          # })
+# 
+# 
 setMethod('cumsum', signature = c(x = 'rhythmInterval'),
           function(x ) {
-            as.rhythmInterval(cumsum(as.double(x)))
+                    den <- getDenominator(x)
+                    num <- getNumerator(x)
+                    
+                    d3 <- prod(c(unique(den)))
+                    
+                    
+                    newnum <- num * (d3 / den)
+                    
+                    rint(d3, cumsum(newnum))
           })
-
+# 
 
 ####Subtraction
 
@@ -571,7 +606,7 @@ as.recip.rhythmInterval <- function(rint) {
                                  sapply(dots[den.needdot], 
                                         function(rint) paste(rep('.', rint), collapse = '')))
           
-          den[is.na(den)] <- "empty rhythm"
+          den[is.na(den)] <- "rint(0)"
           den <- paste0(SIGN, den)
           output <- IfElse(num == 1L, den, paste0(den, '%', num)) 
           
@@ -669,11 +704,11 @@ read.numeric2rhythmInterval <- function(n) {
           
           frac <- attr(MASS::fractions(n, cycles = 8), 'frac')
           
-          frac <- strsplit(frac, split = '/')
-          
-          num <- as.integer(sapply(frac, head, n = 1))
-          den <- as.integer(sapply(frac, tail, n = 1))
-          den[lengths(frac) == 1] <- 1L
+          num <- as.integer(stringi::stri_extract_first_words(frac))
+          den <- as.integer(stringi::stri_extract_last_words(frac))
+          # num <- as.integer(sapply(frac, '[',  i = 1))
+          # den <- as.integer(sapply(frac, tail, n = 1))
+          den[num == den] <- 1L
           
           rint(den, num)
 }
@@ -722,6 +757,10 @@ as.rhythmInterval.character <- regexDispatch('Recip'   = read.recip2rhythmInterv
                                              '[0-9]+[%/][0-9]+' = read.fraction2rhythmInterval,
                                              'Decimal' = read.numeric2rhythmInterval)
 
+#' @export
+setAs('character', 'rhythmInterval', as.rhythmInterval)
+#' @export
+setAs('numeric', 'rhythmInterval', as.rhythmInterval)
 
 #############################################################################-
 #### Translating rhythm representations ----
@@ -760,8 +799,27 @@ as.decimal.character <- as.decimal.rhythmInterval %.% as.rhythmInterval
 ######Special rhythm functions ####----
 ##################################################-
 
+#' Tools for analyzing rhythm and meter.
+#' 
+#' \code{\link[humdrumR:humdrumR]{humdrumR}} includes a number of useful
+#' functions for working with rhythms and meter.
+#' \describe{
+#' \item{\code{\link{rhythmDecompose}}}{Decomposes a series of rhythms in terms of desired pulses.}
+#' \item{\code{\link{rhythmOffset}}}{Calculates the cummulative offset of durations from a starting point.}
+#' }
+#' 
+#' 
+#' @name humMeter
+NULL
+
+#' Decompose durations in terms of other durations
+#' 
+#' 
+#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
+#' analysis tools}}.
+#' @family humMeter rhythmOffset metricPosition
 #' @export
-decompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
+rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
           into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
@@ -787,8 +845,13 @@ decompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
           decompositions
 }
 
+#' Calculate metric positions from duration data.
+#' 
+#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
+#' analysis tools}}.
+#' @family humMeter rhythmOffset rhythmDecompose
 #' @export
-metricposition <- function(rints, measurelength = rint(1), 
+metricPosition <- function(rints, measurelength = rint(1), 
                            beats = rint(c(4, 8, 16, 32))) {
   cumrints <- cumsum(c(rint(1, 0), rints)) %% measurelength
   
@@ -805,10 +868,60 @@ metricposition <- function(rints, measurelength = rint(1),
 
 }
 
-#### Augmentation and dimminution
+
+#' Calculate rhythmic "offset"
+#' 
+#' Borrowing the term from \code{music21}, rhythmic "offset"
+#' refers to a duration of time since a starting point (usually, the beginning
+#' of a piece).
+#' \code{rhythmOffset} takes a vector of numbers representing durations
+#' (maybe \code{\linkS4class{rhythmInterval}s}, maybe other
+#' numeric values) and cummulatively sums them from a starting value.
+#' The output is a vector of durations of the same type as the input
+#' where each output value corresponds to the duration of time elapsed
+#' at that point.
+#' 
+#' @param durations A vector of numeric values representing durations.
+#' @param start A duration value (coerced to same class as \code{durations}), from which the
+#' offset begins. 
+#' @param groups A vector of equal length as \code{durations} representing a grouping factor,
+#' usable by \code{\link[base]{tapply}}. If \code{!is.null(groups)}, offsets are calculated
+#' for duration values within each group. The \code{start} argument is recycle to match
+#' the length of the number of groups, so a different start value can be applied to each group.
+#' If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the 
+#' first \code{start} value.
+#' 
+#' @family humMeter metricPosition rhythmDecompose
+#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+#' @export
+rhythmOffset <- function(durations, start = 0, groups = NULL) {
+          start <- as(start, class(durations))
+          
+          off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
+                 
+          if (is.null(groups)) {
+             off(durations, start)
+                    
+          }   else {
+                    if (length(groups) != length(durations)) {
+                              stop(call. = FALSE,
+                                   "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
+                    }
+                    
+                    dur.groups <- split(as.numeric(durations), as.numeric(groups))
+                    durs <- unlist(Map(off, dur.groups, as.numeric(start)))
+                    as(durs, class(durations))
+                    
+          }
+
+          
+}
+
+#### Augmentation and dimminution 
 
 #' Scale rhythmic duration
 #' @name RhythmScaling
+#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
 #' @export
 augment <- function(x, scalar = 2, ...) UseMethod('augment')
 

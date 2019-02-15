@@ -71,7 +71,6 @@ NULL
 `%hum<%` <- function(humdrumR, formula) {
           if (class(humdrumR) != 'humdrumR') stop("%hum<% pipe operator can only be called with humdrumR data on left side. \n
                                                   You will get this error if you put %hum<% anywhere except the last step of a humdrum pipe." )
-          
           if (rlang::is_formula(formula) && is.null(rlang::f_lhs(formula))) {
            splitpipe <- splitPipe(formula)
            formula <- splitpipe$Current

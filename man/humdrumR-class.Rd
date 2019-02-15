@@ -54,7 +54,7 @@ humdata['character'] <- humdata2
 }
 \description{
 This \code{S4} class is the basic unit of the 
-\code{\link[humdrum:humdrumR]{humdrumR}} package.
+\code{\link[humdrumR:humdrumR]{humdrumR}} package.
 Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
 more humdrum files.
 In the documentation we refer to the collection of files within a \code{\linkS4class{humdrumR}} object

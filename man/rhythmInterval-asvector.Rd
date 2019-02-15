@@ -14,6 +14,8 @@
 \usage{
 \S4method{[}{rhythmInterval,ANY}(x, i)
 
+\S4method{[[}{rhythmInterval,ANY,ANY}(x, i)
+
 \S4method{[}{rhythmInterval,ANY,missing,rhythmInterval}(x, i) <- value
 
 \S4method{c}{rhythmInterval}(x, ...)
@@ -23,7 +25,8 @@
 \S4method{dim}{rhythmInterval}(x)
 
 as.data.frame.rhythmInterval(x, row.names = NULL, optional = FALSE,
-  ...)
+  nm = paste(deparse(substitute(x), width.cutoff = 500L), collapse =
+  " "), ...)
 
 \method{as.data.table}{rhythmInterval}(x, row.names = NULL,
   optional = FALSE, ...)

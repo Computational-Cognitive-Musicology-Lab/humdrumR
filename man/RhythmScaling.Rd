@@ -25,3 +25,6 @@ diminish(x, scalar = 2, ...)
 \description{
 Scale rhythmic duration
 }
+\seealso{
+Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+}

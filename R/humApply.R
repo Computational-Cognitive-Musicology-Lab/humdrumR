@@ -523,7 +523,7 @@ parseArgFormula <- function(form) {
           # The function takes the input formula and turns it into a rlang::quosure.
           exprs <- splitFormula(form) # divides formula into list of expressions
           
-          if (grepl('^~', deparse(form))) { 
+          if (grepl('^~', deparse(form)[1])) { 
                     keyword <- quote(do) # if keyword is empty, default to 'do'
           } else {
                     keyword <- exprs[[1]]
