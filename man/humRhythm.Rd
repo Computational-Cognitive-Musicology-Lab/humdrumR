@@ -4,11 +4,14 @@
 \alias{humRhythm}
 \alias{as.fraction.character}
 \alias{as.recip.character}
+\alias{as.decimal.character}
 \title{Rhythm translations}
 \usage{
 \method{as.fraction}{character}(x)
 
 \method{as.recip}{character}(x)
+
+\method{as.decimal}{character}(x)
 }
 \description{
 These functions translate various rhythm representations

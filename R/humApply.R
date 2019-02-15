@@ -23,7 +23,7 @@
 
 
 #' with(in)Humdrum
-#' a
+#' 
 #' Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
 #' 
 #' @section Overview:
@@ -410,7 +410,7 @@ withHumdrum <- function(humdrumR,  ...) {
                     humdrumR <- do.call('withinHumdrum', c(humdrumR,
                                                            formulaeSubset,
                                                            namedArgs))
-                    doexpressions <- tail(parsedFormulae$doexpressions, 1)       
+                    parsedFormulae$doexpressions <- tail(parsedFormulae$doexpressions, 1)       
           } 
           
           # Getting the humtab with the right record types.
@@ -418,13 +418,13 @@ withHumdrum <- function(humdrumR,  ...) {
           
           
           #### Create main expression
-          currentdo <- doexpressions[[1]]
+          currentdo <- parsedFormulae$doexpressions[[1]]
           currentdo <- interpolateNamedValues(currentdo, namedArgs)
 
           funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
 
           humtabFunc  <- humtableApplier(funcQuosure, 
-                                         captureOutput = !grepl('p', names(doexpressions)[1]),
+                                         captureOutput = !grepl('p', names(parsedFormulae$doexpressions)[1]),
                                          reHumtab = FALSE)
           
           #### evaluate expression 

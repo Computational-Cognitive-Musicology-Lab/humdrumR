@@ -752,6 +752,10 @@ as.fraction.character <- as.fraction.rhythmInterval %.% as.rhythmInterval
 #' @export
 as.recip.character <- as.recip.rhythmInterval %.% as.rhythmInterval
 
+#' @name humRhythm
+#' @export
+as.decimal.character <- as.decimal.rhythmInterval %.% as.rhythmInterval
+
 #################################################-
 ######Special rhythm functions ####----
 ##################################################-

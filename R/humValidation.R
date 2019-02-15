@@ -161,6 +161,7 @@ validate_whiteSpace <- function(records, local, ...) {
           output <- list()
           
           
+          
           # startwith 
           hits_start <- stringi::stri_detect_regex(records, '^\\s')
           output$Start <- hitsTable(hits_start, which(hits_start), 'starts with whitespace')
@@ -170,7 +171,8 @@ validate_whiteSpace <- function(records, local, ...) {
           output$Double <- hitsTable(hits_double, local[hits_double], 'contains consecutive spaces')
           
           # hanging space 
-          hits_hanging   <- stringi::stri_detect_regex(records[local], ' \t|\t | $|\t$')
+          hits_hanging   <- stringi::stri_detect_regex(records[local], ' \t|\t | $|\t$') & 
+                    !stringi::stri_detect_regex(records[local], '^!') # ok in comments
           output$Hanging <- hitsTable(hits_hanging, local[hits_hanging], 'contains hanging white space')
           
           # missing token

@@ -100,8 +100,8 @@ pickFiles <- function(pattern, recursive = FALSE) {
 
 readFiles <- function(patterns, ..., recursive = FALSE, verbose = TRUE) {
           # takes in a regex-glob pattern(s) and reads (quickly) all the matching files as lines.
-          # If verbose is true, it warns how many files are going to be read before starting.
-          # recursive is passed as argument to pickFiles
+          # If verbose is true, it prints names of all matched files.
+          # recursive is passed as argument to pickFiles.
           
   patterns  <- c(patterns, unlist(list(...)))
   filenames <- unique(unlist(lapply(patterns, pickFiles, recursive = recursive)))
@@ -172,7 +172,8 @@ shortFileNames <- function(fns) {
 #' directly and use the \code{errorReport.path} argument.
 #' 
 #' @param verbose
-#' logical: If \code{TRUE}, the names of matching files are printed before parsing begins.
+#' logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
+#' useful as a check to make sure you aren't reading the wrong files!
 #' 
 #' @examples 
 #' readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
@@ -199,15 +200,22 @@ readHumdrum = function(pattern, ..., recurse.pattern = FALSE, validate = TRUE, v
  
  cat(paste0('Parsing ', num2str(length(names(files))), ' files...'))
  
- humtabs <- if (verbose) {
-          Map(function(file, filename) { cat(filename, '\n') ; parseRecords(file)}, 
+ if (verbose) {
+          cat('\n')
+          humtabs <- Map(function(file, filename) { 
+                    ht <- parseRecords(file)
+                    cat(filename, '\n')
+                    ht
+                    }, 
               files, names(files)) 
  } else {
-          lapply(files, parseRecords)
+          humtabs <- lapply(files, parseRecords)
  }
  
  #
  shortfilenames <- shortFileNames(names(files))
+ 
+ cat("Assembling corpus...")
  
  humtabs <- Map(function(dt, n, fn, sfn) {
                dt$NFile = n

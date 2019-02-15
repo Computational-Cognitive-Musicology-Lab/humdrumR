@@ -760,8 +760,8 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL,
                    alignColumns = TRUE,
                    padder = NA, 
                    path.fold = TRUE) { 
-                    
                     dataTypes <- checkTypes(dataTypes, 'dataTypes', 'as.matrix')
+                    
                     if (!is.null(fields)) x <- setActiveFields(x, fields)
                     
                     if (is.empty(x)) return(matrix(character(0L), ncol = 0, nrow = 0))
@@ -778,10 +778,10 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL,
                     if (ragged && alignColumns) x <- alignColumns(x, "_C")
                     
                     dataTypes <- c(dataTypes, 'P')
-                    
                     x <- foldRecords(x, foldAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fields = fields, dataTypes = dataTypes)
+                    records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, were getting errors.
                     matrices <- lapply(records, stringi::stri_list2matrix, byrow = TRUE)
                     
                     if (length(matrices) == 1L) {
@@ -1152,7 +1152,6 @@ foldPaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
 #' @export
 foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE) {
           checkhumdrumR(humdrumR, 'foldRecords')
-          
           humtab <- getHumtab(humdrumR)
           if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
           
@@ -1160,6 +1159,7 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
           foldHumdrum(humdrumR, byfields = c('File', 'Record'), 
                       foldAtomic = foldAtomic, sep = sep, padPaths = padPaths)
           
+
 }
 
 
@@ -1199,7 +1199,7 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
           # Drop determines whether record dataTypes that are 
           # absent from value are left unchanged (drop = TRUE)
           # or replaced with empty data tables (drop = FALSE)
-          if (is.data.table(value)) value <- splitHumtab(value, drop = drop)
+          if (data.table::is.data.table(value)) value <- splitHumtab(value, drop = drop)
           humdrumR@Humtable[names(value)] <- value
           
           humdrumR
@@ -1646,8 +1646,10 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
             
             # In each piece, identify existing Spines and index according to them, ordinally.
             D <- D[,
-                   { ipiece <- sort(unique(Spine))[j]
-                     .SD[Spine %in% ipiece] }, 
+                   { 
+                              ipiece <- sort(unique(Spine))[j]
+                              .SD[Spine %in% ipiece]
+                     }, 
                    by = File]
             
             putD(x) <- D
@@ -1816,7 +1818,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'formula'),
 
             
 
-
+#' @export
 indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
   #####ReIndex GLIMd humdrum tables to match indexing of D tables
   # To do this we need to:
@@ -1833,7 +1835,7 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
   D     <- getD(humdrumR)
   # first add missing fields (columns)
   missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
-  missingfieldsTypes <- sapply(D[ , missingfields, with = FALSE], class) 
+  missingfieldsTypes <- vapply(D[ , missingfields, with = FALSE], class, FUN.VALUE = character(1)) 
   
   if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
   
@@ -1848,7 +1850,7 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
   GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = NFile, .SDcols = colnames(D)[colnames(D) != 'NFile']]
   
   # resplit and put back in to humdrumR object
-  putHumtab(humdrumR, drop = TRUE) <- GLIMDdP
+  putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
   humdrumR
 }
 
@@ -1960,6 +1962,27 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 ####################################################-
 #########################Print methods ----
 #########################################################-
+
+
+#' @export
+setMethod('show', signature = c(object = 'humdrumR'),
+          function(object) {
+                    len  <- length(object)
+                    trim <- if (len == 1L) 400L else 40L
+                    print_humtab(object, firstAndLast = TRUE, max.records.file = trim)
+                    
+                    if (len > 1L) {
+                              cat('\n')
+                              cat('\thumdrumR corpus of ', 
+                                  ifelse(len <= 100L, num2word(len), num2str(len)), 
+                                  ' files.\n', sep = '') 
+                    }
+                    
+                    ## Fields
+                    showFields(object, 'Data')
+                    
+          })
+
 
 #' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
@@ -2106,25 +2129,4 @@ print_humtab_notActiveVector <- function(humdrumR, cutMiddle = FALSE) {
     cat('\n')
   }
 }
-
-#' @export
-setMethod('show', signature = c(object = 'humdrumR'),
-          function(object) {
-            len  <- length(object)
-            trim <- if (len == 1L) 400L else 40L
-            
-            print_humtab(object, firstAndLast = TRUE, 
-                         max.records.file = trim)
-            
-            if (len > 1L) {
-              cat('\n')
-              cat('\thumdrumR corpus of ', 
-                  ifelse(len <= 100L, num2word(len), num2str(len)), 
-                  ' files.\n', sep = '') 
-            }
-            
-            ## Fields
-            showFields(object, 'Data')
-        
-          })
 

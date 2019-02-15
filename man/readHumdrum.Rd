@@ -22,7 +22,8 @@ on matching files before they are parsed. Any files which contain syntax errors 
 skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
 directly and use the \code{errorReport.path} argument.}
 
-\item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins.}
+\item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
+useful as a check to make sure you aren't reading the wrong files!}
 
 \item{recursive.pattern}{logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.}
 }
