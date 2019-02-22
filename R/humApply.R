@@ -819,13 +819,12 @@ partApply <- function(humtab, partitions, humfunc) {
   
   curpart <- partitions[[1]]
   curpart <- tandemsForm(curpart)
-  curpart <- rlang::eval_tidy(curpart, data = humtab) # getting part evaluated in it's own environment
- 
+  # curpart <- rlang::eval_tidy(curpart, data = humtab) # getting part evaluated in it's own environment
+  
   if (names(partitions)[1] %in% c('by', 'groupby', 'group_by')) {
-    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = list(curpart), .SDcols = colnames(humtab)])
+    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = !!curpart])#, .SDcols = colnames(humtab)])
     
-    output <- eval(rlang::quo_squash(dtcall))  # do it!
-    output[ , curpart := NULL]
+    eval(rlang::quo_squash(dtcall))  # do it!
     
   } else {
             
