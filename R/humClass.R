@@ -69,7 +69,9 @@
 #' \item{Stop}{\code{integer} - Which token in a multistop token. Single tokes are numbered \code{1}.
 #'       This field is always \code{NA} when \code{Global == TRUE}.}
 #' }
-#' 
+#' In addition, any humdrum table with multiple subcorpuses---named with different patterns in call to \code{\link{humRead}}),
+#' or created when \code{\link[humdrumR:merge]{merging}} multiple \code{\linkS4class{humdrumR}} data objects---will have a 
+#' \code{SubCorpus} spine of character values identifying the different subcorpora.
 #' 
 #' 
 #' \strong{Interpretation fields:} Interpretation fields describe interpretation metadata in the humdrum file(s).
@@ -641,7 +643,7 @@ setMethod('initialize', 'humdrumR',
 
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
-                                    Structure = c('File', 'FullFileName', 'NFile',
+                                    Structure = c('SubCorpus', 'File', 'FullFileName', 'NFile',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
@@ -1006,6 +1008,23 @@ alignColumns <- function(humdrumR, padder = '_C') {
           humdrumR
           
 }
+
+
+setMethod('c', signature = 'humdrumR',
+          function(x, ...) {
+              humdrumRs <- c(x, list(...))
+              if (any(sapply(humdrumRs, class) != 'humdrumR')) stop("Can't use c to concatinate a humdrumR corpus with \\
+                                                                    anything but another humdrumR corpus.")
+              
+              humtabs <- lapply(humdrumRs, getHumtab, dataTypes = c('GLIMDdP'))
+              
+              
+              lapply(humtabs, function(humtab) unique(humtab$NFile))
+              
+              
+              
+              
+          })
 # 
 # padRecord <- function(record) {
 #           ## This is used by alignColumns
