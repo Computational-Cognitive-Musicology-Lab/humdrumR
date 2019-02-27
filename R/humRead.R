@@ -265,8 +265,8 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
  if (length(unique(names(corpora))) > 1L) filetab[ , SubCorpus := rep(names(corpora), lengths(corpora))]
  
  humtabs <- unlist(humtabs, recursive = FALSE)
- humtab <- data.table::rbindlist(humtabs, fill = TRUE)
- humtab <- humtab[filetab, on = "FullFileName"]
+ humtab  <- data.table::rbindlist(humtabs, fill = TRUE)
+ humtab  <- humtab[filetab, on = "FullFileName"]
  
  humtab[ , Type := parseTokenType(Token)]
  humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
@@ -452,7 +452,7 @@ parseTokenType <- function(spine) {
     
     firstchar <- stringi::stri_sub(spine, 0L, 2L)
     
-    c("P", "G", "L", "I", "M", "d", "D")[pmatch(firstchar, c('_P', "!!", "!", "*", "=", "."), nomatch = 7)]
+    c("P", "G", "L", "I", "M", "d", "D")[pmatch(firstchar, c('_P', "!!", "!", "*", "=", "."), nomatch = 7, duplicates.ok = TRUE)]
     
 }
 

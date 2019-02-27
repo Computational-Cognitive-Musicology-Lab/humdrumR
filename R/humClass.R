@@ -622,7 +622,7 @@ spliceHumtab <- function(humtab) {
 #' extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."
 #' @slot LoadTime A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \code{\link{readHumdrum}} was
 #' called to create this \code{humdrumR} object.
-#' 
+#' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
 #' 
 #' @name humdrumR-class
@@ -898,6 +898,30 @@ npieces <- function(humdrumR) {
           length(unique(humtab$NFile))
 }
 
+#' Does humdrumR corpus contain subcorpora?
+#' 
+#' \code{\linkS4class{humdrumR}} can be divided into "subcorpora."
+#' These functions tell us if there are any subcorpora and, if so, what they are called.
+#' @name humSubCorpora
+#' @export
+anySubcorpora <- function(humdrumR){
+    checkhumdrumR(humdrumR, 'anySubcorpora')
+    
+    humtab <- getHumtab(humdrumR)
+    
+    length(unique(humtab$SubCorpus)) > 1L
+}
+
+#' @name humSubCorpora
+#' @export
+namesSubcorpora <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'namesSubcorpora')
+    
+    humtab <- getHumtab(humdrumR)
+    
+    unique(humtab$SubCorpus)
+}
+
 #' @name humSize
 #' @export
 nfiles <- npieces
@@ -923,6 +947,7 @@ is.empty <- function(humdrumR) ntokens(humdrumR, 'D') == 0L
 
 #' @export
 anyPaths <- function(humdrumR) {
+          checkhumdrumR(humdrumR, 'anyPaths')
           humtab <- getD(humdrumR)
           
           any(humtab$Path > 0L, na.rm = TRUE)
@@ -931,6 +956,8 @@ anyPaths <- function(humdrumR) {
 
 #' @export
 anyStops <- function(humdrumR) {
+          checkhumdrumR(humdrumR, 'anyStops')
+    
           humtab <- getD(humdrumR)
           any(humtab$Stop > 1L, na.rm = TRUE)
           
@@ -970,8 +997,8 @@ alignColumns <- function(humdrumR, padder = '_C') {
           
           cols <- seq_len(nrow(allSpinePathcombs))
         
-          maxP <- max(humtab$Path) + 1L
-          maxS <- max(humtab$Spine)
+          maxP <- max(humtab$Path,  na.rm = TRUE) + 1L
+          maxS <- max(humtab$Spine, na.rm = TRUE)
           
           # Initialize empty matrix
           PSmat <- matrix(NA_integer_, nrow = maxS, ncol = maxP, dimnames = list(Spines = unique(humtab$Spine), Paths = unique(humtab$Path)))
@@ -1992,9 +2019,18 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
                     if (len > 1L) {
                               cat('\n')
-                              cat('\thumdrumR corpus of ', 
+                              cat('\thumdrumR corpus of', 
                                   ifelse(len <= 100L, num2word(len), num2str(len)), 
-                                  ' files.\n', sep = '') 
+                                  'files') 
+                              if (anySubcorpora(object)) {
+                                  subnames <- namesSubcorpora(object)
+                                  cat(' (', num2word(length(subnames)), 
+                                      " subcorpora: ", 
+                                      paste(subnames, collapse = ', '), 
+                                      ')', sep = '')
+                              }
+                              cat('.\n')
+                                  
                     }
                     
                     ## Fields
