@@ -643,7 +643,8 @@ setMethod('initialize', 'humdrumR',
 
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
-                                    Structure = c('SubCorpus', 'File', 'FullFileName', 'NFile',
+                                    Structure = c(if ('SubCorpus' %in% fields) 'SubCorpus' else NULL, 
+                                                  'File', 'FullFileName', 'NFile',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',

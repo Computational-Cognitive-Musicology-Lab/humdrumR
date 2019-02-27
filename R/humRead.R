@@ -257,10 +257,10 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
  #
  cat("Assembling corpus...")
  
- filenames <- unlist(sapply(corpora, names))
- filetab <- data.table(NFile        = seq_along(filenames),
-                         FullFileName = filenames,
-                         File         = shortFileNames(filenames))
+ filenames <- unlist(lapply(corpora, names), use.names = FALSE)
+ filetab <- data.table::data.table(NFile        = seq_along(filenames),
+                                   FullFileName = filenames,
+                                   File         = shortFileNames(filenames))
  
  if (length(unique(names(corpora))) > 1L) filetab[ , SubCorpus := rep(names(corpora), lengths(corpora))]
  
