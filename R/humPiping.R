@@ -8,6 +8,9 @@
 #' functions in a piping style, similar to the \code{|} (pipe)
 #' in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
 #' from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
+#' (In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by 
+#' \code{\link[humdrumR:humdrumR-package]{humdrumR}, and we encourage you to incorporate it into
+#' your \code{humdrumR} work flows.)
 #' 
 #' The key is that the function \code{\link{withinHumdrum}} always returns a new
 #' \code{\linkS4class{humdrumR}} data object. Thus, you can always send the output
@@ -24,6 +27,10 @@
 #' Thus, \code{\%hum<\%} should only be used as the last step in a pipe---you would do this
 #' if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 #' a normal vector or list of R data.
+#' 
+#' \code{\%hum[]\%} is similar to \code{\%hum>\%} except it apply the formulae on its right-hand
+#' side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
+#' a \code{\linkS4class{humdrumR}} data object on the fly.
 #' 
 #' @name humPipe
 NULL
@@ -44,53 +51,50 @@ NULL
 #' 
 #' @export
 `%hum>%` <- function(humdrumR, formula) {
-          if (class(humdrumR) != 'humdrumR') stop("%hum>% pipe operator can only be called with humdrumR data on left side." )
-          
-          if (rlang::is_formula(formula) && is.null(rlang::f_lhs(formula))) {
-           splitpipe <- splitPipe(formula)
-           formula <- splitpipe$Current
-           rest    <- splitpipe$Rest
-          } else {
-           rest <- NULL
-                    
-          }
-                    
-          output <- do.call('withinHumdrum', c(humdrumR, formula))
-          
-          if (!is.null(rest)) {
-                    nextpipe <- call(splitpipe$Infix, quote(output), rest)
-                    
-                    eval(nextpipe)
-          } else {
-           output         
-          }
+    doPipe(humdrumR, formula, '%hum>%', 'withinHumdrum')
 }
+
 
 #' @name humPipe
 #' @export
 `%hum<%` <- function(humdrumR, formula) {
-          if (class(humdrumR) != 'humdrumR') stop("%hum<% pipe operator can only be called with humdrumR data on left side. \n
-                                                  You will get this error if you put %hum<% anywhere except the last step of a humdrum pipe." )
-          if (rlang::is_formula(formula) && is.null(rlang::f_lhs(formula))) {
-           splitpipe <- splitPipe(formula)
-           formula <- splitpipe$Current
-           rest    <- splitpipe$Rest
-          } else {
-           rest <- NULL
-                    
-          }
-                    
-          output <- do.call('withHumdrum', c(humdrumR, formula))
-          
-          if (!is.null(rest)) {
-                   stop("%hum<% pipe operator can only be called with humdrumR data on left side. 
-                                                  You will get this error if you put %hum<% anywhere but the last step of a humdrum pipe." )
-          } else {
-           output         
-          }
+          # if (class(humdrumR) != 'humdrumR') stop("%hum<% pipe operator can only be called with humdrumR data on left side. \n
+                                                  # You will get this error if you put %hum<% anywhere except the last step of a humdrum pipe." )
+     doPipe(humdrumR, formula, '%hum<%', 'withHumdrum')
+}
+
+#' @export
+`%hum[]%` <- function(humdrumR, formula) {
+    doPipe(humdrumR, formula, '%hum[]%', 'filterHumdrum')
 }
 
 
+doPipe <- function(humdrumR, formula, pipename, call) {
+    # this function is used by the main piping infix operators
+    # It takes a pipe splitting off multiple pipes if necessary,
+    # and applies the first step in the pipe, then recalls with the rest of the pipe.
+    if (class(humdrumR) != 'humdrumR') stop(call. = FALSE,
+                                            glue::glue("{pipename} pipe operator can only be called with humdrumR data on left side."))
+    
+    if (rlang::is_formula(formula) && is.null(rlang::f_lhs(formula))) {
+        splitpipe <- splitPipe(formula)
+        formula <- splitpipe$Current
+        rest    <- splitpipe$Rest
+    } else {
+        rest <- NULL
+        
+    }
+    
+    output <- do.call(call, list(humdrumR, formula))
+    
+    if (!is.null(rest)) {
+        nextpipe <- call(splitpipe$Infix, quote(output), rest)
+        
+        eval(nextpipe)
+    } else {
+        output         
+    }
+}
 
 splitPipe <- function(formula) {
           # this function takes a right-sided formula and splits

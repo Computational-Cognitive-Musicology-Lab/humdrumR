@@ -78,7 +78,9 @@ See this \code{\link[humdrumR:humColumns]{explanation of columns in humdrumR}}.}
 \item{Stop}{\code{integer} - Which token in a multistop token. Single tokes are numbered \code{1}.
       This field is always \code{NA} when \code{Global == TRUE}.}
 }
-
+In addition, any humdrum table with multiple subcorpuses---named with different patterns in call to \code{\link{humRead}}),
+or created when \code{\link[humdrumR:merge]{merging}} multiple \code{\linkS4class{humdrumR}} data objects---will have a 
+\code{SubCorpus} spine of character values identifying the different subcorpora.
 
 
 \strong{Interpretation fields:} Interpretation fields describe interpretation metadata in the humdrum file(s).

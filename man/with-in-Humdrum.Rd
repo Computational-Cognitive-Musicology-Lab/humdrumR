@@ -265,7 +265,7 @@ withinHumdrum(humdata,
 \section{Piping}{
 
 For calls to \code{withinHumdrum}, the result of each \code{do} expression
-is insterted back into the \link[humtable]{humdrum table}. The results
+is insterted back into the \code{\link[humtable]{humdrum table}}. The results
 are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
 of the expression are shorter than the rows in the \link[humtable]{humdrum table},
 or an \code{object}, the humdrum table is shrunk to fit them.

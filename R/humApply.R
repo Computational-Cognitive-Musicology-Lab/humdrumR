@@ -244,7 +244,7 @@
 #' 
 #' @section Piping:
 #' For calls to \code{withinHumdrum}, the result of each \code{do} expression
-#' is insterted back into the \link[humtable]{humdrum table}. The results
+#' is insterted back into the \code{\link[humtable]{humdrum table}}. The results
 #' are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
 #' of the expression are shorter than the rows in the \link[humtable]{humdrum table},
 #' or an \code{object}, the humdrum table is shrunk to fit them.
@@ -277,7 +277,7 @@ NULL
 #' @name with-in-Humdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
-          if (class(humdrumR) != "humdrumR") stop('withinHumdrum(humdrumR = ) argument must be a humdrumR object.')
+          checkhumdrumR(humdrumR, 'withinHumdrum')
           
           #### Preprocessing ... argument
           elips <- list(...)
@@ -293,7 +293,11 @@ withinHumdrum <- function(humdrumR,  ...) {
           # graphics, recordtypes, doexpressions, ngrams, partitions
           # also WhichAreDo (a logical vector)
           parsedFormulae <- parseKeywords(formulae) 
-          
+          if (length(parsedFormulae$doexpressions) == 0L) {
+                  warning(call. = FALSE,
+                       "No do-expression in call to withinHumdrum, humdrumR object is returned unchanged.")
+                 return(humdrumR)
+          }
           
           ### graphical options
           if (length(parsedFormulae$graphics) > 0) {
@@ -373,7 +377,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' @name with-in-Humdrum
 #' @export
 withHumdrum <- function(humdrumR,  ...) {
-          if (class(humdrumR) != "humdrumR") stop('withHumdrum(humdrumR = ) argument must be a humdrumR object.')
+          checkhumdrumR(humdrumR, 'withHumdrum')
           
           #### Preprocessing ... argument
           elips <- list(...)
@@ -389,6 +393,11 @@ withHumdrum <- function(humdrumR,  ...) {
           # graphics, recordtypes, doexpressions, ngrams, partitions
           # also WhichAreDo (a logical vector)
           parsedFormulae <- parseKeywords(formulae) 
+          if (length(parsedFormulae$doexpressions) == 0L) {
+              warning(call. = FALSE,
+                      "No do-expression in call to withHumdrum, humdrumR object is returned unchanged.")
+              return(humdrumR)
+          }
           
           # graphical options
           if (length(parsedFormulae$graphics) > 0) {
@@ -597,7 +606,7 @@ prepareForm <- function(humtab, funcQuosure, active, ngram = NULL) {
   funcQuosure <- splatForm(funcQuosure)
   
   # find what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInFormula(humtab, funcQuosure))
+  usedInExpr <- unique(fieldsInExpr(humtab, funcQuosure))
   
   if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
                                         Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",

@@ -13,6 +13,29 @@ Repeat <- function(x, ..., margin = 2) {
   out
 }
 
+wrapInCall <- function(form, call) {
+    # This function takes a formula and wraps the rhs
+    # with a call to any.
+    # i.e. form -> any(form)
+    rhs <- rlang::f_rhs(form)
+    rhs <- call(call, call('(', rhs))
+    
+    as.formula(rhs, lhs = rlang::f_lhs(form))
+}
+
+as.formula <- function(x, lhs = NULL) {
+    if (rlang::is_quosure(x)) {
+        class(x) <- 'formula'
+        rlang::f_lhs(x) <- lhs
+        x
+    } else {
+        rlang::new_formula(lhs = lhs, rhs = x,
+                           env = parent.env(environment()))
+    }
+    
+}
+
+
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 substituteName <- function(expr, subs) {
@@ -28,7 +51,7 @@ substituteName <- function(expr, subs) {
 }
 
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
-          if (length(sys.calls()) > 4L) return(args) 
+          if (length(sys.calls()) > 6L) return(args) 
           
           argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
           callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
@@ -61,10 +84,19 @@ checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, ma
           args[!ill]
 }
 
-checkhumdrumR <- function(x, name) {
- if (!is.humdrumR((x))) stop("The humdrumR argument in a call to {name} must be a humdrumR object.")         
+checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
+ if (!is.humdrumR((x))) stop(call. = FALSE,
+                             glue::glue("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object."))         
 }
 
+checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
+    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
+    checkArgs(dataTypes,
+              c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
+              argname, callname, warnSuperfluous = TRUE, 
+              min.length = 1L, max.length = 7L,
+              classes = "character")
+}
 `xnames<-` <- function(x, values) {
           if (is.null(dim(x))) names(x) <- values else rownames(x) <- values
           

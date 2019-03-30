@@ -93,7 +93,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
   checkhumdrumR(humdrumR, 'census')
-  dataTypes <- checkTypes(dataTypes, 'dataTypes', 'census')
+  dataTypes <- checkTypes(dataTypes, 'census')
           
   ## This function creates a data.table of class humCensus
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)

@@ -11,11 +11,7 @@ humdrumR \%hum>\% formula
 humdrumR \%hum<\% formula
 }
 \description{
-These infix operators make it possible to use
-the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-functions in a piping style, similar to the \code{|} (pipe)
-in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
-from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
+Piping humdrumR data
 }
 \details{
 The key is that the function \code{\link{withinHumdrum}} always returns a new
@@ -33,6 +29,10 @@ the output can't be piped any further (using \code{\%hum>\%} or \code{\%hum<\%})
 Thus, \code{\%hum<\%} should only be used as the last step in a pipe---you would do this
 if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 a normal vector or list of R data.
+
+\code{\%hum[]\%} is similar to \code{\%hum>\%} except it apply the formulae on its right-hand
+side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
+a \code{\linkS4class{humdrumR}} data object on the fly.
 }
 \examples{
 humdata <- readHumdrum('path*.krn')

@@ -224,7 +224,7 @@ shortFileNames <- function(fns) {
 #' # If there are any directories called "Joined", loads all files (if any) that end with "krn".
 #' 
 #' @export
-readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, validate = TRUE, verbose = FALSE) {
+readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, validate = TRUE, verbose = FALSE, parseGlobal = TRUE, parseTandem = TRUE) {
       
  patterns <- unlist(list(...))
  # Make sure patterns are all named
@@ -247,7 +247,7 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
  humtabs <- lapply(corpora,
                    function(files) {
                        Map(function(file, filename) { 
-                           ht <- parseRecords(file, filename)
+                           ht <- parseRecords(file, filename, parseGlobal)
                            if (verbose) cat(filename, '\n')
                            ht
                        }, 
@@ -272,9 +272,10 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
  humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
  humtab[ , Global := is.na(Spine)]
  #
- tandemTab <- tandemTable(humtab$Tandem)
- if (!is.null(tandemTab)) humtab <- cbind(humtab, tandemTab)
- 
+ if (parseTandem) {
+    tandemTab <- tandemTable(humtab$Tandem)
+    if (!is.null(tandemTab)) humtab <- cbind(humtab, tandemTab)
+ }
  cat('Done!\n')
  
  makeHumdrumR(humtab, patterns)
@@ -285,12 +286,12 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
 
 
 
-parseRecords <- function(records, filename) {
+parseRecords <- function(records, filename, parseGlobal = TRUE) {
           # This function is the biggest part of readHumdrum
           # It takes a character vector representing the records 
           # in a single humdrum file, and outputs a data.table (an incomplete humdrum table).
   
-  global <- parseGlobal(records)
+  global <- if (parseGlobal) parseGlobal(records) else NA
   local  <- parseLocal(records)
   
   humtab <- if (length(global) == 1 && is.na(global)) local else rbind(global$Data, local, fill = TRUE)
@@ -450,10 +451,15 @@ parseTokenType <- function(spine) {
     # simply categories records by spine type,
     # to create the humdrum tables Type field.
     
-    firstchar <- stringi::stri_sub(spine, 0L, 2L)
+    out <- rep('D', length(spine))
     
-    c("P", "G", "L", "I", "M", "d", "D")[pmatch(firstchar, c('_P', "!!", "!", "*", "=", "."), nomatch = 7, duplicates.ok = TRUE)]
-    
+    out[spine == '_P'] <- 'P'
+    out[spine == '.'] <- 'd'
+    out[stringi::stri_detect_regex(spine, '^\\*')] <- 'I'
+    out[stringi::stri_detect_regex(spine, '^=')] <- 'M'
+    out[stringi::stri_detect_regex(spine, '^!')] <- 'L'
+    out[stringi::stri_detect_regex(spine, '^!!')] <- 'G'
+    out
 }
 
 

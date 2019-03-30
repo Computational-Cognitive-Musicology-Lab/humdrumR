@@ -4,18 +4,27 @@
 \alias{readHumdrum}
 \title{Read humdrum files into R}
 \usage{
-readHumdrum(pattern, ..., recurse.pattern = FALSE, validate = TRUE,
-  verbose = FALSE)
+readHumdrum(..., recursive = FALSE, multipleInstances = FALSE,
+  validate = TRUE, verbose = FALSE, parseGlobal = TRUE,
+  parseTandem = TRUE)
 }
 \arguments{
-\item{pattern}{character: One or more patterns used to identify files to read. Each pattern represents
+\item{...}{character: One or more patterns used to identify files to read. Each pattern represents
 a file path, using normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
 \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.). Each directory
 and the final file pattern are treated as regular expressions. Thus, we can say things like \code{"../^A.*/.*krn"}, which would
-match any kern files in any directory beginning with a capital \code{"A"} in the directory above the current working directory.}
+match any kern files in any directory beginning with a capital \code{"A"} in the directory above the current working directory.
 
-\item{...}{Any additional arguments are interpreted as additional directory regular-expression patterns, appended to the
-\code{pattern} argument.}
+If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
+\code{Corpus} field. Unnamed patterns are simply labeled "Unnamed."}
+
+\item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.}
+
+\item{multipleInstances}{\code{logical} indicating what should happen if multiple search patterns match the same files.
+If \code{multipleInstances = TRUE},
+any such files are read multiple times, grouped into their respective corpora by the \code{Corpus} field. 
+If \code{multipleInstances = FALSE}, any redundant files are only read into the corpus of the first pattern they 
+match.}
 
 \item{validate}{\code{logical} If \code{TRUE}, \code{\link{validateHumdrum}} is called
 on matching files before they are parsed. Any files which contain syntax errors are automatically
@@ -24,8 +33,6 @@ directly and use the \code{errorReport.path} argument.}
 
 \item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!}
-
-\item{recursive.pattern}{logical: If \code{TRUE}, the final part of the serach pattern (i.e., the file search) is searched for recursively through all sub directories.}
 }
 \description{
 This function reads one or more humdrum files to create a \code{\link[humdrumR:humtable]{humdrum table}}
