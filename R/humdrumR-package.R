@@ -1,12 +1,18 @@
 #' humdrumR
 #'
-#' A toolkit for the analysis of humdrum data.
+#' \code{humdrumR} is a toolkit for the analysis of data encoded in the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.
+#' The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
+#' Tens of thousands of musical scores (and other musical data) have been encoded in humdrum, many available online, 
+#' for instance at \href{http://kern.ccarh.org/}{KernScores}.
+#' 
+#' \code{humdrumR} is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, levaraging
+#' the power of R to give us enprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 #'
 #' @section Package design:
 #' The package \code{humdrumR} has xx main components:
 #' \enumerate{
 #' \item To represent humdrum data in R, we have the \code{\linkS4class{humdrumR}} \emph{S4} class, and it's core
-#' component the \code{\link[humdrumR:humtable]{Humdrum Table}}. 
+#' component the \code{\link[humdrumR:humTable]{Humdrum Table}}. 
 #' \item To create \code{\linkS4class{humdrumR}} data, a sophisticated
 #' humdrum data parser: \code{\link{readHumdrum}}. \code{\linkS4class{humdrumR}} data
 #' can also be written back to humdrum-syntax text files using \code{\link{writeHumdrum}}.

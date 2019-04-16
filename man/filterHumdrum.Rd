@@ -24,9 +24,9 @@ humdata[[x:y, l:m]]
 humdata[['regex']]
 }
 \description{
-\code{filterHumdrum} is a command used to filter a \code{\linkS4class[humdrumR]{humdrumR}} corpus.
+\code{filterHumdrum} is a command used to filter a \code{\linkS4class{humdrumR}} corpus.
 Indexing (using the \code{[]} or {\code{[[]]}} operators is a special case---indeed,
-the \code{[]} and \code{[[]]} methods for \code{\linkS4class[humdrumR]{humdrumR}} objects are 
+the \code{[]} and \code{[[]]} methods for \code{\linkS4class{humdrumR}} objects are 
 simply wrappers to calls to \code{filterHumdrum}.
 }
 \details{
@@ -34,17 +34,17 @@ simply wrappers to calls to \code{filterHumdrum}.
 Any number of formulae or functions can be fed as arguments to \code{filterHumdrum}: these arguments
 are passed directly to a call to \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}}.
 The only caveat difference is that the do expressions / functions fed to \code{filterHumdrum} 
-must be \href[https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)]{predicate} expressions---
+must be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions---
 expressions that return a logical vector.
 The returned vector must either be the same length as the input data (the number
-of rows in the \code{\link[humtable]{humdrum table}}) \emph{or} be of length \code{1}.
+of rows in the \code{\link[humdrumR::humtable]{humdrum table}}) \emph{or} be of length \code{1}.
 
-If a predicate expression \emph{is} of length \code{1}, the entire \code{\link[humtable]{humdrum table}}
+If a predicate expression \emph{is} of length \code{1}, the entire \code{\link[humdrumR::humtable]{humdrum table}}
 is either returned (\code{TRUE}) or filtered out (\code{FALSE}).
 This can be combined with a \code{by~} expression to filter out entire segments:
 for instance, the command
 \preformatted{
-filterHumdrum(humdata, ~any(. %~% '[eE]-'), by ~ File ~ Spine)
+filterHumdrum(humdata, ~any(. \%~\% '\eE]-'), by ~ File ~ Spine)
 }
 will look in each file and remove any spine which contains an Eb token (the whole spine is removed
 if it contains even one Eb).

@@ -14,11 +14,14 @@
 \alias{simplify}
 \alias{generalize}
 \alias{as.tonalInterval}
-\title{The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.}
+\title{The basic constructor for \code{tonalInterval}s.
+\code{tint} accepts integer values for octaves and fifths and numeric values for cent.
+\code{simpletint} accepts only an integer (fifth) and creates
+a "simple" interval---i.e., an ascending interval less than one octave.}
 \usage{
-tint(o, f, c = numeric(length(o)))
+tint(octave = 0L, fifth = 0L, cent = numeric(length(octave)))
 
-simpletint(f)
+simpletint(fifth)
 
 getFifth(tint)
 
@@ -73,8 +76,8 @@ generalize(tint)
 as.tonalInterval(...)
 }
 \description{
-The basic constructor for \code{\link[humdrumR:tonalInterval]{tonalIntervals}}.
-
-A basic constructor for simple \code{tonalIntervals}
-(i.e., within one octave).
+The basic constructor for \code{tonalInterval}s.
+\code{tint} accepts integer values for octaves and fifths and numeric values for cent.
+\code{simpletint} accepts only an integer (fifth) and creates
+a "simple" interval---i.e., an ascending interval less than one octave.
 }

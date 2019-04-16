@@ -286,7 +286,7 @@ withinHumdrum <- function(humdrumR,  ...) {
           
           # turn  any functions into formula
           formulae <- anyfuncs2forms(formulae, parent.env(environment()))
-          if (any(sapply(formulae, Negate(rlang::is_formula)))) stop('In withinHumdrum(...) unnamed arguments must be formulas or functions.')
+          if (any(!sapply(formulae, rlang::is_formula))) stop('In withinHumdrum(...) unnamed arguments must be formulas or functions.')
           
           #### Processing formulae list
           #parseKeywords returns a list with the following names:
@@ -386,7 +386,7 @@ withHumdrum <- function(humdrumR,  ...) {
           
           # turn  any functions into formula
           formulae <- anyfuncs2forms(formulae, parent.env(environment()))
-          if (any(sapply(formulae, Negate(rlang::is_formula)))) stop('In withHumdrum(...) unnamed arguments must be formulas or functions.')
+          if (any(!sapply(formulae, rlang::is_formula))) stop('In withHumdrum(...) unnamed arguments must be formulas or functions.')
          
           #### Processing formulae list
           #parseKeywords returns a list with the following names:

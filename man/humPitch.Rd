@@ -2,16 +2,10 @@
 % Please edit documentation in R/humPitch.R
 \name{humPitch}
 \alias{humPitch}
-\alias{as.semit}
-\alias{as.midi}
-\alias{as.sciPitch}
-\alias{as.kernPitch}
-\alias{as.interval}
 \alias{as.solfa}
-\alias{as.ratio}
-\alias{as.frequency}
 \alias{as.semit.character}
 \alias{as.midi.character}
+\alias{as.tonalname.character}
 \alias{as.kernPitch.character}
 \alias{as.sciPitch.character}
 \alias{as.interval.character}
@@ -20,26 +14,13 @@
 \alias{as.ratio.character}
 \title{Pitch translations}
 \usage{
-as.semit(x, ...)
-
-as.midi(x, ...)
-
-as.sciPitch(x, ...)
-
-as.kernPitch(x, ...)
-
-as.interval(x, specific = TRUE, directed = TRUE, ...)
-
 as.solfa(x, key = 0L, ...)
-
-as.ratio(x, twelfth = 2^(19/12), ...)
-
-as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
-  twelfth = 2^(19/12), ...)
 
 \method{as.semit}{character}(x)
 
 \method{as.midi}{character}(x)
+
+\method{as.tonalname}{character}(x, kernFlats = FALSE)
 
 \method{as.kernPitch}{character}(x)
 

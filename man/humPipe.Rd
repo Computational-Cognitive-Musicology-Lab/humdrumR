@@ -11,7 +11,14 @@ humdrumR \%hum>\% formula
 humdrumR \%hum<\% formula
 }
 \description{
-Piping humdrumR data
+These infix operators make it possible to use
+the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+functions in a piping style, similar to the \code{|} (pipe)
+in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
+from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
+(In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by 
+\code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
+your \code{humdrumR} work flows.)
 }
 \details{
 The key is that the function \code{\link{withinHumdrum}} always returns a new

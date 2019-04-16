@@ -24,6 +24,8 @@ Collate: humdrumR-package.R
          humValidation.R
          humRhythm.R
          humPitch.R
+         humKey.R
+         humHarmony.R
 RoxygenNote: 6.1.1
 Suggests: 
     testthat

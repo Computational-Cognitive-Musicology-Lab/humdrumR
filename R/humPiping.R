@@ -9,7 +9,7 @@
 #' in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
 #' from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
 #' (In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by 
-#' \code{\link[humdrumR:humdrumR-package]{humdrumR}, and we encourage you to incorporate it into
+#' \code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
 #' your \code{humdrumR} work flows.)
 #' 
 #' The key is that the function \code{\link{withinHumdrum}} always returns a new
@@ -85,7 +85,9 @@ doPipe <- function(humdrumR, formula, pipename, call) {
         
     }
     
-    output <- do.call(call, list(humdrumR, formula))
+    if (!is.list(formula)) formula <- list(formula)
+    
+    output <- do.call(call, c(humdrumR, formula))
     
     if (!is.null(rest)) {
         nextpipe <- call(splitpipe$Infix, quote(output), rest)

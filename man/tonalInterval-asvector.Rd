@@ -35,7 +35,7 @@ is.atomic.tonalInterval(x)
 \method{rep}{tonalInterval}(x, ...)
 
 \method{order}{tonalInterval}(x, na.last = TRUE, decreasing = FALSE,
-  method = c("auto", "shell", "radix"))
+  method = c("auto", "shell", "radix"), ...)
 
 \S4method{sort}{tonalInterval}(x, decreasing = FALSE)
 

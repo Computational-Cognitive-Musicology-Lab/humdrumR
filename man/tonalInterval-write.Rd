@@ -2,24 +2,47 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-write}
 \alias{tonalInterval-write}
+\alias{as.semit}
 \alias{as.semit.tonalInterval}
+\alias{as.midi}
 \alias{as.midi.tonalInterval}
+\alias{as.tonalname}
+\alias{as.tonalname.tonalInterval}
+\alias{as.sciPitch}
 \alias{as.sciPitch.tonalInterval}
+\alias{as.kernPitch}
 \alias{as.kernPitch.tonalInterval}
+\alias{as.interval}
 \alias{as.interval.tonalInterval}
 \alias{as.solfa.numeric}
 \alias{as.solfa.tonalInterval}
+\alias{as.ratio}
 \alias{as.ratio.tonalInterval}
+\alias{as.frequency}
 \alias{as.frequency.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
+as.semit(x, ...)
+
 \method{as.semit}{tonalInterval}(x)
+
+as.midi(x, ...)
 
 \method{as.midi}{tonalInterval}(x)
 
+as.tonalname(x, kernFlats = FALSE, ...)
+
+\method{as.tonalname}{tonalInterval}(x, kernFlats = FALSE)
+
+as.sciPitch(x, ...)
+
 \method{as.sciPitch}{tonalInterval}(x)
 
+as.kernPitch(x, ...)
+
 \method{as.kernPitch}{tonalInterval}(x)
+
+as.interval(x, specific = TRUE, directed = TRUE, ...)
 
 \method{as.interval}{tonalInterval}(x, specific = TRUE,
   directed = TRUE, quality.labels = list(augment = "A", diminish = "d",
@@ -29,7 +52,12 @@
 
 \method{as.solfa}{tonalInterval}(x, key = 0L)
 
+as.ratio(x, twelfth = 2^(19/12), ...)
+
 \method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12))
+
+as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
+  twelfth = 2^(19/12), ...)
 
 \method{as.frequency}{tonalInterval}(x, reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))

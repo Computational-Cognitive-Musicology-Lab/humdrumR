@@ -394,7 +394,7 @@ spliceHumtab <- function(humtab) {
 #' 
 #' @section Active field:
 #' The \code{Active} slot contains an \code{rlang::quosure} expression
-#' refering to fields in the \code{\link[humdrumR:humTable]{Humtable}.
+#' refering to fields in the \code{\link[humdrumR:humTable]{Humtable}}.
 #' This expression is used as the "default" value in a lot of \code{humdrumR} code.
 #' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 #' i.e., whenever you return a \code{humdrumR} object in the terminal.
@@ -1209,7 +1209,7 @@ fieldMatch <- function(humdrumR, names) {
 }
 
 #' Use \code{fields} to list the current fields in 
-#' a \code{\linkS4class{humdrumR} object.
+#' a \code{\linkS4class{humdrumR}} object.
 #' @name humdrumR-class
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 

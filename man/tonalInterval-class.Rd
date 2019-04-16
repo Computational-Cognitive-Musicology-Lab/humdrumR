@@ -14,6 +14,8 @@ position on the circle of fifths. These values are held in the slots \code{\@Oct
 and \code{\@Fifth}. 
 The interval/pitch represented is the result of the Octaves and Perfect 5ths (actually, Perfect
 *12ths*) in the slots added together.
+(\code{tonalInterval} interfaces with \code{\link[humdrumR:humdrumR]{humdrumR}}'s other 
+\code{\link[humdrumR:humTonality]{types of tonal data}}.)
 }
 \details{
 Tonal intervals (which are rather abstract) can be translated to more concrete 
@@ -112,3 +114,6 @@ Numeric comparisons (e.g., \code{>},
 \code{<=}) are based on their semitone (equal temperament) size.
 }
 
+\seealso{
+humTonality
+}
