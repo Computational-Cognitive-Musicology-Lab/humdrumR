@@ -22,10 +22,10 @@ Collate: humdrumR-package.R
          humInterpretations.R
          humRegex.R
          humValidation.R
+         humVector.R
          humRhythm.R
          humPitch.R
-         humKey.R
-         humHarmony.R
+         humDiatonic.R
 RoxygenNote: 6.1.1
 Suggests: 
     testthat

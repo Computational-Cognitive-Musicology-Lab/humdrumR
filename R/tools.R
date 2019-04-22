@@ -413,12 +413,12 @@ rotate.default <- function(obj, rotation = 1, wrap = FALSE, pad = NA) {
           rotation <- rotation[1]
 
           size <- length(obj)
-          rotation = sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
+          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
           if (rotation == 0) return(obj)
 
           ind <- seq_len(size) - rotation
 
-          if (wrap) ind <- ind %mod% size else ind[ind > size | ind < 1] <- NA
+          if (wrap) ind <- ((ind - 1L) %% size) + 1L else ind[ind > size | ind < 1] <- NA
 
           output <- obj[ind]
 
@@ -498,8 +498,7 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
 }
 
 grepl_list <- function(pattern, ls) sapply(ls, function(el) any(grepl(pattern, el, useBytes = TRUE), na.rm = TRUE)) 
-
-
+    
 
 switchpatch <- function(x,  ...) {
     funcs <- list(...)

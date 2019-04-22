@@ -14,8 +14,8 @@ getTonic(tkey)
 \description{
 \code{diatonicKey} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
-A key is represented by two integers, \code{Tonic} and \code{Mode}.
-Tonic is simply the tonic note of the key on the circle of fifths.
+A key is represented by two integers, \code{Root} and \code{Mode}.
+Root is simply the tonic note of the key on the circle of fifths.
 Mode is a value between 0 and 6 on the circle of fifths, indicating the diatonic mode:
 \itemize{
 \item 0 = Lydian

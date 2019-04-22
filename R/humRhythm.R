@@ -18,15 +18,10 @@
 #' termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
 #' 
 #' @section Vectorization:
-#' The \code{rhythmInterval} class has all the \code{\link[rhythmInterval-asvector]{basic vector methods}} 
-#' defined for it to function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
-#' \code{\link[base]{length}}, etc.).
-#' (Each slot can actually hold a vector of integers representing
-#' Numerators/Denominators). This means you can apply normal vectorized commands to \code{rhythmInterval}s, and even put
-#' them in \code{\link[base:data.frame]{data.frames}}.
-#' However, \code{R} is limited in this regard---users can't define
-#' \code{S4} classes that really act like \code{R} atomics---, so you may 
-#' run in to problems if you take this too far.
+#' \code{rhythmInterval} inherits from the virtual class 
+#' \code{\linkS4class{humdrumVector}}.
+#' This means you can apply normal vectorized commands to \code{rhythmInterval}s, 
+#' and even put them in \code{\link[base:data.frame]{data.frames}}.
 #' 
 #' @section Arithmetic:
 #' \code{rhythmInterval} objects have arithmetic operations defined.
@@ -67,17 +62,15 @@ setClass('rhythmInterval', slots = c(Numerator = 'integer', Denominator = 'integ
 
 setValidity('rhythmInterval', 
             function(object) {
-              n <- object@Numerator
-              d <- object@Denominator
-              
-              length(n) == length(d) && all(d != 0) && 
-		is.integer(d) && is.integer(n)
+                all(getDenominator(object) != 0L)
             }
 )
 
 setMethod('initialize', 'rhythmInterval',
           function(.Object, Denominator = 4L, Numerator = 1L) {
-            fraction <- reduce_fraction(Numerator, Denominator)
+            .Object <- callNextMethod()
+              
+            fraction <- reduce_fraction(getNumerator(.Object), getDenominator(.Object))
             fraction <- do.call('match_size', fraction) 
             fraction <- lapply(fraction, as.integer)
             max_length <- max(lengths(fraction))
@@ -108,7 +101,10 @@ gcd <- function(x, y) {
 #' The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
 #' @name rhythmInterval
 #' @export
-rint <- function(denominator, numerator = 1L)  new('rhythmInterval', Denominator = denominator, Numerator = numerator)
+rint <- function(denominator, numerator = 1L) {
+    if (any(denominator == 0)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
+    new('rhythmInterval', Denominator = as.integer(denominator), Numerator = as.integer(numerator))
+}
 
 rint_empty <- rint(1, 0)
 
@@ -124,76 +120,8 @@ getDenominator <- function(rint) rint@Denominator
 ######rhythmInterval vector (and other core) methods ####
 
 
-#' Methods required to make rhythmIntervals act like vectors
-#' 
-#' These methods allow us to treat 
-#' \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}
-#' a lot like base \code{R} 
-#' \code{\link[base:vector]{atomic vectors}}.
-#' @name rhythmInterval-asvector
-NULL 
 
 ####Indexing ####
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('[', signature = c(x = 'rhythmInterval'),
-          function(x, i) {
-            if (missing(i)) return(x)
-	    rint(getDenominator(x)[i], getNumerator(x)[i])
-          })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('[[', signature = c(x = 'rhythmInterval'),
-          function(x, i) {
-                    if (missing(i)) return(x)
-                    rint(getDenominator(x)[i], getNumerator(x)[i])
-          })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('[<-', signature = c(x = 'rhythmInterval', i = 'ANY', j = 'missing', value = 'rhythmInterval'),
-          function(x, i, value) {
-            if (missing(i)) return(x)
-            
-            x@Numerator[i] <- getNumerator(value)
-            x@Denominator[i] <- getDenominator(value)
-            
-            x
-          })
-
-
-####Shape ####
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('c', signature = c('rhythmInterval'),
-          function(x, ...) {
-            durs <- unlist(list(x, ...))
-            
-            ns <- unlist(sapply(durs, getNumerator))
-            ds <- unlist(sapply(durs, getDenominator))
-            
-            rint(ds, ns)
-            })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('length', signature = c(x = 'rhythmInterval'),
-          function(x) {
-            length(getNumerator(x))
-          })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('dim', signature = c(x = 'rhythmInterval'),
-          function(x) {
-            # length(x)
-            NULL
-          })
-
-####Is/As ####
 
 #' @name rhythmInterval
 #' @export
@@ -202,74 +130,16 @@ is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 #' @name rhythmInterval-asvector
 #' @export
-as.data.frame.rhythmInterval <- function(x, row.names = NULL, optional = FALSE, nm = paste(deparse(substitute(x), width.cutoff = 500L), collapse = " "), ...) {
-  force(nm)
-          
-  if (is.null(row.names)) row.names <- 1:length(x)
-  
-  names(x) <- NULL
-  value <- list(x)
-  if (!optional) names(value) <- nm
-  
-  structure(value, row.names = row.names, class = 'data.frame')
-}
-
-#' @name rhythmInterval-asvector
-#' @export
-as.data.table.rhythmInterval <- function(x, row.names = NULL, optional = FALSE, ...) {
-          if (is.null(row.names)) row.names <- 1:length(x)
-          
-          value <- list(x)
-          attr(value, 'row.names') <- row.names
-          attr(value, 'names') <- if (is.null(names(x))) 'rhythmInterval' else names(x)
-          class(value) <- c('data.table')
-          value
-}
-
-
-
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('as.vector', signature = c('rhythmInterval'),
-          function(x) { x })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('as.list', signature = c('rhythmInterval'),
-          function(x, ...) {
-            x <- list(x, ...)
-            x <- do.call('c', x)
-            
-            lapply(seq_along(x), function(i) x[i])
-          })
-
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('is.vector', signature = c('rhythmInterval'),
-          function(x) { TRUE })
-
-#' @name rhythmInterval-asvector
-#' @export
 setMethod('is.numeric', signature = c('rhythmInterval'),
           function(x) { TRUE })
 
-#' @name rhythmInterval-asvector
-#' @export
-is.atomic.rhythmInterval <- function(x) TRUE
 
-#' @name rhythmInterval-asvector
-#' @export
-rep.rhythmInterval <- function(x, ...) {
-           rint(rep(getDenominator(x), ...),
-		rep(getNumerator(x), ...))
-}
 
 ######rhythmInterval order/relations methods ####
 
 #' @name rhythmInterval-asvector
 #' @export
-order.rhythmInterval <- function(x, na.last = TRUE, decreasing = FALSE,
+order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
                     order(as.double(x), 
                           na.last = na.last,
@@ -278,96 +148,27 @@ order.rhythmInterval <- function(x, na.last = TRUE, decreasing = FALSE,
                     )
           }
 
-#' @name rhythmInterval-asvector
-#' @export
-sort.rhythmInterval <- function(x, decreasing = FALSE) {
-                    x[order(x, decreasing = decreasing)]
-          }
-
-
 #' @name rhythmInterval
 #' @export
-setMethod('==', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
+setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
           function(e1, e2) {
-            getNumerator(e1) == getNumerator(e2) & 
-		getDenominator(e1) == getDenominator(e2)
+              checkSame(e1, e2, 'Compare')
+              callGeneric(as.double(e1), as.double(e2))
           })
 
 #' @name rhythmInterval
 #' @export
-setMethod('!=', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            getNumerator(e1) != getNumerator(e2) |
-		getDenominator(e1) != getDenominator(e2)
-          })
-
-
-#' @name rhythmInterval
-#' @export
-setMethod('>', signature = c('rhythmInterval', 'rhythmInterval'),
-          function(e1, e2) {
-                    as.double(e1) > as.double(e2)
-          })
-
-#' @name rhythmInterval
-#' @export
-setMethod('>=', signature = c('rhythmInterval', 'rhythmInterval'),
-          function(e1, e2) {
-                    as.double(e1) >= as.double(e2)
-          })
-
-#' @name rhythmInterval
-#' @export
-setMethod('<', signature = c('rhythmInterval', 'rhythmInterval'),
-          function(e1, e2) {
-                    as.double(e1) < as.double(e2)
-          })
-
-#' @name rhythmInterval
-#' @export
-setMethod('<=', signature = c('rhythmInterval', 'rhythmInterval'),
-          function(e1, e2) {
-                    as.double(e1) <= as.double(e2)
+setMethod('Summary', signature = c('rhythmInterval'),
+          function(x) {
+              read.numeric2rhythmInterval(callGeneric(as.double(x)))
           })
 
 
 ######rhythminterval formatting methods ####
 
-#' @name rhythmInterval-asvector
-#' @export
-setMethod('show', signature = c(object = 'rhythmInterval'), 
-          function(object) {
-            output <- as.recip(object)
-            cat(output)
-            invisible(output)
-          }
-)
-
-#' @name rhythmInterval-asvector
-#' @export
-format.rhythmInterval <- function(x, ...) {
-          as.recip(x)
-  # n <- x@Numerator
-  # d <- x@Denominator
-  # dots <- log(n + 1L, base = 2L) 
-  # dots <- dots - 1L
-  # dots[!dots %in% 1:100  & (log(d, 2) %% 1) == 0 & d != 1] <- 0L
-  # 
-  # targets <- dots != 0L & (log(d, 2) %% 1) == 0 & d!= 1
-  # n[targets] <- 1L
-  # 
-  # 
-  # d[targets] <- d[targets] / (2 ^ dots[targets])
-  # d[targets] <- paste0(d[targets], sapply(dots[targets], function(x) paste(rep('.', x), collapse ='')))
-  # 
-  # output <- ifelse(n == 1L, d, paste0(d, '%', n))
-  # output
-}
-
 #' @name rhythmInterval
 #' @export
-setMethod('as.character', c(x = 'rhythmInterval'),
-          function(x) as.recip(x))
+setMethod('as.character', c(x = 'rhythmInterval'), function(x) as.recip(x))
 
 #' @name rhythmInterval
 #' @export
@@ -395,101 +196,28 @@ setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
             rint(d3, n1 + n2)
           })
 
-#' @export
-setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'ANY'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-		  e2 <- as.rhythmInterval(e2)
-		  e1 + e2
-          })
 
-#' @export
-setMethod('+', signature = c(e1 = 'ANY', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-		  e1 <- as.rhythmInterval(e1)
-		  e1 + e2
-          })
-
-#' @export
-setMethod('Summary', signature = c(x = 'rhythmInterval'),
-          function(x, ...) {
-                  as.rhythmInterval(callGeneric(as.double(x), ...))
-                    
-          })
 
 #' @export
 setMethod('Math', signature = c(x = 'rhythmInterval'),
           function(x) {
-                    as.rhythmInterval(callGeneric(as.double(x)))
+                    read.numeric2rhythmInterval(callGeneric(as.double(x)))
                     
           })
 
-# setMethod('sum', signature = c(x = 'rhythmInterval'),
-          # function(x, ..., na.rm = TRUE) {
-            # x <- do.call('c', list(x, ...))
-            # as.rhythmInterval(sum(as.double(x), na.rm = na.rm))
-          # })
-# 
-# 
-setMethod('cumsum', signature = c(x = 'rhythmInterval'),
-          function(x ) {
-                    den <- getDenominator(x)
-                    num <- getNumerator(x)
-                    
-                    d3 <- prod(c(unique(den)))
-                    
-                    
-                    newnum <- num * (d3 / den)
-                    
-                    rint(d3, cumsum(newnum))
-          })
 # 
 
 ####Subtraction
 
 #' @export
 setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
-          function(e1, e2) {
-                    e1 * -1
+          function(e1) {
+              e1@Numerator <- getNumerator(e1) * -1L
+              e1
           })
 
 
-#' @export
-setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-            d1 <- e1@Denominator
-            d2 <- e2@Denominator
-            
-            d3 <- d1 * d2
-            n1 <- e1@Numerator * (d3 / d1)
-            n2 <- e2@Numerator * (d3 / d2)
-            
-            rint(d3, n1 - n2)
-            
-          })
 
-#' @export
-setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'ANY'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-		  e2 <- as.rhythmInterval(e2)
-		  e1 - e2
-          })
-
-#' @export
-setMethod('-', signature = c(e1 = 'ANY', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-            
-		  e1 <- as.rhythmInterval(e1)
-		  e1 - e2
-          })
 
 #' @export
 setMethod('diff', signature = c('rhythmInterval'),
@@ -503,10 +231,9 @@ setMethod('diff', signature = c('rhythmInterval'),
 #' @export
 setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
           function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
             IfElse(abs(e2) < 1, 
-                   rint(e1@Denominator,  e1@Numerator * e2),
-                   as.rhythmInterval(e1@Numerator / (e1@Denominator * 1 / e2))
+                   rint(e1@Denominator     ,  e1@Numerator * e2),
+                   rint(e1@Denominator * e2,  e1@Numerator     ),
                    )
             
           })
@@ -745,6 +472,13 @@ read.fraction2rhythmInterval <- function(str) {
 
 #' @name rhythmInterval
 #' @export 
+setAs('character', 'rhythmInterval', function(from) as.rhythmInterval.character(from))
+#' @name rhythmInterval
+#' @export 
+setAs('numeric', 'rhythmInterval', function(from) as.rhythmInterval.numeric(from))
+
+#' @name rhythmInterval
+#' @export 
 as.rhythmInterval <- function(...) UseMethod('as.rhythmInterval')
 
 #' @name rhythmInterval-read
@@ -757,10 +491,6 @@ as.rhythmInterval.character <- regexDispatch('Recip'   = read.recip2rhythmInterv
                                              '[0-9]+[%/][0-9]+' = read.fraction2rhythmInterval,
                                              'Decimal' = read.numeric2rhythmInterval)
 
-#' @export
-setAs('character', 'rhythmInterval', as.rhythmInterval)
-#' @export
-setAs('numeric', 'rhythmInterval', as.rhythmInterval)
 
 #############################################################################-
 #### Translating rhythm representations ----
