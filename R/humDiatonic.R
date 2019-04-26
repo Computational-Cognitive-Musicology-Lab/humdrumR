@@ -9,22 +9,26 @@
 #' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
 #' A key is represented by two integers, \code{Root} and \code{Mode}.
 #' Root is simply the tonic note of the key on the circle of fifths.
-#' Mode is a value between 0 and 6 on the circle of fifths, indicating the diatonic mode:
+#' Mode is a value on the circle of fifths, indicating the diatonic mode (range of 7 consecutive values)
+#' relative to the root.
 #' \itemize{
-#' \item 0 = Lydian
-#' \item 1 = Major (Ionian)
-#' \item 2 = Mixolydian
-#' \item 3 = Dorian
-#' \item 4 = Minor (Aeolian)
-#' \item 5 = Phyrgian
-#' \item 6 = Locrian
-#'}
+#' \item{ 1 = Lydian}
+#' \item{ 0 = Major (Ionian)}
+#' \item{-1 = Mixolydian}
+#' \item{-2 = Dorian}
+#' \item{-3 = Minor (Aeolian)}
+#' \item{-4 = Phyrgian}
+#' \item{-5 = Locrian}
+#' }
 #' 
 #' @name humDiatonic
 #' @seealso humTonality
+NULL
+
+#' @name humDiatonic
 #' @export 
 setClass('diatonicSet', contains = 'humdrumVector',
-         slots = c(Root = 'integer', Mode = 'integer'))
+         slots = c(Root = 'integer', Mode = 'integer', Alterations = 'integer'))
 
 
 #' @name humDiatonic
@@ -41,42 +45,69 @@ setClass('tertianSet', contains = 'diatonicSet',
 #' @name humDiatonic
 #' @export
 getRoot <- function(dset) dset@Root
+
 `setRoot<-` <- function(x, value) {
-    x@Root <- rep(value, length.out = x@Root)
+    x@Root <- Repeat(value, length.out = length(x))
     x
 }
+
 #' @name humDiatonic
 #' @export
 getMode <- function(dset) dset@Mode
 
+`setMode<-` <- function(x, value) {
+    x@Mode <- Repeat(value, length.out = length(x))
+    x
+}
+
+
 #' @name humDiatonic
 #' @export
-getThirds <- function(tset, as.bits = TRUE) if (as.bits) ints2bits(tset@Thirds) else tset@Thirds
+getAlterations <- function(dset) dset@Alterations
 
-ints2bits <- function(n, nbits = 6) t(sapply(n, function(x) c(TRUE, head(as.logical(intToBits(x)), nbits))))
-bits2ints <- function(x) as.integer(rowSums(sweep(x[ , -1, drop = FALSE], 2, 2L ^ (0L:(ncol(x) - 2L)), `*`)))
+#' @name humDiatonic
+#' @export
+getThirds <- function(tset) cbind(TRUE, ints2bits(tset@Thirds))
 
-# triad = 3, 7th = 7, 9th = 15, 11th = 31, 13th = 63
+ints2bits <- function(n, nbits = 6) {
+    mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
+    
+    rownames(mat) <- n
+    colnames(mat) <- 2 ^ (0:(nbits - 1))
+    mat
+}
 
+bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)))
 
+    
+    
 ## Constructors
 
 #' The basic constructor for \code{diatonicSet}s.
 #' Accepts either a integer (fifth) or a \code{\link[humdrumR:tonalInterval]{tonalInterval}}.
 #' @name humDiatonic
 #' @export
-dset <- function(root = 0L, mode = 1L) {
+dset <- function(root = 0L, mode = 0L, alterations = 0L) {
            if (is.tonalInterval(root)) root <- getFifth(root)
-           new('diatonicSet', Root = as.integer(root), Mode = as.integer(mode))
+           new('diatonicSet', 
+               Root = as.integer(root), 
+               Mode = as.integer(mode), 
+               Alterations = as.integer(alterations))
 }
 
-tset <- function(root = 0L, mode = 1L, cardinality = 3L) {
+#' @name humDiatonic
+#' @export
+tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L) {
     if (is.tonalInterval(root)) root <- getFifth(root)
     
     root <- IfElse(cardinality == 0L, NA_integer_, root)
-    exten <- c(0L, 0L, 1L, 3L, 7L, 15L, 31L, 63L)[cardinality + 1L]
+    extensions <- c(0L, 0L, 1L, 3L, 7L, 15L, 31L, 63L)[cardinality + 1L]
     
-    new('tertianSet', Root = as.integer(root), Mode = as.integer(mode), Thirds = exten)
+    new('tertianSet', 
+        Root = as.integer(root), 
+        Mode = as.integer(mode), 
+        Alterations = as.integer(alterations), 
+        Thirds = extensions)
 }
 
 
@@ -92,7 +123,7 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 
-#' @name diatonicSet-asvector
+#' @name humdrumVector
 #' @export
 setMethod('is.numeric', signature = c('diatonicSet'),
           function(x) { FALSE })
@@ -107,7 +138,7 @@ setMethod('is.numeric', signature = c('diatonicSet'),
 #' Modes are sorted secondarily from fewest flats to most sharps.
 #' If \code{parallel = TRUE} all modes are grouped by shared tonics, so
 #' C minor and C major will appear besides each other.
-#' If \code{parallel = FALSE} modes\keys are sorted together by number of accidentals,
+#' If \code{parallel = FALSE} modes/keys are sorted together by number of accidentals,
 #' so C minor and Eb major will be sorted next to each other.
 #' @name diatonicSet
 #' @export
@@ -162,8 +193,11 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 ######Special methods
 
 # How many accidentals does key have?
-accidentals <- function(dset) getRoot(dset) - getMode(dset) - 1L
+accidentals <- function(dset) getRoot(dset) - getMode(dset)
 
+
+
+# triad = 3, 7th = 7, 9th = 15, 11th = 31, 13th = 63
 
 ############################################-
 ####### Writing diatonic representations ----
@@ -184,34 +218,72 @@ NULL
 fifth2mode <- function(fifth, short = FALSE) {
     
     fullname <- rep("?", length(fifth))
-    fullname[fifth > -5 & fifth <= 1] <-  c('locrian', 'phrygian', 
+    fullname[fifth >= -5 & fifth <= 1] <-  c('locrian', 'phrygian', 
                                            'minor', 'dorian', 'mixolydian', 
-                                           'major', 'lydian')[fifth[fifth > -5 & fifth <= 1] + 6L]
+                                           'major', 'lydian')[fifth[fifth >= -5 & fifth <= 1] + 6L]
                       
     
     if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
 }
 
 
-getFifths <- function(dset, ...) UseMethod("getFifths")
 
+#' @export
+getFifths <- function(dset, step = 2L) UseMethod("getFifths")
+
+#' @export
 getFifths.diatonicSet <- function(dset, step = 2L) {
-    base <- -1L:5L
-    t(mapply(function(m, r) {
-           fs <- rotate(base + r + m, -1L + m, wrap = TRUE)[(seq(0, by = step, length.out = 7L) %% 7L) + 1L]
-           fs[1] <- r
-           fs
-        },
-        getMode(dset), getRoot(dset)))
+    mode <- getMode(dset)
+    root <- getRoot(dset)
+    
+    fifths <- t(mapply(function(m, alt) {
+        fs <- rotate(-1:5L, m - 1L, wrap = TRUE)
+        alterFifthSet(fs, alt)
+    },
+    mode, getAlterations(dset)))
+    
+    fifths <- sweep(fifths, 1, root + mode, `+`)
+    fifths[ , 1] <- root
+    
+    orderScale(fifths, step = step)
 }
 
+#' @export
 getFifths.tertianSet <- function(tset) {
     fifths <- getFifths.diatonicSet(tset, step = 4L)
+    thirds <- getThirds(tset)
     
-    thirds <- getThirds(tset, as.bits = TRUE)
-    
+    fifths <- fifths * thirds
     fifths[!thirds] <- NA_integer_
+    
+    colnames(fifths) <- c('Root', '3rd', '5th', '7th', '9th', '11th', '13th')
+    rownames(fifths) <- fifth2tonalname(fifths[ , 1])
+    
     fifths
+    
+    
+}
+
+
+alterFifthSet <- function(f, n = 0L, position = 2L) {
+    if (n == 0L) return(f)
+    
+    which.alter <- order(f, decreasing = n < 0L)[position]
+    f[which.alter] <- f[which.alter] + 7L * sign(n)
+    
+    Recall(f, n - sign(n), position = position)
+    
+}
+
+
+orderScale <- function(fs, step = 2L) {
+    sq <- (seq(0, by = step, length.out = length(fs)) %% 7L) + 1L
+    if (is.null(dim(fs))) {
+        fs[(seq(0, by = step, length.out = length(fs)) %% 7L) + 1L]
+    } else {
+        fs[ , (seq(0, by = step, length.out = ncol(fs)) %% 7L) + 1L, drop = FALSE]
+    }
+    
 }
 
 
@@ -266,165 +338,88 @@ as.tonalname.diatonicSet <- function(x, kernFlats = FALSE) {
     fifth2tonalname(getRoot(x), kernFlats)
 }
 
-
-
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
 
-
-getSciQuality <- function(tset, collapse.triads = TRUE) {
-    roots <- getRoot(tset)
-    
-    
+getSciQuality <- function(tset, collapse.triad = TRUE) {
+   
     fifths <- getFifths(tset)
-    fifths[] <- sweep(fifths, 1, fifths[1], `-`)
-    fifths <- fifths[ , -1, drop = FALSE] # remove root because it doesn't bear on the quality
+    fifths <- sweep(fifths, 1, fifths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
     
-    qualities <- fifths
-    qualities[!is.na(fifths)] <- fifth2quality(fifths[!is.na(fifths)],
-                                               quality.labels = list(perfect = "P", major = "M", minor = "m",
-                                                                     augment = "+", diminish = "o"))
-    qualities[is.na(qualities)] <- '_'
-    qualities[nchar(qualities) > 1L] <- paste0('(', qualities[nchar(qualities) > 1L], ')')
+    qualities <- fifth2quality(fifths,
+                               quality.labels = list(major = 'M', minor = 'm',
+                                                     diminish = 'o', augment = '+',
+                                                     perfect = 'P'))
     
-    # if (length(qualification) > 4L) qualification[5L] <- c(o = "o", m = 'P', M = '+')[qualification[5L]]
-    if (collapse.triads) {
-        triads <- apply(qualities[, 1:2, drop = FALSE], 1, 
-                         function(`35`) {
-                             `35` <- paste(`35`, collapse = '')
-                             switch(`35`, 
-                                    MP   = "M", 
-                                    `M+` = "+", 
-                                    mP   = "m", 
-                                    `mo` = 'o', 
-                                    paste0('{', `35`, '}'))
-                             
-                         })
+    qualities[is.na(qualities)] <- ""
+    qualities[nchar(qualities) > 1L] <- paste0('(',  qualities[nchar(qualities) > 1L], ')')
+    if (collapse.triad) {
+        triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, paste, collapse = ''),
+                        function(row) {
+                            switch(row,
+                                   MP = "M",
+                                   mP = "m",
+                                   mo = 'o',
+                                   `M+` = "+",
+                                   paste0('{', row, '}'))
+                            
+                        })
         qualities[ , 2] <- triads
         qualities <- qualities[ , -1, drop = FALSE]
     }
     
-    qualities <- apply(qualities, 1, paste, collapse = '') 
-    qualities[] <- stringi::stri_trim(qualities, side = 'right', pattern = '[^_]')
-    qualities
+    apply(qualities, 1, paste, collapse = '')
+    
 }
 
-
-#' @name humHarmony
+#' @name diatonicSet
 #' @export
-as.sciChord <- function(tset, collapse.triads = TRUE) {
-    roots <- getRoot(tset)
-    tonalnames <- fifth2tonalname(roots, kernFlats = FALSE)
+as.sciChord <- function(tharm) {
+    root <- getRoot(tharm)
+    tonalname <- fifth2tonalname(root, kernFlats = FALSE)
     
    
-    qualities <- getSciQuality(tset, collapse.triads = collapse.triads)
+    quality <- getSciQuality(tharm)
     
-    paste0(tonalnames, qualities)
+    paste0(tonalname, quality)
 }
 
-# 
-# as.jazz <- function(tset) {
-#     roots  <- fifth2tonalname(getRoot(tset))
-#     thirds <- lapply(getThirds(tset), tail, n = -1L)
-#     fifths <- lapply(getFifths(tset), function(f) f[-1] - f[1])
-#     
-#     qualMatrix <- t(mapply(function(f, th) {th[th] <- th[th] * f ; th}, fifths, thirds))
-#     qualMatrix[] <- fifth2quality(qualMatrix)
-#     qualMatrix[!do.call('rbind', thirds)] <- NA_character_
-#     qualMatrix[qualMatrix == 'P'] <- ''
-#     colnames(qualMatrix) <- c('3rd', '5th', '7th', '9th', '11th', '13th')
-# 
-#     qualities <- character(length(tset))
-#     
-#     #
-#     transformer <- vector('list', length(roots))
-#     thirdMissing <- is.na(qualMatrix[ , '3rd'])
-#     transformer[thirdMissing] lapply() <- apply(qualMatrix[thirdMissing, , drop = FALSE], 1,
-#           function(row) {
-#               fix <- ''
-#               
-#               `119` <- row[c('11th', '9th')]
-#               if (all(is.na(`119`)) && !is.na(row['5th'])) {
-#                   fix <- paste0(row['5th'], '5')
-#                   
-#               } else {
-#                   fix <- paste('sus', c('4', '2')[!is.na(`119`)])
-#               }
-#               function(x) paste0(x, fix)
-#               
-#           }) 
-#     
-#     browser()
-#     
-# }
 
-#' @name humHarmony
+#' @name diatonicSet
 #' @export
 as.chordSymbol <- function(tharm, sep = '') {
-    scichord <- as.sciChord(tharm, collapse.triads = FALSE)
+    scichord <- as.sciChord(tharm)
     
     root <- stringr::str_extract(scichord, '^[A-G][b#]*')
     qual <- stringr::str_remove(scichord, '^[A-G][b#]*')
     
-    c(
-    ##Diads
-         #Thirds
-       o   = "(b3)",
-       m   = "(m3)",
-      `M` = '(M3)',
-      `+`  = "(#3)",
-         #Fifths
-      `_o` = "(b5)",
-      `_P` = "5",
-      `_+` = "(#5)",
-         #Sevenths
-      `__o` = '(d7)',
-      `__m` = '(m7)',
-      `__M` = '(M7)',
-      `__+` = '(#7)',
-         #Ninths
-      `___o` = '(d9)',
-      `___m` = '(b9)',
-      `___M` = '(9)',
-      `___+` = '(#9)',
-         #Fourths
-      `____o` = '(b4)',
-      `____P` = '(4)',
-      `____+` = '(#4)',
-         #Sixths
-      `_____o` = '(b6)',
-      `_____m` = '(m6)',
-      `_____M` = '(M6)',
-      `_____+` = '(#6)',
-    #Tertian
-         # Triads
-      oo = "dim(b3)",
-      mo = "dim",
-      mP = "min",
-      Mo = "maj(b5)",
-      MP = "",
-      `M+` = "aug",
-      `m+` = 'min(aug)',
-         # 7ths
-      ooo = 'dim7(b3)',
-      moo = 'dim7',
-      mom = 'min7(b5)',
-      mPm = 'min7',
-      MPm = '7',
-      MPM = 'maj7',
-      `M+m` = '7(#5)',
-      `M+M` = 'maj7(#5)',
-         # 9ths
-      moom = "dim7(b9)",
-      momm = 'min(b9,b5)',
-      mPmm = 'min(b9)',
-      mPmM = 'min9',
-      MPmM = "9",
-      MPMM = "maj9",
-        # Susx (missing third, but 11 or 9 present)
-      `_P__o` = 'sus4(b5)',
-      `_P__P` = 'sus4',
-      `_P__+` = 'sus4(#5)',
-    
+    c(M = "",
+      m = "min",
+      o = "dim",
+      `+` = "aug",
+      MM = "maj7",
+      MMM = 'maj9',
+      MMMP = 'maj11',
+      `MMM+` = 'maj9(#11)',
+      `MMM+M` = 'maj13(#11)',
+      Mm = "7",
+      Mmm = "b9",
+      MmM = "9",
+      `Mm+` = "7(#9)",
+      `MmM+` = "#11",
+      MmMPM = '13',
+      MmMPm = 'b13',
+      mm = "min7",
+      mmM = "min9",
+      mmm = "min(b9)",
+      mmMP = "min11",
+      MmMP = "11",
+      om = "min7(b5)",
+      oo = "dim7",
+      `+m` = "aug7",
+      `+M` = "aug(maj7)",
+      `_` = 'dim(b3)',
+      `_m` = 'dim7(b5b3)',
+      `_o` = 'dim7(b3)'
       )[qual] -> qual
     
     paste0(root, sep, qual)
@@ -432,32 +427,47 @@ as.chordSymbol <- function(tharm, sep = '') {
 }
 
     
-#' @name humHarmony
+#' @name diatonicSet
 #' @export
-as.romanNumeral <- function(tharm) {
- root <- getRoot(tharm)
- mode <- getMode(tharm)
- 
- generic <- fifth2genericinterval(root)
- rootrel <- root + mode - 1L
- 
- 
- accidental <- fifth2accidental(rootrel, # the 1L==major is built into fifth2accidental, so must be offset with -1L
-                                sharp = "#",
-                                flat  = 'b')
- 
- naturalize <- root > -2L & root < 6L & accidental != ''
- accidental[naturalize] <- "n"
+as.romanNumeral <- function(tset, key = dset(0L, 0L)) {
     
- roman <- c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')[generic]
+ root <- getRoot(tset)
  
- roman[(root + mode - 1L) > 1L] <- tolower(roman[(root + mode - 1L) > 1L])
+ degree <- as.scaleDegree(root, key = key, cautionary = FALSE)
+ 
+ accidental <- stringi::stri_extract_first_regex(degree, '^[mnb#M]*')
+ accidental[accidental == 'M'] = 'n'
+ accidental[accidental == 'm'] = 'b'
+ degree     <- stringi::stri_extract_first_regex(degree, '[1-7]')
+ 
+ numeral <- c(`1` = 'I', `2` = 'II', `3` = 'III', `4` = 'IV', `5` = 'V', `6` = 'VI', `7` = 'VII')[degree]
  
  ##
- quality <- character(length(root))
- quality[rootrel >=  5L] <- 'o'
- quality[rootrel <= -3L] <- '+'
+ mode <- getMode(tset)
+ numeral <- IfElse(mode < -1, tolower(numeral), numeral)
  
- paste0(accidental, roman, quality)
+ qualities <- getSciQuality(tset)
+ nqual <- nchar(qualities)
+ qualities[nqual > 1L] <- paste0(substr(qualities[nqual > 1L], 0L, 1L), c('7', '9', '11', '13')[nqual - 1L])
+ qualities <- stringi::stri_replace_first_regex(qualities, '^[Mm]', '')
+ 
+ paste0(accidental, numeral, qualities)
  
 }
+
+
+#####################################-
+#### Reading diatonic representations ----
+#######################################-
+#' Reading  from various representations
+#' 
+#' These functions all translate other pitch representations
+#' into 
+#' 
+#' These functions all assume that thheir string input is a well-formed
+#' example of the target pitch representation, with no extra strings.
+#' (The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
+#' used to clean/filter inputs into these functions.
+#' 
+#' @name diatonicSet-read
+NULL

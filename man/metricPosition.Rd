@@ -11,7 +11,7 @@ metricPosition(rints, measurelength = rint(1), beats = rint(c(4, 8, 16,
 Calculate metric positions from duration data.
 }
 \seealso{
-Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
-analysis tools}}.
+Other rhythm analysis tools: \code{\link{RhythmScaling}},
+  \code{\link{rhythmDecompose}}, \code{\link{rhythmOffset}}
 }
-\concept{humMeter rhythmOffset rhythmDecompose}
+\concept{rhythm analysis tools}

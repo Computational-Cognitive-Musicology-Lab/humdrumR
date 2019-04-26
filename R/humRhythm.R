@@ -58,7 +58,9 @@
 #' @slot Octave Integers
 #' 
 #' @export
-setClass('rhythmInterval', slots = c(Numerator = 'integer', Denominator = 'integer'))  
+setClass('rhythmInterval', 
+         contains = 'humdrumVector', 
+         slots = c(Numerator = 'integer', Denominator = 'integer')) -> rhythmInterval
 
 setValidity('rhythmInterval', 
             function(object) {
@@ -106,7 +108,7 @@ rint <- function(denominator, numerator = 1L) {
     new('rhythmInterval', Denominator = as.integer(denominator), Numerator = as.integer(numerator))
 }
 
-rint_empty <- rint(1, 0)
+# rint_empty <- rint(1, 0)
 
 #' @name rhythmInterval
 #' @export
@@ -128,7 +130,7 @@ getDenominator <- function(rint) rint@Denominator
 is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 
-#' @name rhythmInterval-asvector
+#' @name humdrumVector
 #' @export
 setMethod('is.numeric', signature = c('rhythmInterval'),
           function(x) { TRUE })
@@ -137,7 +139,7 @@ setMethod('is.numeric', signature = c('rhythmInterval'),
 
 ######rhythmInterval order/relations methods ####
 
-#' @name rhythmInterval-asvector
+#' @name rhythmInterval
 #' @export
 order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
@@ -233,7 +235,7 @@ setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
           function(e1, e2) {
             IfElse(abs(e2) < 1, 
                    rint(e1@Denominator     ,  e1@Numerator * e2),
-                   rint(e1@Denominator * e2,  e1@Numerator     ),
+                   rint(e1@Denominator * e2,  e1@Numerator     )
                    )
             
           })
@@ -545,9 +547,7 @@ NULL
 #' Decompose durations in terms of other durations
 #' 
 #' 
-#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
-#' analysis tools}}.
-#' @family humMeter rhythmOffset metricPosition
+#' @family rhythm analysis tools
 #' @export
 rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
           into <- sort(into, decreasing = TRUE)
@@ -577,9 +577,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 
 #' Calculate metric positions from duration data.
 #' 
-#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
-#' analysis tools}}.
-#' @family humMeter rhythmOffset rhythmDecompose
+#' @family rhythm analysis tools
 #' @export
 metricPosition <- function(rints, measurelength = rint(1), 
                            beats = rint(c(4, 8, 16, 32))) {
@@ -621,8 +619,7 @@ metricPosition <- function(rints, measurelength = rint(1),
 #' If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the 
 #' first \code{start} value.
 #' 
-#' @family humMeter metricPosition rhythmDecompose
-#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+#' @family rhythm analysis tools
 #' @export
 rhythmOffset <- function(durations, start = 0, groups = NULL) {
           start <- as(start, class(durations))
@@ -651,7 +648,7 @@ rhythmOffset <- function(durations, start = 0, groups = NULL) {
 
 #' Scale rhythmic duration
 #' @name RhythmScaling
-#' @seealso Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+#' @family rhythm analysis tools
 #' @export
 augment <- function(x, scalar = 2, ...) UseMethod('augment')
 

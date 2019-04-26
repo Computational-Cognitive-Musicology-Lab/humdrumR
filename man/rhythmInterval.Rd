@@ -7,6 +7,7 @@
 \alias{getNumerator}
 \alias{getDenominator}
 \alias{is.rhythmInterval}
+\alias{order.rhythmInterval}
 \alias{as.double.rhythmInterval}
 \alias{as.recip}
 \alias{as.fraction}
@@ -22,17 +23,12 @@ getDenominator(rint)
 
 is.rhythmInterval(x)
 
-\S4method{==}{rhythmInterval,rhythmInterval}(e1, e2)
+\method{order}{rhythmInterval}(x, ..., na.last = TRUE,
+  decreasing = FALSE, method = c("auto", "shell", "radix"))
 
-\S4method{!=}{rhythmInterval,rhythmInterval}(e1, e2)
+\S4method{Compare}{rhythmInterval,rhythmInterval}(e1, e2)
 
-\S4method{>}{rhythmInterval,rhythmInterval}(e1, e2)
-
-\S4method{>=}{rhythmInterval,rhythmInterval}(e1, e2)
-
-\S4method{<}{rhythmInterval,rhythmInterval}(e1, e2)
-
-\S4method{<=}{rhythmInterval,rhythmInterval}(e1, e2)
+\S4method{Summary}{rhythmInterval}(x)
 
 \S4method{as.character}{rhythmInterval}(x)
 

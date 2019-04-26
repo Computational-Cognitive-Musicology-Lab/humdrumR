@@ -14,8 +14,11 @@
 \alias{as.kernPitch.tonalInterval}
 \alias{as.interval}
 \alias{as.interval.tonalInterval}
-\alias{as.solfa.numeric}
+\alias{as.scaleDegree}
+\alias{as.scaleDegree.tonalInterval}
+\alias{as.scaleDegree.numeric}
 \alias{as.solfa.tonalInterval}
+\alias{as.solfa.numeric}
 \alias{as.ratio}
 \alias{as.ratio.tonalInterval}
 \alias{as.frequency}
@@ -48,9 +51,17 @@ as.interval(x, specific = TRUE, directed = TRUE, ...)
   directed = TRUE, quality.labels = list(augment = "A", diminish = "d",
   major = "M", minor = "m", perfect = "P"))
 
-\method{as.solfa}{numeric}(x, key = 0L)
+as.scaleDegree(x, directed = TRUE, cautionary = FALSE, ...)
 
-\method{as.solfa}{tonalInterval}(x, key = 0L)
+\method{as.scaleDegree}{tonalInterval}(x, key = 0L, directed = TRUE,
+  cautionary = FALSE)
+
+\method{as.scaleDegree}{numeric}(x, key = 0L, directed = TRUE,
+  cautionary = TRUE)
+
+\method{as.solfa}{tonalInterval}(x, key = 0L, directed = TRUE)
+
+\method{as.solfa}{numeric}(x, key = 0L, directed = TRUE)
 
 as.ratio(x, twelfth = 2^(19/12), ...)
 

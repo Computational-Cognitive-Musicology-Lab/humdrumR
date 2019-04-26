@@ -94,11 +94,13 @@ NULL
 #' version of an interval.
 #' 
 #' @section Relational Operators:
+#' 
 #' \code{tonalInnterval}s can be compared using the standard
 #' \code{\link[base:Comparison]{relational operators}}---\code{==},
 #' \code{!=}, \code{>}, \code{>=}, etc.
 #' \code{tonalIntervals}s are equal only if their \code{Octave} and
-#' \code{Fifth} slots are identical. 
+#' \code{Fifth} slots are identical. Thus, enharmonic notes are \emph{not}
+#' equal.
 #' Numeric comparisons (e.g., \code{>}, 
 #' \code{<=}) are based on their semitone (equal temperament) size.
 #' 
@@ -111,10 +113,11 @@ NULL
 #' @slot Cent Real numbers representing the cents (2^(1/1200)) offset of the interval.
 #' 
 #' @seealso humTonality
+#' @name tonalInterval
 #' @export
 setClass('tonalInterval', 
          contains = 'humdrumVector',
-         slots = c(Fifth = 'integer', Octave = 'integer', Cent = 'numeric'))
+         slots = c(Fifth = 'integer', Octave = 'integer', Cent = 'numeric')) -> tonalInterval
 
 setValidity('tonalInterval', 
             function(object) {
@@ -183,21 +186,13 @@ pythagorean.comma <- tint(-19, 12)
 ######tonalInterval vector (and other core) methods ####
 
 
-#' Methods required to make tonalIntervals act like vectors
-#' 
-#' These methods allow us to treat 
-#' \code{\link[humdrumR:tonalInterval]{tonalIntervals}}
-#' a lot like base \code{R} 
-#' \code{\link[base:vector]{atomic vectors}}.
-#' @name tonalInterval-asvector
-NULL
 
 
 #' @name tonalInterval
 #' @export
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
-#' @name tonalInterval-asvector
+#' @name tonalInterval
 #' @export
 setMethod('is.numeric', signature = c('tonalInterval'),
           function(x) { TRUE })
@@ -333,7 +328,7 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
 ######Special methods
 
 #' @name tonalInterval
-#' @export 
+#' @export
 invert <- function(tint, around = tint(0,0)) around + around - tint
 
 
@@ -375,31 +370,33 @@ fifth2accidental <- function(fifth, sharp = '#', flat = '-') {
           accN <- fifth2qualityN(fifth)
           
           output <- character(length(fifth)) # vector of empty strings ""
-          output[fifth > 5] <- strrep(sharp,  abs(accN[fifth > 5]))
-          output[fifth < -1] <- strrep(flat,   abs(accN[fifth < -1]))
+          output[!is.na(fifth) & fifth >  5] <- strrep(sharp,  abs(accN[!is.na(fifth) & fifth > 5]))
+          output[!is.na(fifth) & fifth < -1] <- strrep(flat,   abs(accN[!is.na(fifth) & fifth < -1]))
           output
 }
 fifth2tonalname <- function(fifth, kernFlats = TRUE) {
           letternames <- fifth2lettername(fifth)
           flatstyle <- if (kernFlats) '-' else 'b'
           accidentals <- fifth2accidental(fifth, '#', flatstyle)
-          
-          paste0(letternames, accidentals)
+          IfElse(!is.na(letternames) & !is.na(accidentals),
+                 paste0(letternames, accidentals), 
+                 NA_character_)
 }
+
 fifth2quality <- function(fifth, quality.labels = list(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')) {
           list2env(quality.labels, envir = environment()) 
           #puts major, minor, augment, diminish, perfect into environment
-        
-          fifth <- fifth 
     
-    
-          qualityN <- fifth2qualityN(fifth)
-          qualities <- rep(major, length(fifth))
-          qualities <- IfElse(fifth < 2 & fifth > -2, rep(perfect, length(fifth)), qualities)
-          qualities <- IfElse(fifth > 5,  strrep(augment,  abs(qualityN)), qualities)
-          qualities <- IfElse(fifth > 5,  strrep(augment,  abs(qualityN)), qualities)
-          qualities <- IfElse(fifth > -6 & fifth < -1, rep(minor, length(fifth)), qualities)          
-          qualities <- IfElse(fifth <= -6, strrep(diminish, abs(fifth2qualityN(fifth + 4))), qualities)          
+          qualityN <- abs(fifth2qualityN(fifth))
+          qualities <- if (is.null(dim(fifth))) rep(major, length(fifth)) else array(major, dim = dim(fifth))
+          na <- is.na(fifth)
+          qualities[na] <- NA_character_
+          
+          qualities[] <- IfElse(!na & fifth < 2 & fifth > -2, rep(perfect, length(fifth)), qualities)
+          qualities[] <- IfElse(!na & fifth > 5,  strrep(augment,  qualityN), qualities)
+          qualities[] <- IfElse(!na & fifth > 5,  strrep(augment,  qualityN), qualities)
+          qualities[] <- IfElse(!na & fifth > -6 & fifth < -1, rep(minor, length(fifth)), qualities)          
+          qualities[] <- IfElse(!na & fifth <= -6, strrep(diminish, abs(fifth2qualityN(fifth + 4))), qualities)     
           qualities
           
 }
@@ -564,7 +561,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TR
 }
 
 ##### As solfege (i.e., "do", "si")
-#' @name humPitch
+#' @name tonalInteral-write
 #' @export
 as.solfa <- function(x, key = 0L, ...) UseMethod('as.solfa')
 
@@ -676,10 +673,15 @@ genericinterval2fifth   <- function(ints) {
 }
 lettername2fifth <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2
 accidental2fifth <- function(acc, sharp = '#', flat = '-') {
-          sharps <- stringi::stri_count_fixed(acc, pattern = sharp)
-          flats  <- stringi::stri_count_fixed(acc, pattern = flat)
-          
+          sharps <- colSums(do.call('cbind', lapply(acc, stringi::stri_count_fixed, pattern = sharp)))
+          flats  <- colSums(do.call('cbind', lapply(acc, stringi::stri_count_fixed, pattern = flat )))
           (7 * sharps) - (7 * flats)
+}
+tonalname2fifth <- function(tn) {
+    fifth <- lettername2fifth(stringr::str_sub(tn, start = 0L, end = 1L))
+    acc <- accidental2fifth(stringr::str_sub(tn, start = 2L), sharp = '#', flat = c('-', 'b'))
+    
+    fifth + acc
 }
 solfa2fifth <- function(solfa) {
  base <- stringr::str_sub(solfa, start = 0L, end = 1L)        
@@ -916,22 +918,22 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 #### orom anything!
 
 #' @name tonalInterval
-#' @export 
+#' @export
 setAs('numeric', 'tonalInterval', function(from) as.tonalInterval.numeric(from))
 #' @name tonalInterval
-#' @export 
+#' @export
 setAs('character', 'tonalInterval', function(from) as.tonalInterval.character(from))
 
 #' @name tonalInterval
-#' @export 
+#' @export
 as.tonalInterval <- function(...) UseMethod('as.tonalInterval')
 
 #' @name tonalInterval-read
-#' @export 
+#' @export
 as.tonalInterval.numeric <- read.semit2tonalInterval
 
 #' @name tonalInterval-read
-#' @export 
+#' @export
 as.tonalInterval.character <- regexDispatch( 'Kern Pitch' = read.kernPitch2tonalInterval,
                                              'Interval'  = read.interval2tonalInterval,
                                              'Scientific Pitch' = read.sciPitch2tonalInterval,

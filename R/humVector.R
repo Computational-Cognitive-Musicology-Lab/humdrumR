@@ -16,7 +16,7 @@
 #' For instance, though \code{humdrumVector} classes work (ok) in \code{\link[base]{data.frame}}s
 #' \code{data.table}s and \code{tibbles} might give you problems.
 #' 
-#' @section Requirements
+#' @section Requirements:
 #' 
 #' To work, \code{humdrumVector} makes a few assumptions about your class.
 #' Your class must one or more slots which themselves contain vectors or matrices, with 
@@ -29,14 +29,14 @@
 #' not that the slots are all the same length.
 #' 
 #' 
-#' @section Initialize
+#' @section Initialize:
 #' An initialize method which automatically makes all slots the same length is predefined
 #' for \code{humdrumVectors}. If you want to make a more specialized \code{initialize} method,
 #' you can still take advantage of the inherited method by using \code{UseNextMethod} at the 
 #' beginning of your function.
 #' 
 #' 
-#' @section Predefined methods 
+#' @section Predefined methods:
 #' 
 #' You must \code{order} and any arithmetic/comparison methods for your class
 #' yourself. However,
@@ -61,13 +61,15 @@ setValidity('humdrumVector',
             function(object) {
                 slots <- getSlots(object)
                 
-                lengths <- sapply(slots,
-                                  function(s) {
-                                    if (is.null(dim(s))) length(s) else nrow(s)  
-                                      
-                                  })
                 
-                length(unique(lengths)) == 1L
+                dims <- sapply(slots,
+                               function(s) {
+                                   dims <- dim(s)
+                                    if (is.null(dims)) c(length(s), 0) else dims
+                                      
+                                })
+                
+                nrow(unique(dims)) == 1L
                 
             })
 
@@ -76,7 +78,7 @@ setMethod('initialize',
           'humdrumVector',
           function(.Object, ...) {
               args <- list(...)
-              args <- do.call('match_size', args)
+              args <- do.call('match_size', c(args, list(margin = 1:2)))
               
               setSlots(.Object) <- args
               .Object              
@@ -84,7 +86,6 @@ setMethod('initialize',
 
 getSlots <- function(x) {
     slotnames <- slotNames(x)
-    
     slots <- lapply(slotnames, slot, object = x)
     names(slots) <- slotnames
     slots

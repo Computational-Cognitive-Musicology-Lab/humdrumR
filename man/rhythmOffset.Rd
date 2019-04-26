@@ -31,6 +31,8 @@ where each output value corresponds to the duration of time elapsed
 at that point.
 }
 \seealso{
-Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+Other rhythm analysis tools: \code{\link{RhythmScaling}},
+  \code{\link{metricPosition}},
+  \code{\link{rhythmDecompose}}
 }
-\concept{humMeter metricPosition rhythmDecompose}
+\concept{rhythm analysis tools}

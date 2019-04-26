@@ -1,11 +1,15 @@
-Repeat <- function(x, ..., margin = 2) {
+Repeat <- function(x, ..., margin = 2L) {
   if (is.null(dim(x))) {
-    out <- do.call('rep', list(x = x, ...))
+     out <- if (margin == 1L) do.call('rep', list(x = x, ...)) else x
   } else {
-    out <- do.call('apply', list(X = x, MARGIN = margin, FUN = rep, ...))
-    if (margin == 1) out <- t(out)
+      
+    out <- if (margin == 1) {
+        x[rep(seq_len(nrow(x)), ...), , drop = FALSE]
+    } else {
+        x[ , rep(seq_len(ncol(x)), ...), drop = FALSE]
+    }
 
-    if (is.data.frame(x)) out <-  as.data.frame(out, stringsAsFactors = FALSE)
+    if (is.data.frame(x)) out <- as.data.frame(out, stringsAsFactors = FALSE)
 
     if (!is.null(rownames(out)))  rownames(out) <- make.unique(rownames(out))
     if (!is.null(colnames(out)))  colnames(out) <- make.unique(colnames(out))
@@ -104,23 +108,29 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 }
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
-          stuff <- list(...)
+          stuff   <- list(...)
+          notnull <- !sapply(stuff, is.null)
           
           if (is.function(size.out)) {
-                    sizes <- sapply(stuff,
+                    sizes <- lapply(stuff[notnull],
                                     function(thing) {
                                               dim <- dim(thing)
-                                              if (is.null(dim)) length(thing) else dim[margin]
+                                              if (is.null(dim)) {
+                                                  if (length(margin) == 1L) length(thing) else c(length(thing), 1L)
+                                              } else {
+                                                  dim[margin]
+                                              }
                                     })
                     
-                    size.out <- size.out(sizes)
+                    size.out <- apply(do.call('rbind', sizes), 2, size.out)
           }
           
-          output <- lapply(stuff, Repeat, length.out = size.out, margin = margin)
+          for (i in seq_along(margin)) {
+            stuff[notnull] <- lapply(stuff[notnull], Repeat, length.out = size.out[i], margin = margin[i])
+          }
+          if (toEnv) list2env(stuff[names(stuff != '')], envir = parent.frame(1))
           
-          if (toEnv) list2env(output[names(output != '')], envir = parent.frame(1))
-          
-          if (toEnv) invisible(output) else output
+          if (toEnv) invisible(stuff) else stuff
           
 }
 
@@ -331,30 +341,7 @@ hasdim <- function(x) !is.null(dim(x))
     xl > yl
 }
 
-len1 <- function(x) {if (!hasdim(x)) length(x) else nrow(x)} == 1L
-len0 <- function(x) {if (!hasdim(x)) length(x) else nrow(x)} == 0L
-lennot0 <- function(x) {if (!hasdim(x)) length(x) else nrow(x)} != 0L
 
-match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
-  stuff <- list(...)
-
-  if (is.function(size.out)) {
-    sizes <- sapply(stuff,
-                    function(thing) {
-                      dim <- dim(thing)
-                      if (is.null(dim)) length(thing) else dim[margin]
-                    })
-
-    size.out <- size.out(sizes)
-  }
-
-  output <- lapply(stuff, Repeat, length.out = size.out, margin = margin)
-
-  if (toEnv) list2env(output[names(output != '')], envir = parent.frame(1))
-
-  if (toEnv) invisible(output) else output
-
-}
 
 #' @export
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')

@@ -3,6 +3,7 @@
 \docType{class}
 \name{rhythmInterval-class}
 \alias{rhythmInterval-class}
+\alias{rhythmInterval}
 \title{Representation of rhythmic information}
 \description{
 This \emph{S4} class is the core rhythm representation in the 
@@ -28,15 +29,10 @@ termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
 
 \section{Vectorization}{
 
-The \code{rhythmInterval} class has all the \code{\link[rhythmInterval-asvector]{basic vector methods}} 
-defined for it to function like an \code{R} atomic vector (\code{\link[base]{c}}, \code{\link[base]{[}}, 
-\code{\link[base]{length}}, etc.).
-(Each slot can actually hold a vector of integers representing
-Numerators/Denominators). This means you can apply normal vectorized commands to \code{rhythmInterval}s, and even put
-them in \code{\link[base:data.frame]{data.frames}}.
-However, \code{R} is limited in this regard---users can't define
-\code{S4} classes that really act like \code{R} atomics---, so you may 
-run in to problems if you take this too far.
+\code{rhythmInterval} inherits from the virtual class 
+\code{\linkS4class{humdrumVector}}.
+This means you can apply normal vectorized commands to \code{rhythmInterval}s, 
+and even put them in \code{\link[base:data.frame]{data.frames}}.
 }
 
 \section{Arithmetic}{

@@ -30,7 +30,7 @@ as.solfa(x, key = 0L, ...)
   quality.labels = list(augment = "A", diminish = "d", major = "M", minor
   = "m", perfect = "P"))
 
-\method{as.solfa}{character}(x, key = 0L)
+\method{as.solfa}{character}(x, key = 0L, directed = TRUE)
 
 \method{as.frequency}{character}(x, reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))

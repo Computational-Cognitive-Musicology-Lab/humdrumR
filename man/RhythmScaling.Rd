@@ -26,5 +26,7 @@ diminish(x, scalar = 2, ...)
 Scale rhythmic duration
 }
 \seealso{
-Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm analsis tools}}.
+Other rhythm analysis tools: \code{\link{metricPosition}},
+  \code{\link{rhythmDecompose}}, \code{\link{rhythmOffset}}
 }
+\concept{rhythm analysis tools}

@@ -10,7 +10,7 @@ rhythmDecompose(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32)))
 Decompose durations in terms of other durations
 }
 \seealso{
-Read about \code{\link[humdrumR:humdrumR]{humdrumR}} \code{\link[humdrumR:humMeter]{rhythm
-analysis tools}}.
+Other rhythm analysis tools: \code{\link{RhythmScaling}},
+  \code{\link{metricPosition}}, \code{\link{rhythmOffset}}
 }
-\concept{humMeter rhythmOffset metricPosition}
+\concept{rhythm analysis tools}
