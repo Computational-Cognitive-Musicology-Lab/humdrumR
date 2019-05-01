@@ -3,6 +3,7 @@
 \docType{class}
 \name{humDiatonic}
 \alias{humDiatonic}
+\alias{diatonicSet}
 \alias{getRoot}
 \alias{getMode}
 \alias{getAlterations}
@@ -34,15 +35,16 @@ is.tertianSet(x)
 \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
 A key is represented by two integers, \code{Root} and \code{Mode}.
 Root is simply the tonic note of the key on the circle of fifths.
-Mode is a value between 0 and 6 on the circle of fifths, indicating the diatonic mode:
+Mode is a value on the circle of fifths, indicating the diatonic mode (range of 7 consecutive values)
+relative to the root.
 \itemize{
-\item{0 = Lydian}
-\item{1 = Major (Ionian)}
-\item{2 = Mixolydian}
-\item{3 = Dorian}
-\item{4 = Minor (Aeolian)}
-\item{5 = Phyrgian}
-\item{6 = Locrian}
+\item{ 1 = Lydian}
+\item{ 0 = Major (Ionian)}
+\item{-1 = Mixolydian}
+\item{-2 = Dorian}
+\item{-3 = Minor (Aeolian)}
+\item{-4 = Phyrgian}
+\item{-5 = Locrian}
 }
 }
 \seealso{

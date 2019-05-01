@@ -404,7 +404,7 @@ fifth2simpleInterval <- function(fifth, quality.labels = list(perfect = 'P', aug
           generic <- fifth2genericinterval(fifth)
           qualities <- fifth2quality(fifth,  quality.labels)
           
-          paste0(qualities, generic)
+          IfElse(is.na(generic) | is.na(qualities), NA_character_, paste0(qualities, generic))
 }
 
 
@@ -534,7 +534,6 @@ as.scaleDegree.tonalInterval <- function(x, key = 0L, directed = TRUE, cautionar
 #' @name tonalInterval-write
 #' @export
 as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TRUE) {
-    
     if (is.diatonicSet(key)) {
         mode <- getMode(key)
         key  <- getRoot(key)
@@ -553,7 +552,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TR
                                                             minor = 'm'))
     if (!cautionary) {
         x <- x - mode
-        inkey <- x <= 5L & x >= -1L
+        inkey <- !is.na(x) & x <= 5L & x >= -1L
         intervals[inkey] <-  stringi::stri_sub(intervals[inkey], from = 2L)
     }
     intervals
@@ -561,7 +560,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TR
 }
 
 ##### As solfege (i.e., "do", "si")
-#' @name tonalInteral-write
+#' @name tonalInterval-write
 #' @export
 as.solfa <- function(x, key = 0L, ...) UseMethod('as.solfa')
 
@@ -915,7 +914,7 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 #### From frequency
 
 
-#### orom anything!
+#### From anything!
 
 #' @name tonalInterval
 #' @export

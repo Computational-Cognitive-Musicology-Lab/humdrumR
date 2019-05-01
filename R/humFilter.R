@@ -241,10 +241,8 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
     formulae <- list(...)
     formulae <- anyfuncs2forms(formulae, parent.env(environment()))
     if (any(!sapply(formulae, rlang::is_formula))) stop('In filterHumdrum(...) unnamed arguments must be formulas or functions.')
-   
-    humdrumR_withindex <- withinHumdrum(humdrumR, ...)
-    humdrumR_withindex$INDEX <- humdrumR_withindex
     
+    humdrumR_withindex <- withinHumdrum(humdrumR, ...)
     result <- evalActive(humdrumR_withindex)
     
     if (!is.logical(result)) stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
@@ -255,6 +253,7 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
     dataTypes <- rlang::eval_tidy(parsedFormulae$recordtypes)
     dataTypes <- checkTypes(dataTypes, 'filterHumdrum', 'recordtypes ~ ...')
     humtab_withindex <- getHumtab(humdrumR_withindex, dataTypes)
+    indexPipe <- tail(pipeFields(humtab_withindex), 1L)
     
     if (nrecords(humdrumR_withindex) != nrecords(humdrumR)) {
         humtab <- getHumtab(humdrumR, dataTypes)
@@ -262,11 +261,11 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
             by <- parsedFormulae$partitions[['by']] # only get first
             humtab_withindex <- humtab_withindex[humtab, on = fieldsInExpr(humdrumR, by)]
         }
-        humtab$INDEX <- humtab_withindex$INDEX
+        humtab[ , indexPipe] <- humtab_withindex[ , indexPipe, with = FALSE]
         humtab_withindex <- humtab
     }
     
-    humtab <- nullifyTokens(humtab_withindex, fields(humdrumR))
+    humtab <- nullifyTokens(humtab_withindex, fields(humdrumR), indexPipe)
     humtab <- removeNull(humtab)
     
     putHumtab(humdrumR, drop = TRUE) <- humtab
@@ -280,12 +279,12 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
 }
 
 
-nullifyTokens <- function(humtab, fields) {
+nullifyTokens <- function(humtab, fields, indexPipe) {
     # This function takes a humdrum table which already has a
-    # logical INDEX column and replaces all tokens in all data fields
+    # logical INDEX column ("indexPipe") and replaces all tokens in all data fields
     # in those indices with null data
-    replaceInd <- !humtab$INDEX
-    humtab[ , INDEX := NULL]
+    replaceInd <- !humtab[ , indexPipe, with = FALSE]
+    humtab[ , eval(indexPipe) := NULL]
     replaceInd[is.na(replaceInd)] <- FALSE
     
     charFields  <- fields[Class == 'character' & Type == "Data"]$Name
@@ -413,11 +412,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
           function(x, j) {
               j <- numericIndexCheck(j)    
               
-              form <- do ~ Spine %in% sort(unique(Spine))[i]
+              form <- do ~ Spine %in% sort(unique(Spine))[j]
               
               if (any(i < 0)) form <- wrapInCall(form, "!")
               
-              filterHumdrum(x, form, by ~ File,
+              filterHumdrum(x, form,# , by ~ File,
                             recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
           })
 
@@ -627,7 +626,7 @@ indexGLIM_piece <- function(humtab) {
   
   # remove all except last barline before first data record
   prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
-  if (lennot0(prebarline))   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
+  if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
   
   #remove everything after last data record, except global stuff, '*-' or '=='
   humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]

@@ -21,14 +21,11 @@
 #' \item{-5 = Locrian}
 #' }
 #' 
-#' @name humDiatonic
 #' @seealso humTonality
-NULL
-
 #' @name humDiatonic
 #' @export 
 setClass('diatonicSet', contains = 'humdrumVector',
-         slots = c(Root = 'integer', Mode = 'integer', Alterations = 'integer'))
+         slots = c(Root = 'integer', Mode = 'integer', Alterations = 'integer')) -> diatonicSet
 
 
 #' @name humDiatonic
@@ -236,11 +233,16 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
     mode <- getMode(dset)
     root <- getRoot(dset)
     
-    fifths <- t(mapply(function(m, alt) {
-        fs <- rotate(-1:5L, m - 1L, wrap = TRUE)
-        alterFifthSet(fs, alt)
-    },
-    mode, getAlterations(dset)))
+    notna <- !is.na(mode) & !is.na(root)
+    
+    fifths <- matrix(NA_integer_, nrow = length(root), ncol = 7)
+    if (any(notna)) {
+        fifths[notna, ] <- t(mapply(function(m, alt) {
+            fs <- rotate(-1:5L, m - 1L, wrap = TRUE)
+            alterFifthSet(fs, alt)
+        },
+        mode[notna], getAlterations(dset)[notna]))
+    }
     
     fifths <- sweep(fifths, 1, root + mode, `+`)
     fifths[ , 1] <- root
@@ -376,11 +378,10 @@ getSciQuality <- function(tset, collapse.triad = TRUE) {
 as.sciChord <- function(tharm) {
     root <- getRoot(tharm)
     tonalname <- fifth2tonalname(root, kernFlats = FALSE)
-    
    
     quality <- getSciQuality(tharm)
     
-    paste0(tonalname, quality)
+    IfElse(!is.na(root) & !is.na(tonalname), paste0(tonalname, quality), NA_character_)
 }
 
 
@@ -388,7 +389,6 @@ as.sciChord <- function(tharm) {
 #' @export
 as.chordSymbol <- function(tharm, sep = '') {
     scichord <- as.sciChord(tharm)
-    
     root <- stringr::str_extract(scichord, '^[A-G][b#]*')
     qual <- stringr::str_remove(scichord, '^[A-G][b#]*')
     
@@ -422,14 +422,19 @@ as.chordSymbol <- function(tharm, sep = '') {
       `_o` = 'dim7(b3)'
       )[qual] -> qual
     
-    paste0(root, sep, qual)
+    IfElse(!is.na(root) & !is.na(qual), paste0(root, sep, qual), NA_character_)
     
 }
 
-    
+### As roman numeral (I, V, viio, etc.)    
+
 #' @name diatonicSet
 #' @export
-as.romanNumeral <- function(tset, key = dset(0L, 0L)) {
+as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
+
+#' @name diatonicSet
+#' @export
+as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L)) {
     
  root <- getRoot(tset)
  
@@ -451,7 +456,7 @@ as.romanNumeral <- function(tset, key = dset(0L, 0L)) {
  qualities[nqual > 1L] <- paste0(substr(qualities[nqual > 1L], 0L, 1L), c('7', '9', '11', '13')[nqual - 1L])
  qualities <- stringi::stri_replace_first_regex(qualities, '^[Mm]', '')
  
- paste0(accidental, numeral, qualities)
+ IfElse(!is.na(root), paste0(accidental, numeral, qualities), NA_character_)
  
 }
 
@@ -469,5 +474,74 @@ as.romanNumeral <- function(tset, key = dset(0L, 0L)) {
 #' (The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
 #' used to clean/filter inputs into these functions.
 #' 
-#' @name diatonicSet-read
+#' @name diatonicSet
 NULL
+
+####From scientific chord labels (i.e., GMm)
+
+#' @name diatonicSet
+#' @export
+read.sciChord2tertianSet <- function(csym) {
+    tonalname <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
+    fifth <- tonalname2fifth(tonalname)
+    
+    quality <- stringr::str_remove(csym, tonalname)
+    quality7 <- substr(quality, start = 0L, stop = 3L)
+    
+    mode <- c(m  = -3, M = 0, A = 3, d = -5,
+              mm = -3, Mm = -1, MM = 0, dm = -5, dd = -8, AM = 3, Am = -1,
+              mmm = -4, mmM = -3)[quality7]
+    
+    cardinality <- c(3, 4, 5, 6, 7)[nchar(quality)]
+    
+    alterations <- numeric(length(fifth))
+    alterations[quality7 == 'Am'] <- 3
+    
+    tset(root = fifth, mode = mode, cardinality = cardinality, alterations = alterations )
+    
+}
+
+
+#### From anything!
+
+#' @name diatonicSet
+#' @export
+setAs('numeric', 'tertianSet', function(from) as.tertianSet.numeric(from))
+#' @name diatonicSet
+#' @export
+setAs('character', 'tertianSet', function(from) as.tertianSet.character(from))
+
+#' @name diatonicSet
+#' @export
+as.tertianSet <- function(...) UseMethod('as.tertianSet')
+
+
+#' @name diatonicSet
+#' @export
+as.tertianSet.character <- regexDispatch( 'Scientific Chord' = read.sciChord2tertianSet,
+                                          '.' = force)
+
+
+
+
+#############################################################################-
+#### Translating pitch representations ----
+####################################################################-
+
+#' Pitch translations
+#' 
+#' These functions translate various pitch representations
+#' between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
+#' they will even (automatically) read parts of a string which represent a pitch,
+#' and translate only that part (leaving the rest of the string unchanged).
+#' They all have an option \code{inPlace} which can be set to \code{FALSE}
+#' if you want them to discard non-pitch parts of the string(s).
+#' 
+#' Under the hood, these functions use the \code{\link{humdrumR}} 
+#' \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
+#' fundamental, \emph{lingua franca} representation of pitch.
+#' 
+#' @name diatonicSet
+#' @export
+as.romanNumeral.character <- as.romanNumeral.tertianSet %.% as.tertianSet
+

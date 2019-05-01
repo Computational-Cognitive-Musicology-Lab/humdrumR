@@ -1546,7 +1546,6 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
   FileNames <- getHumtab(humdrumR)[ , unique(File)]
   
   lines <- paste0(NRecord, ':  \t', lines)
-  
   ## Trim an space lines
   lines <- padColumns(lines, max.token.length = max.token.length)
   ellipsis <- stringr::str_dup('#', max(nchar(lines[!grepl(':   *!!', lines)])))

@@ -7,6 +7,11 @@
 \alias{as.sciChord}
 \alias{as.chordSymbol}
 \alias{as.romanNumeral}
+\alias{as.romanNumeral.tertianSet}
+\alias{read.sciChord2tertianSet}
+\alias{as.tertianSet}
+\alias{as.tertianSet.character}
+\alias{as.romanNumeral.character}
 \title{\code{diatonicSets} methods for \code{\link[base]{order}} and 
 \code{\link[base]{sort}} order/sort along the circle of fifths.
 Modes are sorted secondarily from fewest flats to most sharps.
@@ -30,14 +35,36 @@ as.sciChord(tharm)
 
 as.chordSymbol(tharm, sep = "")
 
-as.romanNumeral(tharm)
+as.romanNumeral(x, ...)
+
+\method{as.romanNumeral}{tertianSet}(tset, key = dset(0L, 0L))
+
+read.sciChord2tertianSet(csym)
+
+as.tertianSet(...)
+
+\method{as.tertianSet}{character}(str, inPlace = FALSE)
+
+\method{as.romanNumeral}{character}(x, key = dset(0L, 0L))
 }
 \description{
-\code{diatonicSets} methods for \code{\link[base]{order}} and 
-\code{\link[base]{sort}} order/sort along the circle of fifths.
-Modes are sorted secondarily from fewest flats to most sharps.
-If \code{parallel = TRUE} all modes are grouped by shared tonics, so
-C minor and C major will appear besides each other.
-If \code{parallel = FALSE} modes/keys are sorted together by number of accidentals,
-so C minor and Eb major will be sorted next to each other.
+These functions all translate other pitch representations
+into
+
+These functions translate various pitch representations
+between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
+they will even (automatically) read parts of a string which represent a pitch,
+and translate only that part (leaving the rest of the string unchanged).
+They all have an option \code{inPlace} which can be set to \code{FALSE}
+if you want them to discard non-pitch parts of the string(s).
+}
+\details{
+These functions all assume that thheir string input is a well-formed
+example of the target pitch representation, with no extra strings.
+(The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
+used to clean/filter inputs into these functions.
+
+Under the hood, these functions use the \code{\link{humdrumR}} 
+\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
+fundamental, \emph{lingua franca} representation of pitch.
 }

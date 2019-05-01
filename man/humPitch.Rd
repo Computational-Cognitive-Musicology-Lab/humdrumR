@@ -2,7 +2,6 @@
 % Please edit documentation in R/humPitch.R
 \name{humPitch}
 \alias{humPitch}
-\alias{as.solfa}
 \alias{as.semit.character}
 \alias{as.midi.character}
 \alias{as.tonalname.character}
@@ -14,8 +13,6 @@
 \alias{as.ratio.character}
 \title{Pitch translations}
 \usage{
-as.solfa(x, key = 0L, ...)
-
 \method{as.semit}{character}(x)
 
 \method{as.midi}{character}(x)

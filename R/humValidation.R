@@ -19,7 +19,7 @@
 #' @export
 validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path = NULL, files = NULL) {
 
-  if (!is.null(pattern)) files <- readFiles(pattern, recursive = recursive, verbose = FALSE)
+  if (!is.null(pattern)) files <- unlist(readFiles(pattern, recursive = recursive, verbose = FALSE), recursive = FALSE)
   if (is.null(files)) stop("validateHumdrum needs either a pattern or files argument to be specified", call. = FALSE)
   
   cat(glue::glue("Validating {length(files)} files..."))

@@ -282,7 +282,7 @@ ditto <- function(spine) {
 #' @export
 IfElse <- function(true, yes, no) {
   out <- no
-  if (any(true)) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
+  if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
 
@@ -401,7 +401,7 @@ rotate.default <- function(obj, rotation = 1, wrap = FALSE, pad = NA) {
 
           size <- length(obj)
           rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
-          if (rotation == 0) return(obj)
+          if (rotation == 0L) return(obj)
 
           ind <- seq_len(size) - rotation
 

@@ -186,6 +186,16 @@ setMethod('dim', signature = 'humdrumVector', function(x) NULL)
 
 #' @name humdrumVector
 #' @export
+setMethod('is.na', signature = 'humdrumVector',
+          function(x) {
+              slots <- getSlots(x)
+              subvects <- sapply(slots, is.na)
+              apply(subvects, 1, any)
+          })
+
+
+#' @name humdrumVector
+#' @export
 is.humdrumVector <- function(x) inherits(x, 'humdrumVector')
 
 #' @name humdrumVector

@@ -21,6 +21,8 @@
 
 \S4method{dim}{humdrumVector}(x)
 
+\S4method{is.na}{humdrumVector}(x)
+
 is.humdrumVector(x)
 
 \S4method{is.vector}{humdrumVector}(x)

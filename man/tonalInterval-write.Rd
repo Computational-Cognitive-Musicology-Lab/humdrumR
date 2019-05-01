@@ -17,6 +17,7 @@
 \alias{as.scaleDegree}
 \alias{as.scaleDegree.tonalInterval}
 \alias{as.scaleDegree.numeric}
+\alias{as.solfa}
 \alias{as.solfa.tonalInterval}
 \alias{as.solfa.numeric}
 \alias{as.ratio}
@@ -58,6 +59,8 @@ as.scaleDegree(x, directed = TRUE, cautionary = FALSE, ...)
 
 \method{as.scaleDegree}{numeric}(x, key = 0L, directed = TRUE,
   cautionary = TRUE)
+
+as.solfa(x, key = 0L, ...)
 
 \method{as.solfa}{tonalInterval}(x, key = 0L, directed = TRUE)
 
