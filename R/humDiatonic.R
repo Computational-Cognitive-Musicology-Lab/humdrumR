@@ -434,29 +434,54 @@ as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
 
 #' @name diatonicSet
 #' @export
-as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L)) {
-    
- root <- getRoot(tset)
+as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FALSE) {
+ fifths <- getFifths(tset)
  
- degree <- as.scaleDegree(root, key = key, cautionary = FALSE)
+ degrees <- array(NA_character_, dim = dim(fifths))
+ degrees[] <- apply(fifths, 2, as.scaleDegree, cautionary = FALSE, key = key)
  
- accidental <- stringi::stri_extract_first_regex(degree, '^[mnb#M]*')
+ ### Root
+ roots    <- stringi::stri_extract_first_regex(degrees[ , 1], '[1-7]')
+ numerals <- c(`1` = 'I', `2` = 'II', `3` = 'III', `4` = 'IV', `5` = 'V', `6` = 'VI', `7` = 'VII')[roots]
+ 
+ ### triad quality
+ mode <- getMode(tset)
+ numeral <- IfElse(mode < -1L, tolower(numerals), numerals)
+ triadalt <- character(length(mode))
+ triadalt[mode < -4L] <- 'o'
+ triadalt[mode >  1L] <- '+'
+ 
+ ### extensions and alterations
+ accidental   <- degrees
+ accidental[] <- apply(degrees, 2, stringi::stri_extract_first_regex, pattern = '^[mnb#M]*')
  accidental[accidental == 'M'] = 'n'
  accidental[accidental == 'm'] = 'b'
- degree     <- stringi::stri_extract_first_regex(degree, '[1-7]')
  
- numeral <- c(`1` = 'I', `2` = 'II', `3` = 'III', `4` = 'IV', `5` = 'V', `6` = 'VI', `7` = 'VII')[degree]
+ rootaccidental <- accidental[ , 1L]
+ accidental <- accidental[ , -1L, drop = FALSE]
+ 
+ chordtones <- c('3', '5', '7', '9', '11', '13')
+ 
+ if (!cautionary) {
+     chordtones <- chordtones[-1:-2]
+     accidental <- accidental[ , -1:-2, drop = FALSE]
+ }
+ 
+ n <- length(chordtones)
+ extensions <- apply(accidental, 1,
+       function(row) {
+           notna <- !is.na(row)
+           acc <- row != ''
+           last <- logical(length(row))
+           if (any(notna)) last[ max(which(notna))] <- TRUE
+           hits <- notna & (acc | last)
+           paste(row[hits], chordtones[hits], sep = '', collapse = '')
+           
+       })
+ 
  
  ##
- mode <- getMode(tset)
- numeral <- IfElse(mode < -1, tolower(numeral), numeral)
- 
- qualities <- getSciQuality(tset)
- nqual <- nchar(qualities)
- qualities[nqual > 1L] <- paste0(substr(qualities[nqual > 1L], 0L, 1L), c('7', '9', '11', '13')[nqual - 1L])
- qualities <- stringi::stri_replace_first_regex(qualities, '^[Mm]', '')
- 
- IfElse(!is.na(root), paste0(accidental, numeral, qualities), NA_character_)
+ IfElse(!is.na(roots), paste0(rootaccidental, numeral, triadalt, extensions), NA_character_)
  
 }
 
@@ -490,7 +515,7 @@ read.sciChord2tertianSet <- function(csym) {
     
     mode <- c(m  = -3, M = 0, A = 3, d = -5,
               mm = -3, Mm = -1, MM = 0, dm = -5, dd = -8, AM = 3, Am = -1,
-              mmm = -4, mmM = -3)[quality7]
+              mmm = -4, mmM = -3, MmM = -1)[quality7]
     
     cardinality <- c(3, 4, 5, 6, 7)[nchar(quality)]
     
