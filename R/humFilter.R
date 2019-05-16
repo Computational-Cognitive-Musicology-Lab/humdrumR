@@ -299,9 +299,12 @@ nullifyTokens <- function(humtab, fields, indexPipe) {
 
 removeNull <- function(humtab) {
     # this function removes any spines, paths or records that are ALL null
+    if (humtab[ , all(Null)]) return(humtab[FALSE])
+    
     humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Spine), ]
-    humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Record), ]
-    humtab <- humtab[ , unique(colnames(humtab)), with = FALSE]
+    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Record), ]
+    
+    if (nrow(humtab) > 0L) humtab <- humtab[ , unique(colnames(humtab)), with = FALSE]
     
     humtab
 }
@@ -632,12 +635,14 @@ indexGLIM_piece <- function(humtab) {
   humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
   
   
-  if (any(humtab$Type == 'd')) {
+  # if (any(humtab$Type == 'd')) {
     #remove records containing only d
-    rectab <- table(humtab$Record, humtab$Type)
-    recs   <- as.numeric(rownames(rectab))
-    humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
-  }
+    # rectab <- table(humtab$Record, humtab$Type)
+    # recs   <- as.numeric(rownames(rectab))
+    # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
+  # }
+  
+  
   
   if (any(humtab$Type == 'M')) {
     #remove consecutive barlines

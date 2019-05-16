@@ -66,6 +66,11 @@ getAlterations <- function(dset) dset@Alterations
 #' @export
 getThirds <- function(tset) cbind(TRUE, ints2bits(tset@Thirds))
 
+`setThirds<-` <- function(x, value) {
+    x@Thirds <- Repeat(value, length.out = length(x))
+    x
+}
+
 ints2bits <- function(n, nbits = 6) {
     mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
     
@@ -191,7 +196,6 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 
 # How many accidentals does key have?
 accidentals <- function(dset) getRoot(dset) - getMode(dset)
-
 
 
 # triad = 3, 7th = 7, 9th = 15, 11th = 31, 13th = 63
@@ -437,6 +441,8 @@ as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
 as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FALSE) {
  fifths <- getFifths(tset)
  
+ if (!is.diatonicSet(key)) key <- as.diatonicSet(key)
+ 
  degrees <- array(NA_character_, dim = dim(fifths))
  degrees[] <- apply(fifths, 2, as.scaleDegree, cautionary = FALSE, key = key)
  
@@ -502,6 +508,20 @@ as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FA
 #' @name diatonicSet
 NULL
 
+
+### From key interpretation
+#' @name diatonicSet
+#' @export
+read.keyI2diatonicSet <- function(keyI) {
+    tonalnames <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#b-]*')
+    
+    fifths <- tonalname2fifth(tonalnames)
+    
+    dset(fifths, mode = c(-3L, 0L)[(keyI == toupper(keyI)) + 1L])
+    
+}
+
+
 ####From scientific chord labels (i.e., GMm)
 
 #' @name diatonicSet
@@ -528,6 +548,19 @@ read.sciChord2tertianSet <- function(csym) {
 
 
 #### From anything!
+
+
+#' @name diatonicSet
+#' @export
+as.diatonicSet <- function(...) UseMethod('as.diatonicSet')
+
+
+#' @name diatonicSet
+#' @export
+as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = read.keyI2diatonicSet,
+                                          '.' = force)
+
+
 
 #' @name diatonicSet
 #' @export
@@ -569,4 +602,24 @@ as.tertianSet.character <- regexDispatch( 'Scientific Chord' = read.sciChord2ter
 #' @name diatonicSet
 #' @export
 as.romanNumeral.character <- as.romanNumeral.tertianSet %.% as.tertianSet
+
+
+
+#################################################
+
+
+#' @name diatonicSet
+#' @export
+as.triad <- function(x, ...) UseMethod('as.triad')
+
+#' @name diatonicSet
+#' @export
+as.triad.tertianSet <- function(x) {
+    setThirds(x) <- 3L
+    x
+}
+
+#' @name diatonicSet
+#' @export
+as.triad.character <- as.triad.tertianSet %.% as.tertianSet
 

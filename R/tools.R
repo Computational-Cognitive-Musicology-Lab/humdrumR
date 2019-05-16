@@ -1,5 +1,6 @@
-Repeat <- function(x, ..., margin = 2L) {
+Repeat <- function(x, ..., margin = 1L) {
   if (is.null(dim(x))) {
+     # out <- do.call('rep', list(x = x, ...)) 
      out <- if (margin == 1L) do.call('rep', list(x = x, ...)) else x
   } else {
       

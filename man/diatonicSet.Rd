@@ -8,10 +8,16 @@
 \alias{as.chordSymbol}
 \alias{as.romanNumeral}
 \alias{as.romanNumeral.tertianSet}
+\alias{read.keyI2diatonicSet}
 \alias{read.sciChord2tertianSet}
+\alias{as.diatonicSet}
+\alias{as.diatonicSet.character}
 \alias{as.tertianSet}
 \alias{as.tertianSet.character}
 \alias{as.romanNumeral.character}
+\alias{as.triad}
+\alias{as.triad.tertianSet}
+\alias{as.triad.character}
 \title{\code{diatonicSets} methods for \code{\link[base]{order}} and 
 \code{\link[base]{sort}} order/sort along the circle of fifths.
 Modes are sorted secondarily from fewest flats to most sharps.
@@ -37,15 +43,29 @@ as.chordSymbol(tharm, sep = "")
 
 as.romanNumeral(x, ...)
 
-\method{as.romanNumeral}{tertianSet}(tset, key = dset(0L, 0L))
+\method{as.romanNumeral}{tertianSet}(tset, key = dset(0L, 0L),
+  cautionary = FALSE)
+
+read.keyI2diatonicSet(keyI)
 
 read.sciChord2tertianSet(csym)
+
+as.diatonicSet(...)
+
+\method{as.diatonicSet}{character}(str, inPlace = FALSE)
 
 as.tertianSet(...)
 
 \method{as.tertianSet}{character}(str, inPlace = FALSE)
 
-\method{as.romanNumeral}{character}(x, key = dset(0L, 0L))
+\method{as.romanNumeral}{character}(x, key = dset(0L, 0L),
+  cautionary = FALSE)
+
+as.triad(x, ...)
+
+\method{as.triad}{tertianSet}(x)
+
+\method{as.triad}{character}(x)
 }
 \description{
 These functions all translate other pitch representations

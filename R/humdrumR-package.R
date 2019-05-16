@@ -44,7 +44,12 @@
 #' @importFrom abind abind
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom data.table data.table rbindlist setorder setcolorder copy as.data.table is.data.table
+NULL
+
 #' @importFrom magrittr %>%
+#' @name %>%
+#' @rdname magrittr.%>%
+#' @export
 NULL
 
 # #' Parsed \code{\linkS4class{humdrumR}} data for 371 Bach chorales
