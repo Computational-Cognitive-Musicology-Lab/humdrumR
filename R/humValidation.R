@@ -26,6 +26,10 @@ validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path 
   
   filenames <- names(files)
   
+  # If files are empty everything gets thrown off...this is a hacky fix
+  # Just pad empty files with a single empty record
+  files <- lapply(files, function(x) if (length(x) == 0) "" else x)
+  
   filevec  <- rep(filenames, lengths(files))
   recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
   records  <- unlist(files)

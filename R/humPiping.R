@@ -28,6 +28,12 @@
 #' if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 #' a normal vector or list of R data.
 #' 
+#' ' \code{\%humT\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered 
+#' humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
+#' \code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
+#' \href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
+#' for instance, for plotting.
+#' 
 #' \code{\%hum[]\%} is similar to \code{\%hum>\%} except it apply the formulae on its right-hand
 #' side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
 #' a \code{\linkS4class{humdrumR}} data object on the fly.
@@ -58,9 +64,27 @@ NULL
 #' @name humPipe
 #' @export
 `%hum<%` <- function(humdrumR, formula) {
-          # if (class(humdrumR) != 'humdrumR') stop("%hum<% pipe operator can only be called with humdrumR data on left side. \n
-                                                  # You will get this error if you put %hum<% anywhere except the last step of a humdrum pipe." )
      doPipe(humdrumR, formula, '%hum<%', 'withHumdrum')
+}
+
+#' @name humPipe
+#' @export
+`%humT%` <- function(humdrumR, formula) {
+    if (is.list(formula)) {
+        formula <- lapply(formula,
+                          function(form) {
+                              lhs <- rlang::f_lhs(form)
+                              
+                              if (is.null(lhs) || rlang::as_name(lhs) %in% c('d' , 'do')) {
+                                  rlang::f_lhs(form) <- quote(doplot)
+                              }
+                              form
+                          })
+    } else {
+        rlang::f_lhs(formula) <- quote(doplot)
+    }
+    
+    doPipe(humdrumR, formula, '%humT%', 'withinHumdrum')
 }
 
 #' @export
@@ -87,7 +111,9 @@ doPipe <- function(humdrumR, formula, pipename, call) {
     
     if (!is.list(formula)) formula <- list(formula)
     
-    output <- do.call(call, c(humdrumR, formula))
+    call <- as.symbol(call)
+    myquo <- rlang::quo((!!call)(humdrumR, !!!formula))
+    output <- rlang::eval_tidy(myquo)
     
     if (!is.null(rest)) {
         nextpipe <- call(splitpipe$Infix, quote(output), rest)

@@ -4,11 +4,14 @@
 \alias{humPipe}
 \alias{\%hum>\%}
 \alias{\%hum<\%}
+\alias{\%humT\%}
 \title{Piping humdrumR data}
 \usage{
 humdrumR \%hum>\% formula
 
 humdrumR \%hum<\% formula
+
+humdrumR \%humT\% formula
 }
 \description{
 These infix operators make it possible to use
@@ -36,6 +39,12 @@ the output can't be piped any further (using \code{\%hum>\%} or \code{\%hum<\%})
 Thus, \code{\%hum<\%} should only be used as the last step in a pipe---you would do this
 if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 a normal vector or list of R data.
+
+' \code{\%humT\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered 
+humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
+\code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
+\href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
+for instance, for plotting.
 
 \code{\%hum[]\%} is similar to \code{\%hum>\%} except it apply the formulae on its right-hand
 side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index

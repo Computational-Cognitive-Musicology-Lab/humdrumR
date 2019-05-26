@@ -77,16 +77,18 @@ humtable <- function(..., levels = NULL) {
     args <- Map(factor, args, levels)
   }
   
-  do.call('table', c(args, useNA = 'ifany'))
+  na <- if (any(sapply(args, is.na))) 'always' else 'no'
+  
+  do.call('table', c(args, useNA = na))
 }
 
 #' @export
 append2string <- function(app, sep = '') {
  newfunc <- function(str) paste(str, sep, app, collapse = '')
  
- if (is.function(func)) body(newfunc) <- call('{', quote(app <- app(str)), body(newfunc))
+ if (is.function(newfunc)) body(newfunc) <- call('{', quote(app <- app(str)), body(newfunc))
  
- humFunc(newFunc)
+ humFunc(newfunc)
 }
 
   

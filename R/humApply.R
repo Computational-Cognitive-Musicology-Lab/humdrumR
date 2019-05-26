@@ -318,8 +318,9 @@ withinHumdrum <- function(humdrumR,  ...) {
           
           funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
           
+          sideeffectonly <- grepl('p', names(parsedFormulae$doexpressions)[1]) # do~ names with 'p' as in 'doplot'
           humtabFunc  <- humtableApplier(funcQuosure, 
-                                         captureOutput = !grepl('p', names(parsedFormulae$doexpressions)[1]),
+                                         captureOutput = !sideeffectonly,
                                          reHumtab = TRUE)
           
           #### evaluate expression 
@@ -330,34 +331,36 @@ withinHumdrum <- function(humdrumR,  ...) {
                     partApply(humtab, parsedFormulae$partitions, humtabFunc)
           }
           
-          
-          #### Put new humtable back into humdrumR object
-          
-          # if we mixed record types, the newhumtab will not know
-          # where to be put back
-          # This section should be improved (Nat, 11/29/2018)
-          if (any(is.na(newhumtab$Type))) {
-                    newtype <- if ('D' %in% parsedFormulae$recordtypes) 'D' else parsedFormulae$recordtypes[1]
-                    newhumtab$Type[is.na(newhumtab$Type)] <- newtype
+          if (!sideeffectonly) {
+              #### Put new humtable back into humdrumR object
+              
+              # if we mixed record types, the newhumtab will not know
+              # where to be put back
+              # This section should be improved (Nat, 11/29/2018)
+              if (any(is.na(newhumtab$Type))) {
+                  newtype <- if ('D' %in% parsedFormulae$recordtypes) 'D' else parsedFormulae$recordtypes[1]
+                  newhumtab$Type[is.na(newhumtab$Type)] <- newtype
+              }
+              putHumtab(humdrumR, drop = TRUE) <- newhumtab
+              ########### Update other slots in humdrumR object
+              
+              # Now that the Humtable is taken care of,
+              # tell the humdrumR object about the new fields and set the Active formula.
+              newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
+              if (length(newfields) > 0) {
+                  addFields(humdrumR) <- newfields
+                  humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
+                      act <- ifelsecalls(parsedFormulae$partitions['where'], 
+                                         c(humdrumR@Active, lapply(newfields, 
+                                                                   function(nf) rlang::as_quosure(as.symbol(nf), environment(humdrumR)))))
+                      putActive(humdrumR, act)
+                  } else {
+                      setActiveFields(humdrumR, newfields) 
+                  }
+              }
+              # humdrumR <- indexGLIM(humdrumR)
+              
           }
-          putHumtab(humdrumR, drop = TRUE) <- newhumtab
-          ########### Update other slots in humdrumR object
-          
-          # Now that the Humtable is taken care of,
-          # tell the humdrumR object about the new fields and set the Active formula.
-          newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
-          if (length(newfields) > 0) {
-                    addFields(humdrumR) <- newfields
-                    humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
-                              act <- ifelsecalls(parsedFormulae$partitions['where'], 
-                                                 c(humdrumR@Active, lapply(newfields, 
-                                                                           function(nf) rlang::as_quosure(as.symbol(nf), environment(humdrumR)))))
-                              putActive(humdrumR, act)
-                    } else {
-                              setActiveFields(humdrumR, newfields) 
-                    }
-          }
-          # humdrumR <- indexGLIM(humdrumR)
           
           if (length(parsedFormulae$doexpressions) > 1) {
                     do.call('Recall', c(humdrumR,  

@@ -46,11 +46,6 @@
 #' @importFrom data.table data.table rbindlist setorder setcolorder copy as.data.table is.data.table
 NULL
 
-#' @importFrom magrittr %>%
-#' @name %>%
-#' @rdname magrittr.%>%
-#' @export
-NULL
 
 # #' Parsed \code{\linkS4class{humdrumR}} data for 371 Bach chorales
 # #' 
