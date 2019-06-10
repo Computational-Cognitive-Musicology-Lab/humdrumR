@@ -1,2 +1,17 @@
 
+Incorporate "local" code, to make things cleaner.
+
+Write writeHumdrum
+
+
+Make "melodic direction" functions to be incorporated into deg, degree, and solfa, etc.
+
+work on where~xx ... does it really work?
+
+
+Windowing
+
+
+N-grams
+
 

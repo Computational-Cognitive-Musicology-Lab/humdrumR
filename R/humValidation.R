@@ -46,7 +46,6 @@ validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path 
                 validate_spinePaths)
   reports <- data.table::rbindlist(lapply(funcs, do.call, 
                                           args = list(records, local, filevec)))
-  
   if (nrow(reports) == 0L) {
    cat("all valid.\n")
    return(invisible(files))
@@ -119,6 +118,7 @@ hitsTable <- function(hits, indices, messages) {
 }
 
 validate_File <- function(records, local, filevec) {
+    ## Could improve this to give more specific messages?
  tapply(records[local], filevec[local],
         function(file) {
                   opens  <- grepl('^\\*\\*', file)
@@ -133,7 +133,7 @@ validate_File <- function(records, local, filevec) {
  
   firstrecs <- tapply(which(local), filevec[local], '[', i = 1)
   
-  hitsTable(hits, firstrecs, "** and *- records in file are missing or don't add up")
+  hitsTable(hits, firstrecs[hits], "** and *- records in file are missing or don't add up")
           
 }
  
@@ -224,13 +224,14 @@ validate_spinePaths <- function(records, local, filevec) {
           
           # output <- list()
           
-    
           #
           hits <- changes != diffs #& c(!singleDrop, FALSE) & c(!singleAdd, FALSE)
           
           padding <- locrecords == 'XXX_padding'
           hits <- hits[!padding]
           diffs <- diffs[!padding]
+          
+          hits[diffs == 0L] <- FALSE
           
           addsordrops <- ifelse(diffs[hits] > 0, 'adds', 'drops')
           columns <- ifelse(abs(diffs[hits]) > 1L, 'columns', 'column')

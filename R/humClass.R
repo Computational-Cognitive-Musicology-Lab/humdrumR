@@ -1033,7 +1033,7 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
 
 getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 
-`putHumtab<-` = function(humdrumR, value, drop = FALSE) {
+`putHumtab<-` <- function(humdrumR, value, drop = FALSE) {
           # adds humtab into humdrumR
           # Drop determines whether record dataTypes that are 
           # absent from value are left unchanged (drop = TRUE)
@@ -1043,6 +1043,15 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
           
           humdrumR
 }
+
+`addNulld<-` <- function(humdrumR, value) {
+    old <- getHumtab(humdrumR, 'd')
+    value <- value[ , colnames(old), with = FALSE]
+    humdrumR@Humtable$d <- rbind(old, value)
+    humdrumR
+    
+}
+
 
 `putD<-` <- function(humdrumR, value) { 
   # This is a shortcut to replacing non-dull data records

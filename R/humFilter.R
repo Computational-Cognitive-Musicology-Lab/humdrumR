@@ -248,7 +248,6 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
     if (!is.logical(result)) stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
     
     # 
-    
     parsedFormulae <- parseKeywords(formulae)
     dataTypes <- rlang::eval_tidy(parsedFormulae$recordtypes)
     dataTypes <- checkTypes(dataTypes, 'filterHumdrum', 'recordtypes ~ ...')
@@ -265,11 +264,10 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
         humtab_withindex <- humtab
     }
     
-    humtab <- nullifyTokens(humtab_withindex, fields(humdrumR), indexPipe)
-    humtab <- removeNull(humtab)
     
-    putHumtab(humdrumR, drop = TRUE) <- humtab
-    
+    ###
+    humdrumR <- nullifyTokens(humdrumR, humtab_withindex, fields(humdrumR), indexPipe)
+
     if (indexGLIM) {
         humdrumR <- indexGLIM(humdrumR, 
                               c("G", "L", "I", "M", "D", "d", "P")[-match(dataTypes,  c("G", "L", "I", "M", "D", "d", "P"))])
@@ -279,12 +277,13 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
 }
 
 
-nullifyTokens <- function(humtab, fields, indexPipe) {
+nullifyTokens <- function(humdrumR, humtab, fields, indexPipe) {
     # This function takes a humdrum table which already has a
     # logical INDEX column ("indexPipe") and replaces all tokens in all data fields
     # in those indices with null data
+    # Returns a new humdrumR object, with the new humtable(s) inside it.
+    
     replaceInd <- !humtab[ , indexPipe, with = FALSE]
-    humtab[ , eval(indexPipe) := NULL]
     replaceInd[is.na(replaceInd)] <- FALSE
     
     charFields  <- fields[Class == 'character' & Type == "Data"]$Name
@@ -294,16 +293,29 @@ nullifyTokens <- function(humtab, fields, indexPipe) {
     if (length(otherFields) > 0L) humtab[ , otherFields] <- lapply(humtab[ , otherFields, with = FALSE], function(col) { col[replaceInd] <- NA             ; col})
     
     humtab$Null[replaceInd] <- TRUE
-    humtab
+    humtab$Type[humtab$Type == 'D' & humtab$Null] <- 'd'
+    
+    ##
+    humtab <- removeNull(humtab)
+    replaceInd <- !humtab[ , indexPipe, with = FALSE]
+    replaceInd[is.na(replaceInd)] <- FALSE
+    humtab[ , eval(indexPipe) := NULL]
+    
+    newdInd <- (replaceInd & humtab$Type == 'd')[ , 1]
+    putHumtab(humdrumR, drop = TRUE) <- humtab[!newdInd]
+    if (any(newdInd)) addNulld(humdrumR) <- humtab[newdInd]
+ 
+    humdrumR   
 }
 
 removeNull <- function(humtab) {
     # this function removes any spines, paths or records that are ALL null
     if (humtab[ , all(Null)]) return(humtab[FALSE])
     
-    humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Spine), ]
-    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Record), ]
+    humtab <- humtab[!(Stop > 1 & Null == TRUE)]
     
+    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Spine), ]
+    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Record), ]
     if (nrow(humtab) > 0L) humtab <- humtab[ , unique(colnames(humtab)), with = FALSE]
     
     humtab
