@@ -4,7 +4,7 @@
 \alias{getFields}
 \title{Get named}
 \usage{
-getFields(humdrumR, fields = NULL, dataTypes = "D")
+getFields(humdrumR, fieldnames = NULL, dataTypes = "D")
 }
 \description{
 Get named

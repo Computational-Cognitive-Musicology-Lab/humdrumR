@@ -21,7 +21,7 @@ NULL
 #' @name regexDispatch
 #' @export
 do2RE <- function(.func, regex) {
-          .funcargs <- fargs(.func)
+          .funcargs <- formals(args(.func))
           
           if (length(.funcargs) == 0L) stop("Can't make a new function using do2RE if the original function takes no arguments.")
           
@@ -71,7 +71,7 @@ regexDispatch <- function(...) {
           if (length(funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
           
           regexes <- getRE(names(funcs))
-          funcsArgs <- lapply(funcs, function(rf) fargs(rf)[-1])
+          funcsArgs <- lapply(funcs, function(rf) formals(args(rf))[-1])
           genericFunc <- function() {
                     if (!is.character(str)) return(str)
                     Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex)))
@@ -124,8 +124,8 @@ setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
                     
                     # get old formal arguments, and make new ones,
                     # both for the top level function ,and the closure functions
-                    oldArgs   <- fargs(f1)
-                    funcsArgs <- lapply(newfuncs, function(rf) fargs(rf)[-1])
+                    oldArgs   <- formals(args(f1))
+                    funcsArgs <- lapply(newfuncs, function(rf) formals(args(rf))[-1])
                     
                     f1Env$funcsArgs <- funcsArgs
                     

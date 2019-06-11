@@ -11,15 +11,15 @@
 \usage{
 \S4method{as.vector}{humdrumR}(x, mode = "any")
 
-as.lines(humdrumR, dataTypes = "GLIMDd", field = NULL,
+as.lines(humdrumR, dataTypes = "GLIMDd", fieldname = NULL,
   alignColumns = FALSE, padPaths = FALSE, padder = "")
 
 as.matrix(humdata)
 
 as.data.frame(humdata)
 
-as.matrices(humdrumR, dataTypes = "D", fields = NULL, padder = NA,
-  path.fold = TRUE)
+as.matrices(humdrumR, dataTypes = "D", fieldnames = NULL,
+  padder = NA, path.fold = TRUE)
 
 as.data.frames(humdrumR)
 }

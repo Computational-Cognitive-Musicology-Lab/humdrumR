@@ -543,13 +543,12 @@ setMethod('as.vector',
 
 #' @name humCoersion
 #' @export
-as.lines <- function(humdrumR, dataTypes = 'GLIMDd', field = NULL, 
+as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
                      alignColumns = FALSE, padPaths = FALSE, padder = '') {
           dataTypes <- checkTypes(dataTypes, 'as.lines')
           
-          
           mat <- as.matrix(humdrumR, dataTypes = dataTypes, padder = padder,
-                           fields = field[1], alignColumns = alignColumns,
+                           fieldnames = fieldname[1], alignColumns = alignColumns,
                            path.fold = !padPaths)
           
           lines <- apply(mat, 1, function(row) glue::glue_collapse(row[!is.na(row)], sep = '\t'))
@@ -564,13 +563,13 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', field = NULL,
 #' @name humCoersion
 #' @usage as.matrix(humdata)
 #' @export
-as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL, 
+as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
                    alignColumns = TRUE,
                    padder = NA, 
                    path.fold = TRUE) { 
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
-                    if (!is.null(fields)) x <- setActiveFields(x, fields)
+                    if (!is.null(fieldnames)) x <- setActiveFields(x, fieldnames)
                     
                     if (is.empty(x)) return(matrix(character(0L), ncol = 0, nrow = 0))
                     
@@ -588,7 +587,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL,
                     dataTypes <- c(dataTypes, 'P')
                     x <- foldRecords(x, foldAtomic = FALSE, padPaths = TRUE)
                     
-                    records <- getFields(x, fields = fields, dataTypes = dataTypes)
+                    records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
                     records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, were getting errors.
                     matrices <- lapply(records, stringi::stri_list2matrix, byrow = TRUE)
                     
@@ -616,10 +615,10 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fields = NULL,
 #' @export
 setMethod('as.data.frame', 
           signature = c(x = 'humdrumR'),
-          function(x, dataTypes = 'D', field = NULL, padder = NA, fold.path = TRUE) {
-                    if (!is.null(field) && length(field) != 1L) stop("Can only coerce one field in a humdrumR object to a data.frame.")
+          function(x, dataTypes = 'D', fieldname = NULL, padder = NA, fold.path = TRUE) {
+                    if (!is.null(fieldname) && length(fieldname) != 1L) stop("Can only coerce one field in a humdrumR object to a data.frame.")
                     
-                    as.data.frame(as.matrix(x, dataTypes, field[1], padder, fold.path), stringsAsFactors = FALSE)
+                    as.data.frame(as.matrix(x, dataTypes, fieldname, padder, fold.path), stringsAsFactors = FALSE)
           })
 
 
@@ -627,12 +626,12 @@ setMethod('as.data.frame',
 
 #' @name humCoersion
 #' @export
-as.matrices <- function(humdrumR, dataTypes = 'D', fields = NULL, padder = NA, path.fold = TRUE) {
+as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
           n <- length(humdrumR)
           lapply(1:n,
                  function(i) as.matrix.humdrumR(humdrumR[i], dataTypes = dataTypes, 
-                                       fields = fields, 
+                                       fieldnames = fieldnames, 
                                        padder = padder, 
                                        path.fold = path.fold))
           
@@ -895,12 +894,9 @@ foldHumdrum <- function(humdrumR, byfields,
           # byfields determines what fields to fold across.
           # byfields should be a character vector.
           # suitable for the "by" argument in a data.table[].
-          # funcname is just the name of the use function that is being called
-          # (it is only used in case of an error).
-          # passfunc is a function which lookas at a humtable
-          # and determines if the humtable should be returned with no changes.
           checkhumdrumR(humdrumR, 'foldHumdrum')
-          
+          humdrumR <- indexGLIM(humdrumR)      
+    
           dataTypes <- if (padPaths) "GLIMDdP" else "GLIMDd"
           humtab   <- getHumtab(humdrumR, dataTypes)
           
@@ -909,7 +905,7 @@ foldHumdrum <- function(humdrumR, byfields,
           fieldtypes <- sapply(humtab[ , fieldnames, with = FALSE], class)
           
           # What fields to apply across
-          byfields <- fieldMatch(humdrumR, byfields)
+          byfields <- fieldMatch(humdrumR, byfields, callfun = 'foldHumdrum', argname = 'byfields')
           byfields <- do.call('call', c(".", lapply(byfields, as.symbol)), quote = TRUE)
           
           #### Construct the expressions which will do the work
@@ -1149,7 +1145,7 @@ setActive <- function(humdrumR, form) {
 #' @name humActive
 #' @export
 setActiveFields <- function(humdrumR, fieldnames) {
-  fieldnames <- fieldMatch(humdrumR, fieldnames)
+  fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'setActiveFields', argname = 'fieldnames')
   actquo <- if (length(fieldnames) > 1L) {
             rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
             } else {
@@ -1201,17 +1197,35 @@ setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
             name <- as.character(name)
             
-            matches <- fieldMatch(x, name)
-            
-            if (is.na(matches))  stop(glue::glue("You are trying to use the $ operator to make a field within a humdrumR object active,
-                                                 but there is no field called '{name}'"), call. = FALSE)
+            matches <- fieldMatch(x, name, callfun = '$', argname = 'name')
             
             setActiveFields(x, matches)
           })
 
-fieldMatch <- function(humdrumR, names) {
+fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
           fields <- fields(humdrumR)$Name
-          target <- pmatch(names, fields)
+          target <- pmatch(fieldnames, fields)
+          
+          nomatch <- is.na(target)
+          
+          if (all(nomatch)) {
+              stop(call. = FALSE,
+                   glue::glue('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
+                              glue::glue_collapse(fieldnames, sep = ', ', last = ', and '),
+                              'are not names of fields in your humdrumR object.'))
+          }
+          
+          if (any(nomatch)) {
+              warning(call. = FALSE, immediate. = TRUE,
+                      glue::glue('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
+                                 glue::glue_collapse(fieldnames[is.na(target)], 
+                                                sep = ', ', last = ', and '),
+                                 'are not names of fields in your humdrumR object.')
+                      )
+              target <- target[!nomatch]
+              
+          }
+          
 
           fields[target]
 
@@ -1308,16 +1322,16 @@ isField <- function(humdrumR, names) {
 
 #' Get named 
 #' @export
-getFields <- function(humdrumR, fields = NULL, dataTypes = 'D') {
+getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
           dataTypes <- checkTypes(dataTypes, 'getFields')
           
-          if (is.null(fields)) fields <- activeFields(humdrumR)
+          if (is.null(fieldnames)) fieldnames <- activeFields(humdrumR)
           
-          fields <- fieldMatch(humdrumR, fields)
+          fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'getFields', argname = 'fieldnames')
           
           humtab <- getHumtab(humdrumR, dataTypes)
           
-          humtab[ , fields, with = FALSE]
+          humtab[ , fieldnames, with = FALSE]
           
 }
 

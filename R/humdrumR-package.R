@@ -40,7 +40,7 @@
 #' @importFrom MASS fractions
 #' @importFrom combinat permn
 #' @importFrom utils combn
-#' @importFrom glue glue
+#' @importFrom glue glue glue_collapse
 #' @importFrom abind abind
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom data.table data.table rbindlist setorder setcolorder copy as.data.table is.data.table
