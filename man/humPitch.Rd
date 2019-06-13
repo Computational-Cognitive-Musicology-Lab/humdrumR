@@ -24,8 +24,7 @@
 \method{as.sciPitch}{character}(x)
 
 \method{as.interval}{character}(x, specific = TRUE, directed = TRUE,
-  quality.labels = list(augment = "A", diminish = "d", major = "M", minor
-  = "m", perfect = "P"))
+  quality.labels = c(), contour.labels = c())
 
 \method{as.solfa}{character}(x, key = 0L, directed = TRUE)
 

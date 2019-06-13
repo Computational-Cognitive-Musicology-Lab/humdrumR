@@ -383,8 +383,10 @@ fifth2tonalname <- function(fifth, kernFlats = TRUE) {
                  NA_character_)
 }
 
-fifth2quality <- function(fifth, quality.labels = list(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')) {
-          list2env(quality.labels, envir = environment()) 
+fifth2quality <- function(fifth, quality.labels = c()) {
+          setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+          
+          list2env(as.list(quality.labels), envir = environment()) 
           #puts major, minor, augment, diminish, perfect into environment
     
           qualityN <- abs(fifth2qualityN(fifth))
@@ -400,12 +402,15 @@ fifth2quality <- function(fifth, quality.labels = list(perfect = 'P', augment = 
           qualities
           
 }
-fifth2simpleInterval <- function(fifth, quality.labels = list(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')) {
+fifth2simpleInterval <- function(fifth, quality.labels = c()) {
+          setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+    
           generic <- fifth2genericinterval(fifth)
           qualities <- fifth2quality(fifth,  quality.labels)
           
           IfElse(is.na(generic) | is.na(qualities), NA_character_, paste0(qualities, generic))
 }
+
 
 
 ##### As semit (i.e., 0, -11)
@@ -492,48 +497,104 @@ as.interval <- function(x, specific = TRUE, directed = TRUE, ...) UseMethod('as.
 #' @name tonalInterval-write
 #' @export
 as.interval.tonalInterval <- function(x, specific = TRUE, directed = TRUE, 
-                   quality.labels = list(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')) {
-                   octave <- sciOctave(x) - 4
-                    
-                   fifth <- getFifth(x)
-                   fifth <- IfElse(octave < 0,   fifth * sign(octave), fifth) # invert interval if direction is down
-                   direction <- if (directed) {
-                             IfElse(fifth == 0, 
-                                    rep('', length(fifth)),  
-                                    c('-', '+', '+')[sign(octave) + 2])
-                   }  else {
-                             ""         
-                   }
-                   genericints <- fifth2genericinterval(fifth)
-                   octave <- abs(IfElse(octave < 0, octave + 1, octave)) # problem here?
-                   octaveshift <- abs(genericints + (7 * octave))
-                    
-                   if (specific) {
-                             qualities <- fifth2quality(fifth, quality.labels)
-                    } else {
-                             qualities <- ''
-                    }
-                    
-                    paste0(direction, qualities, octaveshift)
-          }
+                                      quality.labels = c(), contour.labels = c()) {
+    
+    setoptions(quality.labels) <- c(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')
+    setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+')
+    
+    octave <- sciOctave(x) - 4
+    
+    fifth <- getFifth(x)
+    fifth <- IfElse(octave < 0,   fifth * sign(octave), fifth) # invert interval if direction is down
+    direction <- if (directed) {
+        IfElse(fifth == 0, 
+               rep('', length(fifth)),  
+               contour.labels[c('Down', 'Same', 'Up')[sign(octave) + 2]])
+    }  else {
+        ""         
+    }
+    genericints <- fifth2genericinterval(fifth)
+    octave <- abs(IfElse(octave < 0, octave + 1, octave)) # problem here?
+    octaveshift <- abs(genericints + (7 * octave))
+    
+    if (specific) {
+        qualities <- fifth2quality(fifth, quality.labels)
+    } else {
+        qualities <- ''
+    }
+    
+    paste0(direction, qualities, octaveshift)
+}
+
+
+#### As melodic contour
+
+#' Get melodic contours
+#' 
+#' @rdname MelodicContour
+#' @export
+as.contour <- function(tint, derive, threshold, octave, contour.labels) UseMethod('as.contour')
+
+#' @rdname MelodicContour
+#' @export
+as.contour.tonalInterval <- function(tint, derive = TRUE, 
+                                     threshold = 0,
+                                     octave = TRUE,
+                                     contour.labels = c()) {
+    setoptions(contour.labels) <- c(Down = 'v', Same = '', Up = '^', Bound = "|")
+    
+    if (derive) tint <- diff(tint)
+    
+    cont <- character(length(tint))
+    
+    semits <- as.semit.tonalInterval(tint)
+    targets <- abs(semits) >= threshold
+    
+    cont[targets] <- contour.labels[c('Down', 'Same', 'Up')[sign(semits[targets]) + 2L]]
+    
+    if (octave) {
+        cont <- strrep(cont, 1L + (abs(semits) %/% 12))
+    }
+    
+    
+    if (derive) c(contour.labels['Bound'], cont) else cont
+    
+}
+
+addcontour <- function(strs, tint, threshold = 0L, octave = TRUE, contour.labels = c()) {
+    cont <- as.contour.tonalInterval(x, derive = TRUE, octave = octave,
+                                     threshold = threshold, contour.labels = contour.labels)
+    paste0(cont, strs)
+    
+}
+
+
 
 ##### As scale degree (i.e., "do", "si")
 
 
 #' @name tonalInterval-write
 #' @export
-as.scaleDegree <- function(x, directed = TRUE, cautionary = FALSE, ...) UseMethod('as.scaleDegree')
-
-#' @name tonalInterval-write
-#' @export
-as.scaleDegree.tonalInterval <- function(x, key = 0L, directed = TRUE, cautionary = FALSE) {
-    fifths <- getFifth(x)        
-    as.scaleDegree.numeric(fifths, key, directed = TRUE, cautionary = FALSE)
+as.scaleDegree <- function(x, cautionary = FALSE, contour = FALSE, quality.labels = c(), ...) {
+    UseMethod('as.scaleDegree')
 }
 
 #' @name tonalInterval-write
 #' @export
-as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TRUE) {
+as.scaleDegree.tonalInterval <- function(x, key = 0L, cautionary = FALSE, contour = FALSE, quality.labels = c(), ...) {
+    fifths <- getFifth(x)        
+    
+    deg  <- as.scaleDegree.numeric(fifths, key, cautionary = FALSE, quality.labels = quality.labels)
+    
+    if (contour) addcontour(deg, x, threshold = 6L, ...) else deg
+    
+}
+
+#' @name tonalInterval-write
+#' @export
+as.scaleDegree.numeric <- function(x, key = 0L, cautionary = TRUE, quality.labels = c()) {
+    setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
+    
     if (is.diatonicSet(key)) {
         mode <- getMode(key)
         key  <- getRoot(key)
@@ -544,12 +605,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, directed = TRUE, cautionary = TR
     
     x <- x - key
     
-    intervals <- fifth2simpleInterval(x, 
-                                      quality.labels = list(perfect = 'n', 
-                                                            augment = '#', 
-                                                            diminish = 'b', 
-                                                            major = 'M', 
-                                                            minor = 'm'))
+    intervals <- fifth2simpleInterval(x, quality.labels = quality.labels)
     if (!cautionary) {
         x <- x - mode
         inkey <- !is.na(x) & x <= 5L & x >= -1L
@@ -842,6 +898,7 @@ read.interval2tonalInterval <- function(str) {
 }
 
 
+
 #### From scale degree
 
 read.scaleDegree2tonalInterval <- read.interval2tonalInterval
@@ -1040,3 +1097,5 @@ transpose.character <- regexDispatch('Kern Pitch' = as.kernPitch %.% transpose.t
                                      'Decimal' = as.semit %.% transpose.tonalInterval %.% read.semit2tonalInterval)
 
 
+
+###############

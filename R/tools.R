@@ -499,3 +499,17 @@ switchpatch <- function(x,  ...) {
      funcs[['otherwise']](x)         
     }
 }
+
+
+
+`setoptions<-` <- function(x, values) {
+    # used to set options
+    poss <- names(x)
+    
+    ind <- Filter(Negate(is.na), pmatch(names(x), poss))
+    
+    values[ind] <- x
+    
+    values
+    
+}

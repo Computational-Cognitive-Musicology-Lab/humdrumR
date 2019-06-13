@@ -49,16 +49,16 @@ as.kernPitch(x, ...)
 as.interval(x, specific = TRUE, directed = TRUE, ...)
 
 \method{as.interval}{tonalInterval}(x, specific = TRUE,
-  directed = TRUE, quality.labels = list(augment = "A", diminish = "d",
-  major = "M", minor = "m", perfect = "P"))
+  directed = TRUE, quality.labels = c(), contour.labels = c())
 
-as.scaleDegree(x, directed = TRUE, cautionary = FALSE, ...)
+as.scaleDegree(x, cautionary = FALSE, contour = FALSE,
+  quality.labels = c(), ...)
 
-\method{as.scaleDegree}{tonalInterval}(x, key = 0L, directed = TRUE,
-  cautionary = FALSE)
+\method{as.scaleDegree}{tonalInterval}(x, key = 0L, cautionary = FALSE,
+  contour = NULL, quality.labels = c(), contour.labels = c())
 
-\method{as.scaleDegree}{numeric}(x, key = 0L, directed = TRUE,
-  cautionary = TRUE)
+\method{as.scaleDegree}{numeric}(x, key = 0L, cautionary = TRUE,
+  quality.labels = c())
 
 as.solfa(x, key = 0L, ...)
 
