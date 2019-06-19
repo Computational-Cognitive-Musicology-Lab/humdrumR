@@ -133,7 +133,16 @@ readFiles <- function(patterns, recursive = FALSE, multipleInstances = FALSE, ve
             }
         }
         
-        if (length(patterns) > 1L) cat(glue::glue("Pattern '{names(patterns)}' matches {lengths(filenames)} files."), sep = '\n') 
+        if (length(patterns) > 1L) {
+          if (is.null(names(patterns))) {
+            cat(glue::glue("Search patterns match ", 
+                           glue::glue_collapse(lengths(filenames), sep = ', ', last = ', and '),
+                           " files respectively."), 
+                '\n')
+          } else {
+            cat(glue::glue("Pattern '{names(patterns)}' matches {lengths(filenames)} files."), sep = '\n') 
+          }  
+        } 
     }
     
       
@@ -228,8 +237,9 @@ readHumdrum = function(..., recursive = FALSE, multipleInstances = FALSE, valida
       
  patterns <- unlist(list(...))
  # Make sure patterns are all named
- if (is.null(names(patterns))) names(patterns) <- rep("Unnamed", length(patterns))
- names(patterns)[names(patterns) == ''] <- "Unnamed"
+ 
+ patnames <- names(patterns)
+ if (!is.null(patnames) && any(patnames == '')) names(patterns)[patnames == ''] <- rep("Unnamed", sum(patnames == ''))
  
  #
  corpora <- readFiles(patterns, recursive = recursive, multipleInstances = multipleInstances, verbose = verbose)

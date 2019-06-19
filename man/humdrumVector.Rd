@@ -55,7 +55,7 @@ as.data.frame.humdrumVector(x, row.names = NULL, optional = FALSE, ...)
 
 \S4method{-}{humdrumVector,humdrumVector}(e1, e2)
 
-\S4method{diff}{humdrumVector}(x)
+\S4method{diff}{humdrumVector}(x, lag = 1L, differences = 1L)
 
 \S4method{+}{humdrumVector,ANY}(e1, e2)
 

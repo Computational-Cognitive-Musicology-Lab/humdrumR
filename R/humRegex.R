@@ -74,7 +74,7 @@ regexDispatch <- function(...) {
           funcsArgs <- lapply(funcs, function(rf) formals(args(rf))[-1])
           genericFunc <- function() {
                     if (!is.character(str)) return(str)
-                    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex)))
+                    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
                     if (any(Nmatches > 0)) {
                               #which function to dispatch
                               Ncharmatches <- sapply(regexes[Nmatches > 0],

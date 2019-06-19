@@ -1,0 +1,145 @@
+---
+title: "Getting started with humdrumR"
+author: "Nathaniel Condit-Schultz"
+date:   "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with humdrumR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+Welcome to "Getting started with humdrumR"!
+This document will introduce you the basics of humdrumR, so that you can start doing simple analyses of humdrum data.
+(If you aren't sure what humdrumR is or what it can do, checkout the [Overview of humdrumR](Overview.html "Overview of humdrumR") before trying to get started.)
+This tutorial is aimed at novice or even non-programmers---if you are already a strong coder and want to move things a long a little faster, checkout the [humdrumR for coders](IntroForCoders.html "humdrumR for coders") tutorial instead.
+
+This vignette closely parallels information in `humdrumR`'s code documentation;
+within an R session, you can find more concise versions of the material in this document by calling:
+
+```{r}
+library(humdrumR)
+
+?humdrumR
+
+```
+
+## Quick Start
+
+Let's just dive right in!
+First, make sure humdrumR is installed: [how to install humdrumR](Install.html "Installing humdrumR"). 
+Open an R session and load the humdrumR library using the command `library(humdrumR)`---now you are ready to rock!
+
+HumdrumR comes packaged with a small number of humdrum data files, just for you to play around with.
+These files are stored in the directory where your computer installed humdrumR, in a subfolder called "HumdrumData".
+You can move your R session to this folder using R's "set working directory command": `setwd(humdrumRroot)`.
+Once you're in the humdrumR directory, you can use the base R `dir` function to see what humdrum data is available to you.
+
+```{r}
+library(humdrumR)
+
+setwd(humdrumRroot)
+
+dir('HumdrumData')
+
+```
+
+
+It looks like there are `r num2word(length(dir('HumdrumData')))` folders of humdrum data available to you.
+Using `dir` again, we can look inside one: let's start with the 'BachChorales' folder.
+
+```{r}
+
+dir('HumdrumData/BachChorales')
+
+```
+
+
+There are `r num2word(length(dir('HumdrumData/BachChorales')))` files in the folder, named "chor001.krn", "chor002.krn", etc.
+These are simple plain humdrum text files, using the '**kern' interpretation to represent ten chorales by J.S. Bach.
+Take a minute to find the files in your computer's finder/exporer and open them up with a simple text editor.
+One of the core philosophies of humdrumR is that we maintain a direct, transparent relationship with our symbolic data---so always take the time to look at your data! 
+You can also do this within Rstudio's "Files" pane---in fact, Rstudio will make things extra easy for you because you can (within the Files pane) click "More" > "Go To Working Directory" to quickly find the files.
+
+
+
+
+### Reading humdrum data
+
+Now that we've found some humdrum data to look at, let's read it into humdrumR.
+We can do this useing humdrumR's `readHumdrum` command.
+Try this:
+
+```{r}
+
+readHumdrum('HumdrumData/BachChorales/chor001.krn') -> chor1
+
+```
+
+This command does two things:
+
+1. The `readHumdrum` function will read the "chor001.krn" file into R and create a humdrumR data object from it.
+2. This new object will be saved to a variable called `chor1`. (The name 'chor1' is just a name I chose---you are welcome to give it a different name if you want.)
+
+Once we've created our `chor1` object (or whatever you chose to call it), we can take a quick look at what it is by just typing its name on the command line and pressing enter:
+
+```{r}
+
+chor1
+
+```
+
+(In R, when you enter something on the command line, R "prints" it out for you to read.)
+The print out you see shows you the name of the file, the contents of the file, and some stuff about "Data fields" that you will learn about soon.
+
+Cool! Still, looking at a single humdrum file is not really that exciting. 
+The whole point of using computers is working with large ammounts of data.
+Luckily, humdrumR makes this very easy.
+Check out this next command:
+
+```{r}
+readHumdrum('HumdrumData/BachChorales/chor0') -> chorales
+```
+
+Notice that all I've changed is that instead of writing `'chor001.krn'`, I wrote `'chor0'`.
+When we feed the string `'chor0'` to `readHumdrum`, it won't just look for a file called "chor0"; it will read *any* file in that folder whose name contains the substring "chor0"---which in this case is all ten files!
+Try printing the new `chorales` object to see how it is different.
+
+```{r}
+
+chorales
+
+```
+
+Wow! We've now got a "humdrumR corpus of `r num2word(length(chorales)) ` files"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
+Notice that when you print humdrumR object, humdrumR shows you the beginning of the first file and the end of the last file, as well as telling you how many files there are in total.
+
+
+---
+
+`readHumdrum` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
+
+
+### Filtering our data
+
+Now that we've got a corpus, often the first thing we want to do is filter out parts of the data.
+
+
+# The Data Model
+
+To really make use of humdrumR, you need to understand a bit about how humdrum data is represented in the humdrumR package: the "Data Model."
+
+
+
+
+

@@ -1,0 +1,145 @@
+---
+title: "Reading and writing data with humdrumR"
+author: "Nathaniel Condit-Schultz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading and writing data with humdrumR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
+knitr::opts_chunk$set(message = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Welcome to "Reading and writing data with humdrumR"!
+This document will give you detailed overview of humdrumR's data reading and writing functions.
+This document closely parallels parts of humdrumR's code documentation;
+within an R session, you can read more concise version the material in this document by calling:
+
+```{r } 
+library(humdrumR)
+
+?readHumdrum
+?writeHumdrum
+
+```
+
+-------
+
+> **Note**:
+> humdrumR is primarily intended to be used for analyzing existing humdrum data, and most users will be reading humdrum data a lot more often than writing it.
+> humdrumR *is* able to write modified humdrum data back to humdrum-syntax text files, but this is a secondary use-case, and has recieved relatively little attention/thought in the current version of the package.
+
+# Reading humdrum data
+
+
+The `readHumdrum` function is the gateway to humdrumR: it is the function we use to read humdrum data, encoded in humdrum-syntax text files, into R.
+
+### Practice Data
+
+In the following examples, we will make use the small number of raw humdrum data files which are included with humdrumR.
+To access these files, we need to navigate to the directory where your computer installed humdrumR---fortunately, humdrumR records where this directory is on your computer in a variable called `humdrumRroot`.
+
+```{r}
+library(humdrumR)
+setwd(humdrumRroot)
+
+```
+
+
+The humdrum data is stored in a subdirectory called "HumdrumData"---we can look at the contents of this directory using `dir(recursive = TRUE)`:
+
+```{r}
+
+dir('HumdrumData', recursive = TRUE)
+
+```
+
+As we can see, there are `r num2word(length(dir('HumdrumData')))` directories containing a total of `r num2word(length(dir('HumdrumData', recursive = TRUE)))` files.
+
+
+## Targeting files
+
+To use `readHumdrum` we call the function with one (or more) character-string arguments.
+These arguments are interpreted as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), and matched against files on your system.
+For instance,
+```{r}
+library(humdrumR)
+setwd(humdrumRroot)
+
+readHumdrum('HumdrumData/BachChorales/chor.*.krn')
+
+```
+
+We matched all files in the 'HumdrumData/BachChorales' directory whose name matched the regular expression "chor.*.krn."
+As you can see, you can include directory paths (relative or absolute) to the files you are targeting---using your operating system's appopriate delimeter ("\" for windows, "/" for everybody else).
+However, *each* directory is also treated as a regular expression, possibly matching multiple directories.
+So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" folder and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" folder, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all krn files in either folder!
+
+```{r}
+readHumdrum('HumdrumData/.*Variations/.*.krn')
+```
+
+> Be careful: since each directory/file name is always treated like a regular expression, we can sometimes specify something that is more general than we intend. 
+> For instance, the command `readHumdrum('MyFolder/.*')` will match files in a folder called "MyFolder," but would also match folders names "MyFolder_Also", or "ThisIsMyFolder."
+> If you want to be sure to match exactly one and only one directory/file, use "^" and "\$" regular-expression markers to explicitely mark the beginning and end of your pattern:
+> the command `readHumdrum('^MyFolder$/.*')` will only read files from one directory "MyFolder."
+
+To read all our test files we can enter:
+
+```{r}
+
+readHumdrum('HumdrumData/.*/.*')
+
+```
+
+> Note:
+> Since humdrumR can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched.
+> If this happens, humdrumR identifies each file with enough of it's directory path to make sure they are all unique.
+
+### Multiple Patterns
+
+Sometimes, expressing all the files you want in a single regular expression is not possible.
+Luckily, `readHumdrum` can accept as many separate patterns you want.
+Instead of writing `readHumdrum('HumdrumData/.*Variations/.*.krn')`, you could be explicit and write 
+
+```{r}
+readHumdrum('HumdrumData/BeethovenVariations/.*.krn',
+            'HumdrumData/MozartVariations/.*.krn')
+```
+
+> Note:
+> It is possible to write multiple patterns which match some (or all) of the same files. If the argument `multipleInstances = FALSE`, each unique file will only be read once (into th first matching pattern). 
+> If `multipleInstances = TRUE`, the same file(s) can be read more than once.
+
+
+You can also give your patterns names, and these names will be placed in a [field]() called `SubCorpus`, which you can access during your analysis.
+Thus, we could write
+
+```{r}
+readHumdrum(Rap  = 'HumdrumData/Rap/.*',
+            Rock = 'HumdrumData/RollingStone/.*') -> rapAndRock
+```
+and we'd later be able to separate our rap and rock data.
+This feature is very useful if you are working with multiple heterogenous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.
+
+
+## Reading
+
+So, what actually happens when we run `readHumdrum`?
+By now, you've seen that `readHumdrum` prints out a few messages describing its process.
+
+1. First, the files which match your search patterns (if any) are identified, and their text is read into R.
+2. Next, these files are checked to see if they are valid humdrum files. Any files which are invalid are skipped. Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `humdrumR`'s data validation tools, and how they can be used to identify errors in your humdrum data.
+Suffice it to say, for now, that unless you specify the argument `validate = FALSE`, calling `readHumdrum` includes a call to the function `validateHumdrum`, which checks that the files conform to the structure of the humdrum syntax. (`validateHumdrum` does not automatically check if the humdrum data is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)
+3. The files are parsed---i.e., translated into `humdrumR`'s [data.table backend](HumdrumTable.html). This step takes the longest by far, as it includes parsing all the humdrum files' data tokens, interpretations, reference records, and (worst of all) spine paths. Indeed, reading humdrum data with spine paths will take significantly longer than reading pathless data. To save yourself some time, you can specifiy `parseGlobal = FALSE` and/or `parseTandem = FALSE`---but of course, you won't then have access to global data (including reference records) and/or tandem interpration information!
+
+### Validation
+
+

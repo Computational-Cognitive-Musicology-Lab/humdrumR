@@ -310,11 +310,11 @@ as.keysignatureI <- function(dset) {
         notef <- do.call(`:`, as.list(range(unique(c(from, to)))))
         notenames <- as.kernPitch(simpletint(notef))
         
-        notes[notzero] <- unlist(Map(function(from, to) paste(collapse = '', notenames[match(from:to, notef)]), 
+        notes[notzero] <- unlist(Map(function(from, to) .paste(collapse = '', notenames[match(from:to, notef)]), 
                                      from, to))
     }
         
-    paste0("*k[", notes, ']')
+    .paste("*k[", notes, ']')
 }
 
 
@@ -333,15 +333,15 @@ as.keyI <- function(dset) {
                       "",
                       fifth2mode(mode, short = TRUE))
     
-    paste0("*", root, ":", modelab)
+    .paste("*", root, ":", modelab)
 }
 
 ##### As tonal name (i.e., "Eb")
 
 #' @name diatonicSet-write
 #' @export
-as.tonalname.diatonicSet <- function(x, kernFlats = FALSE) {
-    fifth2tonalname(getRoot(x), kernFlats)
+as.tonalname.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
+    fifth2tonalname(getRoot(x), accidental.labels)
 }
 
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
@@ -357,23 +357,23 @@ getSciQuality <- function(tset, collapse.triad = TRUE) {
                                                      perfect = 'P'))
     
     qualities[is.na(qualities)] <- ""
-    qualities[nchar(qualities) > 1L] <- paste0('(',  qualities[nchar(qualities) > 1L], ')')
+    qualities[nchar(qualities) > 1L] <- .paste('(',  qualities[nchar(qualities) > 1L], ')')
     if (collapse.triad) {
-        triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, paste, collapse = ''),
+        triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, .paste, collapse = ''),
                         function(row) {
                             switch(row,
                                    MP = "M",
                                    mP = "m",
                                    mo = 'o',
                                    `M+` = "+",
-                                   paste0('{', row, '}'))
+                                   .paste('{', row, '}'))
                             
                         })
         qualities[ , 2] <- triads
         qualities <- qualities[ , -1, drop = FALSE]
     }
     
-    apply(qualities, 1, paste, collapse = '')
+    apply(qualities, 1, .paste, collapse = '')
     
 }
 
@@ -381,11 +381,11 @@ getSciQuality <- function(tset, collapse.triad = TRUE) {
 #' @export
 as.sciChord <- function(tharm) {
     root <- getRoot(tharm)
-    tonalname <- fifth2tonalname(root, kernFlats = FALSE)
+    tonalname <- fifth2tonalname(root, accidental.labels = c(flat = 'b'))
    
     quality <- getSciQuality(tharm)
     
-    IfElse(!is.na(root) & !is.na(tonalname), paste0(tonalname, quality), NA_character_)
+    IfElse(!is.na(root) & !is.na(tonalname), .paste(tonalname, quality), NA_character_)
 }
 
 
@@ -426,7 +426,7 @@ as.chordSymbol <- function(tharm, sep = '') {
       `_o` = 'dim7(b3)'
       )[qual] -> qual
     
-    IfElse(!is.na(root) & !is.na(qual), paste0(root, sep, qual), NA_character_)
+    IfElse(!is.na(root) & !is.na(qual), .paste(root, sep, qual), NA_character_)
     
 }
 
@@ -481,13 +481,13 @@ as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FA
            last <- logical(length(row))
            if (any(notna)) last[ max(which(notna))] <- TRUE
            hits <- notna & (acc | last)
-           paste(row[hits], chordtones[hits], sep = '', collapse = '')
+           .paste(row[hits], chordtones[hits], sep = '', collapse = '')
            
        })
  
  
  ##
- IfElse(!is.na(roots), paste0(rootaccidental, numeral, triadalt, extensions), NA_character_)
+ IfElse(!is.na(roots), .paste(rootaccidental, numeral, triadalt, extensions), NA_character_)
  
 }
 

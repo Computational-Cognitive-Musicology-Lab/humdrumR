@@ -17,7 +17,7 @@
 
 \method{as.midi}{character}(x)
 
-\method{as.tonalname}{character}(x, kernFlats = FALSE)
+\method{as.tonalname}{character}(x, accidental.labels = c())
 
 \method{as.kernPitch}{character}(x)
 
@@ -26,7 +26,8 @@
 \method{as.interval}{character}(x, specific = TRUE, directed = TRUE,
   quality.labels = c(), contour.labels = c())
 
-\method{as.solfa}{character}(x, key = 0L, directed = TRUE)
+\method{as.solfa}{character}(x, key = 0L, contour = FALSE,
+  directed = TRUE)
 
 \method{as.frequency}{character}(x, reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))

@@ -104,7 +104,7 @@ gcd <- function(x, y) {
 #' @name rhythmInterval
 #' @export
 rint <- function(denominator, numerator = 1L) {
-    if (any(denominator == 0)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
+    if (any(denominator == 0, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
     new('rhythmInterval', Denominator = as.integer(denominator), Numerator = as.integer(numerator))
 }
 
@@ -329,15 +329,14 @@ as.recip.rhythmInterval <- function(rint) {
           den[num == 0L] <- NA_integer_
           num[den.needdot | num == 0L] <- 1L
           
-          den[den.needdot] <- den[den.needdot] / (2 ^ dots[den.needdot])
+          den[which(den.needdot)] <- den[which(den.needdot)] / (2 ^ dots[which(den.needdot)])
           
-          den[den.needdot] <- paste0(den[den.needdot], 
-                                 sapply(dots[den.needdot], 
-                                        function(rint) paste(rep('.', rint), collapse = '')))
+          den[which(den.needdot)] <- .paste(den[which(den.needdot)], 
+                                            sapply(dots[which(den.needdot)], strrep, x = '.'))
           
-          den[is.na(den)] <- "rint(0)"
-          den <- paste0(SIGN, den)
-          output <- IfElse(num == 1L, den, paste0(den, '%', num)) 
+          den[is.na(den)] <- NA_character_
+          den <- .paste(SIGN, den)
+          output <- IfElse(num == 1L, den, .paste(den, '%', num)) 
           
           if (any(output %in% c('1%2', '1%3', '1%4', '1%6'))) {
                 output[output == '1%2'] <- '0'    
@@ -358,7 +357,7 @@ as.fraction <- function(...) UseMethod('as.fraction')
 #' @name rhythmInterval-write
 #' @export
 as.fraction.numeric <- function(n) {
-          fractions <- attr(MASS::fractions(n), 'fracs')
+          fractions <- IfElse(is.na(n), NA_character_, attr(MASS::fractions(n), 'fracs'))
           
           gsub('/', '%', fractions)
 }
@@ -366,7 +365,7 @@ as.fraction.numeric <- function(n) {
 #' @name rhythmInterval-write
 #' @export
 as.fraction.rhythmInterval <- function(rint) {
-          paste0(getNumerator(rint), '%', getDenominator(rint))
+          .paste(getNumerator(rint), '%', getDenominator(rint))
 }
 
 #### As decimal
@@ -450,22 +449,24 @@ read.fraction2rhythmInterval <- function(str) {
           split <- strsplit(str, split = '%|/')
           
           ns <- lapply(split, function(n) {
-                    if (tail(n, 1) == '') n[length(n)] <- 1L
-                    if (n[1] == '') n[1] <- '1'
-                    if (any(n == '')) n <- n[n != '']
-                    
-                    if (length(n) == 1) n <- c(n, '1') 
-                    
-                    n <- as.numeric(n)
-                    
-                    ## if more than two numbers in any token, 
-                    ## evaluate all but the rightmost as division
-                    if (length(n) >  2L) n <- c(Reduce(`/`, head(n, -1)), tail(n, 1))
-                    
-                    n
+              if (all(is.na(n))) return(rint(NA))
+              
+              if (tail(n, 1) == '') n[length(n)] <- 1L
+              if (n[1] == '') n[1] <- '1'
+              if (any(n == '')) n <- n[n != '']
+              
+              if (length(n) == 1) n <- c(n, '1') 
+              
+              n <- as.numeric(n)
+              
+              ## if more than two numbers in any token, 
+              ## evaluate all but the rightmost as division
+              if (length(n) >  2L) n <- c(Reduce(`/`, head(n, -1)), tail(n, 1))
+              
+              rint(n[2], n[1])
           })
           
-          do.call('c', lapply(ns, function(n) rint(n[2], n[1])))
+          do.call('c', ns)
           
 }
 

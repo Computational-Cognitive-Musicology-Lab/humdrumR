@@ -108,7 +108,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
           x
 }
 
-match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
+match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
           notnull <- !sapply(stuff, is.null)
           
@@ -127,7 +127,12 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           }
           
           for (i in seq_along(margin)) {
-            stuff[notnull] <- lapply(stuff[notnull], Repeat, length.out = size.out[i], margin = margin[i])
+              stuff[notnull] <- if (recycle) {
+                 lapply(stuff[notnull], Repeat, length.out = size.out[i], margin = margin[i])
+              } else {
+                 lapply(stuff[notnull], pad, before = FALSE, n = size.out[i])
+                  
+              }
           }
           if (toEnv) list2env(stuff[names(stuff != '')], envir = parent.frame(1))
           
@@ -135,6 +140,13 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE) {
           
 }
 
+pad <- function(x, n, before = TRUE) {
+    lenx <- length(x)
+    
+    padding <- rep(as(NA, Class = class(x)), n - lenx)
+    
+    if (before) c(padding, x) else c(x, padding)
+}
 
 #' @export
 setGeneric('compose', function(f1, f2, ...) standardGeneric('compose'))
@@ -356,6 +368,8 @@ num2print <- function(n, label = NULL) {
           n_str
 }
 
+if1 <- function(n, str1, strmore) ifelse(n == 1, str1, strmore)
+
 #' @export
 num2word <- function(num) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -504,8 +518,9 @@ switchpatch <- function(x,  ...) {
 
 `setoptions<-` <- function(x, values) {
     # used to set options
-    poss <- names(x)
+    if (is.null(x)) return(values)
     
+    poss <- names(values)
     ind <- Filter(Negate(is.na), pmatch(names(x), poss))
     
     values[ind] <- x
@@ -513,3 +528,24 @@ switchpatch <- function(x,  ...) {
     values
     
 }
+
+.paste <- function(..., sep = '', collapse = NULL, na.empty = FALSE) {
+    args <- do.call('match_size', list(...))
+    
+    nas <- lapply(args, is.na)
+    
+    if (na.empty) {
+        args <- Map(`[<-`, args, nas, value = "")
+        do.call('paste', c(args, sep = sep, collapse = collapse))
+    } else {
+        nas <- apply(do.call('rbind', nas), 2, any)
+        IfElse(nas, NA_character_, paste(..., sep = sep, collapse = collapse))
+    }
+    
+}
+
+vectorna <- function(n, mode = 'character') {
+    rep(as(NA, Class = mode), n)
+    
+}
+

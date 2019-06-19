@@ -47,16 +47,8 @@
 NULL
 
 
-# #' Parsed \code{\linkS4class{humdrumR}} data for 371 Bach chorales
-# #' 
-# #' This is humdrumR's parsing (via \code{\link{readHumdrum}}) of kern files
-# #' representing J.S. Bach's 371 chorales.
-# #' 
-# #' @format A \code{\linkS4class{humdrumR}} object containing 371 files.
-# #' 
-# #' @source \url{http://kern.humdrum.org/search?s=t&keyword=chorale}
-# "Bach371"
-
+#' @export
+humdrumRroot <- system.file(package = 'humdrumR')
 
 
 setOldClass('quosure')

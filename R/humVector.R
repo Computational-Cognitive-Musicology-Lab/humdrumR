@@ -120,8 +120,8 @@ setMethod('[', c(x = 'humdrumVector'),
           function(x, i) {
             slots <- getSlots(x)
             slots <- lapply(slots, 
-                            function(x) {
-                              if (is.null(dim(x))) x[i] else x[i, , drop = FALSE]
+                            function(slot) {
+                              if (is.null(dim(slot))) slot[i] else slot[i, , drop = FALSE]
                             })
             setSlots(x) <- slots
             x
@@ -142,9 +142,9 @@ setMethod('[<-', c(x = 'humdrumVector', i = 'ANY', j = 'missing', value = 'humdr
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
               
-              slots <- Map(function(x, v) {
-                                  if (is.null(dim(x))) x[i] <- v[i] else x[i,] <- v[i, , drop = FALSE]
-                                  x
+              slots <- Map(function(slotx, slotv) {
+                                  if (is.null(dim(slotx))) slotx[i] <- slotv else slotx[i,] <- slotv
+                                  slotx
                              },
                            slotsx, slotsv)
               setSlots(x) <- slots
@@ -156,6 +156,8 @@ setMethod('[<-', c(x = 'humdrumVector', i = 'ANY', j = 'missing', value = 'humdr
 setMethod('c', 'humdrumVector',
           function(x, ...) {
               xs <- list(x, ...)
+              xs <- lapply(xs, function(x) if (!is.humdrumVector(x) && all(is.na(x))) tint(x) else x)
+              
               Reduce(function(x, y) checkSame(x, y, 'c'), xs)
               
               xslots <- lapply(xs, getSlots)
@@ -189,7 +191,8 @@ setMethod('dim', signature = 'humdrumVector', function(x) NULL)
 setMethod('is.na', signature = 'humdrumVector',
           function(x) {
               slots <- getSlots(x)
-              subvects <- sapply(slots, is.na)
+              
+              subvects <- do.call('cbind', lapply(slots, is.na))
               apply(subvects, 1, any)
           })
 
@@ -237,11 +240,21 @@ setMethod('as.character', 'humdrumVector',
           function(x) {
               slots <- getSlots(x)
               slots <- Filter(is.vector, slots)
-              do.call('paste', c(slots, sep = ' '))
+              do.call('.paste', c(slots, sep = ' '))
           })
 #' @name humdrumVector
 #' @export
-setMethod('show', signature = c(object = 'humdrumVector'), function(object) { cat(as.character(object)) ; invisible(object)})
+setMethod('show', signature = c(object = 'humdrumVector'), 
+          function(object) { 
+              if (length(object) == 0L) {
+                  cat(paste0(class(object), '(0)'))
+              } else {
+                  strs <- format(as.character(object), justify = 'left')
+                  
+                  cat(strs)
+              }
+            invisible(object)
+            }  )
 
 
 #' @name humdrumVector
@@ -281,8 +294,7 @@ setMethod('==', signature = c('humdrumVector', 'humdrumVector'),
               
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
-              
-              comparisonmatrix <- do.call('cbind', Map(`==`, slots1, slots2))
+              comparisonmatrix <- do.call('rbind', Map(`==`, slots1, slots2))
               
               apply(comparisonmatrix, 2, all)
           })
@@ -340,8 +352,14 @@ setMethod('-', signature = c('humdrumVector', 'humdrumVector'),
 #' @name humdrumVector
 #' @export
 setMethod('diff', signature = c('humdrumVector'),
-          function(x) {
-              tail(x, -1) - head(x, -1)
+          function(x, lag = 1L, differences = 1L) {
+              out <- tail(x, -lag) - head(x, -lag)
+              
+              if (differences > 1L) {
+                  Recall(out, lag, differences - 1L)
+              } else {
+                  out
+              }
           })
 
 

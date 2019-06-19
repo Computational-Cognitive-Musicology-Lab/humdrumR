@@ -1,10 +1,12 @@
 
 Incorporate "local" code, to make things cleaner.
 
-Write writeHumdrum
+
+Make NA values always work in humdrumVector objects
 
 
 Make "melodic direction" functions to be incorporated into deg, degree, and solfa, etc.
+
 
 work on where~xx ... does it really work?
 

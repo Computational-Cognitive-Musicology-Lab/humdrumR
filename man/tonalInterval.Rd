@@ -30,7 +30,9 @@ is.tonalInterval(x)
 
 \S4method{is.numeric}{tonalInterval}(x)
 
-\S4method{Compare}{tonalInterval,tonalInterval}(e1, e2)
+\S4method{>}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{>=}{tonalInterval,tonalInterval}(e1, e2)
 
 \S4method{Summary}{tonalInterval}(x)
 
@@ -44,7 +46,7 @@ is.tonalInterval(x)
 
 \S4method{cumsum}{tonalInterval}(x)
 
-\S4method{diff}{tonalInterval}(x)
+\S4method{diff}{tonalInterval}(x, lag = 1, differences = 1)
 
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 

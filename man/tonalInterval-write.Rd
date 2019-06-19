@@ -34,9 +34,9 @@ as.midi(x, ...)
 
 \method{as.midi}{tonalInterval}(x)
 
-as.tonalname(x, kernFlats = FALSE, ...)
+as.tonalname(x, accidental.labels = c(), ...)
 
-\method{as.tonalname}{tonalInterval}(x, kernFlats = FALSE)
+\method{as.tonalname}{tonalInterval}(x, accidental.labels = c())
 
 as.sciPitch(x, ...)
 
@@ -55,14 +55,15 @@ as.scaleDegree(x, cautionary = FALSE, contour = FALSE,
   quality.labels = c(), ...)
 
 \method{as.scaleDegree}{tonalInterval}(x, key = 0L, cautionary = FALSE,
-  contour = NULL, quality.labels = c(), contour.labels = c())
+  contour = FALSE, quality.labels = c(), ...)
 
 \method{as.scaleDegree}{numeric}(x, key = 0L, cautionary = TRUE,
   quality.labels = c())
 
-as.solfa(x, key = 0L, ...)
+as.solfa(x, key = 0L, contour = FALSE, ...)
 
-\method{as.solfa}{tonalInterval}(x, key = 0L, directed = TRUE)
+\method{as.solfa}{tonalInterval}(x, key = 0L, contour = FALSE,
+  directed = TRUE)
 
 \method{as.solfa}{numeric}(x, key = 0L, directed = TRUE)
 
