@@ -265,7 +265,7 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
     }
     
     
-    ###
+    ### This function can't be removed right now
     humdrumR <- nullifyTokens(humdrumR, humtab_withindex, fields(humdrumR), indexPipe)
 
     if (indexGLIM) {

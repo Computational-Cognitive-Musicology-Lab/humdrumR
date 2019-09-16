@@ -11,7 +11,7 @@ as.keysignatureI(dset)
 
 as.keyI(dset)
 
-\method{as.tonalname}{diatonicSet}(x, kernFlats = FALSE)
+\method{as.tonalname}{diatonicSet}(x, accidental.labels = c(flat = "b"))
 }
 \description{
 These functions all translate \code{\link[humdrumR:humDiatonic]{diatonicSets}} to 

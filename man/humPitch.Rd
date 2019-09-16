@@ -26,8 +26,7 @@
 \method{as.interval}{character}(x, specific = TRUE, directed = TRUE,
   quality.labels = c(), contour.labels = c())
 
-\method{as.solfa}{character}(x, key = 0L, contour = FALSE,
-  directed = TRUE)
+\method{as.solfa}{character}(x, key = 0L, contour = FALSE, ...)
 
 \method{as.frequency}{character}(x, reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))

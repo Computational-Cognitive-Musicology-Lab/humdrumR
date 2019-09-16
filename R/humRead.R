@@ -650,8 +650,7 @@ parseBarlines <- function(spine) {
           
   Singles <- cumsum(grepl('^=', spine))
   Doubles <- cumsum(grepl('^==', spine))
-  
-  BarLabels <- str_sub(grep('^=', spine, value = TRUE), 2L)[Singles + 1L]
+  BarLabels <- str_sub(grep('^=', spine, value = TRUE), 2L)[IfElse(Singles == 0L, NA_integer_, Singles)]
   
   data.frame(BarN = Singles, 
              DoubleBarN = Doubles, 

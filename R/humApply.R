@@ -334,9 +334,18 @@ withinHumdrum <- function(humdrumR,  ...) {
           if (!sideeffectonly) {
               #### Put new humtable back into humdrumR object
               
-              # if we mixed record types, the newhumtab will not know
-              # where to be put back
-              # This section should be improved (Nat, 11/29/2018)
+              newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
+              
+              # This section should be improved (Nat, 07/16/2019)
+              local({
+                  d    <- newhumtab$Type == 'd'
+                  null <- Reduce('&', lapply(newhumtab[ , newfields, with = FALSE],
+                                             function(col) is.na(col) | col == '.'))
+
+                  newhumtab[ , Null:= Null & d & null]
+                  # newhumtab[ , Type:= IfElse(Null, Type, 'D')]
+              })
+              
               if (any(is.na(newhumtab$Type))) {
                   newtype <- if ('D' %in% parsedFormulae$recordtypes) 'D' else parsedFormulae$recordtypes[1]
                   newhumtab$Type[is.na(newhumtab$Type)] <- newtype
@@ -346,9 +355,11 @@ withinHumdrum <- function(humdrumR,  ...) {
               
               # Now that the Humtable is taken care of,
               # tell the humdrumR object about the new fields and set the Active formula.
-              newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
               if (length(newfields) > 0) {
+                  ## Add fields to humtab
                   addFields(humdrumR) <- newfields
+                  
+                  ## Create new Active quosure
                   humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
                       act <- ifelsecalls(parsedFormulae$partitions['where'], 
                                          c(humdrumR@Active, lapply(newfields, 

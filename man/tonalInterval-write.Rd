@@ -62,10 +62,9 @@ as.scaleDegree(x, cautionary = FALSE, contour = FALSE,
 
 as.solfa(x, key = 0L, contour = FALSE, ...)
 
-\method{as.solfa}{tonalInterval}(x, key = 0L, contour = FALSE,
-  directed = TRUE)
+\method{as.solfa}{tonalInterval}(x, key = 0L, contour = FALSE, ...)
 
-\method{as.solfa}{numeric}(x, key = 0L, directed = TRUE)
+\method{as.solfa}{numeric}(x, key = 0L)
 
 as.ratio(x, twelfth = 2^(19/12), ...)
 
