@@ -10,7 +10,7 @@ readLinesFast <- function(fname, x) {
 
 # findFiles('Mozart', c('.*hum', '.*krn')) ---> "Mozart/.*hum" AND "Mozart/.*krn"
 
-findFiles <- function(..., content = NULL, recursive = FALSE) {
+findFiles <- function(..., content = NULL, recursive = FALSE, multipleMatches = FALSE) {
       # This function searches for files within directories using regular expressions.
       # These are kind of like Unix "glob" patterns, but instead use regex syntax (to be consistent with rest of package).
       # One or more vectors of regular expressions are input.
@@ -20,10 +20,30 @@ findFiles <- function(..., content = NULL, recursive = FALSE) {
       
       cursep <- .Platform$file.sep
       
-      pattern <- gsub(paste0(cursep, cursep, cursep, '*'), cursep, pattern)
+      #### Parse ... arguments into a cartesian collection of patterns, ordered left to right
+      patterns <- list(...)
       
-      dir_file <- strsplit(pattern, cursep, fixed = TRUE, 
-                           useBytes = TRUE)[[1]]
+      if (length(patterns) == 0L) patterns <- list("")
+      
+      
+      # Cartesian product patterns
+      patgrid <- do.call('expand.grid', c(patterns, stringsAsFactors = FALSE))
+      patgridnames <- sapply(1:ncol(patgrid), 
+                             function(i) names(unlist(patterns))[match(patgrid[,i], unlist(patterns))] )
+      browser()
+      patterns <- apply(patgrid, 1, paste, collapse = cursep)
+      patnames    <- apply(patgridnames, 1, paste, collapse = '')
+      names(patterns) <- patnames
+      patterns <- gsub(paste0(cursep, cursep, cursep, '*'), cursep, patterns)
+      #
+      
+      
+      ## split
+ 
+      
+      dir_file <- strsplit(patterns, cursep, fixed = TRUE, 
+                           useBytes = TRUE)
+      dir_f
       
       if (length(dir_file) == 1) dir_file <- c('.', dir_file)
       
