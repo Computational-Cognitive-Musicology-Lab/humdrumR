@@ -8,11 +8,15 @@ readLinesFast <- function(fname, x) {
       stringi::stri_split_fixed(buf, "\n", omit_empty = TRUE)[[1]] 
 }
 
+# findFiles('Mozart', c('.*hum', '.*krn')) ---> "Mozart/.*hum" AND "Mozart/.*krn"
 
-pickFiles <- function(pattern, recursive = FALSE) {
+findFiles <- function(..., content = NULL, recursive = FALSE) {
       # This function searches for files within directories using regular expressions.
       # These are kind of like Unix "glob" patterns, but instead use regex syntax (to be consistent with rest of package).
+      # One or more vectors of regular expressions are input.
+      # The cartesian combinations of all these vectors are pasted together, left to right.
       # See the documentation for readHumdrum for use details.
+      # content is a re which is matched against file content.
       
       cursep <- .Platform$file.sep
       
@@ -98,12 +102,16 @@ pickFiles <- function(pattern, recursive = FALSE) {
 }
 
 
+#' @export
+findHumdrum <- function
+
+
 readFiles <- function(patterns, recursive = FALSE, multipleInstances = FALSE, verbose = TRUE) {
       # takes named vector of regex-glob pattern(s) and reads (quickly) all the matching files as lines.
       # If verbose is true, it prints names of all matched files.
-      # recursive is passed as argument to pickFiles.
+      # recursive is passed as argument to findFiles.
       
-    filenames <- lapply(patterns, pickFiles, recursive = recursive)
+    filenames <- lapply(patterns, findFiles, recursive = recursive)
     
     if (all(lengths(filenames) == 0L)) {
         cat('Zero files match search pattern(s). Returning NULL.\n')
