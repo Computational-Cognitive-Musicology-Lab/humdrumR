@@ -1,216 +1,297 @@
-#### reading files ----
-# These are helper functions used by readHumdrum
 
-readLinesFast <- function(fname, x) {
-      s <- file.info(fname)$size 
-      buf <- readChar(fname, s, useBytes = TRUE)
-      buf <- stringi::stri_enc_tonative(buf)
-      stringi::stri_split_fixed(buf, "\n", omit_empty = TRUE)[[1]] 
+############################################################################## ---
+############## Finding files ----
+
+
+### These functions identify files on the local disc that we want to read.
+### As such, they are helpers for readFiles and readHumdrum.
+### There is one exported (public-facing) function: findHumdrum.
+
+
+<<<<<<< Updated upstream
+=======
+findFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates = FALSE, verbose = FALSE) {
+    # This function is the workhorse behind the findHumdrum function.
+    # The function is used to identify text files on the local system, based their filenames/paths,
+    # and/or their file content. 
+    # Details of usage can be found in the findHumdrum user documentation.
+    # The main difference of findFiles from findHumdrum is that it doesn't check that the files are 
+    # valid humdrum Files.
+    
+    #### Parse ... arguments into a cartesian collection of patterns, ordered left to right
+    patterns <- assemblePatterns(list(...))
+    
+    ##### split paths into directories (all but rightmost) and files (rightmost)
+    dirpaths  <- dirname(patterns)
+    filepaths <- basename(patterns)
+    
+    #### find matches
+    ## dirs
+    matchingdirs <- lapply(dirpaths, matchDirs)
+    # if (sum(lengths(matchingdirs)) == 0L) return(character(0))
+    
+    # if (!allowDuplicates) matchingdirs <- remove.duplicates(matchingdirs)
+    
+    matchingdirs <- Filter(Negate(is.null), matchingdirs)
+    
+    ## full paths (incl file)
+    matchingpaths <- Map(matchFiles, filepaths, 
+                         matchingdirs = matchingdirs,
+                         recursive    = recursive)
+    
+    #### unlist, but with appropriate pattern names (if any)
+    matchingpaths <- setNames(unlist(matchingpaths),
+                              rep(names(patterns), lengths(matchingpaths)))
+    
+    
+    
+    # Are they actually text files?
+    matchingpaths <- Filter(istextFile, matchingpaths)
+    
+    #### print matches per pattern
+    cat(glue::glue("Pattern {ifelse(names(patterns) == '', '', paste0(names(patterns), ' = '))}",
+                   "'{patterns}' matches {rle(names(matchingpaths))$lengths} files."), sep = '\n')
+    
+    
+    if (length(matchingpaths) == 0L) return(character(0L))
+    
+    # Are some files matched more than once?
+    duplicates <- matchingpaths[duplicated(matchingpaths)]
+    if (!allowDuplicates) matchingpaths <- matchingpaths[!duplicated(matchingpaths)]
+    
+    
+    ### Filter by "contains" (regular expressions) argument
+    if (!is.null(contains)) matchingpaths <- Filter(fileContains(contains), matchingpaths)
+   
+    
+    #### Messages
+    if (length(duplicates) > 0L) {
+        if (verbose) {
+            cat(glue::glue('\t(Warning, the following {length(duplicates)} files match more than one search pattern:'), '\n')  
+            cat(glue::glue('\t\t{duplicates}'), sep = '\n')
+        } else {
+            cat(glue::glue('\t(Warning, {length(duplicates)} files match more than one pattern. '))
+        }
+        
+        if (allowDuplicates) {
+            cat("If this is a problem, be more specific in your searches or specify allowDuplicates = FALSE",
+                "to force humdrumR to only match each file once.\n")
+        }  else {
+            cat("Since allowDuplicates = FALSE, these files are only being associated with the first pattern",
+                "they match.)\n")
+        }
+    }
+    
+  matchingpaths
+    
+    
+    
+}
+
+assemblePatterns <- function(patternargs) {
+    # This function does work for findFiles
+    # It translates one or more regular expression "patternargs" into
+    # a cartesian product of specific file-path regular expressions to look for.
+    # See the findHumdrum documentation for more explanation.
+    
+    if (length(patternargs) == 0L) return("")
+    
+    # Cartesian product patterns
+    patgrid  <- do.call('expand.grid', c(patternargs, stringsAsFactors = FALSE))
+    patterns <- apply(patgrid, 1, paste, collapse = .Platform$file.sep)
+    patterns <- gsub(paste0(strrep(.Platform$file.sep, 3), '*'), .Platform$file.sep, patterns)
+    
+    names(patterns) <- if (length(unlist(lapply(patternargs, names))) > 0L) {
+        patgridnames <- patgrid
+        patgridnames[] <- sapply(1:ncol(patgrid), 
+                               function(i) names(unlist(patternargs))[match(patgrid[,i], unlist(patternargs))] )
+        
+        apply(patgridnames, 1, paste, collapse = '')
+    } else {
+        rep('', length(patterns))
+    }
+    
+    #
+    patterns
+    
+}
+>>>>>>> Stashed changes
+
+
+matchDirs <- function(dirpattern) {
+    # This function does work for findFiles.
+    # Given directory-path regular expressions (dirpattern) it finds matching directories on the system.
+    # See the findHumdrum documentation for more explanation.
+    dirpattern <- strsplit(dirpattern, split = .Platform$file.sep)[[1]]
+    dirpattern <- dirpattern[dirpattern != '.']
+    
+    if (dirpattern[1] == '~') {
+        dirpattern <- dirpattern[-1]
+        initial <- path.expand('~')
+    } else { 
+        initial <- '.' 
+    }
+    Reduce( function(cur, nex) {
+        unlist( lapply(cur, 
+                       function(curdir) { 
+                           hits <- if (nex %in% c('..', '.')) {
+                               return(paste(curdir, nex, sep = .Platform$file.sep))
+                           } else {
+                               grep(nex, useBytes = TRUE,
+                                    list.dirs(path = curdir, recursive = FALSE, full.names = FALSE), 
+                                    value = TRUE)
+                           }
+                           if (length(hits) > 0L) {
+                               paste(curdir, hits, sep = .Platform$file.sep) 
+                           } else {
+                               NULL
+                           }
+                       } 
+        )
+        )
+    },
+    x = dirpattern, 
+    init = initial
+    ) -> matchingdirs
+    
+    ## remove paths containing //
+    matchingdirs <- matchingdirs[!stringr::str_detect(matchingdirs, strrep(.Platform$file.sep, 2))]
+    
+    
+    ##
+    matchingdirs
+    
+     
+}
+
+matchFiles <- function(filepattern, matchingdirs, recursive) {
+    # This function does work for findFiles.
+    # Given file-path regular expressions (filepattern), AND the matchingdirs produced by matchDirs,
+    # it finds matching files in all the matched directories.
+    # See the findHumdrum documentation for more explanation.
+    
+    matchingfiles <- 
+        lapply(matchingdirs, 
+               function(curdir) {
+                   paths <- list.files(path = curdir, pattern = filepattern, recursive = recursive)
+                   
+                   files <- Filter(function(x) !x %in% list.dirs(curdir, recursive = FALSE, full.names = FALSE),
+                                   paths)
+                 
+                   if (length(files) > 0) paste(curdir, files, sep = .Platform$file.sep) else NULL
+               })
+    
+    
+    if (length(matchingfiles) == 0L) return(character(0)) 
+    
+    matchingfiles <- unlist(matchingfiles, use.names = FALSE)
+    
+    matchingfiles <- stringr::str_replace(matchingfiles, pattern = paste0("^\\.", .Platform$file.sep), replacement = '')
+    
+    Filter(Negate(is.na), matchingfiles)
+    
+    
+}
+
+istextFile <- function(fpath) {
+    # given file path, asks if the file is a text file
+    # returns logical
+    
+    directories <- list.dirs(dirname(fpath), full.names = FALSE, recursive = FALSE)
+    if (fpath %in% directories) return(FALSE)
+    
+    
+    encdetect <- stringi::stri_enc_detect2(stringi::stri_read_raw(fpath))[[1]]
+    !is.na(encdetect$Encoding) && !is.na(encdetect$Confidence) && encdetect$Confidence > 0.8
+}
+
+fileContains <- function(pattern) {
+    # given pattern, create fucntion which asks if all regular expressions in pattern argument are found in input filename
+    # returns function which takes pattern and returns logical
+    function(fpath) {
+        line <- readLinesFast(fpath, lines = FALSE)
+        
+        all(stringr::str_detect(line, pattern))
+    }
 }
 
 # findFiles('Mozart', c('.*hum', '.*krn')) ---> "Mozart/.*hum" AND "Mozart/.*krn"
 
-findFiles <- function(..., content = NULL, recursive = FALSE, multipleMatches = FALSE) {
-      # This function searches for files within directories using regular expressions.
-      # These are kind of like Unix "glob" patterns, but instead use regex syntax (to be consistent with rest of package).
-      # One or more vectors of regular expressions are input.
-      # The cartesian combinations of all these vectors are pasted together, left to right.
-      # See the documentation for readHumdrum for use details.
-      # content is a re which is matched against file content.
-      
-      cursep <- .Platform$file.sep
-      
-      #### Parse ... arguments into a cartesian collection of patterns, ordered left to right
-      patterns <- list(...)
-      
-      if (length(patterns) == 0L) patterns <- list("")
-      
-      
-      # Cartesian product patterns
-      patgrid <- do.call('expand.grid', c(patterns, stringsAsFactors = FALSE))
-      patgridnames <- sapply(1:ncol(patgrid), 
-                             function(i) names(unlist(patterns))[match(patgrid[,i], unlist(patterns))] )
-      browser()
-      patterns <- apply(patgrid, 1, paste, collapse = cursep)
-      patnames    <- apply(patgridnames, 1, paste, collapse = '')
-      names(patterns) <- patnames
-      patterns <- gsub(paste0(cursep, cursep, cursep, '*'), cursep, patterns)
-      #
-      
-      
-      ## split
- 
-      
-      dir_file <- strsplit(patterns, cursep, fixed = TRUE, 
-                           useBytes = TRUE)
-      dir_f
-      
-      if (length(dir_file) == 1) dir_file <- c('.', dir_file)
-      
-      # Find matching directories
-      dirpattern <- head(dir_file, -1)
-      
-      if (dirpattern[1] == '~') {
-            dirpattern <- dirpattern[-1]
-            initial <- path.expand('~')
-      } else { 
-            initial <- '.' 
-      }
-      
-      Reduce( function(cur, rest) {
-            unlist( lapply(cur, 
-                           function(curdir) { 
-                                 hits <- if (rest %in% c('..', '.')) {
-                                       rest
-                                 } else {
-                                       grep(rest[1], useBytes = TRUE,
-                                            list.dirs(path = curdir, recursive = FALSE, full.names = FALSE), 
-                                            value = TRUE)
-                                 }
-                                 paste(curdir, hits, sep = cursep) 
-                           } 
-            )
-            )
-      },
-      x = dirpattern, 
-      init = initial
-      ) -> matchingdirs
-      
-      matchingdirs <- matchingdirs[!stringr::str_detect(matchingdirs, paste0(cursep, cursep))]
-      
-      if (length(matchingdirs) == 1 && matchingdirs == paste0('.', cursep)) stop('\n\tNo directories match search\n\n')
-      
-      # Find matching files in those directories
-      filepattern <- tail(dir_file, 1)
-      
-      unlist(
-            lapply(matchingdirs, 
-                   function(curdir) {
-                         Filter(function(x) !x %in% list.dirs(curdir, recursive = FALSE, full.names = FALSE),
-                                list.files(path = curdir, pattern = filepattern, recursive = recursive)
-                         ) -> files
-                         
-                         if (length(files) > 0) paste(curdir, files, sep = '/') else NA
-                   })
-      ) -> matchingfiles
-      
-      matchingfiles <- matchingfiles[!is.na(matchingfiles)]
-      
-      if (length(matchingfiles) == 0) return(character(0)) 
-      
-      matchingfiles <- stringr::str_replace(matchingfiles, paste0("^\\.", cursep), '')
-      
-      unique(unlist(Filter(Negate(is.na), matchingfiles))) -> output
-      
-      #
-      
-      if (any(grepl(paste0("^\\.\\.", cursep, "|", "\\.\\.", cursep), output))) {
-            curd   <- getwd()
-            output <- paste0(curd, cursep, output)
-            output <- unlist(lapply(output, function(path) { 
-                  path <-  strsplit(path, cursep)[[1]]
-                  while(any(path == '..')) {
-                        hit  <- which(path[-1] == '..' & head(path, -1) != '..')
-                        path <- path[-hit : (-(hit + 1))] 
-                  }
-                  paste(path, collapse = cursep)
-            }
-            ))
-      }
-      
-      if (length(output) == 0) character(0) else output
+
+#' @export
+findHumdrum <- function(..., contains = NULL, recursive = FALSE, allowDuplicates = FALSE, verbose = FALSE) {
+    
+    ## First call findFiles with exactly the same arguments
+    files <- readFiles(..., contains = contains, recursive = recursive, 
+                       allowDuplicates = allowDuplicates, verbose = verbose)
+    files <- isValidHumdrum(files, errorReport.path = NULL)
+    
+    files
+    
+    
 }
 
 
-#' @export
-findHumdrum <- function
+###################################################################---
+############## Reading files ----
+
+# These are helper functions used by readHumdrum
+# They do the actual work of reading in text from files.
+# There is no exported (public-facing) functio for users.
+
+readLinesFast <- function(fpath, lines = TRUE) {
+    stringi::stri_read_raw(fpath)
+    
+    s <- file.info(fpath)$size 
+      
+    buf <- readChar(fpath, s, useBytes = TRUE)
+    buf <- stringi::stri_enc_tonative(buf)
+    if (lines) stringi::stri_split_fixed(buf, "\n", omit_empty = TRUE)[[1]] else buf
+}
 
 
-readFiles <- function(patterns, recursive = FALSE, multipleInstances = FALSE, verbose = TRUE) {
-      # takes named vector of regex-glob pattern(s) and reads (quickly) all the matching files as lines.
-      # If verbose is true, it prints names of all matched files.
-      # recursive is passed as argument to findFiles.
-      
-    filenames <- lapply(patterns, findFiles, recursive = recursive)
+readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates = FALSE, verbose = FALSE) {
+    # takes named vector of regex-glob pattern(s) and reads (quickly) all the matching files as lines.
+    # If verbose is true, it prints names of all matched files.
+    # recursive is passed as argument to findFiles.
     
-    if (all(lengths(filenames) == 0L)) {
-        cat('Zero files match search pattern(s). Returning NULL.\n')
-        return(NULL)
-    }
+    filenames <- findFiles(..., contains = contains, recursive = recursive,
+                           allowDuplicates = allowDuplicates, verbose = verbose)
     
-    if (length(patterns) > 1L) {
-        multiples <- Reduce(intersect, filenames)
-        
-        
-        if (length(multiples) > 0L) {
-            if (verbose) {
-                cat(glue::glue('(Warning, the following {length(multiples)} files match more than one pattern:'), '\n')  
-                cat(glue::glue('\t{multiples}'), sep = '\n')
-            } else {
-                cat(glue::glue('(Warning, {length(multiples)} files match more than one pattern. '))
-            }
-            
-            if (multipleInstances) {
-                cat("If this is a problem, be more specific in your searches or specify multipleInstances = FALSE",
-                    "to force humdrumR to only read each file once.\n")
-            }  else {
-                cat("Since multipleInstances = FALSE, these files are only being read into the first pattern",
-                    "they match.)\n")
-                
-                for (j in 2:length(filenames)) filenames[[j]] <- filenames[[j]][!filenames[[j]] %in% unlist(filenames[1:(j - 1)])] 
-            }
-        }
-        
-        if (length(patterns) > 1L) {
-          if (is.null(names(patterns))) {
-            cat(glue::glue("Search patterns match ", 
-                           glue::glue_collapse(lengths(filenames), sep = ', ', last = ', and '),
-                           " files respectively."), 
-                '\n')
-          } else {
-            cat(glue::glue("Pattern '{names(patterns)}' matches {lengths(filenames)} files."), sep = '\n') 
-          }  
-        } 
-    }
+    if (all(lengths(filenames) == 0L)) return(NULL)
     
-      
-      cat(glue::glue('\nReading {num2str(sum(lengths(filenames)))} files...'))
-      
-      if (verbose) {
-            cat('\n')
-            cat(unlist(filenames), sep = '\n')
-      }
-      
-      files <- lapply(filenames, 
-                      function(fns) {
-                            fs <- lapply(fns, readLinesFast)
-                            names(fs) <- fns
-                            fs
-                      })
-      names(files) <- names(patterns)
-      
-      cat("Done!\n")
-      
-      files
+    files <- lapply(filenames, readLinesFast)
+ 
+    names(files) <- filenames
+    
+    attr(files, 'searchpatterns') <- names(filenames)
+    
+    files
 }
 
 shortFileNames <- function(fns) {
-          # This function takes a list of full directory paths
-          # and finds the shortest unique version of each one.
-          # In most cases, the final final name is returned,
-          # but if two (or more directores) contain files 
-          # with the same names, their directory names are retained
-          # to distinguish them
-          stepin <- stringr::str_replace(fns, '[^/]*/', '')
-          
-          duples <- duplicated(stepin) | rev(duplicated(rev(stepin))) | 
-                    stepin == fns | stepin == '' | is.na(stepin)
-          ifelse(duples, fns, Recall(stepin))
+    # This function takes a list of full directory paths
+    # and finds the shortest unique version of each one.
+    # In most cases, the final final name is returned,
+    # but if two (or more directores) contain files 
+    # with the same names, their directory names are retained
+    # to distinguish them
+    stepin <- stringr::str_replace(fns, '[^/]*/', '')
+    
+    duples <- duplicated(stepin) | rev(duplicated(rev(stepin))) | 
+        stepin == fns | stepin == '' | is.na(stepin)
+    ifelse(duples, fns, Recall(stepin))
 }
 
 
-########################### readHumdrum ----
 
+
+#############################################################################################---
+########################### readHumdrum ----
+################################################################--
+
+## This is the main event: the function which parses text files (found and read already by findHumdrum and readFiles)
+## readHumdrum itself is the only exported (public-facing) function.
 
 
 
@@ -230,6 +311,9 @@ shortFileNames <- function(fns) {
 #' If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
 #' \code{Corpus} field. Unnamed patterns are simply labeled "Unnamed."
 #' 
+#' If a pattern contains a solo dot followed by a file sep---e.g., "./", "x/./y"---this is treated as the current directory, not a regular expression.
+#' If a pattern contains two dots---e.g., "../"---this is treated as the directory above, not a regular expression.
+#' If you want to create a regular expression to match any directory, use ".*/".
 #' 
 #' @param recursive
 #' logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.

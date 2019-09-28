@@ -17,82 +17,94 @@
 #' @name humValidation
 #' 
 #' @export
-validateHumdrum <- function(pattern = NULL, recursive = FALSE, errorReport.path = NULL, files = NULL) {
+validateHumdrum <- function(..., contains = NULL, recursive = FALSE, errorReport.path = NULL) {
 
-  if (!is.null(pattern)) files <- unlist(readFiles(pattern, recursive = recursive, verbose = FALSE), recursive = FALSE)
-  if (is.null(files)) stop("validateHumdrum needs either a pattern or files argument to be specified", call. = FALSE)
+  files <- readFiles(..., contains = contains, recursive = recursive, allowDuplicates = FALSE)
   
-  cat(glue::glue("Validating {length(files)} files..."))
-  
-  filenames <- names(files)
-  
-  # If files are empty everything gets thrown off...this is a hacky fix
-  # Just pad empty files with a single empty record
-  files <- lapply(files, function(x) if (length(x) == 0) "" else x)
-  
-  filevec  <- rep(filenames, lengths(files))
-  recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
-  records  <- unlist(files)
-          
-  local   <- !grepl('^!!', records)
-  
-  reports <- list()
-  # 
-  funcs <- list(validate_File,
-                validate_Characters,
-                validate_Records,
-                validate_recordTypes,
-                validate_whiteSpace,
-                validate_spinePaths)
-  reports <- data.table::rbindlist(lapply(funcs, do.call, 
-                                          args = list(records, local, filevec)))
-  if (nrow(reports) == 0L) {
-   cat("all valid.\n")
-   return(invisible(files))
+  if (length(files) == 0L) {
+      cat('No matching files to validate.')
+      list()
+  } else {
+      isValidHumdrum(files, errorReport.path = NULL)
   }
   
-  badFiles  <- unique(filevec[reports$Location])
-  goodFiles <- filenames[!filenames %in% badFiles]
-  
-  cat(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."))
-  
-  if (!is.null(errorReport.path)) {
-            file.sep <- .Platform$file.sep
-            if (!dir.exists(errorReport.path)) dir.create(path = errorReport.path)
-            
-            reports <- reports[ , c("RecordN", "File") := .(recordNs[Location], filevec[Location])]
+}
 
-            # Summary file
-            summary <- reports[ , fileErrorSummary(.SD, unique(File)) , by = File]$V1
-            summary.file <- paste0(errorReport.path, file.sep,
-                                   "humdrumR_syntaxErrorReport_", 
-                                   Sys.Date(), ".txt")
-            writeLines(summary, summary.file)
-            
-            # Annotated files
-            recordTable <- data.table::data.table(Record = records, Location = seq_along(records),
-                                                  RecordN = recordNs, File = filevec)
-            recordReports <- reports[recordTable, on = c('Location', 'File', 'RecordN')]
-            recordReports <- recordReports[ , if (any(!is.na(Message))) .SD else NULL, by = File]
-            
-            annotation.path <- paste0(errorReport.path,  file.sep,
-                                      "AnnotatedFiles", file.sep)
-            if (!dir.exists(annotation.path)) dir.create(annotation.path)
-            
-            uniqFiles <- gsub(file.sep, '_', shortFileNames(unique(recordReports$File)))
-            recordReports[ , File := paste0(annotation.path, uniqFiles[match(File, unique(File))], '_errorAnnotations')]
-            recordReports[ , Message := ifelse(is.na(Message), "", Message)]
-            recordReports <- recordReports[ , .(File = unique(File), Message = paste(Message, collapse = ' and '), 
-                                                RecordN = unique(RecordN), Record = unique(Record)), by = Location]
-            recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
-            recordReports[ , writeLines(paste0(Message, ' | ', Record), unique(File)), by = File]
-                        
-            cat(glue::glue("report written in directory '{errorReport.path}'...")) 
-  }
-  
-  cat(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
-      
-  return(invisible(files[goodFiles]))
+
+isValidHumdrum <- function(files, errorReport.path = NULL) {
+    ## This function does the actual work for validateHumdrum
+    ## It takes a list of already read files
+    
+    cat(glue::glue("Validating {length(files)} files..."))
+    
+    # If files are empty everything gets thrown off...this is a hacky fix
+    # Just pad empty files with a single empty record
+    files <- IfElse(lengths(files) == 0L, "", files)
+    
+    filevec  <- rep(files, lengths(files))
+    recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
+    records  <- unlist(files)
+    
+    local   <- !grepl('^!!', records)
+    
+    reports <- list()
+    # 
+    funcs <- list(validate_File,
+                  validate_Characters,
+                  validate_Records,
+                  validate_recordTypes,
+                  validate_whiteSpace,
+                  validate_spinePaths)
+    reports <- data.table::rbindlist(lapply(funcs, do.call, 
+                                            args = list(records, local, filevec)))
+    if (nrow(reports) == 0L) {
+        cat("all valid.\n")
+        return(seq_along(files))
+    }
+    
+    badFiles  <- unique(filevec[reports$Location])
+    goodFiles <- filenames[!filenames %in% badFiles]
+    browser()
+    
+    cat(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."))
+    
+    if (!is.null(errorReport.path)) {
+        file.sep <- .Platform$file.sep
+        if (!dir.exists(errorReport.path)) dir.create(path = errorReport.path)
+        
+        reports <- reports[ , c("RecordN", "File") := .(recordNs[Location], filevec[Location])]
+        
+        # Summary file
+        summary <- reports[ , fileErrorSummary(.SD, unique(File)) , by = File]$V1
+        summary.file <- paste0(errorReport.path, file.sep,
+                               "humdrumR_syntaxErrorReport_", 
+                               Sys.Date(), ".txt")
+        writeLines(summary, summary.file)
+        
+        # Annotated files
+        recordTable <- data.table::data.table(Record = records, Location = seq_along(records),
+                                              RecordN = recordNs, File = filevec)
+        recordReports <- reports[recordTable, on = c('Location', 'File', 'RecordN')]
+        recordReports <- recordReports[ , if (any(!is.na(Message))) .SD else NULL, by = File]
+        
+        annotation.path <- paste0(errorReport.path,  file.sep,
+                                  "AnnotatedFiles", file.sep)
+        if (!dir.exists(annotation.path)) dir.create(annotation.path)
+        
+        uniqFiles <- gsub(file.sep, '_', shortFileNames(unique(recordReports$File)))
+        recordReports[ , File := paste0(annotation.path, uniqFiles[match(File, unique(File))], '_errorAnnotations')]
+        recordReports[ , Message := ifelse(is.na(Message), "", Message)]
+        recordReports <- recordReports[ , .(File = unique(File), Message = paste(Message, collapse = ' and '), 
+                                            RecordN = unique(RecordN), Record = unique(Record)), by = Location]
+        recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
+        recordReports[ , writeLines(paste0(Message, ' | ', Record), unique(File)), by = File]
+        
+        cat(glue::glue("report written in directory '{errorReport.path}'...")) 
+    }
+    
+    cat(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
+    
+    return(goodFiles)
 }
 
 fileErrorSummary <- function(.SD, filename) {

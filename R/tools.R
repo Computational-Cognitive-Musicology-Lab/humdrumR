@@ -18,6 +18,17 @@ Repeat <- function(x, ..., margin = 1L) {
   out
 }
 
+remove.duplicates <- function(lis) {
+    groups <- rep(seq_along(lis), lengths(lis))
+
+    values <- unlist(lis, use.names = FALSE)
+    
+    dups <- duplicated(values)
+    
+    tapply(values[!dups], groups[!dups], c, simplify = FALSE)
+    
+}
+
 wrapInCall <- function(form, call) {
     # This function takes a formula and wraps the rhs
     # with a call to any.
@@ -203,6 +214,8 @@ allsame <- function(x) length(unique(x)) == 1L
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
 
+
+
 fargs <- function(func) formals(args(func))
 
 #' @export
@@ -295,6 +308,7 @@ ditto <- function(spine) {
 #' @export
 IfElse <- function(true, yes, no) {
   out <- no
+  match_size(yes = yes, no = no, toEnv = TRUE)
   if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
