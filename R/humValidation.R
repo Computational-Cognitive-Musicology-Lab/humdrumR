@@ -19,21 +19,27 @@
 #' @export
 validateHumdrum <- function(..., contains = NULL, recursive = FALSE, errorReport.path = NULL) {
 
-  files <- readFiles(..., contains = contains, recursive = recursive, allowDuplicates = FALSE)
+  fileFrame <- readFiles(..., contains = contains, recursive = recursive, allowDuplicates = FALSE)
   
-  if (length(files) == 0L) {
-      cat('No matching files to validate.')
-      list()
-  } else {
-      isValidHumdrum(files, errorReport.path = NULL)
-  }
+  fileFrame <- isValidHumdrum(fileFrame, errorReport.path = errorReport.path)
   
+  invisible(fileFrame)
 }
 
 
-isValidHumdrum <- function(files, errorReport.path = NULL) {
+isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     ## This function does the actual work for validateHumdrum
-    ## It takes a list of already read files
+    ## It takes a character of filestrings (not lines) with names representing the filepath
+
+    if (nrow(fileFrame) == 0L) {
+        cat("No files to validate.")
+        fileFrame[ , Valid := logical(0)]
+        return(fileFrame)
+    }
+    
+    ##
+    files     <- fileFrame$Files
+    filepaths <- fileFrame$Filepath
     
     cat(glue::glue("Validating {length(files)} files..."))
     
@@ -41,7 +47,7 @@ isValidHumdrum <- function(files, errorReport.path = NULL) {
     # Just pad empty files with a single empty record
     files <- IfElse(lengths(files) == 0L, "", files)
     
-    filevec  <- rep(files, lengths(files))
+    filevec  <- rep(filepaths, lengths(files))
     recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
     records  <- unlist(files)
     
@@ -59,12 +65,13 @@ isValidHumdrum <- function(files, errorReport.path = NULL) {
                                             args = list(records, local, filevec)))
     if (nrow(reports) == 0L) {
         cat("all valid.\n")
-        return(seq_along(files))
+        fileFrame[ , Valid := TRUE]
+        return(fileFrame)
     }
     
     badFiles  <- unique(filevec[reports$Location])
-    goodFiles <- filenames[!filenames %in% badFiles]
-    browser()
+    hits      <- !filepaths %in% badFiles
+    goodFiles <- filepaths[hits]
     
     cat(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."))
     
@@ -91,7 +98,7 @@ isValidHumdrum <- function(files, errorReport.path = NULL) {
                                   "AnnotatedFiles", file.sep)
         if (!dir.exists(annotation.path)) dir.create(annotation.path)
         
-        uniqFiles <- gsub(file.sep, '_', shortFileNames(unique(recordReports$File)))
+        uniqFiles <- gsub(file.sep, '_', shortFilenames(unique(recordReports$File)))
         recordReports[ , File := paste0(annotation.path, uniqFiles[match(File, unique(File))], '_errorAnnotations')]
         recordReports[ , Message := ifelse(is.na(Message), "", Message)]
         recordReports <- recordReports[ , .(File = unique(File), Message = paste(Message, collapse = ' and '), 
@@ -104,12 +111,15 @@ isValidHumdrum <- function(files, errorReport.path = NULL) {
     
     cat(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
     
-    return(goodFiles)
+    #
+    fileFrame[ , Valid := hits]
+    
+    fileFrame
 }
 
 fileErrorSummary <- function(.SD, filename) {
 
- file.message <- glue::glue("In file '{shortFileNames(filename)}':\n", .trim = FALSE)
+ file.message <- glue::glue("In file '{shortFilenames(filename)}':\n", .trim = FALSE)
  
  .SD <- .SD[, .(Messages = paste(Message, sep = '\n\t\t')), by = RecordN] #may be multiple messages on one record
  

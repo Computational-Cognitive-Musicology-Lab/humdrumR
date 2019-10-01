@@ -18,19 +18,9 @@ Repeat <- function(x, ..., margin = 1L) {
   out
 }
 
-remove.duplicates <- function(lis) {
-    groups <- rep(seq_along(lis), lengths(lis))
-
-    values <- unlist(lis, use.names = FALSE)
-    
-    dups <- duplicated(values)
-    
-    tapply(values[!dups], groups[!dups], c, simplify = FALSE)
-    
-}
 
 wrapInCall <- function(form, call) {
-    # This function takes a formula and wraps the rhs
+    # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs
     # with a call to any.
     # i.e. form -> any(form)
     rhs <- rlang::f_rhs(form)
@@ -65,6 +55,22 @@ substituteName <- function(expr, subs) {
   expr
           
 }
+
+remove.duplicates <- function(listofvalues) {
+    # takes a list of vectors of values and removes elements from later vectors which
+    # appear in earlier vectors
+    if (sum(lengths(listofvalues)) == 0L) return(listofvalues)
+    
+    groups <- factor(rep(seq_along(listofvalues), lengths(listofvalues)), 
+                     levels = seq_along(listofvalues)) # must specificy levels again because there may be empty vectors
+
+    values <- unlist(listofvalues, use.names = FALSE)
+
+    dups <- duplicated(values)
+    setNames(tapply(values[!dups], groups[!dups], c, simplify = FALSE), names(listofvalues))
+    
+}
+
 
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
           if (length(sys.calls()) > 6L) return(args) 
