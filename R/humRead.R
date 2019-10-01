@@ -102,8 +102,6 @@ findFiles <- function(..., content = NULL, recursive = FALSE) {
 }
 
 
-#' @export
-findHumdrum <- function
 
 
 readFiles <- function(patterns, recursive = FALSE, multipleInstances = FALSE, verbose = TRUE) {
