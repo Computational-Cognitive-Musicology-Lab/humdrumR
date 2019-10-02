@@ -41,7 +41,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     files     <- fileFrame$Files
     filepaths <- fileFrame$Filepath
     
-    cat(glue::glue("Validating {length(files)} files..."))
+    cat(glue::glue("Validating {num2print(length(files))} files..."))
     
     # If files are empty everything gets thrown off...this is a hacky fix
     # Just pad empty files with a single empty record

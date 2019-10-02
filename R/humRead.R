@@ -30,7 +30,6 @@ findFiles <- function(..., recursive = FALSE) {
     #### find matches
     ## dirs
     matchingdirs <- lapply(dirpaths, matchDirs)
-    # matchingdirs <- Filter(Negate(is.null), matchingdirs)
     
     ## full paths (incl file)
     matchingpaths <- if (sum(lengths(matchingdirs)) == 0L) {
@@ -41,7 +40,6 @@ findFiles <- function(..., recursive = FALSE) {
             recursive    = recursive)
     }
 
-    
     data.table(Filepath   = matchingpaths,
                Directories = matchingdirs,
                Pattern     = patterns,
@@ -88,17 +86,20 @@ matchDirs <- function(dirpattern) {
     # Given directory-path regular expressions (dirpattern) it finds matching directories on the system.
     # See the findHumdrum documentation for more explanation.
     dirpattern <- strsplit(dirpattern, split = .Platform$file.sep)[[1]]
-    dirpattern <- dirpattern[dirpattern != '.' | seq_along(dirpattern) == 1L] # only allow "." in first position
     
-    if (dirpattern[1] == '~') {
+    dirpattern <- dirpattern[dirpattern != "."]
+    
+    
+    if (dirpattern[1] == '') {
         dirpattern <- dirpattern[-1]
-        initial <- path.expand('~')
+        initial <- "/"
     } else { 
         initial <- '.' 
     }
+    
     Reduce( function(cur, nex) {
         unlist( lapply(cur, 
-                       function(curdir) { 
+                       function(curdir) {
                            hits <- if (nex %in% c('..', '.')) {
                                return(paste(curdir, nex, sep = .Platform$file.sep))
                            } else {
@@ -120,8 +121,8 @@ matchDirs <- function(dirpattern) {
     ) -> matchingdirs
     
     ## remove paths containing //
-    matchingdirs <- matchingdirs[!stringr::str_detect(matchingdirs, strrep(.Platform$file.sep, 2))]
-    
+    matchingdirs <- gsub(paste0(strrep(.Platform$file.sep, 3), '*'), .Platform$file.sep, matchingdirs)   
+
     
     ##
     matchingdirs
@@ -139,7 +140,6 @@ matchFiles <- function(filepattern, matchingdirs, recursive) {
         lapply(matchingdirs, 
                function(curdir) {
                    paths <- list.files(path = curdir, pattern = filepattern, recursive = recursive)
-                   
                    files <- Filter(function(x) !x %in% list.dirs(curdir, recursive = FALSE, full.names = FALSE),
                                    paths)
                  
@@ -280,7 +280,10 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
                                           }))
     
     # Split lines
-    fileFrame[ , FileLines := splitFiles2Lines(Files)]
+    fileFrame[ , FileLines := list(splitFiles2Lines(Files))]
+    
+    # Number files
+    fileFrame[ , File := match(Filepath, unique(Filepath))]
     
     # return
     cat(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)))} files read from disk."), '\n')
@@ -462,28 +465,40 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     
     if (verbose) cat ('\n')
     
+    
+    ## Divide out any pieces within files
+    fileFrame <- separatePieces(fileFrame)
+    
+    ## Parse records
     humtabs <- Map(
-        function(file, filename) { 
-            humtab <- parseRecords(file, filename, parseGlobal)
+        function(file, piece) { 
+            humtab <- parseRecords(file, piece, parseGlobal)
             if (verbose) cat(filename, '\n') 
             humtab
         }, 
-        fileFrame$FileLines, fileFrame$Filepath) 
+        fileFrame$FileLines, fileFrame$Piece) 
     
-    #
+    ##########-
+    ### Assembling local record information with corpus metadata (filenames, reference records, etc.)
+    ##########-
     cat("Assembling corpus...")
-    ######################PICK UP HERE
-    fileFrame[ , File  := shortFilenames(Filepath)]
-    fileFrame[ , Index := findPieces(FileLines)]
-    # find pieces cumsum(stringi::stri_count_regex(x,'\\*\\*') - stringi::stri_count_regex(x,'\\*-') )
-   
-    humtabs <- unlist(humtabs, recursive = FALSE)
-    humtab  <- data.table::rbindlist(humtabs, fill = TRUE)
-    humtab  <- humtab[filetab, on = "Filepath"]
     
+    ###### consolidate files into one data.table
+    humtab  <- data.table::rbindlist(humtabs, fill = TRUE) # fill = TRUE because some pieces have different reference records
+   
+    # file/piece info
+    fileFrame[ , Filename := shortFilenames(Filepath)]
+    fileFrame[ , FileLines := NULL]
+    
+    # combine with parsed data
+    humtab  <- humtab[fileFrame,  on = "Piece"]
+    
+    
+    ## Other general information about tokens
     humtab[ , Type := parseTokenType(Token)]
     humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
     humtab[ , Global := is.na(Spine)]
+    
     #
     if (parseTandem) {
         tandemTab <- tandemTable(humtab$Tandem)
@@ -491,7 +506,7 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     }
     cat('Done!\n')
     
-    makeHumdrumR(humtab, patterns)
+    makeHumdrumR(humtab, unique(fileFrame$Pattern))
     
     
 }
@@ -499,7 +514,7 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
 
 
 
-parseRecords <- function(records, filename, parseGlobal = TRUE) {
+parseRecords <- function(records, piece, parseGlobal = TRUE) {
           # This function is the biggest part of readHumdrum
           # It takes a character vector representing the records 
           # in a single humdrum file, and outputs a data.table (an incomplete humdrum table).
@@ -509,13 +524,16 @@ parseRecords <- function(records, filename, parseGlobal = TRUE) {
   
   humtab <- if (length(global) == 1 && is.na(global)) local else rbind(global$Data, local, fill = TRUE)
   
+  # Data record numbers
   humtab$NData <- rep(NA, nrow(humtab))
   D <- !grepl('^[!=*]', humtab$Token)
   humtab$NData[D] <- match(humtab$Record[D],  sort(unique(humtab$Record[D])))
   
+  #
   humtab <- if (!(length(global) == 1 && is.na(global))) cbind(humtab, global$Table) else humtab
   
-  humtab$Filepath <- filename
+
+  humtab[ , Piece := piece]
   humtab
 }
 
@@ -568,17 +586,11 @@ parseLocal <- function(records) {
           
   recordn <- grep('^!!', records, invert = TRUE, useBytes = TRUE)
   localrecords <- records[recordn]
-
-  ##
-  pieces <- findPieces(localrecords)
   
   
   ###local is list of vectors of strings
   ###(each string = one record)
   local <- stringi::stri_split_fixed(localrecords, pattern = '\t')
-  
-  #
-  
   
   #spine paths
   if (any(grepl('*^', localrecords, fixed = TRUE),
@@ -632,7 +644,6 @@ parseLocal <- function(records) {
   
   # Don't need recordns to be characters anymore.
   recordns  <- as.integer(recordns)
-  
   humtab <- data.table::data.table(Token = tokens,
                                  Column = Columns,
                                  Spine = SpineNumbers[Columns],
@@ -651,10 +662,46 @@ parseLocal <- function(records) {
 }
 
 
-findPieces <- function(local) {
-    nspines <- cumsum(stringi::stri_count_regex(local,'\\*\\*') - stringi::stri_count_regex(local,'\\*-') )
+separatePieces <- function(fileFrame) {
+    # Takes a file frame.
+    # It looks at each file and breaks it into subfiles if necessarry
+    # it returns a new file frame, expanded to include newly split files 
+    # and with new "Piece" column
     
-    head(c(1, nspines == 0), n = -1L)
+    filelines <- fileFrame$FileLines
+    
+    containmultiple <- sapply(filelines, 
+                              function(lines) {
+                                  sum(stringi::stri_detect_regex(lines, '^\\*\\*')) > 1L
+                              })
+    
+    filelines[containmultiple] <-
+        lapply(filelines[containmultiple], 
+           function(lines) {
+               open  <- stringi::stri_count_regex(lines,'\\*\\*')
+               close <- stringi::stri_count_regex(lines,'\\*-')
+               nspines <- open - close
+               
+               newpiece <- head(nspines, -1) > 0L & tail(nspines, -1) == 0L
+               if (nspines[1] == 0L) {
+                   newpiece[which(newpiece)[1]] <- FALSE
+                   newpiece[1] <- TRUE
+               }
+               pieces <- cumsum(c(newpiece, FALSE))
+               split(lines, f = pieces) 
+           })
+    
+    filelines[!containmultiple] <- lapply(filelines[!containmultiple], list)
+    
+    ## spread out 
+    newFrame <- data.table(FileLines = unlist(filelines, recursive = FALSE),
+                           Filepath  = rep(fileFrame$Filepath, lengths(filelines)))
+    newFrame[ , Piece := 1:nrow(newFrame)]
+    
+    fileFrame <- fileFrame[ , c('Filepath', 'File', 'Label')]
+    
+    newFrame[fileFrame, on = 'Filepath']
+    
 }
 # 
 # parseTokenType <- function(spine) {
@@ -825,7 +872,7 @@ parseSections <- function(spine) {
   sectionTypes <- unique(stringi::stri_extract_all_regex(grep('\\*>[^>]*>[^>]', spine, value = TRUE), '\\*>[^>]*>'))
   sectionTypes <- paste0('^\\', c('*>[^>]*$', sectionTypes))
   
-  nesting <- max(stringi::stri_count_fixed(str_sub(grep('^\\*>', spine, value = TRUE), 3L), '>'))
+  nesting <- max(stringi::stri_count_fixed(stringr::str_sub(grep('^\\*>', spine, value = TRUE), 3L), '>'))
   
   matrices <- lapply(sectionTypes, 
                      function(type) {
@@ -833,7 +880,7 @@ parseSections <- function(spine) {
                        if (!any(hits)) return(NULL)
                        
                        depth <- rep(NA_integer_, length(spine))
-                       depth[hits] <-stringi::stri_count_fixed(str_sub(spine[hits], 3L), '>')
+                       depth[hits] <- stringi::stri_count_fixed(stringr::str_sub(spine[hits], 3L), '>')
                        
                        typemat <- if (any(depth != 0, na.rm = TRUE)) { 
                          sapply(sort(unique(depth[depth != 0])), 
@@ -866,7 +913,7 @@ parseBarlines <- function(spine) {
           
   Singles <- cumsum(grepl('^=', spine))
   Doubles <- cumsum(grepl('^==', spine))
-  BarLabels <- str_sub(grep('^=', spine, value = TRUE), 2L)[IfElse(Singles == 0L, NA_integer_, Singles)]
+  BarLabels <- stringr::str_sub(grep('^=', spine, value = TRUE), 2L)[IfElse(Singles == 0L, NA_integer_, Singles)]
   
   data.frame(BarN = Singles, 
              DoubleBarN = Doubles, 
