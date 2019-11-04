@@ -46,9 +46,9 @@
 #' Every humdrum table starts with twelve Structure fields, describing where
 #' the token came from:
 #' \describe{
-#' \item{File}{\code{character} - The name of the humdrum file.}
-#' \item{FullFileName}{\code{character} - The full file name, including it's path.}
-#' \item{NFile}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
+#' \item{Filename}{\code{character} - The name of the humdrum file.}
+#' \item{Filepath}{\code{character} - The full file name, including it's path.}
+#' \item{File}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
 #' \item{Record}{\code{integer} - The record (i.e., line) number.}
 #' \item{NData}{\code{integer} - An enumeration of \strong{data records} specifically.}
 #' \item{Global}{\code{logical} - Did the token come from a glocal record (i.e., a record with no spine)?}
@@ -348,12 +348,12 @@ spliceHumtab <- function(humtab) {
           # it also sorts them by default values
           humtab <- rbindlist(humtab, fill = TRUE)
           
-          # sortby <- c('NFile', 'Spine', 'Path', 'Record', 'Stop')
+          # sortby <- c('File', 'Spine', 'Path', 'Record', 'Stop')
           # sortby <- sortby[sapply(humtab[ , sortby, with = FALSE], class) != 'list'] 
           # Can't sort by lists
           # These should never be lists...but still
           # if (length(sortby) > 0L) do.call('setorder', c(humtab, lapply(sortby, as.symbol))) # data.table::setorder
-          setorder(humtab, NFile, Record, Column, Stop)
+          setorder(humtab, File, Record, Column, Stop)
           
           humtab
 }
@@ -449,7 +449,7 @@ setMethod('initialize', 'humdrumR',
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
                                     Structure = c(if ('SubCorpus' %in% fields) 'SubCorpus' else NULL, 
-                                                  'File', 'FullFileName', 'NFile',
+                                                  'Filename', 'Filepath', 'File',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
@@ -462,7 +462,7 @@ setMethod('initialize', 'humdrumR',
             .Object@Humtable  <- splitHumtab(humtab)        
             .Object@Fields    <- fieldcategories
             .Object@Active    <- rlang::quo(Token)
-            .Object@Files     <- list(Search = pattern, Names = unique(humtab$FullFileName))
+            .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
             .Object
           })
@@ -600,7 +600,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     outMat[outMat == '_C'] <- padder
                     outMat[outMat == '_P'] <- padder
                     outMat[outMat == 'NA'] <- padder
-                    dimnames(outMat) <- c(list(File.Record = with(getHumtab(x, dataTypes = dataTypes), paste0(NFile, '.', Record)),
+                    dimnames(outMat) <- c(list(File.Record = with(getHumtab(x, dataTypes = dataTypes), paste0(File, '.', Record)),
                                                Column = 1:ncol(outMat)),
                                           if (length(dim(outMat)) == 3L) list(Field = colnames(records)) else NULL)
                     
@@ -682,7 +682,7 @@ isActiveVector <- function(humdrumR) {
 nrecords <- function(humdrumR, dataTypes = 'D') {
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
-          n <- humtab[Stop == 1L | is.na(Stop) , .(NR = length(unique(Record))), by = File] 
+          n <- humtab[Stop == 1L | is.na(Stop) , .(NR = length(unique(Record))), by = Filename] 
           
           sum(n$NR)
 }
@@ -700,7 +700,7 @@ ntokens <- function(humdrumR, dataTypes = 'D') {
 npieces <- function(humdrumR) {
           humtab <- getD(humdrumR)
           
-          length(unique(humtab$NFile))
+          length(unique(humtab$File))
 }
 
 #' Does humdrumR corpus contain subcorpora?
@@ -774,8 +774,8 @@ ragged <- function(humdrumR) {
           
           humtab <- getD(humdrumR)
           
-          ncols   <- humtab[!is.na(Column) , length(unique(Column)), by = File]$V1
-          nspines <- humtab[!is.na(Spine)  , length(unique(Spine)) , by = File]$V1
+          ncols   <- humtab[!is.na(Column) , length(unique(Column)), by = Filename]$V1
+          nspines <- humtab[!is.na(Spine)  , length(unique(Spine)) , by = Filename]$V1
           
           length(unique(ncols)) > 1L || length(unique(nspines)) > 1L
           
@@ -827,7 +827,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
                     newtab[ , copyfields] <- .SD[1, copyfields, with = FALSE]
                     newtab
                     }
-                    , by = File, .SDcols =  colnames(humtab)]
+                    , by = Filename, .SDcols =  colnames(humtab)]
           
           newrows <- is.na(humtabPadded$Type)
           humtabPadded$Stop[newrows]  <- 1L
@@ -837,7 +837,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
           humtabPadded$Spine <- allSpinePathcombs[humtabPadded$Column, 'Spine'] 
           humtabPadded$Path  <- allSpinePathcombs[humtabPadded$Column, 'Path' ] - 1
           
-          setorder(humtabPadded, NFile, Column, Record, Stop)
+          setorder(humtabPadded, File, Column, Record, Stop)
           
           putHumtab(humdrumR, drop = TRUE) <- humtabPadded
           humdrumR
@@ -968,7 +968,7 @@ foldStops <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
           humtab <- getHumtab(humdrumR)
           if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
           
-          foldHumdrum(humdrumR, byfields = c('File', 'Spine', 'Record', 'Path'), 
+          foldHumdrum(humdrumR, byfields = c('Filename', 'Spine', 'Record', 'Path'), 
                       foldAtomic = foldAtomic, sep = sep)
 }
 
@@ -980,7 +980,7 @@ foldPaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
           
           if (!anyPaths(humdrumR)) return(humdrumR)
           
-          output <- foldHumdrum(humdrumR, byfields = c('File', 'Record', 'Spine'), 
+          output <- foldHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
                                 foldAtomic = foldAtomic, sep = sep, padPaths = FALSE)
           
           output@Humtable$P <- output@Humtable$P[0]
@@ -997,7 +997,7 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
           if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
           
           
-          foldHumdrum(humdrumR, byfields = c('File', 'Record'), 
+          foldHumdrum(humdrumR, byfields = c('Filename', 'Record'), 
                       foldAtomic = foldAtomic, sep = sep, padPaths = padPaths)
           
 
@@ -1084,7 +1084,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   dataTypes <- checkTypes(dataTypes, 'evalActive')
   
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-  # locnames <- humtab[ , paste(NFile, Spine, Path, Stop, Record, sep = '.')]
+  # locnames <- humtab[ , paste(File, Spine, Path, Stop, Record, sep = '.')]
   
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
   
@@ -1133,7 +1133,7 @@ getActive <- function(humdrumR) humdrumR@Active
 #' @name humActive
 #' @export
 setActive <- function(humdrumR, form) {
-  putActive(humdrumR, rlang::as_quosure(form))
+  putActive(humdrumR, rlang::as_quosure(form, rlang::f_env(form)))
 }
 
 
@@ -1565,8 +1565,8 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
                     padPaths = TRUE, alignColumns = TRUE)
   
   NRecord <- num2str(as.numeric(gsub('^.*\\.', '', names(lines))), pad = TRUE)
-  NFile   <- gsub('\\..*$', '', names(lines))
-  FileNames <- getHumtab(humdrumR)[ , unique(File)]
+  File   <- gsub('\\..*$', '', names(lines))
+  Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
   
   lines <- paste0(NRecord, ':  \t', lines)
   ## Trim an space lines
@@ -1575,8 +1575,8 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
   
   
   ##
-  lines   <- split(lines, f = NFile)
-  NRecord <- split(NRecord, f = NFile)
+  lines   <- split(lines, f = File)
+  NRecord <- split(NRecord, f = File)
   
   lines <- Map(f = function(l, rn, last) {
             if (length(l) <= max.records.file) return(l)
@@ -1602,7 +1602,7 @@ print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
   
   
   
-  ellipses <- paste0(ellipsis, ' ', FileNames)
+  ellipses <- paste0(ellipsis, ' ', Filenames)
   lines    <- Map(append, lines, ellipses, after = 0L)
   
   ##
@@ -1628,7 +1628,7 @@ print_humtab_notActiveVector <- function(humdrumR, cutMiddle = FALSE) {
   refs <- lays$Name[lays$Type == 'Reference']
   
   notact <- D[ , !colnames(D) %in% activeFields(humdrumR), with = FALSE ]
-  notact <- notact[ , colnames(notact) %in% c(refs, 'File', 'Spine', 
+  notact <- notact[ , colnames(notact) %in% c(refs, 'Filename', 'Spine', 
                                               'Record', 'Path', 
                                               'Exclusive', 'BarN', 'DoubleBarN'), with = FALSE]
   
@@ -1636,7 +1636,7 @@ print_humtab_notActiveVector <- function(humdrumR, cutMiddle = FALSE) {
   printnotact <- nrow(notact) > 0 && nrow(notact) == length(act)
   if (printnotact) {
     ellipsis <- '####'
-    collabs <- lapply(colnames(notact), function(col) paste0(gsub('File: ', '', paste0(col, ": ")), notact[[col]]))
+    collabs <- lapply(colnames(notact), function(col) paste0(gsub('Filename: ', '', paste0(col, ": ")), notact[[col]]))
     collabs <- apply(do.call('cbind',collabs), 1, 
                      function(row) paste0('               ', ellipsis, paste(row, collapse = ', '), ellipsis))
   }

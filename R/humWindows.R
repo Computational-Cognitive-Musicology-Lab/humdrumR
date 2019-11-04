@@ -174,7 +174,7 @@ windows <- function(df, form, with = list(), ...,
           if (end > nrow(df)) end <- nrow(df)
           
           
- with <- lapply(c(with, list(...)), rlang::as_quosure)
+ with <- lapply(c(with, list(...)), rlang::as_quosure, env = parent.env(environment()))
  with[] <- lapply(with, rlang::eval_tidy, data = df)
  with <- c(with, df)
  

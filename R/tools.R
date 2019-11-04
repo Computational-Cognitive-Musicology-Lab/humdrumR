@@ -18,6 +18,7 @@ Repeat <- function(x, ..., margin = 1L) {
   out
 }
 
+plural <- function(n, then, els) IfElse(n > 1, then, els)
 
 wrapInCall <- function(form, call) {
     # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs

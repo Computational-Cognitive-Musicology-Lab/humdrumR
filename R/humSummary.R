@@ -61,8 +61,8 @@ setMethod('summary', 'humdrumR',
 
 #' A \code{humCensus} table has one row for each file in the corpus.
 #' Rows are labeled with each file's corresponding 
-#' number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{NFile} field)
-#'  and name (the \strong{File} field).
+#' number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{File} field)
+#'  and name (the \strong{Filename} field).
 #' In addition, when a \code{humCensus} object is printed,
 #' the totals across all files are printed as well---(unique) and (per token)
 #' across all files are calculated across all files as well, not summed.
@@ -101,7 +101,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   
   ##ADD MULTISTOPS, MOVE BARS TO sections FUNCTION
   
-  censusTable <- humtab[ , .(NFile            = unique(NFile),
+  censusTable <- humtab[ , .(File            = unique(File),
                       Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
                       Tokens           = nrow(.SD),
                       `(unique)`       = list(unique(Token)),
@@ -109,7 +109,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
                       `(per token)`    = round(mean(nchar(Token)), 2)
                       ),
                       # Bars             = length(unique(BarN))),
-                      by = File]
+                      by = Filename]
   
   
   attr(censusTable, 'corpusName') <- corpusName
@@ -127,7 +127,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   dataTypes  <- attr(censusTable, 'dataTypes')          
   
   if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
-  if (is.character(i)) expr <- call('grepl', quote(i), quote(File))
+  if (is.character(i)) expr <- call('grepl', quote(i), quote(Filename))
   if (is.numeric(i)) expr <- quote(i)
   
   censusTable <- popclass(censusTable)
@@ -162,8 +162,8 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   }
   
   ##
-  files <- paste0(censusTable$File, " [", num2str(censusTable$NFile, pad = TRUE), "]")
-  censusTable[ , c('NFile', 'File') := NULL] # in place!
+  files <- paste0(censusTable$Filename, " [", num2str(censusTable$File, pad = TRUE), "]")
+  censusTable[ , c('File', 'Filename') := NULL] # in place!
   
   #
   sums <- censusTable[, lapply(.SD,
@@ -185,7 +185,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   #
   censusTable <- cbind(files, censusTable)
   colNames    <- colnames(censusTable)
-  colNames[1] <- "" # don't print "File" as header
+  colNames[1] <- "" # don't print "Filename" as header
   
   ## how wide does each column need to be to accomodate longest strings in each column?
   lenCol <- pmax(nchar(colNames),
@@ -257,8 +257,8 @@ print.humCensus <- function(censusTable, showall = TRUE) {
 #' 
 #' A \code{humReference} table has one row for each file in the corpus.
 #' Rows are labeled with each file's corresponding 
-#' number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{NFile} field)
-#'  and name (the \strong{File} field).
+#' number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{File} field)
+#'  and name (the \strong{Filename} field).
 #' In addition, when a \code{humReference} object is printed,
 #' three different summary totals are printed for each reference code:
 #' \strong{Any} indicates how many files in the corpus have at least
@@ -345,10 +345,10 @@ reference.humdrumR <- function(humdrumR) {
   humtab <- getHumtab(humdrumR)
   fieldtable <- fields(humdrumR, fieldTypes = 'Reference')
   
-  refTable <- humtab[ , c('NFile', 'File', fieldtable$Name), with = FALSE]
+  refTable <- humtab[ , c('File', 'Filename', fieldtable$Name), with = FALSE]
   # 
   
-  refTable <- refTable[!duplicated(File)]
+  refTable <- refTable[!duplicated(Filename)]
   
   attr(refTable, 'corpusName') <- corpusName
   refTable %class% 'humReference'
@@ -376,7 +376,7 @@ reference.humdrumR <- function(humdrumR) {
   if (missing(i)) i <- seq_len(nrow(refTable)) 
   
   if (is.character(j)) j <- pmatch(j, colnames(refTable)) - 2L
-  if (is.character(i)) i <- grep(i, refTable$File)
+  if (is.character(i)) i <- grep(i, refTable$Filename)
   
   j <- j[j <= (ncol(refTable) - 2L)]
   
@@ -408,8 +408,8 @@ print.humReference <- function(refTable, showall = TRUE) {
           }
           
           ##
-          files <- paste0(refTable$File, " [", num2str(refTable$NFile, pad = TRUE), "]")
-          refTable[ , c('NFile', 'File') := NULL] # in place!
+          files <- paste0(refTable$Filename, " [", num2str(refTable$File, pad = TRUE), "]")
+          refTable[ , c('File', 'Filename') := NULL] # in place!
           
           ######### -
           corpusMessage <- paste0("\n###### Reference records in humdrumR corpus ",
@@ -463,7 +463,7 @@ print.humReference <- function(refTable, showall = TRUE) {
                               lapply(Totals, nchar))) + 1L # plus one to add space between lines
           
           # append filename, plus totals categories
-          colNames   <- c("", colNames) # don't print "File" as a header
+          colNames   <- c("", colNames) # don't print "Filename" as a header
           lenCol     <- c(max(nchar(c(files, names(Totals)))), lenCol)
           
           ## If there is only one column
@@ -513,15 +513,15 @@ spines  <- function(humdrumR) {
   humtab <- getHumtab(humdrumR)
   
   spins <- humtab[Global == FALSE , 
-                    .(NFile            = unique(NFile),
+                    .(File            = unique(File),
                       Spines           = length(unique(Spine)),
                       Columns          = length(unique(Column)),
                       Splits           = sum(grepl('\\*\\^', Token)),
                       Splices          = length(unique(Record[grepl('\\*v', Token)])),
                       Where            = list(.SD[ , length(unique(Path)) - 1, by = Spine]$V1)),
-                  by = File]
+                  by = Filename]
   
-  setcolorder(spins, c('NFile', 'File', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
+  setcolorder(spins, c('File', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
   
   spins %class% 'humSpines'
 }
@@ -535,7 +535,7 @@ spines  <- function(humdrumR) {
   if (missing(i)) i <- seq_len(nrow(spines)) 
   
   if (is.character(j)) j <- pmatch(j, colnames(spines)) - 2
-  if (is.character(i)) i <- pmatch(i, spines$File)
+  if (is.character(i)) i <- pmatch(i, spines$Filename)
   
   spines <- popclass(spines)
   spines <- spines[i, c(1, 2, j + 2), with = FALSE]
@@ -550,7 +550,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
   if (nrow(spinemat) < 1) {cat('Empty humdrumR object.\n') ; return(invisible(NULL))}
   
   spinemat <- popclass(spinemat)
-  spinemat$NFile <- paste0(num2str(spinemat$NFile), ":")
+  spinemat$File <- paste0(num2str(spinemat$File), ":")
   spinemat[ , In := sapply(Where, sum %.% GT(0))]
   where <- spinemat$Where
   spinemat[ , 'Where' := NULL]
@@ -559,7 +559,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
   
   
   if (nrow(spinemat) == 1) {
-    cat(spinemat$File, ': ', spinemat$Spines, ' spines', if (anypaths) paste0(' : ', spinemat$Columns, {if ( spinemat$Columns > 1) ' paths' else ' path'}) else '', '\n', sep = '')
+    cat(spinemat$Filename, ': ', spinemat$Spines, ' spines', if (anypaths) paste0(' : ', spinemat$Columns, {if ( spinemat$Columns > 1) ' paths' else ' path'}) else '', '\n', sep = '')
     where <- where[[1]]
     
     if (anypaths) {
@@ -568,12 +568,12 @@ print.humSpines <- function(spinemat, showall = TRUE) {
     
   } else {
     setcolorder(spinemat,
-                c('NFile', 'File', 'Spines',
+                c('File', 'Filename', 'Spines',
                   'Columns', 'In', 'Splits', 'Splices'))
   
 
     cols <- if (anypaths) 1:7 else 1:3
-    colNames <- c('', 'File', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
+    colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
       
     lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
                    nchar(colNames), sapply(spinemat[ , cols, with = FALSE], max %.% nchar)) + 2
@@ -634,20 +634,20 @@ interpretations <- function(humdrumR) {
                    !Token %in% c('*', '*-', '*v', '*^') &
                    !grepl('\\*>.*', Token)]
   tandem[ , ID := factor(idTandem(Token))]
-  tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = NFile]$V1)
-  rownames(tandemN) <- unique(humtab$File)
-  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, length %.% unique))), by = NFile]$V1)
+  tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = File]$V1)
+  rownames(tandemN) <- unique(humtab$Filename)
+  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, length %.% unique))), by = File]$V1)
   tandemUN[is.na(tandemUN)] <- 0L
   
   tandIDs  <- levels(tandem$ID)
-  tandemIn <- do.call('rbind', tandem[, .(list(colSums(tapply(ID, list(Spine,ID), length), na.rm = TRUE))), by = NFile]$V1)
+  tandemIn <- do.call('rbind', tandem[, .(list(colSums(tapply(ID, list(Spine,ID), length), na.rm = TRUE))), by = File]$V1)
   
   
   # Exclusive
   exclusive <- humtab[grepl('^\\*\\*', Token)]
   exclusive$Token <- factor(exclusive$Token)
-  exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = NFile]$V1)
-  rownames(exclusiveN) <- unique(humtab$NFile)
+  exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = File]$V1)
+  rownames(exclusiveN) <- unique(humtab$File)
   
   list(Exclusive = exclusiveN, 
        Tandem    = list(Number    = tandemN, 
@@ -666,12 +666,12 @@ print.humInterpretations <- function(interps, showall = TRUE) {
   Nexclusive <- ncol(interps$Exclusive)
           
   interpmat <- data.table(interps$Exclusive, tandems)
-  interpmat$NFile <- paste0(num2str(rownames(interps$Exclusive)), ":")
-  interpmat$File  <- rownames(interps$Tandem$Number)
-  setcolorder(interpmat, c('NFile', 'File', head(colnames(interpmat), -2)))
+  interpmat$File <- paste0(num2str(rownames(interps$Exclusive)), ":")
+  interpmat$Filename  <- rownames(interps$Tandem$Number)
+  setcolorder(interpmat, c('File', 'Filename', head(colnames(interpmat), -2)))
   
   if (nrow(interpmat) == 1) {
-    cat(interpmat$NFile, '\n')
+    cat(interpmat$File, '\n')
     cat("Exclusive: ")
     interps$Exclusive[ , cat(Exclusive), by = Spine]
     cat('\n')
@@ -680,7 +680,7 @@ print.humInterpretations <- function(interps, showall = TRUE) {
     
     
   } else  {
-    colNames <- c('', 'File', colnames(interpmat)[-1:-2])
+    colNames <- c('', 'Filename', colnames(interpmat)[-1:-2])
     colKeys <- character(length(colNames))
     colKeys[3 + Nexclusive] <-   '(Total.Unique.Spines)'
     

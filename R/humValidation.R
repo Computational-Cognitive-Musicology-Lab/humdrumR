@@ -79,10 +79,10 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         file.sep <- .Platform$file.sep
         if (!dir.exists(errorReport.path)) dir.create(path = errorReport.path)
         
-        reports <- reports[ , c("RecordN", "File") := .(recordNs[Location], filevec[Location])]
+        reports <- reports[ , c("RecordN", "Filename") := .(recordNs[Location], filevec[Location])]
         
         # Summary file
-        summary <- reports[ , fileErrorSummary(.SD, unique(File)) , by = File]$V1
+        summary <- reports[ , fileErrorSummary(.SD, unique(Filename)) , by = Filename]$V1
         summary.file <- paste0(errorReport.path, file.sep,
                                "humdrumR_syntaxErrorReport_", 
                                Sys.Date(), ".txt")
@@ -90,21 +90,21 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         
         # Annotated files
         recordTable <- data.table::data.table(Record = records, Location = seq_along(records),
-                                              RecordN = recordNs, File = filevec)
-        recordReports <- reports[recordTable, on = c('Location', 'File', 'RecordN')]
-        recordReports <- recordReports[ , if (any(!is.na(Message))) .SD else NULL, by = File]
+                                              RecordN = recordNs, Filename = filevec)
+        recordReports <- reports[recordTable, on = c('Location', 'Filename', 'RecordN')]
+        recordReports <- recordReports[ , if (any(!is.na(Message))) .SD else NULL, by = Filename]
         
         annotation.path <- paste0(errorReport.path,  file.sep,
                                   "AnnotatedFiles", file.sep)
         if (!dir.exists(annotation.path)) dir.create(annotation.path)
         
-        uniqFiles <- gsub(file.sep, '_', shortFilenames(unique(recordReports$File)))
-        recordReports[ , File := paste0(annotation.path, uniqFiles[match(File, unique(File))], '_errorAnnotations')]
+        uniqFiles <- gsub(file.sep, '_', shortFilenames(unique(recordReports$Filename)))
+        recordReports[ , Filename := paste0(annotation.path, uniqFiles[match(Filename, unique(Filename))], '_errorAnnotations')]
         recordReports[ , Message := ifelse(is.na(Message), "", Message)]
-        recordReports <- recordReports[ , .(File = unique(File), Message = paste(Message, collapse = ' and '), 
+        recordReports <- recordReports[ , .(Filename = unique(Filename), Message = paste(Message, collapse = ' and '), 
                                             RecordN = unique(RecordN), Record = unique(Record)), by = Location]
         recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
-        recordReports[ , writeLines(paste0(Message, ' | ', Record), unique(File)), by = File]
+        recordReports[ , writeLines(paste0(Message, ' | ', Record), unique(Filename)), by = Filename]
         
         cat(glue::glue("report written in directory '{errorReport.path}'...")) 
     }

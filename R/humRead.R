@@ -238,11 +238,12 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     
     # Duplicate matches?
     matchTable <- fileFrame[ , table(unlist(Filepath), rep(Pattern, lengths(Filepath)))] # this is used later, for verbose printing
-    if (!allowDuplicates) fileFrame[ , Filepath := remove.duplicates(Filepath)]  
+    if (!allowDuplicates) fileFrame[ , Filepath := .(remove.duplicates(Filepath))]  
     
     ### Files
-    fileFrame[ , Files := lapply(Filepath, readTextFiles)]
+    fileFrame[ , Files := .(lapply(Filepath, readTextFiles))]
     
+
     if (!is.null(contains)) fileFrame <- filterFilesByContent(fileFrame, contains)
     
     ### print warnings if there are duplicates
@@ -264,7 +265,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
              cat(glue::glue("\tREpath-pattern {Label}'{Pattern}'",
                             " matches {lengths(Filepath)} files",
                             contains,
-                            " in {lengths(Directories)} directories",
+                            " in {lengths(Directories)} {plural(lengths(Directories), 'directories', 'directory')}",
                             '.', .trim = FALSE ), sep = '\n')
          })
     
@@ -309,7 +310,7 @@ readTextFiles <- function(fpaths) {
     if (length(fpaths) == 0L) return(character(0))
     
     raw <- lapply(fpaths, stringi::stri_read_raw)
-    enc <- data.table::rbindlist(stringi::stri_enc_detect2(raw))
+    enc <- data.table::rbindlist(lapply(stringi::stri_enc_detect2(raw), head, n = 1))
     
     text <- !is.na(enc$Encoding) & enc$Confidence > 0.8
     
@@ -622,9 +623,8 @@ parseLocal <- function(records) {
   #interpretations
   exclusivestandems <- parseInterpretations(mat)
   exclusives <- exclusivestandems$Exclusive
-  tandems    <- exclusivestandems$Tandem
-  tandems    <- setNames(unlist(tandems), names(tokens))
-
+  tandems    <- unlist(exclusivestandems$Tandem)
+  
   ##################### tokens
   tokens <- parseMultiStops(tokens)
   #If there are multistops, the spines are no longer the same lengths, and have different recordns.
@@ -635,12 +635,14 @@ parseLocal <- function(records) {
 
   # expand objects to match recordn, which may have changed when multistops were introduced
   # recordns are still characters. This is necessarry, because we use them as names to index other objects.
-  sections <- sections[recordns, , drop = FALSE]
-  barlines <- barlines[recordns, , drop = FALSE]
-  tandems  <- tandems[recordns]
+  sections <- sections[recordns, , drop = FALSE] # these two should always be the same in each spine,
+  barlines <- barlines[recordns, , drop = FALSE] # so I'm really just copying the first spine...maybe change this to work like tandems (below)?
+ 
   
   spineLengths <- nrow(mat) + apply(mat[!grepl('^[*!=]', mat[ , 1]), , drop = FALSE], 2, function(col) sum(stringi::stri_count_fixed(col, ' ')))
   Columns      <- rep(Columns, spineLengths)
+  
+  tandems  <- tandems[paste0(SpineNumbers[Columns], '_', recordns)] # These are different in each spine
   
   # Don't need recordns to be characters anymore.
   recordns  <- as.integer(recordns)
@@ -797,11 +799,13 @@ parseInterpretations <- function(spinemat) {
            interps <- spine[interpind]
            
            setNames(sapply(seq_along(spine), function(i) paste(interps[i >= interpind], collapse = ',')), 
-                    rownames(spinemat))
+                    paste0(j, '_', rownames(spinemat)))
          } 
   ) -> tandemIs
   
   exclusiveI <- apply(spinemat, 2, function(spine) tail(spine[stringi::stri_startswith_fixed(spine, '**')], 1))
+  
+  
   
   list(Exclusive = exclusiveI, 
        Tandems   = tandemIs)
