@@ -381,8 +381,8 @@ hasdim <- function(x) !is.null(dim(x))
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
 
-num2print <- function(n, label = NULL) {
-          n_str <- ifelse(n <= 100L, num2word(n), num2str(n))
+num2print <- function(n, label = NULL, capitalize = FALSE) {
+          n_str <- ifelse(n <= 100L, num2word(n, capitalize = capitalize), num2str(n))
           
           if (!is.null(label)) n_str <- paste0(n_str, ' ', label, ifelse(n > 1L, 's', ''))
           
@@ -392,11 +392,12 @@ num2print <- function(n, label = NULL) {
 if1 <- function(n, str1, strmore) ifelse(n == 1, str1, strmore)
 
 #' @export
-num2word <- function(num) {
+num2word <- function(num, capitalize = FALSE) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
             'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
   tens = c('', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety')
 
+  
 
   out = num
   out[num < 101] = unlist(lapply(num[num < 101],
@@ -408,7 +409,7 @@ num2word <- function(num) {
                                    }
                                  )
                           )
-  out
+  if (capitalize) stringi::stri_trans_totitle(out) else out
 }
 
 padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stringi::stri_pad_left, strs, sizes))}

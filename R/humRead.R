@@ -22,6 +22,7 @@ findFiles <- function(..., recursive = FALSE) {
     
     #### Parse ... arguments into a cartesian collection of patterns, ordered left to right
     patterns <- assemblePatterns(list(...))
+    patterns[patterns == ""] <- ".*"
     
     ##### split paths into directories (all but rightmost) and files (rightmost)
     dirpaths  <- dirname(patterns)
@@ -39,8 +40,8 @@ findFiles <- function(..., recursive = FALSE) {
         Map(matchFiles, filepaths, matchingdirs,
             recursive    = recursive)
     }
-
-    data.table(Filepath   = matchingpaths,
+    
+    data.table(Filepath    = matchingpaths,
                Directories = matchingdirs,
                Pattern     = patterns,
                Label       = names(patterns))
@@ -53,7 +54,8 @@ assemblePatterns <- function(patternargs) {
     # a cartesian product of specific file-path regular expressions to look for.
     # See the findHumdrum documentation for more explanation.
     
-    if (length(patternargs) == 0L) return("")
+    if (length(patternargs) == 0L) return(c(`_1` = ""))
+    
     
     # Cartesian product patterns
     patgrid  <- do.call('expand.grid', c(patternargs, stringsAsFactors = FALSE))
@@ -89,12 +91,11 @@ matchDirs <- function(dirpattern) {
     
     dirpattern <- dirpattern[dirpattern != "."]
     
-    
-    if (dirpattern[1] == '') {
+    if (length(dirpattern) && dirpattern[1] == "") {
         dirpattern <- dirpattern[-1]
         initial <- "/"
     } else { 
-        initial <- '.' 
+        initial <- "." 
     }
     
     Reduce( function(cur, nex) {
@@ -123,11 +124,8 @@ matchDirs <- function(dirpattern) {
     ## remove paths containing //
     matchingdirs <- gsub(paste0(strrep(.Platform$file.sep, 3), '*'), .Platform$file.sep, matchingdirs)   
 
-    
     ##
     matchingdirs
-    
-     
 }
 
 matchFiles <- function(filepattern, matchingdirs, recursive) {
@@ -193,9 +191,8 @@ filterFilesByContent <- function(fileFrame, patterns, combine = `&`) {
 }
 
 
-# findFiles('Mozart', c('.*hum', '.*krn')) ---> "Mozart/.*hum" AND "Mozart/.*krn"
 
-
+#' @name readHumdrum
 #' @export
 findHumdrum <- function(..., contains = NULL, recursive = FALSE, allowDuplicates = FALSE, verbose = FALSE) {
     
@@ -234,7 +231,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     cat("Finding and reading files...\n")
     
     ### Filenames
-    fileFrame <- findFiles(..., recursive = recursive) 
+    fileFrame <- findFiles(..., recursive = recursive)
     
     # Duplicate matches?
     matchTable <- fileFrame[ , table(unlist(Filepath), rep(Pattern, lengths(Filepath)))] # this is used later, for verbose printing
@@ -243,7 +240,12 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     ### Files
     fileFrame[ , Files := .(lapply(Filepath, readTextFiles))]
     
-
+    fileFrame <- as.list(fileFrame) # this stupidy (translatign to list and back) 
+    # is because of annoying data.table assignment behavior, which acts differently
+    # depending assiging columns of lists if nrow == 1.
+    fileFrame$Filepath <- lapply(fileFrame$Files, function(files) if (length(files)) names(files) else files)
+    fileFrame <- as.data.table(fileFrame)
+    
     if (!is.null(contains)) fileFrame <- filterFilesByContent(fileFrame, contains)
     
     ### print warnings if there are duplicates
@@ -256,21 +258,33 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
           {
              Label <- IfElse(grepl('^_[1-9]', Label), "", paste0(Label, ' = '))
              
+             # prepare string to print if contains
              contains <- if(!is.null(contains)) {
                  glue::glue(" (containing ", 
                             glue::glue_collapse(paste0("'", contains, "'"), sep = ', ', last = ' and '),
                             ")")
                  } else ""
              
+             # prepare string to print if verbose
+             filepaths <- if (verbose) {
+                 sapply(Filepath,
+                        function(fps) {
+                            paste(paste0('\t\t', fps), collapse = '\n')
+                        }) 
+             } else ""
+             
              cat(glue::glue("\tREpath-pattern {Label}'{Pattern}'",
-                            " matches {lengths(Filepath)} files",
+                            " matches {lengths(Filepath)} text files",
                             contains,
                             " in {lengths(Directories)} {plural(lengths(Directories), 'directories', 'directory')}",
-                            '.', .trim = FALSE ), sep = '\n')
+                            if (verbose) ":\n" else ".",
+                            "{filepaths}",
+                            .trim = FALSE ), sep = '\n')
          })
     
     # Unwrap nested lists
     fileFrame[ , Directories := NULL]
+    
     fileFrame <- as.data.table(lapply(fileFrame, 
                                       function(col) {
                                           if (is.list(col)) {
@@ -287,7 +301,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame[ , File := match(Filepath, unique(Filepath))]
     
     # return
-    cat(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)))} files read from disk."), '\n')
+    cat(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)), capitalize = TRUE)} files read from disk."), '\n')
     
     fileFrame
 }
@@ -305,7 +319,8 @@ readLinesFast <- function(fpath, lines = TRUE) {
 
 
 readTextFiles <- function(fpaths) {
-    # This function reads files, skipping non-text files
+    # This function reads files, 
+    # skipping and leaving out non-text files
     # returns a vector of strings (one per file)
     if (length(fpaths) == 0L) return(character(0))
     
@@ -335,12 +350,17 @@ duplicateWarnings <- function(matchTable, allowDuplicates, verbose) {
     
     duptable <- matchTable[duplicates, , drop = FALSE]
     
+    warning <- c('Regarding findHumdrum/readHumdrum file-search patterns:\n\t\t',
+                 glue::glue("{num2print(sum(duplicates), capitalize = TRUE)} ",
+                            "{plural(sum(duplicates), 'files match', 'file matches')} ",
+                            "match more than one search-pattern. \n"))
+    
+    warning(warning, call. = FALSE, immediate. = FALSE, noBreaks. = FALSE)
+    
     cat(strrep('-', options('width')$width),
         '\nhumdrumR WARNING\n\t',
-        'Regarding findHumdrum/readHumdrum file-search patterns:\n\t',
-        glue::glue("{num2print(sum(duplicates))} files match more than one search-pattern. \n"),
+        warning,
         sep = '')
-    
     
     if (verbose) {
         uniqcombos <- unique.matrix(duptable)
@@ -402,61 +422,117 @@ shortFilenames <- function(fns) {
 
 
 
-#' Read humdrum files into R
+#' Find and read humdrum files into R
 #' 
-#' This function reads one or more humdrum files to create a \code{\link[humdrumR:humtable]{humdrum table}}
-#' then builds a \code{\linkS4class{humdrumR}} data object around the table.
+#' These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.
+#' 
+#' \code{findHumdrum} does the work of finding and reading the text files into R.
+#' \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
+#' create a \code{\link[humdrumR:humtable]{humdrum table}} and build
+#' a \code{\linkS4class{humdrumR}} data object around the table.
 #' 
 #' 
-#' @param ... character: One or more patterns used to identify files to read. Each pattern represents
-#' a file path, using normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
-#' \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.). Each directory
-#' and the final file pattern are treated as regular expressions. Thus, we can say things like \code{"../^A.*/.*krn"}, which would
-#' match any kern files in any directory beginning with a capital \code{"A"} in the directory above the current working directory.
-#' 
-#' If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
-#' \code{Corpus} field. Unnamed patterns are simply labeled "Unnamed."
-#' 
-#' If a pattern contains a solo dot followed by a file sep---e.g., "./", "x/./y"---this is treated as the current directory, not a regular expression.
-#' If a pattern contains two dots---e.g., "../"---this is treated as the directory above, not a regular expression.
-#' If you want to create a regular expression to match any directory, use ".*/".
+#' @param ... character: One or more patterns used to identify files to read.
+#' For details: see the "REpath-patterns" section below.
 #' 
 #' @param recursive
-#' logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.
+#' logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
+#' recursively through all sub directories.
 #' 
-#' @param multipleInstances \code{logical} indicating what should happen if multiple search patterns match the same files.
-#' If \code{multipleInstances = TRUE},
-#' any such files are read multiple times, grouped into their respective corpora by the \code{Corpus} field. 
-#' If \code{multipleInstances = FALSE}, any redundant files are only read into the corpus of the first pattern they 
+#' @param allowDuplicates \code{logical} or length one, indicating what should happen if multiple search patterns match the same files.
+#' If \code{allowDuplicates = TRUE},
+#' any such files are read multiple times, grouped into their respective corpora by the \code{Label} field. 
+#' If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they 
 #' match.
 #' 
+#' @param contains \code{character}. If \code{!is.null(contains)}, the \code{contains} argument is
+#' is treated as regular expressions: only files which contain matches to
+#'  \emph{all} of these regular expressions are read.
+#' Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches 
+#' to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).
 #' 
-#' @param validate \code{logical} If \code{TRUE}, \code{\link{validateHumdrum}} is called
-#' on matching files before they are parsed. Any files which contain syntax errors are automatically
-#' skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
-#' directly and use the \code{errorReport.path} argument.
 #' 
 #' @param verbose
 #' logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
 #' 
+#' @section REpath-patterns:
+#' 
+#' "REpath-patterns" are specified using \code{...} arguments. 
+#' In combination, all the \code{...} arguments are used to search for file paths.
+#' Each part of the search path you specify (\code{"dirpart/dirpart/filepart"}, etc) are matched as regular expressions
+#' against directories/files on your disc.
+#' Thus, we can say things like \code{findHumdrum("../^A.*/.*krn$")}, which would
+#' match any kern files in any directory beginning with a capital \code{"A"} in the 
+#' directory above the current working directory.
+#' For conveniance, you can break the path across multiple arguments instead of using delimited strings: For example, the code
+#' \code{findHumdrum("..", "^A.*", ".*krn$")} will give an identical result as the previous example 
+#' (\code{findHumdrum("../^A.*/,*krn$")}).
+#' This is useful when searching for more than one pattern (see next paragraph) in the same directory.
+#' 
+#' If you want to search for \emph{more than one} pattern, you can input them as a character vector:
+#' For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
+#' filenames containing "mozart" OR "beethoven."
+#' This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
+#' look for any file kern files in directories containing "Mozart" OR "Beethoven."
+#' If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
+#' \code{Label} field. Unnamed patterns are simply labeled with numbers.
+#' 
+#' Normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
+#' \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.)
+#' are followed.
+#' If a pattern contains a solo dot followed by a file sep---e.g., \code{"./"}, \code{"x/./y"}---this is 
+#' treated as the current directory, not a regular expression.
+#' If a pattern contains two dots---e.g., \code{"../"}---this is treated as the directory above, not a regular expression.
+#' If you want to create a regular expression to match any directory, use \code{".*/"}.
+#' 
+#' The regex pattern \code{""} matches any file (it is changed to \code{".*"}). If you don't specifiy any \code{...} argument,
+#' \code{findHumdrum} (or \code{readHumdrum}) will default to \code{".*"} as well.
+#' Thus, \code{readHumdrum()} will read any humdrum files in the working directory.
+#' 
+#' (If two or more files in different directories share the same name, a unique name is created for 
+#' each file by appending the names of the directories they occupy, recursively
+#' until the names are unique.)
+#' 
+#' @section Validity:
+#' 
+#' \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
+#' Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
+#' skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
+#' directly and its \code{errorReport.path} argument.
+#' 
+#' @section Result:
+#' 
+#' \code{findHumdrum} returns a "fileFrame" (\code{data.table}), listing all file names,
+#' the patterns they match, the directories they were found in, \emph{and} the raw text content of these files.
+#' 
+#' \code{readHumdrum} returns a fully parsed \code{humdrumR} object.
+#' 
 #' @examples 
+#' readHumdrum() # loads all valid humdrum files in the current directory.
+#' 
 #' readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
 #' 
-#' readHumdrum('^Composers$/^Be|^Mo/.*/^Joined$/.*krn$') 
+#' readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$") 
 #' # Goes inside the directory "Composers".
 #' # Inside "Composers" looks for directories that start with "Be" or "Mo".
 #' # If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
 #' # Within these directories, looks for directories called "Joined".
 #' # If there are any directories called "Joined", loads all files (if any) that end with "krn".
 #' 
+#' readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")
+#' # exactly the same as the previous!
+#' 
+#' readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") 
+#' # exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
+#' in the Label field as "Beethoven" and "Mozart" respectively.
+#' 
+#' @name readHumdrum
 #' @export
-readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, validate = TRUE, verbose = FALSE, parseGlobal = TRUE, parseTandem = TRUE) {
+readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, parseTandem =TRUE, parseGlobal = TRUE) {
     
-    fileFrame <- readFiles(..., contains = contains, recursive = recursive, 
-                           allowDuplicates = allowDuplicates, verbose = verbose)
-    
-    if (validate) fileFrame <- isValidHumdrum(fileFrame)
+    fileFrame <- findHumdrum(..., contains = contains, recursive = recursive, 
+                             allowDuplicates = allowDuplicates, verbose = verbose)
     
     #
     if (nrow(fileFrame) == 0L) return(NULL)

@@ -2,54 +2,122 @@
 % Please edit documentation in R/humRead.R
 \name{readHumdrum}
 \alias{readHumdrum}
-\title{Read humdrum files into R}
+\alias{findHumdrum}
+\title{Find and read humdrum files into R}
 \usage{
+findHumdrum(..., contains = NULL, recursive = FALSE,
+  allowDuplicates = FALSE, verbose = FALSE)
+
 readHumdrum(..., recursive = FALSE, contains = NULL,
-  allowDuplicates = FALSE, validate = TRUE, verbose = FALSE,
-  parseGlobal = TRUE, parseTandem = TRUE)
+  allowDuplicates = FALSE, verbose = FALSE, parseTandem = TRUE,
+  parseGlobal = TRUE)
 }
 \arguments{
-\item{...}{character: One or more patterns used to identify files to read. Each pattern represents
-a file path, using normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
-\code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.). Each directory
-and the final file pattern are treated as regular expressions. Thus, we can say things like \code{"../^A.*/.*krn"}, which would
-match any kern files in any directory beginning with a capital \code{"A"} in the directory above the current working directory.
+\item{...}{character: One or more patterns used to identify files to read.
+For details: see the "REpath-patterns" section below.}
 
-If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
-\code{Corpus} field. Unnamed patterns are simply labeled "Unnamed."
+\item{contains}{\code{character}. If \code{!is.null(contains)}, the \code{contains} argument is
+is treated as regular expressions: only files which contain matches to
+ \emph{all} of these regular expressions are read.
+Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches 
+to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).}
 
-If a pattern contains a solo dot followed by a file sep---e.g., "./", "x/./y"---this is treated as the current directory, not a regular expression.
-If a pattern contains two dots---e.g., "../"---this is treated as the directory above, not a regular expression.
-If you want to create a regular expression to match any directory, use ".*/".}
+\item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
+recursively through all sub directories.}
 
-\item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.}
-
-\item{validate}{\code{logical} If \code{TRUE}, \code{\link{validateHumdrum}} is called
-on matching files before they are parsed. Any files which contain syntax errors are automatically
-skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
-directly and use the \code{errorReport.path} argument.}
+\item{allowDuplicates}{\code{logical} or length one, indicating what should happen if multiple search patterns match the same files.
+If \code{allowDuplicates = TRUE},
+any such files are read multiple times, grouped into their respective corpora by the \code{Label} field. 
+If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they 
+match.}
 
 \item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!}
-
-\item{multipleInstances}{\code{logical} indicating what should happen if multiple search patterns match the same files.
-If \code{multipleInstances = TRUE},
-any such files are read multiple times, grouped into their respective corpora by the \code{Corpus} field. 
-If \code{multipleInstances = FALSE}, any redundant files are only read into the corpus of the first pattern they 
-match.}
 }
 \description{
-This function reads one or more humdrum files to create a \code{\link[humdrumR:humtable]{humdrum table}}
-then builds a \code{\linkS4class{humdrumR}} data object around the table.
+These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.
 }
+\details{
+\code{findHumdrum} does the work of finding and reading the text files into R.
+\code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
+create a \code{\link[humdrumR:humtable]{humdrum table}} and build
+a \code{\linkS4class{humdrumR}} data object around the table.
+}
+\section{REpath-patterns}{
+
+
+"REpath-patterns" are specified using \code{...} arguments. 
+In combination, all the \code{...} arguments are used to search for file paths.
+Each part of the search path you specify (\code{"dirpart/dirpart/filepart"}, etc) are matched as regular expressions
+against directories/files on your disc.
+Thus, we can say things like \code{findHumdrum("../^A.*/.*krn$")}, which would
+match any kern files in any directory beginning with a capital \code{"A"} in the 
+directory above the current working directory.
+For conveniance, you can break the path across multiple arguments instead of using delimited strings: For example, the code
+\code{findHumdrum("..", "^A.*", ".*krn$")} will give an identical result as the previous example 
+(\code{findHumdrum("../^A.*/,*krn$")}).
+This is useful when searching for more than one pattern (see next paragraph) in the same directory.
+
+If you want to search for \emph{more than one} pattern, you can input them as a character vector:
+For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
+filenames containing "mozart" OR "beethoven."
+This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
+look for any file kern files in directories containing "Mozart" OR "Beethoven."
+If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
+\code{Label} field. Unnamed patterns are simply labeled with numbers.
+
+Normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
+\code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.)
+are followed.
+If a pattern contains a solo dot followed by a file sep---e.g., \code{"./"}, \code{"x/./y"}---this is 
+treated as the current directory, not a regular expression.
+If a pattern contains two dots---e.g., \code{"../"}---this is treated as the directory above, not a regular expression.
+If you want to create a regular expression to match any directory, use \code{".*/"}.
+
+The regex pattern \code{""} matches any file (it is changed to \code{".*"}). If you don't specifiy any \code{...} argument,
+\code{findHumdrum} (or \code{readHumdrum}) will default to \code{".*"} as well.
+Thus, \code{readHumdrum()} will read any humdrum files in the working directory.
+
+(If two or more files in different directories share the same name, a unique name is created for 
+each file by appending the names of the directories they occupy, recursively
+until the names are unique.)
+}
+
+\section{Validity}{
+
+
+\code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
+Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
+skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
+directly and its \code{errorReport.path} argument.
+}
+
+\section{Result}{
+
+
+\code{findHumdrum} returns a "fileFrame" (\code{data.table}), listing all file names,
+the patterns they match, the directories they were found in, \emph{and} the raw text content of these files.
+
+\code{readHumdrum} returns a fully parsed \code{humdrumR} object.
+}
+
 \examples{
+readHumdrum() # loads all valid humdrum files in the current directory.
+
 readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
 
-readHumdrum('^Composers$/^Be|^Mo/.*/^Joined$/.*krn$') 
+readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$") 
 # Goes inside the directory "Composers".
 # Inside "Composers" looks for directories that start with "Be" or "Mo".
 # If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
 # Within these directories, looks for directories called "Joined".
 # If there are any directories called "Joined", loads all files (if any) that end with "krn".
+
+readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")
+# exactly the same as the previous!
+
+readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") 
+# exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
+in the Label field as "Beethoven" and "Mozart" respectively.
 
 }
