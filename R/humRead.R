@@ -170,8 +170,6 @@ istextFile <- function(fpaths) {
     !is.na(enc$Encoding) & enc$Confidence > 0.8
 }
 
-<<<<<<< HEAD
-=======
 filterFilesByContent <- function(fileFrame, patterns, combine = `&`) {
     # takes a data.table with filenames 
     # and removes those that don't contain matches to (regex) patterns args.
@@ -210,7 +208,6 @@ findHumdrum <- function(..., contains = NULL, recursive = FALSE, allowDuplicates
     fileFrame
     
 }
->>>>>>> readHumdrumWork
 
 
 ###################################################################---
