@@ -37,8 +37,8 @@ indicating the mean length of each token.}
 }
 A \code{humCensus} table has one row for each file in the corpus.
 Rows are labeled with each file's corresponding 
-number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{NFile} field)
- and name (the \strong{File} field).
+number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{File} field)
+ and name (the \strong{Filename} field).
 In addition, when a \code{humCensus} object is printed,
 the totals across all files are printed as well---(unique) and (per token)
 across all files are calculated across all files as well, not summed.

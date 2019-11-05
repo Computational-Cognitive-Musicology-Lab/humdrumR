@@ -52,12 +52,16 @@ operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..
 
 \strong{2. Structure fields:} Structure fields describe where each data point
 came from---which file, which spine, which record, etc.
-Every humdrum table starts with twelve Structure fields, describing where
+Every humdrum table starts with thirteen Structure fields, describing where
 the token came from:
 \describe{
-\item{File}{\code{character} - The name of the humdrum file.}
-\item{FullFileName}{\code{character} - The full file name, including it's path.}
-\item{NFile}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
+\item{Filename}{\code{character} - The unique name of the humdrum file. May include an appended path 
+if more than one file with the same name were read from different directories (see\code{\link{readHumdrum}} docs).}
+\item{Filepath}{\code{character} - The full file name (including its full path).}
+\item{File}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
+\item{Label}{\code{character} - A label specified during the call to \code{\link{readHumdrum}}, associated with
+a particular REpath-pattern. If no label was specified, patterns are just labeled \code{"_n"}, where "n" is the 
+number of the pattern. (Labels can also be created when merging two humdrumR objects.) }
 \item{Record}{\code{integer} - The record (i.e., line) number.}
 \item{NData}{\code{integer} - An enumeration of \strong{data records} specifically.}
 \item{Global}{\code{logical} - Did the token come from a glocal record (i.e., a record with no spine)?}
@@ -78,9 +82,6 @@ See this \code{\link[humdrumR:humColumns]{explanation of columns in humdrumR}}.}
 \item{Stop}{\code{integer} - Which token in a multistop token. Single tokes are numbered \code{1}.
       This field is always \code{NA} when \code{Global == TRUE}.}
 }
-In addition, any humdrum table with multiple subcorpuses---named with different patterns in call to \code{\link{humRead}}),
-or created when \code{\link[humdrumR:merge]{merging}} multiple \code{\linkS4class{humdrumR}} data objects---will have a 
-\code{SubCorpus} spine of character values identifying the different subcorpora.
 
 
 \strong{Interpretation fields:} Interpretation fields describe interpretation metadata in the humdrum file(s).

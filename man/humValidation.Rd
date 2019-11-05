@@ -5,8 +5,8 @@
 \alias{validateHumdrum}
 \title{Validate humdrum files}
 \usage{
-validateHumdrum(pattern = NULL, recursive = FALSE,
-  errorReport.path = NULL, files = NULL)
+validateHumdrum(..., contains = NULL, recursive = FALSE,
+  errorReport.path = NULL)
 }
 \arguments{
 \item{recursive}{\code{logical}. If \code{TRUE}, the final part of the serach pattern (i.e., the file search) 
@@ -17,10 +17,10 @@ in the file \code{'humdrumR_syntaxErrorReport_date.txt'}. In addition, all files
 are written to this directory (with \code{'errorMarkup'} appended to their names), with 
 errors annotated inline.}
 
-\item{files}{A list of character strings, each representing a record in a file.}
-
 \item{patterns}{\code{character} vector. Search pattern(s) for identifying files 
 (see \code{\link{readHumdrum}}).}
+
+\item{files}{A list of character strings, each representing a record in a file.}
 }
 \description{
 This function checks files for violations of the 

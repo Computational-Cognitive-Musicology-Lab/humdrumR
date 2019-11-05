@@ -13,14 +13,14 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     cat('Writing humdrum data...\n')
     cat('Determining validity of new filenames...')
     #
-    filenameTable <- getFields(humdrumR, c('NFile', 'File', 'FullFileName'), dataTypes = 'GLIMDd')
-    filenameTable[ , Directory := stringi::stri_replace_last_regex(FullFileName, paste0(File, '$'), '')]
-    filenameTable[ , File      := stringi::stri_replace_all_regex(File, '/', ':')] # in case filenames contain dir/file
+    filenameTable <- getFields(humdrumR, c('File', 'Filename', 'Filepath'), dataTypes = 'GLIMDd')
+    filenameTable[ , Directory := dirname(Filepath)]
+    filenameTable[ , Filename      := stringi::stri_replace_all_regex(Filename, '/', ':')] # in case filenames contain dir/file
     
     ## File extensions
     re.ext <- '\\.[A-Za-z0-9]{1,4}$'
-    filenameTable[ , Extension := stringi::stri_extract_last_regex(File, re.ext)]
-    filenameTable[ , File      := stringi::stri_replace_last_regex(File, re.ext, '')]
+    filenameTable[ , Extension := stringi::stri_extract_last_regex(Filename, re.ext)]
+    filenameTable[ , Filename      := stringi::stri_replace_last_regex(Filename, re.ext, '')]
     
     if (!is.null(extension)) {
         filenameTable[ , Extension := extension]
@@ -37,12 +37,12 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     filenameTable[ , Directory := if (is.null(directory)) Directory else directory]
     filenameTable[ , NewFile := paste0(Directory, .Platform$file.sep, 
                                        prefix, 
-                                       if (is.null(rename)) File else rename, 
+                                       if (is.null(rename)) Filename else rename, 
                                        affix, 
                                        IfElse(is.na(Extension), '', Extension))]
     
     
-    filenameTable <- filenameTable[ , .SD[1], by = File] # get unique value for each file!
+    filenameTable <- filenameTable[ , .SD[1], by = Filename] # get unique value for each file!
     if (any(duplicated(filenameTable$NewFile))) {
         warning(call. = FALSE, noBreaks. = FALSE, immediate. = FALSE,
                 "In your call to writeHumdrum, your arguments are resulting in non-unique names ",
@@ -132,9 +132,9 @@ processFixer.function <- function(fix, origfilenames, humdrumR) {
     if (length(formals(args(fix))) < 1L) return(fix())
     
     uniqfilenames <- unique(origfilenames)
-    uniqfilenames[ , Fixed := fix(File)]
+    uniqfilenames[ , Fixed := fix(Filename)]
     
-    uniqfilenames[origfilenames, on = 'NFile']$Fixed
+    uniqfilenames[origfilenames, on = 'File']$Fixed
     
 }
 processFixer.formula <- function(fix, origfilenames, humdrumR) {

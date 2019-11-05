@@ -362,7 +362,7 @@ setMethod('[',
           function(x, i) {
               i <- numericIndexCheck(i)
               
-              form <- do ~ NFile %in% sort(unique(NFile))[i]
+              form <- do ~ File %in% sort(unique(File))[i]
               
               if (any(i < 0)) form <- wrapInCall(form, "!")
               
@@ -379,7 +379,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i) {
-              filterHumdrum(x, do ~ any(. %~% i),  by ~ NFile, 
+              filterHumdrum(x, do ~ any(. %~% i),  by ~ File, 
                             recordtypes ~ "D", indexGLIM = TRUE)
           })
 
@@ -451,7 +451,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'numeric'),
 #           Dd <- getHumtab(humdrumR, dataTypes = c('D', 'd'))
 #           Dd[ , .indhits := grepl(pattern = ind, evalActive(humdrumR, dataTypes = c('D', 'd')))]
 #           
-#           Dd <- Dd[ , func(.SD), by = NFile]
+#           Dd <- Dd[ , func(.SD), by = File]
 #           putHumtab(humdrumR, drop = TRUE) < Dd[ , '.indhits' :=  NULL]
 #           humdrumR
 # }
@@ -619,13 +619,13 @@ indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
   
   GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
   
-  # next  remove missing pieces (i.e., File or NFile fields)
-  GLIMDdP <- GLIMDdP[NFile %in% unique(unlist(D$NFile))]
+  # next  remove missing pieces (i.e., File or Filename fields)
+  GLIMDdP <- GLIMDdP[File %in% unique(unlist(D$File))]
   
   # then, do indexing by piece:
   # (GLIMd and D records are combined into one table, then split by piece)
   GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
-  GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = NFile, .SDcols = colnames(D)[colnames(D) != 'NFile']]
+  GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
   
   # resplit and put back in to humdrumR object
   putHumtab(humdrumR, drop = FALSE) <- GLIMDdP

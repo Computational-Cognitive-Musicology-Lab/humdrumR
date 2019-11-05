@@ -1092,7 +1092,7 @@ collapse2n <- function(x, colname, class, n = 1) {
   if (length(uniqx) == 0) return(rep(as(NA, class), n))
   
   if (colname %in% c('Record', 'Spine', 'Path', 'ColumnNumber', 
-                     'StopNumber', 'Bar', 'DoubleBarline', 'NData', 'NFile')) {
+                     'StopNumber', 'Bar', 'DoubleBarline', 'NData', 'File')) {
     uniqx[1:n]
   } else {
     rep( if (length(uniqx) == 1) uniqx else as(NA, class) , n)

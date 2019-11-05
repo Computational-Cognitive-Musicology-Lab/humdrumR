@@ -18,7 +18,7 @@ knitr::opts_chunk$set(message = FALSE,
 ```
 
 Welcome to "Reading and writing data with humdrumR"!
-This document will give you detailed overview of humdrumR's data reading and writing functions.
+This document will give you a detailed overview of humdrumR's data reading and writing functionality.
 This document closely parallels parts of humdrumR's code documentation;
 within an R session, you can read more concise version the material in this document by calling:
 
@@ -67,8 +67,10 @@ As we can see, there are `r num2word(length(dir('HumdrumData')))` directories co
 ## Targeting files
 
 To use `readHumdrum` we call the function with one (or more) character-string arguments.
-These arguments are interpreted as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), and matched against files on your system.
-For instance,
+(In the function documentation (`?readHumdrum`), you'll see these arguments called `...`---in R, `...` R means *any* number of unnamed arguments.)
+These arguments are interpreted as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), and matched against directories and files on your system.
+We call these "**REpath-patterns**."
+For instance, 
 ```{r}
 library(humdrumR)
 setwd(humdrumRroot)
@@ -77,10 +79,14 @@ readHumdrum('HumdrumData/BachChorales/chor.*.krn')
 
 ```
 
-We matched all files in the 'HumdrumData/BachChorales' directory whose name matched the regular expression "chor.*.krn."
+mataches all files in the 'HumdrumData/BachChorales' directory whose name matched the regular expression "chor.*.krn."
 As you can see, you can include directory paths (relative or absolute) to the files you are targeting---using your operating system's appopriate delimeter ("\" for windows, "/" for everybody else).
 However, *each* directory is also treated as a regular expression, possibly matching multiple directories.
-So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" folder and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" folder, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all krn files in either folder!
+In other words, `humdrumR` breaks your input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
+The last expression is used to match files---earlier expressions are used to match directories.
+So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" directories and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" directories, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all kern files in both directories!
+
+
 
 ```{r}
 readHumdrum('HumdrumData/.*Variations/.*.krn')
@@ -99,36 +105,103 @@ readHumdrum('HumdrumData/.*/.*')
 
 ```
 
+
 > Note:
 > Since humdrumR can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched.
 > If this happens, humdrumR identifies each file with enough of it's directory path to make sure they are all unique.
 
+----
+
+### Multi-Argument Approach
+
+Earlier we mentioned that we can have one *or more* of these RE-path patterns.
+Why more than one?
+Well, we can divided our RE-path patterns across multiple arguments (from left to right):
+Instead of writing `readHumdrum("HumdrumData/BachChorales/chor.*.krn")`, we can write `readHumdrum("HumdrumData", "BachChorales", "chor.*.krn")`.
+To repeat, these two lines of code:
+
+```{r eval = FALSE}
+readHumdrum("HumdrumData/BachChorales/chor.*.krn")
+
+readHumdrum("HumdrumData", "BachChorales", "chor.*.krn")
+```
+
+What's the advantage of this approach...we'll see in the next section.
+
 ### Multiple Patterns
 
 Sometimes, expressing all the files you want in a single regular expression is not possible.
-Luckily, `readHumdrum` can accept as many separate patterns you want.
+Luckily, `readHumdrum` can accept as many separate patterns you want, just group them into a vector.
 Instead of writing `readHumdrum('HumdrumData/.*Variations/.*.krn')`, you could be explicit and write 
 
 ```{r}
-readHumdrum('HumdrumData/BeethovenVariations/.*.krn',
-            'HumdrumData/MozartVariations/.*.krn')
+readHumdrum(c('HumdrumData/BeethovenVariations/.*.krn', 'HumdrumData/MozartVariations/.*.krn'))
 ```
+
+I've used the `c` command to create a vector with two REpath-patterns.
+However, that was a lot of (bug-prone) typing...what if we combine these multipel patterns with the Multi-Argument Approach from above?:
+
+```{r}
+readHumdrum('HumdrumData',
+            c('BeethovenVariations', 'MozartVariations'),
+            '.*.krn')
+```
+We get the same result!
+How did this work exactly?
+We've fed three arguments to `readHumdrum`.
+The first and last arguments (`"HumdrumData"` and `".*.krn"`) are length one.
+However, the middle argument ("...Variations") if of length two.
+`readHumdrum` concatenates the three arguments together, making *two* separate REpath-patterns:
+
+```{r eval = FALSE}
+"HumdrumData/BeethovenVariations/.*.krn"
+```
+**AND**
+```{r eval = FALSE}
+"HumdrumData/MozartVariations/.*.krn"
+```
+
 
 > Note:
 > It is possible to write multiple patterns which match some (or all) of the same files. If the argument `multipleInstances = FALSE`, each unique file will only be read once (into th first matching pattern). 
 > If `multipleInstances = TRUE`, the same file(s) can be read more than once.
 
 
-You can also give your patterns names, and these names will be placed in a [field]() called `SubCorpus`, which you can access during your analysis.
+#### Pattern Names
+
+Whenever we specific more than one REpath-pattern, `humdrumR` gives them names which we can access in the `Label` field of the resulting `humdrumR` data object.
+You can choose these labels by giving names to the patterns in your multi-pattern vectors:
 Thus, we could write
 
 ```{r}
-readHumdrum(Rap  = 'HumdrumData/Rap/.*',
-            Rock = 'HumdrumData/RollingStone/.*') -> rapAndRock
+readHumdrum('HumdrumData',
+            c(Rap  = 'Rap/.*',
+              Rock = 'RollingStone/.*')) -> rapAndRock
 ```
-and we'd later be able to separate our rap and rock data.
+and these two separate patterns will be matched and read *and* the names `"Rap"` and `"Rock"` will be associated with them in the resulting `Label` field.
 This feature is very useful if you are working with multiple heterogenous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.
 
+## Finding Files
+
+`readHumdrum` interprets REpath-patterns and finds files using the helper function `findHumdrum`.
+If you are not sure where your humdrum files are, or what pattern you want to use to find them, you might start be using `findHumdrum`.
+`findHumdrum` takes the same input as `readHumdrum`, but doesn't fully parse the input into `humdrumR`.
+Instead, it returns a `data.table` containing matching filenames (if any) and raw file content.
+
+If you use the `verbose = TRUE` option for either `findHumdrum` or `readHumdrum`, a complete list of all the matches files will be printed.
+This is useful to check if you are reading the files you *intend* to read.
+
+### Validation
+
+`findHumdrum`, and by extension `readHumdrum`, are smart functions that will ignore non-humdrum files matched by your pattern.
+Non-text files (like `.pdf` or `.jpg`) will be ignored.
+Whatsmore, text files which fail to conform to the humdrum syntax will not be read either.
+You will see a message that checks which files are "valid humdrum," and tell you how many (if any) text files are not read.
+
+If you are trying to read a file which you *think* should be valid humdrum, but `readHumdrum` won't read it, use `validateHumdrum` with the exact same REpath-pattern arguments, and specify and `errorReport.path` to see a detailed report of the problem.
+`humdrumR` won't read files with *any* humdrum-syntax violations---there might be minor problems in the data that you need to fix.
+Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `humdrumR`'s data validation tools, and how they can be used to identify errors in your humdrum data.
+(`validateHumdrum` does not automatically check if the humdrum data is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)
 
 ## Reading
 
@@ -136,10 +209,8 @@ So, what actually happens when we run `readHumdrum`?
 By now, you've seen that `readHumdrum` prints out a few messages describing its process.
 
 1. First, the files which match your search patterns (if any) are identified, and their text is read into R.
-2. Next, these files are checked to see if they are valid humdrum files. Any files which are invalid are skipped. Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `humdrumR`'s data validation tools, and how they can be used to identify errors in your humdrum data.
-Suffice it to say, for now, that unless you specify the argument `validate = FALSE`, calling `readHumdrum` includes a call to the function `validateHumdrum`, which checks that the files conform to the structure of the humdrum syntax. (`validateHumdrum` does not automatically check if the humdrum data is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)
+2. Next, these files are checked to see if they are valid humdrum files. 
 3. The files are parsed---i.e., translated into `humdrumR`'s [data.table backend](HumdrumTable.html). This step takes the longest by far, as it includes parsing all the humdrum files' data tokens, interpretations, reference records, and (worst of all) spine paths. Indeed, reading humdrum data with spine paths will take significantly longer than reading pathless data. To save yourself some time, you can specifiy `parseGlobal = FALSE` and/or `parseTandem = FALSE`---but of course, you won't then have access to global data (including reference records) and/or tandem interpration information!
 
-### Validation
 
 

@@ -18,8 +18,10 @@ Repeat <- function(x, ..., margin = 1L) {
   out
 }
 
+plural <- function(n, then, els) IfElse(n > 1, then, els)
+
 wrapInCall <- function(form, call) {
-    # This function takes a formula and wraps the rhs
+    # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs
     # with a call to any.
     # i.e. form -> any(form)
     rhs <- rlang::f_rhs(form)
@@ -54,6 +56,22 @@ substituteName <- function(expr, subs) {
   expr
           
 }
+
+remove.duplicates <- function(listofvalues) {
+    # takes a list of vectors of values and removes elements from later vectors which
+    # appear in earlier vectors
+    if (sum(lengths(listofvalues)) == 0L) return(listofvalues)
+    
+    groups <- factor(rep(seq_along(listofvalues), lengths(listofvalues)), 
+                     levels = seq_along(listofvalues)) # must specificy levels again because there may be empty vectors
+
+    values <- unlist(listofvalues, use.names = FALSE)
+
+    dups <- duplicated(values)
+    setNames(tapply(values[!dups], groups[!dups], c, simplify = FALSE), names(listofvalues))
+    
+}
+
 
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
           if (length(sys.calls()) > 6L) return(args) 
@@ -203,6 +221,8 @@ allsame <- function(x) length(unique(x)) == 1L
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
 
+
+
 fargs <- function(func) formals(args(func))
 
 #' @export
@@ -295,6 +315,7 @@ ditto <- function(spine) {
 #' @export
 IfElse <- function(true, yes, no) {
   out <- no
+  match_size(yes = yes, no = no, toEnv = TRUE)
   if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
@@ -360,8 +381,8 @@ hasdim <- function(x) !is.null(dim(x))
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
 
-num2print <- function(n, label = NULL) {
-          n_str <- ifelse(n <= 100L, num2word(n), num2str(n))
+num2print <- function(n, label = NULL, capitalize = FALSE) {
+          n_str <- ifelse(n <= 100L, num2word(n, capitalize = capitalize), num2str(n))
           
           if (!is.null(label)) n_str <- paste0(n_str, ' ', label, ifelse(n > 1L, 's', ''))
           
@@ -371,11 +392,12 @@ num2print <- function(n, label = NULL) {
 if1 <- function(n, str1, strmore) ifelse(n == 1, str1, strmore)
 
 #' @export
-num2word <- function(num) {
+num2word <- function(num, capitalize = FALSE) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
             'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
   tens = c('', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety')
 
+  
 
   out = num
   out[num < 101] = unlist(lapply(num[num < 101],
@@ -387,7 +409,7 @@ num2word <- function(num) {
                                    }
                                  )
                           )
-  out
+  if (capitalize) stringi::stri_trans_totitle(out) else out
 }
 
 padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stringi::stri_pad_left, strs, sizes))}

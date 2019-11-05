@@ -47,8 +47,8 @@ Thus, if you want to see actualy reference records, try indexing the
 
 A \code{humReference} table has one row for each file in the corpus.
 Rows are labeled with each file's corresponding 
-number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{NFile} field)
- and name (the \strong{File} field).
+number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{File} field)
+ and name (the \strong{Filename} field).
 In addition, when a \code{humReference} object is printed,
 three different summary totals are printed for each reference code:
 \strong{Any} indicates how many files in the corpus have at least
