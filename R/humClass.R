@@ -1295,17 +1295,8 @@ fieldsInExpr <- function(humtab, expr) {
   ## This function identifies which, if any,
   ## fields in a humtable are referenced in an expression (or rhs for formula).
   if (is.humdrumR(humtab)) humtab <- getHumtab(humtab)          
-  if (rlang::is_formula(expr)) expr <- rlang::f_rhs(expr)
-          
-  colnms  <- colnames(humtab)
   
-  applyExpr(expr, rebuild = FALSE,
-            function(ex) {
-              exstr <- deparse(ex)
-              match <- colnms[pmatch(exstr, colnms)]
-              if (is.na(match)) NULL else match
-            }) -> usedInExpr
-  unique(unlist(usedInExpr))
+  namesInExpr(colnames(humtab), expr)
 }
 
 activeFields <- function(humdrumR) {

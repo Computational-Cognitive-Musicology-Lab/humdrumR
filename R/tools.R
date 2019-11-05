@@ -536,6 +536,23 @@ switchpatch <- function(x,  ...) {
     }
 }
 
+namesInExpr <- function(names, expr) {
+    ## This function identifies which, if any,
+    ## of a character vector ("names") are referenced as a name 
+    ## (not including things called as functions) in an expression 
+    ## (or rhs for formula).
+    if (rlang::is_formula(expr)) expr <- rlang::f_rhs(expr)
+    
+    applyExpr(expr, rebuild = FALSE,
+              function(ex) {
+                  exstr <- deparse(ex)
+                  match <- names[pmatch(exstr, names)]
+                  if (is.na(match)) NULL else match
+              }) -> usedInExpr
+    unique(unlist(usedInExpr))
+}
+
+
 
 
 `setoptions<-` <- function(x, values) {

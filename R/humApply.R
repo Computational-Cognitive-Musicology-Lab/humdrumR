@@ -322,15 +322,13 @@ withinHumdrum <- function(humdrumR,  ...) {
           humtabFunc  <- humtableApplier(funcQuosure, 
                                          captureOutput = !sideeffectonly,
                                          reHumtab = TRUE)
-          
           #### evaluate expression 
-          
-          newhumtab <- if (length(parsedFormulae$partitions) == 0) {
-                    humtabFunc(humtab)
+          newhumtab <- if (length(parsedFormulae$partitions)) {
+              partApply(humtab, parsedFormulae$partitions, humtabFunc)
           } else {
-                    partApply(humtab, parsedFormulae$partitions, humtabFunc)
+              humtabFunc(humtab)
           }
-          
+
           if (!sideeffectonly) {
               #### Put new humtable back into humdrumR object
               
@@ -355,16 +353,19 @@ withinHumdrum <- function(humdrumR,  ...) {
               
               # Now that the Humtable is taken care of,
               # tell the humdrumR object about the new fields and set the Active formula.
-              if (length(newfields) > 0) {
+              if (length(newfields)) {
                   ## Add fields to humtab
                   addFields(humdrumR) <- newfields
                   
                   ## Create new Active quosure
                   humdrumR <- if (any(names(parsedFormulae$partitions) == 'where')) {
                       act <- ifelsecalls(parsedFormulae$partitions['where'], 
-                                         c(humdrumR@Active, lapply(newfields, 
-                                                                   function(nf) rlang::as_quosure(as.symbol(nf), environment(humdrumR)))))
-                      putActive(humdrumR, act)
+                                         c(humdrumR@Active, 
+                                           lapply(newfields, 
+                                                  function(nf) rlang::as_quosure(as.symbol(nf), 
+                                                                                 environment(humdrumR)))))
+                     
+                       putActive(humdrumR, act)
                   } else {
                       setActiveFields(humdrumR, newfields) 
                   }
@@ -455,6 +456,7 @@ withHumdrum <- function(humdrumR,  ...) {
           output <- if (length(parsedFormulae$partitions) == 0) {
                     humtabFunc(humtab)
           } else {
+
                     if (length(parsedFormulae$partitions) > 1) {
                               # If there are more than one partitions, need to run the initial ones (all but last)
                               # first with reHumtab output = TRUE. Only with last partition do we drop the humdrumR
@@ -830,7 +832,7 @@ ngramifyForm <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 ################################## Applying expressions across partitions
 
 
-partApply <- function(humtab, partitions, humfunc) {
+partApply <- function(humtab, partitions, humfunc, targetFields) {
   if (length(partitions) == 0L) return(humfunc(humtab))
           
   partQuosure <- if (length(partitions) == 1L) {
@@ -845,9 +847,10 @@ partApply <- function(humtab, partitions, humfunc) {
   # curpart <- rlang::eval_tidy(curpart, data = humtab) # getting part evaluated in it's own environment
   
   if (names(partitions)[1] %in% c('by', 'groupby', 'group_by')) {
-    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = !!curpart])#, .SDcols = colnames(humtab)])
+    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = !!curpart, .SDcols = colnames(humtab)])
+    output <- eval(rlang::quo_squash(dtcall))  # do it!
     
-    eval(rlang::quo_squash(dtcall))  # do it!
+    output[,!duplicated(colnames(output)), with = FALSE]
     
   } else {
             
@@ -855,7 +858,7 @@ partApply <- function(humtab, partitions, humfunc) {
     output <- eval(rlang::quo_squash(dtcall))  # do it!
     
     # get unchanged part
-    negatecall      <- rlang::expr(humtab[!curpart])
+    negatecall <- rlang::expr(humtab[!curpart])
     rest <- eval(negatecall)
     
     rbind(output, rest, fill = TRUE)
@@ -974,7 +977,6 @@ interpolateNamedValues <- function(expr, namedArgs) {
           #' it's easy. The hard part is what to do when the output is different than
           #' the input. This function hard codes a few common possibilities,
           #' but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
-          
           humtab <- object # R requires the names object and value for x<- functions
           
           curpipen <- curPipeN(humtab) 
