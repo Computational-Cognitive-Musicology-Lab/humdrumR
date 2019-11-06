@@ -43,7 +43,7 @@
 #' 
 #' \strong{2. Structure fields:} Structure fields describe where each data point
 #' came from---which file, which spine, which record, etc.
-#' Every humdrum table starts with thirteen Structure fields, describing where
+#' Every humdrum table starts with fourteen Structure fields, describing where
 #' the token came from:
 #' \describe{
 #' \item{Filename}{\code{character} - The unique name of the humdrum file. May include an appended path 
@@ -51,6 +51,8 @@
 #' \item{Filepath}{\code{character} - The full file name (including its full path).}
 #' \item{File}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
 #' \item{Label}{\code{character} - A label specified during the call to \code{\link{readHumdrum}}, associated with
+#' \item{Piece}{\code{integer}} - A number specifying the number of the piece in the corpus. Only different from \code{File} when
+#' more than one piece were read from the same file.
 #' a particular REpath-pattern. If no label was specified, patterns are just labeled \code{"_n"}, where "n" is the 
 #' number of the pattern. (Labels can also be created when merging two humdrumR objects.) }
 #' \item{Record}{\code{integer} - The record (i.e., line) number.}
