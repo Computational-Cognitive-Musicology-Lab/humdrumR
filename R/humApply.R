@@ -593,7 +593,7 @@ humtableApplier <- function(funcquo, captureOutput = TRUE, reHumtab = TRUE) {
           #' expression application is put back into the Humtable.  
           
           function(humtab) {
-                    output <- rlang::eval_tidy(funcquo, data = humtab)
+                    output <- evalInTab(funcquo, humtab)
                     if (!captureOutput) return(humtab)
                     if (reHumtab) {
                               pipeIn(humtab) <- output
@@ -602,6 +602,10 @@ humtableApplier <- function(funcquo, captureOutput = TRUE, reHumtab = TRUE) {
                               output
                     }
           }
+}
+
+evalInTab <- function(funcquo, humtab) {
+    rlang::eval_tidy(funcquo, data = humtab)
 }
 
 

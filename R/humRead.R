@@ -494,6 +494,11 @@ shortFilenames <- function(fns) {
 #' each file by appending the names of the directories they occupy, recursively
 #' until the names are unique.)
 #' 
+#' If a single humdrum file has multiple pieces in it---meaning that all spine paths close with `*-`, then
+#' open again with `**`---then they are parsed separetely.
+#' They are distinguished in the `Piece` field.
+#' If there are no multi-piece files, `Piece` and `File` will be identical.
+#' 
 #' @section Validity:
 #' 
 #' \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
