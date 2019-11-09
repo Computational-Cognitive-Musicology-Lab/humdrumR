@@ -316,22 +316,39 @@ withinHumdrum <- function(humdrumR,  ...) {
           currentdo <- parsedFormulae$doexpressions[[1]]
           currentdo <- interpolateNamedValues(currentdo, namedArgs)
           
-          funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
+          doQuosure <- prepareQuo(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
           
-          sideeffectonly <- grepl('p', names(parsedFormulae$doexpressions)[1]) # do~ names with 'p' as in 'doplot'
-          humtabFunc  <- humtableApplier(funcQuosure, 
-                                         captureOutput = !sideeffectonly,
-                                         reHumtab = TRUE)
-          #### evaluate expression 
-          newhumtab <- if (length(parsedFormulae$partitions)) {
-              partApply(humtab, parsedFormulae$partitions, humtabFunc)
-          } else {
-              humtabFunc(humtab)
-          }
-
+          ###########################-
+          #### evaluate "do" expression! 
+          ###########################-
+          humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
+          result <- evalDoQuo(doQuosure, humtab,
+                              parsedFormulae$partitions)
+         
+          ###
+          
+          sideeffectonly <- grepl('p', names(parsedFormulae$doexpressions)[1]) 
+          # do ~ names with 'p' as in 'doplot', mean side effects only
+          
           if (!sideeffectonly) {
-              #### Put new humtable back into humdrumR object
+              local({
+              #### if any new fields have same name as old, remove old
+              # ADD A CHECK TO PREVENT OVERWRITING STRUCTURAL FIELDS?
+                overwrittenfields <- colnames(result)[colnames(result) %in% colnames(humtab)]
+                overwrittenfields <- overwrittenfields[overwrittenfields != '_rowKey_']
+                if (length(overwrittenfields)) humtab[ , eval(overwrittenfields) := NULL]
+              })
               
+              ## put result into new humtab
+              newhumtab <- humtab[result, on ='_rowKey_'] 
+              newhumtab[ , `_rowKey_` := NULL]
+              
+              # number new pipes
+              unnamedresult <- colnames(newhumtab) == 'Pipe'
+              colnames(newhumtab)[unnamedresult] <- paste0('Pipe', curPipeN(humtab) + seq_len(sum(unnamedresult)))
+              
+              
+              #### Put new humtable back into humdrumR object
               newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
               
               # This section should be improved (Nat, 07/16/2019)
@@ -445,7 +462,7 @@ withHumdrum <- function(humdrumR,  ...) {
           currentdo <- parsedFormulae$doexpressions[[1]]
           currentdo <- interpolateNamedValues(currentdo, namedArgs)
 
-          funcQuosure <- prepareForm(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
+          funcQuosure <- prepareQuo(humtab, currentdo, humdrumR@Active, parsedFormulae$ngrams)
 
           humtabFunc  <- humtableApplier(funcQuosure, 
                                          captureOutput = !grepl('p', names(parsedFormulae$doexpressions)[1]),
@@ -584,46 +601,77 @@ splitFormula <- function(form) {
 
 ###########- Applying withinHumdrum's expression to a data.table
 
-humtableApplier <- function(funcquo, captureOutput = TRUE, reHumtab = TRUE) {
-          #' This function operates within withinHumdrum.
-          #' It takes a quosure created by prepareForm 
-          #' and turns it into a function which can be applied 
-          #' to a Humtable (i.e., a data.table). 
-          #' It's second argument determines if the result of the 
-          #' expression application is put back into the Humtable.  
-          
-          function(humtab) {
-                    output <- evalInTab(funcquo, humtab)
-                    if (!captureOutput) return(humtab)
-                    if (reHumtab) {
-                              pipeIn(humtab) <- output
-                              humtab
-                    } else {
-                              output
-                    }
-          }
+
+evalDoQuo <- function(doQuo, humtab, partQuos) {
+    if (length(partQuos) == 0L) {
+        result <- rlang::eval_tidy(doQuo, data = humtab)
+        parseResult(result, humtab$`_rowKey_`)
+        
+    } else {
+        result <- evalDoQuo_part(doQuo, humtab, partQuos)
+        if (is.data.frame(x)) result else data.table::rbindlist(result)
+    }
+}
+evalDoQuo_part <- function(doQuo, humtab, partQuos) {
+    ### evaluation partition expression and collapse results 
+    ## to a single factor
+    partType <- names(partQuos)[1]
+    partition <- rlang::eval_tidy(partQuos[[1]], humtab)
+    
+    if (!is.list(partition)) partition <- list(partition)
+    partition <- lapply(partition, rep, length.out = nrow(humtab))
+    
+    partition <- Reduce(switch(partType, by = paste0, where = `&`), partition)
+    
+    partEval <- switch(partType,
+                       by    = evalDoQuo_by,
+                       where = evalDoQuo_where)
+    
+    result <- partEval(doQuo, humtab, partition, partQuos)
+    result
+    
 }
 
-evalInTab <- function(funcquo, humtab) {
-    rlang::eval_tidy(funcquo, data = humtab)
+evalDoQuo_by <- function(doQuo, humtab, partition, parts) {
+    # this function doesn't use reHum because data.table 
+    # pretty much already does (some) of whats needed.
+    targetFields <- namesInExprs(colnames(humtab), c(doQuo, parts[-1]))
+    targetFields <- c(targetFields, '_rowKey_')
+    
+    result <- humtab[ , 
+                      list(list(evalDoQuo(doQuo, .SD, parts[-1]))), 
+                      by = partition, .SDcols = targetFields]
+   
+    result$V1
 }
+evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
+    result <- evalDoQuo(doQuo, humtab[partition], parts[-1])
+    
+    if (!is.logical(partition)) stop(call. = FALSE,
+                                     "In your call to with(in)Humdrum with a 'where ~ x' expression, 
+                                     your where-expression must evaluate to a boolean.")
+    
+    result[humtab[, '_rowKey_'], on ='_rowKey_'] 
+}
+
+
 
 
 ####################- Parsing expressions fed to withinHumdrum
 
 
-prepareForm <- function(humtab, funcQuosure, active, ngram = NULL) {
+prepareQuo <- function(humtab, funcQuosure, active, ngram = NULL) {
   #' This is the main function used by \code{\link{withinHumdrum}} to prepare the current
   #' do expression argument for application to a \code{\linkS4class{humdrumR}} object.
   
   # turn . to active formula
-  funcQuosure <- activateForm(funcQuosure, active)
+  funcQuosure <- activateQuo(funcQuosure, active)
   
   # tandem interpretations
-  funcQuosure <- tandemsForm(funcQuosure)
+  funcQuosure <- tandemsQuo(funcQuosure)
   
   # splats
-  funcQuosure <- splatForm(funcQuosure)
+  funcQuosure <- splatQuo(funcQuosure)
   
   # find what fields (if any) are used in formula
   usedInExpr <- unique(fieldsInExpr(humtab, funcQuosure))
@@ -634,11 +682,11 @@ prepareForm <- function(humtab, funcQuosure, active, ngram = NULL) {
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
-  if (any(lists)) funcQuosure <- mapifyForm(funcQuosure, usedInExpr, depth = 1L)
+  if (any(lists)) funcQuosure <- mapifyQuo(funcQuosure, usedInExpr, depth = 1L)
     
   # if ngram is present
   if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
-            funcQuosure <- ngramifyForm(funcQuosure, 
+            funcQuosure <- ngramifyQuo(funcQuosure, 
                                         ngram, usedInExpr, 
                                         depth = 1L + any(lists))
   }
@@ -646,9 +694,9 @@ prepareForm <- function(humtab, funcQuosure, active, ngram = NULL) {
   funcQuosure
 }
 
-####################### Functions used inside prepareForm
+####################### Functions used inside prepareQuo
 
-activateForm <- function(funcQuosure, active) {
+activateQuo <- function(funcQuosure, active) {
   #' This function takes the \code{expression} argument
   #' from the parent \code{\link{withinHumdrum}} call and 
   #' inserts the \code{Active} expression from the 
@@ -660,7 +708,7 @@ activateForm <- function(funcQuosure, active) {
 
 #### Interpretations in expressions
 
-tandemsForm <- function(funcQuosure) {
+tandemsQuo <- function(funcQuosure) {
  # This function inserts calls to getTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
@@ -724,12 +772,12 @@ getTandem <- function(tandem, regex) {
 # I want to apply log to. The traditional R way is 
 # do.call('log', as.list(myvector)).
 # This is essentially splatting. What I want is syntactic sugar to
-# go log(myvector) and have it work. splatForm allows exactly this in a 
+# go log(myvector) and have it work. splatQuo allows exactly this in a 
 # call to withinHumdrum. We can group one field by another field, then
 # feed each group as an argument to a function.
 #
 
-splatForm <- function(funcQuosure) {
+splatQuo <- function(funcQuosure) {
   #' This function takes an expression,
   #' and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExpr)},
   #' with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
@@ -756,7 +804,7 @@ splatForm <- function(funcQuosure) {
 }
 
 parseAt <- function(atExpr) {
- #' This function is used by splatForm
+ #' This function is used by splatQuo
  #' It replaces an expression of the form \code{TargetExpr@GroupingExpr}
  #' with \code{tapply(TargetExpr, GroupingExpr, c)}.
 
@@ -768,14 +816,14 @@ parseAt <- function(atExpr) {
 
 ########## Mapping expression across list fields.
 
-xifyForm <- function(expression, usedInExpr, depth = 1L) {
+xifyQuo <- function(expression, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which creates an lambda function which takes those names
           #' as arguments and calls the expression with them.
           #' This lambda function is appropriate for calling with
           #' Map, lapply, ngramApply, etc.
-          #' This is used by listifyForm and ngramifyForm.
+          #' This is used by listifyQuo and ngramifyQuo.
           #' 
           #' Argnames within the newly generated lambda expressions are changed
           #' to lower case versions of usedInExpr strings, but with depth "_" appended
@@ -795,14 +843,14 @@ xifyForm <- function(expression, usedInExpr, depth = 1L) {
 }
 
 
-mapifyForm <- function(funcQuosure, usedInExpr, depth = 1L) {
+mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which uses Map to call this expression across these named objects.
           #' (It presumes that the named objects are actually lists).
-          #' It first uses xifyForm to put the expression in the form of a 
+          #' It first uses xifyQuo to put the expression in the form of a 
           #' lambda function.
-  funcQuosure <- xifyForm(funcQuosure, usedInExpr, depth)
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   rlang::quo_set_expr(funcQuosure, 
                       rlang::expr(Map(f = !!rlang::quo_get_expr(funcQuosure), 
@@ -810,15 +858,15 @@ mapifyForm <- function(funcQuosure, usedInExpr, depth = 1L) {
 
 }
 
-ngramifyForm <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
+ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
           #' This function takes an expression and a vector of strings representing
           #' names used in that expression and creates an expression
           #' which uses applyNgram on these named objects.
-          #' It first uses xifyForm to put the expression in the form of a 
+          #' It first uses xifyQuo to put the expression in the form of a 
           #' lambda function.
           #' 
           #' 
-  funcQuosure <- xifyForm(funcQuosure, usedInExpr, depth)
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   # rlang::quo_set_expr(funcQuosure,
                       # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
@@ -833,43 +881,8 @@ ngramifyForm <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 
 
 
-################################## Applying expressions across partitions
 
 
-partApply <- function(humtab, partitions, humfunc, targetFields) {
-  if (length(partitions) == 0L) return(humfunc(humtab))
-          
-  partQuosure <- if (length(partitions) == 1L) {
-                    rlang::quo(humfunc(.SD)) 
-          } else  {
-                    rlang::quo(partApply(.SD, partitions[-1], humfunc))
-          }
-  
-  
-  curpart <- partitions[[1]]
-  curpart <- tandemsForm(curpart)
-  # curpart <- rlang::eval_tidy(curpart, data = humtab) # getting part evaluated in it's own environment
-  
-  if (names(partitions)[1] %in% c('by', 'groupby', 'group_by')) {
-    dtcall <- rlang::quo(humtab[ , !!partQuosure,  by = !!curpart, .SDcols = colnames(humtab)])
-    output <- eval(rlang::quo_squash(dtcall))  # do it!
-    
-    output[,!duplicated(colnames(output)), with = FALSE]
-    
-  } else {
-            
-    dtcall <- rlang::quo(humtab[curpart, !!partQuosure])
-    output <- eval(rlang::quo_squash(dtcall))  # do it!
-    
-    # get unchanged part
-    negatecall <- rlang::expr(humtab[!curpart])
-    rest <- eval(negatecall)
-    
-    rbind(output, rest, fill = TRUE)
-  
-  }
-  
-}
 
 #' Change or insert values in an expression
 #' 
@@ -973,6 +986,50 @@ interpolateNamedValues <- function(expr, namedArgs) {
 #          if output is list of vectors of matching length, create new columns.
 #     Multiple input columns
 
+parseResult <- function(result, rowKey) {
+    # this takes a nested list of results with associated
+    # indices and reconstructs the output object.
+    if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table())
+    
+    parseFunc <- switch(class(result)[1],
+                        data.table = force,
+                        data.frame = as.data.table,
+                        integer   = ,
+                        numeric   = ,
+                        factor    = ,
+                        character = ,
+                        logical   = parseResult_vector,
+                        list      = parseResult_list,
+                        parseResult_other)
+    
+    result <- parseFunc(result)
+    colnames(result) <- gsub('^V{1}[0-9]+', "Pipe", colnames(result))
+    
+    #
+    lenRes <- nrow(result)
+    lenKey <- length(rowKey)
+    
+    if (lenRes > lenKey) stop("Sorry, withinHumdrum doesn't currently support functions/do-expressions
+                              that return values that are longer than their input.", .call = FALSE)
+    
+    result[ , `_rowKey_` := rowKey[1:nrow(result)]]
+    result
+    
+}
+
+parseResult_vector <- function(result) {
+    if (allnamed(result) && length(result) < 15) {
+        # If it's a short vector and ALL the ellements are named,
+        # we'd like to make them each their own (named) field
+        # in a data.table
+        as.data.table(as.list(result))
+    } else {
+        data.table(Pipe = result)
+    }
+}
+
+parseResult_list  <- function(result) data.table(result) 
+parseResult_other <- function(result) data.table(list(result))
 
 `pipeIn<-` <- function(object, value) {
           #' This is the main function for taking the output of a
@@ -985,18 +1042,7 @@ interpolateNamedValues <- function(expr, namedArgs) {
           
           curpipen <- curPipeN(humtab) 
           
-          lenvalue <- length(value)
-          if (lenvalue > nrow(humtab)) stop("Sorry, withinHumdrum doesn't currently support functions/expressions that return values that are longer than their input.", .call = FALSE)
-          
-          if (is.object(value)) value <- list(list(value))
-          
-          if (is.atomic(value) && allnamed(value) && lenvalue < 10L) value <- as.list(value)
-          
-          if (is.atomic(value) || (is.list(value) & length(value) == nrow(humtab))) value <- list(value)
-          
-          ### value should be a list now
-          if (!is.list(value)) stop(glue::glue("Nat, pipeIn just recieved an input of class {class(value)} which doesn't fit your conditions."), .call = TRUE)
-          
+         
           ####
           if (!allsame(lengths_(value))) value <- list(value)
           
@@ -1027,19 +1073,23 @@ interpolateNamedValues <- function(expr, namedArgs) {
 ifelsecalls <- function(calls, fields) {
           # function used within withinHumdrum, as part of 
           # humdrumR (re)assembly process.
-          call <- call('ifelse', rlang::f_rhs(calls[[1]]), 
-                       quote(.), fields[[1]])
-          if (len1(calls)) {
-                    call[[3]] <- fields[[2]]
+    
+          conditionexpr <- calls[[1]]
+          
+          ifexpr <- if (length(calls) == 1L) {
+              fields[[2]]
           } else {
-                    call[[3]] <- Recall(calls[-1], fields[-1])
+              Recall(calls[-1], fields[-1])
           }
           
-          call
+          elseexpr <- fields[[1]]
+          
+          #
+          rlang::quo(ifelse(!!conditionexpr, !!ifexpr, !!elseexpr))
 }
 
 pipeFields <- function(humtab) {
-  #' Another function used by pipeIn<-
+  #' Another function used by pipeIn<- (withing curePipeN)
   #' Takes a humtab and identifies the pipe fields (columns), if any,
   #' are in it.
   colnms <- colnames(humtab)
@@ -1065,7 +1115,7 @@ lengths_ <- function(ls) {
           #' Acts just like base::lengths function,
           #' except it knows to treat any argument where
           #' is.object == TRUE as length 1.
-          ifelse(sapply(ls, is.object), 1, sapply(ls, length))
+          IfElse(sapply(ls, is.object), 1, sapply(ls, length))
           
 }
 

@@ -84,7 +84,7 @@ NULL
         rlang::f_lhs(formula) <- quote(doplot)
     }
     
-    doPipe(humdrumR, formula, '%humT%', 'withinHumdrum')
+    invisible(doPipe(humdrumR, formula, '%humT%', 'withinHumdrum'))
 }
 
 #' @export
@@ -131,11 +131,14 @@ splitPipe <- function(formula) {
           expr <- rlang::f_rhs(formula)
           expr <- paste(collapse = '', deparse(expr))
           
-          exprs <- strsplit(expr, split = '%hum>%|%hum<%')[[1]]
+          knownPipes <- paste(collapse = '|',
+                              c('%hum<%', '%hum>%', '%humT%', '%hum\\[\\]%',
+                                '%>%' ,'%T>%'))
+          exprs <- strsplit(expr, split = knownPipes)[[1]]
           
           if (length(exprs) == 1) return(list(Current = formula, Rest = NULL, Infix = NA_character_))
           
-          infix <- stringr::str_match(expr, '%hum<%|%hum>%')[1] 
+          infix <- stringr::str_match(expr, knownPipes)[1] 
           
           rlang::f_rhs(formula) <- parse(text = exprs[[1]])[[1]]
           

@@ -1,3 +1,13 @@
+
+#' Shortcuts to making data.frames
+#' 
+#' These are just convenient (shorthands) for data.table and data.frame
+#' @name data.frame.alis
+#' @export
+d.t <- data.table::data.table
+#' @export
+d.f <- function(...) data.frame(..., stringsAsFactors = FALSE)
+
 Repeat <- function(x, ..., margin = 1L) {
   if (is.null(dim(x))) {
      # out <- do.call('rep', list(x = x, ...)) 
@@ -285,7 +295,7 @@ LT <- function(n) {
 }
 #' @export
 grepls <- function(patterns, string, combine = any) {
-  if (len1(patterns)) return(grepl(patterns, string))
+  if (length(patterns) == 1L) return(grepl(patterns, string))
 
   matches <- matrix(sapply(patterns, grepl, x = string), ncol = length(patterns))
   apply(matches, 1, combine)
@@ -534,6 +544,10 @@ switchpatch <- function(x,  ...) {
     } else {
      funcs[['otherwise']](x)         
     }
+}
+
+namesInExprs <- function(names, exprs) {
+    unique(unlist(lapply(exprs, namesInExpr, names = names)))
 }
 
 namesInExpr <- function(names, expr) {

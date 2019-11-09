@@ -649,10 +649,10 @@ as.data.frames <- function(humdrumR) {
 
 
 # A humdrumR object is treated differently depending on whether its
-# active columns contain atomic data ("isActiveVector") or not (tables, lists, matrices, etc.).
+# active columns contain atomic data ("isActiveAtomic") or not (tables, lists, matrices, etc.).
 # this function tests if the active column is a vector or not
 #' @export
-isActiveVector <- function(humdrumR) {
+isActiveAtomic <- function(humdrumR) {
           act <- evalActive(humdrumR)
           !is.object(act) && !is.list(act) 
 }
@@ -1092,7 +1092,6 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
   
-  
   if (is.atomic(values)) {
     values[is.na(values) | values == '.'] <- nullAs
   } else {
@@ -1513,8 +1512,8 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   humdrumR <- indexGLIM(humdrumR)
   humdrumR <- fields.as.character(humdrumR)
   
-  if (isActiveVector(humdrumR)) {
-    print_humtab_isActiveVector(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
+  if (isActiveAtomic(humdrumR)) {
+    print_humtab_isActiveAtomic(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                                 max.records.file, max.token.length)
   }  else {
     print_humtab_notActiveVector(humdrumR, firstAndLast)
@@ -1554,7 +1553,7 @@ padColumns <- function(lines, max.token.length) {
 
 }
 
-print_humtab_isActiveVector <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
+print_humtab_isActiveAtomic <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                                         max.records.file = 40L, max.token.length = 12L) {
   lines <- as.lines(humdrumR, dataTypes = dataTypes,
                     padPaths = TRUE, alignColumns = TRUE)
