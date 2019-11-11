@@ -2,11 +2,13 @@
 #' Shortcuts to making data.frames
 #' 
 #' These are just convenient (shorthands) for data.table and data.frame
-#' @name data.frame.alis
+#' @name data.frame.alias
 #' @export
 d.t <- data.table::data.table
+
+#' @name data.frame.alias
 #' @export
-d.f <- function(...) data.frame(..., stringsAsFactors = FALSE)
+d.f <- function(...) data.frame(..., stringsAsFactors = FALSE, fix.empty.names = FALSE)
 
 Repeat <- function(x, ..., margin = 1L) {
   if (is.null(dim(x))) {

@@ -568,9 +568,8 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 #' @usage as.matrix(humdata)
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
-                   alignColumns = TRUE,
-                   padder = NA, 
-                   path.fold = TRUE) { 
+                   alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
+    
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
                     if (!is.null(fieldnames)) x <- setActiveFields(x, fieldnames)
@@ -1136,7 +1135,7 @@ getActive <- function(humdrumR) humdrumR@Active
 #' @name humActive
 #' @export
 setActive <- function(humdrumR, form) {
-  putActive(humdrumR, rlang::as_quosure(form, rlang::f_env(form)))
+  putActive(humdrumR, rlang::as_quosure(form))
 }
 
 
@@ -1512,12 +1511,12 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   humdrumR <- indexGLIM(humdrumR)
   humdrumR <- fields.as.character(humdrumR)
   
-  if (isActiveAtomic(humdrumR)) {
+  # if (isActiveAtomic(humdrumR)) {
     print_humtab_isActiveAtomic(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                                 max.records.file, max.token.length)
-  }  else {
-    print_humtab_notActiveVector(humdrumR, firstAndLast)
-  }
+  # }  else {
+    # print_humtab_notActiveVector(humdrumR, firstAndLast)
+  # }
   invisible(NULL)
   
 }

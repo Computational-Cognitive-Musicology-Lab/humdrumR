@@ -2,14 +2,14 @@
 % Please edit documentation in R/humApply.R
 \name{pipeFields}
 \alias{pipeFields}
-\title{Another function used by pipeIn<-
+\title{Another function used by pipeIn<- (withing curePipeN)
 Takes a humtab and identifies the pipe fields (columns), if any,
 are in it.}
 \usage{
 pipeFields(humtab)
 }
 \description{
-Another function used by pipeIn<-
+Another function used by pipeIn<- (withing curePipeN)
 Takes a humtab and identifies the pipe fields (columns), if any,
 are in it.
 }

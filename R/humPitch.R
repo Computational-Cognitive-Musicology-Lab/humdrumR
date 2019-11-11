@@ -1045,9 +1045,9 @@ as.tonalInterval.numeric <- read.semit2tonalInterval
 
 #' @name tonalInterval-read
 #' @export
-as.tonalInterval.character <- regexDispatch( 'Kern Pitch' = read.kernPitch2tonalInterval,
+as.tonalInterval.character <- regexDispatch( 'KernPitch' = read.kernPitch2tonalInterval,
                                              'Interval'  = read.interval2tonalInterval,
-                                             'Scientific Pitch' = read.sciPitch2tonalInterval,
+                                             'ScientificPitch' = read.sciPitch2tonalInterval,
                                              'Solfege' = read.solfa2tonalInterval,
                                              'Decimal' = read.semit2tonalInterval)
 
@@ -1145,9 +1145,9 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
 
 #' @name humTranspose
 #' @export
-transpose.character <- regexDispatch('Kern Pitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
+transpose.character <- regexDispatch('KernPitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
                                      'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,
-                                     'Scientific Pitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
+                                     'ScientificPitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
                                      'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval,
                                      'Decimal' = as.semit %.% transpose.tonalInterval %.% read.semit2tonalInterval)
 

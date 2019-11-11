@@ -2,14 +2,14 @@
 % Please edit documentation in R/humApply.R
 \name{parseAt}
 \alias{parseAt}
-\title{This function is used by splatForm
+\title{This function is used by splatQuo
 It replaces an expression of the form \code{TargetExpr@GroupingExpr}
 with \code{tapply(TargetExpr, GroupingExpr, c)}.}
 \usage{
 parseAt(atExpr)
 }
 \description{
-This function is used by splatForm
+This function is used by splatQuo
 It replaces an expression of the form \code{TargetExpr@GroupingExpr}
 with \code{tapply(TargetExpr, GroupingExpr, c)}.
 }
