@@ -1,4 +1,0 @@
-Using corpora[~Token %~% "xxx"] giving error in nullifyTokens
-
-
-setActive(x, ~cbind(A,B)) doesn't work the way i expect?
