@@ -1,0 +1,20 @@
+!!!XYZ: This is a reference record, with reference code "XYZ"
+**exclusive	**exclusive
+*tandem1	*tandem1
+*tandem2	*tandem2
+*tandem3	*
+=barline	=barline
+data	data
+data	data
+.	data
+!! Global comment
+data	data
+=barline	=barline
+*tandem2	*tandem2
+data	data
+!	! local comment
+.	data
+.	data
+.	data
+=barline	=barline
+*-	*-

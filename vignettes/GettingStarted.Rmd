@@ -9,12 +9,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 ```{r, include = FALSE}
 knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = ""
 )
 ```
 
@@ -37,10 +38,10 @@ library(humdrumR)
 ## Quick Start
 
 Let's just dive right in!
-First, make sure humdrumR is installed: [how to install humdrumR](Install.html "Installing humdrumR"). 
+First, make sure humdrumR is installed: [how to install humdrumR](https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR "Getting humdrumR from github").  
 Open an R session and load the humdrumR library using the command `library(humdrumR)`---now you are ready to rock!
 
-HumdrumR comes packaged with a small number of humdrum data files, just for you to play around with.
+HumdrumR comes packaged with a small number of humdrum data files just for you to play around with.
 These files are stored in the directory where your computer installed humdrumR, in a subfolder called "HumdrumData".
 You can move your R session to this folder using R's "set working directory command": `setwd(humdrumRroot)`.
 Once you're in the humdrumR directory, you can use the base R `dir` function to see what humdrum data is available to you.
@@ -130,14 +131,340 @@ Notice that when you print humdrumR object, humdrumR shows you the beginning of 
 `readHumdrum` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
 
 
-### Filtering our data
-
-Now that we've got a corpus, often the first thing we want to do is filter out parts of the data.
 
 
 # The Data Model
 
-To really make use of humdrumR, you need to understand a bit about how humdrum data is represented in the humdrumR package: the "Data Model."
+To really make use of humdrumR, you need to understand a bit about how humdrum data is represented in the humdrumR package: the humdrumR "**data model**."
+
+The essential thing to understand is how it maps between the [humdrum data syntax](humdrum.org) and a R data.table.
+
+![](images/DataModelDiagram.png){width=600px}
+
+To fully understand this, you should start with at least a basic understanding of the humdrum syntax! 
+Read about the syntax at [humdrum.org](humdrum.org) or check out [our vignette]{HumdrumSyntax.html "The Humdrum Syntax"} on the topic.
+
+## data.frames
+
+Data.frames are essential to R.
+A data.frame is simply a two-dimensional table of named columns.
+Each column is either a vector or list of values, all of which are the same length.
+
+`humdrumR` makes use of a popular extension of base-R data.frames, the [data.table](https://cran.r-project.org/web/packages/data.table/index.html).
+
+
+In `humdrumR`, *every* single, individual token in a collection of humdrum-syntax text files is given its own row in a data.frame.
+For example, consider this simple, humdrum-syntax file:
+
+
+
+```{r echo=FALSE, results='none'}
+ex1 <- readLines('examples/BasicExample.krn')
+
+rest <- ex1[-1]
+tokens <- c(ex1[1], unlist(strsplit(rest, split = '\t| ')))
+
+##
+ex1df <- as.data.frame(t(stringi::stri_list2matrix(strsplit(rest, '\t'))), stringsAsFactors = FALSE)
+
+cat(' ', sep = '', ex1[1], '\n')
+apply(format.data.frame(ex1df, justify = 'left', width = 30), 1, 
+      function(x) cat(' ', x, sep = '', '\n')) 
+
+
+```
+
+This file contains `r num2word(length(tokens))` individual tokens.
+To illustrate, here I'll print the same file, but with *each* token bracketed by `<` and `>`:
+
+```{r echo = FALSE}
+
+printquoted <- function(ex) {
+quoted <- ex
+    quoted[] <- lapply(quoted,
+                   function(col) {
+                       col <- strsplit(col, split = ' ')
+                       col <- lapply(col,  function(x) paste0('<', x, '>'))
+                       sapply(col, paste, collapse = ' ')
+                       
+                   })
+
+
+cat('<', ex1[1], '>', '\n', sep ='')
+apply(format.data.frame(quoted, justify = 'left', width = 30), 1, 
+      function(x) cat(x, sep = '', '\n'))
+    invisible(NULL)
+}
+
+printquoted(ex1df)
+
+```
+
+So what happens when `humdrumR` reads this file?
+(This file is bundled with `humdrumR` in the `"humdrumRroot/examples"` directory.)
+
+```{r}
+setwd(humdrumRroot)
+
+example1 <- readHumdrum('examples/BasicExample.krn')
+
+example1
+```
+
+We see the same thing we saw earlier, when we were reading real humdrum data from the `"HumdrumData"` folder.
+But what's under the hood?
+To see that, we can use the `getHumtab` function to extract the underlying humdrum table:
+
+
+
+```{r}
+
+humtab <- getHumtab(example1)
+
+humtab
+
+```
+
+
+Look at that, a `data.table` with `r num2word(nrow(humtab))` rows!
+In this case, the humdrum data table ("humtable") has `r num2word(ncol(humtab))` columns!
+The columns are:
+
+```{r}
+colnames(humtab)
+
+```
+
+In `humdrumR`, we refer to these columns as **fields**.
+To learn what fields are in a humdrumR object, it is better to call the `fields` command directly on the original `humdrumR` object:
+
+```{r}
+fields(example1)
+```
+
+We see that there are `r num2word(ncol(humtab))` fields (humtable columns), and that they are divided into five types of fields: 
+
++ Data fields
++ Structure fields
++ Interpretation fields
++ Form fields
++ Reference fields
+
+(A good place to read the details about what all the columns means is the `Humtable` documentation you can get by calling `?Humtable`.)
+
+
+Let's go back to the Bach chorales dataset we loaded earlier (we saved it as `chorales`):
+
+```{r}
+fields(chorales)
+
+```
+
+The `chorales` corpus has `r nrow(fields(chorales))` fields!---all the same fields as `example1`, but some additional ones.
+These additional fields are interpretation and reference records that didn't appear in our toy `example1`.
+
+----
+
+### Main Fields
+
+The most important fields that are always present in a humdrumR humtable are 1) the "Token" field which contains the original `character` tokens read from the humdrum data!; and 2) the "Structural" fields which tell us where in the original humdrum data each token came from.
+The "Structural" fields are what allow humdrumR to (re)construct the original humdrum data---translating between the humdrum-table (`data.table`) and the plain-text humdrum syntax.
+
+We can inspect any field in our humdrumR data using the `$` operator: Just call your humdrumR data object with `$` and the name of a field.
+Using this, we can see what the content of all those structural fields is!
+The most important are the `Spine`, `Record`, (Record) `Type`, and `File(name)` fields.
+
+```{r}
+
+example1$Spine
+
+# example1$Record
+
+example1$Type
+
+example1$Filename
+
+```
+
+The "record types" are:
+
++ `"G"`: global comment (including reference records)
++ `"L"`: local comment
++ `"I"`: interpretation
++ `"M"`: measure (i.e., barlines)
++ `"D"`: (non-null) data token
++ `"d"`: null data token (`"."`)
+
+
+### Stops
+
+In humdrum syntax, multiple tokens can be placed "in the same place" (i.e., same record, same spine) by simply separating them with spaces.
+(This is most commonly used to represent chords in `**kern` data.)
+In `humdrumR`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a humdrumR humtable.
+Thus, we need the `Stop` field to tell us which stop a token came from!
+In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one:
+
+Let's look at an example to make sense of this!
+
+```{r}
+stops <- readHumdrum('examples/Stops.krn')
+
+stops
+
+```
+
+
+Here we have a file with chords in the second spine: individual note tokens separated by spaces.
+Let's inspect the humtable:
+
+```{r}
+getHumtab(stops)
+
+```
+
+You can see that each note of the chords gets its own row, numbered `1`, `2`, and `3` in the `Stop` field!
+
+
+
+### Paths
+
+
+
+Some humdrum data contains "spine paths"---places where a single spine splits into two.
+`humdrumR` treats spine paths as "subspines" of the main spine which they split from, each one numbered in the `Path` field.
+The starting path (leftmost) is numbered path `0`---in datasets with no spine paths, the `Path` field will be all zeros.
+Other paths are numbered with higher integers.
+
+Let's look at a simple example:
+
+```{r}
+
+paths1 <- readHumdrum('examples/Paths.krn')
+
+paths1
+
+paths1$Path
+
+getHumtab(paths1)
+
+```
+
+
+Here is a more complex example:
+
+```{r}
+
+paths2 <- readHumdrum('examples/Paths2.krn')
+
+paths2
+
+paths2$Path
+
+getHumtab(paths2)
+
+
+
+```
+
+Notice that `humdrumR` prints paths in a way that is more readable than reading humdrum syntax directly:
+paths are "shifted" over into columns that align.
+This is what the `Column` field is used for.
+
+
+
+
+# Doing Stuff!
+
+Ok, we've now seen how to read and inspect humdrumR data.
+We've also got some idea of what the humdrum data looks like under the surface: the humdrum table.
+What can we do with it?
+
+When you create a `humdrumR` corpus object, using `readHumdrum`, this object encapsulates a humdrum-table (`data.table`) object, which is where the data is really stored.
+We've already seen that you can extract that humdrum table directly using `getHumtab`---and if you are aleady an R pro, you might just want to extract the table an work with it directly.
+However, what the `humdrumR` object does is give us some convenient ways of working with that table.
+For example, we've already seen that when we print `humdrumR` objects, they print out as humdrum syntax, which is easier to read than the complex humdrum table!
+But the `humdrumR` does more!
+
+The main thing `humdrumR` does is allow us to work with the fields of our humdrum-tables in way that is convenient and powerful.
+First, we create special "*do-expressions*" that refer to the humtable's fields.
+To create these expression, we use the R `~` operator.
+For instance, I can write things like:
+
++ `~ Spine + File`
++ `~ nchar(Token)`
++ `~ paste0(Token, Record)`
+
+Notice that all three of these expressions contain the names of `humdrumR` fields.
+If you execute these lines in an R session, nothing much will happen:
+you'll see that they are saved---'quoted'---and returned as R `formula` objects.
+
+```{r}
+
+~ Spine + File
+
+~ nchar(Token)
+
+~ paste0(Token, Record)
+
+```
+
+However, we can tell `humdrumR` to evaluate these expressions using the fields of our humdrum tables.
+These simplest way is using the `%hum>%` pipe operator, which takes a `humdrumR` object (on its left side), and a `formula` on its right side:
+
+
+```{r}
+
+chorales %hum>% ~ Spine + File
+
+chorales %hum>% ~ nchar(Token)
+
+chorales %hum>% ~ paste0(Token, Record)
+
+```
+
+Each expression is evaluated, and the result is put back in the same place in the humdrum data!
+You'll also notice that in the printout, there is a new Data field, called `Pipe1`---this is the default name `humdrumR` assigns to new fields that you create.
+
+If you want, you can pick your own names by using `$<-` (i.e., assigning to a new name you create using `$`).
+For instance, lets use `humdrumR`'s `as.semit` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
+
+```{r}
+
+chorales %hum>% ~ as.semit(Token)
+
+```
+
+It worked!
+Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it be called `Pipe1` if you want!
+
+```{r}
+
+chorales %hum>% ~ as.semit(Token) -> chorales$Semits
+
+```
+
+There is now a new Data field in our humdrum table, called `Semits`.
+Meanwhile, the original `Token` field is still there, safely unchanged!
+Just like before, we can use the `$` operator to look at our fields:
+
+```{r}
+
+chorales$Token
+
+chorales$Semits
+
+```
+
+Whats more, we can use the `Semits` field *just* like any other field:
+
+```{r}
+
+chorales %hum>% ~ paste0(Token, ' = ', Semits)
+
+
+```
+
+
 
 
 

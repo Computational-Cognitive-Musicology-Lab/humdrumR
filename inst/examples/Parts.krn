@@ -1,0 +1,49 @@
+!!!OTL: Parts example
+**kern
+*M4/4
+*C:
+*Ibass
+*clefF4
+=
+2G
+2C;
+=
+*-
+!!!OTL: Parts example
+**kern
+*M4/4
+*C:
+*Itenor
+*clefF4
+=
+4c
+4B
+2c;
+==
+*-
+!!!OTL: Parts example
+**kern
+*M4/4
+*C:
+*Ialto
+*clefGv2
+=
+4e
+4d
+2e;
+=
+*-
+!!!OTL: Parts example
+**kern
+*M4/4
+*C:
+*Isoprn
+*clefF4
+=
+8cc
+8g
+8a
+8b
+2c;
+=
+*-

@@ -650,11 +650,14 @@ evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
 
 
 prepareQuo <- function(humtab, funcQuosure, active, ngram = NULL) {
-  #' This is the main function used by \code{\link{withinHumdrum}} to prepare the current
-  #' do expression argument for application to a \code{\linkS4class{humdrumR}} object.
+  # This is the main function used by \code{\link{withinHumdrum}} to prepare the current
+  # do expression argument for application to a \code{\linkS4class{humdrumR}} object.
   
   # turn . to active formula
   funcQuosure <- activateQuo(funcQuosure, active)
+  
+  # unnest nested formulae
+  # funcQuosure <- unnestQuo(funcQuosure)
   
   # tandem interpretations
   funcQuosure <- tandemsQuo(funcQuosure)
@@ -686,14 +689,35 @@ prepareQuo <- function(humtab, funcQuosure, active, ngram = NULL) {
 ####################### Functions used inside prepareQuo
 
 activateQuo <- function(funcQuosure, active) {
-  #' This function takes the \code{expression} argument
-  #' from the parent \code{\link{withinHumdrum}} call and 
-  #' inserts the \code{Active} expression from the 
-  #' target \code{\linkS4class{humdrumR}} object in place 
-  #' of any \code{.} subexpressions.
+  # This function takes the \code{expression} argument
+  # from the parent \code{\link{withinHumdrum}} call and 
+  # inserts the \code{Active} expression from the 
+  # target \code{\linkS4class{humdrumR}} object in place 
+  # of any \code{.} subexpressions.
   active <- rlang::f_rhs(active)
   substituteName(funcQuosure, list(. = active))
 }
+
+#### nested formulae in expressions
+# 
+# unnestQuo <- function(funcQuosure) {
+#     ## THIS DOESNT WORK...NEED TO EVALUATE the symbols to figure out if they are formulae 
+#     if (length(funcQuosure) < 2L) return(funcQuosure)
+#     lhs <- rlang::f_lhs(funcQuosure)
+#     if (identical(funcQuosure[[1]], as.symbol('~')) &&
+#         (is.null(lhs) || 
+#          identical(lhs, as.symbol('do')))) {
+#         
+#         return(Recall(funcQuosure[[length(funcQuosure)]]))
+#         
+#     } else 
+#         
+#     for (i in seq_along(funcQuosure)) {
+#         funcQuosure[[i]] <- Recall(funcQuosure[[i]])
+#         
+#     }
+#     funcQuosure
+# }
 
 #### Interpretations in expressions
 
@@ -767,14 +791,14 @@ getTandem <- function(tandem, regex) {
 #
 
 splatQuo <- function(funcQuosure) {
-  #' This function takes an expression,
-  #' and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExpr)},
-  #' with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
-  #' The result is that \code{TargetExpr} is broken into a list of vectors by the
-  #' \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
-  #' argument. See the docementation for \code{\link{withinHumdrum}}.
-  #' This does not look for \code{@} sub expression within branches of a \code{@} expression!
-  #' 
+  # This function takes an expression,
+  # and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExpr)},
+  # with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
+  # The result is that \code{TargetExpr} is broken into a list of vectors by the
+  # \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
+  # argument. See the docementation for \code{\link{withinHumdrum}}.
+  # This does not look for \code{@} sub expression within branches of a \code{@} expression!
+  # 
   if (!is.call(funcQuosure)) return(funcQuosure)
           
   atArgs <- vapply(funcQuosure[-1], function(ex) is.call(ex) && deparse(ex[[1]]) == '@', FUN.VALUE = logical(1))
@@ -806,17 +830,17 @@ parseAt <- function(atExpr) {
 ########## Mapping expression across list fields.
 
 xifyQuo <- function(expression, usedInExpr, depth = 1L) {
-          #' This function takes an expression and a vector of strings representing
-          #' names used in that expression and creates an expression
-          #' which creates an lambda function which takes those names
-          #' as arguments and calls the expression with them.
-          #' This lambda function is appropriate for calling with
-          #' Map, lapply, ngramApply, etc.
-          #' This is used by listifyQuo and ngramifyQuo.
-          #' 
-          #' Argnames within the newly generated lambda expressions are changed
-          #' to lower case versions of usedInExpr strings, but with depth "_" appended
-          #' to make sure there's no accidental overlap (just a precaution).
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which creates an lambda function which takes those names
+          # as arguments and calls the expression with them.
+          # This lambda function is appropriate for calling with
+          # Map, lapply, ngramApply, etc.
+          # This is used by listifyQuo and ngramifyQuo.
+          # 
+          # Argnames within the newly generated lambda expressions are changed
+          # to lower case versions of usedInExpr strings, but with depth "_" appended
+          # to make sure there's no accidental overlap (just a precaution).
           fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
           names(fargs) <- paste0('.', tolower(usedInExpr), strrep('_', depth))
           
@@ -833,12 +857,12 @@ xifyQuo <- function(expression, usedInExpr, depth = 1L) {
 
 
 mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
-          #' This function takes an expression and a vector of strings representing
-          #' names used in that expression and creates an expression
-          #' which uses Map to call this expression across these named objects.
-          #' (It presumes that the named objects are actually lists).
-          #' It first uses xifyQuo to put the expression in the form of a 
-          #' lambda function.
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which uses Map to call this expression across these named objects.
+          # (It presumes that the named objects are actually lists).
+          # It first uses xifyQuo to put the expression in the form of a 
+          # lambda function.
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   rlang::quo_set_expr(funcQuosure, 
@@ -848,13 +872,13 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 }
 
 ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
-          #' This function takes an expression and a vector of strings representing
-          #' names used in that expression and creates an expression
-          #' which uses applyNgram on these named objects.
-          #' It first uses xifyQuo to put the expression in the form of a 
-          #' lambda function.
-          #' 
-          #' 
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which uses applyNgram on these named objects.
+          # It first uses xifyQuo to put the expression in the form of a 
+          # lambda function.
+          # 
+          # 
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   # rlang::quo_set_expr(funcQuosure,

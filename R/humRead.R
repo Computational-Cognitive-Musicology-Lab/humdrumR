@@ -899,7 +899,7 @@ tandemTable <- function(tandems) {
           # identifies any "known" (i.e., standard) interpretations
           # and parses these into a table of new Interpretation fields
           # for the humdrum table.
-          if (all(tandems == "")) return(NULL)
+          if (all(tandems == "", na.rm = TRUE)) return(NULL)
           
           uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
           uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']

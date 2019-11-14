@@ -1,0 +1,20 @@
+!!!OTL: "record types" example 
+**kern	**kern
+*C:	*C:
+*M4/4	*M4/4
+*Ibass	*
+=1	=1
+4G	4g
+4A	8f
+.	8e
+!! Ritardando
+2B	[2f
+=2	=2
+*M3/4	*M3/4
+2.CC	4f]
+!	!Suspension
+.	8e
+.	8d
+.	4e;
+==	==
+*-	*-

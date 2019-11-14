@@ -352,14 +352,17 @@ spliceHumtab <- function(humtab) {
           # it also sorts them by default values
           humtab <- rbindlist(humtab, fill = TRUE)
           
-          # sortby <- c('File', 'Spine', 'Path', 'Record', 'Stop')
-          # sortby <- sortby[sapply(humtab[ , sortby, with = FALSE], class) != 'list'] 
-          # Can't sort by lists
-          # These should never be lists...but still
-          # if (length(sortby) > 0L) do.call('setorder', c(humtab, lapply(sortby, as.symbol))) # data.table::setorder
-          setorder(humtab, File, Record, Column, Stop)
-          
-          humtab
+          orderHumtab(humtab)
+}
+
+orderHumtab <- function(humtab) {
+    orderingcols <- c('File', 'Record', 'Column', 'Stop')
+    
+    # can't sort by lists
+    orderingcols <- orderingcols[sapply(humtab[ , orderingcols, with = FALSE], class) == 'integer']
+    
+    setorderv(humtab, cols = orderingcols)
+    
 }
 
 #######################################################-
@@ -452,8 +455,7 @@ setMethod('initialize', 'humdrumR',
 
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
-                                    Structure = c(if ('SubCorpus' %in% fields) 'SubCorpus' else NULL, 
-                                                  'Filename', 'Filepath', 'File',
+                                    Structure = c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
@@ -840,7 +842,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
           humtabPadded$Spine <- allSpinePathcombs[humtabPadded$Column, 'Spine'] 
           humtabPadded$Path  <- allSpinePathcombs[humtabPadded$Column, 'Path' ] - 1
           
-          setorder(humtabPadded, File, Column, Record, Stop)
+          orderHumtab(humtabPadded)
           
           putHumtab(humdrumR, drop = TRUE) <- humtabPadded
           humdrumR

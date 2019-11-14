@@ -22,13 +22,18 @@
 #' @export 
 setMethod('summary', 'humdrumR',
           function(object, ...) {
-            funcs <- c(census, reference, spines, interpretations) #, interpretations, sections)
+              cat('\t\tSummary of humdrumR object:\n\n')
+              
+              
+            funcs <- c(`Token Census` = census, `Reference Records` = reference, 
+                       `Spine Structure` = spines, `Intepretation Content` = interpretations) #, sections)
             
             summaries <- lapply(funcs, function(f) f(object, ...))
             
             for (i in seq_along(summaries)) {
-              cat(names[i], sep ='')
+              cat('\t', names(funcs)[i], ':\n', sep ='')
               print(summaries[[i]], showall = FALSE)
+              cat('\n')
             }
             invisible(summaries)
           })
@@ -551,7 +556,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
   
   spinemat <- popclass(spinemat)
   spinemat$File <- paste0(num2str(spinemat$File), ":")
-  spinemat[ , In := sapply(Where, sum %.% GT(0))]
+  spinemat[ , In := sapply(Where, function(x) sum(x > 0))]
   where <- spinemat$Where
   spinemat[ , 'Where' := NULL]
   spinemat[ , Columns := Columns - Spines]
@@ -584,7 +589,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
       
       spinemat[ , { row <- unlist(.SD)
                     if (Columns == 0) row[4:7] <- ' '
-                    paste(padder(row, lenCol), collapse = '') 
+                    paste(padder(row[cols], lenCol), collapse = '') 
                   }, 
                 by = 1:nrow(spinemat)]$V1 -> strs
       

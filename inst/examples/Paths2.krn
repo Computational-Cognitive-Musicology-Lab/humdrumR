@@ -1,0 +1,21 @@
+!!!OTL: complex "Path" example
+**path
+a
+*^
+b	c
+d	e
+*^	*
+f	g	h
+i	j	k
+*v	*v	*
+l	m
+n	o
+*	*^
+p	q	r
+s	t	u
+*	*v	*v
+v	w
+x	y
+*v	*v
+z
+*-
