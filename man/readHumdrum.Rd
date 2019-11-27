@@ -9,7 +9,7 @@ findHumdrum(..., contains = NULL, recursive = FALSE,
   allowDuplicates = FALSE, verbose = FALSE)
 
 readHumdrum(..., recursive = FALSE, contains = NULL,
-  allowDuplicates = FALSE, verbose = FALSE, parseTandem = TRUE,
+  allowDuplicates = FALSE, verbose = FALSE, tandems = "all",
   parseGlobal = TRUE)
 }
 \arguments{

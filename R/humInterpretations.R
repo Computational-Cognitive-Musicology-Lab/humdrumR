@@ -8,6 +8,7 @@
 ### for instance "*clefG2" and "*clefF4" are both examples of the same type
 ### of tandem information.
 
+#' @export
 knownInterpretations <- data.table::fread(system.file('extdata', 'KnownInterpretations.tsv', package = 'humdrumR'))
 # Preprocess self-referential {}s in the file KnownInterperations.tsv
 for (i in seq_along(knownInterpretations$RE)) {
@@ -17,7 +18,6 @@ for (i in seq_along(knownInterpretations$RE)) {
                                                    .open = '<<', .close = '>>')         
 }
 
-#' @export
 getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), strict = FALSE) {
  known <- knownInterpretations[knownInterpretations$Type %in% types, ]          
  if (is.null(pattern)) return(known$Name)
@@ -37,7 +37,7 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
            
            res <- sapply(ressplit, function(re) paste(paste0('^(', re, ')$'), collapse = '|'))
  }
- names(res) <- interpPattern
+ names(res) <- pattern # interpPattern
  
  res[is.na(res)] <- pattern[is.na(res)]
  res
@@ -45,15 +45,14 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
 }
 
 
-               
                                      
 
-knownExclusive <- function(strs) {
+matchKnownExclusive <- function(strs) {
   #' @export
   sapply(knownInterpretations[knownInterpretations$Type == 'Exclusive', ], stringr::str_detect, string = strs)
 }
 
-knownTandem <- function(strs) {
+matchKnownTandem <- function(strs) {
   #' @export
   knownTand <- knownInterpretations[knownInterpretations$Type == 'Tandem', ]
   output <- sapply(knownTand$RE, stringr::str_detect, string = strs, simplify = TRUE)
@@ -65,12 +64,12 @@ knownTandem <- function(strs) {
 
 isKnownTandem <- function(strs) {
   #' @export
-  rowSums(knownTandem(strs)) > 0 
+  rowSums(matchKnownTandem(strs)) > 0L
 }
 
 generalizeTandem <- function(strs) {
   #' @export
-  hits <- knownTandem(strs)
+  hits <- matchKnownTandem(strs)
   misses <- rowSums(hits) == 0
   output <- setNames(strs, strs)
   
@@ -84,7 +83,7 @@ generalizeTandem <- function(strs) {
 
 idTandem <- function(strs) {
   #' @export
-  hits <- knownTandem(strs)
+  hits <- matchKnownTandem(strs)
   misses <- rowSums(hits) == 0
   output <- setNames(strs, strs)
   

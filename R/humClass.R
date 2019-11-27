@@ -449,9 +449,10 @@ setClass('humdrumR',
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',
-          function(.Object, humtab, pattern) {
+          function(.Object, humtab, pattern, tandemcol) {
             # humtab = a humdrum table
             # pattern = the original file search pattern (string)
+            # tandem col a logical vector indicating which columns are tandem fields
 
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
@@ -459,7 +460,7 @@ setMethod('initialize', 'humdrumR',
                                                   'Column', 'Spine', 'Path', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
-                                                         fields[fields %in% knownInterpretations[knownInterpretations$Type == 'Tandem', ]$Name]),
+                                                         fields[tandemcol]),
                                     Formal    = c(grep('^Formal', fields, value = TRUE),
                                                   'BarN', 'DoubleBarN', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]

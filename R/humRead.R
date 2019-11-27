@@ -534,7 +534,8 @@ shortFilenames <- function(fns) {
 #' 
 #' @name readHumdrum
 #' @export
-readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, parseTandem =TRUE, parseGlobal = TRUE) {
+readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
+                       tandems = 'all', parseGlobal = TRUE) {
     
     fileFrame <- findHumdrum(..., contains = contains, recursive = recursive, 
                              allowDuplicates = allowDuplicates, verbose = verbose)
@@ -582,13 +583,14 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     humtab[ , Global := is.na(Spine)]
     
     #
-    if (parseTandem) {
-        tandemTab <- tandemTable(humtab$Tandem)
-        if (!is.null(tandemTab)) humtab <- cbind(humtab, tandemTab)
-    }
+    tandemTab <- parseTandem(humtab$Tandem, tandems)
+    if (!is.null(tandemTab)) humtab <- cbind(humtab, tandemTab)
+        
+    #
     cat('Done!\n')
     
-    makeHumdrumR(humtab, unique(fileFrame$Pattern))
+    makeHumdrumR(humtab, unique(fileFrame$Pattern), 
+                 tandemcol = colnames(humtab) %in% colnames(tandemTab))
     
     
 }
@@ -877,48 +879,51 @@ parseInterpretations <- function(spinemat) {
            
            interpind <- rev(grep('^\\*[^*->^v]', spine))
            interpind <- interpind[interpind > tail(stringi::stri_startswith_fixed(spine, '**'), 1)]
-           interps <- spine[interpind]
+           interps <- stringr::str_sub(spine[interpind], start = 2L)
            
            setNames(sapply(seq_along(spine), function(i) paste(interps[i >= interpind], collapse = ',')), 
                     paste0(j, '_', rownames(spinemat)))
          } 
   ) -> tandemIs
   
+  # exclusive
   exclusiveI <- apply(spinemat, 2, function(spine) tail(spine[stringi::stri_startswith_fixed(spine, '**')], 1))
-  
-  
+  exclusiveI <- stringr::str_sub(exclusiveI, start = 3) # strip away **
   
   list(Exclusive = exclusiveI, 
        Tandems   = tandemIs)
 }
 
-tandemTable <- function(tandems) {
+parseTandem <- function(tandems, known) {
           # This function takes the parsed, cummulative
           # Tandem fields produced by parseInterpretations
           # and, using functions from the file humInterpretations.R
           # identifies any "known" (i.e., standard) interpretations
           # and parses these into a table of new Interpretation fields
           # for the humdrum table.
-          if (all(tandems == "", na.rm = TRUE)) return(NULL)
-          
+          # Known indicates
+          if (is.null(known) || all(tandems == "", na.rm = TRUE)) return(NULL)
+    
+          # which are the tandems we want it to recognize
+          REs <- if (length(known) == 1L && known == 'all') {
+              knownInterpretations[Type == 'Tandem', getRE(Name, types = 'Tandem')]
+          } else {
+              REs <- getRE(known)
+              names(REs)[names(known) != ''] <- names(known)[names(known) != '']
+              REs
+          }
+    
+          # parse the stacked tandem vector
           uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
           uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
           
-          areKnownTandems <- isKnownTandem(uniqueTandem)
-          knownTandems   <- uniqueTandem[areKnownTandems]
-          # unknownTandems <- uniqueTandem[!areKnownTandems]
+          # Reduce REs to only those that appear in data
+          REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
           
-          tandemPatterns <- unique(generalizeTandem(knownTandems))
-          tandemMat <- lapply(tandemPatterns,
-                              function(tan) stringr::str_match(tandems, tan)[ ,1])
+          tandemMat <- lapply(REs,
+                              function(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance
           
-          # for (t in knownTandems) tandems <- stringi::stri_replace_all_fixed(tandems, pattern = t, '')
-          # tandems <- stringi::stri_replace_all(tandems, regex = ',,*', ',')
-          # tandems[tandems %in% c(',', '')] <- NA_character_
-          
-          names(tandemMat) <- unique(idTandem(knownTandems))
-          
-          # tandemMat$Tandem <- tandems
+          names(tandemMat) <- names(REs)
           
           as.data.table(tandemMat)
 }
