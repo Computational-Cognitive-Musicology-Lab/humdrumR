@@ -9,8 +9,8 @@ findHumdrum(..., contains = NULL, recursive = FALSE,
   allowDuplicates = FALSE, verbose = FALSE)
 
 readHumdrum(..., recursive = FALSE, contains = NULL,
-  allowDuplicates = FALSE, verbose = FALSE, tandems = "all",
-  parseGlobal = TRUE)
+  allowDuplicates = FALSE, verbose = FALSE, tandems = "known",
+  reference = "all")
 }
 \arguments{
 \item{...}{character: One or more patterns used to identify files to read.
@@ -33,6 +33,12 @@ match.}
 
 \item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!}
+
+\item{tandems}{\code{character}. This argument controls which, if any, tandem interpretations 
+are parsed into their own fields. The default value is \code{"known"}.}
+
+\item{reference}{\code{character}. This argument controls which, if any, reference records
+are parsed into their own fields. The default value is \code{"all"}.}
 }
 \description{
 These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.
@@ -95,6 +101,61 @@ If there are no multi-piece files, `Piece` and `File` will be identical.
 Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
 skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
 directly and its \code{errorReport.path} argument.
+}
+
+\section{Tandem Interpretations}{
+
+
+The \code{tandems} argument controls which tandem interpretations
+parsed into their own fields. This can be helpful to either save processing time and memory
+by \emph{not} parsing interpretations you won't need, or to parse interpretations that 
+humdrumR doesn't recognize.
+The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
+table called \code{knownInterpretations}. 
+Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
+associated with it.
+The default value for the \code{tandems} argument is \code{"known"}. If the \code{tandems} argument
+contains \code{"known"} \emph{all} tandem interpretations in the built-in \code{knownInterpretations} 
+table are parsed.
+Users may specify different interpretations to parse in two ways: 
+
+1) character strings 
+matching one of the name values from the \code{Name} column of \code{knownInterpretations}.
+For instance, if you specify \code{tandems = c('Clef', 'TimeSignature')}, only clef (e.g., \code{"*clefG2"}),
+and time signature (e.g., \code{"*M3/4"}) intepretations will be parsed.
+
+2) if the chracter string(s) in \code{tandem} do not exactly match one of the names in 
+\code{knownInterpretations$Name}, they are treated as regular expressions and used to match
+tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
+that humdrumR doesn't already know about.
+
+If any values in \code{tandems} are named, these names will be used for resulting fields.
+If no matches to an given interpretation are found, no field is created for that interpretation.
+If \code{tandems = NULL}, then no tandem interpretations are parsed.
+}
+
+\section{Reference Records}{
+
+
+By default (\code{reference = "all"}), humdrumR reads all reference records in the data.
+The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of 
+an associated field.
+(If a reference record has no reference code (i.e., it lacks a colon), the field is called "Unkeyed.")
+In large datasets with many reference records, the reference data can actually make up a large portion 
+of the humdrum table, and eat up a lot of memory. In these cases, we might not want to read
+all (or any) reference records---we can instead read only the reference records that we are planning to use 
+in our analyses (if any).
+If \code{reference = NULL}, no reference records are parsed.
+Otherwise, the character values of \code{reference} are treated as reference codes and only
+matching reference records are parsed.
+For instance, \code{readHumdrum(_, reference = "OTL")} will \emph{only} parse OTL reference records.
+If the values of \code{reference} are named, these names are used to name associated fields.
+Thus, by specifing \code{reference = c(Title = 'OTL')}, you can use "OTL" reference records to populate
+a field called "Title".
+
+If there are more than one reference records with the same reference code,
+either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two 
+or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 }
 
 \section{Result}{

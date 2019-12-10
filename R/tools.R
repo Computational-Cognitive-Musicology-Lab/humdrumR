@@ -54,6 +54,13 @@ as.formula <- function(x, lhs = NULL) {
     
 }
 
+names_ <- function(x) {
+    nam <- names(x)
+    
+    if(is.null(nam)) nam <- character(length(x))
+    
+    nam
+}
 
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 

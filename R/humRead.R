@@ -183,8 +183,8 @@ filterFilesByContent <- function(fileFrame, patterns, combine = `&`) {
                           
                       })
     
-    fileFrame[ , Filepath := Map(`[`, Filepath, matches)]
-    fileFrame[ , Files     := Map(`[`, Files    , matches)]
+    fileFrame[ , Filepath := list(Map(`[`, Filepath, matches))]
+    fileFrame[ , Files    := list(Map(`[`, Files   , matches))]
     
     
     fileFrame
@@ -456,6 +456,12 @@ shortFilenames <- function(fns) {
 #' logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
 #' 
+#' @param tandems \code{character}. This argument controls which, if any, tandem interpretations 
+#' are parsed into their own fields. The default value is \code{"known"}. 
+#' 
+#' @param reference \code{character}. This argument controls which, if any, reference records
+#' are parsed into their own fields. The default value is \code{"all"}. 
+#' 
 #' @section REpath-patterns:
 #' 
 #' "REpath-patterns" are specified using \code{...} arguments. 
@@ -506,6 +512,60 @@ shortFilenames <- function(fns) {
 #' skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
 #' directly and its \code{errorReport.path} argument.
 #' 
+#' @section Tandem Interpretations:
+#' 
+#' The \code{tandems} argument controls which tandem interpretations
+#' parsed into their own fields. This can be helpful to either save processing time and memory
+#' by \emph{not} parsing interpretations you won't need, or to parse interpretations that 
+#' humdrumR doesn't recognize.
+#' The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
+#' table called \code{knownInterpretations}. 
+#' Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
+#' associated with it.
+#' The default value for the \code{tandems} argument is \code{"known"}. If the \code{tandems} argument
+#' contains \code{"known"} \emph{all} tandem interpretations in the built-in \code{knownInterpretations} 
+#' table are parsed.
+#' Users may specify different interpretations to parse in two ways: 
+#' 
+#' 1) character strings 
+#' matching one of the name values from the \code{Name} column of \code{knownInterpretations}.
+#' For instance, if you specify \code{tandems = c('Clef', 'TimeSignature')}, only clef (e.g., \code{"*clefG2"}),
+#' and time signature (e.g., \code{"*M3/4"}) intepretations will be parsed.
+#' 
+#' 2) if the chracter string(s) in \code{tandem} do not exactly match one of the names in 
+#' \code{knownInterpretations$Name}, they are treated as regular expressions and used to match
+#' tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
+#' that humdrumR doesn't already know about.
+#' 
+#' If any values in \code{tandems} are named, these names will be used for resulting fields.
+#' If no matches to an given interpretation are found, no field is created for that interpretation.
+#' If \code{tandems = NULL}, then no tandem interpretations are parsed.
+#' 
+#' @section Reference Records:
+#' 
+#' By default (\code{reference = "all"}), humdrumR reads all reference records in the data.
+#' The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of 
+#' an associated field.
+#' (If a reference record has no reference code (i.e., it lacks a colon), the field is called "Unkeyed.")
+#' In large datasets with many reference records, the reference data can actually make up a large portion 
+#' of the humdrum table, and eat up a lot of memory. In these cases, we might not want to read
+#' all (or any) reference records---we can instead read only the reference records that we are planning to use 
+#' in our analyses (if any).
+#' If \code{reference = NULL}, no reference records are parsed.
+#' Otherwise, the character values of \code{reference} are treated as reference codes and only
+#' matching reference records are parsed.
+#' For instance, \code{readHumdrum(_, reference = "OTL")} will \emph{only} parse OTL reference records.
+#' If the values of \code{reference} are named, these names are used to name associated fields.
+#' Thus, by specifing \code{reference = c(Title = 'OTL')}, you can use "OTL" reference records to populate
+#' a field called "Title".
+#' 
+#' If there are more than one reference records with the same reference code,
+#' either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two 
+#' or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
+#' 
+#' 
+#' 
+#' 
 #' @section Result:
 #' 
 #' \code{findHumdrum} returns a "fileFrame" (\code{data.table}), listing all file names,
@@ -535,7 +595,7 @@ shortFilenames <- function(fns) {
 #' @name readHumdrum
 #' @export
 readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
-                       tandems = 'all', parseGlobal = TRUE) {
+                       tandems = 'known', reference = 'all') {
     
     fileFrame <- findHumdrum(..., contains = contains, recursive = recursive, 
                              allowDuplicates = allowDuplicates, verbose = verbose)
@@ -555,7 +615,7 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     ## Parse records
     humtabs <- Map(
         function(file, piece) { 
-            humtab <- parseRecords(file, piece, parseGlobal)
+            humtab <- parseRecords(file, piece, reference)
             if (verbose) cat(filename, '\n') 
             humtab
         }, 
@@ -598,12 +658,12 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
 
 
 
-parseRecords <- function(records, piece, parseGlobal = TRUE) {
+parseRecords <- function(records, piece, reference) {
           # This function is the biggest part of readHumdrum
           # It takes a character vector representing the records 
           # in a single humdrum file, and outputs a data.table (an incomplete humdrum table).
   
-  global <- if (parseGlobal) parseGlobal(records) else NA
+  global <- parseGlobal(records, reference) 
   local  <- parseLocal(records)
   
   humtab <- if (length(global) == 1 && is.na(global)) local else rbind(global$Data, local, fill = TRUE)
@@ -621,8 +681,8 @@ parseRecords <- function(records, piece, parseGlobal = TRUE) {
   humtab
 }
 
-parseGlobal <- function(records) {
-          # This function words for parseRecords
+parseGlobal <- function(records, reference) {
+          # This function works for parseRecords
           # It takes a character vectors of records 
           # from a single humdrum file and outputs 
           # two things: 
@@ -635,30 +695,44 @@ parseGlobal <- function(records) {
   types <- parseTokenType(globalrecords)
   refind <- grepl('^!!!', globalrecords)
   list(Data  = data.table(Token = globalrecords, Record = globalr, Type  = types),
-       Table = parseReference(globalrecords[refind]))
+       Table = parseReference(globalrecords[refind], reference))
 }
 
-parseReference <- function(refrecords) {
+parseReference <- function(refTable, reference) {
           # This parses a character vector of reference records into
           # a data.table with columns indicating reference keys
           # and rows holdingtheir values
-  refrecords <- stringi::stri_split_fixed(refrecords, ':', n = 2)
-  refKeys    <- unlist(lapply(refrecords, function(r) sub('^!!!', '', r[1])))
-  refVals    <- stringi::stri_trim_both(unlist(lapply(refrecords, '[', 2)))
+  if (is.null(reference)) return(NULL)    
+    
+  refrecords <- stringr::str_sub(refTable, start = 4L) # rid of !!!
+  
+  refTable <- as.data.table(stringi::stri_split_fixed(refrecords, ':', n = 2, simplify = TRUE))
+  colnames(refTable) <- c('refKeys', 'refVals')
+  
+  # if there is no colon, there is no key so need to shift the first column over and insert "Unkeyed"
+  refTable[ refVals == '', c('refKeys', 'refVals') := c('Unkeyed', refKeys)]
   
   
   #multiple keys
-  refNums <- as.numeric(stringi::stri_match_last_regex(refKeys, '[0-9][0-9]*$'))
-  refNums[is.na(refNums)] <- '1'
-  refKeys <- stringi::stri_replace_all_regex(refKeys, '[0-9]*$', '')
+  refTable[ , refKeys := stringi::stri_replace_all_regex(refKeys, '[0-9]+$', '')]
+  if (any(duplicated(refTable$refKeys)))  {
+      refTable <- refTable[ , .(refVals =  paste(refVals, collapse = '; ')), by = refKeys]
+      }
+
+  # filter by reference argument
+  if (!(length(reference) == 1L && reference == 'all')) {
+      refTable <- refTable[refKeys %in% reference]
+      names <- names_(reference)
+      names[names == ""] <- reference[names == ""]
+      refTable[ , refKeys := names[match(refKeys, reference)]]
+  }
   
-  # refVals <- tapply(refVals, refKeys, function(x) paste(x, collapse = '\n'), simplify = FALSE)
-  refVals <- tapply(refVals, refKeys, c, simplify = FALSE)
-  refVals <- Map(`names<-`, refVals, tapply(refNums, refKeys, c, simplify = FALSE))
+  if (nrow(refTable) == 0L) {
+      NULL
+  } else {
+      as.data.table(as.list(setNames(refTable$refVals, refTable$refKeys)))
+  }
   
-  
-  # as.data.table(setNames(lapply(refVals, list), names(refVals)))
-  data.table::as.data.table(lapply(refVals, function(ref) if (length(ref) == 1) ref else list(ref)))
 }
 
 
@@ -895,60 +969,59 @@ parseInterpretations <- function(spinemat) {
 }
 
 parseTandem <- function(tandems, known) {
-          # This function takes the parsed, cummulative
-          # Tandem fields produced by parseInterpretations
-          # and, using functions from the file humInterpretations.R
-          # identifies any "known" (i.e., standard) interpretations
-          # and parses these into a table of new Interpretation fields
-          # for the humdrum table.
-          # Known indicates
-          if (is.null(known) || all(tandems == "", na.rm = TRUE)) return(NULL)
+    # This function takes the parsed, cummulative
+    # Tandem fields produced by parseInterpretations
+    # and, using functions from the file humInterpretations.R
+    # identifies any "known" (i.e., standard) interpretations
+    # and parses these into a table of new Interpretation fields
+    # for the humdrum table.
+    # Known indicates
+    if (is.null(known) || all(tandems == "", na.rm = TRUE)) return(NULL)
     
-          # which are the tandems we want it to recognize
-          REs <- if (length(known) == 1L && known == 'all') {
-              knownInterpretations[Type == 'Tandem', getRE(Name, types = 'Tandem')]
-          } else {
-              REs <- getRE(known)
-              names(REs)[names(known) != ''] <- names(known)[names(known) != '']
-              REs
-          }
+    # which are the tandems we want it to recognize
+    REs <- getRE(known)
+    names(REs)[names(known) != ''] <- names(known)[names(known) != '']
+    if (any(REs == 'known')) {
+        REs <- c(REs[REs != 'known'],  
+                 knownInterpretations[Type == 'Tandem', getRE(Name, types = 'Tandem')])
+    }
     
-          # parse the stacked tandem vector
-          uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
-          uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
-          
-          # Reduce REs to only those that appear in data
-          REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
-          
-          tandemMat <- lapply(REs,
-                              function(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance
-          
-          names(tandemMat) <- names(REs)
-          
-          as.data.table(tandemMat)
+    # parse the stacked tandem vector
+    uniqueTandem <- unique(unlist(stringr::str_split(unique(tandems), ',')))
+    uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
+    
+    # Reduce REs to only those that appear in data
+    REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
+    
+    tandemMat <- lapply(REs,
+                        function(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance
+    
+    names(tandemMat) <- names(REs)
+    
+    as.data.table(tandemMat)
 }
 
 parseMultiStops <- function(spine) {
-  # This function is used by parseLocal to stretch out spines 
-  # containing multi stops (i.e., tokens separate by spaces) represented by their own tokens.
-  # This takes a character vector representing a single
-  # spine of tokens, with the names of the vector representing
-  # record numbers.
-  # It returns a new character vector of tokens, with multi stops 
-  # split into their on character strings, and with new record numbers enumerating
-  # any multi stops "X.01", "X.02", "X.03", etc.
-  # Single-stop tokens get labellex "X.01", while non-data tokens get "X.0"
-  nspaces <- stringi::stri_count_fixed(spine, ' ') #count multistops 
-  nspaces[grepl('^[!*=]', spine)] <- 0 #except not in non-data tokens
-  
-  if (!any(nspaces > 0)) return(setNames(spine, paste0(names(spine), '.01'))) # if there are no multistops, just as ".01" to names
-  
-  Map(function(recn, n) gsub('0\\.', '.', paste0(recn, .01 * seq_len(n))), 
-      names(spine), 
-      nspaces + 1) -> multiRecordn
-  spine[!grepl('^[!=*]', spine)] <- strsplit(spine[!grepl('^[!=*]', spine)], split = ' ')
-  
-  setNames(unlist(spine), unlist(multiRecordn))
+    # This function is used by parseLocal to stretch out spines 
+    # containing multi stops (i.e., tokens separate by spaces) represented by their own tokens.
+    # This takes a character vector representing a single
+    # spine of tokens, with the names of the vector representing
+    # record numbers.
+    # It returns a new character vector of tokens, with multi stops 
+    # split into their on character strings, and with new record numbers enumerating
+    # any multi stops "X.01", "X.02", "X.03", etc.
+    # Single-stop tokens get labellex "X.01", while non-data tokens get "X.0"
+    nspaces <- stringi::stri_count_fixed(spine, ' ') #count multistops 
+    nspaces[grepl('^[!*=]', spine)] <- 0 #except not in non-data tokens
+    
+    if (!any(nspaces > 0)) return(setNames(spine, paste0(names(spine), '.01'))) # if there are no multistops, just as ".01" to names
+    
+    Map(function(recn, n) gsub('0\\.', '.', paste0(recn, .01 * seq_len(n))), 
+        names(spine), 
+        nspaces + 1) -> multiRecordn
+    spine[!grepl('^[!=*]', spine)] <- strsplit(spine[!grepl('^[!=*]', spine)], split = ' ')
+    
+    setNames(unlist(spine), unlist(multiRecordn))
 }
 
 parseSections <- function(spine) {
