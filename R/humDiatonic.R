@@ -9,11 +9,13 @@
 #' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
 #' A key is represented by two integers, \code{Root} and \code{Mode}.
 #' Root is simply the tonic note of the key on the circle of fifths.
-#' Mode is a value on the circle of fifths, indicating the diatonic mode (range of 7 consecutive values)
-#' relative to the root.
+#' Mode is a value on the circle of fifths, indicating the diatonic mode.
+#' You can think of the Mode value as indicating the number of accidentals, with negative numbers
+#' for flats and positive numbers for sharps.
+#' The standard diatonic modes occur if the \code{Mode - Tonic} is in the range -5:1:
 #' \itemize{
-#' \item{ 1 = Lydian}
-#' \item{ 0 = Major (Ionian)}
+#' \item{+1 = Lydian}
+#' \item{+0 = Major (Ionian)}
 #' \item{-1 = Mixolydian}
 #' \item{-2 = Dorian}
 #' \item{-3 = Minor (Aeolian)}
@@ -29,6 +31,13 @@ setClass('diatonicSet', contains = 'humdrumVector',
 
 
 #' @name humDiatonic
+#' 
+#' \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
+#' \code{tertianSet} is a subclass of \code{diatonicSet}.
+#' 
+#' 
+#' 
 #' @seealso humTonality
 #' @export 
 setClass('tertianSet', contains = 'diatonicSet',
@@ -61,6 +70,11 @@ getMode <- function(dset) dset@Mode
 #' @name humDiatonic
 #' @export
 getAlterations <- function(dset) dset@Alterations
+
+`setAlterations<-` <- function(x, value) {
+    x@Alterations <- Repeat(value, length.out = length(x))
+    x
+}
 
 #' @name humDiatonic
 #' @export
@@ -195,7 +209,7 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 ######Special methods
 
 # How many accidentals does key have?
-accidentals <- function(dset) getRoot(dset) - getMode(dset)
+accidentals <- function(dset) getMode(dset)
 
 
 # triad = 3, 7th = 7, 9th = 15, 11th = 31, 13th = 63
@@ -234,8 +248,11 @@ getFifths <- function(dset, step = 2L) UseMethod("getFifths")
 
 #' @export
 getFifths.diatonicSet <- function(dset, step = 2L) {
-    mode <- getMode(dset)
+    # the step argument controls the order the fifths are output
+    # step = 2L means every two fifths (which is generic steps)
+    # step = 4L means thirds, which makes tertian harmonies
     root <- getRoot(dset)
+    mode <- getMode(dset) - root
     
     notna <- !is.na(mode) & !is.na(root)
     
@@ -251,23 +268,30 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
     fifths <- sweep(fifths, 1, root + mode, `+`)
     fifths[ , 1] <- root
     
-    orderScale(fifths, step = step)
+    fifths <- orderScale(fifths, step = step)
+    rownames(fifths) <- fifth2tonalname(fifths[ , 1])
+    
+    fifths
 }
 
 #' @export
 getFifths.tertianSet <- function(tset) {
+    alterations <- getAlterations(tset)
+    setAlterations(tset) <- 0L
+    
     fifths <- getFifths.diatonicSet(tset, step = 4L)
     thirds <- getThirds(tset)
+    
     
     fifths <- fifths * thirds
     fifths[!thirds] <- NA_integer_
     
-    colnames(fifths) <- c('Root', '3rd', '5th', '7th', '9th', '11th', '13th')
-    rownames(fifths) <- fifth2tonalname(fifths[ , 1])
+    if (any(alterations != 0L)) fifths <- t(apply(fifths, 1, alterFifthSet, alterations))
+    
+    colnames(fifths)[5:7] <- nth(c(9,11,13))
+    
     
     fifths
-    
-    
 }
 
 
@@ -283,12 +307,14 @@ alterFifthSet <- function(f, n = 0L, position = 2L) {
 
 
 orderScale <- function(fs, step = 2L) {
-    sq <- (seq(0, by = step, length.out = length(fs)) %% 7L) + 1L
-    if (is.null(dim(fs))) {
-        fs[(seq(0, by = step, length.out = length(fs)) %% 7L) + 1L]
-    } else {
-        fs[ , (seq(0, by = step, length.out = ncol(fs)) %% 7L) + 1L, drop = FALSE]
-    }
+    if (is.null(dim(fs))) fs <- matrix(fs, nrow = 1L)
+    
+    sq <- (seq(0, by = step, length.out = ncol(fs)) %% 7L) + 1L
+    fs <- fs[ , sq, drop = FALSE]
+    
+    colnames(fs) <- c("Root", nth(c(1,5,2,6,3,7,4)[sq[-1]]))
+    
+    fs
     
 }
 
@@ -298,7 +324,7 @@ orderScale <- function(fs, step = 2L) {
 #' @name diatonicSet-write
 #' @export
 as.keysignatureI <- function(dset) {
-    fifth <- getRoot(dset) + getMode(dset) 
+    fifth <- getMode(dset) 
     
     notzero <- fifth != 0L
     notes <- character(length(fifth))
@@ -306,7 +332,8 @@ as.keysignatureI <- function(dset) {
     fifth <- fifth[notzero]
     if (any(notzero)) {
         to   <- fifth + ifelse(fifth > 0L, 5, -1)
-        from <- c(-2, 6)[(fifth > 0L) + 1L]
+        from <- c(ifelse(min(fifth) > -7, -2, min(fifth) + 5), 
+                  ifelse(min(fifth) <  7, 6, max(fifth) - 5))[(fifth > 0L) + 1L]
         notef <- do.call(`:`, as.list(range(unique(c(from, to)))))
         notenames <- as.kernPitch(simpletint(notef))
         
@@ -325,7 +352,7 @@ as.keysignatureI <- function(dset) {
 as.keyI <- function(dset) {
     root <- fifth2tonalname(getRoot(dset))
     
-    mode <- getMode(dset)
+    mode <- getMode(dset) - getRoot(dset)
     
     root[mode < -1] <- tolower(root[mode < -1L])
     
@@ -489,6 +516,25 @@ as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FA
  ##
  IfElse(!is.na(roots), .paste(rootaccidental, numeral, triadalt, extensions), NA_character_)
  
+}
+
+#' @name diatonicSet
+#' @export
+as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
+    fifths <- getFifths(x)
+    
+    tonalnames <- array(NA_character_, dim = dim(fifths))
+    tonalnames[] <- fifth2tonalname(fifths)
+    
+    #
+    if (asStops) {
+        apply(tonalnames, 1, 
+                       function(row) paste(row[!is.na(row)], collapse = ' '))
+        } else {
+            tonalnames
+        } 
+    
+    
 }
 
 

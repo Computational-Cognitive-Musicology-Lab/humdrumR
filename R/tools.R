@@ -32,6 +32,17 @@ Repeat <- function(x, ..., margin = 1L) {
 
 plural <- function(n, then, els) IfElse(n > 1, then, els)
 
+nth <- function(n) {
+    affix <- character(length(n))
+    affix[n >= 4] <- "th"
+    affix[n == 1] <- "st"
+    affix[n == 2] <- "nd"
+    affix[n == 3] <- 'rd'
+    
+    paste0(n, affix)
+     
+}
+
 wrapInCall <- function(form, call) {
     # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs
     # with a call to any.

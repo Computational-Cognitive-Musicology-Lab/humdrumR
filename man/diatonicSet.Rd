@@ -8,6 +8,7 @@
 \alias{as.chordSymbol}
 \alias{as.romanNumeral}
 \alias{as.romanNumeral.tertianSet}
+\alias{as.kernPitch.diatonicSet}
 \alias{read.keyI2diatonicSet}
 \alias{read.sciChord2tertianSet}
 \alias{as.diatonicSet}
@@ -45,6 +46,8 @@ as.romanNumeral(x, ...)
 
 \method{as.romanNumeral}{tertianSet}(tset, key = dset(0L, 0L),
   cautionary = FALSE)
+
+\method{as.kernPitch}{diatonicSet}(x, asStops = FALSE)
 
 read.keyI2diatonicSet(keyI)
 
