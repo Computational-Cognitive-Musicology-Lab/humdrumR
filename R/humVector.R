@@ -171,6 +171,20 @@ setMethod('c', 'humdrumVector',
 
 #' @name humdrumVector
 #' @export
+setMethod('rep', 'humdrumVector',
+          function(x, ...) {
+              slots <- getSlots(x)
+              isvec <- sapply(slots, is.vector)
+              
+              slots[isvec] <- lapply(slots[isvec], rep, ...)
+              
+              setSlots(x) <- slots
+              x
+              
+          })
+
+#' @name humdrumVector
+#' @export
 setMethod('length', signature = c('humdrumVector'),
           function(x) {
               slots <- getSlots(x)

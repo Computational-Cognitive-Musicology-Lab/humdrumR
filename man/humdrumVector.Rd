@@ -17,6 +17,8 @@
 
 \S4method{c}{humdrumVector}(x, ...)
 
+\S4method{rep}{humdrumVector}(x, ...)
+
 \S4method{length}{humdrumVector}(x)
 
 \S4method{dim}{humdrumVector}(x)

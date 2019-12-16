@@ -9,6 +9,7 @@
 \alias{as.romanNumeral}
 \alias{as.romanNumeral.tertianSet}
 \alias{as.kernPitch.diatonicSet}
+\alias{as.semit.diatonicSet}
 \alias{read.keyI2diatonicSet}
 \alias{read.sciChord2tertianSet}
 \alias{as.diatonicSet}
@@ -30,6 +31,10 @@ so C minor and Eb major will be sorted next to each other.}
 \method{order}{diatonicSet}(x, ..., parallel = TRUE, na.last = TRUE,
   decreasing = FALSE, method = c("auto", "shell", "radix"))
 
+\S4method{==}{diatonicSet,diatonicSet}(e1, e2)
+
+\S4method{==}{tertianSet,tertianSet}(e1, e2)
+
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
 
 \S4method{Compare}{tertianSet,tertianSet}(e1, e2)
@@ -48,6 +53,8 @@ as.romanNumeral(x, ...)
   cautionary = FALSE)
 
 \method{as.kernPitch}{diatonicSet}(x, asStops = FALSE)
+
+\method{as.semit}{diatonicSet}(x, asStops = FALSE)
 
 read.keyI2diatonicSet(keyI)
 

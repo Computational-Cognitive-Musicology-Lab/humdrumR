@@ -344,6 +344,7 @@ ditto <- function(spine) {
 #' asked to.
 #' @export
 IfElse <- function(true, yes, no) {
+  if (length(true) == 0L) return(vector(class(yes), 0L))
   out <- no
   match_size(yes = yes, no = no, toEnv = TRUE)
   if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]

@@ -6,6 +6,7 @@
 \alias{diatonicSet}
 \alias{getRoot}
 \alias{getMode}
+\alias{getCardinality}
 \alias{getAlterations}
 \alias{getThirds}
 \alias{dset}
@@ -14,17 +15,20 @@
 \alias{is.tertianSet}
 \title{Tonal (diatonic) sets}
 \usage{
-getRoot(dset)
+getRoot(dset, recurse = TRUE)
 
-getMode(dset)
+getMode(dset, recurse = TRUE)
+
+getCardinality(dset)
 
 getAlterations(dset)
 
 getThirds(tset)
 
-dset(root = 0L, mode = 0L, alterations = 0L)
+dset(root = 0L, mode = root, alterations = 0L, of = NULL)
 
-tset(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L)
+tset(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L,
+  of = NULL)
 
 is.diatonicSet(x)
 
@@ -35,11 +39,13 @@ is.tertianSet(x)
 \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
 A key is represented by two integers, \code{Root} and \code{Mode}.
 Root is simply the tonic note of the key on the circle of fifths.
-Mode is a value on the circle of fifths, indicating the diatonic mode (range of 7 consecutive values)
-relative to the root.
+Mode is a value on the circle of fifths, indicating the diatonic mode.
+You can think of the Mode value as indicating the number of accidentals, with negative numbers
+for flats and positive numbers for sharps.
+The standard diatonic modes occur if the \code{Mode - Tonic} is in the range -5:1:
 \itemize{
-\item{ 1 = Lydian}
-\item{ 0 = Major (Ionian)}
+\item{+1 = Lydian}
+\item{+0 = Major (Ionian)}
 \item{-1 = Mixolydian}
 \item{-2 = Dorian}
 \item{-3 = Minor (Aeolian)}
@@ -48,7 +54,5 @@ relative to the root.
 }
 }
 \seealso{
-humTonality
-
 humTonality
 }

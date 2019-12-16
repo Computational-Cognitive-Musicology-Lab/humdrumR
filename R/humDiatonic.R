@@ -25,9 +25,20 @@
 #' 
 #' @seealso humTonality
 #' @name humDiatonic
+NULL
+
+setClassUnion('maybe_dSet', members = 'NULL')
+
+#' @name humDiatonic
 #' @export 
 setClass('diatonicSet', contains = 'humdrumVector',
-         slots = c(Root = 'integer', Mode = 'integer', Alterations = 'integer')) -> diatonicSet
+         slots = c(Root = 'integer', 
+                   Mode = 'integer', 
+                   Alterations = 'integer', 
+                   Of = 'maybe_dSet')) -> diatonicSet
+
+setIs('diatonicSet', 'maybe_dSet')
+
 
 
 #' @name humDiatonic
@@ -50,7 +61,9 @@ setClass('tertianSet', contains = 'diatonicSet',
 
 #' @name humDiatonic
 #' @export
-getRoot <- function(dset) dset@Root
+getRoot <- function(dset, recurse = TRUE) {
+    dset@Root + if (recurse && !is.null(dset@Of)) Recall(dset@Of) else 0L
+}
 
 `setRoot<-` <- function(x, value) {
     x@Root <- Repeat(value, length.out = length(x))
@@ -59,10 +72,21 @@ getRoot <- function(dset) dset@Root
 
 #' @name humDiatonic
 #' @export
-getMode <- function(dset) dset@Mode
+getMode <- function(dset, recurse = TRUE) {
+    dset@Mode + if (recurse && !is.null(dset@Of)) Recall(dset@Of) else 0L
+}
 
 `setMode<-` <- function(x, value) {
     x@Mode <- Repeat(value, length.out = length(x))
+    x
+}
+
+#' @name humDiatonic
+#' @export
+getCardinality <- function(dset) dset@Cardinality
+
+`setCardinality<-` <- function(x, value) {
+    x@Cardinality <- Repeat(value, length.out = length(x))
     x
 }
 
@@ -103,17 +127,18 @@ bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L))
 #' Accepts either a integer (fifth) or a \code{\link[humdrumR:tonalInterval]{tonalInterval}}.
 #' @name humDiatonic
 #' @export
-dset <- function(root = 0L, mode = 0L, alterations = 0L) {
+dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
            if (is.tonalInterval(root)) root <- getFifth(root)
            new('diatonicSet', 
                Root = as.integer(root), 
                Mode = as.integer(mode), 
-               Alterations = as.integer(alterations))
+               Alterations = as.integer(alterations),
+               Of = of)
 }
 
 #' @name humDiatonic
 #' @export
-tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L) {
+tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L, of = NULL) {
     if (is.tonalInterval(root)) root <- getFifth(root)
     
     root <- IfElse(cardinality == 0L, NA_integer_, root)
@@ -123,7 +148,8 @@ tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L) {
         Root = as.integer(root), 
         Mode = as.integer(mode), 
         Alterations = as.integer(alterations), 
-        Thirds = extensions)
+        Thirds = extensions,
+        Of = of)
 }
 
 
@@ -177,18 +203,45 @@ order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasin
 
 #' @name diatonicSet
 #' @export
+setMethod('==', signature = c('diatonicSet', 'diatonicSet'),
+          function(e1, e2) {
+             checkSame(e1, e2, "==")
+             f1 <- getFifths(e1)
+             f2 <- getFifths(e2)
+              
+             same <- f1 == f2 
+             rowSums(x, na.rm = TRUE) == 7L
+          })
+
+#' @name diatonicSet
+#' @export
+setMethod('==', signature = c('tertianSet', 'tertianSet'),
+          function(e1, e2) {
+              checkSame(e1, e2, "==")
+              f1 <- getFifths(e1)
+              f2 <- getFifths(e2)
+              
+              same <- f1 == f2 | (is.na(f1) & is.na(f2))
+              
+              rowSums(x, na.rm = TRUE) == 7L
+          })
+
+#' @name diatonicSet
+#' @export
 setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
           function(e1, e2) {
-             checkSame(e1, e2, "Compare")
-             callGeneric(accidentals(e1), accidentals(e2))
+              checkSame(e1, e2, "Compare")
+              callGeneric("Compare", getRoot(e1), getRoot(e2))
           })
+
 
 #' @name diatonicSet
 #' @export
 setMethod('Compare', signature = c('tertianSet', 'tertianSet'),
           function(e1, e2) {
               checkSame(e1, e2, "Compare")
-              callGeneric(getRoot(e1), get(e2))
+              
+              callGeneric("Compare", getRoot(e1), getRoot(e2))
           })
 
 
@@ -208,8 +261,7 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 
 ######Special methods
 
-# How many accidentals does key have?
-accidentals <- function(dset) getMode(dset)
+    
 
 
 # triad = 3, 7th = 7, 9th = 15, 11th = 31, 13th = 63
@@ -269,7 +321,7 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
     fifths[ , 1] <- root
     
     fifths <- orderScale(fifths, step = step)
-    rownames(fifths) <- fifth2tonalname(fifths[ , 1])
+    rownames(fifths) <- as.keyI(dset)
     
     fifths
 }
@@ -277,7 +329,7 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
 #' @export
 getFifths.tertianSet <- function(tset) {
     alterations <- getAlterations(tset)
-    setAlterations(tset) <- 0L
+    # setAlterations(tset) <- 0L
     
     fifths <- getFifths.diatonicSet(tset, step = 4L)
     thirds <- getThirds(tset)
@@ -286,7 +338,7 @@ getFifths.tertianSet <- function(tset) {
     fifths <- fifths * thirds
     fifths[!thirds] <- NA_integer_
     
-    if (any(alterations != 0L)) fifths <- t(apply(fifths, 1, alterFifthSet, alterations))
+    # if (any(alterations != 0L)) fifths <- sweep(fifths, 1, alterations, alterFifthSet)
     
     colnames(fifths)[5:7] <- nth(c(9,11,13))
     
@@ -295,16 +347,32 @@ getFifths.tertianSet <- function(tset) {
 }
 
 
-alterFifthSet <- function(f, n = 0L, position = 2L) {
-    if (n == 0L) return(f)
+alterFifthSet <- function(f, alter = 0L, position = 2L) {
+    if (alter == 0L) return(f)
     
-    which.alter <- order(f, decreasing = n < 0L)[position]
-    f[which.alter] <- f[which.alter] + 7L * sign(n)
+    which.alter <- order(f, decreasing = alter < 0L)[position]
+    f[which.alter] <- f[which.alter] + 7L * sign(alter)
     
-    Recall(f, n - sign(n), position = position)
+    Recall(f, alter - sign(alter), position = position)
     
 }
 
+# alterFifthSet <- function(fifths, alter = 0L) {
+    ## counteracts Mode, which counts accidentals,
+    ## by removing the first accidentals 
+    ## if alter = 1, 
+    ###### b- e- a- d- -> e- a- d-
+#     if (all(alter == 0L)) return(fifths)
+#     
+#     normalized <- sweep(fifths, 1, fifths[ , 1], `-`)
+#               
+#     start <- IfElse(alter > 0L, -2L, 6L)
+#     end   <- start - alter + sign(alter)
+#     
+#     hits <- sweep(normalized, 1, start, '<=') & sweep(normalized, 1, end, '>=')
+#     
+#     fifths + hits*7
+# }
 
 orderScale <- function(fs, step = 2L) {
     if (is.null(dim(fs))) fs <- matrix(fs, nrow = 1L)
@@ -324,24 +392,25 @@ orderScale <- function(fs, step = 2L) {
 #' @name diatonicSet-write
 #' @export
 as.keysignatureI <- function(dset) {
-    fifth <- getMode(dset) 
+    fifths <- getFifths(dset)
     
-    notzero <- fifth != 0L
-    notes <- character(length(fifth))
-    
-    fifth <- fifth[notzero]
-    if (any(notzero)) {
-        to   <- fifth + ifelse(fifth > 0L, 5, -1)
-        from <- c(ifelse(min(fifth) > -7, -2, min(fifth) + 5), 
-                  ifelse(min(fifth) <  7, 6, max(fifth) - 5))[(fifth > 0L) + 1L]
-        notef <- do.call(`:`, as.list(range(unique(c(from, to)))))
-        notenames <- as.kernPitch(simpletint(notef))
-        
-        notes[notzero] <- unlist(Map(function(from, to) .paste(collapse = '', notenames[match(from:to, notef)]), 
-                                     from, to))
-    }
+    notes <- apply(fifths, 1, 
+                   function(f) {
+                       f <- f[!is.na(f)]
+                       flats  <- f[f < -1]
+                       sharps <- f[f > 5]
+                       accidentals <- c(sort(flats,  decreasing = TRUE),
+                                        sort(sharps, decreasing = TRUE))
+                       paste(tolower(fifth2tonalname(accidentals)), collapse = "")
+                       })
         
     .paste("*k[", notes, ']')
+}
+
+#' @name diatonicSet-write
+#' @export
+as.romanKey <- function(dset) {
+    
 }
 
 
@@ -412,7 +481,9 @@ as.sciChord <- function(tharm) {
    
     quality <- getSciQuality(tharm)
     
-    IfElse(!is.na(root) & !is.na(tonalname), .paste(tonalname, quality), NA_character_)
+    IfElse(!is.na(root) & !is.na(tonalname), 
+           .paste(tonalname, quality), 
+           NA_character_)
 }
 
 
@@ -518,23 +589,34 @@ as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FA
  
 }
 
-#' @name diatonicSet
-#' @export
-as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
+as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
     fifths <- getFifths(x)
     
-    tonalnames <- array(NA_character_, dim = dim(fifths))
-    tonalnames[] <- fifth2tonalname(fifths)
+    pitches <- array(as(NA, Class = outclass), 
+                     dim = dim(fifths), dimnames = dimnames(fifths))
+    pitches[] <- pitch.func(fifths)
     
     #
     if (asStops) {
-        apply(tonalnames, 1, 
-                       function(row) paste(row[!is.na(row)], collapse = ' '))
-        } else {
-            tonalnames
-        } 
+        apply(pitches, 1,  
+              function(row) paste(row[!is.na(row)], collapse = ' '))
+    } else {
+        pitches
+    } 
     
-    
+}
+#' @name diatonicSet
+#' @export
+as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
+    as.pitches(x, asStops, 'character', fifth2tonalname)
+}
+#' @name diatonicSet
+#' @export
+as.semit.diatonicSet <- function(x, asStops = FALSE) {
+    as.pitches(x, asStops, 'integer',
+               function(fifths) {
+                   (fifths * 7L) %% 12L
+               })
 }
 
 

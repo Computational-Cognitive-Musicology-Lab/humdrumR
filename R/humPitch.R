@@ -411,7 +411,6 @@ fifth2accidental <- function(fifth, accidental.labels = c()) {
 }
 fifth2tonalname <- function(fifth, accidental.labels = c()) {
           letternames <- fifth2lettername(fifth)
-          
           accidentals <- fifth2accidental(fifth, accidental.labels)
           IfElse(!is.na(letternames) & !is.na(accidentals),
                  .paste(letternames, accidentals), 
