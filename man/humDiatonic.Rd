@@ -52,7 +52,13 @@ The standard diatonic modes occur if the \code{Mode - Tonic} is in the range -5:
 \item{-4 = Phyrgian}
 \item{-5 = Locrian}
 }
+
+\code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+\code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
+\code{tertianSet} is a subclass of \code{diatonicSet}.
 }
 \seealso{
+humTonality
+
 humTonality
 }

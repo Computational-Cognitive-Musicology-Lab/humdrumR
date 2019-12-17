@@ -409,6 +409,23 @@ fifth2accidental <- function(fifth, accidental.labels = c()) {
           output[isna] <- NA_character_
           output
 }
+
+fifth2alteration <- function(fifth, mode, alteration.labels = c()) {
+    # fifth and mode should be centered to 0 (C major)
+    setoptions(alteration.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+    list2env(as.list(alteration.labels), envir = environment())
+    
+    accidental <- fifth2accidental(fifth - mode, alteration.labels[c('sharp', 'flat')])
+    alteration <- fifth2accidental(fifth       , alteration.labels[c('sharp', 'flat')])
+    
+    alteration[fifth <  6 & accidental == sharp] <- natural
+    alteration[fifth >=  6 & accidental == ""] <- ""
+    
+    alteration[fifth > -2 & accidental == flat ] <- natural
+    alteration[fifth <= -2 & accidental == ""] <- ""
+    
+    alteration
+}
 fifth2tonalname <- function(fifth, accidental.labels = c()) {
           letternames <- fifth2lettername(fifth)
           accidentals <- fifth2accidental(fifth, accidental.labels)

@@ -3,11 +3,14 @@
 \name{diatonicSet-write}
 \alias{diatonicSet-write}
 \alias{as.keysignatureI}
+\alias{as.romanKey}
 \alias{as.keyI}
 \alias{as.tonalname.diatonicSet}
 \title{Writing \code{\link[humdrumR:humDiatonic]{diatonicSets}} to various representations.}
 \usage{
 as.keysignatureI(dset)
+
+as.romanKey(dset)
 
 as.keyI(dset)
 
@@ -17,4 +20,14 @@ as.keyI(dset)
 These functions all translate \code{\link[humdrumR:humDiatonic]{diatonicSets}} to 
 various pitch representations. Diatonic sets can be diatonic keys, or harmonies (the
 more specific \code{\link[humdrumR:humDiatonic]{tertianSet}} class).
+
+"Roman Key" is a relative representation of keys.
+This is like what's used to represent modulation schemes in 
+analyses of classical music. For instance, modulate from I-V,
+the to vi/V.
+}
+\details{
+This is also implicitely what is part of "applied" roman numerals.
+Given a roman numeral like "V65/V", the "/V" really represent a roman key,
+not a chord.
 }

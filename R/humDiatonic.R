@@ -40,8 +40,7 @@ setClass('diatonicSet', contains = 'humdrumVector',
 setIs('diatonicSet', 'maybe_dSet')
 
 
-
-#' @name humDiatonic
+#' Tertian set
 #' 
 #' \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 #' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
@@ -49,6 +48,7 @@ setIs('diatonicSet', 'maybe_dSet')
 #' 
 #' 
 #' 
+#' @name humDiatonic
 #' @seealso humTonality
 #' @export 
 setClass('tertianSet', contains = 'diatonicSet',
@@ -61,8 +61,16 @@ setClass('tertianSet', contains = 'diatonicSet',
 
 #' @name humDiatonic
 #' @export
-getRoot <- function(dset, recurse = TRUE) {
-    dset@Root + if (recurse && !is.null(dset@Of)) Recall(dset@Of) else 0L
+getRoot <- function(dset, recurse = TRUE, sum = TRUE) {
+    # If recurse is FALSE, only returns the "local" root
+    # If recurse is TRUE, includes any diatonic sets in the @Of field
+    # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final root
+    # if sum is FALSE, a matrix of roots is returned
+    roots <- cbind(dset@Root, if (recurse && !is.null(dset@Of)) Recall(dset@Of))
+    
+    if (sum) rowSums(roots) else roots
+    
+    
 }
 
 `setRoot<-` <- function(x, value) {
@@ -72,8 +80,14 @@ getRoot <- function(dset, recurse = TRUE) {
 
 #' @name humDiatonic
 #' @export
-getMode <- function(dset, recurse = TRUE) {
-    dset@Mode + if (recurse && !is.null(dset@Of)) Recall(dset@Of) else 0L
+getMode <- function(dset, recurse = TRUE, sum = TRUE) {
+    # If recurse is FALSE, only returns the "local" mode
+    # If recurse is TRUE, includes any diatonic sets in the @Of field
+    # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final mode
+    # if sum is FALSE, a matrix of modes is returned
+    modes <- cbind(dset@Mode, if (recurse && !is.null(dset@Of)) Recall(dset@Of))
+    
+    if (sum) rowSums(modes) else modes
 }
 
 `setMode<-` <- function(x, value) {
@@ -133,7 +147,8 @@ dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
                Root = as.integer(root), 
                Mode = as.integer(mode), 
                Alterations = as.integer(alterations),
-               Of = of)
+               Of = of) -> x
+           x
 }
 
 #' @name humDiatonic
@@ -293,7 +308,18 @@ fifth2mode <- function(fifth, short = FALSE) {
     if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
 }
 
-
+#' @export
+fifth2romanroot <- function(fifth, mode) {
+    # calculates the roman numeral for the root, including
+    # any root alteration relative to a mode
+    # doesn't change quality
+    # fifth and mode should be centered relative to C major (0,0)
+    numer <- c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')[fifth2genericinterval(fifth)]
+    
+    alteration <- fifth2alteration(fifth, mode)
+    
+    paste0(alteration, numer)
+}
 
 #' @export
 getFifths <- function(dset, step = 2L) UseMethod("getFifths")
@@ -407,10 +433,35 @@ as.keysignatureI <- function(dset) {
     .paste("*k[", notes, ']')
 }
 
+#' Roman Key
+#' 
+#' "Roman Key" is a relative representation of keys.
+#' This is like what's used to represent modulation schemes in 
+#' analyses of classical music. For instance, modulate from I-V,
+#' the to vi/V.
+#' 
+#' This is also implicitely what is part of "applied" roman numerals.
+#' Given a roman numeral like "V65/V", the "/V" really represent a roman key,
+#' not a chord.
+#'
 #' @name diatonicSet-write
 #' @export
 as.romanKey <- function(dset) {
+    root <- getRoot(dset, sum = FALSE)
+    mode <- getMode(dset, sum = FALSE) - root
     
+    numeral <- modelab <- array("", dim = dim(root))
+    numeral[] <- fifth2romanroot(root, cbind(mode[,-1],0))
+    
+    numeral[mode < -1] <- tolower(numeral[mode < -1L])
+    
+    modelab[] <- IfElse(mode == 0L | mode == -3L,
+                      "",
+                     paste0(":", fifth2mode(mode, short = TRUE)))
+    
+    numeral[] <- paste0(numeral, modelab)
+    
+    if (ncol(numeral) > 1L) apply(numeral, 1, paste, collapse = "/") else numeral
 }
 
 
