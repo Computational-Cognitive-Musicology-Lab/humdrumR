@@ -1,4 +1,21 @@
 
+applyrows <- function(x, f, ...){
+    result <- apply(x, 1, f, ...)
+    result <- if (is.null(dim(result))) cbind(result) else t(result)
+    
+    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
+    result
+}
+
+applycols <- function(x, f, ...){
+    result <- apply(x, 2, f, ...)
+    result <- if (is.null(dim(result))) rbind(result) else result
+    
+    
+    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
+    result
+}
+
 #' Shortcuts to making data.frames
 #' 
 #' These are just convenient (shorthands) for data.table and data.frame

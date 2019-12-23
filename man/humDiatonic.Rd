@@ -15,9 +15,9 @@
 \alias{is.tertianSet}
 \title{Tonal (diatonic) sets}
 \usage{
-getRoot(dset, recurse = TRUE)
+getRoot(dset, recurse = TRUE, sum = TRUE)
 
-getMode(dset, recurse = TRUE)
+getMode(dset, recurse = TRUE, sum = TRUE)
 
 getCardinality(dset)
 

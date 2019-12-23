@@ -247,7 +247,7 @@ as.data.frame.humdrumVector <- function(x, row.names = NULL, optional = FALSE, .
     value
 }
 
-#######
+#######-
 #' @name humdrumVector
 #' @export
 setMethod('as.character', 'humdrumVector',

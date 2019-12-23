@@ -39,6 +39,10 @@ setClass('diatonicSet', contains = 'humdrumVector',
 
 setIs('diatonicSet', 'maybe_dSet')
 
+setValidity('diatonicSet', 
+            function(object) {
+                !class(object@Of) == "tertianSet"
+            })
 
 #' Tertian set
 #' 
@@ -66,7 +70,8 @@ getRoot <- function(dset, recurse = TRUE, sum = TRUE) {
     # If recurse is TRUE, includes any diatonic sets in the @Of field
     # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final root
     # if sum is FALSE, a matrix of roots is returned
-    roots <- cbind(dset@Root, if (recurse && !is.null(dset@Of)) Recall(dset@Of))
+    roots <- cbind(dset@Root, 
+                   if (recurse && !is.null(dset@Of)) Recall(dset@Of, recurse = recurse, sum = sum))
     
     if (sum) rowSums(roots) else roots
     
@@ -85,7 +90,8 @@ getMode <- function(dset, recurse = TRUE, sum = TRUE) {
     # If recurse is TRUE, includes any diatonic sets in the @Of field
     # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final mode
     # if sum is FALSE, a matrix of modes is returned
-    modes <- cbind(dset@Mode, if (recurse && !is.null(dset@Of)) Recall(dset@Of))
+    modes <- cbind(dset@Mode, 
+                   if (recurse && !is.null(dset@Of)) Recall(dset@Of, recurse = recurse, sum = sum))
     
     if (sum) rowSums(modes) else modes
 }
@@ -308,7 +314,6 @@ fifth2mode <- function(fifth, short = FALSE) {
     if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
 }
 
-#' @export
 fifth2romanroot <- function(fifth, mode) {
     # calculates the roman numeral for the root, including
     # any root alteration relative to a mode
@@ -367,7 +372,7 @@ getFifths.tertianSet <- function(tset) {
     # if (any(alterations != 0L)) fifths <- sweep(fifths, 1, alterations, alterFifthSet)
     
     colnames(fifths)[5:7] <- nth(c(9,11,13))
-    
+    rownames(fifths) <- fifth2lettername(getRoot(tset))
     
     fifths
 }
@@ -412,6 +417,40 @@ orderScale <- function(fs, step = 2L) {
     
 }
 
+##### Breakout diatonic sets into indivudual pitches
+
+
+as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
+    fifths <- getFifths(x)
+    
+    pitches <- array(as(NA, Class = outclass), 
+                     dim = dim(fifths), dimnames = dimnames(fifths))
+    pitches[] <- pitch.func(fifths)
+    
+    #
+    if (asStops) {
+        apply(pitches, 1,  
+              function(row) paste(row[!is.na(row)], collapse = ' '))
+    } else {
+        pitches
+    } 
+    
+}
+#' @name diatonicSet
+#' @export
+as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
+    as.pitches(x, asStops, 'character', fifth2tonalname)
+}
+
+
+#' @name diatonicSet
+#' @export
+as.semit.diatonicSet <- function(x, asStops = FALSE) {
+    as.pitches(x, asStops, 'integer',
+               function(fifths) {
+                   (fifths * 7L) %% 12L
+               })
+}
 
 ##### As key signature interpretation (i.e., *k[f#], *k[b-e-a-d-g-])
 
@@ -433,28 +472,40 @@ as.keysignatureI <- function(dset) {
     .paste("*k[", notes, ']')
 }
 
-#' Roman Key
+
+#' @name diatonicSet
+#' @export
+as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
+
+
+
+#' Roman Numeral
 #' 
-#' "Roman Key" is a relative representation of keys.
-#' This is like what's used to represent modulation schemes in 
+#' Roman numerals can be calculated for diatonicSets (keys) and 
+#' for tertian sets (chords).
+#' The later case is the standard meaning of "roman numeral."
+#' However, the former case is used as well, for instance
+#'  to represent modulation schemes in 
 #' analyses of classical music. For instance, modulate from I-V,
 #' the to vi/V.
-#' 
-#' This is also implicitely what is part of "applied" roman numerals.
-#' Given a roman numeral like "V65/V", the "/V" really represent a roman key,
-#' not a chord.
+#' More importantly, many "roman numerals" in harmonic analyses
+#' implicitely combine tertian and diatonic roman numerals:
+#' in "applied" roman numerals.
+#' Given a roman numeral like "V65/V", the "V65" represents a
+#' chord while the "/V" represents a key.
 #'
 #' @name diatonicSet-write
 #' @export
-as.romanKey <- function(dset) {
+as.romanNumeral.diatonicSet <- function(dset) {
     root <- getRoot(dset, sum = FALSE)
     mode <- getMode(dset, sum = FALSE) - root
     
-    numeral <- modelab <- array("", dim = dim(root))
-    numeral[] <- fifth2romanroot(root, cbind(mode[,-1],0))
+    cummode <- applyrows(mode, rev %.% cumsum %.% rev)
+    numeral <- modelab <- array("", dim = dim(mode))
+    numeral[] <- fifth2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
+    
     
     numeral[mode < -1] <- tolower(numeral[mode < -1L])
-    
     modelab[] <- IfElse(mode == 0L | mode == -3L,
                       "",
                      paste0(":", fifth2mode(mode, short = TRUE)))
@@ -471,9 +522,8 @@ as.romanKey <- function(dset) {
 #' @export
 as.keyI <- function(dset) {
     root <- fifth2tonalname(getRoot(dset))
-    
     mode <- getMode(dset) - getRoot(dset)
-    
+        
     root[mode < -1] <- tolower(root[mode < -1L])
     
     modelab <- ifelse(mode == 0L | mode == -3L,
@@ -493,7 +543,7 @@ as.tonalname.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
 
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
 
-getSciQuality <- function(tset, collapse.triad = TRUE) {
+getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = TRUE) {
    
     fifths <- getFifths(tset)
     fifths <- sweep(fifths, 1, fifths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
@@ -506,6 +556,7 @@ getSciQuality <- function(tset, collapse.triad = TRUE) {
     qualities[is.na(qualities)] <- ""
     qualities[nchar(qualities) > 1L] <- .paste('(',  qualities[nchar(qualities) > 1L], ')')
     if (collapse.triad) {
+        thirds <- thirds[thirds != 1] - 1
         triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, .paste, collapse = ''),
                         function(row) {
                             switch(row,
@@ -520,7 +571,9 @@ getSciQuality <- function(tset, collapse.triad = TRUE) {
         qualities <- qualities[ , -1, drop = FALSE]
     }
     
-    apply(qualities, 1, .paste, collapse = '')
+    qualities <- qualities[ , thirds, drop = FALSE]
+    
+    if (collapse)  apply(qualities, 1, .paste, collapse = '') else qualities
     
 }
 
@@ -563,10 +616,11 @@ as.chordSymbol <- function(tharm, sep = '') {
       MmMPm = 'b13',
       mm = "min7",
       mmM = "min9",
-      mmm = "min(b9)",
+      mmm = "min7(b9)",
       mmMP = "min11",
       MmMP = "11",
       om = "min7(b5)",
+      omm = "min7(b5b9)",
       oo = "dim7",
       `+m` = "aug7",
       `+M` = "aug(maj7)",
@@ -581,94 +635,46 @@ as.chordSymbol <- function(tharm, sep = '') {
 
 ### As roman numeral (I, V, viio, etc.)    
 
-#' @name diatonicSet
-#' @export
-as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
 
 #' @name diatonicSet
 #' @export
-as.romanNumeral.tertianSet <- function(tset, key = dset(0L, 0L), cautionary = FALSE) {
- fifths <- getFifths(tset)
+as.romanNumeral.tertianSet <- function(tset, cautionary = FALSE) {
+ ofkey <- if (is.null(tset@Of)) "" else paste0('/', as.romanNumeral(tset@Of))
  
- if (!is.diatonicSet(key)) key <- as.diatonicSet(key)
  
- degrees <- array(NA_character_, dim = dim(fifths))
- degrees[] <- apply(fifths, 2, as.scaleDegree, cautionary = FALSE, key = key)
+ root <- getRoot(tset, recurse = FALSE)
+ mode <- getMode(tset, recurse = TRUE) - 
+     getMode(tset, recurse = FALSE) -
+     getRoot(tset, recurse = TRUE) 
  
- ### Root
- roots    <- stringi::stri_extract_first_regex(degrees[ , 1], '[1-7]')
- numerals <- c(`1` = 'I', `2` = 'II', `3` = 'III', `4` = 'IV', `5` = 'V', `6` = 'VI', `7` = 'VII')[roots]
+ numeral <- fifth2romanroot(root, mode + root)
+ 
  
  ### triad quality
- mode <- getMode(tset)
- numeral <- IfElse(mode < -1L, tolower(numerals), numerals)
- triadalt <- character(length(mode))
- triadalt[mode < -4L] <- 'o'
- triadalt[mode >  1L] <- '+'
+ # o or + indicate diminished or augmented fifths
+ # not going to work for weird, double altered
+ triadqual <- getSciQuality(tset, thirds = 1:2)
+ 
+ # case indicates major/minor third
+ numeral <- IfElse(grepl('[mo]', triadqual), tolower(numeral), numeral)
+ triadqual[triadqual %in% c('M', 'm')] <- ""
  
  ### extensions and alterations
- accidental   <- degrees
- accidental[] <- apply(degrees, 2, stringi::stri_extract_first_regex, pattern = '^[mnb#M]*')
- accidental[accidental == 'M'] = 'n'
- accidental[accidental == 'm'] = 'b'
  
- rootaccidental <- accidental[ , 1L]
- accidental <- accidental[ , -1L, drop = FALSE]
+ fifths <- getFifths(tset)[ , -1L:-3L, drop = FALSE]
+ extension <- array(NA_character_, dim = dim(fifths))
  
- chordtones <- c('3', '5', '7', '9', '11', '13')
+
+ extension[] <- fifth2alteration(fifths, getMode(tset), cautionary = FALSE)
+ highest <- applyrows(extension, function(row) seq_len(ncol(extension)) == max(which(!is.na(row))))
+ extension[] <- sweep(extension, 2, c('7', '9', '11', '13'), paste0)
+ extension[!(highest | (!is.na(extension) & extension == ''))] <- ""
+ extension <- applyrows(extension, paste, collapse = "")
  
- if (!cautionary) {
-     chordtones <- chordtones[-1:-2]
-     accidental <- accidental[ , -1:-2, drop = FALSE]
- }
- 
- n <- length(chordtones)
- extensions <- apply(accidental, 1,
-       function(row) {
-           notna <- !is.na(row)
-           acc <- row != ''
-           last <- logical(length(row))
-           if (any(notna)) last[ max(which(notna))] <- TRUE
-           hits <- notna & (acc | last)
-           .paste(row[hits], chordtones[hits], sep = '', collapse = '')
-           
-       })
- 
- 
- ##
- IfElse(!is.na(roots), .paste(rootaccidental, numeral, triadalt, extensions), NA_character_)
+ IfElse(!is.na(root), paste0(numeral, triadqual, extension), NA_character_)
  
 }
 
-as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
-    fifths <- getFifths(x)
-    
-    pitches <- array(as(NA, Class = outclass), 
-                     dim = dim(fifths), dimnames = dimnames(fifths))
-    pitches[] <- pitch.func(fifths)
-    
-    #
-    if (asStops) {
-        apply(pitches, 1,  
-              function(row) paste(row[!is.na(row)], collapse = ' '))
-    } else {
-        pitches
-    } 
-    
-}
-#' @name diatonicSet
-#' @export
-as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
-    as.pitches(x, asStops, 'character', fifth2tonalname)
-}
-#' @name diatonicSet
-#' @export
-as.semit.diatonicSet <- function(x, asStops = FALSE) {
-    as.pitches(x, asStops, 'integer',
-               function(fifths) {
-                   (fifths * 7L) %% 12L
-               })
-}
 
 
 #####################################-
@@ -725,6 +731,32 @@ read.sciChord2tertianSet <- function(csym) {
     
 }
 
+####From roman numerals
+
+read.romanNumeral2diatonicSet <- function(rn) {
+    parseRN <- REparser(DegreeAcc = "^[b#]?", 
+                        Numeral = "[IViv]{1,2}[iI]?", 
+                        TriadQuality= '[o+]?', 
+                        Seventh = '([nb#]?7)?',
+                        Ninth   = '([nb#]?9)?',
+                        Eleventh = '([nb#]?11)?',
+                        Thirteenth = '([nb#]?13)?',
+                        Inversion = '[abcdefg]?')
+    return(parseRN(rn))
+    preacc <- stringr::str_extract(rn, '^[b#]')
+    numeral <- stringr::str_extract(rn, '[VIvi][VIvi]?[Ii]?')
+    isminor <- numeral == tolower(numeral)
+    numeral <- toupper(numeral)
+    
+    accf <- numeric(length(preacc))
+    accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
+    numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
+    isminorf <- isminor * -3
+    tset(numeralf + accf, numeralf + isminorf)
+    
+    # extensions
+    stringr::str_extract_all(rn, '[b#]?[79]|[b#]?11|[b#]?13')
+}
 
 #### From anything!
 

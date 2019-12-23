@@ -4,12 +4,12 @@
 \name{diatonicSet}
 \alias{diatonicSet}
 \alias{order.diatonicSet}
-\alias{as.sciChord}
-\alias{as.chordSymbol}
-\alias{as.romanNumeral}
-\alias{as.romanNumeral.tertianSet}
 \alias{as.kernPitch.diatonicSet}
 \alias{as.semit.diatonicSet}
+\alias{as.romanNumeral}
+\alias{as.sciChord}
+\alias{as.chordSymbol}
+\alias{as.romanNumeral.tertianSet}
 \alias{read.keyI2diatonicSet}
 \alias{read.sciChord2tertianSet}
 \alias{as.diatonicSet}
@@ -43,18 +43,17 @@ so C minor and Eb major will be sorted next to each other.}
 
 \S4method{as.character}{tertianSet}(x)
 
+\method{as.kernPitch}{diatonicSet}(x, asStops = FALSE)
+
+\method{as.semit}{diatonicSet}(x, asStops = FALSE)
+
+as.romanNumeral(x, ...)
+
 as.sciChord(tharm)
 
 as.chordSymbol(tharm, sep = "")
 
-as.romanNumeral(x, ...)
-
-\method{as.romanNumeral}{tertianSet}(tset, key = dset(0L, 0L),
-  cautionary = FALSE)
-
-\method{as.kernPitch}{diatonicSet}(x, asStops = FALSE)
-
-\method{as.semit}{diatonicSet}(x, asStops = FALSE)
+\method{as.romanNumeral}{tertianSet}(tset, cautionary = FALSE)
 
 read.keyI2diatonicSet(keyI)
 
@@ -68,8 +67,7 @@ as.tertianSet(...)
 
 \method{as.tertianSet}{character}(str, inPlace = FALSE)
 
-\method{as.romanNumeral}{character}(x, key = dset(0L, 0L),
-  cautionary = FALSE)
+\method{as.romanNumeral}{character}(x, cautionary = FALSE)
 
 as.triad(x, ...)
 

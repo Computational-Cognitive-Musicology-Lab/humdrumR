@@ -1,3 +1,39 @@
+####### Regex Parsing
+
+#' Make a regular expression parser
+#' 
+#' 
+#' @export
+REparser <- function(...) {
+    
+    res <- list(...)
+    res <- lapply(res, function(re) paste0('^', re))
+    
+    if (is.null(names(res)) | any(names(res) == "")) stop(call. = FALSE,
+                                                          "In call to REparser, all arguments must be named.")
+    function(str) {
+        complete <- !logical(length(str))
+        
+        for (re in names(res)) {
+            locs <- stringr::str_locate(str, res[[re]])
+            
+            hits <- !is.na(locs[ , 1])
+            complete <- complete & hits
+            res[[re]] <- stringr::str_sub(str, locs[ , 'start'], locs[ , 'end'])
+            
+            str[hits] <- stringr::str_sub(str[hits], start = locs[hits, 'end'] + 1)
+        }
+        
+        output <- do.call('cbind', res)
+        output[!complete, ] <- NA_character_
+        output
+    }
+    
+    
+}
+
+
+
 ####### Regex dispatch ----
 
 #' Regular expression method dispatch and function application

@@ -409,22 +409,33 @@ fifth2accidental <- function(fifth, accidental.labels = c()) {
           output[isna] <- NA_character_
           output
 }
-
-fifth2alteration <- function(fifth, mode, alteration.labels = c()) {
-    # fifth and mode should be centered to 0 (C major)
+#' @export
+fifth2alteration <- function(fifth, mode, cautionary = TRUE, alteration.labels = c()) {
+    # fifth and mode must be centered to 0 (C major)
     setoptions(alteration.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
     list2env(as.list(alteration.labels), envir = environment())
     
-    accidental <- fifth2accidental(fifth - mode, alteration.labels[c('sharp', 'flat')])
-    alteration <- fifth2accidental(fifth       , alteration.labels[c('sharp', 'flat')])
+    output <- alteration <- fifth2accidental(fifth - mode, alteration.labels[c('sharp', 'flat')])
+    notna <- !is.na(alteration)
+    alteration <- alteration[notna]
+    fifth <- fifth[notna]
     
-    alteration[fifth <  6 & accidental == sharp] <- natural
-    alteration[fifth >=  6 & accidental == ""] <- ""
+    accidental <- fifth2accidental(fifth, alteration.labels[c('sharp', 'flat')])
     
-    alteration[fifth > -2 & accidental == flat ] <- natural
-    alteration[fifth <= -2 & accidental == ""] <- ""
+    alteration[alteration != '' & fifth <= 5 & fifth >= -1] <- 'n'
+    alteration[fifth >  5 & fifth - mode >=  6] <- accidental[fifth >  5 & fifth - mode >= 6]
+    alteration[fifth < -1 & fifth - mode <= -2] <- accidental[fifth < -1 & fifth - mode <= -2]
     
-    alteration
+    alteration[ alteration %~% '#' & fifth < -1] <- paste0('n', accidental[ alteration %~% '#' & fifth < -1] )
+    alteration[ alteration %~% 'b' & fifth >  5] <- paste0('n', accidental[ alteration %~% 'b' & fifth >  5] )
+    
+    if (cautionary) {
+        alteration[fifth >  5 & alteration == ""] <- paste0('(', accidental[fifth >  5 & alteration == ""], ')')
+        alteration[fifth < -1 & alteration == ""] <- paste0('(', accidental[fifth < -1 & alteration == ""], ')')
+    }
+    
+    output[notna] <- alteration
+    output
 }
 fifth2tonalname <- function(fifth, accidental.labels = c()) {
           letternames <- fifth2lettername(fifth)
