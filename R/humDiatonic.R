@@ -80,7 +80,7 @@ getRoot <- function(dset, recurse = TRUE, sum = TRUE) {
 
 `setRoot<-` <- function(x, value) {
     x@Root <- Repeat(value, length.out = length(x))
-    x
+    as.integer(x)
 }
 
 #' @name humDiatonic
@@ -93,7 +93,7 @@ getMode <- function(dset, recurse = TRUE, sum = TRUE) {
     modes <- cbind(dset@Mode, 
                    if (recurse && !is.null(dset@Of)) Recall(dset@Of, recurse = recurse, sum = sum))
     
-    if (sum) rowSums(modes) else modes
+    as.integer(if (sum) rowSums(modes) else modes)
 }
 
 `setMode<-` <- function(x, value) {
@@ -335,24 +335,28 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
     # step = 2L means every two fifths (which is generic steps)
     # step = 4L means thirds, which makes tertian harmonies
     root <- getRoot(dset)
-    mode <- getMode(dset) - root
+    mode <- getMode(dset)
     
     notna <- !is.na(mode) & !is.na(root)
     
-    fifths <- matrix(NA_integer_, nrow = length(root), ncol = 7)
-    if (any(notna)) {
-        fifths[notna, ] <- t(mapply(function(m, alt) {
-            fs <- rotate(-1:5L, m - 1L, wrap = TRUE)
-            alterFifthSet(fs, alt)
-        },
-        mode[notna], getAlterations(dset)[notna]))
-    }
+    ## Generate scale structure
+    sq <- seq(0L, by = as.integer(step), length.out = 7L)
+    fifths <- matrix(sq, nrow = length(root), ncol = 7L, byrow = TRUE)
+    fifths[!notna, ] <- NA_integer_
+    fifths <- sweep(fifths, 1L, root, `+`)
+    fifths <- sweep(fifths, 1L, mode,
+                    function(row, m) {
+                      (row + 1L - m) %% 7L - 1L + m  # + 1L and - 1L because F is -1
+                    })
     
-    fifths <- sweep(fifths, 1, root + mode, `+`)
+    # Force root to be root, regardless of mode
     fifths[ , 1] <- root
     
-    fifths <- orderScale(fifths, step = step)
+    #
+    fifths[] <- alterFifths(fifths, getAlterations(dset))
+    
     rownames(fifths) <- as.keyI(dset)
+    colnames(fifths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
     
     fifths
 }
@@ -378,46 +382,34 @@ getFifths.tertianSet <- function(tset) {
 }
 
 
-alterFifthSet <- function(f, alter = 0L, position = 2L) {
-    if (alter == 0L) return(f)
+alterFifths <- function(fifths, alt) {
+    alt[is.na(alt)] <- 0L
+    if (all(alt == 0L)) return(fifths)
     
-    which.alter <- order(f, decreasing = alter < 0L)[position]
-    f[which.alter] <- f[which.alter] + 7L * sign(alter)
+    roots <- fifths[ , 1]
     
-    Recall(f, alter - sign(alter), position = position)
+    ord <- applyrows(fifths, rank)
     
+    altmat <- matrix(alt, nrow = length(alt), ncol = 7L)
+    fifths[ord == 2L & altmat > 0L] <- fifths[ord == 2L & alt > 0L] + 7L
+    fifths[ord == 6L & altmat < 0L] <- fifths[ord == 6L & alt < 0L] - 7L
+
+    
+    # recurse if necessary
+    alt <- alt - sign(alt)
+    done <- alt == 0L 
+    if (any(!done)) {
+        fifths[!done, ] <- Recall(fifths[!done, , drop = FALSE], alt[!done])
+    }
+    
+    fifths[, 1] <- roots
+    fifths
+
 }
 
-# alterFifthSet <- function(fifths, alter = 0L) {
-    ## counteracts Mode, which counts accidentals,
-    ## by removing the first accidentals 
-    ## if alter = 1, 
-    ###### b- e- a- d- -> e- a- d-
-#     if (all(alter == 0L)) return(fifths)
-#     
-#     normalized <- sweep(fifths, 1, fifths[ , 1], `-`)
-#               
-#     start <- IfElse(alter > 0L, -2L, 6L)
-#     end   <- start - alter + sign(alter)
-#     
-#     hits <- sweep(normalized, 1, start, '<=') & sweep(normalized, 1, end, '>=')
-#     
-#     fifths + hits*7
-# }
+    
 
-orderScale <- function(fs, step = 2L) {
-    if (is.null(dim(fs))) fs <- matrix(fs, nrow = 1L)
-    
-    sq <- (seq(0, by = step, length.out = ncol(fs)) %% 7L) + 1L
-    fs <- fs[ , sq, drop = FALSE]
-    
-    colnames(fs) <- c("Root", nth(c(1,5,2,6,3,7,4)[sq[-1]]))
-    
-    fs
-    
-}
-
-##### Breakout diatonic sets into indivudual pitches
+##### Breakout diatonic sets into individual pitches
 
 
 as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
@@ -520,7 +512,7 @@ as.romanNumeral.diatonicSet <- function(dset) {
 
 #' @name diatonicSet-write
 #' @export
-as.keyI <- function(dset) {
+as.keyI <- function(dset, alteration.labels = c()) {
     root <- fifth2tonalname(getRoot(dset))
     mode <- getMode(dset) - getRoot(dset)
         
@@ -530,7 +522,15 @@ as.keyI <- function(dset) {
                       "",
                       fifth2mode(mode, short = TRUE))
     
-    .paste("*", root, ":", modelab)
+    #
+    setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
+    alterations <- getAlterations(dset)
+    alterations <- IfElse(alterations > 0,
+                          strrep(alteration.labels['augment'] , abs(alterations)),
+                          strrep(alteration.labels['diminish'], abs(alterations)))
+    
+    
+    .paste("*", root, ":", modelab, alterations)
 }
 
 ##### As tonal name (i.e., "Eb")
