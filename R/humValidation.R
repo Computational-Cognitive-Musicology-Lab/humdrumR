@@ -38,7 +38,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     }
     
     ##
-    files     <- fileFrame$Files
+    files     <- fileFrame$FileLines
     filepaths <- fileFrame$Filepath
     
     cat(glue::glue("Validating {num2print(length(files))} files..."))
@@ -49,7 +49,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     
     filevec  <- rep(filepaths, lengths(files))
     recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
-    records  <- unlist(files)
+    records  <- unlist(fileFrame$FileLines)
     
     local   <- !grepl('^!!', records)
     

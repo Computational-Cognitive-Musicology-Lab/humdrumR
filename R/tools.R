@@ -362,8 +362,8 @@ ditto <- function(spine) {
 #' @export
 IfElse <- function(true, yes, no) {
   if (length(true) == 0L) return(vector(class(yes), 0L))
+  match_size(true = true, yes = yes, no = no, toEnv = TRUE)
   out <- no
-  match_size(yes = yes, no = no, toEnv = TRUE)
   if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
