@@ -260,6 +260,13 @@
 #' @param ... Additional formulas/functions, or lists of formulas/functions.
 #' These are all simply appended to the \code{formulae} argument.
 #' 
+#' @param drop This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
+#' If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
+#' the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
+#' a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
+#' intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that 
+#' the output is consistent.
+#' 
 #' @examples 
 #' humdata <- readHumdrum('directorywithdata/*.krn')
 #' 
@@ -383,7 +390,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #'
 #' @name with-in-Humdrum
 #' @export
-withHumdrum <- function(humdrumR,  ...) {
+withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     checkhumdrumR(humdrumR, 'withHumdrum')
     
     #### Processing formulae list
@@ -394,44 +401,48 @@ withHumdrum <- function(humdrumR,  ...) {
     # parseArgs MAY have changed graphical parameters.
     on.exit(par(parsedArgs$oldpar)) # if old par is NULL, nothing happens
     
-          #### Preprocess humdrumR and humtab
-          # withHumdrum can't handle multiple do expressions, because it doesn't return a
-          # humdrumR object, it can't pipe the output of one do expression to the next.
-          # Instead, if there are more than one do expressions, we call all but the last do expression
-          # using withinHumdrum (which does pipe one do to the next) and only call withHumdrum on the last do expression.
-          # The call to withinHumdrum is identical to the call to withHumdrum, except missing the initial do expressions.
-          if (length(parsedArgs$formulae$doexpressions) > 1L) {
-                    formulae <- parsedArgs$formulae
-                    
-                    formulae$doexpressions <- head(formulae$doexpressions, -1) # all but last doexpression
-                    humdrumR <- do.call('withinHumdrum', 
-                                        c(humdrumR,
-                                          unlist(formulae, use.names = TRUE), 
-                                          parsedArgs$namedArgs))
-                    
-                    parsedArgs$formulae$doexpressions <- tail(parsedArgs$formulae$doexpressions, 1)       
-          } 
-          
-          # Getting the humtab with the right record types.
+    #### Preprocess humdrumR and humtab
+    # withHumdrum can't handle multiple do expressions, because it doesn't return a
+    # humdrumR object, it can't pipe the output of one do expression to the next.
+    # Instead, if there are more than one do expressions, we call all but the last do expression
+    # using withinHumdrum (which does pipe one do to the next) and only call withHumdrum on the last do expression.
+    # The call to withinHumdrum is identical to the call to withHumdrum, except missing the initial do expressions.
+    if (length(parsedArgs$formulae$doexpressions) > 1L) {
+        formulae <- parsedArgs$formulae
+        
+        formulae$doexpressions <- head(formulae$doexpressions, -1) # all but last doexpression
+        humdrumR <- do.call('withinHumdrum', 
+                            c(humdrumR,
+                              unlist(formulae, use.names = TRUE), 
+                              parsedArgs$namedArgs))
+        
+        parsedArgs$formulae$doexpressions <- tail(parsedArgs$formulae$doexpressions, 1)       
+    } 
+    
+    # Getting the humtab with the right record types.
     humtab <- rlang::eval_tidy(rlang::quo(getHumtab(humdrumR, !!parsedArgs$formulae$recordtypes)))
-          
-          
-          #### Create main expression
-          doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions[[1]], 
-                                  humdrumR@Active, parsedArgs$formulae$ngrams)
-          
-          ###########################-
-          #### evaluate "do" expression! 
-          ###########################-
-          humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-          result <- evalDoQuo(doQuosure, humtab, parsedArgs$formulae$partitions)
-          result[ , `_rowKey_` := NULL]
-          
-          ####-
-          ### We want to return the raw result...what do we extract from the results data.table? 
-          
-          result
-          
+    
+    
+    #### Create main expression
+    doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions[[1]], 
+                            humdrumR@Active, parsedArgs$formulae$ngrams)
+    
+    ###########################-
+    #### evaluate "do" expression! 
+    ###########################-
+    humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
+    result <- evalDoQuo(doQuosure, humtab, parsedArgs$formulae$partitions)
+    result[ , `_rowKey_` := NULL]
+    
+    ####-
+    ### Do we want extract the results from the data.table? 
+    if (drop && ncol(result) == 1L && colnames(result) == 'Pipe') {
+        result <- result$Pipe
+        if (is.list(result) && length(result) == 1L) result <- result[[1]]
+    } 
+    
+    result
+    
 }
          
 ##
