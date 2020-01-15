@@ -436,8 +436,8 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     
     ####-
     ### Do we want extract the results from the data.table? 
-    if (drop && ncol(result) == 1L && colnames(result) == 'Pipe') {
-        result <- result$Pipe
+    if (drop && ncol(result) == 1L) {
+        result <- result[[1L]]
         if (is.list(result) && length(result) == 1L) result <- result[[1]]
     } 
     

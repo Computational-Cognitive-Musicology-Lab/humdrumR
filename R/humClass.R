@@ -793,7 +793,7 @@ ragged <- function(humdrumR) {
 #' @export
 alignColumns <- function(humdrumR, padder = '_C') {
           # This function pads and columns and/or paths
-          # which appear don't appear in all pieces
+          # which don't appear in all pieces
           # and renumbers the Column field, such that
           # all pieces have the same number of columns.
 
@@ -919,7 +919,7 @@ foldHumdrum <- function(humdrumR, byfields,
           foldexprs <- Map(function(name, type) {
                     name <- as.symbol(name) 
                     
-                    if (type == 'list') return(call('do.call', 'c', name))
+                    if (type == 'list') return(call('catlists', name))
                     
                     if (foldAtomic) call('paste', name, collapse = sep) else call('list',  name)},
                     fieldnames, fieldtypes)
@@ -1106,26 +1106,30 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   }
   
   if (forceVector) {
-            if (is.list(values)) {         
-                      if (length(unique(lengths(values))) == 1L) {
-                                values <- values <- do.call('paste', c(values, sep = sep))
-                      } else {
-                                values <- sapply(values, paste, collapse = sep)
-                      }
-            }
-            if (is.matrix(values)) {
-                      out <- character(nrow(humtab))
-                      out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, function(row) paste(unique(row), collapse = sep))
-                      out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, function(row) paste(       row , collapse = sep))
-                      # rownames(out) <- locnames
-                      values <- out
-            }   
-            if (is.object(values)) values <- as.character(values)
-            
+      if (is.list(values)) {     
+          vectors <- sapply(class, is.atomic)
+          
+          values <- if (all(lengths(values) == nrow(humtab)) && all(vectors)) {
+              do.call('paste', c(values, sep = sep))
+          } else {
+              sapply(values, function(x) if (is.object(x)) object2str(x) else paste(x, collapse = sep))
+          }
+      }
+      if (is.matrix(values)) {
+          out <- character(nrow(humtab))
+          out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, function(row) paste(unique(row), collapse = sep))
+          out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, function(row) paste(       row , collapse = sep))
+          # rownames(out) <- locnames
+          values <- out
+      }   
+      if (is.object(values)) values <- object2str(values)
+      
   }
   
   values
 }
+
+
 
 #' \code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.
 #' @name humActive
@@ -1217,7 +1221,8 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
               stop(call. = FALSE,
                    glue::glue('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
                               glue::glue_collapse(fieldnames, sep = ', ', last = ', and '),
-                              'are not names of fields in your humdrumR object.'))
+                              plural(length(fieldnames), ' are not names of fields', ' is not the name of a field'),
+                              ' in your humdrumR object.'))
           }
           
           if (any(nomatch)) {
@@ -1336,7 +1341,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
           # and coerceds them to characters, filling in ! * = . as appropriate.
  humtab <- getHumtab(humdrumR, 'GLIMDdP') 
  
- nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
+ nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
  
  active <- activeFields(humdrumR)
  humtab <- humtab[ , 
@@ -1500,7 +1505,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 
 #' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
-                         max.records.file = 40L, max.token.length = 20L) {
+                         max.records.file = 40L, max.token.length = 30L) {
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   
   if (is.empty(humdrumR)) {
@@ -1512,16 +1517,37 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   if (firstAndLast) humdrumR <- humdrumR[unique(c(1, length(humdrumR)))]
   
   humdrumR <- indexGLIM(humdrumR)
-  humdrumR <- fields.as.character(humdrumR)
+  humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
+  # humdrumR <- fields.as.character()
   
-  # if (isActiveAtomic(humdrumR)) {
-    print_humtab_isActiveAtomic(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
-                                max.records.file, max.token.length)
-  # }  else {
-    # print_humtab_notActiveVector(humdrumR, firstAndLast)
-  # }
+  print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
+                max.records.file, max.token.length)
+
   invisible(NULL)
   
+}
+
+
+printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep = ', '){
+    # evaluates the active expression into something printable, and puts it in a 
+    # field called "Print"
+    dataTypes <- checkTypes(dataTypes, "printableActiveField")
+    
+    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd') 
+    nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
+    targets <- humtab$Type %in% dataTypes
+    printable <- IfElse(!targets, 
+                        if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
+                        NA_character_)
+    
+    printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
+                                                  forceVector = TRUE, nullAs = NA))
+    
+    humtab[ , Print := printable]
+    
+    putHumtab(humdrumR, drop = FALSE) <- humtab
+    addFields(humdrumR) <- 'Print'
+    setActive(humdrumR, ~Print)
 }
 
 
@@ -1546,6 +1572,7 @@ padColumns <- function(lines, max.token.length) {
  tokmat[is.na(tokmat)] <- ''
  
  # pad columns
+ toklen <- nchar(tokmat)
  colMaxs <- apply(toklen, 2, max, na.rm = TRUE)
  lines[local] <- apply(tokmat, 1, paste %.% padder, sizes = colMaxs + 2L, collapse = '')
  
@@ -1555,7 +1582,7 @@ padColumns <- function(lines, max.token.length) {
 
 }
 
-print_humtab_isActiveAtomic <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
+print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                                         max.records.file = 40L, max.token.length = 12L) {
   lines <- as.lines(humdrumR, dataTypes = dataTypes,
                     padPaths = TRUE, alignColumns = TRUE)
@@ -1613,33 +1640,5 @@ print_humtab_isActiveAtomic <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefil
   
   cat(unlist(lines), sep = '\n')
   
-}
-
-
-print_humtab_notActiveVector <- function(humdrumR, cutMiddle = FALSE) {
-  act <- evalActive(humdrumR)
-  D <- getD(humdrumR)
-  
-  lays <- fields(humdrumR)
-  refs <- lays$Name[lays$Type == 'Reference']
-  
-  notact <- D[ , !colnames(D) %in% activeFields(humdrumR), with = FALSE ]
-  notact <- notact[ , colnames(notact) %in% c(refs, 'Filename', 'Spine', 
-                                              'Record', 'Path', 
-                                              'Exclusive', 'BarN', 'DoubleBarN'), with = FALSE]
-  
-  notact <- notact[ , sapply(notact, function(col) !all(duplicated(col)[-1]) & !any(is.na(col))), with = FALSE]
-  printnotact <- nrow(notact) > 0 && nrow(notact) == length(act)
-  if (printnotact) {
-    ellipsis <- '####'
-    collabs <- lapply(colnames(notact), function(col) paste0(gsub('Filename: ', '', paste0(col, ": ")), notact[[col]]))
-    collabs <- apply(do.call('cbind',collabs), 1, 
-                     function(row) paste0('               ', ellipsis, paste(row, collapse = ', '), ellipsis))
-  }
-  for (i in 1:nrow(humdrumR)) {
-    if (printnotact) cat(collabs[i], '\n', sep = '')
-    print(act[[i]])
-    cat('\n')
-  }
 }
 

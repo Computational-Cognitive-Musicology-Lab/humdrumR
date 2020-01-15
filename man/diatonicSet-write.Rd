@@ -12,7 +12,7 @@ as.keysignatureI(dset)
 
 \method{as.romanNumeral}{diatonicSet}(dset)
 
-as.keyI(dset)
+as.keyI(dset, alteration.labels = c())
 
 \method{as.tonalname}{diatonicSet}(x, accidental.labels = c(flat = "b"))
 }

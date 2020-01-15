@@ -32,7 +32,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     ## It takes a character of filestrings (not lines) with names representing the filepath
 
     if (nrow(fileFrame) == 0L) {
-        cat("No files to validate.")
+        cat("No files to validate.\n")
         fileFrame[ , Valid := logical(0)]
         return(fileFrame)
     }

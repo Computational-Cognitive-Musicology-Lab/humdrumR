@@ -9,7 +9,7 @@
 \usage{
 withinHumdrum(humdrumR, ...)
 
-withHumdrum(humdrumR, ...)
+withHumdrum(humdrumR, ..., drop = TRUE)
 
 inHumdrum(humdrumR, ...)
 }
@@ -21,6 +21,13 @@ Unnamed arguments must be formulas, functions---lists of formulas/functions, no 
 to a single list of functions/formulas.
 All functions are coerced to a formula as \code{~foo(.)}. The far left-hand side of each formula
 must be a name/symbol. Named arguments are \link[humdrumR:interpolateNamedValues]{interpolated} into and \code{do~X} formulas.}
+
+\item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
+If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
+the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
+a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
+intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that 
+the output is consistent.}
 
 \item{...}{Additional formulas/functions, or lists of formulas/functions.
 These are all simply appended to the \code{formulae} argument.}

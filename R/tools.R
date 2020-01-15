@@ -60,6 +60,31 @@ nth <- function(n) {
      
 }
 
+catlists <- function(lists) {
+    # this is just like do.call('c', lists) except it never returns NULL
+    
+    out <- do.call('c', lists)
+    if(is.null(out)) out <- list() 
+    if (!is.list(out)) out <- list(out)
+    out
+}
+
+object2str <- function(object) {
+    class <- class(object)[1]
+    if (class == 'table') {
+        n <- sum(object)
+        n <- if (n > 1000)  {
+            paste0('~', gsub('e\\+0?', 'e', formatC(n, format='e', digits = 0)))
+        } else {
+            paste0('=', n)
+        }
+        glue::glue("<table: k={length(object)}, n{n}>")
+    } else {
+        paste0('<', class, '>')
+        
+    }
+}
+
 wrapInCall <- function(form, call) {
     # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs
     # with a call to any.
