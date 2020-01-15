@@ -1072,14 +1072,14 @@ parseBarlines <- function(spine) {
   # to extract the three barline related fields from 
   # a humdrum spine.
   # It takes a character vector representing a humdrum spine
-  # and returns a data.frame with three columns representing the three barline fields (BarN, DoubleBarN, BarLabel)
+  # and returns a data.frame with three columns representing the three barline fields (Bar, DoubleBar, BarLabel)
           
   Singles <- cumsum(grepl('^=', spine))
   Doubles <- cumsum(grepl('^==', spine))
   BarLabels <- stringr::str_sub(grep('^=', spine, value = TRUE), 2L)[IfElse(Singles == 0L, NA_integer_, Singles)]
   
-  data.frame(BarN = Singles, 
-             DoubleBarN = Doubles, 
+  data.frame(Bar = Singles, 
+             DoubleBar = Doubles, 
              BarLabel = BarLabels, 
              row.names = names(spine), stringsAsFactors = FALSE)
 }

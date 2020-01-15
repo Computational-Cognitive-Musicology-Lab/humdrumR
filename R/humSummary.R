@@ -113,7 +113,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
                       Characters       = sum(nchar(Token)),
                       `(per token)`    = round(mean(nchar(Token)), 2)
                       ),
-                      # Bars             = length(unique(BarN))),
+                      # Bars             = length(unique(Bar))),
                       by = Filename]
   
   

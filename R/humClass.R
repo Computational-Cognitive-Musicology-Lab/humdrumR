@@ -112,15 +112,15 @@
 #' Humdrum data may or may not also include barlines (tokens beginning \code{'='}).
 #' \code{\link{readHumdrum}} always Three section fields are 
 #' \describe{
-#'   \item{BarN}{\code{integer} - How many single barline records have passed before this token?
-#'     If no '=' tokens occur in the file, \code{BarN} is all zeros.}
-#'   \item{DoubleBarN}{\code{integer} - How many double barlines have passed before this token?
-#'      If no \code{'=='} tokens occur in the file, \code{DoubleBarN} is all zeros.}
+#'   \item{Bar}{\code{integer} - How many single barline records have passed before this token?
+#'     If no '=' tokens occur in the file, \code{Bar} is all zeros.}
+#'   \item{DoubleBar}{\code{integer} - How many double barlines have passed before this token?
+#'      If no \code{'=='} tokens occur in the file, \code{DoubleBar} is all zeros.}
 #'   \item{BarLabel}{\code{character} - Any characters that occur after initial \code{'='} or
 #'      \code{'=='} of previous bar token. These include the \code{"-"} in 
 #'      the \code{'=-'} pickup barline,
 #'      repeat tokens (like \code{"=:\|\|"}), and also explicit \emph{bar numbers}. Note that
-#'      the \code{BarN} field always enumerate every single \code{'='} bar record, while
+#'      the \code{Bar} field always enumerate every single \code{'='} bar record, while
 #'      measure number labels in humdrum data (which appear in the \code{BarLabel} field) may
 #'      do weird things like skipping numbers, repeating numbers, and having suffixes (e.g., "19a")
 #'      If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\code{""}).}
@@ -462,7 +462,7 @@ setMethod('initialize', 'humdrumR',
                                     Interpretation   = c('Exclusive', 'Tandem',
                                                          fields[tandemcol]),
                                     Formal    = c(grep('^Formal', fields, value = TRUE),
-                                                  'BarN', 'DoubleBarN', 'BarLabel'))
+                                                  'Bar', 'DoubleBar', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
             
@@ -1337,8 +1337,10 @@ getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
 }
 
 fields.as.character <- function(humdrumR, useToken = TRUE) {
-# This takes the active humdrumR fields 
-          # and coerceds them to characters, filling in ! * = . as appropriate.
+# This takes the active humdrumR fields (any field used in the Active expression)
+# and coerceds them to characters, filling in null tokens (! * = .) where there are 
+# NAs.
+# is useToken is true, the Token field is used to fill-in (instead of null tokens).
  humtab <- getHumtab(humdrumR, 'GLIMDdP') 
  
  nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
