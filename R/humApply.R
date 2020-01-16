@@ -72,6 +72,9 @@
 #'   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
 #'   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
 #'   is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+#'   \item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+#'   or opening a graphing window. The \code{pre} expression is evaluated in the global environment.}
+#'   \item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
 #' }
 #' 
 #' @section Expression evaluation:
@@ -293,6 +296,11 @@ withinHumdrum <- function(humdrumR,  ...) {
          
           # parseArgs MAY have changed graphical parameters.
           on.exit(par(parsedArgs$oldpar)) # if old par is NULL, nothing happens
+          
+          ### pre and post formulae 
+          if (length(parsedArgs$formulae$pre) > 0L) rlang::eval_tidy(parsedArgs$formulae$pre[[1]], env = .GlobalEnv)
+          if (length(parsedArgs$formulae$post) > 0L) on.exit(rlang::eval_bare(rlang::quo_expr(parsedArgs$formulae$post[[1]]), env = .GlobalEnv),
+                                                             add = TRUE)
           
           #### Preprocess humdrumR and humtab
           # Getting the humtab with the right record types.
@@ -521,7 +529,9 @@ parseKeywords <- function(formulae, withfunc) {
                        ngrams          = c('ngrams', 'ngram', 'ngra', 'ngr', 'ng'),
                        partitions      = c('by', 'where', 'groupby', 'group_by'),
                        recordtypes     = c('recordtype', 'recordtypes'),
-                       windows         = c('windows', 'window'))
+                       windows         = c('windows', 'window'),
+                       pre             = c('pre'),
+                       post            = c('post'))
 
  boolean <- lapply(knownKeywords, `%in%`, x = formulargnames)
  values  <- lapply(boolean, function(b) formulargs[b])
