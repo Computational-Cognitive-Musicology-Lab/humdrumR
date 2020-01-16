@@ -233,8 +233,8 @@
 #' }
 #' 
 #' @section Argument interpolation:
-#' Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateNamedValues]{interpolated}} into the
-#' \code{do} expressions. This is useful if you've already created a list of formulas that like, but would like
+#' Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateArguments]{interpolated}} into the
+#' \code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
 #' to make small changes to a function call within the \code{do} expressions, without starting from scratch.
 #' Examples:
 #' \preformatted{
@@ -257,7 +257,7 @@
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
 #' All functions are coerced to a formula as \code{~foo(.)}. The far left-hand side of each formula
-#' must be a name/symbol. Named arguments are \link[humdrumR:interpolateNamedValues]{interpolated} into and \code{do~X} formulas.
+#' must be a name/symbol. Named arguments are \link[humdrumR:interpolateArguments]{interpolated} into and \code{do~X} formulas.
 
 #' 
 #' @param ... Additional formulas/functions, or lists of formulas/functions.
@@ -438,7 +438,7 @@ parseArgs <- function(..., withfunc) {
     
     #### interpolate named args into do formulae
     if (length(namedArgs) > 0L) parsedFormulae$doexpressions <- lapply(parsedFormulae$doexpressions,  
-                                                                       interpolateNamedValues, namedArgs = namedArgs)
+                                                                       interpolateArguments, namedArgs = namedArgs)
     
     
     ### graphical options
@@ -917,7 +917,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' This function can be used to modify arguments to a functions
 #' within an existing expression (or quosure/formula).
 #' 
-#' \code{interpolateNamedValues} inteprets named value in its \code{namedArgs} 
+#' \code{interpolateArguments} inteprets named value in its \code{namedArgs} 
 #' argument in one of two ways: If the named value is a list, it interprets
 #' the name of the list as a function call, and inserts/swaps any arguments
 #' in that list into any instances of that function call within the \code{expr}.
@@ -926,7 +926,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' Examples:
 #' \preformatted{
 #' myexpr <- quote(dnorm(x, mean = 5))
-#' interpolateNamedValues(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
+#' interpolateArguments(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
 #' 
 #' # result is new expresson: dnorm(x, mean = 2, sd = 5, TRUE)
 #' }
@@ -937,7 +937,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' Examples:
 #' \preformatted{
 #' myexpr <- quote(dnorm(x, mean = 5))
-#' interpolateNamedValues(myexpr, mean = 2)
+#' interpolateArguments(myexpr, mean = 2)
 #' 
 #' # result is new expression: dnorm(x, mean = 2)
 #' 
@@ -945,8 +945,8 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' @examples
 #' myexpr2 <- quote(A + b*x + rnorm(length(a), mean(Z), sd = 2))
 #' 
-#' interpolateNamedValues(myexpr2,
-#'                        list(sd = 10, mean = list(na.rm = TRUE)))
+#' interpolateArguments(myexpr2,
+#'                      list(sd = 10, mean = list(na.rm = TRUE)))
 #'                        
 #' # result is new expression: 
 #' # a + b*x + rnorm(length(a), mean(Z, na.rm = TRUE), sd = 10)
@@ -956,9 +956,19 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' @param namedArgs A list of named arguments. Unnamed arguments are simply ignored.
 #' 
 #' @export
-interpolateNamedValues <- function(expr, namedArgs) {
- namedArgs <- list(...)
- if (length(namedArgs) == 0 || !is.call(expr)) return(expr)
+interpolateArguments <- function(quo, namedArgs) {
+    expr <- rlang::quo_get_expr(quo)
+    expr <- .interpolateArguments(expr, namedArgs)
+    
+    rlang::new_quosure(expr, rlang::quo_get_env(quo))
+    
+}
+    
+.interpolateArguments <- function(expr, namedArgs) {    
+    # the use interpolateArguments takes quosures
+    # under the hood, .interpolateArguments works with raw expressions.
+    # this is necessarry because .interpolateArguments is recursive.
+ if (!is.call(expr)) return(expr)
           
  argNames <- names(namedArgs)
  
@@ -978,7 +988,7 @@ interpolateNamedValues <- function(expr, namedArgs) {
            namedArgs <- namedArgs[argNames != callname]
            argNames <- argNames[argNames != callname]
            if (length(namedArgs) == 0) return(expr)
- }
+ } 
  #       
  named <- if (is.null(names(expr))) logical(length(expr)) else names(expr) != ''
  named[1] <- FALSE
@@ -988,10 +998,9 @@ interpolateNamedValues <- function(expr, namedArgs) {
            }
  }     
  
- expr[!named] <- lapply(expr[!named], interpolateNamedValues, namedArgs = namedArgs)      
+ expr[!named] <- lapply(expr[!named], .interpolateArguments, namedArgs = namedArgs)      
            
  expr
- 
 }
 
 

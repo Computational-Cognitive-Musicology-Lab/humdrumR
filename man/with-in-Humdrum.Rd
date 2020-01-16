@@ -20,7 +20,7 @@ inHumdrum(humdrumR, ...)
 Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 to a single list of functions/formulas.
 All functions are coerced to a formula as \code{~foo(.)}. The far left-hand side of each formula
-must be a name/symbol. Named arguments are \link[humdrumR:interpolateNamedValues]{interpolated} into and \code{do~X} formulas.}
+must be a name/symbol. Named arguments are \link[humdrumR:interpolateArguments]{interpolated} into and \code{do~X} formulas.}
 
 \item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
 If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
@@ -259,8 +259,8 @@ withinHumdrum(humData,
 
 \section{Argument interpolation}{
 
-Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateNamedValues]{interpolated}} into the
-\code{do} expressions. This is useful if you've already created a list of formulas that like, but would like
+Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateArguments]{interpolated}} into the
+\code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
 to make small changes to a function call within the \code{do} expressions, without starting from scratch.
 Examples:
 \preformatted{
