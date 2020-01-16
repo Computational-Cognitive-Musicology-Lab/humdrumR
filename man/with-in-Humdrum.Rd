@@ -88,6 +88,9 @@ Legal keywords, and their meanings are:
   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
   is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+  \item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+  or opening a graphing window. The \code{pre} expression is evaluated in the global environment.}
+  \item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
 }
 }
 

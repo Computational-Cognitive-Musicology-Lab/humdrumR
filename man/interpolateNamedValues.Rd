@@ -4,7 +4,7 @@
 \alias{interpolateNamedValues}
 \title{Change or insert values in an expression}
 \usage{
-interpolateNamedValues(expr, namedArgs)
+interpolateNamedValues(expr, ...)
 }
 \arguments{
 \item{expr}{A unevaluated expression object.}
