@@ -7,6 +7,15 @@ applyrows <- function(x, f, ...){
     result
 }
 
+tempvar <- function(prefix = '') {
+    # this makes random symbols to use as variable names
+    
+    random <- paste(sample(c(letters, 0:9), 5, replace = TRUE), collapse = '')
+    
+    rlang::sym(paste0('._', prefix, '_', random))
+    
+}
+
 applycols <- function(x, f, ...){
     result <- apply(x, 2, f, ...)
     result <- if (is.null(dim(result))) rbind(result) else result
@@ -560,9 +569,17 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
           output
 }
 
-as.arglist <- function(str) {
- al <- alist(x=)[rep('x', length(str))]         
- setNames(al, str)
+as.arglist <- function(argNames, argValues = NULL) {
+ arglist <- alist(x = )[rep('x', length(argNames))] 
+ 
+ arglist <- setNames(arglist, argNames)
+ 
+ if (!is.null(argValues) && any(!is.na(argValues))) {
+     arglist[!is.na(argValues)] <- argValues[!is.na(argValues)]
+ }
+ 
+ arglist
+ 
 }
 
 `%splat|%` <- function(obj, func) {

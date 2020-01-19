@@ -415,6 +415,11 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     
 }
     
+#' inHumdrum
+#' @name with-in-Humdrum
+#' @export
+inHumdrum <- withinHumdrum
+
     
 ##
 
@@ -454,19 +459,14 @@ parseArgs <- function(..., withfunc) {
          namedArgs  = namedArgs)
 }
  
-#' inHumdrum
-#' @name with-in-Humdrum
-#' @export
-inHumdrum <- withinHumdrum
-          
+
 
 anyfuncs2forms <- function(fs, parentenv) {
           areFuncs <- sapply(fs, is.function)
           
           fs[areFuncs] <- lapply(fs[areFuncs],
                                  function(func) {
-                                           expenv <- list2env(list(.func = func))
-                                           parent.env(expenv) <- parentenv
+                                           expenv <- list2env(list(.func = func), parent = parentenv)
                                            formula <- ~ .func(.)
                                            rlang::f_env(formula) <- expenv
                                            formula
@@ -630,7 +630,6 @@ evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
 prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # This is the main function used by \code{\link{withinHumdrum}} to prepare the current
   # do expression argument for application to a \code{\linkS4class{humdrumR}} object.
-  
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuos)
       
@@ -655,13 +654,11 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
-  if (any(lists)) doQuo <- mapifyQuo(doQuo, usedInExpr, depth = 1L)
+  if (any(lists)) doQuo <- mapifyQuo(doQuo, usedInExpr)
     
   # if ngram is present
   if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
-            doQuo <- ngramifyQuo(doQuo, 
-                                        ngram, usedInExpr, 
-                                        depth = 1L + any(lists))
+            doQuo <- ngramifyQuo(doQuo, ngram, usedInExpr)
   }
   
   doQuo
@@ -676,7 +673,7 @@ concatDoQuos <- function(doQuos) {
     sideEffects <- grepl('p', names(doQuos))
     
     
-    if (tail(sideEffects, 1)) doQuos <- c(doQuos, quo(.))
+    if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
 
     temp <- quote(.)
     for (i in 1:length(doQuos)) {
@@ -689,16 +686,15 @@ concatDoQuos <- function(doQuos) {
                            (length(expr) > 1 && expr[[1]] != '<-') &&
                            !sideEffects[i]) {
             
-            temp <- as.symbol(tempfile('xxx', tmpdir = ''))
-            quo(!!temp <- !!doQuos[[i]])
+            temp <- tempvar('doPipe')
+            rlang::quo(!!temp <- !!doQuos[[i]])
             
         } else {
-            rlang::new_quosure(doQuos[[i]], environment())
+            rlang::new_quosure(doQuos[[i]], rlang::quo_get_env(doQuos[[i]]))
         }
     }
     
-    
-    quo({!!!doQuos})
+    rlang::quo({!!!doQuos})
 }
 
 ####################### Functions used inside prepareQuo
@@ -842,68 +838,71 @@ parseAt <- function(atExpr) {
  rlang::expr(tapply(!!expr, !!group, c))
 }
 
-########## Mapping expression across list fields.
+########## Automaticall mapping expressions across data structures.
 
-xifyQuo <- function(expression, usedInExpr, depth = 1L) {
-          # This function takes an expression and a vector of strings representing
-          # names used in that expression and creates an expression
-          # which creates an lambda function which takes those names
-          # as arguments and calls the expression with them.
-          # This lambda function is appropriate for calling with
-          # Map, lapply, ngramApply, etc.
-          # This is used by listifyQuo and ngramifyQuo.
-          # 
-          # Argnames within the newly generated lambda expressions are changed
-          # to lower case versions of usedInExpr strings, but with depth "_" appended
-          # to make sure there's no accidental overlap (just a precaution).
-          fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
-          names(fargs) <- paste0('.', tolower(usedInExpr), strrep('_', depth))
-          
-          expression <- substituteName(expression,
-                                       setNames(lapply(names(fargs), as.symbol), usedInExpr))
-          
-          lambdaexpression      <- quote(function() {} )
-          lambdaexpression[[2]] <- fargs
-          lambdaexpression[[3]] <- rlang::quo_get_expr(expression)
-          
-          rlang::quo_set_expr(expression, lambdaexpression)
-          
+quosureAsfunction <- function(doQuo, usedInExpr) {
+    arglist <- as.arglist(usedInExpr)
+    
+    funcEnv  <- rlang::quo_get_env(doQuo)
+                      
+    func <- function() {
+        args <- as.list(environment())
+        
+        rlang::eval_tidy(doQuo, args)
+    }
+    environment(func) <- list2env(list(doQuo = doQuo))
+    formals(func) <- arglist
+    
+    func
 }
 
 
-mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
-          # This function takes an expression and a vector of strings representing
-          # names used in that expression and creates an expression
-          # which uses Map to call this expression across these named objects.
-          # (It presumes that the named objects are actually lists).
-          # It first uses xifyQuo to put the expression in the form of a 
-          # lambda function.
-  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
-  
-  rlang::quo_set_expr(funcQuosure, 
-                      rlang::expr(Map(f = !!rlang::quo_get_expr(funcQuosure), 
-                                      !!!lapply(usedInExpr, rlang::sym))))
-
+mapifyQuo <- function(doQuo, usedInExpr) {
+          # This function takes a doQuo and creates a new doQuo
+          # which applies that doQuo across a list (or parallel lists) of objects.
+          # Its kind of like base::Vectorize, but works on lists.
+          # usedInExpr is much like Vectorize(vectorize.args)---it needs to be added
+          # so we know what variables to map over.
+    
+    doFunc <- quosureAsfunction(doQuo, usedInExpr)
+    
+    doFuncName <- tempvar('mapify')
+    
+    doQuoEnv <- new.env()
+    assign(as.character(doFuncName), doFunc, doQuoEnv)
+    
+    #
+    doQuo <- rlang::quo(Map(!!doFuncName, !!!rlang::syms(usedInExpr)))
+    doQuo <- rlang::quo_set_env(doQuo, doQuoEnv)
+    
+    doQuo
+    
+                        
+ 
 }
 
-ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
-          # This function takes an expression and a vector of strings representing
-          # names used in that expression and creates an expression
-          # which uses applyNgram on these named objects.
-          # It first uses xifyQuo to put the expression in the form of a 
-          # lambda function.
-          # 
-          # 
-  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
-  
-  # rlang::quo_set_expr(funcQuosure,
-                      # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
-                                             # vecs = list(!!!lapply(usedInExpr, rlang::sym)), 
-                                             # f = !!rlang::quo_get_expr(funcQuosure))))
-  rlang::quo(
-            applyNgram(n = !!ngramQuosure, 
-                       vecs = list(!!!lapply(usedInExpr, rlang::sym)),
-                       f = !!funcQuosure))
+ngramifyQuo <- function(doQuo, ngramQuo, usedInExpr) {
+    # This function takes a doQuo and creates a new doQuo
+    # which applies that doQuo across ngrams.
+    # Its kind of like base::Vectorize.
+    # usedInExpr is much like Vectorize(vectorize.args)---it needs to be added
+    # so we know what variables to map over.
+    doFunc <- quosureAsfunction(doQuo, usedInExpr)
+    
+    doFuncName <- tempvar('ngramify')
+    
+    doQuoEnv <- new.env()
+    assign(as.character(doFuncName), doFunc, doQuoEnv)
+    
+    #
+    doQuo <- rlang::quo(applyNgram(!!ngramQuo, 
+                                   list(!!!rlang::syms(usedInExpr)), 
+                                   !!doFuncName))
+    doQuo <- rlang::quo_set_env(doQuo, doQuoEnv)
+    
+    doQuo
+    
+    
   
 }
 
@@ -1074,8 +1073,15 @@ parseResult_table <- function(result) {
    data.table(list(result))
 }
 
-parseResult_list  <- function(result) data.table(result) 
-parseResult_other <- function(result) data.table(list(result))
+parseResult_list  <- function(result) {
+    if (all(lengths(result) == 1L) &&
+        all(sapply(result, is.atomic)) &&
+        allsame(sapply(result, class))) {
+        result <- unlist(result)
+    }
+    data.table(Pipe = result) 
+}
+parseResult_other <- function(result) data.table(Pipe = list(result))
 
 `pipeIn<-` <- function(object, value) {
           #' This is the main function for taking the output of a
