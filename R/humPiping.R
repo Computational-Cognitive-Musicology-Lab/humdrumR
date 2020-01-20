@@ -76,7 +76,7 @@ NULL
                               lhs <- rlang::f_lhs(form)
                               
                               if (is.null(lhs) || rlang::as_name(lhs) %in% c('d' , 'do')) {
-                                  rlang::f_lhs(form) <- quote(doplot)
+                                  rlang::f_lhs(form) <- quote(dofx)
                               }
                               form
                           })
@@ -112,7 +112,7 @@ doPipe <- function(humdrumR, formula, pipename, call) {
     if (!is.list(formula)) formula <- list(formula)
     
     call <- as.symbol(call)
-    myquo <- rlang::quo((!!call)(humdrumR, !!!formula))
+    myquo <- rlang::quo((!!call)(humdrumR, !!!formula,))
     output <- rlang::eval_tidy(myquo)
     
     if (!is.null(rest)) {
