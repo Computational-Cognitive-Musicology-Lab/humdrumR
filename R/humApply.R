@@ -335,7 +335,7 @@ withinHumdrum <- function(humdrumR,  ...) {
                   addFields(humdrumR) <- newfields
                   
                   ## Create new Active quosure
-                  humdrumR <- if (any(names(parsedArgs$formulae$partitions) == 'where')) {
+                  humdrumR <- if (any(names(parsedArgs$formulae$partitions) == 'where') && is.null(ordoQuosure)) {
                       act <- ifelsecalls(parsedArgs$formulae$partitions['where'], 
                                          c(humdrumR@Active, 
                                            lapply(newfields, 
@@ -405,11 +405,16 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     ### Preparing the "do" expression
     doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions, 
                             humdrumR@Active, parsedArgs$formulae$ngram)
+    ordoQuosure <- prepareQuo(humtab, parsedArgs$formulae$ordoexpression,
+                              humdrumR@Active, parsedArgs$formulae$ngram)
     
     ###########################-
     #### evaluate "do" expression! 
     humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-    result <- evalDoQuo(doQuosure, humtab, parsedArgs$formulae$partitions)
+    
+    result <- evalDoQuo(doQuosure, humtab, 
+                        parsedArgs$formulae$partitions, 
+                        ordoQuosure)
     
     as.list(environment())
     
@@ -435,11 +440,9 @@ parseArgs <- function(..., withfunc) {
     # graphics, recordtypes, doexpressions, ngrams, partitions
     parsedFormulae <- parseKeywords(formulae, withfunc) 
     
-    
     #### interpolate named args into do formulae
     if (length(namedArgs) > 0L) parsedFormulae$doexpressions <- lapply(parsedFormulae$doexpressions,  
                                                                        interpolateArguments, namedArgs = namedArgs)
-    
     
     ### graphical options
     oldpar <- NULL
@@ -483,6 +486,7 @@ parseKeywords <- function(formulae, withfunc) {
  #
  
  knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill'),
+                       ordoexpression  = c('ordo', 'ordofill'),
                        partitions      = c('by', 'where'),
                        graphics        = names(par()),
                        ngram           = 'ngram',
@@ -507,6 +511,13 @@ parseKeywords <- function(formulae, withfunc) {
                                    glue::glue("Your call to {withfunc} doesn't include any do expressions to apply to the data!
                                    These expressions should be either in a formula with no left hand side (~Expr) or with 'do' or 'doplot' on the left hand side (do~Expr, doplot~Expr)."))
  
+ #
+ if (any(boolean$ordoexpressions) && 
+     (!any(names(values$partitions) == 'where') 
+      || !any(boolean$doexpressions)) ) stop(call. = FALSE,
+                                             glue::glue("In your call to {withfunc} you included an 'ordo' expression improperly. 
+                                                        An 'ordo' expression can only be used in combination with BOTH a where expression AND a do expression."))
+ 
  # These keywords must always have exactly one evaluated value.
  #        If there are more than one, take the first.
  #        If there are none, some categories have defaults
@@ -525,19 +536,21 @@ partialMatchKeywords <- function(keys) {
     keys <- gsub('_', '', tolower(keys))
     
     # define standard keys and alternatives
-    standardkeys <- list(do = c('do', 'd', 'eval', 'apply'),
-                         dofill = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         dofx = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
-                                  'doplots', 'plots',
-                                  'evalfxs', 'evalsidefxs', 'evalsideeffects',
-                                  'applyfxs', 'applysidefxs', 'applysideffects'),
-                         by  = c('by', 'groupby', 'groups', 'across', 'groupacross'),
-                         where = c('where', 'when'),
+    standardkeys <- list(do       = c('do', 'd', 'eval', 'apply'),
+                         dofill   = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
+                         dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
+                                      'doplots', 'plots',
+                                      'evalfxs', 'evalsidefxs', 'evalsideeffects',
+                                      'applyfxs', 'applysidefxs', 'applysideffects'),
+                         by       = c('by', 'groupby', 'groups', 'across', 'groupacross'),
+                         where    = c('where', 'when'),
+                         ordo     = c('ordo', 'orelsedo', 'elsedo'),
+                         ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
                          recordtypes = 'recordtypes',
-                         ngram = 'ngrams',
-                         windows = 'windows',
-                         pre = 'pre', 
-                         post = 'post')
+                         ngram    = 'ngrams',
+                         windows  = 'windows',
+                         pre      = 'pre', 
+                         post     = 'post')
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
@@ -576,7 +589,7 @@ parseArgFormula <- function(form) {
                                                   keyword (far left side of formula) which can't be parsed as a name.")
           
           # collapse to one expression
-          expr <- if (length(exprs) == 1) exprs[[1]] else  rlang::expr(list(!!!exprs))
+          expr <- if (length(exprs) == 1L) exprs[[1]] else  rlang::expr(list(!!!exprs))
           quosure <- rlang::new_quosure(expr, env = rlang::f_env(form))
           
           setNames(list(quosure), as.character(keyword))
@@ -598,23 +611,19 @@ splitFormula <- function(form) {
 }
 
 
-
 ##### Preparing doQuo ----
-####################- Parsing expressions fed to withinHumdrum
-
 
 prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # This is the main function used by \code{\link{withinHumdrum}} to prepare the current
   # do expression argument for application to a \code{\linkS4class{humdrumR}} object.
-  
-  # collapse doQuos to a single doQuo
-    
+  if (length(doQuos) == 0L) return(NULL)
   
   # do fill 
   usedInExprs <- lapply(doQuos, fieldsInExpr, humtab = humtab)
-  dofills <- names(doQuos) == 'dofill'
+  dofills <- names(doQuos) %in% c('dofill', 'ordofill')
   doQuos[dofills] <- Map(fillQuo, doQuos[dofills], usedInExprs[dofills])
 
+  # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuos)
       
   # turn . to active formula
@@ -672,7 +681,7 @@ concatDoQuos <- function(doQuos) {
     sideEffects <- names(doQuos) == 'dofx'
     
     
-    if (tail(sideEffects, 1)) doQuos <- c(doQuos, quo(.))
+    if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
 
     temp <- quote(.)
     for (i in 1:length(doQuos)) {
@@ -1008,17 +1017,18 @@ interpolateArguments <- function(quo, namedArgs) {
 
 
 
-evalDoQuo <- function(doQuo, humtab, partQuos) {
+
+evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (length(partQuos) == 0L) {
         result <- rlang::eval_tidy(doQuo, data = humtab)
         parseResult(result, humtab$`_rowKey_`)
         
     } else {
-        result <- evalDoQuo_part(doQuo, humtab, partQuos)
+        result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
         if (is.data.frame(result)) result else data.table::rbindlist(result)
     }
 }
-evalDoQuo_part <- function(doQuo, humtab, partQuos) {
+evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     ### evaluation partition expression and collapse results 
     ## to a single factor
     partType <- names(partQuos)[1]
@@ -1033,12 +1043,11 @@ evalDoQuo_part <- function(doQuo, humtab, partQuos) {
                        by    = evalDoQuo_by,
                        where = evalDoQuo_where)
     
-    result <- partEval(doQuo, humtab, partition, partQuos)
-    result
+    partEval(doQuo, humtab, partition, partQuos, ordoQuo)
     
 }
 
-evalDoQuo_by <- function(doQuo, humtab, partition, parts) {
+evalDoQuo_by <- function(doQuo, humtab, partition, parts, ordoQuo) {
     # this function doesn't use reHum because data.table 
     # pretty much already does (some) of whats needed.
     targetFields <- namesInExprs(colnames(humtab), c(doQuo, parts[-1]))
@@ -1047,20 +1056,25 @@ evalDoQuo_by <- function(doQuo, humtab, partition, parts) {
     partition <- as.factor(partition)
     
     result <- humtab[ , 
-                      list(list(evalDoQuo(doQuo, .SD, parts[-1]))), 
+                      list(list(evalDoQuo(doQuo, .SD, parts[-1], ordoQuo))), 
                       by = partition, .SDcols = targetFields]
     
     result$V1
 }
-evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
-    result <- evalDoQuo(doQuo, humtab[partition], parts[-1])
-    
+evalDoQuo_where <- function(doQuo, humtab, partition, parts, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
                                      "In your call to with(in)Humdrum with a 'where ~ x' expression, 
                                      your where-expression must evaluate to a boolean.")
+    result <- evalDoQuo(doQuo, humtab[partition], parts[-1], ordoQuo)
+    
+    if (!is.null(ordoQuo)) {
+        orresult <- evalDoQuo(ordoQuo, humtab[!partition], parts[-1], NULL)
+        result <- rbind(result, orresult)
+    }
     
     result[humtab[, '_rowKey_'], on ='_rowKey_'] 
 }
+
 
 
 

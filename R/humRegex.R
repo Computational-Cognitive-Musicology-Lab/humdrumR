@@ -197,7 +197,7 @@ setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
 `%~l%` <- function(x, pattern) grepl(pattern, x)
 #' @export
 #' @name RegexFind
-`%~i%` <- function(x, pattern) grepi(pattern, x)
+`%~i%` <- function(x, pattern) grep(pattern, x)
 #' @export
 #' @name RegexFind
 `%~n%` <- function(x, pattern) stringi::stri_count_regex(x, pattern)
