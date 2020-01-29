@@ -380,6 +380,81 @@ as.decimal.rhythmInterval <- function(rint) {
 }
 
 
+#### As unicode duration string
+
+notevalue.unicode <- data.frame(stringsAsFactors = FALSE,
+                                Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
+                                            '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
+                                Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
+
+#' @name rhythmInterval
+#' @export
+as.notevalue <- function(...) UseMethod('as.notevalue')
+
+
+#' @name rhythmInterval-write
+#' @export
+as.notevalue.rhythmInterval <- function(rint) {
+    recip <- as.recip(rint)
+    
+    # base notation
+    parser <- REparser(denominator = "^[0-9]+", 
+                       numerator = "(%[1-9][0-9]*)?", 
+                       dots = '[.]*$')
+    parsed <- parser(recip)
+    
+    
+    
+    symbols <- setNames(notevalue.unicode$Unicode, notevalue.unicode$Recip)
+    
+    base <- symbols[parsed[ , 'denominator']]
+    
+    ##
+    
+    unknown <- is.na(base) & !is.na(recip)
+    primes <- c(3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 
+                53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 
+                109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 
+                173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 
+                233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 
+                293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 
+                367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 
+                433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 
+                499, 503, 509, 521, 523, 541)
+    i <- 1L
+    divides <- character(length(recip))
+    while(any(unknown)) {
+        den <- as.integer(parsed[unknown, 'denominator'])
+        
+        fitbase <- den %% primes[i] == 0 
+        newbase <- den %/% primes[i]
+        newbase <- IfElse(log(newbase, 2) %% 1L == 0,
+                          as.character(newbase),
+                          '1')
+        
+        base[which(unknown)[fitbase]] <- symbols[newbase[fitbase]]
+        divides[which(unknown)[fitbase]] <- paste0("\U2215", primes[i])
+        
+        unknown <- is.na(base) & !is.na(recip)
+        i <- i + 1L
+    }
+    
+    # add multiples
+    multiples <- IfElse(parsed[ , 'numerator'] == "", 
+                        "",
+                        paste0("\U2217", 
+                               stringr::str_sub(parsed[, 'numerator'], start = 2)))
+    notes <- paste0(base, divides, multiples)
+    
+    # add dots
+    dots <- gsub('.', '\U1D16D', parsed[ , 'dots'])
+    
+    paste0(notes, dots)
+    
+}
+
+
+
 #####################################-
 #### Reading rhythm representations ----
 #######################################-
@@ -470,6 +545,40 @@ read.fraction2rhythmInterval <- function(str) {
           
 }
 
+
+
+#' @name rhythmInterval-read
+#' @export
+#### From unicode note values.
+read.notevalue2rhythmInterval <- function(notevalues) {
+    
+    
+    
+    parser <- REparser(notevalue = paste0('^[', 
+                                          paste(notevalue.unicode$Unicode, collapse = ''), 
+                                          ']'),
+                       divide = "(\U2215[1-9][0-9]*)?",
+                       multiples = "(\U2217[1-9][0-9]*)?",
+                       dots = '\U1D16D*')
+    
+    parsed <- parser(notevalues)
+    
+    # 
+    symbols <- setNames(notevalue.unicode$Recip, notevalue.unicode$Unicode)
+    notevalue <- symbols[parsed[ , 'notevalue']]
+    dots  <- gsub('\U1D16D', '.', parsed[ , 'dots'])
+    multiples <- gsub('\U2217', '%', parsed[ , 'multiples'])
+    
+    recip <- paste0(notevalue, multiples, dots)
+    
+    rint <- read.recip2rhythmInterval(recip)
+    
+    #
+    divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
+    rint / IfElse(is.na(divides), 1, divides)
+}
+
+
 #### From anything!
 
 
@@ -490,7 +599,8 @@ as.rhythmInterval.numeric <- read.numeric2rhythmInterval
 
 #' @name rhythmInterval-read
 #' @export 
-as.rhythmInterval.character <- regexDispatch('Recip'   = read.recip2rhythmInterval,
+as.rhythmInterval.character <- regexDispatch('NoteValue' = read.notevalue2rhythmInterval,
+                                             'Recip' = read.recip2rhythmInterval,
                                              '[0-9]+[%/][0-9]+' = read.fraction2rhythmInterval,
                                              'Decimal' = read.numeric2rhythmInterval)
 
@@ -527,6 +637,12 @@ as.recip.character <- as.recip.rhythmInterval %.% as.rhythmInterval
 #' @name humRhythm
 #' @export
 as.decimal.character <- as.decimal.rhythmInterval %.% as.rhythmInterval
+
+#' @name humRhythm
+#' @export
+as.notevalue.character <- as.notevalue.rhythmInterval %.% as.rhythmInterval
+
+
 
 #################################################-
 ######Special rhythm functions ####----
@@ -679,3 +795,5 @@ diminish.rhythmInterval <- function(rint, scalar) rint / scalar
 diminish.character <- regexDispatch('Recip'   = as.recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
                                    '[0-9]+[%/][0-9]+' = as.fraction.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
                                    'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+
+

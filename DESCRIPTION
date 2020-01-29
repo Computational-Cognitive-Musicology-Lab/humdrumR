@@ -28,6 +28,7 @@ Collate: humdrumR-package.R
          humPitch.R
          humRhythm.R
          humDiatonic.R
+         humGraphics.R
 RoxygenNote: 6.1.1
 Suggests: 
     testthat (>= 2.1.0),

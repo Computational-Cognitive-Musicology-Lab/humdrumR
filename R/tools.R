@@ -1,4 +1,5 @@
 
+
 applyrows <- function(x, f, ...){
     result <- apply(x, 1, f, ...)
     result <- if (is.null(dim(result))) cbind(result) else t(result)
@@ -285,11 +286,44 @@ setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),
 
 
 
-  
-is.whole <- function(x) x %% 1 == 0
-
 #' @export
 `%.%` <- function(e1, e2) { compose(e2, e1) }
+
+
+`%predicate%` <- function(f, predicate) {
+        
+    argnames <- names(fargs(f))
+    
+    if (length(args) == 0L) stop(call. = FALSE,
+                                 "Can't make a predicated function if the function has no arguments.")
+    
+    newfunc <- function() {
+        args <- mget(argnames)
+        
+        len <- length(args[[1]])
+        
+        targets <- which(lengths(args) == len)
+        
+        ignore <- applyrows(sapply(args[targets], predicate), any)
+        
+        newargs <- args
+        newargs[targets] <- lapply(newargs[targets], '[', i = !ignore)
+        
+        result <- do.call('f', newargs)
+        
+        output <- rep(as(NA, mode(args[[1]])), len)
+        output[!ignore] <- result
+        
+        output
+        
+        
+    }
+    formals(newfunc) <- formals(f)
+    
+    parent.env(environment(newfunc)) <- environment(f)
+    
+    newfunc
+}
 
 allsame <- function(x) length(unique(x)) == 1L
 
@@ -297,6 +331,8 @@ allsame <- function(x) length(unique(x)) == 1L
   class(object) = append(newclass, class(object))
   object
 }
+
+is.whole <- function(x) x %% 1 == 0
 
 # removes the first class from an object
 popclass <- function(object) `class<-`(object, class(object)[-1])
@@ -306,31 +342,6 @@ popclass <- function(object) `class<-`(object, class(object)[-1])
 
 fargs <- function(func) formals(args(func))
 
-#' @export
-curriedfunction <- function(args, expr) {
-
-  func <- function() {}
-  formals(func) <- args
-
-  isstring <- tryCatch(is.character(expr), error = function(e) FALSE)
-  body(func) <- if (isstring) string2expr(expr) else substitute(expr)
-
-  func <- prependExpression('if (any(misses)) {
-                              formals(.self)[!misses] <- mget(names(.selfargs)[!misses])
-                              formals(.self) <- formals(.self)[order(misses, decreasing = TRUE)]
-                              environment(.self) <- environment()
-                              if (sum(misses) == 1) {
-                                  body(.self) <- parse(text = deparse(body(.self))[-2:-17])
-                              } else {
-                                  .self <- .self %class% "curried"
-                              }
-                              return(.self)}', func)
-  # alternative approach -> formals(func) <- formals()[misses]
-  func <- prependExpression('.self <- sys.function()
-                            .selfargs <- formals(.self)
-                            misses <- unlist(lapply(mget(names(.selfargs)), function(form) all(deparse(form) == "")))', func)
-  func %class% 'curried'
-}
 
 #' @export
 EQ <- function(pat) {
@@ -411,51 +422,6 @@ init <- function(x, n = 1) {
 }
 
 hasdim <- function(x) !is.null(dim(x))
-
-
-`%len==%` <- function (x, y) 
-{
-    xl <- if (!hasdim(x)) {
-        length(x)
-    }
-    else {
-        nrow(x)
-    }
-    yl <- if (is.integer(y)) {
-        y
-    }
-    else {
-        if (is.null(dim(y))) {
-            length(y)
-        }
-        else {
-            nrow(y)
-        }
-    }
-    xl == yl
-}
-
-`%len>%` <- function (x, y) 
-{
-    xl <- if (!hasdim(x)) {
-        length(x)
-    }
-    else {
-        nrow(x)
-    }
-    yl <- if (is.integer(y)) {
-        y
-    }
-    else {
-        if (is.null(dim(y))) {
-            length(y)
-        }
-        else {
-            nrow(y)
-        }
-    }
-    xl > yl
-}
 
 
 

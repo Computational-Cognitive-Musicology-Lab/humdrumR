@@ -5,6 +5,7 @@
 \alias{read.recip2rhythmInterval}
 \alias{read.numeric2rhythmInterval}
 \alias{read.fraction2rhythmInterval}
+\alias{read.notevalue2rhythmInterval}
 \alias{as.rhythmInterval.numeric}
 \alias{as.rhythmInterval.character}
 \title{Reading \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} from various representations}
@@ -14,6 +15,8 @@ read.recip2rhythmInterval(str)
 read.numeric2rhythmInterval(n)
 
 read.fraction2rhythmInterval(str)
+
+read.notevalue2rhythmInterval(notevalues)
 
 \method{as.rhythmInterval}{numeric}(n)
 

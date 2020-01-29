@@ -12,6 +12,7 @@
 \alias{as.recip}
 \alias{as.fraction}
 \alias{as.decimal}
+\alias{as.notevalue}
 \alias{as.rhythmInterval}
 \title{The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.}
 \usage{
@@ -39,6 +40,8 @@ as.recip(...)
 as.fraction(...)
 
 as.decimal(...)
+
+as.notevalue(...)
 
 as.rhythmInterval(...)
 }

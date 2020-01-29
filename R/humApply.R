@@ -290,7 +290,7 @@ withinHumdrum <- function(humdrumR,  ...) {
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
          
           ###
-          if (!all(names(parsedArgs$formulae$doexpressions) == 'dofx')) {
+          if (!all(grepl('p', names(parsedArgs$formulae$doexpressions)))) {
               local({
               #### if any new fields have same name as old, remove old
               # ADD A CHECK TO PREVENT OVERWRITING STRUCTURAL FIELDS?
@@ -404,7 +404,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     ###########################-
     ### Preparing the "do" expression
     doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions, 
-                            humdrumR@Active, parsedArgs$formulae$ngram)
+                            humdrumR@Active, parsedArgs$formulae$ngrams)
     
     ###########################-
     #### evaluate "do" expression! 
@@ -415,13 +415,8 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     
 }
     
-#' inHumdrum
-#' @name with-in-Humdrum
-#' @export
-inHumdrum <- withinHumdrum
-
     
-##### Parsing Args (Formulae) ----
+##
 
 parseArgs <- function(..., withfunc) {
     #### Preprocessing ... argument for with(in)Humdrum
@@ -459,14 +454,19 @@ parseArgs <- function(..., withfunc) {
          namedArgs  = namedArgs)
 }
  
-
+#' inHumdrum
+#' @name with-in-Humdrum
+#' @export
+inHumdrum <- withinHumdrum
+          
 
 anyfuncs2forms <- function(fs, parentenv) {
           areFuncs <- sapply(fs, is.function)
           
           fs[areFuncs] <- lapply(fs[areFuncs],
                                  function(func) {
-                                           expenv <- list2env(list(.func = func), parent = parentenv)
+                                           expenv <- list2env(list(.func = func))
+                                           parent.env(expenv) <- parentenv
                                            formula <- ~ .func(.)
                                            rlang::f_env(formula) <- expenv
                                            formula
@@ -476,42 +476,30 @@ anyfuncs2forms <- function(fs, parentenv) {
 
 parseKeywords <- function(formulae, withfunc) {
  formulargs <- parseArgFormulae(formulae) # output is named list of quosures
- 
- names(formulargs) <- partialMatchKeywords(names(formulargs))
  formulargnames <- names(formulargs)
  
  #
- 
- knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill'),
-                       partitions      = c('by', 'where'),
+ knownKeywords <- list(doexpressions   = c('d', 'do', 'dop', 'dopl', 'doplo', 'doplot', 'plot'),
                        graphics        = names(par()),
-                       ngram           = 'ngram',
-                       recordtypes     = 'recordtypes',
-                       windows         = 'windows',
-                       pre             = 'pre',
-                       post            = 'post')
- 
- 
- #
+                       ngrams          = c('ngrams', 'ngram', 'ngra', 'ngr', 'ng'),
+                       partitions      = c('by', 'where', 'groupby', 'group_by'),
+                       recordtypes     = c('recordtype', 'recordtypes'),
+                       windows         = c('windows', 'window'),
+                       pre             = c('pre'),
+                       post            = c('post'))
+
  boolean <- lapply(knownKeywords, `%in%`, x = formulargnames)
- 
- unknownKeys <- colSums(do.call('rbind', boolean)) == 0L
- if (any(unknownKeys)) {
-     unknownKeynames <- glue::glue_collapse(paste0(formulargnames[unknownKeys], '~'), sep = ', ', last = ' and ')
-     stop(call. = FALSE, glue::glue("In your call to {withfunc}, the formula {plural(sum(unknownKeys), 'keywords', 'keyword')} {unknownKeynames} {plural(sum(unknownKeys), 'do', 'does')} not match any known formula keys." ))
- }
- 
  values  <- lapply(boolean, function(b) formulargs[b])
  
  if (!any(boolean$doexpressions)) stop(call. = FALSE,
-                                   glue::glue("Your call to {withfunc} doesn't include any do expressions to apply to the data!
+                                   glue::glue("Your call to {withfunc} doesn't include any do[plot] expressions to apply to the data!
                                    These expressions should be either in a formula with no left hand side (~Expr) or with 'do' or 'doplot' on the left hand side (do~Expr, doplot~Expr)."))
  
  # These keywords must always have exactly one evaluated value.
  #        If there are more than one, take the first.
  #        If there are none, some categories have defaults
- values$ngram       <- if (length(values$ngram)       == 0L) NULL else values$ngram[[1]]
- values$recordtypes <- if (length(values$recordtypes) == 0L) rlang::quo('D') else values$recordtypes[[1]]
+ values$ngrams      <- if (length(values$ngrams)      == 0) NULL else values$ngrams[[1]]
+ values$recordtypes <- if (length(values$recordtypes) == 0) rlang::quo('D') else values$recordtypes[[1]]
  
  # Other keywords (e.g., windows and partitions) can be of any length, including 0
 
@@ -519,32 +507,7 @@ parseKeywords <- function(formulae, withfunc) {
  values
 }
 
-partialMatchKeywords <- function(keys) {
-    # this function matches partial matches off keywords
-    # to the master standard
-    keys <- gsub('_', '', tolower(keys))
-    
-    # define standard keys and alternatives
-    standardkeys <- list(do = c('do', 'd', 'eval', 'apply'),
-                         dofill = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         dofx = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
-                                  'doplots', 'plots',
-                                  'evalfxs', 'evalsidefxs', 'evalsideeffects',
-                                  'applyfxs', 'applysidefxs', 'applysideffects'),
-                         by  = c('by', 'groupby', 'groups', 'across', 'groupacross'),
-                         where = c('where', 'when'),
-                         recordtypes = 'recordtypes',
-                         ngram = 'ngrams',
-                         windows = 'windows',
-                         pre = 'pre', 
-                         post = 'post')
-    
-    matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
-    
-    IfElse(is.na(matches), keys, rep(names(standardkeys), lengths(standardkeys))[matches])
-    
-    
-}
+
 
 
 parseArgFormulae <- function(l) {
@@ -599,21 +562,76 @@ splitFormula <- function(form) {
 
 
 
-##### Preparing doQuo ----
+###########- Applying withinHumdrum's expression to a data.table
+
+
+
+
+evalDoQuo <- function(doQuo, humtab, partQuos) {
+    if (length(partQuos) == 0L) {
+        result <- rlang::eval_tidy(doQuo, data = humtab)
+        parseResult(result, humtab$`_rowKey_`)
+        
+    } else {
+        result <- evalDoQuo_part(doQuo, humtab, partQuos)
+        if (is.data.frame(result)) result else data.table::rbindlist(result)
+    }
+}
+evalDoQuo_part <- function(doQuo, humtab, partQuos) {
+    ### evaluation partition expression and collapse results 
+    ## to a single factor
+    partType <- names(partQuos)[1]
+    partition <- rlang::eval_tidy(partQuos[[1]], humtab)
+    
+    if (!is.list(partition)) partition <- list(partition)
+    partition <- lapply(partition, rep, length.out = nrow(humtab))
+    
+    partition <- Reduce(switch(partType, by = paste, where = `&`), partition)
+    
+    partEval <- switch(partType,
+                       by    = evalDoQuo_by,
+                       where = evalDoQuo_where)
+    
+    result <- partEval(doQuo, humtab, partition, partQuos)
+    result
+    
+}
+
+evalDoQuo_by <- function(doQuo, humtab, partition, parts) {
+    # this function doesn't use reHum because data.table 
+    # pretty much already does (some) of whats needed.
+    targetFields <- namesInExprs(colnames(humtab), c(doQuo, parts[-1]))
+    targetFields <- c(targetFields, '_rowKey_')
+    
+    partition <- as.factor(partition)
+    
+    result <- humtab[ , 
+                      list(list(evalDoQuo(doQuo, .SD, parts[-1]))), 
+                      by = partition, .SDcols = targetFields]
+   
+    result$V1
+}
+evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
+    result <- evalDoQuo(doQuo, humtab[partition], parts[-1])
+    
+    if (!is.logical(partition)) stop(call. = FALSE,
+                                     "In your call to with(in)Humdrum with a 'where ~ x' expression, 
+                                     your where-expression must evaluate to a boolean.")
+    
+    result[humtab[, '_rowKey_'], on ='_rowKey_'] 
+}
+
+
+
+
 ####################- Parsing expressions fed to withinHumdrum
 
 
 prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # This is the main function used by \code{\link{withinHumdrum}} to prepare the current
   # do expression argument for application to a \code{\linkS4class{humdrumR}} object.
-  # collapse doQuos to a single doQuo
-    
   
-  # do fill 
-  usedInExprs <- lapply(doQuos, fieldsInExpr, humtab = humtab)
-  dofills <- names(doQuos) == 'dofill'
-  doQuos[dofills] <- Map(fillQuo, doQuos[dofills], usedInExprs[dofills])
-
+  # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuos)
       
   # turn . to active formula
@@ -637,39 +655,28 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
-  if (any(lists)) doQuo <- mapifyQuo(doQuo, usedInExpr)
+  if (any(lists)) doQuo <- mapifyQuo(doQuo, usedInExpr, depth = 1L)
     
   # if ngram is present
   if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
-            doQuo <- ngramifyQuo(doQuo, ngram, usedInExpr)
+            doQuo <- ngramifyQuo(doQuo, 
+                                        ngram, usedInExpr, 
+                                        depth = 1L + any(lists))
   }
   
   doQuo
 }
 
 
-fillQuo <- function(doQuo, usedInExpr) {
-    # this takes a do quosure and makes sure its
-    # results expands to be the same size as its input
-    if (length(usedInExpr) == 0L) usedInExpr <- '.'
-    usedInExpr <- rlang::syms(usedInExpr)
-    
-    rlang::quo({
-        targetlen <- max(lengths(list(!!!usedInExpr)))
-        rep(!!doQuo, length.out = targetlen)
-    } )
-    
-}
-
 concatDoQuos <- function(doQuos) {
     ## this function takes a named list of "do" quosures and creates a single quosure
     # which applies each of them in turn.
     # the doQuos must have names either do or doplot
     
-    sideEffects <- names(doQuos) == 'dofx'
+    sideEffects <- grepl('p', names(doQuos))
     
     
-    if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
+    if (tail(sideEffects, 1)) doQuos <- c(doQuos, quo(.))
 
     temp <- quote(.)
     for (i in 1:length(doQuos)) {
@@ -682,15 +689,16 @@ concatDoQuos <- function(doQuos) {
                            (length(expr) > 1 && expr[[1]] != '<-') &&
                            !sideEffects[i]) {
             
-            temp <- tempvar('doPipe')
-            rlang::quo(!!temp <- !!doQuos[[i]])
+            temp <- as.symbol(tempfile('xxx', tmpdir = ''))
+            quo(!!temp <- !!doQuos[[i]])
             
         } else {
-            rlang::new_quosure(doQuos[[i]], rlang::quo_get_env(doQuos[[i]]))
+            rlang::new_quosure(doQuos[[i]], environment())
         }
     }
     
-    rlang::quo({!!!doQuos})
+    
+    quo({!!!doQuos})
 }
 
 ####################### Functions used inside prepareQuo
@@ -834,71 +842,68 @@ parseAt <- function(atExpr) {
  rlang::expr(tapply(!!expr, !!group, c))
 }
 
-########## Automaticall mapping expressions across data structures.
+########## Mapping expression across list fields.
 
-quosureAsfunction <- function(doQuo, usedInExpr) {
-    arglist <- as.arglist(usedInExpr)
-    
-    funcEnv  <- rlang::quo_get_env(doQuo)
-                      
-    func <- function() {
-        args <- as.list(environment())
-        
-        rlang::eval_tidy(doQuo, args)
-    }
-    environment(func) <- list2env(list(doQuo = doQuo))
-    formals(func) <- arglist
-    
-    func
+xifyQuo <- function(expression, usedInExpr, depth = 1L) {
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which creates an lambda function which takes those names
+          # as arguments and calls the expression with them.
+          # This lambda function is appropriate for calling with
+          # Map, lapply, ngramApply, etc.
+          # This is used by listifyQuo and ngramifyQuo.
+          # 
+          # Argnames within the newly generated lambda expressions are changed
+          # to lower case versions of usedInExpr strings, but with depth "_" appended
+          # to make sure there's no accidental overlap (just a precaution).
+          fargs <- as.pairlist(alist(x = )[rep(1, length(usedInExpr))])
+          names(fargs) <- paste0('.', tolower(usedInExpr), strrep('_', depth))
+          
+          expression <- substituteName(expression,
+                                       setNames(lapply(names(fargs), as.symbol), usedInExpr))
+          
+          lambdaexpression      <- quote(function() {} )
+          lambdaexpression[[2]] <- fargs
+          lambdaexpression[[3]] <- rlang::quo_get_expr(expression)
+          
+          rlang::quo_set_expr(expression, lambdaexpression)
+          
 }
 
 
-mapifyQuo <- function(doQuo, usedInExpr) {
-          # This function takes a doQuo and creates a new doQuo
-          # which applies that doQuo across a list (or parallel lists) of objects.
-          # Its kind of like base::Vectorize, but works on lists.
-          # usedInExpr is much like Vectorize(vectorize.args)---it needs to be added
-          # so we know what variables to map over.
-    
-    doFunc <- quosureAsfunction(doQuo, usedInExpr)
-    
-    doFuncName <- tempvar('mapify')
-    
-    doQuoEnv <- new.env()
-    assign(as.character(doFuncName), doFunc, doQuoEnv)
-    
-    #
-    doQuo <- rlang::quo(Map(!!doFuncName, !!!rlang::syms(usedInExpr)))
-    doQuo <- rlang::quo_set_env(doQuo, doQuoEnv)
-    
-    doQuo
-    
-                        
- 
+mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which uses Map to call this expression across these named objects.
+          # (It presumes that the named objects are actually lists).
+          # It first uses xifyQuo to put the expression in the form of a 
+          # lambda function.
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+  
+  rlang::quo_set_expr(funcQuosure, 
+                      rlang::expr(Map(f = !!rlang::quo_get_expr(funcQuosure), 
+                                      !!!lapply(usedInExpr, rlang::sym))))
+
 }
 
-ngramifyQuo <- function(doQuo, ngramQuo, usedInExpr) {
-    # This function takes a doQuo and creates a new doQuo
-    # which applies that doQuo across ngrams.
-    # Its kind of like base::Vectorize.
-    # usedInExpr is much like Vectorize(vectorize.args)---it needs to be added
-    # so we know what variables to map over.
-    doFunc <- quosureAsfunction(doQuo, usedInExpr)
-    
-    doFuncName <- tempvar('ngramify')
-    
-    doQuoEnv <- new.env()
-    assign(as.character(doFuncName), doFunc, doQuoEnv)
-    
-    #
-    doQuo <- rlang::quo(applyNgram(!!ngramQuo, 
-                                   list(!!!rlang::syms(usedInExpr)), 
-                                   !!doFuncName))
-    doQuo <- rlang::quo_set_env(doQuo, doQuoEnv)
-    
-    doQuo
-    
-    
+ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
+          # This function takes an expression and a vector of strings representing
+          # names used in that expression and creates an expression
+          # which uses applyNgram on these named objects.
+          # It first uses xifyQuo to put the expression in the form of a 
+          # lambda function.
+          # 
+          # 
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+  
+  # rlang::quo_set_expr(funcQuosure,
+                      # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
+                                             # vecs = list(!!!lapply(usedInExpr, rlang::sym)), 
+                                             # f = !!rlang::quo_get_expr(funcQuosure))))
+  rlang::quo(
+            applyNgram(n = !!ngramQuosure, 
+                       vecs = list(!!!lapply(usedInExpr, rlang::sym)),
+                       f = !!funcQuosure))
   
 }
 
@@ -999,71 +1004,6 @@ interpolateArguments <- function(quo, namedArgs) {
 }
 
 
-
-
-##### Evaluating do quo in humtab ----
-###########- Applying withinHumdrum's expression to a data.table
-
-
-
-
-evalDoQuo <- function(doQuo, humtab, partQuos) {
-    if (length(partQuos) == 0L) {
-        result <- rlang::eval_tidy(doQuo, data = humtab)
-        parseResult(result, humtab$`_rowKey_`)
-        
-    } else {
-        result <- evalDoQuo_part(doQuo, humtab, partQuos)
-        if (is.data.frame(result)) result else data.table::rbindlist(result)
-    }
-}
-evalDoQuo_part <- function(doQuo, humtab, partQuos) {
-    ### evaluation partition expression and collapse results 
-    ## to a single factor
-    partType <- names(partQuos)[1]
-    partition <- rlang::eval_tidy(partQuos[[1]], humtab)
-    
-    if (!is.list(partition)) partition <- list(partition)
-    partition <- lapply(partition, rep, length.out = nrow(humtab))
-    
-    partition <- Reduce(switch(partType, by = paste, where = `&`), partition)
-    
-    partEval <- switch(partType,
-                       by    = evalDoQuo_by,
-                       where = evalDoQuo_where)
-    
-    result <- partEval(doQuo, humtab, partition, partQuos)
-    result
-    
-}
-
-evalDoQuo_by <- function(doQuo, humtab, partition, parts) {
-    # this function doesn't use reHum because data.table 
-    # pretty much already does (some) of whats needed.
-    targetFields <- namesInExprs(colnames(humtab), c(doQuo, parts[-1]))
-    targetFields <- c(targetFields, '_rowKey_')
-    
-    partition <- as.factor(partition)
-    
-    result <- humtab[ , 
-                      list(list(evalDoQuo(doQuo, .SD, parts[-1]))), 
-                      by = partition, .SDcols = targetFields]
-    
-    result$V1
-}
-evalDoQuo_where <- function(doQuo, humtab, partition, parts) {
-    result <- evalDoQuo(doQuo, humtab[partition], parts[-1])
-    
-    if (!is.logical(partition)) stop(call. = FALSE,
-                                     "In your call to with(in)Humdrum with a 'where ~ x' expression, 
-                                     your where-expression must evaluate to a boolean.")
-    
-    result[humtab[, '_rowKey_'], on ='_rowKey_'] 
-}
-
-
-
-
 #######################################################-
 ################################# Reassembling humtable ----
 #######################################################-
@@ -1134,15 +1074,8 @@ parseResult_table <- function(result) {
    data.table(list(result))
 }
 
-parseResult_list  <- function(result) {
-    if (all(lengths(result) == 1L) &&
-        all(sapply(result, is.atomic)) &&
-        allsame(sapply(result, class))) {
-        result <- unlist(result)
-    }
-    data.table(Pipe = result) 
-}
-parseResult_other <- function(result) data.table(Pipe = list(result))
+parseResult_list  <- function(result) data.table(result) 
+parseResult_other <- function(result) data.table(list(result))
 
 `pipeIn<-` <- function(object, value) {
           #' This is the main function for taking the output of a
