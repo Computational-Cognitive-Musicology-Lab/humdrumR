@@ -819,20 +819,20 @@ splatQuo <- function(funcQuosure) {
   # argument. See the docementation for \code{\link{withinHumdrum}}.
   # This does not look for \code{@} sub expression within branches of a \code{@} expression!
   # 
-  if (!is.call(funcQuosure)) return(funcQuosure)
-          
-  atArgs <- vapply(funcQuosure[-1], function(ex) is.call(ex) && deparse(ex[[1]]) == '@', FUN.VALUE = logical(1))
   
-  if (!any(atArgs)) {
-           for (i in 2:length(funcQuosure)) funcQuosure[[i]] <- Recall(funcQuosure[[i]]) 
-           funcQuosure
-  } else {
-           for (i in (1L + which(atArgs))) funcQuosure[[i]] <- parseAt(funcQuosure[[i]])   
-           callname <- funcQuosure[[1]]
-           funcQuosure[[1]] <- quote(c)
-           rlang::quo(do.call(!!callname, !!funcQuosure ))
-            
+  
+  predicate <- function(expr) any(sapply(expr, testCall, call = '@'))
+  
+  transform <- function(expr) {
+      expr <- recurseQuosure(expr, 
+                     function(quo) testCall(quo, '@'), 
+                     function(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
+                         })
+      expr <- as.list(expr)
+      rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
   }
+  
+  recurseQuosure(funcQuosure, predicate, transform)
  
 }
 

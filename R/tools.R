@@ -95,9 +95,45 @@ object2str <- function(object) {
     }
 }
 
+testCall <- function(expr, call) {
+    # takes an expression or 
+    
+    if (rlang::is_quosure(expr)) expr <- rlang::quo_get_expr(expr)
+    
+    if (!is.call(expr)) return(FALSE)
+    
+    expr[[1]] == rlang::sym(call)
+    
+}
+
+recurseQuosure <- function(quo, predicate, do) {
+    expr <- if (rlang::is_quosure(quo)) rlang::quo_get_expr(quo) else quo
+    if (!is.call(expr)) return(quo)
+    
+    s <- if (expr[[1]] == rlang::sym('{')) 2L else 1L
+    
+    if (predicate(expr)) {
+        expr <- do(expr)
+    } else {
+        for (i in s:length(expr)) {
+            expr[[i]] <- Recall(expr[[i]], predicate, do)
+        }
+    }
+    
+    
+    if (rlang::is_quosure(quo)) {
+        quo <- rlang::quo_set_expr(quo, expr) 
+        return(quo)
+    } else {
+        return(expr)
+    }
+       
+    
+}
+
 wrapInCall <- function(form, call) {
-    # This function takes a formula a# fileFrame[] <- lapply(fileFrame,)nd wraps the rhs
-    # with a call to any.
+    # This function takes a formula and wraps the rhs
+    # with any given call.
     # i.e. form -> any(form)
     rhs <- rlang::f_rhs(form)
     rhs <- call(call, call('(', rhs))
@@ -118,6 +154,7 @@ as.formula <- function(x, lhs = NULL) {
 }
 
 names_ <- function(x) {
+    # gets names with no possibility of NULL
     nam <- names(x)
     
     if(is.null(nam)) nam <- character(length(x))
