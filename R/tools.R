@@ -8,12 +8,14 @@ applyrows <- function(x, f, ...){
     result
 }
 
-tempvar <- function(prefix = '') {
+tempvar <- function(prefix = '', asSymbol = TRUE) {
     # this makes random symbols to use as variable names
     
     random <- paste(sample(c(letters, 0:9), 5, replace = TRUE), collapse = '')
     
-    rlang::sym(paste0('._', prefix, '_', random))
+    char <- paste0('._', prefix, '_', random)
+    
+    if (asSymbol) rlang::sym(char) else char
     
 }
 
