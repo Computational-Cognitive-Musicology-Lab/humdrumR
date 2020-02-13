@@ -4,7 +4,8 @@
 \alias{rhythmOffset}
 \title{Calculate rhythmic "offset"}
 \usage{
-rhythmOffset(durations, start = 0, groups = NULL)
+rhythmOffset(durations, start = 0, groups = NULL,
+  output = as.decimal)
 }
 \arguments{
 \item{durations}{A vector of numeric values representing durations.}
