@@ -22,6 +22,7 @@
 \alias{as.solfa.numeric}
 \alias{as.ratio}
 \alias{as.ratio.tonalInterval}
+\alias{as.decimal.tonalInterval}
 \alias{as.frequency}
 \alias{as.frequency.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
@@ -66,9 +67,11 @@ as.solfa(x, key = 0L, contour = FALSE, ...)
 
 \method{as.solfa}{numeric}(x, key = 0L)
 
-as.ratio(x, twelfth = 2^(19/12), ...)
+as.ratio(x, ..., sep)
 
-\method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12))
+\method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12), sep = "/")
+
+\method{as.decimal}{tonalInterval}(x, twelfth = 2^(19/12))
 
 as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
   twelfth = 2^(19/12), ...)

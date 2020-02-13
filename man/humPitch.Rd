@@ -31,7 +31,7 @@
 \method{as.frequency}{character}(x, reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))
 
-\method{as.ratio}{character}(x, twelfth = 2^(19/12))
+\method{as.ratio}{character}(x, twelfth = 2^(19/12), sep = "/")
 }
 \description{
 These functions translate various pitch representations

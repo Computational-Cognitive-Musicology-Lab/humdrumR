@@ -88,32 +88,6 @@ setMethod('initialize', 'rhythmInterval',
             
           })
 
-reduce_fraction <- function(n ,d) {
-  # Used by rhythmInterval initialize method
-  gcds <- gcd(n, d)
-  
-  list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
-}
-
-gcd <- function(x, y) {
-  # Used by reduce_fraction
-  r <- x %% y
-  ifelse(r, Recall(y, r), y)
-}
-
-numeric2fraction <- function(n) {
-    frac <- attr(MASS::fractions(n, cycles = 8), 'fracs')
-    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
-    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
-    
-    num <- as.integer(frac[ , 1])
-    den <- as.integer(frac[ , 2])
-    
-    den[is.na(den)] <- 1L
-    
-    list(Denominator = den, Numerator = num)
-}
-
 ######rhythmInterval constructors and accessors ####
 
 
@@ -395,28 +369,16 @@ as.recip.rhythmInterval <- function(rint) {
 
 #### As fraction
 
-#' @name rhythmInterval
-#' @export
-as.fraction <- function(...) UseMethod('as.fraction')
+
+
 
 #' @name rhythmInterval-write
 #' @export
-as.fraction.numeric <- function(n) {
-          fractions <- IfElse(is.na(n), NA_character_, attr(MASS::fractions(n), 'fracs'))
-          
-          gsub('/', '%', fractions)
-}
-
-#' @name rhythmInterval-write
-#' @export
-as.fraction.rhythmInterval <- function(rint) {
-          .paste(getNumerator(rint), '%', getDenominator(rint))
+as.ratio.rhythmInterval <- function(rint) {
+          .paste(getNumerator(rint), '/', getDenominator(rint))
 }
 
 #### As decimal
-#' @name rhythmInterval
-#' @export
-as.decimal <- function(...) UseMethod('as.decimal')
 
 #' @name rhythmInterval-write
 #' @export
@@ -678,7 +640,7 @@ NULL
 
 #' @name humRhythm
 #' @export 
-as.fraction.character <- as.fraction.rhythmInterval %.% as.rhythmInterval
+as.fraction.character <- as.ratio.rhythmInterval %.% as.rhythmInterval
 
 #' @name humRhythm
 #' @export
@@ -833,7 +795,7 @@ augment.rhythmInterval <- function(rint, scalar) rint * scalar
 #' @name RhythmScaling
 #' @export
 augment.character <- regexDispatch('Recip'   = as.recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.fraction.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
+                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
 
 
@@ -849,7 +811,7 @@ diminish.rhythmInterval <- function(rint, scalar) rint / scalar
 #' @name RhythmScaling
 #' @export
 diminish.character <- regexDispatch('Recip'   = as.recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.fraction.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
+                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
                                    'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
 
 

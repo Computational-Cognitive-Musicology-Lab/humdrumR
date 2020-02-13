@@ -4,7 +4,7 @@
 \alias{metricPosition}
 \title{Calculate metric positions from duration data.}
 \usage{
-metricPosition(rints, bars = NULL, beats = rint(c(4, 8, 16, 32)))
+metricPosition(rints, bars = NULL, beats = rint(c(2, 4, 8, 16, 32)))
 }
 \description{
 Calculate metric positions from duration data.

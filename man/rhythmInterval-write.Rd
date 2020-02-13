@@ -3,8 +3,7 @@
 \name{rhythmInterval-write}
 \alias{rhythmInterval-write}
 \alias{as.recip.rhythmInterval}
-\alias{as.fraction.numeric}
-\alias{as.fraction.rhythmInterval}
+\alias{as.ratio.rhythmInterval}
 \alias{as.decimal.rhythmInterval}
 \alias{as.decimal.integer}
 \alias{as.decimal.numeric}
@@ -13,9 +12,7 @@
 \usage{
 \method{as.recip}{rhythmInterval}(rint)
 
-\method{as.fraction}{numeric}(n)
-
-\method{as.fraction}{rhythmInterval}(rint)
+\method{as.ratio}{rhythmInterval}(rint)
 
 \method{as.decimal}{rhythmInterval}(rint)
 

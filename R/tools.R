@@ -1,3 +1,28 @@
+reduce_fraction <- function(n ,d) {
+    # Used by rhythmInterval initialize method
+    gcds <- gcd(n, d)
+    
+    list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
+}
+
+gcd <- function(x, y) {
+    # Used by reduce_fraction
+    r <- x %% y
+    ifelse(r, Recall(y, r), y)
+}
+
+numeric2fraction <- function(n) {
+    frac <- attr(MASS::fractions(n, cycles = 8), 'fracs')
+    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
+    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
+    
+    num <- as.integer(frac[ , 1])
+    den <- as.integer(frac[ , 2])
+    
+    den[is.na(den)] <- 1L
+    
+    list(Denominator = den, Numerator = num)
+}
 
 
 applyrows <- function(x, f, ...){
