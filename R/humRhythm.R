@@ -746,15 +746,16 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 #' 
 #' @family rhythm analysis tools
 #' @export
-metricPosition <- function(rints, measurelength = rint(1), 
-                           beats = rint(c(4, 8, 16, 32))) {
-  cumrints <- cumsum(c(rint(1, 0), rints)) %% measurelength
+metricPosition <- function(rints, bars = NULL, 
+                           beats = rint(c(2, 4, 8, 16, 32))) {
   
-  output <- rhythmDecompose(cumrints, beats)
-  durnames <- as.character(rints)
+  offset <- rhythmOffset(rints, bars = bars, as = as.rhythmInterval)
+  
+  output <- rhythmDecompose(offset, into = beats)
+  # durnames <- as.character(rints)
   
   output <- output[1:(nrow(output) - 1), ] 
-  rownames(output) <- make.unique(durnames)
+  # rownames(output) <- make.unique(durnames)
   
   for (j in 1:ncol(output)) {
    output[ , j] <- output[ , j] / beats[j]         
@@ -788,7 +789,7 @@ metricPosition <- function(rints, measurelength = rint(1),
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = 0, groups = NULL, tatum = 1, as = as.decimal) {
+rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
           durations <- as.decimal(durations)
           start <- as.decimal(start)
           tatum <- as.decimal(tatum)
@@ -798,16 +799,16 @@ rhythmOffset <- function(durations, start = 0, groups = NULL, tatum = 1, as = as
           
           off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
                  
-          offsets <- if (is.null(groups)) {
+          offsets <- if (is.null(bars)) {
              off(durations, start)
                     
           }   else {
-                    if (length(groups) != length(durations)) {
+                    if (length(bars) != length(durations)) {
                               stop(call. = FALSE,
                                    "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
                     }
                     
-                    dur.groups <- split(as.numeric(durations), as.numeric(groups))
+                    dur.groups <- split(as.numeric(durations), as.numeric(bars))
                     durs <- unlist(Map(off, dur.groups, as.numeric(start)))
                     as(durs, class(durations))
                     

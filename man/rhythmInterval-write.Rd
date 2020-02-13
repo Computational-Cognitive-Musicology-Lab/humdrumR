@@ -6,6 +6,8 @@
 \alias{as.fraction.numeric}
 \alias{as.fraction.rhythmInterval}
 \alias{as.decimal.rhythmInterval}
+\alias{as.decimal.integer}
+\alias{as.decimal.numeric}
 \alias{as.notevalue.rhythmInterval}
 \title{Writing \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to various representations}
 \usage{
@@ -16,6 +18,10 @@
 \method{as.fraction}{rhythmInterval}(rint)
 
 \method{as.decimal}{rhythmInterval}(rint)
+
+\method{as.decimal}{integer}(x)
+
+\method{as.decimal}{numeric}(x)
 
 \method{as.notevalue}{rhythmInterval}(rint)
 }
