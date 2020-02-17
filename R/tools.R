@@ -12,7 +12,7 @@ gcd <- function(x, y) {
 }
 
 numeric2fraction <- function(n) {
-    frac <- attr(MASS::fractions(n, cycles = 8), 'fracs')
+    frac <- attr(MASS::fractions(n, cycles = 15), 'fracs')
     frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
     if (ncol(frac) == 1L) frac <- cbind(frac, '1')
     
