@@ -27,11 +27,11 @@ to a row in the humdrum table while a "field" refers to a column.
 
 There are five types of fields in a humdrum table: 
 \enumerate{
-\item Data fields
-\item Structure fields
-\item Interpretation fields
-\item Form fields
-\item Reference fields
+\item{Data fields}
+\item{Structure fields}
+\item{Interpretation fields}
+\item{Form fields}
+\item{Reference fields}
 }
 When first created by a call to \code{\link{readHumdrum}} every
 humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation 

@@ -15,4 +15,15 @@ Windowing:
 	prev.open + x	next.open + x
 	prev.close + x	open + x
 
-	prev.open + '('	open + (')' - '(')
+
+	identify "anchors" in vector
+		could be regex matches
+		could be numeric sequences
+
+	Pick open anchors independently	
+	Pick open anchors dependtly
+		dependent on closes
+		dependent on previous open/closes
+
+	ditto for close
+	

@@ -38,6 +38,24 @@
 #' side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
 #' a \code{\linkS4class{humdrumR}} data object on the fly.
 #' 
+#' @section Plural pipes:
+#' 
+#' In R we often apply the same function to a \code{list} of data.
+#' "Plural pipes" expand this idea to piping: take a \code{list} of data
+#' and pipe each element in the list to an expression/function.
+#' There are plural pipe versions of each singular pipe operator.
+#' Just add an "s" to make them plural: 
+#' \itemize{
+#' \item \code{%>%} (singular) : \code{%s>%} (plural);
+#' \item \code{%hum>%} (singular) : \code{%hums>%} (plural);
+#' \item \code{%hum<%} (singular) : \code{%hums<%} (plural);
+#' \item \code{%humT%} (singular) : \code{%humsT%} (plural);
+#' \item \code{%hum[]%} (singular) : \code{%hums[]%} (plural);
+#' }
+#' 
+#' Note: `%s>%` is an expansion of the \code{\link{magrittr::`%>%`}}, which
+#' makes use of some clever meta-programming---we can't guarantee it will
+#' always behave the way we might like!
 #' @name humPipe
 NULL
 
@@ -170,6 +188,41 @@ removeParentheses <- function(expr) {
   expr[[i]] <- Recall(expr[[i]])         
  }
  expr
-                    
-          
+}
+
+
+############### Plural piping ----
+
+
+#' 
+#' @name humPipe
+#' @export
+`%s>%` <- function(lhs, rhs) {
+    if (!is.list(e1)) stop(call. = FALSE,
+                           'If using %s>% ("multi-pipe"), the left-side must be a list of values.')
+    e2 <- rlang::enquo(e2)
+    lapply(e1, function(x) eval(rlang::quo_squash(rlang::quo(x %>% !!e2))))
+    
+}
+
+#' @name humPipe
+#' @export
+`%hums>%` <- function(list, formula) {
+    lapply(list, doPipe, formula = formula, pipename = '%hums>%', call = 'withinHumdrum')
+}
+
+#' @name humPipe
+#' @export
+`%hums<%` <- function(list, formula) {
+    lapply(list, doPipe, formula = formula, pipename = '%hums<%', call = 'withHumdrum')
+}
+#' @name humPipe
+#' @export
+`%humsT%` <- function(list, formula) {
+    lapply(list, function(x) x %humT% formula)
+}
+#' @name humPipe
+#' @export
+`%hums[]%` <- function(list, formula) {
+    lapply(list, doPipe, formula = formula, pipename = '%hums[]%', call = 'filterHumdrum')
 }

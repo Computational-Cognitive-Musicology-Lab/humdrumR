@@ -5,6 +5,11 @@
 \alias{\%hum>\%}
 \alias{\%hum<\%}
 \alias{\%humT\%}
+\alias{\%s>\%}
+\alias{\%hums>\%}
+\alias{\%hums<\%}
+\alias{\%humsT\%}
+\alias{\%hums[]\%}
 \title{Piping humdrumR data}
 \usage{
 humdrumR \%hum>\% formula
@@ -12,6 +17,16 @@ humdrumR \%hum>\% formula
 humdrumR \%hum<\% formula
 
 humdrumR \%humT\% formula
+
+lhs \%s>\% rhs
+
+list \%hums>\% formula
+
+list \%hums<\% formula
+
+list \%humsT\% formula
+
+list \%hums[]\% formula
 }
 \description{
 These infix operators make it possible to use
