@@ -98,10 +98,6 @@ applyRE <- function(x, regex, .func, inPlace = TRUE, ...) {
 
 #' @name regexDispatch
 #' @export
-setClass('regexDispatcher', contains = 'function')
-
-#' @name regexDispatch
-#' @export
 regexDispatch <- function(...) {
           funcs <- Filter(is.function, list(...))
           if (length(funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
@@ -141,41 +137,9 @@ regexDispatch <- function(...) {
           genericArgs <- genericArgs[!duplicated(names(genericArgs))]
           formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = FALSE))
           
-          new('regexDispatcher', genericFunc)
+          genericFunc
 }
 
-
-#' @export
-setMethod('compose', signature = c(f1 = 'regexDispatcher', f2 = 'function'),
-          function(f1, f2) {
-                    
-                    ## get existing closure environment
-                    f1Env <- as.list(environment(f1))
-                    
-                    ## get old functions and make new functions
-                    oldfuncs <- f1Env$funcs
-                    newfuncs <- lapply(oldfuncs, compose, f2 = f2)
-                    
-                    f1Env$funcs <- newfuncs
-                    
-                    # get old formal arguments, and make new ones,
-                    # both for the top level function ,and the closure functions
-                    oldArgs   <- formals(args(f1))
-                    funcsArgs <- lapply(newfuncs, function(rf) formals(args(rf))[-1])
-                    
-                    f1Env$funcsArgs <- funcsArgs
-                    
-                    newArgs <- c(oldArgs, do.call('c', c(funcsArgs, use.names = FALSE)))
-                    newArgs <- newArgs[!duplicated(names(newArgs))]
-                    formals(f1) <- as.pairlist(newArgs)
-                    
-                    ## create new closure enviroment
-                    newf1Env <- new.env()
-                    list2env(f1Env, envir = newf1Env)
-                    environment(f1) <- newf1Env
-                    
-                    f1
-          })
 
 ###################  Regex tools ----
 
