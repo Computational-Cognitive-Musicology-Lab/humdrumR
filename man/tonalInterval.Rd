@@ -118,7 +118,7 @@ will get equal temperement:
 
 \describe{
 \item{\code{Fifth}}{Integers representing the intervals'
-size on the circle of fifths. When considering absolute size
+size on the circl of fifths. When considering absolute size
 these fifths are actually treated like pure \emph{12ths} (i.e., one 
 fifth + one octave): 19 semitones, or \deqn{3^1}.}
 

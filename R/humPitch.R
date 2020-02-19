@@ -1080,18 +1080,53 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 
 #### From decimal
 
-read.decimal2tonalInterval <- function(float, twelfth = 3) {
+#' @name tonalInterval-read
+#' @export
+read.decimal2tonalInterval <- function(float, twelfth = 3, centmargin = 10) {
+    octrange <- attr(centmargin, 'octrange')
+    if (is.null(octrange)) octrange <- 5L
+    if (octrange > 150) stop(.call = FALSE,
+                            "read.decimal2tonalInterval can't find a note corresponding exactly to this frequency/ratio. ",
+                            "Try raising the centmargin.")
     
+    #
+    octs <- -octrange:octrange
     
+    allocts <- do.call('cbind', lapply(2^octs, '*', float))
+    logged <- log(allocts, twelfth)
     
+    whole <- round(logged)
+    remain <- logged - whole
+    
+    whichhit  <- applyrows(remain, function(row) {
+        hitind <- which(abs(row) == min(abs(row)))
+        hitind[which.min(abs(octs[hitind]))]
+    })
+    
+    fifth  <- whole[cbind(seq_along(float), whichhit)]
+    remain <- remain[cbind(seq_along(float), whichhit)]
+    octave <- round(log(float / twelfth ^ fifth, 2))
+    
+    # cents
+    cents <- log(twelfth^remain,2) * 1200
+    
+    accept <- abs(cents) < centmargin
+    
+    output <- tint(octave, fifth, cent = cents)
+    if (any(!accept)) output[!accept] <- Recall(float[!accept], twelfth, 
+                                                data.table::setattr(centmargin, 'octrange', octrange + 5L))
+    output
 }
 
 #### From frequency
 
+#' @name tonalInterval-read
+#' @export
 read.frequency2tonalInterval <- function(float, reference.freq = 440L, 
-                                         reference.tint = tint(-4, 3), twelfth = 3 ) {
+                                         reference.tint = tint(-4, 3), twelfth = 3,
+                                         centmargin = 10) {
     
-    read.decimal2tonalInterval(float / reference.freq, twelfth) + reference.tint
+    read.decimal2tonalInterval(float / reference.freq, twelfth, centmargin = 10) + reference.tint
 }
 
 #### From anything!

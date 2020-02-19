@@ -12,9 +12,8 @@ transpose(x, interval = tint(0, 0), generic = NULL, ...)
 \method{transpose}{tonalInterval}(x, interval = tint(0, 0),
   generic = NULL)
 
-\method{transpose}{character}(str, interval = tint(0, 0),
-  generic = NULL, ..., specific = TRUE, directed = TRUE, key = 0L,
-  contour = FALSE, melodic = FALSE, inPlace = FALSE)
+\method{transpose}{character}(x, interval = tint(0, 0), generic = NULL,
+  restorer = NULL)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

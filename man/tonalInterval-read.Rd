@@ -10,6 +10,9 @@
 \alias{read.interval2tonalInterval}
 \alias{read.solfa2tonalInterval}
 \alias{read.ratio2tonalInterval}
+\alias{read.decimal2tonalInterval}
+\alias{read.frequency2tonalInterval}
+\alias{as.tonalInterval.integer}
 \alias{as.tonalInterval.numeric}
 \alias{as.tonalInterval.character}
 \title{Reading \code{\link[humdrumR:tonalInterval]{tonalIntervals}} from various representations}
@@ -30,7 +33,16 @@ read.solfa2tonalInterval(str, key = 0L)
 
 read.ratio2tonalInterval(str, twelfth = 3)
 
-\method{as.tonalInterval}{numeric}(n, key = NULL, melodic = FALSE)
+read.decimal2tonalInterval(float, twelfth = 3, margin = 10,
+  octrange = 10)
+
+read.frequency2tonalInterval(float, reference.freq = 440L,
+  reference.tint = tint(-4, 3), twelfth = 3)
+
+\method{as.tonalInterval}{integer}(n, key = NULL, melodic = FALSE)
+
+\method{as.tonalInterval}{numeric}(float, twelfth = 3, margin = 10,
+  octrange = 10)
 
 \method{as.tonalInterval}{character}(str, key = 0L, melodic = FALSE,
   inPlace = FALSE)
