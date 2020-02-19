@@ -8,7 +8,6 @@
 \alias{getFifth}
 \alias{getOctave}
 \alias{getCent}
-\alias{m2}
 \alias{is.tonalInterval}
 \alias{as.double.tonalInterval}
 \alias{invert}
@@ -16,7 +15,6 @@
 \alias{generalize}
 \alias{as.tonalInterval}
 \title{Representation of tonal pitch information}
-\format{An object of class \code{tonalInterval} of length 1.}
 \usage{
 tint(octave = 0L, fifth = 0L, cent = numeric(length(octave)))
 
@@ -27,8 +25,6 @@ getFifth(tint)
 getOctave(tint)
 
 getCent(tint)
-
-m2
 
 is.tonalInterval(x)
 
@@ -181,4 +177,3 @@ Numeric comparisons (e.g., \code{>},
 \seealso{
 humTonality
 }
-\keyword{datasets}

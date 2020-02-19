@@ -78,7 +78,6 @@ regexDispatch <- function(...) {
               dispatchFunc <- funcs[[dispatch]]
               dispatchRE   <- regexes[[dispatch]]
               dispatchArgs <- funcsArgs[[dispatch]]
-              
               # ... args
               elips <- names(dispatchArgs) == '...'
               not_elips <- names(dispatchArgs)[!elips]
@@ -92,7 +91,7 @@ regexDispatch <- function(...) {
           # Assemble the new function's arguments
           genericArgs <- do.call('c', c(funcsArgs, use.names = FALSE))
           genericArgs <- genericArgs[!duplicated(names(genericArgs))]
-          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = TRUE))
+          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = FALSE))
           
           genericFunc
 }
@@ -129,15 +128,18 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 .REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     # accepts a regex (whereas REapply can take a unparsed regex name
     # like "Recip").
-    
     matches <- stringi::stri_extract_first(str = x, regex = regex)
     result <- do.call(.func, c(list(matches), list(...)))
     
     if (inPlace) {
+        restorer <- restorer(result)
         result <- as.character(result)         
-        result <- stringi::stri_replace_first(str = x, regex = regex, replacement = result)
+        result <- stringi::stri_replace_first(str = x, regex = regex, 
+                                              replacement = result) %restore% restorer
     }
+    
     result
+
 }
 
 

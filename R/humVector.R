@@ -428,3 +428,28 @@ setMethod('*', signature = c('numeric', 'humdrumVector'),
               e2 * e1
           })
 
+
+
+##### "restoring" ----
+
+`%restore%` <- function(e1, e2) {
+    attr(e1, 'restorer') <- e2
+    e1
+}
+
+`restorer<-` <- function(x, value) {
+    attr(x, 'restorer') <- value
+    x
+}
+
+restore <- function(vector, restorer = NULL) {
+    if (is.null(restorer))  restorer <- attr(vector, 'restorer')
+    
+    if (is.null(restorer)) return(vector)
+    
+    restoreFunc <- match.fun(restorer)
+    
+    restoreFunc(vector)
+}
+
+restorer <- function(x) attr(x, 'restorer')

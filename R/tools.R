@@ -342,7 +342,7 @@ setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),
                     .args <- c(f1, f2, list(...))
                     .funcs <- Filter(is.function, .args)
                     .args  <- Filter(Negate(is.function), .args)
-                    if (length(.funcs) <= 1L) stop("Can't compose on one or zero functions.")
+                    if (length(.funcs) <= 1L) stop("Can't compose one or zero functions.")
                     
                     .funcsArgs <- lapply(.funcs, function(f) formals(args(f))[-1])
                     newfunc <- function() {

@@ -105,7 +105,7 @@ NULL
 #' \code{<=}) are based on their semitone (equal temperament) size.
 #' 
 #' @slot Fifth Integers representing the intervals'
-#' size on the circle of fifths. When considering absolute size
+#' size on the circl of fifths. When considering absolute size
 #' these fifths are actually treated like pure \emph{12ths} (i.e., one 
 #' fifth + one octave): 19 semitones, or \deqn{3^1}.
 #' @slot Octave Integers representing the octave offset of the intervals
@@ -178,27 +178,6 @@ getOctave <- function(tint) tint@Octave
 #' @name tonalInterval
 #' @export
 getCent <- function(tint) tint@Cent
-
-############# Known tonalIntervals ----
-#' @name tonalInterval
-#' @export m2 M3 A2 m3 M3 P4 A4 d5 P5 A5 m6 M6 d7 m7 M7 P8
-m2 <- tint(8, -5)
-M2 <- tint(-3, 2)
-A2 <- tint(-14, 9)
-m3 <- tint(5, -3)
-M3 <- tint(-6, 4)
-P4 <- tint(2, -1)
-A4 <- tint(-9, 6)
-d5 <- tint(10, -6)
-P5 <- tint(-1, 1)
-A5 <- tint(-12, 8)
-m6 <- tint(7, -4)
-M6 <- tint(-4, 3)
-d7 <- tint(15, -9)
-m7 <- tint(4, -2)
-M7 <- tint(-7, 5)
-P8 <- tint(1,0)
-
 
 
 
@@ -284,7 +263,11 @@ setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              as.tonalInterval(e1) + e2
+              e1 <- as.tonalInterval(e1)
+              e3 <- e1 + e2
+              
+              restore(e3, restorer(e1))
+              
           })
 
 #' @name tonalInterval
@@ -298,7 +281,10 @@ setMethod('-', signature = c('tonalInterval', 'missing'),
 #' @export
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              as.tonalInterval(e1) - e2
+              e1 <- as.tonalInterval(e1)
+              e3 <- e1 - e2
+              
+              restore(e3, restorer(e1))
           })
 
 
@@ -911,13 +897,16 @@ read.semit2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
                     
           }
           
-          tints
+          tints %restore% 'as.semit.tonalInterval'
 }
 
 #' @name tonalInterval-read
 #' @export
 read.midi2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
- read.semit2tonalInterval(n - 60L, key = key, melodic = melodic)      
+ midi <- read.semit2tonalInterval(n - 60L, key = key, melodic = melodic) 
+ 
+ midi %restore% 'as.midi.tonalInterval'
+        
 }
 
 ######## From kern pitch
@@ -945,7 +934,7 @@ read.kernPitch2sciPitch <- function(str) {
           components <- read.kernPitch2components(str)
           
           components$Accidentals <- gsub('-', 'b', components$Accidentals)
-          do.call('.paste', components)
+          do.call('.paste', components) 
 }
 
 #' @name tonalInterval-read
@@ -958,7 +947,7 @@ read.kernPitch2tonalInterval <- function(str) {
                             accidental2fifth(Accidentals,   
                                              accidental.labels = c(flat = '-')))
  
-          fifthNsciOct2tonalInterval(fifth, components$SciOctave)
+          fifthNsciOct2tonalInterval(fifth, components$SciOctave) %restore% 'as.kernPitch.tonalInterval'
          
 }
 
@@ -979,7 +968,8 @@ read.sciPitch2tonalInterval <- function(str) {
           
           fifth <- lettername2fifth(letters) + accidental2fifth(accidentals, 
                                                                 accidental.labels = c(flat = 'b'))
-          fifthNsciOct2tonalInterval(fifth, sciOct)
+          
+          fifthNsciOct2tonalInterval(fifth, sciOct) %restore% 'as.sciPitch.tonalInterval'
           
 }
 
@@ -1012,7 +1002,8 @@ read.interval2tonalInterval <- function(str) {
           ## Direction
           
           direction <- 2 * ((is.na(direction) | direction == '+') - 0.5)
-          tints * direction
+          
+          (tints * direction) %restore% 'as.interval.tonalInterval'
           
           
 }
@@ -1029,7 +1020,7 @@ read.scaleDegree2tonalInterval <- read.interval2tonalInterval
 #' @export
 read.solfa2tonalInterval <- function(str, key = 0L) {
   fifths <- solfa2fifth(str) + key
-  simpletint(fifths)
+  simpletint(fifths) %restore% 'as.solfa.tonalInterval'
   
 }
 
@@ -1083,16 +1074,31 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
             fifs[rowSums(impure) > 0] <- round(twelfths[impure])
           }
           
-          tint(octs, fifs)
+          tint(octs, fifs) %restore% 'as.ratio.tonalInterval'
 }
 
 
+#### From decimal
+
+read.decimal2tonalInterval <- function(float, twelfth = 3) {
+    
+    
+    
+}
 
 #### From frequency
 
+read.frequency2tonalInterval <- function(float, reference.freq = 440L, 
+                                         reference.tint = tint(-4, 3), twelfth = 3 ) {
+    
+    read.decimal2tonalInterval(float / reference.freq, twelfth) + reference.tint
+}
 
 #### From anything!
 
+#' @name tonalInterval
+#' @export
+setAs('integer', 'tonalInterval', function(from) as.tonalInterval.integer(from))
 #' @name tonalInterval
 #' @export
 setAs('numeric', 'tonalInterval', function(from) as.tonalInterval.numeric(from))
@@ -1106,7 +1112,11 @@ as.tonalInterval <- function(...) UseMethod('as.tonalInterval')
 
 #' @name tonalInterval-read
 #' @export
-as.tonalInterval.numeric <- read.semit2tonalInterval
+as.tonalInterval.integer <- read.semit2tonalInterval
+
+#' @name tonalInterval-read
+#' @export
+as.tonalInterval.numeric <- read.decimal2tonalInterval
 
 #' @name tonalInterval-read
 #' @export
@@ -1115,7 +1125,6 @@ as.tonalInterval.character <- regexDispatch( 'KernPitch' = read.kernPitch2tonalI
                                              'ScientificPitch' = read.sciPitch2tonalInterval,
                                              'Solfege' = read.solfa2tonalInterval,
                                              'Decimal' = read.semit2tonalInterval)
-
 
 
 
@@ -1195,7 +1204,7 @@ transpose <- function(x, interval = tint(0,0), generic = NULL, ...) UseMethod('t
 transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
           if (!is.tonalInterval(interval)) interval <- as.tonalInterval(interval)
           
-          if (!is.null(generic)) {
+          output <- if (!is.null(generic)) {
               if (!is.tonalInterval(generic)) generic <- as.tonalInterval(generic)
               generic <- generic - tint(-1, 1)
               inkey <- x - generic
@@ -1206,15 +1215,37 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
           } else {
               x + interval
           }
+          
+          output %restore% restorer(x)
 }
 
 #' @name humTranspose
 #' @export
-transpose.character <- regexDispatch('KernPitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
-                                     'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,
-                                     'ScientificPitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
-                                     'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval,
-                                     'Decimal' = as.semit %.% transpose.tonalInterval %.% read.semit2tonalInterval)
+transpose.character <- restore %.% transpose.tonalInterval %.% as.tonalInterval
+
+# transpose.character <- regexDispatch('KernPitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
+                                     # 'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,
+                                     # 'ScientificPitch' = as.sciPitch %.% transpose.tonalInterval %.% read.sciPitch2tonalInterval,
+                                     # 'Solfege'          = as.solfa %.% transpose.tonalInterval %.% read.solfa2tonalInterval,
+                                     # 'Decimal' = as.semit %.% transpose.tonalInterval %.% read.semit2tonalInterval)
+
+
+############# Known tonalIntervals ----
+#' @name tonalInterval
+#' @export dd16 dd9 dd13 dd6 dd10 dd14 dd3 dd7 dd11 dd15 dd4 dd8 dd12 d16 
+#' @export dd5 d9 d13 d2 d6 d10 d14 d3 d7 d11 d15 d4 d8 d12 d5 m9 m13 m2 m6 
+#' @export m10 m14 m3 m7 P11 P15 P4 P8 P12 P1 P5 M9 M13 M2 M6 M10 M14 M3 M7 
+#' @export A11 A4 A8 A12 A1 A5 A9 A13 A2 A6 A10 A14 A3 A7 AA11 d2 AA4 AA8 AA12 
+#' @export AA1 AA5 AA9 AA13 AA2 AA6 AA10 AA3 AA7 dd2
+for (i in -30:32) {
+    for (j in -19:19) {
+        t <- tint(i, j)
+        if (t >= tint(0, 0) & t <= tint(2, 0)) {
+            curint <- as.interval(t, directed = FALSE)
+            assign(curint, t)
+        }
+    }
+}
 
 
 
