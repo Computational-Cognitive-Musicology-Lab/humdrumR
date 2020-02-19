@@ -72,6 +72,10 @@ setMethod('initialize', 'rhythmInterval',
           function(.Object, Denominator = 4L, Numerator = 1L) {
             .Object <- callNextMethod()
               
+            # negative numbers should live in the numeratora
+            Numerator[Denominator < 0L] <- -Numerator[Denominator < 0L]
+            Denominator <- abs(Denominator)
+            
             fraction <- reduce_fraction(getNumerator(.Object), getDenominator(.Object))
             fraction <- do.call('match_size', fraction) 
             fraction <- lapply(fraction, as.integer)
@@ -84,19 +88,6 @@ setMethod('initialize', 'rhythmInterval',
             
           })
 
-reduce_fraction <- function(n ,d) {
-  # Used by rhythmInterval initialize method
-  gcds <- gcd(n, d)
-  
-  list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
-}
-
-gcd <- function(x, y) {
-  # Used by reduce_fraction
-  r <- x %% y
-  ifelse(r, Recall(y, r), y)
-}
-
 ######rhythmInterval constructors and accessors ####
 
 
@@ -104,8 +95,12 @@ gcd <- function(x, y) {
 #' @name rhythmInterval
 #' @export
 rint <- function(denominator, numerator = 1L) {
+    # reduced <- reduce_fraction(numerator, denominator)
+    
     if (any(denominator == 0, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
-    new('rhythmInterval', Denominator = as.integer(denominator), Numerator = as.integer(numerator))
+    new('rhythmInterval', 
+        Denominator = as.integer(denominator), 
+        Numerator = as.integer(numerator))
 }
 
 # rint_empty <- rint(1, 0)
@@ -204,7 +199,6 @@ setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 setMethod('Math', signature = c(x = 'rhythmInterval'),
           function(x) {
                     read.numeric2rhythmInterval(callGeneric(as.double(x)))
-                    
           })
 
 # 
@@ -231,33 +225,53 @@ setMethod('diff', signature = c('rhythmInterval'),
 ####Multiplication
 
 #' @export
+setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
+          function(e1, e2) {
+             # multiplying by integers is simple!
+            rint(IfElse(e2 == 0, 1L, e1@Denominator), 
+                 e1@Numerator * e2)
+          })
+
+
+#' @export
 setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
           function(e1, e2) {
-            IfElse(abs(e2) < 1, 
-                   rint(e1@Denominator     ,  e1@Numerator * e2),
-                   rint(e1@Denominator * e2,  e1@Numerator     )
-                   )
-            
+              # multiplying by float can be hard
+              # use MASS::fractions to do hard work
+              
+              frac <- numeric2fraction(e2) 
+              
+              e1 <- rint(IfElse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
+                         e1@Numerator   * frac$Numerator)
+              e1
           })
 
 #' @export
 setMethod('*', signature = c(e1 = 'numeric', e2 = 'rhythmInterval'),
           function(e1, e2) {
-                    e2 * e1
+              e2 * e1
           })
 
 
 ####Division and modulo
+#' @export
+setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
+          function(e1, e2) {
+              if (any(e2 == 0L)) stop(call. = FALSE, "You can't divide a rhythmInterval by zero.")
+              
+              rint(e1@Denominator * e2, e1@Numerator)
+
+          })
 
 #' @export
 setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
           function(e1, e2) {
-            
-            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            IfElse(abs(e2) < 1, 
-                   rint(e1@Denominator  * e2,  e1@Numerator),
-                   as.rhythmInterval((e1@Numerator  * 1 / e2) / e1@Denominator)
-                   )
+            if (any(e2 == 0)) stop(call. = FALSE, "You can't divide a rhythmInterval by zero.")
+              
+              frac <- numeric2fraction(e2) 
+              
+              rint(e1@Denominator * frac$Numerator,
+                   e1@Numerator * frac$Denominator)
           })
 
 #' @export
@@ -287,7 +301,7 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
                     n <- n %% d
                     
                     rint(d * e2@Denominator,
-                          n * e2@Numerator)
+                         n * e2@Numerator)
           })
 
 
@@ -315,69 +329,70 @@ as.recip <- function(...) UseMethod('as.recip')
 as.recip.rhythmInterval <- function(rint) {
           #modify this to print 0 and 00
           num <- getNumerator(rint)
-          
           den <- getDenominator(rint)
           
+          
+          # Get the sign
           SIGN <- c('-', '', '')[2 + sign(num)]
           num <- abs(num)
+          den[num == 0L] <- 1L
+          
+          while (any(doubles <- den <= 1L & den >= .25 & num > 2L & num < 16L & num %% 2 == 0 & num %% 5 != 0)) {
+              # if we want dotted "0" "00" or "000" values, we need to do some transformations
+              IfElse(doubles, den / 2, den) -> den
+              IfElse(doubles, num / 2, num) -> num
+          }
+                 
+          #### any dots?
+          # dots only apply to powers of 2, up to 00, 0, 1, 2, 4, 8, etc.
           dots <- log(num + 1L, base = 2L) 
           dots <- dots - 1L
-          dots[!dots %in% 1:100  & (log(den, 2) %% 1) == 0 & den != 1] <- 0L
+          dots[!(dots %in% 1:100  & (log(den, 2) %% 1) == 0) | (num / den) > 16] <- 0L
+          # dots[dots < 0] <- 0L 
+          # change numerator to reflect dots 
+          # (if there are does, the numerator is always one)
+          num[dots != 0L] <- 1L
           
+          # change denominator to reflect dots
+          den[dots != 0L] <- den[dots != 0L] / (2 ^ dots[dots != 0L])
           
-          den.needdot <- dots != 0L & den != 1L & log(den, 2) %% 1 == 0
-          den[num == 0L] <- NA_integer_
-          num[den.needdot | num == 0L] <- 1L
+          # add in weird "0" (breve) and "00" (longa) and "000" (maxima)
+          den[(num / den) %in% c(2, 4, 8)] <- strrep('0', log(num / den, 2)[(num / den) %in% c(2, 4, 8)])
+          num[den %in% c('0', '00', '000')] <- '1'
           
-          den[which(den.needdot)] <- den[which(den.needdot)] / (2 ^ dots[which(den.needdot)])
-          
-          den[which(den.needdot)] <- .paste(den[which(den.needdot)], 
-                                            sapply(dots[which(den.needdot)], strrep, x = '.'))
-          
-          den[is.na(den)] <- NA_character_
-          den <- .paste(SIGN, den)
           output <- IfElse(num == 1L, den, .paste(den, '%', num)) 
-          
-          if (any(output %in% c('1%2', '1%3', '1%4', '1%6'))) {
-                output[output == '1%2'] <- '0'    
-                output[output == '1%3'] <- '0.'    
-                output[output == '1%4'] <- '00'    
-                output[output == '1%6'] <- '00.'    
-          }
-          output
+
+          .paste(SIGN, output, strrep('.', dots))
+
 }
 
 
 #### As fraction
 
-#' @name rhythmInterval
-#' @export
-as.fraction <- function(...) UseMethod('as.fraction')
+
+
 
 #' @name rhythmInterval-write
 #' @export
-as.fraction.numeric <- function(n) {
-          fractions <- IfElse(is.na(n), NA_character_, attr(MASS::fractions(n), 'fracs'))
-          
-          gsub('/', '%', fractions)
-}
-
-#' @name rhythmInterval-write
-#' @export
-as.fraction.rhythmInterval <- function(rint) {
-          .paste(getNumerator(rint), '%', getDenominator(rint))
+as.ratio.rhythmInterval <- function(rint) {
+          .paste(getNumerator(rint), '/', getDenominator(rint))
 }
 
 #### As decimal
-#' @name rhythmInterval
-#' @export
-as.decimal <- function(...) UseMethod('as.decimal')
 
 #' @name rhythmInterval-write
 #' @export
 as.decimal.rhythmInterval <- function(rint) {
           as.double(getNumerator(rint) / getDenominator(rint))
 }
+
+#' @name rhythmInterval-write
+#' @export
+#' 
+as.decimal.integer <- function(x) as.numeric(x)
+#' @name rhythmInterval-write
+#' @export
+as.decimal.numeric <- function(x) x
 
 
 #### As unicode duration string
@@ -483,6 +498,7 @@ read.recip2rhythmInterval <- function(str) {
           # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
           uniqstr <- IfElse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
           uniqstr <- IfElse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
+          uniqstr <- IfElse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
           
           ndots <- stringr::str_count(uniqstr, '\\.')
           rhythmInterval <- gsub('\\.+', '', uniqstr)
@@ -505,15 +521,11 @@ read.recip2rhythmInterval <- function(str) {
 read.numeric2rhythmInterval <- function(n) {
           if (!is.numeric(n)) n <- as.numeric(n)
           
-          frac <- attr(MASS::fractions(n, cycles = 8), 'frac')
+          frac <- numeric2fraction(n)
           
-          num <- as.integer(stringi::stri_extract_first_words(frac))
-          den <- as.integer(stringi::stri_extract_last_words(frac))
-          # num <- as.integer(sapply(frac, '[',  i = 1))
-          # den <- as.integer(sapply(frac, tail, n = 1))
-          den[num == den] <- 1L
+          frac$Denominator[frac$Numerator == frac$Denominator] <- 1L
           
-          rint(den, num)
+          rint(frac$Denominator, frac$Numerator)
 }
 
 #### From ratio (string, separated by % or /)
@@ -628,7 +640,7 @@ NULL
 
 #' @name humRhythm
 #' @export 
-as.fraction.character <- as.fraction.rhythmInterval %.% as.rhythmInterval
+as.fraction.character <- as.ratio.rhythmInterval %.% as.rhythmInterval
 
 #' @name humRhythm
 #' @export
@@ -696,15 +708,16 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 #' 
 #' @family rhythm analysis tools
 #' @export
-metricPosition <- function(rints, measurelength = rint(1), 
-                           beats = rint(c(4, 8, 16, 32))) {
-  cumrints <- cumsum(c(rint(1, 0), rints)) %% measurelength
+metricPosition <- function(rints, bars = NULL, 
+                           beats = rint(c(2, 4, 8, 16, 32))) {
   
-  output <- decompose(cumrints, beats)
-  durnames <- as.character(rints)
+  offset <- rhythmOffset(rints, bars = bars, as = as.rhythmInterval)
+  
+  output <- rhythmDecompose(offset, into = beats)
+  # durnames <- as.character(rints)
   
   output <- output[1:(nrow(output) - 1), ] 
-  rownames(output) <- make.unique(durnames)
+  # rownames(output) <- make.unique(durnames)
   
   for (j in 1:ncol(output)) {
    output[ , j] <- output[ , j] / beats[j]         
@@ -738,27 +751,32 @@ metricPosition <- function(rints, measurelength = rint(1),
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = 0, groups = NULL) {
-          start <- as(start, class(durations))
+rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
+          durations <- as.decimal(durations)
+          start <- as.decimal(start)
+          tatum <- as.decimal(tatum)
+          
+          durations <- durations / tatum
+          
           
           off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
                  
-          if (is.null(groups)) {
+          offsets <- if (is.null(bars)) {
              off(durations, start)
                     
           }   else {
-                    if (length(groups) != length(durations)) {
+                    if (length(bars) != length(durations)) {
                               stop(call. = FALSE,
                                    "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
                     }
                     
-                    dur.groups <- split(as.numeric(durations), as.numeric(groups))
+                    dur.groups <- split(as.numeric(durations), as.numeric(bars))
                     durs <- unlist(Map(off, dur.groups, as.numeric(start)))
                     as(durs, class(durations))
                     
           }
-
           
+          if (identical(as, as.decimal)) offsets else as(offsets)
 }
 
 #### Augmentation and dimminution 
@@ -777,7 +795,7 @@ augment.rhythmInterval <- function(rint, scalar) rint * scalar
 #' @name RhythmScaling
 #' @export
 augment.character <- regexDispatch('Recip'   = as.recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.fraction.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
+                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
 
 
@@ -793,7 +811,21 @@ diminish.rhythmInterval <- function(rint, scalar) rint / scalar
 #' @name RhythmScaling
 #' @export
 diminish.character <- regexDispatch('Recip'   = as.recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.fraction.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
+                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
                                    'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+
+
+#### Miscalaneous (however that is supposed to be spelled)
+
+#' Time transformations
+#' 
+#' @name time
+#' @export
+bpm2ms <- function(bpm) 60000/bpm
+
+#' @name time
+#' @export
+ms2bpm <- function(ms) 60000/ms
+
 
 

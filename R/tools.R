@@ -1,3 +1,28 @@
+reduce_fraction <- function(n ,d) {
+    # Used by rhythmInterval initialize method
+    gcds <- gcd(n, d)
+    
+    list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
+}
+
+gcd <- function(x, y) {
+    # Used by reduce_fraction
+    r <- x %% y
+    ifelse(r, Recall(y, r), y)
+}
+
+numeric2fraction <- function(n) {
+    frac <- attr(MASS::fractions(n, cycles = 15), 'fracs')
+    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
+    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
+    
+    num <- as.integer(frac[ , 1])
+    den <- as.integer(frac[ , 2])
+    
+    den[is.na(den)] <- 1L
+    
+    list(Denominator = den, Numerator = num)
+}
 
 # integrate and derive should be perfect inverses, 
 # so long as their skip arguments are the same, and the scalar
@@ -29,12 +54,14 @@ applyrows <- function(x, f, ...){
     result
 }
 
-tempvar <- function(prefix = '') {
+tempvar <- function(prefix = '', asSymbol = TRUE) {
     # this makes random symbols to use as variable names
     
     random <- paste(sample(c(letters, 0:9), 5, replace = TRUE), collapse = '')
     
-    rlang::sym(paste0('._', prefix, '_', random))
+    char <- paste0('._', prefix, '_', random)
+    
+    if (asSymbol) rlang::sym(char) else char
     
 }
 
@@ -383,6 +410,49 @@ setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),
     newfunc
 }
 
+predicateDispatch <- function(func, predicate) {
+    if (is.primitive(func )) stop(call. = FALSE, 'predicateDispatch does not work on primitive functions.')
+    
+    argnames <- names(fargs(func))
+    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch doesn't if the first argument of the method is ..." )
+    
+    argnames <- argnames[argnames != "..."]
+    
+    body <- body(func)
+    body <- quo({
+        rebuild <- predicateParse(predicate, argnames,
+                                  !!!rlang::syms(argnames))
+        result <- {!!body}
+        rebuild(result)
+        })
+    body(func) <- rlang::quo_squash(body)
+    
+    assign('predicate', predicate, envir = environment(func))
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+}
+
+predicateParse <- function(predicate, argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    lengths <- lengths(args)
+    targets <- args[lengths == lengths[1]]
+    bool <- apply(sapply(targets, predicate), 1, any)
+    list2env(lapply(targets, '[', i = !bool), 
+             envir = parent.frame())
+    
+    function(result) {
+        original <- args[[1]]
+        original[!bool] <- result
+        original
+    }
+    
+    
+}
+
+
+
 allsame <- function(x) length(unique(x)) == 1L
 
 `%class%` <- function(object, newclass){
@@ -507,6 +577,24 @@ IfElse <- function(true, yes, no) {
   if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
   out
 }
+
+ifE <- function(bool, Texpr, Fexpr, varnames = c(), outmode = 'character') {
+    Texpr <- enquo(Texpr)
+    Fexpr <- enquo(Fexpr)
+    
+    
+    vars <- mget(varnames, parent.env(environment()))
+    true  <- eval_tidy(Texpr, lapply(vars, '[', bool))
+    false <- eval_tidy(Fexpr, lapply(vars, '[', !bool))
+    
+    output <- vector(mode = outmode, length(bool))
+    
+    output[bool]  <- as(true, outmode)
+    output[!bool] <- as(false, outmode)
+    
+    output
+}
+
 
 
 #' @export
@@ -742,4 +830,7 @@ vectorna <- function(n, mode = 'character') {
     rep(as(NA, Class = mode), n)
     
 }
+
+
+
 

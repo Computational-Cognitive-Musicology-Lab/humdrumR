@@ -10,8 +10,6 @@
 \alias{order.rhythmInterval}
 \alias{as.double.rhythmInterval}
 \alias{as.recip}
-\alias{as.fraction}
-\alias{as.decimal}
 \alias{as.notevalue}
 \alias{as.rhythmInterval}
 \title{The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.}
@@ -36,10 +34,6 @@ is.rhythmInterval(x)
 \method{as.double}{rhythmInterval}(x)
 
 as.recip(...)
-
-as.fraction(...)
-
-as.decimal(...)
 
 as.notevalue(...)
 

@@ -38,7 +38,7 @@ is.tonalInterval(x)
 
 \S4method{as.character}{tonalInterval}(x)
 
-\method{as.double}{tonalInterval}(x)
+\method{as.double}{tonalInterval}(x, ...)
 
 \S4method{+}{tonalInterval,tonalInterval}(e1, e2)
 

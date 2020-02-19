@@ -169,6 +169,7 @@ setMethod('c', 'humdrumVector',
               x
           })
 
+
 #' @name humdrumVector
 #' @export
 setMethod('rep', 'humdrumVector',

@@ -248,7 +248,7 @@ setMethod('as.character', signature = c('tonalInterval'),
 
 #' @name tonalInterval
 #' @export
-as.double.tonalInterval <- function(x) as.double(as.ratio(x))
+as.double.tonalInterval <- function(x, ...) as.decimal(x, ...)
 
 
 ######tonalInterval arithmetic methods ####
@@ -698,28 +698,53 @@ as.solfa.numeric <- function(x,  key = 0L) {
           
           .paste(bases, tails, accidentals)
           
-          }
-
-
-
+}
 
 #### As ratio (i.e., "3/2")
 
 #' @name tonalInterval-write
 #' @export
-as.ratio <- function(x, twelfth = 2^(19/12), ...) UseMethod('as.ratio')
+as.ratio <- function(x,  ..., sep) UseMethod('as.ratio')
+
+#' @name humCoerce
+#' @export
+as.ratio.numeric <- function(n, sep = '/') {
+    frac <- numeric2fraction(n)
+    .paste(frac$Numerator, frac$Denominator, sep = sep)
+}
 
 #' @name tonalInterval-write
 #' @export
-as.ratio.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
-                    fifth <- getFifth(x)
-                    oct   <- getOctave(x)
-                    cent  <- getCent(x)
-                    
-                    IfElse(is.na(fifth), 
-                           NA_real_, 
-                           (2L ^ oct) * (twelfth ^ fifth) * 2^(cent / 1200))
-          }
+as.ratio.tonalInterval <-  function(x, twelfth = 2^(19/12), sep = '/') {
+    frac <- numeric2fraction(as.decimal(x, twelfth = twelfth))
+    
+    .paste(frac$Numerator, frac$Denominator, sep = sep)
+    
+}
+
+#' @name humCoerce
+#' @export
+as.fraction <- as.ratio
+
+
+#### As decimal (i.e, "1.5")
+#' @name humCoerce
+#' @export
+as.decimal <- function(...) UseMethod('as.decimal')
+
+#' @name tonalInterval-write
+#' @export
+as.decimal.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
+    fifth <- getFifth(x)
+    oct   <- getOctave(x)
+    cent  <- getCent(x)
+    
+    IfElse(is.na(fifth), 
+           NA_real_, 
+           (2 ^ oct) * (twelfth ^ fifth) * 2^(cent / 1200))
+}
+
+
 
 #### As frequency (i.e., "440")
 
@@ -734,7 +759,7 @@ as.frequency.tonalInterval <- function(x, reference.freq = 440L,
                                        reference.tint = tint(-4, 3), twelfth = 2^(19/12)) {
             x <- x - reference.tint
             
-            ratio <- as.ratio(x, twelfth = twelfth)
+            ratio <- as.decimal(x, twelfth = twelfth)
             attributes(ratio) <- NULL
             
             reference.freq * ratio

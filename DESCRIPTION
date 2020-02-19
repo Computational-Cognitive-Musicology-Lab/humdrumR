@@ -28,6 +28,7 @@ Collate: humdrumR-package.R
          humPitch.R
          humRhythm.R
          humDiatonic.R
+         humMetric.R
          humGraphics.R
 RoxygenNote: 6.1.1
 Suggests: 
