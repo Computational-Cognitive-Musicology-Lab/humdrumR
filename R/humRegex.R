@@ -54,92 +54,182 @@ REparser <- function(...) {
 #' @name regexDispatch
 NULL
 
-#' @name regexDispatch
-#' @export
-do2RE <- function(.func, regex) {
-          .funcargs <- formals(args(.func))
-          
-          if (length(.funcargs) == 0L) stop("Can't make a new function using do2RE if the original function takes no arguments.")
-          
-          newfunc <- function() {
-                    matches <- stringi::stri_extract_first(str = .first.input, regex = regex)
-                    
-                    args <- lapply(names(.funcargs), get, envir = environment())
-                    args[[1]] <- matches
-                    result  <- do.call('.func', args)
-                    
-                    if (inPlace) {
-                       result <- as.character(result)         
-                       result <- stringi::stri_replace_first(str = .first.input, regex = regex, replacement = result)
-                    }
-                    result
-                    
-          }
-          formals(newfunc) <- c(.funcargs, alist(inPlace = TRUE))
-          .arg1 <- names(.funcargs)[1]
-          body(newfunc) <- substituteName(body(newfunc), list(.first.input = as.symbol(.arg1)))
-          newfunc
-}
 
-#' @name regexDispatch
-#' @export
-applyRE <- function(x, regex, .func, inPlace = TRUE, ...) {
-          if (!is.character(x)) x <- as.character(x)
-          regex <- getRE(regex)
-          matches <- stringi::stri_extract_first(str = x, regex = regex)
-          result <- do.call(.func, c(list(matches), list(...)))
-          
-          if (inPlace) {
-                    result <- as.character(result)         
-                    result <- stringi::stri_replace_first(str = x, regex = regex, replacement = result)
-          }
-          result
-}
+
+
+
+
 
 #' @name regexDispatch
 #' @export
 regexDispatch <- function(...) {
           funcs <- Filter(is.function, list(...))
-          if (length(funcs) <= 1L) stop("Can't regexDispatch on one or zero functions.")
+          if (length(funcs) == 0L) stop("Can't regexDispatch on zero functions.")
           
           regexes <- getRE(names(funcs))
           funcsArgs <- lapply(funcs, function(rf) formals(args(rf))[-1])
+          
           genericFunc <- function() {
-                    if (!is.character(str)) return(str)
-                    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
-                    if (any(Nmatches > 0)) {
-                              #which function to dispatch
-                              Ncharmatches <- sapply(regexes[Nmatches > 0],
-                                                     function(re) {
-                                                               nchars <- nchar(stringi::stri_extract_first_regex(str, re))
-                                                               nchars[is.na(nchars)] <- 0L
-                                                               sum(nchars)
-                                                     })
-                              dispatch <- which(Nmatches > 0)[which.max(Ncharmatches)]
-                              dispatchFunc <- funcs[[dispatch]]
-                              dispatchRE   <- regexes[[dispatch]]
-                              dispatchArgs <- funcsArgs[[dispatch]]
-                              # ... args
-                              elips <- names(dispatchArgs) == '...'
-                              not_elips <- names(dispatchArgs)[!elips]
-                              #
-                              dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
-                              dispatchArgs <- c(x = list(str), regex = dispatchRE, .func = dispatchFunc, inPlace = inPlace,
-                                                dispatchArgs, if (any(elips)) list(...) else list())
-                              do.call('applyRE', dispatchArgs)
-                    } else {
-                              str
-                    }
+              if (!is.character(str)) stop(call. = FALSE,
+                                           "The regex-dispatch function you've called requires a character argument.")
+              
+              dispatch <- regexFindMethod(str, regexes)  
+              if (dispatch == 0L) return(if (inPlace) str else vectorna(length(str), 'character'))
+              dispatchFunc <- funcs[[dispatch]]
+              dispatchRE   <- regexes[[dispatch]]
+              dispatchArgs <- funcsArgs[[dispatch]]
+              
+              # ... args
+              elips <- names(dispatchArgs) == '...'
+              not_elips <- names(dispatchArgs)[!elips]
+              #
+              dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
+              dispatchArgs <- c(x = list(str), regex = dispatchRE, .func = dispatchFunc, inPlace = inPlace,
+                                dispatchArgs, if (any(elips)) list(...) else list())
+              do.call('.REapply', dispatchArgs)
           }
           
-          # Assembel the new function's arguments
+          # Assemble the new function's arguments
           genericArgs <- do.call('c', c(funcsArgs, use.names = FALSE))
           genericArgs <- genericArgs[!duplicated(names(genericArgs))]
-          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = FALSE))
+          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = TRUE))
           
           genericFunc
 }
 
+# 
+regexFindMethod <- function(str, regexes) {
+    # this takes a str of character values and a string of REs
+    # and returns a single interger value representing the 
+    # index (of regexes) to dispatch.
+    
+    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
+    if (!any(Nmatches > 0L)) return(0L)
+    
+    #which function to dispatch
+    Ncharmatches <- sapply(regexes[Nmatches > 0],
+                           function(re) {
+                               nchars <- nchar(stringi::stri_extract_first_regex(str, re))
+                               nchars[is.na(nchars)] <- 0L
+                               sum(nchars)
+                           })
+    which(Nmatches > 0L)[which.max(Ncharmatches)]
+}
+
+
+#' @name regexDispatch
+#' @export
+REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
+    if (!is.character(x)) stop(call. = FALSE,
+                               "Sorry, REapply can only apply to an x argument that is a character vector.")
+    .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
+}
+
+#' 
+.REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
+    # accepts a regex (whereas REapply can take a unparsed regex name
+    # like "Recip").
+    
+    matches <- stringi::stri_extract_first(str = x, regex = regex)
+    result <- do.call(.func, c(list(matches), list(...)))
+    
+    if (inPlace) {
+        result <- as.character(result)         
+        result <- stringi::stri_replace_first(str = x, regex = regex, replacement = result)
+    }
+    result
+}
+
+
+############### Composing predicate functions----
+
+#' @name regexDispatch
+#' @export
+`%predate%` <- function(func, predicate) {
+    predicateDispatch( rlang::expr_text(rlang::enexpr(func)), predicate)
+}
+
+
+#' @name regexDispatch
+#' @export
+`%pREdate%` <- function(func, regex) {
+    args <- list(func)
+    names(args) <- regex
+    do.call('regexDispatch', args)
+}
+
+
+
+predicateDispatch <- function(fname, predicateFunc) {
+    func <- match.fun(fname)
+    #argnames
+    argnames <- names(fargs(func))
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't if the first argument of the method is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- normalizeBody(fname)
+    
+    body <- quo({
+        rebuild <- predicateParse(predicateFunc, argnames,
+                                  !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    body(func) <- rlang::quo_squash(body)
+    environment(func) <- new.env(parent = environment(func))
+    
+    assign('predicateFunc', predicateFunc, envir = environment(func))
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+}
+
+normalizeBody <- function(fname) {
+    # this takes the name of a function (as a string)
+    # and creates a usable function body
+    # including jumping through hoops to for
+    # primitives and generics
+    
+    func <- match.fun(fname)
+    fname <- rlang::sym(fname)
+    ftext <- rlang::quo_text(func)
+    argnames <- rlang::syms(names(fargs(func)))
+    
+    if (is.primitive(func) | 
+        grepl('\\.Internal|\\.Primitive', ftext) |
+        grepl('UseMethod|standardGeneric', ftext)) {
+        rlang::quo((!!fname)(!!!argnames))
+        
+    } else {
+        
+        rlang::fn_body(func)
+    }
+}
+
+
+
+
+predicateParse <- function(predicate, argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    lengths <- lengths(args)
+    targets <- args[lengths == lengths[1]]
+    bool <- apply(sapply(targets, predicate), 1, any)
+    list2env(lapply(targets, '[', i = !bool), 
+             envir = parent.frame())
+    
+    function(result) {
+        if (length(result) != sum(!bool, na.rm = TRUE)) return(result)
+        original <- args[[1]]
+        original[!bool] <- result
+        original
+    }
+    
+    
+}
 
 ###################  Regex tools ----
 

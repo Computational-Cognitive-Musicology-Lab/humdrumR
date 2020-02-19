@@ -2,15 +2,18 @@
 % Please edit documentation in R/humRegex.R
 \name{regexDispatch}
 \alias{regexDispatch}
-\alias{do2RE}
-\alias{applyRE}
+\alias{REapply}
+\alias{\%predate\%}
+\alias{\%pREdate\%}
 \title{Regular expression method dispatch and function application}
 \usage{
-do2RE(.func, regex)
-
-applyRE(x, regex, .func, inPlace = TRUE, ...)
-
 regexDispatch(...)
+
+REapply(x, regex, .func, inPlace = TRUE, ...)
+
+func \%predate\% predicate
+
+func \%pREdate\% regex
 }
 \description{
 The \code{\link{humdrumR}} \strong{regular-expression method dispatch}
