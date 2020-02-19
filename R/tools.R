@@ -1,4 +1,25 @@
 
+# integrate and derive should be perfect inverses, 
+# so long as their skip arguments are the same, and the scalar
+# argument is NULL
+integrate <- function(intervals, scalar = NULL, skip = list(na)) {
+    
+    skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
+     
+    intervals[!skip] <- cumsum(intervals[!skip])
+    if (is.null(scalar)) intervals else intervals + scalar
+
+}
+
+derive <- function(intervals, skip = list(na)) {
+    
+    skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
+    
+    intervals[which(!skip)[-1]] <- diff(intervals[!skip])
+    
+    intervals
+}
+
 
 applyrows <- function(x, f, ...){
     result <- apply(x, 1, f, ...)
@@ -380,6 +401,44 @@ popclass <- function(object) `class<-`(object, class(object)[-1])
 fargs <- function(func) formals(args(func))
 
 
+setClass('predicate.function', contains = 'function', 
+         slots = c(string = 'character'))
+
+setMethod('show', 'predicate.function',
+          function(object) cat(c('f(x) =', object@string)) )
+
+setMethod('&', c('predicate.function', 'predicate.function'),
+          function(e1, e2) {
+              f1 <- e1@.Data
+              f2 <- e2@.Data
+              func <- function(x) {
+                  f1(x) & f2(x)
+              }
+              
+              s1 <- e1@string
+              s2 <- e2@string
+              
+              if (grepl('&|\\|', s1)) s1 <- paste0('(', s1, ')')
+              if (grepl('&|\\|', s2)) s2 <- paste0('(', s2, ')')
+              new('predicate.function', func,
+                  string = paste(s1, s2, sep = ' & '))
+          })
+setMethod('|', c('predicate.function', 'predicate.function'),
+          function(e1, e2) {
+              f1 <- e1@.Data
+              f2 <- e2@.Data
+              func <- function(x) {
+                  f1(x) | f2(x)
+              }
+              
+              s1 <- e1@string
+              s2 <- e2@string
+              
+              if (grepl('&|\\|', s1)) s1 <- paste0('(', s1, ')')
+              if (grepl('&|\\|', s2)) s2 <- paste0('(', s2, ')')
+              new('predicate.function', func,
+                  string = paste(s1, s2, sep = ' | '))
+          })
 #' @export
 EQ <- function(pat) {
   func <- function(x) {
@@ -387,31 +446,43 @@ EQ <- function(pat) {
     ifelse(is.na(pat), is.na(x), x == pat)
   }
 
-  attr(func, 'FuncNames') <- glue('=={deparse(pat)}')
 
   new('predicate.function', func, string = glue::glue('x == {deparse(pat)}'))
+}
+
+LEN <- function(p.f) {
+    func <- function(x) {
+        p.f(length(x))
+    }
+ 
+    new('predicate.function', func,
+        string = gsub('x', 'length(x)', p.f@string))
+       
 }
 
 #' @export
 GT <- function(n) {
   func <- function(x) x > n
-  attr(func, 'FuncNames') <- glue('>{deparse(n)}')
+
   new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
 }
 
 #' @export
 RE <- function(pat) {
   func <- function(x)  if (!hasdim(x)) grepl(pat, x) else greplmat(pat, x)
-  attr(func, 'FuncNames') <- glue('~{deparse(pat)}')
+
   new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
 }
 
 #' @export
 LT <- function(n) {
   func <- function(x) x < n
-  attr(func, 'FuncNames') <- glue('<{deparse(n)}')
+
   new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
 }
+
+na <- new('predicate.function', function(x) is.na(x), string = "NA")
+
 #' @export
 grepls <- function(patterns, string, combine = any) {
   if (length(patterns) == 1L) return(grepl(patterns, string))
@@ -421,19 +492,6 @@ grepls <- function(patterns, string, combine = any) {
 
 }
 
-ditto <- function(spine) {
-          datainds <- grep('^[^!=*]', spine)
-          
-          data <- spine[datainds]
-          
-          notnull <- data != '.' & !is.na(data)
-          grps <- cumsum(notnull)
-          if (grps[1] == 0) grps <- grps + 1
-          
-          spine[datainds] <- data[notnull][grps]
-          spine
-          
-}
 
 #' Lazy version of base::ifelse
 

@@ -354,26 +354,6 @@ generalize <- function(tint) {
           tint %% tint(-11,7)
 }
 
-#' @export
-derive <- function(x, pad = 'approach') {
-    `x'` <- diff(x)
-    
-    if (!is.null(pad)) {
-        `x'` <- if (pad == 'approach') { 
-                    c(tint(rep(NA, order)), `x'`) 
-                } else { 
-                    c(`x'`, tint(rep(NA, order))) 
-                }
-    } 
-    
-    `x'`
-}
-
-
-#' @export
-antiderive <- function(x, start = tint(0,0)) {
-    cumsum(c(start, x))
-}
 
 
 ############################################-
