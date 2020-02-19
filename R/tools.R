@@ -1,3 +1,20 @@
+locate <- function(x, values) {
+    if (is.null(dim(x)) || length(dim(x)) == 1) {
+        lapply(values, function(val) which(x == val))
+    } else {
+        apply(values, 1, 
+              function(val) {
+                  which(Reduce('&', Map('==', x, val)))
+                  
+                  })
+    }
+}
+
+locate.uniq <- function(x) {
+    locate(x, unique(x))
+    
+}
+
 reduce_fraction <- function(n ,d) {
     # Used by rhythmInterval initialize method
     gcds <- gcd(n, d)

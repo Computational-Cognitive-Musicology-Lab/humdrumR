@@ -418,7 +418,7 @@ setMethod('*', signature = c('humdrumVector', 'numeric'),
                                        x * as(e2, class(x))  
                                          
                                      })
-              e1
+              e1 
           })
 
 #' @name humdrumVector

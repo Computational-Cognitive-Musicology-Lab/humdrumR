@@ -223,16 +223,66 @@ predicateParse <- function(predicate, argnames, ...) {
     list2env(lapply(targets, '[', i = !bool), 
              envir = parent.frame())
     
+    output <- args[[1]]
+    
     function(result) {
         if (length(result) != sum(!bool, na.rm = TRUE)) return(result)
-        original <- args[[1]]
-        original[!bool] <- result
-        original
+        output[!bool] <- result
+        output
+    }
+}
+
+
+memoify <- function(fname) {
+    func <- match.fun(fname)
+    #argnames
+    argnames <- names(fargs(func))
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoify a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoify a function if the first argument is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- normalizeBody(fname)
+    
+    body <- quo({
+        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    body(func) <- rlang::quo_squash(body)
+    environment(func) <- new.env(parent = environment(func))
+    
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+    
+}
+
+memoiseParse <- function(argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    lengths <- lengths(args)
+    targets <- as.data.frame(args[lengths == lengths[1]])
+    
+    bool <- duplicated(targets)
+    
+    list2env(lapply(targets, '[', i = !bool), 
+             envir = parent.frame())
+    
+    locations <- locate(targets[[1]], targets[!bool,])
+    i <- cbind(rep(targets[!bool,], lengths(locations)), unlist(locations))
+    i <- i[order(i[,2], decreasing = FALSE),1]
+    
+    output <- vector(class(targets[[1]]), length(targets[[1]]))
+    
+    function(result) {
+        if (length(result) != length(locations)) return(result)
+        result[i]
     }
     
     
 }
-
 ###################  Regex tools ----
 
 
