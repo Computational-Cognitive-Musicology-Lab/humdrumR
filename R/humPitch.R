@@ -179,8 +179,27 @@ getOctave <- function(tint) tint@Octave
 #' @export
 getCent <- function(tint) tint@Cent
 
-############# Special tonalIntervals ----
-pythagorean.comma <- tint(-19, 12)
+############# Known tonalIntervals ----
+#' @name tonalInterval
+#' @export m2 M3 A2 m3 M3 P4 A4 d5 P5 A5 m6 M6 d7 m7 M7 P8
+m2 <- tint(8, -5)
+M2 <- tint(-3, 2)
+A2 <- tint(-14, 9)
+m3 <- tint(5, -3)
+M3 <- tint(-6, 4)
+P4 <- tint(2, -1)
+A4 <- tint(-9, 6)
+d5 <- tint(10, -6)
+P5 <- tint(-1, 1)
+A5 <- tint(-12, 8)
+m6 <- tint(7, -4)
+M6 <- tint(-4, 3)
+d7 <- tint(15, -9)
+m7 <- tint(4, -2)
+M7 <- tint(-7, 5)
+P8 <- tint(1,0)
+
+
 
 
 ######tonalInterval vector (and other core) methods ####
@@ -196,9 +215,6 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 #' @export
 setMethod('is.numeric', signature = c('tonalInterval'),
           function(x) { TRUE })
-
-
-
 
 
 ######tonalInterval order/relations methods ####
@@ -264,10 +280,27 @@ setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
                          getCent(e1) + getCent(e2))
           })
 
+#' @name tonalInterval
+#' @export
+setMethod('+', signature = c('character', 'tonalInterval'),
+          function(e1, e2) {
+              as.tonalInterval(e1) + e2
+          })
+
+#' @name tonalInterval
+#' @export
 setMethod('-', signature = c('tonalInterval', 'missing'),
           function(e1) {
               tint(-getOctave(e1), -getFifth(e1),  -getCent(e1))
               })
+
+#' @name tonalInterval
+#' @export
+setMethod('-', signature = c('character', 'tonalInterval'),
+          function(e1, e2) {
+              as.tonalInterval(e1) - e2
+          })
+
 
 #' @name tonalInterval
 #' @export
