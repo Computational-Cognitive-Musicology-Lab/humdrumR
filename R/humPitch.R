@@ -33,7 +33,7 @@ NULL
 #' Tonal intervals (which are rather abstract) can be translated to more concrete 
 #' pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}} 
 #' methods. Tonal intervals can also be created by reading various inputs
-#' using these \code{\link[humdrumR:tonalInterval-read]{xxx2tonalInterval}} functions.
+#' using these \code{\link[humdrumR:tonalInterval-read]{read.xxx}} functions.
 #' 
 #' In the case of fifths, it is not difficult (for learned musicians at least) to 
 #' see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 
@@ -928,8 +928,6 @@ read.kernPitch2components <- function(str) {
                SciOctave = sciOct)
 }
 
-#' @name tonalInterval-read
-#' @export
 read.kernPitch2sciPitch <- function(str) {
           components <- read.kernPitch2components(str)
           
@@ -1187,7 +1185,15 @@ as.semit.character <- as.semit.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
+as.semit.numeric <- as.integer
+
+#' @name humPitch
+#' @export
 as.midi.character <- as.midi.tonalInterval %.% as.tonalInterval
+
+#' @name humPitch
+#' @export
+as.midi.numeric <- as.integer
 
 #' @name humPitch
 #' @export
@@ -1196,6 +1202,14 @@ as.tonalname.character <- as.tonalname.tonalInterval %.% as.tonalInterval
 #' @name humPitch
 #' @export
 as.kernPitch.character <- as.kernPitch.tonalInterval %.% as.tonalInterval
+
+#' @name humPitch
+#' @export
+as.kernPitch.integer <- as.kernPitch.tonalInterval %.% as.tonalInterval.integer
+
+#' @name humPitch
+#' @export
+as.kernPitch.numeric <- as.kernPitch.tonalInterval %.% as.tonalInterval.numeric
 
 #' @name humPitch
 #' @export

@@ -245,7 +245,7 @@ memoify <- function(fname) {
     #
     fbody <- normalizeBody(fname)
     
-    body <- quo({
+    body <- rlang::quo({
         rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
         result <- {!!fbody}
         rebuild(result)
@@ -262,22 +262,20 @@ memoify <- function(fname) {
 memoiseParse <- function(argnames, ...) {
     args <- setNames(list(...), argnames)
     
-    lengths <- lengths(args)
-    targets <- as.data.frame(args[lengths == lengths[1]])
+    target <- args[[1]]
     
-    bool <- duplicated(targets)
+    bool <- duplicated(target)
     
-    list2env(lapply(targets, '[', i = !bool), 
-             envir = parent.frame())
+    uniq <- target[!bool]
     
-    locations <- locate(targets[[1]], targets[!bool,])
-    i <- cbind(rep(targets[!bool,], lengths(locations)), unlist(locations))
-    i <- i[order(i[,2], decreasing = FALSE),1]
+    assign(argnames[1], uniq, parent.frame())
     
-    output <- vector(class(targets[[1]]), length(targets[[1]]))
+    matrix <- vapply(uniq, function(x) x == target, FUN.VALUE = integer(length(target)))
+    i <- rowSums(matrix * col(matrix))
     
     function(result) {
-        if (length(result) != length(locations)) return(result)
+        if (length(result) != ncol(matrix)) return(result)
+
         result[i]
     }
     
