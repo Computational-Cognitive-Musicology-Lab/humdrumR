@@ -64,7 +64,7 @@ setClass('rhythmInterval',
 
 setValidity('rhythmInterval', 
             function(object) {
-                all(getDenominator(object) != 0L)
+                all(object@Denominator != 0L)
             }
 )
 
@@ -76,7 +76,7 @@ setMethod('initialize', 'rhythmInterval',
             Numerator[Denominator < 0L] <- -Numerator[Denominator < 0L]
             Denominator <- abs(Denominator)
             
-            fraction <- reduce_fraction(getNumerator(.Object), getDenominator(.Object))
+            fraction <- reduce_fraction(.Object@Numerator, .Object@Denominator)
             fraction <- do.call('match_size', fraction) 
             fraction <- lapply(fraction, as.integer)
             max_length <- max(lengths(fraction))
@@ -88,7 +88,7 @@ setMethod('initialize', 'rhythmInterval',
             
           })
 
-######rhythmInterval constructors and accessors ####
+######rhythmInterval constructor ####
 
 
 #' The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
@@ -102,15 +102,6 @@ rint <- function(denominator, numerator = 1L) {
         Denominator = as.integer(denominator), 
         Numerator = as.integer(numerator))
 }
-
-# rint_empty <- rint(1, 0)
-
-#' @name rhythmInterval
-#' @export
-getNumerator   <- function(rint) rint@Numerator
-#' @name rhythmInterval
-#' @export
-getDenominator <- function(rint) rint@Denominator
 
 
 
@@ -183,12 +174,12 @@ setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
           function(e1, e2) {
             if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
                     
-            d1 <- getDenominator(e1)
-            d2 <- getDenominator(e2)
+            d1 <- e1@Denominator
+            d2 <- e2@Denominator
             
             d3 <- d1 * d2
-            n1 <- getNumerator(e1) * (d3 / d1)
-            n2 <- getNumerator(e2) * (d3 / d2)
+            n1 <- e1@Numerator * (d3 / d1)
+            n2 <- e2@Numerator * (d3 / d2)
             
             rint(d3, n1 + n2)
           })
@@ -208,7 +199,7 @@ setMethod('Math', signature = c(x = 'rhythmInterval'),
 #' @export
 setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
           function(e1) {
-              e1@Numerator <- getNumerator(e1) * -1L
+              e1@Numerator <- e1@Numerator * -1L
               e1
           })
 
@@ -328,8 +319,8 @@ as.recip <- function(...) UseMethod('as.recip')
 #' @export
 as.recip.rhythmInterval <- function(rint) {
           #modify this to print 0 and 00
-          num <- getNumerator(rint)
-          den <- getDenominator(rint)
+          num <- rint@Numerator
+          den <- rint@Denominator
           
           
           # Get the sign
@@ -375,7 +366,7 @@ as.recip.rhythmInterval <- function(rint) {
 #' @name rhythmInterval-write
 #' @export
 as.ratio.rhythmInterval <- function(rint) {
-          .paste(getNumerator(rint), '/', getDenominator(rint))
+          .paste(rint@Numerator, '/', rint@Denominator)
 }
 
 #### As decimal
@@ -383,7 +374,7 @@ as.ratio.rhythmInterval <- function(rint) {
 #' @name rhythmInterval-write
 #' @export
 as.decimal.rhythmInterval <- function(rint) {
-          as.double(getNumerator(rint) / getDenominator(rint))
+          as.double(rint@Numerator / rint@Denominator)
 }
 
 #' @name rhythmInterval-write

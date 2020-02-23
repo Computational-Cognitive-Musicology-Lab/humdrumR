@@ -148,7 +148,7 @@ bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L))
 #' @name humDiatonic
 #' @export
 dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
-           if (is.tonalInterval(root)) root <- getFifth(root)
+           if (is.tonalInterval(root)) root <- root@Fifth
            new('diatonicSet', 
                Root = as.integer(root), 
                Mode = as.integer(mode), 
@@ -160,7 +160,7 @@ dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
 #' @name humDiatonic
 #' @export
 tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L, of = NULL) {
-    if (is.tonalInterval(root)) root <- getFifth(root)
+    if (is.tonalInterval(root)) root <- root@Fifth
     
     root <- IfElse(cardinality == 0L, NA_integer_, root)
     extensions <- c(0L, 0L, 1L, 3L, 7L, 15L, 31L, 63L)[cardinality + 1L]

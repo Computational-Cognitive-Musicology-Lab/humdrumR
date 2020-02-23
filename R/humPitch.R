@@ -129,12 +129,12 @@ setMethod("initialize",
           function(.Object, Fifth = 0L, Octave = 0L, Cent = 0L) {
               .Object <- callNextMethod() # call the humdrumVector initialize
 
-              Cent <- getCent(.Object)
+              Cent <- .Object@Cent
               if (any(abs(Cent) >= 1200L, na.rm = TRUE)) {
                   centOctaves <- IfElse(Cent == 0L, 
                                         0L,
                                         as.integer((Cent %/% (sign(Cent) * 1200)) * sign(Cent)))
-                  .Object@Octave <- getOctave(.Object) + centOctaves 
+                  .Object@Octave <- .Object@Octave + centOctaves 
                   Cent   <- Cent  - (1200 * centOctaves)
                  .Object@Cent   <- Cent
               }
@@ -142,7 +142,7 @@ setMethod("initialize",
           }) 
 
 
-######tonalInterval constructors and accessors ####
+######tonalInterval constructors ####
 
 
 ## Constructors
@@ -153,31 +153,15 @@ setMethod("initialize",
 #' a "simple" interval---i.e., an ascending interval less than one octave.
 #' @name tonalInterval
 #' @export
-tint <- function(octave = 0L, fifth = 0L, cent = numeric(length(octave))) {
-            cent[is.na(octave) | is.na(fifth)] <- NA_real_
-            new('tonalInterval', 
-                Octave = as.integer(octave), 
-                Fifth  = as.integer(fifth), 
-                Cent   = as.numeric(cent))
+tint <- function(octave, fifth = 0L, cent = numeric(length(octave))) {
+    if (missing(octave)) return(fifthNsciOct2tonalInterval(fifth, 4L))
+    cent[is.na(octave) | is.na(fifth)] <- NA_real_
+    new('tonalInterval', 
+        Octave = as.integer(octave), 
+        Fifth  = as.integer(fifth), 
+        Cent   = as.numeric(cent))
 }
 
-#' @name tonalInterval
-#' @export
-simpletint <- function(fifth) {
- fifthNsciOct2tonalInterval(fifth, rep(4L, length(fifth)))         
-}
-
-## Accessors
-
-#' @name tonalInterval
-#' @export
-getFifth  <- function(tint) tint@Fifth
-#' @name tonalInterval
-#' @export
-getOctave <- function(tint) tint@Octave
-#' @name tonalInterval
-#' @export
-getCent <- function(tint) tint@Cent
 
 
 
@@ -254,9 +238,9 @@ as.double.tonalInterval <- function(x, ...) as.decimal(x, ...)
 #' @export
 setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    tint(getOctave(e1) + getOctave(e2),
-                         getFifth(e1)  + getFifth(e2), 
-                         getCent(e1) + getCent(e2))
+                    tint(e1@Octave + e2@Octave,
+                         e1@Fifth  + e2@Fifth, 
+                         e1@Cent + e2@Cent)
           })
 
 #' @name tonalInterval
@@ -274,7 +258,7 @@ setMethod('+', signature = c('character', 'tonalInterval'),
 #' @export
 setMethod('-', signature = c('tonalInterval', 'missing'),
           function(e1) {
-              tint(-getOctave(e1), -getFifth(e1),  -getCent(e1))
+              tint(-e1@Octave, -e1@Fifth,  -e1@Cent)
               })
 
 #' @name tonalInterval
@@ -294,14 +278,14 @@ setMethod('sum', signature = c('tonalInterval'),
           function(x, ..., na.rm = TRUE) {
                     x <- list(x, ...)
                     x <- do.call('c', x)
-                    tint(sum(getOctave(x), na.rm), sum(getFifth(x), na.rm), sum(getCent(x), na.rm))
+                    tint(sum(x@Octave, na.rm), sum(x@Fifth, na.rm), sum(x@Cent, na.rm))
           })
 
 #' @name tonalInterval
 #' @export
 setMethod('cumsum', signature = c('tonalInterval'),
           function(x) {
-                    tint(cumsum(getOctave(x)), cumsum(getFifth(x)), cumsum(getCent(x)))
+                    tint(cumsum(x@Octave), cumsum(x@Fifth), cumsum(x@Cent))
           })
 
 
@@ -311,9 +295,9 @@ setMethod('cumsum', signature = c('tonalInterval'),
 #' @export
 setMethod('diff', signature = c('tonalInterval'),
           function(x, lag = 1, differences = 1) {
-                    tint(diff(getOctave(x), lag, differences), 
-                         diff(getFifth(x),  lag, differences), 
-                         diff(getCent(x),   lag, differences))
+                    tint(diff(x@Octave, lag, differences), 
+                         diff(x@Fifth,  lag, differences), 
+                         diff(x@Cent,   lag, differences))
           })
 
 
@@ -331,14 +315,14 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
 	# That way the change applied to the Octave matches the one applied to the Fifth.
           function(e1, e2) {
             if (length(e1) == 0L) return(e1)
-            f1 <- getFifth(e1)
-            f2 <- getFifth(e2)
+            f1 <- e1@Fifth
+            f2 <- e2@Fifth
             match_size(f1 = f1, f2 = f2, toEnv = TRUE)
             
             fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
             fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
             
-            tint(getOctave(e1) - (getOctave(e2) * fifthDivs),
+            tint(e1@Octave - (e2@Octave * fifthDivs),
                  fifthMods)
           })
 
@@ -346,8 +330,8 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-                    f1 <- getFifth(e1)
-                    f2 <- getFifth(e2)
+                    f1 <- e1@Fifth
+                    f2 <- e2@Fifth
                     match_size(f1 = f1, f2 = f2, toEnv = TRUE)
                     ifelse(f2 == 0L, 0L, f1 %/% f2)
           })
@@ -360,12 +344,16 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
 #' @export
 invert <- function(tint, around = tint(0,0)) around + around - tint
 
+#' @name tonalInterval
+#' @export
+is.simple <- function(tint) {
+    semit <- as.semit.tonalInterval(tint)
+    semit >= 0 & semit < 12
+}
 
 #' @name tonalInterval
 #' @export
-simplify <- function(tint) {
-          simpletint(getFifth(tint))
-}
+simplify <- function(tint)  fifthNsciOct2tonalInterval(tint@Fifth, 4L)
 
 #' @name tonalInterval
 #' @export
@@ -483,7 +471,7 @@ as.semit <- function(x, ...) UseMethod('as.semit')
 #' @name tonalInterval-write
 #' @export
 as.semit.tonalInterval <- function(x) {
-                    ((getFifth(x) * 19L) + (getOctave(x) * 12L)) + (getCent(x) / 100L) 
+                    ((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L) 
 }
 
 #' @name tonalInterval-write
@@ -504,7 +492,7 @@ as.tonalname <- function(x, accidental.labels = c(), ...) UseMethod('as.tonalnam
 #' @name tonalInterval-write
 #' @export
 as.tonalname.tonalInterval <- function(x, accidental.labels = c()) {
-    fifth2tonalname(getFifth(x), accidental.labels)
+    fifth2tonalname(x@Fifth, accidental.labels)
 }
 
 #### As scientific pitch (i.e, C4)
@@ -522,7 +510,7 @@ as.sciPitch <- function(x, ...) UseMethod('as.sciPitch')
 #' @export
 as.sciPitch.tonalInterval <- function(x) {
                     octave <- sciOctave(x)
-                    .paste(fifth2tonalname(getFifth(x), c(flat = 'b')), octave)
+                    .paste(fifth2tonalname(x@Fifth, c(flat = 'b')), octave)
             }
 
 
@@ -536,7 +524,7 @@ as.kernPitch <- function(x, ...) UseMethod('as.kernPitch')
 #' @export
 as.kernPitch.tonalInterval <- function(x) {
                     octaves <- sciOctave(x) - 4L
-                    fifths <- getFifth(x)
+                    fifths <- x@Fifth
                     letternames <- fifth2lettername(fifths)
                     accidentals <- fifth2accidental(fifths)
                     
@@ -564,7 +552,7 @@ as.interval.tonalInterval <- function(x, specific = TRUE, directed = TRUE,
     
     octave <- sciOctave(x) - 4
     
-    fifth <- getFifth(x)
+    fifth <- x@Fifth
     fifth <- IfElse(octave < 0,   fifth * sign(octave), fifth) # invert interval if direction is down
     direction <- if (directed) {
         IfElse(fifth == 0, 
@@ -640,7 +628,7 @@ as.scaleDegree <- function(x, cautionary = FALSE,
 #' @name tonalInterval-write
 #' @export
 as.scaleDegree.tonalInterval <- function(x, key = 0L, cautionary = FALSE, contour = FALSE, quality.labels = c(), ...) {
-    fifths <- getFifth(x)        
+    fifths <- x@Fifth        
     
     deg  <- as.scaleDegree.numeric(fifths, key, cautionary = FALSE, quality.labels = quality.labels)
     
@@ -658,7 +646,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, cautionary = TRUE, quality.label
         key  <- getRoot(key)
     } else {
         mode <- 0L
-        key  <- getFifth(as.tonalInterval(key))
+        key  <- as.tonalInterval(key@Fifth)
     }
     
     x <- x - key
@@ -689,7 +677,7 @@ solfatab <- rbind(d = c("e", "o", "i"),
 #' @name tonalInterval-write
 #' @export
 as.solfa.tonalInterval <- function(x, key = 0L, contour = FALSE, ...) {
-    fifths <- getFifth(x)        
+    fifths <- x@Fifth        
     solfa <- as.solfa.numeric(fifths, key)
     
     if (contour) addcontour(solfa, x, threshold = 6L, ...) else solfa
@@ -700,7 +688,7 @@ as.solfa.tonalInterval <- function(x, key = 0L, contour = FALSE, ...) {
 as.solfa.numeric <- function(x,  key = 0L) {
           # This is the function that does the real heavy lifting of the
           # as.solfa function
-          if (!is.numeric(key)) key <- getFifth(as.tonalInterval(key))
+          if (!is.numeric(key)) key <- as.tonalInterval(key@Fifth)
           
           x <- x - key
                     
@@ -754,9 +742,9 @@ as.decimal <- function(...) UseMethod('as.decimal')
 #' @name tonalInterval-write
 #' @export
 as.decimal.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
-    fifth <- getFifth(x)
-    oct   <- getOctave(x)
-    cent  <- getCent(x)
+    fifth <- x@Fifth
+    oct   <- x@Octave
+    cent  <- x@Cent
     
     IfElse(is.na(fifth), 
            NA_real_, 
@@ -879,7 +867,7 @@ read.semit2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
           ##
           if (!is.null(key)) {
               
-           if (!is.integer(key)) key <- getFifth(as.tonalInterval(key))
+           if (!is.integer(key)) key <- as.tonalInterval(key@Fifth)
            fifths <- fifths - key
            tints[fifths > 8 & !is.na(fifths)]  <- tints[fifths > 8 & !is.na(fifths)] - pythagorean.comma
            tints[fifths < -5& !is.na(fifths)] <- tints[fifths < -5 & !is.na(fifths)] + pythagorean.comma

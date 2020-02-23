@@ -241,6 +241,9 @@ substituteName <- function(expr, subs) {
           
 }
 
+`%just%` <- function(e1, e2) if (is.null(e1)) e2 else e1
+`%maybe%` <- function(e1, e2) if(is.null(e1)) e1 else e2(e1)
+
 remove.duplicates <- function(listofvalues) {
     # takes a list of vectors of values and removes elements from later vectors which
     # appear in earlier vectors
