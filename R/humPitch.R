@@ -149,8 +149,8 @@ setMethod("initialize",
 
 #' The basic constructor for \code{tonalInterval}s.
 #' \code{tint} accepts integer values for octaves and fifths and numeric values for cent.
-#' \code{simpletint} accepts only an integer (fifth) and creates
-#' a "simple" interval---i.e., an ascending interval less than one octave.
+#' If the octave argument is missing a "simple" interval is constructed---i.e., an ascending interval less than one octave.
+#' (When appropriate, we can think of these generically as an interval with no specific octave.)
 #' @name tonalInterval
 #' @export
 tint <- function(octave, fifth = 0L, cent = numeric(length(octave))) {
@@ -337,29 +337,6 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
           })
 
 
-
-######Special methods
-
-#' @name tonalInterval
-#' @export
-invert <- function(tint, around = tint(0,0)) around + around - tint
-
-#' @name tonalInterval
-#' @export
-is.simple <- function(tint) {
-    semit <- as.semit.tonalInterval(tint)
-    semit >= 0 & semit < 12
-}
-
-#' @name tonalInterval
-#' @export
-simplify <- function(tint)  fifthNsciOct2tonalInterval(tint@Fifth, 4L)
-
-#' @name tonalInterval
-#' @export
-generalize <- function(tint) {
-          tint %% tint(-11,7)
-}
 
 
 
@@ -1006,7 +983,7 @@ read.scaleDegree2tonalInterval <- read.interval2tonalInterval
 #' @export
 read.solfa2tonalInterval <- function(str, key = 0L) {
   fifths <- solfa2fifth(str) + key
-  simpletint(fifths) %restore% 'as.solfa.tonalInterval'
+  tint( , fifths) %restore% 'as.solfa.tonalInterval'
   
 }
 
@@ -1225,6 +1202,43 @@ as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
 ######Special pitch functions ####
 ##################################################-
 
+######Special methods
+
+#' @name tonalInterval
+#' @export invert invert.tonalInterval invert.default
+invert <- function(tint, around = Unison) UseMethod('invert')
+invert.tonalInterval <- function(tint, around = tint(0,0)) (around + around - tint) %restore% restorer(tint)
+invert.default <- restore %.% invert.tonalInterval %.% as.tonalInterval
+
+#' @name tonalInterval
+#' @export is.simple is.simple.tonalInterval is.simple.default
+is.simple <- function(tint) UseMethod('is.simple')
+is.simple.tonalInterval <- function(tint) {
+    semit <- as.semit.tonalInterval(tint)
+    semit >= 0 & semit < 12
+}
+is.simple.default <- is.simple %.% as.tonalInterval
+
+#' @name tonalInterval
+#' @export simplify simplify.tonalInterval simplify.default
+simplify <- function(tint) UseMethod('simplify')
+simplify.tonalInterval <- function(tint)  fifthNsciOct2tonalInterval(tint@Fifth, 4L) %restore% restorer(tint)
+simplify.default <- restore %.% simplify.tonalInterval %.% as.tonalInterval
+
+#' @name tonalInterval
+#' @export generalize generalize.tonalInterval generalize.default
+generalize <- function(tint, generic = 0L) UseMethod('generalize')
+generalize.tonalInterval <- function(tint, generic = 0L) {
+    # offset by P5 because F (-1) is natural, not F# (6)
+    gtint <- tint - tint( , generic)
+    
+    gtint <- ((gtint + P5) %% tint(-11,7)) - P5
+    
+    (gtint + tint( , generic)) %restore% restorer(tint)
+}
+generalize.default <- restore %.% generalize.tonalInterval %.% as.tonalInterval
+
+
 
 #' Transpose tonalIntervals
 #' 
@@ -1245,7 +1259,7 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
               if (!is.tonalInterval(generic)) generic <- as.tonalInterval(generic)
               generic <- generic - tint(-1, 1)
               inkey <- x - generic
-              chromaticshift <- simpletint(inkey %/% tint(-11, 7))
+              chromaticshift <- tint( , inkey %/% tint(-11, 7))
               inkey <- inkey - chromaticshift
               result <- (inkey + interval) %% tint(-11, 7)
               result + generic + chromaticshift
@@ -1273,7 +1287,7 @@ transpose.character <- restore %.% transpose.tonalInterval %.% as.tonalInterval
 #' @export dd5 d9 d13 d2 d6 d10 d14 d3 d7 d11 d15 d4 d8 d12 d5 m9 m13 m2 m6 
 #' @export m10 m14 m3 m7 P11 P15 P4 P8 P12 P1 P5 M9 M13 M2 M6 M10 M14 M3 M7 
 #' @export A11 A4 A8 A12 A1 A5 A9 A13 A2 A6 A10 A14 A3 A7 AA11 d2 AA4 AA8 AA12 
-#' @export AA1 AA5 AA9 AA13 AA2 AA6 AA10 AA3 AA7 dd2
+#' @export AA1 AA5 AA9 AA13 AA2 AA6 AA10 AA3 AA7 dd2 Unison
 for (i in -30:32) {
     for (j in -19:19) {
         t <- tint(i, j)
@@ -1283,6 +1297,7 @@ for (i in -30:32) {
         }
     }
 }
+Unison <- tint(0, 0)
 
 
 

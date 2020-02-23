@@ -4,7 +4,6 @@
 \alias{tonalInterval-read}
 \alias{read.semit2tonalInterval}
 \alias{read.midi2tonalInterval}
-\alias{read.kernPitch2sciPitch}
 \alias{read.kernPitch2tonalInterval}
 \alias{read.sciPitch2tonalInterval}
 \alias{read.interval2tonalInterval}
@@ -21,8 +20,6 @@ read.semit2tonalInterval(n, key = NULL, melodic = FALSE)
 
 read.midi2tonalInterval(n, key = NULL, melodic = FALSE)
 
-read.kernPitch2sciPitch(str)
-
 read.kernPitch2tonalInterval(str)
 
 read.sciPitch2tonalInterval(str)
@@ -33,16 +30,14 @@ read.solfa2tonalInterval(str, key = 0L)
 
 read.ratio2tonalInterval(str, twelfth = 3)
 
-read.decimal2tonalInterval(float, twelfth = 3, margin = 10,
-  octrange = 10)
+read.decimal2tonalInterval(float, twelfth = 3, centmargin = 10)
 
 read.frequency2tonalInterval(float, reference.freq = 440L,
-  reference.tint = tint(-4, 3), twelfth = 3)
+  reference.tint = tint(-4, 3), twelfth = 3, centmargin = 10)
 
 \method{as.tonalInterval}{integer}(n, key = NULL, melodic = FALSE)
 
-\method{as.tonalInterval}{numeric}(float, twelfth = 3, margin = 10,
-  octrange = 10)
+\method{as.tonalInterval}{numeric}(float, twelfth = 3, centmargin = 10)
 
 \method{as.tonalInterval}{character}(str, key = 0L, melodic = FALSE,
   inPlace = FALSE)

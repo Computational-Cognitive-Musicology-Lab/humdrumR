@@ -4,27 +4,16 @@
 \name{tonalInterval}
 \alias{tonalInterval}
 \alias{tint}
-\alias{simpletint}
-\alias{getFifth}
-\alias{getOctave}
-\alias{getCent}
 \alias{is.tonalInterval}
 \alias{as.double.tonalInterval}
+\alias{as.tonalInterval}
 \alias{invert}
+\alias{is.simple}
 \alias{simplify}
 \alias{generalize}
-\alias{as.tonalInterval}
 \title{Representation of tonal pitch information}
 \usage{
-tint(octave = 0L, fifth = 0L, cent = numeric(length(octave)))
-
-simpletint(fifth)
-
-getFifth(tint)
-
-getOctave(tint)
-
-getCent(tint)
+tint(octave, fifth = 0L, cent = numeric(length(octave)))
 
 is.tonalInterval(x)
 
@@ -58,13 +47,15 @@ is.tonalInterval(x)
 
 \S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
 
-invert(tint, around = tint(0, 0))
+as.tonalInterval(...)
+
+invert(tint, around = Unison)
+
+is.simple(tint)
 
 simplify(tint)
 
-generalize(tint)
-
-as.tonalInterval(...)
+generalize(tint, generic = 0L)
 }
 \description{
 This \emph{S4} class is the core tonal pitch representation in the 
@@ -83,7 +74,7 @@ The interval/pitch represented is the result of the Octaves and Perfect 5ths (ac
 Tonal intervals (which are rather abstract) can be translated to more concrete 
 pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}} 
 methods. Tonal intervals can also be created by reading various inputs
-using these \code{\link[humdrumR:tonalInterval-read]{xxx2tonalInterval}} functions.
+using these \code{\link[humdrumR:tonalInterval-read]{read.xxx}} functions.
 
 In the case of fifths, it is not difficult (for learned musicians at least) to 
 see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 

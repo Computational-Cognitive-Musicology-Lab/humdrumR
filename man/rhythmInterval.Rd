@@ -4,8 +4,6 @@
 \name{rhythmInterval}
 \alias{rhythmInterval}
 \alias{rint}
-\alias{getNumerator}
-\alias{getDenominator}
 \alias{is.rhythmInterval}
 \alias{order.rhythmInterval}
 \alias{as.double.rhythmInterval}
@@ -15,10 +13,6 @@
 \title{The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.}
 \usage{
 rint(denominator, numerator = 1L)
-
-getNumerator(rint)
-
-getDenominator(rint)
 
 is.rhythmInterval(x)
 

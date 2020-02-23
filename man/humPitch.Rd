@@ -3,9 +3,13 @@
 \name{humPitch}
 \alias{humPitch}
 \alias{as.semit.character}
+\alias{as.semit.numeric}
 \alias{as.midi.character}
+\alias{as.midi.numeric}
 \alias{as.tonalname.character}
 \alias{as.kernPitch.character}
+\alias{as.kernPitch.integer}
+\alias{as.kernPitch.numeric}
 \alias{as.sciPitch.character}
 \alias{as.interval.character}
 \alias{as.solfa.character}
@@ -15,11 +19,19 @@
 \usage{
 \method{as.semit}{character}(x)
 
+\method{as.midi}{numeric}()
+
 \method{as.midi}{character}(x)
+
+\method{as.midi}{numeric}()
 
 \method{as.tonalname}{character}(x, accidental.labels = c())
 
 \method{as.kernPitch}{character}(x)
+
+\method{as.kernPitch}{integer}(x, key = NULL, melodic = FALSE)
+
+\method{as.kernPitch}{numeric}(x, twelfth = 3, centmargin = 10)
 
 \method{as.sciPitch}{character}(x)
 
