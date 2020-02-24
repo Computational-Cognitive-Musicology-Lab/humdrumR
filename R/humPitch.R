@@ -862,7 +862,7 @@ read.semit2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
                     
           }
           
-          tints %restore% 'as.semit.tonalInterval'
+          tints %re.as% 'as.semit.tonalInterval'
 }
 
 #' @name tonalInterval-read
@@ -870,7 +870,7 @@ read.semit2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
 read.midi2tonalInterval <- function(n, key = NULL, melodic = FALSE) {
  midi <- read.semit2tonalInterval(n - 60L, key = key, melodic = melodic) 
  
- midi %restore% 'as.midi.tonalInterval'
+ midi %re.as% 'as.midi.tonalInterval'
         
 }
 
@@ -910,7 +910,7 @@ read.kernPitch2tonalInterval <- function(str) {
                             accidental2fifth(Accidentals,   
                                              accidental.labels = c(flat = '-')))
  
-          fifthNsciOct2tonalInterval(fifth, components$SciOctave) %restore% 'as.kernPitch.tonalInterval'
+          fifthNsciOct2tonalInterval(fifth, components$SciOctave) %re.as% 'as.kernPitch.tonalInterval'
          
 }
 
@@ -932,7 +932,7 @@ read.sciPitch2tonalInterval <- function(str) {
           fifth <- lettername2fifth(letters) + accidental2fifth(accidentals, 
                                                                 accidental.labels = c(flat = 'b'))
           
-          fifthNsciOct2tonalInterval(fifth, sciOct) %restore% 'as.sciPitch.tonalInterval'
+          fifthNsciOct2tonalInterval(fifth, sciOct) %re.as% 'as.sciPitch.tonalInterval'
           
 }
 
@@ -966,7 +966,7 @@ read.interval2tonalInterval <- function(str) {
           
           direction <- 2 * ((is.na(direction) | direction == '+') - 0.5)
           
-          (tints * direction) %restore% 'as.interval.tonalInterval'
+          (tints * direction) %re.as% 'as.interval.tonalInterval'
           
           
 }
@@ -983,7 +983,7 @@ read.scaleDegree2tonalInterval <- read.interval2tonalInterval
 #' @export
 read.solfa2tonalInterval <- function(str, key = 0L) {
   fifths <- solfa2fifth(str) + key
-  tint( , fifths) %restore% 'as.solfa.tonalInterval'
+  tint( , fifths) %re.as% 'as.solfa.tonalInterval'
   
 }
 
@@ -1037,7 +1037,7 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
             fifs[rowSums(impure) > 0] <- round(twelfths[impure])
           }
           
-          tint(octs, fifs) %restore% 'as.ratio.tonalInterval'
+          tint(octs, fifs) %re.as% 'as.ratio.tonalInterval'
 }
 
 
@@ -1145,7 +1145,7 @@ as.tonalInterval.character <- regexDispatch( 'KernPitch' = read.kernPitch2tonalI
 #' 
 
 #' @name humPitch
-#' @export
+#' @export as.semit.character
 as.semit.character <- as.semit.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
@@ -1207,8 +1207,8 @@ as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
 #' @name tonalInterval
 #' @export invert invert.tonalInterval invert.default
 invert <- function(tint, around = Unison) UseMethod('invert')
-invert.tonalInterval <- function(tint, around = tint(0,0)) (around + around - tint) %restore% restorer(tint)
-invert.default <- restore %.% invert.tonalInterval %.% as.tonalInterval
+invert.tonalInterval <- function(tint, around = tint(0,0)) (around + around - tint)
+invert.default <- re.as %.% invert.tonalInterval %.% as.tonalInterval
 
 #' @name tonalInterval
 #' @export is.simple is.simple.tonalInterval is.simple.default
@@ -1222,8 +1222,8 @@ is.simple.default <- is.simple %.% as.tonalInterval
 #' @name tonalInterval
 #' @export simplify simplify.tonalInterval simplify.default
 simplify <- function(tint) UseMethod('simplify')
-simplify.tonalInterval <- function(tint)  fifthNsciOct2tonalInterval(tint@Fifth, 4L) %restore% restorer(tint)
-simplify.default <- restore %.% simplify.tonalInterval %.% as.tonalInterval
+simplify.tonalInterval <- function(tint)  fifthNsciOct2tonalInterval(tint@Fifth, 4L) 
+simplify.default <- re.as %.% simplify.tonalInterval %.% as.tonalInterval
 
 #' @name tonalInterval
 #' @export generalize generalize.tonalInterval generalize.default
@@ -1234,9 +1234,9 @@ generalize.tonalInterval <- function(tint, generic = 0L) {
     
     gtint <- ((gtint + P5) %% tint(-11,7)) - P5
     
-    (gtint + tint( , generic)) %restore% restorer(tint)
+    (gtint + tint( , generic))
 }
-generalize.default <- restore %.% generalize.tonalInterval %.% as.tonalInterval
+generalize.default <- re.as %.% generalize.tonalInterval %.% as.tonalInterval
 
 
 
@@ -1267,12 +1267,12 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
               x + interval
           }
           
-          output %restore% restorer(x)
+          output
 }
 
 #' @name humTranspose
 #' @export
-transpose.character <- restore %.% transpose.tonalInterval %.% as.tonalInterval
+transpose.character <- re.as %.% transpose.tonalInterval %.% as.tonalInterval
 
 # transpose.character <- regexDispatch('KernPitch' = as.kernPitch %.% transpose.tonalInterval %.% read.kernPitch2tonalInterval,
                                      # 'Interval'    = as.interval  %.% transpose.tonalInterval %.% read.interval2tonalInterval,

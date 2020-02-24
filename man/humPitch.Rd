@@ -17,33 +17,33 @@
 \alias{as.ratio.character}
 \title{Pitch translations}
 \usage{
-\method{as.semit}{character}(x)
+\method{as.semit}{character}(...)
 
 \method{as.midi}{numeric}()
 
-\method{as.midi}{character}(x)
+\method{as.midi}{character}(...)
 
 \method{as.midi}{numeric}()
 
-\method{as.tonalname}{character}(x, accidental.labels = c())
+\method{as.tonalname}{character}(..., accidental.labels = c())
 
-\method{as.kernPitch}{character}(x)
+\method{as.kernPitch}{character}(...)
 
-\method{as.kernPitch}{integer}(x, key = NULL, melodic = FALSE)
+\method{as.kernPitch}{integer}(n, key = NULL, melodic = FALSE)
 
-\method{as.kernPitch}{numeric}(x, twelfth = 3, centmargin = 10)
+\method{as.kernPitch}{numeric}(float, twelfth = 3, centmargin = 10)
 
-\method{as.sciPitch}{character}(x)
+\method{as.sciPitch}{character}(...)
 
-\method{as.interval}{character}(x, specific = TRUE, directed = TRUE,
+\method{as.interval}{character}(..., specific = TRUE, directed = TRUE,
   quality.labels = c(), contour.labels = c())
 
-\method{as.solfa}{character}(x, key = 0L, contour = FALSE, ...)
+\method{as.solfa}{character}(..., key = 0L, contour = FALSE)
 
-\method{as.frequency}{character}(x, reference.freq = 440L,
+\method{as.frequency}{character}(..., reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))
 
-\method{as.ratio}{character}(x, twelfth = 2^(19/12), sep = "/")
+\method{as.ratio}{character}(..., twelfth = 2^(19/12), sep = "/")
 }
 \description{
 These functions translate various pitch representations

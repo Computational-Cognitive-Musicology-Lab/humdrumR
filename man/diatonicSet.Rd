@@ -67,13 +67,13 @@ as.tertianSet(...)
 
 \method{as.tertianSet}{character}(str, inPlace = FALSE)
 
-\method{as.romanNumeral}{character}(x, cautionary = FALSE)
+\method{as.romanNumeral}{character}(..., cautionary = FALSE)
 
 as.triad(x, ...)
 
 \method{as.triad}{tertianSet}(x)
 
-\method{as.triad}{character}(x)
+\method{as.triad}{character}(...)
 }
 \description{
 These functions all translate other pitch representations

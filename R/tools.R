@@ -353,46 +353,91 @@ pad <- function(x, n, before = TRUE) {
     if (before) c(padding, x) else c(x, padding)
 }
 
-#' @export
-setGeneric('compose', function(f1, f2, ...) standardGeneric('compose'))
+compose <- function(...) UseMethod('compose')
+compose.default <- function(...) {
+    fs <- rev(list(...))
+    fnames <- names(fs)
+    fbodies <- Map(normalizeBody, fnames, fs, seq_along(fs) > 1L)
+    
+    ### arguments
+    fargs <- lapply(fs, fargs)
+    fargs[-1] <- lapply(fargs[-1], 
+                        function(farg) {
+                           if (names(farg)[[1]] == '...') farg <- c(alist(tmp = ), farg)
+                         farg })
+    
+    args <- do.call('c', c(fargs[1], 
+                           lapply(fargs[-1], function(farg) farg[-1]),
+                           use.names = FALSE))
+    args <- args[!duplicated(names(args)) & names(args) != 'tmp']
+    
+    # firstArg <- rlang::sym(names(args)[[1]])
+    pipeArgs <- rlang::syms(sapply(fargs, function(arg) names(arg)[[1]]))
+    
+    ### body
+    body <- rlang::expr({
+        !!!Map(function(bod, arg, parg) {
+            rlang::expr(!!arg <- stickyApply(!!bod, !!!rlang::syms(names(parg))))
+            }, 
+            rlang::syms(head(fnames, -1)), 
+            pipeArgs[-1], 
+            head(fargs, -1))
+        
+        !!fbodies[[length(fbodies)]]
+        
+        })
+    
+    ### environment
+    fenv <- new.env()
+    Map(function(fname, f) assign(fname, f, envir = fenv), fnames, fs)
+    
+    # Create the new function
+    newfunc <- rlang::new_function(args, body, fenv)
+    
+    attr(newfunc, 'composition') <- list(...)
+    
+    newfunc %class% 'composed'
+}
+compose.composed <- function(...) {
+    fs <- list(...)
+    
+    fs <- c(attr(fs[[1]], 'composition'), fs[-1])
+    do.call('compose.default', fs)
+    
+}
 
 #' @export
-setMethod('compose', signature = c(f1 = 'function', f2 = 'function'),  
-          function(f1, f2, ...) {
-                    .args <- c(f1, f2, list(...))
-                    .funcs <- Filter(is.function, .args)
-                    .args  <- Filter(Negate(is.function), .args)
-                    if (length(.funcs) <= 1L) stop("Can't compose one or zero functions.")
-                    
-                    .funcsArgs <- lapply(.funcs, function(f) formals(args(f))[-1])
-                    newfunc <- function() {
-                              for (i in 1:length(.funcs)) {
-                                        currentFunc <- .funcs[[i]]
-                                        currentArgs <- .funcsArgs[[i]]
-                                        # ...
-                                        elips <- names(currentArgs) == '...'
-                                        not_elips <- names(currentArgs)[!elips]
-                                        currentArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
-                                        currentArgs <- c(list(x), currentArgs, if (any(elips)) list(...) else list())
-                                        
-                                        x <- do.call('currentFunc', currentArgs)
-                              }
-                              
-                              x
-                    }
-                    allArgs <- c(.args, unlist(.funcsArgs, recursive = FALSE))
-                    # names(allArgs)[names(allArgs) != '...'] <- gsub('^.*\\.', '', names(allArgs)[names(allArgs) != '...'])
-                    allArgs <- allArgs[!duplicated(names(allArgs))]
-                    formals(newfunc) <- c(alist(x = ), allArgs)
-                    
-                    newfunc
-          }
-)
+print.composed <- function(x) {
+    attributes(x) <- NULL
+    print(x)
+    
+}
 
+stickyAttrs <- function(...) {
+    attrs <- do.call('c', lapply(list(...), attributes))
+    attrs[grep('sticky_', names(attrs))]
+}
 
+`stickyAttrs<-` <- function(x, value) {
+    attributes(x) <- c(attributes(x), value)
+    x
+}
+
+stickyApply <- function(func, ...) {
+    pipe <- stickyAttrs(...)
+    result <- func(...)
+    stickyAttrs(result) <- pipe
+    result
+}
 
 #' @export
-`%.%` <- function(e1, e2) { compose(e2, e1) }
+`%.%` <- function(e1, e2) { 
+    f1name <- rlang::quo_text(rlang::enquo(e1))
+    f2name <- rlang::quo_text(rlang::enquo(e2))
+    
+    fs <- setNames(c(e1, e2), c(f1name, f2name))
+    do.call('compose', fs)
+    }
 
 
 
@@ -661,18 +706,6 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
           output
 }
 
-as.arglist <- function(argNames, argValues = NULL) {
- arglist <- alist(x = )[rep('x', length(argNames))] 
- 
- arglist <- setNames(arglist, argNames)
- 
- if (!is.null(argValues) && any(!is.na(argValues))) {
-     arglist[!is.na(argValues)] <- argValues[!is.na(argValues)]
- }
- 
- arglist
- 
-}
 
 `%splat|%` <- function(obj, func) {
   if (is.atomic(obj)) obj <- as.list(obj)

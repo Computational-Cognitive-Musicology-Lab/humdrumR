@@ -8,13 +8,13 @@
 \alias{as.notevalue.character}
 \title{Rhythm translations}
 \usage{
-\method{as.fraction}{character}(x)
+\method{as.fraction}{character}(...)
 
-\method{as.recip}{character}(x)
+\method{as.recip}{character}(...)
 
-\method{as.decimal}{character}(x)
+\method{as.decimal}{character}(...)
 
-\method{as.notevalue}{character}(x)
+\method{as.notevalue}{character}(...)
 }
 \description{
 These functions translate various rhythm representations
