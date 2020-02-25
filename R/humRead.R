@@ -722,7 +722,7 @@ parseReference <- function(refTable, reference) {
   # filter by reference argument
   if (!(length(reference) == 1L && reference == 'all')) {
       refTable <- refTable[refKeys %in% reference]
-      names <- names_(reference)
+      names <- .names(reference)
       names[names == ""] <- reference[names == ""]
       refTable[ , refKeys := names[match(refKeys, reference)]]
   }

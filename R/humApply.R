@@ -821,11 +821,11 @@ splatQuo <- function(funcQuosure) {
   # 
   
   
-  predicate <- function(expr) any(sapply(expr, testCall, call = '@'))
+  predicate <- function(expr) any(sapply(expr, is.givenCall, call = '@'))
   
   transform <- function(expr) {
       expr <- recurseQuosure(expr, 
-                     function(quo) testCall(quo, '@'), 
+                     function(quo) is.givenCall(quo, '@'), 
                      function(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
                          })
       expr <- as.list(expr)

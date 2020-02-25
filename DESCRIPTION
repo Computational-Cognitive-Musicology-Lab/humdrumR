@@ -11,6 +11,7 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
+         humCompose.R
          humBase.R
          humClass.R
          humSummary.R

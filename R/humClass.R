@@ -1100,7 +1100,6 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
     values[] <- lapply(values, 
                        function(col) {
                                  col[is.na(col) | col == '.'] <- nullAs
-                                 # xnames(col) <- locnames
                                  col
                                  })
   }
