@@ -1,153 +1,9 @@
-## Function composition
+######### Function composition ----
 
-############### Composing predicate functions----
-
-#' @name regexDispatch
-#' @export
-`%predate%` <- function(func, predicate) {
-    predicateDispatch(rlang::expr_text(rlang::enexpr(func)), predicate)
-}
-
-
-#' @name regexDispatch
-#' @export
-`%pREdate%` <- function(func, regex) {
-    args <- list(func)
-    names(args) <- regex
-    do.call('regexDispatch', args)
-}
-
-
-
-predicateDispatch <- function(fname, predicateFunc) {
-    func <- match.fun(fname)
-    #argnames
-    argnames <- names(fargs(func))
-    
-    if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't if the first argument of the method is ..." )
-    argnames <- argnames[argnames != "..."]
-    
-    #
-    fbody <- normalizeBody(fname)
-    
-    body <- rlang::quo({
-        rebuild <- predicateParse(predicateFunc, argnames,
-                                  !!!rlang::syms(argnames[argnames != '...']))
-        result <- {!!fbody}
-        rebuild(result)
-    })
-    body(func) <- rlang::quo_squash(body)
-    environment(func) <- new.env(parent = environment(func))
-    
-    assign('predicateFunc', predicateFunc, envir = environment(func))
-    assign('argnames', argnames, envir = environment(func))
-    
-    func
-}
-
-normalizeBody <- function(fname, func = NULL) {
-    # this takes the name of a function (as a string)
-    # and creates a usable function body
-    # including jumping through hoops to for
-    # primitives and generics
-    
-    if (is.null(func)) func <- match.fun(fname)
-    fname <- rlang::sym(fname)
-    ftext <- rlang::quo_text(func)
-    
-    
-    # args
-    argnames <- names(fargs(func))
-    if (argnames[[1]] == '...' && removeElips) argnames[[1]] <- 'tmp'
-    argnames <- rlang::syms(argnames)
-    
-    namedfuncexpr <- rlang::expr((!!fname)(!!!argnames))
-    
-    if (is.primitive(func) | 
-        grepl('\\.Internal|\\.Primitive', ftext) |
-        grepl('UseMethod|standardGeneric', ftext)) {
-        namedfuncexpr
-        
-    } else {
-        
-        rlang::fn_body(func)
-    }
-}
-
-
-
-
-predicateParse <- function(predicate, argnames, ...) {
-    args <- setNames(list(...), argnames)
-    
-    lengths <- lengths(args)
-    targets <- args[lengths == lengths[1]]
-    bool <- apply(sapply(targets, predicate), 1, any)
-    list2env(lapply(targets, '[', i = !bool), 
-             envir = parent.frame())
-    
-    output <- args[[1]]
-    
-    function(result) {
-        if (length(result) != sum(!bool, na.rm = TRUE)) return(result)
-        output[!bool] <- result
-        output
-    }
-}
-
-
-memoify <- function(fname) {
-    func <- match.fun(fname)
-    #argnames
-    argnames <- names(fargs(func))
-    
-    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoify a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoify a function if the first argument is ..." )
-    argnames <- argnames[argnames != "..."]
-    
-    #
-    fbody <- normalizeBody(fname)
-    
-    body <- rlang::quo({
-        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
-        result <- {!!fbody}
-        rebuild(result)
-    })
-    body(func) <- rlang::quo_squash(body)
-    environment(func) <- new.env(parent = environment(func))
-    
-    assign('argnames', argnames, envir = environment(func))
-    
-    func
-    
-}
-
-memoiseParse <- function(argnames, ...) {
-    args <- setNames(list(...), argnames)
-    
-    target <- args[[1]]
-    
-    bool <- duplicated(target)
-    
-    uniq <- target[!bool]
-    
-    assign(argnames[1], uniq, parent.frame())
-    
-    matrix <- vapply(uniq, function(x) x == target, FUN.VALUE = integer(length(target)))
-    i <- rowSums(matrix * col(matrix))
-    
-    function(result) {
-        if (length(result) != ncol(matrix)) return(result)
-
-        result[i]
-    }
-    
-    
-}
 
 compose <- function(...) UseMethod('compose')
 compose.default <- function(...) {
+# accepts a NAMED list of functions.
     fs <- rev(list(...))
     fnames <- names(fs)
     
@@ -205,23 +61,6 @@ print.composed <- function(x) {
     
 }
 
-stickyAttrs <- function(...) {
-    attrs <- do.call('c', lapply(list(...), attributes))
-    attrs[grep('sticky_', names(attrs))]
-}
-
-`stickyAttrs<-` <- function(x, value) {
-    attributes(x) <- c(attributes(x), value)
-    x
-}
-
-stickyApply <- function(func, ...) {
-    pipe <- stickyAttrs(...)
-    result <- func(...)
-    stickyAttrs(result) <- pipe
-    result
-}
-
 #' @export
 `%.%` <- function(e1, e2) { 
     f1name <- rlang::quo_text(rlang::enquo(e1))
@@ -232,7 +71,29 @@ stickyApply <- function(func, ...) {
     }
 
 
-## Predicate functions
+
+# "sticky attributes" 
+
+stickyApply <- function(func, ...) {
+    pipe <- stickyAttrs(...)
+    result <- func(...)
+    stickyAttrs(result) <- pipe
+    result
+}
+
+
+stickyAttrs <- function(...) {
+    attrs <- do.call('c', lapply(list(...), attributes))
+    attrs[grep('sticky_', names(attrs))]
+}
+
+`stickyAttrs<-` <- function(x, value) {
+    attributes(x) <- c(attributes(x), value)
+    x
+}
+
+
+################## Predicate function generators ----
 
 
 setClass('predicate.function', contains = 'function', 
@@ -257,6 +118,7 @@ setMethod('&', c('predicate.function', 'predicate.function'),
               new('predicate.function', func,
                   string = paste(s1, s2, sep = ' & '))
           })
+
 setMethod('|', c('predicate.function', 'predicate.function'),
           function(e1, e2) {
               f1 <- e1@.Data
@@ -273,10 +135,11 @@ setMethod('|', c('predicate.function', 'predicate.function'),
               new('predicate.function', func,
                   string = paste(s1, s2, sep = ' | '))
           })
+
 #' @export
 EQ <- function(pat) {
   func <- function(x) {
-    c('pat', 'x') %<-% match_size(pat,x)
+    match_size(pat = pat,x = x, toEnv = TRUE)
     ifelse(is.na(pat), is.na(x), x == pat)
   }
 
@@ -289,7 +152,17 @@ LEN <- function(p.f) {
  
     new('predicate.function', func,
         string = gsub('x', 'length(x)', p.f@string))
-       
+}
+
+ANY <- function(p.f) {
+    func <- unclass(any %.% p.f)
+    
+    new('predicate.function', func, string = paste0('any(', p.f@string, ')'))
+}
+ALL <- function(p.f) {
+    func <- unclass(all %.% p.f)
+    
+    new('predicate.function', func, string = paste0('all(', p.f@string, ')'))
 }
 
 #' @export
@@ -332,3 +205,137 @@ na <- new('predicate.function', function(x) is.na(x), string = "NA")
 
 
 
+############### Predicate dispatch ----
+
+#' @name regexDispatch
+#' @export
+`%predate%` <- function(func, predicate) {
+    predicateExpr <- rlang::expr_text(rlang::enexpr(predicate))
+    if (grepl('function\\(', predicateExpr)) predicateExpr <- 'lambda'
+    
+    predicateDispatch(rlang::expr_text(rlang::enexpr(func)), predicate, predicateExpr)
+}
+
+
+
+
+
+
+predicateDispatch <- function(fname, predicateFunc, predicateName) {
+    func <- match.fun(fname)
+    #argnames
+    fargs <- fargs(func)
+    argnames <- names(fargs)
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't if the first argument of the method is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- funcCall(fname)
+    
+    body <- rlang::expr({
+        rebuild <- predicateParse(!!rlang::sym(predicateName), argnames, inPlace,
+                                  !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    fargs[['inPlace']] <- TRUE
+    newenv <- new.env(parent = parent.frame())
+    
+    assign(predicateName, predicateFunc, envir = newenv)
+    assign('argnames', argnames, envir = newenv)
+    
+    rlang::new_function(fargs, body, newenv)
+}
+
+funcCall <- function(fname) {
+    # this takes the name of a function (as a string)
+    # and creates an expression of this function calling
+    # its arguments
+    
+    func <- match.fun(fname)
+    fname <- rlang::sym(fname)
+    ftext <- rlang::quo_text(func)
+    
+    
+    # args
+    argnames <- names(fargs(func))
+    if (argnames[[1]] == '...') argnames[[1]] <- 'tmp'
+    argnames <- rlang::syms(argnames)
+    
+    rlang::expr((!!fname)(!!!argnames))
+    
+}
+
+
+
+predicateParse <- function(predicate, argnames, inPlace, ...) {
+    args <- setNames(list(...), argnames)
+    
+    lengths <- lengths(args)
+    targets <- args[lengths == lengths[1]]
+    bool <- apply(sapply(targets, predicate), 1, any)
+    list2env(lapply(targets, '[', i = bool), 
+             envir = parent.frame())
+    
+    output <- if (inPlace) args[[1]] else vectorna(length(args[[1]]), class(args[[1]]))
+    
+    function(result) {
+        if (length(result) != sum(bool, na.rm = TRUE)) return(if (inPlace) result else output)
+        output[bool] <- result
+        output
+    }
+}
+
+
+###### "Memoify" ----
+
+memoify <- function(fname) {
+    func <- match.fun(fname)
+    #argnames
+    argnames <- names(fargs(func))
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoify a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoify a function if the first argument is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- funcCall(fname)
+    
+    body <- rlang::quo({
+        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    body(func) <- rlang::quo_squash(body)
+    environment(func) <- new.env(parent = environment(func))
+    
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+    
+}
+
+memoiseParse <- function(argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    target <- args[[1]]
+    
+    bool <- duplicated(target)
+    
+    uniq <- target[!bool]
+    
+    assign(argnames[1], uniq, parent.frame())
+    
+    matrix <- vapply(uniq, function(x) x == target, FUN.VALUE = integer(length(target)))
+    i <- rowSums(matrix * col(matrix))
+    
+    function(result) {
+        if (length(result) != ncol(matrix)) return(result)
+
+        result[i]
+    }
+    
+    
+}
