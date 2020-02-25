@@ -754,7 +754,7 @@ parseLocal <- function(records) {
   if (any(grepl('*^', localrecords, fixed = TRUE),
           grepl('*v', localrecords, fixed = TRUE),
           grepl('*+', localrecords, fixed = TRUE),
-          grepl('*-', init(localrecords), fixed = TRUE))) { 
+          grepl('*-', head(localrecords, -1), fixed = TRUE))) { 
             # big if statement decides whether parseSpinePaths needs to be called.          
             # It's worthwhile to waste a little time to do it here.
     local  <- padSpinePaths(local)
