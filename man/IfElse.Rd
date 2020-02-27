@@ -2,8 +2,7 @@
 % Please edit documentation in R/tools.R
 \name{IfElse}
 \alias{IfElse}
-\title{Lazy version of base::ifelse
-This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
+\title{This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
 \code{\link{base::ifelse}} applies the x and y cases to the whole vector,
 regardless of the condition. IfElse only computes the output y where actually 
 asked to.}
@@ -11,7 +10,6 @@ asked to.}
 IfElse(true, yes, no)
 }
 \description{
-Lazy version of base::ifelse
 This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
 \code{\link{base::ifelse}} applies the x and y cases to the whole vector,
 regardless of the condition. IfElse only computes the output y where actually 

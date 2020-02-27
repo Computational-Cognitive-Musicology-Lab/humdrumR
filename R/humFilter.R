@@ -364,7 +364,7 @@ setMethod('[',
               
               form <- do ~ File %in% sort(unique(File))[i]
               
-              if (any(i < 0)) form <- wrapInCall(form, "!")
+              if (any(i < 0)) form <- wrapInCall("!", form)
               
               filterHumdrum(x, form, recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
           })
@@ -393,7 +393,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'formula'),
           function(x, i) {
-              i <- wrapInCall(i, 'any')
+              i <- wrapInCall('any', i)
               
               filterHumdrum(x, i, by ~ File,
                             recordtypes ~ "D", indexGLIM = TRUE)
@@ -413,7 +413,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             
             form <- do ~ Record %in% sort(unique(Record))[i]
             
-            if (any(i < 0)) form <- wrapInCall(form, "!")
+            if (any(i < 0)) form <- wrapInCall("!", form)
             
             filterHumdrum(x, form, by ~ File,
                           recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
@@ -429,7 +429,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
               
               form <- do ~ Spine %in% sort(unique(Spine))[j]
               
-              if (any(i < 0)) form <- wrapInCall(form, "!")
+              if (any(i < 0)) form <- wrapInCall("!", form)
               
               filterHumdrum(x, form,# , by ~ File,
                             recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
@@ -553,7 +553,7 @@ setMethod('[[',
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
           function(x, i) {
-                    i <- wrapInCall(i, 'any')
+                    i <- wrapInCall('any', i)
            
                     filterHumdrum(x, i, by ~ File ~ Record,
                                   recordtypes ~ "D", indexGLIM = TRUE)
@@ -564,7 +564,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
           function(x, j) {
-              i <- wrapInCall(i, 'any')
+              i <- wrapInCall('any', i)
               
               filterHumdrum(x, i, by ~ File ~ Spine,
                             recordtypes ~ "D", indexGLIM = TRUE)

@@ -5,31 +5,58 @@
 #' 
 #' @export
 REparser <- function(...) {
-    
+    # makes a parser which strictly, exhaustively parses a string
+    # into a sequence of regexes
     res <- list(...)
-    res <- lapply(res, function(re) paste0('^', re))
     
     if (is.null(names(res)) | any(names(res) == "")) stop(call. = FALSE,
                                                           "In call to REparser, all arguments must be named.")
-    function(str) {
-        complete <- !logical(length(str))
+    
+    matches <- list()
+    
+    function(str, strict = TRUE, include.lead = FALSE, include.rest = FALSE) {
         
+        complete <- !logical(length(str))
+        lead <- NULL
+        
+        rest <- str
         for (re in names(res)) {
-            locs <- stringr::str_locate(str, res[[re]])
+            locs <- stringr::str_locate(rest, res[[re]])
+            
             
             hits <- !is.na(locs[ , 1])
             complete <- complete & hits
-            res[[re]] <- stringr::str_sub(str, locs[ , 'start'], locs[ , 'end'])
+            # 
+            if (include.lead && is.null(lead)) {
+                # should only ever happen in first iteration
+                lead <- stringr::str_sub(rest, 1, pmax(locs[ , 'end'] - 1L, 0L))
+            }
             
-            str[hits] <- stringr::str_sub(str[hits], start = locs[hits, 'end'] + 1)
+            matches[[re]] <- stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end'])
+            
+            rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
         }
+        output <- do.call('cbind', matches)
         
-        output <- do.call('cbind', res)
-        output[!complete, ] <- NA_character_
+        if (include.lead)  output <- cbind(Lead = lead, output)
+        if (include.rest) output <- cbind(output, Rest = rest)
+        
+        if (strict) output[!complete, ] <- NA_character_
+        rownames(output) <- str
         output
     }
+}
+
+
+
+#' @export
+popRE <- function(string, regex) {
+    parser <- do.call('REparser', list(popped = regex))
+    parsed <- parser(string, include.lead = TRUE, include.rest = TRUE, strict = FALSE)
     
+    output <- cbind(parsed[ , 'popped'], .paste(parsed[ , 'lead'], parsed[ , 'rest'], na.rm = TRUE))
     
+    output
 }
 
 
@@ -42,7 +69,7 @@ REparser <- function(...) {
 #' system is a simple system for making new functions which can by smartly
 #' applied to complex character strings.
 #' 
-#' The function \code{REapply} accepts and arbitrary function
+#' The function \code{do2RE} accepts and arbitrary function
 #' and a \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expression} (regex)
 #' and makes a new function that applies the original function only to
 #' any part of a string which matches the regex.
@@ -53,6 +80,10 @@ REparser <- function(...) {
 #' based on which regexs it finds in its input.
 #' @name regexDispatch
 NULL
+
+
+
+
 
 
 
@@ -141,6 +172,11 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 
 ############### Composing predicate functions----
 
+#' @name regexDispatch
+#' @export
+`%predate%` <- function(func, predicate) {
+    predicateDispatch( rlang::expr_text(rlang::enexpr(func)), predicate)
+}
 
 
 #' @name regexDispatch
@@ -152,6 +188,139 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 }
 
 
+
+predicateDispatch <- function(fname, predicateFunc) {
+    func <- match.fun(fname)
+    #argnames
+    argnames <- names(fargs(func))
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't if the first argument of the method is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- normalizeBody(fname)
+    
+    body <- rlang::quo({
+        rebuild <- predicateParse(predicateFunc, argnames,
+                                  !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    body(func) <- rlang::quo_squash(body)
+    environment(func) <- new.env(parent = environment(func))
+    
+    assign('predicateFunc', predicateFunc, envir = environment(func))
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+}
+
+normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
+    # this takes the name of a function (as a string)
+    # and creates a usable function body
+    # including jumping through hoops to for
+    # primitives and generics
+    
+    if (is.null(func)) func <- match.fun(fname)
+    fname <- rlang::sym(fname)
+    ftext <- rlang::quo_text(func)
+    
+    
+    # args
+    argnames <- names(fargs(func))
+    if (argnames[[1]] == '...' && removeElips) argnames[[1]] <- 'tmp'
+    argnames <- rlang::syms(argnames)
+    
+    namedfuncexpr <- rlang::expr((!!fname)(!!!argnames))
+    
+    if (is.primitive(func) | 
+        grepl('\\.Internal|\\.Primitive', ftext) |
+        grepl('UseMethod|standardGeneric', ftext)) {
+        namedfuncexpr
+        
+    } else {
+        
+        body <- rlang::fn_body(func)
+        if (sum(stringi::stri_count_fixed(as.character(body), '\n')) > 1 ||
+            !grepl('function\\(', as.character(body))) {
+            namedfuncexpr
+        } else {
+            body
+        }
+    }
+}
+
+
+
+
+predicateParse <- function(predicate, argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    lengths <- lengths(args)
+    targets <- args[lengths == lengths[1]]
+    bool <- apply(sapply(targets, predicate), 1, any)
+    list2env(lapply(targets, '[', i = !bool), 
+             envir = parent.frame())
+    
+    output <- args[[1]]
+    
+    function(result) {
+        if (length(result) != sum(!bool, na.rm = TRUE)) return(result)
+        output[!bool] <- result
+        output
+    }
+}
+
+
+memoify <- function(fname) {
+    func <- match.fun(fname)
+    #argnames
+    argnames <- names(fargs(func))
+    
+    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoify a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoify a function if the first argument is ..." )
+    argnames <- argnames[argnames != "..."]
+    
+    #
+    fbody <- normalizeBody(fname)
+    
+    body <- rlang::quo({
+        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
+        result <- {!!fbody}
+        rebuild(result)
+    })
+    body(func) <- rlang::quo_squash(body)
+    environment(func) <- new.env(parent = environment(func))
+    
+    assign('argnames', argnames, envir = environment(func))
+    
+    func
+    
+}
+
+memoiseParse <- function(argnames, ...) {
+    args <- setNames(list(...), argnames)
+    
+    target <- args[[1]]
+    
+    bool <- duplicated(target)
+    
+    uniq <- target[!bool]
+    
+    assign(argnames[1], uniq, parent.frame())
+    
+    matrix <- vapply(uniq, function(x) x == target, FUN.VALUE = integer(length(target)))
+    i <- rowSums(matrix * col(matrix))
+    
+    function(result) {
+        if (length(result) != ncol(matrix)) return(result)
+
+        result[i]
+    }
+    
+    
+}
 ###################  Regex tools ----
 
 

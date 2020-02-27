@@ -566,9 +566,9 @@ as.contour.tonalInterval <- function(tint, derive = TRUE,
                                      threshold = 0,
                                      octave = TRUE,
                                      contour.labels = c()) {
-    setoptions(contour.labels) <- c(Down = 'v', Same = '', Up = '^', Bound = "|")
+    setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+', Bound = "|")
     
-    if (derive) tint <- diff(tint)
+    if (derive) tint <- derive(tint)
     
     cont <- character(length(tint))
     
@@ -579,9 +579,8 @@ as.contour.tonalInterval <- function(tint, derive = TRUE,
     cont[targets] <- contour.labels[c('Down', 'Same', 'Up')[sign(semits[targets]) + 2L]]
     
     if (octave) cont <- strrep(cont, 1L + ((abs(semits) - 1L) %/% 12)) 
-    
-    
-    if (derive) c(contour.labels['Bound'], cont) else cont
+    if (derive) cont[1] <- contour.labels['Bound']
+    cont
     
 }
 
@@ -1183,6 +1182,11 @@ as.sciPitch.character <- as.sciPitch.tonalInterval %.% as.tonalInterval
 #' @name humPitch
 #' @export
 as.interval.character <- as.interval.tonalInterval %.% as.tonalInterval
+
+#' @name humPitch
+#' @export
+as.scaleDegree.character <- as.scaleDegree.tonalInterval %.% as.tonalInterval
+
 
 #' @name humPitch
 #' @export

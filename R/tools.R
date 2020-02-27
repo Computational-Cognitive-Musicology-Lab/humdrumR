@@ -14,6 +14,31 @@ popclass <- function(object) `class<-`(object, class(object)[-1])
 
 fargs <- function(func) formals(args(func))
 
+`%<-%` <- function(names, values) {
+    names <- as.character(rlang::enexpr(names))[-1]
+    if (length(names) > 0L && length(names) != length(values)) stop(call. = FALSE,
+                                              "Left side of multiassign (%<-%) operator must be the same length as the right side.")
+    
+    if (length(names) > 0L) names(values) <- names
+    
+    if (is.null(names(values)) || all(names(values) == "")) stop(call. = FALSE,
+                                                                 "In use of multiassign operator (%<-%), no names have been provided.")
+    list2env(as.list(values), envir = parent.frame())
+    return(invisible(values))
+}
+`%->%` <- function(values, names) {
+    names <- as.character(rlang::enexpr(names))[-1]
+    if (length(names) > 0L && length(names) != length(values)) stop(call. = FALSE,
+                                                                    "Left side of multiassign (%<-%) operator must be the same length as the right side.")
+    
+    if (length(names) > 0L) names(values) <- names
+    
+    if (is.null(names(values)) || all(names(values) == "")) stop(call. = FALSE,
+                                                                 "In use of multiassign operator (%<-%), no names have been provided.")
+    list2env(as.list(values), envir = parent.frame())
+    return(invisible(values))
+}
+
 ### Names ----
 
 .names <- function(x) { #:: a -> character
@@ -274,6 +299,84 @@ IfElse <- function(true, yes, no) {
   out
 }
 
+.ifelse <- function(bool, texpr, fexpr) {
+    # this is a truly lazy ifelse!
+    # i.e., it only evaluates the part of the 
+    # true/false condtions that need to be evaluated.
+    # advantages are:
+    # 1 speed enhancements (doesn't have to calculate two
+    # entire things)
+    # 2 it allows you to include exprs that will cause errors
+    # or warning in some conditions.
+    texpr <- rlang::enquo(texpr)
+    fexpr <- rlang::enquo(fexpr)
+    if (any(!bool)) {
+        fparsed <- captureValues(fexpr, parent.env(environment()))
+        fexpr <- fparsed$expr
+        fvars <- do.call('match_size', c(fparsed$value, list(bool)))
+        f <- rlang::eval_tidy(fexpr, data = lapply(fvars, '[', i = !bool))
+        f <- rep(f, length.out = sum(!bool))
+        output <- vector(class(f), length(bool))
+    }
+    if (any(bool)) {
+        tparsed <- captureValues(texpr, parent.env(environment())) 
+        texpr <- tparsed$expr 
+        tvars <- do.call('match_size', c(tparsed$value, list(bool)))
+        t <- rlang::eval_tidy(texpr, data = lapply(tvars, '[', i =  bool))
+        t <- rep(t, length.out = sum(bool))
+        output <- vector(class(t), length(bool))
+        output[bool] <- t
+    }
+    if (any(!bool))  output[!bool] <- f
+    output
+}
+
+captureValues <- function(expr, env) {
+    if (rlang::is_quosure(expr)) {
+        env <- rlang::quo_get_env(expr)
+        expr <- rlang::quo_squash(expr)
+    }
+    
+    if (is.atomic(expr)) {
+        name <- tempvar('atom', asSymbol = FALSE)
+        return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
+                    expr = rlang::sym(name)))
+    }
+    if (!is.call(expr) ) {
+        return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), rlang::expr_text(expr)),
+                    expr = expr))
+    }
+    if (rlang::expr_text(expr[[1]]) == ":") {
+        name <- tempvar(':', asSymbol = FALSE)
+        return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
+                    expr = rlang::sym(name)))
+    }
+    
+    values <- list()
+    for (i in 2:length(expr)) {
+        recalled <- Recall(expr[[i]], env)
+        expr[[i]] <- recalled$expr
+        values <- c(values, recalled$value)
+    }
+    
+    list(value = values, expr = expr)
+}
+
+captureSymbols <- function(expr) {
+    if (is.atomic(expr)) return(setNames(list(rlang::eval_tidy(expr)),
+                                         tempvar('atom', asSymbol = FALSE)))
+    if (!is.call(expr) ) {  return(setNames(list(rlang::eval_tidy(expr)), 
+                                            rlang::expr_text(expr))) }
+    if (as.character(expr[[1]]) == ":") return(setNames(list(rlang::eval_tidy(expr)),
+                                                        tempvar(':', asSymbol = FALSE)))
+    
+    result <- list()
+    for (i in 2:length(expr)) {
+        result <- c(result, Recall(expr[[i]]))
+    }
+    
+    result
+}
 
 ### Math ----
 
@@ -320,7 +423,6 @@ integrate <- function(intervals, scalar = NULL, skip = list(na)) {
 derive <- function(intervals, skip = list(na)) {
     
     skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
-    
     intervals[which(!skip)[-1]] <- diff(intervals[!skip])
     
     intervals
@@ -402,14 +504,17 @@ recurseQuosure <- function(quo, predicate, do) {
     
 }
 
-wrapInCall <- function(form, call) {
-    # This function takes a formula and wraps the rhs
-    # with any given call.
-    # i.e. form -> any(form)
-    rhs <- rlang::f_rhs(form)
-    rhs <- call(call, call('(', rhs))
+wrapInCall <- function(x, call, ...) {
+    isquo  <- rlang::is_quosure(x)
+    isform <- rlang::is_formula(x)
     
-    as.formula(rhs, lhs = rlang::f_lhs(form))
+    expr <- if (isform & !isquo) rlang::f_rhs(x) else x
+    
+    result <- (if (isquo) rlang::quo else rlang::expr)((!!rlang::sym(call))(((!!expr)), !!!list(...)))
+    
+    if (isform & !isquo) rlang::new_formula(rlang::f_lhs(x), result, rlang::f_env(x)) else result
+    
+    
 }
 
 

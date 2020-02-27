@@ -12,6 +12,7 @@
 \alias{as.kernPitch.numeric}
 \alias{as.sciPitch.character}
 \alias{as.interval.character}
+\alias{as.scaleDegree.character}
 \alias{as.solfa.character}
 \alias{as.frequency.character}
 \alias{as.ratio.character}
@@ -37,6 +38,9 @@
 
 \method{as.interval}{character}(..., specific = TRUE, directed = TRUE,
   quality.labels = c(), contour.labels = c())
+
+\method{as.scaleDegree}{character}(..., key = 0L, cautionary = FALSE,
+  contour = FALSE, quality.labels = c())
 
 \method{as.solfa}{character}(..., key = 0L, contour = FALSE)
 
