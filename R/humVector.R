@@ -109,8 +109,11 @@ setMethod('names', c(x = 'humdrumVector'),
 
 
 checkSame <- function(x, y, call) {
-    if (class(x) != class(y)) stop(call. = FALSE,  
-                                   glue::glue("Can't apply {call} between two humdrumVectors of different types."))
+    if (all(class(x) != class(y))) {
+        stop(call. = FALSE, 
+             glue::glue("Can't apply {call} to a humdrumR vector with something else that is not the same class. "),
+             glue::glue("In this case, you are trying to combine a value of class '{class(x)[1]}' with another value of class '{class(y)[1]}'."))
+    }
     x
 }
 

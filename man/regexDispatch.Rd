@@ -13,6 +13,8 @@ regexDispatch(...)
 
 REapply(x, regex, .func, inPlace = TRUE, ...)
 
+func \%predate\% predicate
+
 func \%pREdate\% regex
 }
 \description{
@@ -21,7 +23,7 @@ system is a simple system for making new functions which can by smartly
 applied to complex character strings.
 }
 \details{
-The function \code{REapply} accepts and arbitrary function
+The function \code{do2RE} accepts and arbitrary function
 and a \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expression} (regex)
 and makes a new function that applies the original function only to
 any part of a string which matches the regex.

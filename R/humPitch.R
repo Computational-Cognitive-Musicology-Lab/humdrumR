@@ -215,6 +215,19 @@ setMethod('Summary', signature = c('tonalInterval'),
               read.semit2tonalInterval(callGeneric(as.semit(x)))
           })
 
+#' @name tonalInterval
+#' @export
+setMethod('abs', signature = c('tonalInterval'),
+          function(x) {
+              IfElse(x < tint(0, 0), -x, x)
+          })
+
+#' @name tonalInterval
+#' @export
+setMethod('sign', signature = c('tonalInterval'),
+          function(x) {
+              sign(as.semit(x))
+          })
 
 
 ######tonalinterval formatting methods ####
@@ -303,6 +316,14 @@ setMethod('diff', signature = c('tonalInterval'),
 
 
 ####Division and modulo
+#' @name tonalInterval
+#' @export
+setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
+          function(e1, e2) {
+              .ifelse(e2 == tint(0, 0),
+                      NA,
+                      as.semit(e1) %/% as.semit(e2))
+          })
 
 #' @name tonalInterval
 #' @export
@@ -314,27 +335,12 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
 	# and subtract that number multiplied by the octave modulus.
 	# That way the change applied to the Octave matches the one applied to the Fifth.
           function(e1, e2) {
-            if (length(e1) == 0L) return(e1)
-            f1 <- e1@Fifth
-            f2 <- e2@Fifth
-            match_size(f1 = f1, f2 = f2, toEnv = TRUE)
-            
-            fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
-            fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
-            
-            tint(e1@Octave - (e2@Octave * fifthDivs),
-                 fifthMods)
+              divs <- e1 %/% e2
+              browser()
+              e1 - (e2 * divs)
           })
 
-#' @name tonalInterval
-#' @export
-setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-                    f1 <- e1@Fifth
-                    f2 <- e2@Fifth
-                    match_size(f1 = f1, f2 = f2, toEnv = TRUE)
-                    ifelse(f2 == 0L, 0L, f1 %/% f2)
-          })
+
 
 
 
@@ -476,7 +482,7 @@ as.tonalname.tonalInterval <- function(x, accidental.labels = c()) {
 
 sciOctave <- function(tint) {
           generic <- tint %% tint(-11L, 7L)
-          as.integer(as.semit(generic) %/% 12L) + 4L
+          as.integer(generic %/% tint(1,0)) + 4L
 }
 
 #' @name tonalInterval-write
@@ -527,10 +533,10 @@ as.interval.tonalInterval <- function(x, specific = TRUE, directed = TRUE,
     setoptions(quality.labels) <- c(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')
     setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+')
     
-    octave <- sciOctave(x) - 4
+    octave <- sciOctave(x) - 4L
     
     fifth <- x@Fifth
-    fifth <- IfElse(octave < 0,   fifth * sign(octave), fifth) # invert interval if direction is down
+    fifth <- IfElse(octave < 0L,   fifth * sign(octave), fifth) # invert interval if direction is down
     direction <- if (directed) {
         IfElse(fifth == 0, 
                rep('', length(fifth)),  
@@ -563,31 +569,36 @@ as.contour <- function(tint, derive, threshold, octave, contour.labels) UseMetho
 #' @rdname MelodicContour
 #' @export
 as.contour.tonalInterval <- function(tint, derive = TRUE, 
-                                     threshold = 0,
+                                     threshold = A4,
                                      octave = TRUE,
                                      contour.labels = c()) {
-    setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+', Bound = "|")
+    setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+', Bound = "")
     
     if (derive) tint <- derive(tint)
     
-    cont <- character(length(tint))
+    contour <- character(length(tint))
     
-    semits <- as.semit.tonalInterval(tint)
+    threshold <- as.tonalInterval(threshold)
+    targets <- abs(tint) >= threshold & !is.na(tint)
     
-    targets <- abs(semits) >= threshold & !is.na(semits)
-    
-    cont[targets] <- contour.labels[c('Down', 'Same', 'Up')[sign(semits[targets]) + 2L]]
-    
-    if (octave) cont <- strrep(cont, 1L + ((abs(semits) - 1L) %/% 12)) 
-    if (derive) cont[1] <- contour.labels['Bound']
-    cont
+    contour[targets] <- contour.labels[c('Down', 'Same', 'Up')[sign(tint[targets]) + 2L]]
+    if (octave) contour <- .ifelse(targets, 
+                                   strrep(contour, 1 + ((abs(tint) - threshold) %/% tint(1, 0))), 
+                                   contour)
+    if (derive) contour[1] <- paste0(contour.labels['Bound'], contour[1])
+    contour
     
 }
 
-addcontour <- function(strs, tint, threshold = 0L, octave = TRUE, contour.labels = c()) {
-    cont <- as.contour.tonalInterval(tint, derive = TRUE, octave = octave,
-                                     threshold = threshold, contour.labels = contour.labels)
-    .paste(cont, strs)
+addcontour <- function(strs, tint, contour.options = list()) {
+    setoptions(contour.options) <- list(derive = TRUE, threshold = 0L, octave = TRUE, after = FALSE)
+    contour.options <- nestoptions(contour.options, contour.labels = c("Up", "Down", "Same", "Bound"))
+    
+    after <- contour.options$after
+    contour.options$after <- NULL
+    
+    contour <- do.call('as.contour.tonalInterval', c(list(tint), contour.options))
+    if (after) .paste(strs, contour) else .paste(contour, strs)
     
 }
 
@@ -622,7 +633,7 @@ as.scaleDegree.numeric <- function(x, key = 0L, cautionary = TRUE, quality.label
         key  <- getRoot(key)
     } else {
         mode <- 0L
-        key  <- as.tonalInterval(key@Fifth)
+        key  <- tint(, key)
     }
     
     x <- x - key
@@ -656,7 +667,12 @@ as.solfa.tonalInterval <- function(x, key = 0L, contour = FALSE, ...) {
     fifths <- x@Fifth        
     solfa <- as.solfa.numeric(fifths, key)
     
-    if (contour) addcontour(solfa, x, threshold = 6L, ...) else solfa
+    if (logicalOption(contour)) {
+        setoptions(contour) <- c(threshold = 6L)
+        addcontour(solfa, x, contour.options = contour)
+    } else {
+        solfa 
+    }
 }
 
 #' @name tonalInterval-write
@@ -820,7 +836,7 @@ solfa2fifth <- function(solfa) {
 
 fifthNsciOct2tonalInterval <- function(fifth, sciOct) {
           tintWith0Octave <- tint(o = numeric(length(fifth)), f = fifth)
-          octshift <- as.semit(tintWith0Octave %% tint(-11, 7)) %/% 12
+          octshift <- (tintWith0Octave %% tint(-11, 7)) %/% tint(1,0)
           
           tint(sciOct - 4 - octshift, fifth)
 }
@@ -1107,6 +1123,8 @@ setAs('character', 'tonalInterval', function(from) as.tonalInterval.character(fr
 #' @export
 as.tonalInterval <- function(...) UseMethod('as.tonalInterval')
 
+as.tonalInterval.tonalInterval <- force
+
 #' @name tonalInterval-read
 #' @export
 as.tonalInterval.integer <- read.semit2tonalInterval
@@ -1286,12 +1304,12 @@ transpose.character <- re.as %.% transpose.tonalInterval %.% as.tonalInterval
 
 
 ############# Known tonalIntervals ----
-#' @name tonalInterval
-#' @export dd16 dd9 dd13 dd6 dd10 dd14 dd3 dd7 dd11 dd15 dd4 dd8 dd12 d16 
-#' @export dd5 d9 d13 d2 d6 d10 d14 d3 d7 d11 d15 d4 d8 d12 d5 m9 m13 m2 m6 
-#' @export m10 m14 m3 m7 P11 P15 P4 P8 P12 P1 P5 M9 M13 M2 M6 M10 M14 M3 M7 
-#' @export A11 A4 A8 A12 A1 A5 A9 A13 A2 A6 A10 A14 A3 A7 AA11 d2 AA4 AA8 AA12 
-#' @export AA1 AA5 AA9 AA13 AA2 AA6 AA10 AA3 AA7 dd2 Unison
+# #' @name tonalInterval
+# #' @export dd16 dd9 dd13 dd6 dd10 dd14 dd3 dd7 dd11 dd15 dd4 dd8 dd12 d16 
+# #' @export dd5 d9 d13 d2 d6 d10 d14 d3 d7 d11 d15 d4 d8 d12 d5 m9 m13 m2 m6 
+# #' @export m10 m14 m3 m7 P11 P15 P4 P8 P12 P1 P5 M9 M13 M2 M6 M10 M14 M3 M7 
+# #' @export A11 A4 A8 A12 A1 A5 A9 A13 A2 A6 A10 A14 A3 A7 AA11 d2 AA4 AA8 AA12 
+# #' @export AA1 AA5 AA9 AA13 AA2 AA6 AA10 AA3 AA7 dd2 Unison
 for (i in -30:32) {
     for (j in -19:19) {
         t <- tint(i, j)

@@ -7,7 +7,7 @@
 \usage{
 as.contour(tint, derive, threshold, octave, contour.labels)
 
-\method{as.contour}{tonalInterval}(tint, derive = TRUE, threshold = 0,
+\method{as.contour}{tonalInterval}(tint, derive = TRUE, threshold = A4,
   octave = TRUE, contour.labels = c())
 }
 \description{

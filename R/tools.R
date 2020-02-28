@@ -523,15 +523,38 @@ wrapInCall <- function(x, call, ...) {
 `setoptions<-` <- function(x, values) {
     # used to set options
     if (is.null(x)) return(values)
-    
     poss <- names(values)
-    ind <- Filter(Negate(is.na), pmatch(names(x), poss))
+    ind <- pmatch(names(x), poss)
+    hits <- !is.na(ind)
+    values[ind[hits]] <- x[hits]
     
-    values[ind] <- x
+    c(x[!hits], values)
+}
+
+logicalOption <- function(opt) {
+    optname <- rlang::expr_text(rlang::enexpr(opt))
+    if (is.logical(opt) && !opt[1]) return(FALSE)
     
-    values
+    if (is.logical(opt)) opt <- list()
+    
+    assign(optname, opt, envir = parent.frame())
+    return(TRUE)
     
 }
+
+nestoptions <- function(opts, ...) {
+    # nests named values in a list within
+    # a new vector of given name
+    nests <- list(...)
+    
+    for (i in seq_along(nests)) {
+        vals <- nests[[i]]
+        opts[[names(nests)[i]]] <- do.call('c', opts[vals])
+    }
+    opts[!names(opts) %in% unlist(nests)]
+    
+}
+
 
 
 ### Strings ----

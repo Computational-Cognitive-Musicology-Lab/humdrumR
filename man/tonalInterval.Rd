@@ -25,6 +25,10 @@ is.tonalInterval(x)
 
 \S4method{Summary}{tonalInterval}(x)
 
+\S4method{abs}{tonalInterval}(x)
+
+\S4method{sign}{tonalInterval}(x)
+
 \S4method{as.character}{tonalInterval}(x)
 
 \method{as.double}{tonalInterval}(x, ...)
@@ -43,9 +47,9 @@ is.tonalInterval(x)
 
 \S4method{diff}{tonalInterval}(x, lag = 1, differences = 1)
 
-\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
-
 \S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
+
+\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
 as.tonalInterval(...)
 
