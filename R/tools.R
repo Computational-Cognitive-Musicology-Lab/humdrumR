@@ -411,12 +411,15 @@ numeric2fraction <- function(n) {
 # integrate and derive should be perfect inverses, 
 # so long as their skip arguments are the same, and the scalar
 # argument is NULL
-integrate <- function(intervals, scalar = NULL, skip = list(na)) {
+#' Interval "calculus"
+#' @rdname intervalCalculus
+#' @export integrate derive calculus
+integrate <- function(intervals, skip = list(na)) {
     
     skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
      
     intervals[!skip] <- cumsum(intervals[!skip])
-    if (is.null(scalar)) intervals else intervals + scalar
+    intervals
 
 }
 
@@ -428,7 +431,17 @@ derive <- function(intervals, skip = list(na)) {
     intervals
 }
 
-
+calculus <- function(x, n, skip = list(na)) {
+    n <- as.integer(n[1])
+    if (n == 0L) return(x)
+    
+    if (n > 0L) {
+        Recall(derive(x, skip), n - 1L)
+    } else {
+        Recall(integrate(x, skip), n + 1L)
+    }
+    
+}
 
 ### Metaprogramming ----
 

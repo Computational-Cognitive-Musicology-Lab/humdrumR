@@ -636,7 +636,7 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   doQuo <- tandemsQuo(doQuo)
   
   # splats
-  doQuo <- splatQuo(doQuo)
+#  doQuo <- splatQuo(doQuo)
   
   # find what fields (if any) are used in formula
   usedInExpr <- unique(fieldsInExpr(humtab, doQuo))

@@ -111,8 +111,10 @@ regexDispatch <- function(...) {
               #
               dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
               dispatchArgs <- c(x = list(str), regex = dispatchRE, .func = dispatchFunc, inPlace = inPlace,
-                                dispatchArgs, if (any(elips)) list(...) else list())
-              do.call('.REapply', dispatchArgs)
+                                dispatchArgs, if (any(elips)) list(...))
+              result <- do.call('.REapply', dispatchArgs)
+              
+              result %re.as% names(dispatch)
           }
           
           # Assemble the new function's arguments
@@ -159,14 +161,27 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     result <- do.call(.func, c(list(matches), list(...)))
     
     if (inPlace) {
-        restorer <- restorer(result)
-        result <- as.character(result)         
-        result <- stringi::stri_replace_first(str = x, regex = regex, 
-                                              replacement = result) %restore% restorer
+        inPlace <- inPlacer(x, regex)
+        
+        result <- if (is.character(result)) {
+            inPlace(re.as(result))
+        } else {
+            result %re.place% inPlace
+        }
     }
     
     result
 
+}
+
+inPlacer <- function(x, regex) {
+    function(result) {
+        stringi::stri_replace_first(str = x,
+                                    replacement = result,
+                                    regex = regex)
+        
+    }
+    
 }
 
 

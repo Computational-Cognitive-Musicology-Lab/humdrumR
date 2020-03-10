@@ -12,11 +12,12 @@
 \alias{as.sciPitch.tonalInterval}
 \alias{as.kernPitch}
 \alias{as.kernPitch.tonalInterval}
+\alias{as.lilyPitch}
 \alias{as.interval}
 \alias{as.interval.tonalInterval}
 \alias{as.scaleDegree}
 \alias{as.scaleDegree.tonalInterval}
-\alias{as.scaleDegree.numeric}
+\alias{as.scaleDegree.integer}
 \alias{as.solfa}
 \alias{as.solfa.tonalInterval}
 \alias{as.solfa.numeric}
@@ -27,9 +28,9 @@
 \alias{as.frequency.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
-as.semit(x, ...)
+as.semit(x, calculus = 0, ...)
 
-\method{as.semit}{tonalInterval}(x)
+\method{as.semit}{tonalInterval}(x, calculus = 0)
 
 as.midi(x, ...)
 
@@ -47,25 +48,28 @@ as.kernPitch(x, ...)
 
 \method{as.kernPitch}{tonalInterval}(x)
 
-as.interval(x, specific = TRUE, directed = TRUE, ...)
+as.lilyPitch(x, ...)
 
-\method{as.interval}{tonalInterval}(x, specific = TRUE,
-  directed = TRUE, quality.labels = c(), contour.labels = c())
+as.interval(x, derive = FALSE, generic = FALSE, contour = TRUE, ...)
 
-as.scaleDegree(x, cautionary = FALSE, contour = FALSE,
+\method{as.interval}{tonalInterval}(x, derive = FALSE, generic = FALSE,
+  contour = TRUE, quality.labels = c())
+
+as.scaleDegree(x, key, cautionary, generic, contour,
   quality.labels = c(), ...)
 
-\method{as.scaleDegree}{tonalInterval}(x, key = 0L, cautionary = FALSE,
-  contour = FALSE, quality.labels = c(), ...)
+\method{as.scaleDegree}{tonalInterval}(x, key = 0L, cautionary = TRUE,
+  generic = FALSE, contour = FALSE, quality.labels = c(), ...)
 
-\method{as.scaleDegree}{numeric}(x, key = 0L, cautionary = TRUE,
-  quality.labels = c())
+\method{as.scaleDegree}{integer}(x, key = 0L, cautionary = TRUE,
+  generic = FALSE, quality.labels = c())
 
-as.solfa(x, key = 0L, contour = FALSE, ...)
+as.solfa(x, key, generic, contour, ...)
 
-\method{as.solfa}{tonalInterval}(x, key = 0L, contour = FALSE, ...)
+\method{as.solfa}{tonalInterval}(x, key = 0L, generic = FALSE,
+  contour = FALSE, ...)
 
-\method{as.solfa}{numeric}(x, key = 0L)
+\method{as.solfa}{numeric}(x, key = 0L, generic = FALSE)
 
 as.ratio(x, ..., sep)
 

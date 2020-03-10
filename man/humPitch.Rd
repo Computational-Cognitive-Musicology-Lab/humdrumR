@@ -18,7 +18,7 @@
 \alias{as.ratio.character}
 \title{Pitch translations}
 \usage{
-\method{as.semit}{character}(...)
+\method{as.semit}{character}(..., calculus = 0)
 
 \method{as.midi}{numeric}()
 
@@ -36,13 +36,14 @@
 
 \method{as.sciPitch}{character}(...)
 
-\method{as.interval}{character}(..., specific = TRUE, directed = TRUE,
-  quality.labels = c(), contour.labels = c())
+\method{as.interval}{character}(..., derive = FALSE, generic = FALSE,
+  contour = TRUE, quality.labels = c())
 
-\method{as.scaleDegree}{character}(..., key = 0L, cautionary = FALSE,
-  contour = FALSE, quality.labels = c())
+\method{as.scaleDegree}{character}(..., key = 0L, cautionary = TRUE,
+  generic = FALSE, contour = FALSE, quality.labels = c())
 
-\method{as.solfa}{character}(..., key = 0L, contour = FALSE)
+\method{as.solfa}{character}(..., key = 0L, generic = FALSE,
+  contour = FALSE)
 
 \method{as.frequency}{character}(..., reference.freq = 440L,
   reference.tint = tint(-4, 3), twelfth = 2^(19/12))

@@ -75,21 +75,52 @@ print.composed <- function(x) {
 # "sticky attributes" 
 
 stickyApply <- function(func, ...) {
-    pipe <- stickyAttrs(...)
+    pipe <- stickyAttrs(list(...)[[1]])
     result <- func(...)
     stickyAttrs(result) <- pipe
     result
 }
 
 
-stickyAttrs <- function(...) {
-    attrs <- do.call('c', lapply(list(...), attributes))
-    attrs[grep('sticky_', names(attrs))]
-}
+stickyAttrs <- function(x) attr(x, 'sticky')
 
 `stickyAttrs<-` <- function(x, value) {
-    attributes(x) <- c(attributes(x), value)
+    attr(x, 'sticky') <- c(stickyAttrs(x), value)
     x
+}
+
+unstick <- function(x) {
+    attr(x, 'sticky') <- NULL
+    x
+}
+    
+
+##### "restoring" ----
+
+`%re.as%` <- function(e1, e2) {
+    stickyAttrs(e1) <- list(as = e2)
+    e1
+}
+
+`%re.place%` <- function(e1, e2) {
+    stickyAttrs(e1) <- list(replace = e2)
+    e1
+}
+
+re.as <- function(vector) {
+    asfunc <- stickyAttrs(vector)$as
+    if (is.null(asfunc)) return(vector)
+    
+    asfunc <- match.fun(paste0('as.', asfunc))
+    stickyApply(asfunc, vector)
+}
+
+re.place <- function(vector) {
+    asfunc <- stickyAttrs(vector)$replace
+    if (is.null(asfunc)) return(unstick(vector))
+    
+    asfunc <- match.fun(asfunc)
+    asfunc(vector)
 }
 
 
