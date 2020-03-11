@@ -8,10 +8,6 @@
 \alias{as.double.tonalInterval}
 \alias{as.tonalInterval}
 \alias{invert}
-\alias{is.simple}
-\alias{simplify}
-\alias{generalize}
-\alias{clockify}
 \title{Representation of tonal pitch information}
 \usage{
 tint(octave, fifth = 0L, cent = numeric(length(octave)))
@@ -55,14 +51,6 @@ is.tonalInterval(x)
 as.tonalInterval(...)
 
 invert(tint, around = Unison)
-
-is.simple(tint)
-
-simplify(tint)
-
-generalize(tint)
-
-clockify(tint, clockwise)
 }
 \description{
 This \emph{S4} class is the core tonal pitch representation in the 

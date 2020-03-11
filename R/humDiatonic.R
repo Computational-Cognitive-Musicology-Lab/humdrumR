@@ -762,9 +762,10 @@ read.romanNumeral2diatonicSet <- function(rn) {
 
 
 #' @name diatonicSet
-#' @export
+#' @export as.diatonicSet as.diatonicSet.diatonicSet
 as.diatonicSet <- function(...) UseMethod('as.diatonicSet')
 
+as.diatonicSet.diatonicSet <- force
 
 #' @name diatonicSet
 #' @export
