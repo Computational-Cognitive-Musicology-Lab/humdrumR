@@ -493,15 +493,13 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
 
 
 recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
-    expr <- if (rlang::is_quosure(quo)) {
-        rlang::quo_squash(quo) 
-    } else {
-        quo
-    }
+    isquo <- rlang::is_quosure(quo)
     
-    if (!is.call(expr)) return(quo)
+    if (!isquo)  quo <- rlang::new_quosure(quo)
     
-    s <- (as.character(expr[[1]]) %in% c('{', '(')) + 1L
+    if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
+    
+    s <- (as.character(quo[[2]][[1]]) %in% c('{', '(')) + 1L
     
     if (s == 1L) {
         pred <- predicate(quo) 
@@ -509,19 +507,14 @@ recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     }
     
     if (s == 2L || !(stopOnHit && pred)) {
-        if (rlang::is_quosure(quo)) {
-            for (i in s:length(expr)) {
-                quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
-            }
-        } else {
-            for (i in s:length(expr)) {
-                expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
-            }
+        for (i in s:length(quo[[2]])) {
+            quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
         }
+        
     }
 
     
-    if (rlang::is_quosure(quo)) quo  else expr
+    if (isquo) quo else quo[[2]]
        
 }
 
