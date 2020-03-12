@@ -492,28 +492,43 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
 }
 
 
-recurseQuosure <- function(quo, predicate, do) {
-    expr <- if (rlang::is_quosure(quo)) rlang::quo_get_expr(quo) else quo
+recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
+    expr <- if (rlang::is_quosure(quo)) {
+        rlang::quo_squash(quo) 
+    } else {
+        quo
+    }
+    
     if (!is.call(expr)) return(quo)
     
-    s <- if (expr[[1]] == rlang::sym('{')) 2L else 1L
+    s <- (as.character(expr[[1]]) %in% c('{', '(')) + 1L
     
-    if (predicate(expr)) {
-        expr <- do(expr)
-    } else {
-        for (i in s:length(expr)) {
-            expr[[i]] <- Recall(expr[[i]], predicate, do)
+    if (s == 1L) {
+        pred <- predicate(quo) 
+        if (pred) quo <- do(quo)
+    }
+    
+    if (s == 2L || !(stopOnHit && pred)) {
+        if (rlang::is_quosure(quo)) {
+            for (i in s:length(expr)) {
+                quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
+            }
+        } else {
+            for (i in s:length(expr)) {
+                expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
+            }
         }
     }
+
     
-    
-    if (rlang::is_quosure(quo)) {
-        quo <- rlang::quo_set_expr(quo, expr) 
-        return(quo)
-    } else {
-        return(expr)
-    }
+    if (rlang::is_quosure(quo)) quo  else expr
        
+}
+
+is.givenCall <- function(expr, call) {
+    if (rlang::is_quosure(expr)) expr <- rlang::quo_squash(expr)
+    is.call(expr) && as.character(expr[[1]]) == call
+    
     
 }
 
@@ -530,6 +545,20 @@ wrapInCall <- function(x, call, ...) {
     
 }
 
+as.arglist <- function(names) {
+    al <- alist(x = )[rep('x', length(names))]
+    
+    setNames(al, names)
+}
+
+append2expr <- function(expr, exprs) {
+    l <- length(expr)
+    for (i in 1:length(exprs)) {
+        expr[[i + l]] <- exprs[[i]]
+    }
+    
+    expr
+}
 
 ### Building smart functions ----
 
