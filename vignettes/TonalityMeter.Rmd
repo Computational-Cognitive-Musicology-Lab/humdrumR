@@ -712,13 +712,67 @@ You can also specify a key, in which case everything is shifted a key.
 
 
 
-## Arguments
+#### Arguments
 
 Various tonal interval functions share a number of common arguments.
 
 method      `sigma`  `delta`  `contour`  `Key`  `generic`  `cautionary`  `simple`  `octave`  `direction`  
 ----------- -------- -------- ---------- ------ ---------- ------------- --------- --------- ------------
 `as.semit`  
+
+## diatonicSet
+
+The `diatonicSet` S4 class represents diatonic keys.
+Like `tonalIntervals`, we conceptualize keys as an interval---their distance from the reference point, Cmajor.
+This means we can represent the key of "G major" and the key of "V" (the major dominant key) in the same way.
+
+
+A `diatonicSet` contains three `integer` slots: `Root`, `Mode`, `Alterations`.
+In addition, a `Of` slot can hold another `diatonicSet`, allowing the recursive representation, a la "V/V/V."
+
+### Root and Key
+
+The `Root` integer slot is simply a line-of-fifths tonal chroma value representing the root of the key relative to 0 (C).
+The `Key` value represents the *key signature*: the number of sharps (positive integers) or flats (negative integers) in the key.
+Alternatively, and equivalently, you can think of `Key` like this:
+C major represents a contiguous block of seven fifths (-1--5), and the `Key` argument shifts this block up or down.
+So if `Key = 2`, our block on the line-of-fifths is 1--7 (a key signature with two sharps).
+The relationship between `Root` and `Key` determines the mode of the diatonic set.
+If `Root == Key`, the mode is major. 
+Other modes can be created as:
+
+Key =        Mode
+------------ -----------
+Root + 1     Lydian
+Root         Ionian (major)
+Root - 1     Mixolydian
+Root - 2     Dorian
+Root - 3     Aeolian (minor)
+Root - 4     Phrygian
+Root - 5     Locrian
+
+For some specific examples:
+
+Root    Key    Tonality
+------- ------ ----------
+1       1      G major
+-3      -3     Eb major
+-3      -2     Eb lydian
+2       0      D dorian
+3       0      A minor
+
+
+### Alteration
+
+The `Alteration` slot of a `diatonicSet` allows the representation of "altered" diatonic scales.
+One way of thinking about the `Key` slot, is that it takes one edge of a 7-fifth contiguous block and moves it to the opposite side.
+The `Alteration` slot takes the *second from most extreme* element and moves it down 7 fifths.
+
+
+
+
+
+
 
 
 
