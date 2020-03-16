@@ -334,8 +334,8 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               f2 <- e2@Fifth
               match_size(f1 = f1, f2 = f2, toEnv = TRUE)
               
-              fifthDivs <- ifelse(f2 == 0L, 0L, f1 %/% f2)
-              fifthMods <- ifelse(f2 == 0L, f1, f1 %%  f2)
+              fifthDivs <- .ifelse(f2 == 0L, 0L, f1 %/% f2)
+              fifthMods <- .ifelse(f2 == 0L, f1, f1 %%  f2)
               
               tint(e1@Octave - (e2@Octave * fifthDivs),
                    fifthMods)
@@ -415,7 +415,7 @@ fifth2alteration <- function(fifth, mode, cautionary = TRUE, alteration.labels =
     output[notna] <- alteration
     output
 }
-fifth2tonalname <- function(fifth, accidental.labels = c()) {
+fifth2tonalChroma <- function(fifth, accidental.labels = c()) {
           letternames <- fifth2lettername(fifth)
           accidentals <- fifth2accidental(fifth, accidental.labels)
           IfElse(!is.na(letternames) & !is.na(accidentals),
@@ -479,12 +479,12 @@ as.midi.tonalInterval <- function(x) as.semit(x) + 60L
 
 #' @name tonalInterval-write
 #' @export
-as.tonalname <- function(x, accidental.labels = c(), ...) UseMethod('as.tonalname')
+as.tonalChroma <- function(x, accidental.labels = c(), ...) UseMethod('as.tonalChroma')
 
 #' @name tonalInterval-write
 #' @export
-as.tonalname.tonalInterval <- function(x, accidental.labels = c()) {
-    fifth2tonalname(x@Fifth, accidental.labels)
+as.tonalChroma.tonalInterval <- function(x, accidental.labels = c()) {
+    fifth2tonalChroma(x@Fifth, accidental.labels)
 }
 
 #### As scientific pitch (i.e, C4)
@@ -502,7 +502,7 @@ as.sciPitch <- function(x, ...) UseMethod('as.sciPitch')
 #' @export
 as.sciPitch.tonalInterval <- function(x) {
                     octave <- sciOctave(x)
-                    .paste(fifth2tonalname(x@Fifth, c(flat = 'b')), octave)
+                    .paste(fifth2tonalChroma(x@Fifth, c(flat = 'b')), octave)
             }
 
 
@@ -541,17 +541,17 @@ as.lilyPitch <- function(x, ...) UseMethod('as.lilyPitch')
 #' 
 #' @rdname MelodicContour
 #' @export
-as.contour <- function(x, derive, threshold, octave, contour.labels) UseMethod('as.contour')
+as.contour <- function(x, delta, threshold, octave, contour.labels) UseMethod('as.contour')
 
 #' @rdname MelodicContour
 #' @export
-as.contour.tonalInterval <- function(x, derive = TRUE, 
+as.contour.tonalInterval <- function(x, delta = TRUE, 
                                      threshold = A4,
                                      octave = TRUE,
                                      contour.labels = c()) {
     setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+', Bound = "")
     
-    if (derive) x <- derive(x)
+    if (delta) x <- delta(x)
     
     contour <- character(length(x))
     
@@ -562,13 +562,13 @@ as.contour.tonalInterval <- function(x, derive = TRUE,
     if (octave) contour <- .ifelse(targets, 
                                    strrep(contour, 1 + (as.semit(abs(x) - threshold) %/% 12L)), 
                                    contour)
-    if (derive) contour[1] <- paste0(contour.labels['Bound'], contour[1])
+    if (delta) contour[1] <- paste0(contour.labels['Bound'], contour[1])
     contour
     
 }
 
 addcontour <- function(strs, tint, contour.options = list()) {
-    setoptions(contour.options) <- list(derive = TRUE, threshold = 0L, octave = TRUE, after = FALSE)
+    setoptions(contour.options) <- list(delta = TRUE, threshold = 0L, octave = TRUE, after = FALSE)
     contour.options <- nestoptions(contour.options, contour.labels = c("Up", "Down", "Same", "Bound"))
     
     after <- contour.options$after
@@ -585,16 +585,16 @@ addcontour <- function(strs, tint, contour.options = list()) {
 
 #' @name tonalInterval-write
 #' @export
-as.interval <- function(x, derive = FALSE, generic = FALSE, contour = TRUE, ...) UseMethod('as.interval')
+as.interval <- function(x, delta = FALSE, generic = FALSE, contour = TRUE, ...) UseMethod('as.interval')
 
 #' @name tonalInterval-write
 #' @export
-as.interval.tonalInterval <- function(x, derive = FALSE, generic = FALSE, contour = TRUE, 
+as.interval.tonalInterval <- function(x, delta = FALSE, generic = FALSE, contour = TRUE, 
                                       quality.labels = c()) {
     
     setoptions(quality.labels) <- c(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')
     
-    if (derive) x <- derive(x)
+    if (delta) x <- delta(x)
     
     octave <- sciOctave(x) - 4L
     
@@ -610,7 +610,7 @@ as.interval.tonalInterval <- function(x, derive = FALSE, generic = FALSE, contou
     
     ## contour
     if (logicalOption(contour)) {
-        setoptions(contour) <- c(derive = FALSE)
+        setoptions(contour) <- c(delta = FALSE)
         addcontour(intervals, x, contour.options = contour)
     } else {
         intervals 
@@ -736,8 +736,8 @@ as.ratio.numeric <- function(n, sep = '/') {
 
 #' @name tonalInterval-write
 #' @export
-as.ratio.tonalInterval <-  function(x, twelfth = 2^(19/12), sep = '/') {
-    frac <- numeric2fraction(as.decimal(x, twelfth = twelfth))
+as.ratio.tonalInterval <-  function(x, tonalRatio = 2^(19/12), sep = '/') {
+    frac <- numeric2fraction(as.decimal(x, tonalRatio = tonalRatio))
     
     .paste(frac$Numerator, frac$Denominator, sep = sep)
     
@@ -755,14 +755,14 @@ as.decimal <- function(...) UseMethod('as.decimal')
 
 #' @name tonalInterval-write
 #' @export
-as.decimal.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
+as.decimal.tonalInterval <-  function(x, tonalRatio = 2^(19/12)) {
     fifth <- x@Fifth
     oct   <- x@Octave
     cent  <- x@Cent
     
     IfElse(is.na(fifth), 
            NA_real_, 
-           (2 ^ oct) * (twelfth ^ fifth) * 2^(cent / 1200))
+           (2 ^ oct) * (tonalRatio ^ fifth) * 2^(cent / 1200))
 }
 
 
@@ -771,15 +771,15 @@ as.decimal.tonalInterval <-  function(x, twelfth = 2^(19/12)) {
 
 #' @name tonalInterval-write
 #' @export
-as.frequency <- function(x, reference.freq = 440L, reference.tint = tint(-4,3), twelfth = 2^(19/12), ...) UseMethod('as.frequency')
+as.frequency <- function(x, reference.freq = 440L, reference.tint = tint(-4,3), tonalRatio = 2^(19/12), ...) UseMethod('as.frequency')
 
 #' @name tonalInterval-write
 #' @export
 as.frequency.tonalInterval <- function(x, reference.freq = 440L, 
-                                       reference.tint = tint(-4, 3), twelfth = 2^(19/12)) {
+                                       reference.tint = tint(-4, 3), tonalRatio = 2^(19/12)) {
             x <- x - reference.tint
             
-            ratio <- as.decimal(x, twelfth = twelfth)
+            ratio <- as.decimal(x, tonalRatio = tonalRatio)
             attributes(ratio) <- NULL
             
             reference.freq * ratio
@@ -827,7 +827,7 @@ accidental2fifth <- function(acc, accidental.labels = c()) {
           as.integer((7 * sharps) - (7 * flats))
           
 }
-tonalname2fifth <- function(tn) {
+tonalChroma2fifth <- function(tn) {
     fifth <- lettername2fifth(stringr::str_sub(tn, start = 0L, end = 1L))
     acc <- accidental2fifth(stringr::str_sub(tn, start = 2L),
                             accidental.labels = c())
@@ -1028,7 +1028,7 @@ read.solfa2tonalInterval <- function(str, key = 0L) {
 
 #' @name tonalInterval-read
 #' @export
-read.ratio2tonalInterval <- function(str, twelfth = 3) {
+read.ratio2tonalInterval <- function(str, tonalRatio = 3) {
           if (is.character(str)) {
                     slashes <- grepl("[/%]", str)
                     num <- numeric(length(str))
@@ -1048,17 +1048,17 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
           
           # octaves
           octaves    <- log(fracs, base = 2)
-          twelfths   <- log(fracs, base = twelfth)
+          tonalRatios   <- log(fracs, base = tonalRatio)
           octaves [ , 2] <- -octaves[ , 2]
-          twelfths[ , 2] <- -twelfths[ , 2] 
+          tonalRatios[ , 2] <- -tonalRatios[ , 2] 
           is.octave  <- is.whole(octaves) & octaves != 0
-          is.twelfth <- is.whole(twelfths) & twelfths != 0
+          is.tonalRatio <- is.whole(tonalRatios) & tonalRatios != 0
           
           octs <- fifs <- numeric(nrow(fracs))
           # easy "pure" matches
-          pure <- rowSums(is.whole(twelfths) | is.whole(octaves)) == 2
-          pure12 <- rowSums(is.twelfth) > 0
-          fifs[pure12] <- twelfths[pure12,][is.twelfth[pure12, ]]
+          pure <- rowSums(is.whole(tonalRatios) | is.whole(octaves)) == 2
+          pure12 <- rowSums(is.tonalRatio) > 0
+          fifs[pure12] <- tonalRatios[pure12,][is.tonalRatio[pure12, ]]
           
           # 
           pure8 <- rowSums(is.octave) > 0
@@ -1067,10 +1067,10 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
           # approximations
           # round to nearest fifth value
           if (any(!pure)) {
-            impure <- !is.twelfth & !is.octave & twelfths != 0
-            twelfths <- twelfths + log(2^(octaves), base = 3)
+            impure <- !is.tonalRatio & !is.octave & tonalRatios != 0
+            tonalRatios <- tonalRatios + log(2^(octaves), base = 3)
             
-            fifs[rowSums(impure) > 0] <- round(twelfths[impure])
+            fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
           }
           
           tint(octs, fifs) %re.as% 'as.ratio.tonalInterval'
@@ -1081,7 +1081,7 @@ read.ratio2tonalInterval <- function(str, twelfth = 3) {
 
 #' @name tonalInterval-read
 #' @export
-read.decimal2tonalInterval <- function(float, twelfth = 3, centmargin = 10) {
+read.decimal2tonalInterval <- function(float, tonalRatio = 3, centmargin = 10) {
     octrange <- attr(centmargin, 'octrange')
     if (is.null(octrange)) octrange <- 5L
     if (octrange > 150) stop(.call = FALSE,
@@ -1092,7 +1092,7 @@ read.decimal2tonalInterval <- function(float, twelfth = 3, centmargin = 10) {
     octs <- -octrange:octrange
     
     allocts <- do.call('cbind', lapply(2^octs, '*', float))
-    logged <- log(allocts, twelfth)
+    logged <- log(allocts, tonalRatio)
     
     whole <- round(logged)
     remain <- logged - whole
@@ -1104,15 +1104,15 @@ read.decimal2tonalInterval <- function(float, twelfth = 3, centmargin = 10) {
     
     fifth  <- whole[cbind(seq_along(float), whichhit)]
     remain <- remain[cbind(seq_along(float), whichhit)]
-    octave <- round(log(float / twelfth ^ fifth, 2))
+    octave <- round(log(float / tonalRatio ^ fifth, 2))
     
     # cents
-    cents <- log(twelfth^remain,2) * 1200
+    cents <- log(tonalRatio^remain,2) * 1200
     
     accept <- abs(cents) < centmargin
     
     output <- tint(octave, fifth, cent = cents)
-    if (any(!accept)) output[!accept] <- Recall(float[!accept], twelfth, 
+    if (any(!accept)) output[!accept] <- Recall(float[!accept], tonalRatio, 
                                                 data.table::setattr(centmargin, 'octrange', octrange + 5L))
     output
 }
@@ -1122,10 +1122,10 @@ read.decimal2tonalInterval <- function(float, twelfth = 3, centmargin = 10) {
 #' @name tonalInterval-read
 #' @export
 read.frequency2tonalInterval <- function(float, reference.freq = 440L, 
-                                         reference.tint = tint(-4, 3), twelfth = 3,
+                                         reference.tint = tint(-4, 3), tonalRatio = 3,
                                          centmargin = 10) {
     
-    read.decimal2tonalInterval(float / reference.freq, twelfth, centmargin = 10) + reference.tint
+    read.decimal2tonalInterval(float / reference.freq, tonalRatio, centmargin = 10) + reference.tint
 }
 
 #### From anything!
@@ -1200,7 +1200,7 @@ as.midi.numeric <- as.integer
 
 #' @name humPitch
 #' @export
-as.tonalname.character <- as.tonalname.tonalInterval %.% as.tonalInterval
+as.tonalChroma.character <- as.tonalChroma.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export

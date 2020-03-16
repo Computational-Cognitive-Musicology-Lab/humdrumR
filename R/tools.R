@@ -408,12 +408,12 @@ numeric2fraction <- function(n) {
     list(Denominator = den, Numerator = num)
 }
 
-# integrate and derive should be perfect inverses, 
+# sigma (integrate) and delta (derive) should be perfect inverses, 
 # so long as their skip arguments are the same, and the scalar
 # argument is NULL
 #' Interval "calculus"
 #' @rdname intervalCalculus
-#' @export integrate derive calculus
+#' @export integrate derive sigma delta calculus
 integrate <- function(intervals, skip = list(na)) {
     
     skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
@@ -422,6 +422,7 @@ integrate <- function(intervals, skip = list(na)) {
     intervals
 
 }
+sigma <- integrate
 
 derive <- function(intervals, skip = list(na)) {
     
@@ -430,6 +431,7 @@ derive <- function(intervals, skip = list(na)) {
     
     intervals
 }
+delta <- derive
 
 calculus <- function(x, n, skip = list(na)) {
     n <- as.integer(n[1])

@@ -431,7 +431,7 @@ as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
 #' @name diatonicSet
 #' @export
 as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
-    as.pitches(x, asStops, 'character', fifth2tonalname)
+    as.pitches(x, asStops, 'character', fifth2tonalChroma)
 }
 
 
@@ -458,7 +458,7 @@ as.keysignatureI <- function(dset) {
                        sharps <- f[f > 5]
                        accidentals <- c(sort(flats,  decreasing = TRUE),
                                         sort(sharps, decreasing = TRUE))
-                       paste(tolower(fifth2tonalname(accidentals)), collapse = "")
+                       paste(tolower(fifth2tonalChroma(accidentals)), collapse = "")
                        })
         
     .paste("*k[", notes, ']')
@@ -513,7 +513,7 @@ as.romanNumeral.diatonicSet <- function(dset) {
 #' @name diatonicSet-write
 #' @export
 as.keyI <- function(dset, alteration.labels = c()) {
-    root <- fifth2tonalname(getRoot(dset))
+    root <- fifth2tonalChroma(getRoot(dset))
     mode <- getMode(dset) - getRoot(dset)
         
     root[mode < -1] <- tolower(root[mode < -1L])
@@ -537,8 +537,8 @@ as.keyI <- function(dset, alteration.labels = c()) {
 
 #' @name diatonicSet-write
 #' @export
-as.tonalname.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
-    fifth2tonalname(getRoot(x), accidental.labels)
+as.tonalChroma.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
+    fifth2tonalChroma(getRoot(x), accidental.labels)
 }
 
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
@@ -581,12 +581,12 @@ getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = 
 #' @export
 as.sciChord <- function(tharm) {
     root <- getRoot(tharm)
-    tonalname <- fifth2tonalname(root, accidental.labels = c(flat = 'b'))
+    tonalChroma <- fifth2tonalChroma(root, accidental.labels = c(flat = 'b'))
    
     quality <- getSciQuality(tharm)
     
-    IfElse(!is.na(root) & !is.na(tonalname), 
-           .paste(tonalname, quality), 
+    IfElse(!is.na(root) & !is.na(tonalChroma), 
+           .paste(tonalChroma, quality), 
            NA_character_)
 }
 
@@ -698,9 +698,9 @@ NULL
 #' @name diatonicSet
 #' @export
 read.keyI2diatonicSet <- function(keyI) {
-    tonalnames <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#b-]*')
+    tonalChromas <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#b-]*')
     
-    fifths <- tonalname2fifth(tonalnames)
+    fifths <- tonalChroma2fifth(tonalChromas)
     
     dset(fifths, mode = c(-3L, 0L)[(keyI == toupper(keyI)) + 1L])
     
@@ -712,10 +712,10 @@ read.keyI2diatonicSet <- function(keyI) {
 #' @name diatonicSet
 #' @export
 read.sciChord2tertianSet <- function(csym) {
-    tonalname <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
-    fifth <- tonalname2fifth(tonalname)
+    tonalChroma <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
+    fifth <- tonalChroma2fifth(tonalChroma)
     
-    quality <- stringr::str_remove(csym, tonalname)
+    quality <- stringr::str_remove(csym, tonalChroma)
     quality7 <- substr(quality, start = 0L, stop = 3L)
     
     mode <- c(m  = -3, M = 0, A = 3, d = -5,
