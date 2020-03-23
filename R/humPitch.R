@@ -946,7 +946,7 @@ read.kernPitch2tonalInterval <- function(str) {
                             accidental2fifth(Accidentals,   
                                              accidental.labels = c(flat = '-')))
  
-          fifthNsciOct2tonalInterval(fifth, components$SciOctave) %re.as% 'as.kernPitch.tonalInterval'
+          fifthNsciOct2tonalInterval(fifth, components$SciOctave)
          
 }
 
@@ -1153,6 +1153,14 @@ as.tonalInterval.integer <- read.semit2tonalInterval
 #' @name tonalInterval-read
 #' @export
 as.tonalInterval.numeric <- read.decimal2tonalInterval
+
+#' @name tonalInterval-read
+#' @export
+tester <- humdrumDispatch('kern: kernPitch' = read.kernPitch2tonalInterval,
+                                             'pitch: sciPitch' = read.sciPitch2tonalInterval,
+                                             'mint,hint: interval'  = read.interval2tonalInterval,
+                                             'solfa: solfege' = read.solfa2tonalInterval,
+                                             'freq: decimal' = read.semit2tonalInterval)
 
 #' @name tonalInterval-read
 #' @export

@@ -13,8 +13,6 @@ regexDispatch(...)
 
 REapply(x, regex, .func, inPlace = TRUE, ...)
 
-func \%predate\% predicate
-
 func \%pREdate\% regex
 }
 \description{

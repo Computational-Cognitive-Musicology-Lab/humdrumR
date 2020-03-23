@@ -154,6 +154,8 @@ setMethod('[<-', c(x = 'humdrumVector', i = 'ANY', j = 'missing', value = 'humdr
               x
           })
 
+
+
 #' @name humdrumVector
 #' @export
 setMethod('c', 'humdrumVector',
@@ -265,7 +267,7 @@ setMethod('as.character', 'humdrumVector',
 setMethod('show', signature = c(object = 'humdrumVector'), 
           function(object) { 
               if (length(object) == 0L) {
-                  cat(paste0(class(object), '(0)'))
+                  cat(paste0(class(object), '(NULL)'))
               } else {
                   strs <- format(as.character(object), justify = 'left')
                   
