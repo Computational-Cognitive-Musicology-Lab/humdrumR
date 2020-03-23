@@ -74,6 +74,7 @@ print.composed <- function(x) {
 
 # "sticky attributes" 
 
+#' @export
 stickyApply <- function(func, ...) {
     pipe <- stickyAttrs(list(...)[[1]])
     result <- func(...)
@@ -97,6 +98,27 @@ unstick <- function(x) {
 
 ##### "restoring" ----
 
+inPlace <- function(result, orig, regex) {
+    replacer <- inPlacer(orig, regex)
+    
+    if (is.character(result)) return(replacer(result))
+    
+    stickyAttrs(result) <- c(replace = replacer)
+    
+    result
+    
+}
+
+inPlacer <- function(orig, regex) {
+    function(result) {
+        .ifelse(is.na(regex), 
+                orig,
+                stringi::stri_replace_first(str = orig,
+                                            replacement = result,
+                                            regex = regex))
+    }
+}
+
 `%re.as%` <- function(e1, e2) {
     stickyAttrs(e1) <- list(as = e2)
     e1
@@ -115,11 +137,12 @@ re.as <- function(vector) {
     stickyApply(asfunc, vector)
 }
 
+
+#' @export
 re.place <- function(vector) {
     asfunc <- stickyAttrs(vector)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
-    asfunc <- match.fun(asfunc)
     asfunc(vector)
 }
 
@@ -348,6 +371,8 @@ memoify <- function(fname) {
     
 }
 
+
+
 memoiseParse <- function(argnames, ...) {
     args <- setNames(list(...), argnames)
     
@@ -370,3 +395,189 @@ memoiseParse <- function(argnames, ...) {
     
     
 }
+
+
+
+#### Humdrum Dispatch (exclusive dispatch AND regex dispatch)
+
+exclusiveFunction <- function(...) {
+    exprs <- rlang::exprs(...)
+    
+    body <- .exclusiveDispatch(exprs)
+    
+    arguments <- c(attr(body, 'arguments'))
+    rlang::new_function(arguments, body, env = parent.frame())
+    
+}
+
+.exclusiveDispatch <- function(exprs) {
+    missing <- sapply(exprs, rlang::is_missing)
+    
+    regexes <- ditto(getRE(gsub('^[^ ]+(: )?', '', names(exprs))), !missing, reverse = TRUE)
+    names(exprs) <- names(regexes) <- gsub(': .*', '', names(exprs))
+    
+    
+    exprs[!missing] <- lapply(exprs[!missing], makeCall)
+    exprs[!missing] <- Map(REcall, regexes[!missing], exprs[!missing])
+    # arguments
+    arguments <- getAllArgs(exprs[!missing]) 
+    
+    rlang::expr({
+        result <- .switch(x, Exclusive, !!!exprs, inPlace = inPlace,  
+                          parallel = list(Exclusive = Exclusive))
+        
+        if (inPlace) {
+            regexes <- c(!!!regexes)
+            result <- inPlace(result, x, regexes[Exclusive])
+        } 
+        result
+        
+    }) -> dispatchExpr
+    attr(dispatchExpr, 'arguments') <- c(x = rlang::missing_arg(), 
+                                         Exclusive = rlang::missing_arg(),
+                                         arguments,
+                                         inPlace = TRUE)
+    
+    dispatchExpr
+    
+}
+
+regexGeneric <- function(...) {
+    exprs <- rlang::exprs(...)
+    
+    body <- .regexGeneric(exprs)
+    
+    arguments <- attr(body, 'arguments')
+    rlang::new_function(arguments, body, env = parent.frame())
+    
+}
+
+.regexGeneric <- function(exprs) {
+    regexes <- getRE(gsub('^[^ ]+(: )?', '', names(exprs)))
+    arguments <- getAllArgs(exprs)
+    exprs <- lapply(exprs, makeCall)
+    
+    exprs <- unname(Map(REcall, regexes, exprs))
+    # exprs <- lapply(exprs, function(expr) rlang::expr({;(!!expr);}))
+    
+    rlang::expr({
+        dispatchn <- regexFindMethod(x, c(!!!regexes))
+        switch(dispatchn, 
+               !!! exprs )
+    }) -> dispatchExpr
+    
+    attr(dispatchExpr, 'arguments') <- c(x = rlang::missing_arg(),
+                                         arguments,
+                                         inPlace = TRUE)
+    
+    dispatchExpr
+    
+}
+
+humdrumDispatch <- function(...) {
+    exprs <- rlang::enexprs(...)
+    
+
+    regexDispatch     <- .regexGeneric(exprs[!sapply(exprs, rlang::is_missing)])
+    exclusiveDispatch <- .exclusiveDispatch(exprs)
+    #
+    arguments <- c(attr(regexDispatch, 'arguments'), attr(exclusiveDispatch, 'arguments'))
+    arguments <- arguments[!duplicated(names(arguments))]
+    
+    regexes <- attr(exclusiveDispatch, 'regexes')
+    
+    body <- rlang::expr({
+        if (missing(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
+    })
+    
+    
+    rlang::new_function(arguments, body)
+    
+    
+    
+}
+
+
+getAllArgs <- function(exprs) {
+    
+    # arguments
+    arguments <- lapply(exprs, callArgs)
+    arguments <- unlist(unname(arguments), recursive = FALSE)
+    arguments <- arguments[!duplicated(names(arguments))]
+}
+
+callArgs <- function(call) {
+    call <- if (is.call(call)) call[[1]] else call
+    func <- rlang::eval_tidy(call)
+    fargs <- fargs(func)
+    fargs[-1]
+    
+}
+makeCall <- function(expr, arg1 = rlang::sym('x')) {
+    if (rlang::is_missing(expr)) return(expr)
+    
+    
+    func <- rlang::eval_tidy(expr)
+    fargs <- names(fargs(func))
+                   
+    args <- setNames(rlang::syms(fargs), fargs)
+    args[[1]] <- arg1
+    names(args)[names(args) == "..."] <- ""
+    rlang::expr((!!expr)(!!!args))
+    
+}
+
+
+REcall <- function(regex, expr) {
+    if (rlang::is_missing(expr)) return(expr)
+    fun <- expr[[1]]
+    rlang::expr(.REapply(!!expr[[2]], !!regex, !!fun, !!!as.list(expr[-1:-2]), inPlace = inPlace))
+}
+
+regexFindMethod <- function(str, regexes) {
+    # this takes a str of character values and a string of REs
+    # and returns a single interger value representing the 
+    # index (of regexes) to dispatch.
+    
+    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
+    if (!any(Nmatches > 0L)) return(0L)
+    
+    #which function to dispatch
+    Ncharmatches <- sapply(regexes[Nmatches > 0],
+                           function(re) {
+                               nchars <- nchar(stringi::stri_extract_first_regex(str, re))
+                               nchars[is.na(nchars)] <- 0L
+                               sum(nchars)
+                           })
+    which(Nmatches > 0L)[which.max(Ncharmatches)]
+}
+
+
+partialApply <- function(func, ...) {
+    fargs <- fargs(func)
+    newargs <- list(...)
+    
+    hits <- names(fargs)[names(fargs) %in% names(newargs)]
+    fargs[hits] <- newargs[hits]
+    
+    formals(func) <- fargs
+    func
+    
+}
+
+REcompose <- function(regex, func, ...) {
+    funcname <- rlang::enexpr(func)
+    
+    fargs <- fargs(partialApply(func, ...))
+    # regex <- getRE(regex)
+    
+    body <- rlang::expr({
+        .REapply(!!rlang::sym(names(fargs)[1]), !!regex, !!funcname, !!!fargs[-1], inPlace = inPlace)
+    })
+    
+    newenv <- new.env(parent.frame())
+    assign(rlang::expr_text(funcname), func, newenv )
+    
+    rlang::new_function(c(fargs, inPlace = TRUE), body, newenv)    
+}
+

@@ -18,6 +18,7 @@ for (i in seq_along(knownInterpretations$RE)) {
                                                    .open = '<<', .close = '>>')         
 }
 
+#' @export
 getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), strict = FALSE) {
  known <- knownInterpretations[knownInterpretations$Type %in% types, ]          
  if (is.null(pattern)) return(known$Name)
@@ -44,7 +45,11 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
  
 }
 
-
+#' @export
+getREexclusive <- function(pattern) {
+    exclusive <- knownInterpretations[knownInterpretations$RE == getRE(pattern), ]$Exclusive   
+    if (exclusive == "") NULL else exclusive
+}
                                      
 
 matchKnownExclusive <- function(strs) {

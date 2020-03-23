@@ -629,6 +629,9 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # turn . to active formula
   doQuo <- activateQuo(doQuo, active)
   
+  # add in arguments that are already fields
+  doQuo <- fieldsArgsQuo(doQuo, colnames(humtab))
+  
   # unnest nested formulae
   # funcQuosure <- unnestQuo(funcQuosure)
   
@@ -690,16 +693,15 @@ concatDoQuos <- function(doQuos) {
         
         expr <- rlang::quo_get_expr(doQuos[[i]])
         
-        doQuos[[i]] <- if (i < length(doQuos) && 
+        if (i < length(doQuos) && 
                            (length(expr) > 1 && expr[[1]] != '<-') &&
                            !sideEffects[i]) {
             
             temp <- as.symbol(tempfile('xxx', tmpdir = ''))
-            quo(!!temp <- !!doQuos[[i]])
+            doQuos[[i]] <- rlang::new_quosure(expr(!!temp <- !!doQuos[[i]]), 
+                                              env = rlang::quo_get_env(doQuos[[i]]))
             
-        } else {
-            rlang::new_quosure(doQuos[[i]], environment())
-        }
+        } 
     }
     
     
@@ -738,6 +740,40 @@ activateQuo <- function(funcQuosure, active) {
 #     }
 #     funcQuosure
 # }
+
+#### Insert arguments which are fields automatically!
+
+fieldsArgsQuo <- function(funcQuosure, fields) {
+    
+    predicate <- function(quo) TRUE
+    
+    do <- function(quo) {
+        formNames <- names(fargs(eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
+        
+        hits <- fields %in% formNames
+        
+        if (!any(hits)) return(quo)
+        
+        namedArgs <- .names(quo[[2]][-1])
+        
+        formNames <- formNames[!formNames %in% namedArgs] 
+        
+        usedArgs <- c(namedArgs, head(head(formNames, 
+                                           min(which(formNames == '...'), 
+                                               length(formNames))), 
+                                      sum(namedArgs == "")))
+        
+        hits <- hits & !(fields %in% usedArgs)
+        hits <- fields[hits]
+        quo[[2]][hits] <- rlang::syms(hits)
+
+        quo
+    }
+    
+    recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
+    
+}
+
 
 #### Interpretations in expressions
 

@@ -150,7 +150,7 @@ allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
 
-vectorna <- function(n, mode = 'character') rep(as(NA, Class = mode), n)
+vectorna <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
 padNA <- function(x, n, before = TRUE) {
 ### pad vector with NA
@@ -224,6 +224,33 @@ remove.duplicates <- function(listofvalues) {
 
     dups <- duplicated(values)
     setNames(tapply(values[!dups], groups[!dups], c, simplify = FALSE), names(listofvalues))
+    
+}
+
+
+segments <- function(x, reverse = FALSE) {
+    # x is logical
+    if (reverse) x <- rev(x)
+    
+    x <- cumsum(x)
+    
+    if (reverse) {
+        x <- rev(-x) + max(x) + 1
+    }
+    
+    x
+    
+}
+
+ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
+    seg <- segments(logical, reverse = reverse)
+    
+    vals <- x[logical]
+    if (!head(logical, 1) && !reverse) vals <- c(NA, vals)
+    if (!tail(logical, 1) && reverse) vals <- c(vals, NA)
+    
+    setNames(rep(vals, rle(seg)$lengths), seg)
+    
     
 }
 
@@ -378,6 +405,57 @@ captureSymbols <- function(expr) {
     result
 }
 
+
+.switch <- function(x, groups, ..., parallel = list()) {
+    exprs <- rlang::enexprs(...)
+    missing <- sapply(exprs, rlang::is_missing)
+    
+    names(exprs)[.names(exprs) == ""] <- 'rest'
+    switch <- names(exprs)
+    rest <- any(switch == 'rest')
+    
+    switchg <- segments(!missing)
+    switchg <- tapply(switch, switchg, paste, collapse = ' | ')[as.character(switchg)]
+    # used to group missing arguments in with the next non missing expression
+    
+    exprs <- exprs[!missing]
+    exprs <- exprs[switch %in% c(groups, if (rest) 'rest')]
+    
+    
+    if (length(exprs) == 0L) return(if (rest) x else vectorna(length(x), class(x)))
+    
+    groupvec <- c(if (rest) 'rest' else 'nomatch', switchg)[match(groups, switch, nomatch = 0) + 1] 
+    
+    # this maps unkown exclusives to "nomatch"
+    grouped <- lapply(c(list(i = seq_along(x), 
+                             group = groupvec,
+                             x = x), 
+                        parallel), split, f = groupvec )
+    
+    exprs <- setNames(exprs[names(grouped$group)], names(grouped$group)) 
+    # makes sure there is a "nomatch" expr, and they are in right order
+    frame <- parent.frame(1)
+    results <- do.call('Map', 
+                       c(function(expr, ...) {
+                           exclgroup <- list(...)
+                           
+                           if (is.null(expr)) return(exclgroup$x)
+                           
+                           rlang::eval_tidy(expr, exclgroup, env = frame)
+                       }, 
+                       c(list(exprs), 
+                         grouped)))
+    
+    results$nomatch <- vectorna(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
+    results <- unstick(do.call('c', unname(results )))
+    
+    i <- order(unlist(grouped$i))
+    results <- results[i]
+    
+    
+    results
+}
+
 ### Math ----
 
 is.whole <- function(x) x %% 1 == 0
@@ -494,28 +572,36 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
 }
 
 
-recurseQuosure <- function(quo, predicate, do) {
-    expr <- if (rlang::is_quosure(quo)) rlang::quo_get_expr(quo) else quo
-    if (!is.call(expr)) return(quo)
+recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
+    isquo <- rlang::is_quosure(quo)
     
-    s <- if (expr[[1]] == rlang::sym('{')) 2L else 1L
+    if (!isquo)  quo <- rlang::new_quosure(quo)
     
-    if (predicate(expr)) {
-        expr <- do(expr)
-    } else {
-        for (i in s:length(expr)) {
-            expr[[i]] <- Recall(expr[[i]], predicate, do)
+    if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
+    
+    s <- (as.character(quo[[2]][[1]]) %in% c('{', '(')) + 1L
+    
+    if (s == 1L) {
+        pred <- predicate(quo) 
+        if (pred) quo <- do(quo)
+    }
+    
+    if (s == 2L || !(stopOnHit && pred)) {
+        for (i in s:length(quo[[2]])) {
+            quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
         }
+        
     }
+
     
-    
-    if (rlang::is_quosure(quo)) {
-        quo <- rlang::quo_set_expr(quo, expr) 
-        return(quo)
-    } else {
-        return(expr)
-    }
+    if (isquo) quo else quo[[2]]
        
+}
+
+is.givenCall <- function(expr, call) {
+    if (rlang::is_quosure(expr)) expr <- rlang::quo_squash(expr)
+    is.call(expr) && as.character(expr[[1]]) == call
+    
     
 }
 
@@ -532,6 +618,20 @@ wrapInCall <- function(x, call, ...) {
     
 }
 
+as.arglist <- function(names) {
+    al <- alist(x = )[rep('x', length(names))]
+    
+    setNames(al, names)
+}
+
+append2expr <- function(expr, exprs) {
+    l <- length(expr)
+    for (i in 1:length(exprs)) {
+        expr[[i + l]] <- exprs[[i]]
+    }
+    
+    expr
+}
 
 ### Building smart functions ----
 
