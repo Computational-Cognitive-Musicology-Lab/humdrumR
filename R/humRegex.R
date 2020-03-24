@@ -131,6 +131,8 @@ regexFindMethod <- function(str, regexes) {
     # and returns a single interger value representing the 
     # index (of regexes) to dispatch.
     
+    regexes <- getRE(regexes)
+    
     Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
     if (!any(Nmatches > 0L)) return(0L)
     
@@ -150,7 +152,10 @@ regexFindMethod <- function(str, regexes) {
 REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     if (!is.character(x)) stop(call. = FALSE,
                                "Sorry, REapply can only apply to an x argument that is a character vector.")
-    .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
+    result <- .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
+    
+    stickyAttrs(result) <- c(as = regex)
+    result
 }
 
 #' 

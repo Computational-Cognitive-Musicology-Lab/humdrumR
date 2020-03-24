@@ -133,8 +133,15 @@ re.as <- function(vector) {
     asfunc <- stickyAttrs(vector)$as
     if (is.null(asfunc)) return(vector)
     
-    asfunc <- match.fun(paste0('as.', asfunc))
-    stickyApply(asfunc, vector)
+    match_size(vector = vector, asfunc = asfunc, toEnv = TRUE)
+    
+    splitvector <- split(vector, asfunc)
+    
+    splitvector <- Map(stickyApply, lapply(paste0("as.", names(splitvector)), match.fun), splitvector)
+    
+    setNames(unlist(splitvector), names(vector))
+    
+    
 }
 
 
@@ -413,7 +420,7 @@ exclusiveFunction <- function(...) {
 .exclusiveDispatch <- function(exprs) {
     missing <- sapply(exprs, rlang::is_missing)
     
-    regexes <- ditto(getRE(gsub('^[^ ]+(: )?', '', names(exprs))), !missing, reverse = TRUE)
+    regexes <- ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE)
     names(exprs) <- names(regexes) <- gsub(': .*', '', names(exprs))
     
     
@@ -425,11 +432,13 @@ exclusiveFunction <- function(...) {
     rlang::expr({
         result <- .switch(x, Exclusive, !!!exprs, inPlace = inPlace,  
                           parallel = list(Exclusive = Exclusive))
-        
         if (inPlace) {
             regexes <- c(!!!regexes)
             result <- inPlace(result, x, regexes[Exclusive])
         } 
+        
+        stickyAttrs(result) <- list(as = regexes[Exclusive])
+        
         result
         
     }) -> dispatchExpr
@@ -453,7 +462,7 @@ regexGeneric <- function(...) {
 }
 
 .regexGeneric <- function(exprs) {
-    regexes <- getRE(gsub('^[^ ]+(: )?', '', names(exprs)))
+    regexes <- gsub('^[^ ]+(: )?', '', names(exprs))
     arguments <- getAllArgs(exprs)
     exprs <- lapply(exprs, makeCall)
     
@@ -462,7 +471,7 @@ regexGeneric <- function(...) {
     
     rlang::expr({
         dispatchn <- regexFindMethod(x, c(!!!regexes))
-        switch(dispatchn, 
+        switch(dispatchn,  
                !!! exprs )
     }) -> dispatchExpr
     
@@ -531,13 +540,15 @@ makeCall <- function(expr, arg1 = rlang::sym('x')) {
 REcall <- function(regex, expr) {
     if (rlang::is_missing(expr)) return(expr)
     fun <- expr[[1]]
-    rlang::expr(.REapply(!!expr[[2]], !!regex, !!fun, !!!as.list(expr[-1:-2]), inPlace = inPlace))
+    rlang::expr(REapply(!!expr[[2]], !!regex, !!fun, !!!as.list(expr[-1:-2]), inPlace = inPlace))
 }
 
 regexFindMethod <- function(str, regexes) {
     # this takes a str of character values and a string of REs
     # and returns a single interger value representing the 
     # index (of regexes) to dispatch.
+    
+    regexes <- getRE(regexes)
     
     Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
     if (!any(Nmatches > 0L)) return(0L)

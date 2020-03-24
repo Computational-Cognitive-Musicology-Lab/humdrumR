@@ -13,7 +13,6 @@
 \alias{read.frequency2tonalInterval}
 \alias{as.tonalInterval.integer}
 \alias{as.tonalInterval.numeric}
-\alias{tester}
 \alias{as.tonalInterval.character}
 \title{Reading \code{\link[humdrumR:tonalInterval]{tonalIntervals}} from various representations}
 \usage{
@@ -29,22 +28,20 @@ read.interval2tonalInterval(str)
 
 read.solfa2tonalInterval(str, key = 0L)
 
-read.ratio2tonalInterval(str, twelfth = 3)
+read.ratio2tonalInterval(str, tonalRatio = 3)
 
-read.decimal2tonalInterval(float, twelfth = 3, centmargin = 10)
+read.decimal2tonalInterval(float, tonalRatio = 3, centmargin = 10)
 
 read.frequency2tonalInterval(float, reference.freq = 440L,
-  reference.tint = tint(-4, 3), twelfth = 3, centmargin = 10)
+  reference.tint = tint(-4, 3), tonalRatio = 3, centmargin = 10)
 
 \method{as.tonalInterval}{integer}(n, key = NULL, melodic = FALSE)
 
-\method{as.tonalInterval}{numeric}(float, twelfth = 3, centmargin = 10)
+\method{as.tonalInterval}{numeric}(float, tonalRatio = 3,
+  centmargin = 10)
 
-tester(x, key = 0L, melodic = FALSE, inPlace = TRUE, Exclusive,
-  regex, .func, ...)
-
-\method{as.tonalInterval}{character}(str, key = 0L, melodic = FALSE,
-  inPlace = FALSE)
+\method{as.tonalInterval}{character}(x, key = 0L, melodic = FALSE,
+  inPlace = TRUE, Exclusive, regex, .func, ...)
 }
 \description{
 These functions all translate other pitch representations

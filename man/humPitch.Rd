@@ -6,7 +6,7 @@
 \alias{as.semit.numeric}
 \alias{as.midi.character}
 \alias{as.midi.numeric}
-\alias{as.tonalname.character}
+\alias{as.tonalChroma.character}
 \alias{as.kernPitch.character}
 \alias{as.kernPitch.integer}
 \alias{as.kernPitch.numeric}
@@ -26,17 +26,17 @@
 
 \method{as.midi}{numeric}()
 
-\method{as.tonalname}{character}(..., accidental.labels = c())
+\method{as.tonalChroma}{character}(..., accidental.labels = c())
 
 \method{as.kernPitch}{character}(...)
 
 \method{as.kernPitch}{integer}(n, key = NULL, melodic = FALSE)
 
-\method{as.kernPitch}{numeric}(float, twelfth = 3, centmargin = 10)
+\method{as.kernPitch}{numeric}(float, tonalRatio = 3, centmargin = 10)
 
 \method{as.sciPitch}{character}(...)
 
-\method{as.interval}{character}(..., derive = FALSE, generic = FALSE,
+\method{as.interval}{character}(..., delta = FALSE, generic = FALSE,
   contour = TRUE, quality.labels = c())
 
 \method{as.scaleDegree}{character}(..., key = 0L, cautionary = TRUE,
@@ -46,9 +46,9 @@
   contour = FALSE)
 
 \method{as.frequency}{character}(..., reference.freq = 440L,
-  reference.tint = tint(-4, 3), twelfth = 2^(19/12))
+  reference.tint = tint(-4, 3), tonalRatio = 2^(19/12))
 
-\method{as.ratio}{character}(..., twelfth = 2^(19/12), sep = "/")
+\method{as.ratio}{character}(..., tonalRatio = 2^(19/12), sep = "/")
 }
 \description{
 These functions translate various pitch representations

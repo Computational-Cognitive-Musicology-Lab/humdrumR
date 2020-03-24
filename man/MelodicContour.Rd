@@ -5,9 +5,9 @@
 \alias{as.contour.tonalInterval}
 \title{Get melodic contours}
 \usage{
-as.contour(x, derive, threshold, octave, contour.labels)
+as.contour(x, delta, threshold, octave, contour.labels)
 
-\method{as.contour}{tonalInterval}(x, derive = TRUE, threshold = A4,
+\method{as.contour}{tonalInterval}(x, delta = TRUE, threshold = A4,
   octave = TRUE, contour.labels = c())
 }
 \description{

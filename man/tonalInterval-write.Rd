@@ -6,8 +6,8 @@
 \alias{as.semit.tonalInterval}
 \alias{as.midi}
 \alias{as.midi.tonalInterval}
-\alias{as.tonalname}
-\alias{as.tonalname.tonalInterval}
+\alias{as.tonalChroma}
+\alias{as.tonalChroma.tonalInterval}
 \alias{as.sciPitch}
 \alias{as.sciPitch.tonalInterval}
 \alias{as.kernPitch}
@@ -36,9 +36,9 @@ as.midi(x, ...)
 
 \method{as.midi}{tonalInterval}(x)
 
-as.tonalname(x, accidental.labels = c(), ...)
+as.tonalChroma(x, accidental.labels = c(), ...)
 
-\method{as.tonalname}{tonalInterval}(x, accidental.labels = c())
+\method{as.tonalChroma}{tonalInterval}(x, accidental.labels = c())
 
 as.sciPitch(x, ...)
 
@@ -50,9 +50,9 @@ as.kernPitch(x, ...)
 
 as.lilyPitch(x, ...)
 
-as.interval(x, derive = FALSE, generic = FALSE, contour = TRUE, ...)
+as.interval(x, delta = FALSE, generic = FALSE, contour = TRUE, ...)
 
-\method{as.interval}{tonalInterval}(x, derive = FALSE, generic = FALSE,
+\method{as.interval}{tonalInterval}(x, delta = FALSE, generic = FALSE,
   contour = TRUE, quality.labels = c())
 
 as.scaleDegree(x, key, cautionary, generic, contour,
@@ -73,15 +73,15 @@ as.solfa(x, key, generic, contour, ...)
 
 as.ratio(x, ..., sep)
 
-\method{as.ratio}{tonalInterval}(x, twelfth = 2^(19/12), sep = "/")
+\method{as.ratio}{tonalInterval}(x, tonalRatio = 2^(19/12), sep = "/")
 
-\method{as.decimal}{tonalInterval}(x, twelfth = 2^(19/12))
+\method{as.decimal}{tonalInterval}(x, tonalRatio = 2^(19/12))
 
 as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
-  twelfth = 2^(19/12), ...)
+  tonalRatio = 2^(19/12), ...)
 
 \method{as.frequency}{tonalInterval}(x, reference.freq = 440L,
-  reference.tint = tint(-4, 3), twelfth = 2^(19/12))
+  reference.tint = tint(-4, 3), tonalRatio = 2^(19/12))
 }
 \description{
 These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 

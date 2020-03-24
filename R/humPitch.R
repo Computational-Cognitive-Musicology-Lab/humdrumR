@@ -230,7 +230,7 @@ setMethod('sign', signature = c('tonalInterval'),
           })
 
 
-######tonalinterval formatting methods ####
+###### Formatting methods ####
 
 
 #' @name tonalInterval
@@ -243,7 +243,7 @@ setMethod('as.character', signature = c('tonalInterval'),
 as.double.tonalInterval <- function(x, ...) as.decimal(x, ...)
 
 
-######tonalInterval arithmetic methods ####
+###### Arithmetic methods ####
 
 ####Addition
 
@@ -968,7 +968,7 @@ read.sciPitch2tonalInterval <- function(str) {
           fifth <- lettername2fifth(letters) + accidental2fifth(accidentals, 
                                                                 accidental.labels = c(flat = 'b'))
           
-          fifthNsciOct2tonalInterval(fifth, sciOct) %re.as% 'as.sciPitch.tonalInterval'
+          fifthNsciOct2tonalInterval(fifth, sciOct) 
           
 }
 
@@ -1128,7 +1128,7 @@ read.frequency2tonalInterval <- function(float, reference.freq = 440L,
     read.decimal2tonalInterval(float / reference.freq, tonalRatio, centmargin = 10) + reference.tint
 }
 
-#### From anything!
+#### From anything! ----
 
 #' @name tonalInterval
 #' @export
@@ -1155,20 +1155,14 @@ as.tonalInterval.integer <- read.semit2tonalInterval
 as.tonalInterval.numeric <- read.decimal2tonalInterval
 
 #' @name tonalInterval-read
-#' @export
-tester <- humdrumDispatch('kern: kernPitch' = read.kernPitch2tonalInterval,
-                                             'pitch: sciPitch' = read.sciPitch2tonalInterval,
-                                             'mint,hint: interval'  = read.interval2tonalInterval,
-                                             'solfa: solfege' = read.solfa2tonalInterval,
-                                             'freq: decimal' = read.semit2tonalInterval)
+#' @export as.tonalInterval.character
+as.tonalInterval.character <- humdrumDispatch('kern: kernPitch' = read.kernPitch2tonalInterval,
+                                              'pitch: sciPitch' = read.sciPitch2tonalInterval,
+                                              'mint,hint: interval'  = read.interval2tonalInterval,
+                                              'solfa: solfa' = read.solfa2tonalInterval,
+                                              'freq: decimal' = read.semit2tonalInterval)
 
-#' @name tonalInterval-read
-#' @export
-as.tonalInterval.character <- regexDispatch( 'kernPitch' = read.kernPitch2tonalInterval,
-                                             'sciPitch' = read.sciPitch2tonalInterval,
-                                             'interval'  = read.interval2tonalInterval,
-                                             'solfege' = read.solfa2tonalInterval,
-                                             'decimal' = read.semit2tonalInterval)
+
 
 
 
@@ -1212,7 +1206,7 @@ as.tonalChroma.character <- as.tonalChroma.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.kernPitch.character <- as.kernPitch.tonalInterval %.% as.tonalInterval
+as.kernPitch.character <- re.place %.% as.kernPitch.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export

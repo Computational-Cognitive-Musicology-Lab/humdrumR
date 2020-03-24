@@ -5,7 +5,7 @@
 \alias{as.keysignatureI}
 \alias{as.romanNumeral.diatonicSet}
 \alias{as.keyI}
-\alias{as.tonalname.diatonicSet}
+\alias{as.tonalChroma.diatonicSet}
 \title{Writing \code{\link[humdrumR:humDiatonic]{diatonicSets}} to various representations.}
 \usage{
 as.keysignatureI(dset)
@@ -14,7 +14,8 @@ as.keysignatureI(dset)
 
 as.keyI(dset, alteration.labels = c())
 
-\method{as.tonalname}{diatonicSet}(x, accidental.labels = c(flat = "b"))
+\method{as.tonalChroma}{diatonicSet}(x, accidental.labels = c(flat =
+  "b"))
 }
 \description{
 These functions all translate \code{\link[humdrumR:humDiatonic]{diatonicSets}} to 
