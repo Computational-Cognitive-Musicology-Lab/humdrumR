@@ -21,7 +21,7 @@
 \alias{as.triad.tertianSet}
 \alias{as.triad.character}
 \title{\code{diatonicSets} methods for \code{\link[base]{order}} and 
-\code{\link[base]{sort}} order/sort along the circle of fifths.
+\code{\link[base]{sort}} order/sort along the circle of LO5ths.
 Modes are sorted secondarily from fewest flats to most sharps.
 If \code{parallel = TRUE} all modes are grouped by shared tonics, so
 C minor and C major will appear besides each other.

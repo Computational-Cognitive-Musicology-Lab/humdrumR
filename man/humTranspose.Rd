@@ -12,7 +12,7 @@ transpose(x, interval = tint(0, 0), generic = NULL, ...)
 \method{transpose}{tonalInterval}(x, interval = tint(0, 0),
   generic = NULL)
 
-\method{transpose}{character}(..., interval = tint(0, 0),
+\method{transpose}{character}(x, ..., interval = tint(0, 0),
   generic = NULL)
 }
 \description{

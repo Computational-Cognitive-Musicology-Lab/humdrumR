@@ -6,11 +6,10 @@
 \alias{tint}
 \alias{is.tonalInterval}
 \alias{as.double.tonalInterval}
-\alias{as.tonalInterval}
 \alias{invert}
 \title{Representation of tonal pitch information}
 \usage{
-tint(octave, fifth = 0L, cent = numeric(length(octave)))
+tint(octave, LO5th = 0L, cent = numeric(length(octave)))
 
 is.tonalInterval(x)
 
@@ -47,8 +46,6 @@ is.tonalInterval(x)
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
 \S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
-
-as.tonalInterval(...)
 
 invert(tint, around = Unison)
 }

@@ -181,7 +181,7 @@ plot(c(0, bassline_reference[-1] - .25), type = 'h', xlab = 'Index', ylab = 'Pit
 text(seq_along(bassline_reference), bassline_reference, labels = bassline_reference, col = 'blue', cex=.7)
 
 ax <- c(0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19)
-axis(2, ax, as.tonalname(as.character(ax)), tick = FALSE, las = 1)
+axis(2, ax, as.tonalChroma(as.character(ax)), tick = FALSE, las = 1)
 
 i <- seq_along(bassline_reference)
 
@@ -716,8 +716,8 @@ You can also specify a key, in which case everything is shifted a key.
 
 Various tonal interval functions share a number of common arguments.
 
-method      `sigma`  `delta`  `contour`  `Key`  `generic`  `cautionary`  `simple`  `octave`  `direction`  
------------ -------- -------- ---------- ------ ---------- ------------- --------- --------- ------------
+method      `sigma`  `delta`  `contour`  `Key`  `generic`  `accidental`  `cautionary`  `simple`  `octave`  `direction`  
+----------- -------- -------- ---------- ------ ---------- ------------- ------------- --------- --------- ------------
 `as.semit`  
 
 ## diatonicSet

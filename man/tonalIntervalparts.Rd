@@ -9,7 +9,7 @@
 \usage{
 octavepart(tint, roundingMethod)
 
-genericpart(tint, key)
+genericpart(tint, Key)
 
 enharmonicpart(tint, wolf, key)
 }

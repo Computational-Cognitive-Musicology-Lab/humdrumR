@@ -144,7 +144,7 @@ bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L))
 ## Constructors
 
 #' The basic constructor for \code{diatonicSet}s.
-#' Accepts either a integer (fifth) or a \code{\link[humdrumR:tonalInterval]{tonalInterval}}.
+#' Accepts either a integer (LO5th) or a \code{\link[humdrumR:tonalInterval]{tonalInterval}}.
 #' @name humDiatonic
 #' @export
 dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
@@ -197,7 +197,7 @@ setMethod('is.numeric', signature = c('diatonicSet'),
 
 
 #' \code{diatonicSets} methods for \code{\link[base]{order}} and 
-#' \code{\link[base]{sort}} order/sort along the circle of fifths.
+#' \code{\link[base]{sort}} order/sort along the circle of LO5ths.
 #' Modes are sorted secondarily from fewest flats to most sharps.
 #' If \code{parallel = TRUE} all modes are grouped by shared tonics, so
 #' C minor and C major will appear besides each other.
@@ -299,29 +299,29 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 #' @name diatonicSet-write
 NULL
 
-###Writing from fifths (integers) to X
-##To start, we need to be able to translate the fifths
+###Writing from LO5ths (integers) to X
+##To start, we need to be able to translate the LO5ths
 ##part of every diaonicKey into various things.
 
-fifth2mode <- function(fifth, short = FALSE) {
+LO5th2mode <- function(LO5th, short = FALSE) {
     
-    fullname <- rep("?", length(fifth))
-    fullname[fifth >= -5 & fifth <= 1] <-  c('locrian', 'phrygian', 
+    fullname <- rep("?", length(LO5th))
+    fullname[LO5th >= -5 & LO5th <= 1] <-  c('locrian', 'phrygian', 
                                            'minor', 'dorian', 'mixolydian', 
-                                           'major', 'lydian')[fifth[fifth >= -5 & fifth <= 1] + 6L]
+                                           'major', 'lydian')[LO5th[LO5th >= -5 & LO5th <= 1] + 6L]
                       
     
     if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
 }
 
-fifth2romanroot <- function(fifth, mode) {
+LO5th2romanroot <- function(LO5th, mode) {
     # calculates the roman numeral for the root, including
     # any root alteration relative to a mode
     # doesn't change quality
-    # fifth and mode should be centered relative to C major (0,0)
-    numer <- c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')[fifth2genericinterval(fifth)]
+    # LO5th and mode should be centered relative to C major (0,0)
+    numer <- c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')[LO5th2genericinterval(LO5th)]
     
-    alteration <- fifth2alteration(fifth, mode)
+    alteration <- LO5th2alteration(LO5th, mode)
     
     paste0(alteration, numer)
 }
@@ -331,8 +331,8 @@ getFifths <- function(dset, step = 2L) UseMethod("getFifths")
 
 #' @export
 getFifths.diatonicSet <- function(dset, step = 2L) {
-    # the step argument controls the order the fifths are output
-    # step = 2L means every two fifths (which is generic steps)
+    # the step argument controls the order the LO5ths are output
+    # step = 2L means every two LO5ths (which is generic steps)
     # step = 4L means thirds, which makes tertian harmonies
     root <- getRoot(dset)
     mode <- getMode(dset)
@@ -341,24 +341,24 @@ getFifths.diatonicSet <- function(dset, step = 2L) {
     
     ## Generate scale structure
     sq <- seq(0L, by = as.integer(step), length.out = 7L)
-    fifths <- matrix(sq, nrow = length(root), ncol = 7L, byrow = TRUE)
-    fifths[!notna, ] <- NA_integer_
-    fifths <- sweep(fifths, 1L, root, `+`)
-    fifths <- sweep(fifths, 1L, mode,
+    LO5ths <- matrix(sq, nrow = length(root), ncol = 7L, byrow = TRUE)
+    LO5ths[!notna, ] <- NA_integer_
+    LO5ths <- sweep(LO5ths, 1L, root, `+`)
+    LO5ths <- sweep(LO5ths, 1L, mode,
                     function(row, m) {
                       (row + 1L - m) %% 7L - 1L + m  # + 1L and - 1L because F is -1
                     })
     
     # Force root to be root, regardless of mode
-    fifths[ , 1] <- root
+    LO5ths[ , 1] <- root
     
     #
-    fifths[] <- alterFifths(fifths, getAlterations(dset))
+    LO5ths[] <- alterFifths(LO5ths, getAlterations(dset))
     
-    rownames(fifths) <- as.keyI(dset)
-    colnames(fifths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
+    rownames(LO5ths) <- as.keyI(dset)
+    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
     
-    fifths
+    LO5ths
 }
 
 #' @export
@@ -366,44 +366,44 @@ getFifths.tertianSet <- function(tset) {
     alterations <- getAlterations(tset)
     # setAlterations(tset) <- 0L
     
-    fifths <- getFifths.diatonicSet(tset, step = 4L)
+    LO5ths <- getFifths.diatonicSet(tset, step = 4L)
     thirds <- getThirds(tset)
     
     
-    fifths <- fifths * thirds
-    fifths[!thirds] <- NA_integer_
+    LO5ths <- LO5ths * thirds
+    LO5ths[!thirds] <- NA_integer_
     
-    # if (any(alterations != 0L)) fifths <- sweep(fifths, 1, alterations, alterFifthSet)
+    # if (any(alterations != 0L)) LO5ths <- sweep(LO5ths, 1, alterations, alterFifthSet)
     
-    colnames(fifths)[5:7] <- nth(c(9,11,13))
-    rownames(fifths) <- fifth2lettername(getRoot(tset))
+    colnames(LO5ths)[5:7] <- nth(c(9,11,13))
+    rownames(LO5ths) <- LO5th2lettername(getRoot(tset))
     
-    fifths
+    LO5ths
 }
 
 
-alterFifths <- function(fifths, alt) {
+alterFifths <- function(LO5ths, alt) {
     alt[is.na(alt)] <- 0L
-    if (all(alt == 0L)) return(fifths)
+    if (all(alt == 0L)) return(LO5ths)
     
-    roots <- fifths[ , 1]
+    roots <- LO5ths[ , 1]
     
-    ord <- applyrows(fifths, rank)
+    ord <- applyrows(LO5ths, rank)
     
     altmat <- matrix(alt, nrow = length(alt), ncol = 7L)
-    fifths[ord == 2L & altmat > 0L] <- fifths[ord == 2L & alt > 0L] + 7L
-    fifths[ord == 6L & altmat < 0L] <- fifths[ord == 6L & alt < 0L] - 7L
+    LO5ths[ord == 2L & altmat > 0L] <- LO5ths[ord == 2L & alt > 0L] + 7L
+    LO5ths[ord == 6L & altmat < 0L] <- LO5ths[ord == 6L & alt < 0L] - 7L
 
     
     # recurse if necessary
     alt <- alt - sign(alt)
     done <- alt == 0L 
     if (any(!done)) {
-        fifths[!done, ] <- Recall(fifths[!done, , drop = FALSE], alt[!done])
+        LO5ths[!done, ] <- Recall(LO5ths[!done, , drop = FALSE], alt[!done])
     }
     
-    fifths[, 1] <- roots
-    fifths
+    LO5ths[, 1] <- roots
+    LO5ths
 
 }
 
@@ -413,11 +413,11 @@ alterFifths <- function(fifths, alt) {
 
 
 as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
-    fifths <- getFifths(x)
+    LO5ths <- getFifths(x)
     
     pitches <- array(as(NA, Class = outclass), 
-                     dim = dim(fifths), dimnames = dimnames(fifths))
-    pitches[] <- pitch.func(fifths)
+                     dim = dim(LO5ths), dimnames = dimnames(LO5ths))
+    pitches[] <- pitch.func(LO5ths)
     
     #
     if (asStops) {
@@ -431,7 +431,7 @@ as.pitches <- function(x, asStops = FALSE, outclass= 'character', pitch.func) {
 #' @name diatonicSet
 #' @export
 as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
-    as.pitches(x, asStops, 'character', fifth2tonalChroma)
+    as.pitches(x, asStops, 'character', LO5th2tonalChroma)
 }
 
 
@@ -439,8 +439,8 @@ as.kernPitch.diatonicSet <- function(x, asStops = FALSE) {
 #' @export
 as.semit.diatonicSet <- function(x, asStops = FALSE) {
     as.pitches(x, asStops, 'integer',
-               function(fifths) {
-                   (fifths * 7L) %% 12L
+               function(LO5ths) {
+                   (LO5ths * 7L) %% 12L
                })
 }
 
@@ -449,16 +449,16 @@ as.semit.diatonicSet <- function(x, asStops = FALSE) {
 #' @name diatonicSet-write
 #' @export
 as.keysignatureI <- function(dset) {
-    fifths <- getFifths(dset)
+    LO5ths <- getFifths(dset)
     
-    notes <- apply(fifths, 1, 
+    notes <- apply(LO5ths, 1, 
                    function(f) {
                        f <- f[!is.na(f)]
                        flats  <- f[f < -1]
                        sharps <- f[f > 5]
                        accidentals <- c(sort(flats,  decreasing = TRUE),
                                         sort(sharps, decreasing = TRUE))
-                       paste(tolower(fifth2tonalChroma(accidentals)), collapse = "")
+                       paste(tolower(LO5th2tonalChroma(accidentals)), collapse = "")
                        })
         
     .paste("*k[", notes, ']')
@@ -494,13 +494,13 @@ as.romanNumeral.diatonicSet <- function(dset) {
     
     cummode <- applyrows(mode, rev %.% cumsum %.% rev)
     numeral <- modelab <- array("", dim = dim(mode))
-    numeral[] <- fifth2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
+    numeral[] <- LO5th2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
     
     
     numeral[mode < -1] <- tolower(numeral[mode < -1L])
     modelab[] <- IfElse(mode == 0L | mode == -3L,
                       "",
-                     paste0(":", fifth2mode(mode, short = TRUE)))
+                     paste0(":", LO5th2mode(mode, short = TRUE)))
     
     numeral[] <- paste0(numeral, modelab)
     
@@ -513,14 +513,14 @@ as.romanNumeral.diatonicSet <- function(dset) {
 #' @name diatonicSet-write
 #' @export
 as.keyI <- function(dset, alteration.labels = c()) {
-    root <- fifth2tonalChroma(getRoot(dset))
+    root <- LO5th2tonalChroma(getRoot(dset))
     mode <- getMode(dset) - getRoot(dset)
         
     root[mode < -1] <- tolower(root[mode < -1L])
     
     modelab <- ifelse(mode == 0L | mode == -3L,
                       "",
-                      fifth2mode(mode, short = TRUE))
+                      LO5th2mode(mode, short = TRUE))
     
     #
     setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
@@ -538,17 +538,17 @@ as.keyI <- function(dset, alteration.labels = c()) {
 #' @name diatonicSet-write
 #' @export
 as.tonalChroma.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
-    fifth2tonalChroma(getRoot(x), accidental.labels)
+    LO5th2tonalChroma(getRoot(x), accidental.labels)
 }
 
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
 
 getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = TRUE) {
    
-    fifths <- getFifths(tset)
-    fifths <- sweep(fifths, 1, fifths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
+    LO5ths <- getFifths(tset)
+    LO5ths <- sweep(LO5ths, 1, LO5ths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
     
-    qualities <- fifth2quality(fifths,
+    qualities <- LO5th2quality(LO5ths,
                                quality.labels = list(major = 'M', minor = 'm',
                                                      diminish = 'o', augment = '+',
                                                      perfect = 'P'))
@@ -581,7 +581,7 @@ getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = 
 #' @export
 as.sciChord <- function(tharm) {
     root <- getRoot(tharm)
-    tonalChroma <- fifth2tonalChroma(root, accidental.labels = c(flat = 'b'))
+    tonalChroma <- LO5th2tonalChroma(root, accidental.labels = c(flat = 'b'))
    
     quality <- getSciQuality(tharm)
     
@@ -647,11 +647,11 @@ as.romanNumeral.tertianSet <- function(tset, cautionary = FALSE) {
      getMode(tset, recurse = FALSE) -
      getRoot(tset, recurse = TRUE) 
  
- numeral <- fifth2romanroot(root, mode + root)
+ numeral <- LO5th2romanroot(root, mode + root)
  
  
  ### triad quality
- # o or + indicate diminished or augmented fifths
+ # o or + indicate diminished or augmented LO5ths
  # not going to work for weird, double altered
  triadqual <- getSciQuality(tset, thirds = 1:2)
  
@@ -661,11 +661,11 @@ as.romanNumeral.tertianSet <- function(tset, cautionary = FALSE) {
  
  ### extensions and alterations
  
- fifths <- getFifths(tset)[ , -1L:-3L, drop = FALSE]
- extension <- array(NA_character_, dim = dim(fifths))
+ LO5ths <- getFifths(tset)[ , -1L:-3L, drop = FALSE]
+ extension <- array(NA_character_, dim = dim(LO5ths))
  
 
- extension[] <- fifth2alteration(fifths, getMode(tset), cautionary = FALSE)
+ extension[] <- LO5th2alteration(LO5ths, getMode(tset), cautionary = FALSE)
  highest <- applyrows(extension, function(row) seq_len(ncol(extension)) == max(which(!is.na(row))))
  extension[] <- sweep(extension, 2, c('7', '9', '11', '13'), paste0)
  extension[!(highest | (!is.na(extension) & extension == ''))] <- ""
@@ -700,9 +700,9 @@ NULL
 read.keyI2diatonicSet <- function(keyI) {
     tonalChromas <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#b-]*')
     
-    fifths <- tonalChroma2fifth(tonalChromas)
+    LO5ths <- tonalChroma2LO5th(tonalChromas)
     
-    dset(fifths, mode = c(-3L, 0L)[(keyI == toupper(keyI)) + 1L])
+    dset(LO5ths, mode = c(-3L, 0L)[(keyI == toupper(keyI)) + 1L])
     
 }
 
@@ -713,7 +713,7 @@ read.keyI2diatonicSet <- function(keyI) {
 #' @export
 read.sciChord2tertianSet <- function(csym) {
     tonalChroma <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
-    fifth <- tonalChroma2fifth(tonalChroma)
+    LO5th <- tonalChroma2LO5th(tonalChroma)
     
     quality <- stringr::str_remove(csym, tonalChroma)
     quality7 <- substr(quality, start = 0L, stop = 3L)
@@ -724,10 +724,10 @@ read.sciChord2tertianSet <- function(csym) {
     
     cardinality <- c(3, 4, 5, 6, 7)[nchar(quality)]
     
-    alterations <- numeric(length(fifth))
+    alterations <- numeric(length(LO5th))
     alterations[quality7 == 'Am'] <- 3
     
-    tset(root = fifth, mode = mode, cardinality = cardinality, alterations = alterations )
+    tset(root = LO5th, mode = mode, cardinality = cardinality, alterations = alterations )
     
 }
 

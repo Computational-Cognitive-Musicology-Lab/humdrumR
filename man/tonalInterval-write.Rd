@@ -2,86 +2,10 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-write}
 \alias{tonalInterval-write}
-\alias{as.semit}
 \alias{as.semit.tonalInterval}
-\alias{as.midi}
-\alias{as.midi.tonalInterval}
-\alias{as.tonalChroma}
-\alias{as.tonalChroma.tonalInterval}
-\alias{as.sciPitch}
-\alias{as.sciPitch.tonalInterval}
-\alias{as.kernPitch}
-\alias{as.kernPitch.tonalInterval}
-\alias{as.lilyPitch}
-\alias{as.interval}
-\alias{as.interval.tonalInterval}
-\alias{as.scaleDegree}
-\alias{as.scaleDegree.tonalInterval}
-\alias{as.scaleDegree.integer}
-\alias{as.solfa}
-\alias{as.solfa.tonalInterval}
-\alias{as.solfa.numeric}
-\alias{as.ratio}
-\alias{as.ratio.tonalInterval}
-\alias{as.decimal.tonalInterval}
-\alias{as.frequency}
-\alias{as.frequency.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
-as.semit(x, calculus = 0, ...)
-
 \method{as.semit}{tonalInterval}(x, calculus = 0)
-
-as.midi(x, ...)
-
-\method{as.midi}{tonalInterval}(x)
-
-as.tonalChroma(x, accidental.labels = c(), ...)
-
-\method{as.tonalChroma}{tonalInterval}(x, accidental.labels = c())
-
-as.sciPitch(x, ...)
-
-\method{as.sciPitch}{tonalInterval}(x)
-
-as.kernPitch(x, ...)
-
-\method{as.kernPitch}{tonalInterval}(x)
-
-as.lilyPitch(x, ...)
-
-as.interval(x, delta = FALSE, generic = FALSE, contour = TRUE, ...)
-
-\method{as.interval}{tonalInterval}(x, delta = FALSE, generic = FALSE,
-  contour = TRUE, quality.labels = c())
-
-as.scaleDegree(x, key, cautionary, generic, contour,
-  quality.labels = c(), ...)
-
-\method{as.scaleDegree}{tonalInterval}(x, key = 0L, cautionary = TRUE,
-  generic = FALSE, contour = FALSE, quality.labels = c(), ...)
-
-\method{as.scaleDegree}{integer}(x, key = 0L, cautionary = TRUE,
-  generic = FALSE, quality.labels = c())
-
-as.solfa(x, key, generic, contour, ...)
-
-\method{as.solfa}{tonalInterval}(x, key = 0L, generic = FALSE,
-  contour = FALSE, ...)
-
-\method{as.solfa}{numeric}(x, key = 0L, generic = FALSE)
-
-as.ratio(x, ..., sep)
-
-\method{as.ratio}{tonalInterval}(x, tonalRatio = 2^(19/12), sep = "/")
-
-\method{as.decimal}{tonalInterval}(x, tonalRatio = 2^(19/12))
-
-as.frequency(x, reference.freq = 440L, reference.tint = tint(-4, 3),
-  tonalRatio = 2^(19/12), ...)
-
-\method{as.frequency}{tonalInterval}(x, reference.freq = 440L,
-  reference.tint = tint(-4, 3), tonalRatio = 2^(19/12))
 }
 \description{
 These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 

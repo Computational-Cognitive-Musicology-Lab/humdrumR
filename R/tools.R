@@ -1,7 +1,27 @@
 ### Null and NA values ----
 
-`%just%` <- function(e1, e2) if (is.null(e1)) e2 else e1
-`%maybe%` <- function(e1, e2) if(is.null(e1)) e1 else e2(e1)
+`%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
+`%fmap%` <- function(e1, e2) if(is.null(e1)) e1 else e2(e1)
+
+`%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2
+
+`%if%` <- function(e1, e2) {
+    expr <- rlang::enexpr(e2)
+    
+    if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
+}
+
+`%!if%` <- function(e1, e2) {
+    expr <- rlang::enexpr(e2)
+    
+    if (!is.null(e1) && !e1) eval(expr, parent.frame()) else NULL
+}
+
+`%if<-%` <- function(e1, e2) {
+    var <- rlang::expr_text(rlang::enexpr(e1))
+    
+    if (!is.null(e2)) assign(var, e2, envir = parent.frame())
+} 
 
 ###
 
@@ -13,6 +33,14 @@
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
 fargs <- function(func) formals(args(func))
+
+`addformals<-` <- function(x, values) {
+    # values must be alist
+    cur <- formals(x)
+    cur <- cur[!names(cur) %in% names(values) ]
+    formals(x) <- c(cur[1], values, cur[-1])
+    x
+}
 
 `%<-%` <- function(names, values) {
     names <- as.character(rlang::enexpr(names))[-1]
@@ -357,6 +385,27 @@ IfElse <- function(true, yes, no) {
     if (any(!bool))  output[!bool] <- f
     output
 }
+
+
+ifif <- function(cond1, cond2, ...) {
+    cond1 <- !(is.null(cond1) || !cond1)
+    cond2 <- !(is.null(cond2) || !cond2)
+    
+	vals <- rlang::enexprs(...) 
+
+	switch <- sum(c(2,1) * c(cond1, cond2))
+	# 0 = neither, 1 = cond2, 2 = cond1, 3 = both
+
+	if (hasArg('both') & switch == 3L) return(eval(vals$both, envir = parent.frame()))
+	if (hasArg('and')  & switch == 3L) return(eval(vals$and, envir = parent.frame()))
+	if (hasArg('or')   & switch >  0L) return(eval(vals$or, envir = parent.frame()))
+	if (hasArg('xor1') & switch == 2L) return(eval(vals$xor1, envir = parent.frame()))
+	if (hasArg('xor2') & switch == 1L) return(eval(vals$xor2, envir = parent.frame()))
+
+	if (hasArg('.else')) eval(vals$.else, envir = parent.frame()) else NULL
+}
+
+
 
 captureValues <- function(expr, env) {
     if (rlang::is_quosure(expr)) {
