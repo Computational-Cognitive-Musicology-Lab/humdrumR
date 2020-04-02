@@ -6,7 +6,6 @@ compose.default <- function(...) {
 # accepts a NAMED list of functions.
     fs <- rev(list(...))
     fnames <- names(fs)
-    
     ### arguments
     fargs <- lapply(fs, fargs)
     fargs[-1] <- lapply(fargs[-1], 

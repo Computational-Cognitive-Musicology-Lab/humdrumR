@@ -13,8 +13,9 @@ transpose(x, interval = tint(0, 0), generic = NULL, ...)
   generic = NULL)
 
 \method{transpose}{character}(x, direction, contour, delta, sigma,
-  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
-  comma.part, Key, Exclusive, interval = tint(0, 0), generic = NULL)
+  generic.part, alteration.part, octave.part, simple.part, simplifier,
+  enharmonic.part, comma.part, Key, Exclusive, interval = tint(0, 0),
+  generic = NULL)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

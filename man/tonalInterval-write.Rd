@@ -2,14 +2,10 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalInterval-write}
 \alias{tonalInterval-write}
-\alias{as.semit.tonalInterval}
+\alias{tint2semit}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
-\method{as.semit}{tonalInterval}(x, direction = TRUE, contour = FALSE,
-  delta = FALSE, sigma = FALSE, generic.part = TRUE,
-  alteration.part = TRUE, octave.part = TRUE, simple.part = TRUE,
-  enharmonic.part = TRUE, comma.part = TRUE, Key = NULL,
-  Exclusive = NULL)
+tint2semit(x)
 }
 \description{
 These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 
