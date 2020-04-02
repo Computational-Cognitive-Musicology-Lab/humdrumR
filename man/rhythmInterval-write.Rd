@@ -12,7 +12,7 @@
 \usage{
 \method{as.recip}{rhythmInterval}(rint)
 
-\method{as.ratio}{rhythmInterval}(rint)
+as.ratio.rhythmInterval(rint)
 
 \method{as.decimal}{rhythmInterval}(rint)
 

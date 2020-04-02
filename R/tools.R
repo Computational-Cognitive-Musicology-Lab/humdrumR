@@ -34,13 +34,7 @@ popclass <- function(object) `class<-`(object, class(object)[-1])
 
 fargs <- function(func) formals(args(func))
 
-`addformals<-` <- function(x, values) {
-    # values must be alist
-    cur <- formals(x)
-    cur <- cur[!names(cur) %in% names(values) ]
-    formals(x) <- c(cur[1], values, cur[-1])
-    x
-}
+
 
 `%<-%` <- function(names, values) {
     names <- as.character(rlang::enexpr(names))[-1]
@@ -388,9 +382,10 @@ IfElse <- function(true, yes, no) {
 
 
 ifif <- function(cond1, cond2, ...) {
-    cond1 <- !(is.null(cond1) || !cond1)
-    cond2 <- !(is.null(cond2) || !cond2)
-    
+    # cond1 <- is.null(cond1) || cond1
+    # cond2 <- is.null(cond2) || cond2
+    # if (!null) {cond1 <- !cond1; cond2 <- !cond2}
+    # 
 	vals <- rlang::enexprs(...) 
 
 	switch <- sum(c(2,1) * c(cond1, cond2))
@@ -673,6 +668,32 @@ as.arglist <- function(names) {
     setNames(al, names)
 }
 
+
+.function <- function(args, body) {
+    rlang::new_function(args, rlang::enexpr(body), parent.frame())
+    
+}
+
+getArglist <- function(form) {
+   form <- form[names(form) != '...']
+   gets <- mget(names(form), envir = parent.frame(), inherits = FALSE, 
+                ifnotfound = replicate(length(form), NULL, simplify = FALSE))
+   gets[sapply(gets, rlang::is_missing)] <- NULL
+   
+   gets
+}
+
+`appendformals<-` <- function(x, values, after = length(x)) {
+    # values must be alist
+    cur <- formals(x)
+    cur <- cur[!names(cur) %in% names(values) ]
+    
+    formals(x) <- c(head(cur, after), 
+                    values, 
+                    tail(cur, length(cur) - after))
+    x
+}
+
 append2expr <- function(expr, exprs) {
     l <- length(expr)
     for (i in 1:length(exprs)) {
@@ -684,15 +705,21 @@ append2expr <- function(expr, exprs) {
 
 ### Building smart functions ----
 
+
+
 `setoptions<-` <- function(x, values) {
     # used to set options
     if (is.null(x)) return(values)
     poss <- names(values)
     ind <- pmatch(names(x), poss)
     hits <- !is.na(ind)
-    values[ind[hits]] <- x[hits]
+    # values[ind[hits]] <- x[hits]
     
-    c(x[!hits], values)
+    # c(x[!hits], values)
+    
+    x[hits] <- values
+    
+    x
 }
 
 logicalOption <- function(opt) {

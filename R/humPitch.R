@@ -236,7 +236,7 @@ setMethod('sign', signature = c('tonalInterval'),
 #' @name tonalInterval
 #' @export
 setMethod('as.character', signature = c('tonalInterval'), 
-          function(x) as.kernPitch(x))
+          function(x) as.interval(x))
 
 #' @name tonalInterval
 #' @export
@@ -455,41 +455,97 @@ LO5th2simpleInterval <- function(LO5th, quality.labels = c()) {
 
 
 
-#### Pitch writing generics ----
+#### as.Pitch generics ----
 
-#' @rdname humdrumPitch
+#' @name humdrumPitch
 #' @export as.contour as.decimal as.frequency as.interval as.kernPitch as.lilyPitch as.midi
-#' @export as.ratio as.scaleDegree as.sciPitch as.semit as.solfa as.tonalChroma as.tonalInterval
-as.contour <- function(x, ..., contour.labels) UseMethod('as.contour')
-as.decimal <- function(x, ...) UseMethod('as.decimal')
-as.frequency <- function(x, reference.freq, reference.tint, tonalHarmonic, ...) UseMethod('as.frequency')
-as.interval <- function(x, ...) UseMethod('as.interval')
-as.kernPitch <- function(x, ...) UseMethod('as.kernPitch')
-as.lilyPitch <- function(x, ...) UseMethod('as.lilyPitch')
-as.midi <- function(x, ...) UseMethod('as.midi')
-as.ratio <- function(x, ..., sep) UseMethod('as.ratio')
-as.scaleDegree <- function(x, ..., quality.labels) UseMethod('as.scaleDegree')
-as.sciPitch <- function(x, ..., accidental.labels) UseMethod('as.sciPitch')
-as.semit <- function(x, ...) UseMethod('as.semit')
-as.solfa <- function(x, ...) UseMethod('as.solfa')
-as.tonalChroma <- function(x, ..., accidental.labels) UseMethod('as.tonalChroma')
-as.tonalInterval <- function(x, ...) UseMethod('as.tonalInterval')
+#' @export as.rational as.scaleDegree as.sciPitch as.semit as.solfa as.tonalChroma as.tonalInterval
+pitchGenerics <- paste0('as.', c('tonalInterval',
+                                 'decimal', 'frequency', 'rational', 'fraction',
+                                 'tonalChroma', 'kernPitch', 'lilyPitch', 'sciPitch',
+                                 'interval', 
+                                 'scaleDegree', 'solfa',
+                                 'semit', 'midi',
+                                 'contour'))
+
+# create generics with shared argments
+for (generic in pitchGenerics) {
+    genfunc <- rlang::new_function(alist(x = ,
+                                         direction = , contour = ,
+                                         delta = , sigma = ,
+                                         generic.part = , alteration.part = ,
+                                         octave.part = , simple.part = ,
+                                         enharmonic.part = , comma.part = ,
+                                         Key = ,
+                                         Exclusive = ),
+                                   body = rlang::expr(UseMethod(!!generic)))
+    assign(generic, genfunc )
+}
+
+# some generics get a few extra arguments
+appendformals(as.frequency, 1L) <- alist(reference.freq = , reference.tint = , tonalHarmonic = )
+appendformals(as.decimal,   1L) <- alist(tonalHarmonic = )
+appendformals(as.rational,  1L) <- alist(tonalHarmonic = )
+appendformals(as.fraction,  1L) <- alist(tonalHarmonic = , sep =)
+
+appendformals(as.contour) <- alist(contour.labels = )
+appendformals(as.kernPitch) <- alist(accidental.labels = )
+appendformals(as.sciPitch)  <- alist(accidental.labels = )
+appendformals(as.tonalChroma)  <- alist(accidental.labels = )
+
+##
+
+args.asPitch <- function(...) {
+    arglist <- as.list(match.call(expand.dots = TRUE))[-1]
+    default <- alist(x = , 
+                     direction = TRUE, contour = FALSE, 
+                     delta = FALSE, sigma = FALSE, 
+                     generic.part = TRUE, alteration.part = TRUE, 
+                     octave.part = TRUE, simple.part = TRUE, 
+                     enharmonic.part = TRUE, comma.part = TRUE, 
+                     Key = NULL, Exclusive = NULL)
+    
+    setoptions(default) <- arglist
+    default
+}
+
+
+pitch.function <- function(body, ...) {
+    body <- rlang::enexpr(body)
+    args <- args.asPitch(...)
+    rlang::expr({
+        x <- tonalTransform(x, !!!args)
+        
+        !!body
+    }) -> body
+    
+    rlang::new_function(args, body, parent.frame())
+    
+}
 
 
 #### Methods tonalInterval -> x
 #' @name tonalInterval-write
 #' @export as.contour.tonalInterval as.decimal.tonalInterval as.frequency.tonalInterval
-#' @export as.interval as.kernPitch as.lilyPitch as.midi as.ratio as.scaleDegree
-#' @export as.sciPitch as.semit as.solfa as.tonalChroma as.tonalInterval.tonalInterval
+#' @export as.interval.tonalInterval as.kernPitch.tonalInterval as.lilyPitch.tonalInterval
+#' @export as.midi.tonalInterval as.rational.tonalInterval as.scaleDegree.tonalInterval
+#' @export as.sciPitch.tonalInterval as.semit.tonalInterval as.solfa.tonalInterval as.tonalChroma as.tonalInterval.tonalInterval
 
 ##### As semit (i.e., 0, -11)
-as.semit.tonalInterval <- function(x, calculus = 0) {
-    semits <- ((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L) 
-    calculus(semits, calculus)
+tint2semit <- function(x) {
+        ((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L) 
 }
 
-as.midi.tonalInterval <- function(x) as.semit(x) + 60L
+as.semit.tonalInterval <- tint2semit %.% tonalTransform
 
+as.midi.tonalInterval <- pitch.function(
+    {
+        as.semit(x,  direction, contour, sigma, 
+                 generic.part, alteration.part, 
+                 octave.part, simple.part, 
+                 enharmonic.part, comma.part, 
+                 Key, Exclusive) + 60L
+    })
 
 ##### As tonal name (i.e., "Eb")
 
@@ -683,19 +739,19 @@ as.solfa.numeric <- function(x,  key = 0L, generic = FALSE) {
 }
 
 #### As ratio (i.e., "3/2")
-as.ratio.numeric <- function(n, sep = '/') {
+as.rational.numeric <- function(n, sep = '/') {
     frac <- numeric2fraction(n)
     .paste(frac$Numerator, frac$Denominator, sep = sep)
 }
 
-as.ratio.tonalInterval <-  function(x, tonalRatio = 2^(19/12), sep = '/') {
+as.rational.tonalInterval <-  function(x, tonalRatio = 2^(19/12), sep = '/') {
     frac <- numeric2fraction(as.decimal(x, tonalRatio = tonalRatio))
     
     .paste(frac$Numerator, frac$Denominator, sep = sep)
     
 }
 
-as.fraction <- as.ratio
+as.fraction <- as.rational
 
 
 #### As decimal (i.e, "1.5")
@@ -1010,7 +1066,7 @@ read.ratio2tonalInterval <- function(str, tonalRatio = 3) {
             fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
           }
           
-          tint(octs, fifs) %re.as% 'as.ratio.tonalInterval'
+          tint(octs, fifs) %re.as% 'as.rational.tonalInterval'
 }
 
 
@@ -1174,7 +1230,7 @@ as.frequency.character <- as.frequency.tonalInterval %.% as.tonalInterval
 
 #' @name humPitch
 #' @export
-as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
+as.rational.character <- as.rational.tonalInterval %.% as.tonalInterval
 
 
 #################################################-
@@ -1185,9 +1241,18 @@ as.ratio.character <- as.ratio.tonalInterval %.% as.tonalInterval
 
 
 #' @export
-transform.tonalInterval <- function(tint, ...) {
-    args <- pmatch.tintArgs(list(...))
-    args <- parse.tintArgs(args)
+tonalTransform <- function(tint,  direction = TRUE, contour = FALSE, 
+                           delta = FALSE, sigma = FALSE, 
+                           generic.part = TRUE, alteration.part = TRUE, 
+                           octave.part = TRUE, simple.part = TRUE, 
+                           enharmonic.part = TRUE, comma.part = TRUE, 
+                           Key = NULL, Exclusive = NULL) {
+    
+    # args <- pmatch.tintArgs(list(...))
+    # args <- parse.tintArgs(args) 
+    # this translates all "partition" transformations into a either TRUE or FALSE 
+    # (before this point, some may simply be missing)
+    
     # args can be:
     # LOGICAL ONLY:
     #   delta sigma
@@ -1206,15 +1271,17 @@ transform.tonalInterval <- function(tint, ...) {
     args$sigma  %if% {tint <- sigma(tint)}
     
     # Generic/Specific
-    ifif(args$generic, args$alteration,
+    ifif(args$generic, args$alteration, 
          xor1 = tint <- genericpart.tonalInterval(tint, args$Key %maybe% dset(0, 0)),
-         xor2 = tint <- alterationpart.tonalInterval(tint, args$Key %maybe% dset(0, 0))
+         xor2 = tint <- alterationpart.tonalInterval(tint, args$Key %maybe% dset(0, 0)),
+         .else = rep(P1, length(tint))
          )
     
     # Simple/Complex
     ifif(args$octave, args$simple,
          xor1 = tint <- octavepart.tonalInterval(tint, args$roundingMethod %maybe% floor),
-         xor2 = tint <- simplepart.tonalInterval(tint, args$roundingMethod %maybe% floor))
+         xor2 = tint <- simplepart.tonalInterval(tint, args$roundingMethod %maybe% floor),
+         .else = rep(P1, length(tint)))
     
     
     tint
@@ -1239,7 +1306,7 @@ parse.tintArgs <- function(args) {
     lens <- lengths(args[c('delta', 'sigma', 'generic', 'alteration', 'specific',
                         'octave', 'simple', 'complex', 'direction', 'contour', 'enharmonic', 'comma')])
     if (any(lens > 1L)) {
-        funccall <- args$callname %maybe% 'transform.tonalInterval'
+        funccall <- args$callname %maybe% 'tonalTransform'
         badargs <- glue::glue_collapse(names(args)[lens > 1L], sep = ', ', last = ', and ')
         stop(call. = FALSE,
              glue::glue("In your call to {funccall}, the arguments {badargs} must be of length one."))
@@ -1249,32 +1316,52 @@ parse.tintArgs <- function(args) {
     
     ## several arguments are "shorthands" for other argument combinations
     
+    ######## generic vs specific 
     if ('specific' %in% names(args)) {
-        args$simple <- TRUE
-        args$octave <- args$specific
-    }
-    if ('complex' %in% names(args)) {
         args$generic <- TRUE
-        args$simple <- args$complex
+        args$alteration <- args$specific
     }
     
-    if ('octave' %in% names(args) && !'simple' %in% names(args)) args$simple <- TRUE
-    
-    ifif(is.null(args$octave), is.null(args$simple), and = {args$simple <- TRUE})
-    
-    if (!is.null(args$roundingMethod) && !rlang::is_function(args$roundingMethod)) {
+    ifif(is.null(args$generic), is.null(args$alteration),
+         xor1 = {args$generic    <- !args$alteration},
+         xor2 = {args$alteration <- FALSE},
+         and  = {args$alteration <- args$generic <- TRUE}
+         )
+    ######### complex vs simple
+    # rounding Method
+    if (!is.null(args$simple) && (is.character(args$simple) || rlang::is_function(args$simple))) {
+        args$roundingMethod <- args$simple
+        args$simple <- TRUE
+    }
+    if (!is.null(args$roundingMethod) && is.character(args$roundingMethod)) {
         rmeth <- pmatch(args$roundingMethod, c('floor', 'up', 'ceiling', 'down', 'truncate', 'directed', 'round', 'smallest'))
         if (is.na(rmeth)) {
-            funccall <- args$callname %maybe% 'transform.tonalInterval'
+            funccall <- args$callname %maybe% 'tonalTransform'
             stop(call. = FALSE, glue::glue("In your call to {funccall}, the roundingMethod argument must match floor/up, ceiling/down, truncate/directed, or round/smallest.") )
-            
         }
         
         args$roundingMethod <- switch(args$roundingMethod,
-                                      floor   = , up       = floor,
-                                      ceiling = , down     = ceiling,
-                                      truncate   = , directed = round)
+                                      floor    = , up       = floor,
+                                      ceiling  = , down     = ceiling,
+                                      truncate = , directed = trunc,
+                                      round    = , smallest = round)
     }
+    
+    if ('complex' %in% names(args)) {
+        args$simple <- TRUE
+        args$octave <- args$complex
+    }
+    
+    ifif(is.null(args$octave), is.null(args$simple),
+         xor1 = {args$octave <- !args$simple},
+         xor2 = {args$simple <- TRUE},
+         and  = {args$octave <- args$simple <- TRUE}
+    )
+    
+    
+   
+
+
     
     args
     
@@ -1367,13 +1454,18 @@ commapart.tonalInterval <- function(tint, wolf = "B#", key = dset(0L, 0L)) {
     
     tint <- tint - key
     
-    
-    wolf <- as.tonalInterval(wolf)
-    wolf[wolf@Fifth < 0L] <- wolf[wolf@Fifth < 0L] + pythagorean.comma
-    
-    tint <- (wolf - P5 - (tint))
-    
-    (tint %/% pythagorean.comma) * -pythagorean.comma
+    if (is.null(wolf)) {
+        commas <- (tint@Fifth %/% 12L) + sign(tint@Fifth)
+        tint + pythagorean.comma * commas
+    } else {
+        wolf <- as.tonalInterval(wolf)
+        wolf[wolf@Fifth < 0L] <- wolf[wolf@Fifth < 0L] + pythagorean.comma
+        
+        tint <- (wolf - P5 - (tint))
+        
+        (tint %/% pythagorean.comma) * -pythagorean.comma
+    }
+ 
     
     
     

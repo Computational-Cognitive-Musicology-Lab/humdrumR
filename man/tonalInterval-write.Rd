@@ -5,7 +5,11 @@
 \alias{as.semit.tonalInterval}
 \title{Writing \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to various representations}
 \usage{
-\method{as.semit}{tonalInterval}(x, calculus = 0)
+\method{as.semit}{tonalInterval}(x, direction = TRUE, contour = FALSE,
+  delta = FALSE, sigma = FALSE, generic.part = TRUE,
+  alteration.part = TRUE, octave.part = TRUE, simple.part = TRUE,
+  enharmonic.part = TRUE, comma.part = TRUE, Key = NULL,
+  Exclusive = NULL)
 }
 \description{
 These functions all translate \code{\link[humdrumR:tonalInterval]{tonalIntervals}} to 

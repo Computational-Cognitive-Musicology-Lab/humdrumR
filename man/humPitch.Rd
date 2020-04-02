@@ -15,40 +15,58 @@
 \alias{as.scaleDegree.character}
 \alias{as.solfa.character}
 \alias{as.frequency.character}
-\alias{as.ratio.character}
+\alias{as.rational.character}
 \title{Pitch translations}
 \usage{
-\method{as.semit}{character}(x, ..., calculus = 0)
+\method{as.semit}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive)
 
 \method{as.midi}{numeric}()
 
-\method{as.midi}{character}(x, ...)
+\method{as.midi}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive)
 
 \method{as.midi}{numeric}()
 
-\method{as.tonalChroma}{character}(x, ..., accidental.labels = c())
+\method{as.tonalChroma}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, accidental.labels = c())
 
-\method{as.kernPitch}{character}(x, ...)
+\method{as.kernPitch}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive)
 
 \method{as.kernPitch}{integer}(n, key = NULL, melodic = FALSE)
 
 \method{as.kernPitch}{numeric}(float, tonalRatio = 3, centmargin = 10)
 
-\method{as.sciPitch}{character}(x, ...)
+\method{as.sciPitch}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive)
 
-\method{as.interval}{character}(x, ..., delta = FALSE, generic = FALSE,
-  contour = TRUE, quality.labels = c())
+\method{as.interval}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, generic = FALSE, quality.labels = c())
 
-\method{as.scaleDegree}{character}(x, ..., key = 0L, cautionary = TRUE,
-  generic = FALSE, contour = FALSE, quality.labels = c())
+\method{as.scaleDegree}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, key = 0L, cautionary = TRUE,
+  generic = FALSE, quality.labels = c(), ...)
 
-\method{as.solfa}{character}(x, ..., key = 0L, generic = FALSE,
-  contour = FALSE)
+\method{as.solfa}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, key = 0L, generic = FALSE, ...)
 
-\method{as.frequency}{character}(x, ..., reference.freq = 440L,
+\method{as.frequency}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, reference.freq = 440L,
   reference.tint = tint(-4, 3), tonalRatio = 2^(19/12))
 
-\method{as.ratio}{character}(x, ..., tonalRatio = 2^(19/12), sep = "/")
+\method{as.rational}{character}(x, direction, contour, delta, sigma,
+  generic.part, alteration.part, octave.part, simple.part, enharmonic.part,
+  comma.part, Key, Exclusive, tonalRatio = 2^(19/12), sep = "/")
 }
 \description{
 These functions translate various pitch representations
