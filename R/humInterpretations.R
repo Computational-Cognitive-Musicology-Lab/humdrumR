@@ -47,8 +47,8 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
 
 #' @export
 getREexclusive <- function(pattern) {
-    exclusive <- knownInterpretations[knownInterpretations$RE == getRE(pattern), ]$Exclusive   
-    if (exclusive == "") NULL else exclusive
+    exclusive <- knownInterpretations[knownInterpretations$RE == getRE(pattern), ]$Exclusive  
+    if (length(exclusive) == 0L || exclusive == "") NULL else exclusive
 }
                                      
 

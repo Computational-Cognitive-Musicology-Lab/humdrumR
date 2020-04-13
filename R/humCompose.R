@@ -3,7 +3,7 @@
 
 compose <- function(...) UseMethod('compose')
 compose.default <- function(...) {
-# accepts a NAMED list of functions.
+# accepts a NAMED ... of functions
     fs <- rev(list(...))
     fnames <- names(fs)
     ### arguments
@@ -110,7 +110,7 @@ inPlace <- function(result, orig, regex) {
 
 inPlacer <- function(orig, regex) {
     function(result) {
-        .ifelse(is.na(regex), 
+        .ifelse(is.na(result), 
                 orig,
                 stringi::stri_replace_first(str = orig,
                                             replacement = result,
@@ -129,7 +129,8 @@ inPlacer <- function(orig, regex) {
 }
 
 re.as <- function(vector) {
-    asfunc <- stickyAttrs(vector)$as
+    sticky <- stickyAttrs(vector)
+    asfunc <- sticky$as
     if (is.null(asfunc)) return(vector)
     
     match_size(vector = vector, asfunc = asfunc, toEnv = TRUE)
@@ -138,7 +139,13 @@ re.as <- function(vector) {
     
     splitvector <- Map(stickyApply, lapply(paste0("as.", names(splitvector)), match.fun), splitvector)
     
-    setNames(unlist(splitvector), names(vector))
+    output <- setNames(unlist(splitvector), names(vector))
+    
+    sticky$as <- NULL
+    stickyAttrs(output) <- sticky
+    
+    output
+    
     
     
 }
@@ -412,7 +419,7 @@ exclusiveFunction <- function(...) {
     body <- .exclusiveDispatch(exprs)
     
     arguments <- c(attr(body, 'arguments'))
-    rlang::new_function(arguments, body, env = parent.frame())
+    rlang::new_function(arguments, body, env = parent.env(environment()))
     
 }
 
@@ -422,27 +429,28 @@ exclusiveFunction <- function(...) {
     regexes <- ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE)
     names(exprs) <- names(regexes) <- gsub(': .*', '', names(exprs))
     
-    
-    exprs[!missing] <- lapply(exprs[!missing], makeCall)
-    exprs[!missing] <- Map(REcall, regexes[!missing], exprs[!missing])
     # arguments
     arguments <- getAllArgs(exprs[!missing]) 
     
+    # make into a call to REcall
+    exprs[!missing] <- lapply(exprs[!missing], makeCall)
+    exprs[!missing] <- Map(REcall, regexes[!missing], exprs[!missing])
+  
+    
     rlang::expr({
-        result <- .switch(x, Exclusive, !!!exprs, inPlace = inPlace,  
+        result <- .switch(x, Exclusive, !!!exprs, #inPlace = inPlace,  
                           parallel = list(Exclusive = Exclusive))
         if (inPlace) {
             regexes <- c(!!!regexes)
             result <- inPlace(result, x, regexes[Exclusive])
         } 
         
-        stickyAttrs(result) <- list(as = regexes[Exclusive])
+        # stickyAttrs(result) <- list(as = regexes[Exclusive])
         
         result
         
     }) -> dispatchExpr
-    attr(dispatchExpr, 'arguments') <- c(x = rlang::missing_arg(), 
-                                         Exclusive = rlang::missing_arg(),
+    attr(dispatchExpr, 'arguments') <- c(alist(x = ,  Exclusive = NULL),
                                          arguments,
                                          inPlace = TRUE)
     
@@ -482,6 +490,8 @@ regexGeneric <- function(...) {
     
 }
 
+##### humdrum dispatch ----
+
 humdrumDispatch <- function(...) {
     exprs <- rlang::enexprs(...)
     
@@ -495,7 +505,7 @@ humdrumDispatch <- function(...) {
     regexes <- attr(exclusiveDispatch, 'regexes')
     
     body <- rlang::expr({
-        if (missing(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
+        if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
     })
     
     

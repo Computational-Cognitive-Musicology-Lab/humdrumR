@@ -165,7 +165,8 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     matches <- stringi::stri_extract_first(str = x, regex = regex)
     result <- do.call(.func, c(list(matches), list(...)))
     
-    stickyAttrs(result) <- list(Exclusive = getREexclusive(regex))
+    associatedExclusive <- getREexclusive(regex)
+    if (!is.null(associatedExclusive)) stickyAttrs(result) <- list(Exclusive = associatedExclusive)
     
     if (inPlace) inPlace(result, x, regex) else result
 

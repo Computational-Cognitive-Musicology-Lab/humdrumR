@@ -547,7 +547,6 @@ integrate <- function(intervals, skip = list(na)) {
 sigma <- integrate
 
 derive <- function(intervals, skip = list(na)) {
-    
     skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
     intervals[which(!skip)[-1]] <- diff(intervals[!skip])
     
@@ -694,6 +693,15 @@ getArglist <- function(form) {
     x
 }
 
+`partialApply<-` <- function(x, values) {
+    cur <- formals(x)
+    cur[.names(values)[.names(values) %in% .names(cur)]] <- values[.names(values) %in% .names(cur)]
+    
+    formals(x) <- c(cur, values[!.names(values) %in% names(cur)])
+    x
+    
+}
+
 append2expr <- function(expr, exprs) {
     l <- length(expr)
     for (i in 1:length(exprs)) {
@@ -710,16 +718,14 @@ append2expr <- function(expr, exprs) {
 `setoptions<-` <- function(x, values) {
     # used to set options
     if (is.null(x)) return(values)
+    
     poss <- names(values)
     ind <- pmatch(names(x), poss)
     hits <- !is.na(ind)
-    # values[ind[hits]] <- x[hits]
     
-    # c(x[!hits], values)
+    values[ind[hits]] <- x[hits]
     
-    x[hits] <- values
-    
-    x
+    c(x[!hits], values)
 }
 
 logicalOption <- function(opt) {

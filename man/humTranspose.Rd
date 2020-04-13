@@ -3,19 +3,9 @@
 \name{humTranspose}
 \alias{humTranspose}
 \alias{transpose}
-\alias{transpose.tonalInterval}
-\alias{transpose.character}
 \title{Transpose tonalIntervals}
 \usage{
 transpose(x, interval = tint(0, 0), generic = NULL, ...)
-
-\method{transpose}{tonalInterval}(x, interval = tint(0, 0),
-  generic = NULL)
-
-\method{transpose}{character}(x, direction, contour, delta, sigma,
-  generic.part, alteration.part, octave.part, simple.part, simplifier,
-  enharmonic.part, comma.part, Key, Exclusive, interval = tint(0, 0),
-  generic = NULL)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

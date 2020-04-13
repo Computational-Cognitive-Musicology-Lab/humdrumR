@@ -7,7 +7,9 @@
 \alias{is.tonalInterval}
 \alias{as.double.tonalInterval}
 \alias{invert}
+\alias{allints}
 \title{Representation of tonal pitch information}
+\format{An object of class \code{character} of length 93.}
 \usage{
 tint(octave, LO5th = 0L, cent = numeric(length(octave)))
 
@@ -15,39 +17,17 @@ is.tonalInterval(x)
 
 \S4method{is.numeric}{tonalInterval}(x)
 
-\S4method{>}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{>=}{tonalInterval,tonalInterval}(e1, e2)
-
-\S4method{Summary}{tonalInterval}(x)
-
-\S4method{abs}{tonalInterval}(x)
-
-\S4method{sign}{tonalInterval}(x)
-
 \S4method{as.character}{tonalInterval}(x)
 
 \method{as.double}{tonalInterval}(x, ...)
 
 \S4method{+}{tonalInterval,tonalInterval}(e1, e2)
 
-\S4method{+}{character,tonalInterval}(e1, e2)
-
-\S4method{-}{tonalInterval,missing}(e1)
-
-\S4method{-}{character,tonalInterval}(e1, e2)
-
-\S4method{sum}{tonalInterval}(x, ..., na.rm = TRUE)
-
-\S4method{cumsum}{tonalInterval}(x)
-
-\S4method{diff}{tonalInterval}(x, lag = 1, differences = 1)
-
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
-\S4method{\%/\%}{tonalInterval,tonalInterval}(e1, e2)
-
 invert(tint, around = Unison)
+
+allints
 }
 \description{
 This \emph{S4} class is the core tonal pitch representation in the 
@@ -61,6 +41,13 @@ The interval/pitch represented is the result of the Octaves and Perfect 5ths (ac
 *12ths*) in the slots added together.
 (\code{tonalInterval} interfaces with \code{\link[humdrumR:humdrumR]{humdrumR}}'s other 
 \code{\link[humdrumR:humTonality]{types of tonal data}}.)
+
+These functions translate various pitch representations
+between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
+they will even (automatically) read parts of a string which represent a pitch,
+and translate only that part (leaving the rest of the string unchanged).
+They all have an option \code{inPlace} which can be set to \code{FALSE}
+if you want them to discard non-pitch parts of the string(s).
 }
 \details{
 Tonal intervals (which are rather abstract) can be translated to more concrete 
@@ -96,6 +83,10 @@ the resulting numbers represent \strong{Pythagorean Tuning}.
 If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we 
 will get equal temperement:
 \deqn{2^{-1} * {2^{\frac{19}{12}}}^1 = 2^{\frac{7}{12}}}
+
+Under the hood, these functions use the \code{\link{humdrumR}} 
+\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
+fundamental, \emph{lingua franca} representation of pitch.
 }
 \section{Slots}{
 
@@ -160,3 +151,4 @@ Numeric comparisons (e.g., \code{>},
 \seealso{
 humTonality
 }
+\keyword{datasets}
