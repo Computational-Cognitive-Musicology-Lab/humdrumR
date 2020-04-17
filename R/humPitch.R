@@ -118,7 +118,9 @@ NULL
 #' @export 
 setClass('tonalInterval', 
          contains = 'humdrumVector',
-         slots = c(Fifth = 'integer', Octave = 'integer', Cent = 'numeric')) -> tonalInterval
+         slots = c(Fifth  = 'integer', 
+                   Octave = 'integer', 
+                   Cent   = 'numeric')) -> tonalInterval
 
 setValidity('tonalInterval', 
             function(object) {
@@ -169,11 +171,6 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 #' @export
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
-#' @name tonalInterval
-#' @export
-setMethod('is.numeric', signature = c('tonalInterval'),
-          function(x) { TRUE })
-
 
 ###..formatting methods ####
 
@@ -223,7 +220,7 @@ setMethod('Summary', signature = c('tonalInterval'),
 
 setMethod('abs', signature = c('tonalInterval'),
           function(x) {
-              IfElse(x < tint(0, 0), -x, x)
+              .ifelse(x < tint(0, 0), -x, x)
           })
 
 setMethod('sign', signature = c('tonalInterval'),
@@ -250,12 +247,22 @@ setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- as.tonalInterval(e1, inPlace = TRUE)
+              e1 <- as.tonalInterval.character(e1, inPlace = TRUE)
               e3 <- stickyApply(`+`, e1, e2)
               
               re.place(re.as(e3))
               
           })
+
+setMethod('+', signature = c('tonalInterval', 'character'),
+          function(e1, e2) {
+              e2 <- as.tonalInterval.character(e2, inPlace = TRUE)
+              e3 <- stickyApply(`+`, e2, e1)
+              
+              re.place(re.as(e3))
+              
+          })
+
 
 
 setMethod('sum', signature = c('tonalInterval'),
