@@ -174,13 +174,23 @@ hasdim <- function(x) !is.null(dim(x))
 
 vectorna <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
-padNA <- function(x, n, before = TRUE) {
+padNA <- function(x, n, before = TRUE, margin = 1L) {
 ### pad vector with NA
-    lenx <- length(x)
+    if (is.null(dim(x)) && margin == 1L) {
+        padding <- vector(class(x), n - length(x))
+        func <- `c`
+    }
+    if (margin == 1L) {
+        padding <- matrix(as(NA, class(x)), n - nrow(x), ncol(x))
+        func <- `rbind`
+    }
+    if (margin == 2L) {
+        padding <- matrix(as(NA, class(x)), nrow(x), n - ncol(x))
+        func <- `cbind`
+    }
     
-    padding <- rep(as(NA, Class = class(x)), n - lenx)
     
-    if (before) c(padding, x) else c(x, padding)
+   if (before) func(padding, x) else func(x, padding)
 }
 
 catlists <- function(lists) {
@@ -280,6 +290,7 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
+          recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)
           
           if (is.function(size.out)) {
@@ -297,10 +308,10 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle =
           }
           
           for (i in seq_along(margin)) {
-              stuff[notnull] <- if (recycle) {
+              stuff[notnull] <- if (recycle[i]) {
                  lapply(stuff[notnull], Repeat, length.out = size.out[i], margin = margin[i])
               } else {
-                 lapply(stuff[notnull], padNA, before = FALSE, n = size.out[i])
+                 lapply(stuff[notnull], padNA, before = FALSE, n = size.out[i], margin = margin[i])
                   
               }
           }
