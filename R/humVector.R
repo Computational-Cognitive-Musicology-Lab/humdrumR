@@ -3,26 +3,51 @@
 #' 
 #' R's "vectorization" is a key strength, so being able to define
 #' S4 classes that act in a vectorized manner is very useful.
-#' Unfortunetaly, defining this classes is a bit tedious.
-#' \code{humdrumVector} is a \emph{virtual} S4 class which takes care of some of 
-#' this tediousness for developers. The \code{humdrumVector}
+#' Unfortunetaly, defining such classes is a bit tedious.
+#' \code{humVector} is a \emph{virtual} S4 class which takes care of most of
+#' this tediousness for developers. The \code{humVector}
 #' defines all the necessarry methods to treat an object as a vector---simply
-#' make your new class inherit \code{humdrumVector} and it is all taken care of!
-#' (To do this, specifify \code{contains = 'humdrumVector'} in your call to \code{setClass}.)
+#' make your new class inherit \code{humVector} and it is all taken care of!
+#' (To do this, specifify \code{contains = 'humVector'} in your call to \code{setClass}.)
 #' 
 #' Be warned, \code{R} is limited in this regard---users can't \emph{really} define
-#' \code{S4} classes that really act fully like \code{R} atomics---, so you may 
+#' \code{S4} classes that \emph{really} act fully like \code{R} atomics---, so you may 
 #' run in to problems if you take this too far. 
-#' For instance, though \code{humdrumVector} classes work (ok) in \code{\link[base]{data.frame}}s
+#' For instance, though \code{humVector} classes work (ok) in \code{\link[base]{data.frame}}s
 #' \code{data.table}s and \code{tibbles} might give you problems.
+#' 
+#' \code{humVector} subclasses behave very similarly to normal R vectors.
+#' However, they do differ in a few respects, mostly in ways that
+#' avoid some of the quirky behaviors with R vectors:
+#' 
+#' Firstly, \code{humVectors} always have dimensions---when we treat
+#' them as one-dimensional vectors they are "really" under the hood
+#' "column-vectors." Thus, the sometimes irritating distinction
+#' between matrices and vectors in R is avoided.
+#' Every \code{humVector} is a matrix, which can have one
+#' column, or multiple columns.
+#' 
+#' \code{humVectors} are indexed just like humdrum vectors/matrices.
+#' If it is a 1-column humVector, index just like it's a vector.
+#' If there are more than 1-columns, you can index them like matrices.
+#' One exception is that \code{humVectors} always give an error if you
+#' try an index that is larger than the vector...instead of padding with \code{NA}s,
+#' as base R does.
+#' 
+#' \code{humVectors} also have a useful \code{cartesian} indexing argument.
+#' If \code{cartesian = TRUE} and both \code{i} and \code{j} indices are included,
+#' \code{i} and \code{j} are treated like cartesian coordinates.
+#' (This behavior can be achieved with base R matrices by inputing a 
+#' matrix with two columns.)
+#' 
+#' 
 #' 
 #' @section Requirements:
 #' 
-#' To work, \code{humdrumVector} makes a few assumptions about your class.
-#' Your class must one or more slots which are themselves matrices, with 
-#' all dims the same.
-#' \code{humdrumVector}'s indexing method will cause all of these vectors to be indexed as one.
-#' When you define a new subclass of \code{humdrumVector}, it will inherit a 
+#' To work, \code{humVector} makes a few assumptions about your class.
+#' Your class must have one or more slots which are vectors, all of which are the same length.
+#' \code{humVector}'s indexing method will cause all of these vectors to be indexed as one.
+#' When you define a new subclass of \code{humVector}, it will inherit a 
 #' \code{validObject} method which assures that all elements are the same dimension.
 #' Thus, if you are writing your own \code{validObject} method (using \code{setValidity})
 #' you just have to worry specifically about the validity of the information in your slots,
@@ -30,198 +55,447 @@
 #' 
 #' 
 #' @section Initialize:
+#' 
 #' An initialize method which automatically makes all slots the same length is predefined
-#' for \code{humdrumVectors}. If you want to make a more specialized \code{initialize} method,
+#' for \code{humVectors}. If you want to make a more specialized \code{initialize} method,
 #' you can still take advantage of the inherited method by using \code{callNextMethod} at the 
 #' beginning of your function.
 #' 
 #' 
 #' @section Predefined methods:
 #' 
-#' You must \code{order} and any arithmetic/comparison methods for your class
+#' You must specify \code{order} and any arithmetic/comparison methods for your class
 #' yourself. However,
 #' \itemize{
 #'  \item{If you define \code{>} and \code{>=}, \code{<} and \code{<=} will be automatically defined.}
 #'  \item{If you define \code{order}, \code{sort} will be automatically defined.}
 #'  \item{If you define \code{as.character} for your class, \code{show} and
 #'   \code{format} methods are defined automatically.}
-#'  \item{If you define \code{+} methods for your class (adding two of class together), inefficient but
-#'   functional implementations of \code{sum} and \code{cumsum} are defined.}
-#'  \item{If you \emph{also} define a prefix \code{-} method (with 
-#'  \code{signature = c(e1 = 'myclass', e2 = 'missing')}),  \code{-} methods between 
-#'  two of your classes are defined, as well as a inefficient default implementation 
-#'  of \code{diff}.}
 #' }
 #' 
-#' @name humdrumVector
+#' Default arithmetic methods for addition, multiplication, negation (\code{-x}) are defined.
+#' They assume that adding your class to another is simply the same as adding each numeric slot in parallel.
+#' If this is not the case, you'll need to create your own, more specific, method!
+#' 
+#' @name humVector
 #' @export
-setClass('humdrumVector')
+NULL
 
-setValidity('humdrumVector',
+setClassUnion('dimnames', c('character', 'integer', 'NULL'))
+
+setClass('humVector', contains = 'VIRTUAL', slots = c(ncol = 'integer', nrow = 'integer', rownames = 'dimnames', colnames = 'dimnames'))
+
+setValidity('humVector', 
             function(object) {
                 slots <- getSlots(object)
+                errors <- c(
+                    if (!all(sapply(slots, is.vector)) || !all(sapply(slots, is.atomic))) 'humVector slots must all be atomic vectors.',
+                    if (!allsame(lengths(slots))) "humVector slots must all be the same length.",
+                    if (length(object@ncol) != 1L || object@ncol < 0L) "The @ncol slot of a humVector must be a single non-negative integer.",
+                    if (length(object@nrow) != 1L || object@ncol < 0L) "The @nrow slot of a humVector must be a single non-negative integer.",
+                    if (!is.null(object@colnames) && length(object@colnames) != object@ncol) "The colnames slot of a humVector must be NULL or must be @ncol in length.",
+                    if (!is.null(object@rownames) && length(object@rownames) != object@nrow) "The rownames slot of a humVector must be NULL or must be @nrow in length.",
+                    if (length(slots[[1]]) != object@ncol * object@nrow) 'The length of the vectors inside the humVector must be @ncol * @nrow.'
+                )
                 
-                dims <- sapply(slots, dim)
-                nrow(unique(dims)) == 1L
+                if (length(errors) > 0L) errors else TRUE
                 
             })
 
 
 setMethod('initialize', 
-          'humdrumVector',
-          function(.Object, ...) {
-              args <- list(...)
-              args <- lapply(args, function(x) if (is.null(dim(x))) cbind(x) else x)
-              args <- do.call('match_size', c(args, list(margin = 1:2), list(recycle = c(TRUE, FALSE))))
+          'humVector',
+          function(.Object, ..., ncol = 1L, nrow = NULL, colnames = NULL, rownames = NULL) {
+              slots <- list(...)
+              slots <- lapply(slots, unname)
+              slots <- do.call('match_size', slots)
               
-              na <- Reduce(`|`, lapply(args, is.na))
-              allna <- apply(na, 2, all)
+              .Object@nrow <- as.integer(length(slots[[1]]) / ncol)
               
-              if (any(na)) args <- lapply(args, function(x) {x[na] <- NA ; x[, !allna, drop = FALSE]})
+              .Object@ncol <- ncol
+              .Object@colnames <- colnames
+              .Object@rownames <- rownames
               
+              if (length(slots) == 0L) return(.Object)
               
+              ## NA in any slot is NA in all slots
+              na <- Reduce(`|`, lapply(slots, is.na))
+              slots <- lapply(slots, function(slot) `[<-`(slot, na, NA))
               
-              args[-1] <- lapply(args[-1], unname)
-              
-              setSlots(.Object) <- args
-              .Object              
+              setSlots(.Object) <- slots
+              validObject(.Object)
+              .Object
           } )
 
-getSlots <- function(x) {
-    slotnames <- slotNames(x)
-    slots <- lapply(slotnames, slot, object = x)
-    names(slots) <- slotnames
+getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character')) {
+    slotinfo <- methods::getSlots(class(x))
+    slotinfo <- slotinfo[!names(slotinfo) %in% c('ncol', 'nrow', 'colnames', 'rownames')]
+    slotinfo <- slotinfo[slotinfo %in% classes]
+
+    slots <- lapply(names(slotinfo), slot, object = x)
+    names(slots) <- names(slotinfo)
     slots
 }
 
 `setSlots<-` <- function(x, value) {
     slotnames <- slotNames(x)
+    
+    slotnames <- slotnames[!slotnames %in% c('ncol', 'nrow', 'colnames', 'rownames')]
     for (s in slotnames) {
         slot(x, s) <- value[[s]]
     }
     
     x
 }
-#' @name humdrumVector
-#' @export
-setMethod('names', c(x = 'humdrumVector'),
-          function(x) {
-              rownames(x)
-          })
 
-#' @name humdrumVector
-#' @export
-setMethod('rownames', c(x = 'humdrumVector'),
-          function(x) {
-              rownames(getSlots(x)[[1]])
-          })
+columns <- function(humvec) {
+    rep(1:ncol(humvec), each = length(humvec))
+}
 
-#' @name humdrumVector
-#' @export
-setMethod('colnames', c(x = 'humdrumVector'),
-          function(x) {
-              colnames(getSlots(x)[[1]])
-          })
-#' @name humdrumVector
-#' @export
-setMethod('dimnames', c(x = 'humdrumVector'),
-          function(x) {
-              list(rownames(x), colnames(x))
-          })
 
-#' @name humdrumVector
-#' @export
-setMethod('names<-', c(x = 'humdrumVector'),
+
+########## shape ----
+
+#' @name humVector
+#' @export dim ncol nrow length
+NULL
+
+#' @name humVector
+#' @export length dim ncol nrow
+setMethod('ncol', signature = 'humVector', function(x) x@ncol)
+setMethod('nrow', signature = 'humVector', function(x) x@nrow)
+setMethod('length', signature = 'humVector', function(x) nrow(x) * (x@ncol > 0L))
+setMethod('dim', signature = 'humVector', function(x) c(nrow = x@nrow, ncol = x@ncol))
+
+`ncol<-` <- function(x, value) {
+    if (is.null(value) || length(value) != 1 || value < 1) stop(call. = FALSE,
+                                                                "The @ncol slot of a humVector must be a single non-negative integer.")
+    if ((nrow(x) * ncol(x) %% value) != 0) stop(call. = FALSE, "The @ncol slot of a humVector must be an even divisor of the total amount of data in the humVector.")
+    x@colnames <- NULL
+    x@rownames <- NULL
+    x@ncol <- value
+    
+    x
+    
+}
+
+### tools 
+
+
+`setdim<-` <- function(x, value) {
+    dim(x) <- dim(value)
+    colnames(x) <- colnames(value)
+    rownames(x) <- rownames(value)
+    x
+}
+
+recycledim <- function(..., funccall) {
+    # accepts two named args
+    args <- list(...)[1:2]
+    d1 <- dim(args[[1]])
+    d2 <- dim(args[[2]])
+    
+    if (identical(d1, d2) || identical(d1, c(1L, 1L)) || identical(d2, c(1L, 1L))) return(NULL)
+    
+    drat <- d1 / d2
+    if (drat[1] == 1 && (d1[2] == 1 || d2[2] == 1)) {
+        args <- setNames(match_size(args[[1]], args[[2]], margin = 2), names(args))
+        list2env(args, envir = parent.frame(1))
+        return(NULL)
+    }
+    if (drat[2] == 1&& (d1[1] == 1 || d2[1] == 1)) {
+        args <- setNames(match_size(args[[1]], args[[2]], margin = 1), names(args))
+        list2env(args, envir = parent.frame(1))
+        return(NULL)
+    }
+    
+    stop(call. = FALSE, glue::glue("In call to {funccall}, the two humVectors are nonconformable.\n",
+                                   ,"To confirm, at least one of their dimensions needs to be the same, while the other is either (also) the same, or 1."))
+    
+}
+
+setClass('test',  contains = 'humVector', slots = c(Int = 'integer')) -> tester
+tester(Int = 1:9, colnames = c('a','c','a'), ncol = 3L) -> z
+
+
+#' @name humVector
+#' @export names colnames rownames
+setMethod('names',    c(x = 'humVector'), function(x) x@rownames)
+setMethod('rownames', c(x = 'humVector'), function(x) x@rownames)
+setMethod('colnames', c(x = 'humVector'), function(x) x@colnames)
+
+#' @exportMethod names<- colnames<- rownames<-
+setMethod('names<-', c(x = 'humVector'),
           function(x, value) {
               rownames(x) <- value
               x
           })
-#' @name humdrumVector
-#' @export
-setMethod('colnames<-', c(x = 'humdrumVector'),
+setMethod('colnames<-', c(x = 'humVector'),
           function(x, value) {
-              slots <- getSlots(x)
-              colnames(slots[[1]]) <- value
-              setSlots(x) <- slots
+              if (!is.null(x@rownames) && !is.null(value) && length(value) != ncol(x)) stop(call. = FALSE, 
+                                                                                            glue::glue("This humVector has rownames so the number of columns is fixed.\n",
+                                                                                            "\tThus, colnames assigned to this humVector must match the current number of columns ({ncol(x)}).\n",
+                                                                                            "\t(Set the rownames(x) <- NULL to remove this restriction.)"))
+              x@colnames <- value
               x
           })
-#' @name humdrumVector
-#' @export
-setMethod('rownames<-', c(x = 'humdrumVector'),
+setMethod('rownames<-', c(x = 'humVector'),
           function(x, value) {
-              slots <- getSlots(x)
-              rownames(slots[[1]]) <- value
-              setSlots(x) <- slots
-              x
-          })
-
-#' @name humdrumVector
-#' @export
-setMethod('dimnames<-', c(x = 'humdrumVector'),
-          function(x, value) {
-              slots <- getSlots(x)
-              dimnames(slots[[1]]) <- value
-              setSlots(x) <- slots
+              if (!is.null(value) && length(value) != length(x)) stop(call. = FALSE, "Rownames assigned to humVector must be the same length as the number of rows.")
+              x@rownames <- value
               x
           })
 
 
 
-
+##############
 
 checkSame <- function(x, y, call) {
+    # this function tests if two arguments are the same class
+    # it is necessary for any generic method for two humVectors, where the two humVectors might be some specific subclass.
     if (all(class(x) != class(y))) {
         stop(call. = FALSE, 
-             glue::glue("Can't apply {call} to a humdrumR vector with something else that is not the same class. "),
+             glue::glue("Can't apply {call} to a humVector with something else that is not the same class. "),
              glue::glue("In this case, you are trying to combine a value of class '{class(x)[1]}' with another value of class '{class(y)[1]}'."))
     }
     x
 }
 
-setMethod('[', c(x = 'humdrumVector', j = 'missing'),
+##### [i, j] ----
+
+humvectorI <- function(i, x) c(outer(i, (seq_along(colnames(x)) - 1) * length(x), '+'))
+humvectorJ <- function(j, x) {
+    columns <- columns(x)
+    unlist(locate(j, columns), use.names = FALSE)
+}
+
+emptyslots <- function(x) {
+    setSlots(x) <- lapply(getSlots(x), function(slot) vector(class(slot), 0L))
+    x
+}
+
+### [i, ] ----
+
+setMethod('[', c(x = 'humVector', i = 'numeric', j = 'missing'),
           function(x, i) {
-            slots <- getSlots(x)
-            slots <- lapply(slots, 
-                            function(slot) {
-                              slot[i, , drop = FALSE]
-                            })
-            setSlots(x) <- slots
+            i <- i[i != 0]
+            if (all(i < 0)) i <- 1L:length(x)[i] # flip negative indices (only if ALL negative)
+            
+            if (length(i) == 0L) {
+                x <- emptyslots(x)
+                rownames(x) <- NULL
+                x@nrow <- 0L
+                return(x)
+            }
+            
+            if (ncol(x) == 0L) {
+                x@row <- length(i)
+                rownames(x) <- rownames(x)[j]
+                return(x)
+            }
+            
+            # 
+            if (any(i < 0))  stop(call. = FALSE, "Can't mix negative and positive numbers in index.")
+            #i[i < 0] <- NA 
+            if (any(i > length(x))) stop(call. = FALSE, "Index is greater than the length of the humVector.\nNormal R vectors don't throw an error for this, but we do.")
+            # i[i > length(x)] <- NA 
+            
+            rownames <- rownames(x)[i]
+            x@nrow <- length(i)
+            # 
+            if (any(i != 0, na.rm = TRUE)) i <- humvectorI(i, x)
+            # 
+            setSlots(x) <- lapply(getSlots(x), '[', i = i)
+            rownames(x) <- rownames
             x
           })
+setMethod('[', c(x = 'humVector', i = 'character', j = 'missing'),
+          function(x, i) {
+              
+              if (is.null(rownames(x))) stop(call. = FALSE, "You can't row-index a humVector (i.e. humVector[i, ])", 
+                                             " with a character string if the humVector has no rownames (i.e., humVector@rownames = NULL).")
+              i <- locate(i, rownames(x))
+              nomatch <- lengths(i) == 0L
+              if (any(nomatch))  stop(call. = FALSE, "In your attempt to row-index a humVector (i.e., humVector[i, ]) ",
+                                      glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
+                                                          sep = ', ', last = ', and '),
+                                      plural(sum(nomatch), ' are not rownames', ' is not a rowname'),
+                                      ' in the humVector.')
+              
+              i <- unlist(i)
+              x[i, ]
+          })
+setMethod('[', c(x = 'humVector', i = 'logical', j = 'missing'),
+          function(x, i ) {
+              if (length(i) != nrow(x)) stop(call. = FALSE,
+                                             "Can't index[i , ] a humVector with a logical vector that is a different length than humVector@nrow.")
+            x[which(i), ]
+          })
+setMethod('[', c(x = 'humVector', i = 'matrix', j = 'missing'),
+          function(x, i ) {
+              matclass <- class(i[1, 1])
+              if (matclass %in% c('character', 'numeric')) {
+                  if (ncol(i) == 1L || nrow(i) == 1L) return(x[c(i), ])
+                  
+                  stop(call. = FALSE,
+                       "Can't index a humVector with a numeric or character matrix unless that matrix is a 1-column or 1-row matrix.")
+              }
+              if (matclass != 'logical') stop(call. = FALSE, glue::glue("Can't index a humVector with a {matclass} matrix."))
+              
+              
+              if (ncol(i) == 1L && length(i) == nrow(x)) return(x[which(i), ])
+              
+              if (!identical(dim(i), dim(x))) stop(call. = FALSE, "Can't index humVector[i , ] with a logical matrix, unless either has the exact same",
+                                                   "dimensions as the humVector, or has the same number of rows but only one column.")
+              
+              ij <- which(i, arr.ind = TRUE)
+              
+              x[ij[ , 'row'], ij [, 'col'], cartesian = TRUE]
+              
+          })
 
-setMethod('[', c(x = 'humdrumVector', i = 'missing'),
+
+### [ , j] ----
+
+setMethod('[', c(x = 'humVector', i = 'missing', j = 'numeric'),
           function(x, j) {
-              slots <- getSlots(x)
-              slots <- lapply(slots, 
-                              function(slot) {
-                                  slot[ , j, drop = FALSE]
-                              })
-              setSlots(x) <- slots
+              j <- j[j != 0]
+              if (all(j < 0L)) j <- seq_len(x@ncol)[j] #negative indices
+              
+              if (length(j) == 0L) {
+                  x <- emptyslots(x)
+                  colnames(x) <- NULL
+                  x@ncol <- 0L
+                  return(x)
+              }
+              
+              if (nrow(x) == 0L) {
+                  x@ncol <- length(j)
+                  colnames(x) <- colnames(x)[j]
+                  return(x)
+              }
+              
+              if (any(j < 0))  stop(call. = FALSE, "Can't mix negative and positive numbers in index.")
+              if (any(j > ncol(x))) stop(call. = FALSE, "Index[, j] is greater than the ncol of the humVector.")
+              
+              colnames <- colnames(x)[j]
+              ncol <- length(j)
+              # 
+              j <- humvectorJ(j, x)
+              setSlots(x) <- lapply(getSlots(x), '[', i = j)
+              # 
+              x@colnames <- colnames
+              x@ncol <- ncol
               x
           })
 
-setMethod('[', c(x = 'humdrumVector'),
-          function(x, i, j) {
-              slots <- getSlots(x)
-              slots <- lapply(slots, 
-                              function(slot) {
-                                  slot[i, j, drop = FALSE]
-                              })
-              setSlots(x) <- slots
-              x
+
+
+setMethod('[', c(x = 'humVector', i = 'missing', j = 'character'),
+          function(x, j) {
+              if (is.null(colnames(x))) stop(call. = FALSE, "You can't column-index a humVector (i.e. humVector[ , j])", 
+                                             " with a character string if the humVector has no colnames (i.e., humVector@colnames = NULL).")
+              
+              j <- match(j, colnames(x))
+              nomatch <- is.na(j)
+              if (any(nomatch))  stop(call. = FALSE, "In your attempt to column-index a humVector (i.e., humVector[ , j]) ",
+                                      glue::glue_collapse(paste0("'", names(j)[nomatch], "'"), 
+                                                          sep = ', ', last = ', and '),
+                                      plural(sum(nomatch), ' are not colnames', ' is not a colname'),
+                                      ' in the humVector.')
+              
+              j <- unlist(j)
+              x[ , j]
+              
           })
 
 
+setMethod('[', c(x = 'humVector', i = 'missing', j = 'logical'),
+          function(x, j ) {
+              if (length(j) != ncol(x)) stop(call. = FALSE,
+                                             "Can't index[  , j] a humVector with a logical vector that is a different length than humVector@ncol.")
+              x[ , which(j)]
+          })
 
-setMethod('[<-', c(x = 'humdrumVector', i = 'ANY', j = 'missing', value = 'humdrumVector'),
+### [i, j]
+
+
+setMethod('[', c(x = 'humVector'),
+          function(x, i, j, cartesian = FALSE) {
+              i <- i[i != 0]
+              j <- j[j != 0]
+              
+              if (cartesian) {
+                  if (!is.numeric(i) || !is.numeric(j)) stop(call. = FALSE, "Can't do cartesian indexing from humVector if i and j aren't both numeric.")
+                  # XXX MAKE CHARACTER POSSIBLE
+                  
+                  match_size(i = i, j = j, toEnv = TRUE)
+                  
+                  if (any(i < 0 | j < 0)) stop(call. = FALSE, "Can't do cartesian indexing with negative indices.")
+                  
+                  i.internal <- humvectorI(i, x)
+                  i.internal <- split(i.internal, rep(1:length(i), length.out = length(i.internal)))
+                  i.internal <- unlist(Map('[', i.internal, j))
+                  
+                  
+                  x@ncol <- 1L
+                  x@nrow <- length(i)
+                  setSlots(x) <- lapply(getSlots(x), '[', i.internal)
+                  x@colnames <- paste(colnames(x)[j], collapse = '.')
+                  x@rownames <- rownames(x)[i]
+                  
+                  x
+                             
+                  
+              } else {
+                 x <- x[i,  ]
+                 x <- x[ , j]
+              }
+              
+              x
+          })
+
+#### [i, j] <- value ----
+
+setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'missing', value = 'humVector'),
           function(x, i, value) {
-              checkSame(x, value, '[<-')
+              checkSame(x, value, '[i , ]<-')
+              
+              xindexed <- x[i, ] # this will return appropriate error if indices are invalid
+              
+              # if value is right dimensions (exactly) when transposed:
+              if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
+              
+              # recycle columns
+              if (length(value) %in% c(1, length(i)) && ncol(value) == 1L && ncol(x) > 1L) {
+                  value <- Repeat(value, length.out = ncol(x), margin = 2)
+              }
+              
+              # sizes still don't match
+              if (ncol(value) != ncol(x)) stop(call. = FALSE,
+                                               glue::glue("Can't assign ([i]<-) a humVector with {ncol(value)} columns into rows of a humVector with {ncol(x)} columns."))
+              
+              # character indices
+              if (is.character(i) && !is.null(rownames(x))) i <- locate(i, rownames(x))
+              
+              # negative indices
+              if (all(i < 0)) i <- (1L:nrow(x))[i]
+              if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
+              
+              #
+              if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
+              if (length(value) != length(i)) stop(call. = FALSE, 
+                                                   glue::glue("Can't assign ([i]<-) a humVector with {length(value)} rows into {length(i)} rows of another humVector.\n",
+                                                              "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
+              
+              
+              ## do it
+              i <- humvectorI(i, x)
               
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
-              
               slots <- Map(function(slotx, slotv) {
-                                  if (is.null(dim(slotx))) slotx[i] <- slotv else slotx[i,] <- slotv
+                                  slotx[i] <- slotv
                                   slotx
                              },
                            slotsx, slotsv)
@@ -229,15 +503,40 @@ setMethod('[<-', c(x = 'humdrumVector', i = 'ANY', j = 'missing', value = 'humdr
               x
           })
 
-setMethod('[<-', c(x = 'humdrumVector', i = 'missing', j = 'ANY', value = 'humdrumVector'),
-          function(x, i, value) {
-              checkSame(x, value, '[<-')
+setMethod('[<-', c(x = 'humVector', i = 'missing', j = 'ANY', value = 'humVector'),
+          function(x, j, value) {
+              checkSame(x, value, '[ , j]<-')
               
+              xindexed <- x[, j] # this will return appropriate error if indices are invalid
+              
+              # if value is right dimensions (exactly) when transposed:
+              if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
+              
+              # recycle rows
+              if (ncol(value) %in% c(1, length(j)) && nrow(value) == 1L && nrow(x) > 1L) {
+                  value <- Repeat(value, length.out = nrow(x), margin = 1)
+              }
+              
+              # sizes still don't match
+              if (nrow(value) != nrow(x)) stop(call. = FALSE,
+                                               glue::glue("Can't assign ([ , j]<-) a humVector with {nrow(value)} rows into columns of a humVector with {nrow(x)} rows."))
+              
+              # character indices
+              if (is.character(j) && !is.null(colnames(x))) j <- locate(j, colnames(x))
+              
+              
+              ## negative indices
+              if (all(j < 0)) j <- (1L:col(x))[j]
+              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
+              
+              
+              # do it 
+              
+              j <- humvectorJ(j, x)
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
-              
               slots <- Map(function(slotx, slotv) {
-                  if (is.null(dim(slotx))) slotx[i] <- slotv else slotx[i,] <- slotv
+                  slotx[j] <- slotv
                   slotx
               },
               slotsx, slotsv)
@@ -245,90 +544,213 @@ setMethod('[<-', c(x = 'humdrumVector', i = 'missing', j = 'ANY', value = 'humdr
               x
           })
 
-
-####
-
-#' @name humdrumVector
-#' @export
-setMethod('c', 'humdrumVector',
-          function(x, ...) {
-              xs <- list(x, ...)
-              xs <- lapply(xs, function(x) if (!is.humdrumVector(x)) as(x, class(xs[[1]])) else x)
+setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'ANY', value = 'humVector'),
+          function(x, i, j, value, cartesian = FALSE) {
+              checkSame(x, value, '[ i, j]<-')
               
-              Reduce(function(x, y) checkSame(x, y, 'c'), xs)
+              if (cartesian) return(cartesianAssign(x, i, j, value))
               
-              xslots <- lapply(xs, getSlots)
-              ncols <- sapply(xslots, function(x) ncol(x[[1]]))
+              xindexed <- x[i, j] # this will return appropriate error if indices are invalid
+              # if value is right dimensions (exactly) when transposed:
+              if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
               
-              if (length(unique(ncols)) != 1L) {
-                  ncol <- max(ncols)
-                  slots[ncols < ncol] <- lapply(slots[ncols < ncol], 
-                                                function(slot) do.call('cbind', c(list(slot), rep(NA, ncol - ncol(slot)))))
-              }
-              xslots <- do.call('Map', c(rbind, xslots))
+              # character indices
+              if (is.character(i)) i <- locate(i, colnames(x))
+              if (is.character(j)) j <- locate(j, colnames(x))
               
-              setSlots(x) <- xslots
+              ## negative indices
+              if (all(j < 0)) j <- (1L:col(x))[j]
+              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
+              
+              # sizes still don't match
+              
+              if (!all(dim(xindexed) == dim(value))) stop(call. = FALSE,
+                                               glue::glue("Can't assign ([ i, j, cartesian = FALSE]<-) a humVector with dimensions ({nrow(value)}, {ncol(value)}) into", 
+                                                          " a subset of a humVector with dimensions ({length(i)}, {length(j)})."))
+              
+              # do it 
+              i.internal <- humvectorI(i, x)
+              j.internal <- humvectorJ(j, x)
+              ij.internal <- intersect(i.internal, j.internal)
+              
+              slotsx <- getSlots(x)
+              slotsv <- getSlots(value)
+              slots <- Map(function(slotx, slotv) {
+                  slotx[ij.internal] <- slotv
+                  slotx
+              }, slotsx, slotsv)
+              
+              setSlots(x) <- slots
               x
           })
 
-rbind.humdrumVector <- function(...) do.call('c', list(...))
-cbind.humdrumVector <-  function(...) {
+cartesianAssign <- function(x, i, j, value) {
+    xindexed <- x[i, j, cartesian = TRUE] # this will return appropriate error if indices are invalid
+    
+    # if value is right dimensions (exactly) when transposed
+    if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
+    
+    # character indices XXX
+    
+    # sizes still don't match
+    if (!all(dim(xindexed) == dim(value))) stop(call. = FALSE,
+                                                glue::glue("Can't assign ([ i, j, cartesian = TRUE]<-) {length(value)} values into", 
+                                                           " {length(i)} cartesian coordinates."))
+    
+    # do it 
+    i.internal <- humvectorI(i, x)
+    i.internal <- split(i.internal, rep(1:length(i), length.out = length(i.internal)))
+    i.internal <- unlist(Map('[', i.internal, j))
+    
+    slotsx <- getSlots(x)
+    slotsv <- getSlots(value)
+    slots <- Map(function(slotx, slotv) {
+        slotx[i.internal] <- slotv
+        slotx
+    }, slotsx, slotsv)
+    
+    setSlots(x) <- slots
+    x
+    
+}
+
+####
+
+setMethod('rep', c(x = 'humVector'),
+          function(x, ...) {
+              slots <- getSlots(x)
+              columns <- columns(x)
+              slots <- lapply(slots,
+                     function(slot) {
+                         unlist(tapply(slot, columns, rep, ..., simplify = FALSE), use.names = FALSE)
+                     })
+              setSlots(x) <- slots
+              x@nrow <- as.integer(length(slots[[1]]) / ncol(x))
+              if (!is.null(rownames(x))) rownames(x) <- rep(rownames(x), ...)
+              x
+          })
+
+setMethod('rev', c(x = 'humVector'),
+          function(x) {
+              z[length(x):1]
+          })
+
+#' @name humVector
+#' @export
+setMethod('c', 'humVector',
+          function(x, ...) {
+              xs <- list(x, ...)
+              do.call('rbind', xs)
+          })
+
+rbind.humVector <- function(...) {
     xs <- list(...)
-    xs <- lapply(xs, function(x) if (!is.humdrumVector(x)) as(x, class(xs[[1]])) else x)
+    xs <- lapply(xs, function(x) if (!is.humVector(x)) as(x, class(xs[[1]])) else x) # force to class of first thing
+    Reduce(function(x, y) checkSame(x, y, 'rbind'), xs)
     
-    Reduce(function(x, y) checkSame(x, y, 'cbind'), xs)
-    
-    xslots <- lapply(xs, getSlots)
-    nrows <- sapply(xslots, function(x) nrow(x[[1]]))
-    
-    xslots <- lapply(xslots, function(slots) lapply(slots, function(slot) slot[1:min(nrows), , drop = FALSE]))
-    
-    xslots <- do.call('Map', c(cbind, xslots))
-    
-    if (max(nrows) > min(nrows)) {
-        pad <- matrix(NA, max(nrows) - min(nrows), ncol(xslots[[1]]))
-        xslots <- lapply(xslots, function(slot) rbind(slot, pad) )
-    }
+    ncols <- sapply(xs, ncol)
+    if (length(unique(ncols)) != 1L) stop(call. = FALSE, "Can't concatinate humVectors with different numbers of columns.")
     
     x <- xs[[1]]
-    setSlots(x) <- xslots
+    xslots <- lapply(xs, getSlots) 
+    
+    xslots <- lapply(xslots,
+                     function(slots) {
+                         lapply(slots, `setdim<-`, value = x)
+                     })
+    slots <- Reduce(function(cur, rest) Map(rbind, cur, rest), xslots)
+    slots <- lapply(slots, c)
+    
+    setSlots(x) <- slots
+    
+    ##
+    rownames <- lapply(xs, rownames)
+    rownames <- if (any(sapply(rownames, is.null))) NULL else unlist(rownames)
+    rownames(x) <- rownames
+    x@nrow <- sum(sapply(xs, nrow))
+    
+    x
+
+    
+}
+cbind.humVector <-  function(...) {
+    xs <- list(...)
+    xs <- lapply(xs, function(x) if (!is.humVector(x)) as(x, class(xs[[1]])) else x) # force to class of first thing
+    Reduce(function(x, y) checkSame(x, y, 'c'), xs)
+    
+    nrows <- sapply(xs, nrow)
+    if (length(unique(nrows)) != 1L) stop(call. = FALSE, "Can't cbind to humVector's with different numbers of rows.")
+    
+    x <- xs[[1]]
+    xslots <- lapply(xs, getSlots)
+    
+    setSlots(x) <- Reduce(function(cur, rest) Map(c, cur, rest), xslots)
+    ##
+    colnames <- lapply(xs, colnames)
+    colnames <- if (any(sapply(colnames, is.null))) NULL else unlist(colnames)
+    x@colnames <- colnames
+    x@ncol <- sum(sapply(xs, ncol))
+     
     x
 }
-#' @name humdrumVector
-#' @export dim ncol nrow length
-NULL
 
-#' @name humdrumVector
-#' @export length dim ncol nrow
-setMethod('dim', signature = 'humdrumVector', function(x) dim(getSlots(x)[[1]]))
-setMethod('ncol', signature = 'humdrumVector', function(x) dim(x)[2])
-setMethod('nrow', signature = 'humdrumVector', function(x) dim(x)[1])
-setMethod('length', signature = c('humdrumVector'), function(x) length(getSlots(x)[[1]]))
-
-#' @name humdrumVector
-#' @export
-setMethod('is.na', signature = 'humdrumVector',
+setMethod('t', signature = 'humVector',
           function(x) {
-              is.na(getSlots(x)[1][ , 1])
+              ncol <- ncol(x)
+              nrow <- nrow(x)
+              colnames <- colnames(x)
+              rownames <- rownames(x)
+              setSlots(x) <- lapply(getSlots(x),
+                     function(slot) {
+                         setdim(slot) <- x
+                         c(t(slot))
+                     })
+              
+              x@colnames <- rownames
+              x@rownames <- colnames
+              x@nrow <- ncol
+              x@ncol <- nrow
+              
+              x
+          })
+
+setMethod('diag', signature = 'humVector',
+          function(x) {
+              if (dim(x)[1] != dim(x)[2]) stop(call. = FALSE, "Can't get diagonal of a non-square humVector. (I.e., the number of rows and columns must be equal.)")
+              
+              x[1:nrow(x), 1:ncol(x), cartesian = TRUE]
+          })
+
+##### is/as xx -----
+
+
+
+#' @name humVector
+#' @export
+setMethod('is.na', signature = 'humVector',
+          function(x) {
+              mat <- is.na(getSlots(x)[[1]])
+              setdim(mat) <- x
+              mat
           })
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-is.humdrumVector <- function(x) inherits(x, 'humdrumVector')
+is.humVector <- function(x) inherits(x, 'humVector')
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('is.vector', signature = 'humdrumVector', function(x) TRUE)
+setMethod('is.vector', signature = 'humVector', function(x) TRUE)
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('as.vector', signature = 'humdrumVector', force)
+setMethod('as.vector', signature = 'humVector', force)
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('as.list', signature = c('humdrumVector'),
+setMethod('as.list', signature = c('humVector'),
           function(x, ...) {
               
               x <- list(x, ...)
@@ -337,25 +759,26 @@ setMethod('as.list', signature = c('humdrumVector'),
               lapply(seq_along(x), function(i) x[i])
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-as.matrix.humdrumVector <- function(x, ...) {
+as.matrix.humVector <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
     
     slots <- getSlots(x)
-    mat <- slots[[1]]
+    mat <- Reduce(collapse, slots)
     
-    mat[] <- Reduce(function(x, y) .paste(x, y, sep = ',', na.rm = TRUE), slots)
-    mat[is.na(slots[[1]])] <- NA_character_
+    mat[is.na(slots[[1]])] <- NA
     
-    rownames(mat) <- rownames(x)
-    colnames(mat) <- colnames(x)
+    dim(mat) <- c(length(x), ncol(x))
+    colnames(mat) <- x@colnames
+    rownames(mat) <- x@rownames
+    
     mat
 }
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-as.data.frame.humdrumVector <- function(x, row.names = NULL, optional = FALSE, ...) {
+as.data.frame.humVector <- function(x, row.names = NULL, optional = FALSE, ...) {
     if (is.null(row.names)) row.names <- 1:length(x)
     
     value <- list(x)
@@ -366,37 +789,34 @@ as.data.frame.humdrumVector <- function(x, row.names = NULL, optional = FALSE, .
 }
 
 #######-
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('as.character', 'humdrumVector',
+setMethod('as.character', 'humVector',
           function(x) {
-              x <- as.matrix.humdrumVector(x)
-              x[] <- as.character(as.matrix)
+              x <- as.matrix.humVector(x)
+              x[] <- as.character(x)
               x
           })
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('show', signature = c(object = 'humdrumVector'), 
+setMethod('show', signature = c(object = 'humVector'), 
           function(object) { 
-              if (nrow(object) == 0L) {
-                  cat(paste0(class(object), '(NULL)'))
+              if (length(object) == 0L) {
+                  cat(paste0(class(object), '[', nrow(object), ' , ', ncol(object), ']'))
               } else {
                   mat <- as.matrix(object)
-                  if (ncol(mat) == 1L) mat <- setNames(c(mat), rownames(mat))
+                  if (ncol(mat) == 1L) {
+                      mat <- c(mat)
+                      names(mat) <- names(object)
+                      if (!is.null(colnames(object))) cat('    ', colnames(object), '\n')
+                  }
                   print(mat, quote = FALSE)
               }
             invisible(object)
             }  )
 
 
-#' @name humdrumVector
-#' @export
-setMethod('rep', c(x = 'humdrumVector'),
-          function(x, ...) {
-              slots <- getSlots(x)
-              i <- 1:nrow(x)
-              x[rep(i, ...), ]
-})
+########## order, equality ----
 
 order <- function(x, ..., na.last = TRUE, decreasing = FALSE, method = c("auto", "shell", "radix")) UseMethod('order')
 
@@ -407,137 +827,225 @@ order.default <- function(x, ..., na.last = TRUE,
 
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('sort', signature = c(x = 'humdrumVector'),
+setMethod('sort', signature = c(x = 'humVector'),
           function(x, decreasing = FALSE) {
               x[order(x, decreasing = decreasing), ]
           })
 
+#####
 
-#' @name humdrumVector
+
+#' @name humVector
 #' @export
-setMethod('==', signature = c('humdrumVector', 'humdrumVector'),
+setMethod('==', signature = c('humVector', 'humVector'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
               
+              match_size(e1 = e1, e2 = e2, margin = 1:2, toEnv = TRUE)
+              
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
-              Reduce(`&`, Map(`==`, slots1, slots2))
+              mat <- Reduce(`&`, Map(`==`, slots1, slots2))
+              setdim(mat) <- e1
+              mat
               
           })
 
 #' @export
-setMethod('!=', signature = c('humdrumVector', 'humdrumVector'),
+setMethod('!=', signature = c('humVector', 'humVector'),
           function(e1, e2) {
               checkSame(e1, e2, '!=')
               
               !(e1 == e2)
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('<', signature = c('humdrumVector', 'humdrumVector'),
+setMethod('<', signature = c('humVector', 'humVector'),
           function(e1, e2) {
               !(e1 >= e2 )
           })
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('<=', signature = c('humdrumVector', 'humdrumVector'),
+setMethod('<=', signature = c('humVector', 'humVector'),
           function(e1, e2) {
               !(e1 > e2)
           })
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-format.humdrumVector <- function(x, ...) { as.character(x)}
+format.humVector <- function(x, ...) { as.character(x)}
 ###
 
-#' @name humdrumVector
-#' @exportMethod + - sum cumsum diff
 
-setMethod('sum', signature = c('humdrumVector'),
-          function(x) {
-              Reduce(`+`, as.list(x))
+
+setMethod('sum', signature = c('humVector'),
+          function(x, ..., na.rm = FALSE) {
+              x <- c(list(x), ...)
+              
+              x <- lapply(x, function(humv) {
+                  setSlots(humv) <- lapply(getSlots(humv, c('numeric', 'integer', 'logical')), sum, na.rm = na.rm)
+                  rownames(humv) <- NULL
+                  colnames(humv) <- "sum"
+                  humv
+              })
+              
+              x <- if (length(x) > 1) {
+                  Reduce(`+`, x)
+              } else {
+                  x[[1]]
+                  
+              }
+              x@nrow <- x@ncol <- 1L
+              x
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('cumsum', signature = c('humdrumVector'),
-          function(x) {
-              do.call('c', (Reduce(`+`, as.list(x), accumulate = TRUE)))
+setMethod('colSums', signature = c('humVector'),
+          function(x, na.rm = FALSE) {
+              
+              setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
+                                    function(slot) {
+                                        setdim(slot) <- x
+                                        as.integer(unname(c(colSums(slot, na.rm = na.rm))))
+                                    })
+              rownames(x) <- NULL
+              x@nrow <- 1L
+                                    
+              x
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('-', signature = c('humdrumVector', 'humdrumVector'),
+setMethod('rowSums', signature = c('humVector'),
+          function(x, na.rm = FALSE) {
+              setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
+                                    function(slot) {
+                                        setdim(slot) <- x
+                                        as.integer(unname(c(rowSums(slot, na.rm = na.rm))))
+                                    })
+              colnames(x) <- NULL
+              x@ncol <- 1L
+              x
+          })
+
+#' @name humVector
+#' @export
+setMethod('cumsum', signature = c('humVector'),
+          function(x) {
+              setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
+                                    function(slot) {
+                                        setdim(slot) <- x
+                                        c(apply(slot, 2, cumsum))
+                                    })
+              
+              x
+          })
+
+
+#' @name humVector
+#' @export
+setMethod('-', signature = c('humVector', 'humVector'),
           function(e1, e2) {
               e1 + (-e2)
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('diff', signature = c('humdrumVector'),
-          function(x, lag = 1L, differences = 1L) {
-              out <- tail(x, -lag) - head(x, -lag)
+setMethod('diff', signature = c('humVector'),
+          function(x, lag = 1L) {
+              setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
+                                    function(slot) {
+                                        setdim(slot) <- x
+                                        c(diff(slot, lag = lag))
+                                    })
+              rownames(x) <- rownames(x)[-1]
+              x@nrow <- x@nrow - 1L
+              x
+          })
+
+
+#' @name humVector
+#' @export
+setMethod('+', signature = c('humVector', 'humVector'),
+          function(e1, e2) {
+              checkSame(e1, e2, '+')
+              recycledim(e1 = e1, e2 = e2, funccall = '+')
               
-              if (differences > 1L) {
-                  Recall(out, lag, differences - 1L)
-              } else {
-                  out
-              }
+              slots <- Map(`+`, getSlots(e1, c('numeric', 'integer', 'logical')), getSlots(e2, c('numeric', 'integer', 'logical')))
+              setSlots(e1) <- slots
+              e1
           })
 
-
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('+', signature = c('humdrumVector', 'ANY'),
-          function(e1, e2) {
-              if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE, margin = 1:2, recycle = c(TRUE, FALSE))
-              e1 + as(e2, class(e1))
-          })
-
-#' @name humdrumVector
-#' @export
-setMethod('+', signature = c('ANY', 'humdrumVector'),
+setMethod('+', signature = c('humVector', 'ANY'),
           function(e1, e2) {
               e1 + as(e2, class(e1))
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('-', signature = c('humdrumVector', 'ANY'),
+setMethod('+', signature = c('ANY', 'humVector'),
+          function(e1, e2) {
+              as(e1, class(e2)) + e2
+          })
+
+#' @name humVector
+#' @export
+setMethod('-', signature = c( 'humVector', 'missing'),
+          function(e1) {
+              
+              setSlots(e1) <- lapply(getSlots(e1), function(slot) -slot )
+              e1
+          })
+
+
+#' @name humVector
+#' @export
+setMethod('-', signature = c( 'humVector', 'humVector'),
+          function(e1, e2) {
+              e1 + -e2
+              
+          })
+
+#' @name humVector
+#' @export
+setMethod('-', signature = c('humVector', 'ANY'),
           function(e1, e2) {
               e1 - as(e2, class(e1))
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('-', signature = c('ANY', 'humdrumVector'),
+setMethod('-', signature = c('ANY', 'humVector'),
           function(e1, e2) {
-              e1 - as(e2, class(e1))
+             as(e1, class(e2)) - e2
           })
 
 
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('*', signature = c('humdrumVector', 'numeric'),
+setMethod('*', signature = c('humVector', 'numeric'),
           function(e1, e2) {
-              setSlots(e1) <- lapply(getSlots(e1), 
+              setSlots(e1) <- lapply(getSlots(e1, c('numeric', 'integer')), 
                                      function(x) {
-                                       x * as(e2, class(x))  
+                                       as(x * e2, class(x))
                                          
                                      })
               e1 
           })
 
-#' @name humdrumVector
+#' @name humVector
 #' @export
-setMethod('*', signature = c('numeric', 'humdrumVector'),
+setMethod('*', signature = c('numeric', 'humVector'),
           function(e1, e2) {
               e2 * e1
           })
@@ -545,6 +1053,5 @@ setMethod('*', signature = c('numeric', 'humdrumVector'),
 
 
 
-setClass('test', contains = 'humdrumVector', slots= c(x='matrix', y= 'matrix'))
 
-new('test', x= 1:5, y= 1:10) -> a
+

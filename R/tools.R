@@ -226,13 +226,13 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
 }
 
 
-locate <- function(x, values) {
-    if (is.null(dim(x)) || length(dim(x)) == 1) {
-        lapply(values, function(val) which(x == val))
+locate <- function(x, table) {
+    if (is.null(dim(table)) || length(dim(x)) == 1) {
+        setNames(lapply(x, function(val) which(table == val)), x)
     } else {
-        apply(values, 1, 
+        apply(x, 1, 
               function(val) {
-                  which(Reduce('&', Map('==', x, val)))
+                  which(Reduce('&', Map('==', table, val)))
                   
                   })
     }
