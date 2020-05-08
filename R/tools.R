@@ -373,7 +373,7 @@ IfElse <- function(true, yes, no) {
     if (any(!bool)) {
         fparsed <- captureValues(fexpr, parent.env(environment()))
         fexpr <- fparsed$expr
-        fvars <- do.call('match_size', c(fparsed$value, list(bool)))
+        fvars <- do.call('match_size', c(fparsed$value, list(bool), margin = 1:2))
         f <- rlang::eval_tidy(fexpr, data = lapply(fvars, '[', i = !bool))
         f <- rep(f, length.out = sum(!bool))
         output <- vector(class(f), length(bool))
@@ -381,13 +381,14 @@ IfElse <- function(true, yes, no) {
     if (any(bool)) {
         tparsed <- captureValues(texpr, parent.env(environment())) 
         texpr <- tparsed$expr 
-        tvars <- do.call('match_size', c(tparsed$value, list(bool)))
+        tvars <- do.call('match_size', c(tparsed$value, list(bool), margin = 1:2))
         t <- rlang::eval_tidy(texpr, data = lapply(tvars, '[', i =  bool))
         t <- rep(t, length.out = sum(bool))
         output <- vector(class(t), length(bool))
         output[bool] <- t
     }
     if (any(!bool))  output[!bool] <- f
+    setdim(output) <- bool
     output
 }
 

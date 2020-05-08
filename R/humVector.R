@@ -168,12 +168,19 @@ setMethod('length', signature = 'humVector', function(x) nrow(x) * (x@ncol > 0L)
 setMethod('dim', signature = 'humVector', function(x) c(nrow = x@nrow, ncol = x@ncol))
 
 `ncol<-` <- function(x, value) {
+    if (ncol(x) == value) {
+        return(x) 
+    } 
+    dimnames(x) <- NULL
+    
     if (is.null(value) || length(value) != 1 || value < 1) stop(call. = FALSE,
                                                                 "The @ncol slot of a humVector must be a single non-negative integer.")
-    if ((nrow(x) * ncol(x) %% value) != 0) stop(call. = FALSE, "The @ncol slot of a humVector must be an even divisor of the total amount of data in the humVector.")
+    if (((nrow(x) * ncol(x)) %% value) != 0) stop(call. = FALSE, "The @ncol slot of a humVector must be an even divisor of the total amount of data in the humVector.")
     x@colnames <- NULL
     x@rownames <- NULL
-    x@ncol <- value
+    x@ncol <- as.integer(value)
+    
+    x@nrow <- as.integer(length(getSlots(x)[[1]]) / value)
     
     x
     
@@ -189,13 +196,40 @@ setMethod('dim', signature = 'humVector', function(x) c(nrow = x@nrow, ncol = x@
     x
 }
 
-recycledim <- function(..., funccall) {
+`copydim<-` <- function(x, value) {
+    if (is.null(dim(x)) && is.atomic(x)) {
+        matrix(x, ncol = ncol(value), nrow = nrow(value), dimnames = dimnames(value))
+    } else {
+        
+        ncol(x) <- ncol(value)
+        dimnames(x) <- dimnames(value)
+        x
+        
+    }
+}
+
+`%<-dim%` <- function(x, value) {
+    setdim(x) <- value
+   x
+    
+}
+
+`%@%` <- function(x, slot) {
+    slot <- rlang::expr_text(rlang::enexpr(slot))
+    slotnames <- slotNames(x)
+    slot <- slotnames[pmatch(slot, slotnames, duplicates.ok = TRUE)]
+    slot(x, slot) %<-dim% x
+    
+}
+
+
+arecycledim <- function(..., funccall) {
     # accepts two named args
     args <- list(...)[1:2]
     d1 <- dim(args[[1]])
     d2 <- dim(args[[2]])
     
-    if (identical(d1, d2) || identical(d1, c(1L, 1L)) || identical(d2, c(1L, 1L))) return(NULL)
+    if (all(d1 == d2) || all(d1 == c(1L, 1L)) || all(d2 == c(1L, 1L))) return(NULL)
     
     drat <- d1 / d2
     if (drat[1] == 1 && (d1[2] == 1 || d2[2] == 1)) {
@@ -214,8 +248,6 @@ recycledim <- function(..., funccall) {
     
 }
 
-setClass('test',  contains = 'humVector', slots = c(Int = 'integer')) -> tester
-tester(Int = 1:9, colnames = c('a','c','a'), ncol = 3L) -> z
 
 
 #' @name humVector
@@ -223,6 +255,7 @@ tester(Int = 1:9, colnames = c('a','c','a'), ncol = 3L) -> z
 setMethod('names',    c(x = 'humVector'), function(x) x@rownames)
 setMethod('rownames', c(x = 'humVector'), function(x) x@rownames)
 setMethod('colnames', c(x = 'humVector'), function(x) x@colnames)
+setMethod('dimnames', c(x = 'humVector'), function(x) list(rownames = x@rownames, colnames = x@colnames))
 
 #' @exportMethod names<- colnames<- rownames<-
 setMethod('names<-', c(x = 'humVector'),
@@ -232,10 +265,7 @@ setMethod('names<-', c(x = 'humVector'),
           })
 setMethod('colnames<-', c(x = 'humVector'),
           function(x, value) {
-              if (!is.null(x@rownames) && !is.null(value) && length(value) != ncol(x)) stop(call. = FALSE, 
-                                                                                            glue::glue("This humVector has rownames so the number of columns is fixed.\n",
-                                                                                            "\tThus, colnames assigned to this humVector must match the current number of columns ({ncol(x)}).\n",
-                                                                                            "\t(Set the rownames(x) <- NULL to remove this restriction.)"))
+              if (!is.null(x@rownames) && !is.null(value) && length(value) != ncol(x)) stop(call. = FALSE, "Colnames assigned to humVector must be the same length as the number of cols.")
               x@colnames <- value
               x
           })
@@ -245,6 +275,20 @@ setMethod('rownames<-', c(x = 'humVector'),
               x@rownames <- value
               x
           })
+setMethod('dimnames<-', c(x = 'humVector'),
+          function(x, value) {
+              if (is.null(value) || length(value) == 1L) {
+                  x@rownames <- NULL
+                  x@colnames <- NULL
+                  return(x)
+              }
+              
+              if (!is.list(value) || length(value) != 2L) stop(call. = FALSE, 'When assigning dimnames to a humVector using dimnames(x) <- value, value must be a list of length two.')
+              rownames(x) <- value[[1]]
+              colnames(x) <- value[[2]]
+              x
+          })
+
 
 
 
@@ -263,7 +307,9 @@ checkSame <- function(x, y, call) {
 
 ##### [i, j] ----
 
-humvectorI <- function(i, x) c(outer(i, (seq_along(colnames(x)) - 1) * length(x), '+'))
+humvectorI <- function(i, x) {
+    c(outer(i, (seq_len(ncol(x)) - 1) * length(x), '+'))
+}
 humvectorJ <- function(j, x) {
     columns <- columns(x)
     unlist(locate(j, columns), use.names = FALSE)
@@ -280,7 +326,6 @@ setMethod('[', c(x = 'humVector', i = 'numeric', j = 'missing'),
           function(x, i) {
             i <- i[i != 0]
             if (all(i < 0)) i <- 1L:length(x)[i] # flip negative indices (only if ALL negative)
-            
             if (length(i) == 0L) {
                 x <- emptyslots(x)
                 rownames(x) <- NULL
@@ -299,14 +344,15 @@ setMethod('[', c(x = 'humVector', i = 'numeric', j = 'missing'),
             #i[i < 0] <- NA 
             if (any(i > length(x))) stop(call. = FALSE, "Index is greater than the length of the humVector.\nNormal R vectors don't throw an error for this, but we do.")
             # i[i > length(x)] <- NA 
-            
             rownames <- rownames(x)[i]
-            x@nrow <- length(i)
+            nrow <- length(i)
             # 
             if (any(i != 0, na.rm = TRUE)) i <- humvectorI(i, x)
             # 
             setSlots(x) <- lapply(getSlots(x), '[', i = i)
+            x@nrow <- nrow
             rownames(x) <- rownames
+            
             x
           })
 setMethod('[', c(x = 'humVector', i = 'character', j = 'missing'),
@@ -632,7 +678,7 @@ setMethod('rep', c(x = 'humVector'),
 
 setMethod('rev', c(x = 'humVector'),
           function(x) {
-              z[length(x):1]
+              x[length(x):1]
           })
 
 #' @name humVector
@@ -762,7 +808,6 @@ setMethod('as.list', signature = c('humVector'),
 #' @name humVector
 #' @export
 as.matrix.humVector <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
-    
     slots <- getSlots(x)
     mat <- Reduce(collapse, slots)
     
@@ -834,7 +879,7 @@ setMethod('sort', signature = c(x = 'humVector'),
               x[order(x, decreasing = decreasing), ]
           })
 
-#####
+##### comparisons ----
 
 
 #' @name humVector
@@ -880,7 +925,8 @@ setMethod('<=', signature = c('humVector', 'humVector'),
 #' @name humVector
 #' @export
 format.humVector <- function(x, ...) { as.character(x)}
-###
+
+#### arithmatic ----
 
 
 

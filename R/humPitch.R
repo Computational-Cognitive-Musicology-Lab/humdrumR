@@ -117,14 +117,14 @@ NULL
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 
-         contains = 'humdrumVector',
+         contains = 'humVector',
          slots = c(Fifth  = 'integer', 
                    Octave = 'integer', 
                    Cent   = 'numeric')) -> tonalInterval
 
 setValidity('tonalInterval', 
             function(object) {
-              all(abs(cents)) <= 1200
+              all(abs(object@Cent) <= 1200)
             })
 
 setMethod("initialize", 
@@ -238,12 +238,6 @@ setMethod('sign', signature = c('tonalInterval'),
 #' @exportMethod + - sum cumsum diff
  
 
-setMethod('+', signature = c('tonalInterval', 'tonalInterval'),
-          function(e1, e2) {
-                    tint(e1@Octave + e2@Octave,
-                         e1@Fifth  + e2@Fifth, 
-                         e1@Cent + e2@Cent)
-          })
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
@@ -265,24 +259,7 @@ setMethod('+', signature = c('tonalInterval', 'character'),
 
 
 
-setMethod('sum', signature = c('tonalInterval'),
-          function(x, ..., na.rm = TRUE) {
-              x <- list(x, ...)
-              x <- do.call('c', x)
-              tint(sum(x@Octave, na.rm), sum(x@Fifth, na.rm), sum(x@Cent, na.rm))
-          })
-
-setMethod('cumsum', signature = c('tonalInterval'),
-          function(x) {
-              tint(cumsum(x@Octave), cumsum(x@Fifth), cumsum(x@Cent))
-          })
-
 ##...subtraction ####
-
-setMethod('-', signature = c('tonalInterval', 'missing'),
-          function(e1) {
-              tint(-e1@Octave, -e1@Fifth,  -e1@Cent)
-              })
 
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
@@ -292,12 +269,6 @@ setMethod('-', signature = c('character', 'tonalInterval'),
               re.as(e3)
           })
 
-setMethod('diff', signature = c('tonalInterval'),
-          function(x, lag = 1, differences = 1) {
-                    tint(diff(x@Octave, lag, differences), 
-                         diff(x@Fifth,  lag, differences), 
-                         diff(x@Cent,   lag, differences))
-          })
 
 
 ##...division/modulo  ####
@@ -314,23 +285,34 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
           # That way the change applied to the Octave matches the one applied to the Fifth.
           function(e1, e2) {
               if (length(e1) == 0L) return(e1)
+              if (length(e2) == 0L) stop(call. = FALSE, "Can't take modulo (%%) with empty modulo.")
+            
+              recycledim(e1 = e1, e2 = e2, funccall = '%%')
               f1 <- e1@Fifth
               f2 <- e2@Fifth
-              match_size(f1 = f1, f2 = f2, toEnv = TRUE)
               
               LO5thDivs <- .ifelse(f2 == 0L, 0L, f1 %/% f2)
               LO5thMods <- .ifelse(f2 == 0L, f1, f1 %%  f2)
               
-              tint(e1@Octave - (e2@Octave * LO5thDivs),
-                   LO5thMods)
+              tint <- tint(e1@Octave - (e2@Octave * LO5thDivs), LO5thMods)
+              
+              copydim(tint) <- e1
+              
+              tint
           })
 
 setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
+            if (length(e1) == 0L) return(e1)
+            if (length(e2) == 0L) stop(call. = FALSE, "Can't take divide (%/%) by empty value.")
+            recycledim(e1 = e1, e2 = e2, funccall = '%/%')
+            
               f1 <- e1@Fifth
               f2 <- e2@Fifth
-              match_size(f1 = f1, f2 = f2, toEnv = TRUE)
-              ifelse(f2 == 0L, 0L, f1 %/% f2)
+              
+              f3 <-  f1 %/% f2
+              copydim(f3) <- e1
+              f3
           })
 
 
