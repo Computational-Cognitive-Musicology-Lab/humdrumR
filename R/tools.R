@@ -1,8 +1,22 @@
 ### Null and NA values ----
 
 `%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
-`%fmap%` <- function(e1, e2) if(is.null(e1)) e1 else e2(e1)
-
+`%fmap%` <- function(e1, e2) {
+    if (is.null(e1)) return(NULL)
+    
+    e2 <- rlang::enexpr(e2)
+    
+    if (length(e2) == 1L) {
+        e2 <- eval(e2, envir = parent.frame(1))
+        if (is.function(e2)) e2(e1) else e2
+        
+    } else {
+        e1 <- rlang::enexpr(e1)
+        eval(substituteName(e2, list(. = e1)))
+        
+    }
+    
+}
 `%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2
 
 `%if%` <- function(e1, e2) {
@@ -22,6 +36,19 @@
     
     if (!is.null(e2)) assign(var, e2, envir = parent.frame())
 } 
+
+`%!<-%` <- function(e1, e2) {
+    # this assigns e2 to e1, UNLESS e1 is NULL
+   x <- rlang::enexpr(e1)
+   
+    if (is.null(e1)) return(invisible(NULL))
+    
+   value <- rlang::enexpr(e2)
+   
+   eval(rlang::expr(!!x <- !!value), envir = parent.frame())
+    
+}
+
 
 ###
 
@@ -59,6 +86,38 @@ fargs <- function(func) formals(args(func))
                                                                  "In use of multiassign operator (%<-%), no names have been provided.")
     list2env(as.list(values), envir = parent.frame())
     return(invisible(values))
+}
+
+.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
+    strs <- unlist(list(...))
+    ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
+    ifelses <- lapply(ifelses,
+                      function(pairs) {
+                          pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
+                          pairs <- strsplit(pairs, split = '\\|')
+                          
+                          pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
+                          ifelse(is.na(pick), '', pick)
+                          
+                      })
+    
+    strs <- Map(function(s, r) {
+        while (length(r) > 0) {
+            s <- stringr::str_replace(s,  '<[^>]*\\|[^>]*>', r[1])
+            r <- r[-1]
+        }
+        s
+    }, 
+                strs, ifelses)
+    
+    strs <- paste(unlist(strs), collapse = sep)
+    glue::glue(strs, .envir = envir)
+}
+
+.stop <- function(..., ifelse = TRUE, sep = ' ') {
+    message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
+   
+     stop(call. = FALSE, message)
 }
 
 ### Names ----
@@ -286,6 +345,25 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
     
 }
 
+##### Dimensions ----
+ `%<-dim%` <- function(x, value) {
+    x <- rlang::enexpr(x)
+    eval(rlang::expr(dim(!!x) <- !!dim(value)), envir = parent.frame())
+}
+
+
+
+
+
+
+
+`%@%` <- function(x, slot) {
+    slot <- rlang::expr_text(rlang::enexpr(slot))
+    slotnames <- slotNames(x)
+    slot <- slotnames[pmatch(slot, slotnames, duplicates.ok = TRUE)]
+    slot(x, slot) %<-dim% x
+    
+}
 ## My versions of some standard utitilies
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
@@ -414,6 +492,7 @@ ifif <- function(cond1, cond2, ...) {
 
 
 
+
 captureValues <- function(expr, env) {
     if (rlang::is_quosure(expr)) {
         env <- rlang::quo_get_env(expr)
@@ -511,6 +590,7 @@ captureSymbols <- function(expr) {
     
     results
 }
+
 
 ### Math ----
 

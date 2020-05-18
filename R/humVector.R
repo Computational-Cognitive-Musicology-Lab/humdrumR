@@ -1,53 +1,60 @@
 
 #' Pseudo-vector classes for humdrum data.
 #' 
-#' R's "vectorization" is a key strength, so being able to define
-#' S4 classes that act in a vectorized manner is very useful.
-#' Unfortunetaly, defining such classes is a bit tedious.
-#' \code{humVector} is a \emph{virtual} S4 class which takes care of most of
-#' this tediousness for developers. The \code{humVector}
-#' defines all the necessarry methods to treat an object as a vector---simply
-#' make your new class inherit \code{humVector} and it is all taken care of!
-#' (To do this, specifify \code{contains = 'humVector'} in your call to \code{setClass}.)
+#' HumdrumR defines a number of S4 classes which are,
+#' underneath the surface, \code{\href(https://en.wikipedia.org/wiki/Composite_data_type){composite data types},
+#' made up of collections of base::R atomic vectors, stuck together.
+#' (Things like this are called structs, or tuples, or records in other languages.)
+#' The "vectorization" or R's atomic types is R's key strength so we
+#' want, as much as possible for our composite types to act just R atomics.
+#' 
+#' \code{struct} is a \emph{virtual} S4 class for just such composite atomic vectors. 
+#' The \code{struct} defines all the necessarry methods to treat a collection of
+#' atomic vectors as a sine vector/matrix---simply
+#' make your new class inherit \code{struct} and it is all taken care of!
+#' (To do this, specifify \code{contains = 'struct'} in your call to \code{setClass}.)
 #' 
 #' Be warned, \code{R} is limited in this regard---users can't \emph{really} define
 #' \code{S4} classes that \emph{really} act fully like \code{R} atomics---, so you may 
 #' run in to problems if you take this too far. 
-#' For instance, though \code{humVector} classes work (ok) in \code{\link[base]{data.frame}}s
+#' For instance, though \code{struct} classes work (ok) in \code{\link[base]{data.frame}}s
 #' \code{data.table}s and \code{tibbles} might give you problems.
 #' 
-#' \code{humVector} subclasses behave very similarly to normal R vectors.
+#' @section Behavior
+#' 
+#' \code{struct} subclasses behave very similarly to normal R vectors.
 #' However, they do differ in a few respects, mostly in ways that
 #' avoid some of the quirky behaviors with R vectors:
+#' In general, the distinction between dimensionless vectors
+#' and dimensioned vectors is slightly weakened with \code{structs}
+#' compared to normal R atomic vectors.
+#' In general, dimensionless \code{struct}s are treated more implicitely
+#' like column-matrices.
+#' Notably, if the struct has rows, \code{length(struct) == nrow(struct)}.
 #' 
-#' Firstly, \code{humVectors} always have dimensions---when we treat
-#' them as one-dimensional vectors they are "really" under the hood
-#' "column-vectors." Thus, the sometimes irritating distinction
-#' between matrices and vectors in R is avoided.
-#' Every \code{humVector} is a matrix, which can have one
-#' column, or multiple columns.
+#' Other differences:
+#' \itemize{
+#'     \item{\code{struct}s can only have no dimensions (\code{dim(struct) == NULL}) or two dimentions.
+#'     Higher dimensional arrays are not possible (yet).}
+#'     \item{\code{rowSums} and \code{colSums} will coerce a dimensionless struct to a column matrix.}
+#'     \item{\code{struct}s always throw an error if you try to index them with a index value
+#'     that is greater than the length/nrow of the \code{struct}. This is different than atomic vectors,
+#'     which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.}
+#'     \item{\code{struct}s with two dimensions have a \code{cartesian} indexing argument.
+#'     If \code{cartesian = TRUE}, the \code{i} and \code{j} arguments are treated as cartesian coordinates.
+#'     (This behavior can be achieved with base R matrices (or \code{struct}s) by inputing a matrix with two columns.)}
 #' 
-#' \code{humVectors} are indexed just like humdrum vectors/matrices.
-#' If it is a 1-column humVector, index just like it's a vector.
-#' If there are more than 1-columns, you can index them like matrices.
-#' One exception is that \code{humVectors} always give an error if you
-#' try an index that is larger than the vector...instead of padding with \code{NA}s,
-#' as base R does.
+#' }
 #' 
-#' \code{humVectors} also have a useful \code{cartesian} indexing argument.
-#' If \code{cartesian = TRUE} and both \code{i} and \code{j} indices are included,
-#' \code{i} and \code{j} are treated like cartesian coordinates.
-#' (This behavior can be achieved with base R matrices by inputing a 
-#' matrix with two columns.)
 #' 
 #' 
 #' 
 #' @section Requirements:
 #' 
-#' To work, \code{humVector} makes a few assumptions about your class.
+#' To work, \code{struct} makes a few assumptions about your class.
 #' Your class must have one or more slots which are vectors, all of which are the same length.
-#' \code{humVector}'s indexing method will cause all of these vectors to be indexed as one.
-#' When you define a new subclass of \code{humVector}, it will inherit a 
+#' \code{struct}'s indexing method will cause all of these vectors to be indexed as one.
+#' When you define a new subclass of \code{struct}, it will inherit a 
 #' \code{validObject} method which assures that all elements are the same dimension.
 #' Thus, if you are writing your own \code{validObject} method (using \code{setValidity})
 #' you just have to worry specifically about the validity of the information in your slots,
@@ -57,7 +64,7 @@
 #' @section Initialize:
 #' 
 #' An initialize method which automatically makes all slots the same length is predefined
-#' for \code{humVectors}. If you want to make a more specialized \code{initialize} method,
+#' for \code{structs}. If you want to make a more specialized \code{initialize} method,
 #' you can still take advantage of the inherited method by using \code{callNextMethod} at the 
 #' beginning of your function.
 #' 
@@ -73,30 +80,74 @@
 #'   \code{format} methods are defined automatically.}
 #' }
 #' 
-#' Default arithmetic methods for addition, multiplication, negation (\code{-x}) are defined.
+#' Default arithmetic methods for addition, (scalar) multiplication, negation (\code{-x}) are defined.
 #' They assume that adding your class to another is simply the same as adding each numeric slot in parallel.
 #' If this is not the case, you'll need to create your own, more specific, method!
 #' 
-#' @name humVector
+#' @name struct
 #' @export
 NULL
 
 setClassUnion('dimnames', c('character', 'integer', 'NULL'))
+setClassUnion('maybeinteger', c('NULL', 'integer'))
 
-setClass('humVector', contains = 'VIRTUAL', slots = c(ncol = 'integer', nrow = 'integer', rownames = 'dimnames', colnames = 'dimnames'))
+setClass('struct', contains = 'VIRTUAL', slots = c(dim = 'maybeinteger', rownames = 'dimnames', colnames = 'dimnames'))
 
-setValidity('humVector', 
+setValidity('struct', 
             function(object) {
+                class <- class(object)
+                
+                #
                 slots <- getSlots(object)
+                slotlen <- length(slots[[1]])
+                
+                dim <- object@dim
+                rownames <- object@rownames
+                colnames <- object@colnames
                 errors <- c(
-                    if (!all(sapply(slots, is.vector)) || !all(sapply(slots, is.atomic))) 'humVector slots must all be atomic vectors.',
-                    if (!allsame(lengths(slots))) "humVector slots must all be the same length.",
-                    if (length(object@ncol) != 1L || object@ncol < 0L) "The @ncol slot of a humVector must be a single non-negative integer.",
-                    if (length(object@nrow) != 1L || object@ncol < 0L) "The @nrow slot of a humVector must be a single non-negative integer.",
-                    if (!is.null(object@colnames) && length(object@colnames) != object@ncol) "The colnames slot of a humVector must be NULL or must be @ncol in length.",
-                    if (!is.null(object@rownames) && length(object@rownames) != object@nrow) "The rownames slot of a humVector must be NULL or must be @nrow in length.",
-                    if (length(slots[[1]]) != object@ncol * object@nrow) 'The length of the vectors inside the humVector must be @ncol * @nrow.'
-                )
+                    if (!{
+                            all(lengths(slots) == slotlen)
+                                    }) glue::glue("Vectors in {class} data slots must all be the same length."),
+                    if (!{
+                            all(sapply(slots, is.vector)) && 
+                            all(sapply(slots, is.atomic))
+                                    }) glue::glue('{class} data slots must all be atomic vectors.'),
+                    
+                    ######## if dim is NULL
+                    if (is.null(dim)) {
+                        c(
+                            if (!{
+                                    is.null(colnames)
+                                            }) glue::glue("{class} can't have @colnames if @dim is NULL."),
+                            if (!{
+                                    is.null(rownames) ||
+                                    length(rownames) == slotlen
+                                            }) glue::glue("If {class}@dim is NULL, it is a dimensionless vector, and the (row)names must ", 
+                                                          "be the same length as the vectors in the data slots.")
+                        )
+                    ####### if dim is not NULL
+                    }  else { 
+                        c(
+                            if (!{
+                                    length(dim) == 2L &&
+                                    all(dim >= 0)
+                                            }) glue::glue("The {class}@dim must either be NULL, or a two-length integer vector with both integers >= 0."),
+                            if (!{
+                                    slotlen == prod(dim)
+                                            }) glue::glue("If {class}@dim is not NULL, the product of the two dimensions (i.e., nrow * ncol) must match the total length",
+                                               " of the atomic-vector data slots."),
+                            if (!{
+                                    is.null(colnames) ||
+                                    length(colnames) == dim[2]
+                                            }) glue::glue("{class}@colnames must be either NULL or the same length as ncol({class})."),
+                            if (!{
+                                    is.null(rownames) ||
+                                    length(rownames) == (slotlen / dim[2]) 
+                                   }) glue::glue("{class}@rownames must be either NULL or the same length as the data slot vectors divided by ncol({class}).")
+                            
+                        )
+                    })
+                            
                 
                 if (length(errors) > 0L) errors else TRUE
                 
@@ -104,15 +155,13 @@ setValidity('humVector',
 
 
 setMethod('initialize', 
-          'humVector',
-          function(.Object, ..., ncol = 1L, nrow = NULL, colnames = NULL, rownames = NULL) {
+          'struct',
+          function(.Object, ..., dim = NULL, colnames = NULL, rownames = NULL) {
               slots <- list(...)
               slots <- lapply(slots, unname)
               slots <- do.call('match_size', slots)
               
-              .Object@nrow <- as.integer(length(slots[[1]]) / ncol)
-              
-              .Object@ncol <- ncol
+              .Object@dim <- dim
               .Object@colnames <- colnames
               .Object@rownames <- rownames
               
@@ -129,7 +178,7 @@ setMethod('initialize',
 
 getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character')) {
     slotinfo <- methods::getSlots(class(x))
-    slotinfo <- slotinfo[!names(slotinfo) %in% c('ncol', 'nrow', 'colnames', 'rownames')]
+    slotinfo <- slotinfo[!names(slotinfo) %in% c('dim', 'colnames', 'rownames')]
     slotinfo <- slotinfo[slotinfo %in% classes]
 
     slots <- lapply(names(slotinfo), slot, object = x)
@@ -140,7 +189,7 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 `setSlots<-` <- function(x, value) {
     slotnames <- slotNames(x)
     
-    slotnames <- slotnames[!slotnames %in% c('ncol', 'nrow', 'colnames', 'rownames')]
+    slotnames <- slotnames[!slotnames %in% c('dim', 'colnames', 'rownames')]
     for (s in slotnames) {
         slot(x, s) <- value[[s]]
     }
@@ -149,81 +198,50 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 }
 
 columns <- function(humvec) {
-    rep(1:ncol(humvec), each = length(humvec))
+    ncol <- if (is.null(dim(humvec))) 1L else ncol(humvec)
+    rep(1:ncol, each = length(humvec))
 }
-
 
 
 ########## shape ----
 
-#' @name humVector
+#' @name struct
 #' @export dim ncol nrow length
 NULL
 
-#' @name humVector
+#' @name struct
 #' @export length dim ncol nrow
-setMethod('ncol', signature = 'humVector', function(x) x@ncol)
-setMethod('nrow', signature = 'humVector', function(x) x@nrow)
-setMethod('length', signature = 'humVector', function(x) nrow(x) * (x@ncol > 0L))
-setMethod('dim', signature = 'humVector', function(x) c(nrow = x@nrow, ncol = x@ncol))
+setMethod('nrow', signature = 'struct', function(x) x@dim %fmap% setNames(.[1], 'nrow'))
+setMethod('ncol', signature = 'struct', function(x) x@dim %fmap% setNames(.[2], 'ncol'))
+setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
+setMethod('dim', signature = 'struct', function(x) x@dim %fmap% setNames(., c('nrow', 'ncol')))
 
-`ncol<-` <- function(x, value) {
-    if (ncol(x) == value) {
-        return(x) 
-    } 
-    dimnames(x) <- NULL
-    
-    if (is.null(value) || length(value) != 1 || value < 1) stop(call. = FALSE,
-                                                                "The @ncol slot of a humVector must be a single non-negative integer.")
-    if (((nrow(x) * ncol(x)) %% value) != 0) stop(call. = FALSE, "The @ncol slot of a humVector must be an even divisor of the total amount of data in the humVector.")
-    x@colnames <- NULL
-    x@rownames <- NULL
-    x@ncol <- as.integer(value)
-    
-    x@nrow <- as.integer(length(getSlots(x)[[1]]) / value)
-    
-    x
-    
-}
+setMethod('dim<-', 'struct',
+          function(x, value) {
+              value %!<-% as.integer(value)
+              
+              if (is.null(value) || any(dim(x) != dim(value))) {
+                  x@colnames <- NULL
+                  x@rownames <- NULL
+              }
+              
+              x@dim <- value
+              
+              validObject(x)
+              x
+              
+          })
+
+setClass('test', contains = 'struct', slots = c(x = 'integer'))
+z <- new('test', x = c(1L,2L,NA, 4L:9L), dim = c(3L,3L))
+y <- new('test', x = c(1L:8L, NA), dim = NULL)
 
 ### tools 
 
 
-`setdim<-` <- function(x, value) {
-    dim(x) <- dim(value)
-    colnames(x) <- colnames(value)
-    rownames(x) <- rownames(value)
-    x
-}
-
-`copydim<-` <- function(x, value) {
-    if (is.null(dim(x)) && is.atomic(x)) {
-        matrix(x, ncol = ncol(value), nrow = nrow(value), dimnames = dimnames(value))
-    } else {
-        
-        ncol(x) <- ncol(value)
-        dimnames(x) <- dimnames(value)
-        x
-        
-    }
-}
-
-`%<-dim%` <- function(x, value) {
-    setdim(x) <- value
-   x
-    
-}
-
-`%@%` <- function(x, slot) {
-    slot <- rlang::expr_text(rlang::enexpr(slot))
-    slotnames <- slotNames(x)
-    slot <- slotnames[pmatch(slot, slotnames, duplicates.ok = TRUE)]
-    slot(x, slot) %<-dim% x
-    
-}
 
 
-arecycledim <- function(..., funccall) {
+recycledim <- function(..., funccall) {
     # accepts two named args
     args <- list(...)[1:2]
     d1 <- dim(args[[1]])
@@ -243,39 +261,50 @@ arecycledim <- function(..., funccall) {
         return(NULL)
     }
     
-    stop(call. = FALSE, glue::glue("In call to {funccall}, the two humVectors are nonconformable.\n",
-                                   ,"To confirm, at least one of their dimensions needs to be the same, while the other is either (also) the same, or 1."))
+    .stop("In call to {funccall}, the two structs are nonconformable.\n",
+          "To confirm, at least one of their dimensions needs to be the same, while the other is either (also) the same, or 1.")
     
 }
 
 
 
-#' @name humVector
+#' @name struct
 #' @export names colnames rownames
-setMethod('names',    c(x = 'humVector'), function(x) x@rownames)
-setMethod('rownames', c(x = 'humVector'), function(x) x@rownames)
-setMethod('colnames', c(x = 'humVector'), function(x) x@colnames)
-setMethod('dimnames', c(x = 'humVector'), function(x) list(rownames = x@rownames, colnames = x@colnames))
+setMethod('names',    c(x = 'struct'), function(x) x@rownames)
+setMethod('rownames', c(x = 'struct'), function(x) x@rownames)
+setMethod('colnames', c(x = 'struct'), function(x) x@colnames)
+setMethod('dimnames', c(x = 'struct'), function(x) list(rownames = x@rownames, colnames = x@colnames))
 
 #' @exportMethod names<- colnames<- rownames<-
-setMethod('names<-', c(x = 'humVector'),
+
+setMethod('colnames<-', c(x = 'struct'),
+          function(x, value) {
+              if (is.null(x@dim)) .stop("Can't add colnames to a {class(x)} with no dimensions.")
+              if (!is.null(value) && length(value) != ncol(x)) .stop("Colnames assigned to {class(x)} must be of length ncol({class(x)}).",
+                                                                     " In this case, you are tring to assign {length(value)} ", 
+                                                                     plural(length(value), 'colnames', 'colname'),
+                                                                     " into a {class(x)} with {ncol(x)} ",
+                                                                     plural(ncol(x), "columns.", "column."))
+              x@colnames <- value
+              x
+          })
+setMethod('rownames<-', c(x = 'struct'),
+          function(x, value) {
+              if (!is.null(value) && length(value) != length(x)) .stop(ifelse = is.null(x@dim),
+                                                                       "Rownames assigned to {class(x)} must be ", 
+                                                                       "<the same length as the {class(x)}|be of length nrow({class(x)})>",
+                                                                       " In this case, you are tring to assign {length(value)} ",  plural(length(value), 'rownames', 'rowname'), 
+                                                                       " into a {class(x)} ", 
+                                                                       "<of length ({length(x)})|with {nrow(x)}> ", plural(nrow(x), "rows.", "row."))
+              x@rownames <- value
+              x
+          })
+setMethod('names<-', c(x = 'struct'),
           function(x, value) {
               rownames(x) <- value
               x
           })
-setMethod('colnames<-', c(x = 'humVector'),
-          function(x, value) {
-              if (!is.null(x@rownames) && !is.null(value) && length(value) != ncol(x)) stop(call. = FALSE, "Colnames assigned to humVector must be the same length as the number of cols.")
-              x@colnames <- value
-              x
-          })
-setMethod('rownames<-', c(x = 'humVector'),
-          function(x, value) {
-              if (!is.null(value) && length(value) != length(x)) stop(call. = FALSE, "Rownames assigned to humVector must be the same length as the number of rows.")
-              x@rownames <- value
-              x
-          })
-setMethod('dimnames<-', c(x = 'humVector'),
+setMethod('dimnames<-', c(x = 'struct'),
           function(x, value) {
               if (is.null(value) || length(value) == 1L) {
                   x@rownames <- NULL
@@ -283,24 +312,22 @@ setMethod('dimnames<-', c(x = 'humVector'),
                   return(x)
               }
               
-              if (!is.list(value) || length(value) != 2L) stop(call. = FALSE, 'When assigning dimnames to a humVector using dimnames(x) <- value, value must be a list of length two.')
+              if (!is.list(value) || length(value) != 2L) .stop('When assigning dimnames to a {class(x)} using dimnames({class(x)}) <- value, value must be a list of length two.')
               rownames(x) <- value[[1]]
               colnames(x) <- value[[2]]
               x
           })
 
 
+##### indexing ----
 
-
-##############
 
 checkSame <- function(x, y, call) {
     # this function tests if two arguments are the same class
-    # it is necessary for any generic method for two humVectors, where the two humVectors might be some specific subclass.
+    # it is necessary for any generic method for two structs, where the two structs might be some specific subclass.
     if (all(class(x) != class(y))) {
-        stop(call. = FALSE, 
-             glue::glue("Can't apply {call} to a humVector with something else that is not the same class. "),
-             glue::glue("In this case, you are trying to combine a value of class '{class(x)[1]}' with another value of class '{class(y)[1]}'."))
+        .stop("Can't apply {call} to a struct with something else that is not the same class.\n",
+              "In this case, you are trying to combine a value of class '{class(x)[1]}' with another value of class '{class(y)[1]}'.")
     }
     x
 }
@@ -322,77 +349,98 @@ emptyslots <- function(x) {
 
 ### [i, ] ----
 
-setMethod('[', c(x = 'humVector', i = 'numeric', j = 'missing'),
+setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
           function(x, i) {
-            i <- i[i != 0]
-            if (all(i < 0)) i <- 1L:length(x)[i] # flip negative indices (only if ALL negative)
+            i <- i[i != 0] # zeros are ignored
+            
+            ### First, special cases where i is empty
             if (length(i) == 0L) {
                 x <- emptyslots(x)
-                rownames(x) <- NULL
-                x@nrow <- 0L
+                
+                x@rownames %!<-% vector(class(x@rownames), 0)
+                x@dim[1]   %!<-% 0L
+                
                 return(x)
             }
             
-            if (ncol(x) == 0L) {
-                x@row <- length(i)
-                rownames(x) <- rownames(x)[j]
-                return(x)
-            }
+            if (all(i < 0)) i <- (1L:length(x))[i] # flip negative indices (only if ALL negative)
             
-            # 
-            if (any(i < 0))  stop(call. = FALSE, "Can't mix negative and positive numbers in index.")
-            #i[i < 0] <- NA 
-            if (any(i > length(x))) stop(call. = FALSE, "Index is greater than the length of the humVector.\nNormal R vectors don't throw an error for this, but we do.")
-            # i[i > length(x)] <- NA 
-            rownames <- rownames(x)[i]
-            nrow <- length(i)
-            # 
-            if (any(i != 0, na.rm = TRUE)) i <- humvectorI(i, x)
-            # 
-            setSlots(x) <- lapply(getSlots(x), '[', i = i)
-            x@nrow <- nrow
-            rownames(x) <- rownames
+            # Check for problems with i 
+            if (any(i < 0))  .stop("When indexing a {class(x)}, you can't mix negative and positive numbers in the index.")
+            if (any(i > length(x))) .stop(ifelse = is.null(dim(x)),
+                                          "The i-index is greater than the <length|nrow> of the {class(x)} object you are trying to index.",
+                                          "<Normal R vectors don't throw an error for this, but we do.|>")
+            
+            ### translate by-row i to actual i of internal vectors
+            i.internal <- if (!is.null(dim(x)) && ncol(x) > 1) humvectorI(i, x) else i
+            
+            # modify dimension info
+            x@rownames %!<-% rownames(x)[i]
+            x@dim[1]   %!<-% length(i)
+            
+            if (!is.null(ncol(x)) && ncol(x) == 0L) return(x) # in this case, the slots are already empty so no further changes are needed.
+            
+            # do it! 
+            setSlots(x) <- lapply(getSlots(x), '[', i = i.internal)
             
             x
           })
-setMethod('[', c(x = 'humVector', i = 'character', j = 'missing'),
+
+setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
           function(x, i) {
+              if (is.null(rownames(x))) {
+                       .stop(ifelse = is.null(dim(x)),
+                             "You can't <|row->index a {class(x)} (i.e. {class(x)}[i<|, >])", 
+                                             "with a character string if the {class(x)} has no <|row>names (i.e., <|row>names({class(x)}) = NULL).")
+              }
+              if (is.numeric(rownames(x))) rownames(x) <- as.character(rownames(x))
               
-              if (is.null(rownames(x))) stop(call. = FALSE, "You can't row-index a humVector (i.e. humVector[i, ])", 
-                                             " with a character string if the humVector has no rownames (i.e., humVector@rownames = NULL).")
               i <- locate(i, rownames(x))
               nomatch <- lengths(i) == 0L
-              if (any(nomatch))  stop(call. = FALSE, "In your attempt to row-index a humVector (i.e., humVector[i, ]) ",
-                                      glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
-                                                          sep = ', ', last = ', and '),
-                                      plural(sum(nomatch), ' are not rownames', ' is not a rowname'),
-                                      ' in the humVector.')
+              if (any(nomatch))  .stop(ifelse = is.null(dim(x)),
+                                       "In your attempt to <|row->index a {class(x)} (i.e., {class(x)}[i<|, >])",
+                                       " using character indices, ", 
+                                       glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
+                                                           sep = ', ', last = ', and '),
+                                       plural(sum(nomatch), ' are not rownames', ' is not a rowname'),
+                                       ' in the {class(x)} object.')
               
               i <- unlist(i)
               x[i, ]
           })
-setMethod('[', c(x = 'humVector', i = 'logical', j = 'missing'),
+setMethod('[', c(x = 'struct', i = 'logical', j = 'missing'),
           function(x, i ) {
-              if (length(i) != nrow(x)) stop(call. = FALSE,
-                                             "Can't index[i , ] a humVector with a logical vector that is a different length than humVector@nrow.")
-            x[which(i), ]
+              if (length(i) != nrow(x)) .stop(ifelse = is.null(dim(x)),
+                                              "Can't index[i<|, >] a {class(x)} with a logical vector of a length that does not match <length|nrow>({class(x)}).")
+              x[which(i), ]
           })
-setMethod('[', c(x = 'humVector', i = 'matrix', j = 'missing'),
+
+setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
           function(x, i ) {
+              if (is.null(dim(x))) .stop("You can't index a dimensionless {class(x)} object with a matrix.")
               matclass <- class(i[1, 1])
-              if (matclass %in% c('character', 'numeric')) {
-                  if (ncol(i) == 1L || nrow(i) == 1L) return(x[c(i), ])
+              
+              if (matclass %in% c('character', 'numeric', 'integer')) {
+                  if (ncol(i) == 1L) return(x[c(i), ])
+                  if (nrow(i) == 1L) return(x[ , c(i)])
+                  if (nrow(i) == nrow(x) && ncol(i) == 2)  return(x[i[ , 1], i[ , 2], cartesian = TRUE])
                   
-                  stop(call. = FALSE,
-                       "Can't index a humVector with a numeric or character matrix unless that matrix is a 1-column or 1-row matrix.")
+                  .stop("To index a {class(x)} a numeric or character matrix, that matrix must either:\n",
+                        "\t1) Be a 1-column (index rows) or 1-row (index columns) matrix---in which case, it is treated like a vector.\n",
+                        "\\2) Be a 2-column matrix, which will be treated as cartesian coordinates.\n",
+                        "\t\t(If you use a character matrix, the {class(x)} object must have appropriate row/colnames defined!)")
               }
-              if (matclass != 'logical') stop(call. = FALSE, glue::glue("Can't index a humVector with a {matclass} matrix."))
+              if (matclass != 'logical') stop(call. = FALSE, glue::glue("Can't index a struct with a {matclass} matrix."))
               
               
               if (ncol(i) == 1L && length(i) == nrow(x)) return(x[which(i), ])
+              if (nrow(i) == 1L && length(i) == ncol(x)) return(x[, which(i)])
               
-              if (!identical(dim(i), dim(x))) stop(call. = FALSE, "Can't index humVector[i , ] with a logical matrix, unless either has the exact same",
-                                                   "dimensions as the humVector, or has the same number of rows but only one column.")
+              
+              if (!identical(dim(i), dim(x))) stop(call. = FALSE, "Can't index struct[i , ] with a logical matrix, unless it either has the exact same",
+                                                   " dimensions as the struct, or matches one dimension while the other dimension == 1, ",
+                                                   "i.e., if the indexing matrix is a single column with the same number of rows as the indexed {class(x)} object OR the indexing matrix ",
+                                                   "has is a single row with the same number of columns as the indexed {class(x)} object.")
               
               ij <- which(i, arr.ind = TRUE)
               
@@ -401,79 +449,90 @@ setMethod('[', c(x = 'humVector', i = 'matrix', j = 'missing'),
           })
 
 
+
 ### [ , j] ----
 
-setMethod('[', c(x = 'humVector', i = 'missing', j = 'numeric'),
+setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
           function(x, j) {
-              j <- j[j != 0]
-              if (all(j < 0L)) j <- seq_len(x@ncol)[j] #negative indices
+              if (is.null(dim(x))) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
               
+              j <- j[j != 0] # zeros are ignored
+              
+              ### First, special cases where j is empty
               if (length(j) == 0L) {
                   x <- emptyslots(x)
-                  colnames(x) <- NULL
-                  x@ncol <- 0L
+                  
+                  x@colnames %!<-% vector(class(x@colnames), 0)
+                  x@dim[2]     <- 0L # we have already seen that x@dim is not NULL so we don't need %!<-%
+                  
                   return(x)
               }
               
-              if (nrow(x) == 0L) {
-                  x@ncol <- length(j)
-                  colnames(x) <- colnames(x)[j]
-                  return(x)
-              }
+              if (all(j < 0)) j <- (1L:ncol(x))[j] # flip negative indices (only if ALL negative)
               
-              if (any(j < 0))  stop(call. = FALSE, "Can't mix negative and positive numbers in index.")
-              if (any(j > ncol(x))) stop(call. = FALSE, "Index[, j] is greater than the ncol of the humVector.")
+              # check for problems with j
+              if (any(j < 0))  .stop("When indexing a {class(x)}, you can't mix negative and positive numbers in the index.")
+              if (any(j > ncol(x))) .stop("Index[, j] is greater than the ncol of this {class(x)} object.")
               
-              colnames <- colnames(x)[j]
-              ncol <- length(j)
-              # 
-              j <- humvectorJ(j, x)
-              setSlots(x) <- lapply(getSlots(x), '[', i = j)
-              # 
-              x@colnames <- colnames
-              x@ncol <- ncol
+              ### translate by-col j to actual j of internal vectors
+              j.internal <- humvectorJ(j, x) 
+              
+              # modify dimension info
+              x@colnames %!<-% colnames(x)[j]
+              x@dim[2]     <-  length(j)
+              
+              if (nrow(x) == 0L) return(x) # in this case, the slots are already empty so no further changes are needed.
+              
+              # do it! 
+              setSlots(x) <- lapply(getSlots(x), '[', i = j.internal)
+              
               x
           })
 
 
 
-setMethod('[', c(x = 'humVector', i = 'missing', j = 'character'),
+setMethod('[', c(x = 'struct', i = 'missing', j = 'character'),
           function(x, j) {
-              if (is.null(colnames(x))) stop(call. = FALSE, "You can't column-index a humVector (i.e. humVector[ , j])", 
-                                             " with a character string if the humVector has no colnames (i.e., humVector@colnames = NULL).")
+              if (is.null(colnames(x))) .stop("You can't column-index a {class(x)} (i.e. {class(x)}[ , j])", 
+                                              " with a character string if the {class(x)} has no colnames (i.e., colnames({class(x)}) = NULL).")
+              if (is.numeric(rownames(x))) rownames(x) <- as.character(rownames(x))
               
-              j <- match(j, colnames(x))
-              nomatch <- is.na(j)
-              if (any(nomatch))  stop(call. = FALSE, "In your attempt to column-index a humVector (i.e., humVector[ , j]) ",
-                                      glue::glue_collapse(paste0("'", names(j)[nomatch], "'"), 
-                                                          sep = ', ', last = ', and '),
-                                      plural(sum(nomatch), ' are not colnames', ' is not a colname'),
-                                      ' in the humVector.')
+              i <- locate(i, rownames(x))
+              nomatch <- lengths(i) == 0L
+              if (any(nomatch))  .stop("In your attempt to column-index a {class(x)} (i.e., {class(x)}[ , j])",
+                                       " using character indices, ", 
+                                       glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
+                                                           sep = ', ', last = ', and '),
+                                       plural(sum(nomatch), ' are not rownames', ' is not a rowname'),
+                                       ' in the {class(x)} object.')
               
-              j <- unlist(j)
-              x[ , j]
-              
+              i <- unlist(i)
+              x[i, ]
           })
 
 
-setMethod('[', c(x = 'humVector', i = 'missing', j = 'logical'),
+setMethod('[', c(x = 'struct', i = 'missing', j = 'logical'),
           function(x, j ) {
-              if (length(j) != ncol(x)) stop(call. = FALSE,
-                                             "Can't index[  , j] a humVector with a logical vector that is a different length than humVector@ncol.")
+              if (length(j) != ncol(x)) .stop("Can't index a {class(x)} (i.e., {class(x)}[ , j]) with a logical vector that is a different length than ncol({class(x)}).")
               x[ , which(j)]
+          })
+
+setMethod('[', c(x = 'struct', i = 'missing', j = 'matrix'),
+          function(x, i ) {
+              .stop("You can't index a {class(x)} with a matrix in the j indexing argument.")
           })
 
 ### [i, j]
 
 
-setMethod('[', c(x = 'humVector'),
+setMethod('[', c(x = 'struct'),
           function(x, i, j, cartesian = FALSE) {
-              i <- i[i != 0]
+              i <- i[i != 0] # zeros are ignored
               j <- j[j != 0]
               
               if (cartesian) {
-                  if (!is.numeric(i) || !is.numeric(j)) stop(call. = FALSE, "Can't do cartesian indexing from humVector if i and j aren't both numeric.")
-                  # XXX MAKE CHARACTER POSSIBLE
+                  if (!is.numeric(i) || !is.numeric(j)) .stop( "Can't do cartesian-index a {class(x)} if i and j aren't BOTH numeric.")
+                  # XXX MAKE CHARACTER POSSIBLE?
                   
                   match_size(i = i, j = j, toEnv = TRUE)
                   
@@ -484,11 +543,11 @@ setMethod('[', c(x = 'humVector'),
                   i.internal <- unlist(Map('[', i.internal, j))
                   
                   
-                  x@ncol <- 1L
-                  x@nrow <- length(i)
+                  x@dim[2] <- 1L
+                  x@dim[1] <- length(i)
                   setSlots(x) <- lapply(getSlots(x), '[', i.internal)
-                  x@colnames <- paste(colnames(x)[j], collapse = '.')
-                  x@rownames <- rownames(x)[i]
+                  x@rownames %!<-% rownames(x)[i]
+                  x@colnames   <- NULL
                   
                   x
                              
@@ -503,11 +562,17 @@ setMethod('[', c(x = 'humVector'),
 
 #### [i, j] <- value ----
 
-setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'missing', value = 'humVector'),
+setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
           function(x, i, value) {
               checkSame(x, value, '[i , ]<-')
               
-              xindexed <- x[i, ] # this will return appropriate error if indices are invalid
+              # if either are vectors, make them into column vectors
+              dimx <- dim(x)
+              if (is.null(dim(x))) x@dim <- c(length(x), 1L)
+              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              
+              # this will return appropriate error if indices are invalid
+              xindexed <- x[i, ] 
               
               # if value is right dimensions (exactly) when transposed:
               if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
@@ -519,19 +584,20 @@ setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'missing', value = 'humVector
               
               # sizes still don't match
               if (ncol(value) != ncol(x)) stop(call. = FALSE,
-                                               glue::glue("Can't assign ([i]<-) a humVector with {ncol(value)} columns into rows of a humVector with {ncol(x)} columns."))
+                                               glue::glue("Can't assign ([i]<-) a {class(x)} object with {ncol(value)} columns into rows of a {class(x)} object with {ncol(x)} columns."))
               
-              # character indices
+              # character or logical indices
               if (is.character(i) && !is.null(rownames(x))) i <- locate(i, rownames(x))
+              if (is.logical(i)) i <- which(i)
               
               # negative indices
               if (all(i < 0)) i <- (1L:nrow(x))[i]
-              if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
+              if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
               
               #
               if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
               if (length(value) != length(i)) stop(call. = FALSE, 
-                                                   glue::glue("Can't assign ([i]<-) a humVector with {length(value)} rows into {length(i)} rows of another humVector.\n",
+                                                   glue::glue("Can't row-assign ([i]<-) a {class(value)} with {length(value)} rows into {length(i)} rows of another {class(x)}.\n",
                                                               "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
               
               
@@ -546,14 +612,22 @@ setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'missing', value = 'humVector
                              },
                            slotsx, slotsv)
               setSlots(x) <- slots
+              
+              x@dim <- xdim # this removes dimensions if were none to begin with
               x
           })
 
-setMethod('[<-', c(x = 'humVector', i = 'missing', j = 'ANY', value = 'humVector'),
+setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
           function(x, j, value) {
               checkSame(x, value, '[ , j]<-')
               
-              xindexed <- x[, j] # this will return appropriate error if indices are invalid
+              if (is.null(dim(x))) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
+              
+              # if value is a vector, make it into a column vector
+              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              
+              # this will return appropriate error if indices are invalid
+              xindexed <- x[, j] 
               
               # if value is right dimensions (exactly) when transposed:
               if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
@@ -565,19 +639,17 @@ setMethod('[<-', c(x = 'humVector', i = 'missing', j = 'ANY', value = 'humVector
               
               # sizes still don't match
               if (nrow(value) != nrow(x)) stop(call. = FALSE,
-                                               glue::glue("Can't assign ([ , j]<-) a humVector with {nrow(value)} rows into columns of a humVector with {nrow(x)} rows."))
+                                               glue::glue("Can't assign ([ , j]<-) a struct with {nrow(value)} rows into columns of a struct with {nrow(x)} rows."))
               
               # character indices
               if (is.character(j) && !is.null(colnames(x))) j <- locate(j, colnames(x))
-              
+              if (is.logical(j)) j <- which(j)
               
               ## negative indices
               if (all(j < 0)) j <- (1L:col(x))[j]
-              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
-              
+              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
               
               # do it 
-              
               j <- humvectorJ(j, x)
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
@@ -590,29 +662,40 @@ setMethod('[<-', c(x = 'humVector', i = 'missing', j = 'ANY', value = 'humVector
               x
           })
 
-setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'ANY', value = 'humVector'),
+setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
           function(x, i, j, value, cartesian = FALSE) {
               checkSame(x, value, '[ i, j]<-')
               
+              if (is.null(dim(x))) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
+              
+              # if value is a vector, make it into a column vector
+              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              
               if (cartesian) return(cartesianAssign(x, i, j, value))
               
-              xindexed <- x[i, j] # this will return appropriate error if indices are invalid
+              # this will return appropriate error if indices are invalid
+              xindexed <- x[i, j]
+              
               # if value is right dimensions (exactly) when transposed:
               if (!all(dim(xindexed) == dim(value)) && all(dim(xindexed) == rev(dim(value)))) value <- t(value)
               
               # character indices
-              if (is.character(i)) i <- locate(i, colnames(x))
+              if (is.character(i)) i <- locate(i, rownames(x))
               if (is.character(j)) j <- locate(j, colnames(x))
+              
+              # logical indices
+              if (is.logical(i)) i <- which(i)
+              if (is.logical(j)) j <- which(j)
               
               ## negative indices
               if (all(j < 0)) j <- (1L:col(x))[j]
-              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in humVector assignment index.")
+              if (any(j < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
               
               # sizes still don't match
               
               if (!all(dim(xindexed) == dim(value))) stop(call. = FALSE,
-                                               glue::glue("Can't assign ([ i, j, cartesian = FALSE]<-) a humVector with dimensions ({nrow(value)}, {ncol(value)}) into", 
-                                                          " a subset of a humVector with dimensions ({length(i)}, {length(j)})."))
+                                               glue::glue("Can't assign ([ i, j, cartesian = FALSE]<-) a {class(value)} object with dimensions ({nrow(value)}, {ncol(value)}) into", 
+                                                          " a subset of a {class(x)} object with indices of dim ({length(i)}, {length(j)})."))
               
               # do it 
               i.internal <- humvectorI(i, x)
@@ -628,6 +711,12 @@ setMethod('[<-', c(x = 'humVector', i = 'ANY', j = 'ANY', value = 'humVector'),
               
               setSlots(x) <- slots
               x
+          })
+
+setMethod('[<-', c(x = 'struct', i = 'matrix'),
+          function(x, i, value) {
+            .stop("Assignment to a matrix index is not (yet) defined for {class(x)} objects.")  
+              
           })
 
 cartesianAssign <- function(x, i, j, value) {
@@ -662,107 +751,147 @@ cartesianAssign <- function(x, i, j, value) {
 
 ####
 
-setMethod('rep', c(x = 'humVector'),
+setMethod('rep', c(x = 'struct'),
           function(x, ...) {
               slots <- getSlots(x)
-              columns <- columns(x)
-              slots <- lapply(slots,
-                     function(slot) {
-                         unlist(tapply(slot, columns, rep, ..., simplify = FALSE), use.names = FALSE)
-                     })
+              
+              slots <- if (is.null(dim(x))) {
+                  lapply(slots, rep, ...)
+              } else {
+                  columns <- columns(x)
+                  lapply(slots,
+                         function(slot) {
+                             unlist(tapply(slot, columns, rep, ..., simplify = FALSE), use.names = FALSE)
+                         })
+              }
+              
               setSlots(x) <- slots
-              x@nrow <- as.integer(length(slots[[1]]) / ncol(x))
-              if (!is.null(rownames(x))) rownames(x) <- rep(rownames(x), ...)
+              x@dim[1]   %!<-% as.integer(length(slots[[1]]) / (ncol(x) %maybe% 1))
+              x@rownames %!<-% rep(rownames(x), ...)
+              
               x
           })
 
-setMethod('rev', c(x = 'humVector'),
+setMethod('rev', c(x = 'struct'),
           function(x) {
               x[length(x):1]
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('c', 'humVector',
-          function(x, ...) {
+setMethod('c', 'struct',
+          function(x, ..., rbind = FALSE) {
               xs <- list(x, ...)
-              do.call('rbind', xs)
+              
+              classes <- unique(sapply(xs, class))
+              if (length(classes) > 1L) .stop(ifelse = length(classes) > 1L,
+                                              "You can't concatinate a {class(x)} object with objects of class<|es> ",
+                                              glue::glue_collapse(classes[-1], sep = ', ', last = ', or '), '.', sep = '')
+              
+              #
+              nulldim <- is.null(dim(xs[[1]]))
+              
+              # make vectors into column vectors
+              xs <- lapply(xs, 
+                           function(x) {
+                               if (is.null(dim(x)))  x@dim <- c(length(x), 1L)
+                               x
+                               })
+              dims <- t(sapply(xs, dim))
+              
+              # row vectors can be transposed to fit in
+              if (!rbind) {
+                  rowvectors <- dims[ , 'nrow'] == 1L
+                  
+                  if(any(!rowvectors) && all(dims[!rowvectors, 'ncol'] == 1L)) {
+                      xs[rowvectors] <- lapply(xs[rowvectors], t)
+                      dims[rowvectors, ] <- apply(dims[rowvectors, , drop = FALSE], 1, rev)
+                      
+                  }
+              }
+              if (length(unique(dims[ , 'ncol'])) != 1L) .stop( "Can't concatinate {class(x)} objects with different numbers of columns.")
+              
+              # do it
+              x <- xs[[1]]
+              
+              xslots <- lapply(xs, getSlots) 
+              xslots <- Map(function(slots, curx) {
+                                    lapply(slots, function(slot) {slot %<-dim% curx ; slot})
+                               },
+                               xslots, xs)
+              slots <- Reduce(function(cur, rest) Map(rbind, cur, rest), xslots)
+              slots <- lapply(slots, c)
+              setSlots(x) <- slots
+              
+              # rownames
+              rownames <- lapply(xs, rownames)
+              x@rownames <-  if (all(!sapply(rownames, is.null))) do.call('c', rownames) else NULL 
+              
+              if (nulldim) {
+                  x@dim <- NULL
+                  x@colnames <- NULL
+                  
+              } else {
+                  #dim
+                  x@dim[1] <- sum(lengths(xs))
+                  x@dim[2] <- dims[1, 'ncol']
+                  
+                  # colnames
+                  colnames <- lapply(xs, colnames)
+                  colnames <- Filter(Negate(is.null), colnames)
+                  x@colnames <- if (length(colnames) == 1L || (length(colnames) > 0L && Reduce(identical, colnames))) colnames[[1]] else NULL
+              }
+              x
+              
           })
 
-rbind.humVector <- function(...) {
+rbind.struct <- function(...) {
     xs <- list(...)
-    xs <- lapply(xs, function(x) if (!is.humVector(x)) as(x, class(xs[[1]])) else x) # force to class of first thing
-    Reduce(function(x, y) checkSame(x, y, 'rbind'), xs)
-    
-    ncols <- sapply(xs, ncol)
-    if (length(unique(ncols)) != 1L) stop(call. = FALSE, "Can't concatinate humVectors with different numbers of columns.")
-    
-    x <- xs[[1]]
-    xslots <- lapply(xs, getSlots) 
-    
-    xslots <- lapply(xslots,
-                     function(slots) {
-                         lapply(slots, `setdim<-`, value = x)
-                     })
-    slots <- Reduce(function(cur, rest) Map(rbind, cur, rest), xslots)
-    slots <- lapply(slots, c)
-    
-    setSlots(x) <- slots
-    
-    ##
-    rownames <- lapply(xs, rownames)
-    rownames <- if (any(sapply(rownames, is.null))) NULL else unlist(rownames)
-    rownames(x) <- rownames
-    x@nrow <- sum(sapply(xs, nrow))
-    
-    x
 
+    xs <- lapply(xs, function(x) if (is.null(dim(x))) t(x) else x)
     
-}
-cbind.humVector <-  function(...) {
-    xs <- list(...)
-    xs <- lapply(xs, function(x) if (!is.humVector(x)) as(x, class(xs[[1]])) else x) # force to class of first thing
-    Reduce(function(x, y) checkSame(x, y, 'c'), xs)
+    x <- do.call('c', c(xs, list(rbind = TRUE)))
     
-    nrows <- sapply(xs, nrow)
-    if (length(unique(nrows)) != 1L) stop(call. = FALSE, "Can't cbind to humVector's with different numbers of rows.")
+    if (is.null(dim(x))) x@dim <- c(length(x), 1L)
     
-    x <- xs[[1]]
-    xslots <- lapply(xs, getSlots)
-    
-    setSlots(x) <- Reduce(function(cur, rest) Map(c, cur, rest), xslots)
-    ##
-    colnames <- lapply(xs, colnames)
-    colnames <- if (any(sapply(colnames, is.null))) NULL else unlist(colnames)
-    x@colnames <- colnames
-    x@ncol <- sum(sapply(xs, ncol))
-     
     x
 }
 
-setMethod('t', signature = 'humVector',
+cbind.struct <-  function(...) {
+    xs <- list(...)
+   
+    xs <- lapply(xs, t)
+    x <- do.call('rbind', xs)
+    
+    t(x)
+    
+    
+}
+
+setMethod('t', signature = 'struct',
           function(x) {
-              ncol <- ncol(x)
-              nrow <- nrow(x)
-              colnames <- colnames(x)
-              rownames <- rownames(x)
+              if (is.null(dim(x))) x@dim <- c(length(x), 1L)
+              
               setSlots(x) <- lapply(getSlots(x),
                      function(slot) {
-                         setdim(slot) <- x
+                         slot %<-dim% x
                          c(t(slot))
                      })
               
+              x@dim <- rev(x@dim)
+              
+              rownames <- rownames(x)
+              x@rownames <- colnames(x)
               x@colnames <- rownames
-              x@rownames <- colnames
-              x@nrow <- ncol
-              x@ncol <- nrow
               
               x
           })
 
-setMethod('diag', signature = 'humVector',
+setMethod('diag', signature = 'struct',
           function(x) {
-              if (dim(x)[1] != dim(x)[2]) stop(call. = FALSE, "Can't get diagonal of a non-square humVector. (I.e., the number of rows and columns must be equal.)")
+              if (is.null(dim(x))) .stop("Can't get the diagonal of a {class(x)} with no dimensions!")
+              if (dim(x)[1] != dim(x)[2]) .stop("Can't get diagonal of a non-square {class(x)}.", 
+                                               "(I.e., the number of rows and columns must be equal.)")
               
               x[1:nrow(x), 1:ncol(x), cartesian = TRUE]
           })
@@ -771,32 +900,32 @@ setMethod('diag', signature = 'humVector',
 
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('is.na', signature = 'humVector',
+setMethod('is.na', signature = 'struct',
           function(x) {
-              mat <- is.na(getSlots(x)[[1]])
-              setdim(mat) <- x
-              mat
+              na <- is.na(getSlots(x)[[1]])
+              na %<-dim% x
+              na
           })
 
 
-#' @name humVector
+#' @name struct
 #' @export
-is.humVector <- function(x) inherits(x, 'humVector')
+is.struct <- function(x) inherits(x, 'struct')
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('is.vector', signature = 'humVector', function(x) TRUE)
+setMethod('is.vector', signature = 'struct', function(x) TRUE)
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('as.vector', signature = 'humVector', force)
+setMethod('as.vector', signature = 'struct', force)
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('as.list', signature = c('humVector'),
+setMethod('as.list', signature = c('struct'),
           function(x, ...) {
               
               x <- list(x, ...)
@@ -805,26 +934,37 @@ setMethod('as.list', signature = c('humVector'),
               lapply(seq_along(x), function(i) x[i])
           })
 
-#' @name humVector
+setGeneric('as.atomic', function(x, ...) standardGeneric('as.atomic'))
+setMethod('as.atomic', 'struct',
+          function(x,  collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
+              slots <- getSlots(x)
+              atom <- Reduce(collapse, slots)
+              
+              atom[is.na(slots[[1]])] <- NA
+              dim(atom) <- dim(x)
+              colnames(atom) <- x@colnames
+              if (hasdim(atom)) rownames(atom) <- x@rownames else names(atom) <- x@rownames
+              atom
+          })
+
+
+#' @name struct
 #' @export
-as.matrix.humVector <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
-    slots <- getSlots(x)
-    mat <- Reduce(collapse, slots)
+as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
+
+    mat <- as.atomic(x, collapse = collapse)
     
-    mat[is.na(slots[[1]])] <- NA
-    
-    dim(mat) <- c(length(x), ncol(x))
+    if (is.null(dim(mat))) dim(mat) <- c(length(x), 1L)
     colnames(mat) <- x@colnames
-    rownames(mat) <- x@rownames
-    
+
     mat
 }
 
 
-#' @name humVector
+#' @name struct
 #' @export
-as.data.frame.humVector <- function(x, row.names = NULL, optional = FALSE, ...) {
-    if (is.null(row.names)) row.names <- 1:length(x)
+as.data.frame.struct <- function(x, optional = FALSE, ...) {
+    row.names <- x@rownames %maybe% 1:length(x)
     
     value <- list(x)
     attr(value, 'row.names') <- row.names
@@ -833,33 +973,33 @@ as.data.frame.humVector <- function(x, row.names = NULL, optional = FALSE, ...) 
     value
 }
 
-#######-
-#' @name humVector
+
+#' @name struct
 #' @export
-setMethod('as.character', 'humVector',
+format.struct <- function(x, ...) { as.character(x)}
+
+
+#' @name struct
+#' @export
+setMethod('as.character', 'struct',
           function(x) {
-              x <- as.matrix.humVector(x)
+              x <- as.atomic(x)
               x[] <- as.character(x)
               x
           })
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('show', signature = c(object = 'humVector'), 
+setMethod('show', signature = c(object = 'struct'), 
           function(object) { 
-              if (length(object) == 0L) {
-                  cat(paste0(class(object), '[', nrow(object), ' , ', ncol(object), ']'))
-              } else {
-                  mat <- as.matrix(object)
-                  if (ncol(mat) == 1L) {
-                      mat <- c(mat)
-                      names(mat) <- names(object)
-                      if (!is.null(colnames(object))) cat('    ', colnames(object), '\n')
-                  }
-                  print(mat, quote = FALSE)
+              
+              cat(class(object), 
+                  if (hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
+                  '\n', sep = '')
+              if (length(object) > 0L) {
+                  print(as.atomic(object), quote = FALSE)
               }
             invisible(object)
             }  )
-
 
 ########## order, equality ----
 
@@ -872,9 +1012,9 @@ order.default <- function(x, ..., na.last = TRUE,
 
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('sort', signature = c(x = 'humVector'),
+setMethod('sort', signature = c(x = 'struct'),
           function(x, decreasing = FALSE) {
               x[order(x, decreasing = decreasing), ]
           })
@@ -882,9 +1022,9 @@ setMethod('sort', signature = c(x = 'humVector'),
 ##### comparisons ----
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('==', signature = c('humVector', 'humVector'),
+setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
               
@@ -893,51 +1033,47 @@ setMethod('==', signature = c('humVector', 'humVector'),
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
               mat <- Reduce(`&`, Map(`==`, slots1, slots2))
-              setdim(mat) <- e1
+              mat %<-dim% e1
               mat
               
           })
 
 #' @export
-setMethod('!=', signature = c('humVector', 'humVector'),
+setMethod('!=', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '!=')
               
               !(e1 == e2)
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('<', signature = c('humVector', 'humVector'),
+setMethod('<', signature = c('struct', 'struct'),
           function(e1, e2) {
               !(e1 >= e2 )
           })
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('<=', signature = c('humVector', 'humVector'),
+setMethod('<=', signature = c('struct', 'struct'),
           function(e1, e2) {
               !(e1 > e2)
           })
 
 
-#' @name humVector
-#' @export
-format.humVector <- function(x, ...) { as.character(x)}
 
 #### arithmatic ----
 
 
 
-setMethod('sum', signature = c('humVector'),
+setMethod('sum', signature = c('struct'),
           function(x, ..., na.rm = FALSE) {
               x <- c(list(x), ...)
               
               x <- lapply(x, function(humv) {
                   setSlots(humv) <- lapply(getSlots(humv, c('numeric', 'integer', 'logical')), sum, na.rm = na.rm)
-                  rownames(humv) <- NULL
-                  colnames(humv) <- "sum"
+                  humv@dim <- humv@colnames <- humv@rownames <- NULL
                   humv
               })
               
@@ -945,81 +1081,82 @@ setMethod('sum', signature = c('humVector'),
                   Reduce(`+`, x)
               } else {
                   x[[1]]
-                  
               }
-              x@nrow <- x@ncol <- 1L
+              x@rownames <- 'sum'
               x
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('colSums', signature = c('humVector'),
+setMethod('colSums', signature = c('struct'),
           function(x, na.rm = FALSE) {
-              
+              if (!hasdim(x)) x <- cbind(x)
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        setdim(slot) <- x
+                                        slot %<-dim% x
                                         as.integer(unname(c(colSums(slot, na.rm = na.rm))))
                                     })
               rownames(x) <- NULL
-              x@nrow <- 1L
+              x@dim <- c(1L, ncol(x))
                                     
               x
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('rowSums', signature = c('humVector'),
+setMethod('rowSums', signature = c('struct'),
           function(x, na.rm = FALSE) {
+              if (!hasdim(x)) x <- rbind(x)
+              
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        setdim(slot) <- x
+                                        slot %<-dim% x
                                         as.integer(unname(c(rowSums(slot, na.rm = na.rm))))
                                     })
               colnames(x) <- NULL
-              x@ncol <- 1L
+              x@dim <- c(nrow(x), 1L)
               x
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('cumsum', signature = c('humVector'),
+setMethod('cumsum', signature = c('struct'),
           function(x) {
+              
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        setdim(slot) <- x
-                                        c(apply(slot, 2, cumsum))
+                                        if (hasdim(x)) {
+                                            slot %<-dim% x
+                                            c(apply(slot, 2, cumsum))
+                                        } else {
+                                            cumsum(slot)
+                                        }
+
                                     })
               
               x
           })
 
 
-#' @name humVector
-#' @export
-setMethod('-', signature = c('humVector', 'humVector'),
-          function(e1, e2) {
-              e1 + (-e2)
-          })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('diff', signature = c('humVector'),
+setMethod('diff', signature = c('struct'),
           function(x, lag = 1L) {
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        setdim(slot) <- x
+                                        slot %<-dim% x
                                         c(diff(slot, lag = lag))
                                     })
-              rownames(x) <- rownames(x)[-1]
-              x@nrow <- x@nrow - 1L
+              x@dim[1] <- x@dim[1] - 1L
+              x@rownames <- x@rownames[-1]
               x
           })
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('+', signature = c('humVector', 'humVector'),
+setMethod('+', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '+')
               recycledim(e1 = e1, e2 = e2, funccall = '+')
@@ -1029,23 +1166,29 @@ setMethod('+', signature = c('humVector', 'humVector'),
               e1
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('+', signature = c('humVector', 'ANY'),
+setMethod('+', signature = c('struct', 'ANY'),
           function(e1, e2) {
               e1 + as(e2, class(e1))
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('+', signature = c('ANY', 'humVector'),
+setMethod('+', signature = c('ANY', 'struct'),
           function(e1, e2) {
               as(e1, class(e2)) + e2
           })
-
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('-', signature = c( 'humVector', 'missing'),
+setMethod('-', signature = c('struct', 'struct'),
+          function(e1, e2) {
+              e1 + (-e2)
+          })
+
+#' @name struct
+#' @export
+setMethod('-', signature = c( 'struct', 'missing'),
           function(e1) {
               
               setSlots(e1) <- lapply(getSlots(e1), function(slot) -slot )
@@ -1053,33 +1196,33 @@ setMethod('-', signature = c( 'humVector', 'missing'),
           })
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('-', signature = c( 'humVector', 'humVector'),
+setMethod('-', signature = c( 'struct', 'struct'),
           function(e1, e2) {
               e1 + -e2
               
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('-', signature = c('humVector', 'ANY'),
+setMethod('-', signature = c('struct', 'ANY'),
           function(e1, e2) {
               e1 - as(e2, class(e1))
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('-', signature = c('ANY', 'humVector'),
+setMethod('-', signature = c('ANY', 'struct'),
           function(e1, e2) {
              as(e1, class(e2)) - e2
           })
 
 
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('*', signature = c('humVector', 'numeric'),
+setMethod('*', signature = c('struct', 'numeric'),
           function(e1, e2) {
               setSlots(e1) <- lapply(getSlots(e1, c('numeric', 'integer')), 
                                      function(x) {
@@ -1089,9 +1232,9 @@ setMethod('*', signature = c('humVector', 'numeric'),
               e1 
           })
 
-#' @name humVector
+#' @name struct
 #' @export
-setMethod('*', signature = c('numeric', 'humVector'),
+setMethod('*', signature = c('numeric', 'struct'),
           function(e1, e2) {
               e2 * e1
           })
