@@ -351,6 +351,12 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
     eval(rlang::expr(dim(!!x) <- !!dim(value)), envir = parent.frame())
 }
 
+`%dim%` <- function(x, value) {
+	dim(x) <- dim(value)
+	if (hasdim(x)) rownames(x) <- rownames(value) else names(x) <- names(value)
+	x
+}
+
 
 
 

@@ -149,7 +149,7 @@ setValidity('struct',
                     })
                             
                 
-                if (length(errors) > 0L) errors else TRUE
+                if (length(errors) == 0L) TRUE else errors 
                 
             })
 

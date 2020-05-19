@@ -131,7 +131,6 @@ setMethod("initialize",
           "tonalInterval",
           function(.Object, Fifth = 0L, Octave = 0L, Cent = 0L) {
               .Object <- callNextMethod() # call the humdrumVector initialize
-
               Cent <- .Object@Cent
               if (any(abs(Cent) >= 1200L, na.rm = TRUE)) {
                   centOctaves <- IfElse(Cent == 0L, 
@@ -155,7 +154,7 @@ setMethod("initialize",
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
     if (missing(octave)) return(LO5thNsciOct2tint(LO5th, 4L))
-    cent[is.na(octave) | is.na(LO5th)] <- NA_real_
+  
     new('tonalInterval', 
         Octave = as.integer(octave), 
         Fifth  = as.integer(LO5th), 
@@ -296,7 +295,7 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               
               tint <- tint(e1@Octave - (e2@Octave * LO5thDivs), LO5thMods)
               
-              copydim(tint) <- e1
+              tint %<-dim% e1
               
               tint
           })
@@ -311,7 +310,7 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
               f2 <- e2@Fifth
               
               f3 <-  f1 %/% f2
-              copydim(f3) <- e1
+             f3 %<-dim% e1
               f3
           })
 
@@ -470,7 +469,7 @@ solfa2LO5th <- function(solfa) {
 ###.. semitones
 
 tint2semit <- function(x) {
-        ((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L) 
+        (((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)) %dim% x
 }
 
 tint2midi <- function(x) tint2semit(x) + 60L
@@ -478,7 +477,7 @@ tint2midi <- function(x) tint2semit(x) + 60L
 ###.. tonal chroma names
 
 tint2tonalChroma <- function(x, accidental.labels = c()) {
-    LO5th2tonalChroma(x@Fifth, accidental.labels)
+    LO5th2tonalChroma(x@Fifth, accidental.labels) %dim% x
 }
 
 #....
