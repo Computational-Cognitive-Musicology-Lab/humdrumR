@@ -31,7 +31,8 @@ Collate: humdrumR-package.R
          humDiatonic.R
          humMetric.R
          humGraphics.R
-RoxygenNote: 6.1.1
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

@@ -2,61 +2,64 @@
 #' Pseudo-vector classes for humdrum data.
 #' 
 #' HumdrumR defines a number of S4 classes which are,
-#' underneath the surface, \code{\href(https://en.wikipedia.org/wiki/Composite_data_type){composite data types},
+#' underneath the surface, [https://en.wikipedia.org/wiki/Composite_data_type](composite data types),
 #' made up of collections of base::R atomic vectors, stuck together.
 #' (Things like this are called structs, or tuples, or records in other languages.)
 #' The "vectorization" or R's atomic types is R's key strength so we
 #' want, as much as possible for our composite types to act just R atomics.
 #' 
-#' \code{struct} is a \emph{virtual} S4 class for just such composite atomic vectors. 
-#' The \code{struct} defines all the necessarry methods to treat a collection of
-#' atomic vectors as a sine vector/matrix---simply
-#' make your new class inherit \code{struct} and it is all taken care of!
-#' (To do this, specifify \code{contains = 'struct'} in your call to \code{setClass}.)
+#' `struct` is a \emph{virtual} S4 class for just such composite atomic vectors. 
+#' The `struct` defines all the necessarry methods to treat a collection of
+#' atomic vectors as a single vector/matrix-like object---simply
+#' make your new class inherit `struct` and it is all taken care of!
+#' (To do this, specifify `contains = "struct"` in your call to [methods::setClass()].)
 #' 
-#' Be warned, \code{R} is limited in this regard---users can't \emph{really} define
-#' \code{S4} classes that \emph{really} act fully like \code{R} atomics---, so you may 
+#' Be warned, `R` is limited in this regard---users can't *really* define
+#' S4 classes that act fully like R atomics---, so you may 
 #' run in to problems if you take this too far. 
-#' For instance, though \code{struct} classes work (ok) in \code{\link[base]{data.frame}}s
-#' \code{data.table}s and \code{tibbles} might give you problems.
+#' For instance, though `struct` classes work (ok) in [base::data.frame]s
+#' [data.table::data.table]s and [tibble::tibble]s might give you problems.
 #' 
 #' @section Behavior
 #' 
-#' \code{struct} subclasses behave very similarly to normal R vectors.
+#' `struct` subclasses behave very similarly to normal R vectors.
 #' However, they do differ in a few respects, mostly in ways that
 #' avoid some of the quirky behaviors with R vectors:
 #' In general, the distinction between dimensionless vectors
-#' and dimensioned vectors is slightly weakened with \code{structs}
+#' and dimensioned vectors is slightly weakened with `structs`
 #' compared to normal R atomic vectors.
-#' In general, dimensionless \code{struct}s are treated more implicitely
+#' In general, dimensionless `struct`s are treated more implicitely
 #' like column-matrices.
-#' Notably, if the struct has rows, \code{length(struct) == nrow(struct)}.
+#' Notably, if the struct has rows, `length(struct) == nrow(struct)`.
+#' Most importantly, dimensioned `struct`s won't drop their dimensions
+#' under various common operations (`c`, `[]`, etc.), the way
+#' base-R matrices do.
+#' Thie biggest difference is that `c` doesn't always cause `struct`s to lose their dimensions.
+#' Rather, if the first argument to `c` has dimensions, the dimensions are kept and the `struct`s
+#' are `rbind`ed (assuming the number of columns are conformable).
 #' 
 #' Other differences:
-#' \itemize{
-#'     \item{\code{struct}s can only have no dimensions (\code{dim(struct) == NULL}) or two dimentions.
-#'     Higher dimensional arrays are not possible (yet).}
-#'     \item{\code{rowSums} and \code{colSums} will coerce a dimensionless struct to a column matrix.}
-#'     \item{\code{struct}s always throw an error if you try to index them with a index value
-#'     that is greater than the length/nrow of the \code{struct}. This is different than atomic vectors,
-#'     which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.}
-#'     \item{\code{struct}s with two dimensions have a \code{cartesian} indexing argument.
-#'     If \code{cartesian = TRUE}, the \code{i} and \code{j} arguments are treated as cartesian coordinates.
-#'     (This behavior can be achieved with base R matrices (or \code{struct}s) by inputing a matrix with two columns.)}
+#' * `struct`s can only have no dimensions (`dim(struct) == NULL`) or two dimentions. Higher dimensional arrays are not possible (yet).}
+#' * `rowSums` and `colSums` will coerce a dimensionless struct to a column matrix.
+#' * `struct`s always throw an error if you try to index them with a index value
+#'    that is greater than the length/nrow of the `struct`. This is different than atomic vectors,
+#'    which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
+#' * `struct`s with two dimensions have a `cartesian` indexing argument.
+#'    If `cartesian = TRUE`, the `i` and `j` arguments are treated as cartesian coordinates.
+#'    (This behavior can be achieved with base R matrices (or `struct`s) by inputing a matrix with two columns.)
 #' 
-#' }
 #' 
 #' 
 #' 
 #' 
 #' @section Requirements:
 #' 
-#' To work, \code{struct} makes a few assumptions about your class.
+#' To work, `struct` makes a few assumptions about your class.
 #' Your class must have one or more slots which are vectors, all of which are the same length.
-#' \code{struct}'s indexing method will cause all of these vectors to be indexed as one.
-#' When you define a new subclass of \code{struct}, it will inherit a 
-#' \code{validObject} method which assures that all elements are the same dimension.
-#' Thus, if you are writing your own \code{validObject} method (using \code{setValidity})
+#' `struct`'s indexing method will cause all of these vectors to be indexed as one.
+#' When you define a new subclass of `struct`, it will inherit a 
+#' `validObject` method which assures that all elements are the same dimension.
+#' Thus, if you are writing your own [methods::validObject()] method (using [methods::setValidity()])
 #' you just have to worry specifically about the validity of the information in your slots,
 #' not that the slots are all the same length.
 #' 
@@ -64,23 +67,23 @@
 #' @section Initialize:
 #' 
 #' An initialize method which automatically makes all slots the same length is predefined
-#' for \code{structs}. If you want to make a more specialized \code{initialize} method,
-#' you can still take advantage of the inherited method by using \code{callNextMethod} at the 
+#' for `structs`. If you want to make a more specialized [methods::initialize()] method,
+#' you can still take advantage of the inherited method by using [methods::callNextMethod()] at the 
 #' beginning of your function.
 #' 
 #' 
 #' @section Predefined methods:
 #' 
-#' You must specify \code{order} and any arithmetic/comparison methods for your class
+#' You must specify [base::order] and any arithmetic/comparison methods for your class
 #' yourself. However,
 #' \itemize{
-#'  \item{If you define \code{>} and \code{>=}, \code{<} and \code{<=} will be automatically defined.}
-#'  \item{If you define \code{order}, \code{sort} will be automatically defined.}
-#'  \item{If you define \code{as.character} for your class, \code{show} and
-#'   \code{format} methods are defined automatically.}
+#'  \item{If you define `>` and `>=`, `<` and `<=` will be automatically defined.}
+#'  \item{If you define `order`, `sort` will be automatically defined.}
+#'  \item{If you define `as.character` for your class, `show` and
+#'   `format` methods are defined automatically.}
 #' }
 #' 
-#' Default arithmetic methods for addition, (scalar) multiplication, negation (\code{-x}) are defined.
+#' Default arithmetic methods for addition, (scalar) multiplication, and negation (`-x`) are defined.
 #' They assume that adding your class to another is simply the same as adding each numeric slot in parallel.
 #' If this is not the case, you'll need to create your own, more specific, method!
 #' 
@@ -96,7 +99,6 @@ setClass('struct', contains = 'VIRTUAL', slots = c(dim = 'maybeinteger', rowname
 setValidity('struct', 
             function(object) {
                 class <- class(object)
-                
                 #
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
@@ -148,7 +150,6 @@ setValidity('struct',
                         )
                     })
                             
-                
                 if (length(errors) == 0L) TRUE else errors 
                 
             })
@@ -159,13 +160,13 @@ setMethod('initialize',
           function(.Object, ..., dim = NULL, colnames = NULL, rownames = NULL) {
               slots <- list(...)
               slots <- lapply(slots, unname)
+              if (length(slots) == 0L) return(.Object)
               slots <- do.call('match_size', slots)
               
               .Object@dim <- dim
               .Object@colnames <- colnames
               .Object@rownames <- rownames
               
-              if (length(slots) == 0L) return(.Object)
               
               ## NA in any slot is NA in all slots
               na <- Reduce(`|`, lapply(slots, is.na))
@@ -198,7 +199,7 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 }
 
 columns <- function(humvec) {
-    ncol <- if (is.null(dim(humvec))) 1L else ncol(humvec)
+    ncol <- if (hasdim(humvec)) ncol(humvec) else 1L
     rep(1:ncol, each = length(humvec))
 }
 
@@ -219,12 +220,10 @@ setMethod('dim', signature = 'struct', function(x) x@dim %fmap% setNames(., c('n
 setMethod('dim<-', 'struct',
           function(x, value) {
               value %!<-% as.integer(value)
-              
-              if (is.null(value) || any(dim(x) != dim(value))) {
+              if (is.null(value) || any(dim(x) != value)) {
                   x@colnames <- NULL
                   x@rownames <- NULL
               }
-              
               x@dim <- value
               
               validObject(x)
@@ -232,22 +231,40 @@ setMethod('dim<-', 'struct',
               
           })
 
-setClass('test', contains = 'struct', slots = c(x = 'integer'))
-z <- new('test', x = c(1L,2L,NA, 4L:9L), dim = c(3L,3L))
-y <- new('test', x = c(1L:8L, NA), dim = NULL)
-
 ### tools 
 
 
 
 
 recycledim <- function(..., funccall) {
+    # SHOULD DOCUMENT THIS BETTER XXX
+    # It's a more limited alternative to match_size
     # accepts two named args
     args <- list(...)[1:2]
+    
+    havedim <- sapply(args, hasdim)
+    # no dim
+    if (all(!havedim)) {
+        args <- setNames(match_size(args[[1]], args[[2]]), names(args))
+        list2env(args, envir = parent.frame(1))
+        return(NULL)
+    }
+    
+    # one without dim (make it into column vector)
+    args[!havedim] <- lapply(args[!havedim], cbind)
+    
+    # Both have dim
+    
     d1 <- dim(args[[1]])
     d2 <- dim(args[[2]])
     
-    if (all(d1 == d2) || all(d1 == c(1L, 1L)) || all(d2 == c(1L, 1L))) return(NULL)
+    if (all(d1 == d2)) return(NULL)
+    
+    if (all(d1 == 1L) || all(d2 == 1L)) {
+        args <- setNames(match_size(args[[1]], args[[2]], margin = 1:2), names(args))
+        list2env(args, envir = parent.frame(1))
+        return(NULL)
+    }   
     
     drat <- d1 / d2
     if (drat[1] == 1 && (d1[2] == 1 || d2[2] == 1)) {
@@ -262,7 +279,8 @@ recycledim <- function(..., funccall) {
     }
     
     .stop("In call to {funccall}, the two structs are nonconformable.\n",
-          "To confirm, at least one of their dimensions needs to be the same, while the other is either (also) the same, or 1.")
+          "To confirm, eitehr one object must be of dim = c(1,1), or 
+          at least one of their dimensions needs to be the same, while the other is either (also) the same, or 1.")
     
 }
 
@@ -301,7 +319,7 @@ setMethod('rownames<-', c(x = 'struct'),
           })
 setMethod('names<-', c(x = 'struct'),
           function(x, value) {
-              rownames(x) <- value
+              x@rownames <- value
               x
           })
 setMethod('dimnames<-', c(x = 'struct'),
@@ -367,12 +385,12 @@ setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
             
             # Check for problems with i 
             if (any(i < 0))  .stop("When indexing a {class(x)}, you can't mix negative and positive numbers in the index.")
-            if (any(i > length(x))) .stop(ifelse = is.null(dim(x)),
+            if (any(i > length(x))) .stop(ifelse = !hasdim(x),
                                           "The i-index is greater than the <length|nrow> of the {class(x)} object you are trying to index.",
                                           "<Normal R vectors don't throw an error for this, but we do.|>")
             
             ### translate by-row i to actual i of internal vectors
-            i.internal <- if (!is.null(dim(x)) && ncol(x) > 1) humvectorI(i, x) else i
+            i.internal <- if (hasdim(x) && ncol(x) > 1) humvectorI(i, x) else i
             
             # modify dimension info
             x@rownames %!<-% rownames(x)[i]
@@ -389,7 +407,7 @@ setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
 setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
           function(x, i) {
               if (is.null(rownames(x))) {
-                       .stop(ifelse = is.null(dim(x)),
+                       .stop(ifelse = !hasdim(x),
                              "You can't <|row->index a {class(x)} (i.e. {class(x)}[i<|, >])", 
                                              "with a character string if the {class(x)} has no <|row>names (i.e., <|row>names({class(x)}) = NULL).")
               }
@@ -397,7 +415,7 @@ setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
               
               i <- locate(i, rownames(x))
               nomatch <- lengths(i) == 0L
-              if (any(nomatch))  .stop(ifelse = is.null(dim(x)),
+              if (any(nomatch))  .stop(ifelse = !hasdim(x),
                                        "In your attempt to <|row->index a {class(x)} (i.e., {class(x)}[i<|, >])",
                                        " using character indices, ", 
                                        glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
@@ -409,15 +427,15 @@ setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
               x[i, ]
           })
 setMethod('[', c(x = 'struct', i = 'logical', j = 'missing'),
-          function(x, i ) {
-              if (length(i) != nrow(x)) .stop(ifelse = is.null(dim(x)),
+          function(x, i) {
+              if (length(i) != length(x)) .stop(ifelse = !hasdim(x),
                                               "Can't index[i<|, >] a {class(x)} with a logical vector of a length that does not match <length|nrow>({class(x)}).")
               x[which(i), ]
           })
 
 setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
           function(x, i ) {
-              if (is.null(dim(x))) .stop("You can't index a dimensionless {class(x)} object with a matrix.")
+              if (!hasdim(x)) .stop("You can't index a dimensionless {class(x)} object with a matrix.")
               matclass <- class(i[1, 1])
               
               if (matclass %in% c('character', 'numeric', 'integer')) {
@@ -454,7 +472,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
           function(x, j) {
-              if (is.null(dim(x))) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
+              if (!hasdim(x)) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
               
               j <- j[j != 0] # zeros are ignored
               
@@ -518,7 +536,7 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'logical'),
           })
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'matrix'),
-          function(x, i ) {
+          function(x, j ) {
               .stop("You can't index a {class(x)} with a matrix in the j indexing argument.")
           })
 
@@ -527,8 +545,8 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'matrix'),
 
 setMethod('[', c(x = 'struct'),
           function(x, i, j, cartesian = FALSE) {
-              i <- i[i != 0] # zeros are ignored
-              j <- j[j != 0]
+              if (is.numeric(i)) i <- i[i != 0] # zeros are ignored
+              if (is.numeric(j)) j <- j[j != 0]
               
               if (cartesian) {
                   if (!is.numeric(i) || !is.numeric(j)) .stop( "Can't do cartesian-index a {class(x)} if i and j aren't BOTH numeric.")
@@ -566,10 +584,13 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
           function(x, i, value) {
               checkSame(x, value, '[i , ]<-')
               
+              if (length(value) == 0 || any(dim(value) == 0L)) return(x)
+              
               # if either are vectors, make them into column vectors
               dimx <- dim(x)
-              if (is.null(dim(x))) x@dim <- c(length(x), 1L)
-              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              if (!hasdim(x)) x@dim <- c(length(x), 1L)
+              if (!hasdim(value)) value@dim <- c(length(value), 1L)
+              
               
               # this will return appropriate error if indices are invalid
               xindexed <- x[i, ] 
@@ -583,37 +604,40 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
               }
               
               # sizes still don't match
-              if (ncol(value) != ncol(x)) stop(call. = FALSE,
-                                               glue::glue("Can't assign ([i]<-) a {class(x)} object with {ncol(value)} columns into rows of a {class(x)} object with {ncol(x)} columns."))
+              if (ncol(value) != ncol(xindexed)) .stop("Can't assign ([i]<-) a {class(x)} object with {ncol(value)} columns into rows of a {class(x)} object with {ncol(x)} columns.")
               
               # character or logical indices
               if (is.character(i) && !is.null(rownames(x))) i <- locate(i, rownames(x))
-              if (is.logical(i)) i <- which(i)
-              
-              # negative indices
-              if (all(i < 0)) i <- (1L:nrow(x))[i]
-              if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
-              
-              #
-              if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
-              if (length(value) != length(i)) stop(call. = FALSE, 
-                                                   glue::glue("Can't row-assign ([i]<-) a {class(value)} with {length(value)} rows into {length(i)} rows of another {class(x)}.\n",
-                                                              "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
-              
+              if (is.logical(i)) {
+                  i.internal <- which(i)
+              } else {
+                  # negative indices
+                  if (all(i < 0)) i <- (1L:nrow(x))[i]
+                  if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
+                  
+                  #
+                  if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
+                  if (length(value) != length(i)) stop(call. = FALSE, 
+                                                       glue::glue("Can't row-assign ([i]<-) a {class(value)} with {length(value)} rows into {length(i)} rows of another {class(x)}.\n",
+                                                                  "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
+                  
+                  
+                  i.internal <- humvectorI(i, x)
+              }
               
               ## do it
-              i <- humvectorI(i, x)
+             
               
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
               slots <- Map(function(slotx, slotv) {
-                                  slotx[i] <- slotv
+                                  slotx[i.internal] <- slotv
                                   slotx
                              },
                            slotsx, slotsv)
               setSlots(x) <- slots
               
-              x@dim <- xdim # this removes dimensions if were none to begin with
+              x@dim <- dimx # this removes dimensions if were none to begin with
               x
           })
 
@@ -621,10 +645,10 @@ setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
           function(x, j, value) {
               checkSame(x, value, '[ , j]<-')
               
-              if (is.null(dim(x))) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
+              if (!hasdim(x)) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
               
               # if value is a vector, make it into a column vector
-              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              if (!hasdim(value)) value@dim <- c(length(value), 1L)
               
               # this will return appropriate error if indices are invalid
               xindexed <- x[, j] 
@@ -666,10 +690,10 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
           function(x, i, j, value, cartesian = FALSE) {
               checkSame(x, value, '[ i, j]<-')
               
-              if (is.null(dim(x))) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
+              if (!hasdim(x)) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")
               
               # if value is a vector, make it into a column vector
-              if (is.null(dim(value))) value@dim <- c(length(value), 1L)
+              if (!hasdim(value)) value@dim <- c(length(value), 1L)
               
               if (cartesian) return(cartesianAssign(x, i, j, value))
               
@@ -755,7 +779,7 @@ setMethod('rep', c(x = 'struct'),
           function(x, ...) {
               slots <- getSlots(x)
               
-              slots <- if (is.null(dim(x))) {
+              slots <- if (!hasdim(x)) {
                   lapply(slots, rep, ...)
               } else {
                   columns <- columns(x)
@@ -789,16 +813,15 @@ setMethod('c', 'struct',
                                               glue::glue_collapse(classes[-1], sep = ', ', last = ', or '), '.', sep = '')
               
               #
-              nulldim <- is.null(dim(xs[[1]]))
+              nulldim <- !hasdim(xs[[1]])
               
               # make vectors into column vectors
               xs <- lapply(xs, 
                            function(x) {
-                               if (is.null(dim(x)))  x@dim <- c(length(x), 1L)
+                               if (!hasdim(x))  x@dim <- c(length(x), 1L)
                                x
                                })
               dims <- t(sapply(xs, dim))
-              
               # row vectors can be transposed to fit in
               if (!rbind) {
                   rowvectors <- dims[ , 'nrow'] == 1L
@@ -848,29 +871,32 @@ setMethod('c', 'struct',
 rbind.struct <- function(...) {
     xs <- list(...)
 
-    xs <- lapply(xs, function(x) if (is.null(dim(x))) t(x) else x)
+    xs <- lapply(xs, function(x) if (!hasdim(x)) t(x) else x)
     
-    x <- do.call('c', c(xs, list(rbind = TRUE)))
+    x <- do.call('c', c(unname(xs), list(rbind = TRUE)))
     
-    if (is.null(dim(x))) x@dim <- c(length(x), 1L)
+    if (!hasdim(x)) x@dim <- c(length(x), 1L)
     
     x
 }
 
 cbind.struct <-  function(...) {
     xs <- list(...)
-   
     xs <- lapply(xs, t)
+    
+    #
     x <- do.call('rbind', xs)
+    x <- t(x)
     
-    t(x)
-    
+    #
+    colnames(x) <- names(xs)
+    x
     
 }
 
 setMethod('t', signature = 'struct',
           function(x) {
-              if (is.null(dim(x))) x@dim <- c(length(x), 1L)
+              if (!hasdim(x)) x@dim <- c(length(x), 1L)
               
               setSlots(x) <- lapply(getSlots(x),
                      function(slot) {
@@ -889,7 +915,7 @@ setMethod('t', signature = 'struct',
 
 setMethod('diag', signature = 'struct',
           function(x) {
-              if (is.null(dim(x))) .stop("Can't get the diagonal of a {class(x)} with no dimensions!")
+              if (!hasdim(x)) .stop("Can't get the diagonal of a {class(x)} with no dimensions!")
               if (dim(x)[1] != dim(x)[2]) .stop("Can't get diagonal of a non-square {class(x)}.", 
                                                "(I.e., the number of rows and columns must be equal.)")
               
@@ -954,7 +980,7 @@ as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep 
 
     mat <- as.atomic(x, collapse = collapse)
     
-    if (is.null(dim(mat))) dim(mat) <- c(length(x), 1L)
+    if (!hasdim(mat)) dim(mat) <- c(length(x), 1L)
     colnames(mat) <- x@colnames
 
     mat
@@ -993,7 +1019,7 @@ setMethod('show', signature = c(object = 'struct'),
           function(object) { 
               
               cat(class(object), 
-                  if (hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
+                  if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
                   '\n', sep = '')
               if (length(object) > 0L) {
                   print(as.atomic(object), quote = FALSE)
@@ -1089,7 +1115,7 @@ setMethod('sum', signature = c('struct'),
 #' @name struct
 #' @export
 setMethod('colSums', signature = c('struct'),
-          function(x, na.rm = FALSE) {
+          function(x, na.rm = FALSE, drop = FALSE) {
               if (!hasdim(x)) x <- cbind(x)
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {

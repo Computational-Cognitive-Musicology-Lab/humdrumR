@@ -2,7 +2,7 @@
 #' Tonal Data Types
 #' 
 #' \code{\link[humdrumR:humdrumR]{humdrumR package}} contains a number of 
-#' intertwined \code{S4} data types defined to represent tonal musical information,
+#' intertwined \code{S4} data types defined to represent tonal musical information
 #' from the traditional Western persective (i.e., diatonicism).
 #' The most important is the \code{\linkS4class{tonalInterval}}.
 #' There are also the \code{\linkS4class{tonalCenter}} and the \code{\linkS4class{tonalHarmony}}.
@@ -117,14 +117,14 @@ NULL
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 
-         contains = 'humVector',
+         contains = 'struct',
          slots = c(Fifth  = 'integer', 
                    Octave = 'integer', 
                    Cent   = 'numeric')) -> tonalInterval
 
 setValidity('tonalInterval', 
             function(object) {
-              all(abs(object@Cent) <= 1200)
+              all(abs(object@Cent) <= 1200, na.rm = TRUE)
             })
 
 setMethod("initialize", 
@@ -287,6 +287,7 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               if (length(e2) == 0L) stop(call. = FALSE, "Can't take modulo (%%) with empty modulo.")
             
               recycledim(e1 = e1, e2 = e2, funccall = '%%')
+              
               f1 <- e1@Fifth
               f2 <- e2@Fifth
               
@@ -371,9 +372,9 @@ LO5th2alteration <- function(LO5th, mode, cautionary = TRUE, alteration.labels =
 LO5th2tonalChroma <- function(LO5th, accidental.labels = c()) {
           letternames <- LO5th2lettername(LO5th)
           accidentals <- LO5th2accidental(LO5th, accidental.labels)
-          IfElse(!is.na(letternames) & !is.na(accidentals),
-                 .paste(letternames, accidentals), 
-                 NA_character_)
+          .ifelse(is.na(letternames) | is.na(accidentals),
+                  NA_character_, 
+                  .paste(letternames, accidentals))
 }
 
 LO5th2quality <- function(LO5th, quality.labels = c()) {
@@ -424,14 +425,13 @@ genericinterval2LO5th   <- function(ints) {
 }
 lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2L
 accidental2LO5th <- function(acc, accidental.labels = c()) {
-  setoptions(accidental.labels) <- c(sharp = '#', flat = '-', flat = 'b')
-  
+  setoptions(accidental.labels) <- c(sharp = '#', flat = '[-b]')
   sharps <- colSums(do.call('rbind', 
                             lapply(accidental.labels[names(accidental.labels) == 'sharp'], 
-                                   stringi::stri_count_fixed, str = acc)))
+                                   stringi::stri_count_regex, str = acc)))
   flats <- colSums(do.call('rbind', 
                            lapply(accidental.labels[names(accidental.labels) == 'flat'], 
-                                  stringi::stri_count_fixed, str = acc)))
+                                  stringi::stri_count_regex, str = acc)))
   as.integer((7 * sharps) - (7 * flats))
   
 }
@@ -482,29 +482,29 @@ tint2tonalChroma <- function(x, accidental.labels = c()) {
 
 #....
 
-tint2sciOctave <- function(tint) {
-          generic <- tint %% tint(-11L, 7L)
-          as.integer(tint2semit(generic) %/% 12L) + 4L
+tint2sciOctave <- function(x) {
+          generic <- x %% tint(-11L, 7L)
+          (as.integer(tint2semit(generic) %/% 12L) + 4L) %dim% x
 }
 
 tint2sciPitch <- function(x) {
                     octave <- tint2sciOctave(x)
-                    .paste(LO5th2tonalChroma(x@Fifth, c(flat = 'b')), octave)
+                    .paste(LO5th2tonalChroma(x@Fifth, c(flat = 'b')), octave) %dim% x
             }
 
 #....
 
 tint2kernPitch <- function(x) {
-                    octaves <- tint2sciOctave(x) - 4L
+                    octaves <- c(tint2sciOctave(x) - 4L)
                     LO5ths <- x@Fifth
                     letternames <- LO5th2lettername(LO5ths)
                     accidentals <- LO5th2accidental(LO5ths)
                     
-                    letternames <- IfElse(octaves >= 0L, tolower(letternames), letternames)
+                    letternames <- .ifelse(octaves >= 0L, tolower(letternames), letternames)
                     repn <- IfElse(octaves >= 0, octaves + 1L, -octaves)
                     repn[repn == 0L] <- 1L
                     
-                    .paste(strrep(letternames, abs(repn)), accidentals)
+                    .paste(strrep(letternames, abs(repn)), accidentals) %dim% x
 }
 
 #....
@@ -528,32 +528,32 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
     directed <- .ifelse(x == tint(0, 0), "", c('-', '+')[1 + (octave >= 0)])
   }
   if (alteration.part) {
-    alteration <- LO5th2quality(x@Fifth, quality.labels)
+    alteration <- LO5th2quality(x@Fifth, quality.labels) %dim% x
   } 
   if (generic.part) {
-    genericInterval <- LO5th2genericinterval(x@Fifth)
-    octave[octave < 0L & genericInterval != 1L] <- octave[octave < 0L & genericInterval != 1L] + 1L
-    generic <- as.character(abs(genericInterval + (7L * abs(octave))))
+    genericInterval <- LO5th2genericinterval(x@Fifth) %dim% x
+    octave[is.na(octave) || octave < 0L & genericInterval != 1L] <- octave[is.na(octave) || octave < 0L & genericInterval != 1L] + 1L
+    generic <- empty('', dimen = dim(x))
+    generic[] <- as.character(abs(genericInterval + (7L * abs(octave))))
   } 
  
   
-  paste0(directed, alteration, generic)
+  .paste(directed, alteration, generic) %dim% x
   
 }
 
 
 ##... scale degrees 
 
-tint2scaleDegree <- function(x, key = 0L, cautionary = TRUE, generic = FALSE, contour = FALSE, quality.labels = c(), ...) {
-    deg  <- as.scaleDegree.integer(x@Fifth, key, cautionary, generic, quality.labels = quality.labels)
+tint2scaleDegree <- function(x, Key = 0L, cautionary = TRUE, generic = FALSE, contour = FALSE, quality.labels = c(), ...) {
+    deg  <- int2scaleDegree(x@Fifth, Key, cautionary, generic, quality.labels = quality.labels)
     
     if (logicalOption(contour)) {
         setoptions(contour) <- c(threshold = 6L)
-        addcontour(deg, x, contour.options = contour)
-    } else {
-        deg
-    }
+        deg <- addcontour(deg, x, contour.options = contour)
+    } 
     
+    deg %dim% x
 }
 
 int2scaleDegree <- function(x, Key = 0L, cautionary = TRUE,
@@ -561,14 +561,14 @@ int2scaleDegree <- function(x, Key = 0L, cautionary = TRUE,
     
     setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
-    if (is.diatonicSet(key)) {
-        mode <- getMode(key)
-        key  <- getRoot(key)
+    if (is.diatonicSet(Key)) {
+        mode <- getMode(Key)
+        key  <- getRoot(Key)
     } else {
         mode <- 0L
     }
-    
-    x <- x - key
+
+    x <- x - Key
     
     if (generic) x <- genericFifth(x)
     
@@ -578,7 +578,7 @@ int2scaleDegree <- function(x, Key = 0L, cautionary = TRUE,
         inkey <- !is.na(x) & x <= 5L & x >= -1L
         intervals[inkey] <-  stringi::stri_sub(intervals[inkey], from = 2L)
     }
-    intervals
+    intervals %dim% x
     
 }
 
@@ -593,22 +593,22 @@ solfatab <- rbind(d = c("e", "o", "i"),
                   t = c("e", "i", "y"))
 
 tint2solfa <- function(x, Key = 0L, generic = FALSE, contour = FALSE, ...) {
-    solfa <- as.solfa.numeric(x@Fifth, key, generic)
+    solfa <- int2solfa(x@Fifth, Key, generic)
     
     if (logicalOption(contour)) {
         setoptions(contour) <- c(threshold = 6L)
-        addcontour(solfa, x, contour.options = contour)
-    } else {
-        solfa 
-    }
+        solfa <- addcontour(solfa, x, contour.options = contour)
+    } 
+    
+    solfa 
 }
 
 int2solfa <- function(x, Key = 0L, generic = FALSE) {
     # This is the function that does the real heavy lifting of the
     # as.solfa function
-    if (!is.numeric(key)) key <- as.tonalInterval(key@Fifth)
+    if (!is.numeric(Key)) Key <- as.tonalInterval(Key@Fifth)
     
-    x <- x - key
+    x <- x - Key
     if (generic) x <- genericFifth(x)
     
     bases <- LO5th2solfabase(x)
@@ -622,7 +622,7 @@ int2solfa <- function(x, Key = 0L, generic = FALSE) {
     
     accidentals <- strrep(c('-', '', '#')[qualSign + 2], abs(residualQualityN))
     
-    .paste(bases, tails, accidentals)
+    .paste(bases, tails, accidentals) %dim% x
     
 }
 
@@ -631,13 +631,13 @@ int2solfa <- function(x, Key = 0L, generic = FALSE) {
 
 num2rational <- function(n, sep = '/') {
     frac <- numeric2fraction(n)
-    .paste(frac$Numerator, frac$Denominator, sep = sep)
+    .paste(frac$Numerator, frac$Denominator, sep = sep) %dim% n
 }
 
 tint2rational <-  function(x, tonalHarmonic = 2^(19/12), sep = '/') {
     frac <- numeric2fraction(as.decimal(x, tonalHarmonic = tonalHarmonic))
     
-    .paste(frac$Numerator, frac$Denominator, sep = sep)
+    .paste(frac$Numerator, frac$Denominator, sep = sep) %dim% x
     
 }
 
@@ -648,9 +648,9 @@ tint2decimal <-  function(x, tonalHarmonic = 2^(19/12)) {
     oct   <- x@Octave
     cent  <- x@Cent
     
-    IfElse(is.na(LO5th), 
-           NA_real_, 
-           (2 ^ oct) * (tonalRatio ^ LO5th) * 2^(cent / 1200))
+    .ifelse(is.na(LO5th), 
+            NA_real_, 
+            (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %dim% x
 }
 
 
@@ -662,7 +662,7 @@ tint2frequency <- function(x, reference.freq = 440L,
     ratio <- as.decimal(x, tonalHarmonic = tonalHarmonic)
     attributes(ratio) <- NULL
     
-    reference.freq * ratio
+    reference.freq * ratio %dim% x
 }
 
 
@@ -706,7 +706,7 @@ addcontour <- function(strs, tint, contour.options = list()) {
 ###.. semitones
 
 semit2tint <- function(n, melodic = FALSE, Key = NULL) {
-          wholen <- as.integer(n)
+          wholen <- as.integer(c(n))
           
           pitchclass <- wholen %% 12L
           
@@ -732,7 +732,7 @@ semit2tint <- function(n, melodic = FALSE, Key = NULL) {
             tints[LO5ths < -5 & !is.na(LO5ths)] <- tints[LO5ths < -5 & !is.na(LO5ths)] + pythagorean.comma
           }
           
-          tints
+          tints %dim% n
 }
 
 midi2tint <- function(n) semit2tint(n - 60L)
@@ -740,6 +740,7 @@ midi2tint <- function(n) semit2tint(n - 60L)
 ###.. tonal chroma names
 
 sciPitch2tint <- function(str) {
+  
   letters     <- stringi::stri_extract_first(str, regex = '[A-G]')
   accidentals <- stringi::stri_extract_first(str, regex = '([#b])\\1*')
   accidentals[is.na(accidentals)] <- ''
@@ -747,10 +748,9 @@ sciPitch2tint <- function(str) {
   sciOct      <- as.numeric(stringi::stri_extract_first(str, regex = '[-+]?[0-9]+'))
   if (all(is.na(sciOct))) sciOct <- rep(4, length(sciOct))
   
-  LO5th <- lettername2LO5th(letters) + accidental2LO5th(accidentals, 
-                                                        accidental.labels = c(flat = 'b'))
+  LO5th <- lettername2LO5th(letters) + accidental2LO5th(accidentals, accidental.labels = c(flat = 'b'))
   
-  LO5thNsciOct2tint(LO5th, sciOct) 
+  LO5thNsciOct2tint(LO5th, sciOct) %dim% str
   
 }
 
@@ -764,7 +764,7 @@ kernPitch2tint <- function(str) {
                       accidental2LO5th(Accidentals,   
                                        accidental.labels = c(flat = '-')))
     
-    LO5thNsciOct2tint(LO5th, components$SciOctave)
+    LO5thNsciOct2tint(LO5th, components$SciOctave) %dim% str
     
 }
 
@@ -824,7 +824,7 @@ interval2tint <- function(str) {
           
           direction <- 2 * ((is.na(direction) | direction == '+') - 0.5)
           
-          tints * direction
+          (tints * direction) %dim% str
           
           
 }
@@ -837,7 +837,7 @@ scaleDegree2tint <- interval2tint
 
 solfa2tint <- function(str, Key = 0L) {
   LO5ths <- solfa2LO5th(str) + 0L
-  tint( , LO5ths)
+  tint( , LO5ths) %dim% str
 }
 
 ###.. numbers
@@ -845,10 +845,10 @@ solfa2tint <- function(str, Key = 0L) {
 rational2decimal <- function(str) {
     split <- strsplit(str, split = '[/%]')
     split <- lapply(split, as.numeric)
-    sapply(split, function(x) x[1] / x[2])
+    sapply(split, function(x) x[1] / x[2]) %dim% str
 }
 
-rational2tint <- function(str, tonalRatio = 3) {
+rational2tint <- function(str, tonalHarmonic = 3) {
           if (is.character(str)) {
                     slashes <- grepl("[/%]", str)
                     num <- numeric(length(str))
@@ -868,7 +868,7 @@ rational2tint <- function(str, tonalRatio = 3) {
           
           # octaves
           octaves    <- log(fracs, base = 2)
-          tonalRatios   <- log(fracs, base = tonalRatio)
+          tonalRatios   <- log(fracs, base = tonalHarmonic)
           octaves [ , 2] <- -octaves[ , 2]
           tonalRatios[ , 2] <- -tonalRatios[ , 2] 
           is.octave  <- is.whole(octaves) & octaves != 0
@@ -893,11 +893,11 @@ rational2tint <- function(str, tonalRatio = 3) {
             fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
           }
           
-          tint(octs, fifs) %re.as% 'as.rational.tonalInterval'
+          tint(octs, fifs) %dim% str
 }
 
 
-decimal2tint <- function(float, tonalRatio = 3, centmargin = 10) {
+decimal2tint <- function(float, tonalHarmonic = 3, centmargin = 10) {
     octrange <- attr(centmargin, 'octrange')
     if (is.null(octrange)) octrange <- 5L
     if (octrange > 150) stop(call. = FALSE,
@@ -908,7 +908,7 @@ decimal2tint <- function(float, tonalRatio = 3, centmargin = 10) {
     octs <- -octrange:octrange
     
     allocts <- do.call('cbind', lapply(2^octs, '*', float))
-    logged <- log(allocts, tonalRatio)
+    logged <- log(allocts, tonalHarmonic)
     
     whole <- round(logged)
     remain <- logged - whole
@@ -920,26 +920,26 @@ decimal2tint <- function(float, tonalRatio = 3, centmargin = 10) {
     
     LO5th  <- whole[cbind(seq_along(float), whichhit)]
     remain <- remain[cbind(seq_along(float), whichhit)]
-    octave <- round(log(float / tonalRatio ^ LO5th, 2))
+    octave <- round(log(float / tonalHarmonic ^ LO5th, 2))
     
     # cents
-    cents <- log(tonalRatio^remain,2) * 1200
+    cents <- log(tonalHarmonic^remain,2) * 1200
     
     accept <- abs(cents) < centmargin
     
     output <- tint(octave, LO5th, cent = cents)
-    if (any(!accept)) output[!accept] <- Recall(float[!accept], tonalRatio, 
+    if (any(!accept)) output[!accept] <- Recall(float[!accept], tonalHarmonic, 
                                                 data.table::setattr(centmargin, 'octrange', octrange + 5L))
-    output
+    output %dim% float
 }
 
 
 
 frequency2tint <- function(float, reference.freq = 440L, 
-                           reference.tint = tint(-4, 3), tonalRatio = 3,
+                           reference.tint = tint(-4, 3), tonalHarmonic = 3,
                            centmargin = 10) {
     
-    decimal2tint(float / reference.freq, tonalRatio, centmargin = 10) + reference.tint
+   ( decimal2tint(float / reference.freq, tonalHarmonic, centmargin = 10) + reference.tint) %dim% float
 }
 
 
@@ -1016,17 +1016,30 @@ transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
 
 
 
-
-
 ####. partitioning tonalIntervals ####
 
-###.. simple + octave = complex ####
 
 #' Tonal interval partitions
 #' 
 #' @name tonalIntervalparts
-#' @export simplepart simplepart.tonalInterval simplepart.default
+NULL
+
+
+
+tintPartition <- function(tint, roundingMethod = floor) {
+  octshift <- as.integer(roundingMethod(tint2semit(tint) / 12))
+  octavepart <- tint(octshift, 0L)
+  
+  simplepart <- tint - octavepart
+  
+  cbind(Octave = octavepart, Simple = simplepart)
+  
+}
+
+###.. simple + octave = complex ####
+
 #' @export octavepart octavepart.tonalInterval octavepart.default
+#' @export simplepart simplepart.tonalInterval simplepart.default
 #' @export is.simple is.simple.tonalInterval is.simple.default
 octavepart <- function(tint, roundingMethod) UseMethod('octavepart')
 simplepart <- function(tint, roundingMethod) UseMethod('simplepart')

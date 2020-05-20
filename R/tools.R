@@ -233,6 +233,25 @@ hasdim <- function(x) !is.null(dim(x))
 
 vectorna <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
+empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
+    if (is.atomic(object)) {
+        return(if (is.null(dimen)) rep(as(value, class(object)), len) else array(as(NA, class(object)), dim = dimen))
+    }
+    
+    if (inherits(object, 'struct')) {
+        struct <- new(class(object))
+        slots <- getSlots(struct)
+        if (!is.null(dimen)) len <- prod(dimen)
+        setSlots(struct) <- lapply(slots, function(slot) rep(as(value, class(slot)), len))
+        
+        dim(struct) <- dimen
+        struct
+        
+    }
+    
+    
+} 
+
 padNA <- function(x, n, before = TRUE, margin = 1L) {
 ### pad vector with NA
     if (is.null(dim(x)) && margin == 1L) {
@@ -353,7 +372,13 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 
 `%dim%` <- function(x, value) {
 	dim(x) <- dim(value)
-	if (hasdim(x)) rownames(x) <- rownames(value) else names(x) <- names(value)
+	if (hasdim(x)) {
+	    rownames(x) <- rownames(value) 
+	    colnames(x) <- colnames(value)
+	} else {
+	    names(x) <- names(value)
+	} 
+	
 	x
 }
 
@@ -454,25 +479,34 @@ IfElse <- function(true, yes, no) {
     # or warning in some conditions.
     texpr <- rlang::enquo(texpr)
     fexpr <- rlang::enquo(fexpr)
+    
+    #
+    bool[is.na(bool)] <- FALSE
+    
     if (any(!bool)) {
-        fparsed <- captureValues(fexpr, parent.env(environment()))
+        fparsed <- captureValues(fexpr, parent.env(environment()), doatomic = FALSE)
         fexpr <- fparsed$expr
-        fvars <- do.call('match_size', c(fparsed$value, list(bool), margin = 1:2))
+        fvars <- do.call('match_size', c(fparsed$value, list(bool), margin = list(1:2)))
+        fvars <- fvars[.names(fvars) != ''] 
+        
         f <- rlang::eval_tidy(fexpr, data = lapply(fvars, '[', i = !bool))
         f <- rep(f, length.out = sum(!bool))
-        output <- vector(class(f), length(bool))
+        
+        output <- empty(f, length(bool), dim(bool))
     }
     if (any(bool)) {
-        tparsed <- captureValues(texpr, parent.env(environment())) 
+        tparsed <- captureValues(texpr, parent.env(environment()), doatomic = FALSE) 
         texpr <- tparsed$expr 
-        tvars <- do.call('match_size', c(tparsed$value, list(bool), margin = 1:2))
+        tvars <- do.call('match_size', c(tparsed$value, list(bool), margin = list(1:2)))
+        tvars <- tvars[.names(tvars) != ''] 
+        
         t <- rlang::eval_tidy(texpr, data = lapply(tvars, '[', i =  bool))
         t <- rep(t, length.out = sum(bool))
-        output <- vector(class(t), length(bool))
+        output <- empty(t, length(bool), dim(bool))
         output[bool] <- t
     }
     if (any(!bool))  output[!bool] <- f
-    setdim(output) <- bool
+    output %<-dim% bool
     output
 }
 
@@ -499,16 +533,20 @@ ifif <- function(cond1, cond2, ...) {
 
 
 
-captureValues <- function(expr, env) {
+captureValues <- function(expr, env, doatomic = TRUE) {
     if (rlang::is_quosure(expr)) {
         env <- rlang::quo_get_env(expr)
         expr <- rlang::quo_squash(expr)
     }
     
     if (is.atomic(expr)) {
-        name <- tempvar('atom', asSymbol = FALSE)
-        return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
+        if (doatomic) {
+            name <- tempvar('atom', asSymbol = FALSE)
+            return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
                     expr = rlang::sym(name)))
+        } else {
+            return(list(value = NULL, expr = expr))
+        }
     }
     if (!is.call(expr) ) {
         return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), rlang::expr_text(expr)),
@@ -522,7 +560,7 @@ captureValues <- function(expr, env) {
     
     values <- list()
     for (i in 2:length(expr)) {
-        recalled <- Recall(expr[[i]], env)
+        recalled <- Recall(expr[[i]], env, doatomic = doatomic)
         expr[[i]] <- recalled$expr
         values <- c(values, recalled$value)
     }
@@ -634,21 +672,33 @@ numeric2fraction <- function(n) {
 #' Interval "calculus"
 #' @rdname intervalCalculus
 #' @export integrate derive sigma delta calculus
-integrate <- function(intervals, skip = list(na)) {
+integrate <- function(intervals, skip = list(is.na)) {
+    intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
-     
-    intervals[!skip] <- cumsum(intervals[!skip])
-    intervals
+    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    
+    lapply(1:ncol(intmat),
+           function(j) {
+               intmat[!skip[ , j], j] <<- cumsum(intmat[!skip[ , j], j])
+           }
+    ) 
+    intmat %dim% intervals
 
 }
 sigma <- integrate
 
-derive <- function(intervals, skip = list(na)) {
-    skip <- applyrows(sapply(skip, function(f) f(intervals)), any)
-    intervals[which(!skip)[-1]] <- diff(intervals[!skip])
+derive <- function(intervals, skip = list(is.na)) {
+    intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    intervals
+    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    
+    lapply(1:ncol(intmat),
+           function(j) {
+               intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
+           }
+    ) 
+    intmat %dim% intervals
+    
 }
 delta <- derive
 
@@ -816,7 +866,6 @@ append2expr <- function(expr, exprs) {
 `setoptions<-` <- function(x, values) {
     # used to set options
     if (is.null(x)) return(values)
-    
     poss <- names(values)
     ind <- pmatch(names(x), poss)
     hits <- !is.na(ind)
@@ -851,13 +900,61 @@ nestoptions <- function(opts, ...) {
 }
 
 
+### Checking arguments
+
+checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
+    if (length(sys.calls()) > 6L) return(args) 
+    
+    argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
+    callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
+    
+    if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
+    if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+    
+    
+    if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
+        classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
+        stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+    }
+    
+    
+    
+    ill <- !args %in% valid
+    
+    
+    if (any(ill)) {
+        case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
+        illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
+        legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
+        
+        
+        message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
+        
+        do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
+    }
+    
+    args[!ill]
+}
+
+checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
+    if (!is.humdrumR((x))) stop(call. = FALSE,
+                                glue::glue("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object."))         
+}
+
+checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
+    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
+    checkArgs(dataTypes,
+              c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
+              argname, callname, warnSuperfluous = TRUE, 
+              min.length = 1L, max.length = 7L,
+              classes = "character")
+}
 
 ### Strings ----
 
 .paste <- function(..., sep = '', collapse = NULL, na.rm = FALSE) {
 # paste, but smart about NA values
-    args <- do.call('match_size', list(...))
-    
+    args <- do.call('match_size', lapply(list(...), `c`))
     nas <- lapply(args, is.na)
     
     if (na.rm) {
@@ -865,7 +962,8 @@ nestoptions <- function(opts, ...) {
         do.call('paste', c(args, sep = sep, collapse = collapse))
     } else {
         nas <- apply(do.call('rbind', nas), 2, any)
-        IfElse(nas, NA_character_, paste(..., sep = sep, collapse = collapse))
+        args <- c(lapply(list(...), `c`), sep = sep, collapse = collapse)
+        ifelse(nas, NA_character_, do.call('paste', args))
     }
     
 }
@@ -940,52 +1038,3 @@ trimLongString <- function(strs, n = 20L) {
   strs
 }
 
-### Checking arguments
-
-checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
-          if (length(sys.calls()) > 6L) return(args) 
-          
-          argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
-          callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
-          
-          if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
-          if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
-          
-          
-          if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
-                    classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
-                    stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
-          }
-          
-
-          
-          ill <- !args %in% valid
-          
-          
-          if (any(ill)) {
-                    case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
-                    illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
-                    legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
-                    
-                    
-                    message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
-                    
-                    do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
-          }
-          
-          args[!ill]
-}
-
-checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
- if (!is.humdrumR((x))) stop(call. = FALSE,
-                             glue::glue("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object."))         
-}
-
-checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
-    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
-    checkArgs(dataTypes,
-              c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
-              argname, callname, warnSuperfluous = TRUE, 
-              min.length = 1L, max.length = 7L,
-              classes = "character")
-}
