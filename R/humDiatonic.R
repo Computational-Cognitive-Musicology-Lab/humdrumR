@@ -8,8 +8,10 @@
 #' Tonal (diatonic) sets
 #' 
 #' 
-#' \code{diatonicSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' `diatonicSet`` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 #' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
+#' `diatonicSet` is a subeclass of (inherits from) [humdrumR::struct], so they act like vectors/matrices.
+#' 
 #' A key is represented by two integers, \code{Root} and \code{Mode}.
 #' Root is simply the tonic note of the key on the circle of fifths.
 #' Mode is a value on the circle of fifths, indicating the diatonic mode.
@@ -26,29 +28,40 @@
 #' \item{-5 = Locrian}
 #' }
 #' 
+#' In addition there is an `Alteration` slot (also integers), which can be used to create various 
+#' "altered" scales. To understand how the `Alteration` integer works, first consider how the `Mode` (key-signature)
+#' integer works.
+#' Think of it like this, we start with a natural diatonic set consisting of the numbers `[-1 0 1 2 3 4 5]` (C major) on the line of fifths:
+#' If the `Mode` integer is `+1`, everything is shifted up one to be `[0 1 2 3 4 5 6]` (C Lydian).
+#' You can think of this as `+1` being added to each number, but instead, think of it has the following operation:
+#' remove the lowest (leftmost number) from the vector, add 7 to that number, then append it on the rightmost side.
+#' If we follow this operation, we take 0 off the left, and add 7 to the end, getting `[0 1 2 3 4 5 6]`.
+#' If `Mode` is greater than one, we repeat this operation however many times, and if `Mode` is negative, we just reverse the procedure.
+#' This way of thinking about the `Mode` value is convoluted, but it helps us under stand the `Alteration` operation.
+#' The `Alteration` integer does the same operation on a key as `Mode`, except we take the *second*-most left/right value and add/subtract 7.
+#' So if `Alteration == -1`, `[-1 0 1 2 3 4 5]` becomes `[-3 -1 0 1 2 3 5]` (C melodic minor);
+#' If `Alteration == -2`, `[-1 0 1 2 3 4 5]` becomes `[-4 -3 -1 0 1 2 5]` (C harmonic minor); and so on.
+#' In fact, `Alteration == -1` results in all diatonic sets which are modes of the *melodic minor* scale, and 
+#' `Alteration == -2` results in diatonic sets which are modes of the *harmonic minor* scale.
+#' Other `Alteration` values get us increasingly exotic scales!
+#' 
+#' 
+#' 
 #' @seealso humTonality
 #' @name humDiatonic
 NULL
 
 
 
-setClassUnion('maybe_dSet', members = 'NULL')
 
 #' @name humDiatonic
 #' @export 
 setClass('diatonicSet', 
-         contains = 'humdrumVector',
+         contains = 'struct',
          slots = c(Root = 'integer', 
                    Mode = 'integer', 
-                   Alterations = 'integer', 
-                   Of = 'maybe_dSet')) -> diatonicSet
+                   Alteration = 'integer')) -> diatonicSet
 
-setIs('diatonicSet', 'maybe_dSet')
-
-setValidity('diatonicSet', 
-            function(object) {
-                !class(object@Of) == "tertianSet"
-            })
 
 
 
@@ -57,7 +70,7 @@ setValidity('diatonicSet',
 #' 
 #' \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 #' \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
-#' \code{tertianSet} is a subclass of \code{diatonicSet}.
+#' \code{tertianSet} is a subclass of \code{diatonicSet} (and thus, `struct`).
 #' 
 #' 
 #' 
@@ -76,57 +89,49 @@ setClass('tertianSet',
 #' Accepts either a integer (LO5th) or a \code{\link[humdrumR:tonalInterval]{tonalInterval}}.
 #' @name humDiatonic
 #' @export
-dset <- function(root = 0L, mode = root, alterations = 0L, of = NULL) {
+dset <- function(root = 0L, mode = root, alterations = 0L) {
            if (is.tonalInterval(root)) root <- root@Fifth
            new('diatonicSet', 
                Root = as.integer(root), 
                Mode = as.integer(mode), 
-               Alterations = as.integer(alterations),
-               Of = of) -> x
-           x
+               Alteration = as.integer(alterations)) 
 }
+
+
 
 #' @name humDiatonic
 #' @export
 tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L, of = NULL) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
-    root <- IfElse(cardinality == 0L, NA_integer_, root)
+    root <- .ifelse(cardinality == 0L, NA_integer_, root)
     extensions <- c(0L, 0L, 1L, 3L, 7L, 15L, 31L, 63L)[cardinality + 1L]
     
     new('tertianSet', 
         Root = as.integer(root), 
         Mode = as.integer(mode), 
-        Alterations = as.integer(alterations), 
-        Thirds = extensions,
-        Of = of)
+        Alteration = as.integer(alterations), 
+        Thirds = extensions)
 }
 
 ##...accessors ####
 
-getRoot <- function(dset, recurse = TRUE, sum = TRUE) {
-    # If recurse is FALSE, only returns the "local" root
-    # If recurse is TRUE, includes any diatonic sets in the @Of field
-    # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final root
-    # if sum is FALSE, a matrix of roots is returned
-    roots <- cbind(dset@Root, 
-                   if (recurse && !is.null(dset@Of)) Recall(dset@Of, recurse = recurse, sum = sum))
+setMethod("LOF", "diatonicSet",
+          function(x, sum = TRUE) {
+              lof <- x@Root
+              lof %<-dim% x
+              
+              if (hasdim(lof) && sum) rowSums(lof) else lof
+              
+          })
+
+getMODE <- function(dset, sum = TRUE) {
+    mode <- dset@Mode
+    mode %<-dim% dset
     
-    if (sum) rowSums(roots) else roots
+    if (hasdim(mode) && sum) rowSums(mode) else mode
     
 }
-
-getMode <- function(dset, recurse = TRUE, sum = TRUE) {
-    # If recurse is FALSE, only returns the "local" mode
-    # If recurse is TRUE, includes any diatonic sets in the @Of field
-    # If sum is TRUE, all keys (X/X/X/X etc) are summed to their final mode
-    # if sum is FALSE, a matrix of modes is returned
-    modes <- cbind(dset@Mode, 
-                   if (recurse && !is.null(dset@Of)) Recall(dset@Of, recurse = recurse, sum = sum))
-    
-    as.integer(if (sum) rowSums(modes) else modes)
-}
-
 
 getThirds <- function(tset) cbind(TRUE, ints2bits(tset@Thirds))
 
@@ -182,12 +187,12 @@ order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasin
                    method = c("auto", "shell", "radix")) {
                     x <- do.call('c', list(x, ...))
                     if (parallel) {
-                      order(getRoot(x), -getMode(x),
+                      order(x@Root, -x@Mode,
                           na.last = na.last,
                           decreasing = decreasing,
                           method = method)
                     } else {
-                      order(getRoot(x) - getMode(x), -getMode(x),
+                      order(x@Root - x@Mode, -x@Mode,
                           na.last = na.last,
                           decreasing = decreasing,
                           method = method)
@@ -204,7 +209,7 @@ setMethod('==', signature = c('diatonicSet', 'diatonicSet'),
              f2 <- dset2LO5ths(e2)
               
              same <- f1 == f2 
-             rowSums(x, na.rm = TRUE) == 7L
+             rowSums(same, na.rm = TRUE) == 7L
           })
 
 #' @name diatonicSet
@@ -217,7 +222,7 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
               
               same <- f1 == f2 | (is.na(f1) & is.na(f2))
               
-              rowSums(x, na.rm = TRUE) == 7L
+              rowSums(same, na.rm = TRUE) == 7L
           })
 
 #' @name diatonicSet
@@ -225,7 +230,7 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
 setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
           function(e1, e2) {
               checkSame(e1, e2, "Compare")
-              callGeneric("Compare", getRoot(e1), getRoot(e2))
+              callGeneric("Compare", e1@Root, e2@Root)
           })
 
 
@@ -235,7 +240,7 @@ setMethod('Compare', signature = c('tertianSet', 'tertianSet'),
           function(e1, e2) {
               checkSame(e1, e2, "Compare")
               
-              callGeneric("Compare", getRoot(e1), getRoot(e2))
+              callGeneric("Compare", e1@Root, e2@Root)
           })
 
 setMethod('abs', signature = c('diatonicSet'),
@@ -284,8 +289,8 @@ dset2LO5ths.diatonicSet <- function(dset, step = 2L) {
     # the step argument controls the order the LO5ths are output
     # step = 2L means every two LO5ths (which is generic steps)
     # step = 4L means thirds, which makes tertian harmonies
-    root <- getRoot(dset)
-    mode <- getMode(dset)
+    root <- dset@Root
+    mode <- dset@Mode
     
     notna <- !is.na(mode) & !is.na(root)
     
@@ -303,7 +308,7 @@ dset2LO5ths.diatonicSet <- function(dset, step = 2L) {
     LO5ths[ , 1] <- root
     
     #
-    LO5ths[] <- alterLO5ths(LO5ths, dset@Alterations)
+    LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
     
     rownames(LO5ths) <- as.keyI(dset)
     colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
@@ -312,7 +317,7 @@ dset2LO5ths.diatonicSet <- function(dset, step = 2L) {
 }
 
 dset2LO5ths.tertianSet <- function(tset) {
-    alterations <- tset@Alterations
+    alterations <- tset@Alteration
     
     LO5ths <- dset2LO5ths.diatonicSet(tset, step = 4L)
     thirds <- getThirds(tset)
@@ -324,7 +329,7 @@ dset2LO5ths.tertianSet <- function(tset) {
     # if (any(alterations != 0L)) LO5ths <- sweep(LO5ths, 1, alterations, alterFifthSet)
     
     colnames(LO5ths)[5:7] <- nth(c(9,11,13))
-    rownames(LO5ths) <- LO5th2lettername(getRoot(tset))
+    rownames(LO5ths) <- LO5th2lettername(tset@Root)
     
     LO5ths
 }
@@ -472,7 +477,7 @@ tset2romanNumeral <- function(tset, cautionary = FALSE) {
  extension <- array(NA_character_, dim = dim(LO5ths))
  
 
- extension[] <- LO5th2alteration(LO5ths, getMode(tset), cautionary = FALSE)
+ extension[] <- LO5th2alteration(LO5ths, tset@Mode, cautionary = FALSE)
  highest <- applyrows(extension, function(row) seq_len(ncol(extension)) == max(which(!is.na(row))))
  extension[] <- sweep(extension, 2, c('7', '9', '11', '13'), paste0)
  extension[!(highest | (!is.na(extension) & extension == ''))] <- ""
@@ -488,8 +493,8 @@ tset2romanNumeral <- function(tset, cautionary = FALSE) {
 #' @name diatonicSet-write
 #' @export
 as.keyI <- function(dset, alteration.labels = c()) {
-    root <- LO5th2tonalChroma(getRoot(dset))
-    mode <- getMode(dset) - getRoot(dset)
+    root <- LO5th2tonalChroma(dset@Root)
+    mode <- dset@Mode - dset@Root
         
     root[mode < -1] <- tolower(root[mode < -1L])
     
@@ -499,7 +504,7 @@ as.keyI <- function(dset, alteration.labels = c()) {
     
     #
     setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
-    alterations <- dset@Alterations
+    alterations <- dset@Alteration
     alterations <- IfElse(alterations > 0,
                           strrep(alteration.labels['augment'] , abs(alterations)),
                           strrep(alteration.labels['diminish'], abs(alterations)))
@@ -513,7 +518,7 @@ as.keyI <- function(dset, alteration.labels = c()) {
 #' @name diatonicSet-write
 #' @export
 as.tonalChroma.diatonicSet <- function(x, accidental.labels = c(flat = 'b')) {
-    LO5th2tonalChroma(getRoot(x), accidental.labels)
+    LO5th2tonalChroma(x@Root, accidental.labels)
 }
 
 ##### As "scientific chord label" (i.e., "Cmm" or "EbMm")
@@ -555,7 +560,7 @@ getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = 
 #' @name diatonicSet
 #' @export
 as.sciChord <- function(tharm) {
-    root <- getRoot(tharm)
+    root <- tharm@Root
     tonalChroma <- LO5th2tonalChroma(root, accidental.labels = c(flat = 'b'))
    
     quality <- getSciQuality(tharm)

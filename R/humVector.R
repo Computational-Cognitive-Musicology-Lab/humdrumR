@@ -291,7 +291,10 @@ recycledim <- function(..., funccall) {
 setMethod('names',    c(x = 'struct'), function(x) x@rownames)
 setMethod('rownames', c(x = 'struct'), function(x) x@rownames)
 setMethod('colnames', c(x = 'struct'), function(x) x@colnames)
-setMethod('dimnames', c(x = 'struct'), function(x) list(rownames = x@rownames, colnames = x@colnames))
+setMethod('dimnames', c(x = 'struct'), function(x) {
+    dn <- list(x@rownames, x@colnames)
+    if (sum(lengths(dn)) == 0L) NULL else dn
+})
 
 #' @exportMethod names<- colnames<- rownames<-
 

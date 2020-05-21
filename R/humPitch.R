@@ -162,6 +162,16 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 }
 
 
+setGeneric("LOF", function(x, sum = FALSE) standardGeneric("LOF"))
+setMethod("LOF", "tonalInterval",
+          function(x, sum = FALSE) {
+            lof <- x@Fifth
+            lof %<-dim% x
+            
+            if (hasdim(lof) && sum) rowSums(lof) else lof
+            
+          })
+
 
 ###..vector/core methods ####
 
@@ -1144,7 +1154,8 @@ pitchRepresentations <- c('tonalInterval',
                           'rational','fraction', 'decimal', 'frequency',
                           'contour')
 
-# create generics with shared argments
+### create generics with shared arguments
+
 for (representation in paste0('as.', pitchRepresentations)) {
     genfunc <- rlang::new_function(alist(x = ,
                                          direction = , contour = ,
@@ -1160,7 +1171,8 @@ for (representation in paste0('as.', pitchRepresentations)) {
     assign(representation, genfunc )
 }
 
-# some generics get a few extra arguments
+### some generics get a few extra arguments
+
 appendformals(as.frequency, 1L) <- alist(reference.freq = , reference.tint = , tonalHarmonic = )
 appendformals(as.decimal,   1L) <- alist(tonalHarmonic = )
 appendformals(as.rational,  1L) <- alist(tonalHarmonic = )
@@ -1184,10 +1196,10 @@ as.tonalInterval.integer <- tonalTransform %.% semit2tint
 as.tonalInterval.numeric <- tonalTransform %.% decimal2tint
 
 char2tint <- humdrumDispatch('kern: kernPitch' = kernPitch2tint,
-                          'pitch: sciPitch' = sciPitch2tint,
-                          'mint,hint: interval'  = interval2tint,
-                          'solfa: solfa' = solfa2tint,
-                          'freq: decimal' = semit2tint)
+                             'pitch: sciPitch' = sciPitch2tint,
+                             'mint,hint: interval'  = interval2tint,
+                             'solfa: solfa' = solfa2tint,
+                             'freq: decimal' = semit2tint)
 
 as.tonalInterval.character <- tonalTransform %.% char2tint
 

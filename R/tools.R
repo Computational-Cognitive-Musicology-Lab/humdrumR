@@ -366,8 +366,10 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 
 ##### Dimensions ----
  `%<-dim%` <- function(x, value) {
-    x <- rlang::enexpr(x)
-    eval(rlang::expr(dim(!!x) <- !!dim(value)), envir = parent.frame())
+    xexpr <- rlang::enexpr(x)
+    # eval(rlang::expr(dim(!!x) <- !!dim(value)), envir = parent.frame())
+    newx <- x %dim% value
+    assign(rlang::expr_name(xexpr), value = newx, envir = parent.frame())
 }
 
 `%dim%` <- function(x, value) {
