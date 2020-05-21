@@ -2,31 +2,20 @@
 % Please edit documentation in R/humDiatonic.R
 \name{diatonicSet-write}
 \alias{diatonicSet-write}
-\alias{as.keysignatureI}
-\alias{as.romanNumeral.diatonicSet}
 \alias{as.keyI}
 \alias{as.tonalChroma.diatonicSet}
-\title{Writing \code{\link[humdrumR:humDiatonic]{diatonicSets}} to various representations.}
+\title{Roman Numeral}
 \usage{
-as.keysignatureI(dset)
-
-\method{as.romanNumeral}{diatonicSet}(dset)
-
 as.keyI(dset, alteration.labels = c())
 
-\method{as.tonalChroma}{diatonicSet}(x, accidental.labels = c(flat =
-  "b"))
+\method{as.tonalChroma}{diatonicSet}(x, accidental.labels = c(flat = "b"))
 }
 \description{
-These functions all translate \code{\link[humdrumR:humDiatonic]{diatonicSets}} to 
-various pitch representations. Diatonic sets can be diatonic keys, or harmonies (the
-more specific \code{\link[humdrumR:humDiatonic]{tertianSet}} class).
-
-Roman numerals can be calculated for diatonicSets (keys) and 
+Roman numerals can be calculated for diatonicSets (keys) and
 for tertian sets (chords).
 The later case is the standard meaning of "roman numeral."
 However, the former case is used as well, for instance
- to represent modulation schemes in 
+to represent modulation schemes in
 analyses of classical music. For instance, modulate from I-V,
 the to vi/V.
 More importantly, many "roman numerals" in harmonic analyses

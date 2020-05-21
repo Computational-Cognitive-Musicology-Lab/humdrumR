@@ -9,19 +9,19 @@
 \alias{invert}
 \alias{allints}
 \title{Representation of tonal pitch information}
-\format{An object of class \code{character} of length 93.}
+\format{
+An object of class \code{character} of length 93.
+}
 \usage{
 tint(octave, LO5th = 0L, cent = numeric(length(octave)))
 
 is.tonalInterval(x)
 
-\S4method{is.numeric}{tonalInterval}(x)
-
 \S4method{as.character}{tonalInterval}(x)
 
 \method{as.double}{tonalInterval}(x, ...)
 
-\S4method{+}{tonalInterval,tonalInterval}(e1, e2)
+\S4method{+}{character,tonalInterval}(e1, e2)
 
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
@@ -30,16 +30,16 @@ invert(tint, around = Unison)
 allints
 }
 \description{
-This \emph{S4} class is the core tonal pitch representation in the 
+This \emph{S4} class is the core tonal pitch representation in the
 \code{\link[humdrumR:humdrumR]{humdrumR package}}.
-The object is used to represent tonal pitch names ("C", "G#", "Db", etc.), tonal intervals 
+The object is used to represent tonal pitch names ("C", "G#", "Db", etc.), tonal intervals
 and scale degrees ("Major 3rd", "Diminished 5th", etc.), and solfege ("Do", "Re", "Fi", etc.).
 Each pitch/interval is represented as two integers: one representing octave, the other
-position on the circle of fifths. These values are held in the slots \code{\@Octave} 
-and \code{\@Fifth}. 
+position on the circle of fifths. These values are held in the slots \code{\@Octave}
+and \code{\@Fifth}.
 The interval/pitch represented is the result of the Octaves and Perfect 5ths (actually, Perfect
-*12ths*) in the slots added together.
-(\code{tonalInterval} interfaces with \code{\link[humdrumR:humdrumR]{humdrumR}}'s other 
+\emph{12ths}) in the slots added together.
+(\code{tonalInterval} interfaces with \code{\link[humdrumR:humdrumR]{humdrumR}}'s other
 \code{\link[humdrumR:humTonality]{types of tonal data}}.)
 
 These functions translate various pitch representations
@@ -50,13 +50,13 @@ They all have an option \code{inPlace} which can be set to \code{FALSE}
 if you want them to discard non-pitch parts of the string(s).
 }
 \details{
-Tonal intervals (which are rather abstract) can be translated to more concrete 
-pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}} 
+Tonal intervals (which are rather abstract) can be translated to more concrete
+pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}}
 methods. Tonal intervals can also be created by reading various inputs
 using these \code{\link[humdrumR:tonalInterval-read]{read.xxx}} functions.
 
-In the case of fifths, it is not difficult (for learned musicians at least) to 
-see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 
+In the case of fifths, it is not difficult (for learned musicians at least) to
+see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3,
 A# = 10, Bb = -2, etc.), intervals (P1 = 0, P5 = 1, M2 = 2, M6 = 3, A6 = 10, m7 = -2, etc.),
 solfege (Do = 0, So = 1, Re = 2, La = 3, Li = 10, Te = -2, etc.).
 It's just the circle of fifths!
@@ -64,7 +64,7 @@ However, how the Fifth and Octave numbers relate to specific intervals/pitches
 is not immediately intuitive, and not is not conducive to human reading. For instance,
 given the pair \eqn{(Octave = -3, Fifth = 3)}{(Octave = -3, Fifth = 3)}, I can quicklty recognize that this \code{tonalInterval}
 refers to the tonal name "A" (or the interval "Major 6th", or the solfege "La", etc.).
-However, it is difficult (even for me) to immediately recognize *which* "A" this is.
+However, it is difficult (even for me) to immediately recognize \emph{which} "A" this is.
 This is ok! And it is intentional. The representation is meant to make coding easier, not for users
 to actually interact with. (Functions to read/write \code{tonalInteval}s to more familiar
 representations are provided with \code{humdrumR}.)
@@ -80,12 +80,12 @@ More generally can also think of the two integers as exponents of two bases: \de
 If the \code{Fifth} base is actually 3, this represents a "pure" 12th, and thus
 the resulting numbers represent \strong{Pythagorean Tuning}.
 \deqn{2^{-1} * 3^{1} = \frac{3^1}{2^1} = \frac{3}{2} = 1.5}
-If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we 
+If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we
 will get equal temperement:
 \deqn{2^{-1} * {2^{\frac{19}{12}}}^1 = 2^{\frac{7}{12}}}
 
-Under the hood, these functions use the \code{\link{humdrumR}} 
-\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
+Under the hood, these functions use the \code{\link{humdrumR}}
+\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
 fundamental, \emph{lingua franca} representation of pitch.
 }
 \section{Slots}{
@@ -93,7 +93,7 @@ fundamental, \emph{lingua franca} representation of pitch.
 \describe{
 \item{\code{Fifth}}{Integers representing the intervals'
 size on the circl of fifths. When considering absolute size
-these fifths are actually treated like pure \emph{12ths} (i.e., one 
+these fifths are actually treated like pure \emph{12ths} (i.e., one
 fifth + one octave): 19 semitones, or \deqn{3^1}.}
 
 \item{\code{Octave}}{Integers representing the octave offset of the intervals
@@ -104,9 +104,9 @@ fifth + one octave): 19 semitones, or \deqn{3^1}.}
 
 \section{Vectorization}{
 
-\code{tonalInterval} inherits from the virtual class 
-\code{\linkS4class{humdrumVector}}.
-This means you can apply normal vectorized commands to \code{tonalInterval}s, 
+\code{tonalInterval} inherits from the virtual class
+\code{\linkS4class{struct}}.
+This means you can apply normal vectorized commands to \code{tonalInterval}s,
 and even put them in \code{\link[base:data.frame]{data.frames}}.
 }
 
@@ -115,23 +115,23 @@ and even put them in \code{\link[base:data.frame]{data.frames}}.
 \code{tonalInterval} objects have (some) arithmetic operations defined.
 Addition and subtraction are straightword and intuitive (i.e., \eqn{M3 + M3 = P5}).
 
-Multiplication and division are slightly more limited: 
+Multiplication and division are slightly more limited:
 \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
-is defined \emph{for integers}: \eqn{M2 * 3 = A4} 
+is defined \emph{for integers}: \eqn{M2 * 3 = A4}
 (the result is always a new \code{tonalInterval}).
 Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
 an integer: \eqn{M4 / M2 = 2L}, but not non-integer values.
-This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
+This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean}
 division is possible: we divide
 a \code{tonalInterval} by another \code{tonalInterval} to get \emph{both}
 an integer \strong{quotient} and a \code{tonalInterval} \strong{remainder}.
-Each of these values can be useful in different ways, 
-so in \code{R} they are calculated with two separate operators: 
+Each of these values can be useful in different ways,
+so in \code{R} they are calculated with two separate operators:
 \code{\link[base:Arithmetic]{\%\% and \%/\%}}.
 The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
-useful in pitch calculations, because tonal scales can be seen as 
+useful in pitch calculations, because tonal scales can be seen as
 a modulus operation (modulo 7 for diatonic). For instance,
-\code{tonalint \%\% tint(-11, 7)} will always calculate the generic 
+\code{tonalint \%\% tint(-11, 7)} will always calculate the generic
 version of an interval.
 }
 
@@ -144,7 +144,7 @@ version of an interval.
 \code{tonalIntervals}s are equal only if their \code{Octave} and
 \code{Fifth} slots are identical. Thus, enharmonic notes are \emph{not}
 equal.
-Numeric comparisons (e.g., \code{>}, 
+Numeric comparisons (e.g., \code{>},
 \code{<=}) are based on their semitone (equal temperament) size.
 }
 

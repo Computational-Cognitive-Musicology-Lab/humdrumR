@@ -31,12 +31,12 @@ returns a description of the standard humdrum \code{!!!OTL} reference record
 (original title metadata).
 }
 \details{
-A \code{humReference} table has one column for 
+A \code{humReference} table has one column for
 each reference code that appears in a \code{\linkS4class{humdrumR}} corpus.
 Since reference records can be long (too much to print on one screen),
 and humdrum files can have multiple of the same type of reference code
 (for instance multiple composers annotated with "!!!COM"),
-by default, a \code{humReference} only prints the number of each type of 
+by default, a \code{humReference} only prints the number of each type of
 reference record to appear in each file.
 However, if only one type of reference code is present in a
 \code{humReference} table, the complete reference records for that code
@@ -46,13 +46,13 @@ Thus, if you want to see actualy reference records, try indexing the
 \code{humReference} table down to one column or row (see below).
 
 A \code{humReference} table has one row for each file in the corpus.
-Rows are labeled with each file's corresponding 
+Rows are labeled with each file's corresponding
 number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{File} field)
- and name (the \strong{Filename} field).
+and name (the \strong{Filename} field).
 In addition, when a \code{humReference} object is printed,
 three different summary totals are printed for each reference code:
 \strong{Any} indicates how many files in the corpus have at least
-one example of each code in them. 
+one example of each code in them.
 \strong{Sum} indicates the total number of each reference code to appear
 in the corpus, including multiple appearances in one file (like multiple "!!!COM"
 records).
@@ -71,9 +71,9 @@ rows or columns respectively, ordinally.
 If \code{i} is a \code{character}, it is matched as a regular expression
 against filenames in the corpus.
 If \code{j} is a \code{character}, it is \code{\link[base:pmatch]{partially-matched}}
- against column names.
+against column names.
 
-A \code{drop} argument is also available. If \code{TRUE}, a plain 
+A \code{drop} argument is also available. If \code{TRUE}, a plain
 \code{\link[data.table]{data.table}} is returned.
 }
 

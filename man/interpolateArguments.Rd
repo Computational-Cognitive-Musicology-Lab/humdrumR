@@ -16,7 +16,7 @@ This function can be used to modify arguments to a functions
 within an existing expression (or quosure/formula).
 }
 \details{
-\code{interpolateArguments} inteprets named value in its \code{namedArgs} 
+\code{interpolateArguments} inteprets named value in its \code{namedArgs}
 argument in one of two ways: If the named value is a list, it interprets
 the name of the list as a function call, and inserts/swaps any arguments
 in that list into any instances of that function call within the \code{expr}.
@@ -31,7 +31,7 @@ interpolateArguments(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
 }
 If a named valued in the \code{namedArgs} argument is not a list,
 that name/value pair is substituted anywhere it is present in the expression.
-This approach is often more conscise, but arguments cannot be added to an 
+This approach is often more conscise, but arguments cannot be added to an
 expression this way, only substituted if already present.
 Examples:
 \preformatted{

@@ -32,7 +32,7 @@ Collate: humdrumR-package.R
          humMetric.R
          humGraphics.R
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.0
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

@@ -9,7 +9,7 @@ alignColumns(humdrumR, padder = "_C")
 }
 \description{
 In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
-which are not the same as "columns" in a spreadsheet. A "column" refers to a 
+which are not the same as "columns" in a spreadsheet. A "column" refers to a
 tab-delineated group of values.
 "Spines" can be a single column, or they may (at any time) split into multiple columns,
 which can in turn split again, using the \code{"*^"} interpretation token. The reverse can happen as well,
@@ -31,7 +31,7 @@ Spine merges (\code{"*v"}) can only happen within spine paths that originally sp
 This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
 informally followed in most humdrum datasets.
 
-Our strict spine-path definition makes everything work fairly simply: 
+Our strict spine-path definition makes everything work fairly simply:
 Within a piece, the spines which appear at the beginning of the piece are the "true" spines through the rest of the piece, numbered
 from left to right, starting from \code{1L}.
 For each local token, the value in the \code{Spine} field is an integer indicating which of these
@@ -122,7 +122,7 @@ In this example, the \code{"_C"} token stands for "padded column."
 The presence of spine paths makes padding columns across pieces a bit more complicated.
 What \code{alignColumns} will do, is match up all pieces in a corpus so that
 every \strong{Spine}/\strong{Path} field pair allign in the same column.
-Here is an example, with its paths already padded: 
+Here is an example, with its paths already padded:
 \preformatted{
 (From piece 1:)
 **kern      _P        **kern

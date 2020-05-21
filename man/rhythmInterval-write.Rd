@@ -23,6 +23,6 @@ as.ratio.rhythmInterval(rint)
 \method{as.notevalue}{rhythmInterval}(rint)
 }
 \description{
-These functions all translate \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to 
+These functions all translate \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to
 various representations.
 }

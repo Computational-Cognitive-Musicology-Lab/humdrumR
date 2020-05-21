@@ -88,13 +88,12 @@
 #' If this is not the case, you'll need to create your own, more specific, method!
 #' 
 #' @name struct
-#' @export
 NULL
 
 setClassUnion('dimnames', c('character', 'integer', 'NULL'))
 setClassUnion('maybeinteger', c('NULL', 'integer'))
 
-setClass('struct', contains = 'VIRTUAL', slots = c(dim = 'maybeinteger', rownames = 'dimnames', colnames = 'dimnames'))
+setClass('struct', contains = 'VIRTUAL', slots = c(dim = 'maybeinteger', rownames = 'dimnames', colnames = 'dimnames')) 
 
 setValidity('struct', 
             function(object) {

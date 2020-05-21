@@ -4,8 +4,7 @@
 \alias{rhythmOffset}
 \title{Calculate rhythmic "offset"}
 \usage{
-rhythmOffset(durations, start = 0, bars = NULL, tatum = 1,
-  as = as.decimal)
+rhythmOffset(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal)
 }
 \arguments{
 \item{durations}{A vector of numeric values representing durations.}
@@ -17,7 +16,7 @@ offset begins.}
 usable by \code{\link[base]{tapply}}. If \code{!is.null(groups)}, offsets are calculated
 for duration values within each group. The \code{start} argument is recycle to match
 the length of the number of groups, so a different start value can be applied to each group.
-If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the 
+If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the
 first \code{start} value.}
 }
 \description{
@@ -32,8 +31,9 @@ where each output value corresponds to the duration of time elapsed
 at that point.
 }
 \seealso{
-Other rhythm analysis tools: \code{\link{RhythmScaling}},
-  \code{\link{metricPosition}},
-  \code{\link{rhythmDecompose}}
+Other rhythm analysis tools: 
+\code{\link{RhythmScaling}},
+\code{\link{metricPosition}()},
+\code{\link{rhythmDecompose}()}
 }
 \concept{rhythm analysis tools}

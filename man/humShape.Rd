@@ -13,8 +13,7 @@ of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
 \usage{
 mergeHumdrum(...)
 
-foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ",
-  padPaths = FALSE)
+foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 
 foldStops(humdrumR, foldAtomic = TRUE, sep = " ")
 
@@ -34,7 +33,7 @@ foldRecords(humdrumR, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 \item{pad}{\code{logical}. Should \code{\link[humdrumR:humColumns]{path/column padding tokens}} be included?}
 }
 \description{
-The \code{foldXXX} family allows you collapse all 
+The \code{foldXXX} family allows you collapse all
 \code{\link[humdrumR:humTable]{user fields}}
 across groups in another field.
 }

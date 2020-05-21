@@ -2,12 +2,12 @@
 % Please edit documentation in R/humApply.R
 \name{humApply}
 \alias{humApply}
-\title{\code{humApply} is just a wrapper for 
+\title{\code{humApply} is just a wrapper for
 \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
 included to parallel the \code{R} family of \code{\link[base:lapply]{_apply}} functions.
 \code{humApply} uses \href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
-to capture arguments fed to it without the user needing to make explicit 
-\code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work 
+to capture arguments fed to it without the user needing to make explicit
+\code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work
 in the \code{\link[base:environment]{global environment}}, so be careful. If you run into
 problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
 explicit \code{\link[base:tilde]{X~formulas}}.}
@@ -20,16 +20,16 @@ humApply(humdrumR, FUN, ..., within = TRUE, doplot = FALSE)
 \item{FUN}{A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
 in the \code{humdrumR} object.}
 
-\item{...}{Any arguments which can be fed to 
+\item{...}{Any arguments which can be fed to
 \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
-\code{do} expressions, which are replaced by the \code{FUN} argument!). 
+\code{do} expressions, which are replaced by the \code{FUN} argument!).
 However, rather that writinging formula in the format \code{Keyword ~ Expression},
-\code{humApply} arguments should be written as normal \code{R} arguments: 
+\code{humApply} arguments should be written as normal \code{R} arguments:
 \code{Keyword = Expression}.
 Unnamed arguments are ignored.
-#' @param within A logical. If \code{TRUE} (the default), 
-\code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the 
-function---meaning that the output is reconstituted into a new field in the 
+#' @param within A logical. If \code{TRUE} (the default),
+\code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the
+function---meaning that the output is reconstituted into a new field in the
 \code{humdrumR} object. If \code{within == FALSE},
 \code{\link[humdrumR:with-in-Humdrum]{withHumdrum}} is used instead,
 which results in the function's output being returned inprocessed.}
@@ -39,12 +39,12 @@ as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)H
 so the result is ignored (for plotting or side-effects purposes).}
 }
 \description{
-\code{humApply} is just a wrapper for 
+\code{humApply} is just a wrapper for
 \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
 included to parallel the \code{R} family of \code{\link[base:lapply]{_apply}} functions.
 \code{humApply} uses \href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
-to capture arguments fed to it without the user needing to make explicit 
-\code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work 
+to capture arguments fed to it without the user needing to make explicit
+\code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work
 in the \code{\link[base:environment]{global environment}}, so be careful. If you run into
 problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
 explicit \code{\link[base:tilde]{X~formulas}}.

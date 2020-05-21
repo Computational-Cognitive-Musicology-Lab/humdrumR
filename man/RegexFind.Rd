@@ -21,11 +21,5 @@ These infix functions are simply syntactic sugar for
 existing \code{R} regular expression matching functions.
 }
 \details{
-\describe{
-\item{\%~l\%}{Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base]{grepl}}}
-\item{\%~\%}{The "default"---same as \code{\%~l\%}}
-\item{\%~i\%}{Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base]{grep}}}
-\item{\%~n\%}{Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more 
-than one match occurs in the same token). Shorthand for \code{\link[stringi]{stri_count_regex}}}
-}
+
 }

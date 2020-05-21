@@ -4,39 +4,28 @@
 \name{humDiatonic}
 \alias{humDiatonic}
 \alias{diatonicSet}
-\alias{getRoot}
-\alias{getMode}
-\alias{getCardinality}
-\alias{getAlterations}
-\alias{getThirds}
 \alias{dset}
 \alias{tset}
 \alias{is.diatonicSet}
 \alias{is.tertianSet}
 \title{Tonal (diatonic) sets}
 \usage{
-getRoot(dset, recurse = TRUE, sum = TRUE)
+dset(root = 0L, mode = root, alterations = 0L)
 
-getMode(dset, recurse = TRUE, sum = TRUE)
-
-getCardinality(dset)
-
-getAlterations(dset)
-
-getThirds(tset)
-
-dset(root = 0L, mode = root, alterations = 0L, of = NULL)
-
-tset(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L,
-  of = NULL)
+tset(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L, of = NULL)
 
 is.diatonicSet(x)
 
 is.tertianSet(x)
 }
 \description{
-\code{diatonicSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
-\code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys.
+\verb{diatonicSet`` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s  \code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western diatonic keys. }diatonicSet` is a subeclass of (inherits from) \link[humdrumR:struct]{humdrumR::struct}, so they act like vectors/matrices.
+
+\code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s
+\code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
+\code{tertianSet} is a subclass of \code{diatonicSet} (and thus, \code{struct}).
+}
+\details{
 A key is represented by two integers, \code{Root} and \code{Mode}.
 Root is simply the tonic note of the key on the circle of fifths.
 Mode is a value on the circle of fifths, indicating the diatonic mode.
@@ -53,9 +42,22 @@ The standard diatonic modes occur if the \code{Mode - Tonic} is in the range -5:
 \item{-5 = Locrian}
 }
 
-\code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
-\code{\link[humdrumR:humTonality]{types of tonal data}}, representing Western tertian harmonies.
-\code{tertianSet} is a subclass of \code{diatonicSet}.
+In addition there is an \code{Alteration} slot (also integers), which can be used to create various
+"altered" scales. To understand how the \code{Alteration} integer works, first consider how the \code{Mode} (key-signature)
+integer works.
+Think of it like this, we start with a natural diatonic set consisting of the numbers \verb{[-1 0 1 2 3 4 5]} (C major) on the line of fifths:
+If the \code{Mode} integer is \code{+1}, everyathing is shifted up one to be \verb{[0 1 2 3 4 5 6]} (C Lydian).
+You can think of this as \code{+1} being added to each number, but instead, think of it has the following operation:
+remove the lowest (leftmost number) from the vector, add 7 to that number, then append it on the rightmost side.
+If we follow this operation, we take 0 off the left, and add 7 to the end, getting \verb{[0 1 2 3 4 5 6]}.
+If \code{Mode} is greater than one, we repeat this operation however many times, and if \code{Mode} is negative, we just reverse the procedure.
+This way of thinking about the \code{Mode} value is convoluted, but it helps us under stand the \code{Alteration} operation.
+The \code{Alteration} integer does the same operation on a key as \code{Mode}, except we take the \emph{second}-most left/right value and add/subtract 7.
+So if \code{Alteration == -1}, \verb{[-1 0 1 2 3 4 5]} becomes \verb{[-3 -1 0 1 2 3 5]} (C melodic minor);
+If \code{Alteration == -2}, \verb{[-1 0 1 2 3 4 5]} becomes \verb{[-4 -3 -1 0 1 2 5]} (C harmonic minor); and so on.
+In fact, \code{Alteration == -1} results in all diatonic sets which are modes of the \emph{melodic minor} scale, and
+\code{Alteration == -2} results in diatonic sets which are modes of the \emph{harmonic minor} scale.
+Other \code{Alteration} values get us increasingly exotic scales!
 }
 \seealso{
 humTonality

@@ -2,13 +2,10 @@
 % Please edit documentation in R/humPitch.R
 \name{tonalIntervalparts}
 \alias{tonalIntervalparts}
-\alias{octavepart}
 \alias{genericpart}
 \alias{enharmonicpart}
 \title{Tonal interval partitions}
 \usage{
-octavepart(tint, roundingMethod)
-
 genericpart(tint, Key)
 
 enharmonicpart(tint, wolf, key)

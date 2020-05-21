@@ -4,8 +4,8 @@
 \alias{humTonality}
 \title{Tonal Data Types}
 \description{
-\code{\link[humdrumR:humdrumR]{humdrumR package}} contains a number of 
-intertwined \code{S4} data types defined to represent tonal musical information,
+\code{\link[humdrumR:humdrumR]{humdrumR package}} contains a number of
+intertwined \code{S4} data types defined to represent tonal musical information
 from the traditional Western persective (i.e., diatonicism).
 The most important is the \code{\linkS4class{tonalInterval}}.
 There are also the \code{\linkS4class{tonalCenter}} and the \code{\linkS4class{tonalHarmony}}.

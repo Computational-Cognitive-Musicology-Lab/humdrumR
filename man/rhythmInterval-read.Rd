@@ -29,6 +29,6 @@ into \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
 \details{
 These functions all assume that thheir string input is a well-formed
 example of the target pitch representation, with no extra strings.
-(The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
+(The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be
 used to clean/filter inputs into these functions.
 }

@@ -9,9 +9,9 @@ getTandem(tandem, regex)
 \description{
 The every \code{\linkS4class{humdrumR}} object has a field called
 \code{Tandem} which is a vector of strings which accumulates
-tandem interpretations in each Spine. This function (\code{getTandem}) 
+tandem interpretations in each Spine. This function (\code{getTandem})
 extracts tandem interpretations from this field, based on a matching
-regular expression. The obligatory \code{'*'} \emph{does not} need to 
+regular expression. The obligatory \code{'*'} \emph{does not} need to
 be included in the \code{regex}, as it is added automatically. Thus,
 if you want to find tandem interpretations that match '*clef..', you
 just have to write \code{regex = 'clef..'}.

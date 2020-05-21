@@ -4,7 +4,7 @@
 \alias{integrate}
 \title{Interval "calculus"}
 \usage{
-integrate(intervals, skip = list(na))
+integrate(intervals, skip = list(is.na))
 }
 \description{
 Interval "calculus"

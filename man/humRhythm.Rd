@@ -25,7 +25,7 @@ They all have an option \code{inPlace} which can be set to \code{FALSE}
 if you want them to discard non-pitch parts of the string(s).
 }
 \details{
-Under the hood, these functions use the \code{\link{humdrumR}} 
-\code{\link[humdrumR:rhythmInterval]{rhythmInterval}} \code{S4} class as the 
+Under the hood, these functions use the \code{\link{humdrumR}}
+\code{\link[humdrumR:rhythmInterval]{rhythmInterval}} \code{S4} class as the
 fundamental, \emph{lingua franca} representation of rhythm.
 }

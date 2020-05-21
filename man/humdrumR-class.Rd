@@ -13,8 +13,10 @@ is.humdrumR(x)
 
 humdata$Field
 
-fields(humdrumR, fieldTypes = c("Data", "Structure", "Interpretation",
-  "Formal", "Reference"))
+fields(
+  humdrumR,
+  fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference")
+)
 
 humdata$name <- vector
 
@@ -37,9 +39,9 @@ humdata[[ , ~expression]]
 hudmata[[~expression1, ~expression2]]
 }
 \description{
-This \code{S4} class is the basic unit of the 
+This \code{S4} class is the basic unit of the
 \code{\link[humdrumR:humdrumR]{humdrumR}} package.
-Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
+Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or
 more humdrum files.
 In the documentation we refer to the collection of files within a \code{\linkS4class{humdrumR}} object
 as a "\strong{corpus}," and each file as a "\strong{piece}."
@@ -47,6 +49,9 @@ However, though humdrum data is \emph{usually} encoded as one "piece" per file, 
 files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 to them as "pieces."
 In coding examples, we name \code{humdrumR} objects \code{\strong{humdata}}.
+}
+\details{
+
 }
 \section{Slots}{
 
@@ -62,7 +67,7 @@ and were read into the \code{humdrumR} object.}
 \item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\code{\link{fields}}).}
 
-\item{\code{Active}}{A quosure expression which 
+\item{\code{Active}}{A quosure expression which
 extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."}
 
 \item{\code{LoadTime}}{A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \code{\link{readHumdrum}} was
@@ -78,21 +83,21 @@ refering to fields in the \code{\link[humdrumR:humTable]{Humtable}}.
 This expression is used as the "default" value in a lot of \code{humdrumR} code.
 For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 i.e., whenever you return a \code{humdrumR} object in the terminal.
-In any expression within a call to 
-\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+In any expression within a call to
+\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
 \code{.} is automatically replaced with the \code{Active} expression.
 
-The active expression can be changed with the commands 
+The active expression can be changed with the commands
 \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
 This is a handy way to quickly look at different fields in your data.
 
-The \code{Active} expression is often just the name of a 
+The \code{Active} expression is often just the name of a
 \code{\link[humdrumR:humTable]{field}}:
 for instance, the default value is \code{Token}.
 However, it can actually be any complex expression which evaluates
 within the \code{\link[humdrum:humTable]{humdrum table}}.
 For instance, the \code{Active} expression could be:
-\code{paste0(Token, " ", Record)}, which would automatically 
+\code{paste0(Token, " ", Record)}, which would automatically
 print each Token with its record number pasted to it.
 }
 

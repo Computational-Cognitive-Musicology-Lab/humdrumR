@@ -5,12 +5,23 @@
 \alias{findHumdrum}
 \title{Find and read humdrum files into R}
 \usage{
-findHumdrum(..., contains = NULL, recursive = FALSE,
-  allowDuplicates = FALSE, verbose = FALSE)
+findHumdrum(
+  ...,
+  contains = NULL,
+  recursive = FALSE,
+  allowDuplicates = FALSE,
+  verbose = FALSE
+)
 
-readHumdrum(..., recursive = FALSE, contains = NULL,
-  allowDuplicates = FALSE, verbose = FALSE, tandems = "known",
-  reference = "all")
+readHumdrum(
+  ...,
+  recursive = FALSE,
+  contains = NULL,
+  allowDuplicates = FALSE,
+  verbose = FALSE,
+  tandems = "known",
+  reference = "all"
+)
 }
 \arguments{
 \item{...}{character: One or more patterns used to identify files to read.
@@ -18,8 +29,8 @@ For details: see the "REpath-patterns" section below.}
 
 \item{contains}{\code{character}. If \code{!is.null(contains)}, the \code{contains} argument is
 is treated as regular expressions: only files which contain matches to
- \emph{all} of these regular expressions are read.
-Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches 
+\emph{all} of these regular expressions are read.
+Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches
 to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).}
 
 \item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
@@ -27,14 +38,14 @@ recursively through all sub directories.}
 
 \item{allowDuplicates}{\code{logical} or length one, indicating what should happen if multiple search patterns match the same files.
 If \code{allowDuplicates = TRUE},
-any such files are read multiple times, grouped into their respective corpora by the \code{Label} field. 
-If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they 
+any such files are read multiple times, grouped into their respective corpora by the \code{Label} field.
+If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they
 match.}
 
 \item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!}
 
-\item{tandems}{\code{character}. This argument controls which, if any, tandem interpretations 
+\item{tandems}{\code{character}. This argument controls which, if any, tandem interpretations
 are parsed into their own fields. The default value is \code{"known"}.}
 
 \item{reference}{\code{character}. This argument controls which, if any, reference records
@@ -52,15 +63,15 @@ a \code{\linkS4class{humdrumR}} data object around the table.
 \section{REpath-patterns}{
 
 
-"REpath-patterns" are specified using \code{...} arguments. 
+"REpath-patterns" are specified using \code{...} arguments.
 In combination, all the \code{...} arguments are used to search for file paths.
 Each part of the search path you specify (\code{"dirpart/dirpart/filepart"}, etc) are matched as regular expressions
 against directories/files on your disc.
 Thus, we can say things like \code{findHumdrum("../^A.*/.*krn$")}, which would
-match any kern files in any directory beginning with a capital \code{"A"} in the 
+match any kern files in any directory beginning with a capital \code{"A"} in the
 directory above the current working directory.
 For conveniance, you can break the path across multiple arguments instead of using delimited strings: For example, the code
-\code{findHumdrum("..", "^A.*", ".*krn$")} will give an identical result as the previous example 
+\code{findHumdrum("..", "^A.*", ".*krn$")} will give an identical result as the previous example
 (\code{findHumdrum("../^A.*/,*krn$")}).
 This is useful when searching for more than one pattern (see next paragraph) in the same directory.
 
@@ -72,10 +83,10 @@ look for any file kern files in directories containing "Mozart" OR "Beethoven."
 If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
 \code{Label} field. Unnamed patterns are simply labeled with numbers.
 
-Normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
+Normal (system appropriate) conventions (i.e., directories separated by \code{"/"},
 \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.)
 are followed.
-If a pattern contains a solo dot followed by a file sep---e.g., \code{"./"}, \code{"x/./y"}---this is 
+If a pattern contains a solo dot followed by a file sep---e.g., \code{"./"}, \code{"x/./y"}---this is
 treated as the current directory, not a regular expression.
 If a pattern contains two dots---e.g., \code{"../"}---this is treated as the directory above, not a regular expression.
 If you want to create a regular expression to match any directory, use \code{".*/"}.
@@ -84,14 +95,14 @@ The regex pattern \code{""} matches any file (it is changed to \code{".*"}). If 
 \code{findHumdrum} (or \code{readHumdrum}) will default to \code{".*"} as well.
 Thus, \code{readHumdrum()} will read any humdrum files in the working directory.
 
-(If two or more files in different directories share the same name, a unique name is created for 
+(If two or more files in different directories share the same name, a unique name is created for
 each file by appending the names of the directories they occupy, recursively
 until the names are unique.)
 
-If a single humdrum file has multiple pieces in it---meaning that all spine paths close with `*-`, then
-open again with `**`---then they are parsed separetely.
-They are distinguished in the `Piece` field.
-If there are no multi-piece files, `Piece` and `File` will be identical.
+If a single humdrum file has multiple pieces in it---meaning that all spine paths close with \verb{*-}, then
+open again with \verb{**}---then they are parsed separetely.
+They are distinguished in the \code{Piece} field.
+If there are no multi-piece files, \code{Piece} and \code{File} will be identical.
 }
 
 \section{Validity}{
@@ -99,7 +110,7 @@ If there are no multi-piece files, `Piece` and `File` will be identical.
 
 \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
 Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
-skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
+skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}}
 directly and its \code{errorReport.path} argument.
 }
 
@@ -108,26 +119,26 @@ directly and its \code{errorReport.path} argument.
 
 The \code{tandems} argument controls which tandem interpretations
 parsed into their own fields. This can be helpful to either save processing time and memory
-by \emph{not} parsing interpretations you won't need, or to parse interpretations that 
+by \emph{not} parsing interpretations you won't need, or to parse interpretations that
 humdrumR doesn't recognize.
 The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
-table called \code{knownInterpretations}. 
+table called \code{knownInterpretations}.
 Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
 associated with it.
 The default value for the \code{tandems} argument is \code{"known"}. If the \code{tandems} argument
-contains \code{"known"} \emph{all} tandem interpretations in the built-in \code{knownInterpretations} 
+contains \code{"known"} \emph{all} tandem interpretations in the built-in \code{knownInterpretations}
 table are parsed.
-Users may specify different interpretations to parse in two ways: 
-
-1) character strings 
+Users may specify different interpretations to parse in two ways:
+\enumerate{
+\item character strings
 matching one of the name values from the \code{Name} column of \code{knownInterpretations}.
 For instance, if you specify \code{tandems = c('Clef', 'TimeSignature')}, only clef (e.g., \code{"*clefG2"}),
 and time signature (e.g., \code{"*M3/4"}) intepretations will be parsed.
-
-2) if the chracter string(s) in \code{tandem} do not exactly match one of the names in 
+\item if the chracter string(s) in \code{tandem} do not exactly match one of the names in
 \code{knownInterpretations$Name}, they are treated as regular expressions and used to match
 tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
 that humdrumR doesn't already know about.
+}
 
 If any values in \code{tandems} are named, these names will be used for resulting fields.
 If no matches to an given interpretation are found, no field is created for that interpretation.
@@ -138,12 +149,12 @@ If \code{tandems = NULL}, then no tandem interpretations are parsed.
 
 
 By default (\code{reference = "all"}), humdrumR reads all reference records in the data.
-The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of 
+The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of
 an associated field.
 (If a reference record has no reference code (i.e., it lacks a colon), the field is called "Unkeyed.")
-In large datasets with many reference records, the reference data can actually make up a large portion 
+In large datasets with many reference records, the reference data can actually make up a large portion
 of the humdrum table, and eat up a lot of memory. In these cases, we might not want to read
-all (or any) reference records---we can instead read only the reference records that we are planning to use 
+all (or any) reference records---we can instead read only the reference records that we are planning to use
 in our analyses (if any).
 If \code{reference = NULL}, no reference records are parsed.
 Otherwise, the character values of \code{reference} are treated as reference codes and only
@@ -154,7 +165,7 @@ Thus, by specifing \code{reference = c(Title = 'OTL')}, you can use "OTL" refere
 a field called "Title".
 
 If there are more than one reference records with the same reference code,
-either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two 
+either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two
 or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 }
 

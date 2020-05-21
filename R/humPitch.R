@@ -67,7 +67,7 @@ NULL
 #' 
 #' @section Vectorization:
 #' \code{tonalInterval} inherits from the virtual class 
-#' \code{\linkS4class{humdrumVector}}.
+#' \code{\linkS4class{struct}}.
 #' This means you can apply normal vectorized commands to \code{tonalInterval}s, 
 #' and even put them in \code{\link[base:data.frame]{data.frames}}.
 #' 
@@ -130,7 +130,7 @@ setValidity('tonalInterval',
 setMethod("initialize", 
           "tonalInterval",
           function(.Object, Fifth = 0L, Octave = 0L, Cent = 0L) {
-              .Object <- callNextMethod() # call the humdrumVector initialize
+              .Object <- callNextMethod() # call the struct initialize
               Cent <- .Object@Cent
               if (any(abs(Cent) >= 1200L, na.rm = TRUE)) {
                   centOctaves <- IfElse(Cent == 0L, 

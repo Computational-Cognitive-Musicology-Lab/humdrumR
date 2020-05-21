@@ -5,19 +5,24 @@
 \title{\code{evalActive} evaluates the active expression in a
 \code{\linkS4class{humdrumR}} object.}
 \usage{
-evalActive(humdrumR, dataTypes = "D", forceVector = FALSE,
-  sep = ", ", nullAs = NA)
+evalActive(
+  humdrumR,
+  dataTypes = "D",
+  forceVector = FALSE,
+  sep = ", ",
+  nullAs = NA
+)
 }
 \arguments{
 \item{humdrumR}{A \code{\linkS4class{humdrumR}} data object.}
 
-\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \code{'G', 'L', 'I', 'M', 'D', 'd', 'P'} 
+\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \code{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
 or any combination of these in a single string (e.g., \code{"LIM"}).
 (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
- (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for an explanation.).}
+(see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for an explanation.).}
 
 \item{forceVector}{\code{logical}. If \code{TRUE}, the result is forced to be an atomic vector.
-#' @param sep A length-one \code{character} string. If \code{forceVector == TRUE} this value is used as a separator 
+#' @param sep A length-one \code{character} string. If \code{forceVector == TRUE} this value is used as a separator
 between tokens that are collapsed.}
 
 \item{nullAsDot}{A single \code{atomic} value. Any null tokens are coerced to this value (default is \code{.}).}

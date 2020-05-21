@@ -30,11 +30,11 @@ list \%hums[]\% formula
 }
 \description{
 These infix operators make it possible to use
-the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
 functions in a piping style, similar to the \code{|} (pipe)
 in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
 from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
-(In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by 
+(In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by
 \code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
 your \code{humdrumR} work flows.)
 }
@@ -55,7 +55,7 @@ Thus, \code{\%hum<\%} should only be used as the last step in a pipe---you would
 if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 a normal vector or list of R data.
 
-' \code{\%humT\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered 
+' \code{\%humT\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered
 humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
 \code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
 \href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
@@ -65,6 +65,27 @@ for instance, for plotting.
 side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
 a \code{\linkS4class{humdrumR}} data object on the fly.
 }
+\section{Plural pipes}{
+
+
+In R we often apply the same function to a \code{list} of data.
+"Plural pipes" expand this idea to piping: take a \code{list} of data
+and pipe each element in the list to an expression/function.
+There are plural pipe versions of each singular pipe operator.
+Just add an "s" to make them plural:
+\itemize{
+\item \code{\%>\%} (singular) : \code{\%s>\%} (plural);
+\item \code{\%hum>\%} (singular) : \code{\%hums>\%} (plural);
+\item \code{\%hum<\%} (singular) : \code{\%hums<\%} (plural);
+\item \code{\%humT\%} (singular) : \code{\%humsT\%} (plural);
+\item \code{%hum[]%} (singular) : \code{%hums[]%} (plural);
+}
+
+Note: \verb{\%s>\%} is an expansion of the \code{\link{magrittr::\verb{\%>\%}}}, which
+makes use of some clever meta-programming---we can't guarantee it will
+always behave the way we might like!
+}
+
 \examples{
 humdata <- readHumdrum('path*.krn')
 

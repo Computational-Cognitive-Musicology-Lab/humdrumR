@@ -16,21 +16,15 @@ inHumdrum(humdrumR, ...)
 \arguments{
 \item{humdrumR}{A \code{\linkS4class{humdrumR}} data object.}
 
-\item{...}{\code{...} arguments to \code{withinHumdrum} are divided into either named or unnamed arguments.
-Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
-to a single list of functions/formulas.
-All functions are coerced to a formula as \code{~foo(.)}. The far left-hand side of each formula
-must be a name/symbol. Named arguments are \link[humdrumR:interpolateArguments]{interpolated} into and \code{do~X} formulas.}
+\item{...}{Additional formulas/functions, or lists of formulas/functions.
+These are all simply appended to the \code{formulae} argument.}
 
 \item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
 If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
 a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
-intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that 
+intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
 the output is consistent.}
-
-\item{...}{Additional formulas/functions, or lists of formulas/functions.
-These are all simply appended to the \code{formulae} argument.}
 }
 \value{
 From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
@@ -43,16 +37,16 @@ Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
 
 These functions are the primary means of working with
 humdrumR data. (They are analogous to the base functions
-\code{\link[base]{with}} and \code{\link[base]{within}} 
+\code{\link[base]{with}} and \code{\link[base]{within}}
 as applied to \code{\link[base:data.frame]{data.frames}}.)
 Specifically they allow you to evaluate arbitrary
 expressions involving fields in a humdrumR data object.
 They also includes a number of special evaluation options:
 \itemize{
-  \item Evaluate an expression in only matching parts of the data.
-  \item Evaluate an expression separately in subsets of the data.
-  \item Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-  \item Evaluate an expression which produces a plot, with particular plotting parameters set using \code{\link[graphics]{par}}.
+\item Evaluate an expression in only matching parts of the data.
+\item Evaluate an expression separately in subsets of the data.
+\item Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
+\item Evaluate an expression which produces a plot, with particular plotting parameters set using \code{\link[graphics]{par}}.
 }
 
 The difference between \code{withHumdrum} and \code{withinHumdrum} is
@@ -67,40 +61,40 @@ fields called \code{PipeX} (see details).
 
 \section{\code{Formulae}}{
 
-Every formula in the \code{formulae} argument 
+Every formula in the \code{formulae} argument
 is treated as a \code{Keyword ~ Expression(s)}
 pairing. Multiple expressions can be input using multiple \code{~} operators:
 \preformatted{Keyword ~ Expression1 [~ Expression2 ~ ... ~ ExpressionN]}
 (the leftmost expression is treated as the keyword.)
 If there is no leftmost expression (i.e., \code{~ Expression}), the Keyword
-defaults to "\code{do}." The keyword expression must be a single, simple name/symbol, following 
+defaults to "\code{do}." The keyword expression must be a single, simple name/symbol, following
 standard R rules (i.e., "\code{.foobar}" is acceptable but "\code{3 + foobar}" is not).
 
 Legal keywords, and their meanings are:
 \describe{
-  \item{do}{An expression to be evaluated within the \code{humdrumR} data object (see "Expression evaluation").}
-  \item{doplot}{An expression to be evaluated within the \code{humdrumR} data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
-  \item{by}{An expression used to break the data into groups, with the \code{do} expression(s) evaluated 
-  separately in each group (see "Partitioning").}
-  \item{where}{An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").}
-  \item{ngrams}{A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.}
-  \item{recordtype}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
-  correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
-  \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
-  is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
-  \item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
-  or opening a graphing window. The \code{pre} expression is evaluated in the global environment.}
-  \item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
+\item{do}{An expression to be evaluated within the \code{humdrumR} data object (see "Expression evaluation").}
+\item{doplot}{An expression to be evaluated within the \code{humdrumR} data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
+\item{by}{An expression used to break the data into groups, with the \code{do} expression(s) evaluated
+separately in each group (see "Partitioning").}
+\item{where}{An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").}
+\item{ngrams}{A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.}
+\item{recordtype}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
+correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations,
+\strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
+is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+\item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+or opening a graphing window. The \code{pre} expression is evaluated in the global environment.}
+\item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
 }
 }
 
 \section{Expression evaluation}{
 
-The right-hand side of any formula in the \code{formulae} argument with the keyword \code{do} or \code{doplot} 
+The right-hand side of any formula in the \code{formulae} argument with the keyword \code{do} or \code{doplot}
 (or with no keyword specified) is evaluated within the \code{humdrumR} data object.
-The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.). 
-You can also include a \code{.} anywhere in the expression, which will be 
-interpreted as the humdrumR object's current \code{\link[dest=humdrumR]{Active}} 
+The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.).
+You can also include a \code{.} anywhere in the expression, which will be
+interpreted as the humdrumR object's current \code{\link[dest=humdrumR]{Active}}
 expression.
 \preformatted{
 humdata <- readHumdrum('directorywithdata/*.krn') # read some data
@@ -115,32 +109,32 @@ withinHumdrum(humdata, ~getSemits(Token) - mean(getSemits(Token)))
 }
 
 If multiple \code{do} expressions are provided, they are each evaluated one at a time,
-with the result of each piped into the next. Other, non-\code{do}, formulae (like \code{by~} or 
+with the result of each piped into the next. Other, non-\code{do}, formulae (like \code{by~} or
 \code{ngrams~}) are reused for each expression evaluated.
 }
 
 \section{Partitioning}{
 
 
-A \code{by} expression is used to break the data into subsets, with the \code{do} expression(s) evaluated 
-separately within each subset. This works the similarly to the \code{by} argument in 
-\code{\link[data.table]{data.table}}s, the \code{INDEX} 
+A \code{by} expression is used to break the data into subsets, with the \code{do} expression(s) evaluated
+separately within each subset. This works the similarly to the \code{by} argument in
+\code{\link[data.table]{data.table}}s, the \code{INDEX}
 argument of \code{\link[base]{tapply}}, or the \code{INDICES} argument of \code{\link[base]{by}}.
-Each \code{by} expression must evaluate, within the \code{humdrumR} data object, to a vector (or a list of vectors 
+Each \code{by} expression must evaluate, within the \code{humdrumR} data object, to a vector (or a list of vectors
 of equal length) of categories to group the data by.
-Most commonly, the \code{by} expression(s) are simply field(s) in the data: 
-for instance, 
+Most commonly, the \code{by} expression(s) are simply field(s) in the data:
+for instance,
 \preformatted{withinHumdrum(humdata,
                        do ~ table(Token),
-                       by ~ File)} 
+                       by ~ File)}
 will apply the function \code{\link[base]{table}} to the \code{Token} field
-\emph{separately} for each file in the \code{humdrumR} data. 
+\emph{separately} for each file in the \code{humdrumR} data.
 However, we can also use more complex expressions like
 \preformatted{withinHumdrum(humdata,
                        do ~ table(Token), 
                        by ~ Spine > 3 | Record \%\% 2 == 0}
-which will evaluate the do expression in two groups, one where either the spine number is 
-three or less \emph{or} the record number is even, and another group where the opposite is true. 
+which will evaluate the do expression in two groups, one where either the spine number is
+three or less \emph{or} the record number is even, and another group where the opposite is true.
 
 If the \code{by} expression evaluates to a list of grouping vectors,
 the \code{do} expressions are evaulated across every combination of categories in all the vectors.
@@ -149,21 +143,21 @@ Thus,
                        do ~ table(Token),
                        by ~ list(File, Spine))}
 will apply \code{table} to \code{Token} across each spine \emph{in} each file.
-As some \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}, if the 
-\code{by} expression has more than two parts, all parts except 
-the (leftmost) keyword part are combined in a list (i.e., \code{by ~ File ~ Spine} 
+As some \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}, if the
+\code{by} expression has more than two parts, all parts except
+the (leftmost) keyword part are combined in a list (i.e., \code{by ~ File ~ Spine}
 becomes \code{by ~ list(File, Spine)}).
 Thus the previous example can also be written:
 \preformatted{withinHumdrum(humdata, 
                        do ~ table(Token),
                        by ~ File ~ Spine)}
-                     
+
 A \code{where} expression is used to identify a subset of the data and evaluate
-the \code{do} expression(s) \emph{only} in that subset. 
+the \code{do} expression(s) \emph{only} in that subset.
 \code{where} expressions must evaluated, within the \code{humdrumR} data object, to
 a single logical vector. The \code{do} expression(s) are only evaluated where this logical
 vector is \code{TRUE}.
-Wherever the \code{where} expression evaluates to \code{FALSE}, the original \code{humdrumR} data is 
+Wherever the \code{where} expression evaluates to \code{FALSE}, the original \code{humdrumR} data is
 kept unchanged.
 
 If multiple partitioning formulae (i.e, \code{by} and \code{where}) expressions
@@ -178,7 +172,7 @@ but only where the \code{semits} field is greater than the mean \code{semits} va
 \preformatted{withinHumdrum(humdata,
                        do ~ sd(semits)
                        where ~ semits > mean(semits), 
-                       by ~ File)} 
+                       by ~ File)}
 wherein the standard deviation of \code{semits} is, again, calculated for each file,
 but this time wherever the \code{semits} field is greater than the mean value \emph{across all the data}.
 }
@@ -217,17 +211,17 @@ own custom tandem interpretations that are not built into \code{humdrumR}.
 \code{humdrumR} includes the function \code{\link{getTandem}} to help us
 extract arbitrary tandem intrpretation data.
 Luckily, \code{withinHumdrum} knows some
- \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
-which makes it easy to do this anywhere in our expressions, simply by putting a 
-named object beginning with the symbol \code{*}. Of course, R doesn't normally 
+\href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
+which makes it easy to do this anywhere in our expressions, simply by putting a
+named object beginning with the symbol \code{*}. Of course, R doesn't normally
 allow names to begin with symbols like \code{*}, but you can force it by
 placing grave symbols around the name \code{`*name`}. If you do this in a \code{withinHumdrum}
-expression, \code{withinHumdrum} will treat this name as a 
+expression, \code{withinHumdrum} will treat this name as a
 regular expression and substitute a call \code{getTandem(Tandem, 'regular expression')} in the expression.
-This means you can could do something like 
+This means you can could do something like
 \preformatted{withinHumdrum(humdata, 
                        do ~ myFunction(Token, `*mytandempattern`))}
-and \code{myFunction} will be called with the first argument being the 
+and \code{myFunction} will be called with the first argument being the
 \code{Token} field, and the second argument being tandem interpretations
 which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
 }
@@ -238,7 +232,7 @@ which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
 Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
 rather than applying the same expression to each piece, we want to feed
 the separate pieces as separate arguments to the same function.
-In \code{withinHumdrum} you can use some 
+In \code{withinHumdrum} you can use some
 \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
 to do just this, using the \code{@} symbol in the format \code{myFunction(TargetExpr@GroupingExpr)}.
 If we make this call

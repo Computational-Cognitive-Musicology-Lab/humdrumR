@@ -19,7 +19,7 @@
 #' 
 #' @section Vectorization:
 #' \code{rhythmInterval} inherits from the virtual class 
-#' \code{\linkS4class{humdrumVector}}.
+#' \code{\linkS4class{struct}}.
 #' This means you can apply normal vectorized commands to \code{rhythmInterval}s, 
 #' and even put them in \code{\link[base:data.frame]{data.frames}}.
 #' 
@@ -59,7 +59,7 @@
 #' 
 #' @export
 setClass('rhythmInterval', 
-         contains = 'humdrumVector', 
+         contains = 'struct', 
          slots = c(Numerator = 'integer', Denominator = 'integer')) -> rhythmInterval
 
 setValidity('rhythmInterval', 
@@ -116,7 +116,7 @@ rint <- function(denominator, numerator = 1L) {
 is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 
-#' @name humdrumVector
+#' @name rhythmInterval
 #' @export
 setMethod('is.numeric', signature = c('rhythmInterval'),
           function(x) { TRUE })

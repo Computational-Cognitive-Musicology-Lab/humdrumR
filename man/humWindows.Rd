@@ -7,8 +7,15 @@
 \alias{nest}
 \title{Applying functions across arbitrary windows.}
 \usage{
-windows(df, form, with = list(), ..., start = 1L, end = nrow(df),
-  bounds = "exclude")
+windows(
+  df,
+  form,
+  with = list(),
+  ...,
+  start = 1L,
+  end = nrow(df),
+  bounds = "exclude"
+)
 
 hop(vec, pattern, start = 1L, end = length(vec))
 

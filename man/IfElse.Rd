@@ -4,7 +4,7 @@
 \alias{IfElse}
 \title{This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
 \code{\link{base::ifelse}} applies the x and y cases to the whole vector,
-regardless of the condition. IfElse only computes the output y where actually 
+regardless of the condition. IfElse only computes the output y where actually
 asked to.}
 \usage{
 IfElse(true, yes, no)
@@ -12,6 +12,6 @@ IfElse(true, yes, no)
 \description{
 This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
 \code{\link{base::ifelse}} applies the x and y cases to the whole vector,
-regardless of the condition. IfElse only computes the output y where actually 
+regardless of the condition. IfElse only computes the output y where actually
 asked to.
 }

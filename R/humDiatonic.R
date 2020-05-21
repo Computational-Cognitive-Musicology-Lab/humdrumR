@@ -32,7 +32,7 @@
 #' "altered" scales. To understand how the `Alteration` integer works, first consider how the `Mode` (key-signature)
 #' integer works.
 #' Think of it like this, we start with a natural diatonic set consisting of the numbers `[-1 0 1 2 3 4 5]` (C major) on the line of fifths:
-#' If the `Mode` integer is `+1`, everything is shifted up one to be `[0 1 2 3 4 5 6]` (C Lydian).
+#' If the `Mode` integer is `+1`, everyathing is shifted up one to be `[0 1 2 3 4 5 6]` (C Lydian).
 #' You can think of this as `+1` being added to each number, but instead, think of it has the following operation:
 #' remove the lowest (leftmost number) from the vector, add 7 to that number, then append it on the rightmost side.
 #' If we follow this operation, we take 0 off the left, and add 7 to the end, getting `[0 1 2 3 4 5 6]`.
@@ -428,7 +428,6 @@ dset2signature <- function(dset) {
 #' chord while the "/V" represents a key.
 #'
 #' @name diatonicSet-write
-#' @export
 NULL
 
 dset2romanNumeral <- function(dset) {
@@ -754,7 +753,7 @@ as.tertianSet.character <- regexDispatch( 'Scientific Chord' = read.sciChord2ter
 #' 
 #' @name diatonicSet
 #' @export
-as.romanNumeral.character <- as.romanNumeral.tertianSet %.% as.tertianSet
+# as.romanNumeral.character <- as.romanNumeral.tertianSet %.% as.tertianSet
 
 
 

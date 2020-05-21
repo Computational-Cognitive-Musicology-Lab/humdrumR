@@ -10,7 +10,9 @@ metricPosition(rints, bars = NULL, beats = rint(c(2, 4, 8, 16, 32)))
 Calculate metric positions from duration data.
 }
 \seealso{
-Other rhythm analysis tools: \code{\link{RhythmScaling}},
-  \code{\link{rhythmDecompose}}, \code{\link{rhythmOffset}}
+Other rhythm analysis tools: 
+\code{\link{RhythmScaling}},
+\code{\link{rhythmDecompose}()},
+\code{\link{rhythmOffset}()}
 }
 \concept{rhythm analysis tools}

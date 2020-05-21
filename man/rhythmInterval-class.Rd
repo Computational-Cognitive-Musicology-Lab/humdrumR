@@ -6,17 +6,17 @@
 \alias{rhythmInterval}
 \title{Representation of rhythmic information}
 \description{
-This \emph{S4} class is the core rhythm representation in the 
+This \emph{S4} class is the core rhythm representation in the
 \code{\link[humdrumR:humdrumR]{humdrumR package}}.
-The object is used to represent rhythmic durations 
+The object is used to represent rhythmic durations
 and metric positions.
-Each duration is represented in 
+Each duration is represented in
 \href{https://en.wikipedia.org/wiki/Whole_note}{whole note} units.
 Numerically, these whole note units are represented as a ratio
 between integers, held in the slots \code{@Numerator} and \code{@Denominator}.
 This allows use to represent any rational number with no loss of precision
 due to rounding errors and weak decimal expansions (like \code{0.333333}).
-Rhythm intervals are similar to standard musical 
+Rhythm intervals are similar to standard musical
 termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
 }
 \section{Slots}{
@@ -29,9 +29,9 @@ termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
 
 \section{Vectorization}{
 
-\code{rhythmInterval} inherits from the virtual class 
-\code{\linkS4class{humdrumVector}}.
-This means you can apply normal vectorized commands to \code{rhythmInterval}s, 
+\code{rhythmInterval} inherits from the virtual class
+\code{\linkS4class{struct}}.
+This means you can apply normal vectorized commands to \code{rhythmInterval}s,
 and even put them in \code{\link[base:data.frame]{data.frames}}.
 }
 
@@ -40,17 +40,17 @@ and even put them in \code{\link[base:data.frame]{data.frames}}.
 \code{rhythmInterval} objects have arithmetic operations defined.
 Addition and subtraction are straightword and intuitive (i.e., \eqn{\frac{1/8} + \frac{3/8} = \frac{1/2}}).
 
-Multiplication and division are slightly more complicated: 
+Multiplication and division are slightly more complicated:
 \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
-is defined \emph{for rational numbers}: \eqn{\frac{3}{8} * 2 = \frac{3}{4}} 
+is defined \emph{for rational numbers}: \eqn{\frac{3}{8} * 2 = \frac{3}{4}}
 (the result is always a new \code{rhythmInterval}).
 However, note that a \code{rhythmInterval} cannot be multiplied by another
-\code{rhythmInterval}---afterall, what would a quarter-note times a quarter-note be? 
+\code{rhythmInterval}---afterall, what would a quarter-note times a quarter-note be?
 A \code{rhythmInterval} can be divided by another \code{rhythmInterval} to produce
 a real number: \eqn{\frac{1}{2} / \frac{1}{4} = 2 }.
-Like other rational values in \code{R} we can also do either 
+Like other rational values in \code{R} we can also do either
 ``true'' (rational) division (using the \code{\link[base:Arithmetic]{/}} operator)
-\emph{or} \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
+\emph{or} \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean}
 division (using the \code{\link[base:Arithmetic]{\%/\%}} operator).
 Rational division (\code{/}) of a \code{rhythmInterval} by another \code{rhythmInterval}
 results in a rational number. For instance, \eqn{\frac{1}{2} / \frac{1}{4} = 2}.

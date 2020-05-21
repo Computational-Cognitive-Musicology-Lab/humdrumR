@@ -20,7 +20,7 @@ tabulate the raw size of a \code{\linkS4class{humdrumR}} corpus.
 \code{census} takes a \code{\linkS4class{humdrumR}} object
 and and returns a \code{\strong{humCensus}} table.
 The \code{dataType} argument controls what types of records to tabulate:
-legal values are \code{'G', 'L', 'I', 'M', 'D', 'd'} 
+legal values are \code{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 The default is \code{"D"}.
 }
@@ -36,9 +36,9 @@ humdrum control characters like \code{"*"} and \code{"!!"}.}
 indicating the mean length of each token.}
 }
 A \code{humCensus} table has one row for each file in the corpus.
-Rows are labeled with each file's corresponding 
+Rows are labeled with each file's corresponding
 number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{File} field)
- and name (the \strong{Filename} field).
+and name (the \strong{Filename} field).
 In addition, when a \code{humCensus} object is printed,
 the totals across all files are printed as well---(unique) and (per token)
 across all files are calculated across all files as well, not summed.
@@ -47,9 +47,9 @@ across all files are calculated across all files as well, not summed.
 
 Rows of a \code{humCensus} object can be selected with a single argument \code{i}:
 e.g., \code{censusTable[i]}.
-If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by 
+If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by
 \code{File} number).
-If \code{i} is a \code{character} string, this string is mached 
+If \code{i} is a \code{character} string, this string is mached
 as a regular expression against file names.
 If \code{i} is a formula, the right-hand side of the formula
 is evaluated within the table---if it evaluates to a logical vector,
@@ -60,7 +60,7 @@ must be referred to with their names enclosed in \code{``}---for example,
 \code{censusTable[~`(unique)` > 100]} will return all files with
 more than 100 unique tokens.
 
-A \code{drop} argument is also available. If \code{TRUE}, a plain 
+A \code{drop} argument is also available. If \code{TRUE}, a plain
 \code{\link[data.table]{data.table}} is returned.
 }
 

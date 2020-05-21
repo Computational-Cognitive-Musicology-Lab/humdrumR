@@ -3,7 +3,7 @@
 \name{collapse2n}
 \alias{collapse2n}
 \title{This is the function that actually collapses a field
-(column in humtable) to a smaller length. 
+(column in humtable) to a smaller length.
 Certain structural fields are treated differently,
 so that (hopefully) things like record and spine numbers
 still make sense after collapse.}
@@ -12,7 +12,7 @@ collapse2n(x, colname, class, n = 1)
 }
 \description{
 This is the function that actually collapses a field
-(column in humtable) to a smaller length. 
+(column in humtable) to a smaller length.
 Certain structural fields are treated differently,
 so that (hopefully) things like record and spine numbers
 still make sense after collapse.
