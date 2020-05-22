@@ -244,8 +244,7 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
         if (!is.null(dimen)) len <- prod(dimen)
         setSlots(struct) <- lapply(slots, function(slot) rep(as(value, class(slot)), len))
         
-        dim(struct) <- dimen
-        struct
+        struct %dim% object
         
     }
     
@@ -365,14 +364,18 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 }
 
 ##### Dimensions ----
- `%<-dim%` <- function(x, value) {
-    xexpr <- rlang::enexpr(x)
-    # eval(rlang::expr(dim(!!x) <- !!dim(value)), envir = parent.frame())
-    newx <- x %dim% value
-    assign(rlang::expr_name(xexpr), value = newx, envir = parent.frame())
+ldim <- function(x) setNames(if (hasdim(x)) c(0L, dim(x)) else c(length(x), 0L, 0L), c('length', 'nrow', 'ncol'))
+
+size <- function(x) {
+    ldim <- ldim(x)
+    if (ldim[1] == 0L) prod(ldim[-1]) else ldim[1]
 }
 
 `%dim%` <- function(x, value) {
+    # set the dimensions of x to equal the dimensions of value
+    # only works if x is actually the right size!
+    if (size(x) != size(value)) .stop("%dim% is trying to match the dimensions of two objects, but the target object is not the right size.")
+    
 	dim(x) <- dim(value)
 	if (hasdim(x)) {
 	    rownames(x) <- rownames(value) 
@@ -384,7 +387,54 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 	x
 }
 
+dropdim <- function(x) {
+    if (is.atomic(x)) {
+        c(x) 
+    } else {
+        dim(x) <- NULL
+        dimnames(x) <- NULL
+        x
+        
+    }
+    
+}
 
+forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
+    # the same as %dim%, except it forces all the ... to be the same dim as ref (recycling if necessary)
+    refdim <- ldim(ref)
+    
+    targets <- list(...)
+    
+    targets <- if (hasdim(ref)) {
+        lapply(targets, 
+               function(x) {
+                   xdim <- ldim(x)
+                   if (hasdim(x)) {
+                       if (xdim['nrow'] != refdim['nrow']) x <- Repeat(x, length.out = refdim['nrow'], margin = 1L)
+                       if (xdim['ncol'] != refdim['ncol']) x <- Repeat(x, length.out = refdim['ncol'], margin = 2L)
+                       x
+                   } else {
+                       matrix(rep(x, length.out = prod(refdim[c('nrow', 'ncol')])), refdim['nrow'], refdim['ncol'], byrow = byrow)
+                   }})
+    } else {
+        lapply(targets, 
+               function(x) {
+                   if (hasdim(x)) x <- dropdim(x)
+                   rep(x, length.out = refdim['length'])
+                   })
+        
+    }
+
+    if (toEnv) {
+        list2env(targets[.names(targets != '')], envir = parent.frame(1))
+        invisible(targets)
+    } else {
+        targets
+    }
+    
+    
+    
+}
 
 
 
@@ -394,7 +444,7 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
     slot <- rlang::expr_text(rlang::enexpr(slot))
     slotnames <- slotNames(x)
     slot <- slotnames[pmatch(slot, slotnames, duplicates.ok = TRUE)]
-    slot(x, slot) %<-dim% x
+    slot(x, slot) %dim% x
     
 }
 ## My versions of some standard utitilies
@@ -431,6 +481,36 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle =
           if (toEnv) invisible(stuff) else stuff
           
 }
+
+match_size2 <- function(..., toEnv = FALSE, byrow = FALSE) {
+    objects <- list(...)
+    
+    nodim <- !sapply(objects, hasdim)
+    
+    sizes <- vector('list', length(objects))
+    sizes[nodim]  <- lapply(objects[nodim],  length)
+    sizes[!nodim] <- lapply(objects[!nodim], dim)
+    
+    if (all(nodim)) {
+        size <- max(unlist(sizes))
+        objects <- lapply(objects, rep, length.out = size)
+    } else {
+        
+        size <- apply(sizes, 1, max)
+        browser()
+        objects[nodim] <- lapply(objects[nodim], function(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
+        
+        objects[!nodim] <- lapply(objects[!nodim], 
+                                  function(x) {
+                                      x <- Repeat(x, length.out = size[1], margin = 1)
+                                      x <- Repeat(x, length.out = size[2], margin = 2)
+                                      x
+                                  })
+        
+    }
+    objects
+}
+
 
 Repeat <- function(x, ..., margin = 1L) {
 # Smart version of base::repeat which replicates things in any
@@ -487,10 +567,9 @@ IfElse <- function(true, yes, no) {
     
     if (any(!bool)) {
         fparsed <- captureValues(fexpr, parent.env(environment()), doatomic = FALSE)
-        fexpr <- fparsed$expr
-        fvars <- do.call('match_size', c(fparsed$value, list(bool), margin = list(1:2)))
-        fvars <- fvars[.names(fvars) != ''] 
+        fvars <- do.call('forcedim', c(list(bool), fparsed$value))
         
+        fexpr <- fparsed$expr
         f <- rlang::eval_tidy(fexpr, data = lapply(fvars, '[', i = !bool))
         f <- rep(f, length.out = sum(!bool))
         
@@ -498,18 +577,17 @@ IfElse <- function(true, yes, no) {
     }
     if (any(bool)) {
         tparsed <- captureValues(texpr, parent.env(environment()), doatomic = FALSE) 
-        texpr <- tparsed$expr 
-        tvars <- do.call('match_size', c(tparsed$value, list(bool), margin = list(1:2)))
-        tvars <- tvars[.names(tvars) != ''] 
+        tvars <- do.call('forcedim', c(list(bool), tparsed$value))
         
+        texpr <- tparsed$expr 
         t <- rlang::eval_tidy(texpr, data = lapply(tvars, '[', i =  bool))
         t <- rep(t, length.out = sum(bool))
+        
         output <- empty(t, length(bool), dim(bool))
         output[bool] <- t
     }
     if (any(!bool))  output[!bool] <- f
-    output %<-dim% bool
-    output
+    output %dim% bool
 }
 
 

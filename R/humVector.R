@@ -841,7 +841,7 @@ setMethod('c', 'struct',
               
               xslots <- lapply(xs, getSlots) 
               xslots <- Map(function(slots, curx) {
-                                    lapply(slots, function(slot) {slot %<-dim% curx ; slot})
+                                    lapply(slots, function(slot) {slot %dim% curx})
                                },
                                xslots, xs)
               slots <- Reduce(function(cur, rest) Map(rbind, cur, rest), xslots)
@@ -869,7 +869,7 @@ setMethod('c', 'struct',
               x
               
           })
-
+#' @export
 rbind.struct <- function(...) {
     xs <- list(...)
 
@@ -882,6 +882,7 @@ rbind.struct <- function(...) {
     x
 }
 
+#' @export
 cbind.struct <-  function(...) {
     xs <- list(...)
     xs <- lapply(xs, t)
@@ -896,13 +897,14 @@ cbind.struct <-  function(...) {
     
 }
 
+#' @export
 setMethod('t', signature = 'struct',
           function(x) {
               if (!hasdim(x)) x@dim <- c(length(x), 1L)
               
               setSlots(x) <- lapply(getSlots(x),
                      function(slot) {
-                         slot %<-dim% x
+                         slot <- slot %dim% x
                          c(t(slot))
                      })
               
@@ -915,6 +917,7 @@ setMethod('t', signature = 'struct',
               x
           })
 
+#' @export
 setMethod('diag', signature = 'struct',
           function(x) {
               if (!hasdim(x)) .stop("Can't get the diagonal of a {class(x)} with no dimensions!")
@@ -933,8 +936,7 @@ setMethod('diag', signature = 'struct',
 setMethod('is.na', signature = 'struct',
           function(x) {
               na <- is.na(getSlots(x)[[1]])
-              na %<-dim% x
-              na
+              na %dim% x
           })
 
 
@@ -962,6 +964,7 @@ setMethod('as.list', signature = c('struct'),
               lapply(seq_along(x), function(i) x[i])
           })
 
+#' @export
 setGeneric('as.atomic', function(x, ...) standardGeneric('as.atomic'))
 setMethod('as.atomic', 'struct',
           function(x,  collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
@@ -1024,7 +1027,7 @@ setMethod('show', signature = c(object = 'struct'),
                   if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
                   '\n', sep = '')
               if (length(object) > 0L) {
-                  print(as.atomic(object), quote = FALSE)
+                  print(as.character(object), quote = FALSE)
               }
             invisible(object)
             }  )
@@ -1061,8 +1064,7 @@ setMethod('==', signature = c('struct', 'struct'),
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
               mat <- Reduce(`&`, Map(`==`, slots1, slots2))
-              mat %<-dim% e1
-              mat
+              mat %dim% e1
               
           })
 
@@ -1121,8 +1123,7 @@ setMethod('colSums', signature = c('struct'),
               if (!hasdim(x)) x <- cbind(x)
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        slot %<-dim% x
-                                        as.integer(unname(c(colSums(slot, na.rm = na.rm))))
+                                        as.integer(unname(c(colSums(slot %dim% x, na.rm = na.rm))))
                                     })
               rownames(x) <- NULL
               x@dim <- c(1L, ncol(x))
@@ -1138,8 +1139,7 @@ setMethod('rowSums', signature = c('struct'),
               
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        slot %<-dim% x
-                                        as.integer(unname(c(rowSums(slot, na.rm = na.rm))))
+                                        as.integer(unname(c(rowSums(slot %dim% x, na.rm = na.rm))))
                                     })
               colnames(x) <- NULL
               x@dim <- c(nrow(x), 1L)
@@ -1154,8 +1154,7 @@ setMethod('cumsum', signature = c('struct'),
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
                                         if (hasdim(x)) {
-                                            slot %<-dim% x
-                                            c(apply(slot, 2, cumsum))
+                                            c(apply(slot %dim% x, 2, cumsum))
                                         } else {
                                             cumsum(slot)
                                         }
@@ -1173,8 +1172,7 @@ setMethod('diff', signature = c('struct'),
           function(x, lag = 1L) {
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     function(slot) {
-                                        slot %<-dim% x
-                                        c(diff(slot, lag = lag))
+                                        c(diff(slot %dim% x, lag = lag))
                                     })
               x@dim[1] <- x@dim[1] - 1L
               x@rownames <- x@rownames[-1]

@@ -165,8 +165,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 setGeneric("LOF", function(x, sum = FALSE) standardGeneric("LOF"))
 setMethod("LOF", "tonalInterval",
           function(x, sum = FALSE) {
-            lof <- x@Fifth
-            lof %<-dim% x
+            lof <- x@Fifth %dim% x
             
             if (hasdim(lof) && sum) rowSums(lof) else lof
             
@@ -306,9 +305,8 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               
               tint <- tint(e1@Octave - (e2@Octave * LO5thDivs), LO5thMods)
               
-              tint %<-dim% e1
+              tint %dim% e1
               
-              tint
           })
 
 setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
@@ -321,8 +319,7 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
               f2 <- e2@Fifth
               
               f3 <-  f1 %/% f2
-             f3 %<-dim% e1
-              f3
+              f3 %dim% e1
           })
 
 
@@ -543,8 +540,8 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
   if (generic.part) {
     genericInterval <- LO5th2genericinterval(x@Fifth) %dim% x
     octave[is.na(octave) || octave < 0L & genericInterval != 1L] <- octave[is.na(octave) || octave < 0L & genericInterval != 1L] + 1L
-    generic <- empty('', dimen = dim(x))
-    generic[] <- as.character(abs(genericInterval + (7L * abs(octave))))
+    # generic <- empty(genericInterval, length(x), dim(x))
+    generic<- as.character(abs(genericInterval + (7L * abs(octave))))
   } 
  
   
@@ -965,7 +962,7 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
                            generic.part = TRUE, alteration.part = TRUE, 
                            octave.part = TRUE, simple.part = TRUE, simplifier = floor,
                            enharmonic.part = TRUE, comma.part = TRUE, 
-                           Key = NULL, Exclusive) {
+                           Key = NULL, Exclusive = NULL) {
     
     if (!direction) x <- abs(x)
     
@@ -1140,60 +1137,59 @@ commapart.tonalInterval <- function(tint, wolf = "B#", key = dset(0L, 0L)) {
 
 ####. generics ####
 
-#' @name humdrumPitch
 #' @export as.tonalInterval 
 #' @export as.semit as.midi
 #' @export as.tonalChroma as.sciPitch as.kernPitch as.lilyPitch
 #' @export as.interval as.scaleDegree as.solfa
 #' @export as.rational as.fraction as.decimal as.frequency
 #' @export as.contour 
-pitchRepresentations <- c('tonalInterval',
-                          'semit', 'midi',
-                          'tonalChroma', 'sciPitch', 'kernPitch', 'lilyPitch',
-                          'interval', 'scaleDegree', 'solfa',
-                          'rational','fraction', 'decimal', 'frequency',
-                          'contour')
+NULL
 
-### create generics with shared arguments
-
-for (representation in paste0('as.', pitchRepresentations)) {
-    genfunc <- rlang::new_function(alist(x = ,
-                                         direction = , contour = ,
-                                         delta = , sigma = ,
-                                         generic.part = , alteration.part = ,
-                                         octave.part = , simple.part = , simplifier = ,
-                                         enharmonic.part = , comma.part = ,
-                                         Key = ,
-                                         Exclusive = ,
-                                         inPlace = ,
-                                         ... =),
-                                   body = rlang::expr(UseMethod(!!representation)))
-    assign(representation, genfunc )
+pitchgeneric <- function(pitchrep, secondargs = alist(), endargs = alist()) {
+  rlang::new_function(c(alist(x = ),
+                        secondargs,  
+                        alist(direction = , contour = ,  delta = , sigma = ,
+                            generic.part = , alteration.part = , octave.part = , simple.part = , simplifier = , 
+                            enharmonic.part = , comma.part = , Key = , Exclusive = , inPlace = , ... = ),
+                        endargs),
+                      rlang::expr(UseMethod(!!pitchrep)),
+                      env = parent.frame())
 }
+
+as.tonalInterval <- pitchgeneric("as.tonalInterval")
+as.semit         <- pitchgeneric("as.semit")
+as.midi          <- pitchgeneric("as.midi")
+as.tonalChroma   <- pitchgeneric("as.tonalChroma", endargs = alist(accidental.labels = ))
+as.sciPitch      <- pitchgeneric("as.sciPitch",    endargs = alist(accidental.labels = ))
+as.kernPitch     <- pitchgeneric("as.kernPitch",   endargs = alist(accidental.labels = ))
+as.lilyPitch     <- pitchgeneric("as.lilyPitch")
+as.interval      <- pitchgeneric("as.interval")
+as.scaleDegree   <- pitchgeneric("as.scaleDegree")
+as.solfa         <- pitchgeneric("as.solfa")
+as.rational      <- pitchgeneric("as.rational" , alist(tonalHarmonic = ))
+as.fraction      <- pitchgeneric("as.fraction" , alist(tonalHarmonic = , sep = ))
+as.decimal       <- pitchgeneric("as.decimal"  , alist(tonalHarmonic = ))
+as.frequency     <- pitchgeneric("as.frequency", alist(reference.freq = , reference.tint = , tonalHarmonic = ))
+as.contour       <- pitchgeneric("as.contour"  , endargs = alist(contour.labels = ))
+
 
 ### some generics get a few extra arguments
 
-appendformals(as.frequency, 1L) <- alist(reference.freq = , reference.tint = , tonalHarmonic = )
-appendformals(as.decimal,   1L) <- alist(tonalHarmonic = )
-appendformals(as.rational,  1L) <- alist(tonalHarmonic = )
-appendformals(as.fraction,  1L) <- alist(tonalHarmonic = , sep =)
-
-appendformals(as.contour) <- alist(contour.labels = )
-appendformals(as.kernPitch) <- alist(accidental.labels = )
-appendformals(as.sciPitch)  <- alist(accidental.labels = )
-appendformals(as.tonalChroma)  <- alist(accidental.labels = )
 
 ####. methods ####
 
 ###.. x as tint ####
 
-#' @name as.tonalInterval
-#' @export as.tonalInterval.tonalInterval
-#' @export as.tonalInterval.integer as.tonalInterval.numeric as.tonalInterval.character
+#' Convert to tonalIntervals
+#' 
+#' Blah blah
+#' @export
 as.tonalInterval.tonalInterval <- tonalTransform
 
-as.tonalInterval.integer <- tonalTransform %.% semit2tint
+#' @export
 as.tonalInterval.numeric <- tonalTransform %.% decimal2tint
+#' @export
+as.tonalInterval.integer <- tonalTransform %.% semit2tint
 
 char2tint <- humdrumDispatch('kern: kernPitch' = kernPitch2tint,
                              'pitch: sciPitch' = sciPitch2tint,
@@ -1201,8 +1197,8 @@ char2tint <- humdrumDispatch('kern: kernPitch' = kernPitch2tint,
                              'solfa: solfa' = solfa2tint,
                              'freq: decimal' = semit2tint)
 
+#' @export
 as.tonalInterval.character <- tonalTransform %.% char2tint
-
 
 #....
 
@@ -1216,76 +1212,132 @@ setAs('numeric', 'tonalInterval', function(from) as.tonalInterval.numeric(from))
 #' @export
 setAs('character', 'tonalInterval', function(from) as.tonalInterval.character(from))
 
-
-
 ###.. tint as x ####
 
-#' @name as.tonalInterval
-#' @export as.semit.tonalInterval as.midi.tonalInterval
-#' @export as.tonalChroma.tonalInterval as.sciPitch.tonalInterval as.kernPitch.tonalInterval as.lilyPitch.tonalInterval
-#' @export as.interval.tonalInterval as.scaleDegree.tonalInterval as.solfa.tonalInterval
-#' @export as.rational.tonalInterval as.fraction.tonalInterval as.decimal.tonalInterval as.frequency.tonalInterval
-#' @export as.contour.tonalInterval
-
-
-for (representation in pitchRepresentations[-1]) {
-  # this loop constructs methods like 
-  #"as.semit.tonalInterval <- tint2semit %.% tonalTransform"
-  fname <- paste0('tint2', representation)
-  funcs <- list(tonalTransform, get(fname))
-  names(funcs) <- c('tonalTransform', fname)
-  method <- do.call('compose', funcs)
-  assign(paste0('as.', representation, '.tonalInterval'), method)
-}
+#' @export
+as.semit.tonalInterval       <- tint2semit       %.% tonalTransform
+#' @export
+as.midi.tonalInterval        <- tint2midi        %.% tonalTransform
+#' @export
+as.tonalChroma.tonalInterval <- tint2tonalChroma %.% tonalTransform
+#' @export
+as.sciPitch.tonalInterval    <- tint2sciPitch    %.% tonalTransform
+#' @export
+as.kernPitch.tonalInterval   <- tint2kernPitch   %.% tonalTransform
+#' @export
+as.lilyPitch.tonalInterval   <- tint2lilyPitch   %.% tonalTransform
+#' @export
+as.interval.tonalInterval    <- tint2interval    %.% tonalTransform
+#' @export
+as.scaleDegree.tonalInterval <- tint2scaleDegree %.% tonalTransform
+#' @export
+as.solfa.tonalInterval       <- tint2solfa       %.% tonalTransform
+#' @export
+as.rational.tonalInterval    <- tint2rational    %.% tonalTransform
+#' @export
+as.fraction.tonalInterval    <- tint2fraction    %.% tonalTransform
+#' @export
+as.decimal.tonalInterval     <- tint2decimal     %.% tonalTransform
+#' @export
+as.frequency.tonalInterval   <- tint2frequency   %.% tonalTransform
+#' @export
+as.contour.tonalInterval     <- tint2contour     %.% tonalTransform
 
 
 ###.. x as y ####
 
-
-
 #.... integer -> y ####
 
-as.semit.integer <- force
-as.midi.integer <- function(x) x + 60L
-
-for (representation in pitchRepresentations[!pitchRepresentations %in% c('semit', 'midi', 'tonalInterval')]) {
-  # this loop constructs methods like 
-  #"as.semit.integer <- tint2semit %.% as.tonalInterval.integer"
-  fname <- paste0('tint2', representation)
-  funcs <- list(get(fname), as.tonalInterval.integer)
-  names(funcs) <- c(fname, 'as.tonalInterval.integer')
-  method <- do.call('compose', funcs)
-  assign(paste0('as.', representation, '.integer'), method)
-}
+#' @export
+as.semit.integer       <- force
+#' @export
+as.midi.integer        <- function(x) x + 60L
+#' @export
+as.tonalChroma.integer <- tint2tonalChroma %.% as.tonalInterval.integer
+#' @export
+as.sciPitch.integer    <- tint2sciPitch    %.% as.tonalInterval.integer
+#' @export
+as.kernPitch.integer   <- tint2kernPitch   %.% as.tonalInterval.integer
+#' @export
+as.lilyPitch.integer   <- tint2lilyPitch   %.% as.tonalInterval.integer
+#' @export
+as.interval.integer    <- tint2interval    %.% as.tonalInterval.integer
+#' @export
+as.scaleDegree.integer <- tint2scaleDegree %.% as.tonalInterval.integer
+#' @export
+as.solfa.integer       <- tint2solfa       %.% as.tonalInterval.integer
+#' @export
+as.rational.integer    <- tint2rational    %.% as.tonalInterval.integer
+#' @export
+as.fraction.integer    <- tint2fraction    %.% as.tonalInterval.integer
+#' @export
+as.decimal.integer     <- tint2decimal     %.% as.tonalInterval.integer
+#' @export
+as.frequency.integer   <- tint2frequency   %.% as.tonalInterval.integer
+#' @export
+as.contour.integer     <- tint2contour     %.% as.tonalInterval.integer
 
 #.... numeric -> y ####
 
-
-for (representation in pitchRepresentations[-1]) {
-  # this loop constructs methods like 
-  #"as.semit.numeric <- tint2semit %.% as.tonalInterval.numeric"
-  fname <- paste0('tint2', representation)
-  funcs <- list(get(fname), as.tonalInterval.numeric)
-  names(funcs) <- c(fname, 'as.tonalInterval.numeric')
-  method <- do.call('compose', funcs)
-  assign(paste0('as.', representation, '.numeric'), method)
-}
+#' @export
+as.semit.numeric       <- tint2semit       %.% as.tonalInterval.numeric
+#' @export
+as.midi.numeric        <- tint2midi        %.% as.tonalInterval.numeric
+#' @export
+as.tonalChroma.numeric <- tint2tonalChroma %.% as.tonalInterval.numeric
+#' @export
+as.sciPitch.numeric    <- tint2sciPitch    %.% as.tonalInterval.numeric
+#' @export
+as.kernPitch.numeric   <- tint2kernPitch   %.% as.tonalInterval.numeric
+#' @export
+as.lilyPitch.numeric   <- tint2lilyPitch   %.% as.tonalInterval.numeric
+#' @export
+as.interval.numeric    <- tint2interval    %.% as.tonalInterval.numeric
+#' @export
+as.scaleDegree.numeric <- tint2scaleDegree %.% as.tonalInterval.numeric
+#' @export
+as.solfa.numeric       <- tint2solfa       %.% as.tonalInterval.numeric
+#' @export
+as.rational.numeric    <- tint2rational    %.% as.tonalInterval.numeric
+#' @export
+as.fraction.numeric    <- tint2fraction    %.% as.tonalInterval.numeric
+#' @export
+as.decimal.numeric     <- tint2decimal     %.% as.tonalInterval.numeric
+#' @export
+as.frequency.numeric   <- tint2frequency   %.% as.tonalInterval.numeric
+#' @export
+as.contour.numeric     <- tint2contour     %.% as.tonalInterval.numeric
 
 #.... character -> y ####
 
-
-for (representation in pitchRepresentations[-1]) {
-  # this loop constructs methods like 
-  #"as.semit.character <- tint2semit %.% as.tonalInterval.character"
-  fname <- paste0('tint2', representation)
-  funcs <- list(re.place, get(fname), as.tonalInterval.character)
-  names(funcs) <- c('re.place', fname, 'as.tonalInterval.character')
-  method <- do.call('compose', funcs)
-  assign(paste0('as.', representation, '.character'), method)
-}
-
-
-
+#' @export
+as.semit.character       <- re.place %.% tint2semit       %.% as.tonalInterval.character
+#' @export
+as.midi.character        <- re.place %.% tint2midi        %.% as.tonalInterval.character
+#' @export
+as.tonalChroma.character <- re.place %.% tint2tonalChroma %.% as.tonalInterval.character
+#' @export
+as.sciPitch.character    <- re.place %.% tint2sciPitch    %.% as.tonalInterval.character
+#' @export
+as.kernPitch.character   <- re.place %.% tint2kernPitch   %.% as.tonalInterval.character
+#' @export
+as.lilyPitch.character   <- re.place %.% tint2lilyPitch   %.% as.tonalInterval.character
+#' @export
+as.interval.character    <- re.place %.% tint2interval    %.% as.tonalInterval.character
+#' @export
+as.scaleDegree.character <- re.place %.% tint2scaleDegree %.% as.tonalInterval.character
+#' @export
+as.solfa.character       <- re.place %.% tint2solfa       %.% as.tonalInterval.character
+#' @export
+as.rational.character    <- re.place %.% tint2rational    %.% as.tonalInterval.character
+#' @export
+as.fraction.character    <- re.place %.% tint2fraction    %.% as.tonalInterval.character
+#' @export
+as.decimal.character     <- re.place %.% tint2decimal     %.% as.tonalInterval.character
+#' @export
+as.frequency.character   <- re.place %.% tint2frequency   %.% as.tonalInterval.character
+#' @export
+as.contour.character     <- re.place %.% tint2contour     %.% as.tonalInterval.character
 
 
 

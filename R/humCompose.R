@@ -1,8 +1,7 @@
 ######### Function composition ----
 
-
 compose <- function(...) UseMethod('compose')
-compose.default <- function(...) {
+compose.default <- function(..., fenv = parent.frame()) {
 # accepts a NAMED ... of functions
     fs <- rev(list(...))
     fnames <- names(fs)
@@ -35,7 +34,7 @@ compose.default <- function(...) {
         })
     
     ### environment
-    fenv <- new.env()
+    # fenv <- new.env() # parent.env(parent.frame())
     Map(function(fname, f) assign(fname, f, envir = fenv), fnames, fs)
     
     # Create the new function
@@ -66,7 +65,7 @@ print.composed <- function(x) {
     f2name <- rlang::quo_text(rlang::enquo(e2))
     
     fs <- setNames(c(e1, e2), c(f1name, f2name))
-    do.call('compose', fs)
+    do.call('compose', c(fs, list(fenv = parent.frame())))
     }
 
 

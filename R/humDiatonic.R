@@ -118,16 +118,14 @@ tset <- function(root = 0L, mode = 1L, alterations = 0L, cardinality = 3L, of = 
 
 setMethod("LOF", "diatonicSet",
           function(x, sum = TRUE) {
-              lof <- x@Root
-              lof %<-dim% x
+              lof <- x@Root %dim% x
               
               if (hasdim(lof) && sum) rowSums(lof) else lof
               
           })
 
 getMODE <- function(dset, sum = TRUE) {
-    mode <- dset@Mode
-    mode %<-dim% dset
+    mode <- dset@Mode %dim% dset
     
     if (hasdim(mode) && sum) rowSums(mode) else mode
     
