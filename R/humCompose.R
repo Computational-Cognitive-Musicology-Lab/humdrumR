@@ -143,7 +143,7 @@ re.as <- function(vector) {
     sticky$as <- NULL
     stickyAttrs(output) <- sticky
     
-    output
+    output %dim% vector
     
     
     
@@ -155,7 +155,7 @@ re.place <- function(vector) {
     asfunc <- stickyAttrs(vector)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
-    asfunc(vector)
+    asfunc(vector) %dim% vector
 }
 
 

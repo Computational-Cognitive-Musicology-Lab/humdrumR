@@ -257,7 +257,10 @@ recycledim <- function(..., funccall) {
     d1 <- dim(args[[1]])
     d2 <- dim(args[[2]])
     
-    if (all(d1 == d2)) return(NULL)
+    if (all(d1 == d2)) {
+        list2env(args, envir = parent.frame(1))
+        return(NULL)
+    }
     
     if (all(d1 == 1L) || all(d2 == 1L)) {
         args <- setNames(match_size(args[[1]], args[[2]], margin = 1:2), names(args))
@@ -643,6 +646,27 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
               x
           })
 
+setMethod('[<-', c(x = 'struct', i = 'matrix', j = 'missing', value = 'struct'),
+          function(x, i, value) {
+              checkSame(x, value, '[i , ]<-')
+              
+              if (is.numeric(i) && ncol(i) == 2) {
+                  i[] <- as.integer(i)
+              } else {
+                  if (is.logical(i) && all(dim(i) == dim(x))) {
+                      i <- which(i, arr.ind = TRUE)
+                  } else {
+                      
+                      .stop("Can't assign to a {class(x)} object with a matrix in the i-index argument, unless that i matrix is a",
+                            " numeric matrix with two rows or a logical matrix with the same dimensions as the {class(x)}.")
+                  }
+              }
+              
+
+              
+              return(cartesianAssign(x, i[,1], i[,2], value))
+          })
+
 setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
           function(x, j, value) {
               checkSame(x, value, '[ , j]<-')
@@ -687,6 +711,9 @@ setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
               setSlots(x) <- slots
               x
           })
+
+
+
 
 setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
           function(x, i, j, value, cartesian = FALSE) {

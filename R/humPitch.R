@@ -259,7 +259,7 @@ setMethod('+', signature = c('character', 'tonalInterval'),
 setMethod('+', signature = c('tonalInterval', 'character'),
           function(e1, e2) {
               e2 <- as.tonalInterval.character(e2, inPlace = TRUE)
-              e3 <- stickyApply(`+`, e2, e1)
+              e3 <- stickyApply(`+`, e1, e2)
               
               re.place(re.as(e3))
               
@@ -274,9 +274,17 @@ setMethod('-', signature = c('character', 'tonalInterval'),
               e1 <- as.tonalInterval(e1)
               e3 <- stickyApply(`-`, e1, e2)
               
-              re.as(e3)
+              re.place(re.as(e3))
           })
 
+
+setMethod('-', signature = c('tonalInterval', 'character'),
+          function(e1, e2) {
+            e2 <- as.tonalInterval(e2)
+            e3 <- stickyApply(`-`, e1, e2)
+            
+            re.place(re.as(e3))
+          })
 
 
 ##...division/modulo  ####
@@ -1211,6 +1219,9 @@ setAs('numeric', 'tonalInterval', function(from) as.tonalInterval.numeric(from))
 #' @name as.tonalInterval
 #' @export
 setAs('character', 'tonalInterval', function(from) as.tonalInterval.character(from))
+#' @name as.tonalInterval
+#' @export
+setAs('matrix', 'tonalInterval', function(from) as.tonalInterval(c(from)) %dim% from)
 
 ###.. tint as x ####
 
