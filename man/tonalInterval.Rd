@@ -25,7 +25,7 @@ is.tonalInterval(x)
 
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
-invert(tint, around = Unison)
+invert(tint, around = Unison, ...)
 
 allints
 }

@@ -20,7 +20,7 @@
 #' For instance, though `struct` classes work (ok) in [base::data.frame]s
 #' [data.table::data.table]s and [tibble::tibble]s might give you problems.
 #' 
-#' @section Behavior
+#' @section Behavior:
 #' 
 #' `struct` subclasses behave very similarly to normal R vectors.
 #' However, they do differ in a few respects, mostly in ways that
@@ -211,10 +211,10 @@ NULL
 
 #' @name struct
 #' @export length dim ncol nrow
-setMethod('nrow', signature = 'struct', function(x) x@dim %fmap% setNames(.[1], 'nrow'))
-setMethod('ncol', signature = 'struct', function(x) x@dim %fmap% setNames(.[2], 'ncol'))
+setMethod('nrow', signature = 'struct', function(x) x@dim[1])
+setMethod('ncol', signature = 'struct', function(x) x@dim[2])
 setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
-setMethod('dim', signature = 'struct', function(x) x@dim %fmap% setNames(., c('nrow', 'ncol')))
+setMethod('dim', signature = 'struct', function(x) x@dim )
 
 setMethod('dim<-', 'struct',
           function(x, value) {
@@ -518,19 +518,19 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'character'),
           function(x, j) {
               if (is.null(colnames(x))) .stop("You can't column-index a {class(x)} (i.e. {class(x)}[ , j])", 
                                               " with a character string if the {class(x)} has no colnames (i.e., colnames({class(x)}) = NULL).")
-              if (is.numeric(rownames(x))) rownames(x) <- as.character(rownames(x))
+              if (is.numeric(colnames(x))) colnames(x) <- as.character(colnames(x))
               
-              i <- locate(i, rownames(x))
-              nomatch <- lengths(i) == 0L
+              j <- locate(j, colnames(x))
+              nomatch <- lengths(j) == 0L
               if (any(nomatch))  .stop("In your attempt to column-index a {class(x)} (i.e., {class(x)}[ , j])",
                                        " using character indices, ", 
-                                       glue::glue_collapse(paste0("'", names(i)[nomatch], "'"), 
+                                       glue::glue_collapse(paste0("'", names(j)[nomatch], "'"), 
                                                            sep = ', ', last = ', and '),
-                                       plural(sum(nomatch), ' are not rownames', ' is not a rowname'),
+                                       plural(sum(nomatch), ' are not colnames', ' is not a colname'),
                                        ' in the {class(x)} object.')
               
-              i <- unlist(i)
-              x[i, ]
+              j <- unlist(j)
+              x[ , j]
           })
 
 
@@ -853,15 +853,15 @@ setMethod('c', 'struct',
               dims <- t(sapply(xs, dim))
               # row vectors can be transposed to fit in
               if (!rbind) {
-                  rowvectors <- dims[ , 'nrow'] == 1L
+                  rowvectors <- dims[ , 1] == 1L
                   
-                  if(any(!rowvectors) && all(dims[!rowvectors, 'ncol'] == 1L)) {
+                  if(any(!rowvectors) && all(dims[!rowvectors, 2] == 1L)) {
                       xs[rowvectors] <- lapply(xs[rowvectors], t)
                       dims[rowvectors, ] <- apply(dims[rowvectors, , drop = FALSE], 1, rev)
                       
                   }
               }
-              if (length(unique(dims[ , 'ncol'])) != 1L) .stop( "Can't concatinate {class(x)} objects with different numbers of columns.")
+              if (length(unique(dims[ , 2])) != 1L) .stop( "Can't concatinate {class(x)} objects with different numbers of columns.")
               
               # do it
               x <- xs[[1]]
@@ -886,7 +886,7 @@ setMethod('c', 'struct',
               } else {
                   #dim
                   x@dim[1] <- sum(lengths(xs))
-                  x@dim[2] <- dims[1, 'ncol']
+                  x@dim[2] <- dims[1, 2]
                   
                   # colnames
                   colnames <- lapply(xs, colnames)
@@ -918,8 +918,12 @@ cbind.struct <-  function(...) {
     x <- do.call('rbind', xs)
     x <- t(x)
     
-    #
-    colnames(x) <- names(xs)
+    # new colnames
+    existing <- sapply(xs, rownames) 
+    new <- .names(xs)
+    new <- Map(function(old, new, len) {if (new == '') old else rep(new, len) }, existing, new, lapply(xs, nrow))
+    if (any(!sapply(new, is.null))) new[sapply(new, is.null)] <- list("")
+    colnames(x) <- unlist(new)
     x
     
 }

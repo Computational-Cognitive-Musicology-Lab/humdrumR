@@ -29,7 +29,7 @@ Since all intervals are relative, there is always an *implicit* reference---the 
 For `tonalIntervals` the origin is the unison interval.
 For `rhythmIntervals` the origin is zero.
 
-`tonalInterval`s and `rhythmIntervals` form mathematical groups---addition is defined (associatively), there is an identity element (the reference point: e.g., unison, 0), and the intervals are invertible.
+`tonalInterval`s and `rhythmIntervals` constitute each constitute an algebraic *module over integers* (module over $\mathbb{Z}$), with appropriate arithmetic operations fully defined in `humdrumR`.
 Since intervals can be added/subtracted, any interval can be thought of as a combination (addition) of other intervals.
 In `humdrumR`, we often "partition" a `interval` as a combination of useful sub-intervals.
 
@@ -181,7 +181,7 @@ plot(c(0, bassline_reference[-1] - .25), type = 'h', xlab = 'Index', ylab = 'Pit
 text(seq_along(bassline_reference), bassline_reference, labels = bassline_reference, col = 'blue', cex=.7)
 
 ax <- c(0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19)
-axis(2, ax, as.tonalChroma(as.character(ax)), tick = FALSE, las = 1)
+# axis(2, ax, as.tonalChroma(as.character(ax)), tick = FALSE, las = 1)
 
 i <- seq_along(bassline_reference)
 
@@ -204,13 +204,13 @@ Or, if we keep track of the local key (usually using a fixed interval to "C").
 
 Tonality is represented in `humdrumR` using three `S4` classes and associated methods: 
 
-+ `humdrumVector`
++ `struct`
     + `tonalInterval` (pitches)
     + `diatonicSet` (keys)
          + `tertianSet` (chords)
 
 `tertianSet` inherits from `diatonicSet`---thus any `tertianSet` is also a `diatonicSet`.
-(All three classes inherit from `humdrumVector`, giving them generic atomic-vector-like behavior.)
+(All three classes inherit from `struct`, giving them generic atomic-vector-like behavior.)
 
 
 ## tonalInterval

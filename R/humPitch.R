@@ -427,6 +427,13 @@ LO5thNsciOct2tint <- function(LO5th, sciOct) {
     tint(sciOct - 4L - octshift, LO5th)
 }
 
+LO5thNcentralOct2tint <- function(LO5th, centralOct) {
+  tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
+  octshift <- round(tint2semit(tintWith0Octave %% tint(-11L, 7L)) / 12L)
+  
+  tint(centralOct - octshift, LO5th)
+}
+
 
 ###. x to line-of-fifths ####
 
@@ -497,6 +504,12 @@ tint2tonalChroma <- function(x, accidental.labels = c()) {
 
 #....
 
+tint2centralOctave <- function(x) {
+  # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
+   generic <- x %% tint(-11L, 7L)
+   (round(tint2semit(generic) / 12L)) %dim% x
+}
+
 tint2sciOctave <- function(x) {
           generic <- x %% tint(-11L, 7L)
           (as.integer(tint2semit(generic) %/% 12L) + 4L) %dim% x
@@ -547,7 +560,7 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
   } 
   if (generic.part) {
     genericInterval <- LO5th2genericinterval(x@Fifth) %dim% x
-    octave[is.na(octave) || octave < 0L & genericInterval != 1L] <- octave[is.na(octave) || octave < 0L & genericInterval != 1L] + 1L
+    octave[!is.na(octave) & octave < 0L & genericInterval != 1L] <- octave[!is.na(octave) & octave < 0L & genericInterval != 1L] + 1L  # can octave be NA?
     # generic <- empty(genericInterval, length(x), dim(x))
     generic<- as.character(abs(genericInterval + (7L * abs(octave))))
   } 
@@ -577,8 +590,8 @@ int2scaleDegree <- function(x, Key = 0L, cautionary = TRUE,
     setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
     if (is.diatonicSet(Key)) {
-        mode <- getMode(Key)
-        key  <- getRoot(Key)
+        mode <- Key@Mode
+        key  <- Key@Root
     } else {
         mode <- 0L
     }
@@ -741,7 +754,7 @@ semit2tint <- function(n, melodic = FALSE, Key = NULL) {
            tints[which(chromatic & isD1)] <- tints[which(chromatic & isD1)] - pythagorean.comma
                     
           } else {
-            mode <- if (is.null(Key)) 0L else getMode(as.diatonicSet(Key))
+            mode <- if (is.null(Key)) 0L else as.diatonicSet(Key)@Mode
             LO5ths <- LO5ths - mode
             tints[LO5ths >  8 & !is.na(LO5ths)]  <- tints[LO5ths > 8 & !is.na(LO5ths)] - pythagorean.comma
             tints[LO5ths < -5 & !is.na(LO5ths)] <- tints[LO5ths < -5 & !is.na(LO5ths)] + pythagorean.comma
@@ -826,7 +839,7 @@ interval2tint <- function(str) {
           qualshift <- sapply(quality,
                               function(qual) {
                                         qual1 <- stringr::str_sub(qual, end = 1L)
-                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, D = -7, A = 7, a = 7) *  nchar(qual)
+                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, D = -7, A = 7, a = 7, NA) *  nchar(qual)
                               }) -  ifelse(grepl('^[dD]', quality) & genericLO5th > 1, 7, 0)
           
           LO5th <- qualshift + genericLO5th
@@ -996,8 +1009,9 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
 
 
 #' @name tonalInterval
-#' @export invert invert.tonalInterval invert.default
-invert <- function(tint, around = Unison) {UseMethod('invert')}
+#' @export 
+invert <- function(tint, around = Unison, ...) {UseMethod('invert')}
+#' @export 
 invert.tonalInterval <- function(tint, around = tint(0L, 0L)) (around + around - tint)
 
 
@@ -1008,20 +1022,20 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L)) (around + around -
 #' However, if a \code{key} argument is specified, tonal transposition
 #' takes place in that (major) key.
 #' @name humTranspose
-#' @export transpose transpose.tonalInterval
-transpose <- function(x, interval = tint(0,0), generic = NULL, ...) {UseMethod('transpose')}
-
-transpose.tonalInterval <- function(x, interval = tint(0,0), generic = NULL) {
+#' @export
+transpose <- function(x, interval = tint(0,0), Key = NULL, ...) {UseMethod('transpose')}
+#' @export
+transpose.tonalInterval <- function(x, interval = tint(0,0), Key = NULL) {
     if (!is.tonalInterval(interval)) interval <- as.tonalInterval(interval)
     
-    output <- if (!is.null(generic)) {
-        if (!is.tonalInterval(generic)) generic <- as.tonalInterval(generic)
-        generic <- generic - tint(-1, 1)
-        inkey <- x - generic
+    output <- if (!is.null(Key)) {
+        if (!is.tonalInterval(Key)) Key <- as.tonalInterval(Key)
+        Key <- Key - tint(-1, 1)
+        inkey <- x - Key
         chromaticshift <- tint( , inkey %/% tint(-11, 7))
         inkey <- inkey - chromaticshift
         result <- (inkey + interval) %% tint(-11, 7)
-        result + generic + chromaticshift
+        result + Key + chromaticshift
     } else {
         x + interval
     }
@@ -1041,105 +1055,114 @@ NULL
 
 
 
-tintPartition <- function(tint, roundingMethod = floor) {
-  octshift <- as.integer(roundingMethod(tint2semit(tint) / 12))
-  octavepart <- tint(octshift, 0L)
+tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor, wolf = NULL) {
+  mat <- tintPartition.octave_simple(tint, roundingMethod = roundingMethod)
   
-  simplepart <- tint - octavepart
-  
-  cbind(Octave = octavepart, Simple = simplepart)
+  cbind(mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key = Key))
   
 }
 
 ###.. simple + octave = complex ####
 
-#' @export octavepart octavepart.tonalInterval octavepart.default
-#' @export simplepart simplepart.tonalInterval simplepart.default
-#' @export is.simple is.simple.tonalInterval is.simple.default
+#' @export octavepart simplepart  is.simple 
 octavepart <- function(tint, roundingMethod) UseMethod('octavepart')
 simplepart <- function(tint, roundingMethod) UseMethod('simplepart')
 is.simple <- function(tint) UseMethod('is.simple')
 
+
+#' @export
 octavepart.tonalInterval <- function(tint, roundingMethod = floor) {
-    octshift <- as.integer(roundingMethod(tint2semit(tint) / 12))
-    tint(octshift, 0L)
+    generic <- genericpart.tonalInterval(tint)
+    octshift <- as.integer(roundingMethod(tint2semit(generic) / 12))
+    tint(octshift, 0L) %dim% tint
 }
 
+#' @export
 simplepart.tonalInterval <- function(tint, roundingMethod = floor) {
     octavepart <- octavepart.tonalInterval(tint, roundingMethod)
     tint - octavepart
 }
 
-is.simple.tonalInterval <- function(tint) {
-    semit <- abs(tint2semit(tint))
-    semit < 12
+tintPartition.octave_simple <- function(tint, roundingMethod = floor) {
+  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
+  octavepart <- octavepart.tonalInterval(tint, roundingMethod)
+  
+  cbind(Octave = octavepart, Simple = tint - octavepart)
+
 }
+
+#' @export
+is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 
 
 ###.. generic + alteration = specific ####
 
 #' @name tonalIntervalparts
-#' @export genericpart genericpart.tonalInterval genericpart.default
-#' @export alterationpart alterationpart.tonalInterval alterationpart.default
+#' @export genericpart alterationpart
 genericpart <- function(tint, Key) UseMethod('genericpart')
 alterationpart <- function(tint, Key) UseMethod('alterationpart')
 
+#' @export
 genericpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
     Key <- as.diatonicSet(Key)
-    mode <- tint( , Key@Mode - Key@Root)
-    Key  <- tint( , Key@Root)
     
-    gtint <- tint - Key 
-    
-    gtint <- ((gtint + P5 - mode ) %% tint(-11L, 7L)) - P5 + mode
-    # offset by P5 because F (-1) is natural, not F# (6)
-    
-    gtint
+    (tint %% Key) - Key
 }
 
-alterationpart.tonalInterval <- function(tint, key = dset(0L, 0L)) {
-    key <- as.diatonicSet(key)
-    gtint <- genericpart.tonalInterval(tint, key)
-    tint - gtint - tint( , key@Root)
+#' @export
+alterationpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
+    Key <- as.diatonicSet(Key)
+    gtint <- genericpart.tonalInterval(tint, Key)
+    
+    (tint - Key) - gtint
+}
+tintPartition.generic_alteration <- function(tint, Key = dset(0L, 0L)) {
+  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
+  gtint<- genericpart.tonalInterval(tint, Key)
+
+  cbind(Generic = gtint,  Alteration = (tint - Key) - gtint)
+  
 }
 
 ###.. enharmonic + comma = harmonic ####
 
-#' @rdname tonalIntervalparts
-#' @export enharmonicpart enharmonicpart.tonalInterval 
-#' @export commapart commapart.tonalInterval
-enharmonicpart <- function(tint, wolf, key) UseMethod('enharmonicpart')
-commapart      <- function(tint, wolf, key) UseMethod('commapart')
+#' @name tonalIntervalparts
+#' @export enharmonicpart commapart
+enharmonicpart <- function(tint, wolf, Key) UseMethod('enharmonicpart')
+commapart      <- function(tint, wolf, Key) UseMethod('commapart')
 
-enharmonicpart.tonalInterval <- function(tint, wolf = "B#", key = dset(0L, 0L)) {
-    key <- as.diatonicSet(key)
-    key <- tint( , key@Root)
-    tint <- tint - key
+#' @export
+enharmonicpart.tonalInterval <- function(tint, wolf = NULL, Key = dset(0L, 0L)) {
+  Key <- as.diatonicSet(Key)
+  
+  if (is.null(wolf)) {
+    tint <- tint - Key
+    flat <- tint@Fifth < 0
+    tint[flat] <- invert.tonalInterval(tint[flat])
     
-    comma <- commapart.tonalInterval(tint, wolf, key = dset(0L, 0L))
+    tint <- tint %% pythagorean.comma
     
-    (tint - comma) + key
+    tint[flat] <- invert.tonalInterval(tint[flat])
+    tint + Key
+  } else {
+    wolf <- as.tonalInterval(wolf) + LO5thNcentralOct2tint(getMode(Key) - 1L, 0L) # -1L because F natural is -1
+    ((tint - wolf) %% pythagorean.comma) + wolf
+  }
+}
+
+#' @export
+commapart.tonalInterval <- function(tint, wolf = NULL, Key = dset(0L, 0L)) {
+  tint - enharmonicpart.tonalInterval(tint, wolf, Key)
     
 }
 
-commapart.tonalInterval <- function(tint, wolf = "B#", key = dset(0L, 0L)) {
-    key <- as.diatonicSet(key)
-    key <- tint( , key@Root)
-    
-    tint <- tint - key
-    
-    if (is.null(wolf)) {
-        commas <- (tint@Fifth %/% 12L) + sign(tint@Fifth)
-        tint + pythagorean.comma * commas
-    } else {
-        wolf <- as.tonalInterval(wolf)
-        wolf[wolf@Fifth < 0L] <- wolf[wolf@Fifth < 0L] + pythagorean.comma
-        
-        tint <- (wolf - P5 - (tint))
-        
-        (tint %/% pythagorean.comma) * -pythagorean.comma
-    }
+tintPartition.enharmonic_comma <- function(tint, wolf = 'A-', Key = dset(0L, 0L)) {
+  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
+  enharm <- enharmonicpart.tonalInterval(tint, wolf = wolf, Key = Key)
+  
+  cbind(Enharmonic = enharm, Comma = tint - enharm)
 }
+
 
 ##### As x ####
 
@@ -1354,8 +1377,19 @@ as.contour.character     <- re.place %.% tint2contour     %.% as.tonalInterval.c
 
 ####
 
-# invert.default <- re.as %.% invert.tonalInterval %.% as.tonalInterval
-# transpose.character <- re.as %.% transpose.tonalInterval %.% as.tonalInterval
+#' @export
+invert.character <- re.place %.% re.as %.% invert.tonalInterval %.% as.tonalInterval.character
+#' @export
+invert.numeric <- re.as %.% invert.tonalInterval %.% as.tonalInterval.numeric
+#' @export
+invert.integer <- re.as %.% invert.tonalInterval %.% as.tonalInterval.integer
+
+#' @export
+transpose.character <- re.place %.% re.as %.% transpose.tonalInterval %.% as.tonalInterval.character
+#' @export
+transpose.numeric <- re.place %.% re.as %.% transpose.tonalInterval %.% as.tonalInterval.numeric
+#' @export
+transpose.integer <- re.place %.% re.as %.% transpose.tonalInterval %.% as.tonalInterval.integer
 # 
 # is.simple.default <- is.simple %.% as.tonalInterval
 # simplepart.default <- re.as %.% simplepart.tonalInterval %.% as.tonalInterval
@@ -1365,7 +1399,6 @@ as.contour.character     <- re.place %.% tint2contour     %.% as.tonalInterval.c
 # 
 # 
 
-invert.default <- force
 traspose.default <- force
 is.simple.default <- force
 simplepart.default <- force

@@ -5,7 +5,7 @@
 \alias{transpose}
 \title{Transpose tonalIntervals}
 \usage{
-transpose(x, interval = tint(0, 0), generic = NULL, ...)
+transpose(x, interval = tint(0, 0), Key = NULL, ...)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

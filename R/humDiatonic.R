@@ -124,10 +124,23 @@ setMethod("LOF", "diatonicSet",
               
           })
 
-getMODE <- function(dset, sum = TRUE) {
+getRoot <- function(dset, sum = TRUE) {
+    root <- dset@Root %dim% dset
+    
+    if (hasdim(root) && sum) rowSums(root) else root
+}
+
+getMode <- function(dset, sum = TRUE) {
     mode <- dset@Mode %dim% dset
     
     if (hasdim(mode) && sum) rowSums(mode) else mode
+    
+}
+
+getAlterations <- function(dset, sum = TRUE) {
+    alter <- dset@Alteration %dim% dset
+    
+    if (hasdim(alter) && sum) rowSums(alter) else alter
     
 }
 
@@ -250,6 +263,54 @@ setMethod('abs', signature = c('diatonicSet'),
 
 ##...addition ####
 
+
+
+#' @export
+setMethod('%%', signature = c('integer', 'diatonicSet'),
+          function(e1, e2) {
+              mode <- getMode(e2)
+              alter <- getAlterations(e2)
+              
+              match_size(e1 = e1, mode = mode, alter = alter, toEnv = TRUE)
+              generic <- ((e1 + 1L) - mode) %% 7
+              
+              if (any(alter != 0)) {
+                  alter <- alter + sign(alter)
+                  toalter <- alter != 0 & generic != .ifelse(alter > 0, 0, 6)
+                  
+                  generic[toalter] <- ((generic[toalter] - alter[toalter]) %% 7 ) + alter[toalter]
+              }
+              generic - 1 + mode
+          })
+
+
+#' @export
+setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
+          function(e1, e2) {
+              fifth <- e1@Fifth
+              
+              generic <- fifth %% e2
+              octdiff <- ((generic - fifth) * 19) / 12
+              
+              tint(round(e1@Octave - octdiff), generic)
+              
+          })
+
+
+#' @export
+setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
+          function(e1, e2) {
+              e1 - LO5thNcentralOct2tint(e2@Root, 0L)
+              
+          })
+
+
+#' @export
+setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
+          function(e1, e2) {
+              e1 + LO5thNcentralOct2tint(e2@Root, 0L)
+              
+          })
 
 ##### To/From line-of-fifths ####
     

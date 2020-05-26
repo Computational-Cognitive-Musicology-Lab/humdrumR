@@ -95,6 +95,38 @@ run in to problems if you take this too far.
 For instance, though \code{struct} classes work (ok) in \link[base:data.frame]{base::data.frame}s
 \link[data.table:data.table]{data.table::data.table}s and \link[tibble:tibble]{tibble::tibble}s might give you problems.
 }
+\section{Behavior}{
+
+
+\code{struct} subclasses behave very similarly to normal R vectors.
+However, they do differ in a few respects, mostly in ways that
+avoid some of the quirky behaviors with R vectors:
+In general, the distinction between dimensionless vectors
+and dimensioned vectors is slightly weakened with \code{structs}
+compared to normal R atomic vectors.
+In general, dimensionless \code{struct}s are treated more implicitely
+like column-matrices.
+Notably, if the struct has rows, \code{length(struct) == nrow(struct)}.
+Most importantly, dimensioned \code{struct}s won't drop their dimensions
+under various common operations (\code{c}, \verb{[]}, etc.), the way
+base-R matrices do.
+Thie biggest difference is that \code{c} doesn't always cause \code{struct}s to lose their dimensions.
+Rather, if the first argument to \code{c} has dimensions, the dimensions are kept and the \code{struct}s
+are \code{rbind}ed (assuming the number of columns are conformable).
+
+Other differences:
+\itemize{
+\item \code{struct}s can only have no dimensions (\code{dim(struct) == NULL}) or two dimentions. Higher dimensional arrays are not possible (yet).}
+\item \code{rowSums} and \code{colSums} will coerce a dimensionless struct to a column matrix.
+\item \code{struct}s always throw an error if you try to index them with a index value
+that is greater than the length/nrow of the \code{struct}. This is different than atomic vectors,
+which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
+\item \code{struct}s with two dimensions have a \code{cartesian} indexing argument.
+If \code{cartesian = TRUE}, the \code{i} and \code{j} arguments are treated as cartesian coordinates.
+(This behavior can be achieved with base R matrices (or \code{struct}s) by inputing a matrix with two columns.)
+}
+}
+
 \section{Requirements}{
 
 
