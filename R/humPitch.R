@@ -402,11 +402,11 @@ LO5th2quality <- function(LO5th, quality.labels = c()) {
           na <- is.na(LO5th)
           qualities[na] <- NA_character_
           
-          qualities[] <- IfElse(!na & LO5th < 2 & LO5th > -2, rep(perfect, length(LO5th)), qualities)
-          qualities[] <- IfElse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
-          qualities[] <- IfElse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
-          qualities[] <- IfElse(!na & LO5th > -6 & LO5th < -1, rep(minor, length(LO5th)), qualities)          
-          qualities[] <- IfElse(!na & LO5th <= -6, strrep(diminish, abs(LO5th2qualityN(LO5th + 4))), qualities)     
+          qualities[] <- .ifelse(!na & LO5th < 2 & LO5th > -2, rep(perfect, length(LO5th)), qualities)
+          qualities[] <- .ifelse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
+          qualities[] <- .ifelse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
+          qualities[] <- .ifelse(!na & LO5th > -6 & LO5th < -1, rep(minor, length(LO5th)), qualities)          
+          qualities[] <- .ifelse(!na & LO5th <= -6, strrep(diminish, abs(LO5th2qualityN(LO5th + 4))), qualities)     
           qualities
           
 }
@@ -417,8 +417,52 @@ LO5th2simpleInterval <- function(LO5th, quality.labels = c()) {
           generic <- LO5th2genericinterval(LO5th)
           qualities <- LO5th2quality(LO5th,  quality.labels)
           
-          IfElse(is.na(generic) | is.na(qualities), NA_character_, .paste(qualities, generic))
+          .paste(qualities, generic, na.if = any)
 }
+
+LO5th2scaleDegree <- function(LO5th, Key = dset(0L, 0L), cautionary = TRUE, quality.labels = c()) {
+  # Key must be diatonicSet
+  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+  
+  intervals <- LO5th2genericinterval(LO5th)
+  
+  needqual <- if (cautionary) seq_along(intervals) > 0L else LO5th != (LO5th %% Key)
+  
+  intervals[needqual] <- .paste(LO5th2quality(LO5th[needqual], quality.labels), intervals[needqual], na.if = any)
+  
+  intervals %dim% LO5th
+  
+}
+
+solfatab <- rbind(d = c("e", "o", "i"),
+                  r = c("a", "e", "i"),
+                  m = c("e", "i", "y"),
+                  f = c("e", "a", "i"),
+                  s = c("e", "o", "i"),
+                  l = c("e", "a", "i"),
+                  t = c("e", "i", "y"))
+
+LO5th2solfa <- function(LO5th, Key = dset(0L, 0L)) {
+  # This is the function that does the real heavy lifting of the
+  # as.solfa function
+  # Key must be a diatonicSet
+  
+  bases <- LO5th2solfabase(LO5th)
+  qualityN <- LO5th2qualityN(LO5th)
+  qualSign <- sign(qualityN)    
+  
+  tails <- solfatab[cbind(LO5th2genericinterval(LO5th), 
+                          qualSign + 2)]
+  
+  residualQualityN <- qualityN - qualSign
+  
+  accidentals <- strrep(c('-', '', '#')[qualSign + 2], abs(residualQualityN))
+  
+  .paste(bases, tails, accidentals) %dim% LO5th
+  
+}
+
+## octave stuff
 
 LO5thNsciOct2tint <- function(LO5th, sciOct) {
     tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
@@ -484,60 +528,113 @@ solfa2LO5th <- function(solfa) {
 }
 
 
-##### To/From tonal intervals ####
 
+##### To/From octaves ####
+
+####. tint to octave ####
+
+tint2centralOctave <- function(x) {
+  # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
+  generic <- x %% dset(0L, 0L)
+  (round(tint2semit(generic) / 12L)) %dim% x
+}
+
+tint2edgeOctave <- function(x) {
+  # edgeOctave is octave from unison and above 
+  generic <- x %% tint(-11L, 7L)
+  (tint2semit(generic) %/% 12L) %dim% x
+}
+
+tint2sciOctave <- function(tint) tint2edgeOctave(tint) + 4L
+
+tint2octavemark <- function(x, tint2octave = tint2edgeOctave, octave.marks = c()) {
+  setoptions(octave.marks) <- c(Up = "^", Down = "v")
+  
+  octave <- dropdim(tint2octave(x))
+  
+  strrep(.ifelse(octave >= 0, octave.marks['Up'], octave.marks['Down']), abs(octave)) %dim% x
+}
+
+#..... octave marker functions
+
+
+relativeOctaver <- function(str, tint, octave.before = TRUE, octave.marks = c()) {
+  if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
+  
+  tint <- delta(tint)
+  label <- tint2octavemark(tint, tint2centralOctave, octave.marks)
+  
+  .paste(if (octave.before) label, str, if (!octave.before) label)
+}
+
+absoluteOctaver <- function(str, tint, octave.offset = 0L, octave.before = TRUE, octave.marks = c()) {
+  if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
+  
+  label <- if (is.logical(octave.marks) && !octave.marks) {
+    tint2edgeOctave(tint) + octave.offset
+  } else {
+    tint2octavemark(tint, tint2edgeOctave, octave.marks)
+  }
+  
+  .paste(if (octave.before) label, str, if (!octave.before) label)
+}
+
+kernOctaver <- function(str, tint) {
+  if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
+  
+  n <- tint2edgeOctave(tint)
+  
+  char <- substr(str, 0L, 1L)
+  char <- .ifelse(n >= 0L, tolower(char), toupper(char))
+  
+  rep <- .ifelse(n >= 0, n + 1, -n)
+  
+  .paste(strrep(char, rep), stringr::str_sub(str, start = 2L))
+  
+}
+
+octaver <- function(str, tint, octave.style = 'sci', ...) {
+  switch(octave.style %maybe% "",
+         kern = kernOctaver(str, tint),
+         sci      = absoluteOctaver(str, tint, octave.offset = 4L, octave.before = FALSE, octave.marks = NULL),
+         lily_absolute = absoluteOctaver(str, tint, octave.before = FALSE, octave.marks = c(Up = "'", Down = ",")),
+         lily_relative = relativeOctaver(str, tint, octave.before = FALSE, octave.marks = c(Up = "'", Down = ",")),
+         absolute = absoluteOctaver(str, tint, ...),
+         relative = relativeOctaver(str, tint, ...),
+         str) # of octave.style is null, str passed unchanged
+}
+
+##### To/From tonal intervals ####
 ####. tint to x ####
 
 ###.. semitones
 
 tint2semit <- function(x) {
-        (((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)) %dim% x
+        as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L))) %dim% x
 }
 
 tint2midi <- function(x) tint2semit(x) + 60L
 
 ###.. tonal chroma names
 
-tint2tonalChroma <- function(x, accidental.labels = c()) {
-    LO5th2tonalChroma(x@Fifth, accidental.labels) %dim% x
+tint2tonalChroma <- function(x, accidental.labels = c(), octave.style = NULL, ...) {
+  tonalchroma <- LO5th2tonalChroma(x@Fifth, accidental.labels) %dim% x
+  
+  octaver(tonalchroma, x, octave.style, ...) %dim% x
+  
 }
 
-#....
 
-tint2centralOctave <- function(x) {
-  # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
-   generic <- x %% tint(-11L, 7L)
-   (round(tint2semit(generic) / 12L)) %dim% x
+tint2sciPitch <- function(x)  tint2tonalChroma(x, accidental.labels = c(flat = 'b'), octave = 'sci')
+
+tint2kernPitch <- function(x) tint2tonalChroma(x, octave = 'kern')
+
+tint2lilyPitch <- function(x, relative.octave = TRUE) {
+  tolower(tint2tonalChroma(x, 
+                           accidental.labels = c(sharp = 'is', flat = 'es'), 
+                           octave = if (relative.octave) 'relative' else 'absolute', 
+                           octave.marks = c(Up = "'", Down = ","),  octave.before = FALSE)) 
 }
-
-tint2sciOctave <- function(x) {
-          generic <- x %% tint(-11L, 7L)
-          (as.integer(tint2semit(generic) %/% 12L) + 4L) %dim% x
-}
-
-tint2sciPitch <- function(x) {
-                    octave <- tint2sciOctave(x)
-                    .paste(LO5th2tonalChroma(x@Fifth, c(flat = 'b')), octave) %dim% x
-            }
-
-#....
-
-tint2kernPitch <- function(x) {
-                    octaves <- c(tint2sciOctave(x) - 4L)
-                    LO5ths <- x@Fifth
-                    letternames <- LO5th2lettername(LO5ths)
-                    accidentals <- LO5th2accidental(LO5ths)
-                    
-                    letternames <- .ifelse(octaves >= 0L, tolower(letternames), letternames)
-                    repn <- IfElse(octaves >= 0, octaves + 1L, -octaves)
-                    repn[repn == 0L] <- 1L
-                    
-                    .paste(strrep(letternames, abs(repn)), accidentals) %dim% x
-}
-
-#....
-
-tint2lilyPitch <- force
 
 ###.. intervals
 
@@ -573,86 +670,33 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
 
 ##... scale degrees 
 
-tint2scaleDegree <- function(x, Key = 0L, cautionary = TRUE, generic = FALSE, contour = FALSE, quality.labels = c(), ...) {
-    deg  <- int2scaleDegree(x@Fifth, Key, cautionary, generic, quality.labels = quality.labels)
+tint2scaleDegree <- function(x, Key = dset(0L, 0L), cautionary = FALSE, contour = FALSE, quality.labels = c(), octave.style = NULL, ...) {
+    setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
-    if (logicalOption(contour)) {
-        setoptions(contour) <- c(threshold = 6L)
-        deg <- addcontour(deg, x, contour.options = contour)
-    } 
+    Key <- Key - getRoot(Key)
     
+    deg  <- LO5th2scaleDegree(x@Fifth, Key, cautionary, quality.labels = quality.labels)
+
+    deg <- octaver(deg, x, octave.style, ...)
+
     deg %dim% x
 }
 
-int2scaleDegree <- function(x, Key = 0L, cautionary = TRUE,
-                            generic = FALSE, quality.labels = c()) {
-    
-    setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
-    
-    if (is.diatonicSet(Key)) {
-        mode <- Key@Mode
-        key  <- Key@Root
-    } else {
-        mode <- 0L
-    }
+# 
 
-    x <- x - Key
-    
-    if (generic) x <- genericFifth(x)
-    
-    intervals <- LO5th2simpleInterval(x, quality.labels = quality.labels)
-    if (!cautionary) {
-        x <- x - mode
-        inkey <- !is.na(x) & x <= 5L & x >= -1L
-        intervals[inkey] <-  stringi::stri_sub(intervals[inkey], from = 2L)
-    }
-    intervals %dim% x
-    
-}
 
 #....
 
-solfatab <- rbind(d = c("e", "o", "i"),
-                  r = c("a", "e", "i"),
-                  m = c("e", "i", "y"),
-                  f = c("e", "a", "i"),
-                  s = c("e", "o", "i"),
-                  l = c("e", "a", "i"),
-                  t = c("e", "i", "y"))
 
-tint2solfa <- function(x, Key = 0L, generic = FALSE, contour = FALSE, ...) {
-    solfa <- int2solfa(x@Fifth, Key, generic)
+
+tint2solfa <- function(x, Key = dset(0L, 0L), octave.style = NULL, ...) {
+  Key <- Key - getRoot(Key)
+  
+  solfa <- LO5th2solfa(x@Fifth, Key)
     
-    if (logicalOption(contour)) {
-        setoptions(contour) <- c(threshold = 6L)
-        solfa <- addcontour(solfa, x, contour.options = contour)
-    } 
-    
-    solfa 
+  octaver(solfa, x, octave.style, ...)
 }
 
-int2solfa <- function(x, Key = 0L, generic = FALSE) {
-    # This is the function that does the real heavy lifting of the
-    # as.solfa function
-    if (!is.numeric(Key)) Key <- as.tonalInterval(Key@Fifth)
-    
-    x <- x - Key
-    if (generic) x <- genericFifth(x)
-    
-    bases <- LO5th2solfabase(x)
-    qualityN <- LO5th2qualityN(x)
-    qualSign <- sign(qualityN)    
-    
-    tails <- solfatab[cbind(LO5th2genericinterval(x), 
-                            qualSign + 2)]
-    
-    residualQualityN <- qualityN - qualSign
-    
-    accidentals <- strrep(c('-', '', '#')[qualSign + 2], abs(residualQualityN))
-    
-    .paste(bases, tails, accidentals) %dim% x
-    
-}
 
 
 ###.. numbers
@@ -863,7 +907,7 @@ scaleDegree2tint <- interval2tint
 
 #....
 
-solfa2tint <- function(str, Key = 0L) {
+solfa2tint <- function(str, Key = dset(0L, 0L)) {
   LO5ths <- solfa2LO5th(str) + 0L
   tint( , LO5ths) %dim% str
 }
@@ -983,8 +1027,13 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
                            generic.part = TRUE, alteration.part = TRUE, 
                            octave.part = TRUE, simple.part = TRUE, simplifier = floor,
                            enharmonic.part = TRUE, comma.part = TRUE, 
-                           Key = NULL, Exclusive = NULL) {
+                           Key = dset(0, 0), Exclusive = NULL) {
+    # Key
+    Key <- if (is.null(Key)) dset(0L, 0L) else as.diatonicSet(Key)
+    x <- x - Key 
+    Key <- Key - getRoot(Key)
     
+    # calculus
     if (!direction) x <- abs(x)
     
     if (delta)  x <- delta(x)
@@ -992,8 +1041,8 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
     
     # Generic/Specific
     ifif(generic.part, alteration.part, 
-         xor1 = x <- genericpart.tonalInterval(x, Key %maybe% dset(0, 0)),
-         xor2 = x <- alterationpart.tonalInterval(x, Key %maybe% dset(0, 0)),
+         xor1 = x <- genericpart.tonalInterval(x, Key),
+         xor2 = x <- alterationpart.tonalInterval(x, Key),
          .else = tint( , rep(0L, length(x))))
     
     # Simple/Complex
@@ -1058,7 +1107,8 @@ NULL
 tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor, wolf = NULL) {
   mat <- tintPartition.octave_simple(tint, roundingMethod = roundingMethod)
   
-  cbind(mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key = Key))
+  Key <- as.diatonicSet(Key)
+  cbind(Key = getRootTint(Key), mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key = Key))
   
 }
 

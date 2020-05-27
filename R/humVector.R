@@ -835,7 +835,6 @@ setMethod('rev', c(x = 'struct'),
 setMethod('c', 'struct',
           function(x, ..., rbind = FALSE) {
               xs <- list(x, ...)
-              
               classes <- unique(sapply(xs, class))
               if (length(classes) > 1L) .stop(ifelse = length(classes) > 1L,
                                               "You can't concatinate a {class(x)} object with objects of class<|es> ",
@@ -896,11 +895,22 @@ setMethod('c', 'struct',
               x
               
           })
+
 #' @export
 rbind.struct <- function(...) {
     xs <- list(...)
-
-    xs <- lapply(xs, function(x) if (!hasdim(x)) t(x) else x)
+    
+    xs <- xs[sapply(xs, size) > 0]
+    
+    ldims <- ldims(xs)
+    hasdim <- ldims$length == 0L
+    maxcol <- if (any(hasdim)) max(0, ldims$ncol) else max(ldims$length)
+    
+    xs[!hasdim] <- lapply(xs[!hasdim],
+                          function(x) {
+                              if (length(x) == 1L && maxcol > 0) x <- rep(x, maxcol)
+                              t(x) # make into row matrix
+                          })
     
     x <- do.call('c', c(unname(xs), list(rbind = TRUE)))
     
@@ -912,7 +922,7 @@ rbind.struct <- function(...) {
 #' @export
 cbind.struct <-  function(...) {
     xs <- list(...)
-    xs <- lapply(xs, t)
+    xs <- lapply(xs, function(x) if (hasdim(x)) t(x) else x)
     
     #
     x <- do.call('rbind', xs)
@@ -921,12 +931,13 @@ cbind.struct <-  function(...) {
     # new colnames
     existing <- sapply(xs, rownames) 
     new <- .names(xs)
-    new <- Map(function(old, new, len) {if (new == '') old else rep(new, len) }, existing, new, lapply(xs, nrow))
+    new <- Map(function(old, new, len) if (new == '') old else rep(new, len %maybe% 1L), existing, new, lapply(xs, nrow))
     if (any(!sapply(new, is.null))) new[sapply(new, is.null)] <- list("")
     colnames(x) <- unlist(new)
     x
     
 }
+
 
 #' @export
 setMethod('t', signature = 'struct',

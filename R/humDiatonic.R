@@ -130,6 +130,12 @@ getRoot <- function(dset, sum = TRUE) {
     if (hasdim(root) && sum) rowSums(root) else root
 }
 
+getRootTint <- function(dset, sum = TRUE) {
+    root <- getRoot(dset, sum)
+    LO5thNcentralOct2tint(root, 0L)
+    
+}
+
 getMode <- function(dset, sum = TRUE) {
     mode <- dset@Mode %dim% dset
     
@@ -287,6 +293,8 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
 #' @export
 setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              
               fifth <- e1@Fifth
               
               generic <- fifth %% e2
@@ -300,7 +308,9 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
 #' @export
 setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
-              e1 - LO5thNcentralOct2tint(e2@Root, 0L)
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              
+              e1 - getRootTint(e2)
               
           })
 
@@ -308,9 +318,23 @@ setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
 #' @export
 setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
-              e1 + LO5thNcentralOct2tint(e2@Root, 0L)
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              
+              e1 + getRootTint(e2)
               
           })
+
+#' @export
+setMethod('-', signature = c('diatonicSet', 'integer'),
+          function(e1, e2) {
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              
+              e1@Root <- e1@Root - e2
+              e1@Mode <- e1@Mode - e2
+              e1
+          })
+
+
 
 ##### To/From line-of-fifths ####
     
@@ -770,6 +794,8 @@ as.diatonicSet.diatonicSet <- force
 #' @export
 as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = read.keyI2diatonicSet,
                                           '.' = force)
+#' @export
+as.diatonicSet.integer <- function(x) dset(x, x)
 
 
 

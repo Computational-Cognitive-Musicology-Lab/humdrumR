@@ -235,7 +235,7 @@ vectorna <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n
 
 empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
     if (is.atomic(object)) {
-        return(if (is.null(dimen)) rep(as(value, class(object)), len) else array(as(NA, class(object)), dim = dimen))
+        return(if (is.null(dimen)) rep(as(value, class(object)), len) else array(as(value, class(c(object))), dim = dimen))
     }
     
     if (inherits(object, 'struct')) {
@@ -364,12 +364,16 @@ ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
 }
 
 ##### Dimensions ----
-ldim <- function(x) setNames(if (hasdim(x)) c(0L, dim(x)) else c(length(x), 0L, 0L), c('length', 'nrow', 'ncol'))
-
-size <- function(x) {
-    ldim <- ldim(x)
-    if (ldim[1] == 0L) prod(ldim[-1]) else ldim[1]
+ldim <- function(x) {
+    ldim <- if (hasdim(x)) c(0L, dim(x)) else c(length(x), 0L, 0L)
+    ldim[4] <- if (ldim[1] == 0L) prod(ldim[-1]) else ldim[1]
+    names(ldim) <- c('length', 'nrow', 'ncol', 'size')
+    as.data.frame(rbind(ldim))
 }
+
+ldims <- function(xs) do.call('rbind', lapply(xs, ldim))
+
+size <- function(x) ldim(x)$size
 
 `%dim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
@@ -404,23 +408,22 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
     refdim <- ldim(ref)
     
     targets <- list(...)
-    
     targets <- if (hasdim(ref)) {
         lapply(targets, 
                function(x) {
                    xdim <- ldim(x)
                    if (hasdim(x)) {
-                       if (xdim['nrow'] != refdim['nrow']) x <- Repeat(x, length.out = refdim['nrow'], margin = 1L)
-                       if (xdim['ncol'] != refdim['ncol']) x <- Repeat(x, length.out = refdim['ncol'], margin = 2L)
+                       if (xdim$nrow != refdim$nrow) x <- Repeat(x, length.out = refdim$nrow, margin = 1L)
+                       if (xdim$ncol != refdim$ncol) x <- Repeat(x, length.out = refdim$ncol, margin = 2L)
                        x
                    } else {
-                       matrix(rep(x, length.out = prod(refdim[c('nrow', 'ncol')])), refdim['nrow'], refdim['ncol'], byrow = byrow)
+                       matrix(rep(x, length.out = refdim$size), refdim$nrow, refdim$ncol, byrow = byrow)
                    }})
     } else {
         lapply(targets, 
                function(x) {
                    if (hasdim(x)) x <- dropdim(x)
-                   rep(x, length.out = refdim['length'])
+                   rep(x, length.out = refdim$length)
                    })
         
     }
@@ -1032,20 +1035,14 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 
 ### Strings ----
 
-.paste <- function(..., sep = '', collapse = NULL, na.rm = FALSE) {
+.paste <- function(..., sep = '', collapse = NULL, na.if = any) {
 # paste, but smart about NA values
     args <- do.call('match_size', lapply(list(...), `c`))
     nas <- lapply(args, is.na)
     
-    if (na.rm) {
-        args <- Map(`[<-`, args, nas, value = "")
-        do.call('paste', c(args, sep = sep, collapse = collapse))
-    } else {
-        nas <- apply(do.call('rbind', nas), 2, any)
-        args <- c(lapply(list(...), `c`), sep = sep, collapse = collapse)
-        ifelse(nas, NA_character_, do.call('paste', args))
-    }
-    
+    args <- Map(`[<-`, args, nas, value = "")
+    nas <- apply(do.call('rbind', nas), 2, na.if)
+    ifelse(nas, NA_character_, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
 
