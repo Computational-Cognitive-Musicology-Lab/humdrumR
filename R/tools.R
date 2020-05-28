@@ -454,6 +454,8 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
+          if (length(stuff) == 0L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
+          
           recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)
           
@@ -567,6 +569,8 @@ IfElse <- function(true, yes, no) {
     
     #
     bool[is.na(bool)] <- FALSE
+    
+    if (length(bool) == 0) return(c())
     
     if (any(!bool)) {
         fparsed <- captureValues(fexpr, parent.env(environment()), doatomic = FALSE)

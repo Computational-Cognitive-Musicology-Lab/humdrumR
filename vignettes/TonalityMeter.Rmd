@@ -626,14 +626,24 @@ We can thus partition notes as combinations of a *harmonic* part and a *comma* p
 
 $\text{interval}_{enharmonic} + \text{interval}_{comma} = \text{interval}_{tonal}$ <!--\_ -->
 
-In pythagorean tuning, enharmonic notes---tonal chroma separated by 12 steps on the line-of-fifths, like G# and Ab---are not exactly the same.
-However, when tuning many musical instruments, musicians are forced to "pick a side"---is it G# or Ab? 
-(This corresponds to a modulo 12 operation on the line-of-fifths, creating the circle-of-fifths.)
-Whatever choice you made, you'd end up with strange "wolf" intervals wherever you "wrapped" around from the flat to the sharp side: for instance, if we choose Ab, we'll end up the interval "C#-Ab" (really, a diminished 6th) standing in for our perfect fifth---we'd call this the "wolf fifth."
-In `humdrumR`, what partitioning `tonalIntervals` as enharmonic/comma pairs, you must specify a `wolf` argument:
-The note you specify as the "wolf" defines the boundary (exclusive) of a 12-fifth range.
-If you specify G# as the wolf, then the range `-4:7` (Ab--C#) is used---anything outside this range, like Db or G#, are respelled enharmonically (to C# and Ab respectively).
-You can also specify a key, in which case everything is shifted a key.
+If we strictly wrap around every 12 steps in the line-of-fifths (i.e., modulo 12), we remove all enharmonic equivalencies, creating the circle-of-fifths.
+However, *where* we wrap matters: in musical practice, we typically aim to center our circle fifths around C, so we get a roughly equal number of flats and sharps. 
+However, since there are five accidentals, strict enharmonics will have to be either 2-flats/3 sharps, or 3-flats/3-sharps.
+Since, the natural diatonic scale spans the range -1:5 on the line-of-fifths, the real center is 2 (D).
+(And when we change key signatures, we want to shift accordingly, allowing higher sharps in sharp key, for instance.)
+Thus, the default behavior in `humdrumR` is to center a set of tints relative to the center of the given key, and enharmonically shift any notes >= 6 OR < -6.
+
+In some cases, we don't actually want to have strict enharmonicism.
+For instance, we might want to allow Dbi---or even Gb and Cbi---alongside C#, F#, and B, but still not want Bbb and Gbbb or A##.
+In `humdrumR`, we can specify I wider "`enharmonicWrap`" value as an argument to `enharmonicpart`.
+The `enharmonicWrap` argument specifies the width of the band of "legal" LoF values we want to allow.
+The default is 12, which results in a perfect enharmonic circle of fifths (Eb:G#), with no enharmonic equivalences.
+If we increase it to 13, we allow Ab and G# to both exist; If we increase it to 14, we allow Eb and D# to both exist; etc.
+An `enharmonicWrap` of 21 allows all single-flat and single-sharp notes, but no double flat/sharps.
+
+
+
+
 
 
 

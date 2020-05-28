@@ -185,7 +185,7 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 #' @name tonalInterval
 #' @export
 setMethod('as.character', signature = c('tonalInterval'), 
-          function(x) as.interval(x))
+          function(x) as.kernPitch(x))
 
 #' @name tonalInterval
 #' @export
@@ -320,7 +320,7 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
 setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
             if (length(e1) == 0L) return(e1)
-            if (length(e2) == 0L) stop(call. = FALSE, "Can't take divide (%/%) by empty value.")
+            if (length(e2) == 0L) stop(call. = FALSE, "Can't divide (%/%) by empty value.")
             recycledim(e1 = e1, e2 = e2, funccall = '%/%')
             
               f1 <- e1@Fifth
@@ -330,6 +330,28 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
               f3 %dim% e1
           })
 
+
+setMethod('%%', signature = c('tonalInterval', 'integer'),
+          function(e1, e2) {
+            if (length(e1) == 0L) return(e1)
+            if (length(e2) == 0L) stop(call. = FALSE, "Can't divide (%%) by empty value.")
+            
+            minusremain <- (e1 %/% e2) * e2
+            
+            e1 - minusremain
+          })
+
+setMethod('%/%', signature = c('tonalInterval', 'integer'),
+          function(e1, e2) {
+            if (length(e1) == 0L) return(e1)
+            if (length(e2) == 0L) stop(call. = FALSE, "Can't divide (%/%) by empty value.")
+            recycledim(e1 = e1, e2 = e2, funccall = '%/%')
+            
+            
+            tint <- tint(e1@Octave %/% e2, e1@Fifth %/% e2)
+            
+            tint %dim% e1
+          })
 
 
 ##### To/From line-of-fifths ####
@@ -567,10 +589,10 @@ relativeOctaver <- function(str, tint, octave.before = TRUE, octave.marks = c())
   .paste(if (octave.before) label, str, if (!octave.before) label)
 }
 
-absoluteOctaver <- function(str, tint, octave.offset = 0L, octave.before = TRUE, octave.marks = c()) {
+absoluteOctaver <- function(str, tint, octave.offset = 0L, octave.before = TRUE, octave.marks = NULL) {
   if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
   
-  label <- if (is.logical(octave.marks) && !octave.marks) {
+  label <- if (is.null(octave.marks)) {
     tint2edgeOctave(tint) + octave.offset
   } else {
     tint2octavemark(tint, tint2edgeOctave, octave.marks)
@@ -673,6 +695,7 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
 tint2scaleDegree <- function(x, Key = dset(0L, 0L), cautionary = FALSE, contour = FALSE, quality.labels = c(), octave.style = NULL, ...) {
     setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
+    x   <- x - Key
     Key <- Key - getRoot(Key)
     
     deg  <- LO5th2scaleDegree(x@Fifth, Key, cautionary, quality.labels = quality.labels)
@@ -690,6 +713,7 @@ tint2scaleDegree <- function(x, Key = dset(0L, 0L), cautionary = FALSE, contour 
 
 
 tint2solfa <- function(x, Key = dset(0L, 0L), octave.style = NULL, ...) {
+  x <- x - Key
   Key <- Key - getRoot(Key)
   
   solfa <- LO5th2solfa(x@Fifth, Key)
@@ -777,16 +801,18 @@ addcontour <- function(strs, tint, contour.options = list()) {
 
 ###.. semitones
 
-semit2tint <- function(n, melodic = FALSE, Key = NULL) {
+semit2tint <- function(n, melodic = FALSE, Key = dset(0, 0)) {
           wholen <- as.integer(c(n))
           
           pitchclass <- wholen %% 12L
           
-          LO5ths <- IfElse(pitchclass %% 2L == 0L, pitchclass, pitchclass - 6L)
+          LO5ths <- .ifelse(pitchclass %% 2L == 0L, pitchclass, pitchclass - 6L)
           octaves <- (wholen - (LO5ths * 19)) %/% 12
           tints <- tint(octaves, LO5ths)
           
           ##
+          tints <- enharmonicpart(tints, 12L, Key %maybe% dset(0, 0))
+          
           if (melodic) {
            chromatic <- LO5ths > 5 | LO5ths < -1
            ints <- c(diff(tints), tint(0, 0)) # tint(0,0) is just padding
@@ -797,17 +823,12 @@ semit2tint <- function(n, melodic = FALSE, Key = NULL) {
            tints[which(chromatic & isA1)] <- tints[which(chromatic & isA1)] + pythagorean.comma
            tints[which(chromatic & isD1)] <- tints[which(chromatic & isD1)] - pythagorean.comma
                     
-          } else {
-            mode <- if (is.null(Key)) 0L else as.diatonicSet(Key)@Mode
-            LO5ths <- LO5ths - mode
-            tints[LO5ths >  8 & !is.na(LO5ths)]  <- tints[LO5ths > 8 & !is.na(LO5ths)] - pythagorean.comma
-            tints[LO5ths < -5 & !is.na(LO5ths)] <- tints[LO5ths < -5 & !is.na(LO5ths)] + pythagorean.comma
-          }
+          } 
           
           tints %dim% n
 }
 
-midi2tint <- function(n) semit2tint(n - 60L)
+midi2tint <- function(n, melodic = FALSE, Key = dset(0, 0)) semit2tint(n - 60L, melodic, Key)
 
 ###.. tonal chroma names
 
@@ -1029,9 +1050,6 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
                            enharmonic.part = TRUE, comma.part = TRUE, 
                            Key = dset(0, 0), Exclusive = NULL) {
     # Key
-    Key <- if (is.null(Key)) dset(0L, 0L) else as.diatonicSet(Key)
-    x <- x - Key 
-    Key <- Key - getRoot(Key)
     
     # calculus
     if (!direction) x <- abs(x)
@@ -1041,8 +1059,8 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
     
     # Generic/Specific
     ifif(generic.part, alteration.part, 
-         xor1 = x <- genericpart.tonalInterval(x, Key),
-         xor2 = x <- alterationpart.tonalInterval(x, Key),
+         xor1 = x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
+         xor2 = x <- alterationpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
          .else = tint( , rep(0L, length(x))))
     
     # Simple/Complex
@@ -1156,7 +1174,7 @@ alterationpart <- function(tint, Key) UseMethod('alterationpart')
 genericpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
     Key <- as.diatonicSet(Key)
     
-    (tint %% Key) - Key
+    (tint %% Key) 
 }
 
 #' @export
@@ -1164,13 +1182,13 @@ alterationpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
     Key <- as.diatonicSet(Key)
     gtint <- genericpart.tonalInterval(tint, Key)
     
-    (tint - Key) - gtint
+    tint  - gtint
 }
 tintPartition.generic_alteration <- function(tint, Key = dset(0L, 0L)) {
   if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
   gtint<- genericpart.tonalInterval(tint, Key)
 
-  cbind(Generic = gtint,  Alteration = (tint - Key) - gtint)
+  cbind(Generic = gtint,  Alteration = tint - gtint)
   
 }
 
@@ -1178,33 +1196,40 @@ tintPartition.generic_alteration <- function(tint, Key = dset(0L, 0L)) {
 
 #' @name tonalIntervalparts
 #' @export enharmonicpart commapart
-enharmonicpart <- function(tint, wolf, Key) UseMethod('enharmonicpart')
-commapart      <- function(tint, wolf, Key) UseMethod('commapart')
+enharmonicpart <- function(tint, enharmonicWrap, Key) UseMethod('enharmonicpart')
+commapart      <- function(tint, enharmonicWrap, Key) UseMethod('commapart')
 
 #' @export
-enharmonicpart.tonalInterval <- function(tint, wolf = NULL, Key = dset(0L, 0L)) {
+enharmonicpart.tonalInterval <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
+  # if wolf is pythagorean comma, result will allways be teh same
+  # if wolf is smaller (fewer fifths), the results will flip around
+  # if wolf is 2*pythagorean.comma ALL notes will flip enharmonic
   Key <- as.diatonicSet(Key)
   
-  if (is.null(wolf)) {
-    tint <- tint - Key
-    flat <- tint@Fifth < 0
-    tint[flat] <- invert.tonalInterval(tint[flat])
-    
-    tint <- tint %% pythagorean.comma
-    
-    tint[flat] <- invert.tonalInterval(tint[flat])
-    tint + Key
-  } else {
-    wolf <- as.tonalInterval(wolf) + LO5thNcentralOct2tint(getMode(Key) - 1L, 0L) # -1L because F natural is -1
-    ((tint - wolf) %% pythagorean.comma) + wolf
-  }
+  modeoffset <- tint( , getMode(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
+  tint <- tint - modeoffset 
+
+  enharmonicbound <- enharmonicWrap %/% 2
+  sharpshift <-  tint( , enharmonicbound) # this makes it so an odd number (like 13) is biased towards sharp side
+  flatshift  <- -tint( , enharmonicWrap - enharmonicbound)
+  
+  fs <- tint@Fifth
+  sharp <-  fs > enharmonicbound
+  flat  <- fs <= -(enharmonicWrap - enharmonicbound)
+  
+  tint[sharp] <- ((tint[sharp] + sharpshift) %%  pythagorean.comma) - sharpshift 
+  tint[ flat] <- ((tint[ flat] + flatshift) %% -pythagorean.comma) - flatshift
+
+  tint + modeoffset
+  
 }
 
 #' @export
-commapart.tonalInterval <- function(tint, wolf = NULL, Key = dset(0L, 0L)) {
+commapart.tonalInterval <- function(tint, LOFrange = 12L, Key = dset(0L, 0L)) {
   tint - enharmonicpart.tonalInterval(tint, wolf, Key)
     
 }
+
 
 tintPartition.enharmonic_comma <- function(tint, wolf = 'A-', Key = dset(0L, 0L)) {
   if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
