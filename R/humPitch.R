@@ -486,12 +486,14 @@ LO5th2solfa <- function(LO5th, Key = dset(0L, 0L)) {
 
 ## octave stuff
 
-LO5thNsciOct2tint <- function(LO5th, sciOct) {
+LO5thNedgeOct2tint <- function(LO5th, edgeOct) {
     tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
     octshift <- tint2semit(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
     
-    tint(sciOct - 4L - octshift, LO5th)
+    tint(edgeOct - octshift, LO5th)
 }
+
+LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNedgeOct2tint(LO5th, sciOct - 4L) 
 
 LO5thNcentralOct2tint <- function(LO5th, centralOct) {
   tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
@@ -504,11 +506,13 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 ###. x to line-of-fifths ####
 
 genericinterval2LO5th   <- function(ints) {
-  ints[ints ==  0] <- NA
-  ints[ints == -1] <- 1
+  ints[ints ==  0L] <- NA
+  ints[ints == -1L] <- 1
   simpleints <- (abs(ints - sign(ints)) %% 7L) # from 0
-  LO5ths <- c(0, 2, 4, 6, 1, 3, 5)[simpleints + 1]
-  ifelse(ints > 0, LO5ths, 7 - LO5ths) %% 7L
+  LO5ths <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[simpleints + 1L]
+  LO5ths <- ifelse(ints > 0L | ints == -1L, LO5ths, 7L - LO5ths) %% 7L
+  LO5ths[LO5ths == 6L] <- -1L
+  LO5ths
   
 }
 lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2L
@@ -561,24 +565,38 @@ tint2centralOctave <- function(x) {
   (round(tint2semit(generic) / 12L)) %dim% x
 }
 
-tint2edgeOctave <- function(x) {
+tint2edgeOctave <- function(x, zero = TRUE) {
   # edgeOctave is octave from unison and above 
   generic <- x %% tint(-11L, 7L)
-  (tint2semit(generic) %/% 12L) %dim% x
+  octave <- tint2semit(generic) %/% 12L
+  
+  if (!zero) octave[octave >= 0L & generic@Fifth != 0L] <- octave[octave >= 0L &  generic@Fifth != 0L] + 1L
+  
+  octave %dim% x
 }
 
 tint2sciOctave <- function(tint) tint2edgeOctave(tint) + 4L
 
-tint2octavemark <- function(x, tint2octave = tint2edgeOctave, octave.marks = c()) {
-  setoptions(octave.marks) <- c(Up = "^", Down = "v")
+tint2octavemark <- function(x, tint2octave = tint2edgeOctave, octave.marks = c(), ...) {
+  setoptions(octave.marks) <- c(Up = "^", Down = "v", Same = "")
   
-  octave <- dropdim(tint2octave(x))
+  octave <- dropdim(tint2octave(x, ...))
   
   strrep(.ifelse(octave >= 0, octave.marks['Up'], octave.marks['Down']), abs(octave)) %dim% x
 }
 
 #..... octave marker functions
 
+relativeContour <- function(str, tint, octave.before = TRUE, octave.marks = c()) {
+  if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
+  
+  setoptions(octave.marks) <- c(Up = "+", Down = "-")
+  
+  tint <- delta(tint)
+  label <- tint2octavemark(tint, tint2edgeOctave, octave.marks, zero = FALSE)
+  
+  .paste(if (octave.before) label, str, if (!octave.before) label)
+}
 
 relativeOctaver <- function(str, tint, octave.before = TRUE, octave.marks = c()) {
   if (!all(ldim(str) == ldim(tint)))  .stop("Can't add octave info to string argument str if str is not same size as tint argument.")
@@ -623,8 +641,13 @@ octaver <- function(str, tint, octave.style = 'sci', ...) {
          lily_relative = relativeOctaver(str, tint, octave.before = FALSE, octave.marks = c(Up = "'", Down = ",")),
          absolute = absoluteOctaver(str, tint, ...),
          relative = relativeOctaver(str, tint, ...),
+         contour  = relativeContour(str, tint, ...),
          str) # of octave.style is null, str passed unchanged
 }
+
+
+####. octave to tint ####
+
 
 ##### To/From tonal intervals ####
 ####. tint to x ####
@@ -692,7 +715,7 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
 
 ##... scale degrees 
 
-tint2scaleDegree <- function(x, Key = dset(0L, 0L), cautionary = FALSE, contour = FALSE, quality.labels = c(), octave.style = NULL, ...) {
+tint2scaleDegree <- function(x, Key = dset(0L, 0L), cautionary = FALSE, quality.labels = c(), octave.style = NULL, ...) {
     setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
     x   <- x - Key
@@ -892,39 +915,90 @@ kernPitch2sciPitch <- function(str) {
 
 ###.. intervals
 
+
+
 interval2tint <- function(str) {
-          direction <- stringi::stri_extract_first(str, regex = "^[-+]")
-          quality   <- stringi::stri_extract_first(str, regex = "[MmP]|[AaDd]+")
-          generic   <- as.integer(stringi::stri_extract_first(str, regex = "[1-9][0-9]*"))
           
+          # parse string
+          direction <- regexPop(str, "^[-+]?")
+          quality <- regexPop(str, '^[PnMm]|^[A#bd]*')
+          generic <- as.integer(regexPop(str, "^[1-9][0-9]*"))
           
+
           ## Fifth
           genericLO5th <- genericinterval2LO5th(generic)
-          genericLO5th[genericLO5th == 6] <- (-1) # because P4 is -1 not 6
-          qualshift <- sapply(quality,
-                              function(qual) {
-                                        qual1 <- stringr::str_sub(qual, end = 1L)
-                                        switch(qual1,  P = 0, M = 0, m = -7, d = -7, D = -7, A = 7, a = 7, NA) *  nchar(qual)
-                              }) -  ifelse(grepl('^[dD]', quality) & genericLO5th > 1, 7, 0)
           
+          # how are degress shifted relative to MAJOR key
+          ## Quality 
+          shifts <- c(X =  NA_integer_, 
+                      P =  0L, n   =  0L,  
+                      M =  0L, m   = -7L,  
+                      d = -7L, b   = -7L,
+                      A =  7L, `#` = 7L) 
+          
+          qualtype <- substr(quality, 1L, 1L)
+          qualshift <- shifts[qualtype] * nchar(quality)
+          # "d" (diminish) on imperfect degrees gets one extra -7L, because it assumes implicit m (minor)
+          qualshift[qualtype == 'd' & !genericLO5th %in% -1L:1L] <- qualshift[qualtype == 'd' & !genericLO5th %in% -1L:1L] - 7L
+          
+          ## together
           LO5th <- qualshift + genericLO5th
           
           ## Octave
-          octaveshift <- ((abs(generic) - 1) %/% 7)
-          tints <- LO5thNsciOct2tint(LO5th, octaveshift + 4L)
+          octaveshift <- (abs(generic) - 1) %/% 7
+          tint <- LO5thNsciOct2tint(LO5th, octaveshift + 4L)                
           
           ## Direction
           
-          direction <- 2 * ((is.na(direction) | direction == '+') - 0.5)
+          sign <- (2 * ((is.na(direction) | direction != '-') - 0.5))
           
-          (tints * direction) %dim% str
-          
+          (tint * sign) %dim% str
           
 }
 
 #....
 
-scaleDegree2tint <- interval2tint
+scaleDegree2tint <- function(str, Key = dset(0, 0), octave.style = NULL, octave.marks = c()) {
+  
+  # parse string
+  octave <- regexPop(str, "^[\\^v',]")
+  quality <- regexPop(str, '^[PnMm]|^[A#bd]*')
+  quality[quality == ""] <- "X" # empty quality
+  generic <- as.integer(regexPop(str, "^[1-7]"))
+
+  ## Fifths
+  C5ths <- genericinterval2LO5th(generic) # defaults for Major
+  key5ths <- C5ths %% (Key - getRoot(Key)) # default for Mode
+  
+  ## Quality 
+  # how are degress shifted relative to MAJOR key
+  shifts <- c(X =  NA_integer_, 
+              P =  0L, n   =  0L,  
+              M =  0L, m   = -7L,  
+              d = -7L, b   = -7L,
+              A =  7L, `#` = 7L) 
+  
+  qualtype <- substr(quality, 1L, 1L)
+  qualshift <- shifts[qualtype] * nchar(quality)
+  # "d" (diminish) on imperfect degrees gets one extra -7L, because it assumes implicit m (minor)
+  qualshift[qualtype == 'd' & !key5ths %in% -1L:1L] <- qualshift[qualtype == 'd' & !key5ths %in% -1L:1L] - 7L
+  
+  ## together
+  LO5ths <- .ifelse(qualtype == 'X', key5ths, C5ths + qualshift)
+  
+  
+  ## Octave
+  octave <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
+  
+
+  
+  
+   LO5thNedgeOct2tint(LO5ths, octave) + Key
+  
+  
+  
+  
+}
 
 #....
 
