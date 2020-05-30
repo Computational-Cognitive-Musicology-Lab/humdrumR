@@ -9,12 +9,11 @@ REparser <- function(...) {
     # into a sequence of regexes
     res <- list(...)
     
-    if (is.null(names(res)) | any(names(res) == "")) stop(call. = FALSE,
-                                                          "In call to REparser, all arguments must be named.")
+    if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparser, all arguments must be named.")
     
     matches <- list()
     
-    function(str, strict = TRUE, include.lead = FALSE, include.rest = FALSE) {
+    function(str, strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
         
         complete <- !logical(length(str))
         lead <- NULL
@@ -36,27 +35,42 @@ REparser <- function(...) {
             
             rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
         }
+        
+        if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
+        if (include.lead) matches <- c(list(Lead = lead), matches)
+        if (include.rest) matches <- c(matches, list(Rest = rest))
+        
+        if (toEnv) list2env(matches, parent.frame())
+        
         output <- do.call('cbind', matches)
-        
-        if (include.lead)  output <- cbind(Lead = lead, output)
-        if (include.rest) output <- cbind(output, Rest = rest)
-        
-        if (strict) output[!complete, ] <- NA_character_
         rownames(output) <- str
-        output
+        
+        return(invisible(output))
     }
 }
 
 
 
+
 #' @export
-popRE <- function(string, regex) {
-    parser <- do.call('REparser', list(popped = regex))
-    parsed <- parser(string, include.lead = TRUE, include.rest = TRUE, strict = FALSE)
+popRE <- function(str, regex) {
+    var <- rlang::enexpr(str)
     
-    output <- cbind(parsed[ , 'popped'], .paste(parsed[ , 'lead'], parsed[ , 'rest'], na.rm = TRUE))
+    loc <- stringi::stri_locate_first_regex(str, regex)
+    hits <- !is.na(loc[ , 1])
+    # match if any
+    match <- character(length(str))
+    match[hits] <- stringi::stri_sub(c(str)[hits], loc[hits, 'start'], loc[hits , 'end'])
+    match <- match %dim% str
     
-    output
+    # rest if any
+    str[hits] <- stringi::stri_sub(str[hits], loc[hits , 'end'] + 1L)
+    str <- str %dim% match
+    
+    if (length(var) == 1L && !is.atomic(var)) eval(rlang::expr(!!var <- !!str), envir = parent.frame())
+    
+    match
+    
 }
 
 
@@ -274,25 +288,21 @@ predicateParse <- function(predicate, argnames, ...) {
 #' @export
 `%~%` <- function(x, pattern) grepl(pattern, x)
 
-regexPop <- function(str, regex) {
-    var <- rlang::enexpr(str)
-    
-    loc <- stringi::stri_locate_first_regex(str, regex)
-    hits <- !is.na(loc[ , 1])
-    # match if any
-    match <- character(length(str))
-    match[hits] <- stringi::stri_sub(c(str)[hits], loc[hits, 'start'], loc[hits , 'end']) 
-    match <- match %dim% str
-    
-    # rest if any
-    str[hits] <- stringi::stri_sub(str[hits], loc[hits , 'end'] + 1L)
-    str <- str %dim% match
-    
-    if (length(var) == 1L && !is.atomic(var)) eval(rlang::expr(!!var <- !!str), envir = parent.frame())
-    
-    match
-    
-}
+
+# regexParse <- function(str, ..., toEnv = TRUE) {
+#     regexes <- list(...)
+#     matches <- setNames(vector('list', length(regexes)), .names(regexes))
+# 
+#     for (i in seq_along(regexes)) { # loop because regexPop change str in place
+#         matches[[i]] <- regexPop(str, regexes[[i]])
+#     }
+# 
+#     if (toEnv) list2env(matches[.names(matches) != ""], envir = parent.frame())
+# 
+#     return(invisible(do.call('cbind', matches)))
+# 
+# 
+# }
 
 
 

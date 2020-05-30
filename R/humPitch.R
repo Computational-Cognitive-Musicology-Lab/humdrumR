@@ -920,9 +920,12 @@ kernPitch2sciPitch <- function(str) {
 interval2tint <- function(str) {
           
           # parse string
-          direction <- regexPop(str, "^[-+]?")
-          quality <- regexPop(str, '^[PnMm]|^[A#bd]*')
-          generic <- as.integer(regexPop(str, "^[1-9][0-9]*"))
+          parser <- REparser(direction = "^[-+]?",
+                             quality = '^[PnMm]|^[A#bd]*',
+                             generic = '^[1-9][0-9]*')
+          
+          parser(str, toEnv = TRUE)
+          generic <- as.integer(generic)
           
 
           ## Fifth
@@ -961,10 +964,10 @@ interval2tint <- function(str) {
 scaleDegree2tint <- function(str, Key = dset(0, 0), octave.style = NULL, octave.marks = c()) {
   
   # parse string
-  octave <- regexPop(str, "^[\\^v',]")
-  quality <- regexPop(str, '^[PnMm]|^[A#bd]*')
+  octave <- popRE(str, "^[\\^v',]")
+  quality <- popRE(str, '^[PnMm]|^[A#bd]*')
   quality[quality == ""] <- "X" # empty quality
-  generic <- as.integer(regexPop(str, "^[1-7]"))
+  generic <- as.integer(popRE(str, "^[1-7]"))
 
   ## Fifths
   C5ths <- genericinterval2LO5th(generic) # defaults for Major
@@ -1196,7 +1199,7 @@ NULL
 
 
 
-tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor, wolf = NULL) {
+tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor) {
   mat <- tintPartition.octave_simple(tint, roundingMethod = roundingMethod)
   
   Key <- as.diatonicSet(Key)
@@ -1275,9 +1278,6 @@ commapart      <- function(tint, enharmonicWrap, Key) UseMethod('commapart')
 
 #' @export
 enharmonicpart.tonalInterval <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
-  # if wolf is pythagorean comma, result will allways be teh same
-  # if wolf is smaller (fewer fifths), the results will flip around
-  # if wolf is 2*pythagorean.comma ALL notes will flip enharmonic
   Key <- as.diatonicSet(Key)
   
   modeoffset <- tint( , getMode(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
@@ -1299,15 +1299,15 @@ enharmonicpart.tonalInterval <- function(tint, enharmonicWrap = 12, Key = dset(0
 }
 
 #' @export
-commapart.tonalInterval <- function(tint, LOFrange = 12L, Key = dset(0L, 0L)) {
-  tint - enharmonicpart.tonalInterval(tint, wolf, Key)
+commapart.tonalInterval <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L)) {
+  tint - enharmonicpart.tonalInterval(tint, enharmonicWrap, Key)
     
 }
 
 
-tintPartition.enharmonic_comma <- function(tint, wolf = 'A-', Key = dset(0L, 0L)) {
+tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L)) {
   if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
-  enharm <- enharmonicpart.tonalInterval(tint, wolf = wolf, Key = Key)
+  enharm <- enharmonicpart.tonalInterval(tint, enharmonicWrap, Key)
   
   cbind(Enharmonic = enharm, Comma = tint - enharm)
 }
@@ -1373,7 +1373,9 @@ as.tonalInterval.integer <- tonalTransform %.% semit2tint
 
 char2tint <- humdrumDispatch('kern: kernPitch' = kernPitch2tint,
                              'pitch: sciPitch' = sciPitch2tint,
-                             'mint,hint: interval'  = interval2tint,
+                             'hint: interval'  = interval2tint,
+                             'mint: interval'  = interval2tint,
+                             'deg: scaleDegree'  = scaleDegree2tint,
                              'solfa: solfa' = solfa2tint,
                              'freq: decimal' = semit2tint)
 

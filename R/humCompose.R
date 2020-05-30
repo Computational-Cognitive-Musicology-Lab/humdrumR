@@ -97,6 +97,7 @@ unstick <- function(x) {
 ##### "restoring" ----
 
 inPlace <- function(result, orig, regex) {
+    regex <- getRE(regex)
     replacer <- inPlacer(orig, regex)
     
     if (is.character(result)) return(replacer(result))
@@ -431,10 +432,19 @@ exclusiveFunction <- function(...) {
     # arguments
     arguments <- getAllArgs(exprs[!missing]) 
     
-    # make into a call to REcall
+    
+    # if any dispatch to multiple exclusives (commma separated)
+    # exclusives <- gsub(': .*', '', names(exprs))
+    # exclusives <- strsplit(exclusives, split = ',')
+    # 
+    # exprs <- rep(exprs, lengths(exclusives))
+    # regexes <- ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE)
+    # names(exprs) <- unlist(exclusives)
+
+    # # make into a call to REcall
     exprs[!missing] <- lapply(exprs[!missing], makeCall)
     exprs[!missing] <- Map(REcall, regexes[!missing], exprs[!missing])
-  
+    # 
     
     rlang::expr({
         result <- .switch(x, Exclusive, !!!exprs, #inPlace = inPlace,  
@@ -490,6 +500,8 @@ regexGeneric <- function(...) {
 }
 
 ##### humdrum dispatch ----
+
+
 
 humdrumDispatch <- function(...) {
     exprs <- rlang::enexprs(...)
