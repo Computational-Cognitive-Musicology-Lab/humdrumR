@@ -17,7 +17,7 @@
   simplifier = floor,
   enharmonic.part = TRUE,
   comma.part = TRUE,
-  Key = NULL,
+  Key = dset(0, 0),
   Exclusive = NULL
 )
 }

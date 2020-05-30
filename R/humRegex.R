@@ -4,53 +4,58 @@
 #' 
 #' 
 #' @export
-REparser <- function(...) {
+REparser <- function(..., strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
     # makes a parser which strictly, exhaustively parses a string
     # into a sequence of regexes
     res <- list(...)
     
     if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparser, all arguments must be named.")
     
-    matches <- list()
-    
-    function(str, strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
-        
-        complete <- !logical(length(str))
-        lead <- NULL
-        
-        rest <- str
-        for (re in names(res)) {
-            locs <- stringr::str_locate(rest, res[[re]])
-            
-            
-            hits <- !is.na(locs[ , 1])
-            complete <- complete & hits
-            # 
-            if (include.lead && is.null(lead)) {
-                # should only ever happen in first iteration
-                lead <- stringr::str_sub(rest, 1, pmax(locs[ , 'end'] - 1L, 0L))
-            }
-            
-            matches[[re]] <- stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end'])
-            
-            rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
-        }
-        
-        if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
-        if (include.lead) matches <- c(list(Lead = lead), matches)
-        if (include.rest) matches <- c(matches, list(Rest = rest))
-        
-        if (toEnv) list2env(matches, parent.frame())
-        
-        output <- do.call('cbind', matches)
-        rownames(output) <- str
-        
-        return(invisible(output))
-    }
+    rlang::new_function(args = alist(str = ),
+                        body = rlang::expr(REparse(str, !!!res, !!strict, !!include.lead, !!include.rest, !!toEnv)))
 }
 
 
-
+#' @export
+REparse <- function(str, ..., strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
+    res <- list(...)
+    if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparse, all arguments must be named.")
+    
+    ##
+    matches <- list()
+    complete <- !logical(length(str))
+    lead <- NULL
+    rest <- str
+    
+    for (re in names(res)) {
+        locs <- stringr::str_locate(rest, res[[re]])
+        
+        
+        hits <- !is.na(locs[ , 1])
+        complete <- complete & hits
+        # 
+        if (include.lead && is.null(lead)) {
+            # should only ever happen in first iteration
+            lead <- stringr::str_sub(rest, 1, pmax(locs[ , 'end'] - 1L, 0L))
+        }
+        
+        matches[[re]] <- stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end'])
+        
+        rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
+    }
+    
+    if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
+    if (include.lead) matches <- c(list(Lead = lead), matches)
+    if (include.rest) matches <- c(matches, list(Rest = rest))
+    
+    if (toEnv) list2env(matches, parent.frame())
+    
+    output <- do.call('cbind', matches)
+    rownames(output) <- str
+    
+    return(invisible(output))
+    
+}
 
 #' @export
 popRE <- function(str, regex) {

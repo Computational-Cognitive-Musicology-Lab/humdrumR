@@ -920,15 +920,10 @@ kernPitch2sciPitch <- function(str) {
 interval2tint <- function(str) {
           
           # parse string
-          parser <- REparser(direction = "^[-+]?",
-                             quality = '^[PnMm]|^[A#bd]*',
-                             generic = '^[1-9][0-9]*')
-          
-          parser(str, toEnv = TRUE)
-          generic <- as.integer(generic)
-          
-
+          REparse(str, direction = "^[-+]?", quality = '^[PnMm]|^[A#bd]+', generic = '^[1-9][0-9]*', toEnv = TRUE)
+  
           ## Fifth
+          generic <- as.integer(generic)
           genericLO5th <- genericinterval2LO5th(generic)
           
           # how are degress shifted relative to MAJOR key
@@ -961,20 +956,19 @@ interval2tint <- function(str) {
 
 #....
 
-scaleDegree2tint <- function(str, Key = dset(0, 0), octave.style = NULL, octave.marks = c()) {
-  
-  # parse string
-  octave <- popRE(str, "^[\\^v',]")
-  quality <- popRE(str, '^[PnMm]|^[A#bd]*')
-  quality[quality == ""] <- "X" # empty quality
-  generic <- as.integer(popRE(str, "^[1-7]"))
+scaleDegree2tint <- function(str, Key = dset(0, 0), octave.style = NULL) {
 
+  # parse string
+  REparse(str, octave = "^[\\^v',]*", quality = '^[PnMm]|^[A#bd]*', generic ="^[1-7]", toEnv = TRUE)
+  
   ## Fifths
+  generic <- as.integer(generic)
   C5ths <- genericinterval2LO5th(generic) # defaults for Major
   key5ths <- C5ths %% (Key - getRoot(Key)) # default for Mode
   
   ## Quality 
   # how are degress shifted relative to MAJOR key
+  quality[quality == ""] <- "X" # empty quality
   shifts <- c(X =  NA_integer_, 
               P =  0L, n   =  0L,  
               M =  0L, m   = -7L,  
@@ -991,23 +985,50 @@ scaleDegree2tint <- function(str, Key = dset(0, 0), octave.style = NULL, octave.
   
   
   ## Octave
-  octave <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
+  tint <- if (is.null(octave.style)) {
+    tint( , LO5ths)
+  } else {
+    
+    if (!octave.style %in% c('relative', 'absolute')) .stop("Currently, can only read scale degree tokens with absolute or relative octaves (lily pond definitions)",
+                                                            " using ^v or ' , symbols.")
+    
+    octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
+    if (octave.style == 'absolute') {
+      LO5thNedgeOct2tint(LO5ths, octaven) 
+    } else {
+      sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
+    }
+  }
   
-
-  
-  
-   LO5thNedgeOct2tint(LO5ths, octave) + Key
-  
-  
-  
-  
+  #
+  (tint + Key) %dim% str
 }
 
 #....
 
-solfa2tint <- function(str, Key = dset(0L, 0L)) {
-  LO5ths <- solfa2LO5th(str) + 0L
-  tint( , LO5ths) %dim% str
+solfa2tint <- function(str, Key = dset(0, 0), octave.style = NULL) {
+  REparse(str, octave = "^[\\^v',]*", solfa = '.+', toEnv = TRUE)
+  
+  LO5ths <- solfa2LO5th(solfa) 
+  
+  ## Octave
+  tint <- if (is.null(octave.style)) {
+    tint( , LO5ths)
+  } else {
+    
+    if (!octave.style %in% c('relative', 'absolute')) .stop("Currently, can only read solfa tokens with absolute or relative octaves (lily pond definitions)",
+                                                            " using ^ v or ' , symbols .")
+    
+    octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
+    if (octave.style == 'absolute') {
+      LO5thNedgeOct2tint(LO5ths, octaven) 
+    } else {
+      sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
+    }
+  }
+  
+  #
+  (tint + Key) %dim% str 
 }
 
 ###.. numbers

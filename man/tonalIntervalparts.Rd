@@ -8,7 +8,7 @@
 \usage{
 genericpart(tint, Key)
 
-enharmonicpart(tint, wolf, Key)
+enharmonicpart(tint, enharmonicWrap, Key)
 }
 \description{
 Tonal interval partitions

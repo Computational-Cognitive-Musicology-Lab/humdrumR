@@ -4,7 +4,13 @@
 \alias{REparser}
 \title{Make a regular expression parser}
 \usage{
-REparser(...)
+REparser(
+  ...,
+  strict = TRUE,
+  include.lead = FALSE,
+  include.rest = FALSE,
+  toEnv = FALSE
+)
 }
 \description{
 Make a regular expression parser
