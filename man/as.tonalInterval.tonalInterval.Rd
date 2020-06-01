@@ -9,7 +9,7 @@
   direction = TRUE,
   contour = FALSE,
   delta = FALSE,
-  sigma = FALSE,
+  sigma = Exclusive \%allin\% c("mint"),
   generic.part = TRUE,
   alteration.part = TRUE,
   octave.part = TRUE,
@@ -17,7 +17,7 @@
   simplifier = floor,
   enharmonic.part = TRUE,
   comma.part = TRUE,
-  Key = dset(0, 0),
+  Key = NULL,
   Exclusive = NULL
 )
 }

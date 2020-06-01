@@ -18,6 +18,7 @@
     
 }
 `%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2
+`%allin%` <- function(e1, e2) !is.null(e1) && all(e1 %in% e2)
 
 `%if%` <- function(e1, e2) {
     expr <- rlang::enexpr(e2)
@@ -53,7 +54,7 @@
 ###
 
 `%class%` <- function(object, newclass){
-  class(object) = append(newclass, class(object))
+  if (!newclass %in% class(object)) class(object) <- append(newclass, class(object))
   object
 }
 
@@ -740,8 +741,37 @@ gcd <- function(x, y) {
     ifelse(r, Recall(y, r), y)
 }
 
-numeric2fraction <- function(n) {
-    frac <- attr(MASS::fractions(n, cycles = 15), 'fracs')
+#' @export
+as.decimal <- function(x, ...) UseMethod('as.decimal') # character string version of numeric 
+#' @export
+as.decimal.character <- function(x) {
+    x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
+    as.decimal.fraction(x)
+}
+#' @export
+as.decimal.numeric <- as.numeric
+#' @export
+as.decimal.rational <- function(x) (x$Numerator / x$Denominator) %dim% x[[1]]
+#' @export
+as.decimal.numeric <- as.numeric
+as.decimal.fraction <- function(x) {
+    exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
+    sapply(exprs, eval) %dim% x
+}
+
+
+
+#' @export
+as.rational <- function(x, ...) UseMethod('as.rational') 
+#' @export
+as.rational.character <- function(x) as.rational.default(as.decimal.character(x))
+#' @export
+as.rational.fraction <- function(x) as.rational.default(as.decimal.fraction(x))
+#' @export
+as.rational.rational <- force
+#' @export
+as.rational.numeric <- function(x) {
+    frac <- attr(MASS::fractions(x, cycles = 15), 'fracs')
     frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
     if (ncol(frac) == 1L) frac <- cbind(frac, '1')
     
@@ -750,8 +780,23 @@ numeric2fraction <- function(n) {
     
     den[is.na(den)] <- 1L
     
-    list(Denominator = den, Numerator = num)
+    list(Numerator = num %dim% x, Denominator = den %dim% x) %class% 'rational'
 }
+
+#' @export
+as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
+#' @export
+as.fraction.character <- function(x, sep = '/') as.fraction.rational(as.rational.character(x), sep = sep) %dim% x
+#' @export
+as.fraction.rational  <- function(x, sep = '/') .paste(x$Numerator, x$Denominator, sep = sep) 
+#' @export
+as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
+#' @export
+as.fraction.fraction  <- function(x, sep = '/') as.fraction.rational(as.rational.fraction(x), sep = sep) %dim% x %class% 'fraction'
+
+print.rational <- function(x) print(as.fraction(x))
+
+#### calculus
 
 # sigma (integrate) and delta (derive) should be perfect inverses, 
 # so long as their skip arguments are the same, and the scalar

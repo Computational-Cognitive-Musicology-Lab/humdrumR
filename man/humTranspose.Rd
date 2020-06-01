@@ -2,10 +2,13 @@
 % Please edit documentation in R/humPitch.R
 \name{humTranspose}
 \alias{humTranspose}
-\alias{transpose}
+\alias{transposeBy}
+\alias{transposeTo}
 \title{Transpose tonalIntervals}
 \usage{
-transpose(x, interval = tint(0, 0), Key = NULL, ...)
+transposeBy(x, by, Key, ...)
+
+transposeTo(x, Key, ...)
 }
 \description{
 This function transposes tonalIntervals by other tonal intervals.

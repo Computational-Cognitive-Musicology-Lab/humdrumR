@@ -5,7 +5,6 @@
 \alias{tonalInterval}
 \alias{tint}
 \alias{is.tonalInterval}
-\alias{as.double.tonalInterval}
 \alias{invert}
 \alias{allints}
 \title{Representation of tonal pitch information}
@@ -19,13 +18,13 @@ is.tonalInterval(x)
 
 \S4method{as.character}{tonalInterval}(x)
 
-\method{as.double}{tonalInterval}(x, ...)
+\S4method{as.numeric}{tonalInterval}(x)
 
 \S4method{+}{character,tonalInterval}(e1, e2)
 
 \S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
 
-invert(tint, around = Unison, ...)
+invert(tint, around, Key, ...)
 
 allints
 }
