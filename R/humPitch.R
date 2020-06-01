@@ -1128,9 +1128,7 @@ contour2tint <- force
 #' @export
 tonalTransform <- function(x,  direction = TRUE, contour = FALSE, 
                            delta = FALSE, sigma = Exclusive %allin% c('mint'), 
-                           generic.part = TRUE, alteration.part = TRUE, 
-                           octave.part = TRUE, simple.part = TRUE, simplifier = floor,
-                           enharmonic.part = TRUE, comma.part = TRUE, 
+                           generic = FALSE, simple = FALSE, simplifier = floor, enharmonic = FALSE, 
                            Key = NULL, Exclusive = NULL) {
     # Key
     
@@ -1141,18 +1139,21 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
     if (sigma)  x <- sigma(x)
     
     # Generic/Specific
-    ifif(generic.part, alteration.part, 
-         xor1 = x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
-         xor2 = x <- alterationpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
-         .else = tint( , rep(0L, length(x))))
+    if (generic) x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L))
+    # ifif(generic.part, alteration.part, 
+         # xor1 = x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
+         # xor2 = x <- alterationpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
+         # .else = tint( , rep(0L, length(x))))
     
     # Simple/Complex
-    ifif(octave.part, simple.part,
-         xor1 = x <- octavepart.tonalInterval(x, simplifier),
-         xor2 = x <- simplepart.tonalInterval(x, simplifier),
-         .else = tint( , rep(0L, length(x))))
+    if (simple) x <- simplepart.tonalInterval(x, simplifier)
+    # ifif(octave.part, simple.part,
+         # xor1 = x <- octavepart.tonalInterval(x, simplifier),
+         # xor2 = x <- simplepart.tonalInterval(x, simplifier),
+         # .else = tint( , rep(0L, length(x))))
     
-    
+    if (enharmonic) x <- enharmonicpart(x, Key = Key)
+    a
     x
 }
 
@@ -1358,8 +1359,8 @@ pitchgeneric <- function(pitchrep, secondargs = alist(), endargs = alist()) {
   rlang::new_function(c(alist(x = ),
                         secondargs,  
                         alist(direction = , contour = ,  delta = , sigma = ,
-                            generic.part = , alteration.part = , octave.part = , simple.part = , simplifier = , 
-                            enharmonic.part = , comma.part = , Key = , Exclusive = , inPlace = , ... = ),
+                            generic = , simple = , simplifier = ,  enharmonic.part = ,
+                            Key = , Exclusive = , inPlace = , ... = ),
                         endargs),
                       rlang::expr(UseMethod(!!pitchrep)),
                       env = parent.frame())
