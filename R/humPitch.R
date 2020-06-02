@@ -19,66 +19,42 @@ NULL
 
 #' Representation of tonal pitch information
 #' 
-#' This \emph{S4} class is the core tonal pitch representation in the 
-#' \code{\link[humdrumR:humdrumR]{humdrumR package}}.
-#' The object is used to represent tonal pitch names ("C", "G#", "Db", etc.), tonal intervals 
-#' and scale degrees ("Major 3rd", "Diminished 5th", etc.), and solfege ("Do", "Re", "Fi", etc.).
-#' Each pitch/interval is represented as two integers: one representing octave, the other
-#' position on the circle of fifths. These values are held in the slots \code{\@Octave} 
-#' and \code{\@Fifth}. 
-#' The interval/pitch represented is the result of the Octaves and Perfect 5ths (actually, Perfect
-#' *12ths*) in the slots added together.
-#' (\code{tonalInterval} interfaces with \code{\link[humdrumR:humdrumR]{humdrumR}}'s other 
-#' \code{\link[humdrumR:humTonality]{types of tonal data}}.)
+#' The `tonalInterval` the core tonal pitch representation in \code{\link[humdrumR:humdrumR]{humdrumR}}.
+#' A `tonalInterval` is an abstract representation of tonal pitch: since musical pitch
+#' is fundamentally relative, it is the **intervals** (distances), and more generally *relationships*,
+#' between "notes" that are important.
+#' All standard musical pitch representations can be represented as `tonalIntervals`: thus, `tonalIntervals`
+#' are a kind of backend, lingua franca, for `humdrumR` pitch functionality.
+#' For the most part, users should not need to interact with `tonalInterval`s much directly.
+#' Rather, `tonalInterval`s work behind the scene in numerous `humdrumR` pitch functions.
+#' See the [pitchRepresentations] and [tonalTransformations] documentation for details of ussage.
+#' See the *Tonality in humdrumR* vignette for a detailed explanation of the theory and specifics of `tonalInterval`s.
 #' 
-#' Tonal intervals (which are rather abstract) can be translated to more concrete 
-#' pitch representations using a variety of \code{\link[humdrumR:tonalInterval-write]{as.xxx}} 
-#' methods. Tonal intervals can also be created by reading various inputs
-#' using these \code{\link[humdrumR:tonalInterval-read]{read.xxx}} functions.
+#' @details:
 #' 
-#' In the case of fifths, it is not difficult (for learned musicians at least) to 
-#' see how the numbers related to tonal pitch names (C = 0, G = 1, D = 2, A = 3, 
-#' A# = 10, Bb = -2, etc.), intervals (P1 = 0, P5 = 1, M2 = 2, M6 = 3, A6 = 10, m7 = -2, etc.),
-#' solfege (Do = 0, So = 1, Re = 2, La = 3, Li = 10, Te = -2, etc.).
-#' It's just the circle of fifths!
-#' However, how the Fifth and Octave numbers relate to specific intervals/pitches
-#' is not immediately intuitive, and not is not conducive to human reading. For instance,
-#' given the pair \eqn{(Octave = -3, Fifth = 3)}{(Octave = -3, Fifth = 3)}, I can quicklty recognize that this \code{tonalInterval}
-#' refers to the tonal name "A" (or the interval "Major 6th", or the solfege "La", etc.).
-#' However, it is difficult (even for me) to immediately recognize *which* "A" this is.
-#' This is ok! And it is intentional. The representation is meant to make coding easier, not for users
-#' to actually interact with. (Functions to read/write \code{tonalInteval}s to more familiar
-#' representations are provided with \code{humdrumR}.)
+#' The `tonalInterval` is a [S4 class](http://adv-r.had.co.nz/S4.html), which inherits from
+#' `humdrumR`'s more general virtual class [struct].
+#' (From [struct], `tonalInterval`s inherit a lot of useful "vector-like" behaviors/functionality.)
 #' 
-#' The way the integers in the \code{@Octave} and \code{@Fift
-#' h} slots are interpreted is as follows:
-#' We can think of each \code{Octave} as corresponding to 12 semitones, and each \code{Fifth} corresponding
-#' to 19 semitones (Perfect 12th). Thus, \deqn{(Octave = -1, Fifth = 1) = -12 + 19 = 7}
-#' or the example from previous paragraph:
-#' \deqn{(O=-3, F=3) = -12*3 + 19*3 = -36 + 57 = 21}
-#' which means the "Major 6" is actually a major 13th.
-#' More generally can also think of the two integers as exponents of two bases: \deqn{(O, F) = 2^O * ~3^F}.
-#' If the \code{Fifth} base is actually 3, this represents a "pure" 12th, and thus
-#' the resulting numbers represent \strong{Pythagorean Tuning}.
-#' \deqn{2^{-1} * 3^{1} = \frac{3^1}{2^1} = \frac{3}{2} = 1.5}
-#' If we instead use as our fifth base \eqn{2^{\frac{19}{12}}} we 
-#' will get equal temperement:
-#' \deqn{2^{-1} * {2^{\frac{19}{12}}}^1 = 2^{\frac{7}{12}}}
+#' @slot Octave integers representing the octave offset.
+#' @slot Fifth integers representing the "line-of-fifths' value.
+#' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
-#' @section Vectorization:
-#' \code{tonalInterval} inherits from the virtual class 
-#' \code{\linkS4class{struct}}.
-#' This means you can apply normal vectorized commands to \code{tonalInterval}s, 
-#' and even put them in \code{\link[base:data.frame]{data.frames}}.
 #' 
 #' @section Arithmetic:
-#' \code{tonalInterval} objects have (some) arithmetic operations defined.
-#' Addition and subtraction are straightword and intuitive (i.e., \eqn{M3 + M3 = P5}).
 #' 
+#' Technically, `tonalInterval`s are examples of algebraic [modules over integers][https://en.wikipedia.org/wiki/Module_(mathematics)].
+#' This means that certain arithmetic operations are defined for `tonalIntervals`, which can be called using 
+#' standard arithmatic operators (`+`, `-`, etc.):
+#' 
+#' 1. Addition: `tonalIntervals` can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + M3 = P5}).
+#' 2. Subtraction: `tonalIntervals` can be subtracted just as they are added. Also, they can be negated with a single `-`
+#'    operator (like `-M3`).
+#' 3. Multiplication: `tonalInterval`s can *not* be multiplied together.
+#'    However, \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication} is defined for integers.
+#'    thus, `tonalIntervals` can be multiplied by integers to create new `tonalInterval`s: e.g., \eqn{M2 * 3 = A4}.
+#' 4. Division: 
 #' Multiplication and division are slightly more limited: 
-#' \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
-#' is defined \emph{for integers}: \eqn{M2 * 3 = A4} 
-#' (the result is always a new \code{tonalInterval}).
 #' Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
 #' an integer: \eqn{M4 / M2 = 2L}, but not non-integer values.
 #' This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
@@ -96,24 +72,16 @@ NULL
 #' 
 #' @section Relational Operators:
 #' 
-#' \code{tonalInnterval}s can be compared using the standard
-#' \code{\link[base:Comparison]{relational operators}}---\code{==},
-#' \code{!=}, \code{>}, \code{>=}, etc.
-#' \code{tonalIntervals}s are equal only if their \code{Octave} and
-#' \code{Fifth} slots are identical. Thus, enharmonic notes are \emph{not}
-#' equal.
-#' Numeric comparisons (e.g., \code{>}, 
-#' \code{<=}) are based on their semitone (equal temperament) size.
+#' `tonalInnterval`s can be compared using the standard [base:Comparison][relational operations]---`==`,
+#' `!=`, `>`, `>=``, etc.
+#' Two `tonalIntervals`s are equal (according to `==`) only if all their `Octave`, `Fifth`, and `Cent` slots
+#' are exactly identical. 
+#' Thus, enharmonic notes (like C# and Db) are \emph{not} equal.
+#' However, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size,
+#' so enharmonicicty is irrelevant.
+#' For instance, `M3 >= A2` is `TRUE`.
 #' 
-#' @slot Fifth Integers representing the intervals'
-#' size on the circl of fifths. When considering absolute size
-#' these fifths are actually treated like pure \emph{12ths} (i.e., one 
-#' fifth + one octave): 19 semitones, or \deqn{3^1}.
-#' @slot Octave Integers representing the octave offset of the intervals
-#' (in addition to the fifth). See details for full explanation.
-#' @slot Cent Real numbers representing the cents (2^(1/1200)) offset of the interval.
 #' 
-#' @seealso humTonality
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 

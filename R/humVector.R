@@ -1,55 +1,52 @@
 
-#' Pseudo-vector classes for humdrum data.
+#' struct
 #' 
-#' HumdrumR defines a number of S4 classes which are,
-#' underneath the surface, [https://en.wikipedia.org/wiki/Composite_data_type](composite data types),
-#' made up of collections of base::R atomic vectors, stuck together.
-#' (Things like this are called structs, or tuples, or records in other languages.)
-#' The "vectorization" or R's atomic types is R's key strength so we
-#' want, as much as possible for our composite types to act just R atomics.
+#' Virtual class to help create atomic-vector-like composite data objects.
 #' 
-#' `struct` is a \emph{virtual} S4 class for just such composite atomic vectors. 
-#' The `struct` defines all the necessarry methods to treat a collection of
-#' atomic vectors as a single vector/matrix-like object---simply
-#' make your new class inherit `struct` and it is all taken care of!
-#' (To do this, specifify `contains = "struct"` in your call to [methods::setClass()].)
+#' HumdrumR defines a number of [S4 classes](http://adv-r.had.co.nz/S4.html) which are, underneath the surface, [composite data types](https://en.wikipedia.org/wiki/Composite_data_type)
+#' made up of collections of [base-R atomic vectors][base::vector], stuck together.
+#' The "vectorized" nature of R's atomic types is one of R's key strengths, so in `humdrumR` we try to A) mostly use the standard atomic types B) 
+#' make all the new types we *do* define act as much like atomic vectors as possible.
+#' `struct` is a *virtual* S4 class which serves this purpose: creating composite atomic vectors which act (mostly) like base-R atomic vectors.
 #' 
-#' Be warned, `R` is limited in this regard---users can't *really* define
-#' S4 classes that act fully like R atomics---, so you may 
-#' run in to problems if you take this too far. 
-#' For instance, though `struct` classes work (ok) in [base::data.frame]s
-#' [data.table::data.table]s and [tibble::tibble]s might give you problems.
+#' As a "virtual class" `struct`s themselves don't really exist as independent objects, but the `struct` class defines (abstractly) all the necessarry methods to treat a collection of
+#' atomic vectors as a single vector/matrix-like object---simply make your new subclass [inherit](https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)) `struct` 
+#' and it is all taken care of. (To do this, specify `contains = "struct"` in your call to [setClass][methods::setClass()].)
+#' 
+#' Important `humdrumR` classes which inherit from `struct` include:
+#' + [tonalInterval]
+#' + [diatonicSet]
+#' + [tertianSet]
+#' + [rhythmInterval]
+#' 
+#' Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act *fully* like R atomics, as
+#' many of their features are hard-coded into R itself and can't be replicated.
+#' The most important limitation of `struct` that you may encounter is that, though `struct` classes work (ok) in [data.frames][base::data.frame],
+#' [data.tables][data.table::data.table] and [tibbles][tibble::tibble] will either not work or give strange behaviors if you put `struct`s into them.
 #' 
 #' @section Behavior:
 #' 
-#' `struct` subclasses behave very similarly to normal R vectors.
-#' However, they do differ in a few respects, mostly in ways that
-#' avoid some of the quirky behaviors with R vectors:
-#' In general, the distinction between dimensionless vectors
-#' and dimensioned vectors is slightly weakened with `structs`
-#' compared to normal R atomic vectors.
-#' In general, dimensionless `struct`s are treated more implicitely
-#' like column-matrices.
-#' Notably, if the struct has rows, `length(struct) == nrow(struct)`.
-#' Most importantly, dimensioned `struct`s won't drop their dimensions
-#' under various common operations (`c`, `[]`, etc.), the way
-#' base-R matrices do.
-#' Thie biggest difference is that `c` doesn't always cause `struct`s to lose their dimensions.
-#' Rather, if the first argument to `c` has dimensions, the dimensions are kept and the `struct`s
-#' are `rbind`ed (assuming the number of columns are conformable).
+#' `struct` subclasses (i.e., classes which inherit from `struct`) behave very similarly to normal [R atomic vectors/matrices][base::vector].
+#' However, they do differ in a few respects, mostly in ways that are intended to avoid some of the quirky behaviors of R matrices:
+#' In general, the distinction between dimensionless vectors and dimensioned vectors ([matrices][base::matrix()]) is slightly weaker in `structs` than with normal R atomic vectors/matrices.
+#' Most importantly, dimensioned `struct`s won't drop their dimensions under various common operations ([c][base::c()], `[]`, etc.), the way base-R matrices do.
+#' In general, it is easier to interact with a multi-column (matrix-)`struct` in the same way as a dimensionless (vector-)`struct`.
+#' For example, if the struct has dimensions then `length(struct) == nrow(struct)`, instead of `length(matrix) == nrow(matrix) * ncol(matrix)`---i.e., the "height"
+#'  of the `struct` (the number of rows) is its length.
+#' Another big difference is in the behaviors of [c][base::c()]: `c` doesn't always cause `struct`s to lose their dimensions and `c` can be used to concatinated multi-column `struct`s,
+#' or even mixes of dimensionless and dimensioned `struct`s:
+#' If any `struct` arguments to `c` have dimensions, the `struct`s are concatinated via a call to [rbind][base::rbind()], with any dimensionless vectors coerced to 
+#' 1-column matrices.
+#' Of course, the (resulting) number of columns must all be the same or an error will occur!
 #' 
 #' Other differences:
-#' * `struct`s can only have no dimensions (`dim(struct) == NULL`) or two dimentions. Higher dimensional arrays are not possible (yet).}
+#' * `struct`s can have either no dimensions (`dim(struct) == NULL`) or two dimensions. Higher dimensional `struct`s are not supported (yet).
 #' * `rowSums` and `colSums` will coerce a dimensionless struct to a column matrix.
-#' * `struct`s always throw an error if you try to index them with a index value
-#'    that is greater than the length/nrow of the `struct`. This is different than atomic vectors,
-#'    which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
+#' * `struct`s always throw an error if you try to index them with a index value that is greater than the length/nrow of the `struct`. 
+#'    This is different than atomic vectors, which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
 #' * `struct`s with two dimensions have a `cartesian` indexing argument.
 #'    If `cartesian = TRUE`, the `i` and `j` arguments are treated as cartesian coordinates.
 #'    (This behavior can be achieved with base R matrices (or `struct`s) by inputing a matrix with two columns.)
-#' 
-#' 
-#' 
 #' 
 #' 
 #' @section Requirements:
@@ -58,8 +55,8 @@
 #' Your class must have one or more slots which are vectors, all of which are the same length.
 #' `struct`'s indexing method will cause all of these vectors to be indexed as one.
 #' When you define a new subclass of `struct`, it will inherit a 
-#' `validObject` method which assures that all elements are the same dimension.
-#' Thus, if you are writing your own [methods::validObject()] method (using [methods::setValidity()])
+#' [validObject][methods::validObject()] method which assures that all elements are the same dimension.
+#' Thus, if you are writing your own `validObject` method (using [setValidity][methods::setValidity()])
 #' you just have to worry specifically about the validity of the information in your slots,
 #' not that the slots are all the same length.
 #' 
@@ -67,27 +64,50 @@
 #' @section Initialize:
 #' 
 #' An initialize method which automatically makes all slots the same length is predefined
-#' for `structs`. If you want to make a more specialized [methods::initialize()] method,
-#' you can still take advantage of the inherited method by using [methods::callNextMethod()] at the 
-#' beginning of your function.
+#' for `structs`. If you want to make a more specialized [initialize][methods::initialize()] method,
+#' you can still take advantage of the inherited method by using [callNextMethod][methods::callNextMethod()] at the 
+#' beginning of your method.
 #' 
 #' 
 #' @section Predefined methods:
 #' 
-#' You must specify [base::order] and any arithmetic/comparison methods for your class
-#' yourself. However,
-#' \itemize{
-#'  \item{If you define `>` and `>=`, `<` and `<=` will be automatically defined.}
-#'  \item{If you define `order`, `sort` will be automatically defined.}
-#'  \item{If you define `as.character` for your class, `show` and
-#'   `format` methods are defined automatically.}
-#' }
+#' The main purpose of the `struct` virtual class is that it defines many of the basic methods you need to manipulate subclass objects.
+#' Most importantly, [indexing][base::Extract] methods are fully defined (that mimic base-R atomic vector/matrix indexing), as well as 
+#' basic "structural" methods like [(col/row)names][base::colnames()], [dim][base::dim()], [length][base::length()], [ncol, nrow][base::ncol()], etc.
+#' In addition:
 #' 
-#' Default arithmetic methods for addition, (scalar) multiplication, and negation (`-x`) are defined.
-#' They assume that adding your class to another is simply the same as adding each numeric slot in parallel.
-#' If this is not the case, you'll need to create your own, more specific, method!
+# #' + If you specify a [order][base::order()] (must be an S3 method!) for you subclass, [sort][base::sort()] will automatically be defined. 
+#' + If you define [> and >=][base::Comparison], `<` and `<=` will be automatically defined.
+#' + If you define [as.character][base::as.character()] for your subclass, [show][methods::show()] and [format][base::format()] methods are automatically defined.
+#' 
+#' What's more, default arithmetic methods for addition, subtraction, (scalar-integer) multiplication, and negation (`-x`) are defined.
+#' The default addition behavior is that each numeric ([base::integer] or [base::numeric]) slot from your subclasses will be added together.
+#' Thus, `struct1 + struct2` will extract each numeric/integer slot from each `struct`, add them together and create a new `struct` from the result.
+#' `-struct` will negate all numeric fields, and subtraction is simply defined as adding the negation.
+#' Since *scalar* multiplication is defined, two `struct`s cannot be multiplied, but a struct can be multiplied by an integer (all numeric fields are multiplied by the integer(s)).
+#' If these definitions don't work for your subclass, you'll need to create your own, more specific, method!
+#' 
+#' @slot dim Either `NULL` or a non-negative [integer-vector][base::integer] of `length == 2L`, representing the number of rows and columns respectively. Dimensions *can* be zero.
+#' @slot rownames Either `NULL` or a [integer][base::integer]/[character][base::character]-vector which is the same length as either
+#' A) if `dim == NULL`, the length of the `struct` B) if `dim != NULL`, the number of rows in the `struct`.
+#' @slot colnames Either `NULL` (it *must* be `NULL` if `dim == NULL`) or a [integer][base::integer]/[character][base::character]-vector of length equal to the number of columns in the `struct`. 
 #' 
 #' @name struct
+#' @seealso Examples of `struct` subclasses: [tonalInterval] [rhythmInterval] [diatonicSet] [tertianSet]
+#' @examples 
+#' setClass('mynewsubclass', contains = 'struct', slots = c(X= 'numeric', Y = 'numeric'))
+#' 
+#' test <- new('mynewsubclass', X = 1:10, Y = 10:1)
+#' 
+#' # all of these should work:
+#' test[1:5]
+#' rev(test)  == test
+#' cbind(test, test)
+#' c(test, test)
+#' test * 3
+#' test - test
+#' 
+#' 
 NULL
 
 setClassUnion('dimnames', c('character', 'integer', 'NULL'))
@@ -205,12 +225,7 @@ columns <- function(humvec) {
 
 ########## shape ----
 
-#' @name struct
-#' @export dim ncol nrow length
-NULL
 
-#' @name struct
-#' @export length dim ncol nrow
 setMethod('nrow', signature = 'struct', function(x) x@dim[1])
 setMethod('ncol', signature = 'struct', function(x) x@dim[2])
 setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
@@ -288,8 +303,6 @@ recycledim <- function(..., funccall) {
 
 
 
-#' @name struct
-#' @export names colnames rownames
 setMethod('names',    c(x = 'struct'), function(x) x@rownames)
 setMethod('rownames', c(x = 'struct'), function(x) x@rownames)
 setMethod('colnames', c(x = 'struct'), function(x) x@colnames)
@@ -830,7 +843,6 @@ setMethod('rev', c(x = 'struct'),
               x[length(x):1]
           })
 
-#' @name struct
 #' @export
 setMethod('c', 'struct',
           function(x, ..., rbind = FALSE) {
@@ -973,7 +985,6 @@ setMethod('diag', signature = 'struct',
 
 
 
-#' @name struct
 #' @export
 setMethod('is.na', signature = 'struct',
           function(x) {
@@ -986,16 +997,13 @@ setMethod('is.na', signature = 'struct',
 #' @export
 is.struct <- function(x) inherits(x, 'struct')
 
-#' @name struct
 #' @export
 setMethod('is.vector', signature = 'struct', function(x) TRUE)
 
 
-#' @name struct
 #' @export
 setMethod('as.vector', signature = 'struct', force)
 
-#' @name struct
 #' @export
 setMethod('as.list', signature = c('struct'),
           function(x, ...) {
@@ -1009,7 +1017,7 @@ setMethod('as.list', signature = c('struct'),
 #' @export
 setGeneric('as.atomic', function(x, ...) standardGeneric('as.atomic'))
 setMethod('as.atomic', 'struct',
-          function(x,  collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
+          function(x,  collapse = function(x, y) .paste(x, y, sep = ',')) {
               slots <- getSlots(x)
               atom <- Reduce(collapse, slots)
               
@@ -1021,7 +1029,6 @@ setMethod('as.atomic', 'struct',
           })
 
 
-#' @name struct
 #' @export
 as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
 
@@ -1034,7 +1041,6 @@ as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep 
 }
 
 
-#' @name struct
 #' @export
 as.data.frame.struct <- function(x, optional = FALSE, ...) {
     row.names <- x@rownames %maybe% 1:length(x)
@@ -1047,12 +1053,10 @@ as.data.frame.struct <- function(x, optional = FALSE, ...) {
 }
 
 
-#' @name struct
 #' @export
 format.struct <- function(x, ...) { as.character(x)}
 
 
-#' @name struct
 #' @export
 setMethod('as.character', 'struct',
           function(x) {
@@ -1060,7 +1064,6 @@ setMethod('as.character', 'struct',
               x[] <- as.character(x)
               x
           })
-#' @name struct
 #' @export
 setMethod('show', signature = c(object = 'struct'), 
           function(object) { 
@@ -1076,16 +1079,7 @@ setMethod('show', signature = c(object = 'struct'),
 
 ########## order, equality ----
 
-order <- function(x, ..., na.last = TRUE, decreasing = FALSE, method = c("auto", "shell", "radix")) UseMethod('order')
 
-order.default <- function(x, ..., na.last = TRUE, 
-                          decreasing = FALSE, method = c("auto", "shell", "radix")) {
-    do.call(base::order, list(x, ..., na.last = na.last, decreasing = decreasing, method = method))
-}
-
-
-
-#' @name struct
 #' @export
 setMethod('sort', signature = c(x = 'struct'),
           function(x, decreasing = FALSE) {
@@ -1095,7 +1089,6 @@ setMethod('sort', signature = c(x = 'struct'),
 ##### comparisons ----
 
 
-#' @name struct
 #' @export
 setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
@@ -1118,7 +1111,6 @@ setMethod('!=', signature = c('struct', 'struct'),
               !(e1 == e2)
           })
 
-#' @name struct
 #' @export
 setMethod('<', signature = c('struct', 'struct'),
           function(e1, e2) {
@@ -1126,7 +1118,6 @@ setMethod('<', signature = c('struct', 'struct'),
           })
 
 
-#' @name struct
 #' @export
 setMethod('<=', signature = c('struct', 'struct'),
           function(e1, e2) {
@@ -1158,7 +1149,6 @@ setMethod('sum', signature = c('struct'),
               x
           })
 
-#' @name struct
 #' @export
 setMethod('colSums', signature = c('struct'),
           function(x, na.rm = FALSE, drop = FALSE) {
@@ -1173,7 +1163,6 @@ setMethod('colSums', signature = c('struct'),
               x
           })
 
-#' @name struct
 #' @export
 setMethod('rowSums', signature = c('struct'),
           function(x, na.rm = FALSE) {
@@ -1188,7 +1177,6 @@ setMethod('rowSums', signature = c('struct'),
               x
           })
 
-#' @name struct
 #' @export
 setMethod('cumsum', signature = c('struct'),
           function(x) {
@@ -1208,7 +1196,6 @@ setMethod('cumsum', signature = c('struct'),
 
 
 
-#' @name struct
 #' @export
 setMethod('diff', signature = c('struct'),
           function(x, lag = 1L) {
@@ -1222,8 +1209,6 @@ setMethod('diff', signature = c('struct'),
           })
 
 
-#' @name struct
-#' @export
 setMethod('+', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '+')
@@ -1234,53 +1219,40 @@ setMethod('+', signature = c('struct', 'struct'),
               e1
           })
 
-#' @name struct
-#' @export
 setMethod('+', signature = c('struct', 'ANY'),
           function(e1, e2) {
               e1 + as(e2, class(e1))
           })
 
-#' @name struct
-#' @export
 setMethod('+', signature = c('ANY', 'struct'),
           function(e1, e2) {
               as(e1, class(e2)) + e2
           })
-#' @name struct
-#' @export
+
 setMethod('-', signature = c('struct', 'struct'),
           function(e1, e2) {
               e1 + (-e2)
           })
 
-#' @name struct
-#' @export
 setMethod('-', signature = c( 'struct', 'missing'),
-          function(e1) {
+          function(e1, e2) {
               
               setSlots(e1) <- lapply(getSlots(e1), function(slot) -slot )
               e1
           })
 
 
-#' @name struct
-#' @export
 setMethod('-', signature = c( 'struct', 'struct'),
           function(e1, e2) {
               e1 + -e2
               
           })
 
-#' @name struct
-#' @export
 setMethod('-', signature = c('struct', 'ANY'),
           function(e1, e2) {
               e1 - as(e2, class(e1))
           })
 
-#' @name struct
-#' @export
 setMethod('-', signature = c('ANY', 'struct'),
           function(e1, e2) {
              as(e1, class(e2)) - e2
@@ -1288,8 +1260,6 @@ setMethod('-', signature = c('ANY', 'struct'),
 
 
 
-#' @name struct
-#' @export
 setMethod('*', signature = c('struct', 'numeric'),
           function(e1, e2) {
               setSlots(e1) <- lapply(getSlots(e1, c('numeric', 'integer')), 
@@ -1300,8 +1270,6 @@ setMethod('*', signature = c('struct', 'numeric'),
               e1 
           })
 
-#' @name struct
-#' @export
 setMethod('*', signature = c('numeric', 'struct'),
           function(e1, e2) {
               e2 * e1

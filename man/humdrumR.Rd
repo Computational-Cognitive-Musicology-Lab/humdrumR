@@ -43,3 +43,4 @@ with a core \code{\linkS4class{rhythmInterval}} \emph{S4} class to represent rhy
 }
 }
 
+\keyword{internal}

@@ -35,6 +35,7 @@
 #' with a core \code{\linkS4class{rhythmInterval}} \emph{S4} class to represent rhythm.
 #' }
 #'
+#' @keywords internal
 #' @docType package
 #' @name humdrumR
 #' @importFrom MASS fractions

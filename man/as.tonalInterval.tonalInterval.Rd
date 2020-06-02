@@ -10,13 +10,10 @@
   contour = FALSE,
   delta = FALSE,
   sigma = Exclusive \%allin\% c("mint"),
-  generic.part = TRUE,
-  alteration.part = TRUE,
-  octave.part = TRUE,
-  simple.part = TRUE,
+  generic = FALSE,
+  simple = FALSE,
   simplifier = floor,
-  enharmonic.part = TRUE,
-  comma.part = TRUE,
+  enharmonic = FALSE,
   Key = NULL,
   Exclusive = NULL
 )

@@ -17,7 +17,7 @@ is.rhythmInterval(x)
 
 \S4method{is.numeric}{rhythmInterval}(x)
 
-\method{order}{rhythmInterval}(
+order.rhythmInterval(
   x,
   ...,
   na.last = TRUE,

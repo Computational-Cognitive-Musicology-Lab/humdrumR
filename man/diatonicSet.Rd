@@ -26,7 +26,7 @@ so C minor and Eb major will be sorted next to each other.}
 
 \S4method{as.character}{tertianSet}(x)
 
-\method{order}{diatonicSet}(
+order.diatonicSet(
   x,
   ...,
   parallel = TRUE,
