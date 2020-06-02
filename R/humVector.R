@@ -3,7 +3,7 @@
 #' 
 #' Virtual class to help create atomic-vector-like composite data objects.
 #' 
-#' HumdrumR defines a number of [S4 classes](http://adv-r.had.co.nz/S4.html) which are, underneath the surface, [composite data types](https://en.wikipedia.org/wiki/Composite_data_type)
+#' `humdrumR` defines a number of [S4 classes](http://adv-r.had.co.nz/S4.html) which are, underneath the surface, [composite data types](https://en.wikipedia.org/wiki/Composite_data_type)
 #' made up of collections of [base-R atomic vectors][base::vector], stuck together.
 #' The "vectorized" nature of R's atomic types is one of R's key strengths, so in `humdrumR` we try to A) mostly use the standard atomic types B) 
 #' make all the new types we *do* define act as much like atomic vectors as possible.

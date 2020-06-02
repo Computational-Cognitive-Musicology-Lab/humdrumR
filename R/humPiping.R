@@ -53,7 +53,7 @@
 #' \item \code{%hum[]%} (singular) : \code{%hums[]%} (plural);
 #' }
 #' 
-#' Note: `%s>%` is an expansion of the \code{\link{magrittr::`%>%`}}, which
+#' Note: `%s>%` is an expansion of the [magrittr::%>%] pipe operator, which
 #' makes use of some clever meta-programming---we can't guarantee it will
 #' always behave the way we might like!
 #' @name humPipe

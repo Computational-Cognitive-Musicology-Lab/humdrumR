@@ -5,58 +5,31 @@
 \alias{tonalInterval}
 \alias{tint}
 \alias{is.tonalInterval}
-\alias{invert}
-\alias{allints}
 \title{Representation of tonal pitch information}
-\format{
-An object of class \code{character} of length 93.
-}
 \usage{
 tint(octave, LO5th = 0L, cent = numeric(length(octave)))
 
 is.tonalInterval(x)
-
-\S4method{as.character}{tonalInterval}(x)
-
-\S4method{as.numeric}{tonalInterval}(x)
-
-\S4method{+}{character,tonalInterval}(e1, e2)
-
-\S4method{\%\%}{tonalInterval,tonalInterval}(e1, e2)
-
-invert(tint, around, Key, ...)
-
-allints
 }
 \description{
-The \code{tonalInterval} the core tonal pitch representation in \code{\link[humdrumR:humdrumR]{humdrumR}}.
-A \code{tonalInterval} is an abstract representation of tonal pitch: since musical pitch
-is fundamentally relative, it is the \strong{intervals} (distances), and more generally \emph{relationships},
-between "notes" that are important.
-All standard musical pitch representations can be represented as \code{tonalIntervals}: thus, \code{tonalIntervals}
-are a kind of backend, lingua franca, for \code{humdrumR} pitch functionality.
-For the most part, users should not need to interact with \code{tonalInterval}s much directly.
-Rather, \code{tonalInterval}s work behind the scene in numerous \code{humdrumR} pitch functions.
-See the \link{pitchRepresentations} and \link{tonalTransformations} documentation for details of ussage.
-See the \emph{Tonality in humdrumR} vignette for a detailed explanation of the theory and specifics of \code{tonalInterval}s.
-
-These functions translate various pitch representations
-between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
-they will even (automatically) read parts of a string which represent a pitch,
-and translate only that part (leaving the rest of the string unchanged).
-They all have an option \code{inPlace} which can be set to \code{FALSE}
-if you want them to discard non-pitch parts of the string(s).
+The \code{tonalInterval} is the core tonal pitch representation in \link[humdrumR:humdrumR]{humdrumR}.
+A \code{tonalInterval} is an abstract representation of tonal pitch, which can be translated to/from all standard "concrete" pitch representations:
+solfege, scientific pitch, semitones, frequencies, scale degrees, intervals, etc.
+For the most part, users should not need to interact with \code{tonalInterval}s much directly---rather, \code{tonalInterval}s work behind the scene in numerous \code{humdrumR} pitch functions.
+See the \link{pitchRepresentations} and \link{tonalTransformations} documentation for details of usage and functionality or the \emph{Tonality in humdrumR} vignette for
+a detailed explanation of the theory and specifics of \code{tonalInterval}s.
 }
 \details{
-:
+The \code{tonalInterval} is a \href{http://adv-r.had.co.nz/S4.html}{S4} subclass of \code{humdrumR}'s virtual class \link{struct}, from which it inherits a lot of useful "vector-like" behaviors/functionality.
 
-The \code{tonalInterval} is a \href{http://adv-r.had.co.nz/S4.html}{S4 class}, which inherits from
-\code{humdrumR}'s more general virtual class \link{struct}.
-(From \link{struct}, \code{tonalInterval}s inherit a lot of useful "vector-like" behaviors/functionality.)
+A constructor function \code{tint} can be used to create \code{tonalIntervals}.
+The three arguments corespond to the three slots: \code{octave}, \code{LO5th} (Fifth), and \code{cent}.
+All inputs will be coerced to match in length.
+What's more, the \code{octave} argument can be left blank, in which case the appropriate octave will automatically be computed
+to place the interval in the "standard octave" above middle-C.
 
-Under the hood, these functions use the \code{\link{humdrumR}}
-\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
-fundamental, \emph{lingua franca} representation of pitch.
+By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method, for \code{tonalInterval}s call \code{as.kernPitch}.
+Thus, if you return a \code{tonalInterval} on the command line (or call \link[base:print]{print}) one one, you'll see the \link[=pitchRepresentations]{kern pitch} representation printed.
 }
 \section{Slots}{
 
@@ -71,40 +44,96 @@ fundamental, \emph{lingua franca} representation of pitch.
 \section{Arithmetic}{
 
 
-Technically, \code{tonalInterval}s are examples of algebraic \link[=https://en.wikipedia.org/wiki/Module_(mathematics)]{modules over integers}.
-This means that certain arithmetic operations are defined for \code{tonalIntervals}, which can be called using
-standard arithmatic operators (\code{+}, \code{-}, etc.):
-\enumerate{
+Technically, \code{tonalInterval}s are examples of algebraic \href{https://en.wikipedia.org/wiki/Module_(mathematics)}{modules over integers}.
+This means that certain arithmetic operations are defined for \code{tonalIntervals} and can be called using standard arithmetic operators (\code{+}, \code{-}, etc.):
+\itemize{
 \item Addition: \code{tonalIntervals} can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + M3 = P5}).
 \item Subtraction: \code{tonalIntervals} can be subtracted just as they are added. Also, they can be negated with a single \code{-}
 operator (like \code{-M3}).
 \item Multiplication: \code{tonalInterval}s can \emph{not} be multiplied together.
-However, \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication} is defined for integers.
-thus, \code{tonalIntervals} can be multiplied by integers to create new \code{tonalInterval}s: e.g., \eqn{M2 * 3 = A4}.
-\item Division:
-Multiplication and division are slightly more limited:
-Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
-an integer: \eqn{M4 / M2 = 2L}, but not non-integer values.
-This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean}
-division is possible: we divide
-a \code{tonalInterval} by another \code{tonalInterval} to get \emph{both}
-an integer \strong{quotient} and a \code{tonalInterval} \strong{remainder}.
-Each of these values can be useful in different ways,
-so in \code{R} they are calculated with two separate operators:
-\code{\link[base:Arithmetic]{\%\% and \%/\%}}.
-The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
-useful in pitch calculations, because tonal scales can be seen as
-a modulus operation (modulo 7 for diatonic). For instance,
-\code{tonalint \%\% tint(-11, 7)} will always calculate the generic
-version of an interval.
+However, \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar (integer) multiplication} is defined:
+thus, \code{tonalIntervals} can be multiplied by integers to create new \code{tonalInterval}s: e.g., \eqn{M2 * 3L = A4}.
+\item Division: as the natural inverse of scale multiplicaion, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean division}
+is defined for \code{tonalIntervals}---i.e., division by/into whole (integer) pieces, often with lefover "remainders" (modulo).
+In R, Euclidean division is achieved with the \link[base:Arithmetic]{\%/\%} operator---\emph{not} \code{/}---, with the associated \link[base:Arithmetic]{\%\%} used for the remainder/modulo.
+Two \code{tonalInterval}s can be divided to produced an integer; Conversely, a \code{tonalInterval} can be divided by an integer to produce a \code{tonalInterval}.
+
+Take note that the way \code{humdrumR} defines Euclidean division is based in \emph{tonal space}---i.e., the line-of-fifths---not frequency or atonal-semitone space.
+For example, an augmented-fourth divided by a major-second \emph{is} \code{3L}, but a diminished-fifth divided by a major-second is \emph{not} 3L---\code{d5 \%/\% M2} equals \code{-3L} with a remainder of \code{P8} (plus an octave)!
+The division algorithm works by applying standard Euclidean division to the \verb{@Fifth} slot (line-of-fifths tonal space), and shifting the \verb{@Octave} value in
+the remainder to the match the appropriate octave.
+This definition has the useful properties that \code{specificinterval \%\% A1 = genericinterval} and \code{interval \%\% d2 = enharmonicinterval}.
 }
 }
 
 \section{Relational Operators}{
 
 
-\code{tonalInnterval}s can be compared using the standard \link[=relational operations]{base:Comparison}---\code{==},
-\code{!=}, \code{>}, \verb{>=``, etc. Two }tonalIntervals\verb{s are equal (according to }==\verb{) only if all their }Octave\verb{, }Fifth\verb{, and }Cent\verb{slots are exactly identical.  Thus, enharmonic notes (like C# and Db) are \\emph\{not\} equal. However, ordinal comparisons (e.g.,}>\verb{, }<=\verb{) between }tonalInterval\verb{s are based on their semitone (equal temperament) size, so enharmonicicty is irrelevant. For instance, }M3 >= A2\code{is}TRUE`.
+\code{tonalInnterval}s can be compared using the standard \link[base:Comparison]{relational operations}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
+Two \code{tonalInterval}s are equal (according to \code{==}) only if all their \code{Octave}, \code{Fifth}, and \code{Cent} slots
+are exactly identical.
+Thus, enharmonic notes (like C# and Db) are \emph{not} equal.
+In contrast, ordinal comparisons (e.g., \code{>}, \code{<=}) between \code{tonalInterval}s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
+Thus, \code{m3 >= A2} and \code{A2 >= m3} are both \code{TRUE}, even though \code{m3 == A2} is not.
 }
 
-\keyword{datasets}
+\section{Coercion}{
+
+
+\code{humdrumR} knows how to \href{https://en.wikipedia.org/wiki/Type_conversion}{coerce} several \link[base:vector]{base-R atomic types} into \code{tonalIntervals}.
+This can be done using the \link[methods:as]{as} function---e.g., \code{as(3, "tonalInterval")}---or more intuitively using the function \code{as.tonalInterval()}.
+Coercision methods are defined for
+\itemize{
+\item \link[base:integer]{integer}: interpreted as semitones
+\item \link[base:numeric]{numeric}: interpreted as frequency ratios, assuming a \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}.
+\item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[humdrumR:regexDispatch]{regular expression dispatch system}, as
+explained fully \link[=pitchRepresentations]{here}.
+}
+
+Since, coersion is defined, \code{tonalInterval} arithmatic can be applied when one of the two arguments is a \code{tonalInterval} and the other is a coercable atomic.
+For instance, \code{M3 + 2L} will interpret \code{2L} as two semitones and add a major-second to the major-third!
+The clever \link[humdrumR:regexDispatch]{dispatch system} will even ignore character strings that are not recognized (see examples)!
+}
+
+\section{Predefined Intervals}{
+
+
+\code{humdrumR} automatically exports a bunch of \code{tonalInterval}s, named by their musical interval representation.
+Every generic interval from 1 to 15 is combined with every interval quality \code{dd} (doubly diminished), \code{d} (diminished), \code{m} (minor), \code{M} (major), \code{A} (augumented)
+\code{AA} (doubly augmented).
+Thus, after loading \code{humdrumR}, you can type things like \code{M3 + M3} and get \code{A5}.
+In addition, the variables \code{unison} (\verb{= P1 = tint(0, 0)}) and \code{pythagorean.comma} (\verb{= d2 = tint(-19,12)}), and \code{octave} (\code{tint(1, 0)}) are exported as well.
+}
+
+\examples{
+
+M3 <- tint(   , 4L)
+
+M2 <- tint(   , 2L)
+M9 <- tint(-1L, 2L)
+
+M9 - M2 
+# = octave
+M9 - 2L
+# = octave
+
+M3 \%/\% M2 
+# = 2
+
+###
+
+cMajor <- sort(tint( , -1:5))
+eMajor <- cMajor + M3
+eMajor + 2L 
+# f# g# a# b cc# dd# ee#
+
+eMajor[4:5] - octave 
+# = A B
+
+"4.ee" + P5 
+# = "4.bb"
+
+
+
+
+}

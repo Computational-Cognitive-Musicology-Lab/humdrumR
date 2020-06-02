@@ -1,13 +1,29 @@
 
-#' Tonal Data Types
+#' humdrumR and pitch
 #' 
-#' \code{\link[humdrumR:humdrumR]{humdrumR package}} contains a number of 
-#' intertwined \code{S4} data types defined to represent tonal musical information
-#' from the traditional Western persective (i.e., diatonicism).
-#' The most important is the \code{\linkS4class{tonalInterval}}.
-#' There are also the \code{\linkS4class{tonalCenter}} and the \code{\linkS4class{tonalHarmony}}.
+#' [humdrumR][humdrumR::humdrumR] includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
 #' 
-#' @name humTonality
+#' @section Tonality:
+#' 
+#' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
+#' + [integers][base::integer] --- used to encode "[line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)" tonal information
+#' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
+#' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
+#' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
+#' 
+#' For a detailed explanation of the theory and specifics of `humdrumR`'s treatment of tonality, see the *Tonality in humdrumR* vignette.
+#' 
+#' @section Atonality:
+#' 
+#' **THIS SECTION IS INCOMPLETE**
+#' 
+#' In addition, there are xxx data types used to encode non-tonal (or [atonal](https://en.wikipedia.org/wiki/Atonality)) pitch information.
+#' 
+#' + [integers][base::integer] --- used to encode [semitones](https://en.wikipedia.org/wiki/Semitone) (as well as [MIDI](https://en.wikipedia.org/wiki/MIDI) numbers).
+#' + [xxx][xxx] --- sets?
+#' + [xxx][xxx] --- 12-tone rows?
+#' 
+#' @name humdrumPitch
 NULL
 
 
@@ -19,67 +35,120 @@ NULL
 
 #' Representation of tonal pitch information
 #' 
-#' The `tonalInterval` the core tonal pitch representation in \code{\link[humdrumR:humdrumR]{humdrumR}}.
-#' A `tonalInterval` is an abstract representation of tonal pitch: since musical pitch
-#' is fundamentally relative, it is the **intervals** (distances), and more generally *relationships*,
-#' between "notes" that are important.
-#' All standard musical pitch representations can be represented as `tonalIntervals`: thus, `tonalIntervals`
-#' are a kind of backend, lingua franca, for `humdrumR` pitch functionality.
-#' For the most part, users should not need to interact with `tonalInterval`s much directly.
-#' Rather, `tonalInterval`s work behind the scene in numerous `humdrumR` pitch functions.
-#' See the [pitchRepresentations] and [tonalTransformations] documentation for details of ussage.
-#' See the *Tonality in humdrumR* vignette for a detailed explanation of the theory and specifics of `tonalInterval`s.
+#' The `tonalInterval` is the core tonal pitch representation in [humdrumR][humdrumR::humdrumR].
+#' A `tonalInterval` is an abstract representation of tonal pitch, which can be translated to/from all standard "concrete" pitch representations:
+#'  solfege, scientific pitch, semitones, frequencies, scale degrees, intervals, etc.
+#' For the most part, users should not need to interact with `tonalInterval`s much directly---rather, `tonalInterval`s work behind the scene in numerous `humdrumR` pitch functions.
+#' See the [pitchRepresentations] and [tonalTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
+#' a detailed explanation of the theory and specifics of `tonalInterval`s.
+#'
+#' @details
 #' 
-#' @details:
+#' The `tonalInterval` is a [S4](http://adv-r.had.co.nz/S4.html) subclass of `humdrumR`'s virtual class [struct], from which it inherits a lot of useful "vector-like" behaviors/functionality.
 #' 
-#' The `tonalInterval` is a [S4 class](http://adv-r.had.co.nz/S4.html), which inherits from
-#' `humdrumR`'s more general virtual class [struct].
-#' (From [struct], `tonalInterval`s inherit a lot of useful "vector-like" behaviors/functionality.)
+#' A constructor function `tint` can be used to create `tonalIntervals`.
+#' The three arguments corespond to the three slots: `octave`, `LO5th` (Fifth), and `cent`.
+#' All inputs will be coerced to match in length.
+#' What's more, the `octave` argument can be left blank, in which case the appropriate octave will automatically be computed
+#' to place the interval in the "standard octave" above middle-C.
+#' 
+#' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method, for `tonalInterval`s call [as.kernPitch()][pitchRepresentations].
+#' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print]) one one, you'll see the [kern pitch][pitchRepresentations] representation printed.
 #' 
 #' @slot Octave integers representing the octave offset.
 #' @slot Fifth integers representing the "line-of-fifths' value.
 #' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
+
 #' 
 #' @section Arithmetic:
 #' 
-#' Technically, `tonalInterval`s are examples of algebraic [modules over integers][https://en.wikipedia.org/wiki/Module_(mathematics)].
-#' This means that certain arithmetic operations are defined for `tonalIntervals`, which can be called using 
-#' standard arithmatic operators (`+`, `-`, etc.):
+#' Technically, `tonalInterval`s are examples of algebraic [modules over integers](https://en.wikipedia.org/wiki/Module_(mathematics)).
+#' This means that certain arithmetic operations are defined for `tonalIntervals` and can be called using standard arithmetic operators (`+`, `-`, etc.):
 #' 
-#' 1. Addition: `tonalIntervals` can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + M3 = P5}).
-#' 2. Subtraction: `tonalIntervals` can be subtracted just as they are added. Also, they can be negated with a single `-`
-#'    operator (like `-M3`).
-#' 3. Multiplication: `tonalInterval`s can *not* be multiplied together.
-#'    However, \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication} is defined for integers.
-#'    thus, `tonalIntervals` can be multiplied by integers to create new `tonalInterval`s: e.g., \eqn{M2 * 3 = A4}.
-#' 4. Division: 
-#' Multiplication and division are slightly more limited: 
-#' Consequently, a \code{tonalInterval} can be divided by another \code{tonalInterval} to produce
-#' an integer: \eqn{M4 / M2 = 2L}, but not non-integer values.
-#' This means that only simple, \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
-#' division is possible: we divide
-#' a \code{tonalInterval} by another \code{tonalInterval} to get \emph{both}
-#' an integer \strong{quotient} and a \code{tonalInterval} \strong{remainder}.
-#' Each of these values can be useful in different ways, 
-#' so in \code{R} they are calculated with two separate operators: 
-#' \code{\link[base:Arithmetic]{\%\% and \%/\%}}.
-#' The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
-#' useful in pitch calculations, because tonal scales can be seen as 
-#' a modulus operation (modulo 7 for diatonic). For instance,
-#' \code{tonalint \%\% tint(-11, 7)} will always calculate the generic 
-#' version of an interval.
+#' + Addition: `tonalIntervals` can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + M3 = P5}).
+#' + Subtraction: `tonalIntervals` can be subtracted just as they are added. Also, they can be negated with a single `-`
+#'   operator (like `-M3`).
+#' + Multiplication: `tonalInterval`s can *not* be multiplied together.
+#'   However, [scalar (integer) multiplication](https://en.wikipedia.org/wiki/Scalar_multiplication) is defined:
+#'   thus, `tonalIntervals` can be multiplied by integers to create new `tonalInterval`s: e.g., \eqn{M2 * 3L = A4}.
+#' + Division: as the natural inverse of scale multiplicaion, [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division)
+#'   is defined for `tonalIntervals`---i.e., division by/into whole (integer) pieces, often with lefover "remainders" (modulo).
+#'   In R, Euclidean division is achieved with the [%/%][base::Arithmetic] operator---*not* `/`---, with the associated [%%][base::Arithmetic] used for the remainder/modulo.
+#'   Two `tonalInterval`s can be divided to produced an integer; Conversely, a `tonalInterval` can be divided by an integer to produce a `tonalInterval`.
+#'   
+#'   Take note that the way `humdrumR` defines Euclidean division is based in *tonal space*---i.e., the line-of-fifths---not frequency or atonal-semitone space.
+#'   For example, an augmented-fourth divided by a major-second *is* `3L`, but a diminished-fifth divided by a major-second is *not* 3L---`d5 %/% M2` equals `-3L` with a remainder of `P8` (plus an octave)!
+#'   The division algorithm works by applying standard Euclidean division to the `@Fifth` slot (line-of-fifths tonal space), and shifting the `@Octave` value in
+#'   the remainder to the match the appropriate octave.
+#'   This definition has the useful properties that `specificinterval %% A1 = genericinterval` and `interval %% d2 = enharmonicinterval`.
+#' 
+#' 
 #' 
 #' @section Relational Operators:
 #' 
-#' `tonalInnterval`s can be compared using the standard [base:Comparison][relational operations]---`==`,
-#' `!=`, `>`, `>=``, etc.
-#' Two `tonalIntervals`s are equal (according to `==`) only if all their `Octave`, `Fifth`, and `Cent` slots
+#' `tonalInnterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
+#' Two `tonalInterval`s are equal (according to `==`) only if all their `Octave`, `Fifth`, and `Cent` slots
 #' are exactly identical. 
-#' Thus, enharmonic notes (like C# and Db) are \emph{not} equal.
-#' However, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size,
-#' so enharmonicicty is irrelevant.
-#' For instance, `M3 >= A2` is `TRUE`.
+#' Thus, enharmonic notes (like C# and Db) are *not* equal.
+#' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
+#' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
+#' 
+#' @section Coercion:
+#' 
+#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `tonalIntervals`.
+#' This can be done using the [as][methods::as] function---e.g., `as(3, "tonalInterval")`---or more intuitively using the function `as.tonalInterval()`.
+#' Coercision methods are defined for 
+#' 
+#' + [integer][base::integer]: interpreted as semitones
+#' + [numeric][base::numeric]: interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
+#' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
+#'   explained fully [here][pitchRepresentations].
+#'   
+#' Since, coersion is defined, `tonalInterval` arithmatic can be applied when one of the two arguments is a `tonalInterval` and the other is a coercable atomic.
+#' For instance, `M3 + 2L` will interpret `2L` as two semitones and add a major-second to the major-third!
+#' The clever [dispatch system][humdrumR::regexDispatch] will even ignore character strings that are not recognized (see examples)!
+#'
+#' 
+#' @section Predefined Intervals:
+#' 
+#' `humdrumR` automatically exports a bunch of `tonalInterval`s, named by their musical interval representation.
+#' Every generic interval from 1 to 15 is combined with every interval quality `dd` (doubly diminished), `d` (diminished), `m` (minor), `M` (major), `A` (augumented)
+#' `AA` (doubly augmented).
+#' Thus, after loading `humdrumR`, you can type things like `M3 + M3` and get `A5`.
+#' In addition, the variables `unison` (`= P1 = tint(0, 0)`) and `pythagorean.comma` (`= d2 = tint(-19,12)`), and `octave` (`tint(1, 0)`) are exported as well.
+#' 
+#' 
+#' 
+#' @examples 
+#' 
+#' M3 <- tint(   , 4L)
+#' 
+#' M2 <- tint(   , 2L)
+#' M9 <- tint(-1L, 2L)
+#' 
+#' M9 - M2 
+#' # = octave
+#' M9 - 2L
+#' # = octave
+#' 
+#' M3 %/% M2 
+#' # = 2
+#' 
+#' ###
+#' 
+#' cMajor <- sort(tint( , -1:5))
+#' eMajor <- cMajor + M3
+#' eMajor + 2L 
+#' # f# g# a# b cc# dd# ee#
+#' 
+#' eMajor[4:5] - octave 
+#' # = A B
+#' 
+#' "4.ee" + P5 
+#' # = "4.bb"
+#' 
+#' 
 #' 
 #' 
 #' @name tonalInterval
@@ -150,16 +219,11 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 ###..formatting methods ####
 
-#' @name tonalInterval
-#' @export
 setMethod('as.character', signature = c('tonalInterval'), 
           function(x) as.kernPitch(x))
 
-#' @name tonalInterval
-#' @export
 setMethod('as.numeric', signature = c('tonalInterval'), 
           function(x) tint2decimal(x))
-
 
 
 ####.logic methods ####
@@ -211,8 +275,6 @@ setMethod('sign', signature = c('tonalInterval'),
 
 ##...addition ####
 
-#' @name tonalInterval
-#' @exportMethod + - sum cumsum diff
  
 
 
@@ -258,8 +320,6 @@ setMethod('-', signature = c('tonalInterval', 'character'),
 
 ##...division/modulo  ####
 
-#' @name tonalInterval
-#' @exportMethod %% %/%
  
 setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
           # To take the modulo of a tonalInterval, it doesn't make sense 
@@ -1093,6 +1153,7 @@ contour2tint <- force
 
 ##### Tonal transforms ####
 
+#' @name tonalTransformations
 #' @export
 tonalTransform <- function(x,  direction = TRUE, contour = FALSE, 
                            delta = FALSE, sigma = Exclusive %allin% c('mint'), 
@@ -1127,7 +1188,7 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
 
 
 
-#' @name tonalInterval
+#' @name tonalTransformations
 #' @export 
 invert <- function(tint, around, Key, ...) UseMethod('invert')
 #' @export 
@@ -1147,7 +1208,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' By default, does real transposition.
 #' However, if a \code{key} argument is specified, tonal transposition
 #' takes place in that (major) key.
-#' @name humTranspose
+#' @name tonalTransformations
 #' @export
 transposeBy <- function(x, by, Key, ...) UseMethod('transposeBy')
 #' @export
@@ -1174,7 +1235,7 @@ transposeBy.tonalInterval <- function(x, by, altered.intervals = FALSE, Key = NU
     y
 }
 
-#' @name humTranspose
+#' @name tonalTransformations
 #' @export
 transposeTo <- function(x, Key, ...) UseMethod('transposeTo')
 #' @export
@@ -1312,6 +1373,21 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 
 
 ##### As x ####
+
+#' Pitch representations and translations
+#' 
+#' These functions translate various pitch representations
+#' between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
+#' they will even (automatically) read parts of a string which represent a pitch,
+#' and translate only that part (leaving the rest of the string unchanged).
+#' They all have an option \code{inPlace} which can be set to \code{FALSE}
+#' if you want them to discard non-pitch parts of the string(s).
+#' 
+#' Under the hood, these functions use the \code{\link{humdrumR}} 
+#' \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
+#' fundamental, \emph{lingua franca} representation of pitch.
+#' @name pitchRepresentations
+NULL
 
 ####. generics ####
 
@@ -1534,19 +1610,6 @@ transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.t
 
 
 
-#' Pitch translations
-#' 
-#' These functions translate various pitch representations
-#' between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
-#' they will even (automatically) read parts of a string which represent a pitch,
-#' and translate only that part (leaving the rest of the string unchanged).
-#' They all have an option \code{inPlace} which can be set to \code{FALSE}
-#' if you want them to discard non-pitch parts of the string(s).
-#' 
-#' Under the hood, these functions use the \code{\link{humdrumR}} 
-#' \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
-#' fundamental, \emph{lingua franca} representation of pitch.
-#' 
 
 
 
@@ -1558,7 +1621,8 @@ transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.t
 #' @export P1 m2 dd3 A3 A4 A5 P6 d7 AA7 M8 m9 dd10 A10 A11 A12 P13 d14 AA14 AA15
 #' @export A1 P2 d3 AA3 AA4 AA5 M6 m7 dd8 A8 P9 d10 AA10 AA11 AA12 M13 m14 dd15
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
-#' @export Unison pythagorean.comma
+#' @export unison pythagorean.comma octave
+NULL
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
 allints[as.matrix(expand.grid(c(3,5), c(1,4,5,11,12,15)))] <- NA
 allints <- c(allints)
@@ -1567,5 +1631,6 @@ allints <- allints[!is.na(allints)]
 for (int in allints) {
   assign(int, interval2tint(int))
 }
-Unison <- P1
+unison <- P1
 pythagorean.comma <- (-d2)
+octave <- P8

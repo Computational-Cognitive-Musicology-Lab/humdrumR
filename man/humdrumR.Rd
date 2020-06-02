@@ -16,30 +16,24 @@ the power of R to give us enprecedented power to manipulate and analyze humdrum 
 }
 \section{Package design}{
 
-The package \code{humdrumR} has xx main components:
-\enumerate{
-\item To represent humdrum data in R, we have the \code{\linkS4class{humdrumR}} \emph{S4} class, and it's core
-component the \code{\link[humdrumR:humTable]{Humdrum Table}}.
-\item To create \code{\linkS4class{humdrumR}} data, a sophisticated
-humdrum data parser: \code{\link{readHumdrum}}. \code{\linkS4class{humdrumR}} data
-can also be written back to humdrum-syntax text files using \code{\link{writeHumdrum}}.
-\item To filter and "index" \code{\linkS4class{humdrumR}} data, we have the
-\code{\link{filterHumdrum}} function, which can also be called in a variety of
-short hands using \code{R}'s standard \code{\link[base:Extract]{indexing operators}}: \code{[]} and \code{[[]]}.
-\item To manipulate and modify \code{\linkS4class{humdrumR}} data,
-we have the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and
-\code{\link{humApply}} functions,
-as well as the \code{\link[humdrumR:humPipe]{\%hum>\%}} operator which allows
-us to use these commands in a pipe-line.
-\item A set of "pipe" operators, so that \code{\linkS4class{humdrumR}} data can be
-manipulated and filtered in concise, bash-style pipe.
-\item To facilate the development of functions to work with humdrum tokens---which are simple
-character strings packed with information---, a useful API we call a
-\code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}.
-\item A \code{\link[humdrumR:humPitch]{module}} for representing and manipulating musical pitch information,
-with a core \code{\linkS4class{tonalInterval}} \emph{S4} class to represent pitch.
-\item A \code{\link[humdrumR:humRhythm]{module}} for representing and manipulating musical rhythm information,
-with a core \code{\linkS4class{rhythmInterval}} \emph{S4} class to represent rhythm.
+
+The package \code{humdrumR} has XXX main components:
+\itemize{
+\item To represent humdrum data in R, we have the \link[humdrumR:humdrumR-class]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
+the \link[humdrumR:Humtable]{humdrum table}.
+\item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
+\code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
+\item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
+short hands using R's standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
+\item To manipulate and modify \code{humdrumR} data, we have the \link[humdrumR:with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
+\item A set of \link[humdrumR:humPipe]{"pipe" operators} (\verb{\%hum>\%}, \verb{\%hum<\%}, etc.), so that \code{humdrumR} data can be manipulated and filtered in concise,
+\href{https://en.wikipedia.org/wiki/Vertical_bar#Pipe}{bash-style pipes}.
+\item To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
+a useful API we call our \link[humdrumR:regexDispatch]{regular-expression dispatch system}.
+\item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,
+including our core \link{tonalInterval} class to represent tonal pitch.
+\item A \link[humdrumR:humRhythm]{module} for representing and manipulating musical rhythm information,
+with a core \link{rhythmInterval} class to represent rhythms.
 }
 }
 

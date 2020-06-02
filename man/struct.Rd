@@ -11,7 +11,7 @@ is.struct(x)
 Virtual class to help create atomic-vector-like composite data objects.
 }
 \details{
-HumdrumR defines a number of \href{http://adv-r.had.co.nz/S4.html}{S4 classes} which are, underneath the surface, \href{https://en.wikipedia.org/wiki/Composite_data_type}{composite data types}
+\code{humdrumR} defines a number of \href{http://adv-r.had.co.nz/S4.html}{S4 classes} which are, underneath the surface, \href{https://en.wikipedia.org/wiki/Composite_data_type}{composite data types}
 made up of collections of \link[base:vector]{base-R atomic vectors}, stuck together.
 The "vectorized" nature of R's atomic types is one of R's key strengths, so in \code{humdrumR} we try to A) mostly use the standard atomic types B)
 make all the new types we \emph{do} define act as much like atomic vectors as possible.
