@@ -4,15 +4,252 @@
 \alias{pitchRepresentations}
 \title{Pitch representations and translations}
 \description{
-These functions translate various pitch representations
-between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
-they will even (automatically) read parts of a string which represent a pitch,
-and translate only that part (leaving the rest of the string unchanged).
-They all have an option \code{inPlace} which can be set to \code{FALSE}
-if you want them to discard non-pitch parts of the string(s).
+Functions for translating between numerous representations of (tonal) pitch.
 }
 \details{
-Under the hood, these functions use the \code{\link{humdrumR}}
-\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
-fundamental, \emph{lingua franca} representation of pitch.
+There are numerous ways that musicians/musicologists encode pitch information---including solfege, scientific pitch,
+intervals, scale degrees, and frequencies---each with different purposes and uses.
+As mentioned in the \link{tonalInterval} documentation, these representations can all be encoded as different
+concrete instantiations of \code{tonalInterval} objects, and thus, can be translated between each other.
+\code{humdrumR} currently recognizes XXX pitch representations:\tabular{llr}{
+   Name \tab Class \tab Description \cr
+   semit \tab \code{integer} \tab \href{https://en.wikipedia.org/wiki/Semitone}{Semitones} \cr
+   midi \tab \code{integer} \tab \href{https://en.wikipedia.org/wiki/MIDI}{MIDI} note number \cr
+   tonalChroma \tab \code{character} \tab Simple tonal lettername + accidental(s) without octave \cr
+   kernPitch \tab \code{character} \tab \href{https://www.humdrum.org/rep/kern/index.html}{Kern} pitch representation \cr
+   sciPitch \tab \code{character} \tab \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific pitch} representation \cr
+   lilyPitch \tab \code{character} \tab \href{https://lilypond.org/doc/v2.20/Documentation/notation/pitches}{LilyPond} pitch representation \cr
+   interval \tab \code{character} \tab Tonal \href{"https://en.wikipedia.org/wiki/Interval_(music)#Interval_number_and_quality"}{interval} \cr
+   scaleDegree \tab \code{character} \tab \href{"https://en.wikipedia.org/wiki/Degree_(music)"}{Scale degree} \cr
+   solfa \tab \code{character} \tab Humdrum \href{https://www.humdrum.org/rep/solfa/}{solfa} representation of solfege \cr
+   decimal \tab \code{numeric} \tab \href{https://en.wikipedia.org/wiki/Interval_ratio}{Frequency ratio} as R \link[base:numeric]{numeric} (equal temperament) \cr
+   frequency \tab \code{numeric} \tab \href{https://en.wikipedia.org/wiki/Frequency#Sound}{Sound frequency} (\href{https://en.wikipedia.org/wiki/Equal_temperament}{equal temperament}) \cr
+   fraction \tab \code{character} \tab Frequency ratio as fraction (Pythagorean tuning) \cr
 }
+
+
+Below are equalivalent examples of each pitch representation.
+All the representations in each column would be represented by the same \link{tonalInterval}---the final two rows show the \code{tonalInterval}
+slot (\verb{@Octave} and \verb{@Fifth}) values associated with each interval as well.
+(Users should never really have to think about these.)\tabular{llllllll}{
+   Name \tab Unison \tab Minor second \tab Descending major second \tab Augmented fourth \tab Perfect 5th \tab Diminished 7th \tab Minor 10th \cr
+   semit \tab \code{0L} \tab \code{1L} \tab \code{-2L} \tab \code{6L} \tab \code{7L} \tab \code{9L} \tab \code{15L} \cr
+   midi \tab \code{60L} \tab \code{61L} \tab \code{58L} \tab \code{66L} \tab \code{67L} \tab \code{69L} \tab \code{75L} \cr
+   tonalChroma \tab \code{"C"} \tab \code{"D-"} \tab \code{"B-"} \tab \code{"F#"} \tab \code{"G"} \tab \code{"B--"} \tab \code{"E-"} \cr
+   kernPitch \tab \code{"c"} \tab \code{"d-"} \tab \code{"B-"} \tab \code{"f#"} \tab \code{"g"} \tab \code{"b--"} \tab \code{"ee-"} \cr
+   sciPitch \tab \code{"C4"} \tab \code{"Db4"} \tab \code{"Bb3"} \tab \code{"F#4"} \tab \code{"G4"} \tab \code{"Bbb4"} \tab \code{"Eb5"} \cr
+   lilyPitch \tab \code{"c"} \tab \code{"des"} \tab \code{"bes,"} \tab \code{"fis"} \tab \code{"g"} \tab \code{"beses"} \tab \code{"ees'"} \cr
+   interval \tab \code{"P1"} \tab \code{"+m2"} \tab \code{"-M2"} \tab \code{"+A4"} \tab \code{"+P5"} \tab \code{"+d7"} \tab \code{"+m10"} \cr
+   scaleDegree \tab \code{"1"} \tab \code{"m2"} \tab \code{"m7"} \tab \code{"#4"} \tab \code{"5"} \tab \code{"b7"} \tab \code{"m3"} \cr
+   solfa \tab \code{"do"} \tab \code{"ra"} \tab \code{"te"} \tab \code{"fi"} \tab \code{"so"} \tab \code{"te-"} \tab \code{"me"} \cr
+   decimal \tab \code{1} \tab \code{1.059} \tab \code{0.891} \tab \code{1.414} \tab \code{1.498} \tab \code{1.682} \tab \code{2.378} \cr
+   frequency \tab \code{261.625} \tab \code{277.182} \tab \code{233.0819} \tab \code{369.994} \tab \code{391.995} \tab \code{440} \tab \code{622.253} \cr
+   fraction \tab \code{"1/1"} \tab \code{"256/243"} \tab \code{"8/9"} \tab \code{"729/512"} \tab \code{"3/2"} \tab \code{"32768/19683"} \tab \code{"64/27"} \cr
+   \verb{@Fifth} \tab \code{0L} \tab \code{-5L} \tab \code{-2L} \tab \code{6L} \tab \code{1L} \tab \code{-9L} \tab \code{-3L} \cr
+   \verb{@Octave} \tab \code{0L} \tab \code{8L} \tab \code{3L} \tab \code{-9L} \tab \code{-1L} \tab \code{15L} \tab \code{6L} \cr
+}
+
+
+As can be seen, not all representations encode the full information.
+For instance, the \emph{scaleDegree} representation drops octave information (by default).
+}
+\section{Pitch Translation}{
+
+
+\code{humdrumR} exports functions to translate all of the frequency representations above to and from \link{tonalInterval}s, and also between each other.
+An input can be converted to any representation by calling the appropriate function of the form \code{as.xxx}: for example, \code{as.solfa}.
+Some of these functions have additional arguments.
+For \code{character} arguments, the appropriate reading/writing methods are determined by the \link[humdrumR:regexDispatch]{regular expression dispatch system} by scanning the
+input strings for regular expressions.
+Each representation also has known \emph{exclusive interpretations} associated with it (see our \emph{The Humdrum Syntax} vingette for clarifiation), and any \code{as.xxx} function can
+have an \verb{Exclusive = } argument added which the dispatch system will take into account (details below).
+For instance, is you just call \code{as.kernPitch("A4")}, the dispatcher will see that the \code{"A4"} string matches scientific pitch notation---however, if you want it to be read as an interval
+(i.e., as an augmented fourth) you can specify \code{as.kernPitch("A4", Exclusive = 'interval')}, \code{humdrumR} will know that "**interval" should be interpreted as an interval.
+The regular expressions associated with each representation are:\preformatted{                 Exclusive          
+kernPitch        **kern             
+Beam             **kern             
+MelodicSignifier **kern             
+Articulation     **kern             
+Slur             **kern             
+recip            **recip            
+sciPitch         **pitch            
+solfa            **solfa            
+interval         **mint,**hint,**int
+scaleDegree      **deg              
+                 RE                                                            
+kernPitch        ([A-Ga-g])\\1*([#-])*\\2*                                     
+Beam             ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                           
+MelodicSignifier [TtMmWw]R?|[TtMmWwS$O]                                        
+Articulation     ['`\\"~I][vu]?|[vu]                                           
+Slur             [(\{\{\\[]+|[)\}\}\\]_]+|_                                        
+recip            [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                      
+sciPitch         [A-G][b#-]*[-+]?[0-9][0-9]*                                   
+solfa            [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei])
+interval         [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                               
+scaleDegree      [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                          
+                 Example
+kernPitch        c      
+Beam             /Jk    
+MelodicSignifier M      
+Articulation     '      
+Slur             (      
+recip            8.     
+sciPitch         C4     
+solfa            do     
+interval         +P5    
+scaleDegree      P5     
+}
+
+In addition, all the \code{character}-based translations can have an \code{inPlace} argument set to either \code{TRUE} or \code{FALSE}.
+If \code{inPlace = TRUE} any extract characters in the input string which are \emph{not} part of the matching regular expression will be untouched:
+for example, \code{as.kernPitch("4.A5xxxv", inPlace = TRUE)} will output \verb{"4.aaxxxv}---the \code{"4."} and \code{xxxv} are not changed.
+On the other hand \code{as.kernPitch("4.A5xxxv", inPlace = FALSE)} will just return \code{"aa"}.
+(Thus, the \code{inPlace} argument can be used as a tool to extract the desired part of strings.)
+\subsection{Special Translation Arguments}{
+
+In addition to \code{inPlace} and \code{Exclusive}, which are arguments to all pitch translation functions, some pitch translation functions have additional arguments
+to control the translation process, either in the reading (interpreting input) or writing (creating output) stage.
+}
+
+\subsection{Pitch Transformation Arguments}{
+
+All the pitch translation functions also have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
+This functionality is described in more detail in the [tonalTransformations] documentation.
+All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
+For example, you can write \code{as.kernPitch(x, generic = TRUE, Key = "A")} to extract generic intervals in the key of A major, and output them in \code{kernPitch} format.
+
+[)}}\]: R:)\%7D\%7D\%5C\%5C
+[0-9]: R:0-9
+[1-9]: R:1-9
+[0-9]: R:0-9
+[.]: R:.
+[b#-]: R:b#-
+[-+]: R:-+
+[0-9]: R:0-9
+[\^v',]: R:\%5C\%5C\%5Ev',
+[aei]: R:aei
+[+-]: R:+-
+[MmP]: R:MmP
+[Ad#b]: R:Ad#b
+[0-9]: R:0-9
+[\^v',]: R:\%5C\%5C\%5Ev',
+[MmPn]: R:MmPn
+[Ad#b]: R:Ad#b
+[0-9]: R:0-9
+[tonalTransformations]: R:tonalTransformations
+[tonalTransformations]: R:tonalTransformations
+}
+}
+
+\section{Pitch Representation Generalizations}{
+
+
+Clearly, the different pitch representation schemes listed above are not all completely unrelated.
+In fact, many are closely related, and very similar.
+These generalities are represented in \code{humdrumR}'s code, and can be used to construct similiar representations by controlling the details of how they are constructed.
+\subsection{Tonal Chroma}{
+
+\emph{Tonal Chroma} is the generic term we use to describe standard tonal names for notes without reference to octave or contour---i.e.,
+a \emph{lettername} (A-G) followed by zero or more \emph{accidentals}.
+The \code{as.tonalChroma} function is the basic function for this type of representation, while \code{as.kernPitch}, \code{as.sciPitch}, and \code{as.lilyPitch} all include deriviative calls to
+\code{as.tonalChroma}.
+\code{as.tonalChroma} includes the following reading arguments:
+\itemize{
+\item \code{upper.case}: \code{logical} argument controls whether the lettername is upper case (\code{TRUE}) or lower case (\code{FALSE}).
+\code{as.kernPitch} and \code{as.lilyPitch} both set this argument to \code{FALSE}, while \code{as.sciPitch} keeps it \code{TRUE} (the default).
+\item \code{accidental.labels}: a \link[base:names]{named} \code{character} vector which controls the characters used to represent accidentals.
+The characters must be named either \code{flat}, \code{sharp}, or \code{natural}.
+The defaults (also used by \code{as.sciPitch}) \code{accidental.labels = c(flat = "b", sharp = "#", natural = "")}, but \code{as.kernPitch} uses \code{accidental.labels = c(flat = "b")},
+and \code{as.lilyPitch} uses \code{accidental.labels = c(sharp = "is", flat = "es")}.
+}
+
+As example usage, if you want (octaveless) tonal chroma but prefer lower case letternames with kern-style accidentals, you could write
+\code{as.tonalChroma(x, upper.case = FALSE, accidental.labels = c(flat = "-"))}.
+}
+
+\subsection{Octave}{
+
+There are a number of ways of representing the specific octave information associated with notes.
+(Including discarding octave information entirely.)
+We can \link[=tonalTransformations]{partition} every specific \link{tonalInterval} as a combination of the basic \emph{simple} part and a \emph{octave} part---an octave "offset."
+\code{humdrumR} recognizes two basic approaches to conceptualizing these octave offsets: \emph{edge octaves} and \emph{centered octaves}.
+\itemize{
+\item In a \emph{edge octave} representation (the standard approach in most contexts) a unison (natural or otherwise) is considered the "bottom" of an octave,
+with all steps/intervals from 1->7 belonging to an octave, crossing over to the next octave above when reaching step 8, or conversely, immediately crossing to
+a lower octave when stepping down one step. The scientific octave corresponds to applying a octave partition using \link[base:floor]{floor} as the \code{simplifer}---see
+\link{tonalTransformations} or the \emph{Tonality in humdrumR} vignette.
+\item In a \emph{central octave} representation, a unison is considered the center of an octave, crossing into higher/lower octaves when passing from a 4th->5th either above or below.
+The central ctave corresponds to applying a octave partition using \link[base:round]{round} as the \code{simplifer}---see
+\link{tonalTransformations} or the \emph{Tonality in humdrumR} vignette.
+}
+
+In \emph{any} case, the convention (which \code{humdrumR} follows) is that only the \link[=tonalTransformations]{generic interval} determines the octave.
+For example, using scientific pitch notation, Cb4 \emph{is} in the same octave as C4, and B#4 is \emph{not} in the same octave as C5.
+
+The following table illustrates the two basic octave approaches:\preformatted{ Semitones Interval TonalChroma EdgeOctave CentralOctave
+       -13      -m9           B         -2            -1
+       -12      -P8           C         -1            -1
+        -8      -m6           E         -1            -1
+        -6      -d5          F#         -1            -1
+        -6      -A4          Gb         -1             0
+        -5      -P4           G         -1             0
+        -3      -m3           A         -1             0
+        -1      -m2           B         -1             0
+        -1      +d1          Cb          0             0
+         0       P1           C          0             0
+         2      +M2           D          0             0
+         4      +M3           E          0             0
+         6      +A4          F#          0             0
+         6      +d5          Gb          0             1
+         7      +P5           G          0             1
+         9      +M6           A          0             1
+        12      +A7          B#          0             1
+        12      +P8           C          1             1
+        14      +M9           D          1             1
+        16     +M10           E          1             1
+        18     +A11          F#          1             1
+        19     +P12           G          1             2
+}
+
+Even given these two basic abstract conceptualizations of octave information, there are still numerous ways to encode this information.
+\code{humdrumR} implements three basic octave representation styles:
+\itemize{
+\item \strong{kern} style: the first character of the tonalChroma is repeated to indicate the octave offset, with upper-case letters to indicate negative octave offsets
+and lower-case letters used to indicate positive (or zero) offsets. Thus, middle-C and the three octaves above and below it look like
+\code{"CCC"}, \code{"CC"}, \code{"C"}, \code{"c"}, \code{"cc"}, \code{"ccc"}, \code{"cccc"}.
+\item \strong{sci}entific-pitch style: the octave number (integer) is simply appended after (or before) the rest of the pitch string.
+(In standard \emph{scientific-pitch} represesntation, the value is also shifted so that middle-C is octave 4.)
+\item \strong{lily}-pond style: a pair of opposing characters are used to indicate positive and negative octave offsets, appended before or after the rest of the pitch string,
+with the number of characters indicating the octave offset.
+In 'as.lilyPond' the characters \code{"'"} (up) and \code{","}) are used (appended afted the accidental).
+We prefer, using the characters \code{"^"} and \code{"v"}, which are used by default by \code{as.scaleDegree} and \code{as.solfa}.
+}
+
+More generally, the \code{as.octave} command can be used to get a isolated octave representation.
+\code{as.octave} has the following arguments:
+\itemize{
+\item \code{markers}: a \link[base:names]{named} \code{character} vector which controls the characters used to represent octave shifts.
+The characters must be named either \code{up}, \code{down}, or \code{same}; the defaults are \code{c(up = "^", down = "v", same = "")}.
+If the \code{marker = NULL}, the octave offset (integer) itself is returned.
+\item \code{centered}: a single \code{logical} value. Is centered octave or edge octave (default = \code{FALSE})?
+\item \code{maximum}: a single integer, indicating the maximum allowed octave offset (default is \code{Inf}).
+For example, if \code{maximum = 2L}, any octave offset of two or greater will be marked \code{"^^"}.
+\item \code{minimum}: a single integer. The inverse of the \code{maximum} argument.
+\item \code{offset}: a single integer, indicating the "center" octave. The default is \code{0L}, but \emph{scientific pitch}
+uses \code{4L}.
+\item \code{style}: a single character string. If this argument is not \code{NULL} (the default) \strong{it overrides all the other arguments}.
+Must be either \code{"kern"}, \code{"Helmholtz"}, \code{"lily"}, or \code{"sci"}, which correspond to arguments of:
+\itemize{
+\item \code{"kern"}: if called directly in \code{as.octave}, returns the letter \code{"c"} in kern style octaves (e.g., \code{"c"}, \code{"CC"}).
+If called as an argument in another pitch function, applies kern style to whatever the pitch string is.
+\item \code{"helmHoltz"}: \code{markers = c(up = "'", down = ",")}, \code{maximum = NULL}, \code{minimum = NULL}, \code{offset = 0L}.
+If called as an argument to another pitch function (besides \code{as.octave}), also changes case of whatever the pitch string is, so that negative octaves are lower case.
+\item ``
+}
+}
+
+Several additional arguments appear as arguments to other pitch functions:
+\code{octave.case}, \code{octave.kern}, \code{octave.before}
+}
+}
+

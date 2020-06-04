@@ -17,7 +17,9 @@
     }
     
 }
-`%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2
+`%==%` <- function(e1, e2) !is.null(e1) &&  e1 == e2 
+`%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2 
+
 `%allin%` <- function(e1, e2) !is.null(e1) && all(e1 %in% e2)
 
 `%if%` <- function(e1, e2) {
@@ -640,7 +642,7 @@ captureValues <- function(expr, env, doatomic = TRUE) {
         return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), rlang::expr_text(expr)),
                     expr = expr))
     }
-    if (rlang::expr_text(expr[[1]]) == ":") {
+    if (rlang::expr_text(expr[[1]]) %in% c(':', '`[`', '`[[`')) {
         name <- tempvar(':', asSymbol = FALSE)
         return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
                     expr = rlang::sym(name)))
@@ -793,7 +795,7 @@ as.fraction.rational  <- function(x, sep = '/') .paste(x$Numerator, x$Denominato
 as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
 #' @export
 as.fraction.fraction  <- function(x, sep = '/') as.fraction.rational(as.rational.fraction(x), sep = sep) %dim% x %class% 'fraction'
-
+#' @export
 print.rational <- function(x) print(as.fraction(x))
 
 #### calculus
@@ -997,6 +999,16 @@ append2expr <- function(expr, exprs) {
 
 `setoptions<-` <- function(x, values) {
     # used to set options
+    # This function is extremely useful whenever you want to have a list/vector of named options
+    # and let users change SOME of the options without having to reset all of them
+    # The values are the default values you want.
+    # x, is the values that users want to change (if any)
+    # so 
+    # # setoptions(c()) <- c(a=1, b = 2)
+    # will keep the default values (a = 1, b = 2) but
+    # # setoptions(c(a = 2)) <- c(a = 1, b = 2)
+    # will overwrite the default (a = 1) with the user choice (a = 2)
+    
     if (is.null(x)) return(values)
     poss <- names(values)
     ind <- pmatch(names(x), poss)
@@ -1094,6 +1106,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     ifelse(nas, NA_character_, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
+affixer <- function(str, fix, prefix = TRUE) .paste(if (prefix) fix, str, if (!prefix) fix)
 
 plural <- function(n, then, els) IfElse(n > 1, then, els)
 

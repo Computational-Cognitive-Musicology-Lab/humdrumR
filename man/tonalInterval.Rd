@@ -28,7 +28,7 @@ All inputs will be coerced to match in length.
 What's more, the \code{octave} argument can be left blank, in which case the appropriate octave will automatically be computed
 to place the interval in the "standard octave" above middle-C.
 
-By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method, for \code{tonalInterval}s call \code{as.kernPitch}.
+By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method, for \code{tonalInterval}s call \link[=pitchRepresentations]{as.kernPitch()}.
 Thus, if you return a \code{tonalInterval} on the command line (or call \link[base:print]{print}) one one, you'll see the \link[=pitchRepresentations]{kern pitch} representation printed.
 }
 \section{Slots}{
