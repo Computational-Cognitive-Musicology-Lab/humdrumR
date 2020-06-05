@@ -28,6 +28,9 @@
     if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
 }
 
+bool <- function(x) is.logical(x) && x[1]
+false <- function(x) is.logical(x) && !x[1]
+
 `%!if%` <- function(e1, e2) {
     expr <- rlang::enexpr(e2)
     
@@ -642,7 +645,7 @@ captureValues <- function(expr, env, doatomic = TRUE) {
         return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), rlang::expr_text(expr)),
                     expr = expr))
     }
-    if (rlang::expr_text(expr[[1]]) %in% c(':', '`[`', '`[[`')) {
+    if (rlang::expr_text(expr[[1]]) %in% c(':', '`[`', '`[[`', '`@`', '`$`')) {
         name <- tempvar(':', asSymbol = FALSE)
         return(list(value = setNames(list(rlang::eval_tidy(expr, env = env)), name),
                     expr = rlang::sym(name)))
@@ -727,6 +730,7 @@ captureSymbols <- function(expr) {
 
 
 ### Math ----
+pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
 
@@ -1008,15 +1012,18 @@ append2expr <- function(expr, exprs) {
     # will keep the default values (a = 1, b = 2) but
     # # setoptions(c(a = 2)) <- c(a = 1, b = 2)
     # will overwrite the default (a = 1) with the user choice (a = 2)
+    # if x is TRUE, return values
+    # if x is FALSE, return FALSE
     
-    if (is.null(x)) return(values)
+    if (is.logical(x)) if (x[1]) x <- NULL else return(FALSE) 
+    if (is.null(x)) return(as.list(values))
     poss <- names(values)
     ind <- pmatch(names(x), poss)
     hits <- !is.na(ind)
     
     values[ind[hits]] <- x[hits]
     
-    c(x[!hits], values)
+    as.list(c(x[!hits], values))
 }
 
 logicalOption <- function(opt) {
@@ -1098,7 +1105,10 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 
 .paste <- function(..., sep = '', collapse = NULL, na.if = any) {
 # paste, but smart about NA values
-    args <- do.call('match_size', lapply(list(...), `c`))
+    args <- list(...)
+    if (length(args) == 1L) return(args[[1]])
+    
+    args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)
     
     args <- Map(`[<-`, args, nas, value = "")
@@ -1106,16 +1116,17 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     ifelse(nas, NA_character_, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
-affixer <- function(str, fix, prefix = TRUE) .paste(if (prefix) fix, str, if (!prefix) fix)
+affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)
 
-plural <- function(n, then, els) IfElse(n > 1, then, els)
+plural <- function(n, then, els) .ifelse(n > 1, then, els)
 
 nth <- function(n) {
-    affix <- character(length(n))
-    affix[n >= 4] <- "th"
-    affix[n == 1] <- "st"
-    affix[n == 2] <- "nd"
-    affix[n == 3] <- 'rd'
+    affix <- rep('th', length(n))
+    mod10 <- abs(n) %% 10
+    mod100 <- abs(n) %% 100
+    affix[mod10 == 1 & mod100 != 11] <- "st"
+    affix[mod10 == 2 & mod100 != 12] <- "nd"
+    affix[mod10 == 3 & mod100 != 13] <- 'rd'
     
     paste0(n, affix)
      

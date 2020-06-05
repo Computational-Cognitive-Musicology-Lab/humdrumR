@@ -6,7 +6,7 @@
 #' @section Tonality:
 #' 
 #' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
-#' + [integers][base::integer] --- used to encode "[line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)" tonal information
+#' + [integers][base::integer] --- used to encode "[line-of-fifths]" tonal information
 #' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
 #' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
 #' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
@@ -385,134 +385,176 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 ##### To/From line-of-fifths ####
 
-###. line-of-fifths to x ####
+#' Line-of-Fifths
+#' 
+#' The fundamental tonal space.
+#' 
+#' @name line-of-fifths
+NULL
+
 
 genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
-LO5th2genericinterval <- function(LO5th) c(1L, 5L, 2L, 6L, 3L, 7L, 4L)[1 + (LO5th %% 7)]
-LO5th2solfabase       <- function(LO5th) c('d', 's', 'r', 'l', 'm', 't', 'f')[1 + (LO5th %% 7)]
-LO5th2lettername      <- function(LO5th, upper.case = TRUE) {
-  i <- 1 + (LO5th %% 7)
-  if (upper.case) c('C', 'G', 'D', 'A', 'E', 'B', 'F')[i] else c('c', 'g', 'd', 'a', 'e', 'b', 'f')[i]
-}
-LO5th2qualityN        <- function(LO5th) as.integer((LO5th + 1) %/% 7)
 
-LO5th2accidental <- function(LO5th, accidental.labels = c()) {
-          setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = '')
-          list2env(as.list(accidental.labels), envir = environment())
+###. line-of-fifths to x ####
+
+##... line-of-fifths to tonalChroma ----
+
+LO5th2genericstep <- function(LO5th, steps = 1L:7L) steps[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
+
+
+LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) (LO5th - (LO5th %% Key)) %/% 7L
+
+cautionaries <- function(LO5th, melodic = FALSE) {
+  # identifies which LO5th elements need a cautionary label
+  
+  uniq <- unique(LO5th)
+  counts <- table(genericFifth(uniq))
+  counts <- counts[counts > 1]
+  cautionary <- genericFifth(LO5th) %in% names(counts)
+  
+  if (melodic) {
+    generic <- genericFifth(LO5th)
+    lapply(as.numeric(names(counts)),
+           function(gen) {
+             cur <- generic  == gen
+             which(cur)[c(FALSE, diff(LO5th[cur]) != 0L)]
+           }) %>% unlist -> hits
+    cautionary <- seq_along(LO5th) %in% hits
+    
+  }
+  cautionary
+}
+
+LO5th2accidental <- function(LO5th, Key = NULL, labels = c(), melodic = FALSE,  cautionary = FALSE, maximum = Inf, minimum = -maximum) {
+          setoptions(labels) <- c(sharp = '#', flat = 'b', natural = 'n')
           
-          accN <- LO5th2qualityN(LO5th)
+          # get "absolute" (c major) accidentals
+          accidentalN <- pmaxmin(LO5th2alterationN(LO5th, dset(0L, 0L)), minimum, maximum) # to c major
+          if (false(labels)) return(accidentalN)
           
-          output <- rep(natural, length(LO5th)) # vector of ""
-          isna <- is.na(LO5th)
-          output[!isna & LO5th >  5] <- strrep(sharp,  abs(accN[!isna & LO5th > 5]))
-          output[!isna & LO5th < -1] <- strrep(flat,   abs(accN[!isna & LO5th < -1]))
-          output[isna] <- NA_character_
-          output
-}
-
-LO5th2alteration <- function(LO5th, mode, cautionary = TRUE, alteration.labels = c()) {
-    # LO5th and mode must be centered to 0 (C major)
-    setoptions(alteration.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
-    list2env(as.list(alteration.labels), envir = environment())
-    
-    output <- alteration <- LO5th2accidental(LO5th - mode, alteration.labels[c('sharp', 'flat')])
-    notna <- !is.na(alteration)
-    alteration <- alteration[notna]
-    LO5th <- LO5th[notna]
-    
-    accidental <- LO5th2accidental(LO5th, alteration.labels[c('sharp', 'flat')])
-    
-    alteration[alteration != '' & LO5th <= 5 & LO5th >= -1] <- 'n'
-    alteration[LO5th >  5 & LO5th - mode >=  6] <- accidental[LO5th >  5 & LO5th - mode >= 6]
-    alteration[LO5th < -1 & LO5th - mode <= -2] <- accidental[LO5th < -1 & LO5th - mode <= -2]
-    
-    alteration[ alteration %~% '#' & LO5th < -1] <- paste0('n', accidental[ alteration %~% '#' & LO5th < -1] )
-    alteration[ alteration %~% 'b' & LO5th >  5] <- paste0('n', accidental[ alteration %~% 'b' & LO5th >  5] )
-    
-    if (cautionary) {
-        alteration[LO5th >  5 & alteration == ""] <- paste0('(', accidental[LO5th >  5 & alteration == ""], ')')
-        alteration[LO5th < -1 & alteration == ""] <- paste0('(', accidental[LO5th < -1 & alteration == ""], ')')
-    }
-    
-    output[notna] <- alteration
-    output
-}
-
-LO5th2tonalChroma <- function(LO5th, accidental.labels, upper.case = TRUE) {
-          letternames <- LO5th2lettername(LO5th, upper.case = upper.case)
-          accidentals <- LO5th2accidental(LO5th, accidental.labels)
-          .ifelse(is.na(letternames) | is.na(accidentals),
-                  NA_character_, 
-                  .paste(letternames, accidentals))
-}
-
-LO5th2quality <- function(LO5th, quality.labels = c()) {
-          setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
-          list2env(as.list(quality.labels), envir = environment()) 
-          #puts major, minor, augment, diminish, perfect into environment
-    
-          qualityN <- abs(LO5th2qualityN(LO5th))
-          qualities <- if (is.null(dim(LO5th))) rep(major, length(LO5th)) else array(major, dim = dim(LO5th))
+          accidentals <- rep(labels$natural, length(LO5th))
           na <- is.na(LO5th)
-          qualities[na] <- NA_character_
+          accidentals[na] <- NA_character_
           
-          qualities[] <- .ifelse(!na & LO5th < 2 & LO5th > -2, rep(perfect, length(LO5th)), qualities)
-          qualities[] <- .ifelse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
-          qualities[] <- .ifelse(!na & LO5th > 5,  strrep(augment,  qualityN), qualities)
-          qualities[] <- .ifelse(!na & LO5th > -6 & LO5th < -1, rep(minor, length(LO5th)), qualities)          
-          qualities[] <- .ifelse(!na & LO5th <= -6, strrep(diminish, abs(LO5th2qualityN(LO5th + 4))), qualities)     
-          qualities
+          accidentals[!na & accidentalN > 0L] <- strrep(labels$sharp, accidentalN[!na & accidentalN > 0L])
+          accidentals[!na & accidentalN < 0L] <- strrep(labels$flat,  abs(accidentalN[!na & accidentalN < 0L]))
+            
+          #
+          if ('doublesharp' %in% names(labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(labels$sharp, 2L), labels$doublesharp)
+          if ('doubleflat'  %in% names(labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(labels$flat , 2L), labels$doubleflat)
           
+          ## remove accidentals that belong to given Key, or c major by default, unless cautionary says otherwise
+          cautionaryind <- if (cautionary) cautionaries(LO5th, melodic = melodic) else FALSE
+          
+          if (!is.null(Key)) {
+            keyaccidentalN <- LO5th2alterationN(LO5th, Key)
+            
+            
+            mismatch <- sign(accidentalN) != sign(keyaccidentalN)
+            
+            accidentals[keyaccidentalN == 0L & !cautionaryind] <- ""
+            accidentals[accidentalN    == 0L & keyaccidentalN != 0L & mismatch] <- labels$natural
+            accidentals[accidentalN    != 0L & keyaccidentalN != 0L & mismatch] <- .paste(labels$natural,
+                                                                                          accidentals[accidentalN != 0L & keyaccidentalN != 0L & mismatch])
+            
+          } else {
+            accidentals[accidentalN == 0L & !cautionaryind] <- ""
+          }
+          
+          accidentals
 }
 
-LO5th2simpleInterval <- function(LO5th, quality.labels = c()) {
-          setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+LO5th2quality <- function(LO5th, labels = c(), Key = NULL, melodic = FALSE,  cautionary = FALSE, maximum = Inf, minimum = -maximum) {
+  setoptions(labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+  
+  # if (!is.null(Key)) LO5th <- LO5th - Key
+  
+  # get qualities
+  qualities <- rep(labels$major, length(LO5th))
+  na <- is.na(LO5th)
+  qualities[na] <- NA_character_
+  
+  qualities[!na & LO5th <  2 & LO5th > -2] <- labels$perfect
+  qualities[!na & LO5th > -6 & LO5th < -1] <- labels$minor      
+  
+  qualities[!na & LO5th >   5] <- strrep(labels$augment,  pmin(abs(LO5th2alterationN(LO5th[!na & LO5th  >  5]     )),  maximum))
+  qualities[!na & LO5th <= -6] <- strrep(labels$diminish, pmin(abs(LO5th2alterationN(LO5th[!na & LO5th <= -6] + 4L)), -minimum))    
+  
+  ## remove qualities that belong to given Key, or c major by default, unless cautionary says otherwise
+  cautionaryind <- if (cautionary) cautionaries(LO5th, melodic = melodic) else FALSE
+  
+  if (!is.null(Key)) {
+    keyalteration <- (LO5th - (LO5th %% Key) ) %/% 7L
     
-          generic <- LO5th2genericinterval(LO5th)
-          qualities <- LO5th2quality(LO5th,  quality.labels)
-          
-          .paste(qualities, generic, na.if = any)
-}
-
-LO5th2scaleDegree <- function(LO5th, Key = dset(0L, 0L), cautionary = TRUE, quality.labels = c()) {
-  # Key must be diatonicSet
-  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+    qualities[keyalteration == 0L & !cautionaryind] <- ""
+    
+  } else {
+    qualities[LO5th >= -1L & LO5th <= 5] <- ""
+  }
   
-  intervals <- LO5th2genericinterval(LO5th)
-  
-  needqual <- if (cautionary) seq_along(intervals) > 0L else LO5th != (LO5th %% Key)
-  
-  intervals[needqual] <- .paste(LO5th2quality(LO5th[needqual], quality.labels), intervals[needqual], na.if = any)
-  
-  intervals %dim% LO5th
+  qualities
   
 }
 
-solfatab <- rbind(d = c("e", "o", "i"),
-                  r = c("a", "e", "i"),
-                  m = c("e", "i", "y"),
-                  f = c("e", "a", "i"),
-                  s = c("e", "o", "i"),
-                  l = c("e", "a", "i"),
-                  t = c("e", "i", "y"))
 
-LO5th2solfa <- function(LO5th, Key = dset(0L, 0L)) {
-  # This is the function that does the real heavy lifting of the
-  # as.solfa function
-  # Key must be a diatonicSet
+
+#... generic tonalchroma maker
+
+LO5th2tonalChroma <- function(LO5th, steps = c('c', 'd', 'e', 'f', 'g', 'a', 'b'), steps.upper = TRUE, sep = "", Key = NULL,
+                              accidentals = TRUE, accidental.labels = c(), cautionary = FALSE, melodic = FALSE, accidental.prefix = FALSE,
+                              quality     = FALSE, quality.labels = c(), quality.prefix = TRUE,
+                              alteration.maximum = Inf, alteration.minimum = -alteration.maximum, ...) {
   
-  bases <- LO5th2solfabase(LO5th)
-  qualityN <- LO5th2qualityN(LO5th)
-  qualSign <- sign(qualityN)    
+  steps <- LO5th2genericstep(LO5th, steps = if (steps.upper) toupper(steps) else tolower(steps))
   
-  tails <- solfatab[cbind(LO5th2genericinterval(LO5th), 
-                          qualSign + 2)]
+  accidentals <- if (accidentals) accidentals <- LO5th2accidental(LO5th, Key = Key, labels = accidental.labels, 
+                                                                  cautionary = cautionary, melodic = melodic,
+                                                                  maximum = alteration.maximum, minimum = alteration.minimum)
+  qualities   <- if (quality)     quality     <- LO5th2quality(LO5th, Key = Key, labels = quality.labels, 
+                                                               cautionary = cautionary, melodic = melodic,
+                                                               maximum = alteration.maximum, minimum = alteration.minimum)
   
-  residualQualityN <- qualityN - qualSign
+  affixer(affixer(steps, accidentals, accidental.prefix, sep = sep), qualities, quality.prefix, sep = sep)
+}
+
+
+
+#.... solfa
+
+
+
+LO5th2solfa <- function(LO5th, steps.upper = FALSE, accidentals = TRUE, alteration.inflection = TRUE,
+                        alteration.maximum = Inf, alteration.minimum = -alteration.maximum,
+                        accidental.labels = c(), accidental.prefix = FALSE) {
+  setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = '')
   
-  accidentals <- strrep(c('-', '', '#')[qualSign + 2], abs(residualQualityN))
+  bases <- c('d', 'r', 'm', 'f', 's', 'l', 't')
+  bases <- LO5th2genericstep(LO5th, bases)
   
-  .paste(bases, tails, accidentals) %dim% LO5th
+  alterationN <- pmaxmin(LO5th2alterationN(LO5th), alteration.minimum, alteration.maximum)
+  qualSign <- sign(alterationN)    
+  tailcol <- 2L
+  
+  if (alteration.inflection) {
+    alterationN <- alterationN - qualSign
+    tailcol <- qualSign + 2L
+  } 
+  
+  solfatails <- rbind(d = c("e", "o", "i"),
+                    r = c("a", "e", "i"),
+                    m = c("e", "i", "y"),
+                    f = c("e", "a", "i"),
+                    s = c("e", "o", "i"),
+                    l = c("e", "a", "i"),
+                    t = c("e", "i", "y"))
+  tails <- solfatails[cbind(match(bases, rownames(solfatails)),  tailcol)]
+  
+
+  if (steps.upper) bases <- toupper(bases)
+  
+  accidentals <- strrep(unlist(accidental.labels[c('flat', 'natural', 'sharp')], use.names = FALSE)[qualSign + 2], abs(alterationN))
+  
+  affixer(.paste(bases, tails), accidentals, accidental.prefix) 
   
 }
 
@@ -550,13 +592,10 @@ genericinterval2LO5th   <- function(ints) {
 lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2L
 accidental2LO5th <- function(acc, accidental.labels = c()) {
   setoptions(accidental.labels) <- c(sharp = '#', flat = '[-b]')
-  sharps <- colSums(do.call('rbind', 
-                            lapply(accidental.labels[names(accidental.labels) == 'sharp'], 
-                                   stringi::stri_count_regex, str = acc)))
-  flats <- colSums(do.call('rbind', 
-                           lapply(accidental.labels[names(accidental.labels) == 'flat'], 
-                                  stringi::stri_count_regex, str = acc)))
-  as.integer((7 * sharps) - (7 * flats))
+  sharps <- stringi::stri_count_regex(acc, pattern = accidental.labels$sharp)
+  flats  <- stringi::stri_count_regex(acc, pattern = accidental.labels$flat)
+  
+  7L * sharps - 7L * flats
   
 }
 tonalChroma2LO5th <- function(tn) {
@@ -567,8 +606,8 @@ tonalChroma2LO5th <- function(tn) {
   LO5th + acc
 }
 solfa2LO5th <- function(solfa) {
-  base <- stringr::str_sub(solfa, start = 0L, end = 1L)        
-  tail <- stringr::str_sub(solfa, start = 2L, end = 2L)        
+  base <- tolower(stringr::str_sub(solfa, start = 0L, end = 1L))
+  tail <- tolower(stringr::str_sub(solfa, start = 2L, end = 2L))
   acc  <- stringr::str_sub(solfa, start = 3L, end = 3L)        
   
   isna <- is.na(base)
@@ -605,29 +644,30 @@ tint2edgeOctave <- function(x) {
 
 tint2octave <- function(x, octave.markers = c(up = '^', down = 'v'), 
                         octave.centered = FALSE, octave.offset = 0L, 
-                        octave.maximum = Inf, octave.minimum = -Inf, octave.style = NULL) {
+                        octave.maximum = Inf, octave.minimum = -Inf, octave.style = NULL, ...) {
   setoptions(octave.markers) <- c(up = "^", down = "v", same = "")
   
   switch(octave.style %maybe% "null",
          null = {},
+         kern = {},
          helmholtz = ,
-         lily = {octave.markers <- c(up = "'", down = ",", same = "")},
+         lily = {octave.markers <- list(up = "'", down = ",", same = "")},
          sci = {octave.offset <- 4L; octave.markers <- NULL},
          relative = {octave.centered <- TRUE },
-         .stop("In call to tint2Octave, style argument must be either 'kern', 'hemlholtz', 'lily', 'sci', or 'relative'.")
+         .stop("In call to tint2octave, style argument must be either 'kern', 'hemlholtz', 'lily', 'sci', or 'relative'.")
          )
   
   #
   octn <- (if (octave.centered) tint2centralOctave(x) else tint2edgeOctave(x)) + octave.offset
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
   
-  if (is.null(octave.markers)) return(octn)
+  if (is.logical(octave.markers) && !octave.markers[1]) return(octn)
   
   output <- if (octave.style %==% 'kern') {
     octave.kernstyle('c', octn)
   } else {
-    out <- strrep(.ifelse(octn >= 0L, octave.markers['up'], octave.markers['down']), abs(octn))
-    out[octn == 0L] <- octave.markers['same']
+    out <- strrep(.ifelse(octn >= 0L, octave.markers$up, octave.markers$down), abs(octn))
+    out[octn == 0L] <- octave.markers$same
     out 
   }
   
@@ -670,6 +710,7 @@ octaver <- function(str, tint, octave.prefix = TRUE, ...) {
 ##### To/From tonal intervals ####
 ####. tint to x ####
 
+
 ###.. semitones
 
 tint2semit <- function(x) {
@@ -680,8 +721,15 @@ tint2midi <- function(x) tint2semit(x) + 60L
 
 ###.. tonal chroma names
 
-tint2tonalChroma <- function(x, accidental.labels = c(), upper.case = TRUE, octave = FALSE,  ...) {
-  tonalchroma <- LO5th2tonalChroma(x@Fifth, accidental.labels, upper.case) %dim% x
+#.... general tools
+
+tint2accidental <- function(x, ...) LO5th2accidental(x@Fifth, ...)
+tint2quality    <- function(x, ...) LO5th2quality(x@Fifth, ...)
+
+
+tint2tonalChroma <- function(x, octave = FALSE, ...) {
+  
+  tonalchroma <- LO5th2tonalChroma(x@Fifth, ...) 
   
   if (octave) tonalchroma <- octaver(tonalchroma, x,  ...)
   
@@ -689,16 +737,14 @@ tint2tonalChroma <- function(x, accidental.labels = c(), upper.case = TRUE, octa
   
 }
 
+#.... specific ones
 
-tint2sciPitch <- function(x)  tint2tonalChroma(x, accidental.labels = c(flat = 'b'), octave.style = 'sci')
+tint2sciPitch <- function(x)  tint2tonalChroma(x, octave = TRUE, octave.style = 'sci', octave.prefix = FALSE)
 
-tint2kernPitch <- function(x) tint2tonalChroma(x, octave.style = 'kern')
+tint2kernPitch <- function(x) tint2tonalChroma(x, steps.upper = FALSE, accidental.labels = c(flat = '-'), octave = TRUE, octave.style = 'kern')
 
 tint2lilyPitch <- function(x, relative.octave = TRUE) {
-  tolower(tint2tonalChroma(x, 
-                           accidental.labels = c(sharp = 'is', flat = 'es'), 
-                           octave = if (relative.octave) 'relative' else 'absolute', 
-                           octave.marks = c(up = "'", down = ","),  octave.before = FALSE)) 
+  tint2tonalChroma(x, accidental.labels = c(sharp = 'is', flat = 'es'), steps.upper = FALSE, octave = TRUE, octave.style = 'lily')
 }
 
 ###.. intervals
@@ -706,7 +752,6 @@ tint2lilyPitch <- function(x, relative.octave = TRUE) {
 
 
 tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.part = TRUE, quality.labels = c()) {
-  
   setoptions(quality.labels) <- c(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')
   
   octave <- tint2edgeOctave(x) 
@@ -721,10 +766,10 @@ tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.p
     alteration <- LO5th2quality(x@Fifth, quality.labels) %dim% x
   } 
   if (generic.part) {
-    genericInterval <- LO5th2genericinterval(x@Fifth) %dim% x
+    genericInterval <- LO5th2genericstep(x@Fifth) %dim% x
     octave[!is.na(octave) & octave < 0L & genericInterval != 1L] <- octave[!is.na(octave) & octave < 0L & genericInterval != 1L] + 1L  # can octave be NA?
     # generic <- empty(genericInterval, length(x), dim(x))
-    generic<- as.character(abs(genericInterval + (7L * abs(octave))))
+    generic <- as.character(abs(genericInterval + (7L * abs(octave))))
   } 
  
   
@@ -739,9 +784,6 @@ tint2scaleDegree <- function(x, Key = NULL, cautionary = FALSE, quality.labels =
     setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
     
     Key <- if (is.null(Key)) dset(0, 0) else as.diatonicSet(Key)
-    
-    x   <- x - Key
-    Key <- Key - getRoot(Key)
     
     deg  <- LO5th2scaleDegree(x@Fifth, Key, cautionary, quality.labels = quality.labels)
 
@@ -830,7 +872,7 @@ tint2contour <- function(x, threshold = tint( , 6),  contour.labels = c()) {
     threshold <- as.tonalInterval(threshold)
     targets <- abs(x) >= threshold & !is.na(x)
     
-    contour[targets] <- contour.labels[c('Down', 'Same', 'Up')[sign(x[targets]) + 2L]]
+    contour[targets] <- unlist(contour.labels[c('Down', 'Same', 'Up')[sign(x[targets]) + 2L]])
     contour <- .ifelse(targets, 
                                    strrep(contour, 1 + (tint2semit(abs(x) - threshold) %/% 12L)), 
                                    contour)
@@ -1672,7 +1714,7 @@ pitchgeneric <- function(pitchrep, secondargs = alist(), endargs = alist()) {
 as.tonalInterval <- pitchgeneric("as.tonalInterval")
 as.semit         <- pitchgeneric("as.semit")
 as.midi          <- pitchgeneric("as.midi")
-as.tonalChroma   <- pitchgeneric("as.tonalChroma", endargs = alist(accidental.labels = ))
+as.tonalChroma   <- pitchgeneric("as.tonalChroma")
 as.sciPitch      <- pitchgeneric("as.sciPitch",    endargs = alist(accidental.labels = ))
 as.kernPitch     <- pitchgeneric("as.kernPitch",   endargs = alist(accidental.labels = ))
 as.lilyPitch     <- pitchgeneric("as.lilyPitch")

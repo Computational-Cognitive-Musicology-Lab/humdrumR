@@ -97,7 +97,6 @@ matchClose <- function(x, table, n = 1L) {
           list(Table = x, X = output)
 }
 
-pmaxmin <- function(x, min, max) pmax(1, pmin(x, max))  
 
 findAfter <- function(vec, after, pattern, npattern = 1) {
  

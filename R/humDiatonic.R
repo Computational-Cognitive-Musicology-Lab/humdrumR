@@ -359,7 +359,7 @@ LO5th2romanroot <- function(LO5th, mode) {
     # LO5th and mode should be centered relative to C major (0,0)
     numer <- c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')[LO5th2genericinterval(LO5th)]
     
-    alteration <- LO5th2alteration(LO5th, mode)
+    alteration <- LO5th2accidental(LO5th, mode)
     
     paste0(alteration, numer)
 }
@@ -559,7 +559,7 @@ tset2romanNumeral <- function(tset, cautionary = FALSE) {
  extension <- array(NA_character_, dim = dim(LO5ths))
  
 
- extension[] <- LO5th2alteration(LO5ths, tset@Mode, cautionary = FALSE)
+ extension[] <- LO5th2accidental(LO5ths, tset@Mode, cautionary = FALSE)
  highest <- applyrows(extension, function(row) seq_len(ncol(extension)) == max(which(!is.na(row))))
  extension[] <- sweep(extension, 2, c('7', '9', '11', '13'), paste0)
  extension[!(highest | (!is.na(extension) & extension == ''))] <- ""

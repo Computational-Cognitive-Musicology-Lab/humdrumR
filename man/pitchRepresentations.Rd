@@ -50,8 +50,8 @@ slot (\verb{@Octave} and \verb{@Fifth}) values associated with each interval as 
 }
 
 
-As can be seen, not all representations encode the full information.
-For instance, the \emph{scaleDegree} representation drops octave information (by default).
+As can be seen, not all representations encode the full pitch information.
+For instance, the \emph{scaleDegree} representation drops octave information (by default), while \emph{semit} drops tonal information (i.e., that \code{C# != Db}).
 }
 \section{Pitch Translation}{
 
@@ -144,13 +144,76 @@ For example, you can write \code{as.kernPitch(x, generic = TRUE, Key = "A")} to 
 \section{Pitch Representation Generalizations}{
 
 
-Clearly, the different pitch representation schemes listed above are not all completely unrelated.
-In fact, many are closely related, and very similar.
-These generalities are represented in \code{humdrumR}'s code, and can be used to construct similiar representations by controlling the details of how they are constructed.
+The different pitch representation schemes listed above are not all completely unrelated---many are very similar.
+Indeed, we can abstract several basic, common, principles that are shared between various pitch representations.
+These shared abstractions simplify the organization of code of \code{humdrumR}, and also allow us to construct new concrete representations based on these abstractions.
+They also mean that many pitch translation functions share common arguments.
+The abstract pitch representation concepts encoded in \code{humdrumR} are:
+\itemize{
+\item Tonality
+\itemize{
+\item Scale steps
+\itemize{
+\item letter names
+\item scale degrees
+\item solfege
+}
+\item Alterations
+\itemize{
+\item Accidentals
+}
+\item Quality
+}
+\item Octave
+\item Contour
+}
+
+For a in depth exploration of the underlying theories, see the \emph{Tonality in humdrumR} vignette
+This document focuses only on ideas relavent to understanding the arguments used in pitch translation functions.
+\subsection{Tonality}{
+
+As explained in the \emph{Tonality in humdrumR} vignette, Western tonality is fundamentally based in partitioning the \href{https://en.wikipedia.org/wiki/Circle_of_fifths}{line-of-fifths}
+into a \link[=tonalTransformations]{generic}, diatonic component (the line-of-fifths \href{"https://en.wikipedia.org/wiki/Modulo_(mathematics)"}{modulo} 7) and zero or more
+\href{"https://en.wikipedia.org/wiki/Accidental_(music)"}{accidental/alteration} components.
+More generally, the intervals between generic steps have associated labels, known as \emph{qualities}.
+\subsection{Scale Steps}{
+
+The \emph{generic} component of tonal pitch is typically represented not in it's underlying line-of-fifths dimension, but in the frequency dimension as a sequence of "scale \strong{steps}."
+Traditionally, these scale steps have been are represented in three equivalent forms: as letters (A-G), numbers (1-7+), or conventional syllables (solfege).
+Letter name and solfege representations of steps are limited to a \link[=tonalTransformations]{simple} within a single octave, and are always \emph{ascending}/\emph{positive}.
+In contrast, the more general numeric representation of steps \emph{can} be extended to \link[=tonalTransformations]{complex} intervals (i.e., greater than 7) as well as negative steps.
+In \code{humdrumR},
+\itemize{
+\item Lettername based representations incude \code{tonalChroma}, \code{kernPitch}, \code{lilyPitch}, \code{helmholtz}, and \code{sciPitch} (see the \strong{Tonal Chroma} section below).
+upper case (this can be overridden by octave representation arguments, see below).
+The only special argument associated with the scale step portion of these representations is the \code{upper.case} logical argument, which controls if the lettername should be uppercase.
+\item The \emph{solfege} representation is only associated with the \code{solfa} function.
+\item The numeric representation of steps include \code{interval} and \code{scaleDegree}. In the former, direction (+/-) and complex intervals are allowed.
+}
+}
+
+\subsection{Alterations/Qualities}{
+
+The \emph{accidental} or "alteration" components of a tonal pitch are represented by additional affixed to a scale step representation.
+There are two rimary accidentals, \href{"https://en.wikipedia.org/wiki/Sharp_(music)"}{sharp} and \href{"https://en.wikipedia.org/wiki/Flat_(music)"}{flat},
+though they can be added together to create multi-sharps and multi-flats. (Sharps and flats can not be mixed, at least in \code{humdrumR}.)
+An accidental or alteration corresponds to adding or subtractiong multiples of \code{7} from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
+In addition, there is the \href{"https://en.wikipedia.org/wiki/Natural_(music)"}{natural} token, which is used to indicate that an interval is not altered.
+
+All \code{humdrumR} pitch translation functions involving accidental representations have an \code{accidental.labels} argument: a \link[base:names]{named} \code{character} vector
+which controls the characters used to represent accidentals.
+The characters must be named either \code{flat}, \code{sharp}, or \code{natural}.
+The defaults are \code{c(flat = "b", sharp = "#", natural = "")}, though the kern representation uses \code{c(flat = "-")}.
+
+The \emph{natural} accidental is only used in the context of a key, and even then are usually ommited.
+To use natural accidentals, a common \code{cautionary} argument can be used.
+If \code{cautionary = TRUE} \emph{and} a \code{Key} is specified, accidental-based pitch representations will include natural tokens.
+}
+
 \subsection{Tonal Chroma}{
 
-\emph{Tonal Chroma} is the generic term we use to describe standard tonal names for notes without reference to octave or contour---i.e.,
-a \emph{lettername} (A-G) followed by zero or more \emph{accidentals}.
+\emph{Tonal Chroma} is the generic term we use to describe standard tonal names for notes without reference to octave or contour---i.e., a \emph{lettername} (A-G)
+followed by zero or more \emph{accidentals}.
 The \code{as.tonalChroma} function is the basic function for this type of representation, while \code{as.kernPitch}, \code{as.sciPitch}, and \code{as.lilyPitch} all include deriviative calls to
 \code{as.tonalChroma}.
 \code{as.tonalChroma} includes the following reading arguments:
@@ -165,6 +228,8 @@ and \code{as.lilyPitch} uses \code{accidental.labels = c(sharp = "is", flat = "e
 
 As example usage, if you want (octaveless) tonal chroma but prefer lower case letternames with kern-style accidentals, you could write
 \code{as.tonalChroma(x, upper.case = FALSE, accidental.labels = c(flat = "-"))}.
+}
+
 }
 
 \subsection{Octave}{
@@ -187,28 +252,28 @@ In \emph{any} case, the convention (which \code{humdrumR} follows) is that only 
 For example, using scientific pitch notation, Cb4 \emph{is} in the same octave as C4, and B#4 is \emph{not} in the same octave as C5.
 
 The following table illustrates the two basic octave approaches:\preformatted{ Semitones Interval TonalChroma EdgeOctave CentralOctave
-       -13      -m9           B         -2            -1
-       -12      -P8           C         -1            -1
-        -8      -m6           E         -1            -1
-        -6      -d5          F#         -1            -1
-        -6      -A4          Gb         -1             0
-        -5      -P4           G         -1             0
-        -3      -m3           A         -1             0
-        -1      -m2           B         -1             0
-        -1      +d1          Cb          0             0
-         0       P1           C          0             0
-         2      +M2           D          0             0
-         4      +M3           E          0             0
-         6      +A4          F#          0             0
-         6      +d5          Gb          0             1
-         7      +P5           G          0             1
-         9      +M6           A          0             1
-        12      +A7          B#          0             1
-        12      +P8           C          1             1
-        14      +M9           D          1             1
-        16     +M10           E          1             1
-        18     +A11          F#          1             1
-        19     +P12           G          1             2
+       -13      -m9        <NA>         -2            -1
+       -12       -8       TRUE#         -1            -1
+        -8      -m6        <NA>         -1            -1
+        -6      -d5        <NA>         -1            -1
+        -6      -A4        <NA>         -1             0
+        -5       -4        <NA>         -1             0
+        -3      -m3        <NA>         -1             0
+        -1      -m2        <NA>         -1             0
+        -1      +d1       TRUE#          0             0
+         0        1       TRUE#          0             0
+         2       +2        <NA>          0             0
+         4       +3        <NA>          0             0
+         6      +A4        <NA>          0             0
+         6      +d5        <NA>          0             1
+         7       +5        <NA>          0             1
+         9       +6        <NA>          0             1
+        12      +A7        <NA>          0             1
+        12       +8       TRUE#          1             1
+        14       +9        <NA>          1             1
+        16      +10        <NA>          1             1
+        18     +A11        <NA>          1             1
+        19      +12        <NA>          1             2
 }
 
 Even given these two basic abstract conceptualizations of octave information, there are still numerous ways to encode this information.

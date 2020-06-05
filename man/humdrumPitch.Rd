@@ -11,7 +11,7 @@
 
 There are four data types extensively used in \code{humdrumR} to encode/process \href{https://en.wikipedia.org/wiki/Tonality}{tonal} musical information:
 \itemize{
-\item \link[base:integer]{integers} --- used to encode "\href{https://en.wikipedia.org/wiki/Circle_of_fifths}{line-of-fifths}" tonal information
+\item \link[base:integer]{integers} --- used to encode "\link{line-of-fifths}" tonal information
 \item \link{tonalInterval} --- embeds line-of-fifth tonal integers alongside \href{https://en.wikipedia.org/wiki/Octave}{octave} and \href{"https://en.wikipedia.org/wiki/Cent_(music)"}{cent} information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
 \item \link{diatonicSet} --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
 \item \link{tertianSet} --- an extension of \code{diatonicSet} used to encode  \href{https://en.wikipedia.org/wiki/Tertian}{tertian} diatonic harmonies.
