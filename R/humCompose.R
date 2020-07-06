@@ -512,6 +512,7 @@ humdrumDispatch <- function(...) {
     #
     arguments <- c(attr(regexDispatch, 'arguments'), attr(exclusiveDispatch, 'arguments'))
     arguments <- arguments[!duplicated(names(arguments))]
+    arguments <- c(arguments[names(arguments) != '...'], arguments[names(arguments) == '...'])
     
     regexes <- attr(exclusiveDispatch, 'regexes')
     

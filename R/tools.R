@@ -28,8 +28,13 @@
     if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
 }
 
-bool <- function(x) is.logical(x) && x[1]
+true <- function(x) is.logical(x) && x[1]
 false <- function(x) is.logical(x) && !x[1]
+# these two functions allow us to test if a variable is 
+# a logical TRUE or FALSE, but not give an error if
+# the variable is NOT logical.
+# (If the variable is NOT logical) it always returns FALSE
+
 
 `%!if%` <- function(e1, e2) {
     expr <- rlang::enexpr(e2)
@@ -849,7 +854,11 @@ calculus <- function(x, n, skip = list(na)) {
     } else {
         Recall(integrate(x, skip), n + 1L)
     }
-    
+}
+
+#' @export
+expand <- function(x) {
+    .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
 }
 
 ### Metaprogramming ----
@@ -993,7 +1002,7 @@ append2expr <- function(expr, exprs) {
     for (i in 1:length(exprs)) {
         expr[[i + l]] <- exprs[[i]]
     }
-    
+    names(expr)[(l + 1):length(expr)] <- names(exprs)
     expr
 }
 
@@ -1047,6 +1056,50 @@ nestoptions <- function(opts, ...) {
         opts[[names(nests)[i]]] <- do.call('c', opts[vals])
     }
     opts[!names(opts) %in% unlist(nests)]
+    
+}
+
+
+
+
+`%dots%` <- function(call, predicate) {
+    # this magic function takes a call with a ...
+    # and applies that expression, except first filters out arguments from the ...
+    # which don't match predicate function
+    # allows us to send DIFFERENT ... to sub functions
+    
+    call <- rlang::enexpr(call)
+    
+    funccall <- deparse(call[[1]])
+    
+    call[[1]] <- quote(list)
+    call <- call[!sapply(call, function(x) deparse(x) == "...")]
+    args <- eval(call, parent.frame())
+    
+    #
+    dots <- eval(quote(list(...)), envir = parent.frame())
+    dots <- dots[predicate(dots)]
+    
+    do.call(funccall, c(args, dots))
+    
+}
+
+overdot <- function(call) {
+    # this function removes redundant arguments 
+    # in ldots 
+    
+    call <- rlang::enexpr(call)
+    
+    dots <- eval(quote(list(...)), envir = parent.frame())
+    
+    if (length(dots) > 0) {
+        call <- call[!sapply(call, function(x) deparse(x) == "...")]
+        call <- call[!names(call) %in% names(dots)]
+        
+        call <- append2expr(call, dots)
+    }    
+    eval(call, envir = parent.frame())
+    
     
 }
 
@@ -1114,6 +1167,24 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
     ifelse(nas, NA_character_, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
+}
+
+has.prefix <- function(prefix, x) {
+    prefix <- paste0('^', prefix)
+    
+    if (missing(x))  function(x) grepl(prefix, x) else grepl(prefix, x)
+}
+
+pasteordered <- function(order, ..., sep = '') {
+    # pastes named elements of ... using order supplied in order
+    strs <- list(...) # named vector of strings,
+    strs <- strs[lengths(strs) > 0L]
+    
+    labels <- names(strs)
+    ordered <- strs[pmatch( order, labels, nomatch = 0)]
+    
+    do.call('.paste', c("", ordered, sep = sep))
+    
 }
 
 affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)

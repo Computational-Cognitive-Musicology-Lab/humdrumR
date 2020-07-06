@@ -4,18 +4,26 @@
 \alias{pitchRepresentations}
 \title{Pitch representations and translations}
 \description{
-Functions for translating between numerous representations of (tonal) pitch.
+Functions for creating and/or translating between numerous representations of pitch.
 }
 \details{
-There are numerous ways that musicians/musicologists encode pitch information---including solfege, scientific pitch,
-intervals, scale degrees, and frequencies---each with different purposes and uses.
-As mentioned in the \link{tonalInterval} documentation, these representations can all be encoded as different
-concrete instantiations of \code{tonalInterval} objects, and thus, can be translated between each other.
-\code{humdrumR} currently recognizes XXX pitch representations:\tabular{llr}{
+There are numerous ways that musicians and musicologists encode pitch information---solfege, scientific pitch,
+intervals, scale degrees, frequencies, etc.---each with different purposes and uses.
+Some of these representations are numeric, but most involve letters and other characters.
+Any of these concrete representations can be translated to and from
+abstract \link{tonalInterval} objects: \code{tonalInterval}s completely represent all/any of these standard representations,
+so \emph{cocrete pitch representation -> tonalInterval} is guaranteed to be lossless.
+However, not all pitch representations encode complete tonal pitch information, so
+\emph{tonalInterval -> concrete pitch representation} may be lossy.
+These caneats asside, \code{humdrumR} can, via the common \code{tonalInterval} representation, encode and translate \emph{between} various
+representations: we can read in data in any reprsentation, manipulate it, and write it to the same or a different representation.
+This documentation describes \code{humdrumR}'s pitch representation and translation features.
+(\code{tonalIntervals} also give us easy ways to \strong{manipulate} pitch information---see the \link{tonalTransform} documentation.)
+
+\code{humdrumR} currently recognizes XXX "standard" pitch representations:\tabular{llr}{
    Name \tab Class \tab Description \cr
    semit \tab \code{integer} \tab \href{https://en.wikipedia.org/wiki/Semitone}{Semitones} \cr
    midi \tab \code{integer} \tab \href{https://en.wikipedia.org/wiki/MIDI}{MIDI} note number \cr
-   tonalChroma \tab \code{character} \tab Simple tonal lettername + accidental(s) without octave \cr
    kernPitch \tab \code{character} \tab \href{https://www.humdrum.org/rep/kern/index.html}{Kern} pitch representation \cr
    sciPitch \tab \code{character} \tab \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific pitch} representation \cr
    lilyPitch \tab \code{character} \tab \href{https://lilypond.org/doc/v2.20/Documentation/notation/pitches}{LilyPond} pitch representation \cr
@@ -28,14 +36,12 @@ concrete instantiations of \code{tonalInterval} objects, and thus, can be transl
 }
 
 
-Below are equalivalent examples of each pitch representation.
-All the representations in each column would be represented by the same \link{tonalInterval}---the final two rows show the \code{tonalInterval}
-slot (\verb{@Octave} and \verb{@Fifth}) values associated with each interval as well.
-(Users should never really have to think about these.)\tabular{llllllll}{
+Below are equivalent examples of each of these standard pitch representation; all the representations in each column of the table are
+represented by the same \link{tonalInterval}---the final
+two rows show the \code{tonalInterval} slot (\verb{@Octave} and \verb{@Fifth}) values associated with each interval as well (users should never really have to think about these).\tabular{llllllll}{
    Name \tab Unison \tab Minor second \tab Descending major second \tab Augmented fourth \tab Perfect 5th \tab Diminished 7th \tab Minor 10th \cr
    semit \tab \code{0L} \tab \code{1L} \tab \code{-2L} \tab \code{6L} \tab \code{7L} \tab \code{9L} \tab \code{15L} \cr
    midi \tab \code{60L} \tab \code{61L} \tab \code{58L} \tab \code{66L} \tab \code{67L} \tab \code{69L} \tab \code{75L} \cr
-   tonalChroma \tab \code{"C"} \tab \code{"D-"} \tab \code{"B-"} \tab \code{"F#"} \tab \code{"G"} \tab \code{"B--"} \tab \code{"E-"} \cr
    kernPitch \tab \code{"c"} \tab \code{"d-"} \tab \code{"B-"} \tab \code{"f#"} \tab \code{"g"} \tab \code{"b--"} \tab \code{"ee-"} \cr
    sciPitch \tab \code{"C4"} \tab \code{"Db4"} \tab \code{"Bb3"} \tab \code{"F#4"} \tab \code{"G4"} \tab \code{"Bbb4"} \tab \code{"Eb5"} \cr
    lilyPitch \tab \code{"c"} \tab \code{"des"} \tab \code{"bes,"} \tab \code{"fis"} \tab \code{"g"} \tab \code{"beses"} \tab \code{"ees'"} \cr
@@ -50,73 +56,124 @@ slot (\verb{@Octave} and \verb{@Fifth}) values associated with each interval as 
 }
 
 
-As can be seen, not all representations encode the full pitch information.
-For instance, the \emph{scaleDegree} representation drops octave information (by default), while \emph{semit} drops tonal information (i.e., that \code{C# != Db}).
+This table illustrates that some reprsentations are lossy, as they don't encode the full pitch information.
+For instance, the \emph{scaleDegree} representation drops octave information, while \emph{semit} drops tonal information (i.e., that \code{C# != Db}).
 }
 \section{Pitch Translation}{
 
 
-\code{humdrumR} exports functions to translate all of the frequency representations above to and from \link{tonalInterval}s, and also between each other.
+\code{humdrumR} exports functions to read and write all of the standard reprsentations above, as well as some custom non-standard representations (see \code{as.tonalChroma} below).
 An input can be converted to any representation by calling the appropriate function of the form \code{as.xxx}: for example, \code{as.solfa}.
-Some of these functions have additional arguments.
-For \code{character} arguments, the appropriate reading/writing methods are determined by the \link[humdrumR:regexDispatch]{regular expression dispatch system} by scanning the
-input strings for regular expressions.
-Each representation also has known \emph{exclusive interpretations} associated with it (see our \emph{The Humdrum Syntax} vingette for clarifiation), and any \code{as.xxx} function can
-have an \verb{Exclusive = } argument added which the dispatch system will take into account (details below).
-For instance, is you just call \code{as.kernPitch("A4")}, the dispatcher will see that the \code{"A4"} string matches scientific pitch notation---however, if you want it to be read as an interval
-(i.e., as an augmented fourth) you can specify \code{as.kernPitch("A4", Exclusive = 'interval')}, \code{humdrumR} will know that "**interval" should be interpreted as an interval.
-The regular expressions associated with each representation are:\preformatted{                 Exclusive          
-kernPitch        **kern             
-Beam             **kern             
-MelodicSignifier **kern             
-Articulation     **kern             
-Slur             **kern             
-recip            **recip            
-sciPitch         **pitch            
-solfa            **solfa            
-interval         **mint,**hint,**int
-scaleDegree      **deg              
-                 RE                                                            
-kernPitch        ([A-Ga-g])\\1*([#-])*\\2*                                     
-Beam             ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                           
-MelodicSignifier [TtMmWw]R?|[TtMmWwS$O]                                        
-Articulation     ['`\\"~I][vu]?|[vu]                                           
-Slur             [(\{\{\\[]+|[)\}\}\\]_]+|_                                        
-recip            [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                      
-sciPitch         [A-G][b#-]*[-+]?[0-9][0-9]*                                   
-solfa            [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei])
-interval         [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                               
-scaleDegree      [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                          
-                 Example
-kernPitch        c      
-Beam             /Jk    
-MelodicSignifier M      
-Articulation     '      
-Slur             (      
-recip            8.     
-sciPitch         C4     
-solfa            do     
-interval         +P5    
-scaleDegree      P5     
+The complete list of \code{as.xxx} functions for pitch representations is:
+\itemize{
+\item Atonal
+\itemize{
+\item \code{as.semit}
+\item \code{as.midi}
+}
+\item Tonal
+\itemize{
+\item \code{as.tonalChroma}
+\itemize{
+\item \code{as.scaleStep}
+\item \code{as.accidental}
+\item \code{as.quality}
+\item \code{as.contour}
+}
+\item \code{as.kernPitch}
+\item \code{as.lilyPitch}
+\item \code{as.sciPitch}
+\item \code{as.interval}
+\item \code{as.scaleDegree}
+\item \code{as.solfa}
+}
+\item Frequency
+\itemize{
+\item \code{as.decimal}
+\item \code{as.frequency}
+\item \code{as.fraction}
+}
 }
 
-In addition, all the \code{character}-based translations can have an \code{inPlace} argument set to either \code{TRUE} or \code{FALSE}.
-If \code{inPlace = TRUE} any extract characters in the input string which are \emph{not} part of the matching regular expression will be untouched:
-for example, \code{as.kernPitch("4.A5xxxv", inPlace = TRUE)} will output \verb{"4.aaxxxv}---the \code{"4."} and \code{xxxv} are not changed.
-On the other hand \code{as.kernPitch("4.A5xxxv", inPlace = FALSE)} will just return \code{"aa"}.
+Note that none of the functions have a plural name, so it's not \code{as.semits} or \code{as.intervals} even if you are applying them to multiple inputs!
+
+Each of these \code{as.xxx} functions does \emph{three} things:
+\enumerate{
+\item Read the input as a \code{tonalInterval} (details below).
+\item If desired, transform the \code{tonalInterval} (see \link{tonalTransform}).
+\item Write the \code{tonalInterval} to the output representation (details below).
+}
+
+Each of these three steps has numerous options that you can control via special arguments.
+The details of the reading and writing stages, and all the associated arguments are described in subsequent sections.
+All pitch translation functions \emph{also} have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
+All the transformation arguments of the \link[=tonalTransformations]{tonalTransform} function can be applied to any pitch translation function.
+For example, you can write \code{as.kernPitch(x, generic = TRUE, Key = "A")} to extract generic intervals in the key of A major and output them in \code{kernPitch} format.
+These transformation arguments are listed as "common" arguments in the table below, and explained in more detail in the \link{tonalTransformations} documentation.
+}
+
+\section{Reading Pitch Information}{
+
+
+The master function \code{as.tonalInterval} converts any recognized pitch input into a \code{tonalInterval} object.
+All the main \code{as.xxx} functions implicitely call \code{as.tonalInterval}.
+How \code{as.tonalInterval} interprets input as pitch information is determined by the base R \link[methods:Methods_Details]{dispatch system} (interpreting the class of the input) and,
+if the input is a character-string, humdrumR's \link[humdrumR:regexDispatch]{regular expression dispatch system}.
+
+The process of reading an input as a \code{tonalInterval} follows two steps:
+
+First, the base R dispatch system checks the \link[base:class]{class} of the input. There are currently methods for three recognized classes:
+\itemize{
+\item \code{integer}: integers are interpreted as semitones.
+\item \code{numeric}: numeric (floating point, not integer values) are interpreted as frequency ratios.
+\item \code{character}: if the input is a character, humdrumRs dispatch system comes into play (see next paragraph).
+}
+
+Given an character-string input, the \code{humdrumR} \link[humdrumR:regexDispatch]{regular expression dispatch system} determines the appropriate way to parse
+pitch information from the string using two criteria:
+\enumerate{
+\item matching known \emph{regular expressions} in the string and
+\item based on the \code{Exclusive} argument, which indicates a \emph{exclusive interpretations} associated with it (see our \emph{The Humdrum Syntax} vingette if you don't know
+what an exclusive interpretation is).
+For any input string, humdrumR searches for known regular expressions and decides to interpret the input based on whichever regular expression matches the \emph{most} input strings.
+For instance, if you call \code{as.kernPitch("A4")} (or any \code{as.xxx} pitch function), the dispatcher will see that the \code{"A4"} string matches the regular expression for
+scientific pitch notation (i.e., the A above middle C) and \emph{also} the regular expression for intervals (i.e., an augmented fourth).
+In this case, there is only one input string, so humdrumR will five scientific notation precedence and interpret the input as the A above middle C.
+However, if we have an input with more information, like \code{as.kernPitch(c("A4", "P5"))}, humdrumR will see that \strong{both} inputs match intervals, but only the first one matches
+scientific pitch notation---therefore, humdrumR will interpret both strings as intervals (augmented fourth and perfect 5th).
+Note that humdrumR will \emph{not} use two different interpretions of the same string.
+Also, any strings which match no known regular expressions, will result in \code{NA} (unless \code{inPlace = TRUE}; see below).
+}
+
+What if we want to interpret \code{as.kernPitch("A4")} as an interval? Well, we can use the \code{Exculusive} argument.
+The \code{Exclusive} argument gives more information to the dispatcher, which will override the purely-regex based decisions.
+For instance, if we specify \code{as.kernPitch("A4", Exclusive = 'interval')}, \code{humdrumR} will know that the exclusive interpretation "**interval"
+should be interpreted as an interval.
+If we run \code{as.kernPitch(c("A4", "P5"), Exclusive = 'pitch')}, humdrumR will return \verb{("a", NA)}, because the second input can't be interpreted as a scientfic pitch.
+However, the \code{Exclusive} argument is vectorized, which gives us the option of using multiple input interpretations on different parts of the same input.
+For instance, \verb{as.kernPitch(c("A4", "A4"), Exclusive = c('pitch', 'int')} will return \verb{("a", "f#")}---the \code{'pitch'} exclusive intepretation is
+matched with the first \code{"A4"} while the \code{'int'} interpretation is matched with the second one!
+
+The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:\preformatted{                 Exclusive           RE                                                             Example
+kernPitch        **kern              ([A-Ga-g])\\1*([#-])*\\2*                                      c      
+Beam             **kern              ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                            /Jk    
+MelodicSignifier **kern              [TtMmWw]R?|[TtMmWwS$O]                                         M      
+Articulation     **kern              ['`\\"~I][vu]?|[vu]                                            '      
+Slur             **kern              [(\{\{\\[]+|[)\}\}\\]_]+|_                                         (      
+recip            **recip             [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                       8.     
+sciPitch         **pitch             [A-G][b#-]*[-+]?[0-9][0-9]*                                    C4     
+solfa            **solfa             [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei]) do     
+interval         **mint,**hint,**int [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                                +P5    
+scaleDegree      **deg               [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                           P5     
+}
+
+A final useful option is controlled using the logical \code{inPlace} argument.
+If \code{inPlace = TRUE} any extra characters in the input string which are \emph{not} part of the matching regular expression will be left unchanged:
+for example, \code{as.kernPitch("4.A5xxxv", inPlace = TRUE)} will output \verb{"4.aaxxxv}---the \code{"A5"} (scientific pitch) is translated to \code{"aa"} (kern pitch)
+but the \code{"4."} and \code{"xxxv"} are not changed.
+In contrast, \code{as.kernPitch("4.A5xxxv", inPlace = FALSE)} will just return \code{"aa"}, stripping away the \code{"4."} and \code{"xxxv"}.
 (Thus, the \code{inPlace} argument can be used as a tool to extract the desired part of strings.)
-\subsection{Special Translation Arguments}{
-
-In addition to \code{inPlace} and \code{Exclusive}, which are arguments to all pitch translation functions, some pitch translation functions have additional arguments
-to control the translation process, either in the reading (interpreting input) or writing (creating output) stage.
-}
-
-\subsection{Pitch Transformation Arguments}{
-
-All the pitch translation functions also have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
-This functionality is described in more detail in the [tonalTransformations] documentation.
-All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
-For example, you can write \code{as.kernPitch(x, generic = TRUE, Key = "A")} to extract generic intervals in the key of A major, and output them in \code{kernPitch} format.
+Note that if \code{inPlace = TRUE}, any inputs which fail to match anything will just be left unchanged.
 
 [)}}\]: R:)\%7D\%7D\%5C\%5C
 [0-9]: R:0-9
@@ -136,185 +193,437 @@ For example, you can write \code{as.kernPitch(x, generic = TRUE, Key = "A")} to 
 [MmPn]: R:MmPn
 [Ad#b]: R:Ad#b
 [0-9]: R:0-9
-[tonalTransformations]: R:tonalTransformations
-[tonalTransformations]: R:tonalTransformations
-}
 }
 
-\section{Pitch Representation Generalizations}{
+\section{Read/Writing Tonal Pitch Information}{
 
 
-The different pitch representation schemes listed above are not all completely unrelated---many are very similar.
-Indeed, we can abstract several basic, common, principles that are shared between various pitch representations.
-These shared abstractions simplify the organization of code of \code{humdrumR}, and also allow us to construct new concrete representations based on these abstractions.
-They also mean that many pitch translation functions share common arguments.
-The abstract pitch representation concepts encoded in \code{humdrumR} are:
+Most of the pitch representations defined in \code{humdrumR} are based in Western diatonic \emph{tonality}---for info on our atonal representations, see the \emph{Read/Writing Atonal Pitch Information} section below.
+The predefined \code{kernPitch}, \code{sciPitch}, \code{lilyPitch}, \code{helmholtz}, \code{interval}, \code{scaleDegree}, and \code{solfa} encodings are all tonal representations---in fact, they all represent \emph{essentially} the same absract
+information,  which is exactly what \code{tonalInterval}s encode.
+Specifically, we condsider all of these representations to be different representations of what we call \emph{tonal chroma}:
+as such, the \code{as.tonalChroma} function is the master function used to construct all of these specific representations.
+The following section(s) explain the abstract principles of pitch representation, how they function in standard representations, and how
+we, in humdrumR, we can use \code{as.tonalChroma} and its arguments to create custom tonal representations of pitch.
+\subsection{Tonal Pitch "Partitions"}{
+
+As discussed in the \emph{Tonality in humdrumR} vignette, tonal intervals can be "partitioned"---i.e., broken into constituent logical pieces.
+There are two main "partitions" we frequently use:
+\enumerate{
+\item the partitioning of a \emph{complex} interval into a \emph{simple parts} and \emph{octave} parts*.
+\item the partitioning of a \emph{specific} interval into a \emph{generic part} and a \emph{alteration} part.
+}
+
+Simple intervals are abstract (\href{https://en.wikipedia.org/wiki/Circle_of_fifths}{line-of-fifths}) information, without regards to a specific pitch in frequency space---i.e., actual "pitch height."
+The combination of a simple interval with an octave part creates a complex interval, which \emph{does} include information about specific pitch height.
+Tonal "line-of-fifths space" can further be partitioned into \link[=tonalTransformations]{generic} (diatonic) information and \emph{specific} interval information which describes the
+\emph{quality} of intervals, including zero or more \href{"https://en.wikipedia.org/wiki/Accidental_(music)"}{alterations} of the diatonic set.
+Thus, any tonal interval/pitch is composed of an \strong{octave} part, a \strong{generic} part, and a \strong{quality} part.
+
+Various pitch representation schemes (kern, solfege) represent the three different parts (octave/generic/quality) of \code{tonalInterval}s in various ways, though some representations are
+lossy/incomplete, as they don't fully encode all three partitions.
+For example, scale degrees represent simple tonal information without complex octave information.
+In some schemes, each tonal partition is represented distinctly from others, allowing us to mix and match different sub-representation to create various full reprsentations.
+In other cases, representations blur partitions in ways that can not be broken apart.
+For instance, solfege syllables do not neatly delineate generic and quality information---the "e" vowel means different qualities depending on which leading consonant it is paired with
+(e.g., "re" vs "me").
+Since the logic of interval representation does not always conform to the more abstract logic of \code{tonalInterval} partitions, we use a different set of terms to
+refer to the \emph{representation} of distinct partitions: scale-\strong{step} for generic information,  \strong{quality}/\strong{alteration}/\strong{accidental} for alteration information, and  \strong{contour} for octave information,
+Thus, the terms \code{step}, \code{contour}, \code{quality}, \code{alteration}, \code{accidental} all appear as or in various pitch representation/translation function arguments (details below).
+
+In humdrumR, a \emph{tonal chroma} is a representation that combines some combination of the three representation partions (scale, alteration, and/or contour).
+The \code{as.tonalChroma} function is a master function for writing tonal chroma.
+The functions\code{as.kernPitch}, \code{as.sciPitch}, \code{as.lilyPitch}, and \code{as.helmholtz} are all simply wrappers which call \code{as.tonalChroma} with various specific arguments.
+\code{as.tonalChroma} itself calls four constituent functions: \code{as.scaleStep}, \code{as.quality}/\code{as.accidental}, and \code{as.contour}/\code{as.octave}.
+The arguments to \code{as.tonalChroma}, derived from the constituent functions (details in the following sections) are:
 \itemize{
-\item Tonality
-\itemize{
-\item Scale steps
-\itemize{
-\item letter names
-\item scale degrees
-\item solfege
+\item \code{as.tonalChroma}:
++ \code{step}, \code{quality}, \code{accidental}, and \code{contour}: each argument a single logical value.
+These arguments indicate whether the scale-step, quality, accidental, and/or contour strings should or shouldn't be printed.
++ \code{order}: a character string of length 3--4, consisting of the words \code{"step"}, \code{"quality"}, \code{"accidental"}, or \code{"contour"}.
+(Partial matches (like \code{"ste"} or \code{"s"} for \code{step}) will work too.)
+This vector controls the order in which the different elements of the string are concatinated.
+For instance, do you want your octave labels before or after the scale step?
++ \code{sep}: a character string which will be used to separate the elements (the default is \code{""}).
+\item from \code{as.scaleStep} (described below):
++ \code{step.labels}
+\item from \code{as.accidental} (described below):
++ \code{accidental.labels}
++ \code{accidental.maximum} and \code{accidental.minimum}
++ \code{accidental.cautionary}
++ \code{accidental.memory}
++ \code{Key}
+\item from \code{as.quality} (described below):
++ \code{quality.labels}
++ \code{quality.maximum} and \code{quality.minimum}
++ \code{quality.cautionary}
++ \code{quality.memory}
++ \code{Key}
+\item from \code{as.contour} (described below):
++ \code{contour.labels}
++ \code{contour.maximum} and \code{contour.minimum}
++ \code{contour.offset}
++ \code{contour.round}
++ \code{contour.delta}
 }
-\item Alterations
-\itemize{
-\item Accidentals
-}
-\item Quality
-}
-\item Octave
-\item Contour
 }
 
-For a in depth exploration of the underlying theories, see the \emph{Tonality in humdrumR} vignette
-This document focuses only on ideas relavent to understanding the arguments used in pitch translation functions.
-\subsection{Tonality}{
-
-As explained in the \emph{Tonality in humdrumR} vignette, Western tonality is fundamentally based in partitioning the \href{https://en.wikipedia.org/wiki/Circle_of_fifths}{line-of-fifths}
-into a \link[=tonalTransformations]{generic}, diatonic component (the line-of-fifths \href{"https://en.wikipedia.org/wiki/Modulo_(mathematics)"}{modulo} 7) and zero or more
-\href{"https://en.wikipedia.org/wiki/Accidental_(music)"}{accidental/alteration} components.
-More generally, the intervals between generic steps have associated labels, known as \emph{qualities}.
 \subsection{Scale Steps}{
 
-The \emph{generic} component of tonal pitch is typically represented not in it's underlying line-of-fifths dimension, but in the frequency dimension as a sequence of "scale \strong{steps}."
-Traditionally, these scale steps have been are represented in three equivalent forms: as letters (A-G), numbers (1-7+), or conventional syllables (solfege).
-Letter name and solfege representations of steps are limited to a \link[=tonalTransformations]{simple} within a single octave, and are always \emph{ascending}/\emph{positive}.
-In contrast, the more general numeric representation of steps \emph{can} be extended to \link[=tonalTransformations]{complex} intervals (i.e., greater than 7) as well as negative steps.
-In \code{humdrumR},
+A particular area of confusion in pitch representation is in the relationship between tonal (line-of-fifths) space and contour (frequency) space.
+The line-of-fifths is an abstract space unrelated to specific frequencies---e.g., G is not inherently "above" or "below" C.
+Still, musicians do not play abstractions, so we must always realize our line-of-fifths space in concrete frequency space.
+By convention, collections from the line-of-fifths are conceptualized as frequency-orded "\strong{scales}": folding the line-of-fifths into a sequence of intervals in the octave "above" the unison.
+In most theoretical contexts, the order/"height" of elements in the scale is actually completely irrelavant.
+Specifically, the first seven (diatonic) elements of the line-of-fifths are mapped into generic \strong{scale-steps} in the order \link{0, 2, 4, 6, 1, 3, 5}.
+Scale-steps are strictly limited to a this seven-step range of a single diatonic octave, and are always "\emph{ascending}"/"\emph{positive}"---as they are steps in a pseudo-octave "above" the unison.
+This representation of the line-of-fiths in terms of scale-steps is the most basic approach to representing pitch, and is associated with arguments containing \code{step};
+The function \code{as.scaleStep} is the basic building block of scale-step representations in humdrumR.
+
+If we apply the modulo-7 operation to the line-of-fifths space, all intervals are mapped to these seven generic steps.
+Alterations of the basic generic steps are represented separately (see \strong{Qualities and Alterations} section below).
+However, we should note that scale order is defined entirely based on the generic interval: for example, C-flat is by convention positioned "below"
+C-natural in the scale, even though it (is often) equivalent to B-natural, which is at the "top" of the scale.
+
+Generic, pseudo-ordered, scale-steps are conventionally represented in three forms: as letters (A-G), numbers (1-7 or I-VII), or conventional syllables (do, re, mi, fa...).
+HumdrumR predefines several representations which include letters (A-G) as their scale-step encoding: \code{kernPitch}, \code{lilyPitch}, \code{helmholtz}, and \code{sciPitch}.
+There are also standard numeric (\code{scaleDegree}) and syllable-based (\code{solfa}) based representations predefined.
+The more generic \code{as.scaleStep} function can be used to write other variations of the scale step representations.
+\code{as.scaleStep} includes two arguments:
 \itemize{
-\item Lettername based representations incude \code{tonalChroma}, \code{kernPitch}, \code{lilyPitch}, \code{helmholtz}, and \code{sciPitch} (see the \strong{Tonal Chroma} section below).
-upper case (this can be overridden by octave representation arguments, see below).
-The only special argument associated with the scale step portion of these representations is the \code{upper.case} logical argument, which controls if the lettername should be uppercase.
-\item The \emph{solfege} representation is only associated with the \code{solfa} function.
-\item The numeric representation of steps include \code{interval} and \code{scaleDegree}. In the former, direction (+/-) and complex intervals are allowed.
+\item \code{step.labels}: a vector of seven elements (default = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) representing the desired names for the seven steps in scale order.
 }
 }
 
-\subsection{Alterations/Qualities}{
+\subsection{Quality and Alterations}{
 
-The \emph{accidental} or "alteration" components of a tonal pitch are represented by additional affixed to a scale step representation.
-There are two rimary accidentals, \href{"https://en.wikipedia.org/wiki/Sharp_(music)"}{sharp} and \href{"https://en.wikipedia.org/wiki/Flat_(music)"}{flat},
-though they can be added together to create multi-sharps and multi-flats. (Sharps and flats can not be mixed, at least in \code{humdrumR}.)
-An accidental or alteration corresponds to adding or subtractiong multiples of \code{7} from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
-In addition, there is the \href{"https://en.wikipedia.org/wiki/Natural_(music)"}{natural} token, which is used to indicate that an interval is not altered.
+Generically, a tonal interval's \emph{quality} indicates its diatonic mode and relationship to that mode.
+Specifically, alterations/accidentals indicate alterations of the key/mode while the quality indicates what the mode is.
 
-All \code{humdrumR} pitch translation functions involving accidental representations have an \code{accidental.labels} argument: a \link[base:names]{named} \code{character} vector
-which controls the characters used to represent accidentals.
-The characters must be named either \code{flat}, \code{sharp}, or \code{natural}.
-The defaults are \code{c(flat = "b", sharp = "#", natural = "")}, though the kern representation uses \code{c(flat = "-")}.
+The diatonic set is primarily defined by the major mode, consisting of the line-of-fifth range -1 to +5.
+These seven intervals are the "\emph{natural}" intervals---by default, unless a major context is specifically counter-indicated, the absence of an accidental
+indicates these natural steps.
+Any intervals outside of this scale can be indicated as alterations of the natural steps using accidentals:
+There are two primary accidentals, \href{"https://en.wikipedia.org/wiki/Sharp_(music)"}{sharp} and \href{"https://en.wikipedia.org/wiki/Flat_(music)"}{flat},
+though they can be added together to create multi-sharps and multi-flats. (Sharps and flats cannot be mixed in \code{humdrumR}.)
+An alteration corresponds to adding or subtracting multiples of \code{7} from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
+Finally, a \href{"https://en.wikipedia.org/wiki/Natural_(music)"}{natural} accidental is used when the default natural step needs to be explicitely labeled.
 
-The \emph{natural} accidental is only used in the context of a key, and even then are usually ommited.
-To use natural accidentals, a common \code{cautionary} argument can be used.
-If \code{cautionary = TRUE} \emph{and} a \code{Key} is specified, accidental-based pitch representations will include natural tokens.
+The encoding of \emph{qualities} is subtly distinct from alterations.
+Qualities encode information about the diatonic mode of intervals, as well as alterations of mode.
+The five consonant diatonic \href{"https://en.wikipedia.org/wiki/Mode_(music)"}{modes}---phyrigian (-5--+1), minor (-4--+2), dorian (-3--+3), mixolydian (-2--+4), and major (-1--+5)---all
+share the same the "\emph{perfect}" first, fourth, and  fifth scale-steps---corresponding to the central -1--+1 on the line-of-fifths.
+However, these five modes encompass two varieties of each of the "\emph{imperfect}" second, third, sixth, and seventh scale steps:
+the \strong{major} steps (+2--+5) and the \strong{minor} steps (-2---5), which are (obviously) inverses on the line-of-fifths.
+Each minor/major pair is separated on line-of-fifths interval of \code{7}, and thus one can be altered into the other.
+Anything on the line-of-fifths outside of the -5--+5 range are represented as one or more alterations of the perfect/imperfect degree.
+Postive alterations (\code{+7}) are  \strong{augmented} while negative alterations (\code{-7}) are \strong{diminished}---like sharps and flat, augmentations and diminutions can be multipled.
+
+The following table illustrates the relationship between the line-of-fifths, scale-steps, accidentals, and qualities:\preformatted{ LO5th Step Accidental Quality
+   -10    E         bb       d
+    -9    B         bb       d
+    -8    F          b       d
+    -7    C          b       d
+    -6    G          b       d
+    -5    D          b       m
+    -4    A          b       m
+    -3    E          b       m
+    -2    B          b       m
+    -1    F          n       P
+     0    C          n       P
+     1    G          n       P
+     2    D          n       M
+     3    A          n       M
+     4    E          n       M
+     5    B          n       M
+     6    F          #       A
+     7    C          #       A
+     8    G          #       A
+     9    D          #       A
+    10    A          #       A
+    11    E          #       A
+    12    B          #       A
+    13    F         ##      AA
+    14    C         ##      AA
 }
 
-\subsection{Tonal Chroma}{
+Note that accidentals are symetrical around the dorian mode (D), while qualities are symetrical around the major mode.
+As a result, though sharp accidentals and augmentation qualities always correspond, flat accidentals are \emph{not} equivalent to diminished qualities.
 
-\emph{Tonal Chroma} is the generic term we use to describe standard tonal names for notes without reference to octave or contour---i.e., a \emph{lettername} (A-G)
-followed by zero or more \emph{accidentals}.
-The \code{as.tonalChroma} function is the basic function for this type of representation, while \code{as.kernPitch}, \code{as.sciPitch}, and \code{as.lilyPitch} all include deriviative calls to
-\code{as.tonalChroma}.
-\code{as.tonalChroma} includes the following reading arguments:
+HumdrumR's predefined tonal chroma representations (\code{kernPitch}, \code{lilyPitch}, \code{helmholtz}, and \code{sciPitch}) each include alteration information through three accidental
+indications (sharp, flat, natural).
+The \code{scaleDegree} and \code{interval} representations encode more general qualities using five categories (major, minor, diminished, augmented, perfect).
+The \code{solfa} representation also encodes quality through conventional (non-systematic) vowel modifications.
+More generally, the \code{as.quality} and \code{as.accidental} functions can be used extract quality information in isolation.
+These functions use some (or all) of the following arguments:
 \itemize{
-\item \code{upper.case}: \code{logical} argument controls whether the lettername is upper case (\code{TRUE}) or lower case (\code{FALSE}).
-\code{as.kernPitch} and \code{as.lilyPitch} both set this argument to \code{FALSE}, while \code{as.sciPitch} keeps it \code{TRUE} (the default).
-\item \code{accidental.labels}: a \link[base:names]{named} \code{character} vector which controls the characters used to represent accidentals.
-The characters must be named either \code{flat}, \code{sharp}, or \code{natural}.
-The defaults (also used by \code{as.sciPitch}) \code{accidental.labels = c(flat = "b", sharp = "#", natural = "")}, but \code{as.kernPitch} uses \code{accidental.labels = c(flat = "b")},
-and \code{as.lilyPitch} uses \code{accidental.labels = c(sharp = "is", flat = "es")}.
-}
-
-As example usage, if you want (octaveless) tonal chroma but prefer lower case letternames with kern-style accidentals, you could write
-\code{as.tonalChroma(x, upper.case = FALSE, accidental.labels = c(flat = "-"))}.
-}
-
-}
-
-\subsection{Octave}{
-
-There are a number of ways of representing the specific octave information associated with notes.
-(Including discarding octave information entirely.)
-We can \link[=tonalTransformations]{partition} every specific \link{tonalInterval} as a combination of the basic \emph{simple} part and a \emph{octave} part---an octave "offset."
-\code{humdrumR} recognizes two basic approaches to conceptualizing these octave offsets: \emph{edge octaves} and \emph{centered octaves}.
+\item \verb{_.labels}:
 \itemize{
-\item In a \emph{edge octave} representation (the standard approach in most contexts) a unison (natural or otherwise) is considered the "bottom" of an octave,
-with all steps/intervals from 1->7 belonging to an octave, crossing over to the next octave above when reaching step 8, or conversely, immediately crossing to
-a lower octave when stepping down one step. The scientific octave corresponds to applying a octave partition using \link[base:floor]{floor} as the \code{simplifer}---see
-\link{tonalTransformations} or the \emph{Tonality in humdrumR} vignette.
-\item In a \emph{central octave} representation, a unison is considered the center of an octave, crossing into higher/lower octaves when passing from a 4th->5th either above or below.
-The central ctave corresponds to applying a octave partition using \link[base:round]{round} as the \code{simplifer}---see
-\link{tonalTransformations} or the \emph{Tonality in humdrumR} vignette.
+\item \code{accidental.labels}: a \link[base:names]{named} character vector which controls the characters used to represent accidentals.
+The characters must be named either \code{flat}, \code{sharp}, \code{natural}, \code{doublesharp}, or \code{doubleflat}.
+The defaults are \code{c(flat = "b", sharp = "#", natural = "n")}.
+By default, \code{doubleflat} and \code{doublesharp} are not defined, and doubles are simply represented by two of the normal accidental symbols.
+However, if either double accidental is defined, every pair of accidentals is collapsed to the double version.
+
+If \code{accidental.labels == FALSE}, returns an integer value counting the number of alterations (positive for sharps, negative for flats).
+\item \code{quality.labels}: a \link[base:names]{named} character vector which controls the characters used to represent qualities.
+The characters must be named either \code{perfect}, \code{major}, \code{minor}, \code{augment}, or \code{diminish}, with defaults
+\code{c(perfect = "P", major = "M", minor = "m", augment = "A", diminish = "d")}.
 }
-
-In \emph{any} case, the convention (which \code{humdrumR} follows) is that only the \link[=tonalTransformations]{generic interval} determines the octave.
-For example, using scientific pitch notation, Cb4 \emph{is} in the same octave as C4, and B#4 is \emph{not} in the same octave as C5.
-
-The following table illustrates the two basic octave approaches:\preformatted{ Semitones Interval TonalChroma EdgeOctave CentralOctave
-       -13      -m9        <NA>         -2            -1
-       -12       -8       TRUE#         -1            -1
-        -8      -m6        <NA>         -1            -1
-        -6      -d5        <NA>         -1            -1
-        -6      -A4        <NA>         -1             0
-        -5       -4        <NA>         -1             0
-        -3      -m3        <NA>         -1             0
-        -1      -m2        <NA>         -1             0
-        -1      +d1       TRUE#          0             0
-         0        1       TRUE#          0             0
-         2       +2        <NA>          0             0
-         4       +3        <NA>          0             0
-         6      +A4        <NA>          0             0
-         6      +d5        <NA>          0             1
-         7       +5        <NA>          0             1
-         9       +6        <NA>          0             1
-        12      +A7        <NA>          0             1
-        12       +8       TRUE#          1             1
-        14       +9        <NA>          1             1
-        16      +10        <NA>          1             1
-        18     +A11        <NA>          1             1
-        19      +12        <NA>          1             2
-}
-
-Even given these two basic abstract conceptualizations of octave information, there are still numerous ways to encode this information.
-\code{humdrumR} implements three basic octave representation styles:
+\item \verb{_.maximum} and \verb{_.minimum}
 \itemize{
-\item \strong{kern} style: the first character of the tonalChroma is repeated to indicate the octave offset, with upper-case letters to indicate negative octave offsets
-and lower-case letters used to indicate positive (or zero) offsets. Thus, middle-C and the three octaves above and below it look like
-\code{"CCC"}, \code{"CC"}, \code{"C"}, \code{"c"}, \code{"cc"}, \code{"ccc"}, \code{"cccc"}.
-\item \strong{sci}entific-pitch style: the octave number (integer) is simply appended after (or before) the rest of the pitch string.
-(In standard \emph{scientific-pitch} represesntation, the value is also shifted so that middle-C is octave 4.)
-\item \strong{lily}-pond style: a pair of opposing characters are used to indicate positive and negative octave offsets, appended before or after the rest of the pitch string,
-with the number of characters indicating the octave offset.
-In 'as.lilyPond' the characters \code{"'"} (up) and \code{","}) are used (appended afted the accidental).
-We prefer, using the characters \code{"^"} and \code{"v"}, which are used by default by \code{as.scaleDegree} and \code{as.solfa}.
+\item Single integer values---defaults are \code{Inf} (maximum) and \code{-Inf} (minimum).
+These arguments define the maximum number of multi-accidentals permitted.
+For instance, if \code{accidental.maximum == 2L}, accidentals of at most \code{"##"} will be output; a triple sharp will be reduced to just a \code{"##"}.
+The\verb{_.minimum} argument must be negative (-2 == two flats).
+By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
+}
+\item \code{Key}: a \link{diatonicSet} object describing the key and mode. Default is \code{NULL}. If \code{Key} is specified, only alterations relative to that key are printed
+(unless the \verb{_.cautionary} or \verb{_.memory} arguments override this).
+\item \verb{_.cautionary}: a single logical value. Causes \emph{more} accidentals/qualities to print (details below). Default is \code{FALSE} for accidentals and \code{TRUE} for qualities.
+\item \verb{_.memory}: a single logical value (default is \code{FALSE}). Causes \emph{fewer} accidentals/qualities to print (details below).
 }
 
-More generally, the \code{as.octave} command can be used to get a isolated octave representation.
-\code{as.octave} has the following arguments:
+The master \code{as.tonalChroma} calls these functions, and can thus pass these arguments to them.
+For example, you could write \code{as.tonalChroma(x, accidental.maximum = 1)}.
+\subsection{Cautionary Alterations}{
+
+The interplay between the \code{Key}, \verb{_.cautionary}, and \verb{_.memory} arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
+Generally, the \code{Key} argument---if not \code{NULL}---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
+The \code{cautionary} argument causes accidentals that would otherwise be suppressed to print---always \emph{adding} accidentals to the output.
+Finally, the \verb{_.memory} argument implents a common practice in music notation where alterations are only printed when the quality of a generic note is different than
+the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them,
+in which case, both the natural and the two sharps will print.
+Combinations of the \code{Key}, \verb{_.cautionary} and \verb{_.memory} arguments achieve the following effects:
+
+In cases where \code{Key} is \code{NULL}:
 \itemize{
-\item \code{markers}: a \link[base:names]{named} \code{character} vector which controls the characters used to represent octave shifts.
+\item \verb{_.cautionary == FALSE & _.memory == FALSE}: only alterations of the C major set are printed. No naturals are shown.
+\item \verb{_.cautionary == TRUE  & _.memory == FALSE}: \strong{all} accidentals/qualities are printed (including all naturals).
+\item \verb{_.cautionary == FALSE & _.memory == TRUE}: alterations of C major set are printed, unless the previous instance of the step was already altered.
+(Natural notes occuring after a previous alteration are marked natural.)
+\item \verb{_.cautionary == TRUE  & _.memory == TRUE}: \strong{all} accidentals/qualities print, unless the previous instance of note was already altered.
+}
+
+If, on the other hand, if a \code{Key} is specified:
+\itemize{
+\item \verb{_.cautionary == FALSE & _.memory == FALSE}: only alterations of the key are printed.
+\item \verb{_.cautionary == TRUE  & _.memory == FALSE}: any alterations of the key are printed as well as any instances of their corresponding in-key quality, so as to assure there is no ambiguity.
+\item \verb{_.cautionary == FALSE & _.memory == TRUE}: alterations of the key are printed, unless the previous instance of note was already altered. In-key accidentals \emph{are} printed if the previous instance of the note
+was altered.
+\item \verb{_.cautionary == TRUE  & _.memory == TRUE}: any alterations of the key are printed as well as their corresponding in-key quality, except for in-key accidentals that appear before any corresponding alterations.
+In other words, the \code{cautionary} rule is applied for any generic note once an alteration is introduced, but not before.
+}
+
+Some standard, useful represenations are:
+\itemize{
+\item \verb{Key == NULL & _.cautionary == FALSE & _.memory == FALSE}: print all accidentals always, but no naturals (normal kern style).
+\item \code{Key == NULL & quality.cautionary == TRUE & quality.memory == FALSE}: print all qualities always (normal humdrum style for intervals).
+\item \verb{Key == _ & _.cautionary == FALSE & _.memory == TRUE}: print out-of-key accidentals, unless previous note was the same alteration (normal style for music notation).
+}
+
+The following tables illustrate the behaviors of the accidental/quality arguments in eight different conditions.
+In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
+Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
+\verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
+\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c    d-   b-   e    b    a   
+NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
+NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c    d    b    e    b    a   
+AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c    d    b-   e-   b-   a-  
+AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
+}
+}
+
+\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1    m2   m7   m3   m7   m6  
+NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1    m2   m7   3    7    6   
+NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
+NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1    2    7    3    7    6   
+AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1    2    m7   m3   m7   m6  
+AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
+}
+}
+
+}
+
+}
+
+\subsection{Contour (e.g., Octave)}{
+
+When we \emph{do} wish to represent concrete, frequency-ordered information about a pitch, we add additional \emph{contour} information to the simple, line-of-fifth representation to
+creating \emph{complex intervals}.
+Since scale-step representations ostensibly encode frequency-space ordering already, the first step is to take the scale-ordering literally---e.g, G really is "above" D---,
+creating what we call a \strong{simple contour}.
+To fully represent a complex interval, we can append zero or more octaves to the simple contour, what we call the \strong{octave contour}.
+
+In humdrumR, the symbols \code{"+"} and \code{"-"} are used to indicate the direction of the simple contour, with various scale-step and quality/alterations used to indicate the simple interval.
+(In many representations, these symbols are implicit, and are thus ommitted.)
+In contrast, the \emph{octave contour} of an interval is simply an integer value, and can be represented a variety of ways:
+either directly as an integer, or using repetitions of symbol pairs, most commonly \code{"^"}/\code{"v"} and \code{"'"}/\code{","}.
+Other approaches represent octave contour information by changing the case (upper or lower) or repeating parts of the simple-interval string.
+By default, the "same" option (i.e., a unison) for both types of contours is left blank as an empty string \code{""}.
+
+The relationship between the simple contour and the octave contour is determined by how the scale step is "rounded" to the octave (see the \emph{Tonality in humdrumR} vignette), which
+is controlled by the \code{contour.round} argument.
+The standard approach, with the scale steps all ascending above the octave is achieved by the \emph{floor} function: we call this a \strong{scale contour}.
+Another approach is to use the \emph{round} function, which rounds the nearest octave below \strong{or} above, centering the steps around the unison instead of above it: the result is a
+scale like \link{-P4, -m3, -m2, P1, M2, M3, P4}, which we call a \strong{central contour}.
+The difference between central contours, scale contours, and other simple contour options, are illustrated further below.
+\subsection{Serial vs Fixed Octave Contour}{
+
+#' As described in the \emph{Tonality in humdrumR} vignette, there are two general approaches to representing intervals: fixed-reference and serial-reference.
+Most pitch representations are \emph{fixed}-reference, with each token representing an interval relative to a common reference (middle-C, tonic, unison, etc.).
+In contrast, a \emph{serial} representation represents each interval cummulatively, relative to the previous interval: the most common example being melodic intervals.
+TonalIntervals can be encode either fixed- or serial-reference intervals, and either approach can be partitioned into simple intervals and octave offsets.
+In the most common cases for representing pitch, the simple contour is treated as the "always ascending" scale contour, and the octave contour is simply kept fixed.
+Common approaches to pairing octave information with this include:
+\itemize{
+\item \strong{sciPitch} style: the octave offset is simply printed as an integer, though offset by +4 so that middle-C (unison) is \code{"4"}.
+\item \strong{kernPitch} style: the scale step is lowercase for octave contours \verb{>= 0} and uppercase otherwise. In addition, the scale step is repeated
+the absolute value of the octave contour times (offset +1 for positive octaves).
+For example, \verb{(CCC = -3, CC = -2, C = -1, c = 0, cc = 1, ccc = 2)}.
+\item \strong{lilyAbsolute} absolute style: the charactes \code{"'"} (positive) or \code{","} are repeated the absolute value of the octave contour.
+\item \strong{helmholtz} style: an intersection of \code{lilyPitch}-absolute and \code{kernPitch} style, the case of the scale step is changed as in kern-style,
+and the \code{"'"}/\code{","} characters are printed a la lilypond absolute style.
+}
+
+However, another particularly useful possibility is to encode the octave part in serial reference and the simple part in fixed reference.
+If we compute a serial-octave contour, and set our \code{contour.round} argument to \code{round}, the contour labels are blank (the "same" marker) if the interval has moved to the \emph{closest} neighbor,
+with the octave contour indicating moves away to that "closest note."
+For instance, we can say, "play the F# above the previous note."
+This is known as "relative pitch" representation in \href{https://lilypond.org/doc/v2.20/Documentation/notation/pitches}{LilyPond}]:
+If \code{relative = TRUE}, \code{as.lilyPitch} will compute markers labeled in this way.
+This approach is can be combined with with scale-contour (\code{contour.round = floor}) representation of pitch as \emph{scale degrees}, resulting in a scale degree representation with lossless
+contour information!
+
+To achieve these serial contours, we use the \code{contour.delta} and \code{contour.round} arguments.
+If \code{delta = TRUE}, the contour of the serial representation of the input is computed, and the octave-part
+of the contour is computed using the \code{contour.round} rounding function.
+\code{floor} will create the "always ascending" scale contour, while \code{round} will achieve a centered contour.
+\code{expand} will label \emph{all} contours as ascending/descending except unisons.
+
+The following table illustrates the different \code{contour.round} arguments when \code{delta = TRUE}:\preformatted{ round floor expand
+                   
+           v      v
+                   
+                  ^
+                  ^
+     v     v      v
+                   
+                  ^
+                  ^
+     ^            ^
+                   
+           v      v
+           v      v
+                  ^
+           v      v
+           v      v
+     ^     ^     ^^
+           v      v
+           v      v
+           v      v
+}
+
+The following table illustrates the same three rounding functions, but with \code{contour.delta = FALSE}.\preformatted{ round floor expand
+                   
+           v      v
+           v      v
+                   
+                  ^
+           v      v
+           v      v
+           v      v
+           v      v
+                  ^
+                  ^
+                  ^
+                  ^
+                  ^
+                  ^
+                   
+     ^     ^     ^^
+     ^     ^     ^^
+     ^     ^     ^^
+     ^     ^      ^
+}
+}
+
+\subsection{Complex Steps}{
+
+The final standard approach to indicating complex contours is through complex steps: i.e., 9ths, 11ths, etc.
+This approach directly represents full contour information as scale steps, with \code{+7} added for every octave contour.
+This representation can only be accessed via the \code{as.interval} function.
+To limit intervals to simple values, use the \link{tonalTransform} arguments \code{octave} and/or \code{roundMethod}.
+}
+
+\subsection{as.contour}{
+
+The \code{as.contour} function can be used to directly generate representations of the octave/contour, or can be called indirectly via \code{as.tonalChroma} or one of the standard
+pitch representation functions (\code{as.kernPitch}, \code{as.sciPitch}, etc.).
+The \code{as.octave} command is a synonym for \code{as.contour}.
+The following arguments are defined for as contour:
+\itemize{
+\item \code{contour.labels}: a \link[base:names]{named} \code{character} vector which controls the characters used to represent octave shifts.
 The characters must be named either \code{up}, \code{down}, or \code{same}; the defaults are \code{c(up = "^", down = "v", same = "")}.
-If the \code{marker = NULL}, the octave offset (integer) itself is returned.
-\item \code{centered}: a single \code{logical} value. Is centered octave or edge octave (default = \code{FALSE})?
-\item \code{maximum}: a single integer, indicating the maximum allowed octave offset (default is \code{Inf}).
-For example, if \code{maximum = 2L}, any octave offset of two or greater will be marked \code{"^^"}.
-\item \code{minimum}: a single integer. The inverse of the \code{maximum} argument.
-\item \code{offset}: a single integer, indicating the "center" octave. The default is \code{0L}, but \emph{scientific pitch}
-uses \code{4L}.
-\item \code{style}: a single character string. If this argument is not \code{NULL} (the default) \strong{it overrides all the other arguments}.
-Must be either \code{"kern"}, \code{"Helmholtz"}, \code{"lily"}, or \code{"sci"}, which correspond to arguments of:
+If \code{contour.labels = FALSE}, the octave offset (integer) itself is returned.
 \itemize{
-\item \code{"kern"}: if called directly in \code{as.octave}, returns the letter \code{"c"} in kern style octaves (e.g., \code{"c"}, \code{"CC"}).
-If called as an argument in another pitch function, applies kern style to whatever the pitch string is.
-\item \code{"helmHoltz"}: \code{markers = c(up = "'", down = ",")}, \code{maximum = NULL}, \code{minimum = NULL}, \code{offset = 0L}.
-If called as an argument to another pitch function (besides \code{as.octave}), also changes case of whatever the pitch string is, so that negative octaves are lower case.
-\item ``
+\item If \code{contour.labels == FALSE}, returns a integer value counting the octave offset number.
+}
+\item \code{contour.maximum} and \code{contour.minimum}
+\itemize{
+\item Single integer values---defaults are \code{Inf} (maximum) and \code{-Inf} (minimum).
+These arguments define the maximum number of octave offset labels permitted.
+If \code{maximum == 2L}, octave offsets of at most (\code{"^^"}) will be output; a triple octave mark will be reduced to just a \verb{"^^}.
+The\code{minimum} arguments should be negative.
+By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
+}
+\item \code{contour.offset}: a single integer, indicating the "center" octave. The default is \code{0L}, but \emph{scientific pitch}
+uses \code{4L} (because middle C is "C4").
+\item \code{contour.delta}: a single logical vale. If \code{TRUE}, the \emph{serial} contour is calculated.
+\item \code{contour.round}: a function, either \code{floor}, \code{round}, \code{trunc}, \code{expand} (see \emph{Tonality in humdrumR} vignette).
+The default is \code{floor}, which is standard when \code{delta = FALSE}.
 }
 }
 
-Several additional arguments appear as arguments to other pitch functions:
-\code{octave.case}, \code{octave.kern}, \code{octave.before}
+}
+}
+
+\section{Reading/Writing Atonal Pitch Information}{
+
+
+Atonal pitch representations predefined in \code{humdrumR} include \code{semit}, \code{midi}, \code{frequency}, \code{ratio}, and \code{fraction}.
+As mentioned above, \code{integer} inputs are interpreted as semitones while \code{numeric} are interpreted as frequency ratios.
+\subsection{Interpreting Frequencies/Ratios}{
+
+Four additional arguments help \code{humdrumR} determing how to interpret frequencies or ratios as \code{tonalInterval}s.
+\itemize{
+\item \code{tonalHarmonic}: This determines the assumed tuning system by specifying the "tonal frequency ratio" associated
+with an interval of a perfect 12th.
+The default is \code{3}, corresponding to pythagorean tuning; change it to \code{2^(19/12)} to use equal temeperament.
+\item \code{centMargin}: this numeric argument determines how close \code{humdrumR} tries to get (in cents) to the input ratio (default is 10 cents).
+If the \code{centMargin} is low, \code{humdrumR} may give you a crazy accidental like \verb{A----} to get very close to the input ratio.
+If the \code{centMargin} is higher, \code{humdrumR} will give the most reasonable (fewest accidentals) \code{tonalInterval} within that margin.
+For example, \code{as.tonalInterval(1.44, centMargin = 10)} will return E##, because a pythagorean E## is within 10 cents of the ratio \code{1.44}.
+However, \code{as.tonalInterval(1.44, centMargin = 20)} will return the more resonable \code{F#}.
+\item \code{frequency.reference} and \code{frequencyTint}: these arguments determing what the reference frequency and note is for
+when reading frequencies. The standard A = 440Hz corresponds to \verb{(frequency.reference = 440, frequencyTint = as.tonalInterval('a'))}.
+}
+}
+
+\subsection{Tonal Decisions}{
+
+When interpreting an atonal reprsentation as a tonal one there are multiple possibilities (for instance, midi note 61 could
+be C# or Db).
+The process \code{humdrumR} uses to determine the tonal representation of atonal input is influenced by the \code{accidental.melodic} and
+\code{Key} arguments:
+By default (\verb{Key == NULL & accidental.melodic == FALSE``), the line-of-fifths range -3--8 (E flat to G sharp) is used. However, if a }Key\verb{argument is specified, this line-of-fifths range will be shifted to match the corresponding key signature. For instance, the key Bb minor would read accidentals in the range -8--3 (Fb flat to A natural). If}accidental.melodic == TRUE\verb{) the atonal notes are interpreted "melodically"---i.e.,  ascending chromatic steps as sharps and descending chromatic steps as flats. When reading frequencies/ratios, a "pure" }tonalHarmonic\verb{value---like the pure}3\verb{of pythagorean tuning---will help determine the appropriate accidental. However, equal temperament will not provide useful information, so the}Key\code{and}accidental.melodic` arguments can be used instead.
 }
 }
 

@@ -11,12 +11,11 @@
 tonalTransform(
   x,
   direction = TRUE,
-  contour = FALSE,
   delta = FALSE,
   sigma = Exclusive \%allin\% c("mint"),
   generic = FALSE,
   simple = FALSE,
-  simplifier = floor,
+  roundContour = floor,
   enharmonic = FALSE,
   Key = NULL,
   Exclusive = NULL

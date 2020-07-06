@@ -38,7 +38,7 @@ NULL
 #' The `tonalInterval` is the core tonal pitch representation in [humdrumR][humdrumR::humdrumR].
 #' A `tonalInterval` is an abstract representation of tonal pitch, which can be translated to/from all standard "concrete" pitch representations:
 #' solfege, scientific pitch, semitones, frequencies, scale degrees, intervals, etc.
-#' For the most part, users should not need to interact with `tonalInterval`s much directly---rather, `tonalInterval`s work behind the scene in numerous `humdrumR` pitch functions.
+#' For the most part, users should not need to interact with `tonalInterval`s directly---rather, `tonalInterval`s work behind the scene in numerous `humdrumR` pitch functions.
 #' See the [pitchRepresentations] and [tonalTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
 #' a detailed explanation of the theory and specifics of `tonalInterval`s.
 #'
@@ -46,11 +46,11 @@ NULL
 #' 
 #' The `tonalInterval` is a [S4](http://adv-r.had.co.nz/S4.html) subclass of `humdrumR`'s virtual class [struct], from which it inherits a lot of useful "vector-like" behaviors/functionality.
 #' 
-#' A constructor function `tint` can be used to create `tonalIntervals`.
+#' The constructor function `tint` can be used to create `tonalIntervals` directly.
 #' The three arguments corespond to the three slots: `octave`, `LO5th` (Fifth), and `cent`.
 #' All inputs will be coerced to match in length.
 #' What's more, the `octave` argument can be left blank, in which case the appropriate octave will automatically be computed
-#' to place the interval in the "standard octave" above middle-C.
+#' to place the interval in the octave above middle-C.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method, for `tonalInterval`s call [as.kernPitch()][pitchRepresentations].
 #' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print]) one one, you'll see the [kern pitch][pitchRepresentations] representation printed.
@@ -66,14 +66,14 @@ NULL
 #' Technically, `tonalInterval`s are examples of algebraic [modules over integers](https://en.wikipedia.org/wiki/Module_(mathematics)).
 #' This means that certain arithmetic operations are defined for `tonalIntervals` and can be called using standard arithmetic operators (`+`, `-`, etc.):
 #' 
-#' + Addition: `tonalIntervals` can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + M3 = P5}).
+#' + Addition: `tonalIntervals` can be added together, acting exactly as you'd expect (i.e., \eqn{M3 + m3 = P5}).
 #' + Subtraction: `tonalIntervals` can be subtracted just as they are added. Also, they can be negated with a single `-`
 #'   operator (like `-M3`).
 #' + Multiplication: `tonalInterval`s can *not* be multiplied together.
 #'   However, [scalar (integer) multiplication](https://en.wikipedia.org/wiki/Scalar_multiplication) is defined:
 #'   thus, `tonalIntervals` can be multiplied by integers to create new `tonalInterval`s: e.g., \eqn{M2 * 3L = A4}.
-#' + Division: as the natural inverse of scale multiplicaion, [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division)
-#'   is defined for `tonalIntervals`---i.e., division by/into whole (integer) pieces, often with lefover "remainders" (modulo).
+#' + Division: as the natural inverse of scale multiplication, [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division)
+#'   is defined for `tonalIntervals`---i.e., division by/into whole (integer) pieces, often with leftover "remainders" (modulo).
 #'   In R, Euclidean division is achieved with the [%/%][base::Arithmetic] operator---*not* `/`---, with the associated [%%][base::Arithmetic] used for the remainder/modulo.
 #'   Two `tonalInterval`s can be divided to produced an integer; Conversely, a `tonalInterval` can be divided by an integer to produce a `tonalInterval`.
 #'   
@@ -116,7 +116,7 @@ NULL
 #' Every generic interval from 1 to 15 is combined with every interval quality `dd` (doubly diminished), `d` (diminished), `m` (minor), `M` (major), `A` (augumented)
 #' `AA` (doubly augmented).
 #' Thus, after loading `humdrumR`, you can type things like `M3 + M3` and get `A5`.
-#' In addition, the variables `unison` (`= P1 = tint(0, 0)`) and `pythagorean.comma` (`= d2 = tint(-19,12)`), and `octave` (`tint(1, 0)`) are exported as well.
+#' In addition, the variables `unison` (`= P1 = tint(0, 0)`),  `pythagorean.comma` (`= d2 = tint(-19,12)`), and `octave` (`tint(1, 0)`) are exported as well.
 #' 
 #' 
 #' 
@@ -399,98 +399,129 @@ genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 
 ##... line-of-fifths to tonalChroma ----
 
-LO5th2genericstep <- function(LO5th, steps = 1L:7L) steps[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
+LO5th2scaleStep <- function(LO5th, step.labels = 1L:7L) {
+  step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
+}
 
 
 LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) (LO5th - (LO5th %% Key)) %/% 7L
 
-cautionaries <- function(LO5th, melodic = FALSE) {
-  # identifies which LO5th elements need a cautionary label
+alteration.conflicts <- function(LO5th) {
+  # do two or more qualities of the same generic intervals appear in the input,
+  # if so, which ones?
   
   uniq <- unique(LO5th)
   counts <- table(genericFifth(uniq))
   counts <- counts[counts > 1]
-  cautionary <- genericFifth(LO5th) %in% names(counts)
-  
-  if (melodic) {
-    generic <- genericFifth(LO5th)
-    lapply(as.numeric(names(counts)),
-           function(gen) {
-             cur <- generic  == gen
-             which(cur)[c(FALSE, diff(LO5th[cur]) != 0L)]
-           }) %>% unlist -> hits
-    cautionary <- seq_along(LO5th) %in% hits
-    
-  }
-  cautionary
+
+  genericFifth(LO5th) %in% names(counts)
 }
 
-LO5th2accidental <- function(LO5th, Key = NULL, labels = c(), melodic = FALSE,  cautionary = FALSE, maximum = Inf, minimum = -maximum) {
-          setoptions(labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+alteration.memory <- function(LO5th) {
+  # propogating though input vector, is each generic interval
+  # a repetition of the same quality the last time it appeared
+  # i.e., c('c', 'c', 'c#', 'a','c#','b','c') -> c(F, T,F,F,T,F,F)
+  # first instances are FALSE in $sameasbefore, but $new indicates where they are
+  
+  
+  generic <- genericFifth(LO5th)
+  lapply(-1L:5L, # no need to consider intervals with no conflicts
+         function(gen) {
+           cur <- generic  == gen
+           which(cur)[c(FALSE, diff(LO5th[cur]) == 0L)]
+         }) %>% unlist -> hits
+  
+  list(sameasbefore = seq_along(LO5th) %in% hits,  
+       new = seq_along(LO5th) %in% unlist(lapply(-1:5L, match, table = generic)))
+  
+}
+
+alteration.inKey <- function(LO5th, Key) {
+  if (is.null(Key)) Key <- dset(0, 0)
+  
+  LO5th2alterationN(LO5th, Key) == 0L
+}
+
+# data.frame(h, alteration.conflicts(h), alteration.memory(h)) -> g
+
+alteration.filter <- function(LO5th, Key, cautionary, memory) {
+  
+  conflicted <- alteration.conflicts(LO5th)
+  mem  <- alteration.memory(LO5th)
+  inKey <- alteration.inKey(LO5th, Key) # if Key == NULL, inKey is now Cmajor
+  
+  if (!(memory || cautionary)) return(inKey) 
+  
+  if (is.null(Key)) {
+    
+    if ( cautionary & !memory) return(rep(FALSE, length(LO5th)))
+    if (!cautionary &  memory) return((mem$sameasbefore & !mem$new) | (mem$new & inKey))
+    if ( cautionary &  memory) return(mem$sameasbefore & !mem$new)
+    
+  } else {
+   
+    if ( cautionary & !memory) return(inKey & !conflicted)
+    if (!cautionary &  memory) return(mem$sameasbefore & (!mem$new | (mem$new & inKey)))
+    if ( cautionary & memory) return(mem$sameasbefore & !xor(inKey, mem$new)) 
+
+  }
+
+ 
+}
+
+
+LO5th2accidental <- function(LO5th, Key = NULL, 
+                             accidental.cautionary = FALSE, accidental.memory = FALSE, 
+                             accidental.labels = c(),  
+                             accidental.maximum = Inf, accidental.minimum = -accidental.maximum) {
+          setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+          
+          dontlabel <- alteration.filter(LO5th, Key, accidental.cautionary, accidental.memory)
           
           # get "absolute" (c major) accidentals
-          accidentalN <- pmaxmin(LO5th2alterationN(LO5th, dset(0L, 0L)), minimum, maximum) # to c major
-          if (false(labels)) return(accidentalN)
+          accidentalN <- pmaxmin(LO5th2alterationN(LO5th, dset(0L, 0L)), accidental.minimum, accidental.maximum) # to c major
+          if (false(accidental.labels)) return(accidentalN)
           
-          accidentals <- rep(labels$natural, length(LO5th))
+          accidentals <- .ifelse(dontlabel, "", accidental.labels$natural)
+          
           na <- is.na(LO5th)
           accidentals[na] <- NA_character_
           
-          accidentals[!na & accidentalN > 0L] <- strrep(labels$sharp, accidentalN[!na & accidentalN > 0L])
-          accidentals[!na & accidentalN < 0L] <- strrep(labels$flat,  abs(accidentalN[!na & accidentalN < 0L]))
+          accidentals[!na & accidentalN > 0L & !dontlabel] <- strrep(accidental.labels$sharp, accidentalN[!na & accidentalN > 0L & !dontlabel])
+          accidentals[!na & accidentalN < 0L & !dontlabel] <- strrep(accidental.labels$flat,  abs(accidentalN[!na & accidentalN < 0L & !dontlabel]))
             
           #
-          if ('doublesharp' %in% names(labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(labels$sharp, 2L), labels$doublesharp)
-          if ('doubleflat'  %in% names(labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(labels$flat , 2L), labels$doubleflat)
-          
-          ## remove accidentals that belong to given Key, or c major by default, unless cautionary says otherwise
-          cautionaryind <- if (cautionary) cautionaries(LO5th, melodic = melodic) else FALSE
-          
-          if (!is.null(Key)) {
-            keyaccidentalN <- LO5th2alterationN(LO5th, Key)
-            
-            
-            mismatch <- sign(accidentalN) != sign(keyaccidentalN)
-            
-            accidentals[keyaccidentalN == 0L & !cautionaryind] <- ""
-            accidentals[accidentalN    == 0L & keyaccidentalN != 0L & mismatch] <- labels$natural
-            accidentals[accidentalN    != 0L & keyaccidentalN != 0L & mismatch] <- .paste(labels$natural,
-                                                                                          accidentals[accidentalN != 0L & keyaccidentalN != 0L & mismatch])
-            
-          } else {
-            accidentals[accidentalN == 0L & !cautionaryind] <- ""
-          }
+          if ('doublesharp' %in% names(accidental.labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(accidental.labels$sharp, 2L), accidental.labels$doublesharp)
+          if ('doubleflat'  %in% names(accidental.labels)) accidentals <- stringi::stri_replace_all_fixed(accidentals, pattern = strrep(accidental.labels$flat , 2L), accidental.labels$doubleflat)
           
           accidentals
+          
 }
 
-LO5th2quality <- function(LO5th, labels = c(), Key = NULL, melodic = FALSE,  cautionary = FALSE, maximum = Inf, minimum = -maximum) {
-  setoptions(labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
+LO5th2quality <- function(LO5th, Key = NULL, 
+                          quality.cautionary = FALSE,  quality.memory = FALSE, 
+                          quality.labels = c(), 
+                          quality.maximum = Inf, quality.minimum = -quality.maximum) {
+  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm')
   
-  # if (!is.null(Key)) LO5th <- LO5th - Key
+  # if (!is.null(Key)) {
+    # LO5th <- LO5th - getRoot(Key)
+    # Key <- Key - getRoot(Key)
+  # }
+  
+  dontlabel <- alteration.filter(LO5th, Key, quality.cautionary, quality.memory)
   
   # get qualities
-  qualities <- rep(labels$major, length(LO5th))
+  qualities <- .ifelse(dontlabel, "", quality.labels$major)
+                       
   na <- is.na(LO5th)
   qualities[na] <- NA_character_
   
-  qualities[!na & LO5th <  2 & LO5th > -2] <- labels$perfect
-  qualities[!na & LO5th > -6 & LO5th < -1] <- labels$minor      
+  qualities[!na & LO5th <  2 & LO5th > -2 & !dontlabel] <- quality.labels$perfect
+  qualities[!na & LO5th > -6 & LO5th < -1 & !dontlabel] <- quality.labels$minor      
   
-  qualities[!na & LO5th >   5] <- strrep(labels$augment,  pmin(abs(LO5th2alterationN(LO5th[!na & LO5th  >  5]     )),  maximum))
-  qualities[!na & LO5th <= -6] <- strrep(labels$diminish, pmin(abs(LO5th2alterationN(LO5th[!na & LO5th <= -6] + 4L)), -minimum))    
-  
-  ## remove qualities that belong to given Key, or c major by default, unless cautionary says otherwise
-  cautionaryind <- if (cautionary) cautionaries(LO5th, melodic = melodic) else FALSE
-  
-  if (!is.null(Key)) {
-    keyalteration <- (LO5th - (LO5th %% Key) ) %/% 7L
-    
-    qualities[keyalteration == 0L & !cautionaryind] <- ""
-    
-  } else {
-    qualities[LO5th >= -1L & LO5th <= 5] <- ""
-  }
+  qualities[!na & LO5th >   5 & !dontlabel] <- strrep(quality.labels$augment,  pmin(abs(LO5th2alterationN(LO5th[!na & LO5th  >  5 & !dontlabel]     )),  quality.maximum))
+  qualities[!na & LO5th <= -6 & !dontlabel] <- strrep(quality.labels$diminish, pmin(abs(LO5th2alterationN(LO5th[!na & LO5th <= -6 & !dontlabel] + 4L)), -quality.minimum))    
   
   qualities
   
@@ -498,76 +529,20 @@ LO5th2quality <- function(LO5th, labels = c(), Key = NULL, melodic = FALSE,  cau
 
 
 
-#... generic tonalchroma maker
-
-LO5th2tonalChroma <- function(LO5th, steps = c('c', 'd', 'e', 'f', 'g', 'a', 'b'), steps.upper = TRUE, sep = "", Key = NULL,
-                              accidentals = TRUE, accidental.labels = c(), cautionary = FALSE, melodic = FALSE, accidental.prefix = FALSE,
-                              quality     = FALSE, quality.labels = c(), quality.prefix = TRUE,
-                              alteration.maximum = Inf, alteration.minimum = -alteration.maximum, ...) {
-  
-  steps <- LO5th2genericstep(LO5th, steps = if (steps.upper) toupper(steps) else tolower(steps))
-  
-  accidentals <- if (accidentals) accidentals <- LO5th2accidental(LO5th, Key = Key, labels = accidental.labels, 
-                                                                  cautionary = cautionary, melodic = melodic,
-                                                                  maximum = alteration.maximum, minimum = alteration.minimum)
-  qualities   <- if (quality)     quality     <- LO5th2quality(LO5th, Key = Key, labels = quality.labels, 
-                                                               cautionary = cautionary, melodic = melodic,
-                                                               maximum = alteration.maximum, minimum = alteration.minimum)
-  
-  affixer(affixer(steps, accidentals, accidental.prefix, sep = sep), qualities, quality.prefix, sep = sep)
-}
 
 
 
-#.... solfa
-
-
-
-LO5th2solfa <- function(LO5th, steps.upper = FALSE, accidentals = TRUE, alteration.inflection = TRUE,
-                        alteration.maximum = Inf, alteration.minimum = -alteration.maximum,
-                        accidental.labels = c(), accidental.prefix = FALSE) {
-  setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = '')
-  
-  bases <- c('d', 'r', 'm', 'f', 's', 'l', 't')
-  bases <- LO5th2genericstep(LO5th, bases)
-  
-  alterationN <- pmaxmin(LO5th2alterationN(LO5th), alteration.minimum, alteration.maximum)
-  qualSign <- sign(alterationN)    
-  tailcol <- 2L
-  
-  if (alteration.inflection) {
-    alterationN <- alterationN - qualSign
-    tailcol <- qualSign + 2L
-  } 
-  
-  solfatails <- rbind(d = c("e", "o", "i"),
-                    r = c("a", "e", "i"),
-                    m = c("e", "i", "y"),
-                    f = c("e", "a", "i"),
-                    s = c("e", "o", "i"),
-                    l = c("e", "a", "i"),
-                    t = c("e", "i", "y"))
-  tails <- solfatails[cbind(match(bases, rownames(solfatails)),  tailcol)]
-  
-
-  if (steps.upper) bases <- toupper(bases)
-  
-  accidentals <- strrep(unlist(accidental.labels[c('flat', 'natural', 'sharp')], use.names = FALSE)[qualSign + 2], abs(alterationN))
-  
-  affixer(.paste(bases, tails), accidentals, accidental.prefix) 
-  
-}
 
 ## octave stuff
 
-LO5thNedgeOct2tint <- function(LO5th, edgeOct) {
+LO5thNscaleOct2tint <- function(LO5th, scaleOct) {
     tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
     octshift <- tint2semit(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
     
-    tint(edgeOct - octshift, LO5th)
+    tint(scaleOct - octshift, LO5th)
 }
 
-LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNedgeOct2tint(LO5th, sciOct - 4L) 
+LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNscaleOct2tint(LO5th, sciOct - 4L) 
 
 LO5thNcentralOct2tint <- function(LO5th, centralOct) {
   tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
@@ -626,9 +601,9 @@ solfa2LO5th <- function(solfa) {
 
 
 
-##### To/From octaves ####
+##### To/From octaves/contours ####
 
-####. tint to octave ####
+####. tint to contour ####
 
 tint2centralOctave <- function(x) {
   # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
@@ -636,70 +611,42 @@ tint2centralOctave <- function(x) {
   (round(tint2semit(generic) / 12L)) %dim% x
 }
 
-tint2edgeOctave <- function(x) {
-  # edgeOctave is octave from unison and above 
+tint2scaleOctave <- function(x) {
+  # scaleOctave is octave from unison and above 
   generic <- x %% tint(-11L, 7L)
   (tint2semit(generic)) %/% 12L %dim% x
 }
 
-tint2octave <- function(x, octave.markers = c(up = '^', down = 'v'), 
-                        octave.centered = FALSE, octave.offset = 0L, 
-                        octave.maximum = Inf, octave.minimum = -Inf, octave.style = NULL, ...) {
-  setoptions(octave.markers) <- c(up = "^", down = "v", same = "")
+tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'), 
+                        contour.offset = 0L, contour.maximum = Inf, contour.minimum = -Inf,
+                        contour.delta = FALSE, contour.round = floor) {
   
-  switch(octave.style %maybe% "null",
-         null = {},
-         kern = {},
-         helmholtz = ,
-         lily = {octave.markers <- list(up = "'", down = ",", same = "")},
-         sci = {octave.offset <- 4L; octave.markers <- NULL},
-         relative = {octave.centered <- TRUE },
-         .stop("In call to tint2octave, style argument must be either 'kern', 'hemlholtz', 'lily', 'sci', or 'relative'.")
-         )
+  setoptions(contour.labels) <- c(up = "^", down = "v", same = "")
   
+  if (contour.delta) x <- delta(x)
   #
-  octn <- (if (octave.centered) tint2centralOctave(x) else tint2edgeOctave(x)) + octave.offset
-  octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
+  octn <- contour.offset + octavepart(x, contour.round)@Octave
+  octn <- pmin(pmax(octn, contour.minimum), contour.maximum)
   
-  if (is.logical(octave.markers) && !octave.markers[1]) return(octn)
+  # if contour.labels = FALSE, we just return the number
+  if (false(contour.labels)) return(octn)
   
-  output <- if (octave.style %==% 'kern') {
-    octave.kernstyle('c', octn)
-  } else {
-    out <- strrep(.ifelse(octn >= 0L, octave.markers$up, octave.markers$down), abs(octn))
-    out[octn == 0L] <- octave.markers$same
-    out 
-  }
-  
-  attr(output, 'octaveN') <- octn %dim% x
-  
-  output %dim% x
+  out <- rep(NA_character_, length(octn))
+  out[!is.na(octn)] <- strrep(.ifelse(octn[!is.na(octn)] >= 0L, contour.labels$up, contour.labels$down), abs(octn[!is.na(octn)]))
+  out[octn == 0L] <- contour.labels$same
+
+  out %dim% x
   
 }
 
-octave.case <- function(str, octn) .ifelse(octn >= 0L, tolower(str), toupper(str))
 
 octave.kernstyle <- function(str, octn) {
-  str <- octave.case(str, octn)
   char <- substr(str, 0L, 1L)
+  char <- .ifelse(octn >= 0L, tolower(char), toupper(char))
   
-  octn[octn >= 0L] <- octn[octn >= 0L] + 1L # 0 -> 1
+  octn[!is.na(octn) & octn >= 0L] <- octn[!is.na(octn) & octn >= 0L] + 1L # 0 -> 1
   
   .paste(strrep(char, abs(octn)), stringr::str_sub(str, start = 2L)) %dim% str
-}
-
-octaver <- function(str, tint, octave.prefix = TRUE, ...) {
-  args <- list(...)
-  
-    
-  octave <- tint2octave(tint, ...)
-  
-  if (args$octave.style %==% 'kern') return(octave.kernstyle(str, attr(octave, 'octaveN')))
-  if (args$octave.style %==% 'helmholtz') str <- octave.case(str, attr(octave, 'octaveN'))
-  if (args$octave.style %iN% c('lily', 'helmholtz')) octave.prefix <- FALSE
-  
-  affixer(str, octave, prefix = octave.prefix)   
-
 }
 
 
@@ -721,75 +668,103 @@ tint2midi <- function(x) tint2semit(x) + 60L
 
 ###.. tonal chroma names
 
-#.... general tools
-
-tint2accidental <- function(x, ...) LO5th2accidental(x@Fifth, ...)
-tint2quality    <- function(x, ...) LO5th2quality(x@Fifth, ...)
-
-
-tint2tonalChroma <- function(x, octave = FALSE, ...) {
+tint2tonalChroma <- function(x, step = TRUE, quality = TRUE, accidental = FALSE, contour = TRUE, 
+                             order = c('quality', 'step', 'accidental', 'contour'), sep = "", ...) {
   
-  tonalchroma <- LO5th2tonalChroma(x@Fifth, ...) 
   
-  if (octave) tonalchroma <- octaver(tonalchroma, x,  ...)
+  steps       <- if (step)       tint2scaleStep(x, ...)   %dots% (has.prefix('step.') %.% names)
+  qualities   <- if (quality)    tint2quality(x, ...)     %dots% (has.prefix('quality.') %.% names)
+  accidentals <- if (accidental) tint2accidental(x, ...)  %dots% (has.prefix('accidental.') %.% names)
+  contours    <- if (contour)    tint2contour(x, ...)     %dots% (has.prefix('contour.') %.% names)
+
+  tonalchroma <- pasteordered(order, step = steps, quality = qualities, accidental = accidentals, contour = contours)
   
   tonalchroma  %dim% x
   
 }
 
-#.... specific ones
+tint2scaleStep  <- function(x, ...) LO5th2scaleStep(x@Fifth, ...)
+tint2accidental <- function(x, ...) LO5th2accidental(x@Fifth, ...)
+tint2quality    <- function(x, ...) LO5th2quality(x@Fifth, ...)
 
-tint2sciPitch <- function(x)  tint2tonalChroma(x, octave = TRUE, octave.style = 'sci', octave.prefix = FALSE)
 
-tint2kernPitch <- function(x) tint2tonalChroma(x, steps.upper = FALSE, accidental.labels = c(flat = '-'), octave = TRUE, octave.style = 'kern')
 
-tint2lilyPitch <- function(x, relative.octave = TRUE) {
-  tint2tonalChroma(x, accidental.labels = c(sharp = 'is', flat = 'es'), steps.upper = FALSE, octave = TRUE, octave.style = 'lily')
+
+###.. specific ones
+
+tint2sciPitch <- function(x, ...)  {
+  overdot(tint2tonalChroma(x, 
+                           step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                           contour.labels = FALSE, contour.offset = 4L, 
+                           quality = FALSE, accidental = TRUE, ...))
 }
 
-###.. intervals
 
+tint2lilyPitch <- function(x, relative = TRUE, ...) {
+  overdot(tint2tonalChroma(x, 
+                           step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                           contour.labels = c(up = "'", down = ","), 
+                           contour.delta = relative,
+                           contour.round = if (relative) round else floor,
+                           accidental.labels = c(sharp = 'is', flat = 'es'),
+                           quality = FALSE, accidental = TRUE, ...))
+} 
 
-
-tint2interval <- function(x, direction = TRUE, generic.part = TRUE, alteration.part = TRUE, quality.labels = c()) {
-  setoptions(quality.labels) <- c(augment = 'A', diminish = 'd', major = 'M', minor = 'm', perfect = 'P')
+tint2helmholtz <- function(x, ...) {
+  notes <- overdot(tint2tonalChroma(x, 
+                                    step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                                    contour.labels = c(up = "'", down = ","), contour.offset = 1L,
+                                    quality = FALSE, accidental = TRUE, ...))
   
-  octave <- tint2edgeOctave(x) 
+  octn <- tint2contour(x, contour.labels = FALSE, contour.offset = 1L)
+  notes[octn < 0L] <- stringr::str_to_title(notes[octn < 0L]) 
+  notes
+}
+                                                                
+tint2kernPitch <- function(x, ...) {
+  simple <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                                     accidental.labels = c(flat = '-'), 
+                                     contour = FALSE, quality = FALSE, accidental = TRUE, ...))
+  
+  octave      <- tint2contour(x, contour.labels = FALSE)
+  
+  octave.kernstyle(simple, octave) %dim% x
+}
+
+
+#.... intervals
+
+
+
+tint2interval <- function(x) {
+  
+  octave <- tint2contour(x, contour.round = floor, contour.labels = FALSE)
+  direction <- .ifelse(x == tint(0, 0), "", c('-', '+')[1 + (octave >= 0)])
+  
   x[octave < 0L] <- x[octave < 0L] * -1L
+  steps <- tint2scaleStep(x, step.labels = 1L:7L)
   
-  generic <- alteration <- directed <- character(length(x))
+  octave[!is.na(octave) & octave < 0L & steps != 1L] <- octave[!is.na(octave) & octave < 0L & steps != 1L] + 1L
+  steps <- steps + octave * 7
   
-  if (direction) {
-    directed <- .ifelse(x == tint(0, 0), "", c('-', '+')[1 + (octave >= 0)])
-  }
-  if (alteration.part) {
-    alteration <- LO5th2quality(x@Fifth, quality.labels) %dim% x
-  } 
-  if (generic.part) {
-    genericInterval <- LO5th2genericstep(x@Fifth) %dim% x
-    octave[!is.na(octave) & octave < 0L & genericInterval != 1L] <- octave[!is.na(octave) & octave < 0L & genericInterval != 1L] + 1L  # can octave be NA?
-    # generic <- empty(genericInterval, length(x), dim(x))
-    generic <- as.character(abs(genericInterval + (7L * abs(octave))))
-  } 
- 
+  qualities <- tint2quality(x, quality.cautionary = TRUE)
   
-  .paste(directed, alteration, generic) %dim% x
+  
+  .paste(direction, qualities, steps) %dim% x
   
 }
 
 
-##... scale degrees 
+#.... scale degrees 
 
-tint2scaleDegree <- function(x, Key = NULL, cautionary = FALSE, quality.labels = c(), octave = FALSE, ...) {
-    setoptions(quality.labels) <- c(perfect = 'n',  augment = '#',  diminish = 'b',  major = 'M',  minor = 'm')
-    
-    Key <- if (is.null(Key)) dset(0, 0) else as.diatonicSet(Key)
-    
-    deg  <- LO5th2scaleDegree(x@Fifth, Key, cautionary, quality.labels = quality.labels)
+tint2scaleDegree <- function(x, Key = Key, contour = FALSE, ...) {
+  Key <- if (is.null(Key)) dset(0, 0) else as.diatonicSet(Key)
+  x <- x - Key
+  Key <- Key - getRoot(Key)
+  
+  tint2tonalChroma(x, Key = Key, step = TRUE, quality = TRUE, accidental = FALSE, contour = contour,
+                   order = c('contour', 'quality', 'step'), ...)
 
-    if (octave) deg <- octaver(deg, x, ...)
-
-    deg %dim% x
 }
 
 # 
@@ -799,18 +774,35 @@ tint2scaleDegree <- function(x, Key = NULL, cautionary = FALSE, quality.labels =
 
 
 
-tint2solfa <- function(x, Key = NULL, octave = FALSE, ...) {
+tint2solfa <- function(x, Key = NULL, contour = FALSE, accidental = TRUE, order = c('contour', 'accidental', 'step'), ...) {
   Key <- if (is.null(Key)) dset(0, 0) else as.diatonicSet(Key)
-  
   x <- x - Key
   Key <- Key - getRoot(Key)
   
-  solfa <- LO5th2solfa(x@Fifth, Key)
-    
-  if (octave) solfa <- octaver(solfa, x, ...)
+  steps <- tint2scaleStep(x, c('d', 'r', 'm', 'f', 's', 'l', 't'))
   
-  solfa
-}
+  ## tails
+  solfatails <- rbind(d = c("e", "o", "i"),
+                      r = c("a", "e", "i"),
+                      m = c("e", "i", "y"),
+                      f = c("e", "a", "i"),
+                      s = c("e", "o", "i"),
+                      l = c("e", "a", "i"),
+                      t = c("e", "i", "y"))
+  tailcol <- sign(tint2accidental(x, accidental.labels = FALSE))
+  tails <- solfatails[cbind(match(steps, rownames(solfatails)),  tailcol + 2L)]
+  
+  
+  accidentals <- if (accidental) stringr::str_sub(tint2accidental(x, ...) %dots% (has.prefix('accidentals.') %.% names),
+                                                  start = 2L) # drop first accidental # will mess up with double sharps/flats
+  contours <- if (contour)  tint2contour(x, ...) %dots% (has.prefix('contour.') %.% names)
+  
+  pasteordered(order, contour = contours, accidental = accidentals, step = .paste(steps, tails))
+}  
+
+
+
+
 
 
 
@@ -849,50 +841,20 @@ tint2decimal <-  function(x, tonalHarmonic = 2^(19/12)) {
             (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %dim% x
 }
 
-tint2frequency <- function(x, reference.freq = 440L, 
-                           reference.tint = tint(-4L, 3L), 
+tint2frequency <- function(x, frequency.reference = 440L, 
+                           frequencyTint = tint(-4L, 3L), 
                            tonalHarmonic = 2^(19/12)) {
-    x <- x - reference.tint
+    x <- x - frequencyTint
     
     ratio <- tint2decimal(x, tonalHarmonic = tonalHarmonic)
     attributes(ratio) <- NULL
     
-    reference.freq * ratio %dim% x
+    frequency.reference * ratio %dim% x
 }
 
 
 
-###.. contour
 
-tint2contour <- function(x, threshold = tint( , 6),  contour.labels = c()) {
-    setoptions(contour.labels) <- c(Down = '-', Same = '', Up = '+', Bound = "")
-    
-    contour <- character(length(x))
-    
-    threshold <- as.tonalInterval(threshold)
-    targets <- abs(x) >= threshold & !is.na(x)
-    
-    contour[targets] <- unlist(contour.labels[c('Down', 'Same', 'Up')[sign(x[targets]) + 2L]])
-    contour <- .ifelse(targets, 
-                                   strrep(contour, 1 + (tint2semit(abs(x) - threshold) %/% 12L)), 
-                                   contour)
-    browser()
-    contour[1] <- paste0(contour.labels['Bound'], contour[1])
-    contour
-    
-}
-
-addcontour <- function(strs, tint, contour.options = list()) {
-    setoptions(contour.options) <- list(delta = TRUE, threshold = 0L, octave = TRUE, after = FALSE)
-    contour.options <- nestoptions(contour.options, contour.labels = c("Up", "Down", "Same", "Bound"))
-    
-    after <- contour.options$after
-    contour.options$after <- NULL
-    
-    contour <- do.call('as.contour.tonalInterval', c(list(tint), contour.options))
-    if (after) .paste(strs, contour) else .paste(contour, strs)
-    
-}
 
 ####. x to tint ####
 
@@ -910,21 +872,26 @@ semit2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
           tints <- tint(octaves, LO5ths)
           
           ##
-          tints <- enharmonicpart(tints, 12L, Key %maybe% dset(0, 0))
-          
-          if (accidental.melodic) {
-           chromatic <- LO5ths > 5 | LO5ths < -1
-           ints <- c(diff(tints), tint(0, 0)) # tint(0,0) is just padding
-
-           isA1 <- ints == tint(-11, 7)
-           isD1 <- ints == tint(11, -7)
-           
-           tints[which(chromatic & isA1)] <- tints[which(chromatic & isA1)] + pythagorean.comma
-           tints[which(chromatic & isD1)] <- tints[which(chromatic & isD1)] - pythagorean.comma
-                    
-          } 
+          tints <- atonal2tint(tints, accidental.melodic, Key)
           
           tints %dim% n
+}
+
+atonal2tint <- function(tint, accidental.melodic, Key = NULL) {
+  if (!is.null(Key)) tint <- enharmonicpart(tint, 12L, Key)
+  
+  if (accidental.melodic) {
+    chromatic <- LO5ths > 5 | LO5ths < -1
+    ints <- c(diff(tint), tint(0, 0)) # tint(0,0) is just padding
+    
+    isA1 <- ints == tint(-11, 7)
+    isD1 <- ints == tint(11, -7)
+    
+    tint[which(chromatic & isA1)] <- tint[which(chromatic & isA1)] + pythagorean.comma
+    tint[which(chromatic & isD1)] <- tint[which(chromatic & isD1)] - pythagorean.comma
+    
+  } 
+  tint
 }
 
 midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 60L, accidental.melodic, Key)
@@ -1020,7 +987,7 @@ interval2tint <- function(str) {
           
           ## Octave
           octaveshift <- (abs(generic) - 1) %/% 7
-          tint <- LO5thNedgeOct2tint(LO5th, octaveshift)                
+          tint <- LO5thNscaleOct2tint(LO5th, octaveshift)                
           
           ## Direction
           
@@ -1072,7 +1039,7 @@ scaleDegree2tint <- function(str, Key = NULL, ...) {
     
     octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
     if (octave.style == 'absolute') {
-      LO5thNedgeOct2tint(LO5ths, octaven) 
+      LO5thNscaleOct2tint(LO5ths, octaven) 
     } else {
       sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
     }
@@ -1101,7 +1068,7 @@ solfa2tint <- function(str, Key = NULL, octave.style = NULL) {
     
     octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
     if (octave.style == 'absolute') {
-      LO5thNedgeOct2tint(LO5ths, octaven) 
+      LO5thNscaleOct2tint(LO5ths, octaven) 
     } else {
       sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
     }
@@ -1116,7 +1083,7 @@ solfa2tint <- function(str, Key = NULL, octave.style = NULL) {
 
 fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational.character(x), tonalHarmonic) %dim% x
 
-rational2tint <- function(x, tonalHarmonic = 3) {
+rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, Key = NULL) {
   if (x$Numerator == 0 || (x$Numerator < 0 & x$Denominator > 0)) .stop('Rational values can only be interpreted as tonalIntervals if they are positive.')
   
   fracs <- do.call('cbind', x)
@@ -1148,17 +1115,19 @@ rational2tint <- function(x, tonalHarmonic = 3) {
     fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
   }
   
+  tint <- atonal2tint(tint, accidental.melodic, Key)
+  
   tint(octs, fifs) %dim% str
 }
 
-decimal2tint <- function(x, tonalHarmonic = 3, centmargin = 10) {
+decimal2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melodic = FALSE, Key = NULL) {
     if (x <= 0) .stop('Decimal (numeric) values can only be interpreted as tonalIntervals if they are positive.')
   
-    octrange <- attr(centmargin, 'octrange')
+    octrange <- attr(centMargin, 'octrange')
     if (is.null(octrange)) octrange <- 5L
     if (octrange > 150) stop(call. = FALSE,
                             "decimal2tint can't find a note corresponding exactly to this frequency/ratio. ",
-                            "Try raising the centmargin.")
+                            "Try raising the centMargin.")
     
     #
     octs <- -octrange:octrange
@@ -1181,21 +1150,24 @@ decimal2tint <- function(x, tonalHarmonic = 3, centmargin = 10) {
     # cents
     cents <- log(tonalHarmonic^remain,2) * 1200
     
-    accept <- abs(cents) < centmargin
+    accept <- abs(cents) < centMargin
     
     output <- tint(octave, LO5th, cent = cents)
     if (any(!accept)) output[!accept] <- Recall(x[!accept], tonalHarmonic, 
-                                                data.table::setattr(centmargin, 'octrange', octrange + 5L))
+                                                data.table::setattr(centMargin, 'octrange', octrange + 5L))
+    
+    output <- atonal2tint(output, accidental.melodic, Key)
+    
     output %dim% x
 }
 
 
 
-frequency2tint <- function(float, reference.freq = 440L, 
-                           reference.tint = tint(-4, 3), tonalHarmonic = 3,
-                           centmargin = 10) {
+frequency2tint <- function(float, frequency.reference = 440L, 
+                           frequencyTint = tint(-4, 3), tonalHarmonic = 3,
+                           centMargin = 10) {
     
-   ( decimal2tint(float / reference.freq, tonalHarmonic, centmargin = 10) + reference.tint) %dim% float
+   ( decimal2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %dim% float
 }
 
 
@@ -1211,9 +1183,9 @@ contour2tint <- force
 #' 
 #' @name tonalTransformations
 #' @export
-tonalTransform <- function(x,  direction = TRUE, contour = FALSE, 
+tonalTransform <- function(x,  direction = TRUE, 
                            delta = FALSE, sigma = Exclusive %allin% c('mint'), 
-                           generic = FALSE, simple = FALSE, simplifier = floor, enharmonic = FALSE, 
+                           generic = FALSE, simple = FALSE, roundContour = floor, enharmonic = FALSE, 
                            Key = NULL, Exclusive = NULL) {
     # Key
     
@@ -1231,10 +1203,10 @@ tonalTransform <- function(x,  direction = TRUE, contour = FALSE,
          # .else = tint( , rep(0L, length(x))))
     
     # Simple/Complex
-    if (simple) x <- simplepart.tonalInterval(x, simplifier)
+    if (simple) x <- simplepart.tonalInterval(x, roundContour)
     # ifif(octave.part, simple.part,
-         # xor1 = x <- octavepart.tonalInterval(x, simplifier),
-         # xor2 = x <- simplepart.tonalInterval(x, simplifier),
+         # xor1 = x <- octavepart.tonalInterval(x, roundContour),
+         # xor2 = x <- simplepart.tonalInterval(x, roundContour),
          # .else = tint( , rep(0L, length(x))))
     
     if (enharmonic) x <- enharmonicpart(x, Key = Key)
@@ -1314,8 +1286,8 @@ NULL
 
 
 
-tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor) {
-  mat <- tintPartition.octave_simple(tint, roundingMethod = roundingMethod)
+tintPartition <- function(tint, Key = dset(0,0), roundContour = floor) {
+  mat <- tintPartition.octave_simple(tint, roundContour = roundContour)
   
   Key <- as.diatonicSet(Key)
   cbind(Key = getRootTint(Key), mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key = Key))
@@ -1325,27 +1297,27 @@ tintPartition <- function(tint, Key = dset(0,0), roundingMethod = floor) {
 ###.. simple + octave = complex ####
 
 #' @export octavepart simplepart  is.simple 
-octavepart <- function(tint, roundingMethod) UseMethod('octavepart')
-simplepart <- function(tint, roundingMethod) UseMethod('simplepart')
+octavepart <- function(tint, roundContour) UseMethod('octavepart')
+simplepart <- function(tint, roundContour) UseMethod('simplepart')
 is.simple <- function(tint) UseMethod('is.simple')
 
 
 #' @export
-octavepart.tonalInterval <- function(tint, roundingMethod = floor) {
+octavepart.tonalInterval <- function(tint, roundContour = floor) {
     generic <- genericpart.tonalInterval(tint)
-    octshift <- as.integer(roundingMethod(tint2semit(generic) / 12))
+    octshift <- as.integer(roundContour(tint2semit(generic) / 12))
     tint(octshift, 0L) %dim% tint
 }
 
 #' @export
-simplepart.tonalInterval <- function(tint, roundingMethod = floor) {
-    octavepart <- octavepart.tonalInterval(tint, roundingMethod)
+simplepart.tonalInterval <- function(tint, roundContour = floor) {
+    octavepart <- octavepart.tonalInterval(tint, roundContour)
     tint - octavepart
 }
 
-tintPartition.octave_simple <- function(tint, roundingMethod = floor) {
+tintPartition.octave_simple <- function(tint, roundContour = floor) {
   if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
-  octavepart <- octavepart.tonalInterval(tint, roundingMethod)
+  octavepart <- octavepart.tonalInterval(tint, roundContour)
   
   cbind(Octave = octavepart, Simple = tint - octavepart)
 
@@ -1432,21 +1404,29 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 
 #' Pitch representations and translations
 #' 
-#' Functions for translating between numerous representations of (tonal) pitch.
+#' Functions for creating and/or translating between numerous representations of pitch.
 #' 
 #' @details 
 #' 
-#' There are numerous ways that musicians/musicologists encode pitch information---including solfege, scientific pitch,
-#' intervals, scale degrees, and frequencies---each with different purposes and uses.
-#' As mentioned in the [tonalInterval] documentation, these representations can all be encoded as different 
-#' concrete instantiations of `tonalInterval` objects, and thus, can be translated between each other.
-#' `humdrumR` currently recognizes XXX pitch representations:
+#' There are numerous ways that musicians and musicologists encode pitch information---solfege, scientific pitch,
+#' intervals, scale degrees, frequencies, etc.---each with different purposes and uses.
+#' Some of these representations are numeric, but most involve letters and other characters.
+#' Any of these concrete representations can be translated to and from
+#' abstract [tonalInterval] objects: `tonalInterval`s completely represent all/any of these standard representations,
+#' so *cocrete pitch representation -> tonalInterval* is guaranteed to be lossless.
+#' However, not all pitch representations encode complete tonal pitch information, so
+#' *tonalInterval -> concrete pitch representation* may be lossy.
+#' These caneats asside, `humdrumR` can, via the common `tonalInterval` representation, encode and translate *between* various 
+#' representations: we can read in data in any reprsentation, manipulate it, and write it to the same or a different representation.
+#' This documentation describes `humdrumR`'s pitch representation and translation features.
+#' (`tonalIntervals` also give us easy ways to **manipulate** pitch information---see the [tonalTransform] documentation.)
+#' 
+#' `humdrumR` currently recognizes XXX "standard" pitch representations:
 #' 
 #' | Name        | Class       | Description                                                                                                                             |
 #' | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------: |
 #' | semit       | `integer`   | [Semitones](https://en.wikipedia.org/wiki/Semitone)                                                                                     |
 #' | midi        | `integer`   | [MIDI](https://en.wikipedia.org/wiki/MIDI) note number                                                                                  |
-#' | tonalChroma | `character` | Simple tonal lettername + accidental(s) without octave                                                                                  |
 #' | kernPitch   | `character` | [Kern](https://www.humdrum.org/rep/kern/index.html) pitch representation                                                                |
 #' | sciPitch    | `character` | [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) representation                                                       |
 #' | lilyPitch   | `character` | [LilyPond](https://lilypond.org/doc/v2.20/Documentation/notation/pitches) pitch representation                                          |
@@ -1456,20 +1436,16 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' | decimal     | `numeric`   | [Frequency ratio](https://en.wikipedia.org/wiki/Interval_ratio) as R [numeric][base::numeric] (equal temperament)                       |
 #' | frequency   | `numeric`   | [Sound frequency](https://en.wikipedia.org/wiki/Frequency#Sound) ([equal temperament](https://en.wikipedia.org/wiki/Equal_temperament)) |
 #' | fraction    | `character` | Frequency ratio as fraction (Pythagorean tuning)                                                                                        |
-#' 
 #  | rational    | `list`      | Frequency ratio as integer numerators and denominators ([Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning))         |
-#  | rational    | `list(1L, 1L)` | `list(256L, 243L)`  | `list(8L, 9L)`           | `list(729L, 512L)` | `list(3L, 2L)` | `list(32768L, 19683L)` | `list(64, 27)` |
 #' 
-#' Below are equalivalent examples of each pitch representation.
-#' All the representations in each column would be represented by the same [tonalInterval]---the final two rows show the `tonalInterval`
-#' slot (`@Octave` and `@Fifth`) values associated with each interval as well.
-#' (Users should never really have to think about these.)
+#' Below are equivalent examples of each of these standard pitch representation; all the representations in each column of the table are 
+#' represented by the same [tonalInterval]---the final
+#' two rows show the `tonalInterval` slot (`@Octave` and `@Fifth`) values associated with each interval as well (users should never really have to think about these).
 #' 
 #' | Name        |  Unison        | Minor second        | Descending major second  | Augmented fourth   | Perfect 5th    | Diminished 7th         | Minor 10th     |
 #' | ----------- | -------------- | ------------------- | ------------------------ | ------------------ | -------------- | ---------------------- | -------------- |
 #' | semit       | `0L`           | `1L`                |  `-2L`                   |  `6L`              |  `7L`          |  `9L`                  |  `15L`         |      
 #' | midi        | `60L`          | `61L`               |  `58L`                   |  `66L`             |  `67L`         |  `69L`                 |  `75L`         | 
-#' | tonalChroma | `"C"`          | `"D-"`              |  `"B-"`                  |  `"F#"`            |  `"G"`         |  `"B--"`               |  `"E-"`        | 
 #' | kernPitch   | `"c"`          | `"d-"`              |  `"B-"`                  |  `"f#"`            |  `"g"`         |  `"b--"`               |  `"ee-"`       | 
 #' | sciPitch    | `"C4"`         | `"Db4"`             |  `"Bb3"`                 |  `"F#4"`           |  `"G4"`        |  `"Bbb4"`              |  `"Eb5"`       | 
 #' | lilyPitch   | `"c"`          | `"des"`             |  `"bes,"`                |  `"fis"`           |  `"g"`         |  `"beses"`             |  `"ees'"`      | 
@@ -1482,21 +1458,89 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' | `@Fifth`    | `0L`           | `-5L`               | `-2L`                    | `6L`               | `1L`           | `-9L`                  | `-3L`          |
 #' | `@Octave`   | `0L`           | `8L`                | `3L`                     | `-9L`              | `-1L`          | `15L`                  | `6L`           |
 #' 
-#' As can be seen, not all representations encode the full pitch information.
-#' For instance, the *scaleDegree* representation drops octave information (by default), while *semit* drops tonal information (i.e., that `C# != Db`).
+#' This table illustrates that some reprsentations are lossy, as they don't encode the full pitch information.
+#' For instance, the *scaleDegree* representation drops octave information, while *semit* drops tonal information (i.e., that `C# != Db`).
 #' 
 #' @section Pitch Translation:
 #' 
-#' `humdrumR` exports functions to translate all of the frequency representations above to and from [tonalInterval]s, and also between each other.
+#' `humdrumR` exports functions to read and write all of the standard reprsentations above, as well as some custom non-standard representations (see `as.tonalChroma` below).
 #' An input can be converted to any representation by calling the appropriate function of the form `as.xxx`: for example, `as.solfa`.
-#' Some of these functions have additional arguments.
-#' For `character` arguments, the appropriate reading/writing methods are determined by the [regular expression dispatch system][humdrumR::regexDispatch] by scanning the
-#' input strings for regular expressions.
-#' Each representation also has known *exclusive interpretations* associated with it (see our *The Humdrum Syntax* vingette for clarifiation), and any `as.xxx` function can
-#' have an `Exclusive = ` argument added which the dispatch system will take into account (details below).
-#' For instance, is you just call `as.kernPitch("A4")`, the dispatcher will see that the `"A4"` string matches scientific pitch notation---however, if you want it to be read as an interval
-#' (i.e., as an augmented fourth) you can specify `as.kernPitch("A4", Exclusive = 'interval')`, `humdrumR` will know that "**interval" should be interpreted as an interval.
-#' The regular expressions associated with each representation are:
+#' The complete list of `as.xxx` functions for pitch representations is:
+#' 
+#' + Atonal
+#'     + `as.semit`
+#'     + `as.midi`
+#' + Tonal     
+#'      + `as.tonalChroma`
+#'           + `as.scaleStep`
+#'           + `as.accidental`
+#'           + `as.quality`
+#'           + `as.contour`
+#'      + `as.kernPitch`
+#'      + `as.lilyPitch`
+#'      + `as.sciPitch`
+#'      + `as.interval`
+#'      + `as.scaleDegree`
+#'      + `as.solfa`
+#' + Frequency
+#'      + `as.decimal`
+#'      + `as.frequency`
+#'      + `as.fraction`
+#' 
+#' Note that none of the functions have a plural name, so it's not `as.semits` or `as.intervals` even if you are applying them to multiple inputs!
+#' 
+#' Each of these `as.xxx` functions does *three* things: 
+#' 
+#' 1. Read the input as a `tonalInterval` (details below).
+#' 2. If desired, transform the `tonalInterval` (see [tonalTransform]).
+#' 3. Write the `tonalInterval` to the output representation (details below).
+#' 
+#' Each of these three steps has numerous options that you can control via special arguments.
+#' The details of the reading and writing stages, and all the associated arguments are described in subsequent sections.
+#' All pitch translation functions *also* have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
+#' All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
+#' For example, you can write `as.kernPitch(x, generic = TRUE, Key = "A")` to extract generic intervals in the key of A major and output them in `kernPitch` format.
+#' These transformation arguments are listed as "common" arguments in the table below, and explained in more detail in the [tonalTransformations] documentation.
+
+#' 
+#' @section Reading Pitch Information:
+#' 
+#' The master function `as.tonalInterval` converts any recognized pitch input into a `tonalInterval` object.
+#' All the main `as.xxx` functions implicitely call `as.tonalInterval`.
+#' How `as.tonalInterval` interprets input as pitch information is determined by the base R [dispatch system][methods::Methods_Details] (interpreting the class of the input) and,
+#' if the input is a character-string, humdrumR's [regular expression dispatch system][humdrumR::regexDispatch].
+#' 
+#' The process of reading an input as a `tonalInterval` follows two steps:
+#' 
+#' First, the base R dispatch system checks the [class][base::class] of the input. There are currently methods for three recognized classes:
+#' + `integer`: integers are interpreted as semitones.
+#' + `numeric`: numeric (floating point, not integer values) are interpreted as frequency ratios. 
+#' + `character`: if the input is a character, humdrumRs dispatch system comes into play (see next paragraph).
+#' 
+#' Given an character-string input, the `humdrumR` [regular expression dispatch system][humdrumR::regexDispatch] determines the appropriate way to parse
+#' pitch information from the string using two criteria: 
+#' 1) matching known *regular expressions* in the string and 
+#' 2) based on the `Exclusive` argument, which indicates a *exclusive interpretations* associated with it (see our *The Humdrum Syntax* vingette if you don't know
+#' what an exclusive interpretation is).
+#' For any input string, humdrumR searches for known regular expressions and decides to interpret the input based on whichever regular expression matches the *most* input strings.
+#' For instance, if you call `as.kernPitch("A4")` (or any `as.xxx` pitch function), the dispatcher will see that the `"A4"` string matches the regular expression for 
+#' scientific pitch notation (i.e., the A above middle C) and *also* the regular expression for intervals (i.e., an augmented fourth).
+#' In this case, there is only one input string, so humdrumR will five scientific notation precedence and interpret the input as the A above middle C.
+#' However, if we have an input with more information, like `as.kernPitch(c("A4", "P5"))`, humdrumR will see that **both** inputs match intervals, but only the first one matches
+#' scientific pitch notation---therefore, humdrumR will interpret both strings as intervals (augmented fourth and perfect 5th).
+#' Note that humdrumR will *not* use two different interpretions of the same string.
+#' Also, any strings which match no known regular expressions, will result in `NA` (unless `inPlace = TRUE`; see below).
+#' 
+#' What if we want to interpret `as.kernPitch("A4")` as an interval? Well, we can use the `Exculusive` argument.
+#' The `Exclusive` argument gives more information to the dispatcher, which will override the purely-regex based decisions.
+#' For instance, if we specify `as.kernPitch("A4", Exclusive = 'interval')`, `humdrumR` will know that the exclusive interpretation "**interval" 
+#' should be interpreted as an interval.
+#' If we run `as.kernPitch(c("A4", "P5"), Exclusive = 'pitch')`, humdrumR will return `("a", NA)`, because the second input can't be interpreted as a scientfic pitch.
+#' However, the `Exclusive` argument is vectorized, which gives us the option of using multiple input interpretations on different parts of the same input.
+#' For instance, `as.kernPitch(c("A4", "A4"), Exclusive = c('pitch', 'int')` will return `("a", "f#")`---the `'pitch'` exclusive intepretation is 
+#' matched with the first `"A4"` while the `'int'` interpretation is matched with the second one!
+#' 
+#' The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:
 #' 
 #' ```{r, echo = FALSE, comment = NA}
 #' 
@@ -1515,178 +1559,449 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' ```
 #'
 #' 
-#' In addition, all the `character`-based translations can have an `inPlace` argument set to either `TRUE` or `FALSE`.
-#' If `inPlace = TRUE` any extract characters in the input string which are *not* part of the matching regular expression will be untouched:
-#' for example, `as.kernPitch("4.A5xxxv", inPlace = TRUE)` will output `"4.aaxxxv`---the `"4."` and `xxxv` are not changed.
-#' On the other hand `as.kernPitch("4.A5xxxv", inPlace = FALSE)` will just return `"aa"`.
+#' A final useful option is controlled using the logical `inPlace` argument.
+#' If `inPlace = TRUE` any extra characters in the input string which are *not* part of the matching regular expression will be left unchanged:
+#' for example, `as.kernPitch("4.A5xxxv", inPlace = TRUE)` will output `"4.aaxxxv`---the `"A5"` (scientific pitch) is translated to `"aa"` (kern pitch)
+#' but the `"4."` and `"xxxv"` are not changed.
+#' In contrast, `as.kernPitch("4.A5xxxv", inPlace = FALSE)` will just return `"aa"`, stripping away the `"4."` and `"xxxv"`.
 #' (Thus, the `inPlace` argument can be used as a tool to extract the desired part of strings.)
+#' Note that if `inPlace = TRUE`, any inputs which fail to match anything will just be left unchanged.
 #' 
 #'  
-#' ### Special Translation Arguments
+#'
 #' 
-#' In addition to `inPlace` and `Exclusive`, which are arguments to all pitch translation functions, some pitch translation functions have additional arguments
-#' to control the translation process, either in the reading (interpreting input) or writing (creating output) stage.
+#' @section Read/Writing Tonal Pitch Information:
 #' 
-#' ### Pitch Transformation Arguments
+#' Most of the pitch representations defined in `humdrumR` are based in Western diatonic *tonality*---for info on our atonal representations, see the *Read/Writing Atonal Pitch Information* section below.
+#' The predefined `kernPitch`, `sciPitch`, `lilyPitch`, `helmholtz`, `interval`, `scaleDegree`, and `solfa` encodings are all tonal representations---in fact, they all represent *essentially* the same absract
+#' information,  which is exactly what `tonalInterval`s encode.
+#' Specifically, we condsider all of these representations to be different representations of what we call *tonal chroma*:
+#' as such, the `as.tonalChroma` function is the master function used to construct all of these specific representations.
+#' The following section(s) explain the abstract principles of pitch representation, how they function in standard representations, and how 
+#' we, in humdrumR, we can use `as.tonalChroma` and its arguments to create custom tonal representations of pitch.
 #' 
-#' All the pitch translation functions also have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
-#' This functionality is described in more detail in the [tonalTransformations] documentation.
-#' All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
-#' For example, you can write `as.kernPitch(x, generic = TRUE, Key = "A")` to extract generic intervals in the key of A major, and output them in `kernPitch` format.
+#' #### Tonal Pitch "Partitions"
+#' 
+#' As discussed in the *Tonality in humdrumR* vignette, tonal intervals can be "partitioned"---i.e., broken into constituent logical pieces.
+#' There are two main "partitions" we frequently use:
+#' 
+#' 1. the partitioning of a *complex* interval into a *simple parts* and *octave* parts*.
+#' 2. the partitioning of a *specific* interval into a *generic part* and a *alteration* part.
+#' 
+#' Simple intervals are abstract ([line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)) information, without regards to a specific pitch in frequency space---i.e., actual "pitch height."
+#' The combination of a simple interval with an octave part creates a complex interval, which *does* include information about specific pitch height.
+#' Tonal "line-of-fifths space" can further be partitioned into [generic][tonalTransformations] (diatonic) information and *specific* interval information which describes the 
+#' *quality* of intervals, including zero or more [alterations]("https://en.wikipedia.org/wiki/Accidental_(music)") of the diatonic set.
+#' Thus, any tonal interval/pitch is composed of an **octave** part, a **generic** part, and a **quality** part.
+#' 
+#' Various pitch representation schemes (kern, solfege) represent the three different parts (octave/generic/quality) of `tonalInterval`s in various ways, though some representations are 
+#' lossy/incomplete, as they don't fully encode all three partitions.
+#' For example, scale degrees represent simple tonal information without complex octave information.
+#' In some schemes, each tonal partition is represented distinctly from others, allowing us to mix and match different sub-representation to create various full reprsentations.
+#' In other cases, representations blur partitions in ways that can not be broken apart.
+#' For instance, solfege syllables do not neatly delineate generic and quality information---the "e" vowel means different qualities depending on which leading consonant it is paired with
+#' (e.g., "re" vs "me").
+#' Since the logic of interval representation does not always conform to the more abstract logic of `tonalInterval` partitions, we use a different set of terms to
+#' refer to the *representation* of distinct partitions: scale-**step** for generic information,  **quality**/**alteration**/**accidental** for alteration information, and  **contour** for octave information,
+#' Thus, the terms `step`, `contour`, `quality`, `alteration`, `accidental` all appear as or in various pitch representation/translation function arguments (details below).
+#' 
+#' In humdrumR, a *tonal chroma* is a representation that combines some combination of the three representation partions (scale, alteration, and/or contour).
+#' The `as.tonalChroma` function is a master function for writing tonal chroma.
+#' The functions`as.kernPitch`, `as.sciPitch`, `as.lilyPitch`, and `as.helmholtz` are all simply wrappers which call `as.tonalChroma` with various specific arguments.
+#' `as.tonalChroma` itself calls four constituent functions: `as.scaleStep`, `as.quality`/`as.accidental`, and `as.contour`/`as.octave`.
+#' The arguments to `as.tonalChroma`, derived from the constituent functions (details in the following sections) are:
+#' 
+#' + `as.tonalChroma`:
+#'        + `step`, `quality`, `accidental`, and `contour`: each argument a single logical value.
+#'          These arguments indicate whether the scale-step, quality, accidental, and/or contour strings should or shouldn't be printed.
+#'        + `order`: a character string of length 3--4, consisting of the words `"step"`, `"quality"`, `"accidental"`, or `"contour"`.
+#'           (Partial matches (like `"ste"` or `"s"` for `step`) will work too.)
+#'           This vector controls the order in which the different elements of the string are concatinated.
+#'           For instance, do you want your octave labels before or after the scale step?
+#'             + `sep`: a character string which will be used to separate the elements (the default is `""`).
+#' + from `as.scaleStep` (described below):
+#'        + `step.labels`
+#' + from `as.accidental` (described below):
+#'        + `accidental.labels` 
+#'        + `accidental.maximum` and `accidental.minimum`
+#'        + `accidental.cautionary`
+#'        + `accidental.memory`
+#'        + `Key`
+#' + from `as.quality` (described below):
+#'        + `quality.labels` 
+#'        + `quality.maximum` and `quality.minimum`
+#'        + `quality.cautionary`
+#'        + `quality.memory`
+#'        + `Key` 
+#' + from `as.contour` (described below):
+#'        + `contour.labels`
+#'        + `contour.maximum` and `contour.minimum`
+#'        + `contour.offset` 
+#'        + `contour.round` 
+#'        + `contour.delta` 
 #' 
 #' 
-#' @section Pitch Representation Generalizations:
+#' ## Scale Steps
 #' 
-#' The different pitch representation schemes listed above are not all completely unrelated---many are very similar.
-#' Indeed, we can abstract several basic, common, principles that are shared between various pitch representations.
-#' These shared abstractions simplify the organization of code of `humdrumR`, and also allow us to construct new concrete representations based on these abstractions.
-#' They also mean that many pitch translation functions share common arguments.
-#' The abstract pitch representation concepts encoded in `humdrumR` are:
+#' A particular area of confusion in pitch representation is in the relationship between tonal (line-of-fifths) space and contour (frequency) space.
+#' The line-of-fifths is an abstract space unrelated to specific frequencies---e.g., G is not inherently "above" or "below" C.
+#' Still, musicians do not play abstractions, so we must always realize our line-of-fifths space in concrete frequency space.
+#' By convention, collections from the line-of-fifths are conceptualized as frequency-orded "**scales**": folding the line-of-fifths into a sequence of intervals in the octave "above" the unison.
+#' In most theoretical contexts, the order/"height" of elements in the scale is actually completely irrelavant.
+#' Specifically, the first seven (diatonic) elements of the line-of-fifths are mapped into generic **scale-steps** in the order [0, 2, 4, 6, 1, 3, 5].
+#' Scale-steps are strictly limited to a this seven-step range of a single diatonic octave, and are always "*ascending*"/"*positive*"---as they are steps in a pseudo-octave "above" the unison.
+#' This representation of the line-of-fiths in terms of scale-steps is the most basic approach to representing pitch, and is associated with arguments containing `step`;
+#' The function `as.scaleStep` is the basic building block of scale-step representations in humdrumR.
 #' 
-#' + Tonality
-#'      + Scale steps
-#'           + letter names
-#'           + scale degrees
-#'           + solfege
-#'      + Alterations
-#'           + Accidentals 
-#'      + Quality
-#' + Octave
-#' + Contour
+#' If we apply the modulo-7 operation to the line-of-fifths space, all intervals are mapped to these seven generic steps.
+#' Alterations of the basic generic steps are represented separately (see **Qualities and Alterations** section below).
+#' However, we should note that scale order is defined entirely based on the generic interval: for example, C-flat is by convention positioned "below"
+#' C-natural in the scale, even though it (is often) equivalent to B-natural, which is at the "top" of the scale.
 #' 
-#' For a in depth exploration of the underlying theories, see the *Tonality in humdrumR* vignette
-#' This document focuses only on ideas relavent to understanding the arguments used in pitch translation functions.
+#' Generic, pseudo-ordered, scale-steps are conventionally represented in three forms: as letters (A-G), numbers (1-7 or I-VII), or conventional syllables (do, re, mi, fa...).
+#' HumdrumR predefines several representations which include letters (A-G) as their scale-step encoding: `kernPitch`, `lilyPitch`, `helmholtz`, and `sciPitch`.
+#' There are also standard numeric (`scaleDegree`) and syllable-based (`solfa`) based representations predefined.
+#' The more generic `as.scaleStep` function can be used to write other variations of the scale step representations.
+#' `as.scaleStep` includes two arguments:
 #' 
-#' ## Tonality
-#' 
-#' As explained in the *Tonality in humdrumR* vignette, Western tonality is fundamentally based in partitioning the [line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)
-#' into a [generic][tonalTransformations], diatonic component (the line-of-fifths [modulo]("https://en.wikipedia.org/wiki/Modulo_(mathematics)") 7) and zero or more 
-#' [accidental/alteration]("https://en.wikipedia.org/wiki/Accidental_(music)") components.
-#' More generally, the intervals between generic steps have associated labels, known as *qualities*.
-#' 
-#' #### Scale Steps
-#' 
-#' The *generic* component of tonal pitch is typically represented not in it's underlying line-of-fifths dimension, but in the frequency dimension as a sequence of "scale **steps**."
-#' Traditionally, these scale steps have been are represented in three equivalent forms: as letters (A-G), numbers (1-7+), or conventional syllables (solfege).
-#' Letter name and solfege representations of steps are limited to a [simple][tonalTransformations] within a single octave, and are always *ascending*/*positive*.
-#' In contrast, the more general numeric representation of steps *can* be extended to [complex][tonalTransformations] intervals (i.e., greater than 7) as well as negative steps.
-#' In `humdrumR`,
-#' 
-#' + Lettername based representations incude `tonalChroma`, `kernPitch`, `lilyPitch`, `helmholtz`, and `sciPitch` (see the **Tonal Chroma** section below).
-#'   upper case (this can be overridden by octave representation arguments, see below).
-#'   The only special argument associated with the scale step portion of these representations is the `upper.case` logical argument, which controls if the lettername should be uppercase.
-#' + The *solfege* representation is only associated with the `solfa` function. 
-#' + The numeric representation of steps include `interval` and `scaleDegree`. In the former, direction (+/-) and complex intervals are allowed.
-#' 
-#' 
-#' #### Alterations/Qualities
-#' 
-#' The *accidental* or "alteration" components of a tonal pitch are represented by additional affixed to a scale step representation.
-#' There are two rimary accidentals, [sharp]("https://en.wikipedia.org/wiki/Sharp_(music)") and [flat]("https://en.wikipedia.org/wiki/Flat_(music)"),
-#' though they can be added together to create multi-sharps and multi-flats. (Sharps and flats can not be mixed, at least in `humdrumR`.)
-#' An accidental or alteration corresponds to adding or subtractiong multiples of `7` from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
-#' In addition, there is the [natural]("https://en.wikipedia.org/wiki/Natural_(music)") token, which is used to indicate that an interval is not altered.
-#' 
-#' All `humdrumR` pitch translation functions involving accidental representations have an `accidental.labels` argument: a [named][base::names()] `character` vector 
-#' which controls the characters used to represent accidentals. 
-#' The characters must be named either `flat`, `sharp`, or `natural`.
-#' The defaults are `c(flat = "b", sharp = "#", natural = "")`, though the kern representation uses `c(flat = "-")`.
-#' 
-#' The *natural* accidental is only used in the context of a key, and even then are usually ommited.
-#' To use natural accidentals, a common `cautionary` argument can be used.
-#' If `cautionary = TRUE` *and* a `Key` is specified, accidental-based pitch representations will include natural tokens.
+#' + `step.labels`: a vector of seven elements (default = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) representing the desired names for the seven steps in scale order.
 #' 
 
-#' ### Tonal Chroma
 #' 
-#' *Tonal Chroma* is the generic term we use to describe standard tonal names for notes without reference to octave or contour---i.e., a *lettername* (A-G)
-#' followed by zero or more *accidentals*.
-#' The `as.tonalChroma` function is the basic function for this type of representation, while `as.kernPitch`, `as.sciPitch`, and `as.lilyPitch` all include deriviative calls to 
-#' `as.tonalChroma`.
-#' `as.tonalChroma` includes the following reading arguments:
+#' ## Quality and Alterations
 #' 
-#' + `upper.case`: `logical` argument controls whether the lettername is upper case (`TRUE`) or lower case (`FALSE`).
-#'   `as.kernPitch` and `as.lilyPitch` both set this argument to `FALSE`, while `as.sciPitch` keeps it `TRUE` (the default).
-#' + `accidental.labels`: a [named][base::names()] `character` vector which controls the characters used to represent accidentals. 
-#'   The characters must be named either `flat`, `sharp`, or `natural`.
-#'   The defaults (also used by `as.sciPitch`) `accidental.labels = c(flat = "b", sharp = "#", natural = "")`, but `as.kernPitch` uses `accidental.labels = c(flat = "b")`,
-#'   and `as.lilyPitch` uses `accidental.labels = c(sharp = "is", flat = "es")`.
-#'    
-#' As example usage, if you want (octaveless) tonal chroma but prefer lower case letternames with kern-style accidentals, you could write 
-#' `as.tonalChroma(x, upper.case = FALSE, accidental.labels = c(flat = "-"))`. 
-#'  
-#' ## Octave
+#' Generically, a tonal interval's *quality* indicates its diatonic mode and relationship to that mode. 
+#' Specifically, alterations/accidentals indicate alterations of the key/mode while the quality indicates what the mode is.
 #' 
-#' There are a number of ways of representing the specific octave information associated with notes.
-#' (Including discarding octave information entirely.)
-#' We can [partition][tonalTransformations] every specific [tonalInterval] as a combination of the basic *simple* part and a *octave* part---an octave "offset."
-#' `humdrumR` recognizes two basic approaches to conceptualizing these octave offsets: *edge octaves* and *centered octaves*.
 #' 
-#' + In a *edge octave* representation (the standard approach in most contexts) a unison (natural or otherwise) is considered the "bottom" of an octave,
-#'   with all steps/intervals from 1->7 belonging to an octave, crossing over to the next octave above when reaching step 8, or conversely, immediately crossing to
-#'   a lower octave when stepping down one step. The scientific octave corresponds to applying a octave partition using [floor][base::floor()] as the `simplifer`---see 
-#'   [tonalTransformations] or the *Tonality in humdrumR* vignette.
-#' + In a *central octave* representation, a unison is considered the center of an octave, crossing into higher/lower octaves when passing from a 4th->5th either above or below.
-#'   The central ctave corresponds to applying a octave partition using [round][base::round()] as the `simplifer`---see 
-#'   [tonalTransformations] or the *Tonality in humdrumR* vignette.
-#'   
-#' In *any* case, the convention (which `humdrumR` follows) is that only the [generic interval][tonalTransformations] determines the octave.
-#' For example, using scientific pitch notation, Cb4 *is* in the same octave as C4, and B#4 is *not* in the same octave as C5.
+#' The diatonic set is primarily defined by the major mode, consisting of the line-of-fifth range -1 to +5.
+#' These seven intervals are the "*natural*" intervals---by default, unless a major context is specifically counter-indicated, the absence of an accidental
+#' indicates these natural steps.
+#' Any intervals outside of this scale can be indicated as alterations of the natural steps using accidentals:
+#' There are two primary accidentals, [sharp]("https://en.wikipedia.org/wiki/Sharp_(music)") and [flat]("https://en.wikipedia.org/wiki/Flat_(music)"),
+#' though they can be added together to create multi-sharps and multi-flats. (Sharps and flats cannot be mixed in `humdrumR`.)
+#' An alteration corresponds to adding or subtracting multiples of `7` from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
+#' Finally, a [natural]("https://en.wikipedia.org/wiki/Natural_(music)") accidental is used when the default natural step needs to be explicitely labeled.
 #' 
-#' The following table illustrates the two basic octave approaches:
+#' The encoding of *qualities* is subtly distinct from alterations.
+#' Qualities encode information about the diatonic mode of intervals, as well as alterations of mode.
+#' The five consonant diatonic [modes]("https://en.wikipedia.org/wiki/Mode_(music)")---phyrigian (-5--+1), minor (-4--+2), dorian (-3--+3), mixolydian (-2--+4), and major (-1--+5)---all 
+#' share the same the "*perfect*" first, fourth, and  fifth scale-steps---corresponding to the central -1--+1 on the line-of-fifths.
+#' However, these five modes encompass two varieties of each of the "*imperfect*" second, third, sixth, and seventh scale steps:
+#' the **major** steps (+2--+5) and the **minor** steps (-2---5), which are (obviously) inverses on the line-of-fifths.
+#' Each minor/major pair is separated on line-of-fifths interval of `7`, and thus one can be altered into the other.
+#' Anything on the line-of-fifths outside of the -5--+5 range are represented as one or more alterations of the perfect/imperfect degree.
+#' Postive alterations (`+7`) are  **augmented** while negative alterations (`-7`) are **diminished**---like sharps and flat, augmentations and diminutions can be multipled.
+#' 
+#' The following table illustrates the relationship between the line-of-fifths, scale-steps, accidentals, and qualities:
 #' 
 #' ```{r, echo = FALSE, comment = NA}
 #' 
-#' tints <- as.tonalInterval(c('BB','C','E','F#','G-','G','A','B',' c-','c','d','e','f#','g-','g','a','b#','cc','dd','ee','ff#','gg'))
+#' f <- -10:14
+#' print(data.frame(`LO5th` = f, 
+#'                  Step = LO5th2scaleStep(f, c('C', 'D', 'E', 'F', 'G', 'A', 'B')), 
+#'                  Accidental = LO5th2accidental(f, accidental.cautionary = TRUE), 
+#'                  Quality = LO5th2quality(f, quality.cautionary = TRUE)), 
+#'       row.names = FALSE)
 #' 
-#' print(data.frame(Semitones = as.semit(tints), 
-#'                  Interval   = as.interval(tints),
-#'                  TonalChroma = as.tonalChroma(tints), 
-#'                  EdgeOctave = tint2edgeOctave(tints), 
-#'                  CentralOctave = tint2centralOctave(tints)),
-#'  row.names = FALSE)
+#' ```
 #' 
-#' ````
+#' Note that accidentals are symetrical around the dorian mode (D), while qualities are symetrical around the major mode.
+#' As a result, though sharp accidentals and augmentation qualities always correspond, flat accidentals are *not* equivalent to diminished qualities.
 #' 
-#' Even given these two basic abstract conceptualizations of octave information, there are still numerous ways to encode this information.
-#' `humdrumR` implements three basic octave representation styles:
 #' 
-#' + **kern** style: the first character of the tonalChroma is repeated to indicate the octave offset, with upper-case letters to indicate negative octave offsets
-#'   and lower-case letters used to indicate positive (or zero) offsets. Thus, middle-C and the three octaves above and below it look like 
-#'   `"CCC"`, `"CC"`, `"C"`, `"c"`, `"cc"`, `"ccc"`, `"cccc"`.
-#' + **sci**entific-pitch style: the octave number (integer) is simply appended after (or before) the rest of the pitch string. 
-#'   (In standard *scientific-pitch* represesntation, the value is also shifted so that middle-C is octave 4.)
-#' + **lily**-pond style: a pair of opposing characters are used to indicate positive and negative octave offsets, appended before or after the rest of the pitch string,
-#'   with the number of characters indicating the octave offset. 
-#'   In 'as.lilyPond' the characters `"'"` (up) and `","`) are used (appended afted the accidental).
-#'   We prefer, using the characters `"^"` and `"v"`, which are used by default by `as.scaleDegree` and `as.solfa`.
+#' 
+
+#' HumdrumR's predefined tonal chroma representations (`kernPitch`, `lilyPitch`, `helmholtz`, and `sciPitch`) each include alteration information through three accidental 
+#' indications (sharp, flat, natural).
+#' The `scaleDegree` and `interval` representations encode more general qualities using five categories (major, minor, diminished, augmented, perfect).
+#' The `solfa` representation also encodes quality through conventional (non-systematic) vowel modifications.
+#' More generally, the `as.quality` and `as.accidental` functions can be used extract quality information in isolation.
+#' These functions use some (or all) of the following arguments:
+
+#' 
+#' + `_.labels`:
+#'      + `accidental.labels`: a [named][base::names()] character vector which controls the characters used to represent accidentals. 
+#'         The characters must be named either `flat`, `sharp`, `natural`, `doublesharp`, or `doubleflat`.
+#'         The defaults are `c(flat = "b", sharp = "#", natural = "n")`.
+#'         By default, `doubleflat` and `doublesharp` are not defined, and doubles are simply represented by two of the normal accidental symbols.
+#'         However, if either double accidental is defined, every pair of accidentals is collapsed to the double version.
+#'         
+#'         If `accidental.labels == FALSE`, returns an integer value counting the number of alterations (positive for sharps, negative for flats).
+#'      + `quality.labels`: a [named][base::names()] character vector which controls the characters used to represent qualities.
+#'         The characters must be named either `perfect`, `major`, `minor`, `augment`, or `diminish`, with defaults 
+#'         `c(perfect = "P", major = "M", minor = "m", augment = "A", diminish = "d")`.
+#'  + `_.maximum` and `_.minimum`
+#'      + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
+#'      These arguments define the maximum number of multi-accidentals permitted.
+#'      For instance, if `accidental.maximum == 2L`, accidentals of at most `"##"` will be output; a triple sharp will be reduced to just a `"##"`.
+#'      The`_.minimum` argument must be negative (-2 == two flats).
+#'      By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
+#'  + `Key`: a [diatonicSet] object describing the key and mode. Default is `NULL`. If `Key` is specified, only alterations relative to that key are printed 
+#'     (unless the `_.cautionary` or `_.memory` arguments override this).
+#'  + `_.cautionary`: a single logical value. Causes *more* accidentals/qualities to print (details below). Default is `FALSE` for accidentals and `TRUE` for qualities.
+#'  + `_.memory`: a single logical value (default is `FALSE`). Causes *fewer* accidentals/qualities to print (details below).
+#'  
+#'  The master `as.tonalChroma` calls these functions, and can thus pass these arguments to them.
+#'  For example, you could write `as.tonalChroma(x, accidental.maximum = 1)`.
+#'  
+#'  ### Cautionary Alterations
+#'  
+#'  The interplay between the `Key`, `_.cautionary`, and `_.memory` arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
+#'  Generally, the `Key` argument---if not `NULL`---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
+#'  The `cautionary` argument causes accidentals that would otherwise be suppressed to print---always *adding* accidentals to the output.
+#'  Finally, the `_.memory` argument implents a common practice in music notation where alterations are only printed when the quality of a generic note is different than
+#'  the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them, 
+#'  in which case, both the natural and the two sharps will print.
+#'  Combinations of the `Key`, `_.cautionary` and `_.memory` arguments achieve the following effects:
+#'  
+#'  In cases where `Key` is `NULL`:
+#'  
+#'  + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the C major set are printed. No naturals are shown.
+#'  + `_.cautionary == TRUE  & _.memory == FALSE`: **all** accidentals/qualities are printed (including all naturals).
+#'  + `_.cautionary == FALSE & _.memory == TRUE`: alterations of C major set are printed, unless the previous instance of the step was already altered. 
+#'     (Natural notes occuring after a previous alteration are marked natural.)
+#'  + `_.cautionary == TRUE  & _.memory == TRUE`: **all** accidentals/qualities print, unless the previous instance of note was already altered. 
+#'  
+#'  If, on the other hand, if a `Key` is specified:
+#'  
+#'  + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the key are printed. 
+#'  + `_.cautionary == TRUE  & _.memory == FALSE`: any alterations of the key are printed as well as any instances of their corresponding in-key quality, so as to assure there is no ambiguity.
+#'  + `_.cautionary == FALSE & _.memory == TRUE`: alterations of the key are printed, unless the previous instance of note was already altered. In-key accidentals *are* printed if the previous instance of the note
+#'     was altered.
+#'  + `_.cautionary == TRUE  & _.memory == TRUE`: any alterations of the key are printed as well as their corresponding in-key quality, except for in-key accidentals that appear before any corresponding alterations.
+#'    In other words, the `cautionary` rule is applied for any generic note once an alteration is introduced, but not before.
+#'  
+#'  
+#'  Some standard, useful represenations are:
+#'  + `Key == NULL & _.cautionary == FALSE & _.memory == FALSE`: print all accidentals always, but no naturals (normal kern style).
+#'  + `Key == NULL & quality.cautionary == TRUE & quality.memory == FALSE`: print all qualities always (normal humdrum style for intervals).
+#'  + `Key == _ & _.cautionary == FALSE & _.memory == TRUE`: print out-of-key accidentals, unless previous note was the same alteration (normal style for music notation).
+#'  
+#'  
+#'  The following tables illustrate the behaviors of the accidental/quality arguments in eight different conditions.
+#'  In the first four conditions, the `Key` argument is NULL, while in the second group of four the key is Ab major.
+#'  Each group of four columns represent the four possible combinations of the `_.cautionary` and `_.memory` arguments, in the pattern
+#'  `c(_.cautionary = FALSE, _.memory = FALSE)`, `c(_.cautionary = FALSE, _.memory = TRUE)`, `c(_.cautionary = TRUE, _.memory = FALSE)`, `c(_.cautionary = TRUE, _.memory = TRUE)`.
+#'  
+#'  #### Accidentals:
+#'  
+#'  ```{r, echo=FALSE, comment = NA}
+#'  
+#'  kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
+#'  tint <- as.tonalInterval(kern)
+#'  
+#'  rbind( 
+#'  NFF = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'  NFT = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'  NTF = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'  NTT = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'  AbFF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'  AbFT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'  AbTF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'  AbTT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-'))
+#'        ) -> mat
+#'        
+#'        mat <- t(apply(mat, 1, function(row) paste0(tint2scaleStep(tint, c('c', 'd', 'e', 'f', 'g', 'a', 'b')), row)))
+#'        
+#'      colnames(mat) <- kern
+#'      print(format(mat, width = 4), quote = FALSE)
+#'  
+#'  ```
+#'  
+#'  #### Qualities:
+#'  
+#'  ```{r, echo=FALSE, comment = NA}
+#'  
+#'  kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
+#'  tint <- as.tonalInterval(kern)
+#'  
+#'  rbind( 
+#'  NFF = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = FALSE),
+#'  NFT = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = TRUE ),
+#'  NTF = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = FALSE),
+#'  NTT = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = TRUE ),
+#'  AbFF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = FALSE),
+#'  AbFT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = TRUE ),
+#'  AbTF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = FALSE),
+#'  AbTT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = TRUE )
+#'        ) -> mat
+#'        
+#'        mat <- t(apply(mat, 1, function(row) paste0(row, tint2scaleStep(tint))))
+#'        
+#'      colnames(mat) <- kern
+#'      print(format(mat, width = 4), quote = FALSE)
+#'  
+#'  ```
+#'  
+#'  
+#'  
+#' ## Contour (e.g., Octave)
+#' 
+#' 
+#' When we *do* wish to represent concrete, frequency-ordered information about a pitch, we add additional *contour* information to the simple, line-of-fifth representation to 
+#' creating *complex intervals*.
+#' Since scale-step representations ostensibly encode frequency-space ordering already, the first step is to take the scale-ordering literally---e.g, G really is "above" D---, 
+#' creating what we call a **simple contour**.
+#' To fully represent a complex interval, we can append zero or more octaves to the simple contour, what we call the **octave contour**.
+#' 
+#' In humdrumR, the symbols `"+"` and `"-"` are used to indicate the direction of the simple contour, with various scale-step and quality/alterations used to indicate the simple interval.
+#' (In many representations, these symbols are implicit, and are thus ommitted.)
+#' In contrast, the *octave contour* of an interval is simply an integer value, and can be represented a variety of ways:
+#' either directly as an integer, or using repetitions of symbol pairs, most commonly `"^"`/`"v"` and `"'"`/`","`.
+#' Other approaches represent octave contour information by changing the case (upper or lower) or repeating parts of the simple-interval string.
+#' By default, the "same" option (i.e., a unison) for both types of contours is left blank as an empty string `""`.
+#' 
+#' The relationship between the simple contour and the octave contour is determined by how the scale step is "rounded" to the octave (see the *Tonality in humdrumR* vignette), which
+#' is controlled by the `contour.round` argument.
+#' The standard approach, with the scale steps all ascending above the octave is achieved by the *floor* function: we call this a **scale contour**.
+#' Another approach is to use the *round* function, which rounds the nearest octave below **or** above, centering the steps around the unison instead of above it: the result is a 
+#' scale like [-P4, -m3, -m2, P1, M2, M3, P4], which we call a **central contour**.
+#' The difference between central contours, scale contours, and other simple contour options, are illustrated further below.
+#' 
+#' 
+#' #### Serial vs Fixed Octave Contour
+#' 
+#' #' As described in the *Tonality in humdrumR* vignette, there are two general approaches to representing intervals: fixed-reference and serial-reference.
+#' Most pitch representations are *fixed*-reference, with each token representing an interval relative to a common reference (middle-C, tonic, unison, etc.).
+#' In contrast, a *serial* representation represents each interval cummulatively, relative to the previous interval: the most common example being melodic intervals.
+#' TonalIntervals can be encode either fixed- or serial-reference intervals, and either approach can be partitioned into simple intervals and octave offsets.
+
+#' In the most common cases for representing pitch, the simple contour is treated as the "always ascending" scale contour, and the octave contour is simply kept fixed.
+#' Common approaches to pairing octave information with this include:
+#' 
+#' + **sciPitch** style: the octave offset is simply printed as an integer, though offset by +4 so that middle-C (unison) is `"4"`.
+#' + **kernPitch** style: the scale step is lowercase for octave contours `>= 0` and uppercase otherwise. In addition, the scale step is repeated
+#'    the absolute value of the octave contour times (offset +1 for positive octaves).
+#'    For example, `(CCC = -3, CC = -2, C = -1, c = 0, cc = 1, ccc = 2)`.
+#' + **lilyAbsolute** absolute style: the charactes `"'"` (positive) or `","` are repeated the absolute value of the octave contour.
+#' + **helmholtz** style: an intersection of `lilyPitch`-absolute and `kernPitch` style, the case of the scale step is changed as in kern-style,
+#'   and the `"'"`/`","` characters are printed a la lilypond absolute style.
 #'   
-#'   
-#' More generally, the `as.octave` command can be used to get a isolated octave representation.
-#' `as.octave` has the following arguments:
+#' However, another particularly useful possibility is to encode the octave part in serial reference and the simple part in fixed reference.
+#' If we compute a serial-octave contour, and set our `contour.round` argument to `round`, the contour labels are blank (the "same" marker) if the interval has moved to the *closest* neighbor,
+#' with the octave contour indicating moves away to that "closest note."
+#' For instance, we can say, "play the F# above the previous note."
+#' This is known as "relative pitch" representation in [LilyPond](https://lilypond.org/doc/v2.20/Documentation/notation/pitches)]:
+#' If `relative = TRUE`, `as.lilyPitch` will compute markers labeled in this way.
+#' This approach is can be combined with with scale-contour (`contour.round = floor`) representation of pitch as *scale degrees*, resulting in a scale degree representation with lossless
+#' contour information!
 #' 
-#' + `markers`: a [named][base::names()] `character` vector which controls the characters used to represent octave shifts.
+#' To achieve these serial contours, we use the `contour.delta` and `contour.round` arguments.
+#' If `delta = TRUE`, the contour of the serial representation of the input is computed, and the octave-part
+#' of the contour is computed using the `contour.round` rounding function.
+#' `floor` will create the "always ascending" scale contour, while `round` will achieve a centered contour.
+#' `expand` will label *all* contours as ascending/descending except unisons.
+#'   
+#' The following table illustrates the different `contour.round` arguments when `delta = TRUE`:
+#'   
+#' ```{r, echo=FALSE, comment = NA}
+#' as.tonalInterval(c('c','A','A','c','d','G','G','A','B-','f','f','e','d','e','d','c','ff','ee','dd','cc')) -> x
+#' 
+#' print(row.names = FALSE, 
+#'       data.table(#Kern = as.kernPitch(x), 
+#'                  round  = tint2contour(x, contour.delta = TRUE, contour.round = round),
+#'                  floor  = tint2contour(x, contour.delta = TRUE, contour.round = floor),
+#'                  expand = tint2contour(x, contour.delta = TRUE, contour.round = expand)
+#'                  ))
+#' 
+#' ```
+#' 
+#' The following table illustrates the same three rounding functions, but with `contour.delta = FALSE`.
+#' 
+#'  ```{r, echo=FALSE, comment = NA}
+#' as.tonalInterval(c('c','A','A','c','d','G','G','A','B-','f','f','e','d','e','d','c','ff','ee','dd','cc')) -> x
+#' 
+#' print(row.names = FALSE, 
+#'       data.table(#Kern = as.kernPitch(x), 
+#'                  round  = tint2contour(x, contour.delta = FALSE, contour.round = round),
+#'                  floor  = tint2contour(x, contour.delta = FALSE, contour.round = floor),
+#'                  expand = tint2contour(x, contour.delta = FALSE, contour.round = expand)
+#'                  ))
+#' 
+#' ```
+#' 
+#' 
+#' 
+#' 
+#' #### Complex Steps
+#' 
+#' The final standard approach to indicating complex contours is through complex steps: i.e., 9ths, 11ths, etc.
+#' This approach directly represents full contour information as scale steps, with `+7` added for every octave contour.
+#' This representation can only be accessed via the `as.interval` function.
+#' To limit intervals to simple values, use the [tonalTransform] arguments `octave` and/or `roundMethod`.
+#' 
+#' 
+#' 
+#' ### as.contour
+#' 
+#' 
+#' The `as.contour` function can be used to directly generate representations of the octave/contour, or can be called indirectly via `as.tonalChroma` or one of the standard
+#' pitch representation functions (`as.kernPitch`, `as.sciPitch`, etc.).
+#' The `as.octave` command is a synonym for `as.contour`.
+#' The following arguments are defined for as contour:
+#' 
+#' 
+#' + `contour.labels`: a [named][base::names()] `character` vector which controls the characters used to represent octave shifts.
 #'   The characters must be named either `up`, `down`, or `same`; the defaults are `c(up = "^", down = "v", same = "")`.
-#'   If the `marker = NULL`, the octave offset (integer) itself is returned. 
-#' + `centered`: a single `logical` value. Is centered octave or edge octave (default = `FALSE`)?
-#' + `maximum`: a single integer, indicating the maximum allowed octave offset (default is `Inf`). 
-#'   For example, if `maximum = 2L`, any octave offset of two or greater will be marked `"^^"`.
-#' + `minimum`: a single integer. The inverse of the `maximum` argument.
-#' + `offset`: a single integer, indicating the "center" octave. The default is `0L`, but *scientific pitch*
-#'   uses `4L`.
-#' + `style`: a single character string. If this argument is not `NULL` (the default) **it overrides all the other arguments**.
-#'   Must be either `"kern"`, `"Helmholtz"`, `"lily"`, or `"sci"`, which correspond to arguments of:
-#'     + `"kern"`: if called directly in `as.octave`, returns the letter `"c"` in kern style octaves (e.g., `"c"`, `"CC"`).
-#'       If called as an argument in another pitch function, applies kern style to whatever the pitch string is.
-#'     + `"helmHoltz"`: `markers = c(up = "'", down = ",")`, `maximum = NULL`, `minimum = NULL`, `offset = 0L`.
-#'       If called as an argument to another pitch function (besides `as.octave`), also changes case of whatever the pitch string is, so that negative octaves are lower case.
-#'     + ``
-#' 
-#' Several additional arguments appear as arguments to other pitch functions:
-#' `octave.case`, `octave.kern`, `octave.before`
+#'   If `contour.labels = FALSE`, the octave offset (integer) itself is returned. 
+#'      + If `contour.labels == FALSE`, returns a integer value counting the octave offset number.
+#' + `contour.maximum` and `contour.minimum`
+#'      + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
+#'      These arguments define the maximum number of octave offset labels permitted.
+#'      If `maximum == 2L`, octave offsets of at most (`"^^"`) will be output; a triple octave mark will be reduced to just a `"^^`.
+#'      The`minimum` arguments should be negative.
+#'      By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
+#' + `contour.offset`: a single integer, indicating the "center" octave. The default is `0L`, but *scientific pitch*
+#'   uses `4L` (because middle C is "C4").
+#' + `contour.delta`: a single logical vale. If `TRUE`, the *serial* contour is calculated.
+#' + `contour.round`: a function, either `floor`, `round`, `trunc`, `expand` (see *Tonality in humdrumR* vignette).
+#'   The default is `floor`, which is standard when `delta = FALSE`. 
 #' 
 #' 
-#'
+#' @section Reading/Writing Atonal Pitch Information:
+#' 
+#' 
+#' Atonal pitch representations predefined in `humdrumR` include `semit`, `midi`, `frequency`, `ratio`, and `fraction`.
+#' As mentioned above, `integer` inputs are interpreted as semitones while `numeric` are interpreted as frequency ratios.
+#' 
+
+#' 
+#'   
+#' #### Interpreting Frequencies/Ratios
+#' 
+#' 
+#' Four additional arguments help `humdrumR` determing how to interpret frequencies or ratios as `tonalInterval`s.
+#' 
+#' + `tonalHarmonic`: This determines the assumed tuning system by specifying the "tonal frequency ratio" associated 
+#'    with an interval of a perfect 12th.
+#'    The default is `3`, corresponding to pythagorean tuning; change it to `2^(19/12)` to use equal temeperament.
+#' + `centMargin`: this numeric argument determines how close `humdrumR` tries to get (in cents) to the input ratio (default is 10 cents).
+#'   If the `centMargin` is low, `humdrumR` may give you a crazy accidental like `A----` to get very close to the input ratio.
+#'   If the `centMargin` is higher, `humdrumR` will give the most reasonable (fewest accidentals) `tonalInterval` within that margin.
+#'   For example, `as.tonalInterval(1.44, centMargin = 10)` will return E##, because a pythagorean E## is within 10 cents of the ratio `1.44`.
+#'   However, `as.tonalInterval(1.44, centMargin = 20)` will return the more resonable `F#`.
+#' + `frequency.reference` and `frequencyTint`: these arguments determing what the reference frequency and note is for 
+#'   when reading frequencies. The standard A = 440Hz corresponds to `(frequency.reference = 440, frequencyTint = as.tonalInterval('a'))`.
+#' 
+#' #### Tonal Decisions
+#' 
+#' When interpreting an atonal reprsentation as a tonal one there are multiple possibilities (for instance, midi note 61 could
+#' be C# or Db).
+#' The process `humdrumR` uses to determine the tonal representation of atonal input is influenced by the `accidental.melodic` and
+#' `Key` arguments:
+#' By default (`Key == NULL & accidental.melodic == FALSE``), the line-of-fifths range -3--8 (E flat to G sharp) is used.
+#' However, if a `Key` argument is specified, this line-of-fifths range will be shifted to match the corresponding key signature.
+#' For instance, the key Bb minor would read accidentals in the range -8--3 (Fb flat to A natural).
+#' If `accidental.melodic == TRUE`) the atonal notes are interpreted "melodically"---i.e., 
+#' ascending chromatic steps as sharps and descending chromatic steps as flats.
+#' When reading frequencies/ratios, a "pure" `tonalHarmonic` value---like the pure `3` of pythagorean tuning---will help determine
+#' the appropriate accidental.
+#' However, equal temperament will not provide useful information, so the `Key` and `accidental.melodic` arguments can be used instead.
+#'   
+#'   
+#' 
+#' 
 #' @name pitchRepresentations
 NULL
 
@@ -1694,19 +2009,20 @@ NULL
 
 #' @export as.tonalInterval 
 #' @export as.semit as.midi
-#' @export as.tonalChroma as.sciPitch as.kernPitch as.lilyPitch
+#' @export as.tonalChroma as.scaleStep as.accidental as.quality as.contour
+#' @export as.sciPitch as.kernPitch as.lilyPitch as.helmholtz
 #' @export as.interval as.scaleDegree as.solfa
 #' @export as.rational as.fraction as.decimal as.frequency
-#' @export as.contour 
 NULL
 
 pitchgeneric <- function(pitchrep, secondargs = alist(), endargs = alist()) {
   rlang::new_function(c(alist(x = ),
                         secondargs,  
-                        alist(direction = , contour = ,  delta = , sigma = ,
-                            generic = , simple = , simplifier = ,  enharmonic.part = ,
-                            Key = , Exclusive = , inPlace = , ... = ),
-                        endargs),
+                        alist(direction = , delta = , sigma = ,
+                            generic = , simple = , roundContour = ,  enharmonic.part = ,
+                            Key = , Exclusive = , inPlace = ),
+                        endargs,
+                        alist(... = )),
                       rlang::expr(UseMethod(!!pitchrep)),
                       env = parent.frame())
 }
@@ -1715,13 +2031,18 @@ as.tonalInterval <- pitchgeneric("as.tonalInterval")
 as.semit         <- pitchgeneric("as.semit")
 as.midi          <- pitchgeneric("as.midi")
 as.tonalChroma   <- pitchgeneric("as.tonalChroma")
-as.sciPitch      <- pitchgeneric("as.sciPitch",    endargs = alist(accidental.labels = ))
-as.kernPitch     <- pitchgeneric("as.kernPitch",   endargs = alist(accidental.labels = ))
+as.scaleStep     <- pitchgeneric("as.scaleStep",  alist(step.labels = ))
+as.accidental    <- pitchgeneric("as.accidental", alist(accidental.labels = , accidental.maximum =, accidental.minimum =, accidental.cautionary = , accidental.memory = ))
+as.quality       <- pitchgeneric("as.quality",    alist(quality.labels = , quality.maximum =, quality.minimum =, quality.cautionary = , quality.memory = ))
+as.contour       <- pitchgeneric("as.contour",    alist(contour.labels = , contour.maximum =, contour.minimum =, contour.offset = , contour.delta = , contour.round = ))
+as.sciPitch      <- pitchgeneric("as.sciPitch")
+as.kernPitch     <- pitchgeneric("as.kernPitch")
 as.lilyPitch     <- pitchgeneric("as.lilyPitch")
+as.helmholtz     <- pitchgeneric("as.helmholtz")
 as.interval      <- pitchgeneric("as.interval")
 as.scaleDegree   <- pitchgeneric("as.scaleDegree")
 as.solfa         <- pitchgeneric("as.solfa")
-as.frequency     <- pitchgeneric("as.frequency", alist(reference.freq = , reference.tint = , tonalHarmonic = ))
+as.frequency     <- pitchgeneric("as.frequency", alist(frequency.reference = , frequencyTint = , tonalHarmonic = ))
 as.contour       <- pitchgeneric("as.contour"  , endargs = alist(contour.labels = ))
 
 
@@ -1781,6 +2102,14 @@ as.midi.tonalInterval        <- tint2midi        %.% tonalTransform
 #' @export
 as.tonalChroma.tonalInterval <- tint2tonalChroma %.% tonalTransform
 #' @export
+as.scaleStep.tonalInterval   <- tint2scaleStep   %.% tonalTransform
+#' @export
+as.accidental.tonalInterval  <- tint2accidental  %.% tonalTransform
+#' @export
+as.quality.tonalInterval     <- tint2quality     %.% tonalTransform
+#' @export
+as.contour.tonalInterval     <- tint2contour     %.% tonalTransform
+#' @export
 as.sciPitch.tonalInterval    <- tint2sciPitch    %.% tonalTransform
 #' @export
 as.kernPitch.tonalInterval   <- tint2kernPitch   %.% tonalTransform
@@ -1815,6 +2144,14 @@ as.midi.integer        <- function(x) x + 60L
 #' @export
 as.tonalChroma.integer <- tint2tonalChroma %.% as.tonalInterval.integer
 #' @export
+as.scaleStep.integer   <- tint2scaleStep   %.% as.tonalInterval.integer
+#' @export
+as.accidental.integer  <- tint2accidental  %.% as.tonalInterval.integer
+#' @export
+as.quality.integer     <- tint2quality     %.% as.tonalInterval.integer
+#' @export
+as.contour.integer     <- tint2contour     %.% as.tonalInterval.integer
+#' @export
 as.sciPitch.integer    <- tint2sciPitch    %.% as.tonalInterval.integer
 #' @export
 as.kernPitch.integer   <- tint2kernPitch   %.% as.tonalInterval.integer
@@ -1840,6 +2177,14 @@ as.midi.numeric        <- tint2midi        %.% as.tonalInterval.numeric
 #' @export
 as.tonalChroma.numeric <- tint2tonalChroma %.% as.tonalInterval.numeric
 #' @export
+as.scaleStep.numeric   <- tint2scaleStep   %.% as.tonalInterval.numeric
+#' @export
+as.accidental.numeric  <- tint2accidental  %.% as.tonalInterval.numeric
+#' @export
+as.quality.numeric     <- tint2quality     %.% as.tonalInterval.numeric
+#' @export
+as.contour.numeric     <- tint2contour     %.% as.tonalInterval.numeric
+#' @export
 as.sciPitch.numeric    <- tint2sciPitch    %.% as.tonalInterval.numeric
 #' @export
 as.kernPitch.numeric   <- tint2kernPitch   %.% as.tonalInterval.numeric
@@ -1864,6 +2209,14 @@ as.semit.character       <- re.place %.% tint2semit       %.% as.tonalInterval.c
 as.midi.character        <- re.place %.% tint2midi        %.% as.tonalInterval.character
 #' @export
 as.tonalChroma.character <- re.place %.% tint2tonalChroma %.% as.tonalInterval.character
+#' @export
+as.scaleStep.character   <- re.place %.% tint2scaleStep   %.% as.tonalInterval.character
+#' @export
+as.accidental.character  <- re.place %.% tint2accidental  %.% as.tonalInterval.character
+#' @export
+as.quality.character     <- re.place %.% tint2quality     %.% as.tonalInterval.character
+#' @export
+as.contour.character     <- re.place %.% tint2contour     %.% as.tonalInterval.character
 #' @export
 as.sciPitch.character    <- re.place %.% tint2sciPitch    %.% as.tonalInterval.character
 #' @export

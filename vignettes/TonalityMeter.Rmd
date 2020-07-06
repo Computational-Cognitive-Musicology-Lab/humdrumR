@@ -523,6 +523,16 @@ In terms of `base::` R functions:
    -M6      0      -M6
    +M6     +1      +M13
    -M6     -1      -M13
+   
++ `expand`: "expand" (round) away from zero---the octave part will always have the
+  sign of the complex interval, whiel the simple part will have the *opposite* sign as the complex interval.
+
+   Simple  Octave  Complex
+   ------- ------- --------
+   +M6      0      +M6
+   -M6      0      -M6
+   +M6     +1      +M13
+   -M6     -1      -M13
 
 + `round`: round to the *nearest* octave, regardless of direction.
   This method results in simple intervals which are always less than a 5th in size.
