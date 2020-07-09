@@ -190,7 +190,7 @@ setMethod("initialize",
 #' @name tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
-    if (missing(octave)) return(LO5thNsciOct2tint(LO5th, 4L))
+    if (missing(octave)) octave <- -LO5th2contourN(LO5th, contour.round = floor)
   
     new('tonalInterval', 
         Octave = as.integer(octave), 
@@ -569,7 +569,7 @@ lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', '
 
 
 
-scaleStep2LO5th <- function(str, step.labels) {
+scaleStep2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) {
   step <- match(str, step.labels, nomatch = NA_integer_) 
   
   ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step])
@@ -599,7 +599,7 @@ accidental2LO5th <- function(str, accidental.labels = c()) {
 quality2LO5th <- function(str, quality.labels = c()) {
   setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm', natural = 'n')
   
-  n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = -7L, natural = 0L)
+  n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = +7L, natural = 0L)
   n <- n[names(quality.labels)[match(substr(str, 1, 1), quality.labels)]] * nchar(str)
   n[is.na(n)] <- 0L
   n
@@ -607,24 +607,6 @@ quality2LO5th <- function(str, quality.labels = c()) {
 
 
 
-solfa2LO5th <- function(solfa) {
-  base <- tolower(stringr::str_sub(solfa, start = 0L, end = 1L))
-  tail <- tolower(stringr::str_sub(solfa, start = 2L, end = 2L))
-  acc  <- stringr::str_sub(solfa, start = 3L, end = 3L)        
-  
-  isna <- is.na(base)
-  
-  baseLO5th <- match(base, c('f', 'd', 's', 'r', 'l', 'm', 't')) - 2L
-  stackedbases <- solfatab[base[!isna], , drop = FALSE]
-  
-  tailLO5th <- (apply(cbind(tail[!isna], stackedbases), 1, function(row) which(row[-1] == row[1])) - 2L) * 7L
-  
-  accLO5th <- accidental2LO5th(acc, c())
-  LO5th <- baseLO5th + accLO5th
-  LO5th[!isna] <- LO5th[!isna] + tailLO5th 
-  
-  unname(LO5th)
-}
 
 
 
@@ -692,12 +674,12 @@ contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L,
   n <- n - contour.offset
   
   n <- if (contour.delta) {
-    simplecontour <- LO5th2contour(delta(simple), contour.round)
+    simplecontour <- LO5th2contourN(delta(simple), contour.round)
     
     sigma(n - simplecontour)
     
   } else {
-    simplecontour <- LO5th2contour(simple, contour.round)
+    simplecontour <- LO5th2contourN(simple, contour.round)
     
     n - simplecontour
   }
@@ -706,10 +688,19 @@ contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L,
 
 }
 
-LO5th2contour <- function(LO5th, contour.round = floor) { 
-  octaves <- (LO5th * 19L) / 12
+LO5th2contourN <- function(LO5th, contour.round = floor) { 
+  octaves <- tint2semit(tint(0L, LO5th) %% tint(-11, 7)) / 12
   
   contour.round(octaves)
+  
+}
+
+kernOctave2tint <- function(str) {
+  nletters <- nchar(str)
+  
+  upper  <- str == toupper(str)
+  
+  tint(ifelse(upper, 0L - nletters, nletters - 1L), 0L)
   
 }
 
@@ -960,49 +951,62 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 
 tonalChroma2tint <- function(str, Key = NULL,
                              parts = c('steps', 'accidentals', 'contours'), sep = "", exhaustive = TRUE, ...) {
+ 
  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
- lips <- list(...)
+ 
+ if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, tou can't read both qualities and accidentals at the same time.",
+                                                               " The parts argument can only include one or the other (or neither).")
+ 
+ include <- list(steps = 'steps' %in% parts,
+                 accidentals = 'accidentals' %in% parts,
+                 qualities = 'qualities' %in% parts,
+                 contours = 'contours' %in% parts)
+ 
   
  if (all(c('accidentals', 'qualities') %in% parts)) .stop("You can't read a tonal chroma with accidentals AND qualities at the same time.")
  
- # labels
- step.labels <- setoptions...(lips$step.labels, c('C', 'D', 'E', 'F', 'G', 'A', 'B'))
- if (!hasArg('step.RE')) step.RE <- captureRE(step.labels) 
+ # regular expressions for each part
  
- REs <-  list(steps       = if ('steps' %in% parts) step.RE,
-              accidentals = if ('accidentals' %in% parts) accidental.RE(...),
-              qualities   = if ('qualities' %in% parts)   quality.RE(...),
-              contours    = if ('contours' %in% parts)   contour.RE(...)
+ REs <-  list(steps       = if (include$steps)       step.RE(...),
+              accidentals = if (include$accidentals) accidental.RE(...),
+              qualities   = if (include$qualities)   quality.RE(...),
+              contours    = if (include$contours)    contour.RE(...)
               )[parts]
  
+ # parse string
  do.call('REparse', c(list(str, exhaustive = exhaustive, toEnv = TRUE, strict = TRUE), REs)) ## save to environment!
  
- # simple interval
- steps       <- scaleStep2LO5th(steps, step.labels)
- alterations <- if ("accidentals" %in% parts) {
-   accidental2LO5th(accidentals, ...) %dots% (has.prefix('accidental.') %.% names)
-   } else {
-     quality2LO5th(qualities, ...) %dots% (has.prefix('quality.') %.% names)
-   }
-  
- simple <- steps + alterations
+ 
+ ## simple interval
+ simple <- alterations <- integer(length(str))
+ if (include$steps) simple <- simple +  scaleStep2LO5th(steps, ...) %dots% (has.prefix('step.')  %.% names)
+ 
+ if (include$accidentals) alterations <- accidental2LO5th(accidentals, ...) %dots% (has.prefix('accidental.') %.% names) 
+ if (include$qualities)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
+ 
+ simple <- simple + alterations
  if (!is.null(Key)) simple[is.na(names(alterations))] <- simple[is.na(names(alterations))] %% Key
  
- # complex interval
- contouroctaves   <- contour2tint(contours, simple, ...)
+ tint <- tint(0L, simple)
  
- tint(0L, simple) + contouroctaves
+ # contours
+ if (!include$contours) contours <- character(length(str))
+ tint <- tint + contour2tint(contours, simple, ...) %dots%  (has.prefix('contour.') %.% names)
+ 
+ tint
  
  
 }
 
+step.RE <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  paste0('[-+]?', captureRE(step.labels))
 accidental.RE <- function(accidental.labels = c(), ...) {
   setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
-  paste0(accidental.labels['natural'], '?|', captureUniq(accidental.labels[c('sharp', 'flat')]))
+  
+  paste0(accidental.labels['natural'], '|', captureUniq(accidental.labels[names(accidental.labels) != 'natural']))
 }
 quality.RE <- function(quality.labels = c(), ...) {
   setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
-  paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], '?'), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
+  paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
 }
 contour.RE <- function(contour.labels = c(), ...) {
   setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
@@ -1010,60 +1014,36 @@ contour.RE <- function(contour.labels = c(), ...) {
 }
 
 
-#.... 
 
-sciPitch2tint <- function(str) {
+
+sciPitch2tint <- function(str, ...) {
+  overdot(tonalChroma2tint(str, parts = c('steps', 'accidentals', 'contours'), 
+                           contour.labels = FALSE, contour.offset = 4L,
+                           step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                           accidental.labels = c(sharp = '#', flat = 'b', natural = 'n'),
+                           ...))
   
-  letters     <- stringi::stri_extract_first(str, regex = '[A-G]')
-  accidentals <- stringi::stri_extract_first(str, regex = '([#b])\\1*')
-  accidentals[is.na(accidentals)] <- ''
-  
-  sciOct      <- as.numeric(stringi::stri_extract_first(str, regex = '[-+]?[0-9]+'))
-  if (all(is.na(sciOct))) sciOct <- rep(4, length(sciOct))
-  
-  LO5th <- lettername2LO5th(letters) + accidental2LO5th(accidentals, accidental.labels = c(flat = 'b'))
-  
-  LO5thNsciOct2tint(LO5th, sciOct) %dim% str
   
 }
 
-#....
 
-kernPitch2tint <- function(str) {
-    components <- kernPitch2components(str)
-    
-    LO5th <- with(components, 
-                  lettername2LO5th(Letters) + 
-                      accidental2LO5th(Accidentals,   
-                                       accidental.labels = c(flat = '-')))
-    
-    LO5thNsciOct2tint(LO5th, components$SciOctave) %dim% str
-    
+
+
+kernPitch2tint <- function(str, ...) {
+  str_ <- toupper(stringr::str_replace(str, '([A-Ga-g])\\1*', '\\1')) # simple part
+  
+  simple <- overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'), 
+                   step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                   accidental.labels = c(sharp = '#', flat = '-', natural = 'n'),
+                   ...))
+  
+  octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
+  
+  simple + octave
+  
 }
 
-kernPitch2components <- function(str) {
-          letters     <- stringi::stri_extract_first(str, regex = '([A-Ga-g])\\1*')
-          
-          accidentals <- stringi::stri_extract_first(str, regex = '([#-])\\1*')
-          accidentals[is.na(accidentals)] <- ''
-          
-          nletters <- nchar(letters)
-          upper    <- letters == toupper(letters)
-          sciOct <- IfElse(upper, 0 - nletters, nletters - 1) + 4
-          
-          letters <- toupper(substr(letters, 0, 1))
-          
-          list(Letters = letters, 
-               Accidentals = accidentals,
-               SciOctave = sciOct)
-}
 
-kernPitch2sciPitch <- function(str) {
-          components <- kernPitch2components(str)
-          
-          components$Accidentals <- gsub('-', 'b', components$Accidentals)
-          do.call('.paste', components) 
-}
 
 
 
@@ -1072,126 +1052,62 @@ kernPitch2sciPitch <- function(str) {
 
 ###.. intervals
 
-
-
-interval2tint <- function(str) {
-          
-          # parse string
-          REparse(str, direction = "^[-+]?", quality = '^[PnMm]|^[A#bd]+', generic = '^[1-9][0-9]*', toEnv = TRUE)
+interval2tint <- function(str, ...) {
+  num <- as.integer(stringr::str_replace_all(str, '[^-+0-9]', ''))
+  num_simple <- abs(num) %% 7L
+  # num_simple[num < 0] <- 9L 
   
-          ## Fifth
-          generic <- as.integer(generic)
-          genericLO5th <- genericinterval2LO5th(generic)
-          
-          # how are degress shifted relative to MAJOR key
-          ## Quality 
-          shifts <- c(X =  NA_integer_, 
-                      P =  0L, n   =  0L,  
-                      M =  0L, m   = -7L,  
-                      d = -7L, b   = -7L,
-                      A =  7L, `#` = 7L) 
-          
-          qualtype <- substr(quality, 1L, 1L)
-          qualshift <- shifts[qualtype] * nchar(quality)
-          # "d" (diminish) on imperfect degrees gets one extra -7L, because it assumes implicit m (minor)
-          qualshift[qualtype == 'd' & !genericLO5th %in% -1L:1L] <- qualshift[qualtype == 'd' & !genericLO5th %in% -1L:1L] - 7L
-          
-          ## together
-          LO5th <- qualshift + genericLO5th
-          
-          ## Octave
-          octaveshift <- (abs(generic) - 1) %/% 7
-          tint <- LO5thNscaleOct2tint(LO5th, octaveshift)                
-          
-          ## Direction
-          
-          sign <- (2 * ((is.na(direction) | direction != '-') - 0.5))
-          
-          (tint * sign) %dim% str
-          
+  str_ <- stringr::str_replace(str, '^[-+]', '')
+  str_ <- stringr::str_replace(str_, as.character(abs(num)), as.character(num_simple))
+  
+  simple <- overdot(tonalChroma2tint(str_, parts = c('qualities', 'steps'), 
+                                     step.labels = c('1', '2', '3', '4', '5', '6', '7'),
+                                     ...))
+  
+  octave <- tint(abs(num) %/% 7L, 0L)
+  
+  (simple + octave) * sign(num)
+  
 }
 
-#....
 
-scaleDegree2tint <- function(str, Key = NULL, ...) {
+scaleDegree2tint <- function(str, ...) {
   
-  Key <- if (is.null(Key)) dset(0L, 0L) else as.diatonicSet(Key)
-
-  # parse string
-  REparse(str, octave = "^[\\^v',]*", quality = '^[PnMm]|^[A#bd]*', generic ="^[1-7]", toEnv = TRUE)
+  overdot(tonalChroma2tint(str, parts = c('qualities', 'steps'), 
+                           step.labels = c('1', '2', '3', '4', '5', '6', '7'),
+                           ...))
   
-  ## Fifths
-  generic <- as.integer(generic)
-  C5ths <- genericinterval2LO5th(generic) # defaults for Major
-  key5ths <- C5ths %% (Key - getRoot(Key)) # default for Mode
-  
-  ## Quality 
-  # how are degress shifted relative to MAJOR key
-  quality[quality == ""] <- "X" # empty quality
-  shifts <- c(X =  NA_integer_, 
-              P =  0L, n   =  0L,  
-              M =  0L, m   = -7L,  
-              d = -7L, b   = -7L,
-              A =  7L, `#` = 7L) 
-  
-  qualtype <- substr(quality, 1L, 1L)
-  qualshift <- shifts[qualtype] * nchar(quality)
-  # "d" (diminish) on imperfect degrees gets one extra -7L, because it assumes implicit m (minor)
-  qualshift[qualtype == 'd' & !key5ths %in% -1L:1L] <- qualshift[qualtype == 'd' & !key5ths %in% -1L:1L] - 7L
-  
-  ## together
-  LO5ths <- .ifelse(qualtype == 'X', key5ths, C5ths + qualshift)
-  
-  
-  ## Octave
-  tint <- if (is.null(octave.style)) {
-    tint( , LO5ths)
-  } else {
-    
-    if (!octave.style %in% c('relative', 'absolute')) .stop("Currently, can only read scale degree tokens with absolute or relative octaves (lily pond definitions)",
-                                                            " using ^v or ' , symbols.")
-    
-    octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
-    if (octave.style == 'absolute') {
-      LO5thNscaleOct2tint(LO5ths, octaven) 
-    } else {
-      sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
-    }
-  }
-  
-  #
-  (tint + Key) %dim% str
 }
 
-#....
 
-solfa2tint <- function(str, Key = NULL, octave.style = NULL) {
-  Key <- if (is.null(Key)) dset(0L, 0L) else as.diatonicSet(Key)
+solfa2tint <- function(str, ...) {
+  syl <- stringr::str_extract(str, '[fdsrlmt][aeioy]')
   
-  REparse(str, octave = "^[\\^v',]*", solfa = '.+', toEnv = TRUE)
+  base <- stringr::str_sub(syl, 1L, 1L)
+  alt  <- stringr::str_sub(syl, 2L, 2L)
   
-  LO5ths <- solfa2LO5th(solfa) 
   
-  ## Octave
-  tint <- if (is.null(octave.style)) {
-    tint( , LO5ths)
-  } else {
-    
-    if (!octave.style %in% c('relative', 'absolute')) .stop("Currently, can only read solfa tokens with absolute or relative octaves (lily pond definitions)",
-                                                            " using ^ v or ' , symbols .")
-    
-    octaven <- stringi::stri_count_regex(octave, "[\\^']") - stringi::stri_count_regex(octave, "[v,]")
-    if (octave.style == 'absolute') {
-      LO5thNscaleOct2tint(LO5ths, octaven) 
-    } else {
-      sigma(LO5thNcentralOct2tint(delta(LO5ths), octaven))
-    }
-  }
+  alt.mat <- rbind(d = c(NA,  'b', '#', '', '##'),
+                   r = c('b', '',  '#', NA, '##'),
+                   m = c(NA,  'b',  '', NA, '#'),
+                   f = c('',  'b', '#', NA, '##'),
+                   s = c(NA,  'b', '#', '', '##'),
+                   l = c('',  'b', '#', NA, '##'),
+                   t = c(NA,  'b', '',  NA, '#'))
+  colnames(alt.mat) <- c('a', 'e', 'i', 'o', 'y')
   
-  #
-
-  (tint + as.diatonicSet(Key)) %dim% str 
+  sylalt <- alt.mat[cbind(base, alt)]
+  
+  str_ <- stringr::str_replace(str, alt, sylalt)
+  
+  tonalChroma2tint(str_, parts = c('steps', 'accidentals'),
+                             step.labels = rownames(alt.mat),
+                             ...)
+  
+  
+  
 }
+
 
 ###.. numbers
 
