@@ -427,6 +427,7 @@ exclusiveFunction <- function(...) {
     missing <- sapply(exprs, rlang::is_missing)
     
     regexes <- ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE)
+    
     names(exprs) <- names(regexes) <- gsub(': .*', '', names(exprs))
     
     # arguments
@@ -501,7 +502,21 @@ regexGeneric <- function(...) {
 
 ##### humdrum dispatch ----
 
-
+regexDispatch <- function(...) {
+  exprs <- rlang::enexprs(...)
+  
+  regexDispatch     <- .regexGeneric(exprs[!sapply(exprs, rlang::is_missing)])
+  
+  arguments <- attr(regexDispatch, 'arguments')
+  arguments <- arguments[!duplicated(names(arguments))]
+  arguments <- c(arguments[names(arguments) != '...'], arguments[names(arguments) == '...'])
+  
+  body <- rlang::expr({
+    !!regexDispatch 
+  })
+  
+  rlang::new_function(arguments, body)
+}
 
 humdrumDispatch <- function(...) {
     exprs <- rlang::enexprs(...)

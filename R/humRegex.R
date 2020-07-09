@@ -4,7 +4,7 @@
 #' 
 #' 
 #' @export
-REparser <- function(..., strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
+REparser <- function(..., strict = TRUE, exhaustive = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
     # makes a parser which strictly, exhaustively parses a string
     # into a sequence of regexes
     res <- list(...)
@@ -12,13 +12,24 @@ REparser <- function(..., strict = TRUE, include.lead = FALSE, include.rest = FA
     if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparser, all arguments must be named.")
     
     rlang::new_function(args = alist(str = ),
-                        body = rlang::expr(REparse(str, !!!res, !!strict, !!include.lead, !!include.rest, !!toEnv)))
+                        body = rlang::expr(REparse(str, !!!res, !!strict, !!exhaustive, !!include.lead, !!include.rest, !!toEnv)))
 }
 
 
+#' Parse String Using Regular expressions
+#' 
+#' Takes an input string and parses it into a sequence of regular expressions.
+#' 
+#' If `exhaustive` is TRUE, the string must be exhaustively broken up by the matching regular expressions.
+#' Superfluous (non-match) characters at the begginning, end, or in bettween matches, will result in 
+#' all `NA` being returned.
+#' If `strict` is TRUE, all regular expressions must be matched or `NA` is returned.
+#' 
 #' @export
-REparse <- function(str, ..., strict = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
+REparse <- function(str, ..., strict = TRUE, exhaustive = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
     res <- list(...)
+    res <- res[lengths(res) > 0]
+    
     if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparse, all arguments must be named.")
     
     ##
@@ -31,29 +42,29 @@ REparse <- function(str, ..., strict = TRUE, include.lead = FALSE, include.rest 
         locs <- stringr::str_locate(rest, res[[re]])
         
         
-        hits <- !is.na(locs[ , 1])
+        hits <- !is.na(locs[ , 1]) & if (exhaustive) locs[ , 1] == 1 else TRUE
         complete <- complete & hits
         # 
-        if (include.lead && is.null(lead)) {
+        if (!exhaustive && include.lead && is.null(lead)) {
             # should only ever happen in first iteration
-            lead <- stringr::str_sub(rest, 1, pmax(locs[ , 'end'] - 1L, 0L))
+            lead <- stringr::str_sub(rest, 0, pmax(locs[ , 'start'] - 1L, 0L))
         }
         
-        matches[[re]] <- stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end'])
+        matches[[re]] <- .ifelse(hits, stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end']), NA_character_)
         
         rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
     }
     
-    if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
     if (include.lead) matches <- c(list(Lead = lead), matches)
     if (include.rest) matches <- c(matches, list(Rest = rest))
+    if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
     
     if (toEnv) list2env(matches, parent.frame())
     
     output <- do.call('cbind', matches)
     rownames(output) <- str
     
-    return(invisible(output))
+    if (toEnv) invisible(output) else output
     
 }
 
@@ -310,4 +321,33 @@ predicateParse <- function(predicate, argnames, ...) {
 # }
 
 
+#################### tools
+
+#' Making Regular Expressions
+#' 
+#' `humdrumR` includes some helpful functions for creating new regular expressions which work with the
+#' [stringr] package.
+#' 
+#' `captureRE` will take a character vector and collapse it to a "capture group."
+#' The `n` argument can be used to append a number tag, for instance `'*'` (zero or more) to the group.
+#' I.e., `captureRE(c("a", "b", "c"), '*')` will output `"[abc]*"`.
+#' 
+#' `captureUniq` will make a similar capture group to `captureRE`, but with an expression
+#' that makes sure that only 1 or more *of the same character* repeats.
+#' For instance, `captureUniq(c('a', 'b','c'))` will return `"([abc])\\1*"`---this expression will match
+#' `"aaa"` or `"bb"` but not `"aabb"`.
+#' 
+#' @rdname regexConstruction
+#' @export
+captureRE <- function(strs, n = '') escaper(paste0('[', paste(collapse = '', strs), ']', n))
+
+#' @rdname regexConstruction
+#' @export
+captureUniq <- function(strs) paste0('(', captureRE(strs), ')?\\1*') 
+# takes a RE capture group and makes it so it will only match one or more of the same character
+    
+escaper <- function(str) {
+    stringr::str_replace_all(str, '\\[\\^', '[\\\\^')
+    
+}
 

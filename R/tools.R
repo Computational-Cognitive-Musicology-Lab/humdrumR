@@ -1008,6 +1008,10 @@ append2expr <- function(expr, exprs) {
 
 ### Building smart functions ----
 
+setoptions... <- function(options, defaults) {
+    setoptions(options) <- defaults
+    options
+}
 
 
 `setoptions<-` <- function(x, values) {
@@ -1155,6 +1159,9 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 }
 
 ### Strings ----
+
+
+matched <- function(x, table) table[pmatch(x, table)]
 
 .paste <- function(..., sep = '', collapse = NULL, na.if = any) {
 # paste, but smart about NA values
