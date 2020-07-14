@@ -12,6 +12,14 @@ compose.default <- function(..., fenv = parent.frame()) {
                            if (names(farg)[[1]] == '...') farg <- c(alist(tmp = ), farg)
                          farg })
     
+    fargNames <- lapply(fargs, 
+                        function(farg) {
+                          names <- names(farg)
+                          names(names) <- ifelse(names == '...', '', names)
+                          rlang::syms(names)
+                          })
+    
+    
     args <- do.call('c', c(fargs[1], 
                            lapply(fargs[-1], function(farg) farg[-1]),
                            use.names = FALSE))
@@ -20,16 +28,18 @@ compose.default <- function(..., fenv = parent.frame()) {
     # firstArg <- rlang::sym(names(args)[[1]])
     pipeArgs <- rlang::syms(sapply(fargs, function(arg) names(arg)[[1]]))
     
+    
+    
     ### body
     body <- rlang::expr({
-        !!!Map(function(bod, arg, parg) {
-            rlang::expr(!!arg <- stickyApply(!!bod, !!!rlang::syms(names(parg))))
+        !!!Map(function(bod, arg, argnames) {
+            rlang::expr(!!arg <- stickyApply(!!bod, !!!argnames))
             }, 
             rlang::syms(head(fnames, -1)), 
             pipeArgs[-1], 
-            head(fargs, -1))
+            head(fargNames, -1))
         
-        (!!tail(fnames,1))(!!!rlang::syms(names(fargs[[length(fargs)]])))
+        (!!tail(fnames,1))(!!!fargNames[[length(fargNames)]])
         
         })
     

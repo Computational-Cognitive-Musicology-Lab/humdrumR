@@ -230,6 +230,10 @@ setMethod('nrow', signature = 'struct', function(x) x@dim[1])
 setMethod('ncol', signature = 'struct', function(x) x@dim[2])
 setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
 setMethod('dim', signature = 'struct', function(x) x@dim )
+setMethod('lengths', signature = 'struct', 
+          function(x) {
+             if (hasdim(x)) array(1, dim(x)) else rep(1L, length(x))
+          })
 
 setMethod('dim<-', 'struct',
           function(x, value) {

@@ -745,10 +745,11 @@ activateQuo <- function(funcQuosure, active) {
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
     
-    predicate <- function(quo) TRUE
+    predicate <- function(quo) !is.null(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
+      
     
     do <- function(quo) {
-        formNames <- names(fargs(eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
+        formNames <- names(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
         
         hits <- fields %in% formNames
         

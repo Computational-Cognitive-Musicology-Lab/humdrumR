@@ -1213,7 +1213,7 @@ setActiveFields <- function(humdrumR, fieldnames) {
   actquo <- if (length(fieldnames) > 1L) {
             rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
             } else {
-            rlang::as_quosure(as.symbol(fieldnames), environment(humdrumR))
+            rlang::new_quosure(as.symbol(fieldnames), env = rlang::get_env(humdrumR@Active))
             }
   putActive(humdrumR, actquo)
 }

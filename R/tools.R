@@ -70,7 +70,7 @@ false <- function(x) is.logical(x) && !x[1]
 
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
-fargs <- function(func) formals(args(func))
+fargs <- function(func)  args(func) %fmap% formals  
 
 
 
