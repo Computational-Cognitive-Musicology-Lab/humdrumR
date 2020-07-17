@@ -950,39 +950,28 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 
 
 tonalChroma2tint <- function(str, Key = NULL,
-                             parts = c('steps', 'accidentals', 'contours'), sep = "", exhaustive = TRUE, ...) {
+                             parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
  
  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
  
- if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, tou can't read both qualities and accidentals at the same time.",
+ if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
  
- include <- list(steps = 'steps' %in% parts,
-                 accidentals = 'accidentals' %in% parts,
-                 qualities = 'qualities' %in% parts,
-                 contours = 'contours' %in% parts)
- 
-  
  if (all(c('accidentals', 'qualities') %in% parts)) .stop("You can't read a tonal chroma with accidentals AND qualities at the same time.")
  
+ ############# parse string
  # regular expressions for each part
+ REs <-  makeRE.tonalChroma(parts, collapse = FALSE, ...)
  
- REs <-  list(steps       = if (include$steps)       step.RE(...),
-              accidentals = if (include$accidentals) accidental.RE(...),
-              qualities   = if (include$qualities)   quality.RE(...),
-              contours    = if (include$contours)    contour.RE(...)
-              )[parts]
- 
- # parse string
- do.call('REparse', c(list(str, exhaustive = exhaustive, toEnv = TRUE, strict = TRUE), REs)) ## save to environment!
+ REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to enviroment!
  
  
  ## simple interval
  simple <- alterations <- integer(length(str))
- if (include$steps) simple <- simple +  scaleStep2LO5th(steps, ...) %dots% (has.prefix('step.')  %.% names)
+ if ('steps' %in% parts) simple <- simple +  scaleStep2LO5th(steps, ...) %dots% (has.prefix('step.')  %.% names)
  
- if (include$accidentals) alterations <- accidental2LO5th(accidentals, ...) %dots% (has.prefix('accidental.') %.% names) 
- if (include$qualities)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
+ if ('accidentals' %in% parts) alterations <- accidental2LO5th(accidentals, ...) %dots% (has.prefix('accidental.') %.% names) 
+ if ('qualities' %in% parts)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
  
  simple <- simple + alterations
  if (!is.null(Key)) simple[is.na(names(alterations))] <- simple[is.na(names(alterations))] %% Key
@@ -990,27 +979,12 @@ tonalChroma2tint <- function(str, Key = NULL,
  tint <- tint(0L, simple)
  
  # contours
- if (!include$contours) contours <- character(length(str))
+ if (!'contours' %in% parts) contours <- character(length(str))
  tint <- tint + contour2tint(contours, simple, ...) %dots%  (has.prefix('contour.') %.% names)
  
  tint
  
  
-}
-
-step.RE <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  paste0('[-+]?', captureRE(step.labels))
-accidental.RE <- function(accidental.labels = c(), ...) {
-  setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
-  
-  paste0(accidental.labels['natural'], '|', captureUniq(accidental.labels[names(accidental.labels) != 'natural']))
-}
-quality.RE <- function(quality.labels = c(), ...) {
-  setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
-  paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
-}
-contour.RE <- function(contour.labels = c(), ...) {
-  setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
-  if (false(contour.labels)) '-?[1-9][0-9]*' else captureUniq(contour.labels)
 }
 
 
@@ -2091,15 +2065,15 @@ as.tonalInterval.numeric <- tonalTransform %.% decimal2tint
 #' @export
 as.tonalInterval.integer <- tonalTransform %.% semit2tint
 
-char2tint <- humdrumDispatch('kern: kernPitch' = kernPitch2tint,
-                             'pitch: sciPitch' = sciPitch2tint,
-                             'hint: interval'  = interval2tint,
-                             'mint: interval'  = interval2tint,
-                             'int: interval'  = interval2tint,
-                             'deg: scaleDegree'  = scaleDegree2tint,
-                             'solfa: solfa' = solfa2tint,
-                             'freq: decimal' = semit2tint,
-                             'fraction: fraction' = fraction2tint)
+char2tint <- humdrumDispatch('kern: makeRE.kernPitch(...)' = kernPitch2tint,
+                             'pitch: makeRE.sciPitch(...)' = sciPitch2tint,
+                             'hint: makeRE.interval(...)'  = interval2tint,
+                             'mint: makeRE.interval(...)'  = interval2tint,
+                             'int: makeRE.interval(...)'  = interval2tint,
+                             'deg: getRE("scaleDegree")'  = scaleDegree2tint,
+                             'solfa: getRE("solfa")' = solfa2tint,
+                             'freq: getRE("decimal")' = semit2tint,
+                             'fraction: getRE("fraction")' = fraction2tint)
 
 #' @export
 as.tonalInterval.character <- tonalTransform %.% char2tint

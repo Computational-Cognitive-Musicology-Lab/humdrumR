@@ -436,7 +436,7 @@ exclusiveFunction <- function(...) {
 .exclusiveDispatch <- function(exprs) {
     missing <- sapply(exprs, rlang::is_missing)
     
-    regexes <- ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE)
+    regexes <- rlang::parse_exprs(ditto(gsub('^[^ ]+(: )?', '', names(exprs)), !missing, reverse = TRUE))
     
     names(exprs) <- names(regexes) <- gsub(': .*', '', names(exprs))
     
@@ -489,7 +489,9 @@ regexGeneric <- function(...) {
 }
 
 .regexGeneric <- function(exprs) {
-    regexes <- gsub('^[^ ]+(: )?', '', names(exprs))
+    regexes <- rlang::parse_exprs(gsub('^[^ ]+(: )?', '', names(exprs)))
+    
+    
     arguments <- getAllArgs(exprs)
     exprs <- lapply(exprs, makeCall)
     

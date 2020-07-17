@@ -4,15 +4,12 @@
 #' 
 #' 
 #' @export
-REparser <- function(..., strict = TRUE, exhaustive = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
+REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, toEnv = FALSE) {
     # makes a parser which strictly, exhaustively parses a string
     # into a sequence of regexes
-    res <- list(...)
-    
-    if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparser, all arguments must be named.")
     
     rlang::new_function(args = alist(str = ),
-                        body = rlang::expr(REparse(str, !!!res, !!strict, !!exhaustive, !!include.lead, !!include.rest, !!toEnv)))
+                        body = rlang::expr(REparse(str, !!!res, !!parse.strict, !!parse.exhaust, !!parse.lead, !!parse.rest, !!toEnv)))
 }
 
 
@@ -26,11 +23,10 @@ REparser <- function(..., strict = TRUE, exhaustive = TRUE, include.lead = FALSE
 #' If `strict` is TRUE, all regular expressions must be matched or `NA` is returned.
 #' 
 #' @export
-REparse <- function(str, ..., strict = TRUE, exhaustive = TRUE, include.lead = FALSE, include.rest = FALSE, toEnv = FALSE) {
-    res <- list(...)
+REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, toEnv = FALSE) {
     res <- res[lengths(res) > 0]
     
-    if (any(.names(res) == "")) stop(call. = FALSE,  "In call to REparse, all arguments must be named.")
+    if (any(.names(res) == "")) .stop("In call to REparse, all arguments must be named.")
     
     ##
     matches <- list()
@@ -42,10 +38,10 @@ REparse <- function(str, ..., strict = TRUE, exhaustive = TRUE, include.lead = F
         locs <- stringr::str_locate(rest, res[[re]])
         
         
-        hits <- !is.na(locs[ , 1]) & if (exhaustive) locs[ , 1] == 1 else TRUE
+        hits <- !is.na(locs[ , 1]) & if (parse.exhaust) locs[ , 1] == 1 else TRUE
         complete <- complete & hits
         # 
-        if (!exhaustive && include.lead && is.null(lead)) {
+        if (!parse.exhaust && parse.lead && is.null(lead)) {
             # should only ever happen in first iteration
             lead <- stringr::str_sub(rest, 0, pmax(locs[ , 'start'] - 1L, 0L))
         }
@@ -55,9 +51,9 @@ REparse <- function(str, ..., strict = TRUE, exhaustive = TRUE, include.lead = F
         rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
     }
     
-    if (include.lead) matches <- c(list(Lead = lead), matches)
-    if (include.rest) matches <- c(matches, list(Rest = rest))
-    if (strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
+    if (parse.lead) matches <- c(list(Lead = lead), matches)
+    if (parse.rest) matches <- c(matches, list(Rest = rest))
+    if (parse.strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
     
     if (toEnv) list2env(matches, parent.frame())
     
@@ -276,7 +272,7 @@ predicateParse <- function(predicate, argnames, ...) {
 
 
 
-###################  Regex tools ----
+###################  User Regex tools ----
 
 
 #' Match strings against regular expression
@@ -321,7 +317,86 @@ predicateParse <- function(predicate, argnames, ...) {
 # }
 
 
-#################### tools
+#################### Making Regexes ----
+
+
+
+cREs <- function(REs, parse.exhaust = TRUE) {
+    REs <- unlist(paste0('(?:', REs, ')'))
+    
+    ## if the regexes use capture groups, we must increment groups in later expressions
+    # for instance, if the first regex has (x)\\1 and the second has (.*)\\1,
+    # we need to change the latter to (.*)\\2
+    hasCapture <- stringr::str_detect(REs, '\\\\[1-9]')
+    if (any(hasCapture)) {
+        captures <-  stringr::str_extract_all(REs[hasCapture], '\\\\[1-9]')
+        noCaptures <- stringr::str_split(REs[hasCapture], '\\\\[1-9]')
+        captures <- lapply(captures, function(cap) as.integer(factor(cap)))
+        
+        shifts <- head(Reduce(function(a, b) a + max(b), captures, init = 0, accumulate = TRUE), length(captures))
+        captures <- Map('+', captures, shifts)
+        
+        REs[hasCapture] <- Map(function(nocap, cap) {paste(c(rbind(nocap, c(paste0('\\', cap),''))), collapse = '')}, noCaptures, captures)
+        
+    }
+    
+    paste(REs, collapse = if (parse.exhaust) '' else '.*') 
+    
+}
+
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  paste0('[-+]?', captureRE(step.labels))
+
+makeRE.accidentals <- function(accidental.labels = c(), ...) {
+    setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+    
+    paste0(accidental.labels['natural'], '|', captureUniq(accidental.labels[names(accidental.labels) != 'natural']))
+}
+
+makeRE.qualities <- function(quality.labels = c(), ...) {
+    setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
+    paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
+}
+
+makeRE.contours <- function(contour.labels = c(), ...) {
+    setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
+    if (false(contour.labels)) '-?[1-9][0-9]*' else captureUniq(contour.labels)
+}
+
+makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ...){
+    REs <-  list(steps       = if ('steps' %in% parts)       makeRE.steps(...),
+                 accidentals = if ('accidentals' %in% parts) makeRE.accidentals(...),
+                 qualities   = if ('qualities' %in% parts)   makeRE.qualities(...),
+                 contours    = if ('contours' %in% parts)    makeRE.contours(...)
+                 )[parts]
+    
+    if (collapse) setNames(cREs(REs), 'tonalChroma') else REs
+    
+}
+
+makeRE.kernPitch <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = c(), accidental.labels = c(), ...) {
+    setoptions(step.labels) <- c('a-g')
+    setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = 'n')
+    
+    REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, accidental.labels = accidental.labels, ...)
+    
+    if ('steps' %in% parts) {
+        REs$steps <- captureUniq(paste0(tolower(step.labels), toupper(step.labels)))
+        REs <- REs[parts]
+    }
+    
+    if (collapse) setNames(cREs(REs), 'kernPitch') else REs
+}
+
+makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, ...) {
+   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, ...), 'sciPitch')
+}
+
+makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
+    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = '1-9][0-9', ...), 'interval')
+}
+
+
+#################### Developer Regex Tools ----
 
 #' Making Regular Expressions
 #' 

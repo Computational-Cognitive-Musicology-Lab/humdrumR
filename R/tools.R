@@ -1071,9 +1071,7 @@ nestoptions <- function(opts, ...) {
     # and applies that expression, except first filters out arguments from the ...
     # which don't match predicate function
     # allows us to send DIFFERENT ... to sub functions
-    
     call <- rlang::enexpr(call)
-    
     funccall <- deparse(call[[1]])
     
     call[[1]] <- quote(list)
