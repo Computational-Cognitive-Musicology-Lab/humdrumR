@@ -629,22 +629,6 @@ as.rhythmInterval.character <- regexDispatch('NoteValue' = read.notevalue2rhythm
 NULL
 
 
-#' @name humRhythm
-#' @export 
-as.fraction.character <- as.ratio.rhythmInterval %.% as.rhythmInterval
-
-#' @name humRhythm
-#' @export
-as.recip.character <- as.recip.rhythmInterval %.% as.rhythmInterval
-
-#' @name humRhythm
-#' @export
-as.decimal.character <- as.decimal.rhythmInterval %.% as.rhythmInterval
-
-#' @name humRhythm
-#' @export
-as.notevalue.character <- as.notevalue.rhythmInterval %.% as.rhythmInterval
-
 
 
 #################################################-

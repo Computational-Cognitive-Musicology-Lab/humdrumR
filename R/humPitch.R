@@ -1004,7 +1004,8 @@ sciPitch2tint <- function(str, ...) {
 
 
 kernPitch2tint <- function(str, ...) {
-  str_ <- toupper(stringr::str_replace(str, '([A-Ga-g])\\1*', '\\1')) # simple part
+  letter <- stringr::str_extract(str, '[A-Ga-g]')
+  str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   simple <- overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'), 
                    step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
@@ -1074,9 +1075,9 @@ solfa2tint <- function(str, ...) {
   
   str_ <- stringr::str_replace(str, alt, sylalt)
   
-  tonalChroma2tint(str_, parts = c('steps', 'accidentals'),
+  overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'),
                              step.labels = rownames(alt.mat),
-                             ...)
+                             ...))
   
   
   
@@ -2070,10 +2071,10 @@ char2tint <- humdrumDispatch('kern: makeRE.kernPitch(...)' = kernPitch2tint,
                              'hint: makeRE.interval(...)'  = interval2tint,
                              'mint: makeRE.interval(...)'  = interval2tint,
                              'int: makeRE.interval(...)'  = interval2tint,
-                             'deg: getRE("scaleDegree")'  = scaleDegree2tint,
-                             'solfa: getRE("solfa")' = solfa2tint,
-                             'freq: getRE("decimal")' = semit2tint,
-                             'fraction: getRE("fraction")' = fraction2tint)
+                             'deg: makeRE.scaleDegree(...)'  = scaleDegree2tint,
+                             'solfa: makeRE.solfa(...)' = solfa2tint,
+                             'freq: makeRE.decimal()' = semit2tint,
+                             'fraction: makeRE.fraction(...)' = fraction2tint)
 
 #' @export
 as.tonalInterval.character <- tonalTransform %.% char2tint

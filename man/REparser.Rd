@@ -5,10 +5,11 @@
 \title{Make a regular expression parser}
 \usage{
 REparser(
-  ...,
-  strict = TRUE,
-  include.lead = FALSE,
-  include.rest = FALSE,
+  res,
+  parse.strict = TRUE,
+  parse.exhaust = TRUE,
+  parse.lead = FALSE,
+  parse.rest = FALSE,
   toEnv = FALSE
 )
 }

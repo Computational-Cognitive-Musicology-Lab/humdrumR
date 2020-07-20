@@ -322,6 +322,7 @@ predicateParse <- function(predicate, argnames, ...) {
 
 
 cREs <- function(REs, parse.exhaust = TRUE) {
+    if (length(REs) == 0) return('')
     REs <- unlist(paste0('(?:', REs, ')'))
     
     ## if the regexes use capture groups, we must increment groups in later expressions
@@ -359,7 +360,7 @@ makeRE.qualities <- function(quality.labels = c(), ...) {
 
 makeRE.contours <- function(contour.labels = c(), ...) {
     setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
-    if (false(contour.labels)) '-?[1-9][0-9]*' else captureUniq(contour.labels)
+    if (false(contour.labels)) '-?[0-9]+' else captureUniq(contour.labels)
 }
 
 makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ...){
@@ -380,7 +381,7 @@ makeRE.kernPitch <- function(parts = c('steps', 'accidentals'), collapse = TRUE,
     REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, accidental.labels = accidental.labels, ...)
     
     if ('steps' %in% parts) {
-        REs$steps <- captureUniq(paste0(tolower(step.labels), toupper(step.labels)))
+        REs$steps <- captureUniq(paste0(tolower(step.labels), toupper(step.labels)), zero = FALSE)
         REs <- REs[parts]
     }
     
@@ -395,6 +396,27 @@ makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ..
     setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = '1-9][0-9', ...), 'interval')
 }
 
+makeRE.scaleDegree <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
+    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = '[1-7]', ...), 'scaleDegree')
+}
+
+makeRE.solfa <- function(parts = c('steps', 'accidentals'), ..., collapse = TRUE) {
+    
+    REs <- makeRE.tonalChroma(parts[parts != 'steps'], ..., collapse = FALSE)
+    
+    if ('steps' %in% parts) {
+        REs$steps <- "[sd][eoi]|[fl][eai]|[mt][eiy]|r[aei]"
+        REs <- REs[parts]
+    }
+    
+    if (collapse) setNames(cREs(REs), 'solfa') else REs
+}
+
+
+####
+
+makeRE.decimal <- function() c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
+makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
 #################### Developer Regex Tools ----
 
@@ -418,7 +440,7 @@ captureRE <- function(strs, n = '') escaper(paste0('[', paste(collapse = '', str
 
 #' @rdname regexConstruction
 #' @export
-captureUniq <- function(strs) paste0('(', captureRE(strs), ')?\\1*') 
+captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
 # takes a RE capture group and makes it so it will only match one or more of the same character
     
 escaper <- function(str) {

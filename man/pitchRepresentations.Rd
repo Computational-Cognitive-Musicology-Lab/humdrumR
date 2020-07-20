@@ -154,17 +154,39 @@ However, the \code{Exclusive} argument is vectorized, which gives us the option 
 For instance, \verb{as.kernPitch(c("A4", "A4"), Exclusive = c('pitch', 'int')} will return \verb{("a", "f#")}---the \code{'pitch'} exclusive intepretation is
 matched with the first \code{"A4"} while the \code{'int'} interpretation is matched with the second one!
 
-The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:\preformatted{                 Exclusive           RE                                                             Example
-kernPitch        **kern              ([A-Ga-g])\\1*([#-])*\\2*                                      c      
-Beam             **kern              ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                            /Jk    
-MelodicSignifier **kern              [TtMmWw]R?|[TtMmWwS$O]                                         M      
-Articulation     **kern              ['`\\"~I][vu]?|[vu]                                            '      
-Slur             **kern              [(\{\{\\[]+|[)\}\}\\]_]+|_                                         (      
-recip            **recip             [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                       8.     
-sciPitch         **pitch             [A-G][b#-]*[-+]?[0-9][0-9]*                                    C4     
-solfa            **solfa             [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei]) do     
-interval         **mint,**hint,**int [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                                +P5    
-scaleDegree      **deg               [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                           P5     
+The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:\preformatted{                 Exclusive          
+kernPitch        **kern             
+Beam             **kern             
+MelodicSignifier **kern             
+Articulation     **kern             
+Slur             **kern             
+recip            **recip            
+sciPitch         **pitch            
+solfa            **solfa            
+interval         **mint,**hint,**int
+scaleDegree      **deg              
+                 RE                                                            
+kernPitch        ([A-Ga-g])\\1*([#-])*\\2*                                     
+Beam             ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                           
+MelodicSignifier [TtMmWw]R?|[TtMmWwS$O]                                        
+Articulation     ['`\\"~I][vu]?|[vu]                                           
+Slur             [(\{\{\\[]+|[)\}\}\\]_]+|_                                        
+recip            [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                      
+sciPitch         [A-G][b#-]*[-+]?[0-9][0-9]*                                   
+solfa            [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei])
+interval         [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                               
+scaleDegree      [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                          
+                 Example
+kernPitch        c      
+Beam             /Jk    
+MelodicSignifier M      
+Articulation     '      
+Slur             (      
+recip            8.     
+sciPitch         C4     
+solfa            do     
+interval         +P5    
+scaleDegree      P5     
 }
 
 A final useful option is controlled using the logical \code{inPlace} argument.
@@ -238,12 +260,12 @@ The functions\code{as.kernPitch}, \code{as.sciPitch}, \code{as.lilyPitch}, and \
 The arguments to \code{as.tonalChroma}, derived from the constituent functions (details in the following sections) are:
 \itemize{
 \item \code{as.tonalChroma}:
-+ \code{step}, \code{quality}, \code{accidental}, and \code{contour}: each argument a single logical value.
-These arguments indicate whether the scale-step, quality, accidental, and/or contour strings should or shouldn't be printed.
-+ \code{order}: a character string of length 3--4, consisting of the words \code{"step"}, \code{"quality"}, \code{"accidental"}, or \code{"contour"}.
-(Partial matches (like \code{"ste"} or \code{"s"} for \code{step}) will work too.)
-This vector controls the order in which the different elements of the string are concatinated.
-For instance, do you want your octave labels before or after the scale step?
++ \code{parts}: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
+Acceptable strings are \code{"steps"}, \code{"qualities"}, \code{"accidentals"}, or \code{"contours"}.
+(\link[base:pmatch]{Partial matches} matches like \code{"ste"} or \code{"s"} for \code{step} will work too.)
+The output tonal chroma string will have its part concatinated in the order they appear in the \code{parts} argument.
+For instance, you could put \code{c('contour', 'step', 'accidental')} to put the contour before the simple interval,
+or put \code{c('step', 'accidental', 'contour')} to put it after.
 + \code{sep}: a character string which will be used to separate the elements (the default is \code{""}).
 \item from \code{as.scaleStep} (described below):
 + \code{step.labels}
@@ -426,27 +448,45 @@ The following tables illustrate the behaviors of the accidental/quality argument
 In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
 Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
 \verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
-\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
-NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
-NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c    d-   b-   e    b    a   
-NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
-NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
-AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c    d    b    e    b    a   
-AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
-AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c    d    b-   e-   b-   a-  
-AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
+\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
+NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
+NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c   
+NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn  
+NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn  
+AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c   
+AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn  
+AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c   
+AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn  
+     d-   b-   e-   b-   a-  
+NFF  d-   b-   e-   b-   a-  
+NFT  d-   b-   e    b    a   
+NTF  d-   b-   e-   b-   a-  
+NTT  d-   b-   e    b    a   
+AbFF d    b    e    b    a   
+AbFT d-   b-   e    b    a   
+AbTF d    b-   e-   b-   a-  
+AbTT d-   b-   e-   b-   a-  
 }
 }
 
-\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
-NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1    m2   m7   m3   m7   m6  
-NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1    m2   m7   3    7    6   
-NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
-NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
-AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1    2    7    3    7    6   
-AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
-AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1    2    m7   m3   m7   m6  
-AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
+\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
+NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1   
+NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1   
+NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1  
+NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1  
+AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1   
+AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1  
+AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1   
+AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1  
+     d-   b-   e-   b-   a-  
+NFF  m2   m7   m3   m7   m6  
+NFT  m2   m7   3    7    6   
+NTF  m2   m7   m3   m7   m6  
+NTT  m2   m7   3    7    6   
+AbFF 2    7    3    7    6   
+AbFT m2   m7   3    7    6   
+AbTF 2    m7   m3   m7   m6  
+AbTT m2   m7   m3   m7   m6  
 }
 }
 

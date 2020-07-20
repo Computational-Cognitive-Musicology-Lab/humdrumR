@@ -764,7 +764,6 @@ as.decimal.numeric <- as.numeric
 #' @export
 as.decimal.rational <- function(x) (x$Numerator / x$Denominator) %dim% x[[1]]
 #' @export
-as.decimal.numeric <- as.numeric
 as.decimal.fraction <- function(x) {
     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
     sapply(exprs, eval) %dim% x
@@ -775,9 +774,9 @@ as.decimal.fraction <- function(x) {
 #' @export
 as.rational <- function(x, ...) UseMethod('as.rational') 
 #' @export
-as.rational.character <- function(x) as.rational.default(as.decimal.character(x))
+as.rational.character <- function(x) as.rational.numeric(as.decimal.character(x))
 #' @export
-as.rational.fraction <- function(x) as.rational.default(as.decimal.fraction(x))
+as.rational.fraction <- function(x) as.rational.numeric(as.decimal.fraction(x))
 #' @export
 as.rational.rational <- force
 #' @export
