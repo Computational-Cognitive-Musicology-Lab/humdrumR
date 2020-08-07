@@ -929,6 +929,7 @@ semit2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
 
 atonal2tint <- function(tint, accidental.melodic, Key = NULL) {
   if (!is.null(Key)) tint <- enharmonicpart(tint, 12L, Key)
+  LO5ths <- tint@Fifth
   
   if (accidental.melodic) {
     chromatic <- LO5ths > 5 | LO5ths < -1
@@ -2289,5 +2290,5 @@ for (int in allints) {
   assign(int, interval2tint(int))
 }
 unison <- P1
-pythagorean.comma <- (-d2)
+pythagorean.comma <- (-dd2)
 octave <- P8

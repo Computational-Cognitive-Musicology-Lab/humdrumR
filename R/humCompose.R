@@ -128,9 +128,9 @@ inPlacer <- function(orig, regex) {
     }
 }
 
-`%re.as%` <- function(e1, e2) {
-    stickyAttrs(e1) <- list(as = e2)
-    e1
+as.re <- function(x, as) {
+    stickyAttrs(x) <- list(as = names(as))
+   x
 }
 
 `%re.place%` <- function(e1, e2) {

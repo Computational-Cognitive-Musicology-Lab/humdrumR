@@ -180,8 +180,7 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
                                "Sorry, REapply can only apply to an x argument that is a character vector.")
     result <- .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
     
-    stickyAttrs(result) <- list(as = regex)
-    result %dim% x
+    as.re(result, regex) %dim% x
 }
 
 #' 
