@@ -843,11 +843,11 @@ tint2solfa <- function(x, Key = NULL,  parts = c('contours', 'accidentals', 'ste
   tails <- solfatails[cbind(match(steps, rownames(solfatails)),  tailcol + 2L)]
   
   
-  accidentals <- if (accidental) stringr::str_sub(tint2accidental(x, ...) %dots% (has.prefix('accidentals.') %.% names),
+  accidentals <- if ('accidentals' %in% parts) stringr::str_sub(tint2accidental(x, ...) %dots% (has.prefix('accidentals.') %.% names),
                                                   start = 2L) # drop first accidental # will mess up with double sharps/flats
   contours <- if ('contours' %in% parts)  tint2contour(x, ...) %dots% (has.prefix('contour.') %.% names)
   
-  pasteordered(parts, contour = contours, accidental = accidentals, step = .paste(steps, tails))
+  pasteordered(parts, contour = contours, accidental = accidentals, steps = .paste(steps, tails))
 }  
 
 
