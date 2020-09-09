@@ -7,7 +7,7 @@
 \usage{
 captureRE(strs, n = "")
 
-captureUniq(strs)
+captureUniq(strs, zero = TRUE)
 }
 \description{
 \code{humdrumR} includes some helpful functions for creating new regular expressions which work with the

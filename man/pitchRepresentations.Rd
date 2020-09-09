@@ -448,15 +448,24 @@ The following tables illustrate the behaviors of the accidental/quality argument
 In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
 Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
 \verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
-\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
-NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
-NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c   
-NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn  
-NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn  
-AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c   
-AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn  
-AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c   
-AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn  
+\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e   
+NFF  a-   a    b-   a    b-   a-   e   
+NFT  a-   an   b-   a    b    a-   e   
+NTF  a-   an   b-   an   b-   a-   en  
+NTT  a-   an   b-   a    b    a-   en  
+AbFF a    an   b    an   b    a    en  
+AbFT a-   an   b-   a    b    a-   en  
+AbTF a-   an   b-   an   b-   a-   en  
+AbTT a-   an   b-   a    b-   a-   en  
+     f    f#   e-   g-   f    b    c   
+NFF  f    f#   e-   g-   f    b    c   
+NFT  f    f#   e-   g-   fn   bn   c   
+NTF  fn   f#   e-   g-   fn   bn   cn  
+NTT  fn   f#   e-   g-   fn   bn   cn  
+AbFF f    f#   e    g-   f    bn   c   
+AbFT fn   f#   e-   g-   fn   bn   cn  
+AbTF fn   f#   e-   g-   fn   bn   c   
+AbTT fn   f#   e-   g-   fn   bn   cn  
      d-   b-   e-   b-   a-  
 NFF  d-   b-   e-   b-   a-  
 NFT  d-   b-   e    b    a   
@@ -469,15 +478,24 @@ AbTT d-   b-   e-   b-   a-
 }
 }
 
-\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c   
-NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1   
-NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1   
-NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1  
-NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1  
-AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1   
-AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1  
-AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1   
-AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1  
+\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e   
+NFF  m6   6    m7   6    m7   m6   3   
+NFT  m6   M6   m7   6    7    m6   3   
+NTF  m6   M6   m7   M6   m7   m6   M3  
+NTT  m6   M6   m7   6    7    m6   M3  
+AbFF 6    M6   7    M6   7    6    M3  
+AbFT m6   M6   m7   6    7    m6   M3  
+AbTF m6   M6   m7   M6   m7   m6   M3  
+AbTT m6   M6   m7   6    m7   m6   M3  
+     f    f#   e-   g-   f    b    c   
+NFF  4    A4   m3   d5   4    7    1   
+NFT  4    A4   m3   d5   P4   M7   1   
+NTF  P4   A4   m3   d5   P4   M7   P1  
+NTT  P4   A4   m3   d5   P4   M7   P1  
+AbFF 4    A4   3    d5   4    M7   1   
+AbFT P4   A4   m3   d5   P4   M7   P1  
+AbTF P4   A4   m3   d5   P4   M7   1   
+AbTT P4   A4   m3   d5   P4   M7   P1  
      d-   b-   e-   b-   a-  
 NFF  m2   m7   m3   m7   m6  
 NFT  m2   m7   3    7    6   

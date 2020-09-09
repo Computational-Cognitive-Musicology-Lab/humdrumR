@@ -29,7 +29,7 @@ What's more, the \code{octave} argument can be left blank, in which case the app
 to place the interval in the octave above middle-C.
 
 By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method, for \code{tonalInterval}s call \link[=pitchRepresentations]{as.kernPitch()}.
-Thus, if you return a \code{tonalInterval} on the command line (or call \link[base:print]{print}) one one, you'll see the \link[=pitchRepresentations]{kern pitch} representation printed.
+Thus, if you return a \code{tonalInterval} on the command line (or call \link[base:print]{print} one one) you'll see the \link[=pitchRepresentations]{kern pitch} representation printed.
 }
 \section{Slots}{
 
@@ -57,6 +57,7 @@ thus, \code{tonalIntervals} can be multiplied by integers to create new \code{to
 is defined for \code{tonalIntervals}---i.e., division by/into whole (integer) pieces, often with leftover "remainders" (modulo).
 In R, Euclidean division is achieved with the \link[base:Arithmetic]{\%/\%} operator---\emph{not} \code{/}---, with the associated \link[base:Arithmetic]{\%\%} used for the remainder/modulo.
 Two \code{tonalInterval}s can be divided to produced an integer; Conversely, a \code{tonalInterval} can be divided by an integer to produce a \code{tonalInterval}.
+}
 
 Take note that the way \code{humdrumR} defines Euclidean division is based in \emph{tonal space}---i.e., the line-of-fifths---not frequency or atonal-semitone space.
 For example, an augmented-fourth divided by a major-second \emph{is} \code{3L}, but a diminished-fifth divided by a major-second is \emph{not} 3L---\code{d5 \%/\% M2} equals \code{-3L} with a remainder of \code{P8} (plus an octave)!
@@ -64,13 +65,12 @@ The division algorithm works by applying standard Euclidean division to the \ver
 the remainder to the match the appropriate octave.
 This definition has the useful properties that \code{specificinterval \%\% A1 = genericinterval} and \code{interval \%\% d2 = enharmonicinterval}.
 }
-}
 
 \section{Relational Operators}{
 
 
-\code{tonalInnterval}s can be compared using the standard \link[base:Comparison]{relational operations}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
-Two \code{tonalInterval}s are equal (according to \code{==}) only if all their \code{Octave}, \code{Fifth}, and \code{Cent} slots
+\code{tonalInterval}s can be compared using the standard \link[base:Comparison]{relational operations}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
+Two \code{tonalInterval}s are equal (according to \code{==}) only if all their slots (\code{Octave}, \code{Fifth}, and \code{Cent})
 are exactly identical.
 Thus, enharmonic notes (like C# and Db) are \emph{not} equal.
 In contrast, ordinal comparisons (e.g., \code{>}, \code{<=}) between \code{tonalInterval}s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
@@ -80,7 +80,7 @@ Thus, \code{m3 >= A2} and \code{A2 >= m3} are both \code{TRUE}, even though \cod
 \section{Coercion}{
 
 
-\code{humdrumR} knows how to \href{https://en.wikipedia.org/wiki/Type_conversion}{coerce} several \link[base:vector]{base-R atomic types} into \code{tonalIntervals}.
+\code{humdrumR} knows how to \href{https://en.wikipedia.org/wiki/Type_conversion}{coerce} several \link[base:vector]{base-R atomic types} into \code{tonalInterval}s.
 This can be done using the \link[methods:as]{as} function---e.g., \code{as(3, "tonalInterval")}---or more intuitively using the function \code{as.tonalInterval()}.
 Coercision methods are defined for
 \itemize{

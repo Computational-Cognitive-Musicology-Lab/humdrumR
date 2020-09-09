@@ -6,10 +6,12 @@
 #' @section Tonality:
 #' 
 #' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
+#' 
 #' + [integers][base::integer] --- used to encode "[line-of-fifths]" tonal information
 #' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
 #' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
 #' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
+#' 
 #' 
 #' For a detailed explanation of the theory and specifics of `humdrumR`'s treatment of tonality, see the *Tonality in humdrumR* vignette.
 #' 
@@ -53,13 +55,12 @@ NULL
 #' to place the interval in the octave above middle-C.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method, for `tonalInterval`s call [as.kernPitch()][pitchRepresentations].
-#' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print]) one one, you'll see the [kern pitch][pitchRepresentations] representation printed.
+#' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print] one one) you'll see the [kern pitch][pitchRepresentations] representation printed.
 #' 
 #' @slot Octave integers representing the octave offset.
 #' @slot Fifth integers representing the "line-of-fifths' value.
 #' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
-
 #' 
 #' @section Arithmetic:
 #' 
@@ -77,18 +78,18 @@ NULL
 #'   In R, Euclidean division is achieved with the [%/%][base::Arithmetic] operator---*not* `/`---, with the associated [%%][base::Arithmetic] used for the remainder/modulo.
 #'   Two `tonalInterval`s can be divided to produced an integer; Conversely, a `tonalInterval` can be divided by an integer to produce a `tonalInterval`.
 #'   
-#'   Take note that the way `humdrumR` defines Euclidean division is based in *tonal space*---i.e., the line-of-fifths---not frequency or atonal-semitone space.
-#'   For example, an augmented-fourth divided by a major-second *is* `3L`, but a diminished-fifth divided by a major-second is *not* 3L---`d5 %/% M2` equals `-3L` with a remainder of `P8` (plus an octave)!
-#'   The division algorithm works by applying standard Euclidean division to the `@Fifth` slot (line-of-fifths tonal space), and shifting the `@Octave` value in
-#'   the remainder to the match the appropriate octave.
-#'   This definition has the useful properties that `specificinterval %% A1 = genericinterval` and `interval %% d2 = enharmonicinterval`.
+#' Take note that the way `humdrumR` defines Euclidean division is based in *tonal space*---i.e., the line-of-fifths---not frequency or atonal-semitone space.
+#' For example, an augmented-fourth divided by a major-second *is* `3L`, but a diminished-fifth divided by a major-second is *not* 3L---`d5 %/% M2` equals `-3L` with a remainder of `P8` (plus an octave)!
+#' The division algorithm works by applying standard Euclidean division to the `@Fifth` slot (line-of-fifths tonal space), and shifting the `@Octave` value in
+#' the remainder to the match the appropriate octave.
+#' This definition has the useful properties that `specificinterval %% A1 = genericinterval` and `interval %% d2 = enharmonicinterval`.
 #' 
 #' 
 #' 
 #' @section Relational Operators:
 #' 
-#' `tonalInnterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
-#' Two `tonalInterval`s are equal (according to `==`) only if all their `Octave`, `Fifth`, and `Cent` slots
+#' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
+#' Two `tonalInterval`s are equal (according to `==`) only if all their slots (`Octave`, `Fifth`, and `Cent`)
 #' are exactly identical. 
 #' Thus, enharmonic notes (like C# and Db) are *not* equal.
 #' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
@@ -96,7 +97,7 @@ NULL
 #' 
 #' @section Coercion:
 #' 
-#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `tonalIntervals`.
+#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `tonalInterval`s.
 #' This can be done using the [as][methods::as] function---e.g., `as(3, "tonalInterval")`---or more intuitively using the function `as.tonalInterval()`.
 #' Coercision methods are defined for 
 #' 
@@ -198,7 +199,9 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
         Cent   = as.numeric(cent))
 }
 
+##...accessors ####
 
+#' @export
 setGeneric("LOF", function(x, sum = FALSE) standardGeneric("LOF"))
 setMethod("LOF", "tonalInterval",
           function(x, sum = FALSE) {
@@ -207,6 +210,12 @@ setMethod("LOF", "tonalInterval",
             if (hasdim(lof) && sum) rowSums(lof) else lof
             
           })
+setMethod('LOF', 'ANY',
+          function(x, sum = FALSE) {
+            x <- as(x, 'tonalInterval')
+            LOF(x, sum)
+          })
+
 
 
 ###..vector/core methods ####
@@ -399,7 +408,7 @@ genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 
 ##... line-of-fifths to tonalChroma ----
 
-LO5th2scaleStep <- function(LO5th, step.labels = 1L:7L) {
+LO5th2scaleStep <- function(LO5th, step.labels = 1L:7L, ...) {
   step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
 }
 
@@ -442,7 +451,7 @@ alteration.inKey <- function(LO5th, Key) {
   LO5th2alterationN(LO5th, Key) == 0L
 }
 
-# data.frame(h, alteration.conflicts(h), alteration.memory(h)) -> g
+
 
 alteration.filter <- function(LO5th, Key, cautionary, memory) {
   
@@ -723,10 +732,10 @@ tint2midi <- function(x) tint2semit(x) + 60L
 tint2tonalChroma <- function(x, parts = c('qualities', 'steps', 'contours'), sep = "", ...) {
   parts <- matched(parts, c('qualities', 'steps', 'contours', 'accidentals'))
   
-  steps       <- if ('steps' %in% parts)        tint2scaleStep(x, ...)   %dots% (has.prefix('step.') %.% names)
-  qualities   <- if ('qualities' %in% parts)    tint2quality(x, ...)     %dots% (has.prefix('quality.') %.% names)
-  accidentals <- if ('accidentals' %in% parts)  tint2accidental(x, ...)  %dots% (has.prefix('accidental.') %.% names)
-  contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.') %.% names)
+  steps       <- if ('steps' %in% parts)        tint2scaleStep(x, ...)   %dots% (has.prefix('step.|Key$') %.% names)
+  qualities   <- if ('qualities' %in% parts)    tint2quality(x, ...)     %dots% (has.prefix('quality.|Key$') %.% names)
+  accidentals <- if ('accidentals' %in% parts)  tint2accidental(x, ...)  %dots% (has.prefix('accidental.|Key$') %.% names)
+  contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.|Key$') %.% names)
 
   tonalchroma <- pasteordered(parts, steps = steps, qualities = qualities, accidentals = accidentals, contours = contours, sep = sep)
   
@@ -782,6 +791,13 @@ tint2kernPitch <- function(x, ...) {
   octave.kernstyle(simple, octave) %dim% x
 }
 
+tint2romanRoot <- function(x, ...) {
+  overdot(tint2tonalChroma(x, 
+                           step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'), 
+                           contour.labels = FALSE, contour.offset = 4L, 
+                           parts = c('accidentals', 'steps'), ...))
+  
+}
 
 #.... intervals
 
@@ -1370,7 +1386,7 @@ commapart      <- function(tint, enharmonicWrap, Key) UseMethod('commapart')
 enharmonicpart.tonalInterval <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
   Key <- as.diatonicSet(Key)
   
-  modeoffset <- tint( , getMode(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
+  modeoffset <- tint( , getSignature(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
   tint <- tint - modeoffset 
 
   enharmonicbound <- enharmonicWrap %/% 2
@@ -1615,33 +1631,33 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' The arguments to `as.tonalChroma`, derived from the constituent functions (details in the following sections) are:
 #' 
 #' + `as.tonalChroma`:
-#'        + `parts`: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
-#'           Acceptable strings are `"steps"`, `"qualities"`, `"accidentals"`, or `"contours"`.
-#'           ([Partial matches][base::pmatch] matches like `"ste"` or `"s"` for `step` will work too.)
-#'           The output tonal chroma string will have its part concatinated in the order they appear in the `parts` argument.
-#'           For instance, you could put `c('contour', 'step', 'accidental')` to put the contour before the simple interval,
-#'           or put `c('step', 'accidental', 'contour')` to put it after.
-#'             + `sep`: a character string which will be used to separate the elements (the default is `""`).
+#'     + `parts`: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
+#'       Acceptable strings are `"steps"`, `"qualities"`, `"accidentals"`, or `"contours"`.
+#'       ([Partial matches][base::pmatch] matches like `"ste"` or `"s"` for `step` will work too.)
+#'       The output tonal chroma string will have its part concatinated in the order they appear in the `parts` argument.
+#'       For instance, you could put `c('contour', 'step', 'accidental')` to put the contour before the simple interval,
+#'       or put `c('step', 'accidental', 'contour')` to put it after.
+#'     + `sep`: a character string which will be used to separate the elements (the default is `""`).
 #' + from `as.scaleStep` (described below):
-#'        + `step.labels`
+#'     + `step.labels`
 #' + from `as.accidental` (described below):
-#'        + `accidental.labels` 
-#'        + `accidental.maximum` and `accidental.minimum`
-#'        + `accidental.cautionary`
-#'        + `accidental.memory`
-#'        + `Key`
+#'     + `accidental.labels` 
+#'     + `accidental.maximum` and `accidental.minimum`
+#'     + `accidental.cautionary`
+#'     + `accidental.memory`
+#'     + `Key`
 #' + from `as.quality` (described below):
-#'        + `quality.labels` 
-#'        + `quality.maximum` and `quality.minimum`
-#'        + `quality.cautionary`
-#'        + `quality.memory`
-#'        + `Key` 
+#'     + `quality.labels` 
+#'     + `quality.maximum` and `quality.minimum`
+#'     + `quality.cautionary`
+#'     + `quality.memory`
+#'     + `Key` 
 #' + from `as.contour` (described below):
-#'        + `contour.labels`
-#'        + `contour.maximum` and `contour.minimum`
-#'        + `contour.offset` 
-#'        + `contour.round` 
-#'        + `contour.delta` 
+#'     + `contour.labels`
+#'     + `contour.maximum` and `contour.minimum`
+#'     + `contour.offset` 
+#'     + `contour.round` 
+#'     + `contour.delta` 
 #' 
 #' 
 #' ## Scale Steps
@@ -1753,7 +1769,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #'  The interplay between the `Key`, `_.cautionary`, and `_.memory` arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
 #'  Generally, the `Key` argument---if not `NULL`---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
 #'  The `cautionary` argument causes accidentals that would otherwise be suppressed to print---always *adding* accidentals to the output.
-#'  Finally, the `_.memory` argument implents a common practice in music notation where alterations are only printed when the quality of a generic note is different than
+#'  Finally, the `_.memory` argument implements a common practice in music notation where alterations are only printed when the quality of a generic note is different than
 #'  the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them, 
 #'  in which case, both the natural and the two sharps will print.
 #'  Combinations of the `Key`, `_.cautionary` and `_.memory` arguments achieve the following effects:

@@ -2,6 +2,7 @@
 % Please edit documentation in R/humDiatonic.R
 \name{diatonicSet}
 \alias{diatonicSet}
+\alias{dset}
 \alias{order.diatonicSet}
 \alias{as.sciChord}
 \alias{as.chordSymbol}
@@ -14,14 +15,12 @@
 \alias{as.triad}
 \alias{as.triad.tertianSet}
 \alias{as.triad.character}
-\title{\code{diatonicSets} methods for \code{\link[base]{order}} and
-\code{\link[base]{sort}} order/sort along the circle of LO5ths.
-Modes are sorted secondarily from fewest flats to most sharps.
-If \code{parallel = TRUE} all modes are grouped by shared tonics, so
-C minor and C major will appear besides each other.
-If \code{parallel = FALSE} modes/keys are sorted together by number of accidentals,
-so C minor and Eb major will be sorted next to each other.}
+\title{The basic constructor for \code{diatonicSet}s.
+The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}}, or a character string which will be coerced to a
+\code{tonalInterval}.}
 \usage{
+dset(root = 0L, signature = root, alterations = 0L)
+
 \S4method{as.character}{diatonicSet}(x)
 
 \S4method{as.character}{tertianSet}(x)
@@ -40,8 +39,6 @@ order.diatonicSet(
 \S4method{==}{tertianSet,tertianSet}(e1, e2)
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
-
-\S4method{Compare}{tertianSet,tertianSet}(e1, e2)
 
 as.sciChord(tharm)
 

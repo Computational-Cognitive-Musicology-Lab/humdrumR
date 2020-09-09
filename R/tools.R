@@ -1174,7 +1174,8 @@ matched <- function(x, table) table[pmatch(x, table)]
 }
 
 has.prefix <- function(prefix, x) {
-    prefix <- paste0('^', prefix)
+    prefix <- strsplit(prefix, split = '\\|')
+    prefix <- sapply(prefix, function(pre) paste(paste0('^', pre), collapse = '|'))
     
     if (missing(x))  function(x) grepl(prefix, x) else grepl(prefix, x)
 }

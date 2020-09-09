@@ -2,20 +2,7 @@
 % Please edit documentation in R/humRhythm.R
 \name{humRhythm}
 \alias{humRhythm}
-\alias{as.fraction.character}
-\alias{as.recip.character}
-\alias{as.decimal.character}
-\alias{as.notevalue.character}
 \title{Rhythm translations}
-\usage{
-\method{as.fraction}{character}(...)
-
-\method{as.recip}{character}(...)
-
-\method{as.decimal}{character}(...)
-
-\method{as.notevalue}{character}(...)
-}
 \description{
 These functions translate various rhythm representations
 between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
