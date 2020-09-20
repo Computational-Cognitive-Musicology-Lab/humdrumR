@@ -16,8 +16,8 @@
 \alias{as.triad.tertianSet}
 \alias{as.triad.character}
 \title{The basic constructor for \code{diatonicSet}s.
-The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}}, or a character string which will be coerced to a
-\code{tonalInterval}.}
+The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
+or a character string which will be coerced to a \code{tonalInterval}.}
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)
 

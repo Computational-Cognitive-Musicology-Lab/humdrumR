@@ -9,6 +9,29 @@
 types of tonal data, representing Western tertian harmonies.
 \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, \code{struct}).
 }
+\details{
+The only structural addition, compared to \code{diatonicSet}, is the \code{Thirds} slot.
+This slot indicates which tertian chord members are active in the chord.
+Since the root is always assumed, there are six other possible chord members:
+the third, fifth, seventh, ninth, eleventh, and thirteenth.
+Every possible combination of these six degrees is represented by a single integer, corresponding
+to the 6-bit representation of on/offs on the six degrees in reverse order (13, 11, 9, 7, 5, 3).
+For example, the integer \code{7} corresponds to a seventh chord: in binary, 7 is \code{000111}.
+The initial three zeros indicate that the 13th, 11th, and 9th are \emph{not} part of the harmony, while the three ones
+indicate that the third fifth and seventh \emph{are} part of the harmony.
+Ultimately, adding or removing a chord degree from a harmony can be achieved by adding the power of
+two associated with that degree:
+\itemize{
+\item \strong{Third}: $\pm 1$
+\item \strong{Fifth}: $\pm 2$
+\item \strong{Seventh}: $\pm 4$
+\item \strong{Ninth}: $\pm 8$
+\item \strong{Eleventh}: $\pm 16$
+\item \strong{Thirteenth}: $\pm 32$
+}
+
+\code{tertianSet} has many specific methods defined for reading/writing harmonic information.
+}
 \seealso{
 diatonicSet humTonality
 }

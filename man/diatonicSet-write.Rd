@@ -2,12 +2,9 @@
 % Please edit documentation in R/humDiatonic.R
 \name{diatonicSet-write}
 \alias{diatonicSet-write}
-\alias{as.keyI}
 \alias{as.tonalChroma.diatonicSet}
 \title{Roman Numeral}
 \usage{
-as.keyI(dset, alteration.labels = c())
-
 \method{as.tonalChroma}{diatonicSet}(x, accidental.labels = c(flat = "b"))
 }
 \description{

@@ -11,6 +11,8 @@
 #' `diatonicSet`` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 #' types of tonal data, representing Western diatonic keys.
 #' For the most part, users should not need to interact with `diatonicSet`s directly---rather, `diatonicSet`s work behind the scene in numerous `humdrumR` pitch functions.
+#' See the [keyRepresentations] and [keyTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
+#' a detailed explanation of the theory and specifics of `diatonicSet`s.
 #' 
 #' @details
 #' 
@@ -68,7 +70,7 @@
 #' 
 #' 
 #' 
-#' @section Arithmetic:
+#' @section Arithmatic:
 #' 
 #' Arithmetic between `diatonicSet`s is not defined.
 #' However, a number of useful arithmetic operations between `diatonicSet`s and other data types *are* defined:
@@ -117,6 +119,26 @@ setClass('diatonicSet',
 #' types of tonal data, representing Western tertian harmonies.
 #' \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, `struct`).
 #' 
+#' The only structural addition, compared to `diatonicSet`, is the `Thirds` slot.
+#' This slot indicates which tertian chord members are active in the chord.
+#' Since the root is always assumed, there are six other possible chord members: 
+#' the third, fifth, seventh, ninth, eleventh, and thirteenth.
+#' Every possible combination of these six degrees is represented by a single integer, corresponding
+#' to the 6-bit representation of on/offs on the six degrees in reverse order (13, 11, 9, 7, 5, 3).
+#' For example, the integer `7` corresponds to a seventh chord: in binary, 7 is `000111`.
+#' The initial three zeros indicate that the 13th, 11th, and 9th are *not* part of the harmony, while the three ones
+#' indicate that the third fifth and seventh *are* part of the harmony.
+#' Ultimately, adding or removing a chord degree from a harmony can be achieved by adding the power of
+#' two associated with that degree: 
+#' 
+#' + **Third**: $\pm 1$
+#' + **Fifth**: $\pm 2$
+#' + **Seventh**: $\pm 4$
+#' + **Ninth**: $\pm 8$
+#' + **Eleventh**: $\pm 16$
+#' + **Thirteenth**: $\pm 32$
+#' 
+#' `tertianSet` has many specific methods defined for reading/writing harmonic information.
 #' 
 #' 
 #' @seealso diatonicSet humTonality
@@ -125,13 +147,16 @@ setClass('tertianSet',
          contains = 'diatonicSet',
          slots = c(Thirds = 'integer'))
 
-
+setValidity('tertianSet', 
+            function(object) {
+                all(object@Thirds <= 2^6)
+            })
 
 ##...constructors ####
 
 #' The basic constructor for \code{diatonicSet}s.
-#' The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}}, or a character string which will be coerced to a 
-#' `tonalInterval`.
+#' The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}}, 
+#' or a character string which will be coerced to a `tonalInterval`.
 #' @name diatonicSet
 #' @export
 dset <- function(root = 0L, signature = root, alterations = 0L) {
@@ -148,7 +173,7 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 #' @name humDiatonic
 #' @export
-tset <- function(root = 0L, signature = 1L, alterations = 0L, cardinality = 3L) {
+tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
     root <- .ifelse(cardinality == 0L, NA_integer_, root)
@@ -163,13 +188,6 @@ tset <- function(root = 0L, signature = 1L, alterations = 0L, cardinality = 3L) 
 
 ##...accessors ####
 
-setMethod("LOF", "diatonicSet",
-          function(x, sum = TRUE) {
-              lof <- x@Root %dim% x
-              
-              if (hasdim(lof) && sum) rowSums(lof) else lof
-              
-          })
 
 getRoot <- function(dset, sum = TRUE) {
     root <- dset@Root %dim% dset
@@ -190,6 +208,13 @@ getSignature <- function(dset, sum = TRUE) {
     
 }
 
+getMode <- function(dset, sum = TRUE) {
+    # mode is sign - root (the signature RELATIVE to the root)
+    root <- getRoot(dset, sum = sum)
+    sign <- getSignature(dset, sum = sum)
+    sign - root
+}
+
 getAlterations <- function(dset, sum = TRUE) {
     alter <- dset@Alteration %dim% dset
     
@@ -197,9 +222,13 @@ getAlterations <- function(dset, sum = TRUE) {
     
 }
 
-getThirds <- function(tset) cbind(TRUE, ints2bits(tset@Thirds))
+getThirds <- function(tset) {
+    if (hasdim(tset)) tset <- tset[ , ncol(tset)]
+    
+    cbind(TRUE, ints2bits(tset@Thirds))
+}
 
-# thirds coded as ints:
+##### how to code/decode chord degrees as integers:
 
 ints2bits <- function(n, nbits = 6) {
     mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
@@ -228,7 +257,7 @@ is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('diatonicSet'), function(x) as.keyI(x))
+setMethod('as.character', signature = c('diatonicSet'), function(x) dset2keyI(x))
 
 #' @name diatonicSet
 #' @export
@@ -396,23 +425,24 @@ LO5th2mode <- function(LO5th, short = FALSE) {
 
 ###. x to line-of-fifths ####
 
-dset2LO5ths <- function(dset, step = 2L) UseMethod("dset2LO5ths")
 
-dset2LO5ths.diatonicSet <- function(dset, step = 2L) {
-    # the step argument controls the order the LO5ths are output
-    # step = 2L means every two LO5ths (which is generic steps)
-    # step = 4L means thirds, which makes tertian harmonies
-    root <- dset@Root
-    mode <- dset@Signature
+setMethod('LO5th', 'diatonicSet',
+          function(x, steporder = 2L ) {
+    # the steporder argument controls the order the LO5ths are output
+    # steporder = 2L means every two LO5ths (which is generic steps)
+    # steporder = 4L means thirds, which makes tertian harmonies
+    dset <- x
+    root <- getRoot(dset, sum = FALSE)
+    sign <- getSignature(dset, sum = FALSE)
     
-    notna <- !is.na(mode) & !is.na(root)
+    notna <- !is.na(sign) & !is.na(root)
     
     ## Generate scale structure
-    sq <- seq(0L, by = as.integer(step), length.out = 7L)
+    sq <- seq(0L, by = as.integer(steporder), length.out = 7L)
     LO5ths <- matrix(sq, nrow = length(root), ncol = 7L, byrow = TRUE)
     LO5ths[!notna, ] <- NA_integer_
     LO5ths <- sweep(LO5ths, 1L, root, `+`)
-    LO5ths <- sweep(LO5ths, 1L, mode,
+    LO5ths <- sweep(LO5ths, 1L, sign,
                     function(row, m) {
                       (row + 1L - m) %% 7L - 1L + m  # + 1L and - 1L because F is -1
                     })
@@ -427,25 +457,7 @@ dset2LO5ths.diatonicSet <- function(dset, step = 2L) {
     colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
     
     LO5ths
-}
-
-dset2LO5ths.tertianSet <- function(tset) {
-    alterations <- tset@Alteration
-    
-    LO5ths <- dset2LO5ths.diatonicSet(tset, step = 4L)
-    thirds <- getThirds(tset)
-    
-    
-    LO5ths <- LO5ths * thirds
-    LO5ths[!thirds] <- NA_integer_
-    
-    # if (any(alterations != 0L)) LO5ths <- sweep(LO5ths, 1, alterations, alterFifthSet)
-    
-    colnames(LO5ths)[5:7] <- nth(c(9,11,13))
-    rownames(LO5ths) <- LO5th2lettername(tset@Root)
-    
-    LO5ths
-}
+})
 
 
 alterLO5ths <- function(LO5ths, alt) {
@@ -459,7 +471,7 @@ alterLO5ths <- function(LO5ths, alt) {
     altmat <- matrix(alt, nrow = length(alt), ncol = 7L)
     LO5ths[ord == 2L & altmat > 0L] <- LO5ths[ord == 2L & alt > 0L] + 7L
     LO5ths[ord == 6L & altmat < 0L] <- LO5ths[ord == 6L & alt < 0L] - 7L
-
+    
     
     # recurse if necessary
     alt <- alt - sign(alt)
@@ -470,10 +482,33 @@ alterLO5ths <- function(LO5ths, alt) {
     
     LO5ths[, 1] <- roots
     LO5ths
-
+    
 }
 
+setMethod('LO5th', 'tertianSet',
+         function(x) {
+    tset <- x
+    # alterations <- getAlterations(tset, sum = TRUE)
     
+    LO5ths <- callNextMethod(tset, step = 4L)
+    thirds <- getThirds(tset)
+    
+    
+    LO5ths <- LO5ths * thirds
+    LO5ths[!thirds] <- NA_integer_
+    
+    # if (any(alterations != 0L)) LO5ths <- sweep(LO5ths, 1, alterations, alterFifthSet)
+    
+    colnames(LO5ths)[5:7] <- nth(c(9,11,13))
+    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(tset, sum = TRUE)), 
+                                         step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                                         parts = c('steps', 'accidentals'))
+    
+    LO5ths
+})
+
+
+##### To/From diatonicSets ####    
 ###. dset to pitches ####
 
 
@@ -502,22 +537,27 @@ dset2semit      <- dset2pitcher(tint2semit)
 dset2midi       <- dset2pitcher(tint2midi)
 dset2kernPitch  <- dset2pitcher(tint2kernPitch)
 
+dset2tints <- function(dset, steporder = 2L) {
+    LO5ths <- LO5th(dset, steporder = steporder)
+    tints <- tint( , LO5ths)
+    tints %dim% LO5ths
+}
 
 
 ####. dset to x ####
 
 dset2signature <- function(dset) {
-    LO5ths <- dset2LO5ths(dset)
+    LO5ths <- LO5th(dset)
+    LO5ths[] <- apply(LO5ths, 1, sort)
+    tints <- tint( , LO5ths) %dim% LO5ths
     
-    notes <- apply(LO5ths, 1, 
-                   function(f) {
-                       f <- f[!is.na(f)]
-                       flats  <- f[f < -1]
-                       sharps <- f[f > 5]
-                       accidentals <- c(sort(flats,  decreasing = TRUE),
-                                        sort(sharps, decreasing = TRUE))
-                       paste(tolower(LO5th2scaleStep(accidentals)), collapse = "")
-                       })
+    notes <- as.tonalChroma(tints, parts = c('steps', 'accidentals'),
+                   accidental.labels = c(flat = '-'),
+                   step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'))
+    
+    notes[LO5ths <= 5L & LO5ths >= -1L] <- ""
+    
+    notes <- apply(notes, 1, paste, collapse = '')
         
     .paste("*k[", notes, ']')
 }
@@ -600,15 +640,15 @@ tset2romanNumeral <- function(tset, cautionary = FALSE) {
 }
 
 
-##### As kern key interpretation (i.e., *G:, *eb-:)
 
-#' @name diatonicSet-write
-#' @export
-as.keyI <- function(dset, alteration.labels = c()) {
-    root <- LO5th2scaleStep(dset@Root)
-    mode <- dset@Signature - dset@Root
-        
-    root[mode < -1] <- tolower(root[mode < -1L])
+
+
+dset2keyI <- function(dset, alteration.labels = c()) {
+    ## As kern key interpretation (i.e., *G:, *e-:)
+    
+    root <- tint2kernPitch(tint( , getRoot(dset, sum = TRUE)))
+    mode <- getMode(dset, sum = TRUE)
+    root[mode > -2L] <- toupper(root[mode > -2L])
     
     modelab <- ifelse(mode == 0L | mode == -3L,
                       "",
@@ -616,10 +656,10 @@ as.keyI <- function(dset, alteration.labels = c()) {
     
     #
     setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
-    alterations <- dset@Alteration
-    alterations <- IfElse(alterations > 0,
-                          strrep(alteration.labels['augment'] , abs(alterations)),
-                          strrep(alteration.labels['diminish'], abs(alterations)))
+    alterations <- getAlterations(dset, sum = TRUE)
+    alterations <- .ifelse(alterations > 0,
+                           strrep(alteration.labels['augment'] , abs(alterations)),
+                           strrep(alteration.labels['diminish'], abs(alterations)))
     
     
     .paste("*", root, ":", modelab, alterations)

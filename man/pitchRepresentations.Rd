@@ -260,33 +260,43 @@ The functions\code{as.kernPitch}, \code{as.sciPitch}, \code{as.lilyPitch}, and \
 The arguments to \code{as.tonalChroma}, derived from the constituent functions (details in the following sections) are:
 \itemize{
 \item \code{as.tonalChroma}:
-+ \code{parts}: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
+\itemize{
+\item \code{parts}: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
 Acceptable strings are \code{"steps"}, \code{"qualities"}, \code{"accidentals"}, or \code{"contours"}.
 (\link[base:pmatch]{Partial matches} matches like \code{"ste"} or \code{"s"} for \code{step} will work too.)
 The output tonal chroma string will have its part concatinated in the order they appear in the \code{parts} argument.
 For instance, you could put \code{c('contour', 'step', 'accidental')} to put the contour before the simple interval,
 or put \code{c('step', 'accidental', 'contour')} to put it after.
-+ \code{sep}: a character string which will be used to separate the elements (the default is \code{""}).
+\item \code{sep}: a character string which will be used to separate the elements (the default is \code{""}).
+}
 \item from \code{as.scaleStep} (described below):
-+ \code{step.labels}
+\itemize{
+\item \code{step.labels}
+}
 \item from \code{as.accidental} (described below):
-+ \code{accidental.labels}
-+ \code{accidental.maximum} and \code{accidental.minimum}
-+ \code{accidental.cautionary}
-+ \code{accidental.memory}
-+ \code{Key}
+\itemize{
+\item \code{accidental.labels}
+\item \code{accidental.maximum} and \code{accidental.minimum}
+\item \code{accidental.cautionary}
+\item \code{accidental.memory}
+\item \code{Key}
+}
 \item from \code{as.quality} (described below):
-+ \code{quality.labels}
-+ \code{quality.maximum} and \code{quality.minimum}
-+ \code{quality.cautionary}
-+ \code{quality.memory}
-+ \code{Key}
+\itemize{
+\item \code{quality.labels}
+\item \code{quality.maximum} and \code{quality.minimum}
+\item \code{quality.cautionary}
+\item \code{quality.memory}
+\item \code{Key}
+}
 \item from \code{as.contour} (described below):
-+ \code{contour.labels}
-+ \code{contour.maximum} and \code{contour.minimum}
-+ \code{contour.offset}
-+ \code{contour.round}
-+ \code{contour.delta}
+\itemize{
+\item \code{contour.labels}
+\item \code{contour.maximum} and \code{contour.minimum}
+\item \code{contour.offset}
+\item \code{contour.round}
+\item \code{contour.delta}
+}
 }
 }
 
@@ -413,7 +423,7 @@ For example, you could write \code{as.tonalChroma(x, accidental.maximum = 1)}.
 The interplay between the \code{Key}, \verb{_.cautionary}, and \verb{_.memory} arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
 Generally, the \code{Key} argument---if not \code{NULL}---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
 The \code{cautionary} argument causes accidentals that would otherwise be suppressed to print---always \emph{adding} accidentals to the output.
-Finally, the \verb{_.memory} argument implents a common practice in music notation where alterations are only printed when the quality of a generic note is different than
+Finally, the \verb{_.memory} argument implements a common practice in music notation where alterations are only printed when the quality of a generic note is different than
 the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them,
 in which case, both the natural and the two sharps will print.
 Combinations of the \code{Key}, \verb{_.cautionary} and \verb{_.memory} arguments achieve the following effects:
@@ -448,63 +458,45 @@ The following tables illustrate the behaviors of the accidental/quality argument
 In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
 Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
 \verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
-\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e   
-NFF  a-   a    b-   a    b-   a-   e   
-NFT  a-   an   b-   a    b    a-   e   
-NTF  a-   an   b-   an   b-   a-   en  
-NTT  a-   an   b-   a    b    a-   en  
-AbFF a    an   b    an   b    a    en  
-AbFT a-   an   b-   a    b    a-   en  
-AbTF a-   an   b-   an   b-   a-   en  
-AbTT a-   an   b-   a    b-   a-   en  
-     f    f#   e-   g-   f    b    c   
-NFF  f    f#   e-   g-   f    b    c   
-NFT  f    f#   e-   g-   fn   bn   c   
-NTF  fn   f#   e-   g-   fn   bn   cn  
-NTT  fn   f#   e-   g-   fn   bn   cn  
-AbFF f    f#   e    g-   f    bn   c   
-AbFT fn   f#   e-   g-   fn   bn   cn  
-AbTF fn   f#   e-   g-   fn   bn   c   
-AbTT fn   f#   e-   g-   fn   bn   cn  
-     d-   b-   e-   b-   a-  
-NFF  d-   b-   e-   b-   a-  
-NFT  d-   b-   e    b    a   
-NTF  d-   b-   e-   b-   a-  
-NTT  d-   b-   e    b    a   
-AbFF d    b    e    b    a   
-AbFT d-   b-   e    b    a   
-AbTF d    b-   e-   b-   a-  
-AbTT d-   b-   e-   b-   a-  
+\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-  
+NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-  
+NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c    d-   b-  
+NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-  
+NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-  
+AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c    d    b   
+AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-  
+AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c    d    b-  
+AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-  
+     e-   b-   a-  
+NFF  e-   b-   a-  
+NFT  e    b    a   
+NTF  e-   b-   a-  
+NTT  e    b    a   
+AbFF e    b    a   
+AbFT e    b    a   
+AbTF e-   b-   a-  
+AbTT e-   b-   a-  
 }
 }
 
-\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e   
-NFF  m6   6    m7   6    m7   m6   3   
-NFT  m6   M6   m7   6    7    m6   3   
-NTF  m6   M6   m7   M6   m7   m6   M3  
-NTT  m6   M6   m7   6    7    m6   M3  
-AbFF 6    M6   7    M6   7    6    M3  
-AbFT m6   M6   m7   6    7    m6   M3  
-AbTF m6   M6   m7   M6   m7   m6   M3  
-AbTT m6   M6   m7   6    m7   m6   M3  
-     f    f#   e-   g-   f    b    c   
-NFF  4    A4   m3   d5   4    7    1   
-NFT  4    A4   m3   d5   P4   M7   1   
-NTF  P4   A4   m3   d5   P4   M7   P1  
-NTT  P4   A4   m3   d5   P4   M7   P1  
-AbFF 4    A4   3    d5   4    M7   1   
-AbFT P4   A4   m3   d5   P4   M7   P1  
-AbTF P4   A4   m3   d5   P4   M7   1   
-AbTT P4   A4   m3   d5   P4   M7   P1  
-     d-   b-   e-   b-   a-  
-NFF  m2   m7   m3   m7   m6  
-NFT  m2   m7   3    7    6   
-NTF  m2   m7   m3   m7   m6  
-NTT  m2   m7   3    7    6   
-AbFF 2    7    3    7    6   
-AbFT m2   m7   3    7    6   
-AbTF 2    m7   m3   m7   m6  
-AbTT m2   m7   m3   m7   m6  
+\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-  
+NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1    m2   m7  
+NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1    m2   m7  
+NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7  
+NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7  
+AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1    2    7   
+AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7  
+AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1    2    m7  
+AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7  
+     e-   b-   a-  
+NFF  m3   m7   m6  
+NFT  3    7    6   
+NTF  m3   m7   m6  
+NTT  3    7    6   
+AbFF 3    7    6   
+AbFT 3    7    6   
+AbTF m3   m7   m6  
+AbTT m3   m7   m6  
 }
 }
 

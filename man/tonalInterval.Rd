@@ -41,7 +41,7 @@ Thus, if you return a \code{tonalInterval} on the command line (or call \link[ba
 \item{\code{Cent}}{numeric values representing cents (1200th of an octave).}
 }}
 
-\section{Arithmetic}{
+\section{Arithmatic}{
 
 
 Technically, \code{tonalInterval}s are examples of algebraic \href{https://en.wikipedia.org/wiki/Module_(mathematics)}{modules over integers}.

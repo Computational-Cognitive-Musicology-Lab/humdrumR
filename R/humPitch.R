@@ -62,7 +62,7 @@ NULL
 #' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
 #' 
-#' @section Arithmetic:
+#' @section Arithmatic:
 #' 
 #' Technically, `tonalInterval`s are examples of algebraic [modules over integers](https://en.wikipedia.org/wiki/Module_(mathematics)).
 #' This means that certain arithmetic operations are defined for `tonalIntervals` and can be called using standard arithmetic operators (`+`, `-`, etc.):
@@ -200,21 +200,6 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 }
 
 ##...accessors ####
-
-#' @export
-setGeneric("LOF", function(x, sum = FALSE) standardGeneric("LOF"))
-setMethod("LOF", "tonalInterval",
-          function(x, sum = FALSE) {
-            lof <- x@Fifth %dim% x
-            
-            if (hasdim(lof) && sum) rowSums(lof) else lof
-            
-          })
-setMethod('LOF', 'ANY',
-          function(x, sum = FALSE) {
-            x <- as(x, 'tonalInterval')
-            LOF(x, sum)
-          })
 
 
 
@@ -563,6 +548,24 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 
 ###. x to line-of-fifths ####
+
+
+#' @export
+setGeneric("LO5th", function(x, sum = FALSE, ...) standardGeneric("LO5th"))
+setMethod("LO5th", "tonalInterval",
+          function(x, sum = FALSE) {
+            lof <- x@Fifth %dim% x
+            
+            if (hasdim(lof) && sum) rowSums(lof) else lof
+            
+          })
+setMethod('LO5th', 'ANY',
+          function(x, sum = FALSE) {
+            x <- as(x, 'tonalInterval')
+            LO5th(x, sum)
+          })
+
+
 
 genericinterval2LO5th   <- function(ints) {
   ints[ints ==  0L] <- NA
