@@ -11,26 +11,27 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
-         humCompose.R
-         humBase.R
-         humClass.R
-         humSummary.R
-         humRead.R
-         humWrite.R
-         humApply.R
-         humFilter.R
-         humWindows.R
-         humPiping.R
-         humPlot.R
-         humInterpretations.R
-         humRegex.R
-         humValidation.R
-         humVector.R
-         humPitch.R
-         humRhythm.R
-         humDiatonic.R
-         humMetric.R
-         humGraphics.R
+         Compose.R
+         Base.R
+         humdrumR-class.R
+         Summary.R
+         Read.R
+         Write.R
+         Apply.R
+         Filter.R
+         Windows.R
+         Piping.R
+         Plot.R
+         Interpretations.R
+         Regex.R
+         Validation.R
+         Vector.R
+         tonalInterval.R
+         rhythmInterval.R
+         diatonicSet.R
+         tertianSet.R
+         Metric.R
+         Graphics.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 

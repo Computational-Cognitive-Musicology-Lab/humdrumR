@@ -1,6 +1,10 @@
-#######################################-
-##################rhythmInterval S4 class ####
-#######################################-
+###################################
+###### rhythmInterval S4 class ####
+###################################
+
+##### class methods ####
+
+####. definition, validity, initialization ####
 
 #' Representation of rhythmic information
 #' 
@@ -88,7 +92,7 @@ setMethod('initialize', 'rhythmInterval',
             
           })
 
-######rhythmInterval constructor ####
+##...constructors ####
 
 
 #' The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
@@ -103,13 +107,13 @@ rint <- function(denominator, numerator = 1L) {
         Numerator = as.integer(numerator))
 }
 
-
-
-######rhythmInterval vector (and other core) methods ####
+##...accessors ####
 
 
 
-####Indexing ####
+####. vector/core methods ####
+
+
 
 #' @name rhythmInterval
 #' @export
@@ -121,9 +125,21 @@ is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 setMethod('is.numeric', signature = c('rhythmInterval'),
           function(x) { TRUE })
 
+###.. formatting methods ####
+
+#' @name rhythmInterval
+#' @export
+setMethod('as.character', c(x = 'rhythmInterval'), function(x) as.recip(x))
+
+#' @name rhythmInterval
+#' @export
+as.double.rhythmInterval <-  function(x) as.decimal(x)
 
 
-######rhythmInterval order/relations methods ####
+####. logic methods ####
+
+###.. order/relations methods ####
+
 
 #' @name rhythmInterval
 #' @export
@@ -151,23 +167,9 @@ setMethod('Summary', signature = c('rhythmInterval'),
               read.numeric2rhythmInterval(callGeneric(as.double(x)))
           })
 
+###.. arithmetic methods ####
 
-######rhythminterval formatting methods ####
-
-#' @name rhythmInterval
-#' @export
-setMethod('as.character', c(x = 'rhythmInterval'), function(x) as.recip(x))
-
-#' @name rhythmInterval
-#' @export
-as.double.rhythmInterval <-  function(x) as.decimal(x)
-
-
-
-######rhythmInterval arithmetic methods ####
-
-
-####Addition
+##... addition ####
 
 #' @export
 setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
@@ -194,14 +196,14 @@ setMethod('Math', signature = c(x = 'rhythmInterval'),
 
 # 
 
-####Subtraction
+##... subtraction ####
 
 #' @export
 setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
           function(e1) {
               e1@Numerator <- e1@Numerator * -1L
-              e1
           })
+              e1
 
 
 
@@ -213,7 +215,8 @@ setMethod('diff', signature = c('rhythmInterval'),
             as.rhythmInterval(diff(as.double(x), na.rm = na.rm))
           })
 
-####Multiplication
+##... multiplication ####
+
 
 #' @export
 setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
@@ -243,8 +246,8 @@ setMethod('*', signature = c(e1 = 'numeric', e2 = 'rhythmInterval'),
               e2 * e1
           })
 
+##...division/modulo  ####
 
-####Division and modulo
 #' @export
 setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
           function(e1, e2) {

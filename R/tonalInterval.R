@@ -1,39 +1,10 @@
+##################################
+###### tonalInterval S4 class ####
+##################################
 
-#' humdrumR and pitch
-#' 
-#' [humdrumR][humdrumR::humdrumR] includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
-#' 
-#' @section Tonality:
-#' 
-#' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
-#' 
-#' + [integers][base::integer] --- used to encode "[line-of-fifths]" tonal information
-#' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
-#' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
-#' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
-#' 
-#' 
-#' For a detailed explanation of the theory and specifics of `humdrumR`'s treatment of tonality, see the *Tonality in humdrumR* vignette.
-#' 
-#' @section Atonality:
-#' 
-#' **THIS SECTION IS INCOMPLETE**
-#' 
-#' In addition, there are xxx data types used to encode non-tonal (or [atonal](https://en.wikipedia.org/wiki/Atonality)) pitch information.
-#' 
-#' + [integers][base::integer] --- used to encode [semitones](https://en.wikipedia.org/wiki/Semitone) (as well as [MIDI](https://en.wikipedia.org/wiki/MIDI) numbers).
-#' + [xxx][xxx] --- sets?
-#' + [xxx][xxx] --- 12-tone rows?
-#' 
-#' @name humdrumPitch
-NULL
+##### class methods ####
 
-
-#####tonalInterval S4 class ####
-
-####.class methods ####
-
-###..definition, validity, initialization ####
+####. definition, validity, initialization ####
 
 #' Representation of tonal pitch information
 #' 
@@ -203,7 +174,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 
 
 
-###..vector/core methods ####
+####. vector/core methods ####
 
 
 #' @name tonalInterval
@@ -211,7 +182,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 
-###..formatting methods ####
+###.. formatting methods ####
 
 setMethod('as.character', signature = c('tonalInterval'), 
           function(x) as.kernPitch(x))
@@ -220,9 +191,9 @@ setMethod('as.numeric', signature = c('tonalInterval'),
           function(x) tint2decimal(x))
 
 
-####.logic methods ####
+####. logic methods ####
 
-###..order/relations methods ####
+###.. order/relations methods ####
 
 #' @export order.tonalInterval
 #' @exportMethod > >= < <= Summary abs sign
@@ -265,9 +236,9 @@ setMethod('sign', signature = c('tonalInterval'),
 
 
 
-###..arithmetic methods ####
+###.. arithmetic methods ####
 
-##...addition ####
+##... addition ####
 
  
 
@@ -292,7 +263,7 @@ setMethod('+', signature = c('tonalInterval', 'character'),
 
 
 
-##...subtraction ####
+##... subtraction ####
 
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
@@ -312,7 +283,7 @@ setMethod('-', signature = c('tonalInterval', 'character'),
           })
 
 
-##...division/modulo  ####
+##... division/modulo  ####
 
  
 setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
@@ -391,7 +362,7 @@ genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 
 ###. line-of-fifths to x ####
 
-##... line-of-fifths to tonalChroma ----
+##... line-of-fifths to tonalChroma ####
 
 LO5th2scaleStep <- function(LO5th, step.labels = 1L:7L, ...) {
   step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
@@ -2068,7 +2039,6 @@ as.frequency     <- pitchgeneric("as.frequency", alist(frequency.reference = , f
 as.contour       <- pitchgeneric("as.contour"  , endargs = alist(contour.labels = ))
 
 
-### some generics get a few extra arguments
 
 
 ####. methods ####
@@ -2258,7 +2228,7 @@ as.contour.character     <- re.place %.% tint2contour     %.% as.tonalInterval.c
 
 
 
-#### Tonal transform methods ----
+##### Tonal transform methods ####
 
 #' @export
 invert.character <- re.place %.% re.as %.% invert.tonalInterval %.% as.tonalInterval.character
@@ -2291,7 +2261,8 @@ transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.t
 
 
 
-############# Known tonalIntervals ####
+##### Predefined tonalIntervals ####
+
 #' @name tonalInterval
 #' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 m8 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
 #' @export d1 d2 AA2 M3 P4 P5 m6 dd7 A7 P8 d9 AA9 M10 P11 P12 m13 dd14 A14 A15
@@ -2300,6 +2271,7 @@ transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.t
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
 #' @export unison pythagorean.comma octave
 NULL
+
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
 allints[as.matrix(expand.grid(c(3,5), c(1,4,5,11,12,15)))] <- NA
 allints <- c(allints)

@@ -47,3 +47,35 @@ humdrumRroot <- system.file(package = 'humdrumR')
 
 
 setOldClass('quosure')
+
+####### Pitch  ----
+
+
+#' humdrumR and pitch
+#' 
+#' [humdrumR][humdrumR::humdrumR] includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
+#' 
+#' @section Tonality:
+#' 
+#' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
+#' 
+#' + [integers][base::integer] --- used to encode "[line-of-fifths]" tonal information
+#' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
+#' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
+#' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
+#' 
+#' 
+#' For a detailed explanation of the theory and specifics of `humdrumR`'s treatment of tonality, see the *Tonality in humdrumR* vignette.
+#' 
+#' @section Atonality:
+#' 
+#' **THIS SECTION IS INCOMPLETE**
+#' 
+#' In addition, there are xxx data types used to encode non-tonal (or [atonal](https://en.wikipedia.org/wiki/Atonality)) pitch information.
+#' 
+#' + [integers][base::integer] --- used to encode [semitones](https://en.wikipedia.org/wiki/Semitone) (as well as [MIDI](https://en.wikipedia.org/wiki/MIDI) numbers).
+#' + [xxx][xxx] --- sets?
+#' + [xxx][xxx] --- 12-tone rows?
+#' 
+#' @name humdrumPitch
+NULL
