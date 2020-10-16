@@ -463,6 +463,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'numeric'),
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
 function(x, i) {
     # gets any record which contains match
+    x <- filterHumdrum(x, do ~ any(. %~% i), by ~ File,
+                       recordtypes ~ "D", indexGLIM = TRUE)
+  
     filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Record,
                   recordtypes ~ "D", indexGLIM = TRUE)
 })
@@ -515,12 +518,12 @@ setMethod('[[',
           definition = function(x, i, j, k, ...) {
               if (missing(k)) return(x)
               
-              if (!rlang::is_formula(k) || is.character(k))  {
+              if (!(rlang::is_formula(k) || is.character(k)))  {
                   stop('When indexing humdrumR objects using [[]], third argument (k) must be a formula or character string.')
               }
               
               if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %~% k)
+                  x <- filterHumdrum(x, do ~ . %~% k, indexGLIM = TRUE)
               }
               if (rlang::is_formula(k)) {
                   x <- do.call('filterHumdrum', c(x, k, 

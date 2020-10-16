@@ -942,7 +942,7 @@ is.givenCall <- function(expr, call) {
     
 }
 
-wrapInCall <- function(x, call, ...) {
+wrapInCall <- function(call, x, ...) {
     isquo  <- rlang::is_quosure(x)
     isform <- rlang::is_formula(x)
     
