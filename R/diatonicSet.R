@@ -360,7 +360,7 @@ setMethod('LO5th', 'diatonicSet',
     #
     LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
     
-    rownames(LO5ths) <- as.keyI(dset)
+    rownames(LO5ths) <- dset2keyI(dset)
     colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
     
     LO5ths
@@ -393,10 +393,9 @@ alterLO5ths <- function(LO5ths, alt) {
 }
 
 
-##### To/From diatonicSets ####    
+##### To/From pitch representations ####    
+
 ###. dset to pitches ####
-
-
 
 dset2pitcher <- function(pitch.func) {
     pitch.func <- rlang::enexpr(pitch.func)
@@ -428,8 +427,11 @@ dset2tints <- function(dset, steporder = 2L) {
     tints %dim% LO5ths
 }
 
+##### To/From diatonic sets ####  
 
 ####. dset to x ####
+
+###.. key signatures
 
 dset2signature <- function(dset) {
     LO5ths <- LO5th(dset)
@@ -448,45 +450,7 @@ dset2signature <- function(dset) {
 }
 
 
-
-
-#' Roman Numeral
-#' 
-#' Roman numerals can be calculated for diatonicSets (keys) and 
-#' for tertian sets (chords).
-#' The later case is the standard meaning of "roman numeral."
-#' However, the former case is used as well, for instance
-#'  to represent modulation schemes in 
-#' analyses of classical music. For instance, modulate from I-V,
-#' the to vi/V.
-#' More importantly, many "roman numerals" in harmonic analyses
-#' implicitely combine tertian and diatonic roman numerals:
-#' in "applied" roman numerals.
-#' Given a roman numeral like "V65/V", the "V65" represents a
-#' chord while the "/V" represents a key.
-#'
-#' @name diatonicSet-write
-NULL
-
-dset2romanNumeral <- function(dset) {
-    root <- getRoot(dset, sum = FALSE)
-    mode <- getSignature(dset, sum = FALSE) - root
-    
-    cummode <- applyrows(mode, rev %.% cumsum %.% rev)
-    numeral <- modelab <- array("", dim = dim(mode))
-    numeral[] <- LO5th2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
-    
-    
-    numeral[mode < -1] <- tolower(numeral[mode < -1L])
-    modelab[] <- IfElse(mode == 0L | mode == -3L,
-                      "",
-                     paste0(":", LO5th2mode(mode, short = TRUE)))
-    
-    numeral[] <- paste0(numeral, modelab)
-    
-    if (ncol(numeral) > 1L) apply(numeral, 1, paste, collapse = "/") else numeral
-}
-
+###.. key indications
 
 
 dset2keyI <- function(dset, alteration.labels = c()) {
@@ -512,6 +476,56 @@ dset2keyI <- function(dset, alteration.labels = c()) {
 }
 
 
+###.. roman numerals
+
+#' Roman Numeral
+#' 
+#' Roman numerals can be calculated for diatonicSets (keys) and 
+#' for tertian sets (chords).
+#' The later case is the standard meaning of "roman numeral."
+#' However, the former case is used as well, for instance
+#'  to represent modulation schemes in 
+#' analyses of classical music. For instance, modulate from I-V,
+#' the to vi/V.
+#' More importantly, many "roman numerals" in harmonic analyses
+#' implicitely combine tertian and diatonic roman numerals:
+#' in "applied" roman numerals.
+#' Given a roman numeral like "V65/V", the "V65" represents a
+#' chord while the "/V" represents a key.
+#'
+#' @name diatonicSet-write
+NULL
+
+dset2romanNumeral <- function(dset, ...) {
+    numeral <- tint2romanRoot(getRootTint(dset), ...)
+    
+    mode <- getMode(dset, sum = TRUE)
+    numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
+    
+    numeral
+    # root <- getRoot(dset, sum = FALSE)
+    # 
+    # 
+    # 
+    # mode <- getSignature(dset, sum = FALSE) - root
+    # 
+    # cummode <- applyrows(mode, rev %.% cumsum %.% rev)
+    # numeral <- modelab <- array("", dim = dim(mode))
+    # numeral[] <- LO5th2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
+    # 
+    # 
+    # numeral[mode < -1] <- tolower(numeral[mode < -1L])
+    # modelab[] <- IfElse(mode == 0L | mode == -3L,
+    #                   "",
+    #                  paste0(":", LO5th2mode(mode, short = TRUE)))
+    # 
+    # numeral[] <- paste0(numeral, modelab)
+    # 
+    # if (ncol(numeral) > 1L) apply(numeral, 1, paste, collapse = "/") else numeral
+}
+
+
+####. x to dset ####
 
 #' Reading  from various representations
 #' 
@@ -527,7 +541,9 @@ dset2keyI <- function(dset, alteration.labels = c()) {
 NULL
 
 
-### From key interpretation
+##... From key interpretation
+
+
 #' @name diatonicSet
 #' @export
 read.keyI2diatonicSet <- function(keyI) {
@@ -539,7 +555,7 @@ read.keyI2diatonicSet <- function(keyI) {
     
 }
 
-####From roman numerals
+##... From roman numerals
 
 read.romanNumeral2diatonicSet <- function(rn) {
     parseRN <- REparser(DegreeAcc = "^[b#]?", 

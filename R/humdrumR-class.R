@@ -558,7 +558,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
                            fieldnames = fieldname[1], alignColumns = alignColumns,
                            path.fold = !padPaths)
           
-          lines <- apply(mat, 1, function(row) glue::glue_collapse(row[!is.na(row)], sep = '\t'))
+          lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
           names(lines) <- rownames(mat)
           
           lines

@@ -154,28 +154,17 @@ However, the \code{Exclusive} argument is vectorized, which gives us the option 
 For instance, \verb{as.kernPitch(c("A4", "A4"), Exclusive = c('pitch', 'int')} will return \verb{("a", "f#")}---the \code{'pitch'} exclusive intepretation is
 matched with the first \code{"A4"} while the \code{'int'} interpretation is matched with the second one!
 
-The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:\preformatted{                 Exclusive          
-kernPitch        **kern             
-Beam             **kern             
-MelodicSignifier **kern             
-Articulation     **kern             
-Slur             **kern             
-recip            **recip            
-sciPitch         **pitch            
-solfa            **solfa            
-interval         **mint,**hint,**int
-scaleDegree      **deg              
-                 RE                                                            
-kernPitch        ([A-Ga-g])\\1*([#-])*\\2*                                     
-Beam             ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                           
-MelodicSignifier [TtMmWw]R?|[TtMmWwS$O]                                        
-Articulation     ['`\\"~I][vu]?|[vu]                                           
-Slur             [(\{\{\\[]+|[)\}\}\\]_]+|_                                        
-recip            [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                      
-sciPitch         [A-G][b#-]*[-+]?[0-9][0-9]*                                   
-solfa            [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei])
-interval         [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                               
-scaleDegree      [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                          
+The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:\preformatted{                 Exclusive           RE                                                            
+kernPitch        **kern              ([A-Ga-g])\\1*([#-])*\\2*                                     
+Beam             **kern              ([/\\\\]?(L+K*)?)|([/\\\\]?(J+k*)?)                           
+MelodicSignifier **kern              [TtMmWw]R?|[TtMmWwS$O]                                        
+Articulation     **kern              ['`\\"~I][vu]?|[vu]                                           
+Slur             **kern              [(\{\{\\[]+|[)\}\}\\]_]+|_                                        
+recip            **recip             [1-9][0-9]*\%?[1-9]?[0-9]*[.]*|0\{1,2\}\\.*                      
+sciPitch         **pitch             [A-G][b#-]*[-+]?[0-9][0-9]*                                   
+solfa            **solfa             [\\^v',]*([sd][eoi][#-]*|[fl][eai][#-]*|[mt][eiy][#-]*|r[aei])
+interval         **mint,**hint,**int [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*                               
+scaleDegree      **deg               [\\^v',]*([MmPn]|[Ad#b]*)[1-9][0-9]*                          
                  Example
 kernPitch        c      
 Beam             /Jk    
@@ -458,45 +447,27 @@ The following tables illustrate the behaviors of the accidental/quality argument
 In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
 Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
 \verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
-\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-  
-NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-  
-NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-  
-NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-  
-NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-  
-AbFF a    an   b    an   b    a    en   f    f#   e    g-  
-AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-  
-AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-  
-AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-  
-     f    b    c    d-   b-   e-   b-   a-  
-NFF  f    b    c    d-   b-   e-   b-   a-  
-NFT  fn   bn   c    d-   b-   e    b    a   
-NTF  fn   bn   cn   d-   b-   e-   b-   a-  
-NTT  fn   bn   cn   d-   b-   e    b    a   
-AbFF f    bn   c    d    b    e    b    a   
-AbFT fn   bn   cn   d-   b-   e    b    a   
-AbTF fn   bn   c    d    b-   e-   b-   a-  
-AbTT fn   bn   cn   d-   b-   e-   b-   a-  
+\subsection{Accidentals:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c    d-   b-   e    b    a   
+NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
+NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c    d    b    e    b    a   
+AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c    d    b-   e-   b-   a-  
+AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
 }
 }
 
-\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-  
-NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5  
-NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5  
-NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5  
-NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5  
-AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5  
-AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5  
-AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5  
-AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5  
-     f    b    c    d-   b-   e-   b-   a-  
-NFF  4    7    1    m2   m7   m3   m7   m6  
-NFT  P4   M7   1    m2   m7   3    7    6   
-NTF  P4   M7   P1   m2   m7   m3   m7   m6  
-NTT  P4   M7   P1   m2   m7   3    7    6   
-AbFF 4    M7   1    2    7    3    7    6   
-AbFT P4   M7   P1   m2   m7   3    7    6   
-AbTF P4   M7   1    2    m7   m3   m7   m6  
-AbTT P4   M7   P1   m2   m7   m3   m7   m6  
+\subsection{Qualities:}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1    m2   m7   m3   m7   m6  
+NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1    m2   m7   3    7    6   
+NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
+NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1    2    7    3    7    6   
+AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1    2    m7   m3   m7   m6  
+AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
 }
 }
 

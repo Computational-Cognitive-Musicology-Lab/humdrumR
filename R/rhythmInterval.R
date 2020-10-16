@@ -202,8 +202,8 @@ setMethod('Math', signature = c(x = 'rhythmInterval'),
 setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
           function(e1) {
               e1@Numerator <- e1@Numerator * -1L
-          })
               e1
+          })
 
 
 

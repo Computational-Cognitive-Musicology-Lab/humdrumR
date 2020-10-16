@@ -4,8 +4,8 @@
 \alias{rhythmInterval}
 \alias{rint}
 \alias{is.rhythmInterval}
-\alias{order.rhythmInterval}
 \alias{as.double.rhythmInterval}
+\alias{order.rhythmInterval}
 \alias{as.recip}
 \alias{as.notevalue}
 \alias{as.rhythmInterval}
@@ -16,6 +16,10 @@ rint(denominator, numerator = 1L)
 is.rhythmInterval(x)
 
 \S4method{is.numeric}{rhythmInterval}(x)
+
+\S4method{as.character}{rhythmInterval}(x)
+
+\method{as.double}{rhythmInterval}(x)
 
 order.rhythmInterval(
   x,
@@ -28,10 +32,6 @@ order.rhythmInterval(
 \S4method{Compare}{rhythmInterval,rhythmInterval}(e1, e2)
 
 \S4method{Summary}{rhythmInterval}(x)
-
-\S4method{as.character}{rhythmInterval}(x)
-
-\method{as.double}{rhythmInterval}(x)
 
 as.recip(...)
 
