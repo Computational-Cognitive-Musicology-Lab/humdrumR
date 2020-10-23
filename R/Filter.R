@@ -650,12 +650,12 @@ indexGLIM_piece <- function(humtab) {
   humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
   
   
-  # if (any(humtab$Type == 'd')) {
+  if (any(humtab$Type == 'd')) {
     #remove records containing only d
-    # rectab <- table(humtab$Record, humtab$Type)
-    # recs   <- as.numeric(rownames(rectab))
-    # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
-  # }
+    rectab <- table(humtab$Record, humtab$Type)
+    recs   <- as.numeric(rownames(rectab))
+    humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
+  }
   
   
   
