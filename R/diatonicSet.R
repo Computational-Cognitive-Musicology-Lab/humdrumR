@@ -144,7 +144,9 @@ getRoot <- function(dset, sum = TRUE) {
 
 getRootTint <- function(dset, sum = TRUE) {
     root <- getRoot(dset, sum)
-    LO5thNcentralOct2tint(root, 0L)
+    
+    out <- LO5thNcentralOct2tint(root, 0L)
+    if (sum) out else out %dim% dset
     
 }
 
@@ -400,7 +402,7 @@ alterLO5ths <- function(LO5ths, alt) {
 dset2pitcher <- function(pitch.func) {
     pitch.func <- rlang::enexpr(pitch.func)
     body <- rlang::expr({
-    	LO5ths <- dset2LO5ths(x)
+    	LO5ths <- LO5th(x)
 
         LO5ths <- apply(LO5ths, 2, tint, octave = octave - 4L)
     
@@ -435,7 +437,7 @@ dset2tints <- function(dset, steporder = 2L) {
 
 dset2signature <- function(dset) {
     LO5ths <- LO5th(dset)
-    LO5ths[] <- apply(LO5ths, 1, sort)
+    LO5ths[] <- t(apply(LO5ths, 1, sort))
     tints <- tint( , LO5ths) %dim% LO5ths
     
     notes <- as.tonalChroma(tints, parts = c('steps', 'accidentals'),
@@ -453,10 +455,10 @@ dset2signature <- function(dset) {
 ###.. key indications
 
 
-dset2keyI <- function(dset, alteration.labels = c()) {
+dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
-    root <- tint2kernPitch(tint( , getRoot(dset, sum = TRUE)))
+    root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
     mode <- getMode(dset, sum = TRUE)
     root[mode > -2L] <- toupper(root[mode > -2L])
     
@@ -472,7 +474,9 @@ dset2keyI <- function(dset, alteration.labels = c()) {
                            strrep(alteration.labels['diminish'], abs(alterations)))
     
     
-    .paste("*", root, ":", modelab, alterations)
+    out <- .paste("*", root, ":", modelab, alterations) 
+    if (!sum) out <- out %dim% dset
+    out
 }
 
 
@@ -496,32 +500,33 @@ dset2keyI <- function(dset, alteration.labels = c()) {
 #' @name diatonicSet-write
 NULL
 
-dset2romanNumeral <- function(dset, ...) {
-    numeral <- tint2romanRoot(getRootTint(dset), ...)
+dset2romanNumeral <- function(dset, ..., sum = FALSE) {
+    tint <- getRootTint(dset, sum = sum)
     
-    mode <- getMode(dset, sum = TRUE)
+    if (hasdim(tint)) {
+        numeral <- array("", dim = dim(tint))
+        numeral[ , 1L] <- tint2romanRoot(tint[ , 1L], ...)
+        if (ncol(tint) > 1L) {
+            for (j in 2:ncol(tint)) {
+               numeral[ , j] <- tint2romanRoot(tint[ , j], Key = dset[ , j - 1L], ...)
+            }
+        }
+    } else {
+        numeral <- tint2romanRoot(tint, ...)
+        
+    }
+    
+    mode <- getMode(dset, sum = sum)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
     
-    numeral
-    # root <- getRoot(dset, sum = FALSE)
-    # 
-    # 
-    # 
-    # mode <- getSignature(dset, sum = FALSE) - root
-    # 
-    # cummode <- applyrows(mode, rev %.% cumsum %.% rev)
-    # numeral <- modelab <- array("", dim = dim(mode))
-    # numeral[] <- LO5th2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
-    # 
-    # 
-    # numeral[mode < -1] <- tolower(numeral[mode < -1L])
-    # modelab[] <- IfElse(mode == 0L | mode == -3L,
-    #                   "",
-    #                  paste0(":", LO5th2mode(mode, short = TRUE)))
-    # 
-    # numeral[] <- paste0(numeral, modelab)
-    # 
-    # if (ncol(numeral) > 1L) apply(numeral, 1, paste, collapse = "/") else numeral
+    modelab <- ifelse(mode == 0L | mode == -3L,
+                      "",
+                      LO5th2mode(mode, short = TRUE))
+    
+    out <- .paste(numeral, modelab)
+    if (!sum) out <- out %dim% dset
+    out
+   
 }
 
 
