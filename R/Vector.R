@@ -1056,6 +1056,20 @@ as.data.frame.struct <- function(x, optional = FALSE, ...) {
     value
 }
 
+list2dt <- function(l) {
+    # This takes a list and makes it into a data.table, spreading struct slots onto separate columns if necessarry.
+    
+    l <- l[!sapply(l, is.list)]
+    if (length(l) == 0) return(data.table())
+    
+    structs <- sapply(l, is.struct)
+    
+    l[structs] <- lapply(l[structs],
+                            function(struct) as.data.table(getSlots(struct)))
+    
+    as.data.table(l)
+}
+
 
 #' @export
 format.struct <- function(x, ...) { as.character(x)}
@@ -1129,6 +1143,11 @@ setMethod('<=', signature = c('struct', 'struct'),
           })
 
 
+#' @export
+duplicated.struct <- function(x, incomparables = FALSE, fromLast = FALSE, nmax = NA) {
+
+    duplicated(as.data.frame(getSlots(x)), incomparables = incomparables, fromLast, nmax)
+}
 
 #### arithmatic ----
 

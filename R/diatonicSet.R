@@ -10,7 +10,7 @@
 #' Tonal (diatonic) sets
 #' 
 #' 
-#' `diatonicSet`` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' `diatonicSet` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
 #' types of tonal data, representing Western diatonic keys.
 #' For the most part, users should not need to interact with `diatonicSet`s directly---rather, `diatonicSet`s work behind the scene in numerous `humdrumR` pitch functions.
 #' See the [keyRepresentations] and [keyTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
@@ -25,7 +25,7 @@
 #' The constructor function `dset` can be used to create `diatonicSets` directly.
 #' The three arguments corespond to the three slots: `root`, `mode`, and `alteration`.
 #' All inputs will be coerced to match in length.
-#' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value.
+#' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value as the root.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
 #'  for `diatonicSet`s call [as.keyI()][diatonicRepresentations].
@@ -33,7 +33,7 @@
 #' you'll see the [key interpretation][diatonicRepresentations] representation printed.
 #' 
 #' @slot Root integers representing the root of the key on the line-of-fifths
-#' @slot Signature integers representing the signature (number of accidentals) of the key
+#' @slot Signature integers representing the signature (number of accidentals) of the key. 
 #' @slot Alteration integers representing alterations of the diatonic set
 #' 
 #' A key is represented by two integers, \code{Root} and \code{Signature}.
@@ -41,6 +41,8 @@
 #' Signature is a value on the circle of fifths, indicating the diatonic mode.
 #' You can think of the Signature value as indicating the number of accidentals, with negative numbers
 #' for flats and positive numbers for sharps.
+#' You can also think of the signature as indicating how much the "natural key" (C major) is
+#' slid up and down the line-of-fifths.
 #' The standard diatonic modes occur if the \code{Signature - Tonic} is in the range -5:1:
 #' 
 #' + +1 = Lydian
@@ -51,6 +53,9 @@
 #' + -4 = Phyrgian
 #' + -5 = Locrian
 #' 
+#' > Note that you can make diatonicSets where the `Root` is outside the `Key`.
+#' > This is unusual, and may resort in sets you wouldn't predict.
+#' 
 #' @section Alterations:
 #' 
 #' The `Alteration` slot (also integers) can be used to represent various 
@@ -58,15 +63,16 @@
 #' integer works.
 #' Think of it like this, we start with a natural diatonic set consisting of the numbers `[-1 0 1 2 3 4 5]` (C major) on the line of fifths:
 #' If the `Signature` integer is `+1`, everything is shifted up one to be `[0 1 2 3 4 5 6]` (C Lydian).
-#' You can think of this as `+1` being added to each number, but instead, think of it as the following operation:
+#' You *can* think of this as `+1` being added to each number, but instead, think of it as the following operation:
 #' remove the lowest (leftmost number) from the vector, add 7 to that number, then append it on the rightmost side.
 #' If we follow this operation, we take 0 off the left, and add 7 to the end, getting `[0 1 2 3 4 5 6]`.
 #' If `Signature` is greater than one, we repeat this operation however many times, and if `Signature` is negative, we just reverse the procedure.
 #' This way of thinking about the `Signature` value is convoluted, but it helps us understand the `Alteration` operation.
+#' 
 #' The `Alteration` integer does the same operation on a key as `Signature`, except we take the *second*-most left/right value and add/subtract 7.
-#' So if `Alteration == -1`, `[-1 0 1 2 3 4 5]` becomes `[-3 -1 0 1 2 3 5]` (C melodic minor);
+#' So if `Alteration == -1`, start with `[-1 0 1 2 3 4 5]`, take the `4`, subtract `7`, and append it to the left side to get `[-3 -1 0 1 2 3 5]` (C melodic minor);
 #' If `Alteration == -2`, `[-1 0 1 2 3 4 5]` becomes `[-4 -3 -1 0 1 2 5]` (C harmonic minor); and so on.
-#' In fact, `Alteration == -1` results in all diatonic sets which are modes of the *melodic minor* scale, and 
+#' `Alteration == -1` results in all diatonic sets which are modes of the *melodic minor* scale, and 
 #' `Alteration == -2` results in diatonic sets which are modes of the *harmonic minor* scale.
 #' Other `Alteration` values get us increasingly exotic scales!
 #' 
@@ -144,7 +150,9 @@ getRoot <- function(dset, sum = TRUE) {
 
 getRootTint <- function(dset, sum = TRUE) {
     root <- getRoot(dset, sum)
-    LO5thNcentralOct2tint(root, 0L)
+    
+    out <- LO5thNcentralOct2tint(root, 0L)
+    if (sum) out else out %dim% dset
     
 }
 
@@ -400,7 +408,7 @@ alterLO5ths <- function(LO5ths, alt) {
 dset2pitcher <- function(pitch.func) {
     pitch.func <- rlang::enexpr(pitch.func)
     body <- rlang::expr({
-    	LO5ths <- dset2LO5ths(x)
+    	LO5ths <- LO5th(x)
 
         LO5ths <- apply(LO5ths, 2, tint, octave = octave - 4L)
     
@@ -435,7 +443,7 @@ dset2tints <- function(dset, steporder = 2L) {
 
 dset2signature <- function(dset) {
     LO5ths <- LO5th(dset)
-    LO5ths[] <- apply(LO5ths, 1, sort)
+    LO5ths[] <- t(apply(LO5ths, 1, sort))
     tints <- tint( , LO5ths) %dim% LO5ths
     
     notes <- as.tonalChroma(tints, parts = c('steps', 'accidentals'),
@@ -453,10 +461,10 @@ dset2signature <- function(dset) {
 ###.. key indications
 
 
-dset2keyI <- function(dset, alteration.labels = c()) {
+dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
-    root <- tint2kernPitch(tint( , getRoot(dset, sum = TRUE)))
+    root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
     mode <- getMode(dset, sum = TRUE)
     root[mode > -2L] <- toupper(root[mode > -2L])
     
@@ -472,7 +480,9 @@ dset2keyI <- function(dset, alteration.labels = c()) {
                            strrep(alteration.labels['diminish'], abs(alterations)))
     
     
-    .paste("*", root, ":", modelab, alterations)
+    out <- .paste("*", root, ":", modelab, alterations) 
+    if (!sum) out <- out %dim% dset
+    out
 }
 
 
@@ -496,92 +506,90 @@ dset2keyI <- function(dset, alteration.labels = c()) {
 #' @name diatonicSet-write
 NULL
 
-dset2romanNumeral <- function(dset, ...) {
-    numeral <- tint2romanRoot(getRootTint(dset), ...)
+dset2romanNumeral <- function(dset, ..., sum = FALSE) {
+    tint <- getRootTint(dset, sum = sum)
     
-    mode <- getMode(dset, sum = TRUE)
+    if (hasdim(tint)) {
+        numeral <- array("", dim = dim(tint))
+        numeral[ , 1L] <- tint2romanRoot(tint[ , 1L], ...)
+        if (ncol(tint) > 1L) {
+            for (j in 2:ncol(tint)) {
+               numeral[ , j] <- tint2romanRoot(tint[ , j], Key = dset[ , j - 1L], ...)
+            }
+        }
+    } else {
+        numeral <- tint2romanRoot(tint, ...)
+        
+    }
+    
+    mode <- getMode(dset, sum = sum)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
     
-    numeral
-    # root <- getRoot(dset, sum = FALSE)
-    # 
-    # 
-    # 
-    # mode <- getSignature(dset, sum = FALSE) - root
-    # 
-    # cummode <- applyrows(mode, rev %.% cumsum %.% rev)
-    # numeral <- modelab <- array("", dim = dim(mode))
-    # numeral[] <- LO5th2romanroot(root, cbind(mode[ , -1, drop = FALSE], 0))
-    # 
-    # 
-    # numeral[mode < -1] <- tolower(numeral[mode < -1L])
-    # modelab[] <- IfElse(mode == 0L | mode == -3L,
-    #                   "",
-    #                  paste0(":", LO5th2mode(mode, short = TRUE)))
-    # 
-    # numeral[] <- paste0(numeral, modelab)
-    # 
-    # if (ncol(numeral) > 1L) apply(numeral, 1, paste, collapse = "/") else numeral
+    modelab <- ifelse(mode == 0L | mode == -3L,
+                      "",
+                      LO5th2mode(mode, short = TRUE))
+    
+    out <- .paste(numeral, modelab)
+    if (!sum) out <- out %dim% dset
+    out
+   
 }
 
 
 ####. x to dset ####
 
-#' Reading  from various representations
-#' 
-#' These functions all translate other pitch representations
-#' into 
-#' 
-#' These functions all assume that thheir string input is a well-formed
-#' example of the target pitch representation, with no extra strings.
-#' (The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
-#' used to clean/filter inputs into these functions.
-#' 
-#' @name diatonicSet
-NULL
 
 
 ##... From key interpretation
 
 
-#' @name diatonicSet
-#' @export
-read.keyI2diatonicSet <- function(keyI) {
-    tonalChromas <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#b-]*')
+keyI2dset <- function(keyI) {
+    keyI <- stringr::str_remove(keyI, '^\\*')
     
-    LO5ths <- tonalChroma2LO5th(tonalChromas)
     
-    dset(LO5ths, mode = c(-3L, 0L)[(keyI == toupper(keyI)) + 1L])
+    #
+    tonalChroma <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#-]*')
+    root <- tonalChroma2tint(toupper(tonalChroma), accidental.labels = c(flat = '-'))@Fifth
+    
+    
+    #
+    minor <- stringi::stri_detect_charclass(tonalChroma, '[a-g]') * -3L
+    
+    mode <- stringi::stri_extract_first_regex(keyI, 'dor$|mix$|phr$|lyd$|loc$')
+    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
+    
+    dset(root, root + mode + minor)
+    
     
 }
 
 ##... From roman numerals
-
-read.romanNumeral2diatonicSet <- function(rn) {
-    parseRN <- REparser(DegreeAcc = "^[b#]?", 
-                        Numeral = "[IViv]{1,2}[iI]?", 
-                        TriadQuality= '[o+]?', 
-                        Seventh = '([nb#]?7)?',
-                        Ninth   = '([nb#]?9)?',
-                        Eleventh = '([nb#]?11)?',
-                        Thirteenth = '([nb#]?13)?',
-                        Inversion = '[abcdefg]?')
-    return(parseRN(rn))
-    preacc <- stringr::str_extract(rn, '^[b#]')
-    numeral <- stringr::str_extract(rn, '[VIvi][VIvi]?[Ii]?')
-    isminor <- numeral == tolower(numeral)
-    numeral <- toupper(numeral)
-    
-    accf <- numeric(length(preacc))
-    accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
-    numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
-    isminorf <- isminor * -3
-    tset(numeralf + accf, numeralf + isminorf)
-    
-    # extensions
-    stringr::str_extract_all(rn, '[b#]?[79]|[b#]?11|[b#]?13')
-}
-
+# 
+# read.romanNumeral2diatonicSet <- function(rn) {
+#     parseRN <- REparser(DegreeAcc = "^[b#]?", 
+#                         Numeral = "[IViv]{1,2}[iI]?", 
+#                         TriadQuality= '[o+]?', 
+#                         Seventh = '([nb#]?7)?',
+#                         Ninth   = '([nb#]?9)?',
+#                         Eleventh = '([nb#]?11)?',
+#                         Thirteenth = '([nb#]?13)?',
+#                         Inversion = '[abcdefg]?')
+#     return(parseRN(rn))
+#     preacc <- stringr::str_extract(rn, '^[b#]')
+#     numeral <- stringr::str_extract(rn, '[VIvi][VIvi]?[Ii]?')
+#     isminor <- numeral == tolower(numeral)
+#     numeral <- toupper(numeral)
+#     
+#     accf <- numeric(length(preacc))
+#     accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
+#     numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
+#     isminorf <- isminor * -3
+#     tset(numeralf + accf, numeralf + isminorf)
+#     
+#     # extensions
+#     stringr::str_extract_all(rn, '[b#]?[79]|[b#]?11|[b#]?13')
+# }
+# 
 
 
 #' @name diatonicSet
@@ -592,7 +600,7 @@ as.diatonicSet.diatonicSet <- force
 
 #' @name diatonicSet
 #' @export
-as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = read.keyI2diatonicSet,
+as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = keyI2dset,
                                           '.' = force)
 #' @export
 as.diatonicSet.integer <- function(x) dset(x, x)

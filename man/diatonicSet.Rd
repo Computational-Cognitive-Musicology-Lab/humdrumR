@@ -4,7 +4,6 @@
 \alias{diatonicSet}
 \alias{dset}
 \alias{order.diatonicSet}
-\alias{read.keyI2diatonicSet}
 \alias{as.diatonicSet}
 \alias{as.diatonicSet.character}
 \alias{as.sciChord}
@@ -31,8 +30,6 @@ order.diatonicSet(
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
 
-read.keyI2diatonicSet(keyI)
-
 as.diatonicSet(...)
 
 \method{as.diatonicSet}{character}(str, inPlace = FALSE)
@@ -48,12 +45,15 @@ as.chordSymbol(tharm, sep = "")
 read.sciChord2tertianSet(csym)
 }
 \description{
-These functions all translate other pitch representations
-into
-}
-\details{
-These functions all assume that thheir string input is a well-formed
-example of the target pitch representation, with no extra strings.
-(The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be
-used to clean/filter inputs into these functions.
+The basic constructor for \code{diatonicSet}s.
+The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
+or a character string which will be coerced to a \code{tonalInterval}.
+
+\code{diatonicSets} methods for \code{\link[base]{order}} and
+\code{\link[base]{sort}} order/sort along the circle of LO5ths.
+Signatures are sorted secondarily from fewest flats to most sharps.
+If \code{parallel = TRUE} all modes are grouped by shared tonics, so
+C minor and C major will appear besides each other.
+If \code{parallel = FALSE} modes/keys are sorted together by number of accidentals,
+so C minor and Eb major will be sorted next to each other.
 }

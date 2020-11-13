@@ -332,7 +332,7 @@ setMethod('%%', signature = c('tonalInterval', 'integer'),
             
             minusremain <- (e1 %/% e2) * e2
             
-            e1 - minusremain
+            (e1 - minusremain) %dim% e1
           })
 
 setMethod('%/%', signature = c('tonalInterval', 'integer'),
@@ -346,6 +346,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
             
             tint %dim% e1
           })
+
+
 
 
 ##### To/From line-of-fifths ####
@@ -410,6 +412,7 @@ alteration.inKey <- function(LO5th, Key) {
 
 
 alteration.filter <- function(LO5th, Key, cautionary, memory) {
+  # determines which notes need an accidental label (FALSE) and which don't (TRUE)
   
   conflicted <- alteration.conflicts(LO5th)
   mem  <- alteration.memory(LO5th)
@@ -563,7 +566,7 @@ scaleStep2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', '
 
 updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, up) - stringi::stri_count_fixed(str, down)
 
-accidental2LO5th <- function(str, accidental.labels = c()) {
+accidental2LO5th <- function(str, accidental.labels = c(), ...) {
   setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
   
   
@@ -755,21 +758,21 @@ tint2helmholtz <- function(x, ...) {
   notes
 }
                                                                 
-tint2kernPitch <- function(x, ...) {
+tint2kernPitch <- function(x, ..., Key = NULL) {
   simple <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                                      accidental.labels = c(flat = '-'), 
-                                     parts = c('steps', 'accidentals'), ...))
+                                     parts = c('steps', 'accidentals'), Key = Key, ...))
   
   octave      <- tint2contour(x, contour.labels = FALSE)
   
   octave.kernstyle(simple, octave) %dim% x
 }
 
-tint2romanRoot <- function(x, ...) {
+tint2romanRoot <- function(x, ..., Key = NULL) {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'), 
                            contour.labels = FALSE, contour.offset = 4L, 
-                           parts = c('accidentals', 'steps'), ...))
+                           parts = c('accidentals', 'steps'), ..., Key = Key))
   
 }
 
