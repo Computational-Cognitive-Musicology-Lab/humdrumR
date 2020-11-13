@@ -566,7 +566,7 @@ scaleStep2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', '
 
 updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, up) - stringi::stri_count_fixed(str, down)
 
-accidental2LO5th <- function(str, accidental.labels = c()) {
+accidental2LO5th <- function(str, accidental.labels = c(), ...) {
   setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
   
   
