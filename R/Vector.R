@@ -938,6 +938,7 @@ rbind.struct <- function(...) {
 #' @export
 cbind.struct <-  function(...) {
     xs <- list(...)
+    xs <- Filter(Negate(is.null), xs)
     xs <- lapply(xs, function(x) if (hasdim(x)) t(x) else x)
     
     #

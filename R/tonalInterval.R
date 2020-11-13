@@ -161,13 +161,12 @@ setMethod("initialize",
 #' (When appropriate, we can think of these generically as an interval with no specific octave.)
 #' @name tonalInterval
 #' @export
-tint <- function(octave, LO5th = 0L, cent = numeric(length(octave))) {
+tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
     if (missing(octave)) octave <- -LO5th2contourN(LO5th, contour.round = floor)
   
-    new('tonalInterval', 
-        Octave = as.integer(octave), 
-        Fifth  = as.integer(LO5th), 
-        Cent   = as.numeric(cent))
+    tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent))
+    
+    if (partition) tintPartition(tint, Key = Key, roundContour = roundContour) else tint
 }
 
 ##...accessors ####
@@ -600,17 +599,17 @@ quality2LO5th <- function(str, quality.labels = c()) {
 
 ####. tint to contour ####
 
-tint2centralOctave <- function(x) {
-  # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
-  generic <- x %% dset(0L, 0L)
-  (round(tint2semit(generic) / 12L)) %dim% x
-}
-
-tint2scaleOctave <- function(x) {
-  # scaleOctave is octave from unison and above 
-  generic <- x %% tint(-11L, 7L)
-  (tint2semit(generic)) %/% 12L %dim% x
-}
+# tint2centralOctave <- function(x) {
+#   # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
+#   generic <- x %% dset(0L, 0L)
+#   (round(tint2semit(generic) / 12L)) %dim% x
+# }
+# 
+# tint2scaleOctave <- function(x) {
+#   # scaleOctave is octave from unison and above 
+#   generic <- x %% tint(-11L, 7L)
+#   (tint2semit(generic)) %/% 12L %dim% x
+# }
 
 tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'), 
                         contour.offset = 0L, contour.maximum = Inf, contour.minimum = -Inf,
@@ -1282,11 +1281,31 @@ NULL
 
 
 
-tintPartition <- function(tint, Key = dset(0,0), roundContour = floor) {
-  mat <- tintPartition.octave_simple(tint, roundContour = roundContour)
+tintPartition <- function(tint, Key = NULL, roundContour = floor) {
+  partMatrix <-  if (hasdim(tint)) {
+    
+    parts <- if (is.null(colnames(tint))) rep(FALSE, ncol(tint)) else colnames(tint) %in% c('Key', 'Octave', 'Generic', 'Alteration', 'Comma')
+    if (all(parts)) return(tint)
+    
+    split <- lapply(1:ncol(tint), function(j) `dim<-`(tint[,j], NULL))
+    
+    for (j in which(!parts)) split[[j]] <- tintPartition(split[[j]], roundContour = roundContour, Key = if (j == 1L) Key else NULL)
+    
+    do.call('cbind', split)
+  } else {
+    mat <- tintPartition.octave_simple(tint, roundContour = roundContour)
+    
+    
+    Key <- Key %fmap% as.diatonicSet
+    
+    cbind(Key = Key %fmap% getRootTint, 
+          mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key =  Key %maybe% dset(0, 0)))
+    
+  }
   
-  Key <- as.diatonicSet(Key)
-  cbind(Key = getRootTint(Key), mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key = Key))
+  keys <- colnames(partMatrix) == 'Key'
+  partMatrix[ , c(which(keys), which(!keys))]
+  
   
 }
 
