@@ -889,6 +889,7 @@ substituteName <- function(expr, subs) {
             for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], subs)
   } else { 
             if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
+   
   }
   expr
           
@@ -1262,6 +1263,23 @@ padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stringi::stri
 trimLongString <- function(strs, n = 20L) {
   strs[str_length(strs) > n] <- paste0(stri_trim_both(str_sub(strs[str_length(strs) > n], end = n)), '...')
   strs
+}
+
+
+ofColumns <- function(str, split = '/') {
+    # split strs into columns
+    if (hasdim(str)) {
+        output <- do.call('cbind', lapply(1:ncol(str), function(j) ofColumns(str[, j, drop = TRUE])))
+        rownames(output) <- apply(str, 1, paste, collapse = '/')
+        
+    } else {
+        output <- stringi::stri_split_fixed(str, pattern = split, simplify = TRUE)
+        rownames(output) <- str
+    }
+    
+    output[output == ""] <- NA_character_
+    output
+    
 }
 
 

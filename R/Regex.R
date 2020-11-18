@@ -435,7 +435,18 @@ makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-
 #' 
 #' @rdname regexConstruction
 #' @export
-captureRE <- function(strs, n = '') escaper(paste0('[', paste(collapse = '', strs), ']', n))
+captureRE <- function(strs, n = '') {
+    strs <- strs[order(nchar(strs), decreasing = TRUE)]
+    
+    multi <- nchar(strs) > 1L
+    
+    strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
+                    if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
+                  collapse = '|')
+    
+    
+    escaper(paste0('(', strs, ')', n))
+}
 
 #' @rdname regexConstruction
 #' @export

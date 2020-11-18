@@ -465,8 +465,8 @@ dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
     root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
-    mode <- getMode(dset, sum = TRUE)
-    root[mode > -2L] <- toupper(root[mode > -2L])
+    mode <- getMode(dset, sum = FALSE)
+    root[!is.na(mode) & mode > -2L] <- toupper(root[!is.na(mode) & mode > -2L])
     
     modelab <- ifelse(mode == 0L | mode == -3L,
                       "",
@@ -474,7 +474,7 @@ dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     
     #
     setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
-    alterations <- getAlterations(dset, sum = TRUE)
+    alterations <- getAlterations(dset, sum = FALSE)
     alterations <- .ifelse(alterations > 0,
                            strrep(alteration.labels['augment'] , abs(alterations)),
                            strrep(alteration.labels['diminish'], abs(alterations)))
@@ -513,8 +513,8 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
         numeral <- array("", dim = dim(tint))
         numeral[ , 1L] <- tint2romanRoot(tint[ , 1L], ...)
         if (ncol(tint) > 1L) {
-            for (j in 2:ncol(tint)) {
-               numeral[ , j] <- tint2romanRoot(tint[ , j], Key = dset[ , j - 1L], ...)
+            for (j in (ncol(tint) - 1):1) {
+               numeral[ , j] <- tint2romanRoot(tint[ , j], Key = dset[ , j + 1L], ...)
             }
         }
     } else {
@@ -543,19 +543,23 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
 ##... From key interpretation
 
 
-keyI2dset <- function(keyI) {
-    keyI <- stringr::str_remove(keyI, '^\\*')
+keyI2dset <- function(str) {
+    str <- stringr::str_remove(str, '^\\*')
     
     
     #
-    tonalChroma <- stringi::stri_extract_first_regex(keyI, '[A-Ga-g][#-]*')
+    REparse(str, 
+            parse.strict = FALSE, parse.exhaust = FALSE, 
+            toEnv = TRUE,
+            list(tonalChroma = '[A-Ga-g][#-]*',
+                 mode = captureRE(c('dor', 'mix', 'phr', 'lyd', 'loc'), '$')))
+    
     root <- tonalChroma2tint(toupper(tonalChroma), accidental.labels = c(flat = '-'))@Fifth
     
     
     #
     minor <- stringi::stri_detect_charclass(tonalChroma, '[a-g]') * -3L
     
-    mode <- stringi::stri_extract_first_regex(keyI, 'dor$|mix$|phr$|lyd$|loc$')
     mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
     
     dset(root, root + mode + minor)
@@ -564,31 +568,34 @@ keyI2dset <- function(keyI) {
 }
 
 ##... From roman numerals
-# 
-# read.romanNumeral2diatonicSet <- function(rn) {
-#     parseRN <- REparser(DegreeAcc = "^[b#]?", 
-#                         Numeral = "[IViv]{1,2}[iI]?", 
-#                         TriadQuality= '[o+]?', 
-#                         Seventh = '([nb#]?7)?',
-#                         Ninth   = '([nb#]?9)?',
-#                         Eleventh = '([nb#]?11)?',
-#                         Thirteenth = '([nb#]?13)?',
-#                         Inversion = '[abcdefg]?')
-#     return(parseRN(rn))
-#     preacc <- stringr::str_extract(rn, '^[b#]')
-#     numeral <- stringr::str_extract(rn, '[VIvi][VIvi]?[Ii]?')
-#     isminor <- numeral == tolower(numeral)
-#     numeral <- toupper(numeral)
-#     
-#     accf <- numeric(length(preacc))
-#     accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
-#     numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
-#     isminorf <- isminor * -3
-#     tset(numeralf + accf, numeralf + isminorf)
-#     
-#     # extensions
-#     stringr::str_extract_all(rn, '[b#]?[79]|[b#]?11|[b#]?13')
-# }
+
+romanNumeral2dset <- function(str, accidental.labels = c()) {
+    setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+    
+    
+    str <- ofColumns(str)
+    
+    REparse(str, parse.strict = FALSE,
+            list(Accidental = captureRE(accidental.labels, '*'),
+                 Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
+                 mode = '(dor|lyd|phr|mix|loc)'),
+            toEnv = TRUE)
+                           
+    
+    
+    root <- tonalChroma2tint(paste0(Accidental, toupper(Numeral)), parts = c('accidentals', 'steps'), 
+                             accidental.labels = accidental.labels, 
+                             step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
+    
+    
+    minor <- stringi::stri_detect_charclass(Numeral, '[iv]') * -3L
+    
+    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
+
+    dset(root, root + mode + minor) %dim% str
+}
+
+
 # 
 
 

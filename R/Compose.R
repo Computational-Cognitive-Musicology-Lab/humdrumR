@@ -415,6 +415,9 @@ memoify.expr <- function(expr, argnames) {
   
 }
 
+memoify.quosure <- function(quosure, argnames) {
+  rlang::quo_set_expr(quosure, memoify.expr(rlang::quo_get_expr(quosure), argnames))
+}
 
 memoiseParse <- function(...) {
     args <- list(...)
@@ -441,7 +444,7 @@ memoiseParse <- function(...) {
     # THIS mapply DOES THE WORK OF SHRINKING THE ARGUMENTS IN THE PARENT FUNCTION
     
     function(result) {
-        if (length(result) != sum(!bool)) return(result)
+        if (is.table(result) || length(result) != sum(!bool)) return(result)
         
         uniqueVals <- target[!bool] # may or may not be data.table, with structs squashed
       

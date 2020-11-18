@@ -186,6 +186,7 @@
 #' 
 #' 
 #' @section Tandem interpretations:
+#' 
 #' The function \code{\link{readHumdrum}} automatically parses
 #' tandem interpretations (that it recognizes) into
 #' their own fields in the resulting \code{\linkS4class{humdrumR}} data.
@@ -210,6 +211,7 @@
 #' which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
 #' 
 #' @section Splatting:
+#' 
 #' ("Splatting" refers to feeding a function a list/vector of arguments.)
 #' Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
 #' rather than applying the same expression to each piece, we want to feed
@@ -233,6 +235,7 @@
 #' }
 #' 
 #' @section Argument interpolation:
+#' 
 #' Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateArguments]{interpolated}} into the
 #' \code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
 #' to make small changes to a function call within the \code{do} expressions, without starting from scratch.
@@ -246,6 +249,7 @@
 #' }
 #' 
 #' @section Piping:
+#' 
 #' For calls to \code{withinHumdrum}, the result of each \code{do} expression
 #' is insterted back into the \code{\link[humtable]{humdrum table}}. The results
 #' are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
@@ -485,7 +489,7 @@ parseKeywords <- function(formulae, withfunc) {
  
  #
  
- knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill'),
+ knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill', 'domemory'),
                        ordoexpression  = c('ordo', 'ordofill'),
                        partitions      = c('by', 'where'),
                        graphics        = names(par()),
@@ -536,8 +540,9 @@ partialMatchKeywords <- function(keys) {
     keys <- gsub('_', '', tolower(keys))
     
     # define standard keys and alternatives
-    standardkeys <- list(do       = c('do', 'd', 'eval', 'apply'),
-                         dofill   = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
+    standardkeys <- list(do          = c('do', 'd', 'eval', 'apply'),
+                         dofill      = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
+                         domemory    = c('domemoify', 'domem'),
                          dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
                                       'doplots', 'plots',
                                       'evalfxs', 'evalsidefxs', 'evalsideeffects',
@@ -622,9 +627,12 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   usedInExprs <- lapply(doQuos, fieldsInExpr, humtab = humtab)
   dofills <- names(doQuos) %in% c('dofill', 'ordofill')
   doQuos[dofills] <- Map(fillQuo, doQuos[dofills], usedInExprs[dofills])
+  
 
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuos)
+
+
       
   # turn . to active formula
   doQuo <- activateQuo(doQuo, active)
@@ -657,8 +665,12 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
             doQuo <- ngramifyQuo(doQuo, 
                                         ngram, usedInExpr, 
                                         depth = 1L + any(lists))
-  }
+  } 
   
+  
+  # do memory
+  if (any(names(doQuos) == 'domemory')) doQuo <- memoify.quosure(doQuo, usedInExpr)
+
   doQuo
 }
 

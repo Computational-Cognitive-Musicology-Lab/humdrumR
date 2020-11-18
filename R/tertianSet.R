@@ -13,7 +13,7 @@
 #' types of tonal data, representing Western tertian harmonies.
 #' \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, `struct`).
 #' 
-#' The only structural addition, compared to `diatonicSet`, is the `Thirds` slot.
+#' The only structural addition, compared to `diatonicSet`, is the `Extensions` slot.
 #' This slot indicates which tertian chord members are active in the chord.
 #' Since the root is always assumed, there are six other possible chord members: 
 #' the third, fifth, seventh, ninth, eleventh, and thirteenth.
@@ -39,16 +39,19 @@
 #' @export 
 setClass('tertianSet', 
          contains = 'diatonicSet',
-         slots = c(Thirds = 'integer'))
+         slots = c(Extensions = 'integer',
+                   Inversion = 'integer'))
 
 setValidity('tertianSet', 
             function(object) {
-                all(object@Thirds <= 2^6)
+                all(object@Extensions <= 2^6 &
+                      object@Inversion >= 0 &
+                      object@Inversion < 7)
             })
 
 #' @name humDiatonic
 #' @export
-tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L) {
+tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, inversion = 0L) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
     root <- .ifelse(cardinality == 0L, NA_integer_, root)
@@ -58,15 +61,16 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L) 
         Root = as.integer(root), 
         Signature = as.integer(signature), 
         Alteration = as.integer(alterations), 
-        Thirds = extensions)
+        Extensions = extensions,
+        Inversion = inversion)
 }
 
 ##...accessors ####
 
-getThirds <- function(tset) {
+getExtensions <- function(tset) {
     if (hasdim(tset)) tset <- tset[ , ncol(tset)]
     
-    cbind(TRUE, ints2bits(tset@Thirds))
+    cbind(TRUE, ints2bits(tset@Extensions))
 }
 
 # how to code/decode chord degrees as integers:
@@ -80,6 +84,13 @@ ints2bits <- function(n, nbits = 6) {
 }
 
 bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)))
+
+
+getInversion <- function(tset) {
+  if (hasdim(tset)) tset <- tset[ , ncol(tset)]
+  
+  tset@Inversion
+}
 
 
 ####. vector/core methods ####
@@ -135,7 +146,7 @@ setMethod('LO5th', 'tertianSet',
     # alterations <- getAlterations(tset, sum = TRUE)
     
     LO5ths <- callNextMethod(tset, step = 4L)
-    thirds <- getThirds(tset)
+    thirds <- getExtensions(tset)
     
     
     LO5ths <- LO5ths * thirds
@@ -152,6 +163,66 @@ setMethod('LO5th', 'tertianSet',
 })
 
 
+##### To/From extensions ####    
+
+###. extensions to x ####
+
+extension2bit <- function(str) {
+  extensions <- stringr::str_extract_all(str, captureRE(c('7', '65', '43', '42', '9', '11', '13', '4')))
+  
+  bit <- 3L # triad
+  
+  sapply(extensions,
+         function(exten) {
+           exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
+           exten <- stringr::str_replace(exten, '4', '11')
+           
+           bit + sum(c(`7` = 4L, `9` = 8L, `11` = 16L, `13` = 32L)[exten])
+         })
+  
+  
+  
+}
+
+extension2tset <- function(str, alteration.labels = c()) {
+  setoptions(alteration.labels) <- c(flat = 'b', sharp = '#', diminished = 'd')
+  
+  alterations <- captureRE(alteration.labels, '*')
+  
+  REparse(str,
+          toEnv = TRUE,
+          list(Alteration = alterations,
+               Extension = ))
+  
+  Extension <-
+  
+  cbind(Alteration, Extension)
+  
+}
+
+
+extensionqual <- function(tset, mode = 0, hits = c()) {
+  root <- tset@Root
+  mix <- tset@Signature
+  
+
+  key <- (-1:5) + mode
+  
+  alters <- rotate(c(`11` = 0, Root = 0,  `12` = 0, `9` = 0, `13` = 0, `10` = 0,  `7` = 0), root)
+  if (length(hits) > 0) alters[hits] <- -1
+  
+  changes <- (key + alters*7)[alters != 0L]
+  
+  diffs <- outer(changes,key, `-`)
+  
+  diffs
+  
+  
+  
+}
+
+###. x to extensions
+
 ##### To/From tertianSets ####    
 
 ###. tset to pitches ####
@@ -160,44 +231,33 @@ setMethod('LO5th', 'tertianSet',
 ####. tset to x ####
 
 
-tset2romanNumeral <- function(tset, cautionary = FALSE) {
- ofkey <- if (is.null(tset@Of)) "" else paste0('/', as.romanNumeral(tset@Of))
- 
- 
- root <- getRoot(tset, recurse = FALSE)
- mode <- getSignature(tset, recurse = TRUE) - 
-     getSignature(tset, recurse = FALSE) -
-     getRoot(tset, recurse = TRUE) 
- 
- numeral <- LO5th2romanroot(root, mode + root)
- 
- 
- ### triad quality
- # o or + indicate diminished or augmented LO5ths
- # not going to work for weird, double altered
- triadqual <- getSciQuality(tset, thirds = 1:2)
- 
- # case indicates major/minor third
- numeral <- IfElse(grepl('[mo]', triadqual), tolower(numeral), numeral)
- triadqual[triadqual %in% c('M', 'm')] <- ""
- 
- ### extensions and alterations
- 
- LO5ths <- dset2LO5ths(tset)[ , -1L:-3L, drop = FALSE]
- extension <- array(NA_character_, dim = dim(LO5ths))
- 
 
- extension[] <- LO5th2accidental(LO5ths, tset@Signature, cautionary = FALSE)
- highest <- applyrows(extension, function(row) seq_len(ncol(extension)) == max(which(!is.na(row))))
- extension[] <- sweep(extension, 2, c('7', '9', '11', '13'), paste0)
- extension[!(highest | (!is.na(extension) & extension == ''))] <- ""
- extension <- applyrows(extension, paste, collapse = "")
- 
- IfElse(!is.na(root), paste0(numeral, triadqual, extension), NA_character_)
- 
+romanNumeral2tset <- function(str) {
+  parsed <- REparse(str, list(Numeral = "^[b#-]?(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
+                              TriadQuality= '[o+]?',
+                              Seventh = '([nb#]?7)?',
+                              Ninth   = '([nb#]?9)?',
+                              Eleventh = '([nb#]?11)?',
+                              Thirteenth = '([nb#]?13)?',
+                              Inversion = '[abcdefg]?'))
+  return(parsed)
+  
+  # root <- tonalChroma2tint(parsed$Numeral, parts = c('accidentals', 'steps'),
+  # step.labels = c(''))
+  
+  
+  isminor <- numeral == tolower(numeral)
+  numeral <- toupper(numeral)
+  
+  accf <- numeric(length(preacc))
+  accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
+  numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
+  isminorf <- isminor * -3
+  tset(numeralf + accf, numeralf + isminorf)
+  
+  # extensions
+  stringr::str_extract_all(str, '[b#]?[79]|[b#]?11|[b#]?13')
 }
-
-
 
 # As "scientific chord label" (i.e., "Cmm" or "EbMm")
 
