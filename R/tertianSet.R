@@ -45,24 +45,31 @@ setClass('tertianSet',
 
 setValidity('tertianSet', 
             function(object) {
-                all(object@Extensions <= 2^6 &
+                all(object@Extensions >= 0L &
+                      object@Extensions <= 2^7 &
                       object@Inversion >= 0 &
                       object@Inversion < 7)
             })
 
 #' @name humDiatonic
 #' @export
-tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, inversion = 0L) {
+tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, extension = NULL, inversion = 0L) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
-    root <- .ifelse(cardinality == 0L, NA_integer_, root)
-    extensions <- c(0L, 1L, 3L, 7L, 15L, 31L, 63L, 127L)[cardinality + 1L]
+    
+    if (is.null(extension)) {
+      root <- .ifelse(cardinality == 0L, NA_integer_, root)
+      extension <- c(0L, 1L, 3L, 7L, 15L, 31L, 63L, 127L)[cardinality + 1L]
+    } else {
+      root <- .ifelse(extension == 0L, NA_integer_, root)
+    }
+   
     
     new('tertianSet', 
         Root = as.integer(root), 
         Signature = as.integer(signature), 
         Alteration = as.integer(alterations), 
-        Extensions = extensions,
+        Extensions = extension,
         Inversion = as.integer(inversion))
 }
 
@@ -164,64 +171,118 @@ setMethod('LO5th', 'tertianSet',
 ###. extensions to x ####
 
 extension2bit <- function(str) {
-  extensions <- stringr::str_extract_all(str, captureRE(c('7', '65', '43', '42', '9', '11', '13', 'sus4', 'add6', 'add2')))
+ 
+  extensions <- stringr::str_extract_all(str, captureRE(c('7', '9', '11', '13', 'sus4', 'add6', 'add2')))
   
-  bit <- 3L # triad
+  bit <- 7L # triad
   
   sapply(extensions,
          function(exten) {
+           if (any(exten %in% c('9', '11', '13')) & !any(exten == '7')) bit <- bit + 8L
+           
+           if (any(stringr::str_detect(exten, 'sus'))) bit <- bit - 2L
+           
+           
+           
            exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
-           
-           if (exten %in% c('7', '9', '11', '13')) bit <- bit + 4L # sevenths
-           
            exten <- stringr::str_replace(exten, 'add2', '9')
            exten <- stringr::str_replace(exten, 'add9', '9')
            exten <- stringr::str_replace(exten, 'sus4', '11')
            exten <- stringr::str_replace(exten, 'add6', '13')
            
-           bit + sum(c(`9` = 8L, `11` = 16L, `13` = 32L)[exten])
+           bit + sum(c(`7` = 8L, `9` = 16L, `11` = 32L, `13` = 64L)[exten])
          })
   
   
   
 }
 
-extension2tset <- function(str, alteration.labels = c()) {
-  setoptions(alteration.labels) <- c(flat = 'b', sharp = '#', diminished = 'd')
+extension2mode <- function(str, accidental.labels, root, isminor, triadQuality) {
+  accidentalRE <- captureUniq(accidental.labels, zero = TRUE)
   
-  alterations <- captureRE(alteration.labels, '*')
+
+  ## Triad
+  Thirds <- Fifths <- integer(length(str))
   
-  REparse(str,
-          toEnv = TRUE,
-          list(Alteration = alterations,
-               Extension = ))
+  # Thirds
+  naturallyMinor3 <- (6 - root) <= 4
+  Thirds[ isminor & !naturallyMinor3] <- -7L
+  Thirds[!isminor &  naturallyMinor3] <- +7L
   
-  Extension <-
+  # Fifths
+  naturallyDim5 <- (6 - root) <= 1L
+  Fifths[triadQuality == 'o' & !naturallyDim5 ] <- -7L
+  Fifths[triadQuality != 'o' &  naturallyDim5 ] <- +7L
+  Fifths[triadQuality == '+'] <- 7L
   
-  cbind(Alteration, Extension)
+  
+  ## Extensions
+  
+  exten <- stringr::str_extract_all(str,   paste0(accidentalRE, '(7|9|11|13)'))
+  
+  acc <- lapply(exten, stringr::str_extract, accidentalRE)
+  acc <- lapply(acc, accidental2LO5th, accidental.lables = accidental.labels)
+  exten <- lapply(exten, stringr::str_remove, accidentalRE)
+  
+  sapply(c('7', '9', '11', '13'), 
+         function(ex) {
+           Map(function(ext, acc) {
+             if (any(ext == ex)) acc[ext == ex][1] else NA_integer_
+           }, exten, acc)
+         }) %>% do.call('cbind', .) -> extensions
+  
+  
+  ### All together
+  alterations <- cbind(`3` = Thirds, `5` = Fifths, extensions)
+  
+  # 
+  mode <- chordalter <- integer(length(str))
+  isalteredchord <- rowSums(alterations != 0L, na.rm = TRUE) != 0L
+  
+  if (any(isalteredchord)) {
+    alterations <- alterations[isalteredchord, , drop = FALSE]
+    isaltered <- alterations != 0  & !is.na(alterations)
+    specified <- !is.na(alterations)
+    alterations[!specified] <- 0L
+    
+    natural <- t(sapply(root[isalteredchord], function(r) ((c(4, 1, 5, 2, -1, 3) + r + 1) %% 7 ) - 1))
+    altered <- fifths <- alterations + natural
+    
+    altered[!isaltered] <- NA
+    
+    mins <- apply(altered, 1, min, na.rm = TRUE)
+    maxs <- apply(altered, 1, max, na.rm = TRUE)
+    
+    
+    fifths[!specified & fifths < (maxs - 7L)] <- fifths[!specified & fifths < (maxs - 7L)] + 7L
+    
+    fifths[!specified & fifths > (mins + 7L)] <- fifths[!specified & fifths > (mins + 7L)] - 7L
+    
+    mins <- apply(fifths, 1, min, na.rm = TRUE)
+    maxs <- apply(fifths, 1, max, na.rm = TRUE)
+    
+    flats  <- pmin(mins - -1, 0)
+    sharps <- pmax(maxs - 5, 0)
+    
+    # diatonic "mixture"
+    mixture <- ifelse(mins < -1, flats, sharps)
+    
+    # non diatonic
+    ranges <- maxs - mins
+    diatonic <- ranges <= 6
+    
+    
+    
+    ##
+    mode[isalteredchord] <- .ifelse(diatonic, mixture,
+                                    sharps)
+    chordalter[isalteredchord] <- .ifelse(diatonic, 0L,
+                                          -(sharps - 1))
+  }
+  list(Mode = mode, Alteration = chordalter)
   
 }
 
-
-extensionqual <- function(tset, mode = 0, hits = c()) {
-  root <- tset@Root
-  mix <- tset@Signature
-  
-
-  key <- (-1:5) + mode
-  
-  alters <- rotate(c(`11` = 0, Root = 0,  `12` = 0, `9` = 0, `13` = 0, `10` = 0,  `7` = 0), root)
-  if (length(hits) > 0) alters[hits] <- -1
-  
-  changes <- (key + alters*7)[alters != 0L]
-  
-  diffs <- outer(changes,key, `-`)
-  
-  diffs
-  
-  
-  
-}
 
 ###. x to extensions
 
@@ -234,31 +295,38 @@ extensionqual <- function(tset, mode = 0, hits = c()) {
 
 
 
-romanNumeral2tset <- function(str) {
-  parsed <- REparse(str, list(Numeral = "^[b#-]?(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
-                              TriadQuality= '[o+]?',
-                              Seventh = '([nb#]?7)?',
-                              Ninth   = '([nb#]?9)?',
-                              Eleventh = '([nb#]?11)?',
-                              Thirteenth = '([nb#]?13)?',
-                              Inversion = '[abcdefg]?'))
-  return(parsed)
+romanNumeral2tset <- function(str, accidental.labels = c()) {
+  setoptions(accidental.labels) <-  c(natural = 'n', flat = 'b', sharp = '#')
   
-  # root <- tonalChroma2tint(parsed$Numeral, parts = c('accidentals', 'steps'),
-  # step.labels = c(''))
+  accidentalRE <- captureUniq(accidental.labels, zero = TRUE)
+  
+  Inversion <- stringr::str_extract(str, captureRE(c('6', '63', '64', '65', '43', '42', '2'), '*'))
+  str <- stringr::str_replace(str, '65|43|42', '7')
+  
+  REparse(str,
+          list(Accidental = accidentalRE,
+               Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
+               TriadQuality = '[o+]?', 
+               Extensions = paste0('(', accidentalRE,
+                                   captureRE(c('7', '9', '11', '13')), 
+                                   '|sus[42]|add[692])*')),
+          toEnv = TRUE) -> parsed
+  
+  bit <- extension2bit(stringr::str_remove_all(Extensions, '[^0-9]*'))
   
   
-  isminor <- numeral == tolower(numeral)
-  numeral <- toupper(numeral)
   
-  accf <- numeric(length(preacc))
-  accf[!is.na(preacc)] <- IfElse(preacc[!is.na(preacc)] == "#", 7, -7)
-  numeralf <- c(IV = -1, I = 0, V = 1, II = 2, VI = 3, III = 4, VII = 5)[toupper(numeral)]
-  isminorf <- isminor * -3
-  tset(numeralf + accf, numeralf + isminorf)
+  root <- tonalChroma2tint(paste0(Accidental, toupper(Numeral)), parts = c('accidentals', 'steps'), 
+                           accidental.labels = accidental.labels, 
+                           step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
   
-  # extensions
-  stringr::str_extract_all(str, '[b#]?[79]|[b#]?11|[b#]?13')
+  mode <- extension2mode(Extensions, accidental.labels, root, Numeral == tolower(Numeral), TriadQuality)
+  
+  return(tset(root,mode$Mode, alterations = mode$Alteration,extension = bit))
+  
+  
+  
+  
 }
 
 # As "scientific chord label" (i.e., "Cmm" or "EbMm")

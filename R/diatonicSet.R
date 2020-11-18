@@ -363,11 +363,11 @@ setMethod('LO5th', 'diatonicSet',
                       (row + 1L - m) %% 7L - 1L + m  # + 1L and - 1L because F is -1
                     })
     
-    # Force root to be root, regardless of mode
-    LO5ths[inversion == 0L , 1] <- root[inversion == 0L]
+    LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
     
     #
-    LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
+    # Force root to be root, regardless of mode
+    LO5ths[inversion == 0L , 1] <- root[inversion == 0L]
     
     rownames(LO5ths) <- dset2keyI(dset)
     colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
@@ -577,7 +577,7 @@ romanNumeral2dset <- function(str, accidental.labels = c()) {
     str <- ofColumns(str)
     
     REparse(str, parse.strict = FALSE,
-            list(Accidental = captureRE(accidental.labels, '*'),
+            list(Accidental = captureUniq(accidental.labels),
                  Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
                  mode = '(dor|lyd|phr|mix|loc)'),
             toEnv = TRUE)

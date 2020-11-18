@@ -23,7 +23,7 @@ REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead 
 #' If `strict` is TRUE, all regular expressions must be matched or `NA` is returned.
 #' 
 #' @export
-REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, toEnv = FALSE) {
+REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, reverse = FALSE, toEnv = FALSE) {
     res <- res[lengths(res) > 0]
     
     if (any(.names(res) == "")) .stop("In call to REparse, all arguments must be named.")
@@ -34,26 +34,49 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.l
     lead <- NULL
     rest <- str
     
+    if (reverse) res <- rev(res)
+    
     for (re in names(res)) {
         locs <- stringr::str_locate(rest, res[[re]])
         
         
-        hits <- !is.na(locs[ , 1]) & if (parse.exhaust) locs[ , 1] == 1 else TRUE
+        
+        hits <- !is.na(locs[ , 1]) 
+        
+        if (parse.exhaust) {
+            if (!reverse) {
+                hits & locs[ , 1] == 1
+            } else {
+                hits & locs[ , 2] == nchar(rest)
+            }
+        }
+        
         complete <- complete & hits
         # 
         if (!parse.exhaust && parse.lead && is.null(lead)) {
             # should only ever happen in first iteration
-            lead <- stringr::str_sub(rest, 0, pmax(locs[ , 'start'] - 1L, 0L))
+            lead <- if (!reverse) {
+                stringr::str_sub(rest, 0, pmax(locs[ , 'start'] - 1L, 0L))
+            } else {
+                stringr::str_sub(rest, locs[ , 'end'] + 1L)
+            }
         }
+        
         
         matches[[re]] <- .ifelse(hits, stringr::str_sub(rest, locs[ , 'start'], locs[ , 'end']), NA_character_)
         
-        rest[hits] <- stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1)
+        rest[hits] <- if (!reverse) {
+            stringr::str_sub(rest[hits], start = locs[hits, 'end'] + 1L) 
+        } else {
+            stringr::str_sub(rest[hits], end = locs[hits, 'start'] - 1L)
+        }
     }
     
     if (parse.lead) matches <- c(list(Lead = lead), matches)
     if (parse.rest) matches <- c(matches, list(Rest = rest))
     if (parse.strict) matches <- lapply(matches, `[<-`, i = !complete, value = NA_character_)
+    
+    if (reverse) matches <- rev(matches)
     
     if (toEnv) list2env(matches, parent.frame())
     
@@ -458,3 +481,7 @@ escaper <- function(str) {
     
 }
 
+
+
+
+##
