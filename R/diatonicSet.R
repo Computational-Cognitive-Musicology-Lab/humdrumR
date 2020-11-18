@@ -340,9 +340,9 @@ LO5th2mode <- function(LO5th, short = FALSE) {
 
 ###. x to line-of-fifths ####
 
-
+#' @export
 setMethod('LO5th', 'diatonicSet',
-          function(x, steporder = 2L ) {
+          function(x, steporder = 2L, inversion = 0L) {
     # the steporder argument controls the order the LO5ths are output
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
@@ -352,9 +352,10 @@ setMethod('LO5th', 'diatonicSet',
     
     notna <- !is.na(sign) & !is.na(root)
     
+    inversion <- rep(inversion, length.out = length(x))
+    
     ## Generate scale structure
-    sq <- seq(0L, by = as.integer(steporder), length.out = 7L)
-    LO5ths <- matrix(sq, nrow = length(root), ncol = 7L, byrow = TRUE)
+    LO5ths <- do.call('rbind', lapply(inversion, function(inv) seq(steporder * inv, by = as.integer(steporder), length.out = 7L)))
     LO5ths[!notna, ] <- NA_integer_
     LO5ths <- sweep(LO5ths, 1L, root, `+`)
     LO5ths <- sweep(LO5ths, 1L, sign,
@@ -363,13 +364,13 @@ setMethod('LO5th', 'diatonicSet',
                     })
     
     # Force root to be root, regardless of mode
-    LO5ths[ , 1] <- root
+    LO5ths[inversion == 0L , 1] <- root[inversion == 0L]
     
     #
     LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
     
     rownames(LO5ths) <- dset2keyI(dset)
-    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(sq %% 7L) + 1L]
+    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
     
     LO5ths
 })

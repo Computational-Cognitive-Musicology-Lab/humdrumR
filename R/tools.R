@@ -212,7 +212,7 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
           rotation <- rotation[1]
 
           size <- dim(mat)[margin]
-          rotation = sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
+          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
           if (rotation == 0) return(mat)
 
           ind <- seq_len(size) - rotation
@@ -858,6 +858,31 @@ calculus <- function(x, n, skip = list(na)) {
 #' @export
 expand <- function(x) {
     .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
+}
+
+
+# bitwise tools
+
+ints2bits <- function(n, nbits = 8) {
+    mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
+    
+    rownames(mat) <- n
+    colnames(mat) <- 2 ^ (0:(nbits - 1))
+    mat
+}
+
+bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)))
+
+
+
+bitwRotateL <- function(a, n, nbits = 8L) {
+    bitwOr(bitwShiftL(a, n), bitwShiftR(a, nbits - n)) %% (2^nbits)
+    
+}
+
+bitwRotateR <- function(a, n, nbits = 8L) {
+    bitwOr(bitwShiftL(a, nbits - n), bitwShiftR(a, n)) %% (2^nbits)
+    
 }
 
 ### Metaprogramming ----

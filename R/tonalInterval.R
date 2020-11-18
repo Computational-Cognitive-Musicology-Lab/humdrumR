@@ -532,11 +532,11 @@ setMethod("LO5th", "tonalInterval",
             if (hasdim(lof) && sum) rowSums(lof) else lof
             
           })
-setMethod('LO5th', 'ANY',
-          function(x, sum = FALSE) {
-            x <- as(x, 'tonalInterval')
-            LO5th(x, sum)
-          })
+# setMethod('LO5th', 'ANY',
+#           function(x, sum = FALSE) {
+#             x <- as(x, 'tonalInterval')
+#             LO5th(x, sum)
+#           })
 
 
 
@@ -1603,7 +1603,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' 1. the partitioning of a *complex* interval into a *simple parts* and *octave* parts*.
 #' 2. the partitioning of a *specific* interval into a *generic part* and a *alteration* part.
 #' 
-#' Simple intervals are abstract ([line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)) information, without regards to a specific pitch in frequency space---i.e., actual "pitch height."
+#' Simple intervals are abstract ([line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths) ) information, without regards to a specific pitch in frequency space---i.e., actual "pitch height."
 #' The combination of a simple interval with an octave part creates a complex interval, which *does* include information about specific pitch height.
 #' Tonal "line-of-fifths space" can further be partitioned into [generic][tonalTransformations] (diatonic) information and *specific* interval information which describes the 
 #' *quality* of intervals, including zero or more [alterations]("https://en.wikipedia.org/wiki/Accidental_(music)") of the diatonic set.

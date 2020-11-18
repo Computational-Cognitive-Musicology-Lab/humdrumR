@@ -15,22 +15,23 @@
 #' 
 #' The only structural addition, compared to `diatonicSet`, is the `Extensions` slot.
 #' This slot indicates which tertian chord members are active in the chord.
-#' Since the root is always assumed, there are six other possible chord members: 
-#' the third, fifth, seventh, ninth, eleventh, and thirteenth.
-#' Every possible combination of these six degrees is represented by a single integer, corresponding
-#' to the 6-bit representation of on/offs on the six degrees in reverse order (13, 11, 9, 7, 5, 3).
-#' For example, the integer `7` corresponds to a seventh chord: in binary, 7 is `000111`.
-#' The initial three zeros indicate that the 13th, 11th, and 9th are *not* part of the harmony, while the three ones
-#' indicate that the third fifth and seventh *are* part of the harmony.
+#' There are seven possible chord members: 
+#' the root, third, fifth, seventh, ninth, eleventh, and thirteenth.
+#' Every possible combination of these seven degrees is represented by a single integer, corresponding
+#' to the 7-bit representation of on/offs on the seven degrees in reverse order (13, 11, 9, 7, 5, 3, 1).
+#' For example, the integer `15` corresponds to a seventh chord: in binary, 15 is `0001111`.
+#' The initial three zeros indicate that the 13th, 11th, and 9th are *not* part of the harmony, while the four ones
+#' indicate that the root, third, fifth, and seventh *are* part of the harmony.
 #' Ultimately, adding or removing a chord degree from a harmony can be achieved by adding the power of
 #' two associated with that degree: 
 #' 
-#' + **Third**: $\pm 1$
-#' + **Fifth**: $\pm 2$
-#' + **Seventh**: $\pm 4$
-#' + **Ninth**: $\pm 8$
-#' + **Eleventh**: $\pm 16$
-#' + **Thirteenth**: $\pm 32$
+#' + **Root**: $\pm 1$
+#' + **Third**: $\pm 2$
+#' + **Fifth**: $\pm 4$
+#' + **Seventh**: $\pm 8$
+#' + **Ninth**: $\pm 16$
+#' + **Eleventh**: $\pm 32$
+#' + **Thirteenth**: $\pm 64$
 #' 
 #' `tertianSet` has many specific methods defined for reading/writing harmonic information.
 #' 
@@ -55,14 +56,14 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
     if (is.tonalInterval(root)) root <- root@Fifth
     
     root <- .ifelse(cardinality == 0L, NA_integer_, root)
-    extensions <- c(0L, 0L, 1L, 3L, 7L, 15L, 31L, 63L)[cardinality + 1L]
+    extensions <- c(0L, 1L, 3L, 7L, 15L, 31L, 63L, 127L)[cardinality + 1L]
     
     new('tertianSet', 
         Root = as.integer(root), 
         Signature = as.integer(signature), 
         Alteration = as.integer(alterations), 
         Extensions = extensions,
-        Inversion = inversion)
+        Inversion = as.integer(inversion))
 }
 
 ##...accessors ####
@@ -70,20 +71,16 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
 getExtensions <- function(tset) {
     if (hasdim(tset)) tset <- tset[ , ncol(tset)]
     
-    cbind(TRUE, ints2bits(tset@Extensions))
+   rootpos <- tset@Extensions
+   inverted <- bitwRotateR(rootpos,  getInversion(tset), nbits = 7L)
+
+   inverted <- inverted + ((inverted - 1) %% 2) # make sure root position is there always 
+
+   as.logical(ints2bits(inverted, nbits = 7L))
+   
 }
 
-# how to code/decode chord degrees as integers:
 
-ints2bits <- function(n, nbits = 6) {
-    mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
-    
-    rownames(mat) <- n
-    colnames(mat) <- 2 ^ (0:(nbits - 1))
-    mat
-}
-
-bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)))
 
 
 getInversion <- function(tset) {
@@ -139,15 +136,14 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
 
 ###. x to line-of-fifths ####
 
-
+#' @export
 setMethod('LO5th', 'tertianSet',
          function(x) {
     tset <- x
     # alterations <- getAlterations(tset, sum = TRUE)
     
-    LO5ths <- callNextMethod(tset, step = 4L)
+    LO5ths <- callNextMethod(tset, steporder = 4L, inversion = getInversion(x))
     thirds <- getExtensions(tset)
-    
     
     LO5ths <- LO5ths * thirds
     LO5ths[!thirds] <- NA_integer_
@@ -168,16 +164,22 @@ setMethod('LO5th', 'tertianSet',
 ###. extensions to x ####
 
 extension2bit <- function(str) {
-  extensions <- stringr::str_extract_all(str, captureRE(c('7', '65', '43', '42', '9', '11', '13', '4')))
+  extensions <- stringr::str_extract_all(str, captureRE(c('7', '65', '43', '42', '9', '11', '13', 'sus4', 'add6', 'add2')))
   
   bit <- 3L # triad
   
   sapply(extensions,
          function(exten) {
            exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
-           exten <- stringr::str_replace(exten, '4', '11')
            
-           bit + sum(c(`7` = 4L, `9` = 8L, `11` = 16L, `13` = 32L)[exten])
+           if (exten %in% c('7', '9', '11', '13')) bit <- bit + 4L # sevenths
+           
+           exten <- stringr::str_replace(exten, 'add2', '9')
+           exten <- stringr::str_replace(exten, 'add9', '9')
+           exten <- stringr::str_replace(exten, 'sus4', '11')
+           exten <- stringr::str_replace(exten, 'add6', '13')
+           
+           bit + sum(c(`9` = 8L, `11` = 16L, `13` = 32L)[exten])
          })
   
   
