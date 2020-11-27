@@ -58,24 +58,42 @@
 #' 
 #' @section Alterations:
 #' 
-#' The `Alteration` slot (also integers) can be used to represent various 
-#' "altered" scales. To understand how the `Alteration` integer works, first consider how the `Signature` (key-signature)
-#' integer works.
-#' Think of it like this, we start with a natural diatonic set consisting of the numbers `[-1 0 1 2 3 4 5]` (C major) on the line of fifths:
-#' If the `Signature` integer is `+1`, everything is shifted up one to be `[0 1 2 3 4 5 6]` (C Lydian).
-#' You *can* think of this as `+1` being added to each number, but instead, think of it as the following operation:
-#' remove the lowest (leftmost number) from the vector, add 7 to that number, then append it on the rightmost side.
-#' If we follow this operation, we take 0 off the left, and add 7 to the end, getting `[0 1 2 3 4 5 6]`.
-#' If `Signature` is greater than one, we repeat this operation however many times, and if `Signature` is negative, we just reverse the procedure.
-#' This way of thinking about the `Signature` value is convoluted, but it helps us understand the `Alteration` operation.
+#' The `Alteration` (also integers) can be used to represent various 
+#' "altered" scales. 
+#' The integer values is interpreted as a seven-trit [balanced ternary](https://en.wikipedia.org/wiki/Balanced_ternary) string.
+#' ("trits" are the ternary equivalent of binary "bits.")
+#' The seven trits correspond to the seven scale degrees on the line-of-fifth indicated by the *signature*---i.e., ordered from 
+#' lowest to hightest on the line-of-fifths, not relative to the root.
+#' (For instance, when the `Signature == 0`, the degrees are `c(-1, 0, 1, 2, 3, 4, 5)`.)
+#' Balanced ternary allows for three digits, `0` (unaltered degree), `1` (sharpened degree), and `-1` (flattened degree).
 #' 
-#' The `Alteration` integer does the same operation on a key as `Signature`, except we take the *second*-most left/right value and add/subtract 7.
-#' So if `Alteration == -1`, start with `[-1 0 1 2 3 4 5]`, take the `4`, subtract `7`, and append it to the left side to get `[-3 -1 0 1 2 3 5]` (C melodic minor);
-#' If `Alteration == -2`, `[-1 0 1 2 3 4 5]` becomes `[-4 -3 -1 0 1 2 5]` (C harmonic minor); and so on.
-#' `Alteration == -1` results in all diatonic sets which are modes of the *melodic minor* scale, and 
-#' `Alteration == -2` results in diatonic sets which are modes of the *harmonic minor* scale.
-#' Other `Alteration` values get us increasingly exotic scales!
+#' The ternary arrangement maps powers of three to each scale degree, as so that in the `Alteration` integer:
 #' 
+#' + $\pm1$: raise or flatten the **7th** scale degree.
+#' + $\pm3$: raise or flatten the **3rd** scale degree.
+#' + $\pm9$: raise or flatten the **6th** scale degree.
+#' + $\pm27$: raise or flatten the **2nd** scale degree.
+#' + $\pm81$: raise or flatten the **5th** scale degree.
+#' + $\pm243$: raise or flatten the **1st** scale degree.
+#' + $\pm749$: raise or flatten the **4th** scale degree.
+#' 
+#' For example, consider `Alteration == 26`:
+#' In a balanced ternary representation, the decimal integer 26 is represented as `1 0 0 1 0 -1 0`.
+#' (In other words 1 in the "27s  place" and -1 in the "ones place"---i.e., 27 - 1).
+#' This represents a raised 2nd (the 27) and a lowered 7th (the -1).
+#' 
+#' The `Alteration` integer allows us to concisely represent all the 2,187 possible combinations of raised and lowered diatonic scale degrees!
+#' However, combined with the `Signature` slot, there is some redundancy in scale representation.
+#' For example, a melodic minor scale can be represented as a major scale (`Signature - Root == 0`) with a lowered third degree (`Alteration == -3`) *or* as 
+#' minor scale (`Signature - Root == -3`) with raised 6ths and 7ths (`Alteration == 10`).
+#' However, though these two representations result in the same set on the line-of-fifths, some might consider them to be
+#' conceptually different in some contexts, so we consider the redundancy acceptable.
+#' Another case of encoding redundancy *is* that `Alteration - 1` (flatten the 7th) is exactly equivalent to `Signature - 1`.
+#' Similarly, `Alteration + 749` (raise the 4th) is exactly equivalent to `Signature + 1`.
+#' 
+#' 
+#' Double-flat and double-shart degrees are **not** encodable in `diatonicSet`.
+#' However, in combination with the `Signature` slot, sets with double-flat/sharps (like doubly-diminished 7ths) can be encoded.
 #' 
 #' 
 #' @section Arithmatic:
@@ -84,6 +102,7 @@
 #' However, a number of useful arithmetic operations between `diatonicSet`s and other data types *are* defined:
 #' 
 #' XXXX Elaborate
+#' XXXX Need to implement special logic for adding Alterations! (Taking into account Signature addition.)
 #' 
 #' 
 #' @section Relational Operators:
@@ -167,14 +186,20 @@ getMode <- function(dset, sum = TRUE) {
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset, sum = sum)
     sign <- getSignature(dset, sum = sum)
-    sign - root
+    (sign - root) 
 }
 
-getAlterations <- function(dset, sum = TRUE) {
-    alter <- dset@Alteration %dim% dset
+getAlterations <- function(dset) {
+    # colnames represent the MAJOR degrees
+    if (hasdim(dset)) dset <- dset[ , ncol(tset)]
     
-    if (hasdim(alter) && sum) rowSums(alter) else alter
+    alterations <- dset@Alteration
     
+    output <- ints2baltern(alterations, 7L) * 7
+    rownames(output) <- NULL
+    colnames(output) <- c('4th', 'Root', '5th', '2nd', '6th', '3rd', '7th')
+    
+    output
 }
 
 ####. vector/core methods ####
@@ -226,11 +251,10 @@ order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasin
 setMethod('==', signature = c('diatonicSet', 'diatonicSet'),
           function(e1, e2) {
              checkSame(e1, e2, "==")
-             f1 <- dset2LO5ths(e1)
-             f2 <- dset2LO5ths(e2)
+             f1 <- LO5th(e1)
+             f2 <- LO5th(e2)
               
-             same <- f1 == f2 
-             rowSums(same, na.rm = TRUE) == 7L
+             rowSums(f1 == f2, na.rm = TRUE) == 7L
           })
 
 
@@ -327,11 +351,13 @@ setMethod('-', signature = c('diatonicSet', 'integer'),
 
 LO5th2mode <- function(LO5th, short = FALSE) {
     
-    fullname <- rep("?", length(LO5th))
-    fullname[LO5th >= -5 & LO5th <= 1] <-  c('locrian', 'phrygian', 
-                                           'minor', 'dorian', 'mixolydian', 
-                                           'major', 'lydian')[LO5th[LO5th >= -5 & LO5th <= 1] + 6L]
-                      
+    known <- LO5th > -7L & LO5th < 2L
+    
+    LO5th <- LO5th %% 7L
+    
+    fullname <- rep('?', length(LO5th))
+    modes <- c('major', 'lydian',  'locrian', 'phyrgian', 'minor', 'dorian', 'mixolydian')
+    fullname[known] <- modes[LO5th[known] + 1]
     
     if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
 }
@@ -347,31 +373,32 @@ setMethod('LO5th', 'diatonicSet',
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
     dset <- x
-    root <- getRoot(dset, sum = FALSE)
-    sign <- getSignature(dset, sum = FALSE)
+    root <- getRoot(dset, sum = TRUE)
+    sign <- getSignature(dset, sum = TRUE)
+    alter <- getAlterations(dset)
+    
     
     notna <- !is.na(sign) & !is.na(root)
-    
     inversion <- rep(inversion, length.out = length(x))
     
-    ## Generate scale structure
-    LO5ths <- do.call('rbind', lapply(inversion, function(inv) seq(steporder * inv, by = as.integer(steporder), length.out = 7L)))
-    LO5ths[!notna, ] <- NA_integer_
-    LO5ths <- sweep(LO5ths, 1L, root, `+`)
-    LO5ths <- sweep(LO5ths, 1L, sign,
-                    function(row, m) {
-                      (row + 1L - m) %% 7L - 1L + m  # + 1L and - 1L because F is -1
-                    })
+    ### get line-of-fifths values
+    LO5ths <- split(outer(sign, -1:5, '+') + alter, f = seq_along(sign))
+
+    ### reorder (root/inversion/steporder)
+    root <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
     
-    LO5ths[] <- alterLO5ths(LO5ths, dset@Alteration)
+    order <- lapply(lapply(root + steporder * inversion, seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
     
-    #
-    # Force root to be root, regardless of mode
-    LO5ths[inversion == 0L , 1] <- root[inversion == 0L]
+    LO5ths <- Map(function(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths, order)
     
-    rownames(LO5ths) <- dset2keyI(dset)
-    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+    # LO5ths <- do.call('rbind', Map(function(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
+                                   # root %% 7L, 1:nrow(LO5ths), inversion))
+    LO5ths <- do.call('rbind', LO5ths)
     
+
+    # rownames(LO5ths) <- dset2keyI(dset)
+    # colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+    # 
     LO5ths
 })
 
@@ -440,6 +467,39 @@ dset2tints <- function(dset, steporder = 2L) {
 
 ####. dset to x ####
 
+
+dset2alterations <- function(dset, alteration.labels = c()) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+
+    mode <- getMode(dset, sum = FALSE)
+    
+    altered <- dset@Alteration != 0L & mode > -7L & mode < 2L
+    
+    alterations <- getAlterations(dset)[altered, , drop = FALSE]
+    alterations[] <- c(alteration.labels$augment, alteration.labels$diminish, "")[match(alterations, c(7, -7, 0))]
+
+    order <- lapply(mode[altered] %% 7, function(m) ((0L:6L + m) %% 7L) + 1 )
+        
+    labs <- do.call('rbind', lapply(order, function(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
+    labs[alterations == ''] <- ''
+
+    alterations[] <- paste0(alterations, labs)
+    alterations <- apply(alterations, 1, paste, collapse='')
+
+    output <- character(length(mode))
+    output[altered] <- alterations
+    output
+
+}
+
+dset2modelabel <- function(dset) {
+    mode <- getMode(dset, sum = TRUE)
+    .ifelse(mode == 0L | mode == -3L,
+            "",
+            LO5th2mode(mode, short = TRUE))
+    
+}
+
 ###.. key signatures
 
 dset2signature <- function(dset) {
@@ -467,23 +527,17 @@ dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     
     root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
     mode <- getMode(dset, sum = FALSE)
-    root[!is.na(mode) & mode > -2L] <- toupper(root[!is.na(mode) & mode > -2L])
+    root[!is.na(mode) & mode %in% c(1L, 0L, 6L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L)])
     
-    modelab <- ifelse(mode == 0L | mode == -3L,
-                      "",
-                      LO5th2mode(mode, short = TRUE))
+    modelab <- dset2modelabel(dset) 
+    
+    alterations <- dset2alterations(dset, alteration.labels)
+    
+    keyI <- .paste("*", root, ":", modelab, alterations) 
     
     #
-    setoptions(alteration.labels) <- c(augment = '+', diminish = '-')
-    alterations <- getAlterations(dset, sum = FALSE)
-    alterations <- .ifelse(alterations > 0,
-                           strrep(alteration.labels['augment'] , abs(alterations)),
-                           strrep(alteration.labels['diminish'], abs(alterations)))
-    
-    
-    out <- .paste("*", root, ":", modelab, alterations) 
-    if (!sum) out <- out %dim% dset
-    out
+    if (!sum) keyI <- keyI %dim% dset
+    keyI
 }
 
 
@@ -526,11 +580,11 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
     mode <- getMode(dset, sum = sum)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
     
-    modelab <- ifelse(mode == 0L | mode == -3L,
-                      "",
-                      LO5th2mode(mode, short = TRUE))
+    modelab <- dset2modelabel(dset) 
     
-    out <- .paste(numeral, modelab)
+    alterations <- dset2alterations(dset)
+    
+    out <- .paste(numeral, modelab, alterations)
     if (!sum) out <- out %dim% dset
     out
    
@@ -540,60 +594,105 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
 ####. x to dset ####
 
 
+alteration2trit <- function(str, mode = integer(length(str)), alteration.labels = c()) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    
+    accidentalRE <- captureUniq(alteration.labels, zero = TRUE)
+    
+    str <- stringr::str_replace(str, '13', '6')
+    str <- stringr::str_replace(str, '11', '4')
+    str <- stringr::str_replace(str, '10', '3')
+    str <- stringr::str_replace(str,  '9', '2')
+    
+    # degrees
+    degrees <- stringr::str_extract_all(str,   paste0(accidentalRE, '[1234567]'))
+    
+    acc <- lapply(degrees, stringr::str_extract, accidentalRE)
+    acc <- lapply(acc, accidental2LO5th, accidental.labels = alteration.labels) 
+    degrees <- lapply(degrees, stringr::str_remove, accidentalRE)
+    
+    alterations <- matrix(0, nrow = length(str), ncol = 7)
+    
+    degrees <- data.frame(Accidentals = unlist(acc), 
+                          Degrees = unlist(degrees),
+                          Row = rep(seq_along(str), lengths(acc)))
 
-##... From key interpretation
-
-
-keyI2dset <- function(str) {
-    str <- stringr::str_remove(str, '^\\*')
+    alterations[cbind(degrees$Row, match(degrees$Degrees, c(4, 1, 5, 2, 6, 3, 7, 4)))] <- degrees$Accidentals 
+    alterations[] <- alterations %/% 7L
     
+    ## rotate to appropriate mode
+    order <- lapply(-mode %% 7L, function(m) ((0L:6L + m) %% 7L) + 1 )
+    threes <- do.call('rbind', lapply(order, function(ord) (3^(6:0))[ord]))
     
-    #
-    REparse(str, 
-            parse.strict = FALSE, parse.exhaust = FALSE, 
-            toEnv = TRUE,
-            list(tonalChroma = '[A-Ga-g][#-]*',
-                 mode = captureRE(c('dor', 'mix', 'phr', 'lyd', 'loc'), '$')))
-    
-    root <- tonalChroma2tint(toupper(tonalChroma), accidental.labels = c(flat = '-'))@Fifth
-    
-    
-    #
-    minor <- stringi::stri_detect_charclass(tonalChroma, '[a-g]') * -3L
-    
-    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
-    
-    dset(root, root + mode + minor)
+    rowSums(threes * alterations)
     
     
 }
 
+##... From key interpretation
+
+
+key2dset <- function(str, parts = c('steps', 'accidentals'), step.labels, alteration.labels, accidental.labels) {
+    
+    str <- stringr::str_remove(str, '^\\*')
+    
+    tonalChromaRE <- makeRE.tonalChroma(parts,  
+                                        accidental.labels = accidental.labels,
+                                        step.labels = step.labels)
+    
+    alterationRE <- paste0('(', 
+                           makeRE.tonalChroma(c('accidentals', 'steps'),
+                                       accidentals.labels = alteration.labels,
+                                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13)),
+                           ')+')
+    
+    REparse(str, 
+            parse.strict = FALSE, parse.exhaust = FALSE, 
+            toEnv = TRUE,
+            list(tonalChroma = tonalChromaRE,
+                 mode = captureRE(c('dor', 'mix', 'phr', 'lyd', 'loc')),
+                 alterations = alterationRE))
+    
+    # Root
+    root <- tonalChroma2tint(toupper(tonalChroma), accidental.labels = accidental.labels, 
+                             step.labels = step.labels[step.labels == toupper(step.labels)])@Fifth
+    
+    
+    # Signature
+    minor <- stringi::stri_detect_charclass(tonalChroma, '[a-z]') * -3L
+    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
+    signature <- root + mode + minor
+    
+    ## Alterations
+    alterations <- .ifelse(is.na(alterations), 0, alteration2trit(alterations, mode + minor))
+    
+    dset(root, signature, alterations)
+    
+}
+
+keyI2dset <- function(str, alteration.labels = c(), accidental.labels = c()) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
+    
+    key2dset(str, c('steps', 'accidentals'),
+             alteration.labels = alteration.labels, accidental.labels = accidental.labels,
+             step.labels = c('C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'A', 'a', 'B', 'b'))
+    
+    
+}
+
+
 ##... From roman numerals
 
-romanNumeral2dset <- function(str, accidental.labels = c()) {
-    setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = c()) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
+    
+    key2dset(str, c('accidentals', 'steps'), 
+             alteration.labels = alteration.labels, accidental.labels = accidental.labels,
+             step.labels = c('I', 'i', 'II', 'ii', 'III', 'iii', 'IV', 'iv', 'V', 'v', 'VI', 'vi', 'VII', 'vii'))
     
     
-    str <- ofColumns(str)
-    
-    REparse(str, parse.strict = FALSE,
-            list(Accidental = captureUniq(accidental.labels),
-                 Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
-                 mode = '(dor|lyd|phr|mix|loc)'),
-            toEnv = TRUE)
-                           
-    
-    
-    root <- tonalChroma2tint(paste0(Accidental, toupper(Numeral)), parts = c('accidentals', 'steps'), 
-                             accidental.labels = accidental.labels, 
-                             step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
-    
-    
-    minor <- stringi::stri_detect_charclass(Numeral, '[iv]') * -3L
-    
-    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
-
-    dset(root, root + mode + minor) %dim% str
 }
 
 

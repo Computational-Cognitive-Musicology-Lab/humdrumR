@@ -864,7 +864,7 @@ expand <- function(x) {
 # bitwise tools
 
 ints2bits <- function(n, nbits = 8) {
-    mat <- t(sapply(n, function(x) as.logical(intToBits(x))))[ , 1:nbits, drop = FALSE]
+    mat <- t(sapply(n, function(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
     
     rownames(mat) <- n
     colnames(mat) <- 2 ^ (0:(nbits - 1))
@@ -874,6 +874,50 @@ ints2bits <- function(n, nbits = 8) {
 bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)))
 
 
+ints2nits <- function(n, it = 2, nits = 8) {
+    
+    cur <- n%%it
+    out <- if (nits <= 1) {
+        cbind(cur)
+    } else {
+        
+        out <- cbind(Recall(n %/% it, it , nits = nits - 1), cur)
+        colnames(out) <- (it^((nits - 1) : 0))
+        out
+        
+    }
+    
+    rownames(out) <- n
+    out
+}
+
+
+ints2baltern <- function(n, ntrits = 8L) {
+    tern <- ints2nits(abs(n), it = 3L, ntrits)
+    
+    while(any(tern == 2L)) {
+        twos <- which(tern == 2L, arr.ind = TRUE)
+        
+        if (any(twos[, 'col'] == 1L)) return(Recall(n, ntrits + 1))
+        
+        tern[twos] <- -1L
+        
+        twos[ , 'col'] <- twos[ , 'col'] - 1L
+        tern[twos] <- tern[twos] + 1
+        
+    }
+    
+    ## allow negative numbers
+    # notzero <- which( tern != 0, arr.ind = TRUE)
+    # firstnotzero <- cbind(which(n != 0), tapply(notzero[ , 'col'], notzero[ , 'row'], min))
+    # tern[firstnotzero] <- tern[firstnotzero] * sign(n[n != 0])
+    
+    ## incorporate sign
+    sweep(tern, 1, sign(n), '*')
+    
+ 
+    
+}
 
 bitwRotateL <- function(a, n, nbits = 8L) {
     bitwOr(bitwShiftL(a, n), bitwShiftR(a, nbits - n)) %% (2^nbits)
@@ -884,6 +928,34 @@ bitwRotateR <- function(a, n, nbits = 8L) {
     bitwOr(bitwShiftL(a, nbits - n), bitwShiftR(a, n)) %% (2^nbits)
     
 }
+
+
+
+## bitwise tools, with decimal place...
+# 
+# num2bits <- function(n, nbits = 8) {
+#     positive <- floor(n)
+#     negative <- as.integer((n - positive) / 2^-31)
+#     # mat <- t(as.integer(sapply(positive, intToBits)) - as.integer(sapply(negative, intToBits)))[, 1:nbits, drop = FALSE]
+#     posmat <- t((sapply(positive, function(x) as.integer(intToBits(x)))))[ , 1:nbits, drop = FALSE]
+#     negmat <- t((sapply(negative, function(x) as.integer(intToBits(x)))))[ , 32:(32-nbits + 1), drop = FALSE]
+#     mat <- posmat - negmat
+#     rownames(mat) <- n
+#     colnames(mat) <- 2 ^ (0:(nbits - 1))
+#     # colnames(mat) <- 2 ^ c((nbits+1):1, 0:(nbits-1 ))
+#     mat
+# }
+# 
+# bits2num <- function(x) {
+#     twos <- sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L)), `*`)
+# 
+#     twos[twos < 0] <- 1 / abs( twos[twos < 0])
+# 
+#     rowSums(twos)
+# }
+# 
+
+
 
 ### Metaprogramming ----
 
