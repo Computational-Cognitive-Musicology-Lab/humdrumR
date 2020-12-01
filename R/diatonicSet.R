@@ -28,7 +28,7 @@
 #' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value as the root.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
-#'  for `diatonicSet`s call [as.keyI()][diatonicRepresentations].
+#'  for `diatonicSet`s call [as.key()][diatonicRepresentations].
 #' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
 #' you'll see the [key interpretation][diatonicRepresentations] representation printed.
 #' 
@@ -214,7 +214,7 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('diatonicSet'), function(x) dset2keyI(x))
+setMethod('as.character', signature = c('diatonicSet'), function(x) dset2key(x))
 
 ####. logic methods ####
 
@@ -396,7 +396,7 @@ setMethod('LO5th', 'diatonicSet',
     LO5ths <- do.call('rbind', LO5ths)
     
 
-    # rownames(LO5ths) <- dset2keyI(dset)
+    # rownames(LO5ths) <- dset2key(dset)
     # colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
     # 
     LO5ths
@@ -522,7 +522,7 @@ dset2signature <- function(dset) {
 ###.. key indications
 
 
-dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
+dset2key <- function(dset, alteration.labels = c(), sum = FALSE) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
     root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
@@ -533,11 +533,11 @@ dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
     
     alterations <- dset2alterations(dset, alteration.labels)
     
-    keyI <- .paste("*", root, ":", modelab, alterations) 
+    key <- .paste("*", root, ":", modelab, alterations) 
     
     #
-    if (!sum) keyI <- keyI %dim% dset
-    keyI
+    if (!sum) key <- key %dim% dset
+    key
 }
 
 
@@ -558,7 +558,7 @@ dset2keyI <- function(dset, alteration.labels = c(), sum = FALSE) {
 #' Given a roman numeral like "V65/V", the "V65" represents a
 #' chord while the "/V" represents a key.
 #'
-#' @name diatonicSet-write
+#' @romanNumerals
 NULL
 
 dset2romanNumeral <- function(dset, ..., sum = FALSE) {
@@ -629,10 +629,83 @@ alteration2trit <- function(str, mode = integer(length(str)), alteration.labels 
     
 }
 
+
+##... from key signature
+
+signature2dset <- function(str, mode = 0L) {
+    signotes <- stringr::str_extract_all(str, '[a-g]([#-n])\\1*')
+    
+    sigs <- integer(length(str))
+    
+    empty <- lengths(signotes) == 0L
+    
+    lof <- lapply(signotes[!empty], 
+                  function(notes) {
+                      lof <- kernPitch2tint(notes)@Fifth
+                      lof[lof < -1L | lof > 5L]
+                      })
+    empty[!empty] <- lengths(lof) == 0L
+    lof <- lof[lengths(lof) > 0L]
+    
+    
+    sharp <- sapply(lof, mean) > 0
+    
+    altered <- unlist(Map(function(fs, bound)  any(diff(sort(c(bound, fs))) > 1), 
+                          lof, 
+                          c(-1, 5L)[sharp + 1L]))
+    
+    
+    ranges <- sapply(lof, range)
+    
+    sigs[!empty] <- .ifelse(sharp, ranges[2, ] - 5, ranges[1, ] + 1)
+    
+    dsets <- dset(sigs - mode, sigs)
+    
+    
+    #
+    if (any(altered)) {
+        
+        alterations <- do.call('rbind',
+                               Map( 
+                                   function(fth, sig) {
+                                       alt <- unalt <- -1L:5L + sig
+                                       natural <- alt > -2L & alt < 6L
+                                       alt[!natural & !alt %in% fth] <-  alt[!natural & !alt %in% fth] + 7L
+                                       (alt - unalt) %/% 7L
+                                   }, 
+                                   lof[altered], sigs[altered]))
+        
+        
+        # if root is altered
+        rootqual <- alterations[cbind(1:nrow(alterations), 2 - mode)]
+        
+        alterations <- as.integer(rowSums(sweep(alterations, 2, 3L^(6L:0L), `*`)))
+        
+        if (any(rootqual != 0L)) {
+            alterations[rootqual != 0L] <- ifelse(alterations[rootqual != 0L] > 0,
+                                                  alterations[rootqual != 0L] %/% 3,
+                                                  alterations[rootqual != 0L] * 3L)
+            sigs[rootqual != 0L] <- sigs[rootqual != 0L] - rootqual[rootqual != 0]
+            mode[rootqual != 0L] <- mode[rootqual != 0L] + rootqual[rootqual != 0]
+        }
+        dsets <- dset(sigs - mode, sigs, alterations)
+        
+        # dsets@Alteration[altered] <- alterations
+    }
+    dsets
+    
+}
+
+
 ##... From key interpretation
 
 
-key2dset <- function(str, parts = c('steps', 'accidentals'), step.labels, alteration.labels, accidental.labels) {
+key2dset <- function(str, parts = c('steps', 'accidentals'), 
+                     step.labels = c('C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'A', 'a', 'B', 'b'), 
+                     alteration.labels, accidental.labels) {
+    
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
     
     str <- stringr::str_remove(str, '^\\*')
     
@@ -670,19 +743,8 @@ key2dset <- function(str, parts = c('steps', 'accidentals'), step.labels, altera
     
 }
 
-keyI2dset <- function(str, alteration.labels = c(), accidental.labels = c()) {
-    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
-    setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
-    
-    key2dset(str, c('steps', 'accidentals'),
-             alteration.labels = alteration.labels, accidental.labels = accidental.labels,
-             step.labels = c('C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'A', 'a', 'B', 'b'))
-    
-    
-}
 
-
-##... From roman numerals
+##... From roman numeral
 
 romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = c()) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
@@ -707,7 +769,7 @@ as.diatonicSet.diatonicSet <- force
 
 #' @name diatonicSet
 #' @export
-as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = keyI2dset,
+as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = key2dset,
                                           '.' = force)
 #' @export
 as.diatonicSet.integer <- function(x) dset(x, x)
