@@ -3,7 +3,7 @@
 \name{evalActive}
 \alias{evalActive}
 \title{\code{evalActive} evaluates the active expression in a
-\code{\linkS4class{humdrumR}} object.}
+\link{humdrumR} object.}
 \usage{
 evalActive(
   humdrumR,
@@ -14,9 +14,9 @@ evalActive(
 )
 }
 \arguments{
-\item{humdrumR}{A \code{\linkS4class{humdrumR}} data object.}
+\item{humdrumR}{A \link{humdrumR} data object.}
 
-\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \code{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
+\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
 or any combination of these in a single string (e.g., \code{"LIM"}).
 (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
 (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for an explanation.).}
@@ -29,5 +29,5 @@ between tokens that are collapsed.}
 }
 \description{
 \code{evalActive} evaluates the active expression in a
-\code{\linkS4class{humdrumR}} object.
+\link{humdrumR} object.
 }

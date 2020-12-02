@@ -1,8 +1,6 @@
 ####### Regex Parsing
 
-#' Make a regular expression parser
-#' 
-#' 
+#' @name REparser
 #' @export
 REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, toEnv = FALSE) {
     # makes a parser which strictly, exhaustively parses a string
@@ -22,6 +20,7 @@ REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead 
 #' all `NA` being returned.
 #' If `strict` is TRUE, all regular expressions must be matched or `NA` is returned.
 #' 
+#' @name REparser
 #' @export
 REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, reverse = FALSE, toEnv = FALSE) {
     res <- res[lengths(res) > 0]
@@ -300,15 +299,13 @@ predicateParse <- function(predicate, argnames, ...) {
 #' Match strings against regular expression
 #' 
 #' These infix functions are simply syntactic sugar for
-#' existing \code{R} regular expression matching functions.
+#' existing `R` regular expression matching functions.
 #' 
-#' \describe{
-#' \item{\%~l\%}{Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base]{grepl}}}
-#' \item{\%~\%}{The "default"---same as \code{\%~l\%}}
-#' \item{\%~i\%}{Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base]{grep}}}
-#' \item{\%~n\%}{Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more 
-#' than one match occurs in the same token). Shorthand for \code{\link[stringi]{stri_count_regex}}}
-#' }
+#' + `\%~l\%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl].
+#' + `\%~\%`: The "default"---same as `\%~l\%`.
+#' + `\%~i\%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep].
+#' + `\%~n\%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
+#'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex].
 #' @export
 #' @name RegexFind
 `%~l%` <- function(x, pattern) grepl(pattern, x)
@@ -397,13 +394,13 @@ makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), co
 }
 
 makeRE.kernPitch <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = c(), accidental.labels = c(), ...) {
-    setoptions(step.labels) <- c('a-g')
+    setoptions(step.labels) <- letters[1:7]
     setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = 'n')
     
     REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, accidental.labels = accidental.labels, ...)
     
     if ('steps' %in% parts) {
-        REs$steps <- captureUniq(paste0(tolower(step.labels), toupper(step.labels)), zero = FALSE)
+        REs$steps <- captureUniq(c(tolower(step.labels), toupper(step.labels)), zero = FALSE)
         REs <- REs[parts]
     }
     
@@ -415,11 +412,11 @@ makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), colla
 }
 
 makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
-    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = '1-9][0-9', ...), 'interval')
+    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = 1:19, ...), 'interval')
 }
 
 makeRE.scaleDegree <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
-    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = '[1-7]', ...), 'scaleDegree')
+    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = 1:7, ...), 'scaleDegree')
 }
 
 makeRE.solfa <- function(parts = c('steps', 'accidentals'), ..., collapse = TRUE) {
@@ -456,22 +453,25 @@ makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-
 #' For instance, `captureUniq(c('a', 'b','c'))` will return `"([abc])\\1*"`---this expression will match
 #' `"aaa"` or `"bb"` but not `"aabb"`.
 #' 
-#' @rdname regexConstruction
+#' @name regexConstruction
 #' @export
 captureRE <- function(strs, n = '') {
     strs <- strs[order(nchar(strs), decreasing = TRUE)]
     
-    multi <- nchar(strs) > 1L
+    if (length(strs) > 1) {
+        multi <- nchar(strs) > 1L & !grepl('-', strs)
+        strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
+                        if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
+                      collapse = '|')
+    }
     
-    strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
-                    if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
-                  collapse = '|')
+
     
     
     escaper(paste0('(', strs, ')', n))
 }
 
-#' @rdname regexConstruction
+#' @name regexConstruction
 #' @export
 captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
 # takes a RE capture group and makes it so it will only match one or more of the same character

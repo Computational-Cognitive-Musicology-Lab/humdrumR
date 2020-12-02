@@ -7,7 +7,14 @@
 \alias{is.tonalInterval}
 \title{Representation of tonal pitch information}
 \usage{
-tint(octave, LO5th = 0L, cent = numeric(length(octave)))
+tint(
+  octave,
+  LO5th = 0L,
+  cent = numeric(length(octave)),
+  partition = FALSE,
+  Key = NULL,
+  roundContour = floor
+)
 
 is.tonalInterval(x)
 }
@@ -36,13 +43,10 @@ Thus, if you return a \code{tonalInterval} on the command line (or call \link[ba
 \describe{
 \item{\code{Octave}}{integers representing the octave offset.}
 
-\item{\code{Fifth}}{integers representing the "line-of-fifths' value.}
+\item{\code{Fifth}}{integers representing the "line-of-fifths" value.}
 
-\item{\code{Cent}}{numeric values representing cents (1200th of an octave).}
-}}
-
-\section{Arithmatic}{
-
+\item{\code{Cent}}{numeric values representing cents (1200th of an octave).
+\subsection{Arithmetic}{
 
 Technically, \code{tonalInterval}s are examples of algebraic \href{https://en.wikipedia.org/wiki/Module_(mathematics)}{modules over integers}.
 This means that certain arithmetic operations are defined for \code{tonalIntervals} and can be called using standard arithmetic operators (\code{+}, \code{-}, etc.):
@@ -66,8 +70,7 @@ the remainder to the match the appropriate octave.
 This definition has the useful properties that \code{specificinterval \%\% A1 = genericinterval} and \code{interval \%\% d2 = enharmonicinterval}.
 }
 
-\section{Relational Operators}{
-
+\subsection{Relational Operators}{
 
 \code{tonalInterval}s can be compared using the standard \link[base:Comparison]{relational operations}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
 Two \code{tonalInterval}s are equal (according to \code{==}) only if all their slots (\code{Octave}, \code{Fifth}, and \code{Cent})
@@ -77,8 +80,7 @@ In contrast, ordinal comparisons (e.g., \code{>}, \code{<=}) between \code{tonal
 Thus, \code{m3 >= A2} and \code{A2 >= m3} are both \code{TRUE}, even though \code{m3 == A2} is not.
 }
 
-\section{Coercion}{
-
+\subsection{Coercion}{
 
 \code{humdrumR} knows how to \href{https://en.wikipedia.org/wiki/Type_conversion}{coerce} several \link[base:vector]{base-R atomic types} into \code{tonalInterval}s.
 This can be done using the \link[methods:as]{as} function---e.g., \code{as(3, "tonalInterval")}---or more intuitively using the function \code{as.tonalInterval()}.
@@ -95,15 +97,15 @@ For instance, \code{M3 + 2L} will interpret \code{2L} as two semitones and add a
 The clever \link[humdrumR:regexDispatch]{dispatch system} will even ignore character strings that are not recognized (see examples)!
 }
 
-\section{Predefined Intervals}{
-
+\subsection{Predefined Intervals:}{
 
 \code{humdrumR} automatically exports a bunch of \code{tonalInterval}s, named by their musical interval representation.
 Every generic interval from 1 to 15 is combined with every interval quality \code{dd} (doubly diminished), \code{d} (diminished), \code{m} (minor), \code{M} (major), \code{A} (augumented)
 \code{AA} (doubly augmented).
 Thus, after loading \code{humdrumR}, you can type things like \code{M3 + M3} and get \code{A5}.
 In addition, the variables \code{unison} (\verb{= P1 = tint(0, 0)}),  \code{pythagorean.comma} (\verb{= d2 = tint(-19,12)}), and \code{octave} (\code{tint(1, 0)}) are exported as well.
-}
+}}
+}}
 
 \examples{
 
@@ -132,7 +134,6 @@ eMajor[4:5] - octave
 
 "4.ee" + P5 
 # = "4.bb"
-
 
 
 

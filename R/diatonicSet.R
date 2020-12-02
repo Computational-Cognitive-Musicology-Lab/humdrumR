@@ -195,7 +195,7 @@ getAlterations <- function(dset) {
     
     alterations <- dset@Alteration
     
-    output <- ints2baltern(alterations, 7L) * 7
+    output <- ints2baltern(alterations, 7L) * 7L
     rownames(output) <- NULL
     colnames(output) <- c('4th', 'Root', '5th', '2nd', '6th', '3rd', '7th')
     
@@ -382,18 +382,19 @@ setMethod('LO5th', 'diatonicSet',
     inversion <- rep(inversion, length.out = length(x))
     
     ### get line-of-fifths values
-    LO5ths <- split(outer(sign, -1:5, '+') + alter, f = seq_along(sign))
+    LO5ths <- split(outer(sign, -1L:5L, '+') + alter, f = seq_along(sign))
 
     ### reorder (root/inversion/steporder)
-    root <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
+    root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
     
-    order <- lapply(lapply(root + steporder * inversion, seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
+    order <- lapply(lapply(root_inkey + steporder * inversion, seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
     
     LO5ths <- Map(function(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths, order)
     
     # LO5ths <- do.call('rbind', Map(function(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
                                    # root %% 7L, 1:nrow(LO5ths), inversion))
     LO5ths <- do.call('rbind', LO5ths)
+    LO5ths[ , 1] <- root
     
 
     # rownames(LO5ths) <- dset2key(dset)

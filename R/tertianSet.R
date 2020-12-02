@@ -56,12 +56,15 @@ setValidity('tertianSet',
 tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, extension = NULL, inversion = 0L) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
+    match_size(root = root, signature = signature, alterations = alterations,
+               cardinality = cardinality, extension = extension, inversion = inversion, 
+               toEnv = TRUE)
     
     if (is.null(extension)) {
       root <- .ifelse(cardinality == 0L, NA_integer_, root)
       extension <- c(0L, 1L, 3L, 7L, 15L, 31L, 63L, 127L)[cardinality + 1L]
     } else {
-      root <- .ifelse(extension == 0L, NA_integer_, root)
+      root[extension == 0L] <- NA_integer_
     }
    
     
@@ -110,7 +113,7 @@ is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbol(x))
+setMethod('as.character', signature = c('tertianSet'), function(x) tset2chordSymbol(x))
 
 ####. logic methods ####
 
@@ -121,8 +124,8 @@ setMethod('as.character', signature = c('tertianSet'), function(x) as.chordSymbo
 setMethod('==', signature = c('tertianSet', 'tertianSet'),
           function(e1, e2) {
               checkSame(e1, e2, "==")
-              f1 <- dset2LO5ths(e1)
-              f2 <- dset2LO5ths(e2)
+              f1 <- LO5th(e1)
+              f2 <- LO5th(e2)
               
               same <- f1 == f2 | (is.na(f1) & is.na(f2))
               
@@ -157,7 +160,7 @@ setMethod('LO5th', 'tertianSet',
     
     # if (any(alterations != 0L)) LO5ths <- sweep(LO5ths, 1, alterations, alterFifthSet)
     
-    colnames(LO5ths)[5:7] <- nth(c(9,11,13))
+    colnames(LO5ths) <- c('root', nth(c(3,5, 7, 9,11,13)))
     rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(tset, sum = TRUE)), 
                                          step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                                          parts = c('steps', 'accidentals'))
@@ -199,14 +202,162 @@ extension2bit <- function(str) {
 
 
 
-###. x to extensions
-
 ##### To/From tertianSets ####    
 
-###. tset to pitches ####
+###.. tset to pitches ####
 
 
 ####. tset to x ####
+
+
+# As "scientific chord label" (i.e., "Cmm" or "EbMm")
+
+getSciQuality <- function(tset, collapse.triad = TRUE, collapse = TRUE, quality.labels = c()) {
+  setoptions(quality.labels) <- c(major = 'M', minor = 'm', 
+                                  diminish = 'o', augment = '+', 
+                                  perfect = 'P')
+   
+    LO5ths <- LO5th(tset)
+    LO5ths <- sweep(LO5ths, 1, LO5ths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
+    
+    qualities <- array("", dim = dim(LO5ths))
+    qualities[!is.na(LO5ths)] <- LO5th2quality(c(LO5ths[!is.na(LO5ths)]),
+                                               quality.labels = quality.labels,
+                                               quality.cautionary = TRUE,
+                                               quality.memory = FALSE)
+    
+    qualities[nchar(qualities) > 1L] <- .paste('(',  qualities[nchar(qualities) > 1L], ')')
+    if (collapse.triad) {
+        triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, paste, collapse = ''),
+                        function(row) {
+                            switch(row,
+                                   MP = "M",
+                                   mP = "m",
+                                   mo = 'o',
+                                   `M+` = "+",
+                                   .paste('{', row, '}'))
+                            
+                        })
+        qualities[ , 2] <- triads
+        qualities <- qualities[ , -1, drop = FALSE]
+    }
+    
+    colnames(qualities) <- nth(c(3, 5, 7, 9, 11, 13))
+    
+    if (collapse)  apply(qualities, 1, paste, collapse = '') else qualities
+    
+}
+
+
+tset2sciChord <- function(tset) {
+    root <- tset@Root
+    tonalChroma <- tint2tonalChroma(tint( , root), parts = c('steps', 'accidentals'),
+                                    accidental.labels = c(flat = 'b'), step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'))
+   
+    quality <- getSciQuality(tset)
+    
+    .ifelse(!is.na(root) & !is.na(tonalChroma), 
+           .paste(tonalChroma, quality), 
+           NA_character_)
+}
+
+
+tset2chordSymbol <- function(tset, sep = '') {
+  # print highest extension
+  # if 7th is major, print "maj"
+  
+  root <- tset@Root
+  tonalChroma <- tint2tonalChroma(tint( , root), parts = c('steps', 'accidentals'),
+                                  accidental.labels = c(flat = 'b'), step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'))
+  
+  qualities <- getSciQuality(tset, collapse = FALSE, collapse.triad = FALSE,
+                             quality.labels = c(major = 'M', minor = 'b', perfect = 'P', augment = '#', diminish = 'o'))
+  present <- qualities != ""
+  
+
+  
+  # triad qual + 
+  triad <- character(length(tset))
+  triad[qualities[ , '3rd'] == 'b' ] <- 'min'
+  triad[qualities[ , '3rd'] == 'M' & qualities[ , '5th'] == '#'] <- '+'
+  
+  sus <- ifelse(!present[ , '3rd'] & qualities[ , '11th'] == 'P', 'sus4', '')
+  sus[!present[ , '3rd'] & qualities[ , '9th'] == 'M'] <- 'sus2'
+  qualities[sus == 'sus4', '11th'] <- ""
+  qualities[sus == 'sus2',  '9th'] <- ""
+  
+  
+  extra5   <- ifelse(qualities[ , '5th'] == 'o', 'b5', '')
+  extra5[qualities[ , '5th'] == '+' & qualities[ , '3rd'] == 'm'] <- '#5'
+  
+  qualities <- qualities[ , -1:-2, drop = FALSE]
+  
+  # extensions
+  extensions <- matrix(c(7, 9, 11, 13), nrow = length(tset), ncol = 4, byrow = TRUE)
+  extensions[!present[ , '7th'], 4] <- 6
+  extensions[qualities == ""] <- ""
+  
+  topmost <- which(present, arr.ind = TRUE)
+  topmost <- tapply(topmost[ , 'col'], topmost[ , 'row'], max) - 2L
+  nottopmost <- sweep(col(qualities), 1, topmost, '<')
+  
+  altered <- sweep(qualities, 2, c('b', 'M', 'P', 'M'), `!=`) & qualities != ""
+  
+  maj7 <- ifelse(qualities[ , '7th'] == 'M', 'maj', '')
+  altered[qualities[ , '7th'] == 'M' & !apply(altered[, -1], 1, any), 1] <- FALSE
+  qualities[qualities[ , '7th'] == 'M', 1] <- ""
+  
+  
+  extensions[nottopmost & !altered] <- ""
+  qualities[!altered] <- ""
+  
+  extensions[] <- paste0(qualities, extensions)
+  extensions <- apply(extensions, 1, paste, collapse = '')
+  
+  
+  paste0(tonalChroma, triad, maj7, extensions, sus, extra5)
+  # 
+    # scichord <- tset2sciChord(tharm)
+    # root <- stringr::str_extract(scichord, '^[A-G][b#]*')
+    # qual <- stringr::str_remove(scichord, '^[A-G][b#]*')
+    # 
+    # c(M = "",
+    #   m = "min",
+    #   o = "dim",
+    #   `+` = "aug",
+    #   MM = "maj7",
+    #   MMM = 'maj9',
+    #   MMMP = 'maj11',
+    #   `MMM+` = 'maj9(#11)',
+    #   `MMM+M` = 'maj13(#11)',
+    #   Mm = "7",
+    #   Mmm = "b9",
+    #   MmM = "9",
+    #   `Mm+` = "7(#9)",
+    #   `MmM+` = "#11",
+    #   MmMPM = '13',
+    #   MmMPm = 'b13',
+    #   mm = "min7",
+    #   mmM = "min9",
+    #   mmm = "min7(b9)",
+    #   mmMP = "min11",
+    #   MmMP = "11",
+    #   om = "min7(b5)",
+    #   omm = "min7(b5b9)",
+    #   oo = "dim7",
+    #   `+m` = "aug7",
+    #   `+M` = "aug(maj7)",
+    #   `_` = 'dim(b3)',
+    #   `_m` = 'dim7(b5b3)',
+    #   `_o` = 'dim7(b3)'
+    #   )[qual] -> qual
+    # 
+    # IfElse(!is.na(root) & !is.na(qual), .paste(root, sep, qual), NA_character_)
+    
+}
+
+
+####. x to text ####
 
 
 
@@ -244,108 +395,8 @@ romanNumeral2tset <- function(str, accidental.labels = c()) {
   
 }
 
-# As "scientific chord label" (i.e., "Cmm" or "EbMm")
 
-getSciQuality <- function(tset, collapse.triad = TRUE, thirds = 1:6, collapse = TRUE) {
-   
-    LO5ths <- dset2LO5ths(tset)
-    LO5ths <- sweep(LO5ths, 1, LO5ths[ , 1], `-`)[ , -1, drop = FALSE] # center on 0 then remove root
-    
-    qualities <- LO5th2quality(LO5ths,
-                               quality.labels = list(major = 'M', minor = 'm',
-                                                     diminish = 'o', augment = '+',
-                                                     perfect = 'P'))
-    
-    qualities[is.na(qualities)] <- ""
-    qualities[nchar(qualities) > 1L] <- .paste('(',  qualities[nchar(qualities) > 1L], ')')
-    if (collapse.triad) {
-        thirds <- thirds[thirds != 1] - 1
-        triads <- sapply(apply(qualities[ , 1:2, drop = FALSE], 1, .paste, collapse = ''),
-                        function(row) {
-                            switch(row,
-                                   MP = "M",
-                                   mP = "m",
-                                   mo = 'o',
-                                   `M+` = "+",
-                                   .paste('{', row, '}'))
-                            
-                        })
-        qualities[ , 2] <- triads
-        qualities <- qualities[ , -1, drop = FALSE]
-    }
-    
-    qualities <- qualities[ , thirds, drop = FALSE]
-    
-    if (collapse)  apply(qualities, 1, .paste, collapse = '') else qualities
-    
-}
-
-#' @name diatonicSet
-#' @export
-as.sciChord <- function(tharm) {
-    root <- tharm@Root
-    tonalChroma <- LO5th2scaleStep(root, accidental.labels = c(flat = 'b'))
-   
-    quality <- getSciQuality(tharm)
-    
-    IfElse(!is.na(root) & !is.na(tonalChroma), 
-           .paste(tonalChroma, quality), 
-           NA_character_)
-}
-
-
-#' @name diatonicSet
-#' @export
-as.chordSymbol <- function(tharm, sep = '') {
-    scichord <- as.sciChord(tharm)
-    root <- stringr::str_extract(scichord, '^[A-G][b#]*')
-    qual <- stringr::str_remove(scichord, '^[A-G][b#]*')
-    
-    c(M = "",
-      m = "min",
-      o = "dim",
-      `+` = "aug",
-      MM = "maj7",
-      MMM = 'maj9',
-      MMMP = 'maj11',
-      `MMM+` = 'maj9(#11)',
-      `MMM+M` = 'maj13(#11)',
-      Mm = "7",
-      Mmm = "b9",
-      MmM = "9",
-      `Mm+` = "7(#9)",
-      `MmM+` = "#11",
-      MmMPM = '13',
-      MmMPm = 'b13',
-      mm = "min7",
-      mmM = "min9",
-      mmm = "min7(b9)",
-      mmMP = "min11",
-      MmMP = "11",
-      om = "min7(b5)",
-      omm = "min7(b5b9)",
-      oo = "dim7",
-      `+m` = "aug7",
-      `+M` = "aug(maj7)",
-      `_` = 'dim(b3)',
-      `_m` = 'dim7(b5b3)',
-      `_o` = 'dim7(b3)'
-      )[qual] -> qual
-    
-    IfElse(!is.na(root) & !is.na(qual), .paste(root, sep, qual), NA_character_)
-    
-}
-
-# As roman numeral (I, V, viio, etc.)    
-
-
-
-
-# From scientific chord labels (i.e., GMm)
-
-#' @name diatonicSet
-#' @export
-read.sciChord2tertianSet <- function(csym) {
+sciChord2tertianSet <- function(csym) {
     tonalChroma <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
     LO5th <- tonalChroma2LO5th(tonalChroma)
     

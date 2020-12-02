@@ -11,6 +11,6 @@ anySubcorpora(humdrumR)
 namesSubcorpora(humdrumR)
 }
 \description{
-\code{\linkS4class{humdrumR}} can be divided into "subcorpora."
+\link{humdrumR} can be divided into "subcorpora."
 These functions tell us if there are any subcorpora and, if so, what they are called.
 }

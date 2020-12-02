@@ -6,9 +6,6 @@
 \alias{order.diatonicSet}
 \alias{as.diatonicSet}
 \alias{as.diatonicSet.character}
-\alias{as.sciChord}
-\alias{as.chordSymbol}
-\alias{read.sciChord2tertianSet}
 \title{The basic constructor for \code{diatonicSet}s.
 The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
 or a character string which will be coerced to a \code{tonalInterval}.}
@@ -32,17 +29,18 @@ order.diatonicSet(
 
 as.diatonicSet(...)
 
-\method{as.diatonicSet}{character}(str, inPlace = FALSE)
+\method{as.diatonicSet}{character}(
+  str,
+  parts = c("steps", "accidentals"),
+  step.labels = c("C", "c", "D", "d", "E", "e", "F", "f", "G", "g", "A", "a", "B", "b"),
+  alteration.labels,
+  accidental.labels,
+  inPlace = FALSE
+)
 
 \S4method{as.character}{tertianSet}(x)
 
 \S4method{==}{tertianSet,tertianSet}(e1, e2)
-
-as.sciChord(tharm)
-
-as.chordSymbol(tharm, sep = "")
-
-read.sciChord2tertianSet(csym)
 }
 \description{
 The basic constructor for \code{diatonicSet}s.

@@ -15,7 +15,6 @@
 #' See the [pitchRepresentations] and [tonalTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
 #' a detailed explanation of the theory and specifics of `tonalInterval`s.
 #'
-#' @details
 #' 
 #' The `tonalInterval` is a [S4](http://adv-r.had.co.nz/S4.html) subclass of `humdrumR`'s virtual class [struct], from which it inherits a lot of useful "vector-like" behaviors/functionality.
 #' 
@@ -29,11 +28,11 @@
 #' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print] one one) you'll see the [kern pitch][pitchRepresentations] representation printed.
 #' 
 #' @slot Octave integers representing the octave offset.
-#' @slot Fifth integers representing the "line-of-fifths' value.
+#' @slot Fifth integers representing the "line-of-fifths" value.
 #' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
 #' 
-#' @section Arithmatic:
+#' ### Arithmetic
 #' 
 #' Technically, `tonalInterval`s are examples of algebraic [modules over integers](https://en.wikipedia.org/wiki/Module_(mathematics)).
 #' This means that certain arithmetic operations are defined for `tonalIntervals` and can be called using standard arithmetic operators (`+`, `-`, etc.):
@@ -57,7 +56,7 @@
 #' 
 #' 
 #' 
-#' @section Relational Operators:
+#' ## Relational Operators
 #' 
 #' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
 #' Two `tonalInterval`s are equal (according to `==`) only if all their slots (`Octave`, `Fifth`, and `Cent`)
@@ -66,7 +65,7 @@
 #' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
-#' @section Coercion:
+#' ## Coercion
 #' 
 #' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `tonalInterval`s.
 #' This can be done using the [as][methods::as] function---e.g., `as(3, "tonalInterval")`---or more intuitively using the function `as.tonalInterval()`.
@@ -82,7 +81,7 @@
 #' The clever [dispatch system][humdrumR::regexDispatch] will even ignore character strings that are not recognized (see examples)!
 #'
 #' 
-#' @section Predefined Intervals:
+#' ## Predefined Intervals:
 #' 
 #' `humdrumR` automatically exports a bunch of `tonalInterval`s, named by their musical interval representation.
 #' Every generic interval from 1 to 15 is combined with every interval quality `dd` (doubly diminished), `d` (diminished), `m` (minor), `M` (major), `A` (augumented)
@@ -122,7 +121,6 @@
 #' 
 #' 
 #' 
-#' 
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 
@@ -155,8 +153,8 @@ setMethod("initialize",
 
 ##...constructors ####
 
-#' The basic constructor for \code{tonalInterval}s.
-#' \code{tint} accepts integer values for octaves and LO5ths and numeric values for cent.
+#' The basic constructor for `tonalInterval`s.
+#' `tint` accepts integer values for octaves and LO5ths and numeric values for cent.
 #' If the octave argument is missing a "simple" interval is constructed---i.e., an ascending interval less than one octave.
 #' (When appropriate, we can think of these generically as an interval with no specific octave.)
 #' @name tonalInterval
@@ -475,7 +473,6 @@ LO5th2quality <- function(LO5th, Key = NULL,
     # LO5th <- LO5th - getRoot(Key)
     # Key <- Key - getRoot(Key)
   # }
-  
   dontlabel <- alteration.filter(LO5th, Key, quality.cautionary, quality.memory)
   
   # get qualities
@@ -1229,7 +1226,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' 
 #' This function transposes tonalIntervals by other tonal intervals.
 #' By default, does real transposition.
-#' However, if a \code{key} argument is specified, tonal transposition
+#' However, if a `key` argument is specified, tonal transposition
 #' takes place in that (major) key.
 #' @name tonalTransformations
 #' @export
@@ -1421,7 +1418,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' 
 #' Functions for creating and/or translating between numerous representations of pitch.
 #' 
-#' @details 
+#' ## details
 #' 
 #' There are numerous ways that musicians and musicologists encode pitch information---solfege, scientific pitch,
 #' intervals, scale degrees, frequencies, etc.---each with different purposes and uses.
@@ -1476,7 +1473,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' This table illustrates that some reprsentations are lossy, as they don't encode the full pitch information.
 #' For instance, the *scaleDegree* representation drops octave information, while *semit* drops tonal information (i.e., that `C# != Db`).
 #' 
-#' @section Pitch Translation:
+#' ## Pitch Translation
 #' 
 #' `humdrumR` exports functions to read and write all of the standard reprsentations above, as well as some custom non-standard representations (see `as.tonalChroma` below).
 #' An input can be converted to any representation by calling the appropriate function of the form `as.xxx`: for example, `as.solfa`.
@@ -1516,9 +1513,9 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
 #' For example, you can write `as.kernPitch(x, generic = TRUE, Key = "A")` to extract generic intervals in the key of A major and output them in `kernPitch` format.
 #' These transformation arguments are listed as "common" arguments in the table below, and explained in more detail in the [tonalTransformations] documentation.
-
 #' 
-#' @section Reading Pitch Information:
+#' 
+#' ## Reading Pitch Information
 #' 
 #' The master function `as.tonalInterval` converts any recognized pitch input into a `tonalInterval` object.
 #' All the main `as.xxx` functions implicitely call `as.tonalInterval`.
@@ -1582,10 +1579,9 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' (Thus, the `inPlace` argument can be used as a tool to extract the desired part of strings.)
 #' Note that if `inPlace = TRUE`, any inputs which fail to match anything will just be left unchanged.
 #' 
-#'  
 #'
 #' 
-#' @section Read/Writing Tonal Pitch Information:
+#' ## Read/Writing Tonal Pitch Information
 #' 
 #' Most of the pitch representations defined in `humdrumR` are based in Western diatonic *tonality*---for info on our atonal representations, see the *Read/Writing Atonal Pitch Information* section below.
 #' The predefined `kernPitch`, `sciPitch`, `lilyPitch`, `helmholtz`, `interval`, `scaleDegree`, and `solfa` encodings are all tonal representations---in fact, they all represent *essentially* the same absract
@@ -1681,7 +1677,6 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' 
 #' + `step.labels`: a vector of seven elements (default = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) representing the desired names for the seven steps in scale order.
 #' 
-
 #' 
 #' ## Quality and Alterations
 #' 
@@ -1725,15 +1720,12 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' As a result, though sharp accidentals and augmentation qualities always correspond, flat accidentals are *not* equivalent to diminished qualities.
 #' 
 #' 
-#' 
-
 #' HumdrumR's predefined tonal chroma representations (`kernPitch`, `lilyPitch`, `helmholtz`, and `sciPitch`) each include alteration information through three accidental 
 #' indications (sharp, flat, natural).
 #' The `scaleDegree` and `interval` representations encode more general qualities using five categories (major, minor, diminished, augmented, perfect).
 #' The `solfa` representation also encodes quality through conventional (non-systematic) vowel modifications.
 #' More generally, the `as.quality` and `as.accidental` functions can be used extract quality information in isolation.
 #' These functions use some (or all) of the following arguments:
-
 #' 
 #' + `_.labels`:
 #'      + `accidental.labels`: a [named][base::names()] character vector which controls the characters used to represent accidentals. 
@@ -1746,110 +1738,108 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #'      + `quality.labels`: a [named][base::names()] character vector which controls the characters used to represent qualities.
 #'         The characters must be named either `perfect`, `major`, `minor`, `augment`, or `diminish`, with defaults 
 #'         `c(perfect = "P", major = "M", minor = "m", augment = "A", diminish = "d")`.
-#'  + `_.maximum` and `_.minimum`
-#'      + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
-#'      These arguments define the maximum number of multi-accidentals permitted.
-#'      For instance, if `accidental.maximum == 2L`, accidentals of at most `"##"` will be output; a triple sharp will be reduced to just a `"##"`.
-#'      The`_.minimum` argument must be negative (-2 == two flats).
-#'      By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
-#'  + `Key`: a [diatonicSet] object describing the key and mode. Default is `NULL`. If `Key` is specified, only alterations relative to that key are printed 
-#'     (unless the `_.cautionary` or `_.memory` arguments override this).
-#'  + `_.cautionary`: a single logical value. Causes *more* accidentals/qualities to print (details below). Default is `FALSE` for accidentals and `TRUE` for qualities.
-#'  + `_.memory`: a single logical value (default is `FALSE`). Causes *fewer* accidentals/qualities to print (details below).
+#' + `_.maximum` and `_.minimum`
+#'     + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
+#'     These arguments define the maximum number of multi-accidentals permitted.
+#'     For instance, if `accidental.maximum == 2L`, accidentals of at most `"##"` will be output; a triple sharp will be reduced to just a `"##"`.
+#'     The`_.minimum` argument must be negative (-2 == two flats).
+#'     By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
+#' + `Key`: a [diatonicSet] object describing the key and mode. Default is `NULL`. If `Key` is specified, only alterations relative to that key are printed 
+#'    (unless the `_.cautionary` or `_.memory` arguments override this).
+#' + `_.cautionary`: a single logical value. Causes *more* accidentals/qualities to print (details below). Default is `FALSE` for accidentals and `TRUE` for qualities.
+#' + `_.memory`: a single logical value (default is `FALSE`). Causes *fewer* accidentals/qualities to print (details below).
 #'  
-#'  The master `as.tonalChroma` calls these functions, and can thus pass these arguments to them.
-#'  For example, you could write `as.tonalChroma(x, accidental.maximum = 1)`.
+#' The master `as.tonalChroma` calls these functions, and can thus pass these arguments to them.
+#' For example, you could write `as.tonalChroma(x, accidental.maximum = 1)`.
+#' 
 #'  
-#'  ### Cautionary Alterations
+#' ### Cautionary Alterations
+#' 
+#' The interplay between the `Key`, `_.cautionary`, and `_.memory` arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
+#' Generally, the `Key` argument---if not `NULL`---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
+#' The `cautionary` argument causes accidentals that would otherwise be suppressed to print---always *adding* accidentals to the output.
+#' Finally, the `_.memory` argument implements a common practice in music notation where alterations are only printed when the quality of a generic note is different than
+#' the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them, 
+#' in which case, both the natural and the two sharps will print.
+#' Combinations of the `Key`, `_.cautionary` and `_.memory` arguments achieve the following effects:
+#' 
+#' In cases where `Key` is `NULL`:
+#' 
+#' + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the C major set are printed. No naturals are shown.
+#' + `_.cautionary == TRUE  & _.memory == FALSE`: **all** accidentals/qualities are printed (including all naturals).
+#' + `_.cautionary == FALSE & _.memory == TRUE`: alterations of C major set are printed, unless the previous instance of the step was already altered. 
+#'    (Natural notes occuring after a previous alteration are marked natural.)
+#' + `_.cautionary == TRUE  & _.memory == TRUE`: **all** accidentals/qualities print, unless the previous instance of note was already altered. 
+#' 
+#' If, on the other hand, if a `Key` is specified:
+#' 
+#' + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the key are printed. 
+#' + `_.cautionary == TRUE  & _.memory == FALSE`: any alterations of the key are printed as well as any instances of their corresponding in-key quality, so as to assure there is no ambiguity.
+#' + `_.cautionary == FALSE & _.memory == TRUE`: alterations of the key are printed, unless the previous instance of note was already altered. In-key accidentals *are* printed if the previous instance of the note
+#'    was altered.
+#' + `_.cautionary == TRUE  & _.memory == TRUE`: any alterations of the key are printed as well as their corresponding in-key quality, except for in-key accidentals that appear before any corresponding alterations.
+#'   In other words, the `cautionary` rule is applied for any generic note once an alteration is introduced, but not before.
+#' 
+#' 
+#' Some standard, useful represenations are:
+#' + `Key == NULL & _.cautionary == FALSE & _.memory == FALSE`: print all accidentals always, but no naturals (normal kern style).
+#' + `Key == NULL & quality.cautionary == TRUE & quality.memory == FALSE`: print all qualities always (normal humdrum style for intervals).
+#' + `Key == _ & _.cautionary == FALSE & _.memory == TRUE`: print out-of-key accidentals, unless previous note was the same alteration (normal style for music notation).
+#' 
+#' 
+#' The following tables illustrate the behaviors of the accidental/quality arguments in eight different conditions.
+#' In the first four conditions, the `Key` argument is NULL, while in the second group of four the key is Ab major.
+#' Each group of four columns represent the four possible combinations of the `_.cautionary` and `_.memory` arguments, in the pattern
+#' `c(_.cautionary = FALSE, _.memory = FALSE)`, `c(_.cautionary = FALSE, _.memory = TRUE)`, `c(_.cautionary = TRUE, _.memory = FALSE)`, `c(_.cautionary = TRUE, _.memory = TRUE)`.
 #'  
-#'  The interplay between the `Key`, `_.cautionary`, and `_.memory` arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
-#'  Generally, the `Key` argument---if not `NULL`---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
-#'  The `cautionary` argument causes accidentals that would otherwise be suppressed to print---always *adding* accidentals to the output.
-#'  Finally, the `_.memory` argument implements a common practice in music notation where alterations are only printed when the quality of a generic note is different than
-#'  the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them, 
-#'  in which case, both the natural and the two sharps will print.
-#'  Combinations of the `Key`, `_.cautionary` and `_.memory` arguments achieve the following effects:
+#' #### Accidentals
 #'  
-#'  In cases where `Key` is `NULL`:
-#'  
-#'  + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the C major set are printed. No naturals are shown.
-#'  + `_.cautionary == TRUE  & _.memory == FALSE`: **all** accidentals/qualities are printed (including all naturals).
-#'  + `_.cautionary == FALSE & _.memory == TRUE`: alterations of C major set are printed, unless the previous instance of the step was already altered. 
-#'     (Natural notes occuring after a previous alteration are marked natural.)
-#'  + `_.cautionary == TRUE  & _.memory == TRUE`: **all** accidentals/qualities print, unless the previous instance of note was already altered. 
-#'  
-#'  If, on the other hand, if a `Key` is specified:
-#'  
-#'  + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the key are printed. 
-#'  + `_.cautionary == TRUE  & _.memory == FALSE`: any alterations of the key are printed as well as any instances of their corresponding in-key quality, so as to assure there is no ambiguity.
-#'  + `_.cautionary == FALSE & _.memory == TRUE`: alterations of the key are printed, unless the previous instance of note was already altered. In-key accidentals *are* printed if the previous instance of the note
-#'     was altered.
-#'  + `_.cautionary == TRUE  & _.memory == TRUE`: any alterations of the key are printed as well as their corresponding in-key quality, except for in-key accidentals that appear before any corresponding alterations.
-#'    In other words, the `cautionary` rule is applied for any generic note once an alteration is introduced, but not before.
-#'  
-#'  
-#'  Some standard, useful represenations are:
-#'  + `Key == NULL & _.cautionary == FALSE & _.memory == FALSE`: print all accidentals always, but no naturals (normal kern style).
-#'  + `Key == NULL & quality.cautionary == TRUE & quality.memory == FALSE`: print all qualities always (normal humdrum style for intervals).
-#'  + `Key == _ & _.cautionary == FALSE & _.memory == TRUE`: print out-of-key accidentals, unless previous note was the same alteration (normal style for music notation).
-#'  
-#'  
-#'  The following tables illustrate the behaviors of the accidental/quality arguments in eight different conditions.
-#'  In the first four conditions, the `Key` argument is NULL, while in the second group of four the key is Ab major.
-#'  Each group of four columns represent the four possible combinations of the `_.cautionary` and `_.memory` arguments, in the pattern
-#'  `c(_.cautionary = FALSE, _.memory = FALSE)`, `c(_.cautionary = FALSE, _.memory = TRUE)`, `c(_.cautionary = TRUE, _.memory = FALSE)`, `c(_.cautionary = TRUE, _.memory = TRUE)`.
-#'  
-#'  #### Accidentals:
-#'  
-#'  ```{r, echo=FALSE, comment = NA}
-#'  
-#'  kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
-#'  tint <- as.tonalInterval(kern)
-#'  
-#'  rbind( 
-#'  NFF = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'  NFT = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'  NTF = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'  NTT = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'  AbFF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'  AbFT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'  AbTF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'  AbTT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-'))
-#'        ) -> mat
-#'        
-#'        mat <- t(apply(mat, 1, function(row) paste0(tint2scaleStep(tint, c('c', 'd', 'e', 'f', 'g', 'a', 'b')), row)))
-#'        
-#'      colnames(mat) <- kern
-#'      print(format(mat, width = 4), quote = FALSE)
-#'  
-#'  ```
-#'  
-#'  #### Qualities:
-#'  
-#'  ```{r, echo=FALSE, comment = NA}
-#'  
-#'  kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
-#'  tint <- as.tonalInterval(kern)
-#'  
-#'  rbind( 
-#'  NFF = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = FALSE),
-#'  NFT = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = TRUE ),
-#'  NTF = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = FALSE),
-#'  NTT = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = TRUE ),
-#'  AbFF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = FALSE),
-#'  AbFT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = TRUE ),
-#'  AbTF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = FALSE),
-#'  AbTT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = TRUE )
-#'        ) -> mat
-#'        
-#'        mat <- t(apply(mat, 1, function(row) paste0(row, tint2scaleStep(tint))))
-#'        
-#'      colnames(mat) <- kern
-#'      print(format(mat, width = 4), quote = FALSE)
-#'  
-#'  ```
-#'  
-#'  
+#' 
+#' ```{r, echo=FALSE, comment = NA}
+#' 
+#' kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
+#' tint <- as.tonalInterval(kern)
+#' mat <- rbind( 
+#'   NFF = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'   NFT = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'   NTF = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'   NTT = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'   AbFF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'   AbFT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
+#'   AbTF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
+#'   AbTT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')))
+#' 
+#' mat <- t(apply(mat, 1, function(row) paste0(tint2scaleStep(tint, c('c', 'd', 'e', 'f', 'g', 'a', 'b')), row)))
+#' 
+#' colnames(mat) <- kern
+#' print(format(mat, width = 4), quote = FALSE)
+#' 
+#' ```
+#' 
+#' #### Qualities
+#' 
+#' ```{r, echo=FALSE, comment = NA}
+#' 
+#' kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
+#' tint <- as.tonalInterval(kern)
+#' 
+#' rbind( 
+#' NFF = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = FALSE),
+#' NFT = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = TRUE ),
+#' NTF = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = FALSE),
+#' NTT = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = TRUE ),
+#' AbFF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = FALSE),
+#' AbFT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = TRUE ),
+#' AbTF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = FALSE),
+#' AbTT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = TRUE )
+#'       ) -> mat
+#'       
+#'       mat <- t(apply(mat, 1, function(row) paste0(row, tint2scaleStep(tint))))
+#'       
+#'     colnames(mat) <- kern
+#'     print(format(mat, width = 4), quote = FALSE)
+#' 
+#' ```
 #'  
 #' ## Contour (e.g., Octave)
 #' 
@@ -1980,7 +1970,6 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' Atonal pitch representations predefined in `humdrumR` include `semit`, `midi`, `frequency`, `ratio`, and `fraction`.
 #' As mentioned above, `integer` inputs are interpreted as semitones while `numeric` are interpreted as frequency ratios.
 #' 
-
 #' 
 #'   
 #' #### Interpreting Frequencies/Ratios
@@ -2005,7 +1994,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' be C# or Db).
 #' The process `humdrumR` uses to determine the tonal representation of atonal input is influenced by the `accidental.melodic` and
 #' `Key` arguments:
-#' By default (`Key == NULL & accidental.melodic == FALSE``), the line-of-fifths range -3--8 (E flat to G sharp) is used.
+#' By default (`Key == NULL & accidental.melodic == FALSE`), the line-of-fifths range -3--8 (E flat to G sharp) is used.
 #' However, if a `Key` argument is specified, this line-of-fifths range will be shifted to match the corresponding key signature.
 #' For instance, the key Bb minor would read accidentals in the range -8--3 (Fb flat to A natural).
 #' If `accidental.melodic == TRUE`) the atonal notes are interpreted "melodically"---i.e., 
@@ -2015,7 +2004,6 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' However, equal temperament will not provide useful information, so the `Key` and `accidental.melodic` arguments can be used instead.
 #'   
 #'   
-#' 
 #' 
 #' @name pitchRepresentations
 NULL

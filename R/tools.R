@@ -875,14 +875,14 @@ bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L))
 
 
 ints2nits <- function(n, it = 2, nits = 8) {
-    
-    cur <- n%%it
+    #
+    cur <- n %% it
     out <- if (nits <= 1) {
         cbind(cur)
     } else {
         
-        out <- cbind(Recall(n %/% it, it , nits = nits - 1), cur)
-        colnames(out) <- (it^((nits - 1) : 0))
+        out <- cbind(Recall(n %/% it, it , nits = nits - 1L), cur)
+        colnames(out) <- (it^((nits - 1L) : 0L))
         out
         
     }
@@ -893,6 +893,7 @@ ints2nits <- function(n, it = 2, nits = 8) {
 
 
 ints2baltern <- function(n, ntrits = 8L) {
+    # integers to balanced ternary
     tern <- ints2nits(abs(n), it = 3L, ntrits)
     
     while(any(tern == 2L)) {
@@ -903,7 +904,7 @@ ints2baltern <- function(n, ntrits = 8L) {
         tern[twos] <- -1L
         
         twos[ , 'col'] <- twos[ , 'col'] - 1L
-        tern[twos] <- tern[twos] + 1
+        tern[twos] <- tern[twos] + 1L
         
     }
     
@@ -913,7 +914,7 @@ ints2baltern <- function(n, ntrits = 8L) {
     # tern[firstnotzero] <- tern[firstnotzero] * sign(n[n != 0])
     
     ## incorporate sign
-    sweep(tern, 1, sign(n), '*')
+    sweep(tern, 1L, as.integer(sign(n)), '*')
     
  
     
@@ -1261,7 +1262,7 @@ matched <- function(x, table) table[pmatch(x, table)]
 .paste <- function(..., sep = '', collapse = NULL, na.if = any) {
 # paste, but smart about NA values
     args <- list(...)
-    if (length(args) == 1L) return(args[[1]])
+    if (length(args) == 1) return(paste(args[[1]], collapse = collapse))
     
     args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)

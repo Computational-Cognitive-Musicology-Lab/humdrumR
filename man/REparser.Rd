@@ -2,7 +2,8 @@
 % Please edit documentation in R/Regex.R
 \name{REparser}
 \alias{REparser}
-\title{Make a regular expression parser}
+\alias{REparse}
+\title{Parse String Using Regular expressions}
 \usage{
 REparser(
   res,
@@ -12,7 +13,24 @@ REparser(
   parse.rest = FALSE,
   toEnv = FALSE
 )
+
+REparse(
+  str,
+  res,
+  parse.strict = TRUE,
+  parse.exhaust = TRUE,
+  parse.lead = FALSE,
+  parse.rest = FALSE,
+  reverse = FALSE,
+  toEnv = FALSE
+)
 }
 \description{
-Make a regular expression parser
+Takes an input string and parses it into a sequence of regular expressions.
+}
+\details{
+If \code{exhaustive} is TRUE, the string must be exhaustively broken up by the matching regular expressions.
+Superfluous (non-match) characters at the begginning, end, or in bettween matches, will result in
+all \code{NA} being returned.
+If \code{strict} is TRUE, all regular expressions must be matched or \code{NA} is returned.
 }

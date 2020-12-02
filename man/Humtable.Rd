@@ -8,7 +8,7 @@
 getHumtab(humdrumR, dataTypes = 'GLIMdD')
 }
 \description{
-In \code{\link{humdrumR}}, humdrum data is stored (within \code{\linkS4class{humdrumR}} objects)
+In \link{humdrumR}, humdrum data is stored (within \link{humdrumR} objects)
 in a data structure called a \strong{Humdrum Table}. A humdrum table
 is actually a \code{\link[data.table]{data.table}}, from the
 R package of the same name. \code{\link[data.table:data.table]{data.tables}}
@@ -25,6 +25,7 @@ to a row in the humdrum table while a "field" refers to a column.
 }
 \section{Fields}{
 
+
 There are five types of fields in a humdrum table:
 \enumerate{
 \item{Data fields}
@@ -33,7 +34,7 @@ There are five types of fields in a humdrum table:
 \item{Form fields}
 \item{Reference fields}
 }
-When first created by a call to \code{\link{readHumdrum}} every
+When first created by a call to \link{readHumdrum} every
 humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation
 fields (\code{Tandem} and \code{Exclusive}), three section fields, and twelve structure fields. Additional fields
 may be present depending on the content of the humdrum file(s), and even more fields can be created
@@ -45,10 +46,10 @@ Every humdrum table starts with a data
 field called \strong{Token}, which
 contains character strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
-\code{\link{withinHumdrum}}---which can also be called using the
+\link{withinHumdrum}---which can also be called using the
 \code{\link[humdrumR:humPipe]{\%hum>\%}} piping
 operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}.
-(These fields can then be renamed using the \code{$<-} operator, if you want.)
+(These fields can then be renamed using the \verb{$<-} operator, if you want.)
 
 \strong{2. Structure fields:} Structure fields describe where each data point
 came from---which file, which spine, which record, etc.
@@ -56,10 +57,10 @@ Every humdrum table starts with fourteen Structure fields, describing where
 the token came from:
 \describe{
 \item{Filename}{\code{character} - The unique name of the humdrum file. May include an appended path
-if more than one file with the same name were read from different directories (see\code{\link{readHumdrum}} docs).}
+if more than one file with the same name were read from different directories (see\link{readHumdrum} docs).}
 \item{Filepath}{\code{character} - The full file name (including its full path).}
 \item{File}{\code{integer} - A unique number associated with each read file (files are numbered alphabetically).}
-\item{Label}{\code{character} - A label specified during the call to \code{\link{readHumdrum}}, associated with
+\item{Label}{\code{character} - A label specified during the call to \link{readHumdrum}, associated with
 \item{Piece}{\code{integer}} - A number specifying the number of the piece in the corpus. Only different from \code{File} when
 more than one piece were read from the same file.
 a particular REpath-pattern. If no label was specified, patterns are just labeled \code{"_n"}, where "n" is the
@@ -97,13 +98,13 @@ users can create their own tandem interpretation. The best we can do in all case
 identify \emph{all} tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
 character string in the \code{Tandem} field. Users can parse this field using the
-\code{\link{getTandem}} function. If no tandem interpretations occur in a file,
+\link{getTandem} function. If no tandem interpretations occur in a file,
 the \code{Tandem} field is still created, but is simply full of empty strings (\code{""}).
 
 Fortunately, many tandem interpretations are widely used and standardized, and these
 interpretations are known by \code{humdrumR}. Recognized interpretations (such as "\*clef_" and "\*k\link{x}")
-are automatically parsed into their own fields by a call to \code{\link{readHumdrum}}.
-See the \code{\link{readHumdrum}} documentation for more details.
+are automatically parsed into their own fields by a call to \link{readHumdrum}.
+See the \link{readHumdrum} documentation for more details.
 
 \strong{Form fields:} Form fields indicate musical sections, or time windows within
 a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
@@ -111,12 +112,12 @@ Humdrum data may or may not include formal metadata fields, indicated by the tok
 Classified formal marks are put into fields matching their name.
 Unclassified formal marks are placed in a field called \code{Formal} as a default.
 Nested formal categories are appended with an underscore and a number for each level of descent:
-\code{Formal_1, Formal_2, ..., Formal_N}.
+\verb{Formal_1, Formal_2, ..., Formal_N}.
 If part of a section is not given a name in a lower hierarchical level, the field is simply
 empty (\code{""}) at that point.
 
 Humdrum data may or may not also include barlines (tokens beginning \code{'='}).
-\code{\link{readHumdrum}} always Three section fields are
+\link{readHumdrum} always Three section fields are
 \describe{
 \item{Bar}{\code{integer} - How many single barline records have passed before this token?
 If no '=' tokens occur in the file, \code{Bar} is all zeros.}
@@ -134,7 +135,7 @@ If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\
 
 \strong{Reference fields:} Reference fields describe any \emph{Reference Records}
 in the humdrum data. Every reference record (records beginning \code{"!!!"}) in any
-humdrum file in a corpus read by \code{\link{readHumdrum}} is parsed into a field named
+humdrum file in a corpus read by \link{readHumdrum} is parsed into a field named
 by the reference code: \code{"XXX"} in \code{"!!!XXX"}. Reference tokens are all identical throughout
 any humdrum piece. If a reference code appears in one file but not another, the field is
 \code{NA} in the file which does not have the code. If no reference records appear in any

@@ -6,7 +6,7 @@
 \alias{as.matrix.humdrumR}
 \alias{as.matrices}
 \alias{as.data.frames}
-\title{\code{\linkS4class{humdrumR}} coersion.}
+\title{\link{humdrumR} coersion.}
 \usage{
 \S4method{as.vector}{humdrumR}(x, mode = "any")
 
@@ -43,24 +43,24 @@ as.data.frames(
 \item{mode}{If the \code{mode} argument is not \code{'any'}, it can be a single \code{character}
 string naming an atomic mode---the output will be coerced to this mode (if possible).}
 
-\item{dataTypes}{Which types of humdrum records to include. Legal values are \code{'G', 'L', 'I', 'M', 'D', 'd'}
+\item{dataTypes}{Which types of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).}
 
 \item{padder}{An atomic value of length one. If \code{par.files} or \code{pad.paths} are true, the \code{padder}
 argument is used to fill in the desired gaps.}
 
-\item{pad.files}{\code{logical} (default \code{TRUE}). If any pieces in the \code{\linkS4class{humdrumR}} corpus have fewer
+\item{pad.files}{\code{logical} (default \code{TRUE}). If any pieces in the \link{humdrumR} corpus have fewer
 \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the \code{padder} argument (\code{par.files == TRUE}) or
 should an an error occur (\code{pad.files == FALSE})? Note that these "padded" points are not represented in the original humdrum data.}
 
-\item{pad.paths}{\code{logical} If any spine path splits (\code{'*^'}) occur in the \code{\linkS4class{humdrumR}} data, should they be padded
+\item{pad.paths}{\code{logical} If any spine path splits (\code{'*^'}) occur in the \link{humdrumR} data, should they be padded
 with the \code{padder} argument (\code{par.files == TRUE}) or
 should an an error occur (\code{pad.paths == FALSE})?
 Note that these "padded" points are not represented in the original humdrum data.}
 
 \item{field(s)}{If the \code{field} argument is \emph{not} \code{NULL}, it can instead be a \code{character} string matching
-the \code{\linkS4class{humdrumR}} object's fields. If so, these fields are extracted instead of the
+the \link{humdrumR} object's fields. If so, these fields are extracted instead of the
 \code{\link[humdrumR:humdrumR-class]{Active expression}}.
 For calls to \code{as.vector} and \code{as.data.frame}, only one field can be extracted.
 However, for calls to \code{as.matrix}, multiple fields can be extraced---these fields will be
@@ -70,15 +70,15 @@ returned in a third matrix dimension, each field forming one rectangular slice.}
 Many users may wish to work with humdrum data without
 using the \code{\link[humdrumR:humdrumR]{humdrumR}} API, instead using
 basic \code{R} data types.
-For this purpose, \code{\linkS4class{humdrumR}} data objects can be coerced to
+For this purpose, \link{humdrumR} data objects can be coerced to
 basic \code{R} data types.
 }
 \details{
-\code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the \code{\linkS4class{humdrumR}} object's
+\code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the \link{humdrumR} object's
 \strong{Active} expression, and (attempts) to force the result to a vector of mode. This
-method is essentially a wrapper for \code{\link{evalActive}}.
+method is essentially a wrapper for \link{evalActive}.
 
-\code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the \code{\linkS4class{humdrumR}} object's
+\code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the \link{humdrumR} object's
 \strong{Active} expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
 Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines.
 
@@ -86,5 +86,5 @@ Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not nec
 \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls \code{as.matrix} then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
 
 \code{as.matrices}, \code{as.data.frames}, and \code{as.data.tables} call \code{as.matrix}/\code{as.data.frame}/\code{as.data.table}
-on each individual file in a \code{\linkS4class{humdrumR}} corpus, returning a list of matices/data.frames/data.tables.
+on each individual file in a \link{humdrumR} corpus, returning a list of matices/data.frames/data.tables.
 }

@@ -202,6 +202,7 @@ The best part is \code{withinHumdrum} will reset \code{par} to it's previous sta
 
 \section{Tandem interpretations}{
 
+
 The function \code{\link{readHumdrum}} automatically parses
 tandem interpretations (that it recognizes) into
 their own fields in the resulting \code{\linkS4class{humdrumR}} data.
@@ -228,6 +229,7 @@ which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
 
 \section{Splatting}{
 
+
 ("Splatting" refers to feeding a function a list/vector of arguments.)
 Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
 rather than applying the same expression to each piece, we want to feed
@@ -253,6 +255,7 @@ withinHumdrum(humData,
 
 \section{Argument interpolation}{
 
+
 Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateArguments]{interpolated}} into the
 \code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
 to make small changes to a function call within the \code{do} expressions, without starting from scratch.
@@ -267,6 +270,7 @@ withinHumdrum(humdata,
 }
 
 \section{Piping}{
+
 
 For calls to \code{withinHumdrum}, the result of each \code{do} expression
 is insterted back into the \code{\link[humtable]{humdrum table}}. The results

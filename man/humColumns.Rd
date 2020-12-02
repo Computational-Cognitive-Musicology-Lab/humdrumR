@@ -22,7 +22,7 @@ Another similar issue is that a corpus of humdrum files may have varying numbers
 multi-column local records.)
 }
 \details{
-In \code{\link{humdrumR}}, spines, columns, and spine paths work like this.
+In \link{humdrumR}, spines, columns, and spine paths work like this.
 First of all, we actually assume a slightly more strict version of the humdrum syntax:
 we assume that all the spines which appear at the beginning of a file (headed with exlusive interpretations
 like \code{"**kern"}) can never merge into each other. Thus, a humdrum file read into \code{humdrumR}
@@ -45,7 +45,7 @@ A spine with no splits will have all \code{0L}s in its \code{Path} field.
 It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 (This always requires removing global records.)
 In order to do this, while maintaining a sensible relationship between spine which have spine paths,
-\code{\link{humRead}} automatically \emph{pads} humdrum data into a complete, non-ragged 2d table.
+\link{humRead} automatically \emph{pads} humdrum data into a complete, non-ragged 2d table.
 For instance, given this file
 \preformatted{
 **kern  **kern
@@ -57,7 +57,7 @@ G       B       D
 A       C        
 *-      *-
 }
-\code{\link{humRead}} pads the file as so:
+\link{humRead} pads the file as so:
 \preformatted{
 **kern   _P       **kern
 A        _P       E
@@ -76,12 +76,12 @@ A        _P       C
 (In this example, the \code{Spine}, \code{Path}, and \code{Column} values are shown below the data.)
 The \code{"_P"} tokens stand for "padded path."
 This appraoch assures that every \strong{Spine} is a contiguous block of tokens, of constant width.
-In most \code{\link{humdrumR}} use cases, these padding tokens (and the \code{Column} field) can be safely ignored.
+In most \link{humdrumR} use cases, these padding tokens (and the \code{Column} field) can be safely ignored.
 }
 
 \section{Corpus padding}{
 
-\code{\link{humRead}} automatically pads spine paths \emph{within pieces}.
+\link{humRead} automatically pads spine paths \emph{within pieces}.
 However, as mentioned above, there is also (sometimes) a need to pad across pieces, in order
 to create a logical, clean 2d structure.
 Consider this example, with humdrum data from two pieces:
@@ -186,7 +186,7 @@ E         _C        D        _P
 0         1         0        1         Path
 1         2         3        4         Column
 }
-Note that code{alignColumns} actually adds rows to the \code{\linkS4class{humdrumR}} object's
+Note that code{alignColumns} actually adds rows to the \link{humdrumR} object's
 internal \code{\link[humdrumR:humTable]{humdrum tables}}.
 }
 

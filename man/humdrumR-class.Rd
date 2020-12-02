@@ -43,7 +43,7 @@ This \code{S4} class is the basic unit of the
 \code{\link[humdrumR:humdrumR]{humdrumR}} package.
 Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or
 more humdrum files.
-In the documentation we refer to the collection of files within a \code{\linkS4class{humdrumR}} object
+In the documentation we refer to the collection of files within a \link{humdrumR} object
 as a "\strong{corpus}," and each file as a "\strong{piece}."
 However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
 files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
@@ -60,17 +60,17 @@ In coding examples, we name \code{humdrumR} objects \code{\strong{humdata}}.
 but containing data from different types of records (e.g., interpretations, data, barlines, comments).}
 
 \item{\code{Files}}{A list of two elements. The first, "Search", contains a single character representing
-the \code{pattern} used in the call to \code{\link{readHumdrum}} which created this \code{humdrumR} object.
+the \code{pattern} used in the call to \link{readHumdrum} which created this \code{humdrumR} object.
 The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
 and were read into the \code{humdrumR} object.}
 
 \item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
-The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\code{\link{fields}}).}
+The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\link{fields}).}
 
 \item{\code{Active}}{A quosure expression which
 extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."}
 
-\item{\code{LoadTime}}{A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \code{\link{readHumdrum}} was
+\item{\code{LoadTime}}{A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \link{readHumdrum} was
 called to create this \code{humdrumR} object.}
 
 \item{\code{Patterns}}{A character vector of the original search patterns used to match files in the system.}

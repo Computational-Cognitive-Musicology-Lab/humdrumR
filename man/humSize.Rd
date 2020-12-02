@@ -26,7 +26,7 @@ is.empty(humdrumR)
 \description{
 These functions can be used to quickly
 get basic information about the size and "shape" of
-a \code{\linkS4class{humdrumR}} corpus.
+a \link{humdrumR} corpus.
 For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
 }
 \details{
