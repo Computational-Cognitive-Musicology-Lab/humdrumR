@@ -533,7 +533,7 @@ regexGeneric <- function(...) {
 
 
 
-humdrumDispatch <- function(...) {
+humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
     exprs <- rlang::enexprs(...)
     
     
@@ -551,24 +551,30 @@ humdrumDispatch <- function(...) {
     
     names(exprs) <- names(REexprs) <- dispatchExclusive
     
-    
+    #
     regexDispatch     <- .regexDispatch(unname(exprs))
     exclusiveDispatch <- .exclusiveDispatch(exprs)
-    #
-  
-    # regexes <- attr(exclusiveDispatch, 'regexes')
-    
-    body <- rlang::expr({
-      regexes <- list(!!!REexprs)
+   
+    ## 
+    body <- if (doExclusiveDispatch) {
+      rlang::expr({
+        regexes <- list(!!!REexprs)
+        
+        if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
+      })
       
-      if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
-    })
-    
-    
+    } else {
+      rlang::expr({
+        regexes <- list(!!!REexprs)
+        
+        !!regexDispatch
+      })
+    }
+    #
     arguments <- c(x = rlang::missing_arg(), 
-                   list(Exclusive = NULL),
+                   if (doExclusiveDispatch) list(Exclusive = NULL),
                    arguments,
-                   inPlace = TRUE)
+                   inPlace = FALSE)
     
     rlang::new_function(arguments, body)
     

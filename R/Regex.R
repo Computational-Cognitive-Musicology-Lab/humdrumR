@@ -340,6 +340,51 @@ predicateParse <- function(predicate, argnames, ...) {
 
 
 
+#' Making Regular Expressions
+#' 
+#' `humdrumR` includes some helpful functions for creating new regular expressions which work with the
+#' [stringr] package.
+#' 
+#' `captureRE` will take a character vector and collapse it to a "capture group."
+#' The `n` argument can be used to append a number tag, for instance `'*'` (zero or more) to the group.
+#' I.e., `captureRE(c("a", "b", "c"), '*')` will output `"[abc]*"`.
+#' 
+#' `captureUniq` will make a similar capture group to `captureRE`, but with an expression
+#' that makes sure that only 1 or more *of the same character* repeats.
+#' For instance, `captureUniq(c('a', 'b','c'))` will return `"([abc])\\1*"`---this expression will match
+#' `"aaa"` or `"bb"` but not `"aabb"`.
+#' 
+#' @name regexConstruction
+#' @export
+captureRE <- function(strs, n = '') {
+    strs <- strs[order(nchar(strs), decreasing = TRUE)]
+    
+    if (length(strs) > 1) {
+        multi <- nchar(strs) > 1L & !grepl('-', strs)
+        strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
+                        if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
+                      collapse = '|')
+    }
+    
+    
+    
+    
+    escaper(paste0('(', strs, ')', n))
+}
+
+#' @name regexConstruction
+#' @export
+captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
+# takes a RE capture group and makes it so it will only match one or more of the same character
+
+escaper <- function(str) {
+    stringr::str_replace_all(str, '\\[\\^', '[\\\\^')
+    
+}
+
+
+
+
 cREs <- function(REs, parse.exhaust = TRUE) {
     if (length(REs) == 0) return('')
     REs <- unlist(paste0('(?:', REs, ')'))
@@ -364,7 +409,9 @@ cREs <- function(REs, parse.exhaust = TRUE) {
     
 }
 
-makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  paste0('[-+]?', captureRE(step.labels))
+####. REs for tonalIntervals ####
+
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ..., step.sign = TRUE)  paste0(if (step.sign) '[-+]?', captureRE(step.labels))
 
 makeRE.accidentals <- function(accidental.labels = c(), ...) {
     setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
@@ -437,50 +484,67 @@ makeRE.solfa <- function(parts = c('steps', 'accidentals'), ..., collapse = TRUE
 makeRE.decimal <- function() c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
 makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
-#################### Developer Regex Tools ----
 
-#' Making Regular Expressions
-#' 
-#' `humdrumR` includes some helpful functions for creating new regular expressions which work with the
-#' [stringr] package.
-#' 
-#' `captureRE` will take a character vector and collapse it to a "capture group."
-#' The `n` argument can be used to append a number tag, for instance `'*'` (zero or more) to the group.
-#' I.e., `captureRE(c("a", "b", "c"), '*')` will output `"[abc]*"`.
-#' 
-#' `captureUniq` will make a similar capture group to `captureRE`, but with an expression
-#' that makes sure that only 1 or more *of the same character* repeats.
-#' For instance, `captureUniq(c('a', 'b','c'))` will return `"([abc])\\1*"`---this expression will match
-#' `"aaa"` or `"bb"` but not `"aabb"`.
-#' 
-#' @name regexConstruction
-#' @export
-captureRE <- function(strs, n = '') {
-    strs <- strs[order(nchar(strs), decreasing = TRUE)]
-    
-    if (length(strs) > 1) {
-        multi <- nchar(strs) > 1L & !grepl('-', strs)
-        strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
-                        if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
-                      collapse = '|')
-    }
-    
+####. REs for diatonic sets ####
 
+makeRE.alterations <- function(alteration.labels, ...) {
+    # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
+    # names(alteration.labels) <- gsub('diminish', 'flat', names(alteration.labels))
     
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     
-    escaper(paste0('(', strs, ')', n))
+    paste0('(', 
+           makeRE.tonalChroma(c('qualities', 'steps'),
+                              quality.labels = alteration.labels,
+                              step.sign = FALSE,
+                              step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13)),
+           ')*')
 }
 
-#' @name regexConstruction
-#' @export
-captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
-# takes a RE capture group and makes it so it will only match one or more of the same character
+makeRE.key <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
+    setoptions(accidental.labels) <- c(flat = '-')
     
-escaper <- function(str) {
-    stringr::str_replace_all(str, '\\[\\^', '[\\\\^')
+    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = '[A-Ga-g]',
+                              ...,
+                              step.sign = FALSE, collapse = FALSE)
     
+    REs['colon'] <- ':'
+    REs['star'] <- '\\*'
+    
+    REs['mode'] <- captureRE(c('dor', 'phy', 'mix', 'loc', 'lyd'), n = '?')
+    REs['alterations'] <- makeRE.alterations(alteration.labels)
+    
+    REs <- REs[c('star', 'steps', 'accidentals', 'colon', 'mode', 'alterations')]
+    
+    if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
+makeRE.romanNumeral <- function(..., alteration.labels = c(), collapse = TRUE) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    
+    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = c('I', 'i', 'II', 'ii', 'III', 'iii', 'IV', 'iv', 'V', 'v', 'VI', 'vi', 'VII', 'vii'),
+                              ...,
+                              step.sign = FALSE, collapse = FALSE)
+    
+    REs['star'] <- '^\\*?'
+    
+    REs['mode'] <- captureRE(c('dor', 'phy', 'mix', 'loc', 'lyd'), n = '?')
+    REs['alterations'] <- makeRE.alterations(alteration.labels)
+    
+    REs <- REs[c('star', 'steps', 'accidentals', 'mode', 'alterations')]
+    
+    if (collapse) setNames(cREs(REs), 'key') else REs
+}
+
+
+makeRE.signature <- function(accidental.labels = c(), ...) {
+    setoptions(accidental.labels) <- c(flat = '-')
+    
+    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
+    paste0('^\\*k\\[(', RE, ')*\\]')
+}
 
 
 

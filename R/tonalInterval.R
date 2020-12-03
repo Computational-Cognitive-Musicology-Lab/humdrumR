@@ -2055,9 +2055,6 @@ as.contour       <- pitchgeneric("as.contour"  , endargs = alist(contour.labels 
 
 ###.. x as tint ####
 
-#' Convert to tonalIntervals
-#' 
-#' Blah blah
 #' @export
 as.tonalInterval.tonalInterval <- tonalTransform
 
@@ -2090,7 +2087,7 @@ setAs('integer', 'tonalInterval', function(from) semit2tint(from))
 #' @export
 setAs('numeric', 'tonalInterval', function(from) decimal2tint(from))
 #' @export
-setAs('character', 'tonalInterval', function(from) as.tonalInterval.character(from))
+setAs('character', 'tonalInterval', function(from) char2tint(from))
 #' @export
 setAs('matrix', 'tonalInterval', function(from) as.tonalInterval(c(from)) %dim% from)
 
@@ -2260,12 +2257,6 @@ transposeTo.character <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as
 transposeTo.numeric <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.tonalInterval.numeric
 #' @export
 transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% as.tonalInterval.integer
-
-
-
-
-
-
 
 
 

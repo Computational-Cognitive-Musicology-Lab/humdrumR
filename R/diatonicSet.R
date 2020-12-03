@@ -333,6 +333,17 @@ setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
           })
 
 #' @export
+setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
+          function(e1, e2) {
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              
+              lof <- e2@Fifth
+              
+              dset(getRoot(e1) + lof, getSignature(e1) + lof, e1@Alteration)
+              
+          })
+
+#' @export
 setMethod('-', signature = c('diatonicSet', 'integer'),
           function(e1, e2) {
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
@@ -592,6 +603,7 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
 }
 
 
+
 ####. x to dset ####
 
 
@@ -703,7 +715,7 @@ signature2dset <- function(str, mode = 0L) {
 
 key2dset <- function(str, parts = c('steps', 'accidentals'), 
                      step.labels = c('C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'A', 'a', 'B', 'b'), 
-                     alteration.labels, accidental.labels) {
+                     alteration.labels = c(), accidental.labels = c()) {
     
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
@@ -714,11 +726,7 @@ key2dset <- function(str, parts = c('steps', 'accidentals'),
                                         accidental.labels = accidental.labels,
                                         step.labels = step.labels)
     
-    alterationRE <- paste0('(', 
-                           makeRE.tonalChroma(c('accidentals', 'steps'),
-                                       accidentals.labels = alteration.labels,
-                                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13)),
-                           ')+')
+    alterationRE <- makeRE.alterations(alteration.labels)
     
     REparse(str, 
             parse.strict = FALSE, parse.exhaust = FALSE, 
@@ -761,22 +769,14 @@ romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = 
 
 # 
 
+##... Numbers
 
-#' @name diatonicSet
-#' @export as.diatonicSet as.diatonicSet.diatonicSet
-as.diatonicSet <- function(...) UseMethod('as.diatonicSet')
-
-as.diatonicSet.diatonicSet <- force
-
-#' @name diatonicSet
-#' @export
-as.diatonicSet.character <- regexDispatch( '[A-Ga-g][#b-]*:' = key2dset,
-                                          '.' = force)
-#' @export
-as.diatonicSet.integer <- function(x) dset(x, x)
+integer2dset <- function(x) dset(x, x)
 
 
-##### Diatonic transforms ####
+
+
+##### Tonals transforms ####
 
 
 
@@ -784,11 +784,7 @@ as.diatonicSet.integer <- function(x) dset(x, x)
 #' Pitch translations
 #' 
 #' These functions translate various pitch representations
-#' between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
-#' they will even (automatically) read parts of a string which represent a pitch,
-#' and translate only that part (leaving the rest of the string unchanged).
-#' They all have an option \code{inPlace} which can be set to \code{FALSE}
-#' if you want them to discard non-pitch parts of the string(s).
+#' 
 #' 
 #' Under the hood, these functions use the \code{\link{humdrumR}} 
 #' \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the 
@@ -800,8 +796,116 @@ as.diatonicSet.integer <- function(x) dset(x, x)
 
 ##### As x ####
 
+#' Diatonic set representations
+#' 
+#' Diatonic sets can be read/wrote in various ways.
+#' 
+#' @name diatonicRepresentations
+NULL
+
 ####. generics ####
+
+
+
+#' @name diatonicSet
+#' @export as.diatonicSet as.key as.signature as.romanNumeral
+as.diatonicSet  <- function(x, ...) UseMethod('as.diatonicSet')
+as.key          <- function(x, ...) UseMethod('as.key')
+as.signature    <- function(x, ...) UseMethod('as.signature')
+as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
+
 
 ####. methods ####
 
+###.. x as dset ####
+
+#' @export
+as.diatonicSet.diatonicSet <- force
+
+#' @export
+as.diatonicSet.numeric <- integer2dset %.% as.integer
+
+
+char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                             'key: makeRE.key(...)' = key2dset,
+                             'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,
+                             'signature: makeRE.signature(...)' = signature2dset)
+
+#' @export
+as.diatonicSet.character <- char2dset
+
+#....
+
+#' @export
+setAs('integer', 'diatonicSet', function(from) integer2dset(from))
+#' @export
+setAs('numeric', 'diatonicSet', function(from) integer2dset(as.integer(from)))
+#' @export
+setAs('character', 'diatonicSet', function(from) char2dset(dset))
+#' @export
+setAs('matrix', 'diatonicSet', function(from) as.diatonicSet(c(from)) %dim% from)
+
+
+###.. dset as x ####
+
+#' @export
+as.key.diatonicSet          <- dset2key
+#' @export
+as.signature.diatonicSet    <- dset2signature
+#' @export
+as.romanNumeral.diatonicSet <- dset2romanNumeral
+
+###. x as y ####
+
+#.... numeric -> y ####
+
+
+#' @export
+as.key.numeric <- dset2key %.% as.diatonicSet.numeric
+#' @export
+as.signature.numeric <- dset2key %.% as.diatonicSet.numeric
+#' @export
+as.romanNumeral.numeric <- dset2key %.% as.diatonicSet.numeric
+
+#.... character -> y ####
+
+#' @export
+as.key.character          <- re.place %.% dset2key %.% as.diatonicSet.character
+#' @export
+as.signature.character    <- re.place %.% dset2signature %.% as.diatonicSet.character
+#' @export
+as.romanNumeral.character <- re.place %.% dset2romanNumeral %.% as.diatonicSet.character
+
+
+##### Tonal transform methods ####
+
 ##### Predefined diatonicSets ####
+#' @export Eflatmajor Cminor Asharpminor Fdorian Dsharpdorian Bflatmixolydian Gsharpmixolydian Eflatlydian Cphrygian Asharpphrygian Flocrian Dsharplocrian 
+#' @export Amajor Fflatmajor Dminor Bsharpminor Gdorian Esharpdorian Cflatmixolydian Alydian Fflatlydian Dphrygian Bsharpphrygian Glocrian Esharplocrian 
+#' @export Bmajor Gflatmajor Eminor Csharpminor Aflatdorian Fsharpdorian Dflatmixolydian Blydian Gflatlydian Ephrygian Csharpphrygian Aflatlocrian Fsharplocrian 
+#' @export Cmajor Asharpmajor Fminor Dsharpminor Bflatdorian Gsharpdorian Eflatmixolydian Clydian Asharplydian Fphrygian Dsharpphrygian Bflatlocrian Gsharplocrian 
+#' @export Dmajor Bsharpmajor Gminor Esharpminor Cflatdorian Amixolydian Fflatmixolydian Dlydian Bsharplydian Gphrygian Esharpphrygian Cflatlocrian 
+#' @export Emajor Csharpmajor Aflatminor Fsharpminor Dflatdorian Bmixolydian Gflatmixolydian Elydian Csharplydian Aflatphrygian Fsharpphrygian Dflatlocrian 
+#' @export Fmajor Dsharpmajor Bflatminor Gsharpminor Eflatdorian Cmixolydian Asharpmixolydian Flydian Dsharplydian Bflatphrygian Gsharpphrygian Eflatlocrian 
+#' @export Gmajor Esharpmajor Cflatminor Adorian Fflatdorian Dmixolydian Bsharpmixolydian Glydian Esharplydian Cflatphrygian Alocrian Fflatlocrian 
+#' @export Aflatmajor Fsharpmajor Dflatminor Bdorian Gflatdorian Emixolydian Csharpmixolydian Aflatlydian Fsharplydian Dflatphrygian Blocrian Gflatlocrian 
+#' @export Bflatmajor Gsharpmajor Eflatminor Cdorian Asharpdorian Fmixolydian Dsharpmixolydian Bflatlydian Gsharplydian Eflatphrygian Clocrian Asharplocrian 
+#' @export Cflatmajor Aminor Fflatminor Ddorian Bsharpdorian Gmixolydian Esharpmixolydian Cflatlydian Aphrygian Fflatphrygian Dlocrian Bsharplocrian 
+#' @export Dflatmajor Bminor Gflatminor Edorian Csharpdorian Aflatmixolydian Fsharpmixolydian Dflatlydian Bphrygian Gflatphrygian Elocrian Csharplocrian 
+#' 
+allkeys <- expand.grid(Step = LETTERS[1:7], stringsAsFactors = FALSE,
+                       Accidental = c('', 'flat', 'sharp'),
+                       Mode = c('major', 'minor', 'dorian', 'mixolydian', 'lydian', 'phrygian', 'locrian'))
+allkeys <- within(allkeys, Handle <- paste0(Step, Accidental, Mode))
+allkeys$Step <- ifelse(allkeys$Mode %in% c('minor', 'dorian', 'phrygian', 'locrian'), tolower(allkeys$Step), allkeys$Step)
+allkeys$Mode <- ifelse(allkeys$Mode %in% c('major', 'minor') , '', substr(allkeys$Mode, 1, 3))
+                      
+
+allkeys$Accidental <- c('', '-', '#')[match(allkeys$Accidental, c('', 'flat', 'sharp'))]
+                      
+allkeys <- within(allkeys, String <- paste0('*', Step, Accidental, ':', Mode))
+
+
+for (i in 1:nrow(allkeys)) {
+    assign(allkeys$Handle[i], as.diatonicSet(allkeys$String[i]))
+}

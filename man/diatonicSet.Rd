@@ -5,7 +5,6 @@
 \alias{dset}
 \alias{order.diatonicSet}
 \alias{as.diatonicSet}
-\alias{as.diatonicSet.character}
 \title{The basic constructor for \code{diatonicSet}s.
 The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
 or a character string which will be coerced to a \code{tonalInterval}.}
@@ -27,31 +26,17 @@ order.diatonicSet(
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
 
-as.diatonicSet(...)
-
-\method{as.diatonicSet}{character}(
-  str,
-  parts = c("steps", "accidentals"),
-  step.labels = c("C", "c", "D", "d", "E", "e", "F", "f", "G", "g", "A", "a", "B", "b"),
-  alteration.labels,
-  accidental.labels,
-  inPlace = FALSE
-)
+as.diatonicSet(x, ...)
 
 \S4method{as.character}{tertianSet}(x)
 
 \S4method{==}{tertianSet,tertianSet}(e1, e2)
 }
 \description{
-The basic constructor for \code{diatonicSet}s.
-The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
-or a character string which will be coerced to a \code{tonalInterval}.
-
-\code{diatonicSets} methods for \code{\link[base]{order}} and
-\code{\link[base]{sort}} order/sort along the circle of LO5ths.
-Signatures are sorted secondarily from fewest flats to most sharps.
-If \code{parallel = TRUE} all modes are grouped by shared tonics, so
-C minor and C major will appear besides each other.
-If \code{parallel = FALSE} modes/keys are sorted together by number of accidentals,
-so C minor and Eb major will be sorted next to each other.
+These functions translate various pitch representations
+}
+\details{
+Under the hood, these functions use the \code{\link{humdrumR}}
+\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
+fundamental, \emph{lingua franca} representation of pitch.
 }
