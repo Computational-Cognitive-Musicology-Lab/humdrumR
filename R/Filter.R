@@ -567,9 +567,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
           function(x, j) {
-              i <- wrapInCall('any', i)
+              j <- wrapInCall('any', j)
               
-              filterHumdrum(x, i, by ~ File ~ Spine,
+              filterHumdrum(x, j, by ~ File ~ Spine,
                             recordtypes ~ "D", indexGLIM = TRUE)
           })
 

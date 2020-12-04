@@ -706,7 +706,7 @@ parseReference <- function(refTable, reference) {
     
   refrecords <- stringr::str_sub(refTable, start = 4L) # rid of !!!
   
-  refTable <- as.data.table(stringi::stri_split_fixed(refrecords, ':', n = 2, simplify = TRUE))
+  refTable <- as.data.table(stringi::stri_split_regex(refrecords, ': *', n = 2, simplify = TRUE))
   colnames(refTable) <- c('refKeys', 'refVals')
   
   # if there is no colon, there is no key so need to shift the first column over and insert "Unkeyed"

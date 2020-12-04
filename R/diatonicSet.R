@@ -879,6 +879,24 @@ romanNumeral.character <- re.place %.% dset2romanNumeral %.% diatonicSet.charact
 
 ##### Tonal transform methods ####
 
+
+#' @export
+is.major <- function(x) UseMethod('is.major')
+#' @export
+is.minor <- function(x) UseMethod('is.minor')
+
+#' @export
+is.major.diatonicSet <- function(x) getMode(x) >= 1L
+#' @export
+is.minor.diatonicSet <- function(x) getMode(x) < -1L
+
+#' @export
+is.minor.diatonicSet <- function(x) getMode(x) == -3L
+#' @export
+is.minor.character <- is.minor.diatonicSet %.% char2dset
+
+
+
 ##### Predefined diatonicSets ####
 #' @export Eflatmajor Cminor Asharpminor Fdorian Dsharpdorian Bflatmixolydian Gsharpmixolydian Eflatlydian Cphrygian Asharpphrygian Flocrian Dsharplocrian 
 #' @export Amajor Fflatmajor Dminor Bsharpminor Gdorian Esharpdorian Cflatmixolydian Alydian Fflatlydian Dphrygian Bsharpphrygian Glocrian Esharplocrian 

@@ -918,10 +918,15 @@ xifyQuo <- function(expression, usedInExpr, depth = 1L) {
           
           lambdaexpression      <- quote(function() {} )
           lambdaexpression[[2]] <- fargs
-          lambdaexpression[[3]] <- rlang::quo_get_expr(expression)
+          lambdaexpression[[3]] <- rlang::quo_squash(expression)
+          # 
+          # lambdaexpression <- rlang::new_quosure(quote(function() {}))
+          # lambdaexpression[[2]][[2]] <- fargs
+          # lambdaexpression[[2]][[3]] <- expression
           
-          rlang::quo_set_expr(expression, lambdaexpression)
-          
+          # rlang::quo_set_expr(expression, lambdaexpression)
+          rlang::quo(!!lambdaexpression)
+          # 
 }
 
 
@@ -935,8 +940,8 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   rlang::quo_set_expr(funcQuosure, 
-                      rlang::expr(Map(f = !!rlang::quo_get_expr(funcQuosure), 
-                                      !!!lapply(usedInExpr, rlang::sym))))
+                      rlang::expr({Map(f = !!rlang::quo_get_expr(funcQuosure), 
+                                      !!!lapply(usedInExpr, rlang::sym))}))
 
 }
 

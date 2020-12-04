@@ -559,6 +559,8 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
                            fieldnames = fieldname[1], alignColumns = alignColumns,
                            path.fold = !padPaths)
           
+          mat[is.na(mat)] <- ""
+          
           lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
           names(lines) <- rownames(mat)
           
@@ -1162,6 +1164,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   }
   
   if (forceVector) {
+      if (is.factor(values)) values <- as.character(values)
       if (is.list(values)) {     
           vectors <- sapply(class, is.atomic)
           
@@ -1449,7 +1452,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
   # nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
   for (name in names(value)) {
     # newfield <- if (value[name] == 'character') nulltypes[humtab$Type] else as(NA, value[name])
-    humtab[[name]] <- as(NA, value[name])
+    humtab[[name]] <- as(NA, if (value[name] == 'factor') 'character' else value[name])
   }
   
   humtab
