@@ -6,11 +6,12 @@
 \alias{is.rhythmInterval}
 \alias{as.double.rhythmInterval}
 \alias{order.rhythmInterval}
-\alias{as.recip}
+\alias{recip}
 \alias{as.notevalue}
-\alias{as.rhythmInterval}
-\title{The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.}
+\title{Representation of rhythmic information}
 \usage{
+rhythmInterval(...)
+
 rint(denominator, numerator = 1L)
 
 is.rhythmInterval(x)
@@ -33,12 +34,74 @@ order.rhythmInterval(
 
 \S4method{Summary}{rhythmInterval}(x)
 
-as.recip(...)
+recip(...)
 
 as.notevalue(...)
 
-as.rhythmInterval(...)
+rhythmInterval(...)
 }
 \description{
-The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
+This \emph{S4} class is the core rhythm representation in the
+\code{\link[humdrumR:humdrumR]{humdrumR package}}.
+The object is used to represent rhythmic durations
+and metric positions.
+Each duration is represented in
+\href{https://en.wikipedia.org/wiki/Whole_note}{whole note} units.
+Numerically, these whole note units are represented as a ratio
+between integers, held in the slots \code{@Numerator} and \code{@Denominator}.
+This allows use to represent any rational number with no loss of precision
+due to rounding errors and weak decimal expansions (like \code{0.333333}).
+Rhythm intervals are similar to standard musical
+termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
 }
+\section{Slots}{
+
+\describe{
+\item{\code{Numerator}}{Integers}
+
+\item{\code{Octave}}{Integers}
+}}
+
+\section{Vectorization}{
+
+\code{rhythmInterval} inherits from the virtual class
+\code{\linkS4class{struct}}.
+This means you can apply normal vectorized commands to \code{rhythmInterval}s,
+and even put them in \code{\link[base:data.frame]{data.frames}}.
+}
+
+\section{Arithmetic}{
+
+\code{rhythmInterval} objects have arithmetic operations defined.
+Addition and subtraction are straightword and intuitive (i.e., \eqn{\frac{1/8} + \frac{3/8} = \frac{1/2}}).
+
+Multiplication and division are slightly more complicated:
+\href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
+is defined \emph{for rational numbers}: \eqn{\frac{3}{8} * 2 = \frac{3}{4}}
+(the result is always a new \code{rhythmInterval}).
+However, note that a \code{rhythmInterval} cannot be multiplied by another
+\code{rhythmInterval}---afterall, what would a quarter-note times a quarter-note be?
+A \code{rhythmInterval} can be divided by another \code{rhythmInterval} to produce
+a real number: \eqn{\frac{1}{2} / \frac{1}{4} = 2 }.
+Like other rational values in \code{R} we can also do either
+``true'' (rational) division (using the \code{\link[base:Arithmetic]{/}} operator)
+\emph{or} \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean}
+division (using the \code{\link[base:Arithmetic]{\%/\%}} operator).
+Rational division (\code{/}) of a \code{rhythmInterval} by another \code{rhythmInterval}
+results in a rational number. For instance, \eqn{\frac{1}{2} / \frac{1}{4} = 2}.
+Rational division of a \code{rhythmInterval} by a rational number results in a
+new \code{rhythmInterval}: \eqn{\frac{1}{2} / 2 = \frac{1}{4}}.
+Eucliean (a.k.a., integer) division can only be applied between \code{rhythmInterval}s
+resulting in an integer quotient---the remainder, which is a \code{rhythmInterval},
+can be calculated with the \code{\link[base:Arithmetic]{\%\%}} operator.
+The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
+useful, for instance in calculating metric positions.
+}
+
+\section{Relational Operators}{
+
+\code{rhythmInterval}s can be compared using the standard
+\code{\link[base:Comparison]{relational operators}}---\code{==},
+\code{!=}, \code{>}, \code{>=}, etc.
+}
+

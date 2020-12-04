@@ -506,11 +506,11 @@ makeRE.key <- function(..., accidental.labels = c(), alteration.labels = c(), co
     
     REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
                               step.labels = '[A-Ga-g]',
-                              ...,
+                              accidental.labels = accidental.labels,
                               step.sign = FALSE, collapse = FALSE)
     
     REs['colon'] <- ':'
-    REs['star'] <- '\\*'
+    REs['star'] <- '\\*?'
     
     REs['mode'] <- captureRE(c('dor', 'phy', 'mix', 'loc', 'lyd'), n = '?')
     REs['alterations'] <- makeRE.alterations(alteration.labels)
@@ -528,12 +528,11 @@ makeRE.romanNumeral <- function(..., alteration.labels = c(), collapse = TRUE) {
                               ...,
                               step.sign = FALSE, collapse = FALSE)
     
-    REs['star'] <- '^\\*?'
     
     REs['mode'] <- captureRE(c('dor', 'phy', 'mix', 'loc', 'lyd'), n = '?')
     REs['alterations'] <- makeRE.alterations(alteration.labels)
     
-    REs <- REs[c('star', 'steps', 'accidentals', 'mode', 'alterations')]
+    REs <- REs[c('steps', 'accidentals', 'mode', 'alterations')]
     
     if (collapse) setNames(cREs(REs), 'key') else REs
 }

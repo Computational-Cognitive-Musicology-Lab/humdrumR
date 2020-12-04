@@ -28,7 +28,7 @@
 #' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value as the root.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
-#'  for `diatonicSet`s call [as.key()][diatonicRepresentations].
+#'  for `diatonicSet`s call [key()][diatonicRepresentations].
 #' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
 #' you'll see the [key interpretation][diatonicRepresentations] representation printed.
 #' 
@@ -116,7 +116,7 @@
 #' @section Coercion:
 #' 
 #' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `diatonicSet`s.
-#' This can be done using the [as][methods::as] function---e.g., `as(3, "diatonicSet")`---or more intuitively using the function `as.diatonicSet()`.
+#' This can be done using the [as][methods::as] function---e.g., `as(3, "diatonicSet")`---or more intuitively using the function `diatonicSet()`.
 #' Coercision methods are defined for 
 #' 
 #' + [integer][base::integer]: interpreted as root of major key
@@ -792,7 +792,7 @@ integer2dset <- function(x) dset(x, x)
 #' 
 #' @name diatonicSet
 #' @export
-# as.romanNumeral.character <- as.romanNumeral.tertianSet %.% as.tertianSet
+# romanNumeral.character <- romanNumeral.tertianSet %.% as.tertianSet
 
 ##### As x ####
 
@@ -808,11 +808,11 @@ NULL
 
 
 #' @name diatonicSet
-#' @export as.diatonicSet as.key as.signature as.romanNumeral
-as.diatonicSet  <- function(x, ...) UseMethod('as.diatonicSet')
-as.key          <- function(x, ...) UseMethod('as.key')
-as.signature    <- function(x, ...) UseMethod('as.signature')
-as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
+#' @export diatonicSet key signature romanNumeral
+diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
+key          <- function(x, ...) UseMethod('key')
+signature    <- function(x, ...) UseMethod('signature')
+romanNumeral <- function(x, ...) UseMethod('romanNumeral')
 
 
 ####. methods ####
@@ -820,10 +820,10 @@ as.romanNumeral <- function(x, ...) UseMethod('as.romanNumeral')
 ###.. x as dset ####
 
 #' @export
-as.diatonicSet.diatonicSet <- force
+diatonicSet.diatonicSet <- force
 
 #' @export
-as.diatonicSet.numeric <- integer2dset %.% as.integer
+diatonicSet.numeric <- integer2dset %.% as.integer
 
 
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
@@ -832,7 +832,7 @@ char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
-as.diatonicSet.character <- char2dset
+diatonicSet.character <- char2dset
 
 #....
 
@@ -843,17 +843,17 @@ setAs('numeric', 'diatonicSet', function(from) integer2dset(as.integer(from)))
 #' @export
 setAs('character', 'diatonicSet', function(from) char2dset(dset))
 #' @export
-setAs('matrix', 'diatonicSet', function(from) as.diatonicSet(c(from)) %dim% from)
+setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
 
 ###.. dset as x ####
 
 #' @export
-as.key.diatonicSet          <- dset2key
+key.diatonicSet          <- dset2key
 #' @export
-as.signature.diatonicSet    <- dset2signature
+signature.diatonicSet    <- dset2signature
 #' @export
-as.romanNumeral.diatonicSet <- dset2romanNumeral
+romanNumeral.diatonicSet <- dset2romanNumeral
 
 ###. x as y ####
 
@@ -861,20 +861,20 @@ as.romanNumeral.diatonicSet <- dset2romanNumeral
 
 
 #' @export
-as.key.numeric <- dset2key %.% as.diatonicSet.numeric
+key.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
-as.signature.numeric <- dset2key %.% as.diatonicSet.numeric
+signature.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
-as.romanNumeral.numeric <- dset2key %.% as.diatonicSet.numeric
+romanNumeral.numeric <- dset2key %.% diatonicSet.numeric
 
 #.... character -> y ####
 
 #' @export
-as.key.character          <- re.place %.% dset2key %.% as.diatonicSet.character
+key.character          <- re.place %.% dset2key %.% diatonicSet.character
 #' @export
-as.signature.character    <- re.place %.% dset2signature %.% as.diatonicSet.character
+signature.character    <- re.place %.% dset2signature %.% diatonicSet.character
 #' @export
-as.romanNumeral.character <- re.place %.% dset2romanNumeral %.% as.diatonicSet.character
+romanNumeral.character <- re.place %.% dset2romanNumeral %.% diatonicSet.character
 
 
 ##### Tonal transform methods ####
@@ -907,5 +907,5 @@ allkeys <- within(allkeys, String <- paste0('*', Step, Accidental, ':', Mode))
 
 
 for (i in 1:nrow(allkeys)) {
-    assign(allkeys$Handle[i], as.diatonicSet(allkeys$String[i]))
+    assign(allkeys$Handle[i], diatonicSet(allkeys$String[i]))
 }

@@ -6,8 +6,8 @@
 \alias{read.numeric2rhythmInterval}
 \alias{read.fraction2rhythmInterval}
 \alias{read.notevalue2rhythmInterval}
-\alias{as.rhythmInterval.numeric}
-\alias{as.rhythmInterval.character}
+\alias{rhythmInterval.numeric}
+\alias{rhythmInterval.character}
 \title{Reading \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} from various representations}
 \usage{
 read.recip2rhythmInterval(str)
@@ -18,9 +18,9 @@ read.fraction2rhythmInterval(str)
 
 read.notevalue2rhythmInterval(notevalues)
 
-\method{as.rhythmInterval}{numeric}(n)
+\method{rhythmInterval}{numeric}(n)
 
-\method{as.rhythmInterval}{character}(str, inPlace = FALSE)
+\method{rhythmInterval}{character}(str, inPlace = FALSE)
 }
 \description{
 These functions all translate other pitch representations

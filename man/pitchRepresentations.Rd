@@ -24,10 +24,10 @@ The default is \code{3}, corresponding to pythagorean tuning; change it to \code
 \item \code{centMargin}: this numeric argument determines how close \code{humdrumR} tries to get (in cents) to the input ratio (default is 10 cents).
 If the \code{centMargin} is low, \code{humdrumR} may give you a crazy accidental like \verb{A----} to get very close to the input ratio.
 If the \code{centMargin} is higher, \code{humdrumR} will give the most reasonable (fewest accidentals) \code{tonalInterval} within that margin.
-For example, \code{as.tonalInterval(1.44, centMargin = 10)} will return E##, because a pythagorean E## is within 10 cents of the ratio \code{1.44}.
-However, \code{as.tonalInterval(1.44, centMargin = 20)} will return the more resonable \code{F#}.
+For example, \code{tonalInterval(1.44, centMargin = 10)} will return E##, because a pythagorean E## is within 10 cents of the ratio \code{1.44}.
+However, \code{tonalInterval(1.44, centMargin = 20)} will return the more resonable \code{F#}.
 \item \code{frequency.reference} and \code{frequencyTint}: these arguments determing what the reference frequency and note is for
-when reading frequencies. The standard A = 440Hz corresponds to \verb{(frequency.reference = 440, frequencyTint = as.tonalInterval('a'))}.
+when reading frequencies. The standard A = 440Hz corresponds to \verb{(frequency.reference = 440, frequencyTint = tonalInterval('a'))}.
 }
 }
 

@@ -230,7 +230,7 @@
 #' 
 #' Examples:
 #' \preformatted{
-#' humdata \%hum>\% ~ as.semits(Token) -> humdata$Semits
+#' humdata \%hum>\% ~ semit(Token) -> humdata$Semits
 #' }
 #' 
 #' 
@@ -527,7 +527,7 @@ setMethod('[[',
               }
               if (rlang::is_formula(k)) {
                   x <- do.call('filterHumdrum', c(x, k, 
-                                                  recordstypes ~ "D", indexGLIM = TRUE,
+                                                  recordtypes ~ "D", indexGLIM = TRUE,
                                                   list(...)))
               }
               

@@ -249,7 +249,7 @@ By using \code{humdata$name} we can immediately assign these pipe fields more me
 
 Examples:
 \preformatted{
-humdata \%hum>\% ~ as.semits(Token) -> humdata$Semits
+humdata \%hum>\% ~ semit(Token) -> humdata$Semits
 }
 }
 

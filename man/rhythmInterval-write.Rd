@@ -2,7 +2,7 @@
 % Please edit documentation in R/rhythmInterval.R
 \name{rhythmInterval-write}
 \alias{rhythmInterval-write}
-\alias{as.recip.rhythmInterval}
+\alias{recip.rhythmInterval}
 \alias{as.ratio.rhythmInterval}
 \alias{as.decimal.rhythmInterval}
 \alias{as.decimal.integer}
@@ -10,7 +10,7 @@
 \alias{as.notevalue.rhythmInterval}
 \title{Writing \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to various representations}
 \usage{
-\method{as.recip}{rhythmInterval}(rint)
+\method{recip}{rhythmInterval}(rint)
 
 as.ratio.rhythmInterval(rint)
 

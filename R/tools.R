@@ -984,7 +984,10 @@ substituteName <- function(expr, subs) {
   if (length(subs) == 0) return(expr)
   
   if (is.call(expr) && length(expr) > 1L) {
-            for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], subs)
+   
+            for (i in 2:length(expr)) {
+                if (!is.null(expr[[i]])) expr[[i]] <- Recall(expr[[i]], subs)
+            }
   } else { 
             if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
    
@@ -1024,9 +1027,8 @@ recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     
     if (s == 2L || !(stopOnHit && pred)) {
         for (i in s:length(quo[[2]])) {
-            quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
+            if (!is.null(quo[[2]][[i]]))  quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
         }
-        
     }
 
     

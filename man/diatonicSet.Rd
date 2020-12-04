@@ -4,7 +4,6 @@
 \alias{diatonicSet}
 \alias{dset}
 \alias{order.diatonicSet}
-\alias{as.diatonicSet}
 \title{The basic constructor for \code{diatonicSet}s.
 The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
 or a character string which will be coerced to a \code{tonalInterval}.}
@@ -26,7 +25,7 @@ order.diatonicSet(
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
 
-as.diatonicSet(x, ...)
+diatonicSet(x, ...)
 
 \S4method{as.character}{tertianSet}(x)
 

@@ -208,17 +208,21 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   # helper function
   accum <- c()
   
-  if (length(ex) == 1) {
+  if (length(ex) <= 1L) {
     return(func(ex))
   } else {
     for (i in (2 - !ignoreHead):length(ex)) {
-      out <- Recall(ex[[i]], func, rebuild = rebuild) 
+      missing <- rlang::is_missing(ex[[i]]) || is.null(ex[[i]])
       
-      if (rebuild) {
-         ex[[i]] <- out 
-         } else {
+      if (!missing) {
+        out <- Recall(ex[[i]], func, rebuild = rebuild) 
+        
+        if (rebuild) {
+          ex[[i]] <- out 
+        } else {
           accum <- c(accum, out) 
-         }
+        }
+      }
     }
   }
   

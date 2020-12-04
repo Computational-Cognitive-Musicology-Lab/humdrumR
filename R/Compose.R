@@ -405,7 +405,11 @@ memoify <- function(fname) {
 
 
 memoify.expr <- function(expr, argnames) {
+  if (argnames[1] == '...') return(expr)
+  
+  argnames <- argnames[argnames != '...']
   args <- setNames(rlang::syms(argnames), argnames)
+       
   
   rlang::expr({
     rememoise <- memoiseParse(!!!args)
