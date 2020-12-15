@@ -11,7 +11,6 @@ Calculate metric positions from duration data.
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{RhythmScaling}},
 \code{\link{rhythmDecompose}()},
 \code{\link{rhythmOffset}()}
 }

@@ -222,7 +222,7 @@ setMethod('diff', signature = c('rhythmInterval'),
 setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
           function(e1, e2) {
              # multiplying by integers is simple!
-            rint(IfElse(e2 == 0, 1L, e1@Denominator), 
+            rint(.ifelse(e2 == 0, 1L, e1@Denominator), 
                  e1@Numerator * e2)
           })
 
@@ -235,7 +235,7 @@ setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
               
               frac <- numeric2fraction(e2) 
               
-              e1 <- rint(IfElse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
+              e1 <- rint(.ifelse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
                          e1@Numerator   * frac$Numerator)
               e1
           })
@@ -300,27 +300,12 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 
 
 
-############################################-
-####### Writing rhythm representations ----
-############################################-
-#' Writing \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to various representations
-#' 
-#' These functions all translate \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} to 
-#' various representations. 
-#' 
-#' @name rhythmInterval-write
-NULL
+##### To/From rhythm intervals ####
+
+####. rint to x ####
 
 
-#### As recip
-
-#' @name rhythmInterval
-#' @export
-recip <- function(...) UseMethod('recip')
-
-#' @name rhythmInterval-write
-#' @export
-recip.rhythmInterval <- function(rint) {
+rint2recip <- function(rint) {
           #modify this to print 0 and 00
           num <- rint@Numerator
           den <- rint@Denominator
@@ -333,8 +318,8 @@ recip.rhythmInterval <- function(rint) {
           
           while (any(doubles <- den <= 1L & den >= .25 & num > 2L & num < 16L & num %% 2 == 0 & num %% 5 != 0)) {
               # if we want dotted "0" "00" or "000" values, we need to do some transformations
-              IfElse(doubles, den / 2, den) -> den
-              IfElse(doubles, num / 2, num) -> num
+              .ifelse(doubles, den / 2, den) -> den
+              .ifelse(doubles, num / 2, num) -> num
           }
                  
           #### any dots?
@@ -354,64 +339,28 @@ recip.rhythmInterval <- function(rint) {
           den[(num / den) %in% c(2, 4, 8)] <- strrep('0', log(num / den, 2)[(num / den) %in% c(2, 4, 8)])
           num[den %in% c('0', '00', '000')] <- '1'
           
-          output <- IfElse(num == 1L, den, .paste(den, '%', num)) 
+          output <- .ifelse(num == 1L, den, .paste(den, '%', num)) 
 
           .paste(SIGN, output, strrep('.', dots))
 
 }
 
-
-#### As fraction
-
-
-
-
-#' @name rhythmInterval-write
-#' @export
-as.ratio.rhythmInterval <- function(rint) {
-          .paste(rint@Numerator, '/', rint@Denominator)
-}
-
-#### As decimal
-
-#' @name rhythmInterval-write
-#' @export
-as.decimal.rhythmInterval <- function(rint) {
-          as.double(rint@Numerator / rint@Denominator)
-}
-
-#' @name rhythmInterval-write
-#' @export
-#' 
-as.decimal.integer <- function(x) as.numeric(x)
-#' @name rhythmInterval-write
-#' @export
-as.decimal.numeric <- function(x) x
-
-
-#### As unicode duration string
+###As unicode duration string
 
 notevalue.unicode <- data.frame(stringsAsFactors = FALSE,
                                 Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
                                             '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
                                 Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
 
-#' @name rhythmInterval
-#' @export
-as.notevalue <- function(...) UseMethod('as.notevalue')
 
-
-#' @name rhythmInterval-write
-#' @export
-as.notevalue.rhythmInterval <- function(rint) {
+rint2notevalue <- function(rint) {
     recip <- recip(rint)
     
     # base notation
-    parser <- REparser(denominator = "^[0-9]+", 
-                       numerator = "(%[1-9][0-9]*)?", 
-                       dots = '[.]*$')
-    parsed <- parser(recip)
-    
+    parsed<- REparse(recip,
+                     res = list(denominator = "^[0-9]+", 
+                                numerator = "(%[1-9][0-9]*)?", 
+                                dots = '[.]*$'))
     
     
     symbols <- setNames(notevalue.unicode$Unicode, notevalue.unicode$Recip)
@@ -437,7 +386,7 @@ as.notevalue.rhythmInterval <- function(rint) {
         
         fitbase <- den %% primes[i] == 0 
         newbase <- den %/% primes[i]
-        newbase <- IfElse(log(newbase, 2) %% 1L == 0,
+        newbase <- .ifelse(log(newbase, 2) %% 1L == 0,
                           as.character(newbase),
                           '1')
         
@@ -449,7 +398,7 @@ as.notevalue.rhythmInterval <- function(rint) {
     }
     
     # add multiples
-    multiples <- IfElse(parsed[ , 'numerator'] == "", 
+    multiples <- .ifelse(parsed[ , 'numerator'] == "", 
                         "",
                         paste0("\U2217", 
                                stringr::str_sub(parsed[, 'numerator'], start = 2)))
@@ -464,35 +413,32 @@ as.notevalue.rhythmInterval <- function(rint) {
 
 
 
-#####################################-
-#### Reading rhythm representations ----
-#######################################-
-#' Reading \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}} from various representations
-#' 
-#' These functions all translate other pitch representations
-#' into \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
-#' 
-#' These functions all assume that thheir string input is a well-formed
-#' example of the target pitch representation, with no extra strings.
-#' (The \code{\link[humdrumR:regexDispatch]{regex dispatch}} functions can be 
-#' used to clean/filter inputs into these functions.
-#' 
-#' @name rhythmInterval-read
-NULL
+###.. numbers
 
 
-#### From recip
 
-#' @name rhythmInterval-read
-#' @export
-read.recip2rhythmInterval <- function(str) {
+rint2rational <- function(rint) .paste(rint@Numerator, '/', rint@Denominator)
+
+rint2decimal <- function(rint) as.double(rint@Numerator / rint@Denominator)
+
+rint2integer <- function(rint) {
+  dub <- rint2decimal
+  
+  as.integer(dub * (1 / min(dub)))
+}
+
+
+####. x to rint ####
+
+
+recip2rint <- function(str) {
           
           uniqstr <- unique(str)
           
           # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
-          uniqstr <- IfElse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
-          uniqstr <- IfElse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
-          uniqstr <- IfElse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
+          uniqstr <- .ifelse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
+          uniqstr <- .ifelse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
+          uniqstr <- .ifelse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
           
           ndots <- stringr::str_count(uniqstr, '\\.')
           rhythmInterval <- gsub('\\.+', '', uniqstr)
@@ -508,26 +454,21 @@ read.recip2rhythmInterval <- function(str) {
           
 }
 
-#### From numeric
+###.. numbers
 
-#' @name rhythmInterval-read
-#' @export
-read.numeric2rhythmInterval <- function(n) {
+numeric2rint <- function(n) {
           if (!is.numeric(n)) n <- as.numeric(n)
           
-          frac <- numeric2fraction(n)
+          frac <- as.rational(n)
           
           frac$Denominator[frac$Numerator == frac$Denominator] <- 1L
           
           rint(frac$Denominator, frac$Numerator)
 }
 
-#### From ratio (string, separated by % or /)
 
-#' @name rhythmInterval-read
-#' @export
-read.fraction2rhythmInterval <- function(str) {
-          split <- strsplit(str, split = '%|/')
+rational2rint <- function(str, split = '/') {
+          split <- strsplit(str, split = split)
           
           ns <- lapply(split, function(n) {
               if (all(is.na(n))) return(rint(NA))
@@ -552,22 +493,20 @@ read.fraction2rhythmInterval <- function(str) {
 }
 
 
-
-#' @name rhythmInterval-read
-#' @export
 #### From unicode note values.
-read.notevalue2rhythmInterval <- function(notevalues) {
+
+notevalue2rint <- function(notevalues) {
     
     
     
-    parser <- REparser(notevalue = paste0('^[', 
+    parsed <- REparse(notevalues,
+                      list(notevalue = paste0('^[', 
                                           paste(notevalue.unicode$Unicode, collapse = ''), 
                                           ']'),
                        divide = "(\U2215[1-9][0-9]*)?",
                        multiples = "(\U2217[1-9][0-9]*)?",
-                       dots = '\U1D16D*')
+                       dots = '\U1D16D*'))
     
-    parsed <- parser(notevalues)
     
     # 
     symbols <- setNames(notevalue.unicode$Recip, notevalue.unicode$Unicode)
@@ -581,55 +520,113 @@ read.notevalue2rhythmInterval <- function(notevalues) {
     
     #
     divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
-    rint / IfElse(is.na(divides), 1, divides)
+    rint / .ifelse(is.na(divides), 1, divides)
 }
 
 
-#### From anything!
+##### Rhythm transforms ####
+
+
+#### Augmentation and dimminution 
+
+
+#' augment <- function(x, scalar = 2, ...) UseMethod('augment')
+#' 
+#' 
+#' #' @name RhythmScaling
+#' #' @export
+#' augment.rhythmInterval <- function(rint, scalar) rint * scalar
+#' 
+#' #' @name RhythmScaling
+#' #' @export
+#' augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
+#'                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
+#'                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
+#' 
+#' 
+#' #' @name RhythmScaling
+#' #' @export
+#' diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
+#' 
+#' 
+#' #' @name RhythmScaling
+#' #' @export
+#' diminish.rhythmInterval <- function(rint, scalar) rint / scalar
+#' 
+#' #' @name RhythmScaling
+#' #' @export
+#' diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
+#'                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
+#'                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+
+
+
+##### As x #####
+
+
+####. generics ####
 
 
 #' @name rhythmInterval
+#' @export rhythmInterval
+#' @export recip duration
+rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
+recip    <- function(x, ...) UseMethod('recip')
+duration <- function(x, ...) UseMethod('duration')
+
+
+####. methods ####
+
+###.. x as rint ###
+
+#' @export
+rhythmInterval.rhythmInterval <- force
+
+#' @export
+rhythmInterval.numeric <- numeric2rint
+
+char2rint <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                             'recip: makeRE.recip()' = recip2rint,
+                             'duration: makeRE.decimal()' = numeric2rint)
+
+#' @export
+rhythmInterval.character <- char2rint
+
+#.... set as
+
 #' @export 
-setAs('character', 'rhythmInterval', function(from) rhythmInterval.character(from))
-#' @name rhythmInterval
+setAs('numeric', 'rhythmInterval', function(from) numeric2rint(from))
 #' @export 
-setAs('numeric', 'rhythmInterval', function(from) rhythmInterval.numeric(from))
-
-#' @name rhythmInterval
+setAs('character', 'rhythmInterval', function(from) char2rint(from))
 #' @export 
-rhythmInterval <- function(...) UseMethod('rhythmInterval')
+setAs('matrix', 'rhythmInterval', function(from) rhythmInterval(c(from)) %dim% from)
 
-#' @name rhythmInterval-read
+
+###.. rint as x ####
+
 #' @export 
-rhythmInterval.numeric <- read.numeric2rhythmInterval
-
-#' @name rhythmInterval-read
+recip.rhythmInterval <- rint2recip
 #' @export 
-rhythmInterval.character <- regexDispatch('NoteValue' = read.notevalue2rhythmInterval,
-                                             'Recip' = read.recip2rhythmInterval,
-                                             '[0-9]+[%/][0-9]+' = read.fraction2rhythmInterval,
-                                             'Decimal' = read.numeric2rhythmInterval)
+duration.rhythmInteval <- rint2decimal
 
 
-#############################################################################-
-#### Translating rhythm representations ----
-####################################################################-
+###.. x as y ####
 
-#' Rhythm translations
-#' 
-#' These functions translate various rhythm representations
-#' between each other. Using the \code{humdrumR} \code{\link[humdrumR:regexDispatch]{regular-expression dispatch system}}
-#' they will even (automatically) read parts of a string which represent a rhythm,
-#' and translate only that part (leaving the rest of the string unchanged).
-#' They all have an option \code{inPlace} which can be set to \code{FALSE}
-#' if you want them to discard non-pitch parts of the string(s).
-#' 
-#' Under the hood, these functions use the \code{\link{humdrumR}} 
-#' \code{\link[humdrumR:rhythmInterval]{rhythmInterval}} \code{S4} class as the 
-#' fundamental, \emph{lingua franca} representation of rhythm.
-#' 
-#' @name humRhythm
-NULL
+#.... numeric -> y ####
+
+#' @export 
+recip.numeric <- rint2recip %.% rhythmInterval.numeric
+#' @export 
+duration.numeric <- force
+
+
+###.. character -> y ####
+
+
+#' @export 
+recip.character <- rint2recip %.% rhythmInterval.character
+#' @export 
+duration.character <- rint2decimal %.% rhythmInterval.character
 
 
 
@@ -756,42 +753,6 @@ rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.d
           
           if (identical(as, as.decimal)) offsets else as(offsets)
 }
-
-#### Augmentation and dimminution 
-
-#' Scale rhythmic duration
-#' @name RhythmScaling
-#' @family rhythm analysis tools
-#' @export
-augment <- function(x, scalar = 2, ...) UseMethod('augment')
-
-
-#' @name RhythmScaling
-#' @export
-augment.rhythmInterval <- function(rint, scalar) rint * scalar
-
-#' @name RhythmScaling
-#' @export
-augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
-                                   'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
-
-
-#' @name RhythmScaling
-#' @export
-diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-
-
-#' @name RhythmScaling
-#' @export
-diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-
-#' @name RhythmScaling
-#' @export
-diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-                                   '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
-                                   'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
-
 
 #### Miscalaneous (however that is supposed to be spelled)
 

@@ -547,4 +547,6 @@ makeRE.signature <- function(accidental.labels = c(), ...) {
 
 
 
-##
+####. REs for durations ####
+
+makeRE.recip <- function() getRE('recip')

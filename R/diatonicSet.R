@@ -834,7 +834,7 @@ char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
 #' @export
 diatonicSet.character <- char2dset
 
-#....
+#.... set as
 
 #' @export
 setAs('integer', 'diatonicSet', function(from) integer2dset(from))

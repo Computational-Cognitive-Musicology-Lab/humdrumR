@@ -2085,7 +2085,7 @@ tonalInterval.rational <- tonalTransform %.% rational2tint
 #' @export
 tonalInterval.fraction <- tonalTransform %.% fraction2tint
 
-#....
+#.... set as
 
 #' @export
 setAs('integer', 'tonalInterval', function(from) semit2tint(from))

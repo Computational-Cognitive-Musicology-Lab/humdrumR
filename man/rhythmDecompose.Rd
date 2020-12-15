@@ -11,7 +11,6 @@ Decompose durations in terms of other durations
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{RhythmScaling}},
 \code{\link{metricPosition}()},
 \code{\link{rhythmOffset}()}
 }

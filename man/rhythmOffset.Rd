@@ -32,7 +32,6 @@ at that point.
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{RhythmScaling}},
 \code{\link{metricPosition}()},
 \code{\link{rhythmDecompose}()}
 }
