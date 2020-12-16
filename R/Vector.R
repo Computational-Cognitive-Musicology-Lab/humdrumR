@@ -472,9 +472,8 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
               }
               if (matclass != 'logical') stop(call. = FALSE, glue::glue("Can't index a struct with a {matclass} matrix."))
               
-              
               if (ncol(i) == 1L && length(i) == nrow(x)) return(x[which(i), ])
-              if (nrow(i) == 1L && length(i) == ncol(x)) return(x[, which(i)])
+              # if (nrow(i) == 1L && length(i) == ncol(x)) return(x[, which(i)])
               
               
               if (!identical(dim(i), dim(x))) stop(call. = FALSE, "Can't index struct[i , ] with a logical matrix, unless it either has the exact same",
@@ -989,7 +988,6 @@ setMethod('diag', signature = 'struct',
 ##### is/as xx -----
 
 
-
 #' @export
 setMethod('is.na', signature = 'struct',
           function(x) {
@@ -1045,16 +1043,34 @@ as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep 
     mat
 }
 
+#' @export
+setAs('struct', 'data.frame', function(from) as.data.frame(from))
+
 
 #' @export
-as.data.frame.struct <- function(x, optional = FALSE, ...) {
-    row.names <- x@rownames %maybe% 1:length(x)
+setMethod('as.data.frame', 'struct',
+          function(x, optional = FALSE, ...) {
+              row.names <- x@rownames %maybe% 1:length(x)
+              
+              value <- list(x)
+              attr(value, 'row.names') <- row.names
+              if (!optional) attr(value, 'names') <- class(x)[1]
+              class(value) <- c('data.frame')
+              value
+          })
+
+struct2data.frame <- function(...) {
+    structs <- list(...)
     
-    value <- list(x)
-    attr(value, 'row.names') <- row.names
-    attr(value, 'names') <- class(x)[1]
-    class(value) <- c('data.frame')
-    value
+    names <- names(structs)
+    if (is.null(names)) names <- character(length(structs))
+    names <- ifelse(names == "", sapply(structs, class), names)
+    
+    df <- do.call('cbind', lapply(structs, as.data.frame))
+    colnames(df) <- names
+    
+    df
+    
 }
 
 list2dt <- function(l) {

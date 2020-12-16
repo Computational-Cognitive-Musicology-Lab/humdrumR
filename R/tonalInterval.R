@@ -618,7 +618,7 @@ tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'),
   
   if (contour.delta) x <- delta(x)
   #
-  octn <- contour.offset + octavepart(x, contour.round)@Octave
+  octn <- contour.offset + tintPartition_complex(x, contour.round)$Octave@Octave
   octn <- pmin(pmax(octn, contour.minimum), contour.maximum)
   
   # if contour.labels = FALSE, we just return the number
@@ -735,7 +735,7 @@ tint2pitch <- function(x, ...)  {
 }
 
 
-tint2lilyPitch <- function(x, relative = TRUE, ...) {
+tint2lily <- function(x, relative = TRUE, ...) {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                            contour.labels = c(up = "'", down = ","), 
@@ -756,7 +756,7 @@ tint2helmholtz <- function(x, ...) {
   notes
 }
                                                                 
-tint2kernPitch <- function(x, ..., Key = NULL) {
+tint2kern <- function(x, ..., Key = NULL) {
   simple <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                                      accidental.labels = c(flat = '-'), 
                                      parts = c('steps', 'accidentals'), Key = Key, ...))
@@ -786,7 +786,7 @@ tint2interval <- function(x) {
   x[octave < 0L] <- x[octave < 0L] * -1L
   steps <- tint2step(x, step.labels = 1L:7L)
   
-  octave[!is.na(octave) & octave < 0L & steps != 1L] <- octave[!is.na(octave) & octave < 0L & steps != 1L] + 1L
+  octave[!is.na(octave) & octave < 0] <- octave[!is.na(octave) & octave < 0L] + 1L
   steps <- steps + octave * 7
   
   qualities <- tint2quality(x, quality.cautionary = TRUE)
@@ -997,7 +997,7 @@ pitch2tint <- function(str, ...) {
 
 
 
-kernPitch2tint <- function(str, ...) {
+kern2tint <- function(str, ...) {
   letter <- stringr::str_extract(str, '[A-Ga-g]')
   str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
@@ -1232,7 +1232,8 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' This function transposes tonalIntervals by other tonal intervals.
 #' By default, does real transposition.
 #' However, if a `key` argument is specified, tonal transposition
-#' takes place in that (major) key.
+#' takes place in that key.
+#' 
 #' @name tonalTransformations
 #' @export
 transposeBy <- function(x, by, Key, ...) UseMethod('transposeBy')
@@ -1283,138 +1284,93 @@ NULL
 
 
 
-tintPartition <- function(tint, Key = NULL, roundContour = floor) {
-  partMatrix <-  if (hasdim(tint)) {
-    
-    parts <- if (is.null(colnames(tint))) rep(FALSE, ncol(tint)) else colnames(tint) %in% c('Key', 'Octave', 'Generic', 'Alteration', 'Comma')
-    if (all(parts)) return(tint)
-    
-    split <- lapply(1:ncol(tint), function(j) `dim<-`(tint[,j], NULL))
-    
-    for (j in which(!parts)) split[[j]] <- tintPartition(split[[j]], roundContour = roundContour, Key = if (j == 1L) Key else NULL)
-    
-    do.call('cbind', split)
-  } else {
-    mat <- tintPartition.octave_simple(tint, roundContour = roundContour)
-    
-    
-    Key <- Key %fmap% diatonicSet
-    
-    cbind(Key = Key %fmap% getRootTint, 
-          mat[, 'Octave'], tintPartition.generic_alteration(mat[ , 'Simple'], Key =  Key %maybe% dset(0, 0)))
-    
+tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'),
+                          roundContour = floor, Key = NULL, enharmonicWrap = 19) {
+  
+   partitions <- matched(partitions, c('complex', 'harmonic', 'specific'))
+   
+   Key <- diatonicSet(Key %maybe% dset(0, 0))
+   match_size(tint = tint, Key = Key, toEnv = TRUE)
+   
+   octave <- if ('complex' %in% partitions) {
+     complex <- tintPartition_complex(tint, roundContour)
+     tint <- complex$Simple
+     complex['Octave']
+   }
+   
+   comma <- if ('harmonic' %in% partitions) {
+     harmonic <- tintPartition_harmonic(tint, enharmonicWrap = enharmonicWrap, Key = Key)
+     tint <- harmonic$Enharmonic
+     harmonic['Comma']
+   }
+   
+  specific <- if ('specific' %in% partitions) {
+    specific <-  tintPartition_specific(tint, Key = Key)
+    tint <- NULL
+    specific
   }
   
-  keys <- colnames(partMatrix) == 'Key'
-  partMatrix[ , c(which(keys), which(!keys))]
+  if (!is.null(tint) && !is.data.frame(tint)) tint <- as.data.frame(tint)
   
-  
-}
-
-###.. simple + octave = complex ####
-
-#' @export octavepart simplepart  is.simple 
-octavepart <- function(tint, roundContour) UseMethod('octavepart')
-simplepart <- function(tint, roundContour) UseMethod('simplepart')
-is.simple <- function(tint) UseMethod('is.simple')
-
-
-#' @export
-octavepart.tonalInterval <- function(tint, roundContour = floor) {
-    generic <- tint # genericpart.tonalInterval(tint)
-    octshift <- as.integer(roundContour(tint2semit(generic) / 12))
-    tint(octshift, 0L) %dim% tint
-}
-
-#' @export
-simplepart.tonalInterval <- function(tint, roundContour = floor) {
-    octavepart <- octavepart.tonalInterval(tint, roundContour)
-    tint - octavepart
-}
-
-tintPartition.octave_simple <- function(tint, roundContour = floor) {
-  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
-  octavepart <- octavepart.tonalInterval(tint, roundContour)
-  
-  cbind(Octave = octavepart, Simple = tint - octavepart)
-
-}
-
-#' @export
-is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
-
-
-###.. generic + alteration = specific ####
-
-#' @name tonalIntervalparts
-#' @export genericpart alterationpart
-genericpart <- function(tint, Key) UseMethod('genericpart')
-alterationpart <- function(tint, Key) UseMethod('alterationpart')
-
-#' @export
-genericpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
-    Key <- diatonicSet(Key)
-    
-    (tint %% Key) 
-}
-
-#' @export
-alterationpart.tonalInterval <- function(tint, Key = dset(0L, 0L)) {
-    Key <- diatonicSet(Key)
-    gtint <- genericpart.tonalInterval(tint, Key)
-    
-    tint  - gtint
-}
-tintPartition.generic_alteration <- function(tint, Key = dset(0L, 0L)) {
-  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
-  gtint<- genericpart.tonalInterval(tint, Key)
-
-  cbind(Generic = gtint,  Alteration = tint - gtint)
+  .cbind(struct2data.frame(Key = getRootTint(Key)), octave, specific, tint, comma)
   
 }
 
-###.. enharmonic + comma = harmonic ####
+###.. simple + octave = complex
 
-#' @name tonalIntervalparts
-#' @export enharmonicpart commapart
-enharmonicpart <- function(tint, enharmonicWrap, Key) UseMethod('enharmonicpart')
-commapart      <- function(tint, enharmonicWrap, Key) UseMethod('commapart')
 
-#' @export
-enharmonicpart.tonalInterval <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
-  Key <- diatonicSet(Key)
+tintPartition_complex <- function(tint, roundContour = floor) {
+  octshift <- roundContour(tint2semit(tint) / 12)
+  
+  octavepart <- tint(octshift, 0L) %dim% tint 
+  simplepart <- tint - octavepart
+  
+  struct2data.frame(Octave = octavepart, Simple = simplepart)
+
+}
+
+
+###.. enharmonic + comma = harmonic
+
+tintPartition_harmonic <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
   
   modeoffset <- tint( , getSignature(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
-  tint <- tint - modeoffset 
-
+  entint <- (tint - modeoffset) %dim% NULL
+  
   enharmonicbound <- enharmonicWrap %/% 2
   sharpshift <-  tint( , enharmonicbound) # this makes it so an odd number (like 13) is biased towards sharp side
   flatshift  <- -tint( , enharmonicWrap - enharmonicbound)
   
-  fs <- tint@Fifth
+  fs <- entint@Fifth
   sharp <-  fs > enharmonicbound
   flat  <- fs <= -(enharmonicWrap - enharmonicbound)
   
-  tint[sharp] <- ((tint[sharp] + sharpshift) %%  pythagorean.comma) - sharpshift 
-  tint[ flat] <- ((tint[ flat] + flatshift) %% -pythagorean.comma) - flatshift
+  entint[sharp] <- ((entint[sharp] + sharpshift) %%  pythagorean.comma) - sharpshift 
+  entint[ flat] <- ((entint[ flat] + flatshift)  %% -pythagorean.comma) - flatshift
+  
+  enharmonicpart <- (entint + modeoffset) %dim% tint
+  commapart <- tint - enharmonicpart
+  
+  struct2data.frame(Enharmonic = enharmonicpart,  Comma = commapart)
+}
 
-  tint + modeoffset
+
+###.. generic + alteration = specific
+
+tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
+ 
+  genericpart    <-  (tint %% Key) 
+  alterationpart <- tint - genericpart
+  
+  struct2data.frame(Generic = genericpart,  Alteration = alterationpart)
   
 }
 
-#' @export
-commapart.tonalInterval <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L)) {
-  tint - enharmonicpart.tonalInterval(tint, enharmonicWrap, Key)
-    
-}
 
 
-tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L)) {
-  if (hasdim(tint) && ncol(tint) > 1) .stop("Can't create a tonalInterval partition matrix if the tonalInterval is already a multi-column matrix.")
-  enharm <- enharmonicpart.tonalInterval(tint, enharmonicWrap, Key)
-  
-  cbind(Enharmonic = enharm, Comma = tint - enharm)
-}
+
+
+
 
 
 ##### As x ####
@@ -1876,7 +1832,6 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' Most pitch representations are *fixed*-reference, with each token representing an interval relative to a common reference (middle-C, tonic, unison, etc.).
 #' In contrast, a *serial* representation represents each interval cummulatively, relative to the previous interval: the most common example being melodic intervals.
 #' TonalIntervals can be encode either fixed- or serial-reference intervals, and either approach can be partitioned into simple intervals and octave offsets.
-
 #' In the most common cases for representing pitch, the simple contour is treated as the "always ascending" scale contour, and the octave contour is simply kept fixed.
 #' Common approaches to pairing octave information with this include:
 #' 
@@ -2013,6 +1968,7 @@ tintPartition.enharmonic_comma <- function(tint, enharmonicWrap = 12L, Key = dse
 #' @name pitchRepresentations
 NULL
 
+
 ####. generics ####
 
 #' @export tonalInterval 
@@ -2068,7 +2024,7 @@ tonalInterval.numeric <- tonalTransform %.% decimal2tint
 #' @export
 tonalInterval.integer <- tonalTransform %.% semit2tint
 
-char2tint <- humdrumDispatch('kern: makeRE.kernPitch(...)' = kernPitch2tint,
+char2tint <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
                              'pitch: makeRE.sciPitch(...)' = pitch2tint,
                              'hint: makeRE.interval(...)'  = interval2tint,
                              'mint: makeRE.interval(...)'  = interval2tint,
@@ -2116,9 +2072,9 @@ contour.tonalInterval     <- tint2contour     %.% tonalTransform
 #' @export
 pitch.tonalInterval    <- tint2pitch    %.% tonalTransform
 #' @export
-kern.tonalInterval   <- tint2kernPitch   %.% tonalTransform
+kern.tonalInterval   <- tint2kern   %.% tonalTransform
 #' @export
-lilypond.tonalInterval   <- tint2lilyPitch   %.% tonalTransform
+lilypond.tonalInterval   <- tint2lily   %.% tonalTransform
 #' @export
 interval.tonalInterval    <- tint2interval    %.% tonalTransform
 #' @export
@@ -2158,9 +2114,9 @@ contour.integer     <- tint2contour     %.% tonalInterval.integer
 #' @export
 pitch.integer    <- tint2pitch    %.% tonalInterval.integer
 #' @export
-kern.integer   <- tint2kernPitch   %.% tonalInterval.integer
+kern.integer   <- tint2kern   %.% tonalInterval.integer
 #' @export
-lilypond.integer   <- tint2lilyPitch   %.% tonalInterval.integer
+lilypond.integer   <- tint2lily   %.% tonalInterval.integer
 #' @export
 interval.integer    <- tint2interval    %.% tonalInterval.integer
 #' @export
@@ -2191,9 +2147,9 @@ contour.numeric     <- tint2contour     %.% tonalInterval.numeric
 #' @export
 pitch.numeric    <- tint2pitch    %.% tonalInterval.numeric
 #' @export
-kern.numeric   <- tint2kernPitch   %.% tonalInterval.numeric
+kern.numeric   <- tint2kern   %.% tonalInterval.numeric
 #' @export
-lilypond.numeric   <- tint2lilyPitch   %.% tonalInterval.numeric
+lilypond.numeric   <- tint2lily   %.% tonalInterval.numeric
 #' @export
 interval.numeric    <- tint2interval    %.% tonalInterval.numeric
 #' @export
@@ -2224,9 +2180,9 @@ contour.character     <- re.place %.% tint2contour     %.% tonalInterval.charact
 #' @export
 pitch.character    <- re.place %.% tint2pitch    %.% tonalInterval.character
 #' @export
-kern.character   <- re.place %.% tint2kernPitch   %.% tonalInterval.character
+kern.character   <- re.place %.% tint2kern   %.% tonalInterval.character
 #' @export
-lilypond.character   <- re.place %.% tint2lilyPitch   %.% tonalInterval.character
+lilypond.character   <- re.place %.% tint2lily   %.% tonalInterval.character
 #' @export
 interval.character    <- re.place %.% tint2interval    %.% tonalInterval.character
 #' @export
@@ -2263,6 +2219,10 @@ transposeTo.numeric <- re.place %.% re.as %.% transposeTo.tonalInterval %.% tona
 #' @export
 transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% tonalInterval.integer
 
+
+is.simple <- function(tint) UseMethod('is.simple')
+#' @export
+is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 
 
 

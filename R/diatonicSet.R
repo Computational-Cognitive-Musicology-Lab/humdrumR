@@ -282,19 +282,24 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
 #' @export
 setMethod('%%', signature = c('integer', 'diatonicSet'),
           function(e1, e2) {
-              signature <- getSignature(e2)
-              alter <- getAlterations(e2)
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
-              match_size(e1 = e1, signature = signature, alter = alter, toEnv = TRUE)
-              generic <- ((e1 + 1L) - signature) %% 7
+              alter <- e2@Alteration
+              signature <- getSignature(e2, sum = TRUE)
               
-              if (any(alter != 0)) {
-                  alter <- alter + sign(alter)
-                  toalter <- alter != 0 & generic != .ifelse(alter > 0, 0, 6)
-                  
-                  generic[toalter] <- ((generic[toalter] - alter[toalter]) %% 7 ) + alter[toalter]
+              output <- integer(length(e1))
+              
+              output[alter == 0L] <- (((e1[alter == 0L] + 1L) - signature) %% 7L) - 1 + signature
+              if (any(alter != 0L)) {
+                  output[alter != 0L] <- {
+                      lof <- LO5th(e2[alter != 0L])
+                      lof[sweep(lof %% 7L, 1, e1[alter != 0L] %% 7L, `==`)]
+                  }
               }
-              generic - 1 + signature
+              
+    
+              output
+      
           })
 
 
@@ -305,10 +310,12 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
               
               fifth <- e1@Fifth
               
-              generic <- fifth %% e2
-              octdiff <- ((generic - fifth) * 19) / 12
+              simple <-  fifth %% e2
               
-              tint(round(e1@Octave - octdiff), generic)
+              octdiff <- ((simple - fifth) * 19) / 12
+              
+              tint(round(e1@Octave - octdiff), simple) %dim% e1
+              
               
           })
 
@@ -465,9 +472,9 @@ dset2pitcher <- function(pitch.func) {
 		        body, parent.env(environment()))
 }
 
-dset2semit      <- dset2pitcher(tint2semit)
-dset2midi       <- dset2pitcher(tint2midi)
-dset2kernPitch  <- dset2pitcher(tint2kernPitch)
+dset2semit <- dset2pitcher(tint2semit)
+dset2midi  <- dset2pitcher(tint2midi)
+dset2kern  <- dset2pitcher(tint2kern)
 
 dset2tints <- function(dset, steporder = 2L) {
     LO5ths <- LO5th(dset, steporder = steporder)
@@ -537,7 +544,7 @@ dset2signature <- function(dset) {
 dset2key <- function(dset, alteration.labels = c(), sum = FALSE) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
-    root <- tint2kernPitch(tint( , getRoot(dset, sum = sum)))
+    root <- tint2kern(tint( , getRoot(dset, sum = sum)))
     mode <- getMode(dset, sum = FALSE)
     root[!is.na(mode) & mode %in% c(1L, 0L, 6L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L)])
     
@@ -654,7 +661,7 @@ signature2dset <- function(str, mode = 0L) {
     
     lof <- lapply(signotes[!empty], 
                   function(notes) {
-                      lof <- kernPitch2tint(notes)@Fifth
+                      lof <- kern2tint(notes)@Fifth
                       lof[lof < -1L | lof > 5L]
                       })
     empty[!empty] <- lengths(lof) == 0L

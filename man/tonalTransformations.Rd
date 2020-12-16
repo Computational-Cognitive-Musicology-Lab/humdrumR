@@ -33,5 +33,5 @@ Various transformations of pitch information
 This function transposes tonalIntervals by other tonal intervals.
 By default, does real transposition.
 However, if a \code{key} argument is specified, tonal transposition
-takes place in that (major) key.
+takes place in that key.
 }

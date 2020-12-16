@@ -99,6 +99,19 @@ fargs <- function(func)  args(func) %fmap% formals
     return(invisible(values))
 }
 
+
+insert <- function(x, i, values) {
+    if (is.logical(i)) i <- which(i)
+    if (length(i) == 0L || length(values) == 0L) return(x)
+    if (length(i) > 1L) .stop("In your call to humdrumR:::insert, you can't insert values into multiple indices.")
+    if (i <= 0) .stop("In your call to humdrumR:::insert, you can't insert at a negative index.")
+    x <- x[-i]
+    
+    append(x, values, i - 1)
+    
+    
+}
+
 .glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
     strs <- unlist(list(...))
     ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
@@ -348,6 +361,19 @@ remove.duplicates <- function(listofvalues) {
 }
 
 
+.cbind <- function(...) {
+    #cbind except skips NULL
+    
+    x <- list(...)
+    x <- x[lengths(x) > 0]
+    
+    do.call('cbind', x)
+    
+}
+
+
+
+
 segments <- function(x, reverse = FALSE) {
     # x is logical
     if (reverse) x <- rev(x)
@@ -389,6 +415,8 @@ size <- function(x) ldim(x)$size
 `%dim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
+    if (is.null(value)) {dim(x) <- NULL; return(x)}
+    
     if (size(x) != size(value)) .stop("%dim% is trying to match the dimensions of two objects, but the target object is not the right size.")
     
 	dim(x) <- dim(value)

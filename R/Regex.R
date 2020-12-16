@@ -421,7 +421,7 @@ makeRE.accidentals <- function(accidental.labels = c(), ...) {
 
 makeRE.qualities <- function(quality.labels = c(), ...) {
     setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
-    paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
+    paste0(captureUniq(quality.labels[c('diminish', 'augment')]), '|', captureRE(quality.labels[c('perfect', 'major', 'minor')], ''))
 }
 
 makeRE.contours <- function(contour.labels = c(), ...) {
@@ -440,7 +440,7 @@ makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), co
     
 }
 
-makeRE.kernPitch <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = c(), accidental.labels = c(), ...) {
+makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = c(), accidental.labels = c(), ...) {
     setoptions(step.labels) <- letters[1:7]
     setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = 'n')
     
@@ -451,7 +451,7 @@ makeRE.kernPitch <- function(parts = c('steps', 'accidentals'), collapse = TRUE,
         REs <- REs[parts]
     }
     
-    if (collapse) setNames(cREs(REs), 'kernPitch') else REs
+    if (collapse) setNames(cREs(REs), 'kern') else REs
 }
 
 makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, ...) {

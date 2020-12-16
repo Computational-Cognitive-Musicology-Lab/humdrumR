@@ -155,7 +155,7 @@ re.as <- function(vector) {
     
     splitvector <- split(vector, asfunc)
     
-    splitvector <- Map(stickyApply, lapply(paste0("as.", names(splitvector)), match.fun), splitvector)
+    splitvector <- Map(stickyApply, lapply(names(splitvector), match.fun), splitvector)
     
     output <- setNames(unlist(splitvector), names(vector))
     

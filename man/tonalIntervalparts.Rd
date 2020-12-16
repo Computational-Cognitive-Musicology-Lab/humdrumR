@@ -2,14 +2,7 @@
 % Please edit documentation in R/tonalInterval.R
 \name{tonalIntervalparts}
 \alias{tonalIntervalparts}
-\alias{genericpart}
-\alias{enharmonicpart}
 \title{Tonal interval partitions}
-\usage{
-genericpart(tint, Key)
-
-enharmonicpart(tint, enharmonicWrap, Key)
-}
 \description{
 Tonal interval partitions
 }
