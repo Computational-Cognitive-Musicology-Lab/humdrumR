@@ -364,12 +364,11 @@ captureRE <- function(strs, n = '') {
         strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
                         if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
                       collapse = '|')
+        
+        if (any(multi)) strs <- paste0('(', strs, ')')
     }
     
-    
-    
-    
-    escaper(paste0('(', strs, ')', n))
+    escaper(paste0(strs, n))
 }
 
 #' @name regexConstruction
@@ -421,7 +420,7 @@ makeRE.accidentals <- function(accidental.labels = c(), ...) {
 
 makeRE.qualities <- function(quality.labels = c(), ...) {
     setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
-    paste0(captureUniq(quality.labels[c('diminish', 'augment')]), '|', captureRE(quality.labels[c('perfect', 'major', 'minor')], ''))
+    paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
 }
 
 makeRE.contours <- function(contour.labels = c(), ...) {
@@ -455,7 +454,7 @@ makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step
 }
 
 makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, ...) {
-   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, ...), 'sciPitch')
+   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, ...), 'pitch')
 }
 
 makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {

@@ -4,8 +4,6 @@
 \alias{tonalTransformations}
 \alias{tonalTransform}
 \alias{invert}
-\alias{transposeBy}
-\alias{transposeTo}
 \title{Tonal Transformations}
 \usage{
 tonalTransform(
@@ -18,20 +16,16 @@ tonalTransform(
   roundContour = floor,
   enharmonic = FALSE,
   Key = NULL,
-  Exclusive = NULL
+  Exclusive = NULL,
+  by = NULL,
+  to = NULL,
+  real = TRUE,
+  relative = FALSE,
+  ...
 )
 
 invert(tint, around, Key, ...)
-
-transposeBy(x, by, Key, ...)
-
-transposeTo(x, Key, ...)
 }
 \description{
 Various transformations of pitch information
-
-This function transposes tonalIntervals by other tonal intervals.
-By default, does real transposition.
-However, if a \code{key} argument is specified, tonal transposition
-takes place in that key.
 }

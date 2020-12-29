@@ -38,6 +38,7 @@ compose.default <- function(..., fenv = parent.frame()) {
             rlang::syms(head(fnames, -1)), 
             pipeArgs[-1], 
             head(fargNames, -1))
+      
         
         # stickyApply(!!(rlang::sym(tail(fnames,1))), !!!fargNames[[length(fargNames)]])
         (!!tail(fnames,1))(!!!fargNames[[length(fargNames)]])
@@ -109,6 +110,27 @@ stickyAttrs <- function(x) attr(x, 'sticky')
 unstick <- function(x) {
     attr(x, 'sticky') <- NULL
     x
+}
+
+passargs <- function(x) {
+  # this COULD be incorporated into compose, but I'd rather not.
+  # It allows one function in the chain to change an input argument for functiosn later in the chain.
+  attrs <- attributes(x)
+  pass <- attrs$pass
+  if (length(pass) == 0L) return(x)
+  
+  attr(x, 'pass') <- NULL
+  
+  parentargs <- names(formals(sys.function(1L)))
+  
+  pass <- pass[names(pass) %in% parentargs]
+  
+  for (arg in names(pass)) {
+    assign(arg, pass[[arg]], parent.frame())
+    
+  }
+
+  x  
 }
     
 
@@ -457,6 +479,8 @@ memoiseParse <- function(...) {
           
           result[merge(target, uniqueVals, on = colnames(uniqueVals), sort = FALSE)$i]
         } else {
+          if (is.struct(target)) target <- as.atomic(target)
+          if (is.struct(uniqueVals)) uniqueVals <- as.atomic(uniqueVals)
           result[match(target, uniqueVals)]
           
         }

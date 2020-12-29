@@ -1023,7 +1023,7 @@ kern2tint <- function(str, ...) {
 
 interval2tint <- function(str, ...) {
   num <- as.integer(stringr::str_replace_all(str, '[^-+0-9]', ''))
-  num_simple <- abs(num) %% 7L
+  num_simple <- ((abs(num) - 1L) %% 7L) + 1L
   # num_simple[num < 0] <- 9L 
   
   str_ <- stringr::str_replace(str, '^[-+]', '')
@@ -1182,7 +1182,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
 tonalTransform <- function(x,  direction = TRUE, 
                            delta = FALSE, sigma = Exclusive %allin% c('mint'), 
                            generic = FALSE, simple = FALSE, roundContour = floor, enharmonic = FALSE, 
-                           Key = NULL, Exclusive = NULL) {
+                           Key = NULL, Exclusive = NULL, ...) {
     # Key
     if (!is.null(Key)) Key <- diatonicSet(Key)
     
@@ -1193,20 +1193,14 @@ tonalTransform <- function(x,  direction = TRUE,
     if (sigma)  x <- sigma(x)
     
     # Generic/Specific
-    if (generic) x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L))
-    # ifif(generic.part, alteration.part, 
-         # xor1 = x <- genericpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
-         # xor2 = x <- alterationpart.tonalInterval(x, Key %maybe% dset(0L, 0L)),
-         # .else = tint( , rep(0L, length(x))))
+    if (generic) x <- tintPartition_specific(x, Key = Key %maybe% dset(0L, 0L))$Generic
     
     # Simple/Complex
-    if (simple) x <- simplepart.tonalInterval(x, roundContour)
-    # ifif(octave.part, simple.part,
-         # xor1 = x <- octavepart.tonalInterval(x, roundContour),
-         # xor2 = x <- simplepart.tonalInterval(x, roundContour),
-         # .else = tint( , rep(0L, length(x))))
+    if (simple) x <- tintPartition_complex(x, roundContour = roundContour)$Simple
     
-    if (enharmonic) x <- enharmonicpart(x, Key = Key)
+    if (enharmonic) x <- tintPartition_harmonic(x, Key = Key %maybe% dset(0L, 0L), ... )$Harmonic
+    
+    
     
     x
 }
@@ -1227,50 +1221,182 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 }
 
 
-#' Transpose tonalIntervals
+#' Transpose pitches and keys
 #' 
-#' This function transposes tonalIntervals by other tonal intervals.
-#' By default, does real transposition.
-#' However, if a `key` argument is specified, tonal transposition
-#' takes place in that key.
+#' This function [transposes][https://en.wikipedia.org/wiki/Transposition_(music)] pitches or keys 
+#' by various intervals or to target keys.
+#' Inside the box, inputs and transpositions take place as `tonalInterval`s or `diatonicSet`s,
+#' but any numeric or character string representation of pitches can be transposed as well.
+#' This function is incorporated directly into [tonalTransform], and thence, all [pitch translation][pitchRepresentations]
+#' functions, so you probably won't call it directly very often.
 #' 
-#' @name tonalTransformations
+#' There are two distinct types of transposition (real and tonal).
+#' There are also two different approaches to *specifying* transpositions: "to" and "by".
+#' "To" transpositions can also be either *parallel* or *relative*.
+#' 
+#' # Types of Transposition
+#' 
+#' There are two different types of transposition: **real** transposition and **tonal** transposition.
+#' In *real* transposition, all inputs are transposed by the same *specific* interval.
+#' For example, the pitches `{C D E F G}` could be transposed up a major second to `{C D E F# G}`.
+#' In *tonal* transposition, inputs are transposed by *generic* intervals, within a key.
+#' For example, the sequence `{C D E F G}`, in the key of C major, could be translated up a generic second
+#' to `{D E F G A}`.
+#' 
+#' To choose between real and tonal transposition, use the `real` argument:
+#' `real = TRUE` for real transposition, `real = FALSE` for tonal transposition.
+#' 
+#' ### Alterations
+#' 
+#' Tonal transposition is complicated by the presence of any alterations in the input pitches.
+#' For instance, if we are given the pitches `{C F# G D# E}`` in the key of C major, how should they by tonally
+#' transposed up a second, within C major?
+#' There is not one obvious, correct answer answer, which can be easily identified.
+#' The algorithm implemented by `humdrumR` is as follows:
+#' 
+#' 1. Alterations/accidentals in the input are identified. (In this case, F# and D#).
+#' 2. The generic pitches are transposed within the key, resulting in `{D G A E F}`.
+#' 3. Alterations in the input are added to the output *unless* the resulting pitches are interpreted as a comma
+#'    by a call to [tintPartion], with a given enharmonic wrap value (the default is `12`).
+#'    In this example, adding the first accidental results in `{G#}` which is not a comma.
+#'    However, the second accidental results in `{E#}` which *is* a comma away from the natural `{F}`. 
+#'    Thus, this accidental is not added to the output, resulting in `{E}`, not `{E#}`.
+#'    The resulting output is `{D G# A E F}`.
+#' 
+#' The size of `enharmonicWrap` effectively determines how extreme accidentals are allowed.
+#' The default value, `12`, assures that no output notes are enharmonically equivalent to notes in the key. 
+#' To further illustrate, here is the sequence `{C F# G D# E, B- A A- G C# D, B D- C}` transposed
+#' tonally within C major by all seven possible generic intervals, with `enharmonicWrap = 12`:
+#' 
+#' 
+#' | Interval  | Output                                                                                                                                                              |
+#' | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+#' | Unison    | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 2nd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 3rd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 4th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 5th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 6th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 7th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')`  |
+#
+#' 
+#' # Specifying Transpositions
+#' 
+#' There are two approaches to specifying transpositions, the `by` and `to` arguments.
+#' The `by` argument must be an interval, and the input is translated by that interval.
+#' If the `by` interval is specific but `real = FALSE`, the input is treated as a generic interval,
+#' and tranposition takes place within the key indicated by the `Key` argument.
+#' 
+#' 
+#' The `to` argument translates an input *to* a desired key.
+#' For example, if the input is in the key of E major but we want it transposed to G major, we could say `to = '*E:'`.
+#' If `real = TRUE`, input is simply translated to the root of the `to` key, with all the exact same intervals.
+#' If `real = FALSE`, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
+#' In either case, the result depends on what the input's key is, which is indicated by the [standard][tonalTransform] `Key` argument.
+#' The `Key` arguments is like the "from" key.
+#' If `Key = NULL`, the input key is interpreted as C major.
+#' 
+#' Consider the input notes `{D B C A# B, D C# D E D}` in the key of the G major.
+#' If we specify `to = e:, real = TRUE`, the output will be `{B G# A F## G#, B A# B C# B}`.
+#' (Notice that even though the `to` key is minor, the output is still clearly in E major).
+#' If we specify `to = e:, real = FALSE`, the output will instead be `{B G A F# G, B A# B C B}`.
+#' 
+#' Building off the previous example, consider how the input *key* matters as well.
+#' If we use the same input notes (`{D B C A# B, D C# D E D}`) but the input `Key` is C major, then:
+#' If we specify `to = e:, real = TRUE`, the output will be `{F# D# E C## D#, F# E# F# G# F#}`.
+#' If we specify `to = e:, real = FALSE`, the output will instead be `{F# D E C# D, F# E F# G F#}`.
+#' 
+#' If *both* `by` and `to` are specified, the `to` transposition is applied first, followed by the `by` transposition.
+#' If `real = FALSE`, the `by` transposition happens within the `to` key, not the `Key` key.
+#' 
+#' ## Relative vs Parallel
+#' 
+#' When transposing to, we have diferent approaches about to determining the relationship between the
+#' "from" key (`Key` argument) and the "to" key (`to` argument).
+#' If we think of "parallel" relationships between keys, we match the roots of the keys regardless of modes.
+#' For instance, C major and C minor are parallel keys.
+#' If we instead think of "relative" relationships between keys, we match the modes of the keys, not the roots.
+#' For instance, C major and A minor are relative keys.
+#' This is similar to the distinction between "la-based minor" solfege (relative) vs "fixed-do" solfege (parallel).
+#' 
+#' When transposing using a `to` argument, if `relative = FALSE` the input key (`Key` argument) is transposed to match the *root*
+#' of the `to` argument.
+#' For example, if the input key is G minor and the `to`` key is C major, the output is transposed to G minor.
+#' However, if `relative = TRUE` the input key is transposed to match the mode of the `to` key:
+#' A G minor input with a C major `to` would be translated to A minor, the parallel minor of the `to` key.
+#' If the `Key` (from key) and `to` (to key) arguments have the same mode, the parallel and relative transpositions
+#' are the same.
+#' 
+#' 
+#' # Special Operators +-
+#' 
+#' As a note, real transposition `by` and interval can be achieved more concisely using the `+` and `-` operators,
+#' as long as at least one side of the operators is an actual `tonalInterval` object.
+#' `humdrumR` preassigns all common tonalIntervals to objects in your global environment.
+#' Thus, you can type commands like `"c#" + M2` to get `d#`, or `c("C4", "E4", "C5") - m6` to get `"E3" "G#3" "E4"`.
+#' 
+#' @param x The input pitch(es) to transpose. A `tonalInterval` or something intepretable as a `tonalInterval`. 
+#' @param by A `tonalInterval` or something intepretable as a `tonalInterval`. 
+#'        The input `x` is transposed by this interval.
+#' @param Key A `diatonicSet` or something intepretable as a `diatonicSet`. For tonal and/or to transpositions,
+#'        this is the "from" key. If this value is `NULL`, it defaults to C major.
+#' @param to A `diatonicSet` or something intepretable as a `diatonicSet`. The input `x` is transposed
+#'        to this key.
+#' @param real A logical. If `TRUE` (the default), transposition is real. If `FALSE`, transposition is tonal.
+#' @param relative A logical. If `TRUE` transposition is relative. If `FALSE` (the default), transposition is parallel.
+#' 
+#' @seealso tonalTransformations
 #' @export
-transposeBy <- function(x, by, Key, ...) UseMethod('transposeBy')
+transpose <- function(x, by, Key, to, real, relative, ...) UseMethod('transpose')
 #' @export
-transposeBy.tonalInterval <- function(x, by, altered.intervals = FALSE, Key = NULL) {
-    if (!is.tonalInterval(by)) by <- tonalInterval(by)
+transpose.tonalInterval <- function(x, by = NULL, Key = NULL, to = NULL, real = TRUE, relative = FALSE, ...) {
+  if (is.null(by) && is.null(to)) return(x)
+  
+  # nullkey <- is.null(Key)
+  Key <- diatonicSet(Key %maybe% dset(0, 0))
+  
+  if (!is.null(to)) {
+    to <- diatonicSet(to)
     
-    if (!altered.intervals) by <- by %% dset(0L, 0L)
-    
-    y <- x + by
-    
-    if (!is.null(Key)) y <- y %% Key
-    
-    if (!altered.intervals) {
-      by <- (y - x)
-      
-      qual <- LO5th2quality(by@Fifth)
-      
-      by[qual %~% 'd'] <- by[qual %~% 'd'] + tint(-11,7) 
-      by[qual %~% 'A'] <- by[qual %~% 'A'] - tint(-11,7) 
-      
-      y <- x + by
+    if (relative) {
+      sigdiff <- getSignature(to) - getSignature(Key)
+      to <- Key + dset(sigdiff, sigdiff)
     }
-      
-    y
+    
+    by <- (getRootTint(to) - getRootTint(Key)) + (by %maybe% tint(0, 0))
+    
+
+    
+    
+  } else {
+    to <- Key
+  }
+  
+  x <- if (real) {
+    x + by
+  } else {
+    
+    x <- tintPartition(x, Key = Key, 'specific')
+    x$Generic <- x$Generic + by
+    x$Generic <- x$Generic %% to
+    
+    altered <- x$Alteration != tint(0, 0)
+    if (any(altered)) {
+      comma <- tintPartition(x$Generic[altered] + x$Alteration[altered], 'harmonic', Key = to, ...)$Comma
+      x$Alteration[which(altered)[comma != tint(0,0)]] <- tint(0, 0)
+    }
+    
+    
+    x$Generic + x$Alteration
+    
+  }
+  
+  # if (!nullkey) attr(x, 'pass') <- c(attr(x, 'pass'), Key = to)
+  x
+  
 }
 
-#' @name tonalTransformations
-#' @export
-transposeTo <- function(x, Key, ...) UseMethod('transposeTo')
-#' @export
-transposeTo.tonalInterval <- function(x, toKey, fromKey = dset(0L, 0L)) {
-    by <- toKey - fromKey
- 
-    (x + by) %% toKey 
 
-}
 
 
 
@@ -1285,7 +1411,7 @@ NULL
 
 
 tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'),
-                          roundContour = floor, Key = NULL, enharmonicWrap = 19) {
+                          roundContour = floor, Key = NULL, enharmonicWrap = 12L) {
   
    partitions <- matched(partitions, c('complex', 'harmonic', 'specific'))
    
@@ -1332,7 +1458,7 @@ tintPartition_complex <- function(tint, roundContour = floor) {
 
 ###.. enharmonic + comma = harmonic
 
-tintPartition_harmonic <- function(tint, enharmonicWrap = 12, Key = dset(0L, 0L)) {
+tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L)) {
   
   modeoffset <- tint( , getSignature(Key)) + M2 # because 2 fifths is the "center" of the diatonic set
   entint <- (tint - modeoffset) %dim% NULL
@@ -1401,10 +1527,10 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 #' | semit       | `integer`   | [Semitones](https://en.wikipedia.org/wiki/Semitone)                                                                                     |
 #' | midi        | `integer`   | [MIDI](https://en.wikipedia.org/wiki/MIDI) note number                                                                                  |
 #' | kernPitch   | `character` | [Kern](https://www.humdrum.org/rep/kern/index.html) pitch representation                                                                |
-#' | pitch    | `character` | [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) representation                                                       |
+#' | pitch       | `character` | [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) representation                                                       |
 #' | lilyPitch   | `character` | [LilyPond](https://lilypond.org/doc/v2.20/Documentation/notation/pitches) pitch representation                                          |
 #' | interval    | `character` | Tonal [interval]("https://en.wikipedia.org/wiki/Interval_(music)#Interval_number_and_quality")                                          |
-#' | degree | `character` | [Scale degree]("https://en.wikipedia.org/wiki/Degree_(music)")                                                                          |
+#' | degree      | `character` | [Scale degree]("https://en.wikipedia.org/wiki/Degree_(music)")                                                                          |
 #' | solfa       | `character` | Humdrum [solfa](https://www.humdrum.org/rep/solfa/) representation of solfege                                                           |
 #' | decimal     | `numeric`   | [Frequency ratio](https://en.wikipedia.org/wiki/Interval_ratio) as R [numeric][base::numeric] (equal temperament)                       |
 #' | frequency   | `numeric`   | [Sound frequency](https://en.wikipedia.org/wiki/Frequency#Sound) ([equal temperament](https://en.wikipedia.org/wiki/Equal_temperament)) |
@@ -2206,18 +2332,13 @@ invert.numeric <- re.as %.% invert.tonalInterval %.% tonalInterval.numeric
 invert.integer <- re.as %.% invert.tonalInterval %.% tonalInterval.integer
 
 #' @export
-transposeBy.character <- re.place %.% re.as %.% transposeBy.tonalInterval %.% tonalInterval.character
+transpose.character <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.character
 #' @export
-transposeBy.numeric <- re.place %.% re.as %.% transposeBy.tonalInterval %.% tonalInterval.numeric
+transpose.numeric <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.numeric
 #' @export
-transposeBy.integer <- re.place %.% re.as %.% transposeBy.tonalInterval %.% tonalInterval.integer
+transpose.integer <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.integer
 
-#' @export
-transposeTo.character <- re.place %.% re.as %.% transposeTo.tonalInterval %.% tonalInterval.character
-#' @export
-transposeTo.numeric <- re.place %.% re.as %.% transposeTo.tonalInterval %.% tonalInterval.numeric
-#' @export
-transposeTo.integer <- re.place %.% re.as %.% transposeTo.tonalInterval %.% tonalInterval.integer
+
 
 
 is.simple <- function(tint) UseMethod('is.simple')
@@ -2230,22 +2351,23 @@ is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 ##### Predefined tonalIntervals ####
 
 #' @name tonalInterval
-#' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 m8 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
+#' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
 #' @export d1 d2 AA2 M3 P4 P5 m6 dd7 A7 P8 d9 AA9 M10 P11 P12 m13 dd14 A14 A15
-#' @export P1 m2 dd3 A3 A4 A5 P6 d7 AA7 M8 m9 dd10 A10 A11 A12 P13 d14 AA14 AA15
+#' @export P1 m2 dd3 A3 A4 A5 P6 d7 AA7 m9 dd10 A10 A11 A12 P13 d14 AA14 AA15
 #' @export A1 P2 d3 AA3 AA4 AA5 M6 m7 dd8 A8 P9 d10 AA10 AA11 AA12 M13 m14 dd15
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
 #' @export unison pythagorean.comma octave
 NULL
 
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
-allints[as.matrix(expand.grid(c(3,5), c(1,4,5,11,12,15)))] <- NA
+allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)
 allints <- allints[!is.na(allints)]
 # cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
 for (int in allints) {
   assign(int, interval2tint(int))
 }
+rm(allints)
 unison <- P1
 pythagorean.comma <- (-dd2)
 octave <- P8
