@@ -1438,7 +1438,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
   
   if (!is.null(tint) && !is.data.frame(tint)) tint <- as.data.frame(tint)
   
-  .cbind(struct2data.frame(Key = getRootTint(Key)), octave, specific, tint, comma)
+  .cbind(struct2data.frame(Key = getRootTint(Key)), octave, specific, tint, comma) %class% 'partition'
   
 }
 

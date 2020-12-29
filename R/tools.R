@@ -1402,19 +1402,32 @@ trimLongString <- function(strs, n = 20L) {
 }
 
 
-ofColumns <- function(str, split = '/') {
+strPartition <- function(str, split = '/') {
     # split strs into columns
-    if (hasdim(str)) {
-        output <- do.call('cbind', lapply(1:ncol(str), function(j) ofColumns(str[, j, drop = TRUE])))
-        rownames(output) <- apply(str, 1, paste, collapse = '/')
-        
-    } else {
-        output <- stringi::stri_split_fixed(str, pattern = split, simplify = TRUE)
-        rownames(output) <- str
-    }
+    # if (hasdim(str)) {
+    #     output <- do.call('cbind', lapply(1:ncol(str), function(j) ofColumns(str[, j, drop = TRUE])))
+    #     rownames(output) <- apply(str, 1, paste, collapse = '/')
+    #     
+    # } else {
+    #     output <- stringi::stri_split_fixed(str, pattern = split, simplify = TRUE)
+    #     rownames(output) <- str
+    # }
+    # 
+    # output[output == ""] <- NA_character_
+    # output
     
-    output[output == ""] <- NA_character_
-    output
+    mat <- stringi::stri_split_fixed(str, pattern = split, simplify = FALSE) %dim% str
+    
+    maxdepth <- max(lengths(mat))
+    df <- lapply(1:maxdepth,
+                               function(i) {
+                                   sapply(mat, '[', i = i) %dim% str
+                                   
+                               }) 
+    
+    df <- as.data.frame(lapply(df, I))
+    colnames(df) <- c('base', rep('of', ncol(df) - 1L))
+    df
     
 }
 
