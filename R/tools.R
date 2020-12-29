@@ -903,9 +903,16 @@ bits2ints <- function(x) as.integer(rowSums(sweep(x, 2, 2L ^ (0L:(ncol(x) - 1L))
 
 
 ints2nits <- function(n, it = 2, nits = 8) {
+    if (hasdim(n)) {
+        cols <- list()
+        for (j in 1:ncol(n)) cols[[j]] <- Recall(n[ , j], it = it, nits = nits)
+        return(do.call('abind', c(along = 3, cols)))
+    }
+    
     #
+    
     cur <- n %% it
-    out <- if (nits <= 1) {
+    out <- if (nits == 1) {
         cbind(cur)
     } else {
         
@@ -927,11 +934,11 @@ ints2baltern <- function(n, ntrits = 8L) {
     while(any(tern == 2L)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
         
-        if (any(twos[, 'col'] == 1L)) return(Recall(n, ntrits + 1))
+        if (any(twos[, 2] == 1L)) return(Recall(n, ntrits + 1))
         
         tern[twos] <- -1L
         
-        twos[ , 'col'] <- twos[ , 'col'] - 1L
+        twos[ , 2] <- twos[ , 2] - 1L
         tern[twos] <- tern[twos] + 1L
         
     }
@@ -942,7 +949,7 @@ ints2baltern <- function(n, ntrits = 8L) {
     # tern[firstnotzero] <- tern[firstnotzero] * sign(n[n != 0])
     
     ## incorporate sign
-    sweep(tern, 1L, as.integer(sign(n)), '*')
+    sweep(tern, c(1, if (length(dim(n))>1) 3), as.integer(sign(n)), '*')
     
  
     

@@ -161,39 +161,29 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 ##...accessors ####
 
 
-getRoot <- function(dset, sum = TRUE) {
-    root <- dset@Root %dim% dset
-    
-    if (hasdim(root) && sum) rowSums(root) else root
-}
+getRoot <- function(dset) dset@Root %dim% dset
 
-getRootTint <- function(dset, sum = TRUE) {
-    root <- getRoot(dset, sum)
+getRootTint <- function(dset) {
+    root <- getRoot(dset)
     
     out <- LO5thNcentralOct2tint(root, 0L)
-    if (sum) out else out %dim% dset
+    out %dim% dset
     
 }
 
-getSignature <- function(dset, sum = TRUE) {
-    signature <- dset@Signature %dim% dset
-    
-    if (hasdim(signature) && sum) rowSums(signature) else signature
-    
-}
+getSignature <- function(dset)  dset@Signature %dim% dset
 
-getMode <- function(dset, sum = TRUE) {
+
+getMode <- function(dset) {
     # mode is sign - root (the signature RELATIVE to the root)
-    root <- getRoot(dset, sum = sum)
-    sign <- getSignature(dset, sum = sum)
-    (sign - root) 
+    root <- getRoot(dset)
+    sign <- getSignature(dset)
+    sign - root
 }
 
 getAlterations <- function(dset) {
     # colnames represent the MAJOR degrees
-    if (hasdim(dset)) dset <- dset[ , ncol(tset)]
-    
-    alterations <- dset@Alteration
+    alterations <- dset@Alteration %dim% dset
     
     output <- ints2baltern(alterations, 7L) * 7L
     rownames(output) <- NULL
@@ -285,7 +275,7 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
               alter <- e2@Alteration
-              signature <- getSignature(e2, sum = TRUE)
+              signature <- getSignature(e2)
               
               output <- integer(length(e1))
               
@@ -308,7 +298,7 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
-              fifth <- e1@Fifth
+              fifth <- getFifth(e1)
               
               simple <-  fifth %% e2
               
@@ -390,13 +380,18 @@ setMethod('LO5th', 'diatonicSet',
     # the steporder argument controls the order the LO5ths are output
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
+    if (hasdim(x) && ncol(x) > 1) {
+        cols <- list()
+        for (j in 1:ncol(x)) cols[[j]] <- Recall(x[ , j] %dim% NULL, steporder = steporder, inversion = inversion)
+        return(do.call('abind', c(along = 3, cols)))
+    }          
+              
     dset <- x
-    root <- getRoot(dset, sum = TRUE)
-    sign <- getSignature(dset, sum = TRUE)
+    root <- getRoot(dset)
+    sign <- getSignature(dset)
     alter <- getAlterations(dset)
     
-    
-    notna <- !is.na(sign) & !is.na(root)
+    # notna <- !is.na(sign) & !is.na(root)
     inversion <- rep(inversion, length.out = length(x))
     
     ### get line-of-fifths values
@@ -420,32 +415,6 @@ setMethod('LO5th', 'diatonicSet',
     # 
     LO5ths
 })
-
-
-alterLO5ths <- function(LO5ths, alt) {
-    alt[is.na(alt)] <- 0L
-    if (all(alt == 0L)) return(LO5ths)
-    
-    roots <- LO5ths[ , 1]
-    
-    ord <- applyrows(LO5ths, rank)
-    
-    altmat <- matrix(alt, nrow = length(alt), ncol = 7L)
-    LO5ths[ord == 2L & altmat > 0L] <- LO5ths[ord == 2L & alt > 0L] + 7L
-    LO5ths[ord == 6L & altmat < 0L] <- LO5ths[ord == 6L & alt < 0L] - 7L
-    
-    
-    # recurse if necessary
-    alt <- alt - sign(alt)
-    done <- alt == 0L 
-    if (any(!done)) {
-        LO5ths[!done, ] <- Recall(LO5ths[!done, , drop = FALSE], alt[!done])
-    }
-    
-    LO5ths[, 1] <- roots
-    LO5ths
-    
-}
 
 
 ##### To/From pitch representations ####    
@@ -490,7 +459,7 @@ dset2tints <- function(dset, steporder = 2L) {
 dset2alterations <- function(dset, alteration.labels = c()) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
 
-    mode <- getMode(dset, sum = FALSE)
+    mode <- getMode(dset)
     
     altered <- dset@Alteration != 0L & mode > -7L & mode < 2L
     
@@ -512,7 +481,7 @@ dset2alterations <- function(dset, alteration.labels = c()) {
 }
 
 dset2modelabel <- function(dset) {
-    mode <- getMode(dset, sum = TRUE)
+    mode <- getMode(dset)
     .ifelse(mode == 0L | mode == -3L,
             "",
             LO5th2mode(mode, short = TRUE))
@@ -541,11 +510,11 @@ dset2signature <- function(dset) {
 ###.. key indications
 
 
-dset2key <- function(dset, alteration.labels = c(), sum = FALSE) {
+dset2key <- function(dset, alteration.labels = c()) {
     ## As kern key interpretation (i.e., *G:, *e-:)
     
-    root <- tint2kern(tint( , getRoot(dset, sum = sum)))
-    mode <- getMode(dset, sum = FALSE)
+    root <- tint2kern(tint( , getRoot(dset)))
+    mode <- getMode(dset)
     root[!is.na(mode) & mode %in% c(1L, 0L, 6L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L)])
     
     modelab <- dset2modelabel(dset) 
@@ -555,7 +524,6 @@ dset2key <- function(dset, alteration.labels = c(), sum = FALSE) {
     key <- .paste("*", root, ":", modelab, alterations) 
     
     #
-    if (!sum) key <- key %dim% dset
     key
 }
 
@@ -580,8 +548,8 @@ dset2key <- function(dset, alteration.labels = c(), sum = FALSE) {
 #' @romanNumerals
 NULL
 
-dset2romanNumeral <- function(dset, ..., sum = FALSE) {
-    tint <- getRootTint(dset, sum = sum)
+dset2romanNumeral <- function(dset, ...) {
+    tint <- getRootTint(dset)
     
     if (hasdim(tint)) {
         numeral <- array("", dim = dim(tint))
@@ -596,7 +564,7 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
         
     }
     
-    mode <- getMode(dset, sum = sum)
+    mode <- getMode(dset)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
     
     modelab <- dset2modelabel(dset) 
@@ -604,7 +572,7 @@ dset2romanNumeral <- function(dset, ..., sum = FALSE) {
     alterations <- dset2alterations(dset)
     
     out <- .paste(numeral, modelab, alterations)
-    if (!sum) out <- out %dim% dset
+
     out
    
 }

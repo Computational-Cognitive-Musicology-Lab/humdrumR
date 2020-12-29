@@ -169,7 +169,20 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 
 ##...accessors ####
 
+#' @export
+setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
+setMethod("LO5th", "tonalInterval",
+          function(x, sum = FALSE) {
+            x@Fifth %dim% x
+          })
+setMethod('LO5th', 'ANY',
+          function(x) {
+            x <- as(x, 'tonalInterval')
+            LO5th(x)
+          })
 
+getFifth  <- function(tint) LO5th(tint)
+getOctave <- function(tint) tint@Octave %dim% tint
 
 ####. vector/core methods ####
 
@@ -522,20 +535,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 ###. x to line-of-fifths ####
 
 
-#' @export
-setGeneric("LO5th", function(x, sum = FALSE, ...) standardGeneric("LO5th"))
-setMethod("LO5th", "tonalInterval",
-          function(x, sum = FALSE) {
-            lof <- x@Fifth %dim% x
-            
-            if (hasdim(lof) && sum) rowSums(lof) else lof
-            
-          })
-# setMethod('LO5th', 'ANY',
-#           function(x, sum = FALSE) {
-#             x <- as(x, 'tonalInterval')
-#             LO5th(x, sum)
-#           })
+
 
 
 
