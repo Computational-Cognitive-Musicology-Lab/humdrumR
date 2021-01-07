@@ -359,7 +359,7 @@ setMethod('-', signature = c('diatonicSet', 'integer'),
 
 LO5th2mode <- function(LO5th, short = FALSE) {
     
-    known <- LO5th > -7L & LO5th < 2L
+    known <- LO5th > -7L & LO5th < 2L & !is.na(LO5th)
     
     LO5th <- LO5th %% 7L
     
@@ -515,7 +515,7 @@ dset2key <- function(dset, alteration.labels = c()) {
     
     root <- tint2kern(tint( , getRoot(dset)))
     mode <- getMode(dset)
-    root[!is.na(mode) & mode %in% c(1L, 0L, 6L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L)])
+    root[!is.na(mode) & mode %in% c(1L, 0L, 6L, -1L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L, -1L)])
     
     modelab <- dset2modelabel(dset) 
     
@@ -670,11 +670,7 @@ signature2dset <- function(str, mode = 0L) {
         alterations <- as.integer(rowSums(sweep(alterations, 2, 3L^(6L:0L), `*`)))
         
         if (any(rootqual != 0L)) {
-            alterations[rootqual != 0L] <- ifelse(alterations[rootqual != 0L] > 0,
-                                                  alterations[rootqual != 0L] %/% 3,
-                                                  alterations[rootqual != 0L] * 3L)
-            sigs[rootqual != 0L] <- sigs[rootqual != 0L] - rootqual[rootqual != 0]
-            mode[rootqual != 0L] <- mode[rootqual != 0L] + rootqual[rootqual != 0]
+           mode[rootqual != 0L] <- mode[rootqual != 0L] - 1L
         }
         dsets <- dset(sigs - mode, sigs, alterations)
         
@@ -690,7 +686,7 @@ signature2dset <- function(str, mode = 0L) {
 
 key2dset <- function(str, parts = c('steps', 'accidentals'), 
                      step.labels = c('C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'A', 'a', 'B', 'b'), 
-                     alteration.labels = c(), accidental.labels = c()) {
+                     alteration.labels = c(), accidental.labels = c(), ...) {
     
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
@@ -699,7 +695,8 @@ key2dset <- function(str, parts = c('steps', 'accidentals'),
     
     tonalChromaRE <- makeRE.tonalChroma(parts,  
                                         accidental.labels = accidental.labels,
-                                        step.labels = step.labels)
+                                        step.labels = step.labels,
+                                        ...)
     
     alterationRE <- makeRE.alterations(alteration.labels)
     
@@ -711,13 +708,14 @@ key2dset <- function(str, parts = c('steps', 'accidentals'),
                  alterations = alterationRE))
     
     # Root
-    root <- tonalChroma2tint(toupper(tonalChroma), accidental.labels = accidental.labels, 
-                             step.labels = step.labels[step.labels == toupper(step.labels)])@Fifth
+    root <- tonalChroma2tint(chartr('A-GIV', 'a-giv', tonalChroma), accidental.labels = accidental.labels, ...,
+                             parts = parts,
+                             step.labels = step.labels[step.labels == tolower(step.labels)])@Fifth
     
     
     # Signature
-    minor <- stringi::stri_detect_charclass(tonalChroma, '[a-z]') * -3L
-    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, phr = -1, loc = -2)[mode])
+    minor <- stringi::stri_detect_regex(str, '[a-g].*:|[iv]') * -3L
+    mode <- .ifelse(is.na(mode), 0 , c(dor = +1, mix = -1, lyd = +1, phr = -1, loc = -2)[mode])
     signature <- root + mode + minor
     
     ## Alterations
@@ -730,13 +728,20 @@ key2dset <- function(str, parts = c('steps', 'accidentals'),
 
 ##... From roman numeral
 
-romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = c()) {
+romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = c(), of = dset(0, 0)) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
-    setoptions(accidental.labels) <- c(sharp = '#', flat = '-')
+    setoptions(accidental.labels) <- c(sharp = '#', flat = 'b')
     
-    key2dset(str, c('accidentals', 'steps'), 
+    
+    of <- dset(0, getMode(of), of@Alteration)
+    dset <- key2dset(str, c('accidentals', 'steps'), 
              alteration.labels = alteration.labels, accidental.labels = accidental.labels,
-             step.labels = c('I', 'i', 'II', 'ii', 'III', 'iii', 'IV', 'iv', 'V', 'v', 'VI', 'vi', 'VII', 'vii'))
+             step.labels = c('I', 'i', 'II', 'ii', 'III', 'iii', 'IV', 'iv', 'V', 'v', 'VI', 'vi', 'VII', 'vii'),
+             Key = of)
+    
+    dset # + getRoot(of)
+    
+    
     
     
 }
@@ -769,7 +774,27 @@ integer2dset <- function(x) dset(x, x)
 #' @export
 # romanNumeral.character <- romanNumeral.tertianSet %.% as.tertianSet
 
+mapPartition <- function(func, split = '/') {
+    function(str) {
+        parts <- strPartition(str, split = split)
+        
+        # parts[] <- lapply(parts, func)
+        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0,0), parts, accumulate = TRUE), -1) 
+        parts %class% "partition"
+        
+    }
+}
+
+sum_diatonicPartition <- function(part) {
+    of <- Reduce('+', lapply(part[ , colnames(part) == 'of', drop = FALSE], getRoot))
+    
+    dset <- part$base
+    dset + dset(of, of, 0L)
+    
+}
+
 ##### As x ####
+
 
 #' Diatonic set representations
 #' 
@@ -801,13 +826,23 @@ diatonicSet.diatonicSet <- force
 diatonicSet.numeric <- integer2dset %.% as.integer
 
 
+
+
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'key: makeRE.key(...)' = key2dset,
                              'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,
                              'signature: makeRE.signature(...)' = signature2dset)
 
+
+char2dset_ <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                              'keyof: makeRE.diatonicPartition(...)' = mapPartition(char2dset),
+                              'key: makeRE.key(...)' = key2dset,
+                              'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,          
+                              'signature: makeRE.signature(...)' = signature2dset)
+
 #' @export
-diatonicSet.character <- char2dset
+diatonicSet.character <- char2dset_
+
 
 #.... set as
 

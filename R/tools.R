@@ -415,6 +415,12 @@ size <- function(x) ldim(x)$size
 `%dim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
+    if (inherits(x, 'partition')) {
+        x[] <- lapply(x, `%dim%`, value =value)
+        return(x)
+    }
+    
+    
     if (is.null(value)) {dim(x) <- NULL; return(x)}
     
     if (size(x) != size(value)) .stop("%dim% is trying to match the dimensions of two objects, but the target object is not the right size.")
@@ -931,7 +937,7 @@ ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
     tern <- ints2nits(abs(n), it = 3L, ntrits)
     
-    while(any(tern == 2L)) {
+    while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
         
         if (any(twos[, 2] == 1L)) return(Recall(n, ntrits + 1))
@@ -1430,6 +1436,7 @@ strPartition <- function(str, split = '/') {
     df
     
 }
+
 
 
 

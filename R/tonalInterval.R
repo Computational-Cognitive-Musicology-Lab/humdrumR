@@ -946,7 +946,7 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 tonalChroma2tint <- function(str, Key = NULL,
                              parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
  
- parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
+  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
  
  if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
