@@ -250,6 +250,10 @@ rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA)
 
 ### Vectors ----
 
+changeifmap <- function(x, table) {
+    .ifelse(x %in% names(table), table[match(x, names(table))], x)
+    
+}
 
 allsame <- function(x) length(unique(x)) == 1L
 
@@ -419,7 +423,6 @@ size <- function(x) ldim(x)$size
         x[] <- lapply(x, `%dim%`, value =value)
         return(x)
     }
-    
     
     if (is.null(value)) {dim(x) <- NULL; return(x)}
     
@@ -1141,11 +1144,9 @@ getArglist <- function(form) {
 
 append2expr <- function(expr, exprs) {
     l <- length(expr)
-    for (i in 1:length(exprs)) {
-        expr[[i + l]] <- exprs[[i]]
-    }
-    names(expr)[(l + 1):length(expr)] <- names(exprs)
-    expr
+    expr <- as.list(expr)
+    
+    as.call(append(expr, exprs, 2))
 }
 
 ### Building smart functions ----
@@ -1303,7 +1304,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 
 matched <- function(x, table) table[pmatch(x, table)]
 
-.paste <- function(..., sep = '', collapse = NULL, na.if = any) {
+.paste <- function(..., sep = '', collapse = NULL, na.if = any, fill = NA_character_) {
 # paste, but smart about NA values
     args <- list(...)
     if (length(args) == 1) return(paste(args[[1]], collapse = collapse))
@@ -1313,7 +1314,7 @@ matched <- function(x, table) table[pmatch(x, table)]
     
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
-    ifelse(nas, NA_character_, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
+    ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
 has.prefix <- function(prefix, x) {

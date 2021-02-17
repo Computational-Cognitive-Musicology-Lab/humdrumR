@@ -341,6 +341,17 @@ setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
           })
 
 #' @export
+setMethod('+', signature = c('diatonicSet', 'integer'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1@Root <- e1@Root + e2
+            e1@Signature <- e1@Signature + e2
+            e1
+          })
+
+
+#' @export
 setMethod('-', signature = c('diatonicSet', 'integer'),
           function(e1, e2) {
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
@@ -350,6 +361,17 @@ setMethod('-', signature = c('diatonicSet', 'integer'),
               e1
           })
 
+
+#' @export
+setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1@Root <- e1@Root + e2@Root
+            e1@Signature <- e1@Signature + e2@Signature
+            e1
+            
+          })
 
 
 ##### To/From line-of-fifths ####
@@ -380,11 +402,6 @@ setMethod('LO5th', 'diatonicSet',
     # the steporder argument controls the order the LO5ths are output
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
-    if (hasdim(x) && ncol(x) > 1) {
-        cols <- list()
-        for (j in 1:ncol(x)) cols[[j]] <- Recall(x[ , j] %dim% NULL, steporder = steporder, inversion = inversion)
-        return(do.call('abind', c(along = 3, cols)))
-    }          
               
     dset <- x
     root <- getRoot(dset)
@@ -407,11 +424,11 @@ setMethod('LO5th', 'diatonicSet',
     # LO5ths <- do.call('rbind', Map(function(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
                                    # root %% 7L, 1:nrow(LO5ths), inversion))
     LO5ths <- do.call('rbind', LO5ths)
-    LO5ths[ , 1] <- root
+    LO5ths[cbind(1:nrow(LO5ths), 1L + ((7L - inversion) %% 7L))] <- root
     
 
-    # rownames(LO5ths) <- dset2key(dset)
-    # colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+    rownames(LO5ths) <- dset2key(dset)
+    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
     # 
     LO5ths
 })
@@ -421,35 +438,24 @@ setMethod('LO5th', 'diatonicSet',
 
 ###. dset to pitches ####
 
+
+
 dset2pitcher <- function(pitch.func) {
     pitch.func <- rlang::enexpr(pitch.func)
     body <- rlang::expr({
     	LO5ths <- LO5th(x)
 
-        LO5ths <- apply(LO5ths, 2, tint, octave = octave - 4L)
-    
-	pitches <- sapply(LO5ths, !!pitch.func)
-    
-    	if (collapse) {
-        	apply(pitches, 1, .paste, na.rm = TRUE)
-    	} else {
-     	    	pitches
-	}
+        tints <- tint( , LO5ths)
+     	(!!pitch.func)(tints, ...)
+      
      })
 
-    rlang::new_function(alist(x = , collapse = FALSE, octave = 4L),
-		        body, parent.env(environment()))
+    rlang::new_function(alist(x = , ... = ), body, parent.env(environment()))
 }
 
-dset2semit <- dset2pitcher(tint2semit)
-dset2midi  <- dset2pitcher(tint2midi)
-dset2kern  <- dset2pitcher(tint2kern)
+dset2tonalChroma <- dset2pitcher(tint2tonalChroma)
 
-dset2tints <- function(dset, steporder = 2L) {
-    LO5ths <- LO5th(dset, steporder = steporder)
-    tints <- tint( , LO5ths)
-    tints %dim% LO5ths
-}
+
 
 ##### To/From diatonic sets ####  
 
@@ -466,17 +472,18 @@ dset2alterations <- function(dset, alteration.labels = c()) {
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(alteration.labels$augment, alteration.labels$diminish, "")[match(alterations, c(7, -7, 0))]
 
-    order <- lapply(mode[altered] %% 7, function(m) ((0L:6L + m) %% 7L) + 1 )
+    order <- lapply(mode[altered] %% 7L, function(m) ((0L:6L + m) %% 7L) + 1 )
         
     labs <- do.call('rbind', lapply(order, function(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
     labs[alterations == ''] <- ''
 
     alterations[] <- paste0(alterations, labs)
+    
     alterations <- apply(alterations, 1, paste, collapse='')
-
     output <- character(length(mode))
     output[altered] <- alterations
     output
+
 
 }
 
@@ -551,18 +558,7 @@ NULL
 dset2romanNumeral <- function(dset, ...) {
     tint <- getRootTint(dset)
     
-    if (hasdim(tint)) {
-        numeral <- array("", dim = dim(tint))
-        numeral[ , 1L] <- tint2romanRoot(tint[ , 1L], ...)
-        if (ncol(tint) > 1L) {
-            for (j in (ncol(tint) - 1):1) {
-               numeral[ , j] <- tint2romanRoot(tint[ , j], Key = dset[ , j + 1L], ...)
-            }
-        }
-    } else {
-        numeral <- tint2romanRoot(tint, ...)
-        
-    }
+    numeral <- tint2romanRoot(tint, ...)
     
     mode <- getMode(dset)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
@@ -864,6 +860,8 @@ key.diatonicSet          <- dset2key
 signature.diatonicSet    <- dset2signature
 #' @export
 romanNumeral.diatonicSet <- dset2romanNumeral
+#' @export
+kern.diatonicSet         <- dset2pitcher(tint2kern)
 
 ###. x as y ####
 

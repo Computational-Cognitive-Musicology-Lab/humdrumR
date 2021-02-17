@@ -140,9 +140,9 @@ setMethod("initialize",
               .Object <- callNextMethod() # call the struct initialize
               Cent <- .Object@Cent
               if (any(abs(Cent) >= 1200L, na.rm = TRUE)) {
-                  centOctaves <- IfElse(Cent == 0L, 
-                                        0L,
-                                        as.integer((Cent %/% (sign(Cent) * 1200)) * sign(Cent)))
+                  centOctaves <- .ifelse(Cent == 0L, 
+                                         0L,
+                                         as.integer((Cent %/% (sign(Cent) * 1200)) * sign(Cent)))
                   .Object@Octave <- .Object@Octave + centOctaves 
                   Cent   <- Cent  - (1200 * centOctaves)
                  .Object@Cent   <- Cent
@@ -162,8 +162,8 @@ setMethod("initialize",
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
     if (missing(octave)) octave <- -LO5th2contourN(LO5th, contour.round = floor)
   
-    tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent))
-    
+    tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
+    tint <- tint %dim% (if (size(tint) == size(LO5th)) LO5th else octave)
     if (partition) tintPartition(tint, Key = Key, roundContour = roundContour) else tint
 }
 
@@ -172,7 +172,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 #' @export
 setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
 setMethod("LO5th", "tonalInterval",
-          function(x, sum = FALSE) {
+          function(x) {
             x@Fifth %dim% x
           })
 setMethod('LO5th', 'ANY',
@@ -710,7 +710,7 @@ tint2tonalChroma <- function(x, parts = c('qualities', 'steps', 'contours'), sep
   steps       <- if ('steps' %in% parts)        tint2step(x, ...)   %dots% (has.prefix('step.|Key$') %.% names)
   qualities   <- if ('qualities' %in% parts)    tint2quality(x, ...)     %dots% (has.prefix('quality.|Key$') %.% names)
   accidentals <- if ('accidentals' %in% parts)  tint2accidental(x, ...)  %dots% (has.prefix('accidental.|Key$') %.% names)
-  contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.|Key$') %.% names)
+  contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.') %.% names)
 
   tonalchroma <- pasteordered(parts, steps = steps, qualities = qualities, accidentals = accidentals, contours = contours, sep = sep)
   
@@ -732,6 +732,13 @@ tint2pitch <- function(x, ...)  {
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            contour.labels = FALSE, contour.offset = 4L, 
                            parts = c('steps', 'accidentals', 'contours'), ...))
+}
+
+tint2simplepitch <- function(x, ...)  {
+  overdot(tint2tonalChroma(x, 
+                           step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                           contour.labels = FALSE, contour.offset = 4L, 
+                           parts = c('steps', 'accidentals'), ...))
 }
 
 
@@ -779,9 +786,8 @@ tint2romanRoot <- function(x, ..., Key = NULL) {
 
 
 tint2interval <- function(x) {
-  
   octave <- tint2contour(x, contour.round = floor, contour.labels = FALSE)
-  direction <- .ifelse(x == tint(0, 0), "", c('-', '+')[1 + (octave >= 0)])
+  direction <- .ifelse(x == tint(0, 0) | !direction, "", c('-', '+')[1 + (octave >= 0)])
   
   x[octave < 0L] <- x[octave < 0L] * -1L
   steps <- tint2step(x, step.labels = 1L:7L)
@@ -2100,7 +2106,7 @@ NULL
 #' @export tonalInterval 
 #' @export semit midi
 #' @export tonalChroma step as.accidental as.quality contour
-#' @export pitch kern lilypond as.helmholtz
+#' @export pitch simplepitch kern lilypond as.helmholtz
 #' @export interval degree solfa
 #' @export as.rational as.fraction as.decimal as.frequency
 NULL
@@ -2126,6 +2132,7 @@ as.accidental    <- pitchgeneric("as.accidental", alist(accidental.labels = , ac
 as.quality       <- pitchgeneric("as.quality",    alist(quality.labels = , quality.maximum =, quality.minimum =, quality.cautionary = , quality.memory = ))
 contour       <- pitchgeneric("contour",    alist(contour.labels = , contour.maximum =, contour.minimum =, contour.offset = , contour.delta = , contour.round = ))
 pitch      <- pitchgeneric("pitch")
+simplepitch      <- pitchgeneric("simplepitch")
 kern     <- pitchgeneric("kern")
 lilypond     <- pitchgeneric("lilypond")
 as.helmholtz     <- pitchgeneric("as.helmholtz")
@@ -2198,6 +2205,8 @@ contour.tonalInterval     <- tint2contour     %.% tonalTransform
 #' @export
 pitch.tonalInterval    <- tint2pitch    %.% tonalTransform
 #' @export
+simplepitch.tonalInterval    <- tint2simplepitch    %.% tonalTransform
+#' @export
 kern.tonalInterval   <- tint2kern   %.% tonalTransform
 #' @export
 lilypond.tonalInterval   <- tint2lily   %.% tonalTransform
@@ -2240,6 +2249,8 @@ contour.integer     <- tint2contour     %.% tonalInterval.integer
 #' @export
 pitch.integer    <- tint2pitch    %.% tonalInterval.integer
 #' @export
+simplepitch.integer    <- tint2simplepitch    %.% tonalInterval.integer
+#' @export
 kern.integer   <- tint2kern   %.% tonalInterval.integer
 #' @export
 lilypond.integer   <- tint2lily   %.% tonalInterval.integer
@@ -2273,6 +2284,8 @@ contour.numeric     <- tint2contour     %.% tonalInterval.numeric
 #' @export
 pitch.numeric    <- tint2pitch    %.% tonalInterval.numeric
 #' @export
+simplepitch.numeric    <- tint2simplepitch    %.% tonalInterval.numeric
+#' @export
 kern.numeric   <- tint2kern   %.% tonalInterval.numeric
 #' @export
 lilypond.numeric   <- tint2lily   %.% tonalInterval.numeric
@@ -2305,6 +2318,8 @@ as.quality.character     <- re.place %.% tint2quality     %.% tonalInterval.char
 contour.character     <- re.place %.% tint2contour     %.% tonalInterval.character
 #' @export
 pitch.character    <- re.place %.% tint2pitch    %.% tonalInterval.character
+#' @export
+simplepitch.character    <- re.place %.% tint2simplepitch    %.% tonalInterval.character
 #' @export
 kern.character   <- re.place %.% tint2kern   %.% tonalInterval.character
 #' @export

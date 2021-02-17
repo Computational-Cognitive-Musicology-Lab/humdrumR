@@ -17,10 +17,6 @@ tonalTransform(
   enharmonic = FALSE,
   Key = NULL,
   Exclusive = NULL,
-  by = NULL,
-  to = NULL,
-  real = TRUE,
-  relative = FALSE,
   ...
 )
 
