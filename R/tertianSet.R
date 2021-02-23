@@ -372,11 +372,11 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
 
 
 reduceFigures <- function(alterations, extensions, inverted, extension.which = c(3, 5, 7, 2, 4, 6), extension.shorthand = TRUE, extension.add = TRUE, extension.sus = TRUE, ...) {
-  if (is.null(extensions)) extensions <- array(NA_integer_, dim = dim(alterations))
-  if (is.null(alterations)) alterations <- array(NA_character_, dim = dim(extensions))
+  if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
+  if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
   
   
-  present <- !is.na(alterations)
+  present <- !is.na(alterations) & !is.na(alterations)
   tags <- array("", dim = dim(alterations))
   
   if (any(!inverted) && extension.sus) {
@@ -429,7 +429,7 @@ tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'),
   
   inversion   <- if ('inversion' %in% parts) {
     if (is.function(inversion.labels)) {
-      inversion.labels(tint( , getBass(x)), Key = Key)
+      ifelse(getInversion(x) == 0, "", inversion.labels(tint( , getBass(x)), Key = Key))
     } else {
       getInversion(x, inversion.labels = inversion.labels)
     }
@@ -460,12 +460,38 @@ tset2figuredBass <- function(tset, ...) {
 
 tset2romanNumeral <- function(tset,  ...) {
   overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), qualifyTriad = triadQualify.Roman, 
-                            inversion.labels = c("", letters[-1]),
-                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=FALSE,
+                            inversion.labels = letters,
+                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=TRUE,
                             extension.sus = TRUE, extension.add = TRUE,
                             inversion = FALSE, figure.Key = TRUE, Key = dset(0,0), ...))
   
 }
+
+tset2sciChord <- function(tset,  ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'qualities'), 
+                            steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
+                            qualifyTriad = paste0, quality.cautionary = TRUE,
+                            extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
+                            accidental.natural = TRUE,
+                            extension.add=FALSE, extension.sus = FALSE,
+                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...))
+  
+}
+
+
+tset2chordSymbol <- function(tset,  ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), 
+                            steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj'),
+                            qualifyTriad = paste0,
+                            inversion.labels = function(x, ...) paste0('/', tint2simplepitch(x)),
+                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=FALSE,
+                            extension.sus = TRUE, extension.add = TRUE,
+                            triad.labels = c(major = ''),
+                            accidental.natural = TRUE,
+                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...))
+  
+}
+
 
 ####. x to text ####
 
