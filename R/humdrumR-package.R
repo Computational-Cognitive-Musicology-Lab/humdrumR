@@ -2,8 +2,8 @@
 #'
 #' `humdrumR` is a toolkit for the analysis of data encoded in the [humdrum syntax](http://www.humdrum.org/guide/ch05/).
 #' The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
-#' Tens of thousands of musical scores (and other musical data) have been encoded in humdrum, many available online, 
-#' for instance at [KernScores](http://kern.ccarh.org/).
+#' Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online through repositories such as 
+#' [KernScores](http://kern.ccarh.org/).
 #' 
 #' `humdrumR` is intended as a modernized replacement for the original [humdrum toolkit](http://www.humdrum.org/), levaraging
 #' the power of R to give us enprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.

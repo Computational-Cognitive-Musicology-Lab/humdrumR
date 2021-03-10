@@ -36,7 +36,7 @@ to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).}
 \item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
 recursively through all sub directories.}
 
-\item{allowDuplicates}{\code{logical} or length one, indicating what should happen if multiple search patterns match the same files.
+\item{allowDuplicates}{\code{logical} of length one, indicating what should happen if multiple search patterns match the same files.
 If \code{allowDuplicates = TRUE},
 any such files are read multiple times, grouped into their respective corpora by the \code{Label} field.
 If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they

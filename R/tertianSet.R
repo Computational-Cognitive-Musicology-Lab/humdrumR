@@ -35,13 +35,13 @@
 #' 
 #' `tertianSet` has many specific methods defined for reading/writing harmonic information.
 #' 
-#' 
+#' @name tertianSet
 #' @seealso diatonicSet humTonality
 #' @export 
 setClass('tertianSet', 
          contains = 'diatonicSet',
          slots = c(Extensions = 'integer',
-                   Inversion = 'integer'))
+                   Inversion = 'integer')) -> tertianSet
 
 setValidity('tertianSet', 
             function(object) {
@@ -51,7 +51,7 @@ setValidity('tertianSet',
                       object@Inversion < 7)
             })
 
-#' @name humDiatonic
+#' @name tertianSet
 #' @export
 tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, extension = NULL, inversion = 0L) {
     if (is.tonalInterval(root)) root <- root@Fifth
@@ -239,7 +239,7 @@ tset2alterations <- function(tset, parts = 'accidentals', inversion = TRUE, Key 
   if (is.null(Key)) {
     Key <- dset(0, -1)
     tset <- tset - getRoot(tset)
-  } 
+  }
   if (!accidental.naturals) {
     tset <- tset - getRoot(Key)
     Key <- Key - getRoot(Key)
@@ -362,8 +362,10 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
                      }
   )
   
-  
-  triad[!incompletetriad] <- reductions[triadnotes[!incompletetriad, , drop = FALSE]]
+  known <- triadnotes[ , '3rd'] %in% rownames(reductions) & triadnotes[ , '5th'] %in% colnames(reductions)
+  triad[!incompletetriad & known] <- reductions[triadnotes[!incompletetriad & known, , drop = FALSE]]
+  triad[incompletetriad | !known] <- paste0('(', triadnotes[incompletetriad | !known , '3rd'], 
+                                                 triadnotes[incompletetriad | !known , '5th'], ')')
   
   triad
   
@@ -371,12 +373,15 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
 }
 
 
-reduceFigures <- function(alterations, extensions, inverted, extension.which = c(3, 5, 7, 2, 4, 6), extension.shorthand = TRUE, extension.add = TRUE, extension.sus = TRUE, ...) {
+reduceFigures <- function(alterations, extensions, inverted, 
+                          extension.which = c(3, 5, 7, 2, 4, 6), extension.shorthand = TRUE, 
+                          extension.add = TRUE, extension.sus = TRUE, 
+                          extension.sep = '', ...) {
   if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
   if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
   
   
-  present <- !is.na(alterations) & !is.na(alterations)
+  present <- !is.na(alterations) 
   tags <- array("", dim = dim(alterations))
   
   if (any(!inverted) && extension.sus) {
@@ -410,32 +415,34 @@ reduceFigures <- function(alterations, extensions, inverted, extension.which = c
   figures <- alterations[ , nth(extension.which), drop = FALSE]
   
   #
+  figures[figures != ""] <- .paste(extension.sep[1], figures[figures != ""], extension.sep[2], na.if = all, sep = '')
   Reduce(paste0, as.data.frame(figures))
   
 }
 
 
-tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, inversion = TRUE, inversion.labels = letters,
+tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, 
+                              inversion = TRUE, inversion.labels = letters,
                               qualifyTriad = triadQualify.Roman, figure.Key = TRUE, accidental.naturals = FALSE, sep = '', ...) {
-  parts <- matched(parts, c('root', 'bass', 'qualities', 'accidentals', 'extensions', 'inversion'))
+  parts <- matched(parts, c('root', 'qualities', 'accidentals', 'extensions', 'inversion'))
   
   qualoracc <- parts[parts %in% c('qualities', 'accidentals')]
   
   
-  root        <- if ('root' %in% parts)      steps(getRootTint(x), Key = Key, ...) 
+  root        <- if ('root' %in% parts)      steps(getRootTint(x), Key = if (figure.Key) Key, ...) 
   alterations <- if (length(qualoracc) > 0L) tset2alterations(x, parts = qualoracc[1], Key = if (figure.Key) Key, inversion = inversion,
                                                               accidental.naturals = accidental.naturals, ...) 
   extensions  <- if ('extensions' %in% parts) tset2extensions(x, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
   
   inversion   <- if ('inversion' %in% parts) {
     if (is.function(inversion.labels)) {
-      ifelse(getInversion(x) == 0, "", inversion.labels(tint( , getBass(x)), Key = Key))
+      ifelse(inversion | getInversion(x) > 0, inversion.labels(tint( , getBass(x)), Key = NULL), "")
     } else {
       getInversion(x, inversion.labels = inversion.labels)
     }
   }
   
-  triad.quality <- tset2triadLabel(x, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
+  triad.quality <- tset2triadLabel(x, Key = NULL, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
   if (!is.null(qualifyTriad)) root <- qualifyTriad(root, triad.quality) 
   
   figures <- if (any(c('extensions', 'qualities') %in% parts)) {
@@ -449,12 +456,24 @@ tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'),
 }
 
 
-tset2figuredBass <- function(tset, ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('inversion', 'accidentals', 'extensions'), qualifyTriad = NULL, inversion.labels = tint2simplepitch,
+tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('inversion','accidentals', 'extensions'), qualifyTriad = NULL, inversion.labels = tint2simplepitch,
+                            steps = tint2simplepitch,
                     extension.shorthand = FALSE, extension.which = c(7,6,5,4,3,2), extension.simple=TRUE,
                     extension.sus = FALSE, extension.add = FALSE,
                     inversion = TRUE, figure.Key = TRUE, Key = dset(0, 0), 
-                    accidental.labels = c(flat = '-'), ...))
+                    sep = '', ...)) -> figures
+  
+  if (extension.shorthand) {
+    figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
+    figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
+    figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
+    figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
+    figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
+  }
+  
+  figures
+  
   
 }
 
@@ -481,14 +500,16 @@ tset2sciChord <- function(tset,  ...) {
 
 tset2chordSymbol <- function(tset,  ...) {
   overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), 
-                            steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj'),
+                            steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj', doubleflat = 'o', doublesharp = '+'),
                             qualifyTriad = paste0,
                             inversion.labels = function(x, ...) paste0('/', tint2simplepitch(x)),
                             extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=FALSE,
                             extension.sus = TRUE, extension.add = TRUE,
                             triad.labels = c(major = ''),
                             accidental.natural = TRUE,
-                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...))
+                            inversion = FALSE, figure.Key = FALSE, Key = dset(getRoot(tset), getRoot(tset) - 1L), ...)) -> chords
+  
+  stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
   
 }
 

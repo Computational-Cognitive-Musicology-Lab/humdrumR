@@ -4,7 +4,7 @@
 \alias{humdrumPitch}
 \title{humdrumR and pitch}
 \description{
-\link[humdrumR:humdrumR]{humdrumR} includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
+\link[=humdrumR]{humdrumR} includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
 }
 \section{Tonality}{
 

@@ -1,7 +1,7 @@
 ---
-title: Tonality and Meter in humdrumR
+title: Pitch and Tonality in humdrumR
 author: "Nathaniel Condit-Schultz"
-date:   "2020-03-15"
+date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Tonality and Meter in humdrumR}
@@ -9,218 +9,17 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-`humdrumR` contains a rich set of built in representations and functions for representing musical tonality and meter.
-A core philosophical/design choice is that both structures are conceptualized/encoded as *intervals*.
-
-
-
-# Intervals 
-
-Both pitch and time are perceived *relatively*: as a relationship between two points.
-Thus we represent them, conceptually, as an *interval*---a difference.
-In the case of pitch, an interval between two frequencies (or more abstractly, a "tonal" interval on the circle-of-fifths).
-In the case of rhythm, an interval between two time points---between two onsets, or between an onset and an offset.
-In `humdrumR`, these abstract intervals are represented as `tonalInterval` and `rhythmInterval` objects, respectively.
-
-To concretize our abstract intervals, we must establish what they are relative to. 
-What is the reference?
-There are actually multiple, useful ways we can represent the same information.
-Since all intervals are relative, there is always an *implicit* reference---the origin, zero.
-For `tonalIntervals` the origin is the unison interval.
-For `rhythmIntervals` the origin is zero.
-
-`tonalInterval`s and `rhythmIntervals` form mathematical groups---addition is defined (associatively), there is an identity element (the reference point: e.g., unison, 0), and the intervals are invertible.
-Since intervals can be added/subtracted, any interval can be thought of as a combination (addition) of other intervals.
-In `humdrumR`, we often "partition" a `interval` as a combination of useful sub-intervals.
-
-## Serial and Fixed Reference
-
-Vectors of `humdrumR` intervals can be represented in two fundamental ways: *serial reference representation* and *fixed reference representation*.
-To illustrate, we will use two examples, one rhythmic, one pitched:
-
-1. The major scale
-2. The "tag-line" rhythm `3+3+3+3+2+2`
-
-
-### Fixed reference
-
-In a fixed-reference representation, all intervals are interpreted relative to a fixed point (implicitly 0).
-Fixed-reference representations of the major scale (using semitones) and the tag-line rhythm are as follows:
-
-
-
-```r
-referenceMajor   <- c(0, 2, 4, 5, 7, 9, 11, 12)
-
-referenceTagline <- c(0, 3, 6, 9, 12, 14, 16)
-```
-
-Note that this representation is quite commonly used by musicians, in various forms, *for pitch*.
-In contrast, fixed-reference representations are **not** commonly used by musicians *for rhythm*.
-However, they *are* used in some contexts, as they essentially represent "time from the beginning" of a piece:
-Thus, the timestamps/timelines in DAWs or "offsets" in `music21` are examples of fixed-reference representations of time.
-
-### Serial reference
-
-An alternative representation is a serial-reference representation, where each interval is measured relative to the previous one.
-Thus, each data point represents the local change ($\Delta$) in the parameter.
-To be lossless (as explained below) the first element of a serial data vector is measured relative to the implicit reference (0).
-Serial representations of our tag-line and the major scale are as follows:
-
-
-```r
-serialMajor   <- c(0, 2, 2, 1, 2, 2, 2, 1)
-
-serialTagline <- c(0, 3, 3, 3, 3, 2, 2) 
-```
-
-This representations is also fairly intuitive to musicians---representing "melodic intervals"---but is *not* how music notation or sequencers represent pitch.
-In contrast, the serial-reference representation for rhythm *is* normative: traditional music notation note values are a serial-reference representation.
-
-
-### Transformations ("Interval Calculus")
-
-
-Since addition is defined for `interval`s fixed-reference and serial-reference representations can be translated between each other.
-
-A serial-reference representation can be calculated as the pairwise differences between elements in a fixed-reference data, with the first reference element appended at the beginning.
-Conversely, a fixed-reference representation can be calculated as the cumulative sum of serial-reference data.
-Thus:
-
-
-```r
-identical(cumsum(serialMajor), referenceMajor)
-```
-
-```
-## [1] TRUE
-```
-
-```r
-identical(cumsum(serialTagline), referenceTagline)
-```
-
-```
-## [1] TRUE
-```
-
-```r
-identical(c(referenceMajor[1], diff(referenceMajor)), serialMajor)
-```
-
-```
-## [1] TRUE
-```
-
-```r
-identical(c(referenceTagline[1], diff(referenceTagline)), serialTagline)
-```
-
-```
-## [1] TRUE
-```
-
-In `humdrumR`, we refer to these two transformations as `delta` ($\Delta$) and `sigma` ($\Sigma$), for differences and sums respecticely.
-In `humdrumR`, we note that the relationship between fixed- and serial-reference representations is analogous to the relationship between a function and its derivative.
-The fixed-reference representation represents a sequence of independent values as a function of (serial) index position.
-The serial-reference representation represents the same sequence as the differences between adjacent elements at each index---how much the fixed representation *changes* at each index.
-(Since the first element in a serial-reference representation is relative to a fixed (implicit) reference, the normal one-to-many relationship between derivatives and functions is removed, and a lossless one-to-one relationship is maintained.)
-These two transformations are thus inverses of each other: $x = sigma(delta(x))$ and $x = delta(sigma(x))$.
-<!--These two transformations are thus inverses of each other: $x = integrate(derive(x))$ and $x = derive(integrate(x))$.-->
-
-<!--Is is because of this analogy that `humdrumR` refers to these functions as `derive` (pairwise differences) and `integrate` (cumulative sum) respectively.-->
-
-
-
-```r
-library(humdrumR)
-```
-
-```
-## Loading required package: magrittr
-```
-
-```
-## Loading required package: rlang
-```
-
-```
-## 
-## Attaching package: 'rlang'
-```
-
-```
-## The following object is masked from 'package:magrittr':
-## 
-##     set_names
-```
-
-```
-## 
-## Attaching package: 'humdrumR'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     integrate, sigma
-```
-
-```r
-identical(referenceMajor, sigma(delta(referenceMajor)))
-```
-
-```
-## [1] TRUE
-```
-
-```r
-identical(referenceMajor, delta(sigma(referenceMajor)))
-```
-
-```
-## [1] TRUE
-```
-
-
-![Derivative/Integral relationship in Major Scale](figure/unnamed-chunk-5-1.png)
-![Derivative/Integral relationship in Tagline Rhythm](figure/unnamed-chunk-6-1.png)
-
-
-
-
-
-## Dynamic Reference
-
-Since `intervals` are additive, another possibilty is to use one vector of intervals as the reference point for a second vector of intervals.
-This allows us to create dynamic reference points.
-
-Some examples 
-
-+ **Figured Bass**: the bass voice in the texture is encoded (in serial/reference reprsentation) while other voices are represented relative to the bass voice.
-+ **Chord Tones**: the abstract "root" of chord progression is represented in one vector, with other vectors representing the "chord tones" (root, 3rd, 5th, 7th, etc.) relative to chord root.
-+ **Scale degrees**: The tonic of the key is used as a dynamic reference, with notes calculated relative to the tonic.
-
-![Figured Bass](figure/unnamed-chunk-7-1.png)
-
-Calculating dynamic reference intervals is lossless only if the complete information on the reference intervals are maintained.
-For instance, we we keep track of the serial or fixed intervals off the bass voice.
-Or, if we keep track of the local key (usually using a fixed interval to "C").
-
-
-
-
 # Tonality
 
 Tonality is represented in `humdrumR` using three `S4` classes and associated methods: 
 
-+ `humdrumVector`
++ `struct`
     + `tonalInterval` (pitches)
     + `diatonicSet` (keys)
          + `tertianSet` (chords)
 
 `tertianSet` inherits from `diatonicSet`---thus any `tertianSet` is also a `diatonicSet`.
-(All three classes inherit from `humdrumVector`, giving them generic atomic-vector-like behavior.)
+(All three classes inherit from `struct`, giving them generic atomic-vector-like behavior.)
 
 
 ## tonalInterval
@@ -313,7 +112,73 @@ In many research use cases, we ignore the `Octave` field altogether, only consid
 
 The following figure illustrate how the dimensions of a `tonalInterval` vector map to pitches as labeled in "scientific pitch notation."
 
-![Scientific Pitch representation in tonalIntervals](figure/unnamed-chunk-8-1.png)
+```{r, fig.cap = "Scientific Pitch representation in tonalIntervals", result = 'hide', echo = FALSE}
+arc <- function(x, y, sigma = 3, ...) {
+    if (length(x) <= 1) return(NULL)
+    
+    for (i in 2:length(x)) {
+        xs <- seq(x[i - 1], x[i], length.out = 1000)
+        
+        scaled <- xs - mean(xs)
+        scaled <- (scaled / max(scaled)) * sigma
+        
+        ys <- plogis(scaled)
+        ys <- ys - min(ys)
+        ys <- ys / max(ys)
+        ys <- (ys * (y[i] - y[i - 1])) + y[i - 1]
+        
+        points(xs, ys, type = 'l', ...)
+        
+    }
+    
+
+}
+
+par(mar = c(6,6,6,6))
+plot.new()
+plot.window(xlim = c(-8,8), ylim = c(8,-8))
+
+segments(0, -15, 0, 15, lwd = 20, col = 'grey90')
+segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
+
+coor <- expand.grid(X = -8:8, Y = -8:8)
+
+text(x = coor$X, y = coor$Y, labels = as.sciPitch(tint(coor$Y, coor$X)), cex=.5)
+
+
+axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
+mtext('Octave', 2, line = 3, las = 1, xpd = NA)
+mtext(quote(2^y), 2, line = 2, las = 1)
+
+axis(1, seq(-14,14, 2), las = 1, tick = FALSE, cex.axis = .8, line = -1)
+mtext('Fifth', 1, line = 2, las = 1, xpd = NA)
+mtext(quote(3^x),  1, line = 1, las = 1)
+
+
+cols <- col2rgb(rainbow(5))
+
+cols <- apply(cols, 2, function(cur) rgb(cur[1], cur[2], cur[3], alpha = 5, maxColorValue = 255))
+
+
+scale <- c(P1, M2, M3, P4, P5, M6, M7)
+
+for (j in -7:7) {
+	jscale <- tint(,-8:8) + j * P8
+	jscale <- jscale[order(jscale@Fifth, jscale@Octave)]
+
+	arc(jscale@Fifth , jscale@Octave + .5, lwd=.3)
+
+#	for (i in 1:length(scale)) {
+#		x <- jscale[i]@Fifth
+#		y <- jscale[i]@Octave
+#		polygon(x + c(-.5 , -.5, .5, .5), 
+#			y + c(-.5, .5, .5, -.5), 
+#		 		col = cols[j],
+#				border= NA)
+#	}
+}
+
+```
 As you can see, the `Fifth` (x) dimension is simple the line-of-fifths.
 However, the way that the `Octave` dimension relates to specific pitches is not very intuitive.
 This is by design.
@@ -338,7 +203,7 @@ For instance, $\text{P5} * 2 = \text{M9}$.
 Finally, `tonalIntervals` have euclidean division (`%/%`) and modulo/remainder (`%%`) operations defined.
 (Rational division (`/` in R) is *not* defined.)
 Euclidean division of `tonalInterval`s is based on tonal (fifths) space, not frequency space.
-This is useful for articulating tonal structures (module 7 for example), but can unintuitive when applied to specific pitches.
+This is useful for articulating tonal structures (modulo 7 for example), but can unintuitive when applied to specific pitches.
 
 
 
@@ -373,14 +238,45 @@ Scale Degree              A1    P5   m6
 Solfege                   di    so   le
 
 That letter names are not really "absolute" is quite evident in many musical practices.
-Transposing instruments right their parts relative to middle C, but their middle C is defined relative to "concert pitch."
+Transposing instruments are notated relative to middle C, but their middle C is defined relative to "concert pitch."
 Similarly, guitars are often "drop-tuned" or capoed, with chords still identified using names relative to the open strings.
 
 The following figure is equivalent to figure XXX, but shows interval values instead.
 
-![Interval Representation of tonalIntervals](figure/unnamed-chunk-9-1.png)
+```{r, fig.cap = "Interval Representation of tonalIntervals", result = 'hide', echo = FALSE}
+
+par(mar = c(6,6,6,6))
+plot.new()
+plot.window(xlim = c(-8,8), ylim = c(8,-8))
+
+segments(0, -15, 0, 15, lwd = 20, col = 'grey90')
+segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
+
+coor <- expand.grid(X = -8:8, Y = -8:8)
+
+text(x = coor$X, y = coor$Y, labels = as.interval(tint(coor$Y, coor$X), contour = c(octave = FALSE, threshold = P1)), cex=.5)
 
 
+axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
+mtext('Octave', 2, line = 3, las = 1, xpd = NA)
+mtext(quote(2^y), 2, line = 2, las = 1)
+
+axis(1, seq(-14,14, 2), las = 1, tick = FALSE, cex.axis = .8, line = -1)
+mtext('Fifth', 1, line = 2, las = 1, xpd = NA)
+mtext(quote(3^x),  1, line = 1, las = 1)
+
+
+scale <- c(P1, M2, M3, P4, P5, M6, M7)
+
+for (i in 1:length(scale)) {
+	x <- scale[i]@Fifth
+	y <- scale[i]@Octave
+	polygon(x + c(-.5 , -.5, .5, .5), 
+		y + c(-.5, .5, .5, -.5), 
+		 	col = rgb(0, 0, 255, 100, max = 255), border= NA)
+}
+
+```
 
 
 
@@ -436,6 +332,16 @@ In terms of `base::` R functions:
    -M6      0      -M6
    +M6     +1      +M13
    -M6     -1      -M13
+   
++ `expand`: "expand" (round) away from zero---the octave part will always have the
+  sign of the complex interval, whiel the simple part will have the *opposite* sign as the complex interval.
+
+   Simple  Octave  Complex
+   ------- ------- --------
+   +M6      0      +M6
+   -M6      0      -M6
+   +M6     +1      +M13
+   -M6     -1      -M13
 
 + `round`: round to the *nearest* octave, regardless of direction.
   This method results in simple intervals which are always less than a 5th in size.
@@ -448,6 +354,25 @@ In terms of `base::` R functions:
    -m3     +2      +M13
    +m3     -2      -M13
      
+#### Contour
+
+To completely represent a tonal interval, both the octave and specific parts are required.
+Many common analytical representations use only the "pure line-of-fifths," simple part---solfege, scale degree, roman numerals, chord degrees, etc..
+If the octave part is discarded, the (specific) original pitches cannot be reconstructed.
+
+Another useful representation is a combination of a fixed-reference simple part with the serial-reference (`delta`) octave part.
+In this representation, the octave part represents the contour of the melody.
+We call this a *derived contour*.
+Throughout `humdrumR`, we adopt the representation from the Rolling Stone dataset and use the `"^"` and `"v"` to represent upward or downward derived contours.
+Thus, `"vla"` means, go down to the nearest `"la"`.
+
+
+As [mentioned above](#algebraandarithmetic), `tonalIntervals` are invertible---they can be positive or negative.
+This corresponds to the "direction" of motion in frequency space, relative to the reference.
+If the reference is serial, then it corresponds to melodic *contour*.
+Throughout `humdrumR`, we adopt the standard (obvious) `**mint` representation's use of `"+"` and `"-"` to represent true (`sigma`) contour.
+
+
 
 
 ### Generic and Specific
@@ -487,12 +412,27 @@ Amaj C                      A
 Amaj D             b        Bb
 Amaj D                      B
 
-
 #### Cautionary Qualities
 
 In some cases we want to know how to tonally partition a `tonalInterval` relative to a key, which is relative to another key!
 One example of this is "cautionary" accidentals in music notation---"cautionary" accidentals involve pitches which are *generic* in a particular key (like A major), but not generic in C major.
 Another example would be chord quality annotations given a key (for instance, a major IV chord in a minor key has a raised 6th scale degree, or scale degrees in a secondary key.
+
+Condsider a piece written in C major, but with a subsection that modulates to E major.
+During the E major section, we observe a D natural---what generic interval is this?
+Obviously, for many analytical purposes, we'd want to think of it in Emajor, which would correspond to $\text{Emaj} + \text{B}_{generic} + \text{b}_{alteration}$---i.e., flatted seventh degree of E major.
+However, what accidental should this note be notated with? 
+Not a flat of course, even though it *is* a "flattened" seventh.
+The (C major) key signature would require no accidental for the D natural, but we'd like one to clarify the note's relationship to the current key.
+If we first partition our note in E major, then partition again the resulting generic interval in C major, we get:
+
+$\text{Emaj} + (\text{Cmaj} + \text{D}_{generic} + \text{#}_{alteration}) + \text{b}_{alteration}$
+
+A sharp *and* a flat---in these cases, we use the symbol natural.
+
+
+
+
 
 ### Enharmonic and Comma
 
@@ -505,27 +445,25 @@ We can thus partition notes as combinations of a *harmonic* part and a *comma* p
 
 $\text{interval}_{enharmonic} + \text{interval}_{comma} = \text{interval}_{tonal}$ <!--\_ -->
 
-In traditional tuning systems, such as pythagorean tuning, enharmonic notes (like G# and Ab) were not exactly the same.
-However, when tuning an instrument, musicians were often forced to "pick a side"---is it G# or Ab? 
-Whatever choice you made, you'd end up with strange "wolf" intervals wherever you "wrapped" around from the flat to the sharp side: for instance, if we choose Ab, we'll end up the interval "C#-Ab" (really, a diminished 6th) standing in for our perfect fifth---we'd call this the "wolf fifth."
-In `humdrumR`, what partitioning `tonalIntervals` as enharmonic/comma pairs, you must specify a `wolf` argument:
-The note you specify as the "wolf" defines the boundary (exclusive) of a 12-fifth range.
-If you specify G# as the wolf, then the range `-4:7` (Ab--C#) is used---anything outside this range, like Db or G#, are respelled enharmonically (to C# and Ab respectively).
-You can also specify a key, in which case everything is shifted a key.
+If we strictly wrap around every 12 steps in the line-of-fifths (i.e., modulo 12), we remove all enharmonic equivalencies, creating the circle-of-fifths.
+However, *where* we wrap matters: in musical practice, we typically aim to center our circle fifths around C, so we get a roughly equal number of flats and sharps. 
+However, since there are five accidentals, strict enharmonics will have to be either 2-flats/3 sharps, or 3-flats/3-sharps.
+Since, the natural diatonic scale spans the range -1:5 on the line-of-fifths, the real center is 2 (D).
+(And when we change key signatures, we want to shift accordingly, allowing higher sharps in sharp key, for instance.)
+Thus, the default behavior in `humdrumR` is to center a set of tints relative to the center of the given key, and enharmonically shift any notes >= 6 OR < -6.
+
+In some cases, we don't actually want to have strict enharmonicism.
+For instance, we might want to allow Dbi---or even Gb and Cbi---alongside C#, F#, and B, but still not want Bbb and Gbbb or A##.
+In `humdrumR`, we can specify I wider "`enharmonicWrap`" value as an argument to `enharmonicpart`.
+The `enharmonicWrap` argument specifies the width of the band of "legal" LoF values we want to allow.
+The default is 12, which results in a perfect enharmonic circle of fifths (Eb:G#), with no enharmonic equivalences.
+If we increase it to 13, we allow Ab and G# to both exist; If we increase it to 14, we allow Eb and D# to both exist; etc.
+An `enharmonicWrap` of 21 allows all single-flat and single-sharp notes, but no double flat/sharps.
 
 
 
 
 
-
-## Contour
-
-A serial-reference representation of tonalIntervals *is* representation of the contour.
-By partitioning a serial-representation we can find more abstract--specific representations.
-Most basically, the sign ($+$, $-$, or null) of a serial contour indicates its overall direction.
-We can also use generic representations.
-
-More generally, we can count contour if the interval crosses an absolute threshold.
 
 
 
@@ -536,76 +474,134 @@ More generally, we can count contour if the interval crosses an absolute thresho
 # Methods
 
 
-`humdrumR` exports numerous functions for converting to/from `rhythmInterval`s and various string representations, as well as integer/numeric representations:
+`humdrumR` exports numerous functions for converting to/from `tonalInterval`s and various string representations, as well as integer/numeric representations:
 
 
-
-
-+ as.double.tonalInterval 
++ as.tonalInterval
+	+ tonalInterval -> tonalInterval
+	+ integer -> (semit) -> tonalInterval
+	+ numeric  -> (semit) -> tonalInterval
+	+ character -> (regex) -> tonalInterval
++ as.double
+        + tonalInterval -> numeric (ratio)
 + as.semit 
 	+ tonalInterval -> integer
 	+ character -> integer
 	+ numeric -> integer
 + as.midi 
-	+ tonalInterval 
-	+ character 
-	+ numeric 
-+ as.tonalname 
-	+ tonalInterval 
-	+ character 
+	+ tonalInterval -> integer
+	+ character -> (regex) -> integer
+	+ numeric -> integer
++ as.tonalChroma 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+        + integer -> (fifth -> tonalInterval) -> character
 + as.sciPitch 
-	+ tonalInterval 
-	+ character 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
 + as.kernPitch 
-	+ tonalInterval 
-	+ character 
-	+ integer 
-	+ numeric 
+	+ tonalInterval -> tonalInterval
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (semits) -> character
+	+ numeric -> (ratio) -> character
 + as.contour 
-	+ tonalInterval 
+	+ tonalInterval -> character
 + as.interval 
-	+ tonalInterval 
-	+ character 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (semits -> tonalInterval) -> character
+	+ numeric -> (ratio -> tonalInterval) -> character
 + as.scaleDegree 
-	+ tonalInterval 
-	+ integer 
-	+ character 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (semits -> tonalInterval) -> character
+	+ numeric -> (ratio -> tonalInterval) -> character
 + as.solfa 
-	+ tonalInterval 
-	+ numeric 
-	+ character 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (fifth -> tonalInterval) -> character
 + as.ratio 
-	+ numeric 
-	+ tonalInterval 
-+ as.ratio.character 
+	+ tonalInterval -> numeric
+	+ character -> (regex -> tonalInterval) -> numeric
+	+ integer -> (fifth -> tonalInterval) -> numeric
+	+ numeric -> numeric
 + as.fraction 
-+ as.decimal 
-	+ tonalInterval 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (fifth -> tonalInterval) -> character
+	+ numeric -> character
 + as.frequency 
-	+ tonalInterval 
-	+ character 
-+ as.tonalInterval 
-	+ tonalInterval 
-	+ integer 
-	+ numeric 
-	+ character 
+	+ tonalInterval -> numeric
+	+ character -> (regex -> tonalInterval) -> numeric
+	+ integer -> (fifth -> tonalInterval) -> numeric
+	+ numeric -> numeric
 
-# Arguments
+
+
+
+
+
+#### Arguments
 
 Various tonal interval functions share a number of common arguments.
 
+method      `sigma`  `delta`  `contour`  `Key`  `generic`  `accidental`  `cautionary`  `simple`  `octave`  `direction`  
+----------- -------- -------- ---------- ------ ---------- ------------- ------------- --------- --------- ------------
+`as.semit`  
 
-Argument      `semit`
-------------- --------
-`sigma`       T
-`delta`       T
-`contour`      
-`key`         T
-`generic`     T
-`cautionary`   
-`simplify`    T
-`directed`    T
+## diatonicSet
 
-# rhythmIntervals
+The `diatonicSet` S4 class represents diatonic keys.
+Like `tonalIntervals`, we conceptualize keys as an interval---their distance from the reference point, Cmajor.
+This means we can represent the key of "G major" and the key of "V" (the major dominant key) in the same way.
+
+
+A `diatonicSet` contains three `integer` slots: `Root`, `Mode`, `Alterations`.
+In addition, a `Of` slot can hold another `diatonicSet`, allowing the recursive representation, a la "V/V/V."
+
+### Root and Key
+
+The `Root` integer slot is simply a line-of-fifths tonal chroma value representing the root of the key relative to 0 (C).
+The `Key` value represents the *key signature*: the number of sharps (positive integers) or flats (negative integers) in the key.
+Alternatively, and equivalently, you can think of `Key` like this:
+C major represents a contiguous block of seven fifths (-1--5), and the `Key` argument shifts this block up or down.
+So if `Key = 2`, our block on the line-of-fifths is 1--7 (a key signature with two sharps).
+The relationship between `Root` and `Key` determines the mode of the diatonic set.
+If `Root == Key`, the mode is major. 
+Other modes can be created as:
+
+Key =        Mode
+------------ -----------
+Root + 1     Lydian
+Root         Ionian (major)
+Root - 1     Mixolydian
+Root - 2     Dorian
+Root - 3     Aeolian (minor)
+Root - 4     Phrygian
+Root - 5     Locrian
+
+For some specific examples:
+
+Root    Key    Tonality
+------- ------ ----------
+1       1      G major
+-3      -3     Eb major
+-3      -2     Eb lydian
+2       0      D dorian
+3       0      A minor
+
+
+### Alteration
+
+The `Alteration` slot of a `diatonicSet` allows the representation of "altered" diatonic scales.
+One way of thinking about the `Key` slot, is that it takes one edge of a 7-fifth contiguous block and moves it to the opposite side.
+The `Alteration` slot takes the *second from most extreme* element and moves it down 7 fifths.
+
+
+
+
+
+
+
 
 

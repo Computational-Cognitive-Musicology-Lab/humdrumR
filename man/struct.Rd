@@ -57,7 +57,7 @@ For example, if the struct has dimensions then \code{length(struct) == nrow(stru
 of the \code{struct} (the number of rows) is its length.
 Another big difference is in the behaviors of \link[base:c]{c}: \code{c} doesn't always cause \code{struct}s to lose their dimensions and \code{c} can be used to concatinated multi-column \code{struct}s,
 or even mixes of dimensionless and dimensioned \code{struct}s:
-If any \code{struct} arguments to \code{c} have dimensions, the \code{struct}s are concatinated via a call to \link[base:rbind]{rbind}, with any dimensionless vectors coerced to
+If any \code{struct} arguments to \code{c} have dimensions, the \code{struct}s are concatinated via a call to \link[base:cbind]{rbind}, with any dimensionless vectors coerced to
 1-column matrices.
 Of course, the (resulting) number of columns must all be the same or an error will occur!
 
@@ -81,7 +81,7 @@ Your class must have one or more slots which are vectors, all of which are the s
 \code{struct}'s indexing method will cause all of these vectors to be indexed as one.
 When you define a new subclass of \code{struct}, it will inherit a
 \link[methods:validObject]{validObject} method which assures that all elements are the same dimension.
-Thus, if you are writing your own \code{validObject} method (using \link[methods:setValidity]{setValidity})
+Thus, if you are writing your own \code{validObject} method (using \link[methods:validObject]{setValidity})
 you just have to worry specifically about the validity of the information in your slots,
 not that the slots are all the same length.
 }
@@ -90,8 +90,8 @@ not that the slots are all the same length.
 
 
 An initialize method which automatically makes all slots the same length is predefined
-for \code{structs}. If you want to make a more specialized \link[methods:initialize]{initialize} method,
-you can still take advantage of the inherited method by using \link[methods:callNextMethod]{callNextMethod} at the
+for \code{structs}. If you want to make a more specialized \link[methods:new]{initialize} method,
+you can still take advantage of the inherited method by using \link[methods:NextMethod]{callNextMethod} at the
 beginning of your method.
 }
 
@@ -100,11 +100,11 @@ beginning of your method.
 
 The main purpose of the \code{struct} virtual class is that it defines many of the basic methods you need to manipulate subclass objects.
 Most importantly, \link[base:Extract]{indexing} methods are fully defined (that mimic base-R atomic vector/matrix indexing), as well as
-basic "structural" methods like \link[base:colnames]{(col/row)names}, \link[base:dim]{dim}, \link[base:length]{length}, \link[base:ncol]{ncol, nrow}, etc.
+basic "structural" methods like \link[base:colnames]{(col/row)names}, \link[base:dim]{dim}, \link[base:length]{length}, \link[base:nrow]{ncol, nrow}, etc.
 In addition:
 \itemize{
 \item If you define \link[base:Comparison]{> and >=}, \code{<} and \code{<=} will be automatically defined.
-\item If you define \link[base:as.character]{as.character} for your subclass, \link[methods:show]{show} and \link[base:format]{format} methods are automatically defined.
+\item If you define \link[base:character]{as.character} for your subclass, \link[methods:show]{show} and \link[base:format]{format} methods are automatically defined.
 }
 
 What's more, default arithmetic methods for addition, subtraction, (scalar-integer) multiplication, and negation (\code{-x}) are defined.

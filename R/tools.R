@@ -502,7 +502,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
-          if (length(stuff) == 0L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
+          if (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
           
           recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)
@@ -1307,7 +1307,8 @@ matched <- function(x, table) table[pmatch(x, table)]
 .paste <- function(..., sep = '', collapse = NULL, na.if = any, fill = NA_character_) {
 # paste, but smart about NA values
     args <- list(...)
-    if (length(args) == 1) return(paste(args[[1]], collapse = collapse))
+        # return(paste(args[[1]], collapse = collapse))
+    # }
     
     args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)
@@ -1332,7 +1333,8 @@ pasteordered <- function(order, ..., sep = '') {
     labels <- names(strs)
     ordered <- strs[pmatch( order, labels, nomatch = 0)]
     
-    do.call('.paste', c("", ordered, sep = sep))
+    # do.call('.paste', c(ordered, list(sep = sep)))
+    do.call('.paste', c(ordered, sep = sep))
     
 }
 

@@ -33,7 +33,7 @@ tint(
 is.tonalInterval(x)
 }
 \description{
-The \code{tonalInterval} is the core tonal pitch representation in \link[humdrumR:humdrumR]{humdrumR}.
+The \code{tonalInterval} is the core tonal pitch representation in \link[=humdrumR]{humdrumR}.
 A \code{tonalInterval} is an abstract representation of tonal pitch, which can be translated to/from all standard "concrete" pitch representations:
 solfege, scientific pitch, semitones, frequencies, scale degrees, intervals, etc.
 For the most part, users should not need to interact with \code{tonalInterval}s directly---rather, \code{tonalInterval}s work behind the scene in numerous \code{humdrumR} pitch functions.
@@ -102,13 +102,13 @@ Coercision methods are defined for
 \itemize{
 \item \link[base:integer]{integer}: interpreted as semitones
 \item \link[base:numeric]{numeric}: interpreted as frequency ratios, assuming a \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}.
-\item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[humdrumR:regexDispatch]{regular expression dispatch system}, as
+\item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[=regexDispatch]{regular expression dispatch system}, as
 explained fully \link[=pitchRepresentations]{here}.
 }
 
 Since, coersion is defined, \code{tonalInterval} arithmatic can be applied when one of the two arguments is a \code{tonalInterval} and the other is a coercable atomic.
 For instance, \code{M3 + 2L} will interpret \code{2L} as two semitones and add a major-second to the major-third!
-The clever \link[humdrumR:regexDispatch]{dispatch system} will even ignore character strings that are not recognized (see examples)!
+The clever \link[=regexDispatch]{dispatch system} will even ignore character strings that are not recognized (see examples)!
 }
 
 \subsection{Predefined Intervals:}{

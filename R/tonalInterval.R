@@ -785,7 +785,7 @@ tint2romanRoot <- function(x, ..., Key = NULL) {
 
 
 
-tint2interval <- function(x) {
+tint2interval <- function(x, direction = TRUE) {
   octave <- tint2contour(x, contour.round = floor, contour.labels = FALSE)
   direction <- .ifelse(x == tint(0, 0) | !direction, "", c('-', '+')[1 + (octave >= 0)])
   
@@ -1511,8 +1511,6 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 #' 
 #' Functions for creating and/or translating between numerous representations of pitch.
 #' 
-#' ## details
-#' 
 #' There are numerous ways that musicians and musicologists encode pitch information---solfege, scientific pitch,
 #' intervals, scale degrees, frequencies, etc.---each with different purposes and uses.
 #' Some of these representations are numeric, but most involve letters and other characters.
@@ -1647,14 +1645,13 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 #' 
 #' The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:
 #' 
-#' ```{r, echo = FALSE, comment = NA}
+#' ```{r, echo = FALSE, comment=NA, results='asis'}
 #' 
-#'   known <- read.delim("./inst/extdata/KnownInterpretations.tsv", fill = T, header=T, quote = "", as.is=T, comment.char = "")
-#'   known <- subset(known, Type == "Exclusive" & !Name %in% c("sciChord", "kern"))
+#'   known <- read.delim("./inst/extdata/KnownInterpretations.tsv", fill = TRUE, header=TRUE, quote = "", as.is=TRUE, comment.char = "")
+#'   known <- subset(known, Type == "Exclusive" & !Name %in% c("sciChord", "kern", "Slur"))
 #'   
-#'   #
 #'   rownames(known) <- known$Name
-#'   known$Type <-known$Name <- NULL
+#'   known$Type <- known$Name <- NULL
 #'   colnames(known) <- gsub('Pretty', 'Example', colnames(known))
 #'   known$Exclusive <- sapply(strsplit(known$Exclusive, split = ','), function(x) paste(paste0('**', x), collapse = ','))
 #'   known$RE <- gsub('<<', '', gsub('>>', '', known$RE))
@@ -2010,7 +2007,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 #' tonalInterval(c('c','A','A','c','d','G','G','A','B-','f','f','e','d','e','d','c','ff','ee','dd','cc')) -> x
 #' 
 #' print(row.names = FALSE, 
-#'       data.table(#Kern = kern(x), 
+#'       data.table(Kern = kern(x), 
 #'                  round  = tint2contour(x, contour.delta = FALSE, contour.round = round),
 #'                  floor  = tint2contour(x, contour.delta = FALSE, contour.round = floor),
 #'                  expand = tint2contour(x, contour.delta = FALSE, contour.round = expand)

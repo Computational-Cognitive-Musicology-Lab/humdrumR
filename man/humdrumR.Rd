@@ -7,8 +7,8 @@
 \description{
 \code{humdrumR} is a toolkit for the analysis of data encoded in the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.
 The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
-Tens of thousands of musical scores (and other musical data) have been encoded in humdrum, many available online,
-for instance at \href{http://kern.ccarh.org/}{KernScores}.
+Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online through repositories such as
+\href{http://kern.ccarh.org/}{KernScores}.
 }
 \details{
 \code{humdrumR} is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, levaraging
@@ -19,20 +19,20 @@ the power of R to give us enprecedented power to manipulate and analyze humdrum 
 
 The package \code{humdrumR} has XXX main components:
 \itemize{
-\item To represent humdrum data in R, we have the \link[humdrumR:humdrumR-class]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
-the \link[humdrumR:Humtable]{humdrum table}.
+\item To represent humdrum data in R, we have the \link[=humdrumR-class]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
+the \link[=Humtable]{humdrum table}.
 \item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
 \code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
 \item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
 short hands using R's standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item To manipulate and modify \code{humdrumR} data, we have the \link[humdrumR:with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
-\item A set of \link[humdrumR:humPipe]{"pipe" operators} (\verb{\%hum>\%}, \verb{\%hum<\%}, etc.), so that \code{humdrumR} data can be manipulated and filtered in concise,
+\item To manipulate and modify \code{humdrumR} data, we have the \link[=with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
+\item A set of \link[=humPipe]{"pipe" operators} (\verb{\%hum>\%}, \verb{\%hum<\%}, etc.), so that \code{humdrumR} data can be manipulated and filtered in concise,
 \href{https://en.wikipedia.org/wiki/Vertical_bar#Pipe}{bash-style pipes}.
 \item To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
-a useful API we call our \link[humdrumR:regexDispatch]{regular-expression dispatch system}.
+a useful API we call our \link[=regexDispatch]{regular-expression dispatch system}.
 \item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,
 including our core \link{tonalInterval} class to represent tonal pitch.
-\item A \link[humdrumR:humRhythm]{module} for representing and manipulating musical rhythm information,
+\item A \link[=humRhythm]{module} for representing and manipulating musical rhythm information,
 with a core \link{rhythmInterval} class to represent rhythms.
 }
 }

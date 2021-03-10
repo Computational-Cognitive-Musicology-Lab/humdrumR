@@ -12,7 +12,7 @@ TransposingInstrument		ITr[^,]* 	ITr_	Tandem
 kernPitch	kern	([A-Ga-g])\1*([#-])*\2*	c	Exclusive
 Beam 	kern	([/\\]?(L+K*)?)|([/\\]?(J+k*)?)	/Jk	Exclusive
 MelodicSignifier	kern	[TtMmWw]R?|[TtMmWwS$O]	M	Exclusive
-Articulation	kern	['`\"~I][vu]?|[vu]	'	Exclusive
+Articulation	kern	['`\"~I][vu]?|[vu]	v	Exclusive
 Slur	kern	[({{\[]+|[)}}\]_]+|_	(	Exclusive
 recip	recip	[1-9][0-9]*%?[1-9]?[0-9]*[.]*|0{1,2}\.*	8.	Exclusive
 sciPitch	pitch	[A-G][b#-]*[-+]?[0-9][0-9]*	C4	Exclusive

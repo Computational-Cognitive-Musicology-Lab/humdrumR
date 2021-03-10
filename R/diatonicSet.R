@@ -53,8 +53,7 @@
 #' + -4 = Phyrgian
 #' + -5 = Locrian
 #' 
-#' > Note that you can make diatonicSets where the `Root` is outside the `Key`.
-#' > This is unusual, and may resort in sets you wouldn't predict.
+#' > Note that you can make diatonicSets where the `Root` is outside the `Key`. This is unusual, and may result in sets you wouldn't predict.
 #' 
 #' @section Alterations:
 #' 
@@ -69,13 +68,13 @@
 #' 
 #' The ternary arrangement maps powers of three to each scale degree, as so that in the `Alteration` integer:
 #' 
-#' + $\pm1$: raise or flatten the **7th** scale degree.
-#' + $\pm3$: raise or flatten the **3rd** scale degree.
-#' + $\pm9$: raise or flatten the **6th** scale degree.
-#' + $\pm27$: raise or flatten the **2nd** scale degree.
-#' + $\pm81$: raise or flatten the **5th** scale degree.
-#' + $\pm243$: raise or flatten the **1st** scale degree.
-#' + $\pm749$: raise or flatten the **4th** scale degree.
+#' + $\pm 1$: raise or flatten the **7th** scale degree.
+#' + $\pm 3$: raise or flatten the **3rd** scale degree.
+#' + $\pm 9$: raise or flatten the **6th** scale degree.
+#' + $\pm 27$: raise or flatten the **2nd** scale degree.
+#' + $\pm 81$: raise or flatten the **5th** scale degree.
+#' + $\pm 243$: raise or flatten the **1st** scale degree.
+#' + $\pm 749$: raise or flatten the **4th** scale degree.
 #' 
 #' For example, consider `Alteration == 26`:
 #' In a balanced ternary representation, the decimal integer 26 is represented as `1 0 0 1 0 -1 0`.
@@ -92,7 +91,7 @@
 #' Similarly, `Alteration + 749` (raise the 4th) is exactly equivalent to `Signature + 1`.
 #' 
 #' 
-#' Double-flat and double-shart degrees are **not** encodable in `diatonicSet`.
+#' Double-flat and double-sharp degrees are **not** encodable in `diatonicSet`.
 #' However, in combination with the `Signature` slot, sets with double-flat/sharps (like doubly-diminished 7ths) can be encoded.
 #' 
 #' 
@@ -125,7 +124,7 @@
 #'   explained fully [here][diatonicRepresentations].
 #'   
 #'
-#' 
+#' @name diatonicSet
 NULL
 
 
@@ -195,7 +194,7 @@ getAlterations <- function(dset) {
 ####. vector/core methods ####
     
 
-#' @name humDiatonic
+#' @name diatonicSet
 #' @export
 is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 

@@ -902,11 +902,12 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
     
     target[ , NewSpine := destinationSpines[match(Spine, targetSpines)]]
+    target <- target[ , sapply(target, function(x) !all(is.na(x))), with=FALSE]
     
     oldspines <- split(target, by = 'Spine', keep.by = FALSE)
     oldspines <- lapply(oldspines, 
                         function(spine) {
-                            datafields <- colnames(spine) %in% fields
+                            datafields <- colnames(spine) %in% fields$Name
                             colnames(spine)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
                             spine
                             })
@@ -1522,7 +1523,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     putHumtab(value, drop = TRUE) <- humtab
                     addFields(value) <- i
                     
-                    value@Active <- substituteName(value@Active, setNames(list(as.symbol(i)), pipes))
+                    value@Active <- substituteName(value@Active, setNames(rlang::syms(i), pipes))
                     
                     value
           })

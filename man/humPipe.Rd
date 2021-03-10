@@ -81,7 +81,7 @@ Just add an "s" to make them plural:
 \item \code{%hum[]%} (singular) : \code{%hums[]%} (plural);
 }
 
-Note: \verb{\%s>\%} is an expansion of the \link[magrittr:\%>\%]{magrittr::\%>\%} pipe operator, which
+Note: \verb{\%s>\%} is an expansion of the \link[magrittr:pipe]{magrittr::\%>\%} pipe operator, which
 makes use of some clever meta-programming---we can't guarantee it will
 always behave the way we might like!
 }

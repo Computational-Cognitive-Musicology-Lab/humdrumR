@@ -1,0 +1,17 @@
+---
+title: Rhythm and Meter in humdrumR
+author: "Nathaniel Condit-Schultz"
+date:   "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tonality and Meter in humdrumR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+
+
+
+# rhythmInterval

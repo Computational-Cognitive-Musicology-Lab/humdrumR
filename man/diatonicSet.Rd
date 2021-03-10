@@ -3,13 +3,14 @@
 \name{diatonicSet}
 \alias{diatonicSet}
 \alias{dset}
+\alias{is.diatonicSet}
 \alias{order.diatonicSet}
 \alias{mapPartition}
-\title{The basic constructor for \code{diatonicSet}s.
-The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}},
-or a character string which will be coerced to a \code{tonalInterval}.}
+\title{Tonal (diatonic) sets}
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)
+
+is.diatonicSet(x)
 
 \S4method{as.character}{diatonicSet}(x)
 
@@ -35,10 +36,131 @@ diatonicSet(x, ...)
 \S4method{==}{tertianSet,tertianSet}(e1, e2)
 }
 \description{
+\code{diatonicSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s
+types of tonal data, representing Western diatonic keys.
+For the most part, users should not need to interact with \code{diatonicSet}s directly---rather, \code{diatonicSet}s work behind the scene in numerous \code{humdrumR} pitch functions.
+See the \link{keyRepresentations} and \link{keyTransformations} documentation for details of usage and functionality or the \emph{Tonality in humdrumR} vignette for
+a detailed explanation of the theory and specifics of \code{diatonicSet}s.
+
 These functions translate various pitch representations
 }
 \details{
+\code{diatonicSet} is a \href{http://adv-r.had.co.nz/S4.html}{S4} subclass of \code{humdrumR}'s virtual class \link{struct},
+from which it inherits a lot of useful "vector-like" behaviors/functionality.
+
+The constructor function \code{dset} can be used to create \code{diatonicSets} directly.
+The three arguments corespond to the three slots: \code{root}, \code{mode}, and \code{alteration}.
+All inputs will be coerced to match in length.
+The \code{root} argument will attempt to coerce character strings to \link[=tonalInterval]{tonalIntervals}, and use their \code{LO5th} value as the root.
+
+By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method,
+for \code{diatonicSet}s call \link[=diatonicRepresentations]{key()}.
+Thus, if you return a \code{diatonicSet} on the command line (or call \link[base:print]{print} one one),
+you'll see the \link[=diatonicRepresentations]{key interpretation} representation printed.
+
 Under the hood, these functions use the \code{\link{humdrumR}}
 \code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
 fundamental, \emph{lingua franca} representation of pitch.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{Root}}{integers representing the root of the key on the line-of-fifths}
+
+\item{\code{Signature}}{integers representing the signature (number of accidentals) of the key.}
+
+\item{\code{Alteration}}{integers representing alterations of the diatonic set
+
+A key is represented by two integers, \code{Root} and \code{Signature}.
+Root is simply the tonic note of the key on the circle of fifths.
+Signature is a value on the circle of fifths, indicating the diatonic mode.
+You can think of the Signature value as indicating the number of accidentals, with negative numbers
+for flats and positive numbers for sharps.
+You can also think of the signature as indicating how much the "natural key" (C major) is
+slid up and down the line-of-fifths.
+The standard diatonic modes occur if the \code{Signature - Tonic} is in the range -5:1:
+\itemize{
+\item +1 = Lydian
+\item +0 = Major (Ionian)
+\item -1 = Mixolydian
+\item -2 = Dorian
+\item -3 = Minor (Aeolian)
+\item -4 = Phyrgian
+\item -5 = Locrian
+}Note that you can make diatonicSets where the Root is outside the Key. This is unusual, and may result in sets you wouldn't predict.}
+}}
+
+\section{Alterations}{
+
+
+The \code{Alteration} (also integers) can be used to represent various
+"altered" scales.
+The integer values is interpreted as a seven-trit \href{https://en.wikipedia.org/wiki/Balanced_ternary}{balanced ternary} string.
+("trits" are the ternary equivalent of binary "bits.")
+The seven trits correspond to the seven scale degrees on the line-of-fifth indicated by the \emph{signature}---i.e., ordered from
+lowest to hightest on the line-of-fifths, not relative to the root.
+(For instance, when the \code{Signature == 0}, the degrees are \code{c(-1, 0, 1, 2, 3, 4, 5)}.)
+Balanced ternary allows for three digits, \code{0} (unaltered degree), \code{1} (sharpened degree), and \code{-1} (flattened degree).
+
+The ternary arrangement maps powers of three to each scale degree, as so that in the \code{Alteration} integer:
+\itemize{
+\item $\pm 1$: raise or flatten the \strong{7th} scale degree.
+\item $\pm 3$: raise or flatten the \strong{3rd} scale degree.
+\item $\pm 9$: raise or flatten the \strong{6th} scale degree.
+\item $\pm 27$: raise or flatten the \strong{2nd} scale degree.
+\item $\pm 81$: raise or flatten the \strong{5th} scale degree.
+\item $\pm 243$: raise or flatten the \strong{1st} scale degree.
+\item $\pm 749$: raise or flatten the \strong{4th} scale degree.
+}
+
+For example, consider \code{Alteration == 26}:
+In a balanced ternary representation, the decimal integer 26 is represented as \verb{1 0 0 1 0 -1 0}.
+(In other words 1 in the "27s  place" and -1 in the "ones place"---i.e., 27 - 1).
+This represents a raised 2nd (the 27) and a lowered 7th (the -1).
+
+The \code{Alteration} integer allows us to concisely represent all the 2,187 possible combinations of raised and lowered diatonic scale degrees!
+However, combined with the \code{Signature} slot, there is some redundancy in scale representation.
+For example, a melodic minor scale can be represented as a major scale (\code{Signature - Root == 0}) with a lowered third degree (\code{Alteration == -3}) \emph{or} as
+minor scale (\code{Signature - Root == -3}) with raised 6ths and 7ths (\code{Alteration == 10}).
+However, though these two representations result in the same set on the line-of-fifths, some might consider them to be
+conceptually different in some contexts, so we consider the redundancy acceptable.
+Another case of encoding redundancy \emph{is} that \code{Alteration - 1} (flatten the 7th) is exactly equivalent to \code{Signature - 1}.
+Similarly, \code{Alteration + 749} (raise the 4th) is exactly equivalent to \code{Signature + 1}.
+
+Double-flat and double-sharp degrees are \strong{not} encodable in \code{diatonicSet}.
+However, in combination with the \code{Signature} slot, sets with double-flat/sharps (like doubly-diminished 7ths) can be encoded.
+}
+
+\section{Arithmatic}{
+
+
+Arithmetic between \code{diatonicSet}s is not defined.
+However, a number of useful arithmetic operations between \code{diatonicSet}s and other data types \emph{are} defined:
+
+XXXX Elaborate
+XXXX Need to implement special logic for adding Alterations! (Taking into account Signature addition.)
+}
+
+\section{Relational Operators}{
+
+
+\code{diatonicSet}s can be compared using the standard \link[base:Comparison]{relational operations} \code{==}, and \code{!=}.
+Two \code{diatonicSet}s are equal (according to \code{==}) only if all their slots (\code{Root}, \code{Signature}, and \code{Alteration})
+are exactly identical.
+Ordinal comparisons (e.g., \code{>}, \code{<=}) between \code{diatonicSet}s are on their \code{Signature} only.
+}
+
+\section{Coercion}{
+
+
+\code{humdrumR} knows how to \href{https://en.wikipedia.org/wiki/Type_conversion}{coerce} several \link[base:vector]{base-R atomic types} into \code{diatonicSet}s.
+This can be done using the \link[methods:as]{as} function---e.g., \code{as(3, "diatonicSet")}---or more intuitively using the function \code{diatonicSet()}.
+Coercision methods are defined for
+\itemize{
+\item \link[base:integer]{integer}: interpreted as root of major key
+\item \link[base:numeric]{numeric}: rounded to nearest integer and intepreted as root of major key
+\item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[=regexDispatch]{regular expression dispatch system}, as
+explained fully \link[=diatonicRepresentations]{here}.
+}
+}
+

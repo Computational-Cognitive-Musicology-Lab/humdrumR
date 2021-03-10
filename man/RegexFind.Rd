@@ -22,10 +22,10 @@ existing \code{R} regular expression matching functions.
 }
 \details{
 \itemize{
-\item \verb{\\\%~l\\\%}: Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \link[base:grepl]{base::grepl}.
+\item \verb{\\\%~l\\\%}: Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \link[base:grep]{base::grepl}.
 \item \verb{\\\%~\\\%}: The "default"---same as \verb{\\\%~l\\\%}.
 \item \verb{\\\%~i\\\%}: Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \link[base:grep]{base::grep}.
 \item \verb{\\\%~n\\\%}: Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more
-than one match occurs in the same token). Shorthand for \link[stringi:stri_count_regex]{stringi::stri_count_regex}.
+than one match occurs in the same token). Shorthand for \link[stringi:stri_count]{stringi::stri_count_regex}.
 }
 }
