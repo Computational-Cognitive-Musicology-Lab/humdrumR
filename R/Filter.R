@@ -647,15 +647,15 @@ indexGLIM_piece <- function(humtab) {
   if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
   
   #remove everything after last data record, except global stuff, '*-' or '=='
-  humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
+  # humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
   
   
-  if (any(humtab$Type == 'd')) {
+  # if (any(humtab$Type == 'd')) {
     #remove records containing only d
-    rectab <- table(humtab$Record, humtab$Type)
-    recs   <- as.numeric(rownames(rectab))
-    humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
-  }
+    # rectab <- table(humtab$Record, humtab$Type)
+    # recs   <- as.numeric(rownames(rectab))
+    # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
+  # }
   
   
   

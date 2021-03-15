@@ -135,7 +135,32 @@
 #' `NA` in the file which does not have the code. If no reference records appear in any
 #' files, no Reference fields are created.
 #' 
+#' @section Null Data
+#' 
+#' In humdrum syntax, there is no requirement that every spine contains data
+#' in every record. Rather, spines can be padded with *null tokens*.
+#' In some cases, entire records may be padded with null tokens.
+#' Each type of humdrum record uses a different null token:
+#' 
+#' + *Intepretation*: `*`
+#' + *Comment*: `!`
+#' + *Barline*: `=`
+#' + *Data*: `.`
+#' 
+#' All null tokens in a humdrum table are identified in the logical `Null` field.
+#' The character string token itself is, of course, held in the `Token` field.
+#' In addition, null *data* tokens (`"."`) are identified as their own `RecordType`: `"d"`.
+#' These null data tokens require special consideration.
+#' 
+#' In humdrum syntax files, and humdrumR's original `Token` field, null data tokens are always represented `"."`.
+#' Within a humtable record, a null *field* is represented as either `"."` (for `character` fields) or `NA` (for other field classes).
+#' A humtable data row is only `Null == TRUE` if **all** data fields are `NA` or `"."`.
+#' If an appliction of `withinHumdrum` returns some `NA` values, they will be seen as full field values.
+#' 
+#' 
+#' 
 #' @section Philosophy:
+#' 
 #' Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
 #' grid structure of the original humdrum data? The Humdrum Table structure affords
 #' maximum data analysis flexibility. Thanks to the Structure fields, we can easily
@@ -559,7 +584,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
                            fieldnames = fieldname[1], alignColumns = alignColumns,
                            path.fold = !padPaths)
           
-          mat[is.na(mat)] <- ""
+          mat[is.na(mat)] <- "."
           
           lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
           names(lines) <- rownames(mat)
@@ -597,7 +622,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     x <- foldRecords(x, foldAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
-                    records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, were getting errors.
+                    records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, we're getting errors.
                     matrices <- lapply(records, stringi::stri_list2matrix, byrow = TRUE)
                     
                     if (length(matrices) == 1L) {
@@ -961,10 +986,9 @@ foldHumdrum <- function(humdrumR, byfields,
           # byfields should be a character vector.
           # suitable for the "by" argument in a data.table[].
           checkhumdrumR(humdrumR, 'foldHumdrum')
-          humdrumR <- indexGLIM(humdrumR)      
+          humdrumR <- indexGLIM(humdrumR)
     
-          dataTypes <- if (padPaths) "GLIMDdP" else "GLIMDd"
-          humtab   <- getHumtab(humdrumR, dataTypes)
+          humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
           
           # What fields do apply to?
           fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1098,9 +1122,19 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 `putHumtab<-` <- function(humdrumR, value, drop = FALSE) {
           # adds humtab into humdrumR
           # Drop determines whether record dataTypes that are 
-          # absent from value are left unchanged (drop = TRUE)
-          # or replaced with empty data tables (drop = FALSE)
-          if (data.table::is.data.table(value)) value <- splitHumtab(value, drop = drop)
+          # absent from value are left unchanged (drop = FALSE)
+          # or replaced with empty data tables (drop = TRUE)
+          # If drop indicates a record type (i.e., GLIM) those types are dropped only
+          if (data.table::is.data.table(value)) {
+              value <- if (is.character(drop)) {
+                  dataTypes <- checkTypes(drop, 'putHumtab')
+                  value <- splitHumtab(value, drop = FALSE)
+                  value[dataTypes]
+              } else {
+                  splitHumtab(value, drop = drop)
+              }
+          }
+          
           humdrumR@Humtable[names(value)] <- value
           
           humdrumR
@@ -1580,7 +1614,6 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   
   humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
-  # humdrumR <- fields.as.character()
   
   print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                 max.records.file, max.token.length)
@@ -1598,7 +1631,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd') 
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
     targets <- humtab$Type %in% dataTypes
-    printable <- IfElse(!targets, 
+    printable <- ifelse(!targets, 
                         if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
                         NA_character_)
     

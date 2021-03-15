@@ -291,6 +291,7 @@ NULL
 #' @name with-in-Humdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
+          humdrumR <- indexGLIM(humdrumR)
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
          
           ###
@@ -304,7 +305,7 @@ withinHumdrum <- function(humdrumR,  ...) {
               })
               
               ## put result into new humtab
-              newhumtab <- humtab[result, on ='_rowKey_'] 
+              newhumtab <- result[humtab, on ='_rowKey_'] 
               newhumtab[ , `_rowKey_` := NULL]
               
               # number new pipes
@@ -313,22 +314,14 @@ withinHumdrum <- function(humdrumR,  ...) {
               
               
               #### Put new humtable back into humdrumR object
-              newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
+              newfields <- setdiff(colnames(newhumtab), colnames(humtab))
               
-              # This section should be improved (Nat, 07/16/2019)
-              local({
-                  d    <- newhumtab$Type == 'd'
-                  null <- Reduce('&', lapply(newhumtab[ , newfields, with = FALSE],
-                                             function(col) is.na(col) | col == '.'))
-
-                  newhumtab[ , Null:= Null & d & null]
-                  # newhumtab[ , Type:= IfElse(Null, Type, 'D')]
-              })
+              # notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) !(is.na(field) | field == '.')))
+              # newhumtab$Null[notnull] <- FALSE
+              # newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
-              if (any(is.na(newhumtab$Type))) {
-                  newtype <- if ('D' %in% parsedArgs$formulae$recordtypes) 'D' else parsedArgs$formulae$recordtypes[1]
-                  newhumtab$Type[is.na(newhumtab$Type)] <- newtype
-              }
+  
+              # putHumtab(humdrumR, drop = union(humtab$Type, newhumtab$Type)) <- newhumtab
               putHumtab(humdrumR, drop = TRUE) <- newhumtab
               ########### Update other slots in humdrumR object
               
