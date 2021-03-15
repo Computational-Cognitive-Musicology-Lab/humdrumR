@@ -291,7 +291,6 @@ NULL
 #' @name with-in-Humdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
-          humdrumR <- indexGLIM(humdrumR)
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
          
           ###
@@ -316,12 +315,20 @@ withinHumdrum <- function(humdrumR,  ...) {
               #### Put new humtable back into humdrumR object
               newfields <- setdiff(colnames(newhumtab), colnames(humtab))
               
-              # notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) !(is.na(field) | field == '.')))
-              # newhumtab$Null[notnull] <- FALSE
-              # newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
+              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
+              newhumtab$Null[notnull] <- FALSE
+              newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
-  
-              # putHumtab(humdrumR, drop = union(humtab$Type, newhumtab$Type)) <- newhumtab
+              # What do do if d is in recordtypes
+              recordtypes <- rlang::eval_tidy(parsedArgs$formulae$recordtypes)
+              if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
+                humtab[ , `_rowKey_` := NULL]
+                newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
+              }
+              if (any(grepl('d', recordtypes))) {
+                humdrumR@Humtable$d <- humdrumR@Humtable$d[FALSE]
+              }
+              
               putHumtab(humdrumR, drop = TRUE) <- newhumtab
               ########### Update other slots in humdrumR object
               

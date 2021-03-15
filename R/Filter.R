@@ -301,9 +301,9 @@ nullifyTokens <- function(humdrumR, humtab, fields, indexPipe) {
     replaceInd[is.na(replaceInd)] <- FALSE
     humtab[ , eval(indexPipe) := NULL]
     
-    newdInd <- (replaceInd & humtab$Type == 'd')[ , 1]
-    putHumtab(humdrumR, drop = TRUE) <- humtab[!newdInd]
-    if (any(newdInd)) addNulld(humdrumR) <- humtab[newdInd]
+    # newdInd <- (replaceInd & humtab$Type == 'd')[ , 1]
+    putHumtab(humdrumR, drop = TRUE) <- humtab#[!newdInd]
+    # if (any(newdInd)) addNulld(humdrumR) <- humtab[newdInd]
  
     humdrumR   
 }
