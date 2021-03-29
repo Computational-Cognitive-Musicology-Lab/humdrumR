@@ -986,7 +986,7 @@ foldHumdrum <- function(humdrumR, byfields,
           # byfields should be a character vector.
           # suitable for the "by" argument in a data.table[].
           checkhumdrumR(humdrumR, 'foldHumdrum')
-          humdrumR <- indexGLIM(humdrumR)
+          # humdrumR <- indexGLIM(humdrumR)
     
           humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
           
@@ -1134,10 +1134,17 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
                   splitHumtab(value, drop = drop)
               }
           }
-          
           humdrumR@Humtable[names(value)] <- value
-          
           humdrumR
+}
+
+matchGLIMfields <- function(humdrumR, from = 'D', to = c('G', 'L', 'I', 'M', 'd', 'P') ) {
+    # make sure all the tables in humTable (i.e., G L I M D and P) all have the same fields
+    # usual case is that fields have been added to D but are missing from other tables.
+    # 
+    putHumtab(humdrumR, drop = FALSE) <- data.table::rbindlist(humdrumR@Humtable, fill = TRUE)
+    
+    humdrumR
 }
 
 `addNulld<-` <- function(humdrumR, value) {
@@ -1517,7 +1524,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     D <- getD(x)
                     
                     if (length(value) == nrow(D)) {
-                              D[i] <- value
+                              D[ , i] <- value
                     } else {
                               stop(glue::glue("Can't assign this value to '{name}' field, because it is the wrong length.
                                               It must be the same length as the number of data tokens (rows) in the Data humdrum table."))
@@ -1540,7 +1547,8 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
                     # If there are no PipeN fields, the active field(s) are copied.
-                    humtab <- getD(value)
+                    humtab <- getHumtab(value)
+                    
                     removeFields(value) <- grep('Pipe', colnames(humtab), value = TRUE)
                     pipes <- pipeFields(humtab)
                     
@@ -1600,7 +1608,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 
 
 #' @export
-print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
+print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
                          max.records.file = 40L, max.token.length = 30L) {
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   
@@ -1612,7 +1620,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   Nfiles <- length(humdrumR)          
   if (firstAndLast) humdrumR <- humdrumR[unique(c(1, length(humdrumR)))]
   
-  humdrumR <- indexGLIM(humdrumR)
+  # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
   
   print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),

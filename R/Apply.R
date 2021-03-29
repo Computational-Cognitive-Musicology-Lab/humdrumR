@@ -320,7 +320,7 @@ withinHumdrum <- function(humdrumR,  ...) {
               newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
               # What do do if d is in recordtypes
-              recordtypes <- rlang::eval_tidy(parsedArgs$formulae$recordtypes)
+              recordtypes <- checkTypes(rlang::eval_tidy(parsedArgs$formulae$recordtypes), 'withinHumdrum')
               if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
                 humtab[ , `_rowKey_` := NULL]
                 newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
