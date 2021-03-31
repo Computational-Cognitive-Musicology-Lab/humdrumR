@@ -235,7 +235,7 @@
 #' 
 #' 
 #' @export
-filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) { 
+filterHumdrum <- function(humdrumR, ...) { 
     checkhumdrumR(humdrumR, 'filterHumdrum')
     
     formulae <- list(...)
@@ -244,51 +244,27 @@ filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) {
     
     oldActive <- getActive(humdrumR)
     
-    humdrumR$`___index___` <- withinHumdrum(humdrumR, ...)
+    humdrumR <- withinHumdrum(humdrumR, ...)
+    indexfield <- tail(pipeFields(getHumtab(humdrumR)), 1)
     
-    if (fields(humdrumR)[Name == '___index___', Class] != 'logical') stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
+    if (fields(humdrumR)[Name == indexfield, Class] != 'logical') stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
     
-    nullifyIndex(humdrumR, oldActive)
-    # 
-    # parsedFormulae <- parseKeywords(formulae)
-    # dataTypes <- rlang::eval_tidy(parsedFormulae$recordtypes)
-    # dataTypes <- checkTypes(dataTypes, 'filterHumdrum', 'recordtypes ~ ...')
-    # humtab_withindex <- getHumtab(humdrumR_withindex, dataTypes)
-    # indexPipe <- tail(pipeFields(humtab_withindex), 1L)
+    nullifyIndex(humdrumR, indexfield, oldActive)
     
-    # if (nrecords(humdrumR_withindex) != nrecords(humdrumR)) {
-        # humtab <- getHumtab(humdrumR, dataTypes)
-        # if (nrow(humtab_withindex) != 1L) {
-            # by <- parsedFormulae$partitions[['by']] # only get first
-            # humtab_withindex <- humtab_withindex[humtab, on = fieldsInExpr(humdrumR, by)]
-        # }
-        # humtab[ , indexPipe] <- humtab_withindex[ , indexPipe, with = FALSE]
-        # humtab_withindex <- humtab
-    # }
-    
-    
-    ### This function can't be removed right now
-    # humdrumR <- nullifyTokens(humdrumR, humtab_withindex, fields(humdrumR), indexPipe)
-
-    # if (indexGLIM) {
-        # humdrumR <- indexGLIM(humdrumR, 
-                              # c("G", "L", "I", "M", "D", "d", "P")[-match(dataTypes,  c("G", "L", "I", "M", "D", "d", "P"))])
-    # }
-    # humdrumR
     
 }
 
-nullifyIndex <- function(humdrumR, newActive = ~Token) {
-  # This function takes a humdrumR object with a logical ___index___ 
-  # field and changes the Null field to Null | !___index___
+nullifyIndex <- function(humdrumR, indexfield, newActive = ~Token) {
+  # This function takes a humdrumR object with a logical indexfield  
+  # field and changes the Null field to Null | !indexfield
   # In other words, it used the index field to make null data.
   
-  if (!'___index___' %in% fields(humdrumR)$Name) return(humdrumR)
+  if (!indexfield  %in% fields(humdrumR)$Name) return(humdrumR)
   humtab <- getHumtab(humdrumR)
-  removeFields(humdrumR) <- '___index___'
+  removeFields(humdrumR) <- indexfield
   
-  humtab[ , Null := Null | !`___index___`]
-  humtab[ , `___index___` := NULL]
+  humtab$Null <-  (!humtab[ , indexfield, with = FALSE]  & !is.na(humtab[ , indexfield, with = FALSE])) | humtab$Null
+  humtab <- humtab[ , colnames(humtab) != indexfield, with = FALSE]
   
   putHumtab(humdrumR, drop = TRUE) <- humtab
   humdrumR <- setActive(humdrumR, newActive)
@@ -296,37 +272,7 @@ nullifyIndex <- function(humdrumR, newActive = ~Token) {
   
   
 }
-# 
-# nullifyTokens <- function(humdrumR, humtab, fields, indexPipe) {
-#     # This function takes a humdrum table which already has a
-#     # logical INDEX column ("indexPipe") and replaces all tokens in all data fields
-#     # in those indices with null data
-#     # Returns a new humdrumR object, with the new humtable(s) inside it.
-# 
-#     replaceInd <- !humtab[ , indexPipe, with = FALSE]
-#     replaceInd[is.na(replaceInd)] <- FALSE
-# 
-#     charFields  <- fields[Class == 'character' & Type == "Data"]$Name
-#     otherFields <- fields[Class != 'character' & Type == "Data"]$Name
-#     replaceStrings <- c(I = "*", L = "!", M = "=", "D" = '.', "d" = ".", P = "_P")[humtab$Type[replaceInd]]
-#     if (length(charFields)  > 0L) humtab[ ,  charFields] <- lapply(humtab[ ,  charFields, with = FALSE], function(col) { col[replaceInd] <- replaceStrings ; col})
-#     if (length(otherFields) > 0L) humtab[ , otherFields] <- lapply(humtab[ , otherFields, with = FALSE], function(col) { col[replaceInd] <- NA             ; col})
-# 
-#     humtab$Null[replaceInd] <- TRUE
-#     humtab$Type[humtab$Type == 'D' & humtab$Null] <- 'd'
-# 
-#     ##
-#     # humtab <- removeNull_humtab(humtab)
-#     replaceInd <- !humtab[ , indexPipe, with = FALSE]
-#     replaceInd[is.na(replaceInd)] <- FALSE
-#     humtab[ , eval(indexPipe) := NULL]
-# 
-#     # newdInd <- (replaceInd & humtab$Type == 'd')[ , 1]
-#     putHumtab(humdrumR, drop = TRUE) <- humtab#[!newdInd]
-#     # if (any(newdInd)) addNulld(humdrumR) <- humtab[newdInd]
-# 
-#     humdrumR
-# }
+
 
 
 ############## Null indexing ----
@@ -334,33 +280,36 @@ nullifyIndex <- function(humdrumR, newActive = ~Token) {
 # humdrumR filtering and application can result in lots of null tokens.
 # These functions remove parts that are entirely null
 
-
-removeNull_humtab <- function(humtab, files = TRUE, spines = TRUE, records = TRUE, stops = TRUE) {
-    # this function removes any spines, paths or records that are ALL null
-    if (humtab[ , all(Null)]) return(humtab[FALSE])
-    
-    if (stops) humtab <- humtab[!(Stop > 1 & Null == TRUE)]
-    
-    if (nrow(humtab) > 0L && files)   humtab <- humtab[ , if (any(Type == 'D')) .SD else NULL, by = .(File)        ]
-    if (nrow(humtab) > 0L && spines)  humtab <- humtab[ , if (any(!Null)) .SD else NULL, by = .(File, Spine) ]
-    if (nrow(humtab) > 0L && records) humtab <- humtab[ , if (any(!Null)) .SD else NULL, by = .(File, Record)]
-    if (nrow(humtab) > 0L) humtab <- humtab[ , unique(colnames(humtab)), with = FALSE]
-    
-    humtab
-}
-
-
-removeNull <- function(humdrumR) {
-  humtab <- getHumtab(humdrumR, 'GLIMDdP') 
-  humtab <- humtab[Null == FALSE]
+removeNull <- function(humdrumR, ..., recordTypes = 'GLIMDdP') {
+  checkhumdrumR(humdrumR, 'removeNull')
+  checkTypes(recordTypes, 'removeNull', 'recordTypes')
+  
+  recordtypesform <- rlang::new_formula(quote(recordtypes), rlang::expr(!!recordTypes))
+  remove <- withHumdrum(humdrumR, recordtypesform, dofill ~ all(Null, na.rm=T), ...)
+  
+  
+  humtab <- getHumtab(humdrumR, recordTypes)
+  humtab <- humtab[remove == FALSE]
+  
   putHumtab(humdrumR, drop = FALSE) <- humtab
   humdrumR
 }
 
-fillNull <- function(humdrumR, ...) {
-    checkhumdrumR(humdrumR, 'fillNull')
+
+unfillNull <- function(humdrumR, ..., fillfromTypes = 'D', recordtypes = recordtypes ~ 'GLIMDdP') {
+  checkhumdrumR(humdrumR, 'unfillNull')
+  fillfromTypes <- checkTypes(fillfromTypes, 'unfillNull', 'fillfromTypes')
   
-    filterHumdrum(humdrumR, dofill ~ any(!Null, na.rm = TRUE), recordtypes ~ 'GLIMDd', ...)
+  humdrumR$Null <- withinHumdrum(humdrumR, dofill ~ any(!Null[Type %in% fillfromTypes]), recordtypes, ...)
+  humdrumR
+  
+  
+}
+fillNull <- function(humdrumR, ..., fillfromTypes = 'D', recordtypes = recordtypes ~ 'GLIMDdP') {
+    checkhumdrumR(humdrumR, 'fillNull')
+    fillfromTypes <- checkTypes(fillfromTypes, 'fillNull', 'fillfromTypes')
+  
+    filterHumdrum(humdrumR, dofill ~ !all(Null[Type %in% fillfromTypes], na.rm = TRUE), recordtypes, ...)
   
 }
 
@@ -407,10 +356,8 @@ setMethod('[',
               
               form <- do ~ File %in% sort(unique(File))[i]
               
-              if (any(i < 0)) form <- wrapInCall("!", form)
-              
-              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
-              removeNull(fillNull(x, by ~ File))
+              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+              removeNull(x, by ~ File)
           })
 
 
@@ -423,8 +370,8 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i) {
-              filterHumdrum(x, do ~ any(. %~% i),  by ~ File, 
-                            recordtypes ~ "D", indexGLIM = TRUE)
+            x <- filterHumdrum(x, do ~ . %~% i,  by ~ File, recordtypes ~ "D")
+            removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
 ##[formula]
@@ -440,7 +387,7 @@ setMethod('[',
               i <- wrapInCall('any', i)
               
               filterHumdrum(x, i, by ~ File,
-                            recordtypes ~ "D", indexGLIM = TRUE)
+                            recordtypes ~ "D")
           })
 
 ####[[]]
@@ -460,7 +407,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             if (any(i < 0)) form <- wrapInCall("!", form)
             
             filterHumdrum(x, form, by ~ File,
-                          recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
+                          recordtypes ~ "GLIMDdP")
           })
 
 
@@ -471,12 +418,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
           function(x, j) {
               j <- numericIndexCheck(j)    
               
-              form <- do ~ Spine %in% sort(unique(Spine))[j]
+              form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
               
-              if (any(i < 0)) form <- wrapInCall("!", form)
               
               filterHumdrum(x, form,# , by ~ File,
-                            recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
+                            recordtypes ~ "GLIMDdP")
           })
 
 #' @name filterHumdrum
@@ -508,10 +454,10 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i) {
     # gets any record which contains match
     x <- filterHumdrum(x, do ~ any(. %~% i), by ~ File,
-                       recordtypes ~ "D", indexGLIM = TRUE)
+                       recordtypes ~ "D")
   
     filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Record,
-                  recordtypes ~ "D", indexGLIM = TRUE)
+                  recordtypes ~ "D")
 })
 
 # setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
@@ -531,7 +477,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
           function(x, j) {
             #gets any spine which contains match
               filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Spine,
-                            recordtypes ~ "D", indexGLIM = TRUE)
+                            recordtypes ~ "D")
           })
 # setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
 #           function(x, j) {
@@ -567,11 +513,11 @@ setMethod('[[',
               }
               
               if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %~% k, indexGLIM = TRUE)
+                  x <- filterHumdrum(x, do ~ . %~% k)
               }
               if (rlang::is_formula(k)) {
                   x <- do.call('filterHumdrum', c(x, k, 
-                                                  recordtypes ~ "D", indexGLIM = TRUE,
+                                                  recordtypes ~ "D",
                                                   list(...)))
               }
               
@@ -603,7 +549,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
                     i <- wrapInCall('any', i)
            
                     filterHumdrum(x, i, by ~ File ~ Record,
-                                  recordtypes ~ "D", indexGLIM = TRUE)
+                                  recordtypes ~ "D")
           })
 
 #' @name humdrumR-class
@@ -614,7 +560,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'),
               j <- wrapInCall('any', j)
               
               filterHumdrum(x, j, by ~ File ~ Spine,
-                            recordtypes ~ "D", indexGLIM = TRUE)
+                            recordtypes ~ "D")
           })
 
 #' @name humdrumR-class

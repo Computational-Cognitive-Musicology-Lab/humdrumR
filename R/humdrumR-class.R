@@ -1196,11 +1196,11 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
   
   if (is.atomic(values)) {
-    values[is.na(values) | values == '.'] <- nullAs
+    values[is.na(values)] <- nullAs
   } else {
     values[] <- lapply(values, 
                        function(col) {
-                                 col[is.na(col) | col == '.'] <- nullAs
+                                 col[is.na(col)] <- nullAs
                                  col
                                  })
   }
@@ -1285,6 +1285,22 @@ Add a reference to some field, for instance Token.", call. = FALSE)
                     stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
           }
           
+}
+
+
+activeTypes <- function(humdrumR) {
+    # this function takes a humdrumR object
+    # and changes the Type field of the humdrumTable
+    # to match the content of the Active expression.
+    
+    active <- evalActive(humdrumR, 'GLIMDdP', forceVector = TRUE, nullAs = NA)
+    humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+    
+    humtab$Type <- parseTokenType(active)
+    putHumtab(humdrumR, drop = FALSE) <- humtab
+    
+    humdrumR
+    
 }
 
 
@@ -1618,7 +1634,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
   }
   
   Nfiles <- length(humdrumR)          
-  if (firstAndLast) humdrumR <- humdrumR[unique(c(1, length(humdrumR)))]
+  if (firstAndLast) humdrumR <- humdrumR[unique(c(1, Nfiles))] 
   
   # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
@@ -1645,6 +1661,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep
     
     printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
                                                   forceVector = TRUE, nullAs = NA))
+    printable[humtab$Null & targets] <- nulltypes[humtab$Type[humtab$Null & targets]]
     
     humtab[ , Print := printable]
     
