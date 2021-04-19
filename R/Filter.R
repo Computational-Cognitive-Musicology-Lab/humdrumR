@@ -370,7 +370,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i) {
-            x <- filterHumdrum(x, do ~ . %~% i,  by ~ File, recordtypes ~ "D")
+            x <- filterHumdrum(x, dofill ~ any(. %~% i),  by ~ File, recordtypes ~ "D")
             removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
@@ -385,9 +385,11 @@ setMethod('[',
           signature = c(x = 'humdrumR', i = 'formula'),
           function(x, i) {
               i <- wrapInCall('any', i)
+              rlang::f_lhs(i) <- quote(dofill)
               
-              filterHumdrum(x, i, by ~ File,
+              x <- filterHumdrum(x, i, by ~ File,
                             recordtypes ~ "D")
+              removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
 ####[[]]

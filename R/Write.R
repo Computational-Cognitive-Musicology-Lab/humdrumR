@@ -120,7 +120,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
 }
 
 
-processFixer <- function(fix, origfilaenames, humdrumR) {
+processFixer <- function(fix, origfilenames, humdrumR) {
     if (is.null(fix)) return(fix)
     
     UseMethod('processFixer')
