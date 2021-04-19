@@ -631,7 +631,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
           
-  humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
+  # humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
   humtab <- getHumtab(humdrumR, dataTypes = 'I')
   
   # Tandem

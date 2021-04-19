@@ -4,7 +4,7 @@
 \alias{filterHumdrum}
 \title{Filter humdrum data}
 \usage{
-filterHumdrum(humdrumR, ..., indexGLIM = TRUE)
+filterHumdrum(humdrumR, ...)
 
 humdata[] # returns unchanged
 

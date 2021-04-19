@@ -542,10 +542,13 @@ setMethod('[[',
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
           function(x, i) {
-                    i <- wrapInCall('any', i)
-           
-                    filterHumdrum(x, i, by ~ File ~ Record,
-                                  recordtypes ~ "D")
+            
+                    i <- rlang::as_quosure(i)
+                    form <- rlang::new_formula(quote(dofill), rlang::expr(Record %in% unique(Record[!!i])))
+                    
+                    x <- filterHumdrum(x, form, by ~ File,
+                                       recordtypes ~ "D")
+                    removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
 #' @name humdrumR-class
@@ -553,10 +556,12 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
           function(x, j) {
-              j <- wrapInCall('any', j)
-              
-              filterHumdrum(x, j, by ~ File ~ Spine,
-                            recordtypes ~ "D")
+            j <- rlang::as_quosure(j)
+            form <- rlang::new_formula(quote(dofill), rlang::expr(Spine %in% unique(Spine[!!j])))
+            
+            x <- filterHumdrum(x, form, by ~ File,
+                               recordtypes ~ "D")
+            removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
 #' @name humdrumR-class
@@ -572,78 +577,76 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'formula'),
 
 
 
-  ############## GLIMdP indexing ----
-  
-#' @export
-indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
-  #####ReIndex GLIMd humdrum tables to match indexing of D tables
-  # To do this we need to:
-  #   
-  #    2) Make sure that pieces which are missing from the D table (because they've been indexed away) 
-  #       are removed from GLIMd table (most likely)
-  #    3) Make sure, on a piece-by-piece basis that
-  #         a) Spines which are missing from D are removed from GLIMd
-  #         b) That there are no records which are all d (null)
-  #         c) That there are no "bunched up" barlines at the beggining, end, or anywherei in the middle.
-  #         d) That there are no tandem interpretations AFTER the last data token.
-          
-  GLIMDdP <- getHumtab(humdrumR, dataTypes = dataTypes)
-  D       <- getD(humdrumR)
-  # first add missing fields (columns)
-  missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
-  missingfieldsTypes <- vapply(D[ , missingfields, with = FALSE], class, FUN.VALUE = character(1)) 
-  
-  if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
-  
-  GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
-  
-  # next  remove missing pieces (i.e., File or Filename fields)
-  GLIMDdP <- GLIMDdP[File %in% unique(unlist(D$File))]
-  
-  # then, do indexing by piece:
-  # (GLIMd and D records are combined into one table, then split by piece)
-  GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
-  GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
-  
-  # resplit and put back in to humdrumR object
-  putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
-  humdrumR
-}
-
-
-indexGLIM_piece <- function(humtab) {
-  ###called by indexGLIM on each individual piece
-  D <- humtab[Type == 'D']
-  # remove missing spines
-  humtab <- humtab[Spine %in% unique(D$Spine) | is.na(Spine)]
-  
-  # remove all except last barline before first data record
-  prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
-  if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
-  
-  #remove everything after last data record, except global stuff, '*-' or '=='
-  # humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
-  
-  
-  # if (any(humtab$Type == 'd')) {
-    #remove records containing only d
-    # rectab <- table(humtab$Record, humtab$Type)
-    # recs   <- as.numeric(rownames(rectab))
-    # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
-  # }
-  
-  
-  
-  if (any(humtab$Type == 'M')) {
-    #remove consecutive barlines
-    rectab <- table(humtab$Record, humtab$Type)
-    recs   <- as.numeric(rownames(rectab))
-    humtab <- humtab[Record %in% recs[!(rectab[ ,'M'] == rotate(rectab[ ,'M'], rotation = -1, pad = -1) & rectab[ ,'M'] > 0)]]
-  }
-  #
-  humtab
-  
-}
+#   
+# indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
+#   #####ReIndex GLIMd humdrum tables to match indexing of D tables
+#   # To do this we need to:
+#   #   
+#   #    2) Make sure that pieces which are missing from the D table (because they've been indexed away) 
+#   #       are removed from GLIMd table (most likely)
+#   #    3) Make sure, on a piece-by-piece basis that
+#   #         a) Spines which are missing from D are removed from GLIMd
+#   #         b) That there are no records which are all d (null)
+#   #         c) That there are no "bunched up" barlines at the beggining, end, or anywherei in the middle.
+#   #         d) That there are no tandem interpretations AFTER the last data token.
+#           
+#   GLIMDdP <- getHumtab(humdrumR, dataTypes = dataTypes)
+#   D       <- getD(humdrumR)
+#   # first add missing fields (columns)
+#   missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
+#   missingfieldsTypes <- vapply(D[ , missingfields, with = FALSE], class, FUN.VALUE = character(1)) 
+#   
+#   if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
+#   
+#   GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
+#   
+#   # next  remove missing pieces (i.e., File or Filename fields)
+#   GLIMDdP <- GLIMDdP[File %in% unique(unlist(D$File))]
+#   
+#   # then, do indexing by piece:
+#   # (GLIMd and D records are combined into one table, then split by piece)
+#   GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
+#   GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
+#   
+#   # resplit and put back in to humdrumR object
+#   putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
+#   humdrumR
+# }
+# 
+# 
+# indexGLIM_piece <- function(humtab) {
+#   ###called by indexGLIM on each individual piece
+#   D <- humtab[Type == 'D']
+#   # remove missing spines
+#   humtab <- humtab[Spine %in% unique(D$Spine) | is.na(Spine)]
+#   
+#   # remove all except last barline before first data record
+#   prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
+#   if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
+#   
+#   #remove everything after last data record, except global stuff, '*-' or '=='
+#   # humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
+#   
+#   
+#   # if (any(humtab$Type == 'd')) {
+#     #remove records containing only d
+#     # rectab <- table(humtab$Record, humtab$Type)
+#     # recs   <- as.numeric(rownames(rectab))
+#     # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
+#   # }
+#   
+#   
+#   
+#   if (any(humtab$Type == 'M')) {
+#     #remove consecutive barlines
+#     rectab <- table(humtab$Record, humtab$Type)
+#     recs   <- as.numeric(rownames(rectab))
+#     humtab <- humtab[Record %in% recs[!(rectab[ ,'M'] == rotate(rectab[ ,'M'], rotation = -1, pad = -1) & rectab[ ,'M'] > 0)]]
+#   }
+#   #
+#   humtab
+#   
+# }
 
 
 

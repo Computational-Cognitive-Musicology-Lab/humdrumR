@@ -144,6 +144,7 @@ files, no Reference fields are created.
 
 \section{Philosophy}{
 
+
 Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
 grid structure of the original humdrum data? The Humdrum Table structure affords
 maximum data analysis flexibility. Thanks to the Structure fields, we can easily
