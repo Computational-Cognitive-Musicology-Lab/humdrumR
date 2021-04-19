@@ -406,8 +406,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             
             form <- do ~ Record %in% sort(unique(Record))[i]
             
-            filterHumdrum(x, form, by ~ File,
+            x <- filterHumdrum(x, form, by ~ File,
                           recordtypes ~ "GLIMDdP")
+            removeNull(fillNull(x, by ~ File), by ~ File)
           })
 
 
@@ -452,11 +453,13 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'numeric'),
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
 function(x, i) {
     # gets any record which contains match
-    x <- filterHumdrum(x, do ~ any(. %~% i), by ~ File,
-                       recordtypes ~ "D")
   
-    filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Record,
-                  recordtypes ~ "D")
+    form <- do ~ Record %in% unique(Record[. %~% i])
+    x <- filterHumdrum(x, form, by ~ File,
+                       recordtypes ~ "D")
+    # filterHumdrum(x, dofill ~ any(. %~% i), by ~ File ~ Record,
+                  # recordtypes ~ "D")
+    removeNull(fillNull(x, by ~ File), by ~ File)
 })
 
 # setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
@@ -475,17 +478,11 @@ function(x, i) {
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
           function(x, j) {
             #gets any spine which contains match
-              filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Spine,
-                            recordtypes ~ "D")
+            form <- do ~ Spine %in% unique(Spine[. %~% j])
+            x <- filterHumdrum(x, form, by ~ File,
+                               recordtypes ~ "D")
+            removeNull(fillNull(x, by ~ File), by ~ File)
           })
-# setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-#           function(x, j) {
-#               #gets any spine which contains match
-#               grepingind(x, j,  function(sd) { 
-#                   recn <- unique(sd$Spine[sd$.indhits])
-#                   sd[Spine %in% recn]
-#               })
-#           })
 
 
 
@@ -512,7 +509,7 @@ setMethod('[[',
               }
               
               if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %~% k)
+                  x <- filterHumdrum(x, do ~ . %~% k, recordtypes ~ "D")
               }
               if (rlang::is_formula(k)) {
                   x <- do.call('filterHumdrum', c(x, k, 
@@ -520,7 +517,7 @@ setMethod('[[',
                                                   list(...)))
               }
               
-              x
+              removeNull(fillNull(x, by ~ File), by ~ File)
               
           })
 
