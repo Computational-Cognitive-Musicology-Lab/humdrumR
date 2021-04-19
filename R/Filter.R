@@ -406,8 +406,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             
             form <- do ~ Record %in% sort(unique(Record))[i]
             
-            if (any(i < 0)) form <- wrapInCall("!", form)
-            
             filterHumdrum(x, form, by ~ File,
                           recordtypes ~ "GLIMDdP")
           })
@@ -422,8 +420,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
               
               form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
               
-              
-              filterHumdrum(x, form,# , by ~ File,
+              filterHumdrum(x, form,
                             recordtypes ~ "GLIMDdP")
           })
 
