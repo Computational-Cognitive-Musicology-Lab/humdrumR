@@ -135,7 +135,7 @@
 #' `NA` in the file which does not have the code. If no reference records appear in any
 #' files, no Reference fields are created.
 #' 
-#' @section Null Data
+#' @section Null Data:
 #' 
 #' In humdrum syntax, there is no requirement that every spine contains data
 #' in every record. Rather, spines can be padded with *null tokens*.

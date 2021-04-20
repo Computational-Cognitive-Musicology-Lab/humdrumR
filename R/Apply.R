@@ -68,7 +68,7 @@
 #'   separately in each group (see "Partitioning").}
 #'   \item{where}{An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").}
 #'   \item{ngrams}{A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.}
-#'   \item{recordtype}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
+#'   \item{recordtypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
 #'   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
 #'   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
 #'   is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
@@ -367,6 +367,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     list2env(.withHumdrum(humdrumR, ..., withfunc = 'withHumdrum'), envir = environment())
+  
     result[ , `_rowKey_` := NULL]
     
     ####-
@@ -419,7 +420,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
                         ordoQuosure)
-    
+    setorder(result, `_rowKey_`)
     as.list(environment())
     
 }
