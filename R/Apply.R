@@ -416,6 +416,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     ###########################-
     #### evaluate "do" expression! 
     humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
+    humtab <- removeFiltered(humtab)
     
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
@@ -424,7 +425,9 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     as.list(environment())
     
 }
-    
+
+
+ 
     
 ##### Parsing Args (Formulae) ----
 
@@ -1264,24 +1267,24 @@ ifelsecalls <- function(calls, fields) {
           rlang::quo(ifelse(!!conditionexpr, !!ifexpr, !!elseexpr))
 }
 
-pipeFields <- function(humtab) {
+pipeFields <- function(humtab, label = 'Pipe') {
   #' Another function used by pipeIn<- (withing curePipeN)
   #' Takes a humtab and identifies the pipe fields (columns), if any,
   #' are in it.
   colnms <- colnames(humtab)
   
-  pipefields  <- colnms[grepl('Pipe', colnms)]
+  pipefields  <- colnms[grepl(label, colnms)]
   
   if (length(pipefields) != 0L) pipefields <- pipefields[order(as.numeric(stringr::str_extract(pipefields, '[0-9]+')))]
   
   pipefields
 }
 
-curPipeN <- function(humtab) {
+curPipeN <- function(humtab, label = 'Pipe') {
           #' A function used by pipeIn<-
           #' identifies how many pipe fields (if any)
           #' are already in a humtable.
-          length(pipeFields(humtab))   
+          length(pipeFields(humtab, label = label))   
           
 }
 
