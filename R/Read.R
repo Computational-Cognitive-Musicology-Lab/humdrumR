@@ -710,8 +710,7 @@ parseReference <- function(refTable, reference) {
   colnames(refTable) <- c('refKeys', 'refVals')
   
   # if there is no colon, there is no key so need to shift the first column over and insert "Unkeyed"
-  refTable[ refVals == '', c('refKeys', 'refVals') := c('Unkeyed', refKeys)]
-  
+  if (any(refTable$refVals == "")) refTable$refVals[refTable$refVals == ""] <- 'Unkeyed'
   
   #multiple keys
   refTable[ , refKeys := stringi::stri_replace_all_regex(refKeys, '[0-9]+$', '')]
