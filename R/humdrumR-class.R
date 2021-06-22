@@ -1194,8 +1194,6 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   # locnames <- humtab[ , paste(File, Spine, Path, Stop, Record, sep = '.')]
   
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
-  filter <- getFilter(humtab)
-  values[!filter] <- as(NA, class(values))
   
   if (is.atomic(values)) {
     values[is.na(values)] <- nullAs
@@ -1303,21 +1301,6 @@ activeTypes <- function(humdrumR) {
     
     humdrumR
     
-}
-
-
-activeNull <- function(humdrumR) {
-    humtab <- getHumtab(humdrumR, 'Dd')
-    
-    active <- evalActive(humdrumR, 'Dd')
-    
-    humtab[ , Null := Null | if (is.character(active)) active == '.' else is.na(active)]
-    humtab$Type[ humtab$Null] <- 'd'
-    humtab$Type[!humtab$Null] <- 'D'
-    
-    
-    putHumtab(humdrumR, drop = FALSE) <- humtab
-    humdrumR
 }
 
 
