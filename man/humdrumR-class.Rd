@@ -28,15 +28,11 @@ humdata['character'] <- humdata2
 
 humdata[[ , 'regex']]
 
-humdata[['regex1', 'regex2']]
-
 humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
 
 humdata[[~expression]]
 
 humdata[[ , ~expression]]
-
-hudmata[[~expression1, ~expression2]]
 }
 \description{
 This \code{S4} class is the basic unit of the

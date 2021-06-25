@@ -142,6 +142,31 @@ any humdrum piece. If a reference code appears in one file but not another, the 
 files, no Reference fields are created.
 }
 
+\section{Null Data}{
+
+
+In humdrum syntax, there is no requirement that every spine contains data
+in every record. Rather, spines can be padded with \emph{null tokens}.
+In some cases, entire records may be padded with null tokens.
+Each type of humdrum record uses a different null token:
+\itemize{
+\item \emph{Intepretation}: \code{*}
+\item \emph{Comment}: \code{!}
+\item \emph{Barline}: \code{=}
+\item \emph{Data}: \code{.}
+}
+
+All null tokens in a humdrum table are identified in the logical \code{Null} field.
+The character string token itself is, of course, held in the \code{Token} field.
+In addition, null \emph{data} tokens (\code{"."}) are identified as their own \code{RecordType}: \code{"d"}.
+These null data tokens require special consideration.
+
+In humdrum syntax files, and humdrumR's original \code{Token} field, null data tokens are always represented \code{"."}.
+Within a humtable record, a null \emph{field} is represented as either \code{"."} (for \code{character} fields) or \code{NA} (for other field classes).
+A humtable data row is only \code{Null == TRUE} if \strong{all} data fields are \code{NA} or \code{"."}.
+If an appliction of \code{withinHumdrum} returns some \code{NA} values, they will be seen as full field values.
+}
+
 \section{Philosophy}{
 
 

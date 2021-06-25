@@ -18,9 +18,9 @@ humdata[[x:y]]
 
 humdata[[ , x:y]]
 
-humdata[[x:y, l:m]]
-
 humdata[['regex']]
+
+humdata[[x:y, l:m]]
 }
 \description{
 \code{filterHumdrum} is a command used to filter a \code{\linkS4class{humdrumR}} corpus.

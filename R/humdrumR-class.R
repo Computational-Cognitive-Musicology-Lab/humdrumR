@@ -484,7 +484,7 @@ setMethod('initialize', 'humdrumR',
             fieldcategories <- list(Data = 'Token',
                                     Structure = c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                                                   'Column', 'Spine', 'Path', 'Stop',
-                                                  'Record', 'NData', 'Global', 'Null', 'Type'),
+                                                  'Record', 'NData', 'Global', 'Null', 'Filter', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
                                                          fields[tandemcol]),
                                     Formal    = c(grep('^Formal', fields, value = TRUE),
@@ -1166,6 +1166,27 @@ matchGLIMfields <- function(humdrumR, from = 'D', to = c('G', 'L', 'I', 'M', 'd'
   humdrumR
 }
 
+updateNull <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR, 'GLIMDd')
+    
+    active <- evalActive(humdrumR, 'GLIMDd', forceVector = TRUE)
+    
+    humtab[ , Null := is.na(active) | active %in% c('.', '!', '*', '=', '_P')]
+    
+    putHumtab(humdrumR) <- humtab
+    
+    humdrumR
+}
+
+update_d <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR, 'Dd')
+    
+    humtab[ , Type := ifelse(Null | Filter, 'd', 'D')]
+    
+    putHumtab(humdrumR, drop = 'Dd') <- humtab
+    
+    humdrumR
+}
 
 
 
@@ -1280,28 +1301,29 @@ Add a reference to some field, for instance Token.", call. = FALSE)
               || (!is.null(dim(act)) && dim(act)[1] == nrows)
               || (is.list(act) && length(act) == nrows)
               || (is.list(act) && all(lengths(act) == nrows))) {
-                    return(humdrumR) 
+                    return(update_d(updateNull(humdrumR)))
           } else {
                     stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
           }
+
           
 }
 
 
-activeTypes <- function(humdrumR) {
-    # this function takes a humdrumR object
-    # and changes the Type field of the humdrumTable
-    # to match the content of the Active expression.
-    
-    active <- evalActive(humdrumR, 'GLIMDdP', forceVector = TRUE, nullAs = NA)
-    humtab <- getHumtab(humdrumR, 'GLIMDdP') 
-    
-    humtab$Type <- parseTokenType(active)
-    putHumtab(humdrumR, drop = FALSE) <- humtab
-    
-    humdrumR
-    
-}
+# activeTypes <- function(humdrumR) {
+#     # this function takes a humdrumR object
+#     # and changes the Type field of the humdrumTable
+#     # to match the content of the Active expression.
+#     
+#     active <- evalActive(humdrumR, 'GLIMDdP', forceVector = TRUE, nullAs = NA)
+#     humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+#     
+#     humtab$Type <- parseTokenType(active)
+#     putHumtab(humdrumR, drop = FALSE) <- humtab
+#     
+#     humdrumR
+#     
+# }
 
 
 ####Fields ----
@@ -1563,13 +1585,20 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
                     # If there are no PipeN fields, the active field(s) are copied.
+                    if (i %in% fields(chor, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name) {
+                        builtin <- i[i %in% fields(chor, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
+                        .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
+                              glue::glue_collapse(builtin, sep = ', ', last = 'and'), 
+                              plural(length(builtin), 'are built-in fields.', 'is a built-in fields'))
+                    }
+              
                     humtab <- getHumtab(value)
                     
-                    removeFields(value) <- grep('Pipe', colnames(humtab), value = TRUE)
                     pipes <- pipeFields(humtab)
+                    removeFields(value) <- pipes
                     
                     if (length(pipes) == 0L) pipes <- activeFields(value)
-                    
+   
                     pipes <- tail(pipes, n = length(i))
                     
                     if (any(i %in% colnames(humtab))) humtab[ , eval(i[i %in% colnames(humtab)]) := NULL]
@@ -1583,7 +1612,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     
                     value@Active <- substituteName(value@Active, setNames(rlang::syms(i), pipes))
                     
-                    value
+                    update_d(updateNull(value))
           })
 
 
@@ -1628,6 +1657,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
                          max.records.file = 40L, max.token.length = 30L) {
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   
+  
   if (is.empty(humdrumR)) {
     cat("\nEmpty humdrumR object\n")
     return(invisible(NULL))
@@ -1647,23 +1677,30 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
 }
 
 
-printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep = ', '){
+printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
     dataTypes <- checkTypes(dataTypes, "printableActiveField")
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd') 
+    
+    active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDd', forceVector = TRUE, nullAs = "."))
+    
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
-    targets <- humtab$Type %in% dataTypes
-    printable <- ifelse(!targets, 
-                        if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
-                        NA_character_)
+    active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]
+    active[humtab[, !Type %in% c('D', 'd')]] <- humtab[!Type %in% c('D', 'd'), Token]
     
-    printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
-                                                  forceVector = TRUE, nullAs = NA))
-    printable[humtab$Null & targets] <- nulltypes[humtab$Type[humtab$Null & targets]]
+    # 
+    # targets <- humtab$Type %in% dataTypes
+    # printable <- ifelse(!targets, 
+                        # if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
+                        # NA_character_)
     
-    humtab[ , Print := printable]
+    # printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
+                                                  # forceVector = TRUE, nullAs = NA))
+    # printable[(humtab$Null | humtab$Filter)] <- nulltypes[humtab$Type[(humtab$Null | humtab$Filter)]]
+    
+    humtab[ , Print := active]
     
     putHumtab(humdrumR, drop = FALSE) <- humtab
     addFields(humdrumR) <- 'Print'
@@ -1707,7 +1744,23 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   lines <- as.lines(humdrumR, dataTypes = dataTypes,
                     padPaths = TRUE, alignColumns = TRUE)
   
+  ## remove consecutive empties
+  # empty <- stringr::str_detect(lines, '^[=.][\t.(=[0-9]*)]*$')
+  # 
+  # chunks <- cumsum(!empty) 
+  # tapply(lines, chunks, 
+  #        function(x) {
+  #            if (length(x) < 5) return(x)
+  #            
+  #            pad <- paste(collapse = '', unique(stringr::str_extract(x[-1:-2], '^.')))
+  #            
+  #            setNames(c(x[1:2], strrep(pad, 3)), c(names(x[1:2]), paste0(names(x[3]), '-', names(x[length(x)]))))
+  #            
+  #        }) %>% unlist -> lines
+  
+  
   NRecord <- num2str(as.numeric(gsub('^.*\\.', '', names(lines))), pad = TRUE)
+  
   File   <- gsub('\\..*$', '', names(lines))
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
   
