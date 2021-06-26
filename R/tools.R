@@ -1403,7 +1403,19 @@ num2word <- function(num, capitalize = FALSE) {
   if (capitalize) stringi::stri_trans_totitle(out) else out
 }
 
-padder <- function(strs, sizes = max(nchar(strs)) + 1) {unlist(Map(stringi::stri_pad_left, strs, sizes))}
+padder <- function(strs, sizes = max(nchar(strs)) + 1) {
+    if (is.matrix(strs) && length(sizes) == ncol(strs)) {
+        # if matrix, do columnwise   
+        strs <- t(strs)
+        
+        strs[] <- stringi::stri_pad_left(c(strs), sizes)
+        
+        t(strs)
+    } else {
+        stringi::stri_pad_left(strs, sizes)
+    }
+    
+}
 
 trimLongString <- function(strs, n = 20L) {
   strs[str_length(strs) > n] <- paste0(stri_trim_both(str_sub(strs[str_length(strs) > n], end = n)), '...')

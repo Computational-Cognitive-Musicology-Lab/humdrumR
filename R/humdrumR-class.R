@@ -587,6 +587,8 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
           mat[is.na(mat)] <- "."
           
           lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
+          lines[grepl('^!!', lines)] <- stringr::str_remove_all(lines[grepl('^!!', lines)], '\t\\.')
+          
           names(lines) <- rownames(mat)
           
           lines
@@ -1708,90 +1710,55 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 }
 
 
-padColumns <- function(lines, max.token.length) {
- # This function takes a bunch of lines, separated by tabs,
- # and replaces the tabs with appropriate numbers of spaces
- # such that the lines will print as nicely aligned columns.
- # It also trims strings that are too long, replacing the last
- # three characters before the cuttoff with "..."
-          
- local <- !grepl('[0-9]:  \t!!', lines)          
- 
- lines[!local] <- paste0('  ', gsub('\t', '', lines[!local]))
- tokmat <- stringi::stri_list2matrix(strsplit(lines[local], split = '\t'), byrow = TRUE)
- 
- # trim long tokens
- toklen  <- nchar(tokmat)
- toklen[is.na(toklen)] <- 0L
- toolong <- toklen > max.token.length
- tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
- tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...')
- tokmat[is.na(tokmat)] <- ''
- 
- # pad columns
- toklen <- nchar(tokmat)
- colMaxs <- apply(toklen, 2, max, na.rm = TRUE)
- lines[local] <- apply(tokmat, 1, paste %.% padder, sizes = colMaxs + 2L, collapse = '')
- 
- lines <- gsub('\t*$', '', lines)
- 
- lines
-
-}
 
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                                        max.records.file = 40L, max.token.length = 12L) {
-  lines <- as.lines(humdrumR, dataTypes = dataTypes,
-                    padPaths = TRUE, alignColumns = TRUE)
+                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 3L) {
+  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
-  ## remove consecutive empties
-  # empty <- stringr::str_detect(lines, '^[=.][\t.(=[0-9]*)]*$')
-  # 
-  # chunks <- cumsum(!empty) 
-  # tapply(lines, chunks, 
-  #        function(x) {
-  #            if (length(x) < 5) return(x)
-  #            
-  #            pad <- paste(collapse = '', unique(stringr::str_extract(x[-1:-2], '^.')))
-  #            
-  #            setNames(c(x[1:2], strrep(pad, 3)), c(names(x[1:2]), paste0(names(x[3]), '-', names(x[length(x)]))))
-  #            
-  #        }) %>% unlist -> lines
+  tokmat[is.na(tokmat)] <- "."
   
   
-  NRecord <- num2str(as.numeric(gsub('^.*\\.', '', names(lines))), pad = TRUE)
+  #
+  tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
-  File   <- gsub('\\..*$', '', names(lines))
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
+  File   <- gsub('\\..*$', '', rownames(tokmat))
+  NRecord <- gsub('^[0-9]*\\.', '', rownames(tokmat))
   
-  lines <- paste0(NRecord, ':  \t', lines)
+  #
+  global <- stringr::str_detect(tokmat[ , 1], '^!!')
+  tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
+  
   ## Trim an space lines
-  lines <- padColumns(lines, max.token.length = max.token.length)
-  ellipsis <- stringr::str_dup('#', max(nchar(lines[!grepl(':   *!!', lines)])))
+  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
+  tokmat <- padColumns(tokmat, global)
   
+  ## collapse to lines
+  tokmat[global, -1L:-2L] <- ""
+  lines <- apply(tokmat, 1, paste, collapse = '')
+  
+  ellipsis <- stringr::str_dup('#', max(nchar(lines[!global])))
   
   ##
   lines   <- split(lines, f = File)
   NRecord <- split(NRecord, f = File)
   
-  lines <- Map(f = function(l, rn, last) {
+  lines <- Map(f = function(l, rn, last, glob) { # hide the first or last lines of each file
             if (length(l) <= max.records.file) return(l)
             
             # lines
             l <- do.call(if (last) tail else head, list(l, n = max.records.file))
             
             # record numbers
-            rn <- stringi::stri_trim_left(rn)
+            # rn <- stringi::stri_trim_left(rn)
             restRN <- do.call(if(last) head else tail, list(rn, n = -max.records.file))
-            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-',restRN[length(restRN)])
-            restRN <- paste0("[", restRN, ']')
+            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-', restRN[length(restRN)])
+            restRN <- paste0(restRN, ':')
             
-            elips  <- stringr::str_dup('.', max(nchar(l[!grepl(':  *!!', l)])))
-            elips  <- paste0(restRN, stringi::stri_sub(elips, from = nchar(restRN) + 1L)) 
+            restRN <- stringr::str_pad(restRN, stringr::str_locate(l[1], ':')[1], side = 'left')
+            rest   <- paste0(restRN, stringi::stri_sub(ellipsis, nchar(restRN) + 1L))
             
-            append(l, elips, after = if (last) 0L else length(l))
-            
-
+            append(l, rest, after = if (last) 0L else length(l))
             
             },
                lines, NRecord, seq_along(lines) == length(lines))
@@ -1800,6 +1767,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   
   ellipses <- paste0(ellipsis, ' ', Filenames)
   lines    <- Map(append, lines, ellipses, after = 0L)
+  
   
   ##
   if (Nmorefiles > 0L) {
@@ -1811,7 +1779,86 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
    lines <- append(lines, message, after = length(lines) - 1L)
   }
   
-  cat(unlist(lines), sep = '\n')
+  lines <- unlist(lines)
+  cat(lines, sep = '\n')
   
 }
 
+
+censorEmptySpace <- function(tokmat, collapseNull = 6) {
+    
+    null <- apply(tokmat == '.' | grepl('^=', tokmat), 1, all, na.rm = TRUE)
+    
+    chunks <- segments(!null)
+    
+    
+    
+    newRN <- unlist(tapply(rownames(tokmat), chunks, function(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
+    newRN <- stringr::str_replace(newRN, '-[0-9]+\\.', '-') # replace redundant fileNumber
+    
+    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
+                                   function(i) {
+                                       if (length(i) <= collapseNull) {
+                                           tokmat[i , , drop = FALSE] 
+                                        } else {
+                                           fill <- if (any(grepl('^=', tokmat[i, 1]))) {
+                                               bars <- tokmat[i, ][grepl('^=', tokmat[i, 1]), 1]
+                                               barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
+                                               base <- strrep('=', length(bars))
+                                               
+                                               if (any(!is.na(barnums))) {
+                                                   barnums <- barnums[!is.na(barnums)]
+                                                   base <- paste0(base, paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-'))
+                                               } 
+                                               
+                                               base
+                                               
+                                           } else {
+                                               strrep('.', length(i) - 1)
+                                           }
+                                           
+                                           
+                                           # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
+                                           rbind(tokmat[i[1], , drop = FALSE], fill)
+                                        }
+                                       
+                     })
+    tokmat <- do.call('rbind', tokmat)
+    
+    rownames(tokmat) <- newRN
+    
+    tokmat
+}
+
+trimTokens <- function(tokmat, max.token.length) {
+    # This function  trims strings that are too long, replacing the last
+    # three characters before the cuttoff with "..."
+    
+    toklen  <- nchar(tokmat)
+    
+    toklen[is.na(toklen)] <- 0L
+    
+    toolong <- toklen > max.token.length
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
+    tokmat[is.na(tokmat)] <- ''
+    
+    tokmat
+    
+}
+
+padColumns <- function(tokmat, global) {
+    # This function takes a token matrix
+    # and pads each token with the appropriate number of spaces
+    # such that the lines will print as nicely aligned columns.
+
+    toklen <- nchar(tokmat)
+    
+    colMaxs <- apply(toklen[!global, ], 2, max) + 2L
+    
+    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], colMaxs)
+    tokmat[global, 1L] <- padder(tokmat[global, 1L], colMaxs[1])
+    
+    tokmat
+    
+}
