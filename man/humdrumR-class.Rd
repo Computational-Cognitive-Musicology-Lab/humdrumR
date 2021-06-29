@@ -39,7 +39,7 @@ This \code{S4} class is the basic unit of the
 \code{\link[humdrumR:humdrumR]{humdrumR}} package.
 Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or
 more humdrum files.
-In the documentation we refer to the collection of files within a \link{humdrumR} object
+In the documentation we refer to the collection of files within a \linkS4class{humdrumR} object
 as a "\strong{corpus}," and each file as a "\strong{piece}."
 However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
 files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
@@ -75,7 +75,7 @@ called to create this \code{humdrumR} object.}
 \section{Active field}{
 
 The \code{Active} slot contains an \code{rlang::quosure} expression
-refering to fields in the \code{\link[humdrumR:humTable]{Humtable}}.
+refering to fields in the \code{\link[humdrumR:humTable]{humTable}}.
 This expression is used as the "default" value in a lot of \code{humdrumR} code.
 For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 i.e., whenever you return a \code{humdrumR} object in the terminal.

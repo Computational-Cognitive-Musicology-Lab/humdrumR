@@ -76,7 +76,7 @@ A        _P       C
 (In this example, the \code{Spine}, \code{Path}, and \code{Column} values are shown below the data.)
 The \code{"_P"} tokens stand for "padded path."
 This appraoch assures that every \strong{Spine} is a contiguous block of tokens, of constant width.
-In most \link{humdrumR} use cases, these padding tokens (and the \code{Column} field) can be safely ignored.
+In most humdrumR use cases, these padding tokens (and the \code{Column} field) can be safely ignored.
 }
 
 \section{Corpus padding}{
@@ -186,7 +186,7 @@ E         _C        D        _P
 0         1         0        1         Path
 1         2         3        4         Column
 }
-Note that code{alignColumns} actually adds rows to the \link{humdrumR} object's
+Note that code{alignColumns} actually adds rows to the \linkS4class{humdrumR} object's
 internal \code{\link[humdrumR:humTable]{humdrum tables}}.
 }
 

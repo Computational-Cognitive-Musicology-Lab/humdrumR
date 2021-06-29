@@ -9,7 +9,7 @@
 \alias{foldRecords}
 \title{These functions are used to change the "shape"
 of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
-(held within \link{humdrumR} objects of course).}
+(held within \linkS4class{humdrumR} objects of course).}
 \usage{
 mergeHumdrum(...)
 
@@ -22,7 +22,7 @@ foldPaths(humdrumR, foldAtomic = TRUE, sep = " ")
 foldRecords(humdrumR, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumR} data object.
+\item{humdrumR}{A \linkS4class{humdrumR} data object.
 (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).}
 
 \item{foldAtomic}{\code{logical}. If \code{foldAtomic == TRUE}, each stop is collapsed to a single string

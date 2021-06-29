@@ -16,11 +16,11 @@ setActiveFields(humdrumR, fieldnames)
 \description{
 \code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.
 
-\code{setActive} takes a \link{humdrumR} object and a formula
+\code{setActive} takes a \linkS4class{humdrumR} object and a formula
 and sets the right side of formula as the object's Active expression.
 
 \code{setActiveFields} takes a character vector of strings representing current
 \code{\link[humdrumR:humTable]{field}} names
-and sets the \link{humdrumR} object's active expression
+and sets the \linkS4class{humdrumR} object's active expression
 to simply return those fields (as a list, if there are more than one).
 }
