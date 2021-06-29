@@ -1656,7 +1656,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 
 #' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
-                         max.records.file = 40L, max.token.length = 30L) {
+                         max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   
   
@@ -1672,7 +1672,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
   
   print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
-                max.records.file, max.token.length)
+                max.records.file, max.token.length, collapseNull)
 
   invisible(NULL)
   
@@ -1712,14 +1712,14 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 
 
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 3L) {
+                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
   tokmat[is.na(tokmat)] <- "."
   
   
   #
-  tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
+  if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
   File   <- gsub('\\..*$', '', rownames(tokmat))
@@ -1785,7 +1785,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
 }
 
 
-censorEmptySpace <- function(tokmat, collapseNull = 6) {
+censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     
     null <- apply(tokmat == '.' | grepl('^=', tokmat), 1, all, na.rm = TRUE)
     
@@ -1798,7 +1798,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 6) {
     
     tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
                                    function(i) {
-                                       if (length(i) <= collapseNull) {
+                                       if (sum(grepl('^=', tokmat[i, 1])) < 2 && length(i) <= collapseNull) {
                                            tokmat[i , , drop = FALSE] 
                                         } else {
                                            fill <- if (any(grepl('^=', tokmat[i, 1]))) {
