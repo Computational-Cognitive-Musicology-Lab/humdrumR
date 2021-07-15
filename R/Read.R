@@ -711,7 +711,8 @@ parseReference <- function(refTable, reference) {
   colnames(refTable) <- c('refKeys', 'refVals')
   
   # if there is no colon, there is no key so need to shift the first column over and insert "Unkeyed"
-  refTable[ refVals == '', c('refKeys', 'refVals') := c('Unkeyed', refKeys)]
+  refTable <- refTable[refKeys != '' | refVals != '']
+  refTable[refKeys == '', refKeys := 'Unkeyed']
   
   
   #multiple keys

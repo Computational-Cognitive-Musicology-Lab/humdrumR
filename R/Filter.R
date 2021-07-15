@@ -4,23 +4,23 @@
 
 #' Filter humdrum data
 #' 
-#' \code{filterHumdrum} is a command used to filter a \code{\linkS4class{humdrumR}} corpus.
-#' Indexing (using the \code{[]} or {\code{[[]]}} operators is a special case---indeed,
-#' the \code{[]} and \code{[[]]} methods for \code{\linkS4class{humdrumR}} objects are 
-#' simply wrappers to calls to \code{filterHumdrum}.
+#' `filterHumdrum` is a command used to filter a [humdrumR-class][humdrumR] corpus.
+#' Indexing (using the `[]` or `[[]]` operators) is a special case---indeed,
+#' the `[]` and `[[]]` methods for `\linkS4class{humdrumR`} objects are 
+#' simply wrappers to calls to `filterHumdrum`.
 #' 
-#' \code{filterHumdrum} is used in the same way as \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}:
-#' Any number of formulae or functions can be fed as arguments to \code{filterHumdrum}: these arguments
-#' are passed directly to a call to \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}}.
-#' The only caveat difference is that the do expressions / functions fed to \code{filterHumdrum} 
-#' must be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions---
-#' expressions that return a logical vector.
+#' `filterHumdrum` is used in the same way as [humdrumR:with-in-Humdrum][withinHumdrum]:
+#' Any number of formulae or functions can be fed as arguments to `filterHumdrum`: these arguments
+#' are passed directly to a call to `\link[humdrumR:with-in-Humdrum]{withinHumdrum`}.
+#' The only difference is that the do expressions/functions fed to `filterHumdrum` 
+#' must be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions---
+#' i.e., expressions that return a logical vector.
 #' The returned vector must either be the same length as the input data (the number
-#' of rows in the \code{\link[humdrumR::humtable]{humdrum table}}) \emph{or} be of length \code{1}. 
+#' of rows in the `\link[humdrumR::humtable]{humdrum table`}) *or* be of length `1`. 
 #' 
-#' If a predicate expression \emph{is} of length \code{1}, the entire \code{\link[humdrumR::humtable]{humdrum table}}
-#' is either returned (\code{TRUE}) or filtered out (\code{FALSE}).
-#' This can be combined with a \code{by~} expression to filter out entire segments:
+#' If a predicate expression *is* of length `1`, the entire `\link[humdrumR::humtable]{humdrum table`}
+#' is either returned (`TRUE`) or filtered out (`FALSE`).
+#' This can be combined with a `by~` expression to filter out entire segments:
 #' for instance, the command
 #' \preformatted{
 #' filterHumdrum(humdata, ~any(. \%~\% '\eE]-'), by ~ File ~ Spine)
@@ -30,59 +30,59 @@
 #' 
 #' @section Indexing:
 #' To learn how to
-#' In \code{R}, the basic \code{\link[base:Extract]{indexing operators}}
-#' are \code{[]} and \code{[[]]}.
+#' In `R`, the basic `\link[base:Extract]{indexing operators`}
+#' are `[]` and `[[]]`.
 #' 
 #' These are used to filter out subsets of data.
-#' In many \code{R} data types (for instance, base \code{R}'s \code{\link[base:list]{list}}),
-#' the \code{[}single brackets\code{]}
-#' are used for "shallower" extraction while the \code{[[}double brackets\code{]]}
+#' In many `R` data types (for instance, base `R`'s `\link[base:list]{list`}),
+#' the `[`single brackets`]`
+#' are used for "shallower" extraction while the `[[`double brackets`]]`
 #' are used for "deeper" extraction.
-#' \code{humdrumR} object indexing follows this same basic pattern:
-#' \code{[}single brackets\code{]} are used to index \code{humdrumR} objects
-#' \emph{by piece} while \code{[[}double brackets\code{]]} are used to index
-#' \emph{within pieces}. (Accidentally writing \code{[]} when you need
-#' \code{[[]]} is a very common error, so watch out!)
+#' `humdrumR` object indexing follows this same basic pattern:
+#' `[`single brackets`]` are used to index `humdrumR` objects
+#' *by piece* while `[[`double brackets`]]` are used to index
+#' *within pieces*. (Accidentally writing `[]` when you need
+#' `[[]]` is a very common error, so watch out!)
 #' 
-#' Whether, indexing by piece or within, \code{humdrumR} objects can use
+#' Whether, indexing by piece or within, `humdrumR` objects can use
 #' three types of indexing arguments:
 #' \itemize{
-#' \item By \code{numeric} (ordinal integers)
-#' \item By \code{character} string (regular expressions)
-#' \item By \code{formula} (arbitrary expressions)
+#' \item By `numeric` (ordinal integers)
+#' \item By `character` string (regular expressions)
+#' \item By `formula` (arbitrary expressions)
 #' }
-#' The last option (by \code{formula}) is the most powerful option,
-#' and indeed, the first two options (\code{numeric} or \code{character} indexing)
+#' The last option (by `formula`) is the most powerful option,
+#' and indeed, the first two options (`numeric` or `character` indexing)
 #' are just convenient shorthands for indexing that can be accomplished using 
-#' the \code{formula} method.
+#' the `formula` method.
 #' 
 #' 
-#' \strong{Numeric indexing:} Indexing \code{humdrumR} objects with
-#'  \strong{\code{[}single brackets\code{]}} will accept
+#' **Numeric indexing:** Indexing `humdrumR` objects with
+#'  **`[`single brackets`]`** will accept
 #' one numeric argument. (Non-integer arguments will be converted to integers.)
-#' This argument will be used to pick pieces within the \code{humdrumR} object ordinally.
-#' Thus, \code{humdata[1:10]} will select the first ten pieces in the data while \code{humdata[42]}
+#' This argument will be used to pick pieces within the `humdrumR` object ordinally.
+#' Thus, `humdata[1:10]` will select the first ten pieces in the data while `humdata[42]`
 #' will select only the 42nd piece. 
 #' 
 #' 
-#' Indexing \code{humdrumR} objects with
-#'  \strong{\code{[[}double brackets\code{]]}} will accept 
-#' one or two numeric arguments, \code{i} and \code{j}, either of which can 
+#' Indexing `humdrumR` objects with
+#'  **`[[`double brackets`]]`** will accept 
+#' one or two numeric arguments, `i` and `j`, either of which can 
 #' be used in isolation or in combination.
-#' If \code{j} is used in isolation, it must be placed after a comma, as in \code{humdata[[ , j ]]}.
+#' If `j` is used in isolation, it must be placed after a comma, as in `humdata[[ , j ]]`.
 #' (Non-integer arguments will be converted to integers.)
-#' \code{i} is used to index data records (i.e., based on the \code{NData} field) ordinally.
-#' Thus, \code{humdata[[1:20]]} indexes the first twenty data records \emph{from each file}
-#' in the corpus, and \code{humdata[[42]]} extracts the 42nd data record \emph{from each file}.
-#' \code{j} is used to index spines  (i.e., based on the \code{Spine} field) ordinally.
-#' Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from each}
+#' `i` is used to index data records (i.e., based on the `NData` field) ordinally.
+#' Thus, `humdata[[1:20]]` indexes the first twenty data records *from each file*
+#' in the corpus, and `humdata[[42]]` extracts the 42nd data record *from each file*.
+#' `j` is used to index spines  (i.e., based on the `Spine` field) ordinally.
+#' Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
 #' file in the corpus.
 #' 
-#' Note that numeric \code{humdrumR} indexing is entirely \strong{ordinal}, meaning 
+#' Note that numeric `humdrumR` indexing is entirely **ordinal**, meaning 
 #' that pieces/data records/spines are not matched based on their value in their
 #' respective fields, but rather on their order among all existing values.
-#' Thus, for \code{[}single-bracket\code{]} indexing the \eqn{ith} piece in the
-#' corpus is taken, regardless of that \code{FileN} field associated
+#' Thus, for `[`single-bracket`]` indexing the \eqn{ith} piece in the
+#' corpus is taken, regardless of that `FileN` field associated
 #' with that piece:
 #' 
 #' \preformatted{
@@ -90,7 +90,7 @@
 #' humsubset[2]
 #' }
 #' 
-#' will return the 12th piece from the original \code{humdata} object, not the second piece.
+#' will return the 12th piece from the original `humdata` object, not the second piece.
 #' Similarly,
 #' \preformatted{
 #' humsubset2 <- humdata[[ , 2:4]]
@@ -98,106 +98,106 @@
 #' }
 #' will return the third spine from the original data.
 #' 
-#' As in traditional \code{R} indexing, negative numbers are allowed as well, causing corresponding elements to be
-#' removed instead of retained. Thus, \code{humdata[-3:-5]} will remove the third, fourth, and fifth pieces from the data
-#' while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
+#' As in traditional `R` indexing, negative numbers are allowed as well, causing corresponding elements to be
+#' removed instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
+#' while `humdata[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
 #' Positive and negative indices cannot be mixed in a single argument.
 #' 
-#' In all cases, indices outside of range (or of value \code{0)} are ignored.
-#' If all indices are \code{0} or outside of range then 
-#' an empty \code{humdrumR} object is returned.
-#' For instance, \code{humdata[[401:500, ]]} will return an empty
-#' \code{humdrumR} object if there are no pieces with more than 400
+#' In all cases, indices outside of range (or of value `0)` are ignored.
+#' If all indices are `0` or outside of range then 
+#' an empty `humdrumR` object is returned.
+#' For instance, `humdata[[401:500, ]]` will return an empty
+#' `humdrumR` object if there are no pieces with more than 400
 #' data records.
 #' 
 #' 
-#' \strong{Character indexing:} Indexing \code{humdrumR} objects with 
-#' \code{[}single brackets\code{]} will accept one 
-#' vector of \code{character} strings. These strings are 
+#' **Character indexing:** Indexing `humdrumR` objects with 
+#' `[`single brackets`]` will accept one 
+#' vector of `character` strings. These strings are 
 #' treated as 
 #' \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the \code{humdrumR} object's \code{Active} fields are searched
+#' The tokens from the `humdrumR` object's `Active` fields are searched
 #' for matches to all the regular expressions you input. Any piece that contains
-#' \emph{\strong{any}} match to \emph{\strong{any}} of the regular expressions is retained---all other pieces
-#' are dropped. Note that (because this is \code{[}single-bracket\code{]} indexing) the entire piece is retained, even if there is only one match.
-#' If no matches occur in any pieces, an empty \code{humdrumR} object is returned.
+#' _**any**_ match to _**any**_ of the regular expressions is retained---all other pieces
+#' are dropped. Note that (because this is `[`single-bracket`]` indexing) the entire piece is retained, even if there is only one match.
+#' If no matches occur in any pieces, an empty `humdrumR` object is returned.
 #' 
-#' Indexing \code{humdrumR} objects with \code{[[}double brackets\code{]]} will 
-#' accept one or two vectors of \code{character} strings, \code{i} and \code{j}, 
+#' Indexing `humdrumR` objects with `[[`double brackets`]]` will 
+#' accept one or two vectors of `character` strings, `i` and `j`, 
 #' either of which can 
 #' be used in isolation or in combination. 
-#' If \code{j} is used in isolation, it must be placed after a comma, 
-#' as in \code{humdata[[ , j]]}.
+#' If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.
 #' These strings are 
 #' treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the \code{humdrumR} object's \code{Active} fields are searched
+#' The tokens from the `humdrumR` object's `Active` fields are searched
 #' for matches to all the regular expressions you input.
-#' Any record which contains at least one token matching any regex in \code{i}
+#' Any record which contains at least one token matching any regex in `i`
 #' will be retained.
 #' Similarly, any spine which contains at least one token matching any
-#' regex in \code{j} is retained.
-#' If \code{i} and {j} are used together,
+#' regex in `j` is retained.
+#' If `i` and {j} are used together,
 #'  matching spines are indexed first, so that 
-#' tokens matching the regular expression(s) in \code{i}
+#' tokens matching the regular expression(s) in `i`
 #' must be found in matching spines.
 #' 
-#' A third argument, \code{k}, can also be used, but only if 
-#' both \code{i} and \code{j} arguments are missing.
-#' In the case of \code{k}, only matching tokens are retained,
+#' A third argument, `k`, can also be used, but only if 
+#' both `i` and `j` arguments are missing.
+#' In the case of `k`, only matching tokens are retained,
 #' regardless of their spine or record number(s).
 #' Any pieces, spines, or records with no matches are dropped entirely.
 #' 
 #' 
-#' \strong{Formula indexing:} Indexing \code{humdrumR} objects with 
-#' \code{formulae} is the most powerful, flexible indexing option.
-#' Either \code{[}single\code{]} or \code{[}double\code{]} brackets will accept
+#' **Formula indexing:** Indexing `humdrumR` objects with 
+#' `formulae` is the most powerful, flexible indexing option.
+#' Either `[`single`]` or `[`double`]` brackets will accept
 #' a formula. The right-hand side of each formula will be evaluated
-#' within the \code{humdrumR} objects internal 
-#' \code{\link[humdrumR:humTable]{humdrum table}}.
-#' Each formula must evaluate to a \code{logical} vector of the same 
+#' within the `humdrumR` objects internal 
+#' `\link[humdrumR:humTable]{humdrum table`}.
+#' Each formula must evaluate to a `logical` vector of the same 
 #' length as the total number of tokens (rows in the humdrum table).
 #' 
-#' In the case of \code{[}single-bracket\code{]} indexing, only one \code{formula}
-#' is accepted, and \emph{every piece} that evalues with at least one 
-#' \code{TRUE} will be retained.
-#' For instance, \code{humdata[~Spine > 4]} will return all pieces
+#' In the case of `[`single-bracket`]` indexing, only one `formula`
+#' is accepted, and *every piece* that evalues with at least one 
+#' `TRUE` will be retained.
+#' For instance, `humdata[~Spine > 4]` will return all pieces
 #' which contain five (or more) spines.
-#' \code{[}single-bracket\code{]} formula indexing is especially useful for indexing
+#' `[`single-bracket`]` formula indexing is especially useful for indexing
 #' meta-data properties like reference records:
-#' for instance, \code{humdata[~COM == "Paul McCartney"]} will return
-#' all pieces with a \code{!!!COM: Paul McCartney} reference record.
+#' for instance, `humdata[~COM == "Paul McCartney"]` will return
+#' all pieces with a `!!!COM: Paul McCartney` reference record.
 #' 
-#' In the case of \code{[[}double-bracket\code{]]} indexing, one or two formulas are accepted, 
-#' in arguments \code{i} and \code{j}, either of which can 
+#' In the case of `[[`double-bracket`]]` indexing, one or two formulas are accepted, 
+#' in arguments `i` and `j`, either of which can 
 #' be used in isolation or in combination. 
-#' If \code{j} is used in isolation, it must be placed after a comma, 
-#' as in \code{humdata[[ , j]]}.
-#' In the case of \code{i} formulae, any record which evaluates to
-#' at least one \code{TRUE} value is retained.
-#' In the case of \code{j}, any spine which evaluates to
-#' at least one \code{TRUE} value is retained.
+#' If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.
+#' In the case of `i` formulae, any record which evaluates to
+#' at least one `TRUE` value is retained.
+#' In the case of `j`, any spine which evaluates to
+#' at least one `TRUE` value is retained.
 #' Any piece which contains no matches is dropped entirely.
 #' 
-#' For \code{[[}double-bracket\code{]]} formula indexing, a third argument, \code{k}
-#' may be used in the absence of \code{i} and \code{j}.
-#' In the case of \code{k} all tokens which evaluate to \code{TRUE}
+#' For `[[`double-bracket`]]` formula indexing, a third argument, `k`
+#' may be used in the absence of `i` and `j`.
+#' In the case of `k` all tokens which evaluate to `TRUE`
 #' are retained, regardless of piece/spine/record.
-#' Pieces, spines, or records with no \code{TRUE} values
+#' Pieces, spines, or records with no `TRUE` values
 #' are simply dropped.
 #' 
 #' @section Assignment:
-#' \code{R} objects often have ways of assigning new values to 
-#' \emph{part} of the object using \code{\link[base:Extract]{indexing operators}}.
-#' \code{humdrumR} objects are no different.
+#' `R` objects often have ways of assigning new values to 
+#' *part* of the object using `\link[base:Extract]{indexing operators`}.
+#' `humdrumR` objects are no different.
 #' 
-#' A new field can be inserted in a \code{humdrumR} object in two ways:
+#' A new field can be inserted in a `humdrumR` object in two ways:
 #' \enumerate{
 #' \item A field can be copied from one humdrumR object to another if the humdrumR objects'
-#' \code{\link[humdrumR:humTable]{humdrum tables}} have the same number of data tokens (i.e., rows).
+#' `\link[humdrumR:humTable]{humdrum tables`} have the same number of data tokens (i.e., rows).
 #' This is actually most useful for renaming fields within a humdrumR object (explained below).
-#' \item A \code{\link[base:vector]{vector}} or \code{\link[base:list]{list}} can be instered as a 
-#' new field in a \code{humdrumR}---but again, it must be the same length as the number of tokens
-#' in the object's \code{\link[humdrumR:humTable]{humdrum table}}.
+#' \item A `\link[base:vector]{vector`} or `\link[base:list]{list`} can be instered as a 
+#' new field in a `humdrumR`---but again, it must be the same length as the number of tokens
+#' in the object's `\link[humdrumR:humTable]{humdrum table`}.
 #' }
 #' 
 #' Fields can be assigned using two syntaxes:
@@ -211,22 +211,22 @@
 #' humdata$fieldname <- x
 #' }
 #' 
-#' \strong{\code{humdrumR$fieldname <- humdrumR} assignment}: Assigning a field in one \code{humdrumR}
-#' object from another \code{humdrumR} object works like this. First of call, as a reminder, the two \code{humdrumR}
-#' objects must have the exact same numbers of data tokens in their \code{\link[humdrumR:humTable]{humdrum tables}}.
-#' This means, that this is most useful for assigning field names from one \code{humdrumR} object to itself.
-#' The name(s) given in the indexing expression on the left side of the assignment (i.e., \code{humdata[c('name1', 'name2')]} or
-#' \code{humdata$name}) are used as new field names.
+#' **`humdrumR$fieldname <- humdrumR` assignment**: Assigning a field in one `humdrumR`
+#' object from another `humdrumR` object works like this. First of call, as a reminder, the two `humdrumR`
+#' objects must have the exact same numbers of data tokens in their `\link[humdrumR:humTable]{humdrum tables`}.
+#' This means, that this is most useful for assigning field names from one `humdrumR` object to itself.
+#' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
+#' `humdata$name`) are used as new field names.
 #' How fields are extracted from the right side of the assignment is a little trickier:
-#' Any fields in the right-side \code{humdrumR} object which are named \eqn{PipeN} (where \eqn{N} is an integer) are copied
+#' Any fields in the right-side `humdrumR` object which are named \eqn{PipeN} (where \eqn{N} is an integer) are copied
 #' in descending order into the named fields on the left side.
 #' If there are no \eqn{PipeN} fields on the right side, any fields used in the current Active formula (on the right side)
 #' are copied instead.
 #' 
-#' This system might seem odd at first, but it is very useful in combination with the \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} function,
-#' and its convenient pipe operator \code{\link[humdrumR:humPipe]{\%hum>\%}}.
-#' The \code{withinHumdrum} command always creates new fields that are called \eqn{Pipe1 ... Pipe2 ... PipeN}.
-#' By using \code{humdata$name} we can immediately assign these pipe fields more meaningful names!
+#' This system might seem odd at first, but it is very useful in combination with the `\link[humdrumR:with-in-Humdrum]{withinHumdrum`} function,
+#' and its convenient pipe operator `\link[humdrumR:humPipe]{\%hum>\%`}.
+#' The `withinHumdrum` command always creates new fields that are called \eqn{Pipe1 ... Pipe2 ... PipeN}.
+#' By using `humdata$name` we can immediately assign these pipe fields more meaningful names!
 #' 
 #' Examples:
 #' \preformatted{

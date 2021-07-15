@@ -43,7 +43,7 @@
 #' contains character strings representing the original strings read from the humdrum files. 
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum]---which can also be called using the 
-#' \code{\link[humdrumR:humPipe]{\%hum>\%}} piping 
+#' [humdrumR:humPipe][\%hum>\%] piping 
 #' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
 #' These fields can be renamed using the `$<-` operator.
 #'
@@ -116,6 +116,7 @@
 #' 
 #' 
 #' **3. Interpretation fields:**
+#'
 #' Interpretation fields describe interpretation metadata in the humdrum file(s).
 #' Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
 #' subsequent interpretation. (See the humdrum syntax vignette for a detailed explanation.)
@@ -938,7 +939,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
 }
 
 #' @export
-#' @name humShape
+#' @name humMerge
 mergeHumdrum <- function(...) {
     
     
