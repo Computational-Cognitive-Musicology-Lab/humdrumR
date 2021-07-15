@@ -1661,8 +1661,8 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
                     # If there are no PipeN fields, the active field(s) are copied.
-                    if (i %in% fields(chor, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name) {
-                        builtin <- i[i %in% fields(chor, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
+                    if (i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name) {
+                        builtin <- i[i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
                         .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
                               glue::glue_collapse(builtin, sep = ', ', last = 'and'), 
                               plural(length(builtin), 'are built-in fields.', 'is a built-in fields'))
@@ -1792,8 +1792,6 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                                         max.records.file = 40L, max.token.length = 12L, collapseNull = 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
-  tokmat[is.na(tokmat)] <- "."
-  
   
   #
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
@@ -1806,7 +1804,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   global <- stringr::str_detect(tokmat[ , 1], '^!!')
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
   
-  ## Trim an space lines
+  ## Trim any space lines
   tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
   tokmat <- padColumns(tokmat, global)
   
@@ -1864,14 +1862,11 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
 
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     
-    null <- apply(tokmat == '.' | grepl('^=', tokmat), 1, all, na.rm = TRUE)
+    null <- apply(matrix(grepl('^\\.( \\.)*$', tokmat) | grepl('^=', tokmat), nrow = nrow(tokmat)), 1, all, na.rm = TRUE)
     
     chunks <- segments(!null)
     
-    
-    
-    newRN <- unlist(tapply(rownames(tokmat), chunks, function(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
-    newRN <- stringr::str_replace(newRN, '-[0-9]+\\.', '-') # replace redundant fileNumber
+    # newRN <- unlist(tapply(rownames(tokmat), chunks, function(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
     
     tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
                                    function(i) {
@@ -1887,22 +1882,30 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
                                                    barnums <- barnums[!is.na(barnums)]
                                                    base <- paste0(base, paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-'))
                                                } 
-                                               
+                                               newRN <- paste(names(bars)[c(1, length(bars))], collapse = '-')
                                                base
                                                
                                            } else {
+                                               newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
+                                               
                                                strrep('.', length(i) - 1)
                                            }
                                            
-                                           
+                                           newRN <- c(rownames(tokmat)[i[1]], newRN)
                                            # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
-                                           rbind(tokmat[i[1], , drop = FALSE], fill)
+                                           tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
+                                           rownames(tokmat) <- newRN
+                                           
+                                           tokmat
+                                           
+                                           
+                                           
                                         }
                                        
                      })
     tokmat <- do.call('rbind', tokmat)
     
-    rownames(tokmat) <- newRN
+    rownames(tokmat) <- stringr::str_replace(rownames(tokmat), '-[0-9]+\\.', '-') # replace redundant fileNumber
     
     tokmat
 }

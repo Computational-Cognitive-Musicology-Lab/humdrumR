@@ -4,79 +4,78 @@
 
 #' Filter humdrum data
 #' 
-#' `filterHumdrum` is a command used to filter a [humdrumR-class][humdrumR] corpus.
-#' Indexing (using the `[]` or `[[]]` operators) is a special case---indeed,
-#' the `[]` and `[[]]` methods for `\linkS4class{humdrumR`} objects are 
-#' simply wrappers to calls to `filterHumdrum`.
+#' `filterHumdrum` is a command used to filter a [humdrumR corpus][humdrumR::humdrumR-class]
+#' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
+#' uses calls to `filterHumdrum`!
 #' 
-#' `filterHumdrum` is used in the same way as [humdrumR:with-in-Humdrum][withinHumdrum]:
-#' Any number of formulae or functions can be fed as arguments to `filterHumdrum`: these arguments
-#' are passed directly to a call to `\link[humdrumR:with-in-Humdrum]{withinHumdrum`}.
-#' The only difference is that the do expressions/functions fed to `filterHumdrum` 
-#' must be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions---
-#' i.e., expressions that return a logical vector.
+#' `filterHumdrum` is used in the same way as [withinHumdrum],
+#' taking any number of "do expressions" (or functions) as arguments.
+#' (In fact, do expressions/function arguments are passed directly to an internal call to `withinHumdrum`.)
+#' The only difference is that the expressions/functions fed to `filterHumdrum` 
+#' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions, 
+#' returning a logical (`TRUE`/`FALSE`) vector.
 #' The returned vector must either be the same length as the input data (the number
-#' of rows in the `\link[humdrumR::humtable]{humdrum table`}) *or* be of length `1`. 
+#' of rows in the [humdrum table][humdrumR::humTable]).
+#' (You can use a `dofill~` expression if you want to "expand" shorter outputs for filtering pusposes.)
+#' `filterHumdrum` updates the humdrum table's `Filter` field using an `|` (logical OR) with your new predicate.
+#' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`.
 #' 
-#' If a predicate expression *is* of length `1`, the entire `\link[humdrumR::humtable]{humdrum table`}
-#' is either returned (`TRUE`) or filtered out (`FALSE`).
-#' This can be combined with a `by~` expression to filter out entire segments:
-#' for instance, the command
-#' \preformatted{
-#' filterHumdrum(humdata, ~any(. \%~\% '\eE]-'), by ~ File ~ Spine)
-#' }
-#' will look in each file and remove any spine which contains an Eb token (the whole spine is removed
-#' if it contains even one Eb).
+#' By default, `filterHumdrum` completely removes any files in the corpus if *all* data records are filtered out (and/or Null).
+#' However, you can stop this by specifying the `removeEmptyFiles` as `FALSE`.
+#' If you *want* to remove empty files, spines, or records, you should call `removeEmptyFiles`, `removeEmptySpines`, or `removeEmptyRecords`.
 #' 
 #' @section Indexing:
-#' To learn how to
-#' In `R`, the basic `\link[base:Extract]{indexing operators`}
-#' are `[]` and `[[]]`.
 #' 
-#' These are used to filter out subsets of data.
-#' In many `R` data types (for instance, base `R`'s `\link[base:list]{list`}),
-#' the `[`single brackets`]`
-#' are used for "shallower" extraction while the `[[`double brackets`]]`
-#' are used for "deeper" extraction.
-#' `humdrumR` object indexing follows this same basic pattern:
-#' `[`single brackets`]` are used to index `humdrumR` objects
-#' *by piece* while `[[`double brackets`]]` are used to index
+#' In R, the basic [indexing operators][base::Extract], `[]` and `[[]]`,
+#' are used to select subsets of data.
+#' For many R data types (for instance, base R [lists][base::list])
+#' the **`[`single brackets`]`** are used for "shallower" extraction while the 
+#' **`[[`double brackets`]]`** are used for "deeper" extraction.
+#' [HumdrumR corpus][humdrumR::humdrumR-class] indexing follows this same basic pattern:
+#' **`[`single brackets`]`** are used to index `humdrumR` objects
+#' *by piece* while **`[[`double brackets`]]`** are used to index
 #' *within pieces*. (Accidentally writing `[]` when you need
 #' `[[]]` is a very common error, so watch out!)
 #' 
 #' Whether, indexing by piece or within, `humdrumR` objects can use
 #' three types of indexing arguments:
-#' \itemize{
-#' \item By `numeric` (ordinal integers)
-#' \item By `character` string (regular expressions)
-#' \item By `formula` (arbitrary expressions)
-#' }
+#' 
+#' + By `numeric` (ordinal integers)
+#' + By `character` string (regular expressions)
+#' + By `formula` (arbitrary expressions)
+#' 
 #' The last option (by `formula`) is the most powerful option,
 #' and indeed, the first two options (`numeric` or `character` indexing)
 #' are just convenient shorthands for indexing that can be accomplished using 
 #' the `formula` method.
 #' 
 #' 
-#' **Numeric indexing:** Indexing `humdrumR` objects with
-#'  **`[`single brackets`]`** will accept
-#' one numeric argument. (Non-integer arguments will be converted to integers.)
+#' ### Numeric indexing:
+#' 
+#' 
+#' Indexing `humdrumR` corpora with
+#' **`[`single brackets`]`** will accept
+#' one numeric argument.
 #' This argument will be used to pick pieces within the `humdrumR` object ordinally.
 #' Thus, `humdata[1:10]` will select the first ten pieces in the data while `humdata[42]`
 #' will select only the 42nd piece. 
-#' 
 #' 
 #' Indexing `humdrumR` objects with
 #'  **`[[`double brackets`]]`** will accept 
 #' one or two numeric arguments, `i` and `j`, either of which can 
 #' be used in isolation or in combination.
-#' If `j` is used in isolation, it must be placed after a comma, as in `humdata[[ , j ]]`.
-#' (Non-integer arguments will be converted to integers.)
-#' `i` is used to index data records (i.e., based on the `NData` field) ordinally.
-#' Thus, `humdata[[1:20]]` indexes the first twenty data records *from each file*
-#' in the corpus, and `humdata[[42]]` extracts the 42nd data record *from each file*.
-#' `j` is used to index spines  (i.e., based on the `Spine` field) ordinally.
-#' Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
-#' file in the corpus.
+#' (If `j` is used in isolation, it must be placed after a comma, as in `humdata[[ , j ]]`.)
+#' 
+#' + `i` is used to index data records (i.e., based on the humtable `Record` field) ordinally.
+#'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each file*
+#'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each file*.
+#' + `j` is used to index spines  (i.e., based on the `Spine` field) ordinally.
+#'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
+#'   file in the corpus.
+#' 
+#' When indexing [humdrumR corpora][humdrumR::humdrumR-class] with numbers,
+#' all `numeric` (double) inputs are converted to integers.
+#' 
 #' 
 #' Note that numeric `humdrumR` indexing is entirely **ordinal**, meaning 
 #' that pieces/data records/spines are not matched based on their value in their
@@ -235,7 +234,7 @@
 #' 
 #' 
 #' @export
-filterHumdrum <- function(humdrumR, ...) { 
+filterHumdrum <- function(humdrumR, ..., removeEmptyFiles = TRUE) { 
     checkhumdrumR(humdrumR, 'filterHumdrum')
     
     formulae <- list(...)
@@ -264,7 +263,9 @@ filterHumdrum <- function(humdrumR, ...) {
     
     humdrumR <- setActive(humdrumR, oldActive)
     
-    removeEmptyFiles(humdrumR)
+    if (removeEmptyFiles) humdrumR <- removeEmptyFiles(humdrumR) 
+    
+    humdrumR
     
 }
 
@@ -294,16 +295,19 @@ removeNull <- function(humdrumR, recordTypes = 'GLIMDd', ...) {
 
 
 #' @export
+#' @rdname filterHumdrum
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File)
 }
 #' @export
+#' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, by ~ File ~ Spine)
+  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
 }
 #' @export
+#' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File ~ Record)

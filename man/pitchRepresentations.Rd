@@ -152,36 +152,16 @@ For instance, \verb{kern(c("A4", "A4"), Exclusive = c('pitch', 'int')} will retu
 matched with the first \code{"A4"} while the \code{'int'} interpretation is matched with the second one!
 
 The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:
-Exclusive
-kernPitch        **kern
-Beam             **kern
-MelodicSignifier **kern
-Articulation     **kern
-recip            **recip
-sciPitch         **pitch
-solfa            **solfa
-interval         **mint,**hint,**int
-scaleDegree      *\emph{deg
-RE
-kernPitch        (\link{A-Ga-g})\\1}(\link{#-})\emph{\\2}
-Beam             ([/\\\]?(L+K*)?)|([/\\\]?(J+k*)?)
-MelodicSignifier [TtMmWw]R?|[TtMmWwS$O]
-Articulation     ['`\\"~I][vu]?|[vu]
-recip            [1-9][0-9]\emph{\%?[1-9]?[0-9]}[.]\emph{|0{1,2}\\.}
-sciPitch         [A-G][b#-]\emph{[-+]?[0-9][0-9]}
-solfa            [\\^v',]\emph{([sd]\link[=#-]{eoi}}|[fl]\link[=#-]{eai}\emph{|[mt]\link[=#-]{eiy}}|r[aei])
-interval         [+-]?([MmP]|[Ad#b]+)[1-9][0-9]*
-scaleDegree      [\\^v',]\emph{([MmPn]|[Ad#b]})[1-9][0-9]*
-Example
-kernPitch        c
-Beam             /Jk
-MelodicSignifier M
-Articulation     v
-recip            8.
-sciPitch         C4
-solfa            do
-interval         +P5
-scaleDegree      P5
+Exclusive           RE                                                             Example
+kernPitch        *\emph{kern              (\link{A-Ga-g})\\1}(\link{#-})\emph{\\2}                                      c
+Beam             \emph{\emph{kern              ([/\\\]?(L+K})?)|([/\\\]?(J+k})?)                            /Jk
+MelodicSignifier **kern              [TtMmWw]R?|[TtMmWwS$O]                                         M
+Articulation     **kern              ['`\\"~I][vu]?|[vu]                                            v
+recip            **recip             [1-9][0-9]\emph{\%?[1-9]?[0-9]}[.]\emph{|0{1,2}\\.}                       8.
+sciPitch         **pitch             [A-G][b#-]\emph{[-+]?[0-9][0-9]}                                    C4
+solfa            **solfa             [\\^v',]\emph{([sd]\link[=#-]{eoi}}|[fl]\link[=#-]{eai}\emph{|[mt]\link[=#-]{eiy}}|r[aei]) do
+interval         **mint,**hint,*\emph{int [+-]?([MmP]|[Ad#b]+)[1-9][0-9]}                                +P5
+scaleDegree      **deg               [\\^v',]\emph{([MmPn]|[Ad#b]})[1-9][0-9]*                           P5
 
 A final useful option is controlled using the logical \code{inPlace} argument.
 If \code{inPlace = TRUE} any extra characters in the input string which are \emph{not} part of the matching regular expression will be left unchanged:
@@ -434,45 +414,27 @@ The following tables illustrate the behaviors of the accidental/quality argument
 In the first four conditions, the \code{Key} argument is NULL, while in the second group of four the key is Ab major.
 Each group of four columns represent the four possible combinations of the \verb{_.cautionary} and \verb{_.memory} arguments, in the pattern
 \verb{c(_.cautionary = FALSE, _.memory = FALSE)}, \verb{c(_.cautionary = FALSE, _.memory = TRUE)}, \verb{c(_.cautionary = TRUE, _.memory = FALSE)}, \verb{c(_.cautionary = TRUE, _.memory = TRUE)}.
-\subsection{Accidentals}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f   
-NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f   
-NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn  
-NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn  
-NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn  
-AbFF a    an   b    an   b    a    en   f    f#   e    g-   f   
-AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn  
-AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn  
-AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn  
-     b    c    d-   b-   e-   b-   a-  
-NFF  b    c    d-   b-   e-   b-   a-  
-NFT  bn   c    d-   b-   e    b    a   
-NTF  bn   cn   d-   b-   e-   b-   a-  
-NTT  bn   cn   d-   b-   e    b    a   
-AbFF bn   c    d    b    e    b    a   
-AbFT bn   cn   d-   b-   e    b    a   
-AbTF bn   c    d    b-   e-   b-   a-  
-AbTT bn   cn   d-   b-   e-   b-   a-  
+\subsection{Accidentals}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFT  a-   an   b-   a    b    a-   e    f    f#   e-   g-   fn   bn   c    d-   b-   e    b    a   
+NTF  a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
+NTT  a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbFF a    an   b    an   b    a    en   f    f#   e    g-   f    bn   c    d    b    e    b    a   
+AbFT a-   an   b-   a    b    a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e    b    a   
+AbTF a-   an   b-   an   b-   a-   en   fn   f#   e-   g-   fn   bn   c    d    b-   e-   b-   a-  
+AbTT a-   an   b-   a    b-   a-   en   fn   f#   e-   g-   fn   bn   cn   d-   b-   e-   b-   a-  
 }
 }
 
-\subsection{Qualities}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f   
-NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4   
-NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4  
-NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4  
-NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4  
-AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4   
-AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4  
-AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4  
-AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4  
-     b    c    d-   b-   e-   b-   a-  
-NFF  7    1    m2   m7   m3   m7   m6  
-NFT  M7   1    m2   m7   3    7    6   
-NTF  M7   P1   m2   m7   m3   m7   m6  
-NTT  M7   P1   m2   m7   3    7    6   
-AbFF M7   1    2    7    3    7    6   
-AbFT M7   P1   m2   m7   3    7    6   
-AbTF M7   1    2    m7   m3   m7   m6  
-AbTT M7   P1   m2   m7   m3   m7   m6  
+\subsection{Qualities}{\preformatted{     a-   a    b-   a    b-   a-   e    f    f#   e-   g-   f    b    c    d-   b-   e-   b-   a-  
+NFF  m6   6    m7   6    m7   m6   3    4    A4   m3   d5   4    7    1    m2   m7   m3   m7   m6  
+NFT  m6   M6   m7   6    7    m6   3    4    A4   m3   d5   P4   M7   1    m2   m7   3    7    6   
+NTF  m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
+NTT  m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbFF 6    M6   7    M6   7    6    M3   4    A4   3    d5   4    M7   1    2    7    3    7    6   
+AbFT m6   M6   m7   6    7    m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   3    7    6   
+AbTF m6   M6   m7   M6   m7   m6   M3   P4   A4   m3   d5   P4   M7   1    2    m7   m3   m7   m6  
+AbTT m6   M6   m7   6    m7   m6   M3   P4   A4   m3   d5   P4   M7   P1   m2   m7   m3   m7   m6  
 }
 }
 

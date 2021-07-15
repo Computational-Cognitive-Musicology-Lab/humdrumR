@@ -10,7 +10,7 @@ as a single \link{data.table}.
 (A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}.)
 Humdrum tables are stored "inside" every \linkS4class{humdrumR} object that you will work with, and various \code{humdrumR}
 functions allow you to study or manipulate the them.
-If you want to directly access the humdrum table within a \linkS4class{humdrumR} object, use the \code{\link[=getHumtab]{getHumtab()}} function.
+If you want to directly access the humdrum table within a \linkS4class{humdrumR} object, use the \link{getHumtab} function.
 }
 \details{
 In a humdrum table, each row represents a single "token"
@@ -50,7 +50,7 @@ field called \strong{Token}, which
 contains character strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
 \link{withinHumdrum}---which can also be called using the
-\code{\link[humdrumR:humPipe]{\%hum>\%}} piping
+\link[=\\\%hum>\\\%]{humdrumR:humPipe} piping
 operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}.
 These fields can be renamed using the \verb{$<-} operator.
 
@@ -158,6 +158,7 @@ of spine paths.
 }
 
 \strong{3. Interpretation fields:}
+
 Interpretation fields describe interpretation metadata in the humdrum file(s).
 Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
 subsequent interpretation. (See the humdrum syntax vignette for a detailed explanation.)

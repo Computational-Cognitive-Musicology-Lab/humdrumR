@@ -2,9 +2,18 @@
 % Please edit documentation in R/Filter.R
 \name{filterHumdrum}
 \alias{filterHumdrum}
+\alias{removeEmptyFiles}
+\alias{removeEmptySpines}
+\alias{removeEmptyRecords}
 \title{Filter humdrum data}
 \usage{
-filterHumdrum(humdrumR, ...)
+filterHumdrum(humdrumR, ..., removeEmptyFiles = TRUE)
+
+removeEmptyFiles(humdrumR, fillfromTypes = "D")
+
+removeEmptySpines(humdrumR, fillfromTypes = "D")
+
+removeEmptyRecords(humdrumR, fillfromTypes = "D")
 
 humdata[] # returns unchanged
 
@@ -23,47 +32,40 @@ humdata[['regex']]
 humdata[[x:y, l:m]]
 }
 \description{
-\code{filterHumdrum} is a command used to filter a \code{\linkS4class{humdrumR}} corpus.
-Indexing (using the \code{[]} or {\code{[[]]}} operators is a special case---indeed,
-the \code{[]} and \code{[[]]} methods for \code{\linkS4class{humdrumR}} objects are
-simply wrappers to calls to \code{filterHumdrum}.
+\code{filterHumdrum} is a command used to filter a \link[=humdrumR-class]{humdrumR corpus}
+Indexing a humdrumR corpus (using the \verb{[]} or \verb{[[]]} operators)
+uses calls to \code{filterHumdrum}!
 }
 \details{
-\code{filterHumdrum} is used in the same way as \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}:
-Any number of formulae or functions can be fed as arguments to \code{filterHumdrum}: these arguments
-are passed directly to a call to \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}}.
-The only caveat difference is that the do expressions / functions fed to \code{filterHumdrum}
-must be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions---
-expressions that return a logical vector.
+\code{filterHumdrum} is used in the same way as \link{withinHumdrum},
+taking any number of "do expressions" (or functions) as arguments.
+(In fact, do expressions/function arguments are passed directly to an internal call to \code{withinHumdrum}.)
+The only difference is that the expressions/functions fed to \code{filterHumdrum}
+\emph{must} be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions,
+returning a logical (\code{TRUE}/\code{FALSE}) vector.
 The returned vector must either be the same length as the input data (the number
-of rows in the \code{\link[humdrumR::humtable]{humdrum table}}) \emph{or} be of length \code{1}.
+of rows in the \link[=humTable]{humdrum table}).
+(You can use a \verb{dofill~} expression if you want to "expand" shorter outputs for filtering pusposes.)
+\code{filterHumdrum} updates the humdrum table's \code{Filter} field using an \code{|} (logical OR) with your new predicate.
+HumdrumR functions (mostly) ignore all data points where \code{Filter == TRUE}.
 
-If a predicate expression \emph{is} of length \code{1}, the entire \code{\link[humdrumR::humtable]{humdrum table}}
-is either returned (\code{TRUE}) or filtered out (\code{FALSE}).
-This can be combined with a \code{by~} expression to filter out entire segments:
-for instance, the command
-\preformatted{
-filterHumdrum(humdata, ~any(. \%~\% '\eE]-'), by ~ File ~ Spine)
-}
-will look in each file and remove any spine which contains an Eb token (the whole spine is removed
-if it contains even one Eb).
+By default, \code{filterHumdrum} completely removes any files in the corpus if \emph{all} data records are filtered out (and/or Null).
+However, you can stop this by specifying the \code{removeEmptyFiles} as \code{FALSE}.
+If you \emph{want} to remove empty files, spines, or records, you should call \code{removeEmptyFiles}, \code{removeEmptySpines}, or \code{removeEmptyRecords}.
 }
 \section{Indexing}{
 
-To learn how to
-In \code{R}, the basic \code{\link[base:Extract]{indexing operators}}
-are \code{[]} and \code{[[]]}.
 
-These are used to filter out subsets of data.
-In many \code{R} data types (for instance, base \code{R}'s \code{\link[base:list]{list}}),
-the \code{[}single brackets\code{]}
-are used for "shallower" extraction while the \code{[[}double brackets\code{]]}
-are used for "deeper" extraction.
-\code{humdrumR} object indexing follows this same basic pattern:
-\code{[}single brackets\code{]} are used to index \code{humdrumR} objects
-\emph{by piece} while \code{[[}double brackets\code{]]} are used to index
-\emph{within pieces}. (Accidentally writing \code{[]} when you need
-\code{[[]]} is a very common error, so watch out!)
+In R, the basic \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
+are used to select subsets of data.
+For many R data types (for instance, base R \link[base:list]{lists})
+the \code{[}single brackets\verb{]} are used for "shallower" extraction while the
+\code{[[}double brackets\verb{]]} are used for "deeper" extraction.
+\link[=humdrumR-class]{HumdrumR corpus} indexing follows this same basic pattern:
+\code{[}single brackets\verb{]} are used to index \code{humdrumR} objects
+\emph{by piece} while \code{[[}double brackets\verb{]]} are used to index
+\emph{within pieces}. (Accidentally writing \verb{[]} when you need
+\verb{[[]]} is a very common error, so watch out!)
 
 Whether, indexing by piece or within, \code{humdrumR} objects can use
 three types of indexing arguments:
@@ -72,20 +74,22 @@ three types of indexing arguments:
 \item By \code{character} string (regular expressions)
 \item By \code{formula} (arbitrary expressions)
 }
+
 The last option (by \code{formula}) is the most powerful option,
 and indeed, the first two options (\code{numeric} or \code{character} indexing)
 are just convenient shorthands for indexing that can be accomplished using
 the \code{formula} method.
+\subsection{Numeric indexing:}{
 
-\strong{Numeric indexing:} Indexing \code{humdrumR} objects with
-\strong{\code{[}single brackets\code{]}} will accept
-one numeric argument. (Non-integer arguments will be converted to integers.)
+Indexing \code{humdrumR} objects with
+\strong{\code{[}single brackets\verb{]}} will accept
+one integer argument. (Non-integer numbers will be converted to integers.)
 This argument will be used to pick pieces within the \code{humdrumR} object ordinally.
 Thus, \code{humdata[1:10]} will select the first ten pieces in the data while \code{humdata[42]}
 will select only the 42nd piece.
 
 Indexing \code{humdrumR} objects with
-\strong{\code{[[}double brackets\code{]]}} will accept
+\strong{\code{[[}double brackets\verb{]]}} will accept
 one or two numeric arguments, \code{i} and \code{j}, either of which can
 be used in isolation or in combination.
 If \code{j} is used in isolation, it must be placed after a comma, as in \code{humdata[[ , j ]]}.
@@ -100,7 +104,7 @@ file in the corpus.
 Note that numeric \code{humdrumR} indexing is entirely \strong{ordinal}, meaning
 that pieces/data records/spines are not matched based on their value in their
 respective fields, but rather on their order among all existing values.
-Thus, for \code{[}single-bracket\code{]} indexing the \eqn{ith} piece in the
+Thus, for \code{[}single-bracket\verb{]} indexing the \eqn{ith} piece in the
 corpus is taken, regardless of that \code{FileN} field associated
 with that piece:
 
@@ -122,7 +126,7 @@ removed instead of retained. Thus, \code{humdata[-3:-5]} will remove the third, 
 while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
 Positive and negative indices cannot be mixed in a single argument.
 
-In all cases, indices outside of range (or of value \code{0)} are ignored.
+In all cases, indices outside of range (or of value \verb{0)} are ignored.
 If all indices are \code{0} or outside of range then
 an empty \code{humdrumR} object is returned.
 For instance, \code{humdata[[401:500, ]]} will return an empty
@@ -130,17 +134,17 @@ For instance, \code{humdata[[401:500, ]]} will return an empty
 data records.
 
 \strong{Character indexing:} Indexing \code{humdrumR} objects with
-\code{[}single brackets\code{]} will accept one
+\code{[}single brackets\verb{]} will accept one
 vector of \code{character} strings. These strings are
 treated as
 \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
 The tokens from the \code{humdrumR} object's \code{Active} fields are searched
 for matches to all the regular expressions you input. Any piece that contains
 \emph{\strong{any}} match to \emph{\strong{any}} of the regular expressions is retained---all other pieces
-are dropped. Note that (because this is \code{[}single-bracket\code{]} indexing) the entire piece is retained, even if there is only one match.
+are dropped. Note that (because this is \code{[}single-bracket\verb{]} indexing) the entire piece is retained, even if there is only one match.
 If no matches occur in any pieces, an empty \code{humdrumR} object is returned.
 
-Indexing \code{humdrumR} objects with \code{[[}double brackets\code{]]} will
+Indexing \code{humdrumR} objects with \code{[[}double brackets\verb{]]} will
 accept one or two vectors of \code{character} strings, \code{i} and \code{j},
 either of which can
 be used in isolation or in combination.
@@ -167,24 +171,24 @@ Any pieces, spines, or records with no matches are dropped entirely.
 
 \strong{Formula indexing:} Indexing \code{humdrumR} objects with
 \code{formulae} is the most powerful, flexible indexing option.
-Either \code{[}single\code{]} or \code{[}double\code{]} brackets will accept
+Either \code{[}single\verb{]} or \code{[}double\verb{]} brackets will accept
 a formula. The right-hand side of each formula will be evaluated
 within the \code{humdrumR} objects internal
-\code{\link[humdrumR:humTable]{humdrum table}}.
+\verb{\link[humdrumR:humTable]\{humdrum table}}.
 Each formula must evaluate to a \code{logical} vector of the same
 length as the total number of tokens (rows in the humdrum table).
 
-In the case of \code{[}single-bracket\code{]} indexing, only one \code{formula}
+In the case of \code{[}single-bracket\verb{]} indexing, only one \code{formula}
 is accepted, and \emph{every piece} that evalues with at least one
 \code{TRUE} will be retained.
 For instance, \code{humdata[~Spine > 4]} will return all pieces
 which contain five (or more) spines.
-\code{[}single-bracket\code{]} formula indexing is especially useful for indexing
+\code{[}single-bracket\verb{]} formula indexing is especially useful for indexing
 meta-data properties like reference records:
 for instance, \code{humdata[~COM == "Paul McCartney"]} will return
-all pieces with a \code{!!!COM: Paul McCartney} reference record.
+all pieces with a \verb{!!!COM: Paul McCartney} reference record.
 
-In the case of \code{[[}double-bracket\code{]]} indexing, one or two formulas are accepted,
+In the case of \code{[[}double-bracket\verb{]]} indexing, one or two formulas are accepted,
 in arguments \code{i} and \code{j}, either of which can
 be used in isolation or in combination.
 If \code{j} is used in isolation, it must be placed after a comma,
@@ -195,28 +199,29 @@ In the case of \code{j}, any spine which evaluates to
 at least one \code{TRUE} value is retained.
 Any piece which contains no matches is dropped entirely.
 
-For \code{[[}double-bracket\code{]]} formula indexing, a third argument, \code{k}
+For \code{[[}double-bracket\verb{]]} formula indexing, a third argument, \code{k}
 may be used in the absence of \code{i} and \code{j}.
 In the case of \code{k} all tokens which evaluate to \code{TRUE}
 are retained, regardless of piece/spine/record.
 Pieces, spines, or records with no \code{TRUE} values
 are simply dropped.
 }
+}
 
 \section{Assignment}{
 
 \code{R} objects often have ways of assigning new values to
-\emph{part} of the object using \code{\link[base:Extract]{indexing operators}}.
+\emph{part} of the object using \verb{\link[base:Extract]\{indexing operators}}.
 \code{humdrumR} objects are no different.
 
 A new field can be inserted in a \code{humdrumR} object in two ways:
 \enumerate{
 \item A field can be copied from one humdrumR object to another if the humdrumR objects'
-\code{\link[humdrumR:humTable]{humdrum tables}} have the same number of data tokens (i.e., rows).
+\verb{\link[humdrumR:humTable]\{humdrum tables}} have the same number of data tokens (i.e., rows).
 This is actually most useful for renaming fields within a humdrumR object (explained below).
-\item A \code{\link[base:vector]{vector}} or \code{\link[base:list]{list}} can be instered as a
+\item A \verb{\link[base:vector]\{vector}} or \verb{\link[base:list]\{list}} can be instered as a
 new field in a \code{humdrumR}---but again, it must be the same length as the number of tokens
-in the object's \code{\link[humdrumR:humTable]{humdrum table}}.
+in the object's \verb{\link[humdrumR:humTable]\{humdrum table}}.
 }
 
 Fields can be assigned using two syntaxes:
@@ -232,7 +237,7 @@ humdata$fieldname <- x
 
 \strong{\code{humdrumR$fieldname <- humdrumR} assignment}: Assigning a field in one \code{humdrumR}
 object from another \code{humdrumR} object works like this. First of call, as a reminder, the two \code{humdrumR}
-objects must have the exact same numbers of data tokens in their \code{\link[humdrumR:humTable]{humdrum tables}}.
+objects must have the exact same numbers of data tokens in their \verb{\link[humdrumR:humTable]\{humdrum tables}}.
 This means, that this is most useful for assigning field names from one \code{humdrumR} object to itself.
 The name(s) given in the indexing expression on the left side of the assignment (i.e., \code{humdata[c('name1', 'name2')]} or
 \code{humdata$name}) are used as new field names.
@@ -242,8 +247,8 @@ in descending order into the named fields on the left side.
 If there are no \eqn{PipeN} fields on the right side, any fields used in the current Active formula (on the right side)
 are copied instead.
 
-This system might seem odd at first, but it is very useful in combination with the \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} function,
-and its convenient pipe operator \code{\link[humdrumR:humPipe]{\%hum>\%}}.
+This system might seem odd at first, but it is very useful in combination with the \verb{\link[humdrumR:with-in-Humdrum]\{withinHumdrum}} function,
+and its convenient pipe operator \verb{\link[humdrumR:humPipe]\{\\\%hum>\\\%}}.
 The \code{withinHumdrum} command always creates new fields that are called \eqn{Pipe1 ... Pipe2 ... PipeN}.
 By using \code{humdata$name} we can immediately assign these pipe fields more meaningful names!
 

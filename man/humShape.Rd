@@ -2,7 +2,6 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humShape}
 \alias{humShape}
-\alias{mergeHumdrum}
 \alias{foldHumdrum}
 \alias{foldStops}
 \alias{foldPaths}
@@ -11,8 +10,6 @@
 of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
 (held within \linkS4class{humdrumR} objects of course).}
 \usage{
-mergeHumdrum(...)
-
 foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 
 foldStops(humdrumR, foldAtomic = TRUE, sep = " ")
