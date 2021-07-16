@@ -94,7 +94,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     #### Get lines
     cat(sep = '', '\nPreparing text...')
     
-    humdrumR <- indexGLIM(humdrumR)
+    # humdrumR <- indexGLIM(humdrumR)
     humdrumR <- fields.as.character(humdrumR)
     lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', fieldname = fieldname, padPaths = TRUE, alignColumns = FALSE)
     filestrs <- tapply(lines, 
@@ -120,7 +120,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
 }
 
 
-processFixer <- function(fix, origfilaenames, humdrumR) {
+processFixer <- function(fix, origfilenames, humdrumR) {
     if (is.null(fix)) return(fix)
     
     UseMethod('processFixer')

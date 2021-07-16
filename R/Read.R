@@ -640,6 +640,7 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     ## Other general information about tokens
     humtab[ , Type := parseTokenType(Token)]
     humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
+    humtab[ , Filter := FALSE]
     humtab[ , Global := is.na(Spine)]
     
     #
@@ -710,7 +711,8 @@ parseReference <- function(refTable, reference) {
   colnames(refTable) <- c('refKeys', 'refVals')
   
   # if there is no colon, there is no key so need to shift the first column over and insert "Unkeyed"
-  if (any(refTable$refVals == "")) refTable$refVals[refTable$refVals == ""] <- 'Unkeyed'
+  refTable <- refTable[refKeys != '' | refVals != '']
+  refTable[refKeys == '', refKeys := 'Unkeyed']
   
   #multiple keys
   refTable[ , refKeys := stringi::stri_replace_all_regex(refKeys, '[0-9]+$', '')]

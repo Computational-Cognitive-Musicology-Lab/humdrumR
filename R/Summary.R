@@ -99,6 +99,8 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   
   checkhumdrumR(humdrumR, 'census')
   dataTypes <- checkTypes(dataTypes, 'census')
+  
+  humdrumR <- removeEmptyFiles(humdrumR)
           
   ## This function creates a data.table of class humCensus
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
@@ -631,7 +633,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
           
-  humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
+  # humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
   humtab <- getHumtab(humdrumR, dataTypes = 'I')
   
   # Tandem

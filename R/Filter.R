@@ -4,325 +4,283 @@
 
 #' Filter humdrum data
 #' 
-#' \code{filterHumdrum} is a command used to filter a \code{\linkS4class{humdrumR}} corpus.
-#' Indexing (using the \code{[]} or {\code{[[]]}} operators is a special case---indeed,
-#' the \code{[]} and \code{[[]]} methods for \code{\linkS4class{humdrumR}} objects are 
-#' simply wrappers to calls to \code{filterHumdrum}.
+#' `filterHumdrum` is a command used to filter a [humdrumR corpus][humdrumR::humdrumR-class]
+#' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
+#' uses calls to `filterHumdrum`!
 #' 
-#' \code{filterHumdrum} is used in the same way as \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}:
-#' Any number of formulae or functions can be fed as arguments to \code{filterHumdrum}: these arguments
-#' are passed directly to a call to \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}}.
-#' The only caveat difference is that the do expressions / functions fed to \code{filterHumdrum} 
-#' must be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions---
-#' expressions that return a logical vector.
-#' The returned vector must either be the same length as the input data (the number
-#' of rows in the \code{\link[humdrumR::humtable]{humdrum table}}) \emph{or} be of length \code{1}. 
+#' `filterHumdrum` is used in a similar manner as [withinHumdrum],
+#' taking any number of "do expressions" (or functions) as arguments.
+#' (In fact, do expressions/function arguments are passed directly to an internal call to `withinHumdrum`.)
+#' The only difference is that the expressions/functions fed to `filterHumdrum` 
+#' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
+#' which return a logical (`TRUE`/`FALSE`) vector.
+#' The returned vector must also be the same length as the input data (the number
+#' of rows in the [humdrum table][humdrumR::humTable]).
+#' (You can use a `dofill~` expression if you want to "expand" shorter outputs for filtering pusposes.)
+#' `filterHumdrum` updates the humdrum table's `Filter` field using an logical OR (`|`) between the existing `Filter` field and the negation of your predicate: `Filter | !Predicate`.
+#' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`: when you print a filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`), and
+#' any calls to [withinHumdrum][with(in)Humdrum] will ignore the filtered data.
 #' 
-#' If a predicate expression \emph{is} of length \code{1}, the entire \code{\link[humdrumR::humtable]{humdrum table}}
-#' is either returned (\code{TRUE}) or filtered out (\code{FALSE}).
-#' This can be combined with a \code{by~} expression to filter out entire segments:
-#' for instance, the command
-#' \preformatted{
-#' filterHumdrum(humdata, ~any(. \%~\% '\eE]-'), by ~ File ~ Spine)
-#' }
-#' will look in each file and remove any spine which contains an Eb token (the whole spine is removed
-#' if it contains even one Eb).
+#' By default, `filterHumdrum` completely removes any files in the corpus where *all* the data records are filtered out.
+#' However, you can stop this by specifying the `removeEmptyFiles` argumet as `FALSE`.
+#' If you *want* to remove empty files, spines, or records, you should call `removeEmptyFiles`, `removeEmptySpines`, or `removeEmptyRecords`.
 #' 
 #' @section Indexing:
-#' To learn how to
-#' In \code{R}, the basic \code{\link[base:Extract]{indexing operators}}
-#' are \code{[]} and \code{[[]]}.
 #' 
-#' These are used to filter out subsets of data.
-#' In many \code{R} data types (for instance, base \code{R}'s \code{\link[base:list]{list}}),
-#' the \code{[}single brackets\code{]}
-#' are used for "shallower" extraction while the \code{[[}double brackets\code{]]}
-#' are used for "deeper" extraction.
-#' \code{humdrumR} object indexing follows this same basic pattern:
-#' \code{[}single brackets\code{]} are used to index \code{humdrumR} objects
-#' \emph{by piece} while \code{[[}double brackets\code{]]} are used to index
-#' \emph{within pieces}. (Accidentally writing \code{[]} when you need
-#' \code{[[]]} is a very common error, so watch out!)
+#' In R, the basic [indexing operators][base::Extract], `[]` and `[[]]`,
+#' are used to select subsets of data.
+#' For many R data types (for instance, base R [lists][base::list])
+#' the **`[`single brackets`]`** are used for "shallower" extraction while the 
+#' **`[[`double brackets`]]`** are used for "deeper" extraction.
+#' [HumdrumR corpus][humdrumR::humdrumR-class] indexing follows this same basic pattern:
+#' **`[`single brackets`]`** are used to index `humdrumR` objects
+#' *by piece* while **`[[`double brackets`]]`** are used to index
+#' *within pieces*. (Accidentally writing `[]` when you need
+#' `[[]]` is a very common error, so watch out!)
 #' 
-#' Whether, indexing by piece or within, \code{humdrumR} objects can use
+#' Whether, indexing by piece or within, `humdrumR` objects can use
 #' three types of indexing arguments:
-#' \itemize{
-#' \item By \code{numeric} (ordinal integers)
-#' \item By \code{character} string (regular expressions)
-#' \item By \code{formula} (arbitrary expressions)
-#' }
-#' The last option (by \code{formula}) is the most powerful option,
-#' and indeed, the first two options (\code{numeric} or \code{character} indexing)
+#' 
+#' + By `numeric` (ordinal integers)
+#' + By `character` string (regular expressions)
+#' + By `formula` (arbitrary expressions)
+#' 
+#' The last option (by `formula`) is the most powerful option,
+#' and indeed, the first two options (`numeric` or `character` indexing)
 #' are just convenient shorthands for indexing that can be accomplished using 
-#' the \code{formula} method.
+#' the `formula` method.
 #' 
 #' 
-#' \strong{Numeric indexing:} Indexing \code{humdrumR} objects with
-#'  \strong{\code{[}single brackets\code{]}} will accept
-#' one numeric argument. (Non-integer arguments will be converted to integers.)
-#' This argument will be used to pick pieces within the \code{humdrumR} object ordinally.
-#' Thus, \code{humdata[1:10]} will select the first ten pieces in the data while \code{humdata[42]}
+#' ### Numeric indexing:
+#' 
+#' 
+#' Indexing `humdrumR` corpora with
+#' **`[`single brackets`]`** will accept
+#' one numeric argument.
+#' This argument will be used to pick pieces within the `humdrumR` object ordinally.
+#' Thus, `humdata[1:10]` will select the first ten pieces in the data while `humdata[42]`
 #' will select only the 42nd piece. 
 #' 
-#' 
-#' Indexing \code{humdrumR} objects with
-#'  \strong{\code{[[}double brackets\code{]]}} will accept 
-#' one or two numeric arguments, \code{i} and \code{j}, either of which can 
+#' Indexing `humdrumR` objects with
+#'  **`[[`double brackets`]]`** will accept 
+#' one or two numeric arguments, `i` and `j`, either of which can 
 #' be used in isolation or in combination.
-#' If \code{j} is used in isolation, it must be placed after a comma, as in \code{humdata[[ , j ]]}.
-#' (Non-integer arguments will be converted to integers.)
-#' \code{i} is used to index data records (i.e., based on the \code{NData} field) ordinally.
-#' Thus, \code{humdata[[1:20]]} indexes the first twenty data records \emph{from each file}
-#' in the corpus, and \code{humdata[[42]]} extracts the 42nd data record \emph{from each file}.
-#' \code{j} is used to index spines  (i.e., based on the \code{Spine} field) ordinally.
-#' Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from each}
-#' file in the corpus.
+#' (If `j` is used in isolation, it must be placed after a comma, as in `humdata[[ , j ]]`.)
 #' 
-#' Note that numeric \code{humdrumR} indexing is entirely \strong{ordinal}, meaning 
+#' + `i` is used to index data records (i.e., based on the humtable `Record` field) ordinally.
+#'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each file*
+#'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each file*.
+#' + `j` is used to index spines  (i.e., based on the `Spine` field) ordinally.
+#'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
+#'   file in the corpus.
+#' 
+#' When indexing [humdrumR corpora][humdrumR::humdrumR-class] with numbers,
+#' all `numeric` (double) inputs are converted to integers.
+#' 
+#' 
+#' Note that numeric `humdrumR` indexing is entirely **ordinal**, meaning 
 #' that pieces/data records/spines are not matched based on their value in their
 #' respective fields, but rather on their order among all existing values.
-#' Thus, for \code{[}single-bracket\code{]} indexing the \eqn{ith} piece in the
-#' corpus is taken, regardless of that \code{FileN} field associated
-#' with that piece:
+#' Thus, for `[`single-bracket`]` indexing the $i_{th}$ piece in the
+#' corpus is taken, regardless of that `FileN` field associated
+#' with that piece.
+#' For example,
 #' 
-#' \preformatted{
+#' ```
 #' humsubset <- humdata[11:20]
 #' humsubset[2]
-#' }
+#' ````
 #' 
-#' will return the 12th piece from the original \code{humdata} object, not the second piece.
+#' will return the 12th piece from the original `humdata` object, *not* the second piece.
+#' This is beacuse the first call to `[]` returns the 11th through 20th pieces, and the second call
+#' returns the *second* piece that is still present (the 12th).
 #' Similarly,
-#' \preformatted{
+#' 
+#' ```
 #' humsubset2 <- humdata[[ , 2:4]]
 #' humsubset2[[ , 2]]
-#' }
+#' ```
+#' 
 #' will return the third spine from the original data.
 #' 
-#' As in traditional \code{R} indexing, negative numbers are allowed as well, causing corresponding elements to be
-#' removed instead of retained. Thus, \code{humdata[-3:-5]} will remove the third, fourth, and fifth pieces from the data
-#' while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
+#' As in normal R indexing, negative numbers can be used, causing corresponding elements to be
+#' *removed* instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
+#' while `humdata[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
 #' Positive and negative indices cannot be mixed in a single argument.
 #' 
-#' In all cases, indices outside of range (or of value \code{0)} are ignored.
-#' If all indices are \code{0} or outside of range then 
-#' an empty \code{humdrumR} object is returned.
-#' For instance, \code{humdata[[401:500, ]]} will return an empty
-#' \code{humdrumR} object if there are no pieces with more than 400
+#' In all cases, indices outside of range (or of value `0`) are ignored.
+#' E.g., if you have a corpus of twenty files and you call `corpus[21]`, there is no 21st piece, so `21` is "out of range".
+#' If all your input indices are `0` and error will result.
+#' If all your input indices are out of range then 
+#' an empty `humdrumR` object is returned.
+#' For instance, `humdata[[401:500, ]]` will return an empty
+#' `humdrumR` object if there are no pieces with more than 400
 #' data records.
 #' 
 #' 
-#' \strong{Character indexing:} Indexing \code{humdrumR} objects with 
-#' \code{[}single brackets\code{]} will accept one 
-#' vector of \code{character} strings. These strings are 
-#' treated as 
-#' \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the \code{humdrumR} object's \code{Active} fields are searched
-#' for matches to all the regular expressions you input. Any piece that contains
-#' \emph{\strong{any}} match to \emph{\strong{any}} of the regular expressions is retained---all other pieces
-#' are dropped. Note that (because this is \code{[}single-bracket\code{]} indexing) the entire piece is retained, even if there is only one match.
-#' If no matches occur in any pieces, an empty \code{humdrumR} object is returned.
+#' ### Character indexing:
 #' 
-#' Indexing \code{humdrumR} objects with \code{[[}double brackets\code{]]} will 
-#' accept one or two vectors of \code{character} strings, \code{i} and \code{j}, 
+#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
+#' `[`single brackets`]` will accept one 
+#' vector of `character` strings. These strings are 
+#' treated as 
+#' [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
+#' 
+#' The tokens from the humdrumR object's `Active` fields are searched
+#' for matches to any of the regular expressions you input. Any piece that contains
+#' **any** match to **any** of the regular expressions is retained---all other pieces
+#' are filtered out. Note that (because this is `[`single-bracket`]` indexing) the entire piece is retained, even if there is only one match.
+#' If no matches occur in any pieces, an empty `humdrumR` object is returned.
+#' 
+#' Indexing `humdrumR` objects with `[[`double brackets`]]` will 
+#' accept one or two vectors of `character` strings, `i` and `j`, 
 #' either of which can 
 #' be used in isolation or in combination. 
-#' If \code{j} is used in isolation, it must be placed after a comma, 
-#' as in \code{humdata[[ , j]]}.
+#' (If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.)
 #' These strings are 
-#' treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the \code{humdrumR} object's \code{Active} fields are searched
-#' for matches to all the regular expressions you input.
-#' Any record which contains at least one token matching any regex in \code{i}
+#' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
+#' The tokens from the humdrumR object's `Active` fields are searched
+#' for matches to any of the regular expressions you input.
+#' Any record which contains at least one token matching any regex in `i`
 #' will be retained.
 #' Similarly, any spine which contains at least one token matching any
-#' regex in \code{j} is retained.
-#' If \code{i} and {j} are used together,
-#'  matching spines are indexed first, so that 
-#' tokens matching the regular expression(s) in \code{i}
-#' must be found in matching spines.
+#' regex in `j` is retained.
+#' If `i` and `j` are used together,
+#' matching spines (`j`) are indexed first, so that 
+#' tokens matching the regular expression(s) in `i`
+#' must be found in the matching spines.
 #' 
-#' A third argument, \code{k}, can also be used, but only if 
-#' both \code{i} and \code{j} arguments are missing.
-#' In the case of \code{k}, only matching tokens are retained,
+#' A third argument, `k`, can also be used, but only if 
+#' both the `i` and `j` arguments are missing.
+#' In order for this to work, you need to put two commas to mark the "missing" `i` and `j` arguments: 
+#' e.g., `humdata[[ , , '[Ee]-']]`.
+#' In the case of `k`, only matching tokens are retained,
 #' regardless of their spine or record number(s).
-#' Any pieces, spines, or records with no matches are dropped entirely.
 #' 
 #' 
-#' \strong{Formula indexing:} Indexing \code{humdrumR} objects with 
-#' \code{formulae} is the most powerful, flexible indexing option.
-#' Either \code{[}single\code{]} or \code{[}double\code{]} brackets will accept
-#' a formula. The right-hand side of each formula will be evaluated
-#' within the \code{humdrumR} objects internal 
-#' \code{\link[humdrumR:humTable]{humdrum table}}.
-#' Each formula must evaluate to a \code{logical} vector of the same 
-#' length as the total number of tokens (rows in the humdrum table).
+#' ### Formula indexing:
 #' 
-#' In the case of \code{[}single-bracket\code{]} indexing, only one \code{formula}
-#' is accepted, and \emph{every piece} that evalues with at least one 
-#' \code{TRUE} will be retained.
-#' For instance, \code{humdata[~Spine > 4]} will return all pieces
+#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
+#' `formulae` is the most powerful, flexible indexing option.
+#' Either `[`single`]` or `[[`double`]]` brackets will accept
+#' a (single) formula. The formula are fed directly as arguments to 
+#' `filterHumdrum`---as such, they music evaluate to a logical vector of the same 
+#' length as the input.
+#' 
+#' In the case of `[`single-bracket`]` indexing, only one `formula`
+#' is accepted, and *every piece* that evalues with at least one 
+#' `TRUE` will be retained.
+#' For instance, `humdata[~Spine > 4]` will return all pieces
 #' which contain five (or more) spines.
-#' \code{[}single-bracket\code{]} formula indexing is especially useful for indexing
+#' `[`single-bracket`]` formula indexing is especially useful for indexing
 #' meta-data properties like reference records:
-#' for instance, \code{humdata[~COM == "Paul McCartney"]} will return
-#' all pieces with a \code{!!!COM: Paul McCartney} reference record.
+#' for instance, `humdata[~COM == "Paul McCartney"]` will return
+#' all pieces with a `!!!COM: Paul McCartney` reference record.
 #' 
-#' In the case of \code{[[}double-bracket\code{]]} indexing, one or two formulas are accepted, 
-#' in arguments \code{i} and \code{j}, either of which can 
+#' In the case of `[[`double-bracket`]]` indexing, one or two formulas are accepted, 
+#' in arguments `i` and `j`, either of which can 
 #' be used in isolation or in combination. 
-#' If \code{j} is used in isolation, it must be placed after a comma, 
-#' as in \code{humdata[[ , j]]}.
-#' In the case of \code{i} formulae, any record which evaluates to
-#' at least one \code{TRUE} value is retained.
-#' In the case of \code{j}, any spine which evaluates to
-#' at least one \code{TRUE} value is retained.
+#' (If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.)
+#' In the case of `i` formulae, any record which evaluates to
+#' at least one `TRUE` value is retained.
+#' In the case of `j`, any spine which evaluates to
+#' at least one `TRUE` value is retained.
 #' Any piece which contains no matches is dropped entirely.
 #' 
-#' For \code{[[}double-bracket\code{]]} formula indexing, a third argument, \code{k}
-#' may be used in the absence of \code{i} and \code{j}.
-#' In the case of \code{k} all tokens which evaluate to \code{TRUE}
+#' For `[[`double-bracket`]]` formula indexing, a third argument, `k`
+#' may be used in the absence of `i` and `j`.
+#' In order for this to work, you need to put two commas to mark the "missing" `i` and `j` arguments: 
+#' e.g., `humdata[[ , , ~formula]]`.
+#' In the case of `k` all tokens which evaluate to `TRUE`
 #' are retained, regardless of piece/spine/record.
-#' Pieces, spines, or records with no \code{TRUE} values
+#' Pieces, spines, or records with no `TRUE` values
 #' are simply dropped.
-#' 
-#' @section Assignment:
-#' \code{R} objects often have ways of assigning new values to 
-#' \emph{part} of the object using \code{\link[base:Extract]{indexing operators}}.
-#' \code{humdrumR} objects are no different.
-#' 
-#' A new field can be inserted in a \code{humdrumR} object in two ways:
-#' \enumerate{
-#' \item A field can be copied from one humdrumR object to another if the humdrumR objects'
-#' \code{\link[humdrumR:humTable]{humdrum tables}} have the same number of data tokens (i.e., rows).
-#' This is actually most useful for renaming fields within a humdrumR object (explained below).
-#' \item A \code{\link[base:vector]{vector}} or \code{\link[base:list]{list}} can be instered as a 
-#' new field in a \code{humdrumR}---but again, it must be the same length as the number of tokens
-#' in the object's \code{\link[humdrumR:humTable]{humdrum table}}.
-#' }
-#' 
-#' Fields can be assigned using two syntaxes:
-#' \preformatted{
-#' humdata['fieldname'] <- x
-#' # or
-#' humdata[c('field1', 'field2')] <- x
-#' }
-#' or 
-#' \preformatted{
-#' humdata$fieldname <- x
-#' }
-#' 
-#' \strong{\code{humdrumR$fieldname <- humdrumR} assignment}: Assigning a field in one \code{humdrumR}
-#' object from another \code{humdrumR} object works like this. First of call, as a reminder, the two \code{humdrumR}
-#' objects must have the exact same numbers of data tokens in their \code{\link[humdrumR:humTable]{humdrum tables}}.
-#' This means, that this is most useful for assigning field names from one \code{humdrumR} object to itself.
-#' The name(s) given in the indexing expression on the left side of the assignment (i.e., \code{humdata[c('name1', 'name2')]} or
-#' \code{humdata$name}) are used as new field names.
-#' How fields are extracted from the right side of the assignment is a little trickier:
-#' Any fields in the right-side \code{humdrumR} object which are named \eqn{PipeN} (where \eqn{N} is an integer) are copied
-#' in descending order into the named fields on the left side.
-#' If there are no \eqn{PipeN} fields on the right side, any fields used in the current Active formula (on the right side)
-#' are copied instead.
-#' 
-#' This system might seem odd at first, but it is very useful in combination with the \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} function,
-#' and its convenient pipe operator \code{\link[humdrumR:humPipe]{\%hum>\%}}.
-#' The \code{withinHumdrum} command always creates new fields that are called \eqn{Pipe1 ... Pipe2 ... PipeN}.
-#' By using \code{humdata$name} we can immediately assign these pipe fields more meaningful names!
-#' 
-#' Examples:
-#' \preformatted{
-#' humdata \%hum>\% ~ semit(Token) -> humdata$Semits
-#' }
-#' 
+#' Using the `k` argument is exactly the same a "plain" call to `filterHumdrum`.
 #' 
 #' @export
-filterHumdrum <- function(humdrumR, ..., indexGLIM = TRUE) { 
+filterHumdrum <- function(humdrumR, ..., removeEmptyFiles = TRUE) { 
     checkhumdrumR(humdrumR, 'filterHumdrum')
     
     formulae <- list(...)
     formulae <- anyfuncs2forms(formulae, parent.env(environment()))
     if (any(!sapply(formulae, rlang::is_formula))) stop('In filterHumdrum(...) unnamed arguments must be formulas or functions.')
     
-    humdrumR_withindex <- withinHumdrum(humdrumR, ...)
-    result <- evalActive(humdrumR_withindex)
+    oldActive <- getActive(humdrumR)
     
-    if (!is.logical(result)) stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
-    
-    # 
-    parsedFormulae <- parseKeywords(formulae)
-    dataTypes <- rlang::eval_tidy(parsedFormulae$recordtypes)
-    dataTypes <- checkTypes(dataTypes, 'filterHumdrum', 'recordtypes ~ ...')
-    humtab_withindex <- getHumtab(humdrumR_withindex, dataTypes)
-    indexPipe <- tail(pipeFields(humtab_withindex), 1L)
-    
-    if (nrecords(humdrumR_withindex) != nrecords(humdrumR)) {
-        humtab <- getHumtab(humdrumR, dataTypes)
-        if (nrow(humtab_withindex) != 1L) {
-            by <- parsedFormulae$partitions[['by']] # only get first
-            humtab_withindex <- humtab_withindex[humtab, on = fieldsInExpr(humdrumR, by)]
-        }
-        humtab[ , indexPipe] <- humtab_withindex[ , indexPipe, with = FALSE]
-        humtab_withindex <- humtab
-    }
-    
-    
-    ### This function can't be removed right now
-    humdrumR <- nullifyTokens(humdrumR, humtab_withindex, fields(humdrumR), indexPipe)
+    humdrumR <- withinHumdrum(humdrumR, ...)
 
-    if (indexGLIM) {
-        humdrumR <- indexGLIM(humdrumR, 
-                              c("G", "L", "I", "M", "D", "d", "P")[-match(dataTypes,  c("G", "L", "I", "M", "D", "d", "P"))])
-    }
+    humtab <- getHumtab(humdrumR, 'GLIMDd')
+    
+    filterPipe <- tail(pipeFields(humtab), 1L)
+    removeFields(humdrumR) <- filterPipe
+    
+    colnames(humtab)[colnames(humtab) == filterPipe] <- '__TmpFilter__'
+    
+    if (humtab[ , class(`__TmpFilter__`)] != 'logical') stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
+    
+    humtab[ , `__TmpFilter__` := `__TmpFilter__` | is.na(`__TmpFilter__`)]
+    humtab[ , Filter := Filter | !`__TmpFilter__`]
+    humtab[ , `__TmpFilter__` := NULL]
+    
+    putHumtab(humdrumR) <- humtab
+    humdrumR <- update_d(humdrumR)
+    
+    humdrumR <- setActive(humdrumR, oldActive)
+    
+    if (removeEmptyFiles) humdrumR <- removeEmptyFiles(humdrumR) 
+    
     humdrumR
     
 }
 
 
-nullifyTokens <- function(humdrumR, humtab, fields, indexPipe) {
-    # This function takes a humdrum table which already has a
-    # logical INDEX column ("indexPipe") and replaces all tokens in all data fields
-    # in those indices with null data
-    # Returns a new humdrumR object, with the new humtable(s) inside it.
-    
-    replaceInd <- !humtab[ , indexPipe, with = FALSE]
-    replaceInd[is.na(replaceInd)] <- FALSE
-    
-    charFields  <- fields[Class == 'character' & Type == "Data"]$Name
-    otherFields <- fields[Class != 'character' & Type == "Data"]$Name
-    replaceStrings <- c(I = "*", L = "!", M = "=", "D" = '.', "d" = ".", P = "_P")[humtab$Type[replaceInd]]
-    if (length(charFields)  > 0L) humtab[ ,  charFields] <- lapply(humtab[ ,  charFields, with = FALSE], function(col) { col[replaceInd] <- replaceStrings ; col})
-    if (length(otherFields) > 0L) humtab[ , otherFields] <- lapply(humtab[ , otherFields, with = FALSE], function(col) { col[replaceInd] <- NA             ; col})
-    
-    humtab$Null[replaceInd] <- TRUE
-    humtab$Type[humtab$Type == 'D' & humtab$Null] <- 'd'
-    
-    ##
-    humtab <- removeNull(humtab)
-    replaceInd <- !humtab[ , indexPipe, with = FALSE]
-    replaceInd[is.na(replaceInd)] <- FALSE
-    humtab[ , eval(indexPipe) := NULL]
-    
-    newdInd <- (replaceInd & humtab$Type == 'd')[ , 1]
-    putHumtab(humdrumR, drop = TRUE) <- humtab[!newdInd]
-    if (any(newdInd)) addNulld(humdrumR) <- humtab[newdInd]
- 
-    humdrumR   
+
+
+############## Null indexing ----
+
+# humdrumR filtering and application can result in lots of filtered tokens.
+# These functions remove parts that are entirely filtered
+
+removeNull <- function(humdrumR, recordTypes = 'GLIMDd', ...) {
+  checkhumdrumR(humdrumR, 'removeNull')
+  # checkTypes(recordTypes, 'removeNull', 'recordTypes')
+  
+  # recordtypesform <- rlang::new_formula(quote(recordtypes), rlang::expr(!!recordTypes))
+  remove <- withHumdrum(humdrumR, recordTypes ~ 'GLIMDd', dofill ~ !(any(Type == 'D')), ...)
+  
+  
+  humtab <- getHumtab(humdrumR, recordTypes)
+  humtab <- humtab[remove == FALSE]
+  
+  putHumtab(humdrumR, drop = FALSE) <- humtab
+  humdrumR
 }
 
-removeNull <- function(humtab) {
-    # this function removes any spines, paths or records that are ALL null
-    if (humtab[ , all(Null)]) return(humtab[FALSE])
-    
-    humtab <- humtab[!(Stop > 1 & Null == TRUE)]
-    
-    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Spine), ]
-    if (nrow(humtab) > 0L) humtab <- humtab[ , if (all(Null)) NULL else .SD, by = .(File, Record), ]
-    if (nrow(humtab) > 0L) humtab <- humtab[ , unique(colnames(humtab)), with = FALSE]
-    
-    humtab
-}
 
+
+#' @export
+#' @rdname filterHumdrum
+removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File)
+}
+#' @export
+#' @rdname filterHumdrum
+removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
+}
+#' @export
+#' @rdname filterHumdrum
+removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Record)
+}
 
 #########################Indexing ----
+
 numericIndexCheck <- function(i) {
     if (any(i < 0) && any(i > 0)) stop("You can't mix negative and positive numbers when trying to index humdrumR objects.")
     if (all(i == 0)) stop("You can't index humdrumR objects with just zeros.")
@@ -364,9 +322,8 @@ setMethod('[',
               
               form <- do ~ File %in% sort(unique(File))[i]
               
-              if (any(i < 0)) form <- wrapInCall("!", form)
-              
-              filterHumdrum(x, form, recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
+              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+              # removeNull(x, by ~ File)
           })
 
 
@@ -379,8 +336,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i) {
-              filterHumdrum(x, do ~ any(. %~% i),  by ~ File, 
-                            recordtypes ~ "D", indexGLIM = TRUE)
+            filterHumdrum(x, dofill ~ any(. %~% i),  by ~ File, recordtypes ~ "D")
           })
 
 ##[formula]
@@ -394,9 +350,9 @@ setMethod('[',
           signature = c(x = 'humdrumR', i = 'formula'),
           function(x, i) {
               i <- wrapInCall('any', i)
+              rlang::f_lhs(i) <- quote(dofill)
               
-              filterHumdrum(x, i, by ~ File,
-                            recordtypes ~ "D", indexGLIM = TRUE)
+              filterHumdrum(x, i, by ~ File, recordtypes ~ "D")
           })
 
 ####[[]]
@@ -413,10 +369,8 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             
             form <- do ~ Record %in% sort(unique(Record))[i]
             
-            if (any(i < 0)) form <- wrapInCall("!", form)
-            
-            filterHumdrum(x, form, by ~ File,
-                          recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
+            filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+
           })
 
 
@@ -427,23 +381,13 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
           function(x, j) {
               j <- numericIndexCheck(j)    
               
-              form <- do ~ Spine %in% sort(unique(Spine))[j]
+              form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
               
-              if (any(i < 0)) form <- wrapInCall("!", form)
+              filterHumdrum(x, form, recordtypes ~ "D")
               
-              filterHumdrum(x, form,# , by ~ File,
-                            recordtypes ~ "GLIMDdP", indexGLIM = FALSE)
           })
 
-#' @name filterHumdrum
-#' @usage humdata[[x:y, l:m]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'numeric'), 
-          function(x, i, j) {
-            x <- x[[ , j]]
-            x <- x[[i, ]]
-            x
-          })
+
 
 #### [[character]]
 
@@ -463,11 +407,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'numeric'),
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
 function(x, i) {
     # gets any record which contains match
-    x <- filterHumdrum(x, do ~ any(. %~% i), by ~ File,
-                       recordtypes ~ "D", indexGLIM = TRUE)
   
-    filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Record,
-                  recordtypes ~ "D", indexGLIM = TRUE)
+    form <- do ~ Record %in% unique(Record[. %~% i])
+    filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
 })
 
 # setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
@@ -486,29 +428,15 @@ function(x, i) {
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
           function(x, j) {
             #gets any spine which contains match
-              filterHumdrum(x, do ~ any(. %~% i), by ~ File ~ Spine,
-                            recordtypes ~ "D", indexGLIM = TRUE)
+            form <- do ~ Spine %in% unique(Spine[. %~% j])
+            
+            filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
+
           })
-# setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-#           function(x, j) {
-#               #gets any spine which contains match
-#               grepingind(x, j,  function(sd) { 
-#                   recn <- unique(sd$Spine[sd$.indhits])
-#                   sd[Spine %in% recn]
-#               })
-#           })
 
 
 
-#' @name humdrumR-class
-#' @usage humdata[['regex1', 'regex2']]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'character'), 
-          function(x, i, j) {
-            x <- x[[ , j]]
-            x <- x[[i, ]]
-            x
-          })
+
 
 #' @name humdrumR-class
 #' @usage humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
@@ -523,14 +451,13 @@ setMethod('[[',
               }
               
               if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %~% k, indexGLIM = TRUE)
+                  x <- filterHumdrum(x, do ~ . %~% k, recordtypes ~ "D")
               }
               if (rlang::is_formula(k)) {
-                  x <- do.call('filterHumdrum', c(x, k, 
-                                                  recordtypes ~ "D", indexGLIM = TRUE,
-                                                  list(...)))
+                  # x <- do.call('filterHumdrum', c(x, k,  recordtypes ~ "D", list(...)))
+                  x <- filterHumdrum(x, k, recordtypes ~ 'D', ...)
               }
-              
+            
               x
               
           })
@@ -556,10 +483,11 @@ setMethod('[[',
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
           function(x, i) {
-                    i <- wrapInCall('any', i)
-           
-                    filterHumdrum(x, i, by ~ File ~ Record,
-                                  recordtypes ~ "D", indexGLIM = TRUE)
+            
+                    i <- rlang::as_quosure(i)
+                    form <- rlang::new_formula(quote(dofill), rlang::expr(Record %in% unique(Record[!!i])))
+                    
+                    filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
           })
 
 #' @name humdrumR-class
@@ -567,108 +495,96 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
           function(x, j) {
-              j <- wrapInCall('any', j)
-              
-              filterHumdrum(x, j, by ~ File ~ Spine,
-                            recordtypes ~ "D", indexGLIM = TRUE)
-          })
-
-#' @name humdrumR-class
-#' @usage hudmata[[~expression1, ~expression2]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'formula'), 
-          function(x, i, j) {
-                    x <- x[[ , j]]
-                    x[[i, ]]
-          })
-
-
-
-
-############## GLIMdP indexing ----
-
-# humdrumR filtering is usually applied in reference to data records.
-# However, in order to reassemble and show humdrum data
-# after indexing humdrum data records, we also need to index 
-# non-data records.
-# The following functions, which I call GLIMd indexing functions,
-# are not used by users, but are called (when necessary) to try
-# and strip away GLIMd records that are defunct (because data
-# records have been stripped away).
-# We also need to bad records and spines with null data tokes (sometimes).
-
+            j <- rlang::as_quosure(j)
+            form <- rlang::new_formula(quote(dofill), rlang::expr(Spine %in% unique(Spine[!!j])))
             
+            filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
+          })
 
+
+
+
+#' @name filterHumdrum
+#' @usage humdata[[x:y, l:m]]
 #' @export
-indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
-  #####ReIndex GLIMd humdrum tables to match indexing of D tables
-  # To do this we need to:
-  #    1) Make sure the GLIMd tables have the same field as D tables
-  #    2) Make sure that pieces which are missing from the D table (because they've been indexed away) 
-  #       are removed from GLIMd table (most likely)
-  #    3) Make sure, on a piece-by-piece basis that
-  #         a) Spines which are missing from D are removed from GLIMd
-  #         b) That there are no records which are all d (null)
-  #         c) That there are no "bunched up" barlines at the beggining, end, or anywherei in the middle.
-  #         d) That there are no tandem interpretations AFTER the last data token.
-          
-  GLIMDdP <- getHumtab(humdrumR, dataTypes = dataTypes)
-  D       <- getD(humdrumR)
-  # first add missing fields (columns)
-  missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
-  missingfieldsTypes <- vapply(D[ , missingfields, with = FALSE], class, FUN.VALUE = character(1)) 
-  
-  if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
-  
-  GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
-  
-  # next  remove missing pieces (i.e., File or Filename fields)
-  GLIMDdP <- GLIMDdP[File %in% unique(unlist(D$File))]
-  
-  # then, do indexing by piece:
-  # (GLIMd and D records are combined into one table, then split by piece)
-  GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
-  GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
-  
-  # resplit and put back in to humdrumR object
-  putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
-  humdrumR
-}
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
+          function(x, i, j) {
+            x <- x[[ , j]]
+            x <- x[[i, ]]
+            x
+          })
 
 
-indexGLIM_piece <- function(humtab) {
-  ###called by indexGLIM on each individual piece
-  D <- humtab[Type == 'D']
-  # remove missing spines
-  humtab <- humtab[Spine %in% unique(D$Spine) | is.na(Spine)]
-  
-  # remove all except last barline before first data record
-  prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
-  if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
-  
-  #remove everything after last data record, except global stuff, '*-' or '=='
-  humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
-  
-  
-  if (any(humtab$Type == 'd')) {
-    #remove records containing only d
-    rectab <- table(humtab$Record, humtab$Type)
-    recs   <- as.numeric(rownames(rectab))
-    humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
-  }
-  
-  
-  
-  if (any(humtab$Type == 'M')) {
-    #remove consecutive barlines
-    rectab <- table(humtab$Record, humtab$Type)
-    recs   <- as.numeric(rownames(rectab))
-    humtab <- humtab[Record %in% recs[!(rectab[ ,'M'] == rotate(rectab[ ,'M'], rotation = -1, pad = -1) & rectab[ ,'M'] > 0)]]
-  }
-  #
-  humtab
-  
-}
+#   
+# indexGLIM <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'd', 'P')) {
+#   #####ReIndex GLIMd humdrum tables to match indexing of D tables
+#   # To do this we need to:
+#   #   
+#   #    2) Make sure that pieces which are missing from the D table (because they've been indexed away) 
+#   #       are removed from GLIMd table (most likely)
+#   #    3) Make sure, on a piece-by-piece basis that
+#   #         a) Spines which are missing from D are removed from GLIMd
+#   #         b) That there are no records which are all d (null)
+#   #         c) That there are no "bunched up" barlines at the beggining, end, or anywherei in the middle.
+#   #         d) That there are no tandem interpretations AFTER the last data token.
+#           
+#   GLIMDdP <- getHumtab(humdrumR, dataTypes = dataTypes)
+#   D       <- getD(humdrumR)
+#   # first add missing fields (columns)
+#   missingfields <- colnames(D)[!colnames(D) %in% colnames(GLIMDdP)]
+#   missingfieldsTypes <- vapply(D[ , missingfields, with = FALSE], class, FUN.VALUE = character(1)) 
+#   
+#   if (length(missingfields) > 0L) padGLIMfields(GLIMDdP) <- missingfieldsTypes
+#   
+#   GLIMDdP <- GLIMDdP[ , colnames(D), with = FALSE] # match order of columns
+#   
+#   # next  remove missing pieces (i.e., File or Filename fields)
+#   GLIMDdP <- GLIMDdP[File %in% unique(unlist(D$File))]
+#   
+#   # then, do indexing by piece:
+#   # (GLIMd and D records are combined into one table, then split by piece)
+#   GLIMDdP <- rbindlist(list(D, GLIMDdP), fill = TRUE, use.names = TRUE)
+#   GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
+#   
+#   # resplit and put back in to humdrumR object
+#   putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
+#   humdrumR
+# }
+# 
+# 
+# indexGLIM_piece <- function(humtab) {
+#   ###called by indexGLIM on each individual piece
+#   D <- humtab[Type == 'D']
+#   # remove missing spines
+#   humtab <- humtab[Spine %in% unique(D$Spine) | is.na(Spine)]
+#   
+#   # remove all except last barline before first data record
+#   prebarline <- unique(humtab$Record[humtab$Type == 'M' & humtab$Record < min(D$Record, na.rm = TRUE)])
+#   if (length(prebarline) != 0L)   humtab <- humtab[!(Record < prebarline[length(prebarline)] & Type == 'M')]
+#   
+#   #remove everything after last data record, except global stuff, '*-' or '=='
+#   # humtab <- humtab[!(Record > max(D$Record, na.rm = TRUE) & !(is.na(Spine) | Token %in% c('*-', '==', '*v', '*^')))]
+#   
+#   
+#   # if (any(humtab$Type == 'd')) {
+#     #remove records containing only d
+#     # rectab <- table(humtab$Record, humtab$Type)
+#     # recs   <- as.numeric(rownames(rectab))
+#     # humtab <- humtab[Record %in% recs[(!(rectab[ , 'd'] > 0 & rectab[ , 'D'] == 0))]]
+#   # }
+#   
+#   
+#   
+#   if (any(humtab$Type == 'M')) {
+#     #remove consecutive barlines
+#     rectab <- table(humtab$Record, humtab$Type)
+#     recs   <- as.numeric(rownames(rectab))
+#     humtab <- humtab[Record %in% recs[!(rectab[ ,'M'] == rotate(rectab[ ,'M'], rotation = -1, pad = -1) & rectab[ ,'M'] > 0)]]
+#   }
+#   #
+#   humtab
+#   
+# }
 
 
 

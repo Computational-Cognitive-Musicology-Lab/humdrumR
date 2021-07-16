@@ -68,7 +68,7 @@
 #'   separately in each group (see "Partitioning").}
 #'   \item{where}{An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").}
 #'   \item{ngrams}{A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.}
-#'   \item{recordtype}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
+#'   \item{recordtypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
 #'   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
 #'   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
 #'   is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
@@ -304,7 +304,7 @@ withinHumdrum <- function(humdrumR,  ...) {
               })
               
               ## put result into new humtab
-              newhumtab <- humtab[result, on ='_rowKey_'] 
+              newhumtab <- result[humtab, on ='_rowKey_'] 
               newhumtab[ , `_rowKey_` := NULL]
               
               # number new pipes
@@ -313,22 +313,22 @@ withinHumdrum <- function(humdrumR,  ...) {
               
               
               #### Put new humtable back into humdrumR object
-              newfields <- colnames(newhumtab)[!colnames(newhumtab) %in% colnames(humtab)]
+              newfields <- setdiff(colnames(newhumtab), colnames(humtab))
               
-              # This section should be improved (Nat, 07/16/2019)
-              local({
-                  d    <- newhumtab$Type == 'd'
-                  null <- Reduce('&', lapply(newhumtab[ , newfields, with = FALSE],
-                                             function(col) is.na(col) | col == '.'))
-
-                  newhumtab[ , Null:= Null & d & null]
-                  # newhumtab[ , Type:= IfElse(Null, Type, 'D')]
-              })
+              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
+              newhumtab$Null[notnull] <- FALSE
+              newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
-              if (any(is.na(newhumtab$Type))) {
-                  newtype <- if ('D' %in% parsedArgs$formulae$recordtypes) 'D' else parsedArgs$formulae$recordtypes[1]
-                  newhumtab$Type[is.na(newhumtab$Type)] <- newtype
+              # What do do if d is in recordtypes
+              recordtypes <- checkTypes(rlang::eval_tidy(parsedArgs$formulae$recordtypes), 'withinHumdrum')
+              if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
+                humtab[ , `_rowKey_` := NULL]
+                newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
               }
+              if (any(grepl('d', recordtypes))) {
+                humdrumR@Humtable$d <- humdrumR@Humtable$d[FALSE]
+              }
+              
               putHumtab(humdrumR, drop = TRUE) <- newhumtab
               ########### Update other slots in humdrumR object
               
@@ -367,6 +367,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     list2env(.withHumdrum(humdrumR, ..., withfunc = 'withHumdrum'), envir = environment())
+  
     result[ , `_rowKey_` := NULL]
     
     ####-
@@ -419,7 +420,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
                         ordoQuosure)
-    
+    setorder(result, `_rowKey_`)
     as.list(environment())
     
 }

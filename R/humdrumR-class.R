@@ -1,106 +1,151 @@
 #' Humdrum Tables
 #' 
-#' In [humdrumR], humdrum data is stored (within [humdrumR] objects)
-#' in a data structure called a \strong{Humdrum Table}. A humdrum table
-#' is actually a \code{\link[data.table]{data.table}}, from the 
-#' R package of the same name. \code{\link[data.table:data.table]{data.tables}}
-#' are simply enhanced R \code{\link[base:data.frame]{data.frames}}, with a few
-#' handy optimizations.
+#' In the [humdrumR] package, the fundamental data structure is called a \strong{Humdrum Table}.
+#' A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
+#' as a single [data.table].
+#' (A `data.table` is an "enhanced" version of R's standard [data.frame].)
+#' Humdrum tables are stored "inside" every [humdrumR-class] object that you will work with, and various `humdrumR`
+#' functions allow you to study or manipulate the them.
+#' If you want to directly access the humdrum table within a [humdrumR-class] object, use the [getHumtab] function.
 #' 
-#' In a humdrum table, each row represents a single 'token'
-#' in the original humdrum data. (Multistops---tokens separated by spaces---are even broken into
-#' their own rows). Each column represents a single
-#' piece of information associated with the token, which we call a \strong{field}.
+#' 
+#' In a humdrum table, each row represents a single "token"
+#' in the original humdrum data. Even multistops---tokens separated by spaces---are broken onto
+#' their own rows. Meanwhile, each column in the humdrum table represents a single
+#' piece of information associated with each token, which we call a **field**.
 #' Throughout this documentation, you should keep in mind that a "token" refers
-#' to a row in the humdrum table while a "field" refers to a column.
+#' to a *row* in the humdrum table while a "field" refers to a *column*:
+#' 
+#' + \eqn{Token = Row}
+#' + \eqn{Field = Column}
 #' 
 #' @section Fields:
 #'
 #' There are five types of fields in a humdrum table: 
-#' \enumerate{
-#' \item{Data fields}
-#' \item{Structure fields}
-#' \item{Interpretation fields}
-#' \item{Form fields}
-#' \item{Reference fields}
-#' }
-#' When first created by a call to [readHumdrum] every
-#' humdrum table has at least eighteen fields: one data field (`Token`), two interpretation 
-#' fields (`Tandem` and \code{Exclusive}), three section fields, and twelve structure fields. Additional fields
-#' may be present depending on the content of the humdrum file(s), and even more fields can be created
-#' by users.
 #' 
-#' \strong{1. Data fields:} Data fields are used to describe individual data points
+#' 1. Data fields
+#' 2. Structure fields
+#' 3. Interpretation fields
+#' 4. Formal fields
+#' 5. Reference fields
+#' 
+#' When first created by a call to [readHumdrum] every
+#' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
+#' fields (`Tandem` and `Exclusive`), three formal fields, and fifteen structure fields. Additional
+#' interpretation or reference fields
+#' may be present depending on the content of the humdrum file(s), and users can create additional data fields
+#' by [assigning to the object][humAssignment].
+#' 
+#' ### Data fields:
+#' 
+#' Data fields are used to describe individual data points
 #' in humdrum data (as opposed to groups of points). 
 #' Every humdrum table starts with a data
-#' field called \strong{Token}, which
+#' field called **Token**, which
 #' contains character strings representing the original strings read from the humdrum files. 
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum]---which can also be called using the 
-#' \code{\link[humdrumR:humPipe]{\%hum>\%}} piping 
+#' [humdrumR:humPipe][\%hum>\%] piping 
 #' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
-#' (These fields can then be renamed using the `$<-` operator, if you want.)
+#' These fields can be renamed using the `$<-` operator.
 #'
 #' 
-#' \strong{2. Structure fields:} Structure fields describe where each data point
-#' came from---which file, which spine, which record, etc.
-#' Every humdrum table starts with fourteen Structure fields, describing where
-#' the token came from:
-#' \describe{
-#' \item{Filename}{`character` - The unique name of the humdrum file. May include an appended path 
-#' if more than one file with the same name were read from different directories (see[readHumdrum] docs).}
-#' \item{Filepath}{`character` - The full file name (including its full path).}
-#' \item{File}{`integer` - A unique number associated with each read file (files are numbered alphabetically).}
-#' \item{Label}{`character` - A label specified during the call to [readHumdrum], associated with
-#' \item{Piece}{`integer`} - A number specifying the number of the piece in the corpus. Only different from \code{File} when
-#' more than one piece were read from the same file.
-#' a particular REpath-pattern. If no label was specified, patterns are just labeled `"_n"`, where "n" is the 
-#' number of the pattern. (Labels can also be created when merging two humdrumR objects.) }
-#' \item{Record}{`integer` - The record (i.e., line) number.}
-#' \item{NData}{`integer` - An enumeration of \strong{data records} specifically.}
-#' \item{Global}{`logical` - Did the token come from a glocal record (i.e., a record with no spine)?}
-#' \item{Type}{`character` - What type of record is it? \code{"D"} = non-null data; \code{"d"} = null data;
-#'    `"I"` = interpretation; \code{"M"} = measure/barline; \code{"L"} = local comment;
-#'    `"G"` = global comment. There is also a \code{"P"} type, which indicates null "non-tokens"
-#'     (see the \code{\link[humdrumR:humColumns]{humdrumR columns}} documentation for an explanation). }
-#' \item{Null}{`logical` - Is this a null record (i.e., is the token ".", "*", "!", "!!", "!!!", or "=")?}
-#' \item{Spine}{`integer` - The spine. This field is \code{NA} when \code{Global == TRUE}.}
-#' \item{Path}{`integer` - The "spine path." Any time a \code{*^} spine path split occurs in
-#'       the humdrum data, the right side of the split becomes a new "path." The original path
-#'       is numbered `0`---if there are no spine path splits, the \code{Path} field is all zeros. 
-#'       This field is always `NA` when \code{Global == TRUE}. (Check out
-#'       the \code{\link[humdrumR:humColumns]{humdrum columns}} documentation for a more thorough explanation
-#'       of spine paths.)}
-#' \item{Column}{`integer` - Which tab-delineated column in the humdrum data---irrespective of Spine/Paths. 
-#' See this \code{\link[humdrumR:humColumns]{explanation of columns in humdrumR}}.}
-#' \item{Stop}{`integer` - Which token in a multistop token. Single tokes are numbered \code{1}.
-#'       This field is always `NA` when \code{Global == TRUE}.}
-#' }
+#' ### Structure fields:
+#' 
+#' Every humdrum table starts with fifteen Structure fields,
+#' which describe where each data token was "located" in the original humdrum data: which file, which spine, which record, etc.
+#' See the vignette on humdrum syntax to fully understand the terms here.
+#' 
+#' + *File info*:
+#'     + `Filename` :: `character`
+#'         + The unique name of the humdrum file. This may include an appended path 
+#'           if more than one file with the same name were read from different directories (see the [readHumdrum] docs).
+#'     + `Filepath` :: `character`
+#'         + The full file name (always includes its full path).
+#'     + `Label` :: `character`
+#'         + A label specified during the call to [readHumdrum], associated with a particular
+#'          `readHumdrum` "REpath-pattern." If no label was specified, patterns are just labeled `"_n"`, where "`n`" is the 
+#'          number of the pattern. (Labels can also be created when [merging two humdrumR objects][humMerge].)
+#'     + `File` :: `integer`
+#'         + A unique number associated with each file (ordered alphabetically, starting from `1`).
+#'     + `Piece` :: `integer`
+#'         + A number specifying the number of the *piece* in the corpus. 
+#'           This is identical to the `File` field except when
+#'           more than one piece were read from the same file.
+#' + *Location info*:
+#'     + `Spine` :: `integer`
+#'         + The spine, numbered (from left-to-right) starting from `1`. 
+#'         + This field is `NA` wherever `Global == TRUE`.
+#'     + `Path` :: `integer`
+#'         + The "spine path." Any time a `*^` spine path split occurs in
+#'           the humdrum data, the right side of the split becomes a new "path." The original path
+#'           is numbered `0` with additional paths numbered with integers to the right.
+#'           (If there are no spine path splits, the `Path` field is all zeros.)
+#'         + This field is always `NA` when `Global == TRUE`. 
+#'         + Read the [humdrum columns documentation][humColumns] for a more thorough explanation
+#'           of spine paths.
+#'     + `Column` :: `integer`
+#'         + The tab-delineated column in the humdrum file---irrespective of Spine/Paths---, numbered starting from `1`.
+#'         + This field is always `NA` when `Global == TRUE`. 
+#'         + See this [explanation of columns in humdrumR][humColumns].
+#'     + `Record` :: `integer`
+#'         + The record (i.e., line) number in the original file.
+#'     + `NData` :: `integer`
+#'         + The *data* record enumeration in the file, starting from `1`.
+#'     + `Stop` :: `integer`
+#'         + Which token in a multistop token, numbered starting from `1`.
+#'         + In files with no multistops, the `Stop` field is all `1`s.
+#'         + This field is always `NA` when `Global == TRUE`.
+#'     + `Global` :: `logical`
+#'         + Did the token come from a global record (as opposed to a local record)?
+#'         + When `Global == TRUE`, the `Spine`, `Column`, and `Stop` fields are always `NA`.
+#' + *Token info*:
+#'     + `Type` :: `character`
+#'         + What type of record is it? 
+#'             + `"D"` = non-null data 
+#'             + `"d"` = null data
+#'             + `"I"` = interpretation
+#'             + `"M"` = measure/barline 
+#'             + `"L"` = local comment
+#'             + `"G"` = global comment. 
+#'             + `"P"` = null "non-tokens" (see the [humdrumR columns][humColumns] documentation for an explanation.)
+#'     + `Null` :: `logical` 
+#'         + Is the [active][humdrumR] data field null? 
+#'         + See the detailed discussion below, in the section of this documentation called "Null Data."
+#'     + `Filter` :: `logical`
+#'         + Has this record/token been [filtered out][filterHumdrum]? 
+#'         
 #'
 #' 
 #' 
-#' \strong{Interpretation fields:} Interpretation fields describe interpretation metadata in the humdrum file(s).
+#' ### Interpretation fields:
+#'
+#' Interpretation fields describe interpretation metadata in the humdrum file(s).
 #' Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
-#' subsequent interpretation. 
-#' All humdrum data must have an \emph{exclusive} interpretation, marked
-#' with two asterisks ("**x")---thus, all humdrum tables have an `Exclusive` field indicating the
-#' exclusive interpretation associated with that token.
-#' Humdrum may or may not include \emph{tandem} interpretations. A universal rule for parsing
+#' subsequent interpretation. (See the humdrum syntax vignette for a detailed explanation.)
+#' *All* humdrum data must have an *exclusive* interpretation
+#' so humdrum tables always have an `Exclusive` (:: `character`) field indicating the
+#' exclusive interpretation associated with each token/row of the [active][humdrumR] field.
+#' 
+#' Humdrum data may, or may not, include additional *tandem* interpretations. A universal rule for parsing
 #' tandem intepretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
-#' users can create their own tandem interpretation. The best we can do in all cases is 
-#' identify \emph{all} tandem interpretations that have appeared previously in the spine
+#' users can create their own tandem interpretations. The best we can do in all cases is 
+#' identify *all* tandem interpretations that have appeared previously in the spine
 #' (counting most recent first). All these previous interpretations are encoded in a single
-#' character string in the `Tandem` field. Users can parse this field using the
-#' [getTandem] function. If no tandem interpretations occur in a file,
-#' the `Tandem` field is still created, but is simply full of empty strings (\code{""}).
+#' character string in the `Tandem` field. 
+#' If working with non-standard intrepretations, users can parse the `Tandem` field using the
+#' [getTandem] function. 
+#' If no tandem interpretations occur in a file, the `Tandem` field is full of empty strings (`""`).
 #' 
 #' Fortunately, many tandem interpretations are widely used and standardized, and these 
-#' interpretations are known by `humdrumR`. Recognized interpretations (such as "\*clef_" and "\*k[x]")
+#' interpretations are known by `humdrumR`. Recognized interpretations (such as `*clefG4` and `*k[b-]`)
 #' are automatically parsed into their own fields by a call to [readHumdrum].
 #' See the [readHumdrum] documentation for more details.
 #' 
 #' 
-#' \strong{Form fields:} Form fields indicate musical sections, or time windows within
+#' ### Formal fields:
+#' 
+#' Formal fields indicate musical sections, or time windows within
 #' a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 #' Humdrum data may or may not include formal metadata fields, indicated by the token `"*>"`.
 #' Classified formal marks are put into fields matching their name.
@@ -110,41 +155,83 @@
 #' If part of a section is not given a name in a lower hierarchical level, the field is simply
 #' empty (`""`) at that point.
 #' 
-#' Humdrum data may or may not also include barlines (tokens beginning `'='`).
-#' [readHumdrum] always Three section fields are 
-#' \describe{
-#'   \item{Bar}{`integer` - How many single barline records have passed before this token?
-#'     If no '=' tokens occur in the file, `Bar` is all zeros.}
-#'   \item{DoubleBar}{`integer` - How many double barlines have passed before this token?
-#'      If no `'=='` tokens occur in the file, \code{DoubleBar} is all zeros.}
-#'   \item{BarLabel}{`character` - Any characters that occur after initial \code{'='} or
-#'      `'=='` of previous bar token. These include the \code{"-"} in 
-#'      the `'=-'` pickup barline,
-#'      repeat tokens (like \code{"=:\|\|"}), and also explicit \emph{bar numbers}. Note that
-#'      the `Bar` field always enumerate every single \code{'='} bar record, while
-#'      measure number labels in humdrum data (which appear in the `BarLabel` field) may
-#'      do weird things like skipping numbers, repeating numbers, and having suffixes (e.g., "19a")
-#'      If no barline tokens appear in the file, `BarLabel` is all empty strings (\code{""}).}
-#' }
+#' Humdrum data may, or may not, also include barlines (tokens beginning `"="`).
+#' Humdrum tables *always* include three formal fields related to barlines:
 #' 
-#' \strong{Reference fields:} Reference fields describe any \emph{Reference Records}
+#' + `Bar` :: `integer` 
+#'     + How many barline records (single or double) have passed before this token?
+#'     + If no `"="` tokens occur in a file, `Bar` is all zeros.
+#'     + Note that this field is independent of whether the barlines are labeled with numbers in the humdrum file!
+#' + `DoubleBar` :: `integer`
+#'     + How many *double*-barline records have passed before this token?
+#'     + If no `"=="` tokens occur in a file, `DoubleBar` is all zeros.
+#' + `BarLabel` :: `character`
+#'     + Any characters that occur in a barline-token *after* an initial `"="` or `"=="`.
+#'       These include the `"-"` in the common "implied barline token `"=-"`,
+#'      repeat tokens (like `"=:||"`), and also any *explicit* bar numbers.
+#'     + Note that the `Bar` field always enumerate *every* bar record, while
+#'      measure-number labels in humdrum data (which appear in the `BarLabel` field) may
+#'      do weird things like skipping numbers, repeating numbers, or having suffixes (e.g., `"19a"`).
+#'      If no barline tokens appear in the file, `BarLabel` is all empty strings (`""`).
+#' 
+#' ### Reference fields:
+#' 
+#' Reference fields describe any *Reference Records*
 #' in the humdrum data. Every reference record (records beginning `"!!!"`) in any
 #' humdrum file in a corpus read by [readHumdrum] is parsed into a field named
-#' by the reference code: `"XXX"` in \code{"!!!XXX"}. Reference tokens are all identical throughout
+#' by the reference code: `"XXX"` in `"!!!XXX"`.
+#' Reference tokens are all identical throughout
 #' any humdrum piece. If a reference code appears in one file but not another, the field is
 #' `NA` in the file which does not have the code. If no reference records appear in any
-#' files, no Reference fields are created.
+#' files read by [readHumdrum], no reference fields are created.
 #' 
-#' @section Philosophy:
-#' Why break humdrum data into this "flat" structure, destroying the spreadsheet-like
-#' grid structure of the original humdrum data? The Humdrum Table structure affords
-#' maximum data analysis flexibility. Thanks to the Structure fields, we can easily
-#' regroup and reform the structures of humdrum data (like spines). 
-#' However, if you would like to change the "flat" structure of a humdrum table,
-#' check out the \code{\link[humdrumR:humShape]{humdrumR reshaping funcitons}}.
+#' Examples of common reference records are `"!!!COM:"` (composer) and `"!!!OTL:"` (original title).
+#' Any humdrum data with these records will end up having `COM` and `OTL` fields in its humdrum table.
+#' 
+#' @section Null Data:
+#' 
+#' In humdrum syntax, there is no requirement that every spine-path contains data
+#' in every record. Rather, spines are often padded with *null tokens*.
+#' In some cases, entire records may be padded with null tokens.
+#' Each type of humdrum record uses a different null token:
+#' 
+#' + *Intepretation*: `*`
+#' + *Comment*: `!`
+#' + *Barline*: `=`
+#' + *Data*: `.`
+#' 
+#' Null tokens in a humdrum table are identified in the logical `Null` field.
+#' The `Null` field is set when a humdrum table is created (by [readHumdrum]) and is updated everytime 
+#' a new [active][humdrumR] field is set.
+#' `Null` is set to `TRUE` wherever, either 
+#' 
+#' + the active field is `character` data and the token is a single `"."`, `"!"`, `"="`, or `"*"`;
+#' + the active field is `NA` (including `NA_character_`).
+#' 
+#' In parallel to the `Null` field, null *data* tokens (`"."`) are identified as their own record type: `"d"`.
+#' All updates/changes to the `Null` field are also propogated to the `Type` field---i.e., setting `Type == d` wherever
+#' a data record is `Null`.
+#' This is important/useful because [withinHumdrum] routines are, by default, only applied to `"D"` data, ignoring `"d"`.
+#' 
+#' Whenever you [print][humPrint] or [export][writeHumdrum] a [humdrumR-class] object, null data in the active field 
+#' (i.e., `Null == TRUE`) print as `"."`.
+#' Thus, if you are working with numeric data, with `NA` values, these `NA` values will print as `"."`.
+#' 
+#' 
+#' 
+#' @section Reshaping:
+#' 
+#' Breaking the complex syntax of humdrum data into the "flat" structure of a humdrum table, with every single token on one line
+#' of a `data.table`, makes humdrum data easier to analyze.
+#' Of course, thanks to the structure fields, we can easily
+#' regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
+#' However, in some cases, you might want to work with humdrum data in a different structure or "shape."
+#' HumdrumR has several options for ["folding"][humShape] tokens within humdrum tables,
+#' or otherwise [reshaping humdrum data][humCoercion] into data formats/structures you might prefer.
+#' 
 #' 
 #' ...
-#' @name Humtable
+#' @name humTable
 NULL
 
 #' Spines vs Paths vs Columns 
@@ -215,7 +302,7 @@ NULL
 #' (In this example, the `Spine`, \code{Path}, and \code{Column} values are shown below the data.)
 #' The `"_P"` tokens stand for "padded path."
 #' This appraoch assures that every \strong{Spine} is a contiguous block of tokens, of constant width.
-#' In most [humdrumR] use cases, these padding tokens (and the `Column` field) can be safely ignored.
+#' In most humdrumR use cases, these padding tokens (and the `Column` field) can be safely ignored.
 #' 
 #' @section Corpus padding:
 #' [humRead] automatically pads spine paths \emph{within pieces}.
@@ -323,7 +410,7 @@ NULL
 #' 0         1         0        1         Path
 #' 1         2         3        4         Column
 #' }
-#' Note that code{alignColumns} actually adds rows to the [humdrumR] object's
+#' Note that code{alignColumns} actually adds rows to the [humdrumR-class] object's
 #' internal \code{\link[humdrumR:humTable]{humdrum tables}}.
 #' @name humColumns
 NULL
@@ -373,67 +460,56 @@ orderHumtab <- function(humtab) {
 #' HumdrumR class
 #' 
 #' This `S4` class is the basic unit of the 
-#' \code{\link[humdrumR:humdrumR]{humdrumR}} package.
-#' Each `humdrumR` object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
+#' [humdrumR] package.
+#' Each `humdrumR` object represents data [read][readHumdrum] from one or 
 #' more humdrum files.
-#' In the documentation we refer to the collection of files within a [humdrumR] object
-#' as a "\strong{corpus}," and each file as a "\strong{piece}."
-#' However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
+#' In the documentation we refer to the collection of files within a [humdrumR-class] object
+#' as a "**corpus**," and each file as a "**piece**."
+#' However, though humdrum data is *usually* encoded as one "piece" per file, this is not necessarily the case:
 #' files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 #' to them as "pieces."
-#' In coding examples, we name `humdrumR` objects \code{\strong{humdata}}.
+#' In coding examples, we name humdrumR objects "`humdata`."
 #' 
 #' The most imporant part of a `humdrumR` object is the 
-#' \code{\link[humdrumR:humTable]{humdrum table(s)}} it holds within it.
-#' In essence, an `humdrumR` object is simply a wrapper around the 
-#' \code{\link[humdrumR:humTable]{humdrum table}} which helps users to
-#' to visualize, index, \code{\link[humdrumR:humSummary]{summarize}}, and manipulate
+#' [humdrum tables][humTable] it holds within it.
+#' In essence, an `humdrumR` object is simply a wrapper around these
+#' humdrum tables, which helps users to
+#' to visualize, index, [summarize][humSummary], and [manipulate][humdrumR::with-in-Humdrum]
 #' the table in a variety of ways.
 #' 
 #' Basic information about the size and shape of `humdrumR` data can be
-#' obtained with calls to \code{\link[humdrumR:humSize]{nrecords, npieces, length, ncol, etc.}}
-#' More detailed summary information can be obtained with the humdrumR \code{\link[humSummary]{corpus summary functions}}.
-#' `humdrumR` data can also be coerced to more basic \code{R} data types using \code{\link[humdrumR:humCoersion]{as.matrix, as.data.frame, etc.}}
+#' obtained with calls to [nrecords, npieces, length, ncol, etc.][humSize].
+#' More detailed summary information can be obtained with the humdrumR [corpus summary functions][humSummary].
+#' HumdrumR data can also be coerced to more basic R data types using [as.matrix, as.data.frame, etc.][humCoercion].
+#' A number of helpful functions are also defined to [reshape][humShape] humdrumR data.
 #' 
-#' `humdrumR` data objects can be filtered and indexed using calls to \code{\link[humdrumR]{filterHumdrum}},
-#' and the standard `R` \code{\link[base:Extract]{indexing operators}}: \code{[]} and \code{[[]] 
+#' The most powerful features of [humdrumR] are the tools it gives you to
 #' 
-#' A number of helpful functions are also defined to \code{\link[humdrumR:humShape]{reshape}} humdrumR data.
+#' 1. Filter humdrum data, using [filterHumdrum] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
+#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::with-in-humdrum] routines,
+#' and their associated [piping operators][humPipe].
+#' 
+#' 
 #' 
 #' @section Active field:
-#' The `Active` slot contains an \code{rlang::quosure} expression
-#' refering to fields in the \code{\link[humdrumR:humTable]{Humtable}}.
-#' This expression is used as the "default" value in a lot of `humdrumR` code.
-#' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
-#' i.e., whenever you return a `humdrumR` object in the terminal.
-#' In any expression within a call to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-#' `.` is automatically replaced with the \code{Active} expression.
 #' 
-#' The active expression can be changed with the commands 
-#' \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
-#' This is a handy way to quickly look at different fields in your data.
+#' The `Active` slot of a [humdrumR] object contains an [expression][rlang::quosure]
+#' which refers to fields in the internal [humdrum table][humTable].
+#' Go to the dedicated [active field][humActive] documentation to learn more about this important slot!
 #' 
-#' The `Active` expression is often just the name of a 
-#' \code{\link[humdrumR:humTable]{field}}:
-#' for instance, the default value is `Token`.
-#' However, it can actually be any complex expression which evaluates
-#' within the \code{\link[humdrum:humTable]{humdrum table}}.
-#' For instance, the `Active` expression could be:
-#' `paste0(Token, " ", Record)`, which would automatically 
-#' print each Token with its record number pasted to it.
 #' 
-#' @slot Humtable A list of \code{\link[humTable]{humdrum tables}}, each having the same fields
+#' @slot Humtable A list of [humdrum tables][humTable], each having the same fields
 #' but containing data from different types of records (e.g., interpretations, data, barlines, comments).
 #' @slot Files A list of two elements. The first, "Search", contains a single character representing
-#' the `pattern` used in the call to [readHumdrum] which created this \code{humdrumR} object.
+#' the `pattern` used in the call to [readHumdrum] which created this humdrumR object.
 #' The second, "Names", is a vector of strings representing all the files which matched the `pattern`
 #' and were read into the `humdrumR` object.
 #' @slot Fields A list containing strings corresponding to the existing fields in the `humdrumR` object.
-#' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see ([fields]).
+#' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see 
+#' the [humdrum table][humTable] documentation.
 #' @slot Active A quosure expression which 
-#' extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."
-#' @slot LoadTime A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which [readHumdrum] was
+#' extracts data from field(s) in the [humdrum table][humTable]: the "active expression."
+#' @slot LoadTime A [POSIXct][base::DataTimeClasses] value, indicating the time at which [readHumdrum] was
 #' called to create this `humdrumR` object.
 #' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
@@ -459,7 +535,7 @@ setMethod('initialize', 'humdrumR',
             fieldcategories <- list(Data = 'Token',
                                     Structure = c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                                                   'Column', 'Spine', 'Path', 'Stop',
-                                                  'Record', 'NData', 'Global', 'Null', 'Type'),
+                                                  'Record', 'NData', 'Global', 'Null', 'Filter', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
                                                          fields[tandemcol]),
                                     Formal    = c(grep('^Formal', fields, value = TRUE),
@@ -486,19 +562,19 @@ setMethod('initialize', 'humdrumR',
 is.humdrumR <- function(x) inherits(x, 'humdrumR')
 
 
-#' [humdrumR] coersion.
+#' humdrumR Coercion.
 #' 
 #' Many users may wish to work with humdrum data without
 #' using the \code{\link[humdrumR:humdrumR]{humdrumR}} API, instead using 
 #' basic `R` data types.
-#' For this purpose, [humdrumR] data objects can be coerced to 
+#' For this purpose, [humdrumR-class] data objects can be coerced to 
 #' basic `R` data types.
 #' 
-#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR] object's
+#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR-class] object's
 #' \strong{Active} expression, and (attempts) to force the result to a vector of mode. This
 #' method is essentially a wrapper for [evalActive].
 #' 
-#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR] object's
+#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR-class] object's
 #' \strong{Active} expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
 #' Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines. 
 #' 
@@ -506,18 +582,18 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
 #' 
 #' `as.matrices`, \code{as.data.frames}, and \code{as.data.tables} call \code{as.matrix}/\code{as.data.frame}/\code{as.data.table}
-#' on each individual file in a [humdrumR] corpus, returning a list of matices/data.frames/data.tables.
+#' on each individual file in a [humdrumR-class] corpus, returning a list of matices/data.frames/data.tables.
 #' 
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
 #' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
 #' 
-#' @param pad.files `logical` (default \code{TRUE}). If any pieces in the [humdrumR] corpus have fewer 
+#' @param pad.files `logical` (default \code{TRUE}). If any pieces in the [humdrumR-class] corpus have fewer 
 #' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (\code{par.files == TRUE}) or
 #' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
 #' 
-#' @param pad.paths `logical` If any spine path splits (\code{'*^'}) occur in the [humdrumR] data, should they be padded 
+#' @param pad.paths `logical` If any spine path splits (\code{'*^'}) occur in the humdrumR data, should they be padded 
 #' with the `padder` argument (\code{par.files == TRUE}) or
 #' should an an error occur (`pad.paths == FALSE`)? 
 #' Note that these "padded" points are not represented in the original humdrum data.
@@ -530,7 +606,7 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' string naming an atomic mode---the output will be coerced to this mode (if possible).
 #' 
 #' @param field(s) If the `field` argument is \emph{not} \code{NULL}, it can instead be a \code{character} string matching
-#' the [humdrumR] object's fields. If so, these fields are extracted instead of the
+#' the [humdrumR-class] object's fields. If so, these fields are extracted instead of the
 #' \code{\link[humdrumR:humdrumR-class]{Active expression}}.
 #' For calls to `as.vector` and \code{as.data.frame}, only one field can be extracted.
 #' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
@@ -539,7 +615,7 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' 
 #' 
 #' 
-#' @name humCoersion
+#' @name humCoercion
 #' @export
 setMethod('as.vector', 
           signature = c(x = 'humdrumR'),
@@ -549,7 +625,7 @@ setMethod('as.vector',
                     as.vector(evalActive(x, dataTypes = 'D', nullAs = '.', forceVector = TRUE), mode)
                     })
 
-#' @name humCoersion
+#' @name humCoercion
 #' @export
 as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
                      alignColumns = FALSE, padPaths = FALSE, padder = '') {
@@ -559,9 +635,11 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
                            fieldnames = fieldname[1], alignColumns = alignColumns,
                            path.fold = !padPaths)
           
-          mat[is.na(mat)] <- ""
+          mat[is.na(mat)] <- "."
           
           lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
+          lines[grepl('^!!', lines)] <- stringr::str_remove_all(lines[grepl('^!!', lines)], '\t\\.')
+          
           names(lines) <- rownames(mat)
           
           lines
@@ -570,7 +648,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 }
 
 
-#' @name humCoersion
+#' @name humCoercion
 #' @usage as.matrix(humdata)
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
@@ -597,7 +675,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     x <- foldRecords(x, foldAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
-                    records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, were getting errors.
+                    records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, we're getting errors.
                     matrices <- lapply(records, stringi::stri_list2matrix, byrow = TRUE)
                     
                     if (length(matrices) == 1L) {
@@ -619,7 +697,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
 }                   
 
-#' @name humCoersion
+#' @name humCoercion
 #' @usage as.data.frame(humdata)
 #' @export
 setMethod('as.data.frame', 
@@ -633,7 +711,7 @@ setMethod('as.data.frame',
 
 
 
-#' @name humCoersion
+#' @name humCoercion
 #' @export
 as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
@@ -645,7 +723,7 @@ as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = N
                                        path.fold = path.fold))
           
 }
-#' @name humCoersion
+#' @name humCoercion
 #' @export 
 as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
           lapply(as.matrices(humdrumR, dataTypes = 'D', fieldnames = NULL, 
@@ -672,7 +750,7 @@ isActiveAtomic <- function(humdrumR) {
 #' 
 #' These functions can be used to quickly
 #' get basic information about the size and "shape" of
-#' a [humdrumR] corpus.
+#' a [humdrumR-class] corpus.
 #' For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
 #' 
 #' A few common base `R` methods are defined
@@ -715,7 +793,7 @@ npieces <- function(humdrumR) {
 
 #' Does humdrumR corpus contain subcorpora?
 #' 
-#' [humdrumR] can be divided into "subcorpora."
+#' [HumdrumR][humdrumR-class] objects can be divided into "subcorpora."
 #' These functions tell us if there are any subcorpora and, if so, what they are called.
 #' @name humSubCorpora
 #' @export
@@ -855,7 +933,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
 }
 
 #' @export
-#' @name humShape
+#' @name humMerge
 mergeHumdrum <- function(...) {
     
     
@@ -936,13 +1014,13 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
 
 #' These functions are used to change the "shape"
 #' of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
-#' (held within [humdrumR] objects of course).
+#' (held within [humdrumR-class] objects of course).
 #' 
 #' The `foldXXX` family allows you collapse all 
 #' \code{\link[humdrumR:humTable]{user fields}}
 #' across groups in another field.
 
-#' @param humdrumR A [humdrumR] data object.
+#' @param humdrumR A [humdrumR-class] data object.
 #' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
 #' @param foldAtomic `logical`. If \code{foldAtomic == TRUE}, each stop is collapsed to a single string
 #' `foldAtomic == FALSE`, each stop is collapsed to a list of tokens. 
@@ -961,10 +1039,9 @@ foldHumdrum <- function(humdrumR, byfields,
           # byfields should be a character vector.
           # suitable for the "by" argument in a data.table[].
           checkhumdrumR(humdrumR, 'foldHumdrum')
-          humdrumR <- indexGLIM(humdrumR)      
+          # humdrumR <- indexGLIM(humdrumR)
     
-          dataTypes <- if (padPaths) "GLIMDdP" else "GLIMDd"
-          humtab   <- getHumtab(humdrumR, dataTypes)
+          humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
           
           # What fields do apply to?
           fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1079,8 +1156,25 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 
 
 
-#' @name Humtable
-#' @usage getHumtab(humdrumR, dataTypes = 'GLIMdD')
+#' Access a Humdrum Table
+#' 
+#' `getHumtab` extracts a [humdrum table][humTable] from a [humdrumR-class] object.
+#' 
+#' @param humdrumR A `humdrumR` object.
+#' @param dataTypes A `character` vector. Specifies which types of data tokens/records to extract.
+#'     See the [humTable] documentation and/or the humdrum syntax vignette for clarification!
+#' 
+#' For `dataTypes`, values can be:
+#' 
+#' + `"G"`: global comments 
+#' + `"L"`: local comments 
+#' + `"I"`: interpretations
+#' + `"M"`: barlines
+#' + `"D"`: non-null data
+#' + `"d"`: null data 
+#' 
+#' Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
+#' 
 #' @export
 getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
           checkhumdrumR(humdrumR, 'getHumtab')
@@ -1098,12 +1192,29 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 `putHumtab<-` <- function(humdrumR, value, drop = FALSE) {
           # adds humtab into humdrumR
           # Drop determines whether record dataTypes that are 
-          # absent from value are left unchanged (drop = TRUE)
-          # or replaced with empty data tables (drop = FALSE)
-          if (data.table::is.data.table(value)) value <- splitHumtab(value, drop = drop)
+          # absent from value are left unchanged (drop = FALSE)
+          # or replaced with empty data tables (drop = TRUE)
+          # If drop indicates a record type (i.e., GLIM) those types are dropped only
+          if (data.table::is.data.table(value)) {
+              value <- if (is.character(drop)) {
+                  dataTypes <- checkTypes(drop, 'putHumtab')
+                  value <- splitHumtab(value, drop = FALSE)
+                  value[dataTypes]
+              } else {
+                  splitHumtab(value, drop = drop)
+              }
+          }
           humdrumR@Humtable[names(value)] <- value
-          
           humdrumR
+}
+
+matchGLIMfields <- function(humdrumR, from = 'D', to = c('G', 'L', 'I', 'M', 'd', 'P') ) {
+    # make sure all the tables in humTable (i.e., G L I M D and P) all have the same fields
+    # usual case is that fields have been added to D but are missing from other tables.
+    # 
+    putHumtab(humdrumR, drop = FALSE) <- data.table::rbindlist(humdrumR@Humtable, fill = TRUE)
+    
+    humdrumR
 }
 
 `addNulld<-` <- function(humdrumR, value) {
@@ -1125,18 +1236,99 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
   humdrumR
 }
 
+updateNull <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR, 'GLIMDd')
+    
+    active <- evalActive(humdrumR, 'GLIMDd', forceVector = TRUE)
+    
+    humtab[ , Null := is.na(active) | active %in% c('.', '!', '*', '=', '_P')]
+    
+    putHumtab(humdrumR) <- humtab
+    
+    humdrumR
+}
+
+update_d <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR, 'Dd')
+    
+    humtab[ , Type := ifelse(Null | Filter, 'd', 'D')]
+    
+    putHumtab(humdrumR, drop = 'Dd') <- humtab
+    
+    humdrumR
+}
 
 
 
 ####### Active slot ----
 ##### Manipulating the Active slot
 
-#'
+#' The "Active expression" of a humdrumR object.
+#' 
+#' This "Active" expression is used as the default value in a lot of humdrumR code.
+#' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
+#' i.e., whenever you return a `humdrumR` object in the terminal.
+#' In any expression within a call to 
+#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+#' `.` is automatically replaced with the \code{Active} expression.
+#' 
+#' The active expression can be changed with the commands 
+#' \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
+#' This is a handy way to quickly look at different fields in your data.
+#' 
+#' The `Active` expression is often just the name of a 
+#' \code{\link[humdrumR:humTable]{field}}:
+#' for instance, the default value is `Token`.
+#' However, it can actually be any complex expression which evaluates
+#' within the \code{\link[humdrum:humTable]{humdrum table}}.
+#' For instance, the `Active` expression could be:
+#' `paste0(Token, " ", Record)`, which would automatically 
+#' print each Token with its record number pasted to it.
+#' 
+#' @section Null data:
+#' 
+#' HumdrumR identifies "null data" based on the active field.
+#' Anywhere the current active field evaluates to `"."` or `NA` is considered Null data, and assigned the type `"d"` in the internal
+#' [humdrum table][humTable].
+#' As you work, there will often be data tokens which are null in one field, but not in another field.
+#' For example, if you load `**kern` data, a token like `"4r"` (quarter-note rest) token will be `NA` if you call `pitch`, but 
+#' not `NA` if you call `recip` (rhythm).
+#' 
+#' ```
+#' 
+#' kerndata <- readHumdrum(...)
+#' 
+#' kerndata$Token %hum>% pitch -> kerndata$Pitch
+#' kerndata$Token %hum>% recip -> kerndata$Rhythm
+#' 
+#' ```
+#' 
+#' Now, if you change the active field between `Pitch` and `Rhythm` you'll see that there
+#' are different numbers of (non-null) data tokens: `ntokens(kerndata$Pitch)` vs `ntokens(kerndata$Rhythm)` will return different numbers!
+#' (The different would be the number of rest tokens.)
+#' Similarly, if you apply functions/expressions to this data (using [withinHumdrum] for example), the result will depend on 
+#' what the active field is:
+#' 
+#' ```
+#' 
+#' kerndata$Pitch %hum<% ~length(Token)
+#' kerndata$Rhythm %hum<% ~length(Token)
+#' 
+#' ```
+#' 
+#' Once again, we'll get different numbers here! (Assuming there are rests in the data.)
+#' This is the case even though the do-expression isn't actually using the `Pitch` or `Rhythm` fields!
+#' If `Pitch` is the active field the rest tokens are null-data and will be ignored!
+#' 
+#' 
+#' @rdname humActive
+NULL
+
 #' `evalActive` evaluates the active expression in a
-#' [humdrumR] object.
+#' [humdrumR object][humdrumR::humdrumR-class].
 #' 
 #' 
-#' @param humdrumR A [humdrumR] data object.
+#' @param humdrumR A [humdrumR-class] data object.
 #' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', 'P'` 
 #' or any combination of these in a single string (e.g., `"LIM"`).
 #' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
@@ -1155,11 +1347,11 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
   
   if (is.atomic(values)) {
-    values[is.na(values) | values == '.'] <- nullAs
+    values[is.na(values)] <- nullAs
   } else {
     values[] <- lapply(values, 
                        function(col) {
-                                 col[is.na(col) | col == '.'] <- nullAs
+                                 col[is.na(col)] <- nullAs
                                  col
                                  })
   }
@@ -1197,7 +1389,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
 getActive <- function(humdrumR) humdrumR@Active
 
 
-#' `setActive` takes a [humdrumR] object and a formula
+#' `setActive` takes a [humdrumR-class] object and a formula
 #' and sets the right side of formula as the object's Active expression.
 #' @name humActive
 #' @export
@@ -1209,7 +1401,7 @@ setActive <- function(humdrumR, form) {
 
 #' `setActiveFields` takes a character vector of strings representing current
 #' \code{\link[humdrumR:humTable]{field}} names
-#' and sets the [humdrumR] object's active expression
+#' and sets the [humdrumR-class] object's active expression
 #' to simply return those fields (as a list, if there are more than one).
 #' @name humActive
 #' @export
@@ -1239,12 +1431,29 @@ Add a reference to some field, for instance Token.", call. = FALSE)
               || (!is.null(dim(act)) && dim(act)[1] == nrows)
               || (is.list(act) && length(act) == nrows)
               || (is.list(act) && all(lengths(act) == nrows))) {
-                    return(humdrumR) 
+                    return(update_d(updateNull(humdrumR)))
           } else {
                     stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
           }
+
           
 }
+
+
+# activeTypes <- function(humdrumR) {
+#     # this function takes a humdrumR object
+#     # and changes the Type field of the humdrumTable
+#     # to match the content of the Active expression.
+#     
+#     active <- evalActive(humdrumR, 'GLIMDdP', forceVector = TRUE, nullAs = NA)
+#     humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+#     
+#     humtab$Type <- parseTokenType(active)
+#     putHumtab(humdrumR, drop = FALSE) <- humtab
+#     
+#     humdrumR
+#     
+# }
 
 
 ####Fields ----
@@ -1302,7 +1511,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 }
 
 #' Use `fields` to list the current fields in 
-#' a [humdrumR] object.
+#' a [humdrumR-class] object.
 #' @name humdrumR-class
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
@@ -1461,7 +1670,101 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 
 
 ############## Assigning to humdrumR #######
-
+#' Assigning new fields
+#' 
+#' R objects often have ways of assigning new values to 
+#' *part* of the object using [indexing operators][base::Extract].
+#' [HumdrumR objects][humdrumR:humdrumR-class] objects are no different, as they allow us to insert
+#' new fields into them!
+#' 
+#' A new field can be inserted into a `humdrumR` object in two ways:
+#' 
+#' 1. A field can be copied from one humdrumR object to another if their
+#'    internal [humdrum tables][humTable] have the exact same number of data tokens (i.e., rows).
+#'    It might not seem obvious, but this mechanism is very useful because it can be used to *rename* existing fields
+#'     within a humdrumR object (explained below).
+#' 2. A [vector][base::vector] or [list of vectors][base::list] can be inserted as 
+#'    new fields in a humdrumR object.
+#' 
+#' Fields can be assigned using two syntaxes:
+#' 
+#' ```
+#' humdata['fieldname'] <- x
+#' # or
+#' humdata[c('fieldname1', 'fieldname2')] <- x
+#' ```
+#' 
+#' or
+#' 
+#' ```
+#' humdata$fieldname <- x
+#' ````
+#' 
+#' where "fieldname" can be whatever you want it to be, of course!
+#' 
+#' ### `humdrumR -> humdrumR` assignment:
+#' 
+#' Assigning a field from one [humdrumR object][humdrumR:humdrumR-class]
+#' to another works like this:
+#' (Recall that the two objects must have the exact same numbers of data tokens.)
+#' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
+#' `humdata$name`) are used as new field names.
+#' How fields are extracted from the right side of the assignment is a little trickier:
+#' Any fields in the right-side `humdrumR` object which are named $PipeN$ (where $N$ is an integer) are copied
+#' in descending order into the named fields on the left side.
+#' If there are no $PipeN$ fields on the right side, any fields used in the current Active formula (on the right side)
+#' are copied instead.
+#' This system might seem odd at first, but it is very useful in combination with the [withinHumdrum] function,
+#' or its convenient pipe operator [%hum>%][humdrumR::humPipe]
+#' When `withinHumdrum` creates new fields, it calls them $Pipe1 \ldots Pipe2 \ldots PipeN$.
+#' Since the output of `withinHumdrum` is always the same as the input except with these new "Pipe" fields,
+#' Byou can use `humdrumR <- humdrumR` assignment to immediately assign these pipe fields more meaningful names in the original object.
+#' This makes the most sense with an example:
+#' 
+#' ```
+#' humdata$Semits <- humdata %hum>% ~semit(Token) 
+#' ````
+#' 
+#' In humdrumR, we actually favor the left-to-right "piping" style.
+#' Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:
+#' 
+#' ```
+#' humdata %hum>% ~semit(Token) -> humdata$Semits
+#' ````
+#' 
+#' Calls to `withinHumdrum` (or `%hum>%`) keep producing new pipe fields.
+#' If there are more than one pipe fields, you can assign multiple fields at once using the `[]<-` syntax:
+#' 
+#' ```
+#' 
+#' humdata %hum>% ~semit(Token) %hum>% ~pitch(Token) -> humdata[c('semit', 'pitch')]
+#' 
+#' ```
+#' 
+#' #' **IMPORTANT NOTE!**: Any "PipeN" fields in the humdrumR object you assign from
+#' that you don't assign field names are simply dropped.
+#' This is nice, because often you might proceed through a serious of piped steps, but you only
+#' want the last one (or two).
+#' If you want to keep all your pipe fields either don't re-assign them at all (i.e., keep the "PipeN" names)
+#' or assign them all names using the `->[c("name1", "name2", "name3", ...)]` syntax.
+#' 
+#' 
+#' ### `humdrumR -> vector` assignment:
+#' 
+#' You can assign vectors or lists of vectors straight into a [humdrumR object][humdrumR:humdrumR-class].
+#' All vectors must be the same length as the number of data tokens
+#' in the target object.
+#' If you provide multiple vectors to assign (as a `list` or `data.frame` of vectors) 
+#' you must provide the same number of fieldnames using the `->[c('name1', 'name2', ...)]` syntax.
+#' You can use the `ntokens` command to determine the right length of vectors you need!
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' @name humAssignment
+NULL
 
 ###$<- simply calls []<- indexing!
 #' @name humdrumR-class
@@ -1482,18 +1785,32 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
           function(x, i, j, value) {
                     D <- getD(x)
                     
-                    if (length(value) == nrow(D)) {
-                              D[i] <- value
-                    } else {
-                              stop(glue::glue("Can't assign this value to '{name}' field, because it is the wrong length.
-                                              It must be the same length as the number of data tokens (rows) in the Data humdrum table."))
+                    if (!is.list(value)) value <- list(value)
+                    
+                    multi <- length(value) > 1L
+                    
+                    if (any(lengths(value) != nrow(D))) {
+                        
+                        .stop("Can't assign", 
+                              plural(length(value), 'these vectors ', 'this vector'),
+                              "into this humdrumR object because",
+                              plural(length(value), 'they are ', 'it is '),
+                              "not the same length as the number of data tokens in the object.")
                     }
+                        
+                    if (length(value) != length(i)) {
+                        .stop("To assign vector(s) to a humdrumR object, the number of new field names you provide",
+                              "must be the same as the number of vectors.")
+                    }
+                        
+                    D[ , i] <- value
                     
                     putD(x) <- D
-                    padGLIMfields(x) <- i
-                    
+                    addFields(x) <- i
                     x <- setActiveFields(x, i)
-                    return(x)
+                    
+                    update_d(updateNull(x))
+
           })
 
 
@@ -1506,12 +1823,20 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
                     # If there are no PipeN fields, the active field(s) are copied.
-                    humtab <- getD(value)
-                    removeFields(value) <- grep('Pipe', colnames(humtab), value = TRUE)
+                    if (any(i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name)) {
+                        builtin <- i[i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
+                        .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
+                              glue::glue_collapse(builtin, sep = ', ', last = 'and'), 
+                              plural(length(builtin), 'are built-in fields.', 'is a built-in fields'))
+                    }
+              
+                    humtab <- getHumtab(value)
+                    
                     pipes <- pipeFields(humtab)
+                    removeFields(value) <- pipes
                     
                     if (length(pipes) == 0L) pipes <- activeFields(value)
-                    
+   
                     pipes <- tail(pipes, n = length(i))
                     
                     if (any(i %in% colnames(humtab))) humtab[ , eval(i[i %in% colnames(humtab)]) := NULL]
@@ -1525,7 +1850,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     
                     value@Active <- substituteName(value@Active, setNames(rlang::syms(i), pipes))
                     
-                    value
+                    update_d(updateNull(value))
           })
 
 
@@ -1535,7 +1860,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 #########################Print methods ----
 #########################################################-
 
-
+#' @name humPrint
 #' @export
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
@@ -1564,11 +1889,15 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-
+#' Show a [humdrumR-class] object in the terminal.
+#' 
+#' 
+#' @name humPrint
 #' @export
-print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
-                         max.records.file = 40L, max.token.length = 30L) {
+print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
+                         max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
   dataTypes <- checkTypes(dataTypes, "print_humtab")
+  
   
   if (is.empty(humdrumR)) {
     cat("\nEmpty humdrumR object\n")
@@ -1576,36 +1905,43 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   }
   
   Nfiles <- length(humdrumR)          
-  if (firstAndLast) humdrumR <- humdrumR[unique(c(1, length(humdrumR)))]
+  if (firstAndLast) humdrumR <- humdrumR[unique(c(1, Nfiles))] 
   
-  humdrumR <- indexGLIM(humdrumR)
+  # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
-  # humdrumR <- fields.as.character()
   
   print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
-                max.records.file, max.token.length)
+                max.records.file, max.token.length, collapseNull)
 
   invisible(NULL)
   
 }
 
 
-printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep = ', '){
+printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
     dataTypes <- checkTypes(dataTypes, "printableActiveField")
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd') 
+    
+    active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDd', forceVector = TRUE, nullAs = "."))
+    
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
-    targets <- humtab$Type %in% dataTypes
-    printable <- IfElse(!targets, 
-                        if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
-                        NA_character_)
+    active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]
+    active[humtab[, !Type %in% c('D', 'd')]] <- humtab[!Type %in% c('D', 'd'), Token]
     
-    printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
-                                                  forceVector = TRUE, nullAs = NA))
+    # 
+    # targets <- humtab$Type %in% dataTypes
+    # printable <- ifelse(!targets, 
+                        # if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
+                        # NA_character_)
     
-    humtab[ , Print := printable]
+    # printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
+                                                  # forceVector = TRUE, nullAs = NA))
+    # printable[(humtab$Null | humtab$Filter)] <- nulltypes[humtab$Type[(humtab$Null | humtab$Filter)]]
+    
+    humtab[ , Print := active]
     
     putHumtab(humdrumR, drop = FALSE) <- humtab
     addFields(humdrumR) <- 'Print'
@@ -1613,74 +1949,53 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = TRUE, sep
 }
 
 
-padColumns <- function(lines, max.token.length) {
- # This function takes a bunch of lines, separated by tabs,
- # and replaces the tabs with appropriate numbers of spaces
- # such that the lines will print as nicely aligned columns.
- # It also trims strings that are too long, replacing the last
- # three characters before the cuttoff with "..."
-          
- local <- !grepl('[0-9]:  \t!!', lines)          
- 
- lines[!local] <- paste0('  ', gsub('\t', '', lines[!local]))
- tokmat <- stringi::stri_list2matrix(strsplit(lines[local], split = '\t'), byrow = TRUE)
- 
- # trim long tokens
- toklen  <- nchar(tokmat)
- toklen[is.na(toklen)] <- 0L
- toolong <- toklen > max.token.length
- tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
- tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...')
- tokmat[is.na(tokmat)] <- ''
- 
- # pad columns
- toklen <- nchar(tokmat)
- colMaxs <- apply(toklen, 2, max, na.rm = TRUE)
- lines[local] <- apply(tokmat, 1, paste %.% padder, sizes = colMaxs + 2L, collapse = '')
- 
- lines <- gsub('\t*$', '', lines)
- 
- lines
-
-}
 
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                                        max.records.file = 40L, max.token.length = 12L) {
-  lines <- as.lines(humdrumR, dataTypes = dataTypes,
-                    padPaths = TRUE, alignColumns = TRUE)
+                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 10L) {
+  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
-  NRecord <- num2str(as.numeric(gsub('^.*\\.', '', names(lines))), pad = TRUE)
-  File   <- gsub('\\..*$', '', names(lines))
+  
+  #
+  if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
+  
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
+  File   <- gsub('\\..*$', '', rownames(tokmat))
+  NRecord <- gsub('^[0-9]*\\.', '', rownames(tokmat))
   
-  lines <- paste0(NRecord, ':  \t', lines)
-  ## Trim an space lines
-  lines <- padColumns(lines, max.token.length = max.token.length)
-  ellipsis <- stringr::str_dup('#', max(nchar(lines[!grepl(':   *!!', lines)])))
+  #
+  global <- stringr::str_detect(tokmat[ , 1], '^!!')
+  tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
   
+  ## Trim any space lines
+  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
+  tokmat <- padColumns(tokmat, global)
+  
+  ## collapse to lines
+  tokmat[global, -1L:-2L] <- ""
+  lines <- apply(tokmat, 1, paste, collapse = '')
+  
+  ellipsis <- stringr::str_dup('#', max(nchar(lines[!global])))
   
   ##
   lines   <- split(lines, f = File)
   NRecord <- split(NRecord, f = File)
   
-  lines <- Map(f = function(l, rn, last) {
+  lines <- Map(f = function(l, rn, last, glob) { # hide the first or last lines of each file
             if (length(l) <= max.records.file) return(l)
             
             # lines
             l <- do.call(if (last) tail else head, list(l, n = max.records.file))
             
             # record numbers
-            rn <- stringi::stri_trim_left(rn)
+            # rn <- stringi::stri_trim_left(rn)
             restRN <- do.call(if(last) head else tail, list(rn, n = -max.records.file))
-            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-',restRN[length(restRN)])
-            restRN <- paste0("[", restRN, ']')
+            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-', restRN[length(restRN)])
+            restRN <- paste0(restRN, ':')
             
-            elips  <- stringr::str_dup('.', max(nchar(l[!grepl(':  *!!', l)])))
-            elips  <- paste0(restRN, stringi::stri_sub(elips, from = nchar(restRN) + 1L)) 
+            restRN <- stringr::str_pad(restRN, stringr::str_locate(l[1], ':')[1], side = 'left')
+            rest   <- paste0(restRN, stringi::stri_sub(ellipsis, nchar(restRN) + 1L))
             
-            append(l, elips, after = if (last) 0L else length(l))
-            
-
+            append(l, rest, after = if (last) 0L else length(l))
             
             },
                lines, NRecord, seq_along(lines) == length(lines))
@@ -1689,6 +2004,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   
   ellipses <- paste0(ellipsis, ' ', Filenames)
   lines    <- Map(append, lines, ellipses, after = 0L)
+  
   
   ##
   if (Nmorefiles > 0L) {
@@ -1700,7 +2016,91 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
    lines <- append(lines, message, after = length(lines) - 1L)
   }
   
-  cat(unlist(lines), sep = '\n')
+  lines <- unlist(lines)
+  cat(lines, sep = '\n')
   
 }
 
+
+censorEmptySpace <- function(tokmat, collapseNull = 10L) {
+    
+    null <- apply(matrix(grepl('^\\.( \\.)*$', tokmat) | grepl('^=', tokmat), nrow = nrow(tokmat)), 1, all, na.rm = TRUE)
+    
+    chunks <- segments(!null)
+    
+    # newRN <- unlist(tapply(rownames(tokmat), chunks, function(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
+    
+    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
+                                   function(i) {
+                                       if (sum(grepl('^=', tokmat[i, 1])) < 2 && length(i) <= collapseNull) {
+                                           tokmat[i , , drop = FALSE] 
+                                        } else {
+                                           fill <- if (any(grepl('^=', tokmat[i, 1]))) {
+                                               bars <- tokmat[i, ][grepl('^=', tokmat[i, 1]), 1]
+                                               barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
+                                               base <- strrep('=', length(bars))
+                                               
+                                               if (any(!is.na(barnums))) {
+                                                   barnums <- barnums[!is.na(barnums)]
+                                                   base <- paste0(base, paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-'))
+                                               } 
+                                               newRN <- paste(names(bars)[c(1, length(bars))], collapse = '-')
+                                               base
+                                               
+                                           } else {
+                                               newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
+                                               
+                                               strrep('.', length(i) - 1)
+                                           }
+                                           
+                                           newRN <- c(rownames(tokmat)[i[1]], newRN)
+                                           # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
+                                           tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
+                                           rownames(tokmat) <- newRN
+                                           
+                                           tokmat
+                                           
+                                           
+                                           
+                                        }
+                                       
+                     })
+    tokmat <- do.call('rbind', tokmat)
+    
+    rownames(tokmat) <- stringr::str_replace(rownames(tokmat), '-[0-9]+\\.', '-') # replace redundant fileNumber
+    
+    tokmat
+}
+
+trimTokens <- function(tokmat, max.token.length) {
+    # This function  trims strings that are too long, replacing the last
+    # three characters before the cuttoff with "..."
+    
+    toklen  <- nchar(tokmat)
+    
+    toklen[is.na(toklen)] <- 0L
+    
+    toolong <- toklen > max.token.length
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
+    tokmat[is.na(tokmat)] <- ''
+    
+    tokmat
+    
+}
+
+padColumns <- function(tokmat, global) {
+    # This function takes a token matrix
+    # and pads each token with the appropriate number of spaces
+    # such that the lines will print as nicely aligned columns.
+
+    toklen <- nchar(tokmat)
+    
+    colMaxs <- apply(toklen[!global, ], 2, max) + 2L
+    
+    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], colMaxs)
+    tokmat[global, 1L] <- padder(tokmat[global, 1L], colMaxs[1])
+    
+    tokmat
+    
+}

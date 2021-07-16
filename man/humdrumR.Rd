@@ -20,7 +20,7 @@ the power of R to give us enprecedented power to manipulate and analyze humdrum 
 The package \code{humdrumR} has XXX main components:
 \itemize{
 \item To represent humdrum data in R, we have the \link[=humdrumR-class]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
-the \link[=Humtable]{humdrum table}.
+the \link[=humTable]{humdrum table}.
 \item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
 \code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
 \item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
