@@ -36,37 +36,56 @@ humdata[[ , ~expression]]
 }
 \description{
 This \code{S4} class is the basic unit of the
-\code{\link[humdrumR:humdrumR]{humdrumR}} package.
-Each \code{humdrumR} object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or
+\link{humdrumR} package.
+Each \code{humdrumR} object represents data \link[=readHumdrum]{read} from one or
 more humdrum files.
 In the documentation we refer to the collection of files within a \linkS4class{humdrumR} object
 as a "\strong{corpus}," and each file as a "\strong{piece}."
 However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
 files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 to them as "pieces."
-In coding examples, we name \code{humdrumR} objects \code{\strong{humdata}}.
+In coding examples, we name humdrumR objects "\code{humdata}."
 }
 \details{
+The most imporant part of a \code{humdrumR} object is the
+\link[=humTable]{humdrum tables} it holds within it.
+In essence, an \code{humdrumR} object is simply a wrapper around these
+humdrum tables, which helps users to
+to visualize, index, \link[=humSummary]{summarize}, and \link[=with-in-Humdrum]{manipulate}
+the table in a variety of ways.
 
+Basic information about the size and shape of \code{humdrumR} data can be
+obtained with calls to \link[=humSize]{nrecords, npieces, length, ncol, etc.}.
+More detailed summary information can be obtained with the humdrumR \link[=humSummary]{corpus summary functions}.
+HumdrumR data can also be coerced to more basic R data types using \link[=humCoercion]{as.matrix, as.data.frame, etc.}.
+A number of helpful functions are also defined to \link[=humShape]{reshape} humdrumR data.
+
+The most powerful features of \link{humdrumR} are the tools it gives you to
+\enumerate{
+\item Filter humdrum data, using \link{filterHumdrum} and the standard R \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
+\item Apply functions and arbitrary commands to humdrum data using the \link[=with-in-Humdrum]{with(in)Humdrum} routines,
+and their associated \link[=humPipe]{piping operators}.
+}
 }
 \section{Slots}{
 
 \describe{
-\item{\code{Humtable}}{A list of \code{\link[humTable]{humdrum tables}}, each having the same fields
+\item{\code{Humtable}}{A list of \link[=humTable]{humdrum tables}, each having the same fields
 but containing data from different types of records (e.g., interpretations, data, barlines, comments).}
 
 \item{\code{Files}}{A list of two elements. The first, "Search", contains a single character representing
-the \code{pattern} used in the call to \link{readHumdrum} which created this \code{humdrumR} object.
+the \code{pattern} used in the call to \link{readHumdrum} which created this humdrumR object.
 The second, "Names", is a vector of strings representing all the files which matched the \code{pattern}
 and were read into the \code{humdrumR} object.}
 
 \item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object.
-The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see (\link{fields}).}
+The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see
+the \link[=humTable]{humdrum table} documentation.}
 
 \item{\code{Active}}{A quosure expression which
-extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."}
+extracts data from field(s) in the \link[=humTable]{humdrum table}: the "active expression."}
 
-\item{\code{LoadTime}}{A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which \link{readHumdrum} was
+\item{\code{LoadTime}}{A \link[base:DataTimeClasses]{POSIXct} value, indicating the time at which \link{readHumdrum} was
 called to create this \code{humdrumR} object.}
 
 \item{\code{Patterns}}{A character vector of the original search patterns used to match files in the system.}
@@ -74,26 +93,9 @@ called to create this \code{humdrumR} object.}
 
 \section{Active field}{
 
-The \code{Active} slot contains an \code{rlang::quosure} expression
-refering to fields in the \code{\link[humdrumR:humTable]{humTable}}.
-This expression is used as the "default" value in a lot of \code{humdrumR} code.
-For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
-i.e., whenever you return a \code{humdrumR} object in the terminal.
-In any expression within a call to
-\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
-\code{.} is automatically replaced with the \code{Active} expression.
 
-The active expression can be changed with the commands
-\code{\link[humdrumR:setActive]{setActive or the $ operator}}.
-This is a handy way to quickly look at different fields in your data.
-
-The \code{Active} expression is often just the name of a
-\code{\link[humdrumR:humTable]{field}}:
-for instance, the default value is \code{Token}.
-However, it can actually be any complex expression which evaluates
-within the \code{\link[humdrum:humTable]{humdrum table}}.
-For instance, the \code{Active} expression could be:
-\code{paste0(Token, " ", Record)}, which would automatically
-print each Token with its record number pasted to it.
+The \code{Active} slot of a \link{humdrumR} object contains an \link[rlang:quosure]{expression}
+which refers to fields in the internal \link[=humTable]{humdrum table}.
+Go to the dedicated \link[=humActive]{active field} documentation to learn more about this important slot!
 }
 

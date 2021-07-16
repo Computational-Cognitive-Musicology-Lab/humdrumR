@@ -101,10 +101,10 @@ chor1
 ```
 
 (In R, when you enter something on the command line, R "prints" it out for you to read.)
-The print out you see shows you the name of the file, the contents of the file, and some stuff about "Data fields" that you will learn about soon.
+The print-out you see shows you the name of the file, the contents of the file, and some stuff about "Data fields" that you will learn about soon.
 
 Cool! Still, looking at a single humdrum file is not really that exciting. 
-The whole point of using computers is working with large ammounts of data.
+The whole point of using computers is working with large amounts of data.
 Luckily, humdrumR makes this very easy.
 Check out this next command:
 
@@ -150,12 +150,11 @@ Data.frames are essential to R.
 A data.frame is simply a two-dimensional table of named columns.
 Each column is either a vector or list of values, all of which are the same length.
 
-`humdrumR` makes use of a popular extension of base-R data.frames, the [data.table](https://cran.r-project.org/web/packages/data.table/index.html).
+HumdrumR makes use of a popular extension of base-R data.frames, the [data.table](https://cran.r-project.org/web/packages/data.table/index.html).
 
 
-In `humdrumR`, *every* single, individual token in a collection of humdrum-syntax text files is given its own row in a data.frame.
+In humdrumR, *every* single, individual token in a collection of humdrum-syntax text files is given its own row in a data.frame.
 For example, consider this simple, humdrum-syntax file:
-
 
 
 ```{r echo=FALSE, results='none'}
@@ -250,7 +249,7 @@ We see that there are `r num2word(ncol(humtab))` fields (humtable columns), and 
 + Form fields
 + Reference fields
 
-(A good place to read the details about what all the columns means is the `Humtable` documentation you can get by calling `?Humtable`.)
+(A good place to read the details about what all the columns means is the `humTable` documentation you can get by calling `?humTable`.)
 
 
 Let's go back to the Bach chorales dataset we loaded earlier (we saved it as `chorales`):

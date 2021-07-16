@@ -8,20 +8,21 @@
 #' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
 #' uses calls to `filterHumdrum`!
 #' 
-#' `filterHumdrum` is used in the same way as [withinHumdrum],
+#' `filterHumdrum` is used in a similar manner as [withinHumdrum],
 #' taking any number of "do expressions" (or functions) as arguments.
 #' (In fact, do expressions/function arguments are passed directly to an internal call to `withinHumdrum`.)
 #' The only difference is that the expressions/functions fed to `filterHumdrum` 
-#' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions, 
-#' returning a logical (`TRUE`/`FALSE`) vector.
-#' The returned vector must either be the same length as the input data (the number
+#' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
+#' which return a logical (`TRUE`/`FALSE`) vector.
+#' The returned vector must also be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
 #' (You can use a `dofill~` expression if you want to "expand" shorter outputs for filtering pusposes.)
-#' `filterHumdrum` updates the humdrum table's `Filter` field using an `|` (logical OR) with your new predicate.
-#' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`.
+#' `filterHumdrum` updates the humdrum table's `Filter` field using an logical OR (`|`) between the existing `Filter` field and the negation of your predicate: `Filter | !Predicate`.
+#' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`: when you print a filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`), and
+#' any calls to [withinHumdrum][with(in)Humdrum] will ignore the filtered data.
 #' 
-#' By default, `filterHumdrum` completely removes any files in the corpus if *all* data records are filtered out (and/or Null).
-#' However, you can stop this by specifying the `removeEmptyFiles` as `FALSE`.
+#' By default, `filterHumdrum` completely removes any files in the corpus where *all* the data records are filtered out.
+#' However, you can stop this by specifying the `removeEmptyFiles` argumet as `FALSE`.
 #' If you *want* to remove empty files, spines, or records, you should call `removeEmptyFiles`, `removeEmptySpines`, or `removeEmptyRecords`.
 #' 
 #' @section Indexing:
@@ -80,81 +81,92 @@
 #' Note that numeric `humdrumR` indexing is entirely **ordinal**, meaning 
 #' that pieces/data records/spines are not matched based on their value in their
 #' respective fields, but rather on their order among all existing values.
-#' Thus, for `[`single-bracket`]` indexing the \eqn{ith} piece in the
+#' Thus, for `[`single-bracket`]` indexing the $i_{th}$ piece in the
 #' corpus is taken, regardless of that `FileN` field associated
-#' with that piece:
+#' with that piece.
+#' For example,
 #' 
-#' \preformatted{
+#' ```
 #' humsubset <- humdata[11:20]
 #' humsubset[2]
-#' }
+#' ````
 #' 
-#' will return the 12th piece from the original `humdata` object, not the second piece.
+#' will return the 12th piece from the original `humdata` object, *not* the second piece.
+#' This is beacuse the first call to `[]` returns the 11th through 20th pieces, and the second call
+#' returns the *second* piece that is still present (the 12th).
 #' Similarly,
-#' \preformatted{
+#' 
+#' ```
 #' humsubset2 <- humdata[[ , 2:4]]
 #' humsubset2[[ , 2]]
-#' }
+#' ```
+#' 
 #' will return the third spine from the original data.
 #' 
-#' As in traditional `R` indexing, negative numbers are allowed as well, causing corresponding elements to be
-#' removed instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
+#' As in normal R indexing, negative numbers can be used, causing corresponding elements to be
+#' *removed* instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
 #' while `humdata[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
 #' Positive and negative indices cannot be mixed in a single argument.
 #' 
-#' In all cases, indices outside of range (or of value `0)` are ignored.
-#' If all indices are `0` or outside of range then 
+#' In all cases, indices outside of range (or of value `0`) are ignored.
+#' E.g., if you have a corpus of twenty files and you call `corpus[21]`, there is no 21st piece, so `21` is "out of range".
+#' If all your input indices are `0` and error will result.
+#' If all your input indices are out of range then 
 #' an empty `humdrumR` object is returned.
 #' For instance, `humdata[[401:500, ]]` will return an empty
 #' `humdrumR` object if there are no pieces with more than 400
 #' data records.
 #' 
 #' 
-#' **Character indexing:** Indexing `humdrumR` objects with 
+#' ### Character indexing:
+#' 
+#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
 #' `[`single brackets`]` will accept one 
 #' vector of `character` strings. These strings are 
 #' treated as 
-#' \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the `humdrumR` object's `Active` fields are searched
-#' for matches to all the regular expressions you input. Any piece that contains
-#' _**any**_ match to _**any**_ of the regular expressions is retained---all other pieces
-#' are dropped. Note that (because this is `[`single-bracket`]` indexing) the entire piece is retained, even if there is only one match.
+#' [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
+#' 
+#' The tokens from the humdrumR object's `Active` fields are searched
+#' for matches to any of the regular expressions you input. Any piece that contains
+#' **any** match to **any** of the regular expressions is retained---all other pieces
+#' are filtered out. Note that (because this is `[`single-bracket`]` indexing) the entire piece is retained, even if there is only one match.
 #' If no matches occur in any pieces, an empty `humdrumR` object is returned.
 #' 
 #' Indexing `humdrumR` objects with `[[`double brackets`]]` will 
 #' accept one or two vectors of `character` strings, `i` and `j`, 
 #' either of which can 
 #' be used in isolation or in combination. 
-#' If `j` is used in isolation, it must be placed after a comma, 
-#' as in `humdata[[ , j]]`.
+#' (If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.)
 #' These strings are 
-#' treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-#' The tokens from the `humdrumR` object's `Active` fields are searched
-#' for matches to all the regular expressions you input.
+#' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
+#' The tokens from the humdrumR object's `Active` fields are searched
+#' for matches to any of the regular expressions you input.
 #' Any record which contains at least one token matching any regex in `i`
 #' will be retained.
 #' Similarly, any spine which contains at least one token matching any
 #' regex in `j` is retained.
-#' If `i` and {j} are used together,
-#'  matching spines are indexed first, so that 
+#' If `i` and `j` are used together,
+#' matching spines (`j`) are indexed first, so that 
 #' tokens matching the regular expression(s) in `i`
-#' must be found in matching spines.
+#' must be found in the matching spines.
 #' 
 #' A third argument, `k`, can also be used, but only if 
-#' both `i` and `j` arguments are missing.
+#' both the `i` and `j` arguments are missing.
+#' In order for this to work, you need to put two commas to mark the "missing" `i` and `j` arguments: 
+#' e.g., `humdata[[ , , '[Ee]-']]`.
 #' In the case of `k`, only matching tokens are retained,
 #' regardless of their spine or record number(s).
-#' Any pieces, spines, or records with no matches are dropped entirely.
 #' 
 #' 
-#' **Formula indexing:** Indexing `humdrumR` objects with 
+#' ### Formula indexing:
+#' 
+#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
 #' `formulae` is the most powerful, flexible indexing option.
-#' Either `[`single`]` or `[`double`]` brackets will accept
-#' a formula. The right-hand side of each formula will be evaluated
-#' within the `humdrumR` objects internal 
-#' `\link[humdrumR:humTable]{humdrum table`}.
-#' Each formula must evaluate to a `logical` vector of the same 
-#' length as the total number of tokens (rows in the humdrum table).
+#' Either `[`single`]` or `[[`double`]]` brackets will accept
+#' a (single) formula. The formula are fed directly as arguments to 
+#' `filterHumdrum`---as such, they music evaluate to a logical vector of the same 
+#' length as the input.
 #' 
 #' In the case of `[`single-bracket`]` indexing, only one `formula`
 #' is accepted, and *every piece* that evalues with at least one 
@@ -169,8 +181,8 @@
 #' In the case of `[[`double-bracket`]]` indexing, one or two formulas are accepted, 
 #' in arguments `i` and `j`, either of which can 
 #' be used in isolation or in combination. 
-#' If `j` is used in isolation, it must be placed after a comma, 
-#' as in `humdata[[ , j]]`.
+#' (If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humdata[[ , j]]`.)
 #' In the case of `i` formulae, any record which evaluates to
 #' at least one `TRUE` value is retained.
 #' In the case of `j`, any spine which evaluates to
@@ -179,59 +191,13 @@
 #' 
 #' For `[[`double-bracket`]]` formula indexing, a third argument, `k`
 #' may be used in the absence of `i` and `j`.
+#' In order for this to work, you need to put two commas to mark the "missing" `i` and `j` arguments: 
+#' e.g., `humdata[[ , , ~formula]]`.
 #' In the case of `k` all tokens which evaluate to `TRUE`
 #' are retained, regardless of piece/spine/record.
 #' Pieces, spines, or records with no `TRUE` values
 #' are simply dropped.
-#' 
-#' @section Assignment:
-#' `R` objects often have ways of assigning new values to 
-#' *part* of the object using `\link[base:Extract]{indexing operators`}.
-#' `humdrumR` objects are no different.
-#' 
-#' A new field can be inserted in a `humdrumR` object in two ways:
-#' \enumerate{
-#' \item A field can be copied from one humdrumR object to another if the humdrumR objects'
-#' `\link[humdrumR:humTable]{humdrum tables`} have the same number of data tokens (i.e., rows).
-#' This is actually most useful for renaming fields within a humdrumR object (explained below).
-#' \item A `\link[base:vector]{vector`} or `\link[base:list]{list`} can be instered as a 
-#' new field in a `humdrumR`---but again, it must be the same length as the number of tokens
-#' in the object's `\link[humdrumR:humTable]{humdrum table`}.
-#' }
-#' 
-#' Fields can be assigned using two syntaxes:
-#' \preformatted{
-#' humdata['fieldname'] <- x
-#' # or
-#' humdata[c('field1', 'field2')] <- x
-#' }
-#' or 
-#' \preformatted{
-#' humdata$fieldname <- x
-#' }
-#' 
-#' **`humdrumR$fieldname <- humdrumR` assignment**: Assigning a field in one `humdrumR`
-#' object from another `humdrumR` object works like this. First of call, as a reminder, the two `humdrumR`
-#' objects must have the exact same numbers of data tokens in their `\link[humdrumR:humTable]{humdrum tables`}.
-#' This means, that this is most useful for assigning field names from one `humdrumR` object to itself.
-#' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
-#' `humdata$name`) are used as new field names.
-#' How fields are extracted from the right side of the assignment is a little trickier:
-#' Any fields in the right-side `humdrumR` object which are named \eqn{PipeN} (where \eqn{N} is an integer) are copied
-#' in descending order into the named fields on the left side.
-#' If there are no \eqn{PipeN} fields on the right side, any fields used in the current Active formula (on the right side)
-#' are copied instead.
-#' 
-#' This system might seem odd at first, but it is very useful in combination with the `\link[humdrumR:with-in-Humdrum]{withinHumdrum`} function,
-#' and its convenient pipe operator `\link[humdrumR:humPipe]{\%hum>\%`}.
-#' The `withinHumdrum` command always creates new fields that are called \eqn{Pipe1 ... Pipe2 ... PipeN}.
-#' By using `humdata$name` we can immediately assign these pipe fields more meaningful names!
-#' 
-#' Examples:
-#' \preformatted{
-#' humdata \%hum>\% ~ semit(Token) -> humdata$Semits
-#' }
-#' 
+#' Using the `k` argument is exactly the same a "plain" call to `filterHumdrum`.
 #' 
 #' @export
 filterHumdrum <- function(humdrumR, ..., removeEmptyFiles = TRUE) { 

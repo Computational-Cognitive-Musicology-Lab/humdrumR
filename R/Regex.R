@@ -300,6 +300,7 @@ predicateParse <- function(predicate, argnames, ...) {
 #' 
 #' These infix functions are simply syntactic sugar for
 #' existing `R` regular expression matching functions.
+#' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
 #' 
 #' + `\%~l\%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl].
 #' + `\%~\%`: The "default"---same as `\%~l\%`.
@@ -308,16 +309,16 @@ predicateParse <- function(predicate, argnames, ...) {
 #'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex].
 #' @export
 #' @name RegexFind
-`%~l%` <- function(x, pattern) grepl(pattern, x)
+`%~l%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
 #' @export
 #' @name RegexFind
-`%~i%` <- function(x, pattern) grep(pattern, x)
+`%~i%` <- function(x, pattern) which(x %~l% pattern)
 #' @export
 #' @name RegexFind
-`%~n%` <- function(x, pattern) stringi::stri_count_regex(x, pattern)
+`%~n%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
 #' @name RegexFind
 #' @export
-`%~%` <- function(x, pattern) grepl(pattern, x)
+`%~%` <- `%~l%`
 
 
 # regexParse <- function(str, ..., toEnv = TRUE) {

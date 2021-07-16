@@ -19,6 +19,7 @@ x \%~\% pattern
 \description{
 These infix functions are simply syntactic sugar for
 existing \code{R} regular expression matching functions.
+If the a vector of regexes is given as the right argument, matches to \emph{any} of the regexes are returned.
 }
 \details{
 \itemize{

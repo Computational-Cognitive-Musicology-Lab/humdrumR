@@ -40,9 +40,10 @@ When first created by a call to \link{readHumdrum} every
 humdrum table has at least nineteen fields: one data field (\code{Token}), two interpretation
 fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fifteen structure fields. Additional
 interpretation or reference fields
-may be present depending on the content of the humdrum file(s), and users can create additional data fields.
+may be present depending on the content of the humdrum file(s), and users can create additional data fields
+by \link[=humAssignment]{assigning to the object}.
+\subsection{Data fields:}{
 
-\strong{1. Data fields:}
 Data fields are used to describe individual data points
 in humdrum data (as opposed to groups of points).
 Every humdrum table starts with a data
@@ -53,8 +54,10 @@ Users can create as many additional data fields as they like. Every call to
 \link[=\\\%hum>\\\%]{humdrumR:humPipe} piping
 operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}.
 These fields can be renamed using the \verb{$<-} operator.
+}
 
-\strong{2. Structure fields:}
+\subsection{Structure fields:}{
+
 Every humdrum table starts with fifteen Structure fields,
 which describe where each data token was "located" in the original humdrum data: which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.
@@ -156,8 +159,9 @@ of spine paths.
 }
 }
 }
+}
 
-\strong{3. Interpretation fields:}
+\subsection{Interpretation fields:}{
 
 Interpretation fields describe interpretation metadata in the humdrum file(s).
 Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
@@ -180,8 +184,10 @@ Fortunately, many tandem interpretations are widely used and standardized, and t
 interpretations are known by \code{humdrumR}. Recognized interpretations (such as \verb{*clefG4} and \verb{*k[b-]})
 are automatically parsed into their own fields by a call to \link{readHumdrum}.
 See the \link{readHumdrum} documentation for more details.
+}
 
-\strong{4. Formal fields:}
+\subsection{Formal fields:}{
+
 Formal fields indicate musical sections, or time windows within
 a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
@@ -217,8 +223,10 @@ do weird things like skipping numbers, repeating numbers, or having suffixes (e.
 If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\code{""}).
 }
 }
+}
 
-\strong{5. Reference fields:}
+\subsection{Reference fields:}{
+
 Reference fields describe any \emph{Reference Records}
 in the humdrum data. Every reference record (records beginning \code{"!!!"}) in any
 humdrum file in a corpus read by \link{readHumdrum} is parsed into a field named
@@ -230,6 +238,7 @@ files read by \link{readHumdrum}, no reference fields are created.
 
 Examples of common reference records are \code{"!!!COM:"} (composer) and \code{"!!!OTL:"} (original title).
 Any humdrum data with these records will end up having \code{COM} and \code{OTL} fields in its humdrum table.
+}
 }
 
 \section{Null Data}{

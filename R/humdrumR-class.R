@@ -33,9 +33,11 @@
 #' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
 #' fields (`Tandem` and `Exclusive`), three formal fields, and fifteen structure fields. Additional
 #' interpretation or reference fields
-#' may be present depending on the content of the humdrum file(s), and users can create additional data fields.
+#' may be present depending on the content of the humdrum file(s), and users can create additional data fields
+#' by [assigning to the object][humAssignment].
 #' 
-#' **1. Data fields:** 
+#' ### Data fields:
+#' 
 #' Data fields are used to describe individual data points
 #' in humdrum data (as opposed to groups of points). 
 #' Every humdrum table starts with a data
@@ -48,7 +50,8 @@
 #' These fields can be renamed using the `$<-` operator.
 #'
 #' 
-#' **2. Structure fields:** 
+#' ### Structure fields:
+#' 
 #' Every humdrum table starts with fifteen Structure fields,
 #' which describe where each data token was "located" in the original humdrum data: which file, which spine, which record, etc.
 #' See the vignette on humdrum syntax to fully understand the terms here.
@@ -115,7 +118,7 @@
 #'
 #' 
 #' 
-#' **3. Interpretation fields:**
+#' ### Interpretation fields:
 #'
 #' Interpretation fields describe interpretation metadata in the humdrum file(s).
 #' Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
@@ -140,7 +143,8 @@
 #' See the [readHumdrum] documentation for more details.
 #' 
 #' 
-#' **4. Formal fields:** 
+#' ### Formal fields:
+#' 
 #' Formal fields indicate musical sections, or time windows within
 #' a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 #' Humdrum data may or may not include formal metadata fields, indicated by the token `"*>"`.
@@ -170,7 +174,8 @@
 #'      do weird things like skipping numbers, repeating numbers, or having suffixes (e.g., `"19a"`).
 #'      If no barline tokens appear in the file, `BarLabel` is all empty strings (`""`).
 #' 
-#' **5. Reference fields:**
+#' ### Reference fields:
+#' 
 #' Reference fields describe any *Reference Records*
 #' in the humdrum data. Every reference record (records beginning `"!!!"`) in any
 #' humdrum file in a corpus read by [readHumdrum] is parsed into a field named
@@ -455,67 +460,56 @@ orderHumtab <- function(humtab) {
 #' HumdrumR class
 #' 
 #' This `S4` class is the basic unit of the 
-#' \code{\link[humdrumR:humdrumR]{humdrumR}} package.
-#' Each `humdrumR` object represents data \code{\link[humdrumR:readHumdrum]{read}} from one or 
+#' [humdrumR] package.
+#' Each `humdrumR` object represents data [read][readHumdrum] from one or 
 #' more humdrum files.
 #' In the documentation we refer to the collection of files within a [humdrumR-class] object
-#' as a "\strong{corpus}," and each file as a "\strong{piece}."
-#' However, though humdrum data is \emph{usually} encoded as one "piece" per file, this is not necessarily the case:
+#' as a "**corpus**," and each file as a "**piece**."
+#' However, though humdrum data is *usually* encoded as one "piece" per file, this is not necessarily the case:
 #' files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
 #' to them as "pieces."
-#' In coding examples, we name `humdrumR` objects \code{\strong{humdata}}.
+#' In coding examples, we name humdrumR objects "`humdata`."
 #' 
 #' The most imporant part of a `humdrumR` object is the 
-#' \code{\link[humdrumR:humTable]{humdrum table(s)}} it holds within it.
-#' In essence, an `humdrumR` object is simply a wrapper around the 
-#' \code{\link[humdrumR:humTable]{humdrum table}} which helps users to
-#' to visualize, index, \code{\link[humdrumR:humSummary]{summarize}}, and manipulate
+#' [humdrum tables][humTable] it holds within it.
+#' In essence, an `humdrumR` object is simply a wrapper around these
+#' humdrum tables, which helps users to
+#' to visualize, index, [summarize][humSummary], and [manipulate][humdrumR::with-in-Humdrum]
 #' the table in a variety of ways.
 #' 
 #' Basic information about the size and shape of `humdrumR` data can be
-#' obtained with calls to \code{\link[humdrumR:humSize]{nrecords, npieces, length, ncol, etc.}}
-#' More detailed summary information can be obtained with the humdrumR \code{\link[humSummary]{corpus summary functions}}.
-#' `humdrumR` data can also be coerced to more basic \code{R} data types using \code{\link[humdrumR:humCoercion]{as.matrix, as.data.frame, etc.}}
+#' obtained with calls to [nrecords, npieces, length, ncol, etc.][humSize].
+#' More detailed summary information can be obtained with the humdrumR [corpus summary functions][humSummary].
+#' HumdrumR data can also be coerced to more basic R data types using [as.matrix, as.data.frame, etc.][humCoercion].
+#' A number of helpful functions are also defined to [reshape][humShape] humdrumR data.
 #' 
-#' `humdrumR` data objects can be filtered and indexed using calls to \code{\link[humdrumR]{filterHumdrum}},
-#' and the standard `R` \code{\link[base:Extract]{indexing operators}}: \code{[]} and \code{[[]] 
+#' The most powerful features of [humdrumR] are the tools it gives you to
 #' 
-#' A number of helpful functions are also defined to \code{\link[humdrumR:humShape]{reshape}} humdrumR data.
+#' 1. Filter humdrum data, using [filterHumdrum] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
+#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::with-in-humdrum] routines,
+#' and their associated [piping operators][humPipe].
+#' 
+#' 
 #' 
 #' @section Active field:
-#' The `Active` slot contains an \code{rlang::quosure} expression
-#' refering to fields in the \code{\link[humdrumR:humTable]{humTable}}.
-#' This expression is used as the "default" value in a lot of `humdrumR` code.
-#' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
-#' i.e., whenever you return a `humdrumR` object in the terminal.
-#' In any expression within a call to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-#' `.` is automatically replaced with the \code{Active} expression.
 #' 
-#' The active expression can be changed with the commands 
-#' \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
-#' This is a handy way to quickly look at different fields in your data.
+#' The `Active` slot of a [humdrumR] object contains an [expression][rlang::quosure]
+#' which refers to fields in the internal [humdrum table][humTable].
+#' Go to the dedicated [active field][humActive] documentation to learn more about this important slot!
 #' 
-#' The `Active` expression is often just the name of a 
-#' \code{\link[humdrumR:humTable]{field}}:
-#' for instance, the default value is `Token`.
-#' However, it can actually be any complex expression which evaluates
-#' within the \code{\link[humdrum:humTable]{humdrum table}}.
-#' For instance, the `Active` expression could be:
-#' `paste0(Token, " ", Record)`, which would automatically 
-#' print each Token with its record number pasted to it.
 #' 
-#' @slot Humtable A list of \code{\link[humTable]{humdrum tables}}, each having the same fields
+#' @slot Humtable A list of [humdrum tables][humTable], each having the same fields
 #' but containing data from different types of records (e.g., interpretations, data, barlines, comments).
 #' @slot Files A list of two elements. The first, "Search", contains a single character representing
-#' the `pattern` used in the call to [readHumdrum] which created this \code{humdrumR} object.
+#' the `pattern` used in the call to [readHumdrum] which created this humdrumR object.
 #' The second, "Names", is a vector of strings representing all the files which matched the `pattern`
 #' and were read into the `humdrumR` object.
 #' @slot Fields A list containing strings corresponding to the existing fields in the `humdrumR` object.
-#' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see ([fields]).
+#' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see 
+#' the [humdrum table][humTable] documentation.
 #' @slot Active A quosure expression which 
-#' extracts data from field(s) in the \code{\link[humdrum:humTable]{humdrum table}}: the "active expression."
-#' @slot LoadTime A \code{\link[base:DataTimeClasses]{POSIXct}} value, indicating the time at which [readHumdrum] was
+#' extracts data from field(s) in the [humdrum table][humTable]: the "active expression."
+#' @slot LoadTime A [POSIXct][base::DataTimeClasses] value, indicating the time at which [readHumdrum] was
 #' called to create this `humdrumR` object.
 #' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
@@ -1269,9 +1263,69 @@ update_d <- function(humdrumR) {
 ####### Active slot ----
 ##### Manipulating the Active slot
 
-#'
+#' The "Active expression" of a humdrumR object.
+#' 
+#' This "Active" expression is used as the default value in a lot of humdrumR code.
+#' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
+#' i.e., whenever you return a `humdrumR` object in the terminal.
+#' In any expression within a call to 
+#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+#' `.` is automatically replaced with the \code{Active} expression.
+#' 
+#' The active expression can be changed with the commands 
+#' \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
+#' This is a handy way to quickly look at different fields in your data.
+#' 
+#' The `Active` expression is often just the name of a 
+#' \code{\link[humdrumR:humTable]{field}}:
+#' for instance, the default value is `Token`.
+#' However, it can actually be any complex expression which evaluates
+#' within the \code{\link[humdrum:humTable]{humdrum table}}.
+#' For instance, the `Active` expression could be:
+#' `paste0(Token, " ", Record)`, which would automatically 
+#' print each Token with its record number pasted to it.
+#' 
+#' @section Null data:
+#' 
+#' HumdrumR identifies "null data" based on the active field.
+#' Anywhere the current active field evaluates to `"."` or `NA` is considered Null data, and assigned the type `"d"` in the internal
+#' [humdrum table][humTable].
+#' As you work, there will often be data tokens which are null in one field, but not in another field.
+#' For example, if you load `**kern` data, a token like `"4r"` (quarter-note rest) token will be `NA` if you call `pitch`, but 
+#' not `NA` if you call `recip` (rhythm).
+#' 
+#' ```
+#' 
+#' kerndata <- readHumdrum(...)
+#' 
+#' kerndata$Token %hum>% pitch -> kerndata$Pitch
+#' kerndata$Token %hum>% recip -> kerndata$Rhythm
+#' 
+#' ```
+#' 
+#' Now, if you change the active field between `Pitch` and `Rhythm` you'll see that there
+#' are different numbers of (non-null) data tokens: `ntokens(kerndata$Pitch)` vs `ntokens(kerndata$Rhythm)` will return different numbers!
+#' (The different would be the number of rest tokens.)
+#' Similarly, if you apply functions/expressions to this data (using [withinHumdrum] for example), the result will depend on 
+#' what the active field is:
+#' 
+#' ```
+#' 
+#' kerndata$Pitch %hum<% ~length(Token)
+#' kerndata$Rhythm %hum<% ~length(Token)
+#' 
+#' ```
+#' 
+#' Once again, we'll get different numbers here! (Assuming there are rests in the data.)
+#' This is the case even though the do-expression isn't actually using the `Pitch` or `Rhythm` fields!
+#' If `Pitch` is the active field the rest tokens are null-data and will be ignored!
+#' 
+#' 
+#' @rdname humActive
+NULL
+
 #' `evalActive` evaluates the active expression in a
-#' [humdrumR-class] object.
+#' [humdrumR object][humdrumR::humdrumR-class].
 #' 
 #' 
 #' @param humdrumR A [humdrumR-class] data object.
@@ -1616,7 +1670,101 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 
 
 ############## Assigning to humdrumR #######
-
+#' Assigning new fields
+#' 
+#' R objects often have ways of assigning new values to 
+#' *part* of the object using [indexing operators][base::Extract].
+#' [HumdrumR objects][humdrumR:humdrumR-class] objects are no different, as they allow us to insert
+#' new fields into them!
+#' 
+#' A new field can be inserted into a `humdrumR` object in two ways:
+#' 
+#' 1. A field can be copied from one humdrumR object to another if their
+#'    internal [humdrum tables][humTable] have the exact same number of data tokens (i.e., rows).
+#'    It might not seem obvious, but this mechanism is very useful because it can be used to *rename* existing fields
+#'     within a humdrumR object (explained below).
+#' 2. A [vector][base::vector] or [list of vectors][base::list] can be inserted as 
+#'    new fields in a humdrumR object.
+#' 
+#' Fields can be assigned using two syntaxes:
+#' 
+#' ```
+#' humdata['fieldname'] <- x
+#' # or
+#' humdata[c('fieldname1', 'fieldname2')] <- x
+#' ```
+#' 
+#' or
+#' 
+#' ```
+#' humdata$fieldname <- x
+#' ````
+#' 
+#' where "fieldname" can be whatever you want it to be, of course!
+#' 
+#' ### `humdrumR -> humdrumR` assignment:
+#' 
+#' Assigning a field from one [humdrumR object][humdrumR:humdrumR-class]
+#' to another works like this:
+#' (Recall that the two objects must have the exact same numbers of data tokens.)
+#' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
+#' `humdata$name`) are used as new field names.
+#' How fields are extracted from the right side of the assignment is a little trickier:
+#' Any fields in the right-side `humdrumR` object which are named $PipeN$ (where $N$ is an integer) are copied
+#' in descending order into the named fields on the left side.
+#' If there are no $PipeN$ fields on the right side, any fields used in the current Active formula (on the right side)
+#' are copied instead.
+#' This system might seem odd at first, but it is very useful in combination with the [withinHumdrum] function,
+#' or its convenient pipe operator [%hum>%][humdrumR::humPipe]
+#' When `withinHumdrum` creates new fields, it calls them $Pipe1 \ldots Pipe2 \ldots PipeN$.
+#' Since the output of `withinHumdrum` is always the same as the input except with these new "Pipe" fields,
+#' Byou can use `humdrumR <- humdrumR` assignment to immediately assign these pipe fields more meaningful names in the original object.
+#' This makes the most sense with an example:
+#' 
+#' ```
+#' humdata$Semits <- humdata %hum>% ~semit(Token) 
+#' ````
+#' 
+#' In humdrumR, we actually favor the left-to-right "piping" style.
+#' Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:
+#' 
+#' ```
+#' humdata %hum>% ~semit(Token) -> humdata$Semits
+#' ````
+#' 
+#' Calls to `withinHumdrum` (or `%hum>%`) keep producing new pipe fields.
+#' If there are more than one pipe fields, you can assign multiple fields at once using the `[]<-` syntax:
+#' 
+#' ```
+#' 
+#' humdata %hum>% ~semit(Token) %hum>% ~pitch(Token) -> humdata[c('semit', 'pitch')]
+#' 
+#' ```
+#' 
+#' #' **IMPORTANT NOTE!**: Any "PipeN" fields in the humdrumR object you assign from
+#' that you don't assign field names are simply dropped.
+#' This is nice, because often you might proceed through a serious of piped steps, but you only
+#' want the last one (or two).
+#' If you want to keep all your pipe fields either don't re-assign them at all (i.e., keep the "PipeN" names)
+#' or assign them all names using the `->[c("name1", "name2", "name3", ...)]` syntax.
+#' 
+#' 
+#' ### `humdrumR -> vector` assignment:
+#' 
+#' You can assign vectors or lists of vectors straight into a [humdrumR object][humdrumR:humdrumR-class].
+#' All vectors must be the same length as the number of data tokens
+#' in the target object.
+#' If you provide multiple vectors to assign (as a `list` or `data.frame` of vectors) 
+#' you must provide the same number of fieldnames using the `->[c('name1', 'name2', ...)]` syntax.
+#' You can use the `ntokens` command to determine the right length of vectors you need!
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' @name humAssignment
+NULL
 
 ###$<- simply calls []<- indexing!
 #' @name humdrumR-class
@@ -1637,18 +1785,32 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
           function(x, i, j, value) {
                     D <- getD(x)
                     
-                    if (length(value) == nrow(D)) {
-                              D[ , i] <- value
-                    } else {
-                              stop(glue::glue("Can't assign this value to '{name}' field, because it is the wrong length.
-                                              It must be the same length as the number of data tokens (rows) in the Data humdrum table."))
+                    if (!is.list(value)) value <- list(value)
+                    
+                    multi <- length(value) > 1L
+                    
+                    if (any(lengths(value) != nrow(D))) {
+                        
+                        .stop("Can't assign", 
+                              plural(length(value), 'these vectors ', 'this vector'),
+                              "into this humdrumR object because",
+                              plural(length(value), 'they are ', 'it is '),
+                              "not the same length as the number of data tokens in the object.")
                     }
+                        
+                    if (length(value) != length(i)) {
+                        .stop("To assign vector(s) to a humdrumR object, the number of new field names you provide",
+                              "must be the same as the number of vectors.")
+                    }
+                        
+                    D[ , i] <- value
                     
                     putD(x) <- D
-                    padGLIMfields(x) <- i
-                    
+                    addFields(x) <- i
                     x <- setActiveFields(x, i)
-                    return(x)
+                    
+                    update_d(updateNull(x))
+
           })
 
 
@@ -1661,7 +1823,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
                     # If there are no PipeN fields, the active field(s) are copied.
-                    if (i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name) {
+                    if (any(i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name)) {
                         builtin <- i[i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
                         .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
                               glue::glue_collapse(builtin, sep = ', ', last = 'and'), 

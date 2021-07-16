@@ -3,7 +3,7 @@
 \name{evalActive}
 \alias{evalActive}
 \title{\code{evalActive} evaluates the active expression in a
-\linkS4class{humdrumR} object.}
+\link[=humdrumR-class]{humdrumR object}.}
 \usage{
 evalActive(
   humdrumR,
@@ -29,5 +29,5 @@ between tokens that are collapsed.}
 }
 \description{
 \code{evalActive} evaluates the active expression in a
-\linkS4class{humdrumR} object.
+\link[=humdrumR-class]{humdrumR object}.
 }
