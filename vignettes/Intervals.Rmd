@@ -1,0 +1,200 @@
+---
+title: Rhythm and Pitch Intervals
+author: "Nathaniel Condit-Schultz"
+date:   "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Rhythm and Pitch Intervals}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+`humdrumR` contains a rich set of built in representations and functions for representing musical tonality and meter.
+A core philosophical/design choice is that both structures are conceptualized/encoded as *intervals*.
+
+
+
+# Intervals 
+
+Both pitch and time are perceived *relatively*: as a relationship between two points.
+Thus we represent them, conceptually, as an *interval*---a difference.
+In the case of pitch, an interval between two frequencies (or more abstractly, a "tonal" interval on the circle-of-fifths).
+In the case of rhythm, an interval between two time points---between two onsets, or between an onset and an offset.
+In `humdrumR`, these abstract intervals are represented as `tonalInterval` and `rhythmInterval` objects, respectively.
+
+To concretize our abstract intervals, we must establish what they are relative to. 
+What is the reference?
+There are actually multiple, useful ways we can represent the same information.
+Since all intervals are relative, there is always an *implicit* reference---the origin, zero.
+For `tonalIntervals` the origin is the unison interval.
+For `rhythmIntervals` the origin is zero.
+
+`tonalInterval`s and `rhythmIntervals` constitute each constitute an algebraic *module over integers* (module over $\mathbb{Z}$), with appropriate arithmetic operations fully defined in `humdrumR`.
+Since intervals can be added/subtracted, any interval can be thought of as a combination (addition) of other intervals.
+In `humdrumR`, we often "partition" a `interval` as a combination of useful sub-intervals.
+
+## Serial and Fixed Reference
+
+Vectors of `humdrumR` intervals can be represented in two fundamental ways: *serial reference representation* and *fixed reference representation*.
+To illustrate, we will use two examples, one rhythmic, one pitched:
+
+1. The major scale
+2. The "tag-line" rhythm `3+3+3+3+2+2`
+
+
+### Fixed reference
+
+In a fixed-reference representation, all intervals are interpreted relative to a fixed point (implicitly 0).
+Fixed-reference representations of the major scale (using semitones) and the tag-line rhythm are as follows:
+
+
+```{r}
+
+referenceMajor   <- c(0, 2, 4, 5, 7, 9, 11, 12)
+
+referenceTagline <- c(0, 3, 6, 9, 12, 14, 16)
+
+```
+
+Note that this representation is quite commonly used by musicians, in various forms, *for pitch*.
+In contrast, fixed-reference representations are **not** commonly used by musicians *for rhythm*.
+However, they *are* used in some contexts, as they essentially represent "time from the beginning" of a piece:
+Thus, the timestamps/timelines in DAWs or "offsets" in `music21` are examples of fixed-reference representations of time.
+
+### Serial reference
+
+An alternative representation is a serial-reference representation, where each interval is measured relative to the previous one.
+Thus, each data point represents the local change ($\Delta$) in the parameter.
+To be lossless (as explained below) the first element of a serial data vector is measured relative to the implicit reference (0).
+Serial representations of our tag-line and the major scale are as follows:
+
+```{r}
+
+serialMajor   <- c(0, 2, 2, 1, 2, 2, 2, 1)
+
+serialTagline <- c(0, 3, 3, 3, 3, 2, 2) 
+
+```
+
+This representations is also fairly intuitive to musicians---representing "melodic intervals"---but is *not* how music notation or sequencers represent pitch.
+In contrast, the serial-reference representation for rhythm *is* normative: traditional music notation note values are a serial-reference representation.
+
+
+### Transformations ("Interval Calculus")
+
+
+Since addition is defined for `interval`s fixed-reference and serial-reference representations can be translated between each other.
+
+A serial-reference representation can be calculated as the pairwise differences between elements in a fixed-reference data, with the first reference element appended at the beginning.
+Conversely, a fixed-reference representation can be calculated as the cumulative sum of serial-reference data.
+Thus:
+
+```{r}
+
+identical(cumsum(serialMajor), referenceMajor)
+
+identical(cumsum(serialTagline), referenceTagline)
+
+identical(c(referenceMajor[1], diff(referenceMajor)), serialMajor)
+
+identical(c(referenceTagline[1], diff(referenceTagline)), serialTagline)
+
+
+```
+
+In `humdrumR`, we refer to these two transformations as `delta` ($\Delta$) and `sigma` ($\Sigma$), for differences and sums respecticely.
+In `humdrumR`, we note that the relationship between fixed- and serial-reference representations is analogous to the relationship between a function and its derivative.
+The fixed-reference representation represents a sequence of independent values as a function of (serial) index position.
+The serial-reference representation represents the same sequence as the differences between adjacent elements at each index---how much the fixed representation *changes* at each index.
+(Since the first element in a serial-reference representation is relative to a fixed (implicit) reference, the normal one-to-many relationship between derivatives and functions is removed, and a lossless one-to-one relationship is maintained.)
+These two transformations are thus inverses of each other: $x = sigma(delta(x))$ and $x = delta(sigma(x))$.
+<!--These two transformations are thus inverses of each other: $x = integrate(derive(x))$ and $x = derive(integrate(x))$.-->
+
+<!--Is is because of this analogy that `humdrumR` refers to these functions as `derive` (pairwise differences) and `integrate` (cumulative sum) respectively.-->
+
+
+```{r}
+library(humdrumR)
+
+identical(referenceMajor, sigma(delta(referenceMajor)))
+
+identical(referenceMajor, delta(sigma(referenceMajor)))
+
+
+```
+
+
+```{r, fig.cap = "Derivative/Integral relationship in Major Scale", echo = FALSE, results = "hide"}
+library(humdrumR)
+
+plot(c(0, referenceMajor[-1] - .25), type = 'h', xlab = 'Index', ylab = 'Semitones',
+	col = 'blue', main = "")
+text(1:8, referenceMajor, labels = referenceMajor, col = 'blue', cex=.7)
+
+points(referenceMajor, type = 'c', col = 'red')
+text((2:8) - .5, referenceMajor[-1] - (serialMajor[-1]/2), labels = paste0(c('-', '', '+')[2 + sign(serialMajor[-1])], serialMajor[-1]), col = 'red', cex=.5, pos=1)
+
+legend('topleft', fill = c('blue', 'red'), legend = c('Reference', 'Serial'), bty = "n")
+
+```
+```{r, fig.cap = "Derivative/Integral relationship in Tagline Rhythm", echo = FALSE, results = "hide"}
+library(humdrumR)
+
+plot(c(0, referenceTagline[-1] - .25), type = 'h', xlab = 'Index', ylab = 'Ticks',
+	col = 'blue', main = "")
+text(1:8, referenceTagline, labels = referenceTagline, col = 'blue', cex=.7)
+
+points(referenceTagline, type = 'c', col = 'red')
+text((2:8) - .5, referenceTagline[-1] - (serialTagline[-1]/2), labels = paste0(c('-', '', '+')[2 + sign(serialTagline[-1])], serialTagline[-1]), col = 'red', cex=.5, pos=1)
+
+legend('topleft', fill = c('blue', 'red'), legend = c('Reference', 'Serial'), bty = "n")
+
+```
+
+
+
+
+
+## Dynamic Reference
+
+Since `intervals` are additive, another possibilty is to use one vector of intervals as the reference point for a second vector of intervals.
+This allows us to create dynamic reference points.
+
+Some examples 
+
++ **Figured Bass**: the bass voice in the texture is encoded (in serial/reference reprsentation) while other voices are represented relative to the bass voice.
++ **Chord Tones**: the abstract "root" of chord progression is represented in one vector, with other vectors representing the "chord tones" (root, 3rd, 5th, 7th, etc.) relative to chord root.
++ **Scale degrees**: The tonic of the key is used as a dynamic reference, with notes calculated relative to the tonic.
+
+```{r, fig.cap = "Figured Bass", echo = FALSE, results = "hide"}
+
+library(humdrumR)
+
+# In semitones:
+
+bassline_reference <- c(0, 7, 4, 5, 2, 4, 5, 7, 7)
+
+harmonicintervals <- c(16, 7, 8, 4, 15, 12, 9, 5, 4)
+
+plot(c(0, bassline_reference[-1] - .25), type = 'h', xlab = 'Index', ylab = 'Pitch', ylim = c(0, 19), axes = FALSE,
+	col = 'blue', main = "")
+text(seq_along(bassline_reference), bassline_reference, labels = bassline_reference, col = 'blue', cex=.7)
+
+ax <- c(0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19)
+# axis(2, ax, as.tonalChroma(as.character(ax)), tick = FALSE, las = 1)
+
+i <- seq_along(bassline_reference)
+
+	segments(x0 = i, x1 = i, y0 = bassline_reference + .25, y1 = bassline_reference + harmonicintervals - .25, col = 'red')
+	text(i, bassline_reference + harmonicintervals, labels = harmonicintervals, col = 'red', cex = .7)
+
+
+legend('topleft', fill = c('blue', 'red'), legend = c('Bass Interval', 'Harmonic Interval'), bty = "n")
+
+```
+
+Calculating dynamic reference intervals is lossless only if the complete information on the reference intervals are maintained.
+For instance, we we keep track of the serial or fixed intervals off the bass voice.
+Or, if we keep track of the local key (usually using a fixed interval to "C").
+
+

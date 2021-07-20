@@ -1,0 +1,19 @@
+pandoc: 2.11.4
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  GettingStarted: GettingStarted.html
+  HumdrumSyntax: HumdrumSyntax.html
+  Intervals: Intervals.html
+  IntroForCoders: IntroForCoders.html
+  KeysAndChord: KeysAndChord.html
+  Overview: Overview.html
+  PitchAndTonality: PitchAndTonality.html
+  ReadWrite: ReadWrite.html
+  RhythmAndMeter: RhythmAndMeter.html
+  Validation: Validation.html
+last_built: 2021-07-20T14:51Z
+urls:
+  reference: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference
+  article: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/articles
+

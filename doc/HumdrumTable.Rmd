@@ -1,0 +1,19 @@
+---
+title: "The humdrumR backend: humdrum tables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The humdrumR backend: humdrum tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(humdrumR)
+```
