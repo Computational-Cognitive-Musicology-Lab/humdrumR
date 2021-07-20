@@ -39,7 +39,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
                                        prefix, 
                                        if (is.null(rename)) Filename else rename, 
                                        affix, 
-                                       IfElse(is.na(Extension), '', Extension))]
+                                       ifelse(is.na(Extension), '', Extension))]
     
     
     filenameTable <- filenameTable[ , .SD[1], by = Filename] # get unique value for each file!

@@ -35,7 +35,7 @@ staff.xycoords <- function(staff, xprop, yinteger) {
     xlim <- staff$X
     xrange <- diff(xlim)
     x <- xlim[1] + xprop * xrange
-    y <- IfElse(yinteger >= 0, staff$Y$Pos, staff$Y$Neg)[abs(yinteger) + 1]
+    y <- ifelse(yinteger >= 0, staff$Y$Pos, staff$Y$Neg)[abs(yinteger) + 1]
     
     list(x = x, y = y)
     

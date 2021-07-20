@@ -6,9 +6,7 @@
 \alias{foldStops}
 \alias{foldPaths}
 \alias{foldRecords}
-\title{These functions are used to change the "shape"
-of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
-(held within \linkS4class{humdrumR} objects of course).}
+\title{HumdrumR data "Shape"}
 \usage{
 foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 
@@ -30,6 +28,11 @@ foldRecords(humdrumR, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 \item{pad}{\code{logical}. Should \code{\link[humdrumR:humColumns]{path/column padding tokens}} be included?}
 }
 \description{
+These functions are used to change the "shape"
+of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
+(held within \linkS4class{humdrumR} objects of course).
+}
+\details{
 The \code{foldXXX} family allows you collapse all
 \code{\link[humdrumR:humTable]{user fields}}
 across groups in another field.

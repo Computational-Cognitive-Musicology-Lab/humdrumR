@@ -5,8 +5,12 @@
 \alias{nrecords}
 \alias{ntokens}
 \alias{npieces}
+\alias{anySubcorpora}
+\alias{namesSubcorpora}
 \alias{nfiles}
 \alias{is.empty}
+\alias{anyPaths}
+\alias{anyStops}
 \title{humdrumR size and shape}
 \usage{
 nrecords(humdrumR, dataTypes = "D")
@@ -15,6 +19,10 @@ ntokens(humdrumR, dataTypes = "D")
 
 npieces(humdrumR)
 
+anySubcorpora(humdrumR)
+
+namesSubcorpora(humdrumR)
+
 nfiles(humdrumR)
 
 length(humdata)
@@ -22,12 +30,19 @@ length(humdata)
 \S4method{nrow}{humdrumR}(x)
 
 is.empty(humdrumR)
+
+anyPaths(humdrumR)
+
+anyStops(humdrumR)
 }
 \description{
 These functions can be used to quickly
 get basic information about the size and "shape" of
 a \linkS4class{humdrumR} corpus.
 For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
+
+\link[=humdrumR-class]{HumdrumR} objects can be divided into "subcorpora."
+These functions tell us if there are any subcorpora and, if so, what they are called.
 }
 \details{
 A few common base \code{R} methods are defined

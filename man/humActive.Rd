@@ -2,25 +2,90 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humActive}
 \alias{humActive}
+\alias{evalActive}
 \alias{getActive}
 \alias{setActive}
 \alias{setActiveFields}
-\title{\code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.}
+\title{The "Active expression" of a humdrumR object.}
 \usage{
+evalActive(
+  humdrumR,
+  dataTypes = "D",
+  forceVector = FALSE,
+  sep = ", ",
+  nullAs = NA
+)
+
 getActive(humdrumR)
 
 setActive(humdrumR, form)
 
 setActiveFields(humdrumR, fieldnames)
 }
-\description{
-\code{getActive(humdata)} is simply an accessor for the humdrumR object's Active quosure.
+\arguments{
+\item{humdrumR}{A \linkS4class{humdrumR} data object.}
 
-\code{setActive} takes a \linkS4class{humdrumR} object and a formula
-and sets the right side of formula as the object's Active expression.
+\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
+or any combination of these in a single string (e.g., \code{"LIM"}).
+(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for an explanation.).}
 
-\code{setActiveFields} takes a character vector of strings representing current
-\code{\link[humdrumR:humTable]{field}} names
-and sets the \linkS4class{humdrumR} object's active expression
-to simply return those fields (as a list, if there are more than one).
+\item{forceVector}{\code{logical}. If \code{TRUE}, the result is forced to be an atomic vector.}
+
+\item{sep}{A length-one \code{character} string. If \code{forceVector == TRUE} this value is used as a separator
+between tokens that are collapsed.}
+
+\item{nullAsDot}{A single \code{atomic} value. Any null tokens are coerced to this value (default is \code{.}).}
 }
+\description{
+This "Active" expression is used as the default value in a lot of humdrumR code.
+For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
+i.e., whenever you return a \code{humdrumR} object in the terminal.
+In any expression within a call to
+\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
+\code{.} is automatically replaced with the \code{Active} expression.
+}
+\details{
+The active expression can be changed with the commands
+\code{\link[humdrumR:setActive]{setActive or the $ operator}}.
+This is a handy way to quickly look at different fields in your data.
+
+The \code{Active} expression is often just the name of a
+\code{\link[humdrumR:humTable]{field}}:
+for instance, the default value is \code{Token}.
+However, it can actually be any complex expression which evaluates
+within the \code{\link[humdrum:humTable]{humdrum table}}.
+For instance, the \code{Active} expression could be:
+\code{paste0(Token, " ", Record)}, which would automatically
+print each Token with its record number pasted to it.
+}
+\section{Null data}{
+
+
+HumdrumR identifies "null data" based on the active field.
+Anywhere the current active field evaluates to \code{"."} or \code{NA} is considered Null data, and assigned the type \code{"d"} in the internal
+\link[=humTable]{humdrum table}.
+As you work, there will often be data tokens which are null in one field, but not in another field.
+For example, if you load \verb{**kern} data, a token like \code{"4r"} (quarter-note rest) token will be \code{NA} if you call \code{pitch}, but
+not \code{NA} if you call \code{recip} (rhythm).\preformatted{
+kerndata <- readHumdrum(...)
+
+kerndata$Token \%hum>\% pitch -> kerndata$Pitch
+kerndata$Token \%hum>\% recip -> kerndata$Rhythm
+
+}
+
+Now, if you change the active field between \code{Pitch} and \code{Rhythm} you'll see that there
+are different numbers of (non-null) data tokens: \code{ntokens(kerndata$Pitch)} vs \code{ntokens(kerndata$Rhythm)} will return different numbers!
+(The different would be the number of rest tokens.)
+Similarly, if you apply functions/expressions to this data (using \link{withinHumdrum} for example), the result will depend on
+what the active field is:\preformatted{
+kerndata$Pitch \%hum<\% ~length(Token)
+kerndata$Rhythm \%hum<\% ~length(Token)
+
+}
+
+Once again, we'll get different numbers here! (Assuming there are rests in the data.)
+This is the case even though the do-expression isn't actually using the \code{Pitch} or \code{Rhythm} fields!
+If \code{Pitch} is the active field the rest tokens are null-data and will be ignored!
+}
+

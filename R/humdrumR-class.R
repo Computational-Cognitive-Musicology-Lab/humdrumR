@@ -1,9 +1,9 @@
 #' Humdrum Tables
 #' 
-#' In the [humdrumR] package, the fundamental data structure is called a \strong{Humdrum Table}.
+#' In the [humdrumR] package, the fundamental data structure is called a **Humdrum Table**.
 #' A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
-#' as a single [data.table].
-#' (A `data.table` is an "enhanced" version of R's standard [data.frame].)
+#' as a single [data.table][data.table::data.table] 
+#' (A `data.table` is an "enhanced" version of R's standard [data.frame]).
 #' Humdrum tables are stored "inside" every [humdrumR-class] object that you will work with, and various `humdrumR`
 #' functions allow you to study or manipulate the them.
 #' If you want to directly access the humdrum table within a [humdrumR-class] object, use the [getHumtab] function.
@@ -19,8 +19,8 @@
 #' + \eqn{Token = Row}
 #' + \eqn{Field = Column}
 #' 
-#' @section Fields:
-#'
+#' # Fields:
+#' 
 #' There are five types of fields in a humdrum table: 
 #' 
 #' 1. Data fields
@@ -48,7 +48,7 @@
 #' [humdrumR:humPipe][\%hum>\%] piping 
 #' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
 #' These fields can be renamed using the `$<-` operator.
-#'
+#' 
 #' 
 #' ### Structure fields:
 #' 
@@ -115,11 +115,11 @@
 #'     + `Filter` :: `logical`
 #'         + Has this record/token been [filtered out][filterHumdrum]? 
 #'         
-#'
+#' 
 #' 
 #' 
 #' ### Interpretation fields:
-#'
+#' 
 #' Interpretation fields describe interpretation metadata in the humdrum file(s).
 #' Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
 #' subsequent interpretation. (See the humdrum syntax vignette for a detailed explanation.)
@@ -188,7 +188,7 @@
 #' Examples of common reference records are `"!!!COM:"` (composer) and `"!!!OTL:"` (original title).
 #' Any humdrum data with these records will end up having `COM` and `OTL` fields in its humdrum table.
 #' 
-#' @section Null Data:
+#' # Null Data:
 #' 
 #' In humdrum syntax, there is no requirement that every spine-path contains data
 #' in every record. Rather, spines are often padded with *null tokens*.
@@ -219,7 +219,7 @@
 #' 
 #' 
 #' 
-#' @section Reshaping:
+#' # Reshaping:
 #' 
 #' Breaking the complex syntax of humdrum data into the "flat" structure of a humdrum table, with every single token on one line
 #' of a `data.table`, makes humdrum data easier to analyze.
@@ -230,9 +230,10 @@
 #' or otherwise [reshaping humdrum data][humCoercion] into data formats/structures you might prefer.
 #' 
 #' 
-#' ...
+#'
 #' @name humTable
 NULL
+
 
 #' Spines vs Paths vs Columns 
 #' 
@@ -252,7 +253,7 @@ NULL
 #' In [humdrumR], spines, columns, and spine paths work like this.
 #' First of all, we actually assume a slightly more strict version of the humdrum syntax:
 #' we assume that all the spines which appear at the beginning of a file (headed with exlusive interpretations
-#' like `"**kern"`) can never merge into each other. Thus, a humdrum file read into \code{humdrumR}
+#' like `"**kern"`) can never merge into each other. Thus, a humdrum file read into `humdrumR`
 #' must not end with fewer columns than it starts.
 #' Spine merges (`"*v"`) can only happen within spine paths that originally split off the same spine.
 #' This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
@@ -262,18 +263,20 @@ NULL
 #' Within a piece, the spines which appear at the beginning of the piece are the "true" spines through the rest of the piece, numbered
 #' from left to right, starting from `1L`.
 #' For each local token, the value in the `Spine` field is an integer indicating which of these
-#' "true" spines it belongs to---global tokens have a `NA` value in their \code{Spine} field, because they are considerd to not belong to any spine.
-#' Any spine path splits (`"*^"` from the main spines form subspines, which we call \strong{Paths}.
+#' "true" spines it belongs to---global tokens have a `NA` value in their `Spine` field, because they are considerd to not belong to any spine.
+#' Any spine path splits (`"*^"` from the main spines form subspines, which we call **Paths**.
 #' Every spine's paths are numbered, from right to left, starting from `0L`.
-#' A spine with no splits will have all `0L`s in its \code{Path} field.
+#' A spine with no splits will have all `0L`s in its `Path` field.
 #' 
 #' @section Columns:
+#'
 #' It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 #' (This always requires removing global records.)
 #' In order to do this, while maintaining a sensible relationship between spine which have spine paths,
-#' [humRead] automatically \emph{pads} humdrum data into a complete, non-ragged 2d table.
+#' [humRead] automatically *pads* humdrum data into a complete, non-ragged 2d table.
 #' For instance, given this file
-#' \preformatted{
+#' 
+#' ```
 #' **kern  **kern
 #' A       E
 #' *^      *
@@ -282,9 +285,11 @@ NULL
 #' *v      *v      *
 #' A       C        
 #' *-      *-
-#' }
+#' ```
+#' 
 #' [humRead] pads the file as so:
-#' \preformatted{
+#' 
+#' ```
 #' **kern   _P       **kern
 #' A        _P       E
 #' *^       _P       *
@@ -298,120 +303,132 @@ NULL
 #' 1        1        2        Spine
 #' 0        1        0        Path
 #' 1        2        3        Column
-#' }
-#' (In this example, the `Spine`, \code{Path}, and \code{Column} values are shown below the data.)
+#' ```
+#' (In this example, the `Spine`, `Path`, and `Column` values are shown below the data.)
 #' The `"_P"` tokens stand for "padded path."
-#' This appraoch assures that every \strong{Spine} is a contiguous block of tokens, of constant width.
+#' This appraoch assures that every **Spine** is a contiguous block of tokens, of constant width.
 #' In most humdrumR use cases, these padding tokens (and the `Column` field) can be safely ignored.
 #' 
 #' @section Corpus padding:
-#' [humRead] automatically pads spine paths \emph{within pieces}.
+#'
+#' [humRead] automatically pads spine paths *within pieces*.
 #' However, as mentioned above, there is also (sometimes) a need to pad across pieces, in order
 #' to create a logical, clean 2d structure.
 #' Consider this example, with humdrum data from two pieces:
-#' \preformatted{
-#' (From piece 1:)
-#' **kern   **kern  **kern
-#' E        D       C
-#' D        .       .
-#' C        C       E
-#' *-       *-      *-
-#' (From piece 2:)
-#' **kern   **kern
-#' A        A
-#' .        B
-#' C        C
-#' *-       *-
-#' }
+#' 
+#' + *Piece 1*:
+#'    ```
+#'    **kern   **kern  **kern
+#'    E        D       C
+#'    D        .       .
+#'    C        C       E
+#'    *-       *-      *-
+#'    ```
+#' + *Piece 2*:
+#'    ```
+#'    **kern   **kern
+#'    A        A
+#'    .        B
+#'    C        C
+#'    *-       *-
+#'    ```
+#' 
 #' In this example, we have two pieces, one with three spines, the other with two.
 #' There is no way to squish these two pieces into one regular 2d table.
-#' But we \emph{could} pad any missing columns, as so:
-#' \preformatted{
-#' (From piece 1:)
-#' **kern   **kern  **kern
-#' E        D       C
-#' D        .       .
-#' C        C       E
-#' *-       *-      *-
-#' (From piece 2:)
-#' **kern  **kern   _C
-#' A        A       _C
-#' .        B       _C
-#' C        C       _C
-#' *-       *-      _C
-#' }
+#' But we *could* pad any missing columns, as so:
+#' 
+#' + *Piece 1*:
+#'    ```
+#'    **kern   **kern  **kern
+#'    E        D       C
+#'    D        .       .
+#'    C        C       E
+#'    *-       *-      *-
+#'    ```
+#' + *Piece 2*:
+#'    ```
+#'    **kern  **kern   _C
+#'    A        A       _C
+#'    .        B       _C
+#'    C        C       _C
+#'    *-       *-      _C
+#'    ```
+#'
 #' The function `alignColumns` is used to achieve just this effect.
 #' In this example, the `"_C"` token stands for "padded column."
 #' 
 #' The presence of spine paths makes padding columns across pieces a bit more complicated.
 #' What `alignColumns` will do, is match up all pieces in a corpus so that
-#' every \strong{Spine}/\strong{Path} field pair allign in the same column.
+#' every **Spine**/**Path** field pair allign in the same column.
 #' Here is an example, with its paths already padded: 
-#' \preformatted{
-#' (From piece 1:)
-#' **kern      _P        **kern
-#' A           _P        E
-#' B           _P        D
-#' *^          _P        *
-#' A           C         E
-#' G#          B         E
-#' *v          *v        *
-#' A           _P        E
-#' *-          _P        *-
-#' #################################################
-#' 1           1         2         Spine
-#' 0           1         0         Path
-#' 1           2         3         Column
 #' 
-#' (From piece 2:)
-#' **kern     **kern    _P
-#' A          E         _P
-#' *          *^        _P
-#' G#         D         F
-#' A          C         E
-#' *          *v        *v
-#' E          D         _P
-#' *-         *-        _P        
-#' #################################################
-#' 1          2         2        Spine
-#' 0          0         1        Path
-#' 1          2         3        Column
-#' }
+#' + *Piece 1*:
+#'    ```
+#'    **kern      _P        **kern
+#'    A           _P        E
+#'    B           _P        D
+#'    *^          _P        *
+#'    A           C         E
+#'    G#          B         E
+#'    *v          *v        *
+#'    A           _P        E
+#'    *-          _P        *-
+#'    #################################################
+#'    1           1         2         Spine
+#'    0           1         0         Path
+#'    1           2         3         Column
+#'    ```
+#' + *Piece 2*:
+#'    ```
+#'    **kern     **kern    _P
+#'    A          E         _P
+#'    *          *^        _P
+#'    G#         D         F
+#'    A          C         E
+#'    *          *v        *v
+#'    E          D         _P
+#'    *-         *-        _P        
+#'    #################################################
+#'    1          2         2        Spine
+#'    0          0         1        Path
+#'    1          2         3        Column
+#'    ```
 #' We have two pieces, each with two spines,
 #' but in the first piece, the first spine splits, while in the second piece, the
 #' second spine splits. Thus, the padded output will have four columns:
-#' \preformatted{
-#' (From piece 1:)
-#' **kern    _P        **kern   _C
-#' A         _P        E        _C
-#' B         _P        D        _C
-#' *^        _P        *        _C
-#' A         C         E        _C
-#' G#        B         E        _C
-#' *v        *v        *        _C
-#' A         _P        E        _C
-#' *-        _P        *-       _C 
-#' ###########################################################
-#' 1         1         2        2         Spine
-#' 0         1         0        1         Path
-#' 1         2         3        4         Column
 #' 
-#' (From piece 2:)
-#' **kern    _C        **kern   _P
-#' A         _C        E        _P
-#' *         _C        *^       _P
-#' G#        _C        D        F
-#' A         _C        C        E
-#' *         _C        *v       *v
-#' E         _C        D        _P
-#' *-        _C        *-       _P 
-#' #########################################################       
-#' 1         1         2        2         Spine
-#' 0         1         0        1         Path
-#' 1         2         3        4         Column
-#' }
-#' Note that code{alignColumns} actually adds rows to the [humdrumR-class] object's
-#' internal \code{\link[humdrumR:humTable]{humdrum tables}}.
+#' + *Piece 1*:
+#'    ```
+#'    **kern    _P        **kern   _C
+#'    A         _P        E        _C
+#'    B         _P        D        _C
+#'    *^        _P        *        _C
+#'    A         C         E        _C
+#'    G#        B         E        _C
+#'    *v        *v        *        _C
+#'    A         _P        E        _C
+#'    *-        _P        *-       _C 
+#'    ###########################################################
+#'    1         1         2        2         Spine
+#'    0         1         0        1         Path
+#'    1         2         3        4         Column
+#' + *Piece 2*:
+#'    ```
+#'    **kern    _C        **kern   _P
+#'    A         _C        E        _P
+#'    *         _C        *^       _P
+#'    G#        _C        D        F
+#'    A         _C        C        E
+#'    *         _C        *v       *v
+#'    E         _C        D        _P
+#'    *-        _C        *-       _P 
+#'    #########################################################       
+#'    1         1         2        2         Spine
+#'    0         1         0        1         Path
+#'    1         2         3        4         Column
+#'    ```
+#' Note that `alignColumns` actually adds rows to the [humdrumR-class] object's
+#' internal [humdrum tables][humTable].
 #' @name humColumns
 NULL
 
@@ -509,7 +526,7 @@ orderHumtab <- function(humtab) {
 #' the [humdrum table][humTable] documentation.
 #' @slot Active A quosure expression which 
 #' extracts data from field(s) in the [humdrum table][humTable]: the "active expression."
-#' @slot LoadTime A [POSIXct][base::DataTimeClasses] value, indicating the time at which [readHumdrum] was
+#' @slot LoadTime A [POSIXct][base::DateTimeClasses] value, indicating the time at which [readHumdrum] was
 #' called to create this `humdrumR` object.
 #' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
@@ -571,44 +588,44 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' basic `R` data types.
 #' 
 #' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR-class] object's
-#' \strong{Active} expression, and (attempts) to force the result to a vector of mode. This
+#' **Active** expression, and (attempts) to force the result to a vector of mode. This
 #' method is essentially a wrapper for [evalActive].
 #' 
 #' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR-class] object's
-#' \strong{Active} expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
+#' **Active** expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
 #' Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines. 
 #' 
 #' \code{\link[base:data.frame]{as.data.frame(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[base:data.frame]{data.frame}}.
 #' \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
 #' 
-#' `as.matrices`, \code{as.data.frames}, and \code{as.data.tables} call \code{as.matrix}/\code{as.data.frame}/\code{as.data.table}
+#' `as.matrices`, `as.data.frames`, and `as.data.tables` call `as.matrix`/`as.data.frame`/`as.data.table`
 #' on each individual file in a [humdrumR-class] corpus, returning a list of matices/data.frames/data.tables.
 #' 
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
-#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
+#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
 #' 
-#' @param pad.files `logical` (default \code{TRUE}). If any pieces in the [humdrumR-class] corpus have fewer 
-#' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (\code{par.files == TRUE}) or
+#' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumR-class] corpus have fewer 
+#' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
 #' 
 #' @param pad.paths `logical` If any spine path splits (\code{'*^'}) occur in the humdrumR data, should they be padded 
-#' with the `padder` argument (\code{par.files == TRUE}) or
+#' with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.paths == FALSE`)? 
 #' Note that these "padded" points are not represented in the original humdrum data.
 #' 
-#' @param padder An atomic value of length one. If `par.files` or \code{pad.paths} are true, the \code{padder}
+#' @param padder An atomic value of length one. If `par.files` or `pad.paths` are true, the `padder`
 #' argument is used to fill in the desired gaps.
 #' 
 #' 
-#' @param mode If the `mode` argument is not \code{'any'}, it can be a single \code{character}
+#' @param mode If the `mode` argument is not \code{'any'}, it can be a single `character`
 #' string naming an atomic mode---the output will be coerced to this mode (if possible).
 #' 
-#' @param field(s) If the `field` argument is \emph{not} \code{NULL}, it can instead be a \code{character} string matching
+#' @param field(s) If the `field` argument is *not* `NULL`, it can instead be a `character` string matching
 #' the [humdrumR-class] object's fields. If so, these fields are extracted instead of the
 #' \code{\link[humdrumR:humdrumR-class]{Active expression}}.
-#' For calls to `as.vector` and \code{as.data.frame}, only one field can be extracted.
+#' For calls to `as.vector` and `as.data.frame`, only one field can be extracted.
 #' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
 #' returned in a third matrix dimension, each field forming one rectangular slice.
 #' 
@@ -757,7 +774,7 @@ isActiveAtomic <- function(humdrumR) {
 #' as synonyms for the humdrumR-specific sizing functions:
 #' \code{\link[base:length]{length(humdata)}} is equivalent to `npieces(humdata)`;
 #' \code{\link[base:nrow]{nrow(humdata)}} is shortand for `nrecords(., dataTypes = 'LIMDd')` (i.e., local records only).
-#' \code{\link[base:ncol]{ncol(humdata)}} returns the \emph{maximum} value of the \code{\link[humdrumR:humTable]{Column}} fields---the maximum number of
+#' \code{\link[base:ncol]{ncol(humdata)}} returns the *maximum* value of the \code{\link[humdrumR:humTable]{Column}} fields---the maximum number of
 #' tab-delineated columns in the humdrum files (irrespective of Spines/Paths).
 #' The results of \code{\link[base:nrow]{nrow}} and \code{\link[base:ncol]{ncol}} will match
 #' up with the dimensions of matrices/data.frames produced by calls to \code{\link[humdrumR:humAs]{as.matrix/as.data.frame}}.
@@ -795,7 +812,7 @@ npieces <- function(humdrumR) {
 #' 
 #' [HumdrumR][humdrumR-class] objects can be divided into "subcorpora."
 #' These functions tell us if there are any subcorpora and, if so, what they are called.
-#' @name humSubCorpora
+#' @name humSize
 #' @export
 anySubcorpora <- function(humdrumR){
     checkhumdrumR(humdrumR, 'anySubcorpora')
@@ -805,7 +822,7 @@ anySubcorpora <- function(humdrumR){
     length(unique(humtab$SubCorpus)) > 1L
 }
 
-#' @name humSubCorpora
+#' @name humSize
 #' @export
 namesSubcorpora <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'namesSubcorpora')
@@ -838,6 +855,7 @@ is.empty <- function(humdrumR) ntokens(humdrumR, 'D') == 0L
 
 
 
+#' @name humSize
 #' @export
 anyPaths <- function(humdrumR) {
           checkhumdrumR(humdrumR, 'anyPaths')
@@ -847,6 +865,7 @@ anyPaths <- function(humdrumR) {
           
 }
 
+#' @name humSize
 #' @export
 anyStops <- function(humdrumR) {
           checkhumdrumR(humdrumR, 'anyStops')
@@ -932,6 +951,8 @@ alignColumns <- function(humdrumR, padder = '_C') {
           
 }
 
+#' Merge two (or more) humdrumR datasets
+#'
 #' @export
 #' @name humMerge
 mergeHumdrum <- function(...) {
@@ -1012,6 +1033,8 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
 
 #########################################foldHumdrum ----
 
+#' HumdrumR data "Shape"
+#'
 #' These functions are used to change the "shape"
 #' of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
 #' (held within [humdrumR-class] objects of course).
@@ -1019,12 +1042,12 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
 #' The `foldXXX` family allows you collapse all 
 #' \code{\link[humdrumR:humTable]{user fields}}
 #' across groups in another field.
-
+#'
 #' @param humdrumR A [humdrumR-class] data object.
-#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
-#' @param foldAtomic `logical`. If \code{foldAtomic == TRUE}, each stop is collapsed to a single string
+#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
+#' @param foldAtomic `logical`. If `foldAtomic == TRUE`, each stop is collapsed to a single string
 #' `foldAtomic == FALSE`, each stop is collapsed to a list of tokens. 
-#' @param sep `character`. If \code{foldAtomic == TRUE}, collapsed tokens are separated by this string.
+#' @param sep `character`. If `foldAtomic == TRUE`, collapsed tokens are separated by this string.
 #' @param pad `logical`. Should \code{\link[humdrumR:humColumns]{path/column padding tokens}} be included?
 #' 
 #' @name humShape
@@ -1175,6 +1198,7 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 #' 
 #' Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
 #' 
+#' @rdname humTable
 #' @export
 getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
           checkhumdrumR(humdrumR, 'getHumtab')
@@ -1270,7 +1294,7 @@ update_d <- function(humdrumR) {
 #' i.e., whenever you return a `humdrumR` object in the terminal.
 #' In any expression within a call to 
 #' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-#' `.` is automatically replaced with the \code{Active} expression.
+#' `.` is automatically replaced with the `Active` expression.
 #' 
 #' The active expression can be changed with the commands 
 #' \code{\link[humdrumR:setActive]{setActive or the $ operator}}.
@@ -1321,7 +1345,7 @@ update_d <- function(humdrumR) {
 #' If `Pitch` is the active field the rest tokens are null-data and will be ignored!
 #' 
 #' 
-#' @rdname humActive
+#' @name humActive
 NULL
 
 #' `evalActive` evaluates the active expression in a
@@ -1330,13 +1354,13 @@ NULL
 #' 
 #' @param humdrumR A [humdrumR-class] data object.
 #' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', 'P'` 
-#' or any combination of these in a single string (e.g., `"LIM"`).
-#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).
-#'  (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for an explanation.).
-#' @param forceVector `logical`. If \code{TRUE}, the result is forced to be an atomic vector.
-#' #' @param sep A length-one `character` string. If \code{forceVector == TRUE} this value is used as a separator 
-#' between tokens that are collapsed.
-#' @param nullAsDot A single `atomic` value. Any null tokens are coerced to this value (default is \code{.}).
+#'        or any combination of these in a single string (e.g., `"LIM"`).
+#'        (see the [humdrum table][humTable] documentation **Fields** section for an explanation.).
+#' @param forceVector `logical`. If `TRUE`, the result is forced to be an atomic vector.
+#' @param sep A length-one `character` string. If `forceVector == TRUE` this value is used as a separator 
+#'        between tokens that are collapsed.
+#' @param nullAsDot A single `atomic` value. Any null tokens are coerced to this value (default is `.`).
+#' @name humActive
 #' @export
 evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA)  {
   dataTypes <- checkTypes(dataTypes, 'evalActive')
@@ -1469,7 +1493,6 @@ checkFieldTypes <- function(types, argname, callname) {
 
 #' This controls which humdrumR data are printed and default target for pipe.
 #' @name humdrumR-class
-#' @usage humdata$Field
 #' @export
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {

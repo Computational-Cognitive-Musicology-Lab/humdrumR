@@ -4,6 +4,7 @@
 \name{tertianSet}
 \alias{tertianSet}
 \alias{tset}
+\alias{is.tertianSet}
 \title{Tertian set}
 \usage{
 tset(
@@ -14,6 +15,8 @@ tset(
   extension = NULL,
   inversion = 0L
 )
+
+is.tertianSet(x)
 }
 \description{
 \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s
@@ -33,13 +36,13 @@ indicate that the root, third, fifth, and seventh \emph{are} part of the harmony
 Ultimately, adding or removing a chord degree from a harmony can be achieved by adding the power of
 two associated with that degree:
 \itemize{
-\item \strong{Root}: $\pm 1$
-\item \strong{Third}: $\pm 2$
-\item \strong{Fifth}: $\pm 4$
-\item \strong{Seventh}: $\pm 8$
-\item \strong{Ninth}: $\pm 16$
-\item \strong{Eleventh}: $\pm 32$
-\item \strong{Thirteenth}: $\pm 64$
+\item \strong{Root}: \eqn{\pm 1}
+\item \strong{Third}: \eqn{\pm 2}
+\item \strong{Fifth}: \eqn{\pm 4}
+\item \strong{Seventh}: \eqn{\pm 8}
+\item \strong{Ninth}: \eqn{\pm 16}
+\item \strong{Eleventh}: \eqn{\pm 32}
+\item \strong{Thirteenth}: \eqn{\pm 64}
 }
 
 \code{tertianSet} has many specific methods defined for reading/writing harmonic information.

@@ -39,3 +39,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR

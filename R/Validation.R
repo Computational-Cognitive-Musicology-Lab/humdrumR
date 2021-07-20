@@ -45,7 +45,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     
     # If files are empty everything gets thrown off...this is a hacky fix
     # Just pad empty files with a single empty record
-    files <- IfElse(lengths(files) == 0L, "", files)
+    files <- ifelse(lengths(files) == 0L, "", files)
     
     filevec  <- rep(filepaths, lengths(files))
     recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 

@@ -4,10 +4,15 @@ author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tonality and Meter in humdrumR}
+  %\VignetteIndexEntry{Pitch and Tonality in humdrumR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+```{r}
+library(humdrumR)
+
+```
 
 # Tonality
 
@@ -104,7 +109,7 @@ Any "tempered fifth" can be used as the generating "tonal harmonic" ratio:
 $2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal ratio}$
 
 For instance, if the $\text{tonalHarmonic} = 2^{\frac{19}{12}}$, the result is equal temperament.
-All `humdrumR` functions that relate to precise frequency values---such as `as.frequency`---have a `tonalHarmonic` argument.
+All `humdrumR` functions that relate to precise frequency values---such as `frequency`---have a `tonalHarmonic` argument.
 This discussion illustrates that what "actual" harmonic we use to generate frequencies is largely irrelevant.
 The combination of the `Octave` and `Fifth` integer slots represents Western "pitch space" abstractly.
 In many research use cases, we ignore the `Octave` field altogether, only considering the abstract "tonal chroma" (i.e., the line-of-fifths) described by the `Fifth` slot.
@@ -143,7 +148,7 @@ segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
 
 coor <- expand.grid(X = -8:8, Y = -8:8)
 
-text(x = coor$X, y = coor$Y, labels = as.sciPitch(tint(coor$Y, coor$X)), cex=.5)
+text(x = coor$X, y = coor$Y, labels = pitch(tint(coor$Y, coor$X)), cex=.5)
 
 
 axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
@@ -254,7 +259,7 @@ segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
 
 coor <- expand.grid(X = -8:8, Y = -8:8)
 
-text(x = coor$X, y = coor$Y, labels = as.interval(tint(coor$Y, coor$X), contour = c(octave = FALSE, threshold = P1)), cex=.5)
+text(x = coor$X, y = coor$Y, labels = interval(tint(coor$Y, coor$X), contour = c(octave = FALSE, threshold = P1)), cex=.5)
 
 
 axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
@@ -477,60 +482,60 @@ An `enharmonicWrap` of 21 allows all single-flat and single-sharp notes, but no 
 `humdrumR` exports numerous functions for converting to/from `tonalInterval`s and various string representations, as well as integer/numeric representations:
 
 
-+ as.tonalInterval
++ tonalInterval
 	+ tonalInterval -> tonalInterval
 	+ integer -> (semit) -> tonalInterval
 	+ numeric  -> (semit) -> tonalInterval
 	+ character -> (regex) -> tonalInterval
-+ as.double
++ double
         + tonalInterval -> numeric (ratio)
-+ as.semit 
++ semit 
 	+ tonalInterval -> integer
 	+ character -> integer
 	+ numeric -> integer
-+ as.midi 
++ midi 
 	+ tonalInterval -> integer
 	+ character -> (regex) -> integer
 	+ numeric -> integer
-+ as.tonalChroma 
++ tonalChroma 
 	+ tonalInterval -> character
 	+ character -> (regex -> tonalInterval) -> character
         + integer -> (fifth -> tonalInterval) -> character
-+ as.sciPitch 
++ pitch 
 	+ tonalInterval -> character
 	+ character -> (regex -> tonalInterval) -> character
-+ as.kernPitch 
++ kernPitch 
 	+ tonalInterval -> tonalInterval
 	+ character -> (regex -> tonalInterval) -> character
 	+ integer -> (semits) -> character
 	+ numeric -> (ratio) -> character
-+ as.contour 
++ contour 
 	+ tonalInterval -> character
-+ as.interval 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (semits -> tonalInterval) -> character
-	+ numeric -> (ratio -> tonalInterval) -> character
-+ as.scaleDegree 
++ interval 
 	+ tonalInterval -> character
 	+ character -> (regex -> tonalInterval) -> character
 	+ integer -> (semits -> tonalInterval) -> character
 	+ numeric -> (ratio -> tonalInterval) -> character
-+ as.solfa 
++ scaleDegree 
+	+ tonalInterval -> character
+	+ character -> (regex -> tonalInterval) -> character
+	+ integer -> (semits -> tonalInterval) -> character
+	+ numeric -> (ratio -> tonalInterval) -> character
++ solfa 
 	+ tonalInterval -> character
 	+ character -> (regex -> tonalInterval) -> character
 	+ integer -> (fifth -> tonalInterval) -> character
-+ as.ratio 
++ ratio 
 	+ tonalInterval -> numeric
 	+ character -> (regex -> tonalInterval) -> numeric
 	+ integer -> (fifth -> tonalInterval) -> numeric
 	+ numeric -> numeric
-+ as.fraction 
++ fraction 
 	+ tonalInterval -> character
 	+ character -> (regex -> tonalInterval) -> character
 	+ integer -> (fifth -> tonalInterval) -> character
 	+ numeric -> character
-+ as.frequency 
++ frequency 
 	+ tonalInterval -> numeric
 	+ character -> (regex -> tonalInterval) -> numeric
 	+ integer -> (fifth -> tonalInterval) -> numeric
@@ -547,7 +552,7 @@ Various tonal interval functions share a number of common arguments.
 
 method      `sigma`  `delta`  `contour`  `Key`  `generic`  `accidental`  `cautionary`  `simple`  `octave`  `direction`  
 ----------- -------- -------- ---------- ------ ---------- ------------- ------------- --------- --------- ------------
-`as.semit`  
+`semit`  
 
 ## diatonicSet
 

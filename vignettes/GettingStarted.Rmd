@@ -56,7 +56,7 @@ dir('HumdrumData')
 ```
 
 
-It looks like there are `r num2word(length(dir('HumdrumData')))` folders of humdrum data available to you.
+It looks like there are `r humdrumR:::num2word(length(dir('HumdrumData')))` folders of humdrum data available to you.
 Using `dir` again, we can look inside one: let's start with the 'BachChorales' folder.
 
 ```{r}
@@ -66,7 +66,7 @@ dir('HumdrumData/BachChorales')
 ```
 
 
-There are `r num2word(length(dir('HumdrumData/BachChorales')))` files in the folder, named "chor001.krn", "chor002.krn", etc.
+There are `r humdrumR:::num2word(length(dir('HumdrumData/BachChorales')))` files in the folder, named "chor001.krn", "chor002.krn", etc.
 These are simple plain humdrum text files, using the '**kern' interpretation to represent ten chorales by J.S. Bach.
 Take a minute to find the files in your computer's finder/exporer and open them up with a simple text editor.
 One of the core philosophies of humdrumR is that we maintain a direct, transparent relationship with our symbolic data---so always take the time to look at your data! 
@@ -122,7 +122,7 @@ chorales
 
 ```
 
-Wow! We've now got a "humdrumR corpus of `r num2word(length(chorales)) ` files"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
+Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2word(length(chorales)) ` files"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
 Notice that when you print humdrumR object, humdrumR shows you the beginning of the first file and the end of the last file, as well as telling you how many files there are in total.
 
 
@@ -137,7 +137,7 @@ Notice that when you print humdrumR object, humdrumR shows you the beginning of 
 
 To really make use of humdrumR, you need to understand a bit about how humdrum data is represented in the humdrumR package: the humdrumR "**data model**."
 
-The essential thing to understand is how it maps between the [humdrum data syntax](humdrum.org) and a R data.table.
+The essential thing to understand is how it maps between the [humdrum data syntax](https://humdrum.org) and a R data.table.
 
 ![](images/DataModelDiagram.png){width=600px}
 
@@ -173,7 +173,7 @@ apply(format.data.frame(ex1df, justify = 'left', width = 30), 1,
 
 ```
 
-This file contains `r num2word(length(tokens))` individual tokens.
+This file contains `r humdrumR:::num2word(length(tokens))` individual tokens.
 To illustrate, here I'll print the same file, but with *each* token bracketed by `<` and `>`:
 
 ```{r echo = FALSE}
@@ -225,8 +225,8 @@ humtab
 ```
 
 
-Look at that, a `data.table` with `r num2word(nrow(humtab))` rows!
-In this case, the humdrum data table ("humtable") has `r num2word(ncol(humtab))` columns!
+Look at that, a `data.table` with `r humdrumR:::num2word(nrow(humtab))` rows!
+In this case, the humdrum data table ("humtable") has `r humdrumR:::num2word(ncol(humtab))` columns!
 The columns are:
 
 ```{r}
@@ -241,7 +241,7 @@ To learn what fields are in a humdrumR object, it is better to call the `fields`
 fields(example1)
 ```
 
-We see that there are `r num2word(ncol(humtab))` fields (humtable columns), and that they are divided into five types of fields: 
+We see that there are `r humdrumR:::num2word(ncol(humtab))` fields (humtable columns), and that they are divided into five types of fields: 
 
 + Data fields
 + Structure fields
@@ -425,11 +425,11 @@ Each expression is evaluated, and the result is put back in the same place in th
 You'll also notice that in the printout, there is a new Data field, called `Pipe1`---this is the default name `humdrumR` assigns to new fields that you create.
 
 If you want, you can pick your own names by using `$<-` (i.e., assigning to a new name you create using `$`).
-For instance, lets use `humdrumR`'s `as.semit` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
+For instance, lets use `humdrumR`'s `semit` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
 
 ```{r}
 
-chorales %hum>% ~ as.semit(Token)
+chorales %hum>% ~ semit(Token)
 
 ```
 
@@ -438,7 +438,7 @@ Lets do it again, but save the result in a new field, which we will call `Semits
 
 ```{r}
 
-chorales %hum>% ~ as.semit(Token) -> chorales$Semits
+chorales %hum>% ~ semit(Token) -> chorales$Semits
 
 ```
 

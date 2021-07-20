@@ -42,26 +42,26 @@ your \code{humdrumR} work flows.)
 The key is that the function \code{\link{withinHumdrum}} always returns a new
 \code{\linkS4class{humdrumR}} data object. Thus, you can always send the output
 of \code{\link{withinHumdrum}} back in to a new call of \code{\link{withinHumdrum}}.
-This is exactly what the \code{\%hum>\%} is for: on the left-hand side,
+This is exactly what the \verb{\%hum>\%} is for: on the left-hand side,
 input a \code{\linkS4class{humdrumR}} object, on the right-hand side suitable
 arguments to \code{\link{withinHumdrum}} (i.e., a formula, a function, or list of formulae,
 functions, and named arguments). You can then chain this call with another call to
-\code{\%hum>\%} and more \code{\link{withinHumdrum}} arguments.
+\verb{\%hum>\%} and more \code{\link{withinHumdrum}} arguments.
 
-\code{\%hum<\%} acts the same way as \code{\%hum>\%} except it calls \code{\link{withHumdrum}}.
+\verb{\%hum<\%} acts the same way as \verb{\%hum>\%} except it calls \code{\link{withHumdrum}}.
 Since \code{\link{withHumdrum}} does \emph{not} return a \code{\linkS4class{humdrumR}},
-the output can't be piped any further (using \code{\%hum>\%} or \code{\%hum<\%}).
-Thus, \code{\%hum<\%} should only be used as the last step in a pipe---you would do this
+the output can't be piped any further (using \verb{\%hum>\%} or \verb{\%hum<\%}).
+Thus, \verb{\\\%hum<\\\%} should only be used as the last step in a pipe---you would do this
 if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
 a normal vector or list of R data.
 
-' \code{\%humT\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered
+' \verb{\\\%humT\\\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered
 humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
 \code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
 \href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
 for instance, for plotting.
 
-\code{\%hum[]\%} is similar to \code{\%hum>\%} except it apply the formulae on its right-hand
+\verb{\%hum[]\%} is similar to \verb{\%hum>\%} except it apply the formulae on its right-hand
 side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
 a \code{\linkS4class{humdrumR}} data object on the fly.
 }
@@ -74,11 +74,11 @@ and pipe each element in the list to an expression/function.
 There are plural pipe versions of each singular pipe operator.
 Just add an "s" to make them plural:
 \itemize{
-\item \code{\%>\%} (singular) : \code{\%s>\%} (plural);
-\item \code{\%hum>\%} (singular) : \code{\%hums>\%} (plural);
-\item \code{\%hum<\%} (singular) : \code{\%hums<\%} (plural);
-\item \code{\%humT\%} (singular) : \code{\%humsT\%} (plural);
-\item \code{%hum[]%} (singular) : \code{%hums[]%} (plural);
+\item \verb{\%>\%} (singular) : \verb{\%s>\%} (plural);
+\item \verb{\%hum>\%} (singular) : \verb{\%hums>\%} (plural);
+\item \verb{\%hum<\%} (singular) : \verb{\%hums<\%} (plural);
+\item \verb{\%humT\%} (singular) : \verb{\%humsT\%} (plural);
+\item \verb{\%hum[]\%} (singular) : \verb{\%hums[]\%} (plural);
 }
 
 Note: \verb{\%s>\%} is an expansion of the \link[magrittr:pipe]{magrittr::\%>\%} pipe operator, which
@@ -87,6 +87,7 @@ always behave the way we might like!
 }
 
 \examples{
+
 humdata <- readHumdrum('path*.krn')
 
 humdata \%hum>\% ~table(.)

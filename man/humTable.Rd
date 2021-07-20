@@ -2,15 +2,39 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humTable}
 \alias{humTable}
+\alias{getHumtab}
 \title{Humdrum Tables}
+\usage{
+getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
+}
+\arguments{
+\item{humdrumR}{A \code{humdrumR} object.}
+
+\item{dataTypes}{A \code{character} vector. Specifies which types of data tokens/records to extract.
+See the \link{humTable} documentation and/or the humdrum syntax vignette for clarification!
+
+For \code{dataTypes}, values can be:
+\itemize{
+\item \code{"G"}: global comments
+\item \code{"L"}: local comments
+\item \code{"I"}: interpretations
+\item \code{"M"}: barlines
+\item \code{"D"}: non-null data
+\item \code{"d"}: null data
+}
+
+Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
+}
 \description{
 In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
-as a single \link{data.table}.
-(A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}.)
+as a single \link[data.table:data.table]{data.table}
+(A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}).
 Humdrum tables are stored "inside" every \linkS4class{humdrumR} object that you will work with, and various \code{humdrumR}
 functions allow you to study or manipulate the them.
 If you want to directly access the humdrum table within a \linkS4class{humdrumR} object, use the \link{getHumtab} function.
+
+\code{getHumtab} extracts a \link[=humTable]{humdrum table} from a \linkS4class{humdrumR} object.
 }
 \details{
 In a humdrum table, each row represents a single "token"
@@ -24,9 +48,7 @@ to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 \item \eqn{Field = Column}
 }
 }
-\section{Fields}{
-
-
+\section{Fields:}{
 There are five types of fields in a humdrum table:
 \enumerate{
 \item Data fields
@@ -241,9 +263,7 @@ Any humdrum data with these records will end up having \code{COM} and \code{OTL}
 }
 }
 
-\section{Null Data}{
-
-
+\section{Null Data:}{
 In humdrum syntax, there is no requirement that every spine-path contains data
 in every record. Rather, spines are often padded with \emph{null tokens}.
 In some cases, entire records may be padded with null tokens.
@@ -274,9 +294,7 @@ Whenever you \link[=humPrint]{print} or \link[=writeHumdrum]{export} a \linkS4cl
 Thus, if you are working with numeric data, with \code{NA} values, these \code{NA} values will print as \code{"."}.
 }
 
-\section{Reshaping}{
-
-
+\section{Reshaping:}{
 Breaking the complex syntax of humdrum data into the "flat" structure of a humdrum table, with every single token on one line
 of a \code{data.table}, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily
@@ -284,7 +302,5 @@ regroup and reform the original humdrum data or use the structure of the data (l
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
 HumdrumR has several options for \link[=humShape]{"folding"} tokens within humdrum tables,
 or otherwise \link[=humCoercion]{reshaping humdrum data} into data formats/structures you might prefer.
-
-...
 }
 

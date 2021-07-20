@@ -590,19 +590,6 @@ Repeat <- function(x, ..., margin = 1L) {
 
 # Lazy version of base::ifelse
 
-#' This function is exactly like \code{\link{base::ifelse}}, except it is lazy.
-#' \code{\link{base::ifelse}} applies the x and y cases to the whole vector,
-#' regardless of the condition. IfElse only computes the output y where actually 
-#' asked to.
-#' @export
-IfElse <- function(true, yes, no) {
-  if (length(true) == 0L) return(vector(class(yes), 0L))
-  match_size(true = true, yes = yes, no = no, toEnv = TRUE)
-  out <- no
-  if (any(true & !is.na(true))) out[!is.na(true) & true ] <- yes[!is.na(true) & true]
-  out
-}
-
 .ifelse <- function(bool, texpr, fexpr) {
     # this is a truly lazy ifelse!
     # i.e., it only evaluates the part of the 
@@ -848,9 +835,10 @@ print.rational <- function(x) print(as.fraction(x))
 # sigma (integrate) and delta (derive) should be perfect inverses, 
 # so long as their skip arguments are the same, and the scalar
 # argument is NULL
+
 #' Interval "calculus"
-#' @rdname intervalCalculus
-#' @export integrate derive sigma delta calculus
+#' @name intervalCalculus
+#' @export 
 integrate <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
@@ -864,8 +852,13 @@ integrate <- function(intervals, skip = list(is.na)) {
     intmat %dim% intervals
 
 }
+
+#' @name intervalCalculus
+#' @export 
 sigma <- integrate
 
+#' @name intervalCalculus
+#' @export 
 derive <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
@@ -879,8 +872,13 @@ derive <- function(intervals, skip = list(is.na)) {
     intmat %dim% intervals
     
 }
+
+#' @name intervalCalculus
+#' @export 
 delta <- derive
 
+#' @name intervalCalculus
+#' @export 
 calculus <- function(x, n, skip = list(na)) {
     n <- as.integer(n[1])
     if (n == 0L) return(x)

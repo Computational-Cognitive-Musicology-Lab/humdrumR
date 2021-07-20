@@ -57,8 +57,8 @@ These functions find valid humdrum files on your local machine and read them int
 \details{
 \code{findHumdrum} does the work of finding and reading the text files into R.
 \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
-create a \code{\link[humdrumR:humtable]{humdrum table}} and build
-a \code{\linkS4class{humdrumR}} data object around the table.
+create a \link{humTable} and build
+a \link[=humdrumR-class]{humdrumR} data object around the table.
 }
 \section{REpath-patterns}{
 
@@ -79,7 +79,7 @@ If you want to search for \emph{more than one} pattern, you can input them as a 
 For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
 filenames containing "mozart" OR "beethoven."
 This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
-look for any file kern files in directories containing "Mozart" OR "Beethoven."
+look for any kern files in directories containing "Mozart" OR "Beethoven."
 If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
 \code{Label} field. Unnamed patterns are simply labeled with numbers.
 

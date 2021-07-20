@@ -10,15 +10,15 @@
 #' Tonal (diatonic) sets
 #' 
 #' 
-#' `diatonicSet` is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' `diatonicSet` is one of [humdrumR]'s 
 #' types of tonal data, representing Western diatonic keys.
-#' For the most part, users should not need to interact with `diatonicSet`s directly---rather, `diatonicSet`s work behind the scene in numerous `humdrumR` pitch functions.
+#' For the most part, users should not need to interact with diatonicSets directly---rather, diatonicSets work behind the scene in numerous `humdrumR` pitch functions.
 #' See the [keyRepresentations] and [keyTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
-#' a detailed explanation of the theory and specifics of `diatonicSet`s.
+#' a detailed explanation of the theory and specifics of diatonicSets.
 #' 
 #' @details
 #' 
-#' `diatonicSet` is a [S4](http://adv-r.had.co.nz/S4.html) subclass of `humdrumR`'s virtual class [struct], 
+#' `diatonicSet` is a [S4](https://adv-r.had.co.nz/S4.html) subclass of `humdrumR`'s virtual class [struct], 
 #' from which it inherits a lot of useful "vector-like" behaviors/functionality.
 #' 
 #' 
@@ -28,7 +28,7 @@
 #' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value as the root.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
-#'  for `diatonicSet`s call [key()][diatonicRepresentations].
+#'  for diatonicSets call [key()][diatonicRepresentations].
 #' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
 #' you'll see the [key interpretation][diatonicRepresentations] representation printed.
 #' 
@@ -36,45 +36,45 @@
 #' @slot Signature integers representing the signature (number of accidentals) of the key. 
 #' @slot Alteration integers representing alterations of the diatonic set
 #' 
-#' A key is represented by two integers, \code{Root} and \code{Signature}.
+#' A key is represented by two integers, `Root` and `Signature`.
 #' Root is simply the tonic note of the key on the circle of fifths.
 #' Signature is a value on the circle of fifths, indicating the diatonic mode.
-#' You can think of the Signature value as indicating the number of accidentals, with negative numbers
+#' You can think of the `Signature` value as indicating the number of accidentals, with negative numbers
 #' for flats and positive numbers for sharps.
 #' You can also think of the signature as indicating how much the "natural key" (C major) is
 #' slid up and down the line-of-fifths.
-#' The standard diatonic modes occur if the \code{Signature - Tonic} is in the range -5:1:
+#' The [traditional diatonic modes](https://en.wikipedia.org/wiki/Mode_(music)) of Western music occur wherever `Signature - Tonic` is in the range `-5:1`:
 #' 
-#' + +1 = Lydian
-#' + +0 = Major (Ionian)
-#' + -1 = Mixolydian
-#' + -2 = Dorian
-#' + -3 = Minor (Aeolian)
-#' + -4 = Phyrgian
-#' + -5 = Locrian
+#' + \eqn{Signature - Tonic = +1 \rightarrow} Lydian
+#' + \eqn{Signature - Tonic = +0 \rightarrow} Major (Ionian)
+#' + \eqn{Signature - Tonic = -1 \rightarrow} Mixolydian
+#' + \eqn{Signature - Tonic = -2 \rightarrow} Dorian
+#' + \eqn{Signature - Tonic = -3 \rightarrow} Minor (Aeolian)
+#' + \eqn{Signature - Tonic = -5 \rightarrow} Locrian
+#' + \eqn{Signature - Tonic = -4 \rightarrow} Phyrgian
 #' 
-#' > Note that you can make diatonicSets where the `Root` is outside the `Key`. This is unusual, and may result in sets you wouldn't predict.
+#' *Note that you can make diatonicSets where the `Root` is outside the `Key`. This is unusual, and may result in sets you wouldn't predict.*
 #' 
 #' @section Alterations:
 #' 
-#' The `Alteration` (also integers) can be used to represent various 
+#' The `Alteration` slots (also integer) can be used to represent various 
 #' "altered" scales. 
-#' The integer values is interpreted as a seven-trit [balanced ternary](https://en.wikipedia.org/wiki/Balanced_ternary) string.
+#' The integer values are interpreted as a seven-trit [balanced ternary](https://en.wikipedia.org/wiki/Balanced_ternary) string.
 #' ("trits" are the ternary equivalent of binary "bits.")
+#' Balanced ternary allows for three digits, `0` (unaltered degree), `1` (sharpened degree), and `-1` (flattened degree).
 #' The seven trits correspond to the seven scale degrees on the line-of-fifth indicated by the *signature*---i.e., ordered from 
 #' lowest to hightest on the line-of-fifths, not relative to the root.
-#' (For instance, when the `Signature == 0`, the degrees are `c(-1, 0, 1, 2, 3, 4, 5)`.)
-#' Balanced ternary allows for three digits, `0` (unaltered degree), `1` (sharpened degree), and `-1` (flattened degree).
+#' (For instance, when `Signature == 0`, the degrees are `c(-1, 0, 1, 2, 3, 4, 5)`.)
 #' 
 #' The ternary arrangement maps powers of three to each scale degree, as so that in the `Alteration` integer:
 #' 
-#' + $\pm 1$: raise or flatten the **7th** scale degree.
-#' + $\pm 3$: raise or flatten the **3rd** scale degree.
-#' + $\pm 9$: raise or flatten the **6th** scale degree.
-#' + $\pm 27$: raise or flatten the **2nd** scale degree.
-#' + $\pm 81$: raise or flatten the **5th** scale degree.
-#' + $\pm 243$: raise or flatten the **1st** scale degree.
-#' + $\pm 749$: raise or flatten the **4th** scale degree.
+#' + \eqn{\pm 1}: raise or flatten the **7th** scale degree.
+#' + \eqn{\pm 3}: raise or flatten the **3rd** scale degree.
+#' + \eqn{\pm 9}: raise or flatten the **6th** scale degree.
+#' + \eqn{\pm 27}: raise or flatten the **2nd** scale degree.
+#' + \eqn{\pm 81}: raise or flatten the **5th** scale degree.
+#' + \eqn{\pm 243}: raise or flatten the **1st** scale degree.
+#' + \eqn{\pm 749}: raise or flatten the **4th** scale degree.
 #' 
 #' For example, consider `Alteration == 26`:
 #' In a balanced ternary representation, the decimal integer 26 is represented as `1 0 0 1 0 -1 0`.
@@ -97,8 +97,8 @@
 #' 
 #' @section Arithmatic:
 #' 
-#' Arithmetic between `diatonicSet`s is not defined.
-#' However, a number of useful arithmetic operations between `diatonicSet`s and other data types *are* defined:
+#' Arithmetic between diatonicSets is not defined.
+#' However, a number of useful arithmetic operations between diatonicSets and other data types *are* defined:
 #' 
 #' XXXX Elaborate
 #' XXXX Need to implement special logic for adding Alterations! (Taking into account Signature addition.)
@@ -106,15 +106,15 @@
 #' 
 #' @section Relational Operators:
 #' 
-#' `diatonicSet`s can be compared using the standard [relational operations][base::Comparison] `==`, and `!=`.
-#' Two `diatonicSet`s are equal (according to `==`) only if all their slots (`Root`, `Signature`, and `Alteration`)
+#' diatonicSets can be compared using the standard [relational operations][base::Comparison] `==`, and `!=`.
+#' Two diatonicSets are equal (according to `==`) only if all their slots (`Root`, `Signature`, and `Alteration`)
 #' are exactly identical. 
-#' Ordinal comparisons (e.g., `>`, `<=`) between `diatonicSet`s are on their `Signature` only.
+#' Ordinal comparisons (e.g., `>`, `<=`) between diatonicSets are on their `Signature` only.
 #' 
 #' 
 #' @section Coercion:
 #' 
-#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `diatonicSet`s.
+#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into diatonicSets.
 #' This can be done using the [as][methods::as] function---e.g., `as(3, "diatonicSet")`---or more intuitively using the function `diatonicSet()`.
 #' Coercision methods are defined for 
 #' 
@@ -551,7 +551,7 @@ dset2key <- function(dset, alteration.labels = c()) {
 #' Given a roman numeral like "V65/V", the "V65" represents a
 #' chord while the "/V" represents a key.
 #'
-#' @romanNumerals
+#' @name romanNumerals
 NULL
 
 dset2romanNumeral <- function(dset, ...) {

@@ -62,7 +62,7 @@ dir('HumdrumData', recursive = TRUE)
 
 ```
 
-As we can see, there are `r num2word(length(dir('HumdrumData')))` directories containing a total of `r num2word(length(dir('HumdrumData', recursive = TRUE)))` files.
+As we can see, there are `r humdrumR:::num2word(length(dir('HumdrumData')))` directories containing a total of `r humdrumR:::num2word(length(dir('HumdrumData', recursive = TRUE)))` files.
 
 
 ## Targeting files
@@ -321,7 +321,7 @@ If you run the command
 knownInterpretations[Type == 'Tandem'] 
 ```
 
-we see that there are currently `r num2word(sum(knownInterpretations$Type == 'Tandem'))` classes of tandem interpretations that `humdrumR` recognizes, each associated with a regular expression.
+we see that there are currently `r humdrumR:::num2word(sum(knownInterpretations$Type == 'Tandem'))` classes of tandem interpretations that `humdrumR` recognizes, each associated with a regular expression.
 Thus, if we really apply `readHumdrum` to this file
 
 ```

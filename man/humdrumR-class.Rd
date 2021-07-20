@@ -11,7 +11,7 @@
 \usage{
 is.humdrumR(x)
 
-humdata$Field
+\S4method{$}{humdrumR}(x, name)
 
 fields(
   humdrumR,
@@ -85,7 +85,7 @@ the \link[=humTable]{humdrum table} documentation.}
 \item{\code{Active}}{A quosure expression which
 extracts data from field(s) in the \link[=humTable]{humdrum table}: the "active expression."}
 
-\item{\code{LoadTime}}{A \link[base:DataTimeClasses]{POSIXct} value, indicating the time at which \link{readHumdrum} was
+\item{\code{LoadTime}}{A \link[base:DateTimeClasses]{POSIXct} value, indicating the time at which \link{readHumdrum} was
 called to create this \code{humdrumR} object.}
 
 \item{\code{Patterns}}{A character vector of the original search patterns used to match files in the system.}

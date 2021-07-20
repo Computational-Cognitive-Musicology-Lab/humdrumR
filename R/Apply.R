@@ -30,7 +30,7 @@
 #' These functions are the primary means of working with
 #' humdrumR data. (They are analogous to the base functions
 #' \code{\link[base]{with}} and \code{\link[base]{within}} 
-          #' as applied to \code{\link[base:data.frame]{data.frames}}.)
+#' as applied to \code{\link[base:data.frame]{data.frames}}.)
 #' Specifically they allow you to evaluate arbitrary
 #' expressions involving fields in a humdrumR data object.
 #' They also includes a number of special evaluation options:
@@ -420,7 +420,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
                         ordoQuosure)
-    setorder(result, `_rowKey_`)
+    data.table::setorder(result, `_rowKey_`)
     as.list(environment())
     
 }
@@ -560,7 +560,7 @@ partialMatchKeywords <- function(keys) {
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
-    IfElse(is.na(matches), keys, rep(names(standardkeys), lengths(standardkeys))[matches])
+    ifelse(is.na(matches), keys, rep(names(standardkeys), lengths(standardkeys))[matches])
     
     
 }
@@ -887,9 +887,9 @@ splatQuo <- function(funcQuosure) {
 }
 
 parseAt <- function(atExpr) {
- #' This function is used by splatQuo
- #' It replaces an expression of the form \code{TargetExpr@GroupingExpr}
- #' with \code{tapply(TargetExpr, GroupingExpr, c)}.
+ # This function is used by splatQuo
+ # It replaces an expression of the form \code{TargetExpr@GroupingExpr}
+ # with \code{tapply(TargetExpr, GroupingExpr, c)}.
 
  expr  <- atExpr[[2]]
  group <- atExpr[[3]]
@@ -1208,17 +1208,18 @@ parseResult_list  <- function(result) data.table(result)
 parseResult_other <- function(result) data.table(list(result))
 
 `pipeIn<-` <- function(object, value) {
-          #' This is the main function for taking the output of a
-          #' function or expression applied to humtable data and putting
-          #' it back into the humtable. If the output and input are the same length,
-          #' it's easy. The hard part is what to do when the output is different than
-          #' the input. This function hard codes a few common possibilities,
-          #' but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
+          # This is the main function for taking the output of a
+          # function or expression applied to humtable data and putting
+          # it back into the humtable. If the output and input are the same length,
+          # it's easy. The hard part is what to do when the output is different than
+          # the input. This function hard codes a few common possibilities,
+          # but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
           humtab <- object # R requires the names object and value for x<- functions
           
           curpipen <- curPipeN(humtab) 
           
-         
+          lengths_ <- function(ls) sapply(ls, function(v) if (is.object(v)) 1L else length(v)) # objects are length 1
+          
           ####
           if (!allsame(lengths_(value))) value <- list(value)
           
@@ -1265,9 +1266,9 @@ ifelsecalls <- function(calls, fields) {
 }
 
 pipeFields <- function(humtab) {
-  #' Another function used by pipeIn<- (withing curePipeN)
-  #' Takes a humtab and identifies the pipe fields (columns), if any,
-  #' are in it.
+  # Another function used by pipeIn<- (withing curePipeN)
+  # Takes a humtab and identifies the pipe fields (columns), if any,
+  # are in it.
   colnms <- colnames(humtab)
   
   pipefields  <- colnms[grepl('Pipe', colnms)]
@@ -1278,33 +1279,24 @@ pipeFields <- function(humtab) {
 }
 
 curPipeN <- function(humtab) {
-          #' A function used by pipeIn<-
-          #' identifies how many pipe fields (if any)
-          #' are already in a humtable.
+          # A function used by pipeIn<-
+          # identifies how many pipe fields (if any)
+          # are already in a humtable.
           length(pipeFields(humtab))   
           
 }
 
-lengths_ <- function(ls) {
-          #' Used by pipeIn<-
-          #' 
-          #' Acts just like base::lengths function,
-          #' except it knows to treat any argument where
-          #' is.object == TRUE as length 1.
-          IfElse(sapply(ls, is.object), 1, sapply(ls, length))
-          
-}
 
 
 
 collapseHumtab <- function(humtab, n = 1L) {
-  #' This is the biggest part of pipeIn<-'s work.
-  #' It's the trickiest part of the process, shrinking
-  #' the existing humtable to match the size of the new fields.
-  #' 
-  #' This function really only passes information into collapse2n, which
-  #' is the really workhorse.
-  #' 
+  # This is the biggest part of pipeIn<-'s work.
+  # It's the trickiest part of the process, shrinking
+  # the existing humtable to match the size of the new fields.
+  # 
+  # This function really only passes information into collapse2n, which
+  # is the really workhorse.
+  # 
   humtab[ , Map(f = collapse2n, 
             .SD, # Each field/column
             colnames(humtab), # the field name
@@ -1314,11 +1306,11 @@ collapseHumtab <- function(humtab, n = 1L) {
   }
 
 collapse2n <- function(x, colname, class, n = 1) {
-  #' This is the function that actually collapses a field
-  #' (column in humtable) to a smaller length. 
-  #' Certain structural fields are treated differently,
-  #' so that (hopefully) things like record and spine numbers
-  #' still make sense after collapse.  
+  # This is the function that actually collapses a field
+  # (column in humtable) to a smaller length. 
+  # Certain structural fields are treated differently,
+  # so that (hopefully) things like record and spine numbers
+  # still make sense after collapse.  
   uniqx <- unique(x)
   uniqx <- uniqx[!is.na(uniqx)]
   if (length(uniqx) == 0) return(rep(as(NA, class), n))

@@ -25,13 +25,13 @@
 #' Ultimately, adding or removing a chord degree from a harmony can be achieved by adding the power of
 #' two associated with that degree: 
 #' 
-#' + **Root**: $\pm 1$
-#' + **Third**: $\pm 2$
-#' + **Fifth**: $\pm 4$
-#' + **Seventh**: $\pm 8$
-#' + **Ninth**: $\pm 16$
-#' + **Eleventh**: $\pm 32$
-#' + **Thirteenth**: $\pm 64$
+#' + **Root**: \eqn{\pm 1}
+#' + **Third**: \eqn{\pm 2}
+#' + **Fifth**: \eqn{\pm 4}
+#' + **Seventh**: \eqn{\pm 8}
+#' + **Ninth**: \eqn{\pm 16}
+#' + **Eleventh**: \eqn{\pm 32}
+#' + **Thirteenth**: \eqn{\pm 64}
 #' 
 #' `tertianSet` has many specific methods defined for reading/writing harmonic information.
 #' 
@@ -113,7 +113,7 @@ rootposition <- function(tset) {
 ####. vector/core methods ####
     
 
-#' @name humDiatonic
+#' @name tertianSet
 #' @export
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 

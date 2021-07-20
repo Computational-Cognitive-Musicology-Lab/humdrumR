@@ -42,13 +42,12 @@ A spine with no splits will have all \code{0L}s in its \code{Path} field.
 }
 \section{Columns}{
 
+
 It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 (This always requires removing global records.)
 In order to do this, while maintaining a sensible relationship between spine which have spine paths,
 \link{humRead} automatically \emph{pads} humdrum data into a complete, non-ragged 2d table.
-For instance, given this file
-\preformatted{
-**kern  **kern
+For instance, given this file\preformatted{**kern  **kern
 A       E
 *^      *
 A       C       E
@@ -57,9 +56,8 @@ G       B       D
 A       C        
 *-      *-
 }
-\link{humRead} pads the file as so:
-\preformatted{
-**kern   _P       **kern
+
+\link{humRead} pads the file as so:\preformatted{**kern   _P       **kern
 A        _P       E
 *^       _P       *
 A        C        E
@@ -73,6 +71,7 @@ A        _P       C
 0        1        0        Path
 1        2        3        Column
 }
+
 (In this example, the \code{Spine}, \code{Path}, and \code{Column} values are shown below the data.)
 The \code{"_P"} tokens stand for "padded path."
 This appraoch assures that every \strong{Spine} is a contiguous block of tokens, of constant width.
@@ -81,41 +80,44 @@ In most humdrumR use cases, these padding tokens (and the \code{Column} field) c
 
 \section{Corpus padding}{
 
+
 \link{humRead} automatically pads spine paths \emph{within pieces}.
 However, as mentioned above, there is also (sometimes) a need to pad across pieces, in order
 to create a logical, clean 2d structure.
 Consider this example, with humdrum data from two pieces:
-\preformatted{
-(From piece 1:)
-**kern   **kern  **kern
+\itemize{
+\item \emph{Piece 1}:\preformatted{**kern   **kern  **kern
 E        D       C
 D        .       .
 C        C       E
 *-       *-      *-
-(From piece 2:)
-**kern   **kern
+}
+\item \emph{Piece 2}:\preformatted{**kern   **kern
 A        A
 .        B
 C        C
 *-       *-
 }
+}
+
 In this example, we have two pieces, one with three spines, the other with two.
 There is no way to squish these two pieces into one regular 2d table.
 But we \emph{could} pad any missing columns, as so:
-\preformatted{
-(From piece 1:)
-**kern   **kern  **kern
+\itemize{
+\item \emph{Piece 1}:\preformatted{**kern   **kern  **kern
 E        D       C
 D        .       .
 C        C       E
 *-       *-      *-
-(From piece 2:)
-**kern  **kern   _C
+}
+\item \emph{Piece 2}:\preformatted{**kern  **kern   _C
 A        A       _C
 .        B       _C
 C        C       _C
 *-       *-      _C
 }
+}
+
 The function \code{alignColumns} is used to achieve just this effect.
 In this example, the \code{"_C"} token stands for "padded column."
 
@@ -123,9 +125,8 @@ The presence of spine paths makes padding columns across pieces a bit more compl
 What \code{alignColumns} will do, is match up all pieces in a corpus so that
 every \strong{Spine}/\strong{Path} field pair allign in the same column.
 Here is an example, with its paths already padded:
-\preformatted{
-(From piece 1:)
-**kern      _P        **kern
+\itemize{
+\item \emph{Piece 1}:\preformatted{**kern      _P        **kern
 A           _P        E
 B           _P        D
 *^          _P        *
@@ -138,9 +139,8 @@ A           _P        E
 1           1         2         Spine
 0           1         0         Path
 1           2         3         Column
-
-(From piece 2:)
-**kern     **kern    _P
+}
+\item \emph{Piece 2}:\preformatted{**kern     **kern    _P
 A          E         _P
 *          *^        _P
 G#         D         F
@@ -153,12 +153,13 @@ E          D         _P
 0          0         1        Path
 1          2         3        Column
 }
+}
+
 We have two pieces, each with two spines,
 but in the first piece, the first spine splits, while in the second piece, the
 second spine splits. Thus, the padded output will have four columns:
-\preformatted{
-(From piece 1:)
-**kern    _P        **kern   _C
+\itemize{
+\item \emph{Piece 1}:\preformatted{**kern    _P        **kern   _C
 A         _P        E        _C
 B         _P        D        _C
 *^        _P        *        _C
@@ -171,9 +172,8 @@ A         _P        E        _C
 1         1         2        2         Spine
 0         1         0        1         Path
 1         2         3        4         Column
-
-(From piece 2:)
-**kern    _C        **kern   _P
+}
+\item \emph{Piece 2}:\preformatted{**kern    _C        **kern   _P
 A         _C        E        _P
 *         _C        *^       _P
 G#        _C        D        F
@@ -186,7 +186,9 @@ E         _C        D        _P
 0         1         0        1         Path
 1         2         3        4         Column
 }
-Note that code{alignColumns} actually adds rows to the \linkS4class{humdrumR} object's
-internal \code{\link[humdrumR:humTable]{humdrum tables}}.
+}
+
+Note that \code{alignColumns} actually adds rows to the \linkS4class{humdrumR} object's
+internal \link[=humTable]{humdrum tables}.
 }
 

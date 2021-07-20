@@ -256,7 +256,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     #### print matches per pattern
     with(fileFrame,
           {
-             Label <- IfElse(grepl('^_[1-9]', Label), "", paste0(Label, ' = '))
+             Label <- ifelse(grepl('^_[1-9]', Label), "", paste0(Label, ' = '))
              
              # prepare string to print if contains
              contains <- if(!is.null(contains)) {
@@ -428,8 +428,8 @@ shortFilenames <- function(fns) {
 #' 
 #' \code{findHumdrum} does the work of finding and reading the text files into R.
 #' \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
-#' create a \code{\link[humdrumR:humtable]{humdrum table}} and build
-#' a \code{\linkS4class{humdrumR}} data object around the table.
+#' create a [humTable] and build
+#' a [humdrumR][humdrumR::humdrumR-class] data object around the table.
 #' 
 #' 
 #' @param ... character: One or more patterns used to identify files to read.
@@ -480,7 +480,7 @@ shortFilenames <- function(fns) {
 #' For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
 #' filenames containing "mozart" OR "beethoven."
 #' This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
-#' look for any file kern files in directories containing "Mozart" OR "Beethoven."
+#' look for any kern files in directories containing "Mozart" OR "Beethoven."
 #' If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
 #' \code{Label} field. Unnamed patterns are simply labeled with numbers.
 #' 
@@ -1077,7 +1077,7 @@ parseBarlines <- function(spine) {
           
   Singles <- cumsum(grepl('^=', spine))
   Doubles <- cumsum(grepl('^==', spine))
-  BarLabels <- stringr::str_sub(grep('^=', spine, value = TRUE), 2L)[IfElse(Singles == 0L, NA_integer_, Singles)]
+  BarLabels <- stringr::str_sub(grep('^=', spine, value = TRUE), 2L)[ifelse(Singles == 0L, NA_integer_, Singles)]
   
   data.frame(Bar = Singles, 
              DoubleBar = Doubles, 
