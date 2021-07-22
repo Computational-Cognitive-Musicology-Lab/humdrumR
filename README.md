@@ -1,6 +1,6 @@
 # humdrumR
 
-`humdrumR` is a R library for analyzing musicological data encoded in the [humdrum](https://www.humdrum.org){target="_blank"} data format.
+`humdrumR` is a R library for analyzing musicological data encoded in the [humdrum](https://www.humdrum.org) data format.
 
 
 
