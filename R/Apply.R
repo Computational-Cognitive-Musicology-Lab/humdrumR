@@ -99,7 +99,6 @@
 #' If multiple \code{do} expressions are provided, they are each evaluated one at a time,
 #' with the result of each piped into the next. Other, non-\code{do}, formulae (like \code{by~} or 
 #' \code{ngrams~}) are reused for each expression evaluated.
-
 #' 
 #' @section Partitioning:
 #' 
@@ -339,17 +338,18 @@ withinHumdrum <- function(humdrumR,  ...) {
                   addFields(humdrumR) <- newfields
                   
                   ## Create new Active quosure
-                  humdrumR <- if (any(names(parsedArgs$formulae$partitions) == 'where') && is.null(ordoQuosure)) {
-                      act <- ifelsecalls(parsedArgs$formulae$partitions['where'], 
-                                         c(humdrumR@Active, 
-                                           lapply(newfields, 
-                                                  function(nf) rlang::as_quosure(as.symbol(nf), 
-                                                                                 environment(humdrumR)))))
-                     
-                       putActive(humdrumR, act)
-                  } else {
-                      setActiveFields(humdrumR, newfields) 
-                  }
+                  # humdrumR <- if (any(names(parsedArgs$formulae$partitions) == 'where') && is.null(ordoQuosure)) {
+                  #     act <- ifelsecalls(parsedArgs$formulae$partitions['where'], 
+                  #                        c(humdrumR@Active, 
+                  #                          lapply(newfields, 
+                  #                                 function(nf) rlang::as_quosure(as.symbol(nf), 
+                  #                                                                environment(humdrumR)))))
+                  #    
+                  #      putActive(humdrumR, act)
+                  # } else {
+                  #     setActiveFields(humdrumR, newfields) 
+                  # }
+                  humdrumR <- setActiveFields(humdrumR, newfields) 
               }
               # humdrumR <- indexGLIM(humdrumR)
               
@@ -462,7 +462,6 @@ parseArgs <- function(..., withfunc) {
          namedArgs  = namedArgs)
 }
  
-#' inHumdrum
 #' @name with-in-Humdrum
 #' @export
 inHumdrum <- withinHumdrum
@@ -633,8 +632,6 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuos)
 
-
-      
   # turn . to active formula
   doQuo <- activateQuo(doQuo, active)
   
@@ -653,9 +650,9 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # find what fields (if any) are used in formula
   usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
   
-  if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
-                                        Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
-                                        call. = FALSE)
+  # if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
+  #                                       Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
+  #                                       call. = FALSE)
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
@@ -677,7 +674,7 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
 
 
 fillQuo <- function(doQuo, usedInExpr) {
-    # this takes a do quosure and makes sure its
+    # this takes a do(fill) quosure and makes sure its
     # results expands to be the same size as its input
     if (length(usedInExpr) == 0L) usedInExpr <- '.'
     usedInExpr <- rlang::syms(usedInExpr)
@@ -1119,7 +1116,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, parts, ordoQuo) {
 evalDoQuo_where <- function(doQuo, humtab, partition, parts, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
                                      "In your call to with(in)Humdrum with a 'where ~ x' expression, 
-                                     your where-expression must evaluate to a boolean.")
+                                     your where expression must evaluate to a logical (TRUE/FALSE).")
     result <- evalDoQuo(doQuo, humtab[partition], parts[-1], ordoQuo)
     
     if (!is.null(ordoQuo)) {
@@ -1127,7 +1124,8 @@ evalDoQuo_where <- function(doQuo, humtab, partition, parts, ordoQuo) {
         result <- rbind(result, orresult)
     }
     
-    result[humtab[, '_rowKey_'], on ='_rowKey_'] 
+   # result[humtab[, '_rowKey_'], on ='_rowKey_'] 
+   result
 }
 
 
@@ -1357,6 +1355,8 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' @param doplot Boolean. If \code{TRUE} the \code{FUN} argument is treated
 #' as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
 #' so the result is ignored (for plotting or side-effects purposes).
+#' 
+#' @name with-in-humdrum
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
           exprs <- rlang::quos(...)

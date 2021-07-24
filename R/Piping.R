@@ -198,7 +198,7 @@ removeParentheses <- function(expr) {
 #' 
 #' @name humPipe
 #' @export
-`%s>%` <- function(lhs, rhs) {
+`%s>%` <- function(e1, e2) {
     if (!is.list(e1)) stop(call. = FALSE,
                            'If using %s>% ("multi-pipe"), the left-side must be a list of values.')
     e2 <- rlang::enquo(e2)
