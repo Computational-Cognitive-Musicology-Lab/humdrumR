@@ -9,14 +9,24 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r}
-library(humdrumR)
+```{r, include = FALSE}
+knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
 
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  dpi = 300,
+  comment = ""
+)
+
+par(family = 'Times', mar = c(0,0,0,0))
+library(humdrumR)
 ```
 
-# Tonality
 
-Tonality is represented in `humdrumR` using three `S4` classes and associated methods: 
+As a computational musicology toolkit, `humdrumR`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
+For the most part, `humdrumR`'s pitch tools are focused on the Western system of tonality, and tools for repretesenting pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
+
+Pitch, and the tonal organization of pitch, is represented in `humdrumR` using three `S4` classes and associated methods: 
 
 + `struct`
     + `tonalInterval` (pitches)
@@ -27,48 +37,209 @@ Tonality is represented in `humdrumR` using three `S4` classes and associated me
 (All three classes inherit from `struct`, giving them generic atomic-vector-like behavior.)
 
 
-## tonalInterval
+If know Western music theory, how to Western read music, or even the basics of giving names to pitches and chords, you should be able to get started with `humdrumR` pitch tools very quickly.
+This vignette takes the time to really explain how and why the `humdrumR` tonal system is set up.
+Fortunately, many sections are marke with "tl;dr" summaries, so you can skip to (sub)sections that are relavent to you.
+
++ Section xxx talks in detail about the music theoretic logic of the `humdrumR` system.
++ Section xxx talks about how `humdrumR` encodes tonal logic.
++ Section xxx talks about the functions and tools that `humdrumR` actually offers for you to work with tonal pitch data!
+
+If you really want to just get started coding ASAP, start with section XXX, and feel free to peruse the earlier sections at your leisure to get that deeper understanding.
+
+
+
+# Tonal Intervals
+
+> **tl;dr**: `humdrumR` encodes tonal pitch information as intervals on the fundamental line-of-fifths (tonal),
+> combined with an octave value to indicate pitch height,.
 
 The `tonalInterval` class is the core pitch representation in `humdrumR`.
 As the name suggests, pitch is encoded *tonally*.
-What does that mean?
+That means that the *focus* of the representation is the **line-of-fifths** (LoF).
+Pitch names (letters and accidentals), intervals, diatonic keys and tertian harmonies all make the most logical sense defined on the line-of-fifths.
+When we want to define specific pitches in frequency space, we have to add *specific* "pitch-height" information, which is encoded as a separate *octaves* field.
 
 
-#### Western Tuning
+
+
+## Psychoacoustics and the Western Tuning System
+
+> **tl;dr**: Tonal intervals are represented as combinations of octaves (second harmonic, 2:1 ratio) and perfect 12ths (third harmonic, ~3:1 ratio).
+> The perfect 12ths represent the circle-of-fifths and all diatonic collections while the octaves help specific specific pitch height.
 
 At first glance, pitch appears to by a straightforward, one-dimensional phenomenon:
-every harmonic "pitched event" has a frequency (perceptually) associated with it, with perceptible frequencies ranging from approximately 20Hz--20kHz.
-However, [as mentioned above](#intervals), humans perception of pitch is predominantly relative, specifically *rational*: we perceive the ratios between pitches.
-(This has the immediate effect of changing the 20Hz-20kHz "linear range" of frequency into a logarithmic space.)
-What's more, "simple", whole-number ratios are privileged in our perception---and the simpler the better.
-The simplest ratio is the 2-to-1 ratio known as an octave: pitches separated by an octave are perceived as being "the same" in some respect.
-Pitches which are "the same" (i.e., multiples of 2 or powers of 2) as each other are said to have the same *pitch chroma*.
-Due to this perceptual phenomenon, most (essentially all) musical scales use the octave as a bounding point---the same patterns pitch chroma (scales) are repeated in each octave we can perceive.
+every "pitched event" has a frequency (perceptually) associated with it.
+We refer to the frequency associated with an event as it's "pitch"---here, we'll use the term frequency and pitch interchangeably.
+
+Human can percieve frequencies ranging from approximately $20$--$20,000_{Hz}$.
+("Hz" is an abbreviation for *Hertz*; e.g. cycles-per-second.)
+
+```{r, echo = FALSE}
 
 
-The octave however, is not the whole story.
-The next few higher harmonic ratios are also perceptually privileged.
-Both the third and fifth harmonics---corresponding to the major scale degrees $\hat{5}$ (perfect fifth) and $\hat{3}$ (major third) respectively---have influenced the development of Western tonality (and other tonalities around the world).
-That is to say, musical scales have been tuned in such a way as to create ratios between scale degrees that are as close to the 3-to-1 or 5-to-1 as possible.
+plot.new()
+plot.window(xlim = c(20, 20e3), ylim = c(0,1))
+axis(1, c(20, 1000, seq(2000, 20e3, 2e3)), pos = .5)
+mtext("Frequency (Hertz)", 3)
+
+```
+
+However, our perception of pitch is predominantly *relative*, not absolute.
+In other words, (most of us) can't identify specific frequenncies in isolation; instead, we percieve the "distance" between pitches, what we call an *interval*.
+More specfically, we percieved distance/intervals between frequencies *rationally*: the distance we percieve is the *ratio* between the pitches.
+For example, the "distance" between the frequencies $200_{Hz}$ and $300_{Hz}$ is the *same* as the distance between $2,400_{Hz}$ and $3,600_{Hz}$.
+Why? Because they are the same ratios: $\frac{200}{300} = \frac{2,400}{3,600}$!
+This means that it makes more sense to think of the enormous $20$--$20,000_{Hz}$ frequency range we percieve on a logarithmic scale, which makes the equal distance look equal on paper:
+
+```{r, echo = FALSE}
+plot.new()
+plot.window(xlim = log(c(20, 20e3), 2), ylim = c(0,1))
+fs <- 20 * (2^(0:10))
+
+axis(1, log(fs, 2), fs, pos = .5)
+
+mtext("Frequency (Hertz)", 3)
+```
+
+
+### Octave Equivalence
+
+We percieve the distance (interval) between pitches based on the ratio between their frequencies.
+But not all ratios are created equal!
+The simplest, integer ratios are **privileged** in our perception---they simply sound better, more *consonant*, to us!
+Integer ratios between frequencies are called [harmonics](https://en.wikipedia.org/wiki/Harmonic).
+The simplest, purest harmonic relationship is the 2-to-1 ratio, which we call an [octave](https://en.wikipedia.org/wiki/Octave).
+Pitches separated by an octave are *so* consonant that we actually percieve them as being "the same pitch" (in some respects).
+We call this sameness *octave equivalence*.
+If two pitches are octave equivalent---i.e., the ratio between their frequencies is a power of two---we say that they are the same *pitch chroma*.
+In the following figure, the three rows of frequencies each represent groups of pitches that are equivalent chroma:
+
+
+```{r, echo = FALSE}
+
+plot.new()
+plot.window(xlim = log(c(20, 20e3), 2), ylim = c(0,1))
+
+fs <- 20 * (2^(0:8)); axis(1, log(fs, 2), fs, pos = .8)
+fs <- 50 * (2^(0:8)) ;  axis(1, log(fs, 2), fs, pos = .5)
+fs <- 90 * (2^(0:8)); axis(1, log(fs, 2), fs, pos = .2)
+
+mtext("Frequency (Hertz)", 3)
+
+
+```
+
+Due to the perceptual reality of octave equivalence, most (essentially all) musical scales use the octave as a bounding point---the same patterns of pitch chroma (e.g., scales) are repeated in each octave we can perceive.
+Thus, even though we can percieve close to ten octaves worth of frequencies, the organization of pitch in music is mostly based on pitches that can be squeezed into a single octave.
+
+
+```{r, echo = FALSE}
+
+plot.new()
+plot.window(xlim = log(c(100, 800), 2), ylim = c(0,1))
+
+
+scale <- 100 * c(1, 9/8, 5/4, 4/3, 3/2, 3/2 * 9/8, 3/2 * 5/4)
+
+
+fs <- 1 * scale; axis(1, log(fs, 2), fs, pos = .8)
+fs <- 2 * scale; axis(1, log(fs, 2), fs, pos = .5)
+fs <- 4 * scale; axis(1, log(fs, 2), fs, pos = .2)
+
+
+mtext("Frequency (Hertz)", 3)
+
+f <- log(125, 2)
+with(spline(x = c(f, f + .5, f+1), y = c(.8,1,.5), n =100), points(y~x, type = 'l', lty='dashed'))
+with(spline(x = c(f+1, f + 1.5, f+2), y = c(.5,.7,.2), n =100), points(y~x, type = 'l', lty= 'dashed'))
+
+f <- log(150, 2)
+with(spline(x = c(f, f + .5, f+1), y = c(.6,.2,.3), n =100), points(y~x, type = 'l', lty='dashed'))
+with(spline(x = c(f+1, f + 1.5, f+2), y = c(.3,0,0.05), n =100), points(y~x, type = 'l', lty= 'dashed'))
+
+
+```
+
+
+### Tonal Harmonics
+
+The 2-to-1 harmonic octave, however, is not the whole story.
+The next couple of integer (harmonic) ratios are also special, perceptually:
+Both the third and the fifth harmonics---corresponding to the major scale degrees $\hat{5}$ (perfect fifth) and $\hat{3}$ (major third) respectively---have influenced the development of Western tonality.
+That is to say, most musical scales are tuned in such a way as to create ratios between scale degrees that are as close to the 3-to-1 or 5-to-1 as possible.
 "Just intonation" is the preeminent Western example.
 
-Even between the third and fifth harmonics, the third harmonic ($\approx\hat{5}$) is the much more prominent: indeed, it is the primary shaper of the Western tonal system.
+The third harmonic ($\approx\hat{5}$) is the **primary** factor in the Western tonal system---in `humdruMR` we call it the *tonal harmonic*.
 The Western diatonic scale is constructed, fundamentally, from arranging 3rd-harmonic intervals within the octave.
 The logical result of this approach is an octave divided into five (pentatonic), seven (diatonic), or twelve (chromatic) *unequal* steps.
+
+
+```{r, echo = FALSE}
+
+plot.new()
+plot.window(xlim = log(c(20, 3000), 2), ylim = c(0,1))
+
+mtext("Frequency (Hertz)", 3)
+
+fs2 <- 20 * (2^(0:7)); axis(1, log(fs2, 2), fs2, pos = 0.2)
+text(mean(log(fs2, 2)), 0, 'Octaves', cex = .6)
+
+fs3 <- 20 * (3^(0:4)) ; axis(1, log(fs3, 2), fs3, pos = .9)
+text(mean(log(fs3, 2)), .95, 'Third (Tonal) Harmonics', cex = .6)
+segments(log(fs3, 2), rep(.7, length(fs3)), log(20,2) + log(fs3/20, 2) %% 1, rep(.3, length(fs3)), lty='dashed')
+
+for (i in 0:6) text(i + sort(log(20, 2) + log(fs3/20, 2) %% 1), rep(.2, length(fs3)), cex = .5, c('C', 'D', 'E', 'G', 'A'), pos = 3)
+
+text(log(1000, 2), .5, 'Pentatonic Scale!')
+```
+
 The seven-note diatonic has been the fundamental unit of Western tonality for several thousand years.
 The chromatic (12-note) superset has gradually grown in prominence over the last five centuries, yet in most tonal contexts, the chromatic set is still distinctly a superset of the diatonic, seen as a diatonic set plus five "alterations."
 
-The role of the 3rd-harmonic as the fundamental *generator* of the diatonic scale is evidenced by its conceptual role in Western tuning.
-A scale *actually* tuned to "pure" 3rd-harmonic results in the *pythagorean tuning*.
-However, it has been a common practice to systematically mistune, or *temper*, some of the scales 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament).
-(Here forward, and throughout `humdrumR`, we refer to the generating 3rd-harmonic ratios as "(perfect) fifths.")
-If twelve fifths are flattened by $\sqrt[{12}]{\frac{3^{19}}{2^{12}}}$ (about 2 cents), the result is a chromatic scale which equally divides the octave---creating *semitones*.
+```{r, echo = FALSE}
+
+plot.new()
+plot.window(xlim = log(c(5, 5000), 2), ylim = c(0,1))
+
+
+mtext("Frequency (Hertz)", 3)
+
+fs2 <- 20 * (2^(-2:8)); axis(1, log(fs2, 2), fs2, pos = 0.2)
+text(mean(log(fs2, 2)), 0, 'Octaves', cex = .6)
+
+fs3 <- 20 * (3^(-1:5)) ; axis(1, log(fs3, 2), round(fs3,2), pos = .9)
+text(mean(log(fs3, 2)), .95, 'Third (Tonal) Harmonics', cex = .6)
+segments(log(fs3, 2), rep(.7, length(fs3)), log(20,2) + log(fs3/20, 2) %% 1, rep(.3, length(fs3)), lty='dashed')
+
+for (i in -2:8) text(i + sort(log(20, 2) + log(fs3/20, 2) %% 1), rep(.2, length(fs3)), cex = .5, c('C', 'D', 'E', 'F', 'G', 'A', 'B'), pos = 3)
+
+text(log(3000, 2), .5, 'Diatonic Scale!')
+```
+
+
+Thus, the 3rd-harmonic is the fundamental *generator* of the Western diatonic scale, diatonic keys, and tonality in general.
+Throughout `humdrumR` we often refer to the *line-of-fifths* (or *circle-of-fifths*), where the "fifths" are those stacked up 3rd harmonics.
+
+
+### Pythagorean Tuning
+
+> **tl;dr**: This sections talks about how the abstract line-of-fifths of "tonal harmonics" is tuned to actual pitches.
+> For the most part, it doesn't really matter that much within Western music; we assume equal temperament most of the time.
+> Most tonal analyses don't really depend on the specific flavor of Western tuning/temperement you use.
+
+A scale *actually* tuned to "pure" 3rd-harmonics results in the [pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
+However, for centuries, Western musicians have systematically mistuned, or *tempered*, some of the 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament).
+For example, if twelve fifths are flattened by $\sqrt[{12}]{\frac{3^{19}}{2^{12}}}$ (about 2 cents), the result is a chromatic scale which equally divides the octave---creating *semitones*.
 This *equal temperament* tuning system has been dominant in the West for less than 250 years.
 
-Despite the ubiquity of equal temperament in the modern era, Pythagorean tuning---and variants which incorporate the pure 5th harmonic---remains the conceptual framework for Western tonality.
+Despite the ubiquity of equal temperament in the modern era, Pythagorean tuning---and variants which incorporate the pure 5th harmonic---remains the *conceptual* basis for Western tonality.
 Notably, in Pythagorean tuning, pitches that are separated by twelve fifths *are not* the same.
-Traditional notation/theory reflects this in the distinction between, for example, G# and Ab, and between minor-3rd and augmented-2nd.
+This is why traditional notation and theory distinguishes between, for example, G# and Ab, and between minor-3rd and augmented-2nd.
 In contrast, in equal temperament, these values are "*enharmonic*"---i.e., equivalent.
+Equally-tempered G# and Ab are played as the same frequency *but* within the tonal organization of Western music they still reflect perceptually distinct categories: for example, G# in the key of E major and Ab in the key of F minor are quite distinct!
+
+### Line-of-Fifths
 
 The fifth-based tonal system results in a general structure known as the *line of fifths* (LoF).
 Each "step" on the LoF corresponds to a fifth (i.e., a 3rd-harmonic ratio).
@@ -84,9 +255,9 @@ If we perform a modulo 7 operation on the LoF, we get a pure diatonic set---"chr
 
 
 
-#### Encoding Western Pitches
+## Encoding Tonal Pitches
 
-To mimic the fundamental logic of Western tonality, `tonalIntervals` are represented by a combination of 2nd and 3rd harmonic powers.
+To mimic the fundamental logic of Western tonality, `tonalIntervals` are represented by a combination of 2nd- and 3rd- harmonic powers.
 These are encoded as integers in the `Octave` and `Fifth` fields respectively.
 The `Fifth` slot represents "tonal chroma"---the line-of-fifths space in which diatonic and chromatic structures are defined.
 The `Octave` slot specifies specific shifts in absolute frequency.
@@ -95,7 +266,7 @@ This combination is modeled on the way their harmonic ratios would combine in Py
 The `Octave` value represents a power of 2 ($2^n$), while the `Fifth` value represents a power of 3 ($3^n$), and the values are multiplied together (which is how human rational/logarithmic perception of pitch works).
 Thus,
 
-$2^{Octave} * 3^{Fifth} = \text{tonal ratio}$
+$2^{Octave} * 3^{Fifth} = \text{tonal interval}$
 
 For example, the `tonalInterval` `(Octave = -2, Fifth = 2)` represents
 
@@ -106,7 +277,7 @@ which corresponds to a (Pythagorean) major-9th.
 The `tonalInterval` representation *is not* in any sense "locked" into Pythagorean tuning.
 Any "tempered fifth" can be used as the generating "tonal harmonic" ratio:
 
-$2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal ratio}$
+$2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal interval}$
 
 For instance, if the $\text{tonalHarmonic} = 2^{\frac{19}{12}}$, the result is equal temperament.
 All `humdrumR` functions that relate to precise frequency values---such as `frequency`---have a `tonalHarmonic` argument.
@@ -184,11 +355,11 @@ for (j in -7:7) {
 }
 
 ```
-As you can see, the `Fifth` (x) dimension is simple the line-of-fifths.
+As you can see, the `Fifth` (x) dimension is simply the line-of-fifths.
 However, the way that the `Octave` dimension relates to specific pitches is not very intuitive.
 This is by design.
 The `tonalInterval` $2^{Octave} * 3^{Fifth}$ scheme is not meant to be engaged directly by users.
-Rather it is a back-end, with very nice properties.
+Rather it is a back-end, with very nice properties:
 
 
 #### Algebra and Arithmetic
@@ -213,7 +384,7 @@ This is useful for articulating tonal structures (modulo 7 for example), but can
 
 
 
-### Tonal "Intervals"
+# Tonal Interval Representations
 
 Western music theory/practice has a rich set of interrelated ways of describing pitch:
 
@@ -228,7 +399,7 @@ Western music theory/practice has a rich set of interrelated ways of describing 
 + Solfege
      - "do", "mi", "so"
 
-In `humdrumR` we note that all of these *concrete* representations are simply different perspectives on the same abstract information---they are all "tonal intervals" which can be represented as `tonalInterval`s.
+In `humdrumR`, all of these *concrete* representations are simply different perspectives on the same abstract information---they are all "tonal intervals" which can be represented as `tonalInterval` objects.
 They differ only in 1) fixed-reference, dynamic-reference, or serial-reference interpretations; 2) whether `Octave` information is included; 3) what "tonal modulo" is used.
 
 At first, musicians may be taken aback by this system: we are accustomed to thinking of values like F# as "absolute" pitch representations, while "so" is a "relative" pitch representations, and melodic intervals as, well, melodic intervals.
