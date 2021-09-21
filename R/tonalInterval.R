@@ -171,6 +171,8 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 
 #' @export
 setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
+setMethod("LO5th", 'partition',
+          function(x) LO5th(sum_diatonicPartition(x)))
 setMethod("LO5th", "tonalInterval",
           function(x) {
             x@Fifth %dim% x

@@ -216,9 +216,12 @@ extension2bit <- function(str) {
            
            bit + sum(c(`7` = 8L, `9` = 16L, `11` = 32L, `13` = 64L)[exten])
          })
+}
+
+
+extension2mode <- function(str, accidental.labels, root, isminor, TriadQuality) {
   
-  
-  
+  root + ifelse(isminor, -3, 0)
 }
 
 
@@ -230,7 +233,7 @@ extension2bit <- function(str) {
 
 ####. tset to x ####
 
-tset2alterations <- function(tset, parts = 'accidentals', inversion = TRUE, Key = dset(0,0), accidental.naturals = TRUE, ...) {
+tset2alterations <- function(tset, parts = 'qualities', inversion = TRUE, Key = dset(0,0), accidental.naturals = TRUE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
   if (!inversion) tset <- rootposition(tset)
@@ -250,7 +253,7 @@ tset2alterations <- function(tset, parts = 'accidentals', inversion = TRUE, Key 
   figures <- tint2tonalChroma(tints,  Key = Key, parts = parts, ...)
   
   # colnames(figures) <- extensions
-  rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0))
+  rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
   figures
   
 }
@@ -361,7 +364,8 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
                        reductions
                      }
   )
-  
+   # BAD FIX:
+  # triadnotes[triadnotes[ , '5th'] == '','5th'] <- 'P'
   known <- triadnotes[ , '3rd'] %in% rownames(reductions) & triadnotes[ , '5th'] %in% colnames(reductions)
   triad[!incompletetriad & known] <- reductions[triadnotes[!incompletetriad & known, , drop = FALSE]]
   triad[incompletetriad | !known] <- paste0('(', triadnotes[incompletetriad | !known , '3rd'], 
@@ -545,7 +549,7 @@ romanNumeral2tset <- function(str, accidental.labels = c()) {
   
   mode <- extension2mode(Extensions, accidental.labels, root, Numeral == tolower(Numeral), TriadQuality)
   
-  return(tset(root,mode$Mode, alterations = mode$Alteration,extension = bit))
+  return(tset(root, mode, alterations = 0, extension = bit))
   
   
   

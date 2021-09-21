@@ -501,7 +501,7 @@ dset2signature <- function(dset) {
     LO5ths[] <- t(apply(LO5ths, 1, sort))
     tints <- tint( , LO5ths) %dim% LO5ths
     
-    notes <- as.tonalChroma(tints, parts = c('steps', 'accidentals'),
+    notes <- tonalChroma(tints, parts = c('steps', 'accidentals'),
                    accidental.labels = c(flat = '-'),
                    step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'))
     
