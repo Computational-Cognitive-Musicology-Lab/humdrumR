@@ -1,5 +1,6 @@
 
 Nat's ToDo:
+	Rethink relationship beween Piece and File field.
 
 Features:
 

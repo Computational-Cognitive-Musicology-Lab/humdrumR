@@ -389,24 +389,34 @@ duplicateWarnings <- function(matchTable, allowDuplicates, verbose) {
                  },
         strrep('-', options('width')$width),
         '\n')
-    
+   
     
     
     return(NULL)
 }
 
-shortFilenames <- function(fns) {
+shortFilenames <- function(fileFrame) {
     # This function takes a list of full directory paths
     # and finds the shortest unique version of each one.
     # In most cases, the final final name is returned,
     # but if two (or more directores) contain files 
     # with the same names, their directory names are retained
     # to distinguish them
-    stepin <- stringr::str_replace(fns, '[^/]*/', '')
+  
+    runs <- rle(fileFrame$Filepath)
     
-    duples <- duplicated(stepin) | rev(duplicated(rev(stepin))) | 
+    shorten <- function(fns) {
+      stepin <- stringr::str_replace(fns, '[^/]*/', '')
+      
+      duples <- duplicated(stepin) | rev(duplicated(rev(stepin))) | 
         stepin == fns | stepin == '' | is.na(stepin)
-    ifelse(duples, fns, Recall(stepin))
+      ifelse(duples, fns, Recall(stepin))
+    }
+    
+    runs$values <- shorten(runs$values)
+    
+    fileFrame[ , Filename := inverse.rle(runs)]
+    fileFrame
 }
 
 
@@ -630,7 +640,7 @@ readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates 
     humtab  <- data.table::rbindlist(humtabs, fill = TRUE) # fill = TRUE because some pieces have different reference records
    
     # file/piece info
-    fileFrame[ , Filename := shortFilenames(Filepath)]
+    fileFrame <- shortFilenames(fileFrame)
     fileFrame[ , FileLines := NULL]
     
     # combine with parsed data
@@ -857,6 +867,7 @@ separatePieces <- function(fileFrame) {
     newFrame <- data.table(FileLines = unlist(filelines, recursive = FALSE),
                            Filepath  = rep(fileFrame$Filepath, lengths(filelines)))
     newFrame[ , Piece := 1:nrow(newFrame)]
+    # newFrame[ , Piece := unlist(lapply(lengths(filelines), seq_len))]
     
     fileFrame <- fileFrame[ , c('Filepath', 'File', 'Label')]
     
