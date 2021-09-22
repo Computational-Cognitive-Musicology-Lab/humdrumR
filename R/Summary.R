@@ -93,7 +93,7 @@ setMethod('summary', 'humdrumR',
 #' 
 #' @name humCensus
 #' @export
-census <- function(humdrumR, dataTypes = 'GLIMDd') {
+census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
@@ -108,7 +108,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   
   ##ADD MULTISTOPS, MOVE BARS TO sections FUNCTION
   
-  censusTable <- humtab[ , .(File            = unique(File),
+  censusTable <- humtab[ , .(
                       Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
                       Tokens           = nrow(.SD),
                       `(unique)`       = list(unique(Token)),
@@ -116,11 +116,12 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
                       `(per token)`    = round(mean(nchar(Token)), 2)
                       ),
                       # Bars             = length(unique(Bar))),
-                      by = Filename]
+                      by = by]
   
   
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- paste(dataTypes, collapse = '')
+  attr(censusTable, 'by') <- by
   censusTable %class% 'humCensus'
 }
 
@@ -134,7 +135,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   dataTypes  <- attr(censusTable, 'dataTypes')          
   
   if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
-  if (is.character(i)) expr <- call('grepl', quote(i), quote(Filename))
+  if (is.character(i)) expr <- call('grepl', quote(i), as.symbol(attr(censusTable, 'by')))
   if (is.numeric(i)) expr <- quote(i)
   
   censusTable <- popclass(censusTable)
@@ -148,6 +149,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd') {
   corpusName <- paste0(corpusName, '[i]')
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- dataTypes
+  attr(censusTable, 'by') <- by
   censusTable
 }
 
@@ -169,8 +171,9 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   }
   
   ##
-  files <- paste0(censusTable$Filename, " [", num2str(censusTable$File, pad = TRUE), "]")
-  censusTable[ , c('File', 'Filename') := NULL] # in place!
+  by <- attr(censusTable, 'by')
+  files <- censusTable[ , paste0(get(by), ' [', num2str(seq_along(get(by)), pad = TRUE), ']')]
+  censusTable[ , get('by') := NULL] # in place!
   
   #
   sums <- censusTable[, lapply(.SD,
@@ -207,7 +210,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   corpusMessage <- paste0("\n###### humdrumR census of ",
                           dataTypes, ' records',
                           if (is.null(corpusName)) "" else glue::glue( " in {corpusName} object"), 
-                          glue::glue(" ({num2print(nfiles, 'file')})"),
+                          glue::glue(" ({num2print(nfiles, by)})"),
                           '\n')
        
   colNames_str <- padder(colNames, lenCol)
@@ -215,7 +218,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   
   if (showall) {
     cat(corpusMessage)
-    cat("###### By file:\n")
+    cat("###### By", by, ":\n")
     cat(colNames_str, '\n', sep = '')
   # 
     censusTable[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
