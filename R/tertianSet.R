@@ -219,12 +219,41 @@ extension2bit <- function(str) {
 }
 
 
-extension2mode <- function(str, accidental.labels, root, isminor, TriadQuality) {
+romanNumeral2mode <- function(root, Key, TriadQuality) {
+  if (is.null(Key)) Key <- dset(0, 0)
+  mode <- getMode(Key)
   
-  root + ifelse(isminor, -3, 0)
 }
 
+romanNumeral2triadQuality <- function(numeral, quality) {
+  output <- c('M', 'm')[1L + (tolower(numeral) == numeral)]
+  output[quality != ''] <- quality
+  
+  output
+  
+  
+}
 
+inversion2int <- function(str) {
+  
+  # (53) 6(3) 64
+  # 7(53) 65(3) (6)43 (64)2
+  # 9(753) 76(53) 654(3) 6432 7642
+  # 11(9753) 76532 76543 65432 76432
+  
+  # str <- figureLonghands(str)
+  
+  inversion <- integer(length(str))
+  
+  c('6' = 1, '63' = 1, '65' = 1,
+    '64' = 2, '643' = 2, '43' = 2,
+    '642' = 3, '42' = 3, '2' = 3) -> codes
+  inversion[str %in% names(codes)] <- codes[str[str %in% names(codes)]]
+  
+  inversion
+  
+  
+}
 
 ##### To/From tertianSets ####    
 
@@ -336,7 +365,7 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
   
   setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
   
-  qualities <- tset2alterations(tset, parts = 'qualities', inversion = FALSE, Key = NULL, quality.labels = quality.labels, quality.cautionary = TRUE)
+  qualities <- tset2alterations(tset, parts = 'qualities', inversion = FALSE, Key = NULL, quality.labels = quality.labels, quality.cautionary = TRUE, quality.memory = TRUE)
   qualities[!is.na(qualities) & nchar(qualities) > 1L] <- .paste('(',  qualities[!is.na(qualities) & nchar(qualities) > 1L], ')')
   # rownames(qualities) <- root
   
@@ -522,12 +551,15 @@ tset2chordSymbol <- function(tset,  ...) {
 
 
 
-romanNumeral2tset <- function(str, accidental.labels = c()) {
+romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.labels = c()) {
   setoptions(accidental.labels) <-  c(natural = 'n', flat = 'b', sharp = '#')
+  setoptions(triad.labels) <- c(diminish = 'o', augment = '+')
   
   accidentalRE <- captureUniq(accidental.labels, zero = TRUE)
+  triadqualRE <- captureRE(triad.labels, '?')
   
-  Inversion <- stringr::str_extract(str, captureRE(c('6', '63', '64', '65', '43', '42', '2'), '*'))
+  Inversion <- stringr::str_extract(str, captureRE(c('6', '643', '63', '64', '65', '43', '42', '2'), '+'))
+  Inversion <- inversion2int(Inversion)
   str <- stringr::str_replace(str, '65|43|42', '7')
   
   REparse(str,
@@ -541,15 +573,15 @@ romanNumeral2tset <- function(str, accidental.labels = c()) {
   
   bit <- extension2bit(stringr::str_remove_all(Extensions, '[^0-9]*'))
   
-  
+  TriadQuality <- romanNumeral2triadQuality(Numeral, TriadQuality)
   
   root <- tonalChroma2tint(paste0(Accidental, toupper(Numeral)), parts = c('accidentals', 'steps'), 
                            accidental.labels = accidental.labels, 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
   
-  mode <- extension2mode(Extensions, accidental.labels, root, Numeral == tolower(Numeral), TriadQuality)
+  mode <- romanNumeral2mode(root, Key, TriadQuality)
   
-  return(tset(root, mode, alterations = 0, extension = bit))
+  return(tset(root, mode, alterations = 0, extension = bit, inversion = Inversion))
   
   
   
