@@ -18,7 +18,7 @@ humdrumR \%hum<\% formula
 
 humdrumR \%humT\% formula
 
-lhs \%s>\% rhs
+e1 \%s>\% e2
 
 list \%hums>\% formula
 

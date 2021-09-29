@@ -551,6 +551,27 @@ makeRE.romanKey <- function(..., accidental.labels = c(), alteration.labels = c(
 }
 
 
+
+makeRE.signature <- function(accidental.labels = c(), ...) {
+    setoptions(accidental.labels) <- c(flat = '-')
+    
+    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
+    paste0('^\\*k\\[(', RE, ')*\\]')
+}
+
+makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
+    
+    key <- makeRE.key(...)
+    romanNumeral <- makeRE.romanKey(...)
+    
+    re <- paste0('(', key, '|', romanNumeral, ')')
+    
+    paste0('((', re, ')', split, ')', if (mustPartition) '+' else '?', re)
+}
+
+
+####. REs for tertian sets ####
+
 makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
@@ -569,8 +590,8 @@ makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = 
                               step.sign = FALSE, collapse = FALSE)
     
     
-    REs['triadalt'] <- paste0(triad.labels['augment'], '?')
-    res['triadalt'] <- paste0(triad.labels['diminish'], '?')
+    REs['triadalt'] <- paste0('[', triad.labels['augment'],  ']?')
+    res['triadalt'] <- paste0('[', triad.labels['diminish'], ']?')
     
     REs$steps <- paste0('(', cREs(REs[c('steps', 'triadalt')]), '|', cREs(res[c('steps', 'triadalt')]), ')')
     REs$triadalt <- NULL
@@ -584,21 +605,15 @@ makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = 
 
 
 
-makeRE.signature <- function(accidental.labels = c(), ...) {
-    setoptions(accidental.labels) <- c(flat = '-')
+makeRE.tertianPartition <- function(..., split = '/') {
     
-    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
-    paste0('^\\*k\\[(', RE, ')*\\]')
-}
-
-makeRE.diatonicPartition <- function(..., split = '/') {
+    romanChord <- makeRE.romanChord(...)
     
-    key <- makeRE.key(...)
-    romanNumeral <- makeRE.romanNumeralkey(...)
+    re <- paste0('(', romanChord, ')')
     
-    re <- paste0('(', key, '|', romanNumeral, ')')
+    key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0('((', re, ')', split, ')+', re)
+    paste0('((', re, ')', split, ')+', key)
 }
 
 

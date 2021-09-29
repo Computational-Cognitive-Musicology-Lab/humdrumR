@@ -742,7 +742,6 @@ romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = 
 }
 
 
-# 
 
 ##... Numbers
 
@@ -752,8 +751,6 @@ integer2dset <- function(x) dset(x, x)
 
 
 ##### Tonals transforms ####
-
-
 
 
 #' Pitch translations
@@ -774,7 +771,7 @@ mapPartition <- function(func, split = '/') {
         parts <- strPartition(str, split = split)
         
         # parts[] <- lapply(parts, func)
-        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0,0), parts, accumulate = TRUE), -1) 
+        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
         parts %class% "partition"
         
     }
@@ -822,21 +819,20 @@ diatonicSet.numeric <- integer2dset %.% as.integer
 
 
 
-
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'key: makeRE.key(...)' = key2dset,
                              'romanKey: makeRE.romanKey(...)' = romanNumeral2dset,
                              'signature: makeRE.signature(...)' = signature2dset)
 
 
-char2dset_ <- humdrumDispatch(doExclusiveDispatch = FALSE,
+char2dset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
                               'keyof: makeRE.diatonicPartition(...)' = mapPartition(char2dset),
                               'key: makeRE.key(...)' = key2dset,
                               'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                               'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
-diatonicSet.character <- char2dset_
+diatonicSet.character <- char2dset_partition
 
 
 #.... set as

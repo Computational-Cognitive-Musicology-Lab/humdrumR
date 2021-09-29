@@ -614,8 +614,9 @@ sciChord2tset <- function(csym) {
     
 }
 
+##... Numbers
 
-
+integer2tset <- function(x) tset(x, x)
 
 ##### Tertian transforms ####
 
@@ -631,15 +632,31 @@ NULL
 ####. generics ####
 
 #' @name tertianSet
-#' @export tertianSet key signature romanChord
-diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
-key          <- function(x, ...) UseMethod('key')
-signature    <- function(x, ...) UseMethod('signature')
+#' @export tertianSet figuredBass sciChord chordSymbol romanChord
+tertianSet   <- function(x, ...) UseMethod('tertianSet')
+figuredBass  <- function(x, ...) UseMethod('figuredBass')
+sciChord     <- function(x, ...) UseMethod('sciChord')
+chordSymbol  <- function(x, ...) UseMethod('chordSymbol')
 romanChord   <- function(x, ...) UseMethod('romanChord')
 
 
-####. methods ####
+####. methods ####  
+ 
+###.. x as tset ####
+
+#' @export
+tertianSet.tertianSet <- force
+
+#' @export
+tertianSet.numeric <- integer2tset %.% as.integer
 
 
+char2tset           <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset)
 
-##### Predefined tertianSets ####
+char2tset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                       'keyof: makeRE.tertianPartition(...)' = mapPartition(char2tset),
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset)
+
+#' @export
+tertianSet.character <- char2tset_partition
