@@ -551,9 +551,10 @@ makeRE.romanNumeralkey <- function(..., accidental.labels = c(), alteration.labe
 }
 
 
-makeRE.romanNumeralchord <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
+makeRE.romanNumeralchord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
+    setoptions(triad.labels)      <- c(diminish = 'o', augment = '+')
     
     REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
                               step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
@@ -568,17 +569,17 @@ makeRE.romanNumeralchord <- function(..., accidental.labels = c(), alteration.la
                               step.sign = FALSE, collapse = FALSE)
     
     
-    REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
-    res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
+    REs['triadalt'] <- paste0(triad.labels['augment'], '?')
+    res['triadalt'] <- paste0(triad.labels['diminish'], '?')
     
-    REs$steps <- paste0('(', cREs(REs[c('steps', 'mode')]), '|', cREs(res[c('steps', 'mode')]), ')')
-    REs$mode <- NULL
+    REs$steps <- paste0('(', cREs(REs[c('steps', 'triadalt')]), '|', cREs(res[c('steps', 'triadalt')]), ')')
+    REs$triadalt <- NULL
     
     REs['alterations'] <- makeRE.alterations(alteration.labels)
     REs <- REs[c('accidentals', 'steps', 'alterations')]
     
     
-    if (collapse) setNames(cREs(REs), 'key') else REs
+    if (collapse) setNames(cREs(REs), 'chord') else REs
 }
 
 
