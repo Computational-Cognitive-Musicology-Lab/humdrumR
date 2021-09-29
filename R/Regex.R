@@ -520,7 +520,7 @@ makeRE.key <- function(..., accidental.labels = c(), alteration.labels = c(), co
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
-makeRE.romanNumeralkey <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
+makeRE.romanKey <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
     
@@ -551,7 +551,7 @@ makeRE.romanNumeralkey <- function(..., accidental.labels = c(), alteration.labe
 }
 
 
-makeRE.romanNumeralchord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
+makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
     setoptions(triad.labels)      <- c(diminish = 'o', augment = '+')

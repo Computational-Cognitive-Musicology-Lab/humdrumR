@@ -621,7 +621,22 @@ sciChord2tset <- function(csym) {
 
 ##### As x ####
 
+#' Tertian set representations
+#' 
+#' Tertian sets can be read/wrote in various ways.
+#' 
+#' @name tertianRepresentations
+NULL
+
 ####. generics ####
+
+#' @name tertianSet
+#' @export tertianSet key signature romanChord
+diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
+key          <- function(x, ...) UseMethod('key')
+signature    <- function(x, ...) UseMethod('signature')
+romanChord   <- function(x, ...) UseMethod('romanChord')
+
 
 ####. methods ####
 

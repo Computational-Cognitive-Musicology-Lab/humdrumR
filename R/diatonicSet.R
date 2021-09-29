@@ -767,7 +767,7 @@ integer2dset <- function(x) dset(x, x)
 #' 
 #' @name diatonicSet
 #' @export
-# romanNumeral.character <- romanNumeral.tertianSet %.% as.tertianSet
+# romanKey.character <- romanKey.tertianSet %.% as.tertianSet
 
 mapPartition <- function(func, split = '/') {
     function(str) {
@@ -803,11 +803,11 @@ NULL
 
 
 #' @name diatonicSet
-#' @export diatonicSet key signature romanNumeral
+#' @export diatonicSet key signature romanKey
 diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
 key          <- function(x, ...) UseMethod('key')
 signature    <- function(x, ...) UseMethod('signature')
-romanNumeral <- function(x, ...) UseMethod('romanNumeral')
+romanKey     <- function(x, ...) UseMethod('romanKey')
 
 
 ####. methods ####
@@ -825,14 +825,14 @@ diatonicSet.numeric <- integer2dset %.% as.integer
 
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'key: makeRE.key(...)' = key2dset,
-                             'romanNumeral: makeRE.romanNumeralkey(...)' = romanNumeral2dset,
+                             'romanKey: makeRE.romanKey(...)' = romanNumeral2dset,
                              'signature: makeRE.signature(...)' = signature2dset)
 
 
 char2dset_ <- humdrumDispatch(doExclusiveDispatch = FALSE,
                               'keyof: makeRE.diatonicPartition(...)' = mapPartition(char2dset),
                               'key: makeRE.key(...)' = key2dset,
-                              'romanNumeral: makeRE.romanNumeralkey(...)' = romanNumeral2dset,          
+                              'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                               'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
@@ -858,7 +858,7 @@ key.diatonicSet          <- dset2key
 #' @export
 signature.diatonicSet    <- dset2signature
 #' @export
-romanNumeral.diatonicSet <- dset2romanNumeral
+romanKey.diatonicSet     <- dset2romanNumeral
 #' @export
 kern.diatonicSet         <- dset2pitcher(tint2kern)
 
@@ -872,7 +872,7 @@ key.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
 signature.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
-romanNumeral.numeric <- dset2key %.% diatonicSet.numeric
+romanKey.numeric <- dset2key %.% diatonicSet.numeric
 
 #.... character -> y ####
 
@@ -881,7 +881,7 @@ key.character          <- re.place %.% dset2key %.% diatonicSet.character
 #' @export
 signature.character    <- re.place %.% dset2signature %.% diatonicSet.character
 #' @export
-romanNumeral.character <- re.place %.% dset2romanNumeral %.% diatonicSet.character
+romanKey.character     <- re.place %.% dset2romanNumeral %.% diatonicSet.character
 
 
 ##### Tonal transform methods ####
