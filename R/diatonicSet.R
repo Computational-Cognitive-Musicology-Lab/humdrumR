@@ -825,14 +825,14 @@ diatonicSet.numeric <- integer2dset %.% as.integer
 
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'key: makeRE.key(...)' = key2dset,
-                             'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,
+                             'romanNumeral: makeRE.romanNumeralkey(...)' = romanNumeral2dset,
                              'signature: makeRE.signature(...)' = signature2dset)
 
 
 char2dset_ <- humdrumDispatch(doExclusiveDispatch = FALSE,
                               'keyof: makeRE.diatonicPartition(...)' = mapPartition(char2dset),
                               'key: makeRE.key(...)' = key2dset,
-                              'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,          
+                              'romanNumeral: makeRE.romanNumeralkey(...)' = romanNumeral2dset,          
                               'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
