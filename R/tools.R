@@ -958,8 +958,10 @@ ints2baltern <- function(n, ntrits = 8L) {
     ## incorporate sign
     sweep(tern, c(1, if (length(dim(n))>1) 3), as.integer(sign(n)), '*')
     
- 
-    
+}
+
+baltern2int <- function(mat) {
+    as.integer(rowSums(sweep(mat, 2, 3^((ncol(mat)-1):0), `*`)))
 }
 
 bitwRotateL <- function(a, n, nbits = 8L) {

@@ -572,6 +572,26 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
 
 ####. REs for tertian sets ####
 
+makeRE.sciChord <- function(..., quality.labels = c(), collapse = TRUE) {
+    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+    
+    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = '[A-G]',
+                              step.sign = FALSE, collapse = FALSE, ...)
+    
+    qualityRE <- captureRE(quality.labels[c('major', 'minor', 'augment', 'diminish')])
+    REs['qualities'] <-  paste0('(', 
+                                qualityRE, '{3}',  
+                                captureRE(quality.labels[c('perfect', 'augment', 'diminish')]), 
+                                qualityRE, 
+                                '?)|(', 
+                                qualityRE, '{1,3})')
+   
+    REs <- REs[c('steps', 'accidentals', 'qualities')]
+    
+    if (collapse) setNames(cREs(REs), 'sciChord') else REs
+}
+
 makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')

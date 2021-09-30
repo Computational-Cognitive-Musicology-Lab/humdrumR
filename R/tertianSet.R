@@ -594,23 +594,70 @@ romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.la
 }
 
 
-sciChord2tset <- function(csym) {
-    tonalChroma <- stringi::stri_extract_first_regex(csym, '^[A-Ga-g][#b-]*')
-    LO5th <- tonalChroma2LO5th(tonalChroma)
+sciChord2tset <- function(str, quality.labels = c(),  ...) {
+   setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+
+   
+    REparse(str,
+            makeRE.sciChord(..., quality.labels = quality.labels, collapse = FALSE),
+            toEnv = TRUE) -> parsed
+  
+  
+    root <- tonalChroma2tint(paste0(steps, accidentals), ...)@Fifth
     
-    quality <- stringr::str_remove(csym, tonalChroma)
-    quality7 <- substr(quality, start = 0L, stop = 3L)
+    # modes are the 7 13th-chord/modes
+    modes <- setNames(1:-5, c('MMMAM', 'MMMPM', 'MmMPM', 'mmMPM', 'mmMPm', 'mmmPm', 'dmmPm'))
+    modes <- modes[c(2,5,4,3,1,6,7)] # reorder to prefer major > minor, etc.     
+    modes_qual <- strsplit(names(modes), split = '')
     
-    mode <- c(m  = -3, M = 0, A = 3, d = -5,
-              mm = -3, Mm = -1, MM = 0, dm = -5, dd = -8, AM = 3, Am = -1,
-              mmm = -4, mmM = -3, MmM = -1)[quality7]
+    names(modes) <- sapply(modes_qual,
+                           function(q) paste(quality.labels[c(M = 'major', m = 'minor', d = 'diminish', P = 'perfect')[q]], collapse = ''))
+          
+    mode <- modes[sapply(paste0('^', qualities), function(q) which(str_detect(names(modes), q))[1])]
     
-    cardinality <- c(3, 4, 5, 6, 7)[nchar(quality)]
     
-    alterations <- numeric(length(LO5th))
-    alterations[quality7 == 'Am'] <- 3
+    alterations <- integer(length(root))
+    if (any(is.na(mode))) {
+      altered <- is.na(mode)
+      quality.labels <- quality.labels[c('diminish', 'minor', 'perfect', 'major', 'augment')] # reorder for rank
+      
+      mode_alterations <- lapply(strsplit(qualities[altered], split = ''),
+                         function(q) {
+                           hits <- do.call('rbind', lapply(modes_qual, function(mq) q == head(mq, length(q))))
+                           
+                           if (any(hits[ , 1])) hits[!hits[ , 1]] <- FALSE
+                           
+                           pick <- which.max(rowSums(hits))
+                           mode <- modes[pick]
+                           
+                           altered <- !hits[pick, ]
+                           alterint <-  if (any(altered)) {
+                             supposedtobe <- modes_qual[[pick]][which(altered)]
+                             actual <- q[altered]
+                             
+                             change <- ifelse(which(altered) == 4L, # 11th
+                                              match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
+                                              match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
+                            
+                             altermat <- matrix(0L, nrow = 1, ncol = 7)
+                             c('2' = 7, '5' = 5, '3' = 4, '4' = 1)
+                             altermat[head(((c(-1, 6, 3, -1, 4, -1, -1) + mode) %% 7) + 1L, length(q))[altered]] <- change
+                             
+                             baltern2int(altermat[ , 7:1, drop = FALSE])
+                             
+                           } else 0L
+                           # what direction are they altered?
+                           c(mode = mode, altered = alterint)
+                           }) %>% do.call('rbind', .)
+      mode[altered] <- mode_alterations[ , 1]
+      alterations[altered] <- mode_alterations[ , 2]
+      
+      
+    }
     
-    # tset(root = LO5th, mode = mode, cardinality = cardinality, alterations = alterations )
+    cardinality <- nchar(qualities) + 2L
+    
+    tset(root = root, signature = root + mode, cardinality = cardinality, alterations = alterations )
     
 }
 
@@ -660,3 +707,38 @@ char2tset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
 
 #' @export
 tertianSet.character <- char2tset_partition
+
+#.... set as
+
+#' @export
+setAs('integer', 'tertianSet', function(from) integer2tset(from))
+#' @export
+setAs('numeric', 'tertianSet', function(from) integer2tset(as.integer(from)))
+#' @export
+setAs('character', 'tertianSet', function(from) char2tset(from))
+#' @export
+setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
+
+
+
+###.. tset as x ####
+
+#' @export
+romanChord.tertianSet <- tset2romanNumeral
+
+
+###. x as y ####
+
+#.... numeric -> y ####
+
+#' @export
+romanChord.numeric <- tset2romanNumeral %.% tertianSet.numeric
+
+#.... character -> y ####
+
+#' @export
+romanChord.character <- re.place %.% tset2romanNumeral %.% tertianSet.character
+
+
+
+##### Tonal transform methods ####

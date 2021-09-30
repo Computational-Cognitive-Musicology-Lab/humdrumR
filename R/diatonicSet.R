@@ -842,7 +842,7 @@ setAs('integer', 'diatonicSet', function(from) integer2dset(from))
 #' @export
 setAs('numeric', 'diatonicSet', function(from) integer2dset(as.integer(from)))
 #' @export
-setAs('character', 'diatonicSet', function(from) char2dset(dset))
+setAs('character', 'diatonicSet', function(from) char2dset(from))
 #' @export
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
