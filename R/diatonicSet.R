@@ -576,7 +576,7 @@ dset2romanNumeral <- function(dset, ...) {
 
 ####. x to dset ####
 
-qualities2dset <-  function(str, steporder = 2L, quality.labels = c(),  ...) {
+qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.labels = c(),  ...) {
     setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
     
     
@@ -593,7 +593,7 @@ qualities2dset <-  function(str, steporder = 2L, quality.labels = c(),  ...) {
     modes_int <- 1L:-5L
     names(modes) <- names(modes_int) <- sapply(modes, paste, collapse = '')
     
-    modes_int <- modes_int[c(2,5,4,3,1,6,7)] # reorder to prefer major > minor, etc.     
+    modes_int <- modes_int[c(2,3,5,4,1,6,7)] # reorder to prefer major > mixo > minor, etc.     
     modes <- modes[names(modes_int)]
     
     ####
@@ -602,7 +602,12 @@ qualities2dset <-  function(str, steporder = 2L, quality.labels = c(),  ...) {
       ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
       str <- sapply(str, function(s) paste(s[ord], collapse = ''))
     }
-    mode <- modes_int[str]
+    
+    if (allow_partial) {
+      mode <- sapply(paste0('^', str), function(str) modes_int[which(stringr::str_detect(names(modes_int), str))[1]])
+    } else {
+      mode <- modes_int[str]
+    }
     
     alterations <- integer(length(str))
     if (any(is.na(mode))) {
@@ -612,18 +617,18 @@ qualities2dset <-  function(str, steporder = 2L, quality.labels = c(),  ...) {
       
       mode_alterations <- lapply(strsplit(str[altered], split = ''),
                                  function(qualities) {
-                                   hits <- qualities == modes
+                                   hits <- qualities == modes[1L:length(qualities), ]
                                    
                                    # only want to alter 1 5 or 3 as last resort
                                    if (any(hits[1, ])) hits[ , !hits[1, ]] <- FALSE
+                                   if (any(hits[2, ])) hits[ , !hits[2, ]] <- FALSE
                                    if (any(hits[5, ])) hits[ , !hits[5, ]] <- FALSE
-                                   if (any(hits[3, ])) hits[ , !hits[3, ]] <- FALSE
                                    
                                    # which is closest mode
                                    pick <- which.max(colSums(hits))
                                    mode <- modes_int[pick] 
                                    #
-                                   altered <- !hits[, pick]
+                                   altered <- !hits[, pick] & (allow_partial & qualities != '.')
                                    supposedtobe <- modes[altered, pick]
                                    actual <- qualities[altered]
                                      

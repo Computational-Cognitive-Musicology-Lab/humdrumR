@@ -593,6 +593,27 @@ romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.la
   
 }
 
+sciQualities2tset <- function(str, quality.labels = c(), ...) {
+  setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+  
+  triads <- with(quality.labels,
+                 setNames(paste0(perfect,
+                                 c(major,   minor,   minor,    major), 
+                                 c(perfect, perfect, diminish, augment)),
+                          c(major, minor, diminish, augment))[stringr::str_sub(str, 1L, 1L)])
+  
+  chord <- paste0(triads, stringr::str_sub(str, 2L))
+  
+  chord <- stringr::str_pad(chord, width = 7L, side = 'right', pad = '.')
+  
+  dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, quality.labels = quality.labels)
+  
+  
+  cardinalities <- nchar(str) + 2L
+  
+  tset(dset@Root, dset@Signature, dset@Alteration, cardinalities)
+  
+}
 
 sciChord2tset <- function(str, quality.labels = c(),  ...) {
    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
@@ -602,62 +623,9 @@ sciChord2tset <- function(str, quality.labels = c(),  ...) {
             makeRE.sciChord(..., quality.labels = quality.labels, collapse = FALSE),
             toEnv = TRUE) -> parsed
   
-  
     root <- tonalChroma2tint(paste0(steps, accidentals), ...)@Fifth
     
-    # modes are the 7 13th-chord/modes
-    modes <- setNames(1:-5, c('MMMAM', 'MMMPM', 'MmMPM', 'mmMPM', 'mmMPm', 'mmmPm', 'dmmPm'))
-    modes <- modes[c(2,5,4,3,1,6,7)] # reorder to prefer major > minor, etc.     
-    modes_qual <- strsplit(names(modes), split = '')
-    
-    names(modes) <- sapply(modes_qual,
-                           function(q) paste(quality.labels[c(M = 'major', m = 'minor', d = 'diminish', P = 'perfect')[q]], collapse = ''))
-          
-    mode <- modes[sapply(paste0('^', qualities), function(q) which(str_detect(names(modes), q))[1])]
-    
-    
-    alterations <- integer(length(root))
-    if (any(is.na(mode))) {
-      altered <- is.na(mode)
-      quality.labels <- quality.labels[c('diminish', 'minor', 'perfect', 'major', 'augment')] # reorder for rank
-      
-      mode_alterations <- lapply(strsplit(qualities[altered], split = ''),
-                         function(q) {
-                           hits <- do.call('rbind', lapply(modes_qual, function(mq) q == head(mq, length(q))))
-                           
-                           if (any(hits[ , 1])) hits[!hits[ , 1]] <- FALSE
-                           
-                           pick <- which.max(rowSums(hits))
-                           mode <- modes[pick]
-                           
-                           altered <- !hits[pick, ]
-                           alterint <-  if (any(altered)) {
-                             supposedtobe <- modes_qual[[pick]][which(altered)]
-                             actual <- q[altered]
-                             
-                             change <- ifelse(which(altered) == 4L, # 11th
-                                              match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
-                                              match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
-                            
-                             altermat <- matrix(0L, nrow = 1, ncol = 7)
-                             c('2' = 7, '5' = 5, '3' = 4, '4' = 1)
-                             altermat[head(((c(-1, 6, 3, -1, 4, -1, -1) + mode) %% 7) + 1L, length(q))[altered]] <- change
-                             
-                             baltern2int(altermat[ , 7:1, drop = FALSE])
-                             
-                           } else 0L
-                           # what direction are they altered?
-                           c(mode = mode, altered = alterint)
-                           }) %>% do.call('rbind', .)
-      mode[altered] <- mode_alterations[ , 1]
-      alterations[altered] <- mode_alterations[ , 2]
-      
-      
-    }
-    
-    cardinality <- nchar(qualities) + 2L
-    
-    tset(root = root, signature = root + mode, cardinality = cardinality, alterations = alterations )
+    sciQualities2tset(qualities, quality.labels = quality.labels, ...) + tset(root, root)
     
 }
 
