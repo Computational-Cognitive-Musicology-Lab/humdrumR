@@ -528,7 +528,7 @@ tset2sciChord <- function(tset,  ...) {
                             steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
                             qualifyTriad = paste0, quality.cautionary = TRUE,
                             extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
-                            accidental.natural = TRUE,
+                            accidental.naturals = TRUE,
                             extension.add=FALSE, extension.sus = FALSE,
                             inversion = FALSE, figure.Key = FALSE, Key = NULL, ...))
   
@@ -540,10 +540,10 @@ tset2chordSymbol <- function(tset,  ...) {
                             steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj', doubleflat = 'o', doublesharp = '+'),
                             qualifyTriad = paste0,
                             inversion.labels = function(x, ...) paste0('/', tint2simplepitch(x)),
-                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=FALSE,
+                            extension.shorthand = TRUE, extension.which = c(7, 2, 4, 6), extension.simple=FALSE,
                             extension.sus = TRUE, extension.add = TRUE,
                             triad.labels = c(major = ''),
-                            accidental.natural = TRUE,
+                            accidental.naturals = FALSE,
                             inversion = FALSE, figure.Key = FALSE, Key = dset(getRoot(tset), getRoot(tset) - 1L), ...)) -> chords
   
   stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
