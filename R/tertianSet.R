@@ -467,7 +467,7 @@ tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'),
   
   
   root        <- if ('root' %in% parts)      steps(getRootTint(x), Key = if (figure.Key) Key, ...) 
-  alterations <- if (length(qualoracc) > 0L) tset2alterations(x, parts = qualoracc[1], Key = if (figure.Key) Key, inversion = inversion,
+  alterations <- if (length(qualoracc) > 0L) tset2alterations(x, parts = qualoracc[1], Key = Key, inversion = inversion,
                                                               accidental.naturals = accidental.naturals, ...) 
   extensions  <- if ('extensions' %in% parts) tset2extensions(x, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
   
