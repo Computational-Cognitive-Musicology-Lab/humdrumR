@@ -576,6 +576,77 @@ dset2romanNumeral <- function(dset, ...) {
 
 ####. x to dset ####
 
+qualities2dset <-  function(str, steporder = 2L, quality.labels = c(),  ...) {
+    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+    
+    
+    
+    # modes are the 7 13th-chord/modes in L05th order
+    modes <- list(c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'augment'),
+                  c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'major', 'major', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'minor', 'major', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'minor', 'minor', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'minor', 'minor', 'minor', 'minor', 'perfect'),
+                  c('perfect', 'diminish', 'minor', 'minor', 'minor', 'minor', 'perfect'))
+    modes <- lapply(modes, function(labels) unlist(quality.labels[labels]))
+    modes_int <- 1L:-5L
+    names(modes) <- names(modes_int) <- sapply(modes, paste, collapse = '')
+    
+    modes_int <- modes_int[c(2,5,4,3,1,6,7)] # reorder to prefer major > minor, etc.     
+    modes <- modes[names(modes_int)]
+    
+    ####
+    if (steporder != 1L) {
+      str <- strsplit(str, split = '')
+      ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
+      str <- sapply(str, function(s) paste(s[ord], collapse = ''))
+    }
+    mode <- modes_int[str]
+    
+    alterations <- integer(length(str))
+    if (any(is.na(mode))) {
+      altered <- is.na(mode)
+      quality.labels <- quality.labels[c('diminish', 'minor', 'perfect', 'major', 'augment')] # reorder for rank
+      modes <- do.call('cbind', modes)
+      
+      mode_alterations <- lapply(strsplit(str[altered], split = ''),
+                                 function(qualities) {
+                                   hits <- qualities == modes
+                                   
+                                   # only want to alter 1 5 or 3 as last resort
+                                   if (any(hits[1, ])) hits[ , !hits[1, ]] <- FALSE
+                                   if (any(hits[5, ])) hits[ , !hits[5, ]] <- FALSE
+                                   if (any(hits[3, ])) hits[ , !hits[3, ]] <- FALSE
+                                   
+                                   # which is closest mode
+                                   pick <- which.max(colSums(hits))
+                                   mode <- modes_int[pick] 
+                                   #
+                                   altered <- !hits[, pick]
+                                   supposedtobe <- modes[altered, pick]
+                                   actual <- qualities[altered]
+                                     
+                                   # what direction are they altered?
+                                   change <- ifelse(which(altered) %in% c(1L, 2L, 7L), # Perfects
+                                                    match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
+                                                    match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
+                                     
+                                   altermat <- matrix(0L, nrow = 1, ncol = 7)
+                                   altermat[((which(altered) - mode) %% 7L) + 1L] <- change
+                                     
+                                   alterint <- baltern2int(altermat)
+                                   c(mode = mode, altered = alterint)
+                                 }) %>% do.call('rbind', .)
+      mode[altered] <- mode_alterations[ , 1]
+      alterations[altered] <- mode_alterations[ , 2]
+      
+    }
+    
+    dset(root = 0, signature = mode, alterations = alterations )
+    
+}
+
 
 alteration2trit <- function(str, mode = integer(length(str)), alteration.labels = c()) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
