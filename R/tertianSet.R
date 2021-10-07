@@ -244,6 +244,8 @@ extensions2sciQuality <- function(root, extensions, accidental.labels, Key = NUL
          interval2tint,
          parts = c('accidentals', 'steps'),
          Key = NULL)
+  
+  extensions <- Map(`+`, extensions, root)
 
   extensions <- lapply(extensions, tint2quality, Key = Key, ...)
   
@@ -619,9 +621,9 @@ romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.la
 
   
   
-  return(qualitytset + tset(root, root,  
-                            extension = inversion_extension$Extension,  
-                            inversion = inversion_extension$Inversion))
+  return(tset(root, root, 
+              extension = inversion_extension$Extension,  
+              inversion = inversion_extension$Inversion) + qualitytset)
   
   
   
