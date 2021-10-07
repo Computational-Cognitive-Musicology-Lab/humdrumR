@@ -576,6 +576,7 @@ accidental2LO5th <- function(str, accidental.labels = c(), ...) {
   n <- updownN(str, up = accidental.labels['sharp'], down = accidental.labels['flat'])
   
   names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  names(n)[is.na(names(n))] <- ""
   
   n * 7L
   

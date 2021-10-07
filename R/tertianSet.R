@@ -224,39 +224,67 @@ extension2bit <- function(str) {
   # mode + root - mode + TriadQuality
 # }
 
-romanNumeral2triadQuality <- function(numeral, quality, triad.labels) {
-  # output <- c('M', 'm')[1L + (tolower(numeral) == numeral)]
-  # output[quality != ''] <- quality
-  # output is an integer representing the quality as a tset mode
+
+romanNumeral2sciQuality <- function(numeral, quality, triad.labels) {
   
-  mode <- ifelse(tolower(numeral) == numeral, -3L, 0L)
+  triad <- rep('M', length(numeral))
+  triad[numeral == tolower(numeral)] <- 'm'
   
-  mode[quality != ''] <- mode[quality != ''] + c(diminish = -3L, augment = 3L)[names(triad.labels)[match(quality[quality != ''], triad.labels)]]
+  triad[quality == triad.labels$diminish] <- triad.labels$diminish
+  triad[quality == triad.labels$augment] <- triad.labels$augment
   
-  mode
-  
+  triad
   
 }
 
-inversion2int <- function(str) {
+extensions2sciQuality <- function(root, extensions, accidental.labels, Key = NULL, ...) {
+  extensions <- stringr::str_extract_all(extensions, paste0(captureRE(accidental.labels, n = '*'), captureRE(2:13)))
   
-  # (53) 6(3) 64
-  # 7(53) 65(3) (6)43 (64)2
-  # 9(753) 76(53) 654(3) 6432 7642
-  # 11(9753) 76532 76543 65432 76432
+  extensions <- lapply(extensions,
+         interval2tint,
+         parts = c('accidentals', 'steps'),
+         Key = NULL)
+
+  extensions <- lapply(extensions, tint2quality, Key = Key, ...)
   
-  # str <- figureLonghands(str)
+  sapply(extensions, paste, collapse = '')
   
-  inversion <- integer(length(str))
+}
+
+extensions2inversion <- function(str, figureFill = TRUE) {
   
-  c('6' = 1, '63' = 1, '65' = 1,
-    '64' = 2, '643' = 2, '43' = 2,
-    '642' = 3, '42' = 3, '2' = 3) -> codes
-  inversion[str %in% names(codes)] <- codes[str[str %in% names(codes)]]
+  str[str == ''] <- '35'
   
-  inversion
+  lapply(stringr::str_extract_all(str, captureRE(1:13), simplify = FALSE), 
+                  function(fig) {
+                    fig <- c(1L, as.integer(fig))
+                    
+
+                                      
+                    fig <- ifelse(fig %% 2L == 0L, fig - 7L, fig)
+                    fig <- (fig - min(fig)) %/% 2L # translates steps -> thirds
+                    fig <- unique(fig)
+                    
+                    inversion <- as.integer(fig[1])
+                    
+                    if (figureFill) {
+                      fig_new <- if (inversion == 0L && 
+                                     ((length(fig) == 2L && any(fig[2] %in% c(1L, 2L))) ||
+                                     ((length(fig) > 2L) && !all(diff(fig) == 1L) && any(fig[-1] <= 3L)))) {
+                        fig
+                      } else {
+                        if (max(fig) <= 2L) 0:2 else unique(c(0:3L, fig[fig > 3L]))
+                      }
+                    } -> fig
+                    
+                    data.frame(Inversion = inversion, Extension = as.integer(sum(2^fig)))
+                    }) %>% do.call('rbind', .)
   
+    
+    
   
+    
+
 }
 
 ##### To/From tertianSets ####    
@@ -563,30 +591,37 @@ romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.la
   triadqualRE <- captureRE(triad.labels, '?')
   
   of <- dset(0, getMode(of), of@Alteration)
-  
-  Inversion <- stringr::str_extract(str, captureRE(c('6', '643', '63', '64', '65', '43', '42', '2'), '+'))
-  Inversion <- inversion2int(Inversion)
-  str <- stringr::str_replace(str, '65|43|42', '7')
-  
   REparse(str,
           list(Accidental = accidentalRE,
                Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
                TriadQuality = '[o+]?', 
                Extensions = paste0('(', accidentalRE,
-                                   captureRE(c('7', '9', '11', '13')), 
+                                   captureRE(13:2), 
                                    '|sus[42]|add[692])*')),
           toEnv = TRUE) -> parsed
-  
-  bit <- extension2bit(stringr::str_remove_all(Extensions, '[^0-9]*'))
-  
-  TriadQuality <- romanNumeral2triadQuality(Numeral, TriadQuality, triad.labels)
   
   root <- tonalChroma2tint(paste0(Accidental, toupper(Numeral)), parts = c('accidentals', 'steps'), 
                            accidental.labels = accidental.labels, Key = of, 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
   
+  qualitytset <- local({
+    quality.labels <- c(major = 'M', minor = 'm', perfect = 'P', triad.labels)
+    TriadQuality <- romanNumeral2sciQuality(Numeral, TriadQuality, triad.labels)
+    extensionQuality <- extensions2sciQuality(root, Extensions, accidental.labels, Key = of, quality.labels = quality.labels)
+    
+    sciQualities2tset(paste0(TriadQuality, extensionQuality), quality.labels = quality.labels)
+  })
+ 
+  inversion_extension <- extensions2inversion(stringr::str_remove_all(Extensions, '[^0-9]*'))
+
   
-  return(tset(root, root + TriadQuality, alterations = 0, extension = bit, inversion = Inversion))
+  
+
+  
+  
+  return(qualitytset + tset(root, root,  
+                            extension = inversion_extension$Extension,  
+                            inversion = inversion_extension$Inversion))
   
   
   

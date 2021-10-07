@@ -628,7 +628,7 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.
                                    pick <- which.max(colSums(hits))
                                    mode <- modes_int[pick] 
                                    #
-                                   altered <- !hits[, pick] & (allow_partial & qualities != '.')
+                                   altered <- !hits[, pick] & (!allow_partial | qualities != '.')
                                    supposedtobe <- modes[altered, pick]
                                    actual <- qualities[altered]
                                      
@@ -636,7 +636,8 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.
                                    change <- ifelse(which(altered) %in% c(1L, 2L, 7L), # Perfects
                                                     match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
                                                     match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
-                                     
+                                   if (any(abs(change) > 1L)) return(mode = NA_integer_, altered = NA_integer_)
+                                   
                                    altermat <- matrix(0L, nrow = 1, ncol = 7)
                                    altermat[((which(altered) - mode) %% 7L) + 1L] <- change
                                      

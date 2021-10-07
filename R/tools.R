@@ -934,6 +934,8 @@ ints2nits <- function(n, it = 2, nits = 8) {
 }
 
 
+
+
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
     tern <- ints2nits(abs(n), it = 3L, ntrits)
@@ -973,7 +975,6 @@ bitwRotateR <- function(a, n, nbits = 8L) {
     bitwOr(bitwShiftL(a, nbits - n), bitwShiftR(a, n)) %% (2^nbits)
     
 }
-
 
 
 ## bitwise tools, with decimal place...
