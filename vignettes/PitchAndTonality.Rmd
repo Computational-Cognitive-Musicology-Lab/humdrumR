@@ -24,7 +24,7 @@ library(humdrumR)
 
 
 As a computational musicology toolkit, `humdrumR`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
-For the most part, `humdrumR`'s pitch tools are focused on the Western system of tonality, and tools for repretesenting pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
+For the most part, `humdrumR`'s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
 
 Pitch, and the tonal organization of pitch, is represented in `humdrumR` using three `S4` classes and associated methods: 
 
@@ -39,7 +39,7 @@ Pitch, and the tonal organization of pitch, is represented in `humdrumR` using t
 
 If know Western music theory, how to Western read music, or even the basics of giving names to pitches and chords, you should be able to get started with `humdrumR` pitch tools very quickly.
 This vignette takes the time to really explain how and why the `humdrumR` tonal system is set up.
-Fortunately, many sections are marke with "tl;dr" summaries, so you can skip to (sub)sections that are relavent to you.
+Fortunately, many sections are marked with "tl;dr" summaries, so you can skip to (sub)sections that are relevant to you.
 
 + Section xxx talks in detail about the music theoretic logic of the `humdrumR` system.
 + Section xxx talks about how `humdrumR` encodes tonal logic.
@@ -105,12 +105,12 @@ mtext("Frequency (Hertz)", 3)
 
 ### Octave Equivalence
 
-We percieve the distance (interval) between pitches based on the ratio between their frequencies.
+We perceive the distance (interval) between pitches based on the ratio between their frequencies.
 But not all ratios are created equal!
 The simplest, integer ratios are **privileged** in our perception---they simply sound better, more *consonant*, to us!
 Integer ratios between frequencies are called [harmonics](https://en.wikipedia.org/wiki/Harmonic).
 The simplest, purest harmonic relationship is the 2-to-1 ratio, which we call an [octave](https://en.wikipedia.org/wiki/Octave).
-Pitches separated by an octave are *so* consonant that we actually percieve them as being "the same pitch" (in some respects).
+Pitches separated by an octave are *so* consonant that we actually perceive them as being "the same pitch" (in some respects).
 We call this sameness *octave equivalence*.
 If two pitches are octave equivalent---i.e., the ratio between their frequencies is a power of two---we say that they are the same *pitch chroma*.
 In the following figure, the three rows of frequencies each represent groups of pitches that are equivalent chroma:
@@ -131,7 +131,7 @@ mtext("Frequency (Hertz)", 3)
 ```
 
 Due to the perceptual reality of octave equivalence, most (essentially all) musical scales use the octave as a bounding point---the same patterns of pitch chroma (e.g., scales) are repeated in each octave we can perceive.
-Thus, even though we can percieve close to ten octaves worth of frequencies, the organization of pitch in music is mostly based on pitches that can be squeezed into a single octave.
+Thus, even though we can perceive close to ten octaves worth of frequencies, the organization of pitch in music is mostly based on pitches that can be squeezed into a single octave.
 
 
 ```{r, echo = FALSE}
@@ -226,7 +226,7 @@ Throughout `humdrumR` we often refer to the *line-of-fifths* (or *circle-of-fift
 
 > **tl;dr**: This sections talks about how the abstract line-of-fifths of "tonal harmonics" is tuned to actual pitches.
 > For the most part, it doesn't really matter that much within Western music; we assume equal temperament most of the time.
-> Most tonal analyses don't really depend on the specific flavor of Western tuning/temperement you use.
+> Most tonal analyses don't really depend on the specific flavor of Western tuning/temperament you use.
 
 A scale *actually* tuned to "pure" 3rd-harmonics results in the [pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
 However, for centuries, Western musicians have systematically mistuned, or *tempered*, some of the 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament).
@@ -461,6 +461,64 @@ for (i in 1:length(scale)) {
 
 Many of the practical distinctions between different "concrete" representation of pitch (previous section) boil down to different ways we *partition* (or discard) `tonalInterval` information.
 
+To begin, we can distinguish between the tonal and height dimensions of pitch.
+Tonal pitch information (like "Major third" or "c#") can be abstract, not corresponding to specific frequencies.
+Thus, an abstract c# is neither "above" nor "below" g#.
+However, tonal intervals *are* ordered into scales---wrapped within an octave.
+We can "round" differently to the unison.
+
+Scaled tonal intervals are still best regarded as abstract.
+Only with the combination of octave information do we get complex intervals.
+
+
+$$
+\begin{aligned}
+TonalInterval = Octave \times LoF
+Octave = \mathbb{Z}
+LoF = \mathbb{Z}
+\end{aligned}
+$$
+
+Every tonal interval combines a simple interval with an octave offset.
+A simple interval with octave is a complex interval.
+
+$$
+\begin{aligned}
+Complex = Simple \times Octave 
+Specific = Alteration + Quality + Generic
+Generic = Step
+Alteration = Comma + Accidental
+\end{aligned}
+$$
+
+A scale step is one of seven numbers on the line-of-fifths, 0 through 6, corresponding to seven scale steps: 0 = Unison, 2 = Second, 4 = Third, 6 = Fourth, 1 = Fifth, 3 = Sixth, 5 = Seventh.
+A 
+
+$$
+$$
+
+$$
+\begin{aligned}
+Step = \{0, 1, 2, 3, 4, 5 ,6\}
+Quality(Key) \subset Step \times \{7q\ |\ q \in \Mathbb{z}\}
+\end{aligned}
+$$
+
+
+
+$$
+\begin{aligned}
+Octave + (Key + (Quality + Step) + Alteration + Comma) = Pitch
+Pitch - Octave = Specific
+(Step + Quality) + Alteration = Specific
+\end{aligned}
+$$
+
+$$
+Amajor_{Key} + \hat{3}_{Step} + Major_{Quality} + Flat_{Alteration} = C natural
+$$
+
+
 
 ### Simple and Complex
 
@@ -616,7 +674,7 @@ A sharp *and* a flat---in these cases, we use the symbol natural.
 
 HumdrumR `tonalIntervals` can represent *any* tonal pitch on the circle-of-fifths, even `G#######`!
 In the context of equal-temperament tuning, we consider tones separated by 12 steps on the circle-of-fifths to be "the same"---they are *enharmonic*.
-Thus, in equal temperament, the interval of a dimished second---also known as the *pythagorean comma*---is identical to a unison.
+Thus, in equal temperament, the interval of a diminished second---also known as the *pythagorean comma*---is identical to a unison.
 We can thus partition notes as combinations of a *harmonic* part and a *comma* part.
 
 $\text{interval}_{enharmonic} + \text{interval}_{comma} = \text{interval}_{tonal}$ <!--\_ -->
@@ -778,6 +836,12 @@ The `Alteration` slot takes the *second from most extreme* element and moves it 
 
 
 
+
+
+## TertianSet
+
+
+Roman numerals.
 
 
 

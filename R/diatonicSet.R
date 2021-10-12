@@ -501,7 +501,7 @@ dset2signature <- function(dset) {
     LO5ths[] <- t(apply(LO5ths, 1, sort))
     tints <- tint( , LO5ths) %dim% LO5ths
     
-    notes <- as.tonalChroma(tints, parts = c('steps', 'accidentals'),
+    notes <- tonalChroma(tints, parts = c('steps', 'accidentals'),
                    accidental.labels = c(flat = '-'),
                    step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'))
     
@@ -575,6 +575,83 @@ dset2romanNumeral <- function(dset, ...) {
 
 
 ####. x to dset ####
+
+qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.labels = c(),  ...) {
+    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+    
+    
+    
+    # modes are the 7 13th-chord/modes in L05th order
+    modes <- list(c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'augment'),
+                  c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'major', 'major', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'minor', 'major', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'major', 'minor', 'minor', 'minor', 'perfect'),
+                  c('perfect', 'perfect', 'minor', 'minor', 'minor', 'minor', 'perfect'),
+                  c('perfect', 'diminish', 'minor', 'minor', 'minor', 'minor', 'perfect'))
+    modes <- lapply(modes, function(labels) unlist(quality.labels[labels]))
+    modes_int <- 1L:-5L
+    names(modes) <- names(modes_int) <- sapply(modes, paste, collapse = '')
+    
+    modes_int <- modes_int[c(2,3,5,4,1,6,7)] # reorder to prefer mixo > major >  minor, etc.     
+    modes <- modes[names(modes_int)]
+    
+    ####
+    if (steporder != 1L) {
+      str <- strsplit(str, split = '')
+      ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
+      str <- sapply(str, function(s) paste(s[ord], collapse = ''))
+    }
+    
+    if (allow_partial) {
+      mode <- sapply(paste0('^', str), function(str) modes_int[which(stringr::str_detect(names(modes_int), str))[1]])
+    } else {
+      mode <- modes_int[str]
+    }
+    
+    alterations <- integer(length(str))
+    if (any(is.na(mode))) {
+      altered <- is.na(mode)
+      quality.labels <- quality.labels[c('diminish', 'minor', 'perfect', 'major', 'augment')] # reorder for rank
+      modes <- do.call('cbind', modes)
+      
+      mode_alterations <- lapply(strsplit(str[altered], split = ''),
+                                 function(qualities) {
+                                   hits <- qualities == modes[1L:length(qualities), ]
+                                   
+                                   # only want to alter 1 5 or 3 as last resort
+                                   if (any(hits[1, ])) hits[ , !hits[1, ]] <- FALSE
+                                   if (any(hits[2, ])) hits[ , !hits[2, ]] <- FALSE
+                                   if (any(hits[5, ])) hits[ , !hits[5, ]] <- FALSE
+                                   
+                                   # which is closest mode
+                                   pick <- which.max(colSums(hits))
+                                   mode <- modes_int[pick] 
+                                   #
+                                   altered <- !hits[, pick] & (!allow_partial | qualities != '.')
+                                   supposedtobe <- modes[altered, pick]
+                                   actual <- qualities[altered]
+                                     
+                                   # what direction are they altered?
+                                   change <- ifelse(which(altered) %in% c(1L, 2L, 7L), # Perfects
+                                                    match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
+                                                    match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
+                                   if (any(abs(change) > 1L)) change <- sign(change)
+                                   
+                                   altermat <- matrix(0L, nrow = 1, ncol = 7)
+                                   altermat[((which(altered) - mode) %% 7L) + 1L] <- change
+                                     
+                                   alterint <- baltern2int(altermat)
+                                   c(mode = mode, altered = alterint)
+                                 }) %>% do.call('rbind', .)
+      mode[altered] <- mode_alterations[ , 1]
+      alterations[altered] <- mode_alterations[ , 2]
+      
+    }
+    
+    dset(root = 0, signature = mode, alterations = alterations )
+    
+}
 
 
 alteration2trit <- function(str, mode = integer(length(str)), alteration.labels = c()) {
@@ -742,7 +819,6 @@ romanNumeral2dset <- function(str, alteration.labels = c(), accidental.labels = 
 }
 
 
-# 
 
 ##... Numbers
 
@@ -752,8 +828,6 @@ integer2dset <- function(x) dset(x, x)
 
 
 ##### Tonals transforms ####
-
-
 
 
 #' Pitch translations
@@ -767,14 +841,14 @@ integer2dset <- function(x) dset(x, x)
 #' 
 #' @name diatonicSet
 #' @export
-# romanNumeral.character <- romanNumeral.tertianSet %.% as.tertianSet
+# romanKey.character <- romanKey.tertianSet %.% as.tertianSet
 
 mapPartition <- function(func, split = '/') {
     function(str) {
         parts <- strPartition(str, split = split)
         
         # parts[] <- lapply(parts, func)
-        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0,0), parts, accumulate = TRUE), -1) 
+        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
         parts %class% "partition"
         
     }
@@ -803,11 +877,11 @@ NULL
 
 
 #' @name diatonicSet
-#' @export diatonicSet key signature romanNumeral
+#' @export diatonicSet key signature romanKey
 diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
 key          <- function(x, ...) UseMethod('key')
 signature    <- function(x, ...) UseMethod('signature')
-romanNumeral <- function(x, ...) UseMethod('romanNumeral')
+romanKey     <- function(x, ...) UseMethod('romanKey')
 
 
 ####. methods ####
@@ -822,21 +896,20 @@ diatonicSet.numeric <- integer2dset %.% as.integer
 
 
 
-
 char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'key: makeRE.key(...)' = key2dset,
-                             'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,
+                             'romanKey: makeRE.romanKey(...)' = romanNumeral2dset,
                              'signature: makeRE.signature(...)' = signature2dset)
 
 
-char2dset_ <- humdrumDispatch(doExclusiveDispatch = FALSE,
+char2dset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
                               'keyof: makeRE.diatonicPartition(...)' = mapPartition(char2dset),
                               'key: makeRE.key(...)' = key2dset,
-                              'romanNumeral: makeRE.romanNumeral(...)' = romanNumeral2dset,          
+                              'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                               'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
-diatonicSet.character <- char2dset_
+diatonicSet.character <- char2dset_partition
 
 
 #.... set as
@@ -846,7 +919,7 @@ setAs('integer', 'diatonicSet', function(from) integer2dset(from))
 #' @export
 setAs('numeric', 'diatonicSet', function(from) integer2dset(as.integer(from)))
 #' @export
-setAs('character', 'diatonicSet', function(from) char2dset(dset))
+setAs('character', 'diatonicSet', function(from) char2dset(from))
 #' @export
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
@@ -858,7 +931,7 @@ key.diatonicSet          <- dset2key
 #' @export
 signature.diatonicSet    <- dset2signature
 #' @export
-romanNumeral.diatonicSet <- dset2romanNumeral
+romanKey.diatonicSet     <- dset2romanNumeral
 #' @export
 kern.diatonicSet         <- dset2pitcher(tint2kern)
 
@@ -872,7 +945,7 @@ key.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
 signature.numeric <- dset2key %.% diatonicSet.numeric
 #' @export
-romanNumeral.numeric <- dset2key %.% diatonicSet.numeric
+romanKey.numeric <- dset2key %.% diatonicSet.numeric
 
 #.... character -> y ####
 
@@ -881,7 +954,7 @@ key.character          <- re.place %.% dset2key %.% diatonicSet.character
 #' @export
 signature.character    <- re.place %.% dset2signature %.% diatonicSet.character
 #' @export
-romanNumeral.character <- re.place %.% dset2romanNumeral %.% diatonicSet.character
+romanKey.character     <- re.place %.% dset2romanNumeral %.% diatonicSet.character
 
 
 ##### Tonal transform methods ####

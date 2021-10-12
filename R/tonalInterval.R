@@ -171,6 +171,8 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 
 #' @export
 setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
+setMethod("LO5th", 'partition',
+          function(x) LO5th(sum_diatonicPartition(x)))
 setMethod("LO5th", "tonalInterval",
           function(x) {
             x@Fifth %dim% x
@@ -555,6 +557,7 @@ lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', '
 
 step2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) {
   step <- match(str, step.labels, nomatch = NA_integer_) 
+  step <- ((step - 1L) %% 7L) + 1L
   
   ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step])
 }
@@ -574,6 +577,7 @@ accidental2LO5th <- function(str, accidental.labels = c(), ...) {
   n <- updownN(str, up = accidental.labels['sharp'], down = accidental.labels['flat'])
   
   names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  names(n)[is.na(names(n))] <- ""
   
   n * 7L
   
@@ -952,7 +956,7 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 tonalChroma2tint <- function(str, Key = NULL,
                              parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
  
-  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
+ parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
  
  if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
@@ -974,7 +978,7 @@ tonalChroma2tint <- function(str, Key = NULL,
  if ('qualities' %in% parts)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
  
  simple <- simple + alterations
- if (!is.null(Key)) simple[is.na(names(alterations))] <- simple[is.na(names(alterations))] %% Key
+ if (!is.null(Key)) simple[names(alterations) == ""] <- simple[names(alterations) == ""] %% Key
  
  tint <- tint(0L, simple)
  
@@ -2124,19 +2128,19 @@ tonalInterval <- pitchgeneric("tonalInterval")
 semit         <- pitchgeneric("semit")
 midi          <- pitchgeneric("midi")
 tonalChroma   <- pitchgeneric("tonalChroma")
-step     <- pitchgeneric("step",  alist(step.labels = ))
-as.accidental    <- pitchgeneric("as.accidental", alist(accidental.labels = , accidental.maximum =, accidental.minimum =, accidental.cautionary = , accidental.memory = ))
-as.quality       <- pitchgeneric("as.quality",    alist(quality.labels = , quality.maximum =, quality.minimum =, quality.cautionary = , quality.memory = ))
+step          <- pitchgeneric("step",  alist(step.labels = ))
+as.accidental <- pitchgeneric("as.accidental", alist(accidental.labels = , accidental.maximum =, accidental.minimum =, accidental.cautionary = , accidental.memory = ))
+as.quality    <- pitchgeneric("as.quality",    alist(quality.labels = , quality.maximum =, quality.minimum =, quality.cautionary = , quality.memory = ))
 contour       <- pitchgeneric("contour",    alist(contour.labels = , contour.maximum =, contour.minimum =, contour.offset = , contour.delta = , contour.round = ))
-pitch      <- pitchgeneric("pitch")
-simplepitch      <- pitchgeneric("simplepitch")
-kern     <- pitchgeneric("kern")
-lilypond     <- pitchgeneric("lilypond")
-as.helmholtz     <- pitchgeneric("as.helmholtz")
+pitch         <- pitchgeneric("pitch")
+simplepitch   <- pitchgeneric("simplepitch")
+kern          <- pitchgeneric("kern")
+lilypond      <- pitchgeneric("lilypond")
+as.helmholtz  <- pitchgeneric("as.helmholtz")
 interval      <- pitchgeneric("interval")
-degree   <- pitchgeneric("degree")
+degree        <- pitchgeneric("degree")
 solfa         <- pitchgeneric("solfa")
-as.frequency     <- pitchgeneric("as.frequency", alist(frequency.reference = , frequencyTint = , tonalHarmonic = ))
+as.frequency  <- pitchgeneric("as.frequency", alist(frequency.reference = , frequencyTint = , tonalHarmonic = ))
 contour       <- pitchgeneric("contour"  , endargs = alist(contour.labels = ))
 
 

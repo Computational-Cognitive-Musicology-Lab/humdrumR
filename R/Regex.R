@@ -80,7 +80,7 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.l
     if (toEnv) list2env(matches, parent.frame())
     
     output <- do.call('cbind', matches)
-    rownames(output) <- str
+    # if (length(str) > 0L) rownames(output) <- str
     
     if (toEnv) invisible(output) else output
     
@@ -520,24 +520,36 @@ makeRE.key <- function(..., accidental.labels = c(), alteration.labels = c(), co
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
-makeRE.romanNumeral <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
+makeRE.romanKey <- function(..., accidental.labels = c(), alteration.labels = c(), collapse = TRUE) {
     setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
     setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
     
     REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
-                              step.labels = c('I', 'i', 'II', 'ii', 'III', 'iii', 'IV', 'iv', 'V', 'v', 'VI', 'vi', 'VII', 'vii'),
+                              step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                              accidental.labels = accidental.labels,
+                              ...,
+                              step.sign = FALSE, collapse = FALSE)
+    
+    res <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'),
                               accidental.labels = accidental.labels,
                               ...,
                               step.sign = FALSE, collapse = FALSE)
     
     
-    REs['mode'] <- captureRE(c('dor', 'phy', 'mix', 'loc', 'lyd'), n = '?')
-    REs['alterations'] <- makeRE.alterations(alteration.labels)
+    REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
+    res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
     
-    REs <- REs[c('accidentals', 'steps', 'mode', 'alterations')]
+    REs$steps <- paste0('(', cREs(REs[c('steps', 'mode')]), '|', cREs(res[c('steps', 'mode')]), ')')
+    REs$mode <- NULL
+    
+    REs['alterations'] <- makeRE.alterations(alteration.labels)
+    REs <- REs[c('accidentals', 'steps', 'alterations')]
+    
     
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
+
 
 
 makeRE.signature <- function(accidental.labels = c(), ...) {
@@ -547,14 +559,81 @@ makeRE.signature <- function(accidental.labels = c(), ...) {
     paste0('^\\*k\\[(', RE, ')*\\]')
 }
 
-makeRE.diatonicPartition <- function(..., split = '/') {
+makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
     
     key <- makeRE.key(...)
-    romanNumeral <- makeRE.romanNumeral(...)
+    romanNumeral <- makeRE.romanKey(...)
     
     re <- paste0('(', key, '|', romanNumeral, ')')
     
-    paste0('((', re, ')', split, ')+', re)
+    paste0('((', re, ')', split, ')', if (mustPartition) '+' else '?', re)
+}
+
+
+####. REs for tertian sets ####
+
+makeRE.sciChord <- function(..., quality.labels = c(), collapse = TRUE) {
+    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+    
+    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = '[A-G]',
+                              step.sign = FALSE, collapse = FALSE, ...)
+    
+    qualityRE <- captureRE(quality.labels[c('major', 'minor', 'augment', 'diminish')])
+    REs['qualities'] <-  paste0('(', 
+                                qualityRE, '{3}',  
+                                captureRE(quality.labels[c('perfect', 'augment', 'diminish')]), 
+                                qualityRE, 
+                                '?)|(', 
+                                qualityRE, '{1,3})')
+   
+    REs <- REs[c('steps', 'accidentals', 'qualities')]
+    
+    if (collapse) setNames(cREs(REs), 'sciChord') else REs
+}
+
+makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
+    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+    setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
+    setoptions(triad.labels)      <- c(diminish = 'o', augment = '+')
+    
+    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                              accidental.labels = accidental.labels,
+                              ...,
+                              step.sign = FALSE, collapse = FALSE)
+    
+    res <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
+                              step.labels = c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'),
+                              accidental.labels = accidental.labels,
+                              ...,
+                              step.sign = FALSE, collapse = FALSE)
+    
+    
+    REs['triadalt'] <- paste0('[', triad.labels['augment'],  ']?')
+    res['triadalt'] <- paste0('[', triad.labels['diminish'], ']?')
+    
+    REs$steps <- paste0('(', cREs(REs[c('steps', 'triadalt')]), '|', cREs(res[c('steps', 'triadalt')]), ')')
+    REs$triadalt <- NULL
+    
+    REs['alterations'] <- makeRE.alterations(alteration.labels)
+    REs <- REs[c('accidentals', 'steps', 'alterations')]
+    
+    
+    if (collapse) setNames(cREs(REs), 'chord') else REs
+}
+
+
+
+makeRE.tertianPartition <- function(..., split = '/') {
+    
+    romanChord <- makeRE.romanChord(...)
+    
+    re <- paste0('(', romanChord, ')')
+    
+    key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
+    
+    paste0('((', re, ')', split, ')+', key)
 }
 
 
