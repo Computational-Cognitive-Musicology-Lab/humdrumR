@@ -80,7 +80,7 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.l
     if (toEnv) list2env(matches, parent.frame())
     
     output <- do.call('cbind', matches)
-    rownames(output) <- str
+    # if (length(str) > 0L) rownames(output) <- str
     
     if (toEnv) invisible(output) else output
     

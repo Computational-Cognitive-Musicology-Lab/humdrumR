@@ -557,6 +557,7 @@ lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', '
 
 step2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) {
   step <- match(str, step.labels, nomatch = NA_integer_) 
+  step <- ((step - 1L) %% 7L) + 1L
   
   ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step])
 }
@@ -955,7 +956,7 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 tonalChroma2tint <- function(str, Key = NULL,
                              parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
  
-  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
+ parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
  
  if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
@@ -977,7 +978,7 @@ tonalChroma2tint <- function(str, Key = NULL,
  if ('qualities' %in% parts)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
  
  simple <- simple + alterations
- if (!is.null(Key)) simple[is.na(names(alterations))] <- simple[is.na(names(alterations))] %% Key
+ if (!is.null(Key)) simple[names(alterations) == ""] <- simple[names(alterations) == ""] %% Key
  
  tint <- tint(0L, simple)
  

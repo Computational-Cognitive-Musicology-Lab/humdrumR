@@ -239,17 +239,55 @@ romanNumeral2sciQuality <- function(numeral, quality, triad.labels) {
 
 extensions2sciQuality <- function(root, extensions, accidental.labels, Key = NULL, ...) {
   extensions <- stringr::str_extract_all(extensions, paste0(captureRE(accidental.labels, n = '*'), captureRE(2:13)))
+  hits <- lengths(extensions) > 0L
   
-  extensions <- lapply(extensions,
-         interval2tint,
-         parts = c('accidentals', 'steps'),
-         Key = NULL)
   
-  extensions <- Map(`+`, extensions, root)
+  extensions <- lapply(extensions, 
+                       function(x) {
+                         REapply(x, '[0-9]+',  
+                                           function(n) { 
+                                             n <- as.integer(n) 
+                                             n <- ifelse(n %% 2L == 0L, n - 7L, n) 
+                                             n <- n - min(n) 
+                                             as.character(n + 1L) 
+                                             }) -> x
+                         attributes(x) <- NULL
+                         x[REapply(x, '[0-9]+', order %.% as.numeric, inPlace = FALSE)]
+                         
+                         })
+  extensionN <- lapply(extensions,
+                       function(x) {
+                         x <- REapply(x, '[0-9]+', as.integer, inPlace = FALSE)
+                         attributes(x) <- NULL
+                         x
+                       })
 
-  extensions <- lapply(extensions, tint2quality, Key = Key, ...)
+  mode <- if(is.null(Key)) 0L else getMode(Key)
   
-  sapply(extensions, paste, collapse = '')
+  extensions <- lapply(extensions[hits],
+         tonalChroma2tint,
+         parts = c('accidentals', 'steps'),
+         Key = dset(0, -root[hits] + mode),
+         step.labels = 1:14,
+         accidental.labels = accidental.labels)
+  
+  # extensions <- Map(function(ext, r) {
+    # browser()
+    # ext + tint(, r)
+    # }, extensions, root[hits])
+
+  extensions <- lapply(extensions, tint2quality, Key = NULL, quality.cautionary = TRUE, ...)
+  
+  dots <- rep('.', 7L)
+  Map(function(ext, n) {
+    dots[n] <- ext
+    paste(dots, collapse = '')
+    
+  }) %>% unlist -> output
+  browser()
+  # output <- character(length(hits))
+  # output[hits] <- sapply(extensions, paste, collapse = '')
+  output
   
 }
 
@@ -585,18 +623,18 @@ tset2chordSymbol <- function(tset,  ...) {
 
 
 
-romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.labels = c(), of = dset(0,0 )) {
+romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.labels = c(), of = dset(0,0), ...) {
   setoptions(accidental.labels) <-  c(natural = 'n', flat = 'b', sharp = '#')
   setoptions(triad.labels) <- c(diminish = 'o', augment = '+')
   
   accidentalRE <- captureUniq(accidental.labels, zero = TRUE)
-  triadqualRE <- captureRE(triad.labels, '?')
+  triadQualityRE <- captureRE(triad.labels, '?')
   
   of <- dset(0, getMode(of), of@Alteration)
   REparse(str,
           list(Accidental = accidentalRE,
                Numeral = "(vii|VII|iii|III|vi|VI|iv|IV|ii|II|v|V|i|I)", 
-               TriadQuality = '[o+]?', 
+               TriadQuality = triadQualityRE, 
                Extensions = paste0('(', accidentalRE,
                                    captureRE(13:2), 
                                    '|sus[42]|add[692])*')),
@@ -606,24 +644,24 @@ romanNumeral2tset <- function(str, Key = NULL, accidental.labels = c(), triad.la
                            accidental.labels = accidental.labels, Key = of, 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))@Fifth
   
+  inversion_extension <- extensions2inversion(stringr::str_remove_all(Extensions, '[^0-9]*'))
+  
   qualitytset <- local({
     quality.labels <- c(major = 'M', minor = 'm', perfect = 'P', triad.labels)
     TriadQuality <- romanNumeral2sciQuality(Numeral, TriadQuality, triad.labels)
-    extensionQuality <- extensions2sciQuality(root, Extensions, accidental.labels, Key = of, quality.labels = quality.labels)
+    extensionQuality <- extensions2sciQuality(root, Extensions, 
+                                              accidental.labels, Key = of, quality.labels = quality.labels)
     
     sciQualities2tset(paste0(TriadQuality, extensionQuality), quality.labels = quality.labels)
   })
  
-  inversion_extension <- extensions2inversion(stringr::str_remove_all(Extensions, '[^0-9]*'))
 
   
   
-
-  
-  
-  return(tset(root, root, 
+  return(tset(root, root + getMode(qualitytset),
+              alterations = qualitytset@Alteration,
               extension = inversion_extension$Extension,  
-              inversion = inversion_extension$Inversion) + qualitytset)
+              inversion = inversion_extension$Inversion))
   
   
   
