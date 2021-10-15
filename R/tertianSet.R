@@ -308,27 +308,32 @@ parseFiguration <- function(str, figureFill = TRUE, ...) {
            # extensions
            setorder(parsedfig, steps)
  
-           extensionInt <- parsedfig[Explicit == TRUE , {
+           parsedfig <- parsedfig[  , {
              newthirds <- if (length(thirds) == 0L) {
                0L:2L 
              } else {
-               newthirds<- if (all(steps <= 3L)) 0:max(thirds) else 0L:max(2L, max(thirds))
+               newthirds <- if (all(steps <= 3L)) 0:max(thirds) else 0L:max(2L, max(thirds))
                
                if (all(steps == 5L) && accidentals[1] == "") newthirds <- setdiff(newthirds, 1L) 
-               gaps <- diff(steps)
-               skips <- gaps > 2L & head(accidentals == '', -1L)
-               if (any(skips)) for (g in gaps[gaps > 2L]) newthirds <- setdiff(newthirds, thirds[which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
+               gaps <- diff(steps[Explicit])
+               skips <- gaps > 2L & head(accidentals[Explicit] == '', -1L)
+               if (any(skips)) for (g in gaps[gaps > 2L]) newthirds <- setdiff(newthirds, thirds[Explicit][which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
                newthirds
+               
              }
-             as.integer(sum(2^newthirds))
-           }]
              
+             newaccidentals <- accidentals[match(newthirds, thirds)]
+             newaccidentals[is.na(newaccidentals)] <- ""
+             
+             data.table(accidentals = newaccidentals, steps = newthirds * 2L + 1L, thirds = newthirds, Explicit = FALSE)
+           }]
            
+             
+           extensionInt <- parsedfig[ , as.integer(sum(2^thirds))]
            #
-           # parsedfig <- parsedfig[Explicit == TRUE]
            data.table(Inversion   = inversion, 
                       Extension   = extensionInt, 
-                      Degrees     = list(parsedfig$thirds * 2L + 1L),
+                      Degrees     = list(parsedfig$steps),
                       Accidentals = list(parsedfig$accidentals))
            
            
@@ -748,7 +753,7 @@ char2tset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
                                        'romanChord: makeRE.romanChord(...)' = romanNumeral2tset)
 
 #' @export
-tertianSet.character <- char2tset_partition
+tertianSet.character <- force %.% char2tset_partition
 
 #.... set as
 

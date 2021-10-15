@@ -146,7 +146,7 @@ setClass('diatonicSet',
 #' @name diatonicSet
 #' @export
 dset <- function(root = 0L, signature = root, alterations = 0L) {
-           if (is.character(root)) root <- as.tonalInterval.character(root)
+           if (is.character(root)) root <- tonalInterval.character(root)
            if (is.tonalInterval(root)) root <- root@Fifth
            
            new('diatonicSet', 
