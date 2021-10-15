@@ -18,7 +18,6 @@ REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead 
 #' If `exhaustive` is TRUE, the string must be exhaustively broken up by the matching regular expressions.
 #' Superfluous (non-match) characters at the begginning, end, or in bettween matches, will result in 
 #' all `NA` being returned.
-#' If `strict` is TRUE, all regular expressions must be matched or `NA` is returned.
 #' 
 #' @name REparser
 #' @export
@@ -43,10 +42,10 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.l
         hits <- !is.na(locs[ , 1]) 
         
         if (parse.exhaust) {
-            if (!reverse) {
-                hits & locs[ , 1] == 1
+            hits <- if (!reverse) {
+                hits & (locs[ , 1] == 1)
             } else {
-                hits & locs[ , 2] == nchar(rest)
+                hits & (locs[ , 2] == nchar(rest))
             }
         }
         
@@ -490,12 +489,10 @@ makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-
 makeRE.alterations <- function(alteration.labels, ...) {
     # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
     # names(alteration.labels) <- gsub('diminish', 'flat', names(alteration.labels))
-    
-    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+
     
     paste0('(', 
-           makeRE.tonalChroma(c('qualities', 'steps'),
-                              quality.labels = alteration.labels,
+           makeRE.tonalChroma(c('accidentals', 'steps'), ...,
                               step.sign = FALSE,
                               step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13)),
            ')*')
@@ -592,32 +589,29 @@ makeRE.sciChord <- function(..., quality.labels = c(), collapse = TRUE) {
     if (collapse) setNames(cREs(REs), 'sciChord') else REs
 }
 
-makeRE.romanChord <- function(..., accidental.labels = c(), alteration.labels = c(), triad.labels = c(), collapse = TRUE) {
-    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
-    setoptions(accidental.labels) <- c(sharp   = '#', flat     = 'b')
-    setoptions(triad.labels)      <- c(diminish = 'o', augment = '+')
+makeRE.romanChord <- function(..., triad.labels = c(), collapse = TRUE) {
+    setoptions(triad.labels)      <- c(diminish = 'o', augment  = '+')
+    triad.labels$augment <- paste0('[', triad.labels$augment, ']') # because "+" is a special character!
     
-    REs <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
-                              step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-                              accidental.labels = accidental.labels,
-                              ...,
-                              step.sign = FALSE, collapse = FALSE)
+    REs <- list()
+    REs$accidentals <- makeRE.accidentals(...)
     
-    res <- makeRE.tonalChroma(parts = c('steps', 'accidentals'),
-                              step.labels = c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii'),
-                              accidental.labels = accidental.labels,
-                              ...,
-                              step.sign = FALSE, collapse = FALSE)
+    upper <- paste0('(?=[IV]+', triad.labels$augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
+    lower <- paste0('(?=[iv]+', triad.labels$diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
+    REs$numerals <- paste0('(', upper, '|', lower, ')')
     
     
-    REs['triadalt'] <- paste0('[', triad.labels['augment'],  ']?')
-    res['triadalt'] <- paste0('[', triad.labels['diminish'], ']?')
     
-    REs$steps <- paste0('(', cREs(REs[c('steps', 'triadalt')]), '|', cREs(res[c('steps', 'triadalt')]), ')')
-    REs$triadalt <- NULL
+    # REs['triadalts'] <- paste0('(', 
+    #                           '(?<=[IV])', triad.labels['augment'],
+    #                           '|',
+    #                           '(?<=[iv])', triad.labels['diminish'],
+    #                           ')')
+    REs$triadalts <- captureRE(triad.labels, n = '?')
+
     
-    REs['alterations'] <- makeRE.alterations(alteration.labels)
-    REs <- REs[c('accidentals', 'steps', 'alterations')]
+    REs['figurations'] <- makeRE.alterations(...)
+    REs <- REs[c('accidentals', 'numerals', 'triadalts', 'figurations')]
     
     
     if (collapse) setNames(cREs(REs), 'chord') else REs
