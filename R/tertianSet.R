@@ -225,20 +225,15 @@ extension2bit <- function(str) {
 # }
 
 
-triad2sciQuality <- function(numeral, triadalt, extensionQualities, triad.labels) {
+triad2sciQuality <- function(triad, extensionQualities, triad.labels) {
   
-  triad <- rep('M', length(numeral))
-  triad[numeral == tolower(numeral)] <- 'm'
-  
-  triad[triadalt == triad.labels$diminish] <- triad.labels$diminish
-  triad[triadalt == triad.labels$augment]  <- triad.labels$augment
-  
+
   triadQualities <- with(triad.labels, 
                      {
-                     quals <-cbind(perfect, 
-                                   c(major, minor, minor, major), 
-                                   c(perfect, perfect, diminish, augment))
-                     rownames(quals) <- c(major, minor, diminish, augment)
+                     quals <- cbind(perfect, 
+                                    c(major, minor, minor, major), 
+                                    c(perfect, perfect, diminish, augment))
+                      rownames(quals) <- c(major, minor, diminish, augment)
                        cbind(quals[triad, , drop = FALSE ], '.', '.', '.', '.')
                      })
   extensionQualities[col(extensionQualities) <= 3L & extensionQualities == '.'] <- triadQualities[col(extensionQualities) <= 3L & extensionQualities == '.']
@@ -250,7 +245,7 @@ triad2sciQuality <- function(numeral, triadalt, extensionQualities, triad.labels
 
 
 
-extensions2qualities <- function(root, figurations, triadalts, triad.labels, Key = NULL, ...) {
+extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) {
   
 
   mode <- if(is.null(Key)) 0L else getMode(Key)
@@ -656,12 +651,21 @@ romanNumeral2tset <- function(str, Key = NULL, triad.labels = c(), of = dset(0,0
   
   figurations <- parseFiguration(figurations)
   
-  ###
+  ### quality of degress
+  # extension qualities
   quality.labels <- c(major = 'M', minor = 'm', perfect = 'P', triad.labels)
-  
   qualities <- extensions2qualities(root, figurations, triadalts,
-                                    Key = of, quality.labels = quality.labels, triad.labels = quality.labels)
-  qualities <- triad2sciQuality(numerals, triadalts, qualities, triad.labels = quality.labels)
+                                    Key = of, quality.labels = quality.labels)
+  # incorporate quality of
+  qualities <- local({
+    triad <- rep(quality.labels$major, length(numerals))
+    triad[numeral == tolower(numerals)] <- quality.labels$minor
+    triad[triadalt == triad.labels$diminish] <- triad.labels$diminish
+    triad[triadalt == triad.labels$augment]  <- triad.labels$augment
+    
+    triad2sciQuality(triad, qualities, triad.labels = quality.labels)
+  })
+
   qualitytset <-  sciQualities2tset(qualities, quality.labels = quality.labels)
   
   # if 1 is altered!
@@ -703,6 +707,16 @@ sciChord2tset <- function(str, quality.labels = c(),  ...) {
             toEnv = TRUE) -> parsed
   
     root <- tonalChroma2tint(paste0(steps, accidentals), ...)@Fifth
+    
+    # qualities
+    qualities <- local({
+      qualities <- stringr::str_pad(qualities, width = 5L, side = 'right', pad = '.')
+      qualities <- do.call('rbind', strsplit(qualities, split = ""))
+      triad <- qualities[ , 1]
+      extensions <- cbind('.', '.', '.', qualities[ , -1L, drop = FALSE])
+      
+      triad2sciQuality(triad, extensions, triad.labels = quality.labels)
+    })
     
     sciQualities2tset(qualities, quality.labels = quality.labels, ...) + tset(root, root)
     
@@ -746,11 +760,13 @@ tertianSet.numeric <- integer2tset %.% as.integer
 
 
 char2tset           <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset)
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
+                                       'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
 char2tset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
                                        'keyof: makeRE.tertianPartition(...)' = mapPartition(char2tset),
-                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset)
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
+                                       'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
 #' @export
 tertianSet.character <- force %.% char2tset_partition
