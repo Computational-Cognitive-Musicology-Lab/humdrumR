@@ -401,7 +401,6 @@ setMethod('LO5th', 'diatonicSet',
     # the steporder argument controls the order the LO5ths are output
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
-              
     dset <- x
     root <- getRoot(dset)
     sign <- getSignature(dset)

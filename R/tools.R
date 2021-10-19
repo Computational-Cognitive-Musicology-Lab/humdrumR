@@ -259,7 +259,7 @@ allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
 
-vectorna <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
+vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
 empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
     if (is.atomic(object)) {
@@ -723,7 +723,7 @@ captureSymbols <- function(expr) {
     exprs <- exprs[switch %in% c(groups, if (rest) 'rest')]
     
     
-    if (length(exprs) == 0L) return(if (rest) x else vectorna(length(x), class(x)))
+    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), class(x)))
     
     groupvec <- c(if (rest) 'rest' else 'nomatch', switchg)[match(groups, switch, nomatch = 0) + 1] 
     
@@ -747,7 +747,7 @@ captureSymbols <- function(expr) {
                        c(list(exprs), 
                          grouped)))
     
-    results$nomatch <- vectorna(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
+    results$nomatch <- vectorNA(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
     results <- unstick(do.call('c', unname(results )))
     
     i <- order(unlist(grouped$i))

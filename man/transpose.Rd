@@ -65,13 +65,13 @@ The default value, \code{12}, assures that no output notes are enharmonically eq
 To further illustrate, here is the sequence \verb{\{C F# G D# E, B- A A- G C# D, B D- C\}} transposed
 tonally within C major by all seven possible generic intervals, with \code{enharmonicWrap = 12}:\tabular{ll}{
    Interval \tab Output \cr
-   Unison \tab {C  F# G  D  E  B- A  A  G  C# D  B  D  C  } \cr
-   2nd \tab {D  G# A  E  F  c  B  B- A  D  E  c  E- D  } \cr
-   3rd \tab {E  A  B  F# G  d  c  c  B  E  F  d  F  E  } \cr
-   4th \tab {F  B  c  G# A  e- d  d  c  F# G  e  G  F  } \cr
-   5th \tab {G  c# d  A  B  f  e  e- d  G# A  f  A  G  } \cr
-   6th \tab {A  d  e  B  c  g  f  f  e  A  B  g  B- A  } \cr
-   7th \tab {b  ee ff cc#dd aa gg gg ff b  cc aa cc b  } \cr
+   Unison \tab {CF#GDEB-AAGC#DBDC} \cr
+   2nd \tab {DG#AEFcBB-ADEcE-D} \cr
+   3rd \tab {EABF#GdccBEFdFE} \cr
+   4th \tab {FBcG#Ae-ddcF#GeGF} \cr
+   5th \tab {Gc#dABfee-dG#AfAG} \cr
+   6th \tab {AdeBcgffeABgB-A} \cr
+   7th \tab {beeffcc#ddaaggggffbccaaccb} \cr
 }
 
 }

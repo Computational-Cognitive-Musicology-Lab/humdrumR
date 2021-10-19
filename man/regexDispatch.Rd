@@ -4,7 +4,6 @@
 \alias{regexDispatch}
 \alias{\%predate\%}
 \alias{REapply}
-\alias{\%pREdate\%}
 \title{Regular expression method dispatch and function application}
 \usage{
 func \%predate\% predicate
@@ -12,8 +11,6 @@ func \%predate\% predicate
 regexDispatch(...)
 
 REapply(x, regex, .func, inPlace = TRUE, ...)
-
-func \%pREdate\% regex
 }
 \description{
 The \code{\link{humdrumR}} \strong{regular-expression method dispatch}

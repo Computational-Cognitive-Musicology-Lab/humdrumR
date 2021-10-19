@@ -148,7 +148,7 @@ regexDispatch <- function(...) {
                                            "The regex-dispatch function you've called requires a character argument.")
               
               dispatch <- regexFindMethod(str, regexes)  
-              if (dispatch == 0L) return(if (inPlace) str else vectorna(length(str), 'character'))
+              if (dispatch == 0L) return(if (inPlace) str else vectorNA(length(str), 'character'))
               dispatchFunc <- funcs[[dispatch]]
               dispatchRE   <- regexes[[dispatch]]
               dispatchArgs <- funcsArgs[[dispatch]]
@@ -209,7 +209,14 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     # accepts a regex (whereas REapply can take a unparsed regex name
     # like "Recip").
     matches <- stringi::stri_extract_first(str = x, regex = regex)
-    result <- do.call(.func, c(list(matches), list(...)))
+    result <- local({
+        hits <- !is.na(matches)
+        hits_result <- do.call(.func, c(list(matches[hits]), list(...)))
+        
+        result <- vectorNA(length(x), class(hits_result))
+        result[hits] <- hits_result
+        result
+    })
     
     associatedExclusive <- getREexclusive(regex)
     if (!is.null(associatedExclusive)) stickyAttrs(result) <- list(Exclusive = associatedExclusive)
@@ -221,16 +228,6 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 
 
 
-############### Composing predicate functions----
-
-
-#' @name regexDispatch
-#' @export
-`%pREdate%` <- function(func, regex) {
-    args <- list(func)
-    names(args) <- regex
-    do.call('regexDispatch', args)
-}
 
 
 
@@ -272,23 +269,6 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 
 
 
-predicateParse <- function(predicate, argnames, ...) {
-    args <- setNames(list(...), argnames)
-    
-    lengths <- lengths(args)
-    targets <- args[lengths == lengths[1]]
-    bool <- apply(sapply(targets, predicate), 1, any)
-    list2env(lapply(targets, '[', i = !bool), 
-             envir = parent.frame())
-    
-    output <- args[[1]]
-    
-    function(result) {
-        if (length(result) != sum(!bool, na.rm = TRUE)) return(result)
-        output[!bool] <- result
-        output
-    }
-}
 
 
 

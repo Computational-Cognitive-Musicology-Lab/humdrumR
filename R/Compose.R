@@ -44,7 +44,8 @@ compose.default <- function(..., fenv = parent.frame()) {
         (!!tail(fnames,1))(!!!fargNames[[length(fargNames)]])
         })
     
-    body <- memoify.expr(body, names(args))
+    body <- predicateDispatch.expr('is.na', body, 'x', negate = TRUE)
+    body <- memoizeDispatch.expr(body, names(args))
     
     ### environment
     # fenv <- new.env() # parent.env(parent.frame())
@@ -254,6 +255,7 @@ EQ <- function(pat) {
   new('predicate.function', func, string = glue::glue('x == {deparse(pat)}'))
 }
 
+#' @export
 LEN <- function(p.f) {
     func <- function(x) p.f(length(x))
  
@@ -261,11 +263,13 @@ LEN <- function(p.f) {
         string = gsub('x', 'length(x)', p.f@string))
 }
 
+#' @export
 ANY <- function(p.f) {
     func <- unclass(any %.% p.f)
     
     new('predicate.function', func, string = paste0('any(', p.f@string, ')'))
 }
+#' @export
 ALL <- function(p.f) {
     func <- unclass(all %.% p.f)
     
@@ -308,7 +312,10 @@ RE <- function(pat) {
   new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
 }
 
-na <- new('predicate.function', function(x) is.na(x), string = "NA")
+#' @export
+na <- new('predicate.function', function(x) is.na(x), string = "x == NA")
+#' @export
+notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 
 
@@ -327,7 +334,6 @@ na <- new('predicate.function', function(x) is.na(x), string = "NA")
 
 
 
-
 predicateDispatch <- function(fname, predicateFunc, predicateName) {
     func <- match.fun(fname)
     #argnames
@@ -335,7 +341,7 @@ predicateDispatch <- function(fname, predicateFunc, predicateName) {
     argnames <- names(fargs)
     
     if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't if the first argument of the method is ..." )
+    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't work if the first argument of the method is ..." )
     argnames <- argnames[argnames != "..."]
     
     #
@@ -356,6 +362,21 @@ predicateDispatch <- function(fname, predicateFunc, predicateName) {
     rlang::new_function(fargs, body, newenv)
 }
 
+predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE) {
+  if (argnames[1] == '...') return(expr)
+  
+  argnames <- argnames[argnames != '...']
+  args <- setNames(rlang::syms(argnames), argnames)
+  
+  predicateFuncName <- rlang::sym(predicateFuncName)
+  
+  rlang::expr({
+    rebuild <- predicateParse(!!predicateFuncName, !!!args, negate =  !!negate, allargs = FALSE)
+    predicateResult <- {!!expr}
+    rebuild(predicateResult)
+  })
+  
+}
 funcCall <- function(fname) {
     # this takes the name of a function (as a string)
     # and creates an expression of this function calling
@@ -377,35 +398,77 @@ funcCall <- function(fname) {
 
 
 
-predicateParse <- function(predicate, argnames, inPlace, ...) {
-    args <- setNames(list(...), argnames)
+# predicateParse <- function(predicate, argnames, inPlace, ...) {
+#     args <- setNames(list(...), argnames)
+#     
+#     lengths <- lengths(args)
+#     targets <- args[lengths == lengths[1]]
+#     bool <- apply(sapply(targets, predicate), 1, any)
+#     list2env(lapply(targets, '[', i = bool), 
+#              envir = parent.frame())
+#     
+#     output <- if (inPlace) args[[1]] else vectorNA(length(args[[1]]), class(args[[1]]))
+#     
+#     function(result) {
+#         if (length(result) != sum(bool, na.rm = TRUE)) return(if (inPlace) result else output)
+#         output[bool] <- result
+#         output
+#     }
+# }
+
+
+#' @export
+predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, negate = FALSE) {
+  args <- list(...)
+  
+  if (is.null(names(args)) || any(names(args) == "")) .stop("predicateParse requires that all arguments are named.")
+  
+  # only atomic/struct args are affected
+  args <- args[sapply(args, function(arg) is.atomic(arg) || is.struct(arg))]
+  
+  if (length(args) == 0L) return(force)
+  
+  target <- args[[1]]
+
+  # "parallel" args are the same length as the target arg
+  args <- args[lengths(args) == length(target)]
+  
+  argnames <- names(args)
+  
+  bool <- if (allargs) Reduce('&', lapply(args, predicateFunc)) else predicateFunc(target)
+  if (negate) bool <- !bool
+  
+  matchingArgs <- lapply(args, '[', i = bool)
+  
+  
+  mapply(assign, argnames, matchingArgs, MoreArgs = list(envir = parent.frame())) 
+  # THIS mapply DOES THE WORK OF SHRINKING THE ARGUMENTS IN THE PARENT FUNCTION
+  
+  function(result) {
+    if (!(is.struct(result) || is.atomic(result)) || length(result) != sum(bool)) return(result)
     
-    lengths <- lengths(args)
-    targets <- args[lengths == lengths[1]]
-    bool <- apply(sapply(targets, predicate), 1, any)
-    list2env(lapply(targets, '[', i = bool), 
-             envir = parent.frame())
+    output <- if (inPlace && class(target) == class(result)) target else vectorNA(length(target), class(result))
     
-    output <- if (inPlace) args[[1]] else vectorna(length(args[[1]]), class(args[[1]]))
+    output[bool] <- result
+    stickyAttrs(output) <- stickyAttrs(result)
     
-    function(result) {
-        if (length(result) != sum(bool, na.rm = TRUE)) return(if (inPlace) result else output)
-        output[bool] <- result
-        output
-    }
+    output
+    
+  }
 }
+
 
 
 ###### "Memoify" ----
 
 #' @export
-memoify <- function(fname) {
+memoizeDispatch <- function(fname) {
     func <- match.fun(fname)
     #argnames
     argnames <- names(fargs(func))
     
-    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoify a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoify a function if the first argument is ..." )
+    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoizeDispatch a function with no arguments." )
+    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoizeDispatch a function if the first argument is ..." )
     argnames <- argnames[argnames != "..."]
     
     #
@@ -426,7 +489,7 @@ memoify <- function(fname) {
 }
 
 
-memoify.expr <- function(expr, argnames) {
+memoizeDispatch.expr <- function(expr, argnames) {
   if (argnames[1] == '...') return(expr)
   
   argnames <- argnames[argnames != '...']
@@ -435,29 +498,30 @@ memoify.expr <- function(expr, argnames) {
   
   rlang::expr({
     rememoise <- memoiseParse(!!!args)
-    result <- {!!expr}
-    rememoise(result)
+    memoizeResult <- {!!expr}
+    rememoise(memoizeResult)
   })
   
 }
 
-memoify.quosure <- function(quosure, argnames) {
-  rlang::quo_set_expr(quosure, memoify.expr(rlang::quo_get_expr(quosure), argnames))
+memoizeDispatch.quosure <- function(quosure, argnames) {
+  rlang::quo_set_expr(quosure, memoizeDispatch.expr(rlang::quo_get_expr(quosure), argnames))
 }
 
-memoiseParse <- function(...) {
+memoiseParse <- function(..., minN = 100L) {
     args <- list(...)
+    
+    if (is.null(names(args)) || any(names(args) == "")) .stop("memoiseParse requires that all arguments are named.")
+    
+    # only atomic/struct args that are longer than minN are affected
+    args <- args[sapply(args, function(arg) (is.atomic(arg) || is.struct(arg)) && length(arg) >= minN)]
+    
+    if (length(args) == 0L) return(force)
+    
     target <- args[[1]]
     
-    # in many cases, memoise is innapropriate
-    minN <- 100
-    if (length(args) == 0L || (is.object(target) && !is.struct(target)) || is.list(target) || length(target) < minN) return(force)
-    
     # "parallel" args are the same length as the first arg, atomic or stuct, and longer than minN
-    args <- args[lengths(args) == length(target) & 
-                   lengths(args) >= minN & 
-                   !sapply(args, function(x) is.list(x) | (is.object(x) & !is.struct(x)))]
-    
+    args <- args[lengths(args) == length(target)]
     argnames <- names(args)
    
     if (length(args) > 1L) target <- list2dt(args)  
@@ -589,6 +653,7 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
         regexes <- list(!!!REexprs)
         
         if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
+        
       })
       
     } else {
@@ -598,6 +663,10 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
         !!regexDispatch
       })
     }
+    
+    
+    # body <- predicateDispatch.expr('is.na', body, 'x', negate = TRUE)
+    # body <- memoizeDispatch.expr(body, 'x')
     #
     arguments <- c(x = rlang::missing_arg(), 
                    if (doExclusiveDispatch) list(Exclusive = NULL),

@@ -48,7 +48,7 @@ setValidity('tertianSet',
                 all(object@Extensions >= 0L &
                       object@Extensions <= 2^7 &
                       object@Inversion >= 0 &
-                      object@Inversion < 7)
+                      object@Inversion < 7, na.rm = TRUE)
             })
 
 #' @name tertianSet
@@ -123,7 +123,7 @@ is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) tset2chordSymbol(x))
+setMethod('as.character', signature = c('tertianSet'), function(x) .ifelse(is.na(x), NA, tset2chordSymbol(x)))
 
 ####. logic methods ####
 
@@ -659,9 +659,9 @@ romanNumeral2tset <- function(str, Key = NULL, triad.labels = c(), of = dset(0,0
   # incorporate quality of
   qualities <- local({
     triad <- rep(quality.labels$major, length(numerals))
-    triad[numeral == tolower(numerals)] <- quality.labels$minor
-    triad[triadalt == triad.labels$diminish] <- triad.labels$diminish
-    triad[triadalt == triad.labels$augment]  <- triad.labels$augment
+    triad[numerals == tolower(numerals)] <- quality.labels$minor
+    triad[triadalts == triad.labels$diminish] <- triad.labels$diminish
+    triad[triadalts == triad.labels$augment]  <- triad.labels$augment
     
     triad2sciQuality(triad, qualities, triad.labels = quality.labels)
   })
@@ -787,7 +787,9 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 ###.. tset as x ####
 
 #' @export
-romanChord.tertianSet <- tset2romanNumeral
+romanChord.tertianSet <- force %.% tset2romanNumeral
+#' @export
+sciChord.teritianSet <- force %.% tset2sciChord
 
 
 ###. x as y ####
@@ -796,11 +798,15 @@ romanChord.tertianSet <- tset2romanNumeral
 
 #' @export
 romanChord.numeric <- tset2romanNumeral %.% tertianSet.numeric
+#' @export
+sciChord.numeric <- tset2sciChord %.% tertianSet.numeric
 
 #.... character -> y ####
 
 #' @export
 romanChord.character <- re.place %.% tset2romanNumeral %.% tertianSet.character
+#' @export
+sciChord.character <- re.place %.% tset2sciChord %.% tertianSet.character
 
 
 
