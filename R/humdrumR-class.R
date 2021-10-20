@@ -682,7 +682,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     paths  <- anyPaths(x)
                     if (paths && path.fold) x <- foldPaths(x, foldAtomic = TRUE, sep = '\t')
                     
-                    ragged <- ragged(x)
+                    ragged <- is.ragged(x)
                     #if (ragged && !alignColumns) stop("In call as.matrix(humdrumR, pad = FALSE): This humdrumR object has different numbers
                      #                                # of spines or paths across files, so it can't by made into a matrix unless pad = TRUE")
                     
@@ -875,8 +875,12 @@ anyStops <- function(humdrumR) {
           
 }
 
-
-ragged <- function(humdrumR) {
+#' Does the corpus vary in the number of spines?
+#' 
+#' Some humdrum corpora are homogenous, with the same number of spines in each file.
+#' This function returns TRUE for corpora that are homogenous, and FALSE otherwise.
+#' @export
+is.ragged <- function(humdrumR) {
           # Do the pieces in the corpus vary in number of columns?
           
           humtab <- getD(humdrumR)
@@ -886,6 +890,17 @@ ragged <- function(humdrumR) {
           
           length(unique(ncols)) > 1L || length(unique(nspines)) > 1L
           
+}
+
+
+renumberSpines <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR, 'GLIMDdP')
+    
+    humtab[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
+    
+    putHumtab(humdrumR, drop = FALSE) <- humtab
+    humdrumR
+    
 }
 
 #### Reshaping ----
