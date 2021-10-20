@@ -146,7 +146,7 @@ setClass('diatonicSet',
 #' @name diatonicSet
 #' @export
 dset <- function(root = 0L, signature = root, alterations = 0L) {
-           if (is.character(root)) root <- as.tonalInterval.character(root)
+           if (is.character(root)) root <- tonalInterval.character(root)
            if (is.tonalInterval(root)) root <- root@Fifth
            
            new('diatonicSet', 
@@ -401,7 +401,6 @@ setMethod('LO5th', 'diatonicSet',
     # the steporder argument controls the order the LO5ths are output
     # steporder = 2L means every two LO5ths (which is generic steps)
     # steporder = 4L means thirds, which makes tertian harmonies
-              
     dset <- x
     root <- getRoot(dset)
     sign <- getSignature(dset)

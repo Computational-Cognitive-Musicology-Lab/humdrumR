@@ -542,7 +542,7 @@ partialMatchKeywords <- function(keys) {
     # define standard keys and alternatives
     standardkeys <- list(do          = c('do', 'd', 'eval', 'apply'),
                          dofill      = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         domemory    = c('domemoify', 'domem'),
+                         domemory    = c('domemoizeDispatch', 'domem'),
                          dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
                                       'doplots', 'plots',
                                       'evalfxs', 'evalsidefxs', 'evalsideeffects',
@@ -667,7 +667,7 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   
   
   # do memory
-  if (any(names(doQuos) == 'domemory')) doQuo <- memoify.quosure(doQuo, usedInExpr)
+  if (any(names(doQuos) == 'domemory')) doQuo <- memoizeDispatch.quosure(doQuo, usedInExpr)
 
   doQuo
 }
