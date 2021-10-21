@@ -7,7 +7,7 @@
 \alias{print.humCensus}
 \title{Tabulate records and tokens in a humdrumR corpus}
 \usage{
-census(humdrumR, dataTypes = "GLIMDd")
+census(humdrumR, dataTypes = "GLIMDd", by = "Filename")
 
 census(humdata)[i]
 

@@ -2074,7 +2074,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
                                            tokmat[i , , drop = FALSE] 
                                         } else {
                                            fill <- if (any(grepl('^=', tokmat[i, 1]))) {
-                                               bars <- tokmat[i, ][grepl('^=', tokmat[i, 1]), 1]
+                                               bars <- tokmat[i, , drop = FALSE][grepl('^=', tokmat[i, 1]), 1]
                                                barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
                                                base <- strrep('=', length(bars))
                                                

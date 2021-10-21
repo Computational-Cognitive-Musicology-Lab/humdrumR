@@ -7,7 +7,7 @@
 \alias{removeEmptyRecords}
 \title{Filter humdrum data}
 \usage{
-filterHumdrum(humdrumR, ..., removeEmptyFiles = TRUE)
+filterHumdrum(humdrumR, ...)
 
 removeEmptyFiles(humdrumR, fillfromTypes = "D")
 

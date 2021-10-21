@@ -78,8 +78,11 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
 
 ##...accessors ####
 
-
+#' @export
 getBass <- function(tset) LO5th(tset)[ , 1L]
+
+#' @export
+getBassTint <- function(tset) tint( , getBass(tset))
 
 getExtensions <- function(tset) {
     

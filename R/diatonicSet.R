@@ -160,8 +160,10 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 ##...accessors ####
 
 
+#' @export
 getRoot <- function(dset) dset@Root %dim% dset
 
+#' @export
 getRootTint <- function(dset) {
     root <- getRoot(dset)
     

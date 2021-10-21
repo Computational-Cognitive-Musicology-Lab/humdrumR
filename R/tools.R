@@ -392,17 +392,40 @@ segments <- function(x, reverse = FALSE) {
     
 }
 
-ditto <- function(x, logical = !is.na(x), reverse = FALSE) {
-    seg <- segments(logical, reverse = reverse)
+#' Propogate data points to "fill" null data.
+#' 
+#' `fillThru` is a function that allow you to "fill" null values in a vector
+#' with non-null values from earlier/later in the same vector.
+#' The default, "foward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
+#' The `reverse` argument can be used to cause "backeward" filling, where the *next* (higher index) non-null value is used.
+#' 
+#' Which values are considered "non-null" can be controlled using the `nonnull` argument.
+#' The `nonnull` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
+#' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
+#' 
+#' 
+#' 
+#' @export
+#' @name fillThru
+fillThru <- function(x, nonnull = function(x) !is.na(x) & x != '.', reverse = FALSE) {
     
-    vals <- x[logical]
-    if (!head(logical, 1) && !reverse) vals <- c(NA, vals)
-    if (!tail(logical, 1) && reverse) vals <- c(vals, NA)
+    if (is.function(nonnull)) nonnull <- nonnull(x)
+    
+    seg <- segments(nonnull, reverse = reverse)
+    
+    vals <- x[nonnull]
+    if (!head(nonnull, 1) && !reverse) vals <- c(x[1], vals)
+    if (!tail(nonnull, 1) && reverse) vals <- c(vals, tail(x, 1))
     
     setNames(rep(vals, rle(seg)$lengths), seg)
-    
-    
 }
+
+#' @export
+#' @name fillThru
+fillForward <- function(...) fillThru(..., reverse = FALSE)
+#' @export
+#' @name fillThru
+fillBackwards <- function(...) fillThru(..., reverse = TRUE)
 
 ##### Dimensions ----
 ldim <- function(x) {
