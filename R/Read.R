@@ -1052,7 +1052,7 @@ parseSections <- function(spine) {
   matrices <- lapply(sectionTypes, 
                      function(type) {
                        hits  <- grepl(type, spine)
-                       if (!any(hits)) return(NULL)
+                       if (!any(hits)) return(data.frame(row.names = names(spine)))
                        
                        depth <- rep(NA_integer_, length(spine))
                        depth[hits] <- stringi::stri_count_fixed(stringr::str_sub(spine[hits], 3L), '>')
