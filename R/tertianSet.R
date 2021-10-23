@@ -126,7 +126,7 @@ is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) .ifelse(is.na(x), NA, tset2chordSymbol(x)))
+setMethod('as.character', signature = c('tertianSet'), function(x) tset2chordSymbol(x))
 
 ####. logic methods ####
 
@@ -539,7 +539,7 @@ reduceFigures <- function(alterations, extensions, inverted,
 }
 
 
-tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, 
+tset2tonalHarmony <- (function(tset, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, 
                               inversion = TRUE, inversion.labels = letters,
                               qualifyTriad = triadQualify.Roman, figure.Key = TRUE, accidental.naturals = FALSE, sep = '', ...) {
   parts <- matched(parts, c('root', 'qualities', 'accidentals', 'extensions', 'inversion'))
@@ -547,31 +547,32 @@ tset2tonalHarmony <- function(x, parts = c('root', 'accidentals', 'extensions'),
   qualoracc <- parts[parts %in% c('qualities', 'accidentals')]
   
   
-  root        <- if ('root' %in% parts)      steps(getRootTint(x), Key = if (figure.Key) Key, ...) 
-  alterations <- if (length(qualoracc) > 0L) tset2alterations(x, parts = qualoracc[1], Key = Key, inversion = inversion,
+  root        <- if ('root' %in% parts)      steps(getRootTint(tset), Key = if (figure.Key) Key, ...) 
+  alterations <- if (length(qualoracc) > 0L) tset2alterations(tset, parts = qualoracc[1], Key = Key, inversion = inversion,
                                                               accidental.naturals = accidental.naturals, ...) 
-  extensions  <- if ('extensions' %in% parts) tset2extensions(x, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
+  extensions  <- if ('extensions' %in% parts) tset2extensions(tset, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
   
   inversion   <- if ('inversion' %in% parts) {
     if (is.function(inversion.labels)) {
-      ifelse(inversion | getInversion(x) > 0, inversion.labels(tint( , getBass(x)), Key = NULL), "")
+      ifelse(inversion | getInversion(tset) > 0, inversion.labels(tint( , getBass(tset)), Key = NULL), "")
     } else {
-      getInversion(x, inversion.labels = inversion.labels)
+      getInversion(tset, inversion.labels = inversion.labels)
     }
   }
   
-  triad.quality <- tset2triadLabel(x, Key = NULL, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
+  triad.quality <- tset2triadLabel(tset, Key = NULL, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
   if (!is.null(qualifyTriad)) root <- qualifyTriad(root, triad.quality) 
   
   figures <- if (any(c('extensions', 'qualities') %in% parts)) {
     parts[parts == qualoracc[1]] <- 'figures'
-    reduceFigures(alterations, extensions, getInversion(x) > 0L, ...) %dots% (has.prefix('extension.') %.% names)
+    reduceFigures(alterations, extensions, getInversion(tset) > 0L, ...) %dots% (has.prefix('extension.') %.% names)
   }
   
   tonalharmony <- pasteordered(parts, root = root, figures = figures, inversion = inversion, sep = sep)
   
-  tonalharmony  %dim% x
-}
+  tonalharmony  %dim% tset
+}) %>% predicateDispatch(., 'is.na', negate = TRUE)
+
 
 
 tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
@@ -595,6 +596,7 @@ tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
   
 }
 
+
 tset2romanNumeral <- function(tset,  ...) {
   overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), qualifyTriad = triadQualify.Roman, 
                             inversion.labels = letters,
@@ -611,8 +613,7 @@ tset2sciChord <- function(tset,  ...) {
                             extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
                             accidental.naturals = TRUE,
                             extension.add=FALSE, extension.sus = FALSE,
-                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...))
-  
+                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...)) 
 }
 
 
@@ -790,9 +791,9 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 ###.. tset as x ####
 
 #' @export
-romanChord.tertianSet <- force %.% tset2romanNumeral
+romanChord.tertianSet <- tset2romanNumeral
 #' @export
-sciChord.teritianSet <- force %.% tset2sciChord
+sciChord.tertianSet <- tset2sciChord
 
 
 ###. x as y ####

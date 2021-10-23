@@ -44,12 +44,14 @@ compose.default <- function(..., fenv = parent.frame()) {
         (!!tail(fnames,1))(!!!fargNames[[length(fargNames)]])
         })
     
-    body <- predicateDispatch.expr('is.na', body, 'x', negate = TRUE)
+    body <- predicateDispatch.expr('is.na', body, names(args)[1], negate = TRUE)
     body <- memoizeDispatch.expr(body, names(args))
     
     ### environment
     # fenv <- new.env() # parent.env(parent.frame())
-    Map(function(fname, f) assign(fname, f, envir = fenv), fnames, fs)
+    Map(function(fname, f) assign(fname, f, envir = fenv), 
+        c(fnames, 'memoiseParse', 'predicateParse'), 
+        c(fs, memoiseParse, predicateParse))
     
     
     # Create the new function
@@ -332,10 +334,16 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 
 
-
-
-predicateDispatch <- function(fname, predicateFunc, predicateName) {
-    func <- match.fun(fname)
+#' @export
+predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
+  
+    fbody <- if (is.character(func)) {
+       func <- match.fun(fname)
+       funcCall(fname)
+    } else {
+       body(func)
+    }
+    
     #argnames
     fargs <- fargs(func)
     argnames <- names(fargs)
@@ -344,20 +352,15 @@ predicateDispatch <- function(fname, predicateFunc, predicateName) {
     if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't work if the first argument of the method is ..." )
     argnames <- argnames[argnames != "..."]
     
-    #
-    fbody <- funcCall(fname)
-    
-    body <- rlang::expr({
-        rebuild <- predicateParse(!!rlang::sym(predicateName), argnames, inPlace,
-                                  !!!rlang::syms(argnames[argnames != '...']))
-        result <- {!!fbody}
-        rebuild(result)
-    })
-    fargs[['inPlace']] <- TRUE
     newenv <- new.env(parent = parent.frame())
-    
-    assign(predicateName, predicateFunc, envir = newenv)
-    assign('argnames', argnames, envir = newenv)
+    #### 
+    if (is.function(predicateFunc)) {
+      assign('predicate', predicateFunc, envir = newenv)
+      predicateFunc <- 'predicate'
+    }
+
+    body <- predicateDispatch.expr(predicateFunc, fbody, argnames, negate = negate)
+
     
     rlang::new_function(fargs, body, newenv)
 }
