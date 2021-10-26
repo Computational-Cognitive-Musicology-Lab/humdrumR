@@ -68,7 +68,7 @@ setClass('rhythmInterval',
 
 setValidity('rhythmInterval', 
             function(object) {
-                all(object@Denominator != 0L)
+                all(object@Denominator[!is.na(object@Denominator)] != 0L)
             }
 )
 
@@ -590,7 +590,7 @@ char2rint <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'duration: makeRE.decimal()' = numeric2rint)
 
 #' @export
-rhythmInterval.character <- char2rint
+rhythmInterval.character <- force %.% char2rint
 
 #.... set as
 
