@@ -408,7 +408,7 @@ setMethod('LO5th', 'diatonicSet',
     sign <- getSignature(dset)
     alter <- getAlterations(dset)
     
-    # notna <- !is.na(sign) & !is.na(root)
+    notna <- !is.na(sign) & !is.na(root)
     inversion <- rep(inversion, length.out = length(x))
     
     ### get line-of-fifths values
@@ -417,14 +417,13 @@ setMethod('LO5th', 'diatonicSet',
     ### reorder (root/inversion/steporder)
     root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
     
-    order <- lapply(lapply(root_inkey + steporder * inversion, seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
-    
-    LO5ths <- Map(function(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths, order)
+    order <- lapply(lapply(root_inkey[notna] + steporder * inversion[notna], seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
+    LO5ths[notna] <- Map(function(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths[notna], order)
     
     # LO5ths <- do.call('rbind', Map(function(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
                                    # root %% 7L, 1:nrow(LO5ths), inversion))
     LO5ths <- do.call('rbind', LO5ths)
-    LO5ths[cbind(1:nrow(LO5ths), 1L + ((7L - inversion) %% 7L))] <- root
+    LO5ths[cbind((1:nrow(LO5ths))[notna], 1L + ((7L - inversion[notna]) %% 7L))] <- root[notna]
     
 
     rownames(LO5ths) <- dset2key(dset)
@@ -467,7 +466,7 @@ dset2alterations <- function(dset, alteration.labels = c()) {
 
     mode <- getMode(dset)
     
-    altered <- dset@Alteration != 0L & mode > -7L & mode < 2L
+    altered <- !is.na(dset@Alteration) & dset@Alteration != 0L & mode > -7L & mode < 2L
     
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(alteration.labels$augment, alteration.labels$diminish, "")[match(alterations, c(7, -7, 0))]

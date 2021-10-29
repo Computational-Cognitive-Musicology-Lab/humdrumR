@@ -356,7 +356,7 @@ setMethod('[',
 #' @export
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'formula'),
-          function(x, i) {
+          function(x, i, removeEmpty = TRUE) {
               i <- wrapInCall('any', i)
               rlang::f_lhs(i) <- quote(dofill)
               
