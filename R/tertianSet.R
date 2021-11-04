@@ -660,7 +660,7 @@ romanNumeral2tset <- function(str, Key = NULL, triad.labels = c(), of = dset(0,0
   quality.labels <- c(major = 'M', minor = 'm', perfect = 'P', triad.labels)
   qualities <- extensions2qualities(root, figurations, triadalts,
                                     Key = of, quality.labels = quality.labels)
-  # incorporate quality of
+  # incorporate quality of triad
   qualities <- local({
     triad <- rep(quality.labels$major, length(numerals))
     triad[numerals == tolower(numerals)] <- quality.labels$minor
@@ -793,7 +793,11 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 #' @export
 romanChord.tertianSet <- tset2romanNumeral
 #' @export
+<<<<<<< Updated upstream
 sciChord.tertianSet <- tset2sciChord
+=======
+sciChord.tertianSet <- force %.% tset2sciChord
+>>>>>>> Stashed changes
 
 
 ###. x as y ####
