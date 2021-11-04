@@ -289,7 +289,7 @@ parseFiguration <- function(str, figureFill = TRUE, ...) {
                                                                         ...)))
   lapply(figures, 
          function(parsedfig) {
-           parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(accidentals = character(0L), steps = character(0L))
+           parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(accidentals = character(2L), steps = c('5', '3'))
            parsedfig[ , Explicit := TRUE]
            
            if (!any(parsedfig$steps == '1')) parsedfig <- rbind(parsedfig, data.table(accidentals = '', steps = '1', Explicit = FALSE)) 
