@@ -793,16 +793,7 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 #' @export
 romanChord.tertianSet <- tset2romanNumeral
 #' @export
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-sciChord.tertianSet <- tset2sciChord
-=======
 sciChord.tertianSet <- force %.% tset2sciChord
->>>>>>> Stashed changes
-=======
-sciChord.tertianSet <- force %.% tset2sciChord
->>>>>>> Stashed changes
-
 
 ###. x as y ####
 

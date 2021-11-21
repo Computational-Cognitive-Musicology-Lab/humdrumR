@@ -172,9 +172,10 @@ getRootTint <- function(dset) {
     
 }
 
+#' @export getSignature
 getSignature <- function(dset)  dset@Signature %dim% dset
 
-
+#' @export
 getMode <- function(dset) {
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset)
@@ -274,17 +275,17 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
 setMethod('%%', signature = c('integer', 'diatonicSet'),
           function(e1, e2) {
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-              
+            
               alter <- e2@Alteration
               signature <- getSignature(e2)
               
               output <- integer(length(e1))
               
-              output[alter == 0L] <- (((e1[alter == 0L] + 1L) - signature) %% 7L) - 1 + signature
-              if (any(alter != 0L)) {
-                  output[alter != 0L] <- {
-                      lof <- LO5th(e2[alter != 0L])
-                      lof[sweep(lof %% 7L, 1, e1[alter != 0L] %% 7L, `==`)]
+              output[!is.na(alter) & alter == 0L] <- (((e1[!is.na(alter) & alter == 0L] + 1L) - signature) %% 7L) - 1 + signature
+              if (any(!is.na(alter) & alter != 0L)) {
+                  output[!is.na(alter) & alter != 0L] <- {
+                      lof <- LO5th(e2[!is.na(alter) & alter != 0L])
+                      lof[sweep(lof %% 7L, 1, e1[!is.na(alter) & alter != 0L] %% 7L, `==`)]
                   }
               }
               

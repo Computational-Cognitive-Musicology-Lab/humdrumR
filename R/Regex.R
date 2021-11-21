@@ -201,7 +201,11 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
                                "Sorry, REapply can only apply to an x argument that is a character vector.")
     result <- .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
     
-    as.re(result, regex) %dim% x
+    if (inherits(result, 'partition')) {
+        result <- lapply(result,
+                         function(res) { res %dim% x})
+    }
+    as.re(result, regex) 
 }
 
 #' 
@@ -213,8 +217,18 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
         hits <- !is.na(matches)
         hits_result <- do.call(.func, c(list(matches[hits]), list(...)))
         
-        result <- vectorNA(length(x), class(hits_result))
-        result[hits] <- hits_result
+        if (inherits(hits_result, 'partition')) {
+            result <- hits_result
+            result <- lapply(hits_result,
+                             function(hresult) {
+                                 result <- vectorNA(length(x), class(hresult))
+                                 result[hits] <- hresult
+                                 result 
+                             })
+        } else {
+            result <- vectorNA(length(x), class(hits_result))
+            result[hits] <- hits_result
+        }
         result
     })
     

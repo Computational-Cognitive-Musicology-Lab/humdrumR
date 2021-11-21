@@ -978,7 +978,7 @@ tonalChroma2tint <- function(str, Key = NULL,
  if ('qualities' %in% parts)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
  
  simple <- simple + alterations
- if (!is.null(Key)) simple[names(alterations) == ""] <- simple[names(alterations) == ""] %% Key
+ if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
  
  tint <- tint(0L, simple)
  

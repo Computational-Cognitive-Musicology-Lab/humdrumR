@@ -1903,7 +1903,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
                     len  <- length(object)
-                    trim <- if (len == 1L) 400L else 40L
+                    trim <- if (len == 1L) 800L else 40L
                     print_humtab(object, firstAndLast = TRUE, max.records.file = trim)
                     
                     if (len > 1L) {
