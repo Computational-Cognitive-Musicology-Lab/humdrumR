@@ -408,7 +408,7 @@ alteration.memory <- function(LO5th) {
          function(gen) {
            cur <- generic  == gen
            which(cur)[c(FALSE, diff(LO5th[cur]) == 0L)]
-         }) %>% unlist -> hits
+         }) |> unlist() -> hits
   
   list(sameasbefore = seq_along(LO5th) %in% hits,  
        new = seq_along(LO5th) %in% unlist(lapply(-1:5L, match, table = generic)))

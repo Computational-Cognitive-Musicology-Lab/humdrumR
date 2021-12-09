@@ -266,7 +266,7 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
     
     dots[1L + ((deg - 1L) %/% 2L)] <- qualities
     dots
-  }, root, figurations$Degrees, figurations$Accidentals, rep(mode, length(root))) %>% do.call('rbind', .)
+  }, root, figurations$Degrees, figurations$Accidentals, rep(mode, length(root))) |> do.call(what = 'rbind')
   
   
   
@@ -335,7 +335,7 @@ parseFiguration <- function(str, figureFill = TRUE, ...) {
                       Accidentals = list(parsedfig$accidentals))
            
            
-         }) %>% do.call('rbind', .)
+         }) |> do.call(what = 'rbind')
 }
 
 ##### To/From tertianSets ####    
@@ -571,7 +571,7 @@ tset2tonalHarmony <- (function(tset, parts = c('root', 'accidentals', 'extension
   tonalharmony <- pasteordered(parts, root = root, figures = figures, inversion = inversion, sep = sep)
   
   tonalharmony  %dim% tset
-}) %>% predicateDispatch(., 'is.na', negate = TRUE)
+}) |> predicateDispatch('is.na', negate = TRUE)
 
 
 

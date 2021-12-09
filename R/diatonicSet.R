@@ -644,7 +644,7 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.
                                      
                                    alterint <- baltern2int(altermat)
                                    c(mode = mode, altered = alterint)
-                                 }) %>% do.call('rbind', .)
+                                 }) |> do.call(what = 'rbind')
       mode[altered] <- mode_alterations[ , 1]
       alterations[altered] <- mode_alterations[ , 2]
       

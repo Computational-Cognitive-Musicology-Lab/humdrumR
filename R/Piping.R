@@ -6,11 +6,8 @@
 #' These infix operators make it possible to use
 #' the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
 #' functions in a piping style, similar to the \code{|} (pipe)
-#' in unix-style terminals, or the \code{\link[magrittr:%>%]{pipe operator}}
+#' in unix-style terminals, or the \code{|>}  pipe operator.
 #' from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
-#' (In fact, the \code{\link[magrittr:%>%]{magrittr}} pipe is imported by 
-#' \code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
-#' your `humdrumR` work flows.)
 #' 
 #' The key is that the function \code{\link{withinHumdrum}} always returns a new
 #' \code{\linkS4class{humdrumR}} data object. Thus, you can always send the output
@@ -46,14 +43,14 @@
 #' There are plural pipe versions of each singular pipe operator.
 #' Just add an "s" to make them plural: 
 #' 
-#' + `%>%` (singular) : `%s>%` (plural);
+#' + `|>` (singular) : `%s>%` (plural);
 #' + `%hum>%` (singular) : `%hums>%` (plural);
 #' + `%hum<%` (singular) : `%hums<%` (plural);
 #' + `%humT%` (singular) : `%humsT%` (plural);
 #' + `%hum[]%` (singular) : `%hums[]%` (plural);
 #' 
 #' 
-#' Note: `%s>%` is an expansion of the [magrittr::%>%] pipe operator, which
+#' Note: `%s>%` is an expansion of the `\>` pipe operator, which
 #' makes use of some clever meta-programming---we can't guarantee it will
 #' always behave the way we might like!
 #' @name humPipe
@@ -202,7 +199,7 @@ removeParentheses <- function(expr) {
     if (!is.list(e1)) stop(call. = FALSE,
                            'If using %s>% ("multi-pipe"), the left-side must be a list of values.')
     e2 <- rlang::enquo(e2)
-    lapply(e1, function(x) eval(rlang::quo_squash(rlang::quo(x %>% !!e2))))
+    lapply(e1, function(x) eval(rlang::quo_squash(rlang::quo(!!(e2(x))))))
     
 }
 
