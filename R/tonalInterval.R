@@ -961,8 +961,6 @@ tonalChroma2tint <- function(str, Key = NULL,
  if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
  
- if (all(c('accidentals', 'qualities') %in% parts)) .stop("You can't read a tonal chroma with accidentals AND qualities at the same time.")
- 
  ############# parse string
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, ...)
