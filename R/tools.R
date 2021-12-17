@@ -27,9 +27,9 @@
     
     if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
 }
-
+truthy <- function(x) !is.null(x) && length(x) > 0L && ((!is.logical(x) && !(length(x) == 1 && x[1] == 0)) || (length(x) == 1L & x[1]))
 true <- function(x) is.logical(x) && x[1]
-false <- function(x) is.logical(x) && !x[1]
+false <- function(x) is.null(x) || is.logical(x) && !x[1]
 # these two functions allow us to test if a variable is 
 # a logical TRUE or FALSE, but not give an error if
 # the variable is NOT logical.
@@ -379,7 +379,7 @@ remove.duplicates <- function(listofvalues) {
 
 
 segments <- function(x, reverse = FALSE) {
-    # x is logical
+    if (!is.logical(x)) x <- c(TRUE, head(x, -1L) != tail(x, -1L))
     if (reverse) x <- rev(x)
     
     x <- cumsum(x)
@@ -391,6 +391,8 @@ segments <- function(x, reverse = FALSE) {
     x
     
 }
+
+
 
 #' Propogate data points to "fill" null data.
 #' 
@@ -525,7 +527,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
-          if (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
+          if (is.function(size.out) && (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim)))) return(invisible(stuff))
           
           recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)

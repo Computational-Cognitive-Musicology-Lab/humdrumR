@@ -1,10 +1,9 @@
-##################################
-###### tonalInterval S4 class ####
-##################################
+# tonalInterval S4 class ####
 
-##### class methods ####
+## class methods ####
 
-####. definition, validity, initialization ####
+### definition, validity, initialization ####
+
 
 #' Representation of tonal pitch information
 #' 
@@ -151,7 +150,7 @@ setMethod("initialize",
           }) 
 
 
-##...constructors ####
+### constructors ####
 
 #' The basic constructor for `tonalInterval`s.
 #' `tint` accepts integer values for octaves and LO5ths and numeric values for cent.
@@ -160,14 +159,14 @@ setMethod("initialize",
 #' @name tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
-    if (missing(octave)) octave <- -LO5th2contourN(LO5th, contour.round = floor)
+    if (missing(octave) || is.null(octave)) octave <- -floor((LO5th * 19) / 12)
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
     tint <- tint %dim% (if (size(tint) == size(LO5th)) LO5th else octave)
     if (partition) tintPartition(tint, Key = Key, roundContour = roundContour) else tint
 }
 
-##...accessors ####
+### accessors ####
 
 #' @export
 setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
@@ -186,7 +185,7 @@ setMethod('LO5th', 'ANY',
 getFifth  <- function(tint) LO5th(tint)
 getOctave <- function(tint) tint@Octave %dim% tint
 
-####. vector/core methods ####
+### vector/core methods ####
 
 
 #' @name tonalInterval
@@ -194,7 +193,7 @@ getOctave <- function(tint) tint@Octave %dim% tint
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 
-###.. formatting methods ####
+#### formatting methods ####
 
 setMethod('as.character', signature = c('tonalInterval'), 
           function(x) kern(x))
@@ -203,9 +202,9 @@ setMethod('as.numeric', signature = c('tonalInterval'),
           function(x) tint2decimal(x))
 
 
-####. logic methods ####
+### logic methods ####
 
-###.. order/relations methods ####
+#### order/relations methods ####
 
 #' @export order.tonalInterval
 #' @exportMethod > >= < <= Summary abs sign
@@ -248,12 +247,9 @@ setMethod('sign', signature = c('tonalInterval'),
 
 
 
-###.. arithmetic methods ####
+#### arithmetic methods ####
 
-##... addition ####
-
- 
-
+##### addition ####
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
@@ -275,7 +271,7 @@ setMethod('+', signature = c('tonalInterval', 'character'),
 
 
 
-##... subtraction ####
+##### subtraction ####
 
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
@@ -295,7 +291,7 @@ setMethod('-', signature = c('tonalInterval', 'character'),
           })
 
 
-##... division/modulo  ####
+##### division/modulo  ####
 
  
 setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
@@ -362,7 +358,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 
 
-##### To/From line-of-fifths ####
+## To/From line-of-fifths ####
 
 #' Line-of-Fifths
 #' 
@@ -374,9 +370,9 @@ NULL
 
 genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 
-###. line-of-fifths to x ####
+### line-of-fifths to x ####
 
-##... line-of-fifths to tonalChroma ####
+##### line-of-fifths to tonalChroma ####
 
 LO5th2step <- function(LO5th, step.labels = 1L:7L, ...) {
   step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
@@ -534,38 +530,139 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 }
 
 
-###. x to line-of-fifths ####
+### x to line-of-fifths ####
 
 
 
 
 
 
-genericinterval2LO5th   <- function(ints) {
-  ints[ints ==  0L] <- NA
-  ints[ints == -1L] <- 1
-  simpleints <- (abs(ints - sign(ints)) %% 7L) # from 0
-  LO5ths <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[simpleints + 1L]
-  LO5ths <- .ifelse(ints > 0L | ints == -1L, LO5ths, 7L - LO5ths) %% 7L
-  LO5ths[LO5ths == 6L] <- -1L
-  LO5ths
+
+
+step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
   
-}
-lettername2LO5th <- function(ln) match(toupper(ln), c('F', 'C', 'G', 'D', 'A', 'E', 'B')) - 2L
-
-
-
-step2LO5th <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) {
-  step <- match(str, step.labels, nomatch = NA_integer_) 
+  if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pithes, the number of "step.labels" must be a multiple of 7.')
+  
+  step <- if (is.null(step.labels)) as.integer(str) else match(str, step.labels, nomatch = NA_integer_) 
   step <- ((step - 1L) %% 7L) + 1L
   
-  ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step])
+  tint <- tint( , ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step]))
+  
+  attr(tint, 'steps') <- step
+  
+  tint
 }
 
 
 
 
 updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, up) - stringi::stri_count_fixed(str, down)
+
+
+specifier2tint <- function(str, step = NULL, Key = NULL, 
+                           qualities = TRUE,
+                           fromKey = FALSE, memory = FALSE, alterKey = FALSE,
+                           sharp = '#', flat = '-', natural = 'n', 
+                           doublesharp = FALSE, doubleflat = FALSE, 
+                           perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
+                           ...) {
+  
+  # step is lof = -1:5
+  step <- if (is.null(step)) 0L else getFifth(step)
+   
+  if (qualities && alterKey) .stop("When parsing tonal information, you can't use the alterKey == TRUE if the specifier type is 'quality'.")
+    
+  # use double sharp/flats?
+  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
+  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
+  
+  # incorporate memory?
+  if (truthy(memory)) {
+    match_size(size.out = length(str),
+               step = step, 
+               memory = memory, 
+               toEnv = TRUE)
+    
+    str <- unlist(tapply(str, segments(paste0(step, ':', memory)), fillForward, nonnull = function(x) x != ''))
+  } 
+  
+  # calculate lof
+  lof <- (if (qualities) {
+    updownN(str, up = augment, down = diminish) -
+      (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
+      (str == 'm')
+  } else {
+    updownN(str, up = sharp, down = flat)
+  } ) * 7L
+
+  
+  # incorporate key?
+  if (alterKey && !is.null(Key)) {
+    lof <- (step %% Key) + lof
+  } 
+  if (!alterKey && fromKey && !is.null(Key)) {
+    lof[str == ''] <- step[str == ''] %% Key
+  }
+
+  # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  # names(n)[is.na(names(n))] <- ""
+  
+  tint( , lof)
+  
+}
+
+
+accidental2tint <- function(str, step = 0L, Key = dset(0L, 0L), 
+                            accidentalFromKey = FALSE, accidentalMemory = FALSE, accidentalRelativeToKey = FALSE,
+                            sharp = '#', flat = '-', natural = 'n', 
+                            doublesharp = FALSE, doubleflat = FALSE, ...) {
+  
+  # use double sharp/flats?
+  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
+  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
+  
+  # incorporate memory
+  if (truthy(accidentalMemory)) {
+    match_size(size.out = length(str),
+               step = step, 
+               accidentalMemory = accidentalMemory, 
+               toEnv = TRUE)
+    
+    str <- unlist(tapply(str, segments(paste0(step, ':', accidentalMemory)), fillForward, nonnull = function(x) x != ''))
+  } 
+  
+  # calculate lof
+  lof <- updownN(str, up = sharp, down = flat) * 7L
+  
+  
+  if (accidentalFromKey) {
+    lof[str == ''] <- step[str == ''] %% Key
+  }
+ 
+  # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  # names(n)[is.na(names(n))] <- ""
+  
+  tint( , lof)
+  
+}
+
+quality2tint <- function(str, step = NULL, quality.labels = c(), ...) {
+  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm', natural = 'n')
+  
+  n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = +7L, natural = 0L)
+  
+  q_type <- names(quality.labels)[match(substr(str, 1, 1), quality.labels)]
+  q_n <- nchar(str)
+  
+  n <- n[q_type] * q_n
+  if (!is.null(step)) n[q_type == quality.labels['diminish'] & 
+                          step %in% c(7L, 3L, 6L)] <-  n[q_type == quality.labels['diminish'] &
+                                                           step %in% c(7L, 3L, 6L)] - 7L
+  n[is.na(n)] <- 0L
+  n
+}
+
+
 
 accidental2LO5th <- function(str, accidental.labels = c(), ...) {
   setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
@@ -584,11 +681,20 @@ accidental2LO5th <- function(str, accidental.labels = c(), ...) {
 }
 
 
-quality2LO5th <- function(str, quality.labels = c()) {
+
+
+quality2LO5th <- function(str, step = NULL, quality.labels = c(), ...) {
   setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm', natural = 'n')
   
   n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = +7L, natural = 0L)
-  n <- n[names(quality.labels)[match(substr(str, 1, 1), quality.labels)]] * nchar(str)
+  
+  q_type <- names(quality.labels)[match(substr(str, 1, 1), quality.labels)]
+  q_n <- nchar(str)
+  
+  n <- n[q_type] * q_n
+  if (!is.null(step)) n[q_type == quality.labels['diminish'] & 
+                          step %in% c(7L, 3L, 6L)] <-  n[q_type == quality.labels['diminish'] &
+                                                           step %in% c(7L, 3L, 6L)] - 7L
   n[is.na(n)] <- 0L
   n
 }
@@ -597,10 +703,9 @@ quality2LO5th <- function(str, quality.labels = c()) {
 
 
 
+## To/From octaves/contours ####
 
-##### To/From octaves/contours ####
-
-####. tint to contour ####
+### tint to contour ####
 
 # tint2centralOctave <- function(x) {
 #   # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
@@ -648,9 +753,9 @@ octave.kernstyle <- function(str, octn) {
 
 
 
-####. contour to tint ####
+### contour to tint ####
 
-contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L, contour.delta = FALSE, contour.round = floor) {
+contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L, contour.delta = FALSE, contour.round = floor, ...) {
   setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
   
   n <- if (false(contour.labels)) {
@@ -661,27 +766,18 @@ contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L,
   
   n <- n - contour.offset
   
-  n <- if (contour.delta) {
-    simplecontour <- LO5th2contourN(delta(simple), contour.round)
+  if (contour.delta) {
+    semits <- tint2semit(delta(simple))
     
-    sigma(n - simplecontour)
+    n <- sigma(n - contour.round(semits / 12))
     
-  } else {
-    simplecontour <- LO5th2contourN(simple, contour.round)
-    
-    n - simplecontour
-  }
+  } 
   
   tint(n, 0L)
 
 }
 
-LO5th2contourN <- function(LO5th, contour.round = floor) { 
-  octaves <- tint2semit(tint(0L, LO5th) %% tint(-11, 7)) / 12
-  
-  contour.round(octaves)
-  
-}
+
 
 kernOctave2tint <- function(str) {
   nletters <- nchar(str)
@@ -693,11 +789,12 @@ kernOctave2tint <- function(str) {
 }
 
 
-##### To/From tonal intervals ####
-####. tint to x ####
+## To/From tonal intervals ####
+### tint to x ####
 
+#### Atonal ####
 
-###.. semitones
+##### semitones
 
 tint2semit <- function(x) {
         as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L))) %dim% x
@@ -705,15 +802,21 @@ tint2semit <- function(x) {
 
 tint2midi <- function(x) tint2semit(x) + 60L
 
-###.. tonal chroma 
+#### Tonal ####
+
+##### tonal chroma  ----
 
 
 tint2tonalChroma <- function(x, parts = c('qualities', 'steps', 'contours'), sep = "", ...) {
   parts <- matched(parts, c('qualities', 'steps', 'contours', 'accidentals'))
   
+  # simple part
   steps       <- if ('steps' %in% parts)        tint2step(x, ...)   %dots% (has.prefix('step.|Key$') %.% names)
   qualities   <- if ('qualities' %in% parts)    tint2quality(x, ...)     %dots% (has.prefix('quality.|Key$') %.% names)
   accidentals <- if ('accidentals' %in% parts)  tint2accidental(x, ...)  %dots% (has.prefix('accidental.|Key$') %.% names)
+  
+  
+  # complex part
   contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.') %.% names)
 
   tonalchroma <- pasteordered(parts, steps = steps, qualities = qualities, accidentals = accidentals, contours = contours, sep = sep)
@@ -909,11 +1012,9 @@ tint2frequency <- function(x, frequency.reference = 440L,
 
 
 
-####. x to tint ####
+### x to tint ####
 
-
-
-###.. semitones
+#### Atonal ####
 
 semit2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
           wholen <- as.integer(c(n))
@@ -950,10 +1051,10 @@ atonal2tint <- function(tint, accidental.melodic, Key = NULL) {
 
 midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 60L, accidental.melodic, Key)
 
-###.. tonal chroma 
+#### Tonal ####
 
 
-tonalChroma2tint <- function(str, Key = NULL,
+tonalChroma2tint <- function(str, 
                              parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
  
  parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
@@ -967,24 +1068,18 @@ tonalChroma2tint <- function(str, Key = NULL,
  
  REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to enviroment!
  
+ ## simple part
+ generic   <- if ('steps' %in% parts)  step2tint(steps, ...) 
+ accidentals <- if ('accidentals' %in% parts) specifier2tint(accidentals, qualities = FALSE, step = generic, ...) 
+ qualities   <- if ('qualities'   %in% parts) specifier2tint(qualities,   qualities = TRUE,  step = generic, ...) 
  
- ## simple interval
- simple <- alterations <- integer(length(str))
- if ('steps' %in% parts) simple <- simple +  step2LO5th(steps, ...) %dots% (has.prefix('step.')  %.% names)
- 
- if ('accidentals' %in% parts) alterations <- accidental2LO5th(accidentals, ...) %dots% (has.prefix('accidental.') %.% names) 
- if ('qualities' %in% parts)   alterations <- quality2LO5th(qualities,      ...) %dots% (has.prefix('quality.')    %.% names)
- 
- simple <- simple + alterations
- if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
- 
- tint <- tint(0L, simple)
+ simple <- (generic %maybe% tint( , 0L)) + (accidentals %maybe%  tint( , 0L)) + (qualities %maybe%  tint( , 0L))
+ # if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
  
  # contours
- if (!'contours' %in% parts) contours <- character(length(str))
- tint <- tint + contour2tint(contours, simple, ...) %dots%  (has.prefix('contour.') %.% names)
+ if ('contours' %in% parts) contour2tint(contours, simple, ...) + simple else simple
  
- tint
+
  
  
 }
@@ -1179,7 +1274,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
 
 
 
-##### Tonal transforms ####
+## Tonal transforms ####
 
 #' Tonal Transformations
 #' 
@@ -1408,7 +1503,7 @@ transpose.tonalInterval <- function(x, by = NULL, Key = NULL, to = NULL, real = 
 
 
 
-####. partitioning tonalIntervals ####
+### partitioning tonalIntervals ####
 
 
 #' Tonal interval partitions
@@ -1507,7 +1602,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 
 
 
-##### As x ####
+## As x ####
 
 #' Pitch representations and translations
 #' 
@@ -2100,7 +2195,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 NULL
 
 
-####. generics ####
+### generics ####
 
 #' @export tonalInterval 
 #' @export semit midi
@@ -2144,9 +2239,9 @@ contour       <- pitchgeneric("contour"  , endargs = alist(contour.labels = ))
 
 
 
-####. methods ####
+### methods ####
 
-###.. x as tint ####
+##### x as tint ####
 
 #' @export
 tonalInterval.tonalInterval <- tonalTransform
@@ -2185,7 +2280,7 @@ setAs('character', 'tonalInterval', function(from) char2tint(from))
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% from)
 
 
-###.. tint as x ####
+##### tint as x ####
 
 #' @export
 semit.tonalInterval       <- tint2semit       %.% tonalTransform
@@ -2227,9 +2322,9 @@ as.frequency.tonalInterval   <- tint2frequency   %.% tonalTransform
 contour.tonalInterval     <- tint2contour     %.% tonalTransform
 
 
-###.. x as y ####
+##### x as y ####
 
-#.... integer -> y ####
+###### integer -> y ####
 
 #' @export
 semit.integer       <- force
@@ -2264,7 +2359,7 @@ as.frequency.integer   <- tint2frequency   %.% tonalInterval.integer
 #' @export
 contour.integer     <- tint2contour     %.% tonalInterval.integer
 
-#.... numeric -> y ####
+###### numeric -> y ####
 
 #' @export
 semit.numeric       <- tint2semit       %.% tonalInterval.numeric
@@ -2299,7 +2394,7 @@ as.frequency.numeric   <- tint2frequency   %.% tonalInterval.numeric
 #' @export
 contour.numeric     <- tint2contour     %.% tonalInterval.numeric
 
-#.... character -> y ####
+###### character -> y ####
 
 #' @export
 semit.character       <- re.place %.% tint2semit       %.% tonalInterval.character
@@ -2336,7 +2431,7 @@ contour.character     <- re.place %.% tint2contour     %.% tonalInterval.charact
 
 
 
-##### Tonal transform methods ####
+### Tonal transform methods ####
 
 #' @export
 invert.character <- re.place %.% re.as %.% invert.tonalInterval %.% tonalInterval.character
@@ -2362,7 +2457,7 @@ is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 
 
 
-##### Predefined tonalIntervals ####
+# Predefined tonalIntervals ####
 
 #' @name tonalInterval
 #' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
@@ -2372,12 +2467,12 @@ is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
 #' @export unison pythagorean.comma octave
 NULL
-
+# 
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
 allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)
 allints <- allints[!is.na(allints)]
-# cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
+cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
 for (int in allints) {
   assign(int, interval2tint(int))
 }

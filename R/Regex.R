@@ -406,15 +406,13 @@ cREs <- function(REs, parse.exhaust = TRUE) {
 
 makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ..., step.sign = TRUE)  paste0(if (step.sign) '[-+]?', captureRE(step.labels))
 
-makeRE.accidentals <- function(accidental.labels = c(), ...) {
-    setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
     
-    paste0(accidental.labels['natural'], '|', captureUniq(accidental.labels[names(accidental.labels) != 'natural']))
+    paste0(natural, '|', captureUniq(c(sharp, flat)))
 }
 
-makeRE.qualities <- function(quality.labels = c(), ...) {
-    setoptions(quality.labels) <-  c(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', natural = 'n')
-    paste0(captureRE(quality.labels[c('perfect', 'major', 'minor')], ''), '|', captureUniq(quality.labels[c('diminish', 'augment')]))
+makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {
+    paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
 }
 
 makeRE.contours <- function(contour.labels = c(), ...) {

@@ -259,7 +259,7 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
     deg <- deg[!redundantroot]
     acc <- acc[!redundantroot]
     if (length(deg) == 0L) return(dots)
-    LO5th <- step2LO5th(deg, step.labels = 1L:14L) #%% dset(0, m)
+    LO5th <- step2LO5th(deg, step.labels = 1L:14L)
     alterations <- accidental2LO5th(acc, ...)
     
     qualities <- LO5th2quality(as.integer((LO5th %% dset(-r, m - r)) + alterations), ..., quality.cautionary = TRUE)
