@@ -532,182 +532,6 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 }
 
 
-### x to line-of-fifths ####
-
-
-
-
-
-
-
-
-step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
-  
-  if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pithes, the number of "step.labels" must be a multiple of 7.')
-  
-  step <- if (is.null(step.labels)) as.integer(str) else match(str, step.labels, nomatch = NA_integer_) 
-  step <- ((step - 1L) %% 7L) + 1L
-  
-  tint <- tint( , ifelse(is.na(step), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[step]))
-  
-  attr(tint, 'steps') <- step
-  
-  tint
-}
-
-
-
-
-updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, up) - stringi::stri_count_fixed(str, down)
-
-
-specifier2tint <- function(str, step = NULL, Key = NULL, 
-                           qualities = TRUE,
-                           fromKey = FALSE, memory = FALSE, alterKey = FALSE,
-                           sharp = '#', flat = '-', natural = 'n', 
-                           doublesharp = FALSE, doubleflat = FALSE, 
-                           perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
-                           ...) {
-  
-  # step is lof = -1:5
-  step <- if (is.null(step)) 0L else getFifth(step)
-   
-  if (qualities && alterKey) .stop("When parsing tonal information, you can't use the alterKey == TRUE if the specifier type is 'quality'.")
-    
-  # use double sharp/flats?
-  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
-  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
-  
-  
-  
-  # incorporate memory?
-  if (truthy(memory)) {
-    match_size(size.out = length(str),
-               step = step, 
-               memory = memory, 
-               toEnv = TRUE)
-    
-    str <- unlist(tapply_inplace(str, paste0(step, ':', memory), fillForward, nonnull = function(x) x != ''))
-  } 
-  
-  # calculate lof
-  
-  natural <- stringi::stri_detect_fixed(str, natural)
-  lof <- (if (qualities) {
-    updownN(str, up = augment, down = diminish) -
-      (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
-      (str == 'm')
-  } else {
-    updownN(str, up = sharp, down = flat)
-  } ) * 7L
-
-  
-  # incorporate key?
-  if (!is.null(Key) && fromKey) {
-    keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
-    if (alterKey) {
-      lof <- lof + keyalt
-    } else {
-      lof[str == ''] <- keyalt[str == '']
-    }
-    
-  }
-  # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
-  # names(n)[is.na(names(n))] <- ""
-  
-  tint( , lof)
-  
-}
-
-
-accidental2tint <- function(str, step = 0L, Key = dset(0L, 0L), 
-                            accidentalFromKey = FALSE, accidentalMemory = FALSE, accidentalRelativeToKey = FALSE,
-                            sharp = '#', flat = '-', natural = 'n', 
-                            doublesharp = FALSE, doubleflat = FALSE, ...) {
-  
-  # use double sharp/flats?
-  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
-  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
-  
-  # incorporate memory
-  if (truthy(accidentalMemory)) {
-    match_size(size.out = length(str),
-               step = step, 
-               accidentalMemory = accidentalMemory, 
-               toEnv = TRUE)
-    
-    str <- unlist(tapply(str, segments(paste0(step, ':', accidentalMemory)), fillForward, nonnull = function(x) x != ''))
-  } 
-  
-  # calculate lof
-  lof <- updownN(str, up = sharp, down = flat) * 7L
-  
-  
-  if (accidentalFromKey) {
-    lof[str == ''] <- step[str == ''] %% Key
-  }
- 
-  # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
-  # names(n)[is.na(names(n))] <- ""
-  
-  tint( , lof)
-  
-}
-
-quality2tint <- function(str, step = NULL, quality.labels = c(), ...) {
-  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm', natural = 'n')
-  
-  n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = +7L, natural = 0L)
-  
-  q_type <- names(quality.labels)[match(substr(str, 1, 1), quality.labels)]
-  q_n <- nchar(str)
-  
-  n <- n[q_type] * q_n
-  if (!is.null(step)) n[q_type == quality.labels['diminish'] & 
-                          step %in% c(7L, 3L, 6L)] <-  n[q_type == quality.labels['diminish'] &
-                                                           step %in% c(7L, 3L, 6L)] - 7L
-  n[is.na(n)] <- 0L
-  n
-}
-
-
-
-accidental2LO5th <- function(str, accidental.labels = c(), ...) {
-  setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
-  
-  
-  if ('doublesharp' %in% names(accidental.labels)) str <- gsub(accidental.labels['doublesharp'], strrep(accidental.labels['sharp'], 2), str)
-  if ('doubleflat'  %in% names(accidental.labels)) str <- gsub(accidental.labels['doubleflat'],  strrep(accidental.labels['flat'], 2), str)
-  
-  n <- updownN(str, up = accidental.labels['sharp'], down = accidental.labels['flat'])
-  
-  names(n) <- names(accidental.labels)[match(str, accidental.labels)]
-  names(n)[is.na(names(n))] <- ""
-  
-  n * 7L
-  
-}
-
-
-
-
-quality2LO5th <- function(str, step = NULL, quality.labels = c(), ...) {
-  setoptions(quality.labels) <- c(perfect = 'P', augment = 'A', diminish = 'd', major = 'M', minor = 'm', natural = 'n')
-  
-  n <- c(perfect = 0L, major = 0L, minor = -7L, diminish = -7L, augment = +7L, natural = 0L)
-  
-  q_type <- names(quality.labels)[match(substr(str, 1, 1), quality.labels)]
-  q_n <- nchar(str)
-  
-  n <- n[q_type] * q_n
-  if (!is.null(step)) n[q_type == quality.labels['diminish'] & 
-                          step %in% c(7L, 3L, 6L)] <-  n[q_type == quality.labels['diminish'] &
-                                                           step %in% c(7L, 3L, 6L)] - 7L
-  n[is.na(n)] <- 0L
-  n
-}
-
-
 
 
 
@@ -811,6 +635,7 @@ tint2semit <- function(x) {
 tint2midi <- function(x) tint2semit(x) + 60L
 
 #### Tonal ####
+
 
 ##### tonal chroma  ----
 
@@ -1062,10 +887,124 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 #### Tonal ####
 
 
-tonalChroma2tint <- function(str, 
-                             parts = c('steps', 'accidentals', 'contours'), sep = "", parse.exhaust = TRUE, ...) {
+step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), octaveCase = FALSE, ...) {
+  
+  if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pitches, the number of "step.labels" must be a multiple of 7.')
+  
+  if (!is.null(step.labels) && octaveCase) {
+    upper <- str == toupper(str) 
+    str <- tolower(str)
+    step.labels <- tolower(step.labels)
+  }
+  
+  step <- if (is.null(step.labels)) as.integer(str) else match(str, step.labels, nomatch = NA_integer_) 
+  
+  # generic
+  genericstep <- ((step - 1L) %% 7L) + 1L
+  tint <- tint( , ifelse(is.na(genericstep), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[genericstep]))
+  
+  # specific
+  octave <- (step - 1L) %/% 7L
+  
+  if (!is.null(step.labels) && octaveCase && any(upper)) {
+    octave[upper] <- -1L - octave[upper] 
+  }
+  
+  tint <- tint + tint(octave, 0L)
+  
+  tint
+}
+
+
+
+
+updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, up) - stringi::stri_count_fixed(str, down)
+
+
+
+accidental2LO5th <- function(str, accidental.labels = c(), ...) {
+  setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
+  
+  
+  if ('doublesharp' %in% names(accidental.labels)) str <- gsub(accidental.labels['doublesharp'], strrep(accidental.labels['sharp'], 2), str)
+  if ('doubleflat'  %in% names(accidental.labels)) str <- gsub(accidental.labels['doubleflat'],  strrep(accidental.labels['flat'], 2), str)
+  
+  n <- updownN(str, up = accidental.labels['sharp'], down = accidental.labels['flat'])
+  
+  names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  names(n)[is.na(names(n))] <- ""
+  
+  n * 7L
+  
+}
+
+
+specifier2tint <- function(str, step = NULL, Key = NULL, 
+                           qualities = TRUE,
+                           fromKey = FALSE, memory = FALSE, alterKey = FALSE,
+                           sharp = '#', flat = '-', natural = 'n', 
+                           doublesharp = FALSE, doubleflat = FALSE, 
+                           perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
+                           ...) {
+  
+  # step is lof = -1:5
+  step <- if (is.null(step)) 0L else getFifth(step)
+   
+  if (qualities && alterKey) .stop("When parsing tonal information, you can't use the alterKey == TRUE if the specifier type is 'quality'.")
+    
+  # use double sharp/flats?
+  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
+  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
+  
+  
+  
+  # incorporate memory?
+  if (truthy(memory)) {
+    match_size(size.out = length(str),
+               step = step, 
+               memory = memory, 
+               toEnv = TRUE)
+    
+    str <- unlist(tapply_inplace(str, paste0(step, ':', memory), fillForward, nonnull = function(x) x != ''))
+  } 
+  
+  # calculate lof
+  
+  natural <- stringi::stri_detect_fixed(str, natural)
+  lof <- (if (qualities) {
+    updownN(str, up = augment, down = diminish) -
+      (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
+      (str == 'm')
+  } else {
+    updownN(str, up = sharp, down = flat)
+  } ) * 7L
+
+  
+  # incorporate key?
+  if (!is.null(Key) && fromKey) {
+    keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
+    if (alterKey) {
+      lof <- lof + keyalt
+    } else {
+      lof[str == ''] <- keyalt[str == '']
+    }
+    
+  }
+  # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
+  # names(n)[is.na(names(n))] <- ""
+  
+  tint( , lof)
+  
+}
+
+
+
+tonalChroma2tint <- function(str,  
+                             parts = c('steps', 'accidentals', 'contours'), 
+                             expression = NULL,
+                             parse.exhaust = TRUE, ...) {
  
- parts <- matched(parts, c('steps', 'accidentals', 'qualities', 'contours'))
+ parts <- matched(parts, c('sign', 'steps', 'accidentals', 'qualities', 'contours'))
  
  if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
                                                                " The parts argument can only include one or the other (or neither).")
@@ -1074,7 +1013,7 @@ tonalChroma2tint <- function(str,
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, ...)
  
- REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to enviroment!
+ REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
  
  ## simple part
  generic   <- if ('steps' %in% parts)  step2tint(steps, ...) 
@@ -1085,8 +1024,12 @@ tonalChroma2tint <- function(str,
  # if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
  
  # contours
- if ('contours' %in% parts) contour2tint(contours, simple, ...) + simple else simple
+ tint <- if ('contours' %in% parts) contour2tint(contours, simple, ...) + simple else simple
  
+ if ('sign' %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
+ 
+ 
+ tint
 
  
  

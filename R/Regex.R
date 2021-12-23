@@ -404,7 +404,15 @@ cREs <- function(REs, parse.exhaust = TRUE) {
 
 ####. REs for tonalIntervals ####
 
-makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ..., step.sign = TRUE)  paste0(if (step.sign) '[-+]?', captureRE(step.labels))
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), octaveCase = FALSE, ...)  {
+    if (is.null(step.labels)) {
+        '[1-9][0-9]*' 
+    }  else  {
+        if (octaveCase) step.labels <- c(tolower(step.labels), toupper(step.labels))
+        captureRE(step.labels)
+    }
+   
+}
 
 makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
     
@@ -421,7 +429,8 @@ makeRE.contours <- function(contour.labels = c(), ...) {
 }
 
 makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ...){
-    REs <-  list(steps       = if ('steps' %in% parts)       makeRE.steps(...),
+    REs <-  list(sign        = if ('sign' %in% parts)       '[-+]?',
+                 steps       = if ('steps' %in% parts)       makeRE.steps(...),
                  accidentals = if ('accidentals' %in% parts) makeRE.accidentals(...),
                  qualities   = if ('qualities' %in% parts)   makeRE.qualities(...),
                  contours    = if ('contours' %in% parts)    makeRE.contours(...)
