@@ -159,7 +159,9 @@ setMethod("initialize",
 #' @name tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
-    if (missing(octave) || is.null(octave)) octave <- -floor((LO5th * 19) / 12)
+    if (missing(octave) || is.null(octave)) {
+      octave <- -floor(tint2semit(tint(0L, LO5th) %% tint(-11L, 7L)) / 12)
+    }
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
     tint <- tint %dim% (if (size(tint) == size(LO5th)) LO5th else octave)
@@ -576,6 +578,8 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
   if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
   
+  
+  
   # incorporate memory?
   if (truthy(memory)) {
     match_size(size.out = length(str),
@@ -583,10 +587,12 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
                memory = memory, 
                toEnv = TRUE)
     
-    str <- unlist(tapply(str, segments(paste0(step, ':', memory)), fillForward, nonnull = function(x) x != ''))
+    str <- unlist(tapply_inplace(str, paste0(step, ':', memory), fillForward, nonnull = function(x) x != ''))
   } 
   
   # calculate lof
+  
+  natural <- stringi::stri_detect_fixed(str, natural)
   lof <- (if (qualities) {
     updownN(str, up = augment, down = diminish) -
       (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
@@ -597,13 +603,15 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
   
   # incorporate key?
-  if (alterKey && !is.null(Key)) {
-    lof <- (step %% Key) + lof
-  } 
-  if (!alterKey && fromKey && !is.null(Key)) {
-    lof[str == ''] <- step[str == ''] %% Key
+  if (!is.null(Key) && fromKey) {
+    keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
+    if (alterKey) {
+      lof <- lof + keyalt
+    } else {
+      lof[str == ''] <- keyalt[str == '']
+    }
+    
   }
-
   # names(n) <- names(accidental.labels)[match(str, accidental.labels)]
   # names(n)[is.na(names(n))] <- ""
   

@@ -408,7 +408,7 @@ makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...
 
 makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
     
-    paste0(natural, '|', captureUniq(c(sharp, flat)))
+    paste0(natural,'?', captureUniq(c(sharp, flat)))
 }
 
 makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {

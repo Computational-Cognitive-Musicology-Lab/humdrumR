@@ -375,7 +375,13 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
-
+tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
+    
+    output <- tapply(X, INDEX, FUN, ...) |> unlist()
+    indices <- tapply(seq_along(X), INDEX, force) |> unlist()
+    
+    output[order(indices)]
+}
 
 
 segments <- function(x, reverse = FALSE) {
