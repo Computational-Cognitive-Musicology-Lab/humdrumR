@@ -621,10 +621,9 @@ kernOctave2tint <- function(str) {
 }
 
 
-## To/From tonal intervals ####
-### tint to x ####
+# Deparsing pitch information ####
 
-#### Atonal ####
+## Atonal ####
 
 ##### semitones
 
@@ -634,10 +633,8 @@ tint2semit <- function(x) {
 
 tint2midi <- function(x) tint2semit(x) + 60L
 
-#### Tonal ####
+## Tonal ####
 
-
-##### tonal chroma  ----
 
 
 tint2tonalChroma <- function(x, parts = c('qualities', 'steps', 'contours'), sep = "", ...) {
@@ -845,7 +842,7 @@ tint2frequency <- function(x, frequency.reference = 440L,
 
 
 
-### x to tint ####
+# Parsing pitch information ####
 
 #### Atonal ####
 
@@ -887,15 +884,9 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) semit2tint(n - 
 #### Tonal ####
 
 
-step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), octaveCase = FALSE, ...) {
+step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
   
   if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pitches, the number of "step.labels" must be a multiple of 7.')
-  
-  if (!is.null(step.labels) && octaveCase) {
-    upper <- str == toupper(str) 
-    str <- tolower(str)
-    step.labels <- tolower(step.labels)
-  }
   
   step <- if (is.null(step.labels)) as.integer(str) else match(str, step.labels, nomatch = NA_integer_) 
   
@@ -905,10 +896,6 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), o
   
   # specific
   octave <- (step - 1L) %/% 7L
-  
-  if (!is.null(step.labels) && octaveCase && any(upper)) {
-    octave[upper] <- -1L - octave[upper] 
-  }
   
   tint <- tint + tint(octave, 0L)
   
@@ -1001,7 +988,6 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
 tonalChroma2tint <- function(str,  
                              parts = c('steps', 'accidentals', 'contours'), 
-                             expression = NULL,
                              parse.exhaust = TRUE, ...) {
  
  parts <- matched(parts, c('sign', 'steps', 'accidentals', 'qualities', 'contours'))
@@ -1016,7 +1002,7 @@ tonalChroma2tint <- function(str,
  REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
  
  ## simple part
- generic   <- if ('steps' %in% parts)  step2tint(steps, ...) 
+ generic     <- if ('steps' %in% parts)       step2tint(steps, ...) 
  accidentals <- if ('accidentals' %in% parts) specifier2tint(accidentals, qualities = FALSE, step = generic, ...) 
  qualities   <- if ('qualities'   %in% parts) specifier2tint(qualities,   qualities = TRUE,  step = generic, ...) 
  
@@ -1042,23 +1028,16 @@ pitch2tint <- function(str, ...) {
   overdot(tonalChroma2tint(str, parts = c('steps', 'accidentals', 'contours'), 
                            contour.labels = FALSE, contour.offset = 4L,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                           accidental.labels = c(sharp = '#', flat = 'b', natural = 'n'),
+                           flat = 'b',
                            ...))
-  
-  
 }
-
-
-
 
 kern2tint <- function(str, ...) {
   letter <- stringr::str_extract(str, '[A-Ga-g]')
   str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   simple <- overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'), 
-                   step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                   accidental.labels = c(sharp = '#', flat = '-', natural = 'n'),
-                   ...))
+                    step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...))
   
   octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
   
@@ -1066,31 +1045,8 @@ kern2tint <- function(str, ...) {
   
 }
 
-
-
-
-
-
-
-
-###.. intervals
-
 interval2tint <- function(str, ...) {
-  num <- as.integer(stringr::str_replace_all(str, '[^-+0-9]', ''))
-  num_simple <- ((abs(num) - 1L) %% 7L) + 1L
-  # num_simple[num < 0] <- 9L 
-  
-  str_ <- stringr::str_replace(str, '^[-+]', '')
-  str_ <- stringr::str_replace(str_, as.character(abs(num)), as.character(num_simple))
-  
-  simple <- overdot(tonalChroma2tint(str_, parts = c('qualities', 'steps'), 
-                                     step.labels = c('1', '2', '3', '4', '5', '6', '7'),
-                                     ...))
-  
-  octave <- tint(abs(num) %/% 7L, 0L)
-  
-  (simple + octave) * sign(num)
-  
+  overdot(tonalChroma2tint(str, parts = c('sign', 'qualities', 'steps'),  step.labels = NULL, ...))
 }
 
 
@@ -1224,8 +1180,18 @@ frequency2tint <- function(float, frequency.reference = 440L,
 }
 
 
+char2tint <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
+                             'pitch: makeRE.sciPitch(...)' = pitch2tint,
+                             'hint: makeRE.interval(...)'  = interval2tint,
+                             'mint: makeRE.interval(...)'  = interval2tint,
+                             'int: makeRE.interval(...)'  = interval2tint,
+                             'deg: makeRE.scaleDegree(...)'  = degree2tint,
+                             'solfa: makeRE.solfa(...)' = solfa2tint,
+                             'freq: makeRE.decimal()' = semit2tint,
+                             'fraction: makeRE.fraction(...)' = fraction2tint)
 
-## Tonal transforms ####
+
+# Tonal transforms ####
 
 #' Tonal Transformations
 #' 
@@ -2202,15 +2168,7 @@ tonalInterval.numeric <- tonalTransform %.% decimal2tint
 #' @export
 tonalInterval.integer <- tonalTransform %.% semit2tint
 
-char2tint <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
-                             'pitch: makeRE.sciPitch(...)' = pitch2tint,
-                             'hint: makeRE.interval(...)'  = interval2tint,
-                             'mint: makeRE.interval(...)'  = interval2tint,
-                             'int: makeRE.interval(...)'  = interval2tint,
-                             'deg: makeRE.scaleDegree(...)'  = degree2tint,
-                             'solfa: makeRE.solfa(...)' = solfa2tint,
-                             'freq: makeRE.decimal()' = semit2tint,
-                             'fraction: makeRE.fraction(...)' = fraction2tint)
+
 
 #' @export
 tonalInterval.character <- tonalTransform %.% char2tint

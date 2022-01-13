@@ -404,13 +404,8 @@ cREs <- function(REs, parse.exhaust = TRUE) {
 
 ####. REs for tonalIntervals ####
 
-makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), octaveCase = FALSE, ...)  {
-    if (is.null(step.labels)) {
-        '[1-9][0-9]*' 
-    }  else  {
-        if (octaveCase) step.labels <- c(tolower(step.labels), toupper(step.labels))
-        captureRE(step.labels)
-    }
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  {
+    if (is.null(step.labels)) '[1-9][0-9]*'  else  captureRE(step.labels) 
    
 }
 
