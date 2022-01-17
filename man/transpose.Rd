@@ -71,7 +71,7 @@ tonally within C major by all seven possible generic intervals, with \code{enhar
    4th \tab {F  B  c  G# A  e- d  d  c  F# G  e  G  F  } \cr
    5th \tab {G  c# d  A  B  f  e  e- d  G# A  f  A  G  } \cr
    6th \tab {A  d  e  B  c  g  f  f  e  A  B  g  B- A  } \cr
-   7th \tab {b  ee ff cc#dd aa gg gg ff b  cc aa cc b  } \cr
+   7th \tab {B  e  f  c# d  a  g  g  f  B  c  a  c  B  } \cr
 }
 
 }

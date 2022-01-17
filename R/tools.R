@@ -1,5 +1,18 @@
 ### Null and NA values ----
 
+with... <- function(arg, expression, orelse = NULL) {
+    expression <- rlang::enexpr(expression)
+    
+    if (eval(rlang::expr(hasArg(!!arg)), envir = parent.frame())) {
+        expression <- substituteName(expression, setNames(list(rlang::expr(list(...)[[!!arg]])), arg))
+        eval(expression, envir = parent.frame())
+    } else {
+        orelse
+    }
+    
+}
+
+
 `%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
 `%fmap%` <- function(e1, e2) {
     if (is.null(e1)) return(NULL)
@@ -789,7 +802,7 @@ captureSymbols <- function(expr) {
 }
 
 
-### Math ----
+# Math ----
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
@@ -807,8 +820,13 @@ gcd <- function(x, y) {
     ifelse(r, Recall(y, r), y)
 }
 
+## new numeric representations ####
+
+#### decimal ####
+# this is just an extension of numeric to understand my fraction and rational representations
+
 #' @export
-as.decimal <- function(x, ...) UseMethod('as.decimal') # character string version of numeric 
+as.decimal <- function(x, ...) UseMethod('as.decimal')
 #' @export
 as.decimal.character <- function(x) {
     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
@@ -824,7 +842,8 @@ as.decimal.fraction <- function(x) {
     sapply(exprs, eval) %dim% x
 }
 
-
+#### rational ####
+# represent rational numbers as list of numerator and denominator
 
 #' @export
 as.rational <- function(x, ...) UseMethod('as.rational') 
@@ -847,6 +866,9 @@ as.rational.numeric <- function(x) {
     
     list(Numerator = num %dim% x, Denominator = den %dim% x) %class% 'rational'
 }
+
+#### fraction ####
+# rational numbers as character string
 
 #' @export
 as.fraction <- function(x, sep, ...) UseMethod('as.fraction')

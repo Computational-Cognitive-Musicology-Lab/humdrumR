@@ -435,11 +435,9 @@ makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), co
     
 }
 
-makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = c(), accidental.labels = c(), ...) {
-    setoptions(step.labels) <- letters[1:7]
-    setoptions(accidental.labels) <- c(sharp = '#', flat = '-', natural = 'n')
+makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = letters[1:7], ...) {
     
-    REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, accidental.labels = accidental.labels, ...)
+    REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, ...)
     
     if ('steps' %in% parts) {
         REs$steps <- captureUniq(c(tolower(step.labels), toupper(step.labels)), zero = FALSE)
@@ -449,8 +447,10 @@ makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step
     if (collapse) setNames(cREs(REs), 'kern') else REs
 }
 
-makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, ...) {
-   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, ...), 'pitch')
+makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), 
+                            collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, 
+                            flat = 'b', ...) {
+   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, flat = flat, ...), 'pitch')
 }
 
 makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
