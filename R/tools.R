@@ -13,6 +13,7 @@ with... <- function(arg, expression, orelse = NULL) {
 }
 
 
+
 `%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
 `%fmap%` <- function(e1, e2) {
     if (is.null(e1)) return(NULL)

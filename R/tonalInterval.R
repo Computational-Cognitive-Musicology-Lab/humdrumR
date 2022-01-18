@@ -1269,31 +1269,48 @@ rwArgs <- function(...) {
 }
 
 
+pitchArgs <- function(generic = !specific, specific = !generic, 
+                      simple = !complex, complex = !simple,
+                      ..., callname) {
+  
+  if (hasArg('parts')) return(list(...))
+  
+  
+  if (!xor(generic, specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
+  if (!xor(simple, complex)) .stop("In your call to {callname}, you've specified contradictory 'simple' and 'complex' arguments...it has to be one or the other!")
+  
+  parts <- c('steps', if(specific) 'accidentals', if (complex) 'octave')
+  
+  list(parts = parts, ...)
+ 
+  
+}
+
 
 makePitchTransformer <- function(deparser) {
   # this function will create various pitch transform functions
+  deparser <- rlang::enexpr(deparser)
   
+  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE),
+                      rlang::expr( {
+                        
+                        putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, onlymatch = dropNA, negate = TRUE)
+                        
+                        result <- {
+                          args <- pitchArgs()
+                          args <- rwArgs(...)
+                          parsed <- do.call(tonalInterval, c(list(x, inPlace = inPlace), args$parseArgs))
+                          output <- do.call(!!deparser, c(list(parsed), args$deparseArgs))
+                          
+                          if (inPlace) output <- re.place(output, parsed)
+                          
+                          output
+                        }
+                        
+                        putNAback(result)
+                        
+                      }))
   
-  function(x, ..., inPlace = FALSE, dropNA = FALSE) {
-    args <- rwArgs(...)
-    
-    putnaback <- predicateParse(is.na, x = x, onlymatch = dropNA, negate = TRUE)
-    
-    result <- {
-      tint <- do.call('tonalInterval', c(list(x, inPlace = inPlace), args$parse))
-      output <- do.call(deparser, c(list(tint), args$deparse))
-      
-      if (inPlace) {
-        replacer <- stickyAttrs(tint)$replace
-        if (!is.null(replacer)) output <- replacer(output)
-      } 
-      
-      output
-    }
-    
-    putnaback(result)
-    
-  }
 
 }
 

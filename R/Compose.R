@@ -141,7 +141,10 @@ passargs <- function(x) {
 
 ##### "restoring" ----
 
+
+
 inPlace <- function(result, orig, regex) {
+  
   
     if (is.null(stickyAttrs(result)$replace)) {
       stickyAttrs(result) <- c(replace = inPlacer(orig, getRE(regex)))
@@ -197,8 +200,8 @@ re.as <- function(vector) {
 
 
 #' @export
-re.place <- function(vector) {
-    asfunc <- stickyAttrs(vector)$replace
+re.place <- function(vector, reference = vector) {
+    asfunc <- stickyAttrs(reference)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
     asfunc(vector) %dim% vector
@@ -367,7 +370,7 @@ predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
     rlang::new_function(fargs, body, newenv)
 }
 
-predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE) {
+predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE, onlymatch = FALSE) {
   if (argnames[1] == '...') return(expr)
   
   argnames <- argnames[argnames != '...']
@@ -376,7 +379,7 @@ predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = F
   predicateFuncName <- rlang::sym(predicateFuncName)
   
   rlang::expr({
-    rebuild <- predicateParse(!!predicateFuncName, !!!args, negate =  !!negate, allargs = FALSE)
+    rebuild <- predicateParse(!!predicateFuncName, !!!args, negate =  !!negate, allargs = FALSE, onlymatch = !!onlymatch)
     predicateResult <- {!!expr}
     rebuild(predicateResult)
   })
