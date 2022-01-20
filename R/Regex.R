@@ -404,9 +404,18 @@ cREs <- function(REs, parse.exhaust = TRUE) {
 
 ####. REs for tonalIntervals ####
 
-makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...)  {
-    if (is.null(step.labels)) '[1-9][0-9]*'  else  captureRE(step.labels) 
-   
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...)  {
+    if (is.null(step.labels)) return('[1-9][0-9]*')
+    
+    if (steps.sign) step.labels <- c(tolower(step.labels), toupper(step.labels))
+    
+    
+        # captureUniq(step.labels, zero = FALSE)
+
+    captureRE(step.labels) 
+
+    
+
 }
 
 makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
@@ -423,7 +432,7 @@ makeRE.contours <- function(contour.labels = c(), ...) {
     if (false(contour.labels)) '-?[0-9]+' else captureUniq(contour.labels)
 }
 
-makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ...){
+makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ..., regexname = 'tonalChroma'){
     REs <-  list(sign        = if ('sign' %in% parts)       '[-+]?',
                  steps       = if ('steps' %in% parts)       makeRE.steps(...),
                  accidentals = if ('accidentals' %in% parts) makeRE.accidentals(...),
@@ -431,26 +440,21 @@ makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), co
                  contours    = if ('contours' %in% parts)    makeRE.contours(...)
                  )[parts]
     
-    if (collapse) setNames(cREs(REs), 'tonalChroma') else REs
+    if (collapse) setNames(cREs(REs), regexname) else REs
     
 }
 
-makeRE.kern <- function(parts = c('steps', 'accidentals'), collapse = TRUE, step.labels = letters[1:7], ...) {
+makeRE.kern <- function(parts = c('steps', 'accidentals')) {
     
-    REs <- makeRE.tonalChroma(parts[parts != 'steps'], collapse = FALSE, ...)
+    step.labels <- unlist(lapply(1:10, strrep, x = c))
+    makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, ..., regexname = 'kern')
     
-    if ('steps' %in% parts) {
-        REs$steps <- captureUniq(c(tolower(step.labels), toupper(step.labels)), zero = FALSE)
-        REs <- REs[parts]
-    }
-    
-    if (collapse) setNames(cREs(REs), 'kern') else REs
 }
 
 makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), 
                             collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, 
                             flat = 'b', ...) {
-   setNames(makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, flat = flat, ...), 'pitch')
+   makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, flat = flat, ..., regexname = 'pitch')
 }
 
 makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {

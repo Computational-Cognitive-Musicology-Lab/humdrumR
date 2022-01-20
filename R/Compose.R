@@ -659,7 +659,6 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
     body <- if (doExclusiveDispatch) {
       rlang::expr({
         regexes <- list(!!!REexprs)
-        
         if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
         
       })

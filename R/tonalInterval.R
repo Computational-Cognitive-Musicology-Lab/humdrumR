@@ -480,9 +480,13 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 
 
-## To/From octaves/contours ####
 
-### tint to contour ####
+###################################################################### ###
+# Deparsing pitch information ############################################
+###################################################################### ###
+
+### Octaves ####
+
 
 # tint2centralOctave <- function(x) {
 #   # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
@@ -496,9 +500,10 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 #   (tint2semit(generic)) %/% 12L %dim% x
 # }
 
+
 tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'), 
-                        contour.offset = 0L, contour.maximum = Inf, contour.minimum = -Inf,
-                        contour.delta = FALSE, contour.round = floor) {
+                         contour.offset = 0L, contour.maximum = Inf, contour.minimum = -Inf,
+                         contour.delta = FALSE, contour.round = floor, ...) {
   
   setoptions(contour.labels) <- c(up = "^", down = "v", same = "")
   
@@ -513,7 +518,7 @@ tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'),
   out <- rep(NA_character_, length(octn))
   out[!is.na(octn)] <- strrep(.ifelse(octn[!is.na(octn)] >= 0L, contour.labels$up, contour.labels$down), abs(octn[!is.na(octn)]))
   out[octn == 0L] <- contour.labels$same
-
+  
   out %dim% x
   
 }
@@ -528,50 +533,9 @@ octave.kernstyle <- function(str, octn) {
   .paste(strrep(char, abs(octn)), stringr::str_sub(str, start = 2L)) %dim% str
 }
 
+### Atonal ####
 
-
-### contour to tint ####
-
-contour2tint <- function(str, simple, contour.labels = c(), contour.offset = 0L, contour.delta = FALSE, contour.round = floor, ...) {
-  setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
-  
-  n <- if (false(contour.labels)) {
-    as.numeric(str)
-  } else { 
-    updownN(str, up = contour.labels['up'], down = contour.labels['down']) 
-  }
-  
-  n <- n - contour.offset
-  
-  if (contour.delta) {
-    semits <- tint2semit(delta(simple))
-    
-    n <- sigma(n - contour.round(semits / 12))
-    
-  } 
-  
-  tint(n, 0L)
-
-}
-
-
-
-kernOctave2tint <- function(str) {
-  nletters <- nchar(str)
-  
-  upper  <- str == toupper(str)
-  
-  tint(ifelse(upper, 0L - nletters, nletters - 1L), 0L)
-  
-}
-
-###################################################################### ###
-# Deparsing pitch information ############################################
-###################################################################### ###
-
-## Atonal ####
-
-##### semitones
+#### Semitones ####
 
 tint2semit <- function(x) {
         as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L))) %dim% x
@@ -579,27 +543,81 @@ tint2semit <- function(x) {
 
 tint2midi <- function(x) tint2semit(x) + 60L
 
-## Tonal ####
+
+#### Frequency ####
 
 
 
-tint2tonalChroma <- function(x, parts = c('qualities', 'steps', 'contours'), sep = "", tonal = FALSE, ...) {
+tint2rational <-  function(x, tonalHarmonic = 3L) {
+  Fifth <- x@Fifth
+  Octave <- x@Octave
+  Cent <- x@Cent
+  
+  num <- .ifelse(Fifth >= 0L, tonalHarmonic ^  Fifth, 1L) * .ifelse(Octave >= 0L, 2L ^  Octave, 1L)
+  den <- .ifelse(Fifth <  0L, tonalHarmonic ^ -Fifth, 1L) * .ifelse(Octave <  0L, 2L ^ -Octave, 1L)
+  
+  
+  if (any(Cent != 0)) {
+    floats <- as.rational.numeric(tint2decimal(x[Cent != 0], tonalHarmonic))
+    num[Cent != 0] <- floats$Numerator
+    den[Cent != 0] <- floats$Denominator
+    
+  } 
+  list(Numerator = as.integer(num) %dim% x, Denominator = as.integer(den) %dim% x) %class% 'rational'
+  
+}
+
+tint2fraction <- function(x, tonalHarmonic = 3) as.fraction.rational(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
+
+tint2decimal <-  function(x, tonalHarmonic = 2^(19/12)) {
+  LO5th <- x@Fifth
+  oct   <- x@Octave
+  cent  <- x@Cent
+  
+  .ifelse(is.na(LO5th), 
+          NA_real_, 
+          (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %dim% x
+}
+
+tint2frequency <- function(x, frequency.reference = 440L, 
+                           frequencyTint = tint(-4L, 3L), 
+                           tonalHarmonic = 2^(19/12)) {
+  x <- x - frequencyTint
+  
+  ratio <- tint2decimal(x, tonalHarmonic = tonalHarmonic)
+  attributes(ratio) <- NULL
+  
+  frequency.reference * ratio %dim% x
+}
+
+
+
+### Tonal ####
+
+
+
+tint2tonalChroma <- function(x, 
+                             parts = c('specifiers', 'steps', 'contours'), sep = "", 
+                             step = TRUE, specific = TRUE, complex = TRUE,
+                             tonal = FALSE, qualities = TRUE, ..., collapseparts = TRUE) {
   if (tonal) with...('Key', {x <- x + Key})
   
-  parts <- matched(parts, c('qualities', 'steps', 'contours', 'accidentals'))
+  parts <- matched(parts, c('specifiers', 'steps', 'contours'))
   
   # simple part
-  steps       <- if ('steps' %in% parts)        tint2step(x, ...) 
-  qualities   <- if ('qualities' %in% parts)    tint2specifier(x, qualities = TRUE, ...)   
-  accidentals <- if ('accidentals' %in% parts)  tint2specifier(x, qualities = FALSE, ...) 
-  
+  steps       <- if (step)        tint2step(x, ...) 
+  specifiers  <- if (specific)    tint2specifier(x, qualities = qualities, ...)   
   
   # complex part
-  contours    <- if ('contours' %in% parts)     tint2contour(x, ...)     %dots% (has.prefix('contour.') %.% names)
+  contours    <- if (complex)     tint2contour(x, ...)
 
-  tonalchroma <- pasteordered(parts, steps = steps, qualities = qualities, accidentals = accidentals, contours = contours, sep = sep)
+  if (collapseparts) {
+    tonalchroma <- pasteordered(parts, steps = steps, specifiers = specifiers, contours = contours, sep = sep)
+    tonalchroma  %dim% x
+  } else {
+    cbind(steps = steps, specifiers = specifiers, contours = contours)
+  }
   
-  tonalchroma  %dim% x
   
 }
 
@@ -610,7 +628,7 @@ tint2quality <- function(x, ...) tint2specifier(x, ..., qualities = TRUE)
 tint2accidental <- function(x, ...) tint2specifier(x, ..., qualities = FALSE)
 
 tint2specifier <- function(x, Key = NULL, ...,
-                           qualities =FALSE,
+                           qualities = FALSE,
                            cautionary = FALSE, 
                            fromKey = FALSE, memory = FALSE, alterKey = FALSE,
                            sharp = '#', flat = '-', natural = 'n', 
@@ -620,11 +638,9 @@ tint2specifier <- function(x, Key = NULL, ...,
                            accidental.integer = FALSE) {
   LO5th <- LO5th(x)
   
-  # if (!is.null(Key)) Key <- diatonicSet(Key)
-  
   dontlabel <- alteration.filter(LO5th, Key, cautionary, memory)
   
-  specifiers <- .ifelse(dontlabel, "", if (qualities) major else natural)
+  specifiers <- ifelse(dontlabel, "", if (qualities) major else natural)
   
   na <- is.na(LO5th)
   specifiers[na] <- NA_character_
@@ -667,8 +683,8 @@ tint2pitch <- function(x, ...)  {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            contour.labels = FALSE, contour.offset = 4L, 
-                           flat = 'b',
-                           parts = c('steps', 'accidentals', 'contours'), ...))
+                           flat = 'b', qualities = FALSE,
+                           parts = c('steps', 'specifiers', 'contours'), ...))
 }
 
 tint2simplepitch <- function(x, ...)  {
@@ -700,15 +716,16 @@ tint2helmholtz <- function(x, ...) {
   notes
 }
                                                                 
-tint2kern <- function(x, ...) {
+tint2kern <- function(x, complex = TRUE, ...) {
   
-  simple <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                     parts = c('steps', 'accidentals'), 
+  kern <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                                     parts = c('steps', 'specifiers'), qualities = FALSE,
                                      tonal = TRUE, ...))
   
-  octave      <- tint2contour(x, contour.labels = FALSE)
+  if (complex) kern <- octave.kernstyle(kern, tint2contour(x, contour.labels = FALSE)) 
   
-  octave.kernstyle(simple, octave) %dim% x
+  kern %dim% x
+  
 }
 
 tint2romanRoot <- function(x, ..., Key = NULL) {
@@ -799,53 +816,6 @@ tint2solfa <- function(x, Key = NULL,  parts = c('contours', 'accidentals', 'ste
 
 
 
-###.. numbers
-
-
-
-tint2rational <-  function(x, tonalHarmonic = 3L) {
-  Fifth <- x@Fifth
-  Octave <- x@Octave
-  Cent <- x@Cent
-  
-  num <- .ifelse(Fifth >= 0L, tonalHarmonic ^  Fifth, 1L) * .ifelse(Octave >= 0L, 2L ^  Octave, 1L)
-  den <- .ifelse(Fifth <  0L, tonalHarmonic ^ -Fifth, 1L) * .ifelse(Octave <  0L, 2L ^ -Octave, 1L)
-  
-  
-  if (any(Cent != 0)) {
-    floats <- as.rational.numeric(tint2decimal(x[Cent != 0], tonalHarmonic))
-    num[Cent != 0] <- floats$Numerator
-    den[Cent != 0] <- floats$Denominator
-    
-  } 
-  list(Numerator = as.integer(num) %dim% x, Denominator = as.integer(den) %dim% x) %class% 'rational'
-  
-}
-
-tint2fraction <- function(x, tonalHarmonic = 3) as.fraction.rational(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
-
-tint2decimal <-  function(x, tonalHarmonic = 2^(19/12)) {
-    LO5th <- x@Fifth
-    oct   <- x@Octave
-    cent  <- x@Cent
-    
-    .ifelse(is.na(LO5th), 
-            NA_real_, 
-            (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %dim% x
-}
-
-tint2frequency <- function(x, frequency.reference = 440L, 
-                           frequencyTint = tint(-4L, 3L), 
-                           tonalHarmonic = 2^(19/12)) {
-    x <- x - frequencyTint
-    
-    ratio <- tint2decimal(x, tonalHarmonic = tonalHarmonic)
-    attributes(ratio) <- NULL
-    
-    frequency.reference * ratio %dim% x
-}
-
-
 
 
 ###################################################################### ### 
@@ -853,6 +823,41 @@ tint2frequency <- function(x, frequency.reference = 440L,
 ###################################################################### ### 
 
 ## Pitch parsers ####
+
+### Octaves ####
+
+contour2tint <- function(str, simpletint, contour.labels = c(), contour.offset = 0L, contour.delta = FALSE, contour.round = floor, ...) {
+  setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
+  
+  n <- if (false(contour.labels)) {
+    as.numeric(str)
+  } else { 
+    updownN(str, up = contour.labels['up'], down = contour.labels['down']) 
+  }
+  
+  n <- n - contour.offset
+  
+  if (contour.delta) {
+    semits <- tint2semit(delta(simpletint))
+    
+    n <- sigma(n - contour.round(semits / 12))
+    
+  } 
+  
+  tint(n, 0L)
+  
+}
+
+
+
+kernOctave2tint <- function(str) {
+  nletters <- nchar(str)
+  
+  upper  <- str == toupper(str)
+  
+  tint(ifelse(upper, 0L - nletters, nletters - 1L), 0L)
+  
+}
 
 ### Atonal ####
 
@@ -990,11 +995,14 @@ frequency2tint <- function(float, frequency.reference = 440L,
 ### Tonal ####
 
 
-step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...) {
   
   if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pitches, the number of "step.labels" must be a multiple of 7.')
   
-  step <- if (is.null(step.labels)) as.integer(str) else match(str, step.labels, nomatch = NA_integer_) 
+  
+  
+  step <- if (is.null(step.labels)) as.integer(str) else match(toupper(str), toupper(step.labels), nomatch = NA_integer_) 
+  
   
   # generic
   genericstep <- ((step - 1L) %% 7L) + 1L
@@ -1005,6 +1013,8 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), .
   
   tint <- tint + tint(octave, 0L)
   
+  if (steps.sign) tint[str == toupper(str)] <- (tint[str == toupper(str)] + tint(1, 0) ) * -1
+    
   tint
 }
 
@@ -1109,15 +1119,15 @@ tonalChroma2tint <- function(str,
  REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
  
  ## simple part
- generic     <- if ('steps' %in% parts)       step2tint(steps, ...) 
- accidentals <- if ('accidentals' %in% parts) specifier2tint(accidentals, qualities = FALSE, step = generic, ...) 
- qualities   <- if ('qualities'   %in% parts) specifier2tint(qualities,   qualities = TRUE,  step = generic, ...) 
+ steps     <- if ('steps' %in% parts)       step2tint(steps, ...) 
+ accidentals <- if ('accidentals' %in% parts) specifier2tint(accidentals, qualities = FALSE, step = steps, ...) 
+ qualities   <- if ('qualities'   %in% parts) specifier2tint(qualities,   qualities = TRUE,  step = steps, ...) 
  
- simple <- (generic %maybe% tint( , 0L)) + (accidentals %maybe%  tint( , 0L)) + (qualities %maybe%  tint( , 0L))
+ simpletint <- (steps %maybe% tint( , 0L)) + (accidentals %maybe%  tint( , 0L)) + (qualities %maybe%  tint( , 0L))
  # if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
  
  # contours
- tint <- if ('contours' %in% parts) contour2tint(contours, simple, ...) + simple else simple
+ tint <- if ('contours' %in% parts) contour2tint(contours, simpletint = simpletint, ...) + simpletint else simpletint
  
  if ('sign' %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
@@ -1142,15 +1152,16 @@ pitch2tint <- function(str, ...) {
 }
 
 kern2tint <- function(str, ...) {
-  letter <- stringr::str_extract(str, '[A-Ga-g]')
-  str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
+  # letter <- stringr::str_extract(str, '[A-Ga-g]')
+  # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
-  simple <- overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'), tonal = TRUE, 
-                    step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...))
+  step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+  simple <- overdot(tonalChroma2tint(str, parts = c('steps', 'accidentals'), tonal = TRUE, 
+                    step.labels = step.labels, steps.sign = TRUE, ...))
   
-  octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
+  # octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
   
-  simple + octave
+  simple #+ octave
   
 }
 
@@ -1269,38 +1280,43 @@ rwArgs <- function(...) {
 }
 
 
-pitchArgs <- function(generic = !specific, specific = !generic, 
-                      simple = !complex, complex = !simple,
-                      ..., callname) {
+pitchArgs <- function(args, callname) {
   
-  if (hasArg('parts')) return(list(...))
+  argnames <- .names(args)
   
+  if ('generic' %in% argnames) {
+    if ('specific' %in% argnames && !xor(args$generic, args$specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
+    args$specific <- !args$generic
+  }
   
-  if (!xor(generic, specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
-  if (!xor(simple, complex)) .stop("In your call to {callname}, you've specified contradictory 'simple' and 'complex' arguments...it has to be one or the other!")
+  if ('simple' %in% argnames) {
+    if ('complex' %in% argnames && !xor(args$simple, args$complex)) .stop("In your call to {callname}, you've specified contradictory 'simple' and 'complex' arguments...it has to be one or the other!")
+    args$complex <- !args$simple
+  }
   
-  parts <- c('steps', if(specific) 'accidentals', if (complex) 'octave')
-  
-  list(parts = parts, ...)
  
+  args 
   
 }
 
 
-makePitchTransformer <- function(deparser) {
+makePitchTransformer <- function(deparser, callname) {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   
-  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE),
+  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE),
                       rlang::expr( {
                         
                         putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, onlymatch = dropNA, negate = TRUE)
                         
                         result <- {
-                          args <- pitchArgs()
                           args <- rwArgs(...)
                           parsed <- do.call(tonalInterval, c(list(x, inPlace = inPlace), args$parseArgs))
-                          output <- do.call(!!deparser, c(list(parsed), args$deparseArgs))
+                          if (!deparse) return(parsed)
+                          
+                          output <- do.call(!!deparser, c(list(parsed), pitchArgs(args$deparseArgs, callname)))
+                          
+                          
                           
                           if (inPlace) output <- re.place(output, parsed)
                           
@@ -1315,9 +1331,9 @@ makePitchTransformer <- function(deparser) {
 }
 
 #' @export
-kern2 <- makePitchTransformer(tint2kern) 
-pitch2 <- makePitchTransformer(tint2pitch)
-solfa2 <- makePitchTransformer(tint2solfa)
+kern2 <- makePitchTransformer(tint2kern, 'kern') 
+pitch2 <- makePitchTransformer(tint2pitch, 'pitch')
+solfa2 <- makePitchTransformer(tint2solfa, 'solfa')
 
 # Tonal transforms ####
 
@@ -1594,7 +1610,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
 
 
 tintPartition_complex <- function(tint, roundContour = floor) {
-  octshift <- roundContour(tint2semit(tint) / 12)
+  octshift <- roundContour(tint2semit(tint %% dset(0, 0)) / 12)
   
   octavepart <- tint(octshift, 0L) %dim% tint 
   simplepart <- tint - octavepart
