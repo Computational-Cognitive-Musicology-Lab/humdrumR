@@ -465,7 +465,21 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, 
   }
 }
 
-
+dimParse <- function(x) {
+  name <- as.character(rlang::enexpr(x))
+  olddim <- dim(x) 
+  
+  x <- dropdim(x)
+  
+  assign(name, value = x, envir = parent.frame())
+  
+  function(newx) {
+    if (length(newx) == prod(olddim))  dim(newx) <- olddim 
+    
+    newx
+    
+  }
+}
 
 ###### "Memoify" ----
 
