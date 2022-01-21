@@ -596,26 +596,26 @@ tint2frequency <- function(x, frequency.reference = 440L,
 
 
 tint2tonalChroma <- function(x, 
-                             parts = c('specifiers', 'steps', 'contours'), sep = "", 
+                             parts = c("species", "step", "octave"), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
                              tonal = FALSE, Key = NULL,
                              qualities = TRUE, ..., collapseparts = TRUE) {
   if (tonal && !is.null(Key)) x <- x + diatonicSet(Key)
   
-  parts <- matched(parts, c('specifiers', 'steps', 'contours'))
+  parts <- matched(parts, c("species", "step", "octave"))
   
   # simple part
-  steps       <- if (step)        tint2step(x, ...) 
-  specifiers  <- if (specific)    tint2specifier(x, qualities = qualities, ...)   
+  step     <- if (step)        tint2step(x, ...) 
+  species  <- if (specific)    tint2specifier(x, qualities = qualities, ...)   
   
   # complex part
-  contours    <- if (complex)     tint2contour(x, ...)
+  octave   <- if (complex)     tint2contour(x, ...)
 
   if (collapseparts) {
-    tonalchroma <- pasteordered(parts, steps = steps, specifiers = specifiers, contours = contours, sep = sep)
+    tonalchroma <- pasteordered(parts, step = step, species = species, octave = octave, sep = sep)
     tonalchroma  %dim% x
   } else {
-    cbind(steps = steps, specifiers = specifiers, contours = contours)
+    cbind(step = step, species = species, octave = octave)
   }
   
   
@@ -684,14 +684,14 @@ tint2pitch <- function(x, ...)  {
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            contour.labels = FALSE, contour.offset = 4L, 
                            flat = 'b', qualities = FALSE,
-                           parts = c('steps', 'specifiers', 'contours'), ...))
+                           parts = c("step", "species", "octave"), ...))
 }
 
 tint2simplepitch <- function(x, ...)  {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            contour.labels = FALSE, contour.offset = 4L, 
-                           parts = c('steps', 'accidentals'), ...))
+                           parts = c("step", 'accidentals'), ...))
 }
 
 
@@ -702,7 +702,7 @@ tint2lily <- function(x, relative = TRUE, ...) {
                            contour.delta = relative,
                            contour.round = if (relative) round else floor,
                            sharp = 'is', flat = 'es',
-                           parts = c('steps', 'accidentals', 'contours'), ...))
+                           parts = c("step", 'accidentals', "octave"), ...))
 } 
 
 tint2helmholtz <- function(x, ...) {
@@ -719,7 +719,7 @@ tint2helmholtz <- function(x, ...) {
 tint2kern <- function(x, complex = TRUE, ...) {
   
   kern <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                     parts = c('steps', 'specifiers'), qualities = FALSE,
+                                     parts = c("step", "species"), qualities = FALSE,
                                      tonal = TRUE, ...))
   
   if (complex) kern <- octave.kernstyle(kern, tint2contour(x, contour.labels = FALSE)) 
@@ -732,7 +732,7 @@ tint2romanRoot <- function(x, ..., Key = NULL) {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'), 
                            contour.labels = FALSE, contour.offset = 4L, 
-                           parts = c('accidentals', 'steps'), ..., Key = Key))
+                           parts = c('accidentals', "step"), ..., Key = Key))
   
 }
 
@@ -760,7 +760,7 @@ tint2interval <- function(x, direction = TRUE) {
 
 #.... scale degrees 
 
-tint2degree <- function(x, Key = Key, parts = c('qualities', 'steps'), ...) {
+tint2degree <- function(x, Key = Key, parts = c('qualities', "step"), ...) {
   Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
   x <- x - Key
   Key <- Key - getRoot(Key)
@@ -776,11 +776,8 @@ tint2degree <- function(x, Key = Key, parts = c('qualities', 'steps'), ...) {
 
 
 
-tint2solfa <- function(x, Key = NULL,  parts = c('contours', 'accidentals', 'steps'), 
+tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"), 
                        factor = FALSE, ...) {
-  # Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
-  # x <- x - Key
-  # Key <- Key - getRoot(Key)
   
   steps <- tint2step(x, c('d', 'r', 'm', 'f', 's', 'l', 't'))
   
@@ -798,7 +795,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c('contours', 'accidentals', 'ste
   
   accidentals <- if ('accidentals' %in% parts) stringr::str_sub(tint2specifier(x, ...) ,
                                                   start = 2L) # drop first accidental # will mess up with double sharps/flats
-  contours <- if ('contours' %in% parts)  tint2contour(x, ...) %dots% (has.prefix('contour.') %.% names)
+  contours <- if ("octave" %in% parts)  tint2contour(x, ...) %dots% (has.prefix('contour.') %.% names)
   
   str <- pasteordered(parts, contour = contours, accidental = accidentals, steps = .paste(steps, tails))
   
@@ -850,12 +847,12 @@ contour2tint <- function(str, simpletint, contour.labels = c(), contour.offset =
 
 
 octave2tint <- function(str, simpletint, 
-                        contour = TRUE,
+                        octave.integer = TRUE,
                         up = '^', down = 'v', 
                         octave.offset = 0L, octave.round = floor,
                         relative = FALSE, ...) {
   
-  n <- if (!contour) {
+  n <- if (octave.integer) {
     as.integer(str)
   } else { 
     updownN(str, up = up, down = down) 
@@ -866,7 +863,7 @@ octave2tint <- function(str, simpletint,
   if (relative) {
     semits <- tint2semit(delta(simpletint))
     
-    n <- sigma(n - contour.round(semits / 12))
+    n <- sigma(n - octave.round(semits / 12))
     
   } 
   
@@ -1130,31 +1127,33 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
 
 tonalChroma2tint <- function(str,  
-                             parts = c('steps', 'specifiers', 'octaves'), 
-                             qualities = FALSE,
+                             parts = c("step", "species", "octave"), 
+                             qualities = !accidentals, accidentals = !qualities,
                              parse.exhaust = TRUE, 
                              tonal = FALSE, Key = NULL, 
                              ...) {
  
- parts <- matched(parts, c('sign', 'steps', 'specifiers', 'octaves'))
+  
+ if (!xor(qualities, accidentals)) .stop("When parsing pitch information, you must choose either 'accientals' or 'qualities', not {if(qualities & accidentals) 'both' else 'neither'}!")
+  
+ parts <- matched(parts, c("sign", "step", "species", "octave"))
  
  
  ############# parse string
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, ...)
- 
  REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
  
  ## simple part
- steps      <- if ('steps' %in% parts)      step2tint(steps, ...) 
- specifiers <- if ('specifiers' %in% parts) specifier2tint(specifiers, qualities = qualities, step = steps, ...) 
+ step    <- if ("step" %in% parts)    step2tint(step, ...) 
+ species <- if ("species" %in% parts) specifier2tint(species, qualities = qualities, step = step, ...) 
  
- simpletint <- (steps %maybe% tint( , 0L)) + (specifiers %maybe%  tint( , 0L)) 
+ simpletint <- (step %maybe% tint( , 0L)) + (species %maybe%  tint( , 0L)) 
  
  # contours
- tint <- if ('octaves' %in% parts) octave2tint(octaves, simpletint = simpletint, ...) + simpletint else simpletint
+ tint <- if ("octave" %in% parts) octave2tint(octave, simpletint = simpletint, ...) + simpletint else simpletint
  
- if ('sign' %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
+ if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
  if (tonal && !is.null(Key)) tint <- tint - diatonicSet(Key)
  
@@ -1168,8 +1167,9 @@ tonalChroma2tint <- function(str,
 
 
 pitch2tint <- function(str, ...) {
-  overdot(tonalChroma2tint(str, parts = c('steps', 'specifiers', 'octaves'), 
-                           octave.offset = 4L, contour = FALSE,
+  overdot(tonalChroma2tint(str, parts = c("step", "species", "octave"), 
+                           octave.offset = 4L, octave.integer = TRUE,
+                           accidentals = TRUE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
                            tonal = TRUE,
@@ -1181,8 +1181,9 @@ kern2tint <- function(str, ...) {
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-  simple <- overdot(tonalChroma2tint(str, parts = c('steps', 'specifiers'), tonal = TRUE, 
-                    step.labels = step.labels, steps.sign = TRUE, ...))
+  simple <- overdot(tonalChroma2tint(str, parts = c("step", "species"), tonal = TRUE,  
+                                     accidentals = TRUE,
+                                     step.labels = step.labels, steps.sign = TRUE, ...))
   
   # octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
   
@@ -1191,14 +1192,16 @@ kern2tint <- function(str, ...) {
 }
 
 interval2tint <- function(str, ...) {
-  overdot(tonalChroma2tint(str, parts = c('sign', 'qualities', 'steps'),  step.labels = NULL, ...))
+  overdot(tonalChroma2tint(str, parts = c('sign', 'species', "step"), qualities = TRUE, step.labels = NULL, ...))
 }
 
 
 degree2tint <- function(str, ...) {
   
-  overdot(tonalChroma2tint(str, parts = c('qualities', 'steps'), 
+  overdot(tonalChroma2tint(str, parts = c("octave", "species", "step"), 
+                           accidentals = TRUE,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
+                           octave.integer = FALSE, relative = TRUE, octave.round = round,
                            ...))
   
 }
@@ -1224,11 +1227,11 @@ solfa2tint <- function(str, ...) {
   
   str_ <- stringr::str_replace(str, alt, sylalt)
   
-  overdot(tonalChroma2tint(str_, parts = c('steps', 'accidentals'),
-                             step.labels = rownames(alt.mat),
+  overdot(tonalChroma2tint(str_, parts = c("octave", "step", "species"),
+                           step.labels = rownames(alt.mat), accidentals = TRUE,
+                           octave.integer = FALSE, relative = TRUE, octave.round = round,
+                           
                              ...))
-  
-  
   
 }
 
@@ -1918,11 +1921,11 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
 #' 
 #' + `tonalChroma`:
 #'     + `parts`: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
-#'       Acceptable strings are `"steps"`, `"qualities"`, `"accidentals"`, or `"contours"`.
+#'       Acceptable strings are `"step"`, `"qualities"`, `"accidentals"`, or `"octave"`.
 #'       ([Partial matches][base::pmatch] matches like `"ste"` or `"s"` for `step` will work too.)
 #'       The output tonal chroma string will have its part concatinated in the order they appear in the `parts` argument.
-#'       For instance, you could put `c('contour', 'step', 'accidental')` to put the contour before the simple interval,
-#'       or put `c('step', 'accidental', 'contour')` to put it after.
+#'       For instance, you could put `c("octave", 'step', 'accidental')` to put the contour before the simple interval,
+#'       or put `c('step', 'accidental', "octave")` to put it after.
 #'     + `sep`: a character string which will be used to separate the elements (the default is `""`).
 #' + from `step` (described below):
 #'     + `step.labels`
@@ -2535,15 +2538,15 @@ is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 #' @export unison pythagorean.comma octave
 NULL
 # 
-allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
-allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
-allints <- c(allints)
-allints <- allints[!is.na(allints)]
-cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
-for (int in allints) {
-  assign(int, interval2tint(int))
-}
-rm(allints)
-unison <- P1
-pythagorean.comma <- (-dd2)
-octave <- P8
+# allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
+# allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
+# allints <- c(allints)
+# allints <- allints[!is.na(allints)]
+# cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
+# for (int in allints) {
+  # assign(int, interval2tint(int))
+# }
+# rm(allints)
+# unison <- P1
+# pythagorean.comma <- (-dd2)
+# octave <- P8
