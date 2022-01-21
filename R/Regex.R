@@ -427,45 +427,43 @@ makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 
     paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
 }
 
-makeRE.contours <- function(contour.labels = c(), ...) {
-    setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
-    if (false(contour.labels)) '-?[0-9]+' else captureUniq(contour.labels)
+makeRE.contours <- function(contour = TRUE, up = '^', down = 'v', ...) {
+    if (!contour) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
-makeRE.tonalChroma <- function(parts = c('steps', 'accidentals', 'contours'), collapse = TRUE, ..., regexname = 'tonalChroma'){
+makeRE.tonalChroma <- function(parts = c('steps', 'specifiers', 'octaves'), qualities = FALSE, collapse = TRUE, ..., regexname = 'tonalChroma'){
     REs <-  list(sign        = if ('sign' %in% parts)       '[-+]?',
                  steps       = if ('steps' %in% parts)       makeRE.steps(...),
-                 accidentals = if ('accidentals' %in% parts) makeRE.accidentals(...),
-                 qualities   = if ('qualities' %in% parts)   makeRE.qualities(...),
-                 contours    = if ('contours' %in% parts)    makeRE.contours(...)
+                 specifiers = if ('specifiers' %in% parts) {if (qualities) makeRE.qualities(...) else makeRE.accidentals(...)},
+                 octaves    = if ('octaves' %in% parts)    makeRE.contours(...)
                  )[parts]
     
     if (collapse) setNames(cREs(REs), regexname) else REs
     
 }
 
-makeRE.kern <- function(parts = c('steps', 'accidentals')) {
+makeRE.kern <- function(parts = c('steps', 'specifiers'), ...) {
     
-    step.labels <- unlist(lapply(1:10, strrep, x = c))
+    step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
     makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, ..., regexname = 'kern')
     
 }
 
-makeRE.sciPitch <- function(parts = c('steps', 'accidentals', 'contours'), 
-                            collapse = TRUE, contour.offset = 4L, contour.labels = FALSE, 
+makeRE.sciPitch <- function(parts = c('steps', 'specifiers', 'octaves'), 
+                            collapse = TRUE, octave.offset = 4L, contour = FALSE,
                             flat = 'b', ...) {
-   makeRE.tonalChroma(parts, collapse  = collapse, contour.offset = contour.offset, contour.labels = contour.labels, flat = flat, ..., regexname = 'pitch')
+   makeRE.tonalChroma(parts, collapse  = collapse, octave.offset = octave.offset, contour = contour, flat = flat, ..., regexname = 'pitch')
 }
 
-makeRE.interval <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
-    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = 1:19, ...), 'interval')
+makeRE.interval <- function(parts = c('specifiers', 'steps'), collapse = TRUE, ...) {
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = TRUE, step.labels = 1:19, ..., regexname = 'interval')
 }
 
-makeRE.scaleDegree <- function(parts = c('qualities', 'steps'), collapse = TRUE, ...) {
-    setNames(makeRE.tonalChroma(parts, collapse  = collapse, step.labels = 1:7, ...), 'scaleDegree')
+makeRE.scaleDegree <- function(parts = c('specifiers', 'steps'), collapse = TRUE, ...) {
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = TRUE, step.labels = 1:7, ..., regexname = 'scaleDegree')
 }
 
-makeRE.solfa <- function(parts = c('steps', 'accidentals'), ..., collapse = TRUE) {
+makeRE.solfa <- function(parts = c('steps', 'specifiers'), ..., collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts[parts != 'steps'], ..., collapse = FALSE)
     

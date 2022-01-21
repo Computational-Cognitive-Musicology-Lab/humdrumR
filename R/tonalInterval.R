@@ -504,7 +504,6 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 tint2contour <- function(x, contour.labels = c(up = '^', down = 'v'), 
                          contour.offset = 0L, contour.maximum = Inf, contour.minimum = -Inf,
                          contour.delta = FALSE, contour.round = floor, ...) {
-  
   setoptions(contour.labels) <- c(up = "^", down = "v", same = "")
   
   if (contour.delta) x <- delta(x)
@@ -599,8 +598,9 @@ tint2frequency <- function(x, frequency.reference = 440L,
 tint2tonalChroma <- function(x, 
                              parts = c('specifiers', 'steps', 'contours'), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
-                             tonal = FALSE, qualities = TRUE, ..., collapseparts = TRUE) {
-  if (tonal) with...('Key', {x <- x + Key})
+                             tonal = FALSE, Key = NULL,
+                             qualities = TRUE, ..., collapseparts = TRUE) {
+  if (tonal && !is.null(Key)) x <- x + diatonicSet(Key)
   
   parts <- matched(parts, c('specifiers', 'steps', 'contours'))
   
@@ -849,6 +849,32 @@ contour2tint <- function(str, simpletint, contour.labels = c(), contour.offset =
 }
 
 
+octave2tint <- function(str, simpletint, 
+                        contour = TRUE,
+                        up = '^', down = 'v', 
+                        octave.offset = 0L, octave.round = floor,
+                        relative = FALSE, ...) {
+  
+  n <- if (!contour) {
+    as.integer(str)
+  } else { 
+    updownN(str, up = up, down = down) 
+  }
+  
+  n <- n - octave.offset
+  
+  if (relative) {
+    semits <- tint2semit(delta(simpletint))
+    
+    n <- sigma(n - contour.round(semits / 12))
+    
+  } 
+  
+  tint(n, 0L)
+  
+}
+
+
 
 kernOctave2tint <- function(str) {
   nletters <- nchar(str)
@@ -1011,9 +1037,10 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), s
   # specific
   octave <- (step - 1L) %/% 7L
   
+  if (steps.sign) octave[str == toupper(str)] <- (octave[str == toupper(str)] + 1L) * -1
+  
   tint <- tint + tint(octave, 0L)
   
-  if (steps.sign) tint[str == toupper(str)] <- (tint[str == toupper(str)] + tint(1, 0) ) * -1
     
   tint
 }
@@ -1103,14 +1130,14 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
 
 tonalChroma2tint <- function(str,  
-                             parts = c('steps', 'accidentals', 'contours'), 
+                             parts = c('steps', 'specifiers', 'octaves'), 
+                             qualities = FALSE,
                              parse.exhaust = TRUE, 
-                             tonal = FALSE, ...) {
+                             tonal = FALSE, Key = NULL, 
+                             ...) {
  
- parts <- matched(parts, c('sign', 'steps', 'accidentals', 'qualities', 'contours'))
+ parts <- matched(parts, c('sign', 'steps', 'specifiers', 'octaves'))
  
- if (sum(parts %in% c('qualities', 'accidentals')) > 1L) .stop("When reading a string as a tonal chroma, you can't read both qualities and accidentals at the same time.",
-                                                               " The parts argument can only include one or the other (or neither).")
  
  ############# parse string
  # regular expressions for each part
@@ -1119,19 +1146,17 @@ tonalChroma2tint <- function(str,
  REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
  
  ## simple part
- steps     <- if ('steps' %in% parts)       step2tint(steps, ...) 
- accidentals <- if ('accidentals' %in% parts) specifier2tint(accidentals, qualities = FALSE, step = steps, ...) 
- qualities   <- if ('qualities'   %in% parts) specifier2tint(qualities,   qualities = TRUE,  step = steps, ...) 
+ steps      <- if ('steps' %in% parts)      step2tint(steps, ...) 
+ specifiers <- if ('specifiers' %in% parts) specifier2tint(specifiers, qualities = qualities, step = steps, ...) 
  
- simpletint <- (steps %maybe% tint( , 0L)) + (accidentals %maybe%  tint( , 0L)) + (qualities %maybe%  tint( , 0L))
- # if (!is.null(Key)) simple[.names(alterations) == ""] <- simple[.names(alterations) == ""] %% Key
+ simpletint <- (steps %maybe% tint( , 0L)) + (specifiers %maybe%  tint( , 0L)) 
  
  # contours
- tint <- if ('contours' %in% parts) contour2tint(contours, simpletint = simpletint, ...) + simpletint else simpletint
+ tint <- if ('octaves' %in% parts) octave2tint(octaves, simpletint = simpletint, ...) + simpletint else simpletint
  
  if ('sign' %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
- if (tonal) with...('Key', {tint <- tint - Key})
+ if (tonal && !is.null(Key)) tint <- tint - diatonicSet(Key)
  
  tint
 
@@ -1143,8 +1168,8 @@ tonalChroma2tint <- function(str,
 
 
 pitch2tint <- function(str, ...) {
-  overdot(tonalChroma2tint(str, parts = c('steps', 'accidentals', 'contours'), 
-                           contour.labels = FALSE, contour.offset = 4L,
+  overdot(tonalChroma2tint(str, parts = c('steps', 'specifiers', 'octaves'), 
+                           octave.offset = 4L, contour = FALSE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
                            tonal = TRUE,
@@ -1156,7 +1181,7 @@ kern2tint <- function(str, ...) {
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-  simple <- overdot(tonalChroma2tint(str, parts = c('steps', 'accidentals'), tonal = TRUE, 
+  simple <- overdot(tonalChroma2tint(str, parts = c('steps', 'specifiers'), tonal = TRUE, 
                     step.labels = step.labels, steps.sign = TRUE, ...))
   
   # octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
@@ -1258,30 +1283,29 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 # Translating Pitch Representations (x2y) ################################
 ###################################################################### ### 
 
-rwArgs <- function(...) {
-  # This function takes a list of arguments and looks for any argument
-  # names that are prepended with "write" or "read", and separates them
-  
-  args <- list(...)
-  
-  # prepare read and write arguments (if any)
-  argTarget <- stringr::str_extract(.names(args), '^(read|write)?')
-  names(args) <- gsub('^(write|read)', '', .names(args))
-  
-  parseArgs <- deparseArgs <- args
-  
-  parseArgs <- c(args[argTarget == 'read'], args[argTarget != 'write'])
-  parseArgs <- parseArgs[!duplicated(names(parseArgs))]
-  
-  deparseArgs <- c(args[argTarget == 'write'], args[argTarget != 'read'])
-  deparseArgs <- deparseArgs[!duplicated(names(deparseArgs))]
-  
-  list(parseArgs = parseArgs, deparseArgs = deparseArgs)
-}
+# rwArgs <- function(...) {
+#   # This function takes a list of arguments and looks for any argument
+#   # names that are prepended with "write" or "read", and separates them
+#   
+#   args <- list(...)
+#   
+#   # prepare read and write arguments (if any)
+#   argTarget <- stringr::str_extract(.names(args), '^(read|write)?')
+#   names(args) <- gsub('^(write|read)', '', .names(args))
+#   
+#   parseArgs <- deparseArgs <- args
+#   
+#   parseArgs <- c(args[argTarget == 'read'], args[argTarget != 'write'])
+#   parseArgs <- parseArgs[!duplicated(names(parseArgs))]
+#   
+#   deparseArgs <- c(args[argTarget == 'write'], args[argTarget != 'read'])
+#   deparseArgs <- deparseArgs[!duplicated(names(deparseArgs))]
+#   
+#   list(parseArgs = parseArgs, deparseArgs = deparseArgs)
+# }
 
 
-pitchArgs <- function(args, callname) {
-  
+pitchArgs <- function(args,  callname) {
   argnames <- .names(args)
   
   if ('generic' %in% argnames) {
@@ -1294,36 +1318,58 @@ pitchArgs <- function(args, callname) {
     args$complex <- !args$simple
   }
   
- 
+  if ('absolute' %in% argnames) {
+    if ('relative' %in% argnames && !xor(args$relative, args$absolute)) .stop("In your call to {callname}, you've specified contradictory 'relative' and 'absolute' arguments...it has to be one or the other!")
+    args$relative <- !args$absolute
+  }
+  
   args 
   
 }
 
 
+
 makePitchTransformer <- function(deparser, callname) {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
+  callname <- rlang::enexpr(callname)
   
-  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE),
+  parse <- function(...) list(...) %class% 'parseArgs'
+  
+  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list()),
                       rlang::expr( {
                         
-                        putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, onlymatch = dropNA, negate = TRUE)
+                        args <- lapply(rlang::enexprs(...), eval, envir = environment())
+                        parse <- sapply(args, inherits, what = 'parseArgs')
+                        if (any(parse)) {
+                          parseArgs <- c(parseArgs, unlist(args[parse], recursive = FALSE)) 
+                          args <- args[!parse]
+                        }
+                        
+                        parseArgs   <- pitchArgs(c(list(Key = args$fromKey %maybe% Key, Exclusive = Exclusive), parseArgs), !!callname)
+                        deparseArgs <- pitchArgs(c(list(Key = args$toKey %maybe% Key), args), !!callname)
+                        
+                        # remove NA values
+                        putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, negate = TRUE)
                         
                         result <- {
-                          args <- rwArgs(...)
-                          parsed <- do.call(tonalInterval, c(list(x, inPlace = inPlace), args$parseArgs))
+                          
+                          #
+                          parsed <- do.call(tonalInterval, c(list(x, inPlace = inPlace), parseArgs))
+                          
                           if (!deparse) return(parsed)
                           
-                          output <- do.call(!!deparser, c(list(parsed), pitchArgs(args$deparseArgs, callname)))
+                          output <- do.call(!!deparser, c(list(parsed), deparseArgs))
                           
                           
                           
                           if (inPlace) output <- re.place(output, parsed)
                           
+                          
                           output
                         }
                         
-                        putNAback(result)
+                        if (dropNA) result else putNAback(result)
                         
                       }))
   
