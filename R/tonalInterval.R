@@ -360,130 +360,14 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 
 
-## To/From line-of-fifths ####
-
-#' Line-of-Fifths
-#' 
-#' The fundamental tonal space.
-#' 
-#' @name line-of-fifths
-NULL
-
-
-genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
-
-### line-of-fifths to x ####
-
-##### line-of-fifths to tonalChroma ####
-
-LO5th2step <- function(LO5th, step.labels = 1L:7L, ...) {
-  step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
-}
-
-
-LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) (LO5th - (LO5th %% Key)) %/% 7L
-
-alteration.conflicts <- function(LO5th) {
-  # do two or more qualities of the same generic intervals appear in the input,
-  # if so, which ones?
-  
-  uniq <- unique(LO5th)
-  counts <- table(genericFifth(uniq))
-  counts <- counts[counts > 1]
-
-  genericFifth(LO5th) %in% names(counts)
-}
-
-alteration.memory <- function(LO5th) {
-  # propogating though input vector, is each generic interval
-  # a repetition of the same quality the last time it appeared
-  # i.e., c('c', 'c', 'c#', 'a','c#','b','c') -> c(F, T,F,F,T,F,F)
-  # first instances are FALSE in $sameasbefore, but $new indicates where they are
-  
-  
-  generic <- genericFifth(LO5th)
-  lapply(-1L:5L, # no need to consider intervals with no conflicts
-         function(gen) {
-           cur <- generic  == gen
-           which(cur)[c(FALSE, diff(LO5th[cur]) == 0L)]
-         }) |> unlist() -> hits
-  
-  list(sameasbefore = seq_along(LO5th) %in% hits,  
-       new = seq_along(LO5th) %in% unlist(lapply(-1:5L, match, table = generic)))
-  
-}
-
-alteration.inKey <- function(LO5th, Key) {
-  if (is.null(Key)) Key <- dset(0, 0)
-  
-  LO5th2alterationN(LO5th, Key) == 0L
-}
-
-
-
-alteration.filter <- function(LO5th, Key, cautionary, memory) {
-  # determines which notes need an accidental label (FALSE) and which don't (TRUE)
-  
-  conflicted <- alteration.conflicts(LO5th)
-  mem  <- alteration.memory(LO5th)
-  inKey <- alteration.inKey(LO5th, Key) # if Key == NULL, inKey is now Cmajor
-  
-  if (!(memory || cautionary)) return(inKey) 
-  
-  if (is.null(Key)) {
-    
-    if ( cautionary & !memory) return(rep(FALSE, length(LO5th)))
-    if (!cautionary &  memory) return((mem$sameasbefore & !mem$new) | (mem$new & inKey))
-    if ( cautionary &  memory) return(mem$sameasbefore & !mem$new)
-    
-  } else {
-   
-    if ( cautionary & !memory) return(inKey & !conflicted)
-    if (!cautionary &  memory) return(mem$sameasbefore & (!mem$new | (mem$new & inKey)))
-    if ( cautionary & memory) return(mem$sameasbefore & !xor(inKey, mem$new)) 
-
-  }
-
- 
-}
-
-
-
-
-
-
-
-
-
-
-
-## octave stuff
-
-
-LO5thNscaleOct2tint <- function(LO5th, scaleOct) {
-    tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
-    octshift <- tint2semit(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
-    
-    tint(scaleOct - octshift, LO5th)
-}
-
-LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNscaleOct2tint(LO5th, sciOct - 4L) 
-
-LO5thNcentralOct2tint <- function(LO5th, centralOct) {
-  tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
-  octshift <- round(tint2semit(tintWith0Octave %% tint(-11L, 7L)) / 12L)
-  
-  tint(centralOct - octshift, LO5th)
-}
-
-
-
 
 
 
 ###################################################################### ###
 # Deparsing pitch information ############################################
 ###################################################################### ###
+
+## Pitch deparsers ####
 
 ### Octaves ####
 
@@ -531,6 +415,27 @@ octave.kernstyle <- function(str, octn) {
   
   .paste(strrep(char, abs(octn)), stringr::str_sub(str, start = 2L)) %dim% str
 }
+
+
+LO5thNscaleOct2tint <- function(LO5th, scaleOct) {
+  tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
+  octshift <- tint2semit(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
+  
+  tint(scaleOct - octshift, LO5th)
+}
+
+LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNscaleOct2tint(LO5th, sciOct - 4L) 
+
+LO5thNcentralOct2tint <- function(LO5th, centralOct) {
+  tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
+  octshift <- round(tint2semit(tintWith0Octave %% tint(-11L, 7L)) / 12L)
+  
+  tint(centralOct - octshift, LO5th)
+}
+
+
+
+
 
 ### Atonal ####
 
@@ -592,6 +497,85 @@ tint2frequency <- function(x, frequency.reference = 440L,
 
 
 ### Tonal ####
+
+###### Alteration stuff #####
+
+alteration.conflicts <- function(LO5th) {
+  # do two or more qualities of the same generic intervals appear in the input,
+  # if so, which ones?
+  
+  uniq <- unique(LO5th)
+  counts <- table(genericFifth(uniq))
+  counts <- counts[counts > 1]
+  
+  genericFifth(LO5th) %in% names(counts)
+}
+
+alteration.memory <- function(LO5th) {
+  # propogating though input vector, is each generic interval
+  # a repetition of the same quality the last time it appeared
+  # i.e., c('c', 'c', 'c#', 'a','c#','b','c') -> c(F, T,F,F,T,F,F)
+  # first instances are FALSE in $sameasbefore, but $new indicates where they are
+  
+  
+  generic <- genericFifth(LO5th)
+  lapply(-1L:5L, # no need to consider intervals with no conflicts
+         function(gen) {
+           cur <- generic  == gen
+           which(cur)[c(FALSE, diff(LO5th[cur]) == 0L)]
+         }) |> unlist() -> hits
+  
+  list(sameasbefore = seq_along(LO5th) %in% hits,  
+       new = seq_along(LO5th) %in% unlist(lapply(-1:5L, match, table = generic)))
+  
+}
+
+alteration.inKey <- function(LO5th, Key) {
+  if (is.null(Key)) Key <- dset(0, 0)
+  
+  LO5th2alterationN(LO5th, Key) == 0L
+}
+
+
+
+alteration.filter <- function(LO5th, Key, cautionary, memory) {
+  # determines which notes need an accidental label (FALSE) and which don't (TRUE)
+  
+  conflicted <- alteration.conflicts(LO5th)
+  mem  <- alteration.memory(LO5th)
+  inKey <- alteration.inKey(LO5th, Key) # if Key == NULL, inKey is now Cmajor
+  
+  if (!(memory || cautionary)) return(inKey) 
+  
+  if (is.null(Key)) {
+    
+    if ( cautionary & !memory) return(rep(FALSE, length(LO5th)))
+    if (!cautionary &  memory) return((mem$sameasbefore & !mem$new) | (mem$new & inKey))
+    if ( cautionary &  memory) return(mem$sameasbefore & !mem$new)
+    
+  } else {
+    
+    if ( cautionary & !memory) return(inKey & !conflicted)
+    if (!cautionary &  memory) return(mem$sameasbefore & (!mem$new | (mem$new & inKey)))
+    if ( cautionary & memory) return(mem$sameasbefore & !xor(inKey, mem$new)) 
+    
+  }
+  
+  
+}
+
+
+LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) (LO5th - (LO5th %% Key)) %/% 7L
+
+genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
+
+
+
+#### Parsers ####
+
+LO5th2step <- function(LO5th, step.labels = 1L:7L, ...) {
+  step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th %% 7)]
+}
 
 
 
@@ -823,6 +807,9 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"
 
 ### Octaves ####
 
+
+
+
 contour2tint <- function(str, simpletint, contour.labels = c(), contour.offset = 0L, contour.delta = FALSE, contour.round = floor, ...) {
   setoptions(contour.labels) <- c(up = '^', down = 'v', same = '')
   
@@ -1016,6 +1003,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
 }
 
 ### Tonal ####
+
 
 
 step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...) {
