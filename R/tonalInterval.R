@@ -639,12 +639,12 @@ tint2specifier <- function(x, Key = NULL, ...,
 tint2tonalChroma <- function(x, 
                              parts = c("species", "step", "octave"), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
-                             tonal = FALSE, Key = NULL,
+                             keyed = FALSE, Key = NULL,
                              qualities = !accidentals, accidentals = !qualities, ...) {
   
   if (!xor(qualities, accidentals)) .stop("When deparsing pitch information, you must choose either 'accidentals' or 'qualities', not {if(qualities & accidentals) 'both' else 'neither'}!")
   
-  if (tonal && !is.null(Key)) x <- x + diatonicSet(Key)
+  if (keyed && !is.null(Key)) x <- x + diatonicSet(Key)
   
   parts <- matched(parts, c("species", "step", "octave"))
   
@@ -674,7 +674,7 @@ tint2pitch <- function(x, ...)  {
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            octave.offset = 4L, integer = TRUE,
                            flat = 'b', qualities = FALSE,
-                           tonal = TRUE,
+                           keyed = TRUE,
                            parts = c("step", "species", "octave"), ...))
 }
 
@@ -682,7 +682,7 @@ tint2kern <- function(x, complex = TRUE, Key = NULL, ...) {
   
   kern <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                                    parts = c("step", "species"), qualities = FALSE, 
-                                   tonal = TRUE, Key = Key, ...))
+                                   keyed = TRUE, Key = Key, ...))
   
   if (complex) kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE)) 
   
@@ -752,7 +752,7 @@ tint2degree <- function(x, Key = Key, parts = c("octave", "species", "step"), ..
   # Key <- Key - getRoot(Key)
   
   overdot(tint2tonalChroma(x, Key = Key, parts = parts, 
-                           complex = FALSE,
+                           complex = FALSE, keyed = FALSE,
                            octave.integer = FALSE, relative = TRUE, octave.round = round, ...))
 
 }
@@ -783,7 +783,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"
   
   accidentals <- if ('accidentals' %in% parts) stringr::str_sub(tint2specifier(x, ...) ,
                                                   start = 2L) # drop first accidental # will mess up with double sharps/flats
-  contours <- if ("octave" %in% parts)  tint2octave(x, ...) %dots% (has.prefix('contour.') %.% names)
+  contours <- if ("octave" %in% parts)  tint2octave(x, ...) 
   
   str <- pasteordered(parts, contour = contours, accidental = accidentals, steps = .paste(steps, tails))
   
@@ -1129,7 +1129,7 @@ tonalChroma2tint <- function(str,
                              parts = c("step", "species", "octave"), 
                              qualities = !accidentals, accidentals = !qualities,
                              parse.exhaust = TRUE, 
-                             tonal = FALSE, Key = NULL, 
+                             keyed = FALSE, Key = NULL, 
                              ...) {
  
   
@@ -1154,7 +1154,7 @@ tonalChroma2tint <- function(str,
  
  if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
- if (tonal && !is.null(Key)) tint <- tint - diatonicSet(Key)
+ if (keyed && !is.null(Key)) tint <- tint - diatonicSet(Key)
  
  tint
 
@@ -1171,7 +1171,7 @@ pitch2tint <- function(str, ...) {
                            accidentals = TRUE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
-                           tonal = TRUE,
+                           keyed = TRUE,
                            ...))
 }
 
@@ -1180,7 +1180,8 @@ kern2tint <- function(str, ...) {
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-  simple <- overdot(tonalChroma2tint(str, parts = c("step", "species"), tonal = TRUE,  
+  simple <- overdot(tonalChroma2tint(str, parts = c("step", "species"), 
+                                     keyed = TRUE,  
                                      accidentals = TRUE,
                                      step.labels = step.labels, steps.sign = TRUE, ...))
   
@@ -1198,7 +1199,8 @@ interval2tint <- function(str, ...) {
 degree2tint <- function(str, ...) {
   
   overdot(tonalChroma2tint(str, parts = c("octave", "species", "step"), 
-                           accidentals = TRUE,
+                           accidentals = TRUE, 
+                           keyed = FALSE,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
                            ...))
@@ -1228,6 +1230,7 @@ solfa2tint <- function(str, ...) {
   
   overdot(tonalChroma2tint(str_, parts = c("octave", "step", "species"),
                            step.labels = rownames(alt.mat), accidentals = TRUE,
+                           keyed = FALSE,
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
                            flat = 'b',
                              ...))
@@ -1288,7 +1291,7 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 
 ## Pitch transform maker ####
 
-pitchArgs <- function(args,  callname) {
+pitchArgCheck <- function(args,  callname) {
   argnames <- .names(args)
   
   if ('generic' %in% argnames) {
@@ -1318,20 +1321,36 @@ makePitchTransformer <- function(deparser, callname) {
   callname <- rlang::enexpr(callname)
   
   parse <- function(...) list(...) %class% 'parseArgs'
+  transpose <- function(...) list(...) %class% 'transposeArgs'
   
-  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list()),
+  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list(), transposeArgs = list()),
                       rlang::expr( {
                         redim <- dimParse(x)
                         
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment())
-                        parse <- sapply(args, inherits, what = 'parseArgs')
-                        if (any(parse)) {
-                          parseArgs <- c(parseArgs, unlist(args[parse], recursive = FALSE)) 
-                          args <- args[!parse]
-                        }
+                        # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
+                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        classes <- sapply(args, \(arg) class(arg)[1]) 
                         
-                        parseArgs   <- pitchArgs(c(list(Key = args$fromKey %maybe% Key, Exclusive = Exclusive), parseArgs), !!callname)
-                        deparseArgs <- pitchArgs(c(list(Key = args$toKey %maybe% Key), args), !!callname)
+                        transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
+                        parseArgs   <- pitchArgCheck(c(list(Exclusive = Exclusive), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
+                        deparseArgs <- pitchArgCheck(args[!grepl('Args$', classes)], !!callname)
+
+                        # Keys
+                        if (is.null(transposeArgs$from)) {
+                          parseArgs$Key <- Key
+                          transposeArgs$from <- CKey(Key)
+                        } else {
+                          parseArgs$Key <- transposeArgs$from
+                          transposeArgs$from <- CKey(transposeArgs$from)
+                        }
+                        if (is.null(transposeArgs$to)) {
+                          deparseArgs$Key <- Key
+                          transposeArgs$to <- CKey(Key)
+                        } else {
+                          deparseArgs$Key <- transposeArgs$to
+                          transposeArgs$to <- CKey(transposeArgs$to)
+                        }
+                      
                         
                         # remove NA values
                         putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, negate = TRUE)
@@ -1339,15 +1358,18 @@ makePitchTransformer <- function(deparser, callname) {
                         result <- {
                           
                           #
-                          parsed <- do.call(tonalInterval, c(list(x, inPlace = inPlace), parseArgs))
+                          parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace), parseArgs))
                           
-                          if (!deparse) return(parsed)
+                          if (length(transposeArgs) > 0L) {
+                            parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
+                          }
+                          if (!deparse) return(parsedTint)
                           
-                          output <- do.call(!!deparser, c(list(parsed), deparseArgs))
+                          output <- do.call(!!deparser, c(list(parsedTint), deparseArgs))
                           
                           
                           
-                          if (inPlace) output <- re.place(output, parsed)
+                          if (inPlace) output <- re.place(output, parsedtint)
                           
                           
                           output
@@ -1379,38 +1401,6 @@ solfa <- makePitchTransformer(tint2solfa, 'solfa')
 
 
 # Tonal transforms ####
-
-#' Tonal Transformations
-#' 
-#' Various transformations of pitch information
-#' 
-#' @name tonalTransformations
-#' @export
-tonalTransform <- function(x,  direction = TRUE, 
-                           delta = FALSE, sigma = Exclusive %allin% c('mint'), 
-                           generic = FALSE, simple = FALSE, roundContour = floor, enharmonic = FALSE, 
-                           Key = NULL, Exclusive = NULL, ...) {
-    # Key
-    if (!is.null(Key)) Key <- diatonicSet(Key)
-    
-    # calculus
-    if (!direction) x <- abs(x)
-    
-    if (delta)  x <- delta(x)
-    if (sigma)  x <- sigma(x)
-    
-    # Generic/Specific
-    if (generic) x <- tintPartition_specific(x, Key = Key %maybe% dset(0L, 0L))$Generic
-    
-    # Simple/Complex
-    if (simple) x <- tintPartition_complex(x, roundContour = roundContour)$Simple
-    
-    if (enharmonic) x <- tintPartition_harmonic(x, Key = Key %maybe% dset(0L, 0L), ... )$Harmonic
-    
-    
-    
-    x
-}
 
 
 
@@ -1556,34 +1546,37 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' @export
 transpose <- function(x, by, Key, to, real, relative, ...) UseMethod('transpose')
 #' @export
-transpose.tonalInterval <- function(x, by = NULL, Key = NULL, to = NULL, real = TRUE, relative = FALSE, ...) {
+transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   if (is.null(by) && is.null(to)) return(x)
   
-  # nullkey <- is.null(Key)
-  Key <- diatonicSet(Key %maybe% dset(0, 0))
+  ## Prepare arguments
+  args <- transposeArgCheck(list(...))
+  real <- args$real
+  relative <- args$relative
+  
+  ## Deal with keys
+  from <- diatonicSet(from %maybe% dset(0, 0))
   
   if (!is.null(to)) {
     to <- diatonicSet(to)
     
     if (relative) {
-      sigdiff <- getSignature(to) - getSignature(Key)
-      to <- Key + dset(sigdiff, sigdiff)
+      sigdiff <- getSignature(to) - getSignature(from)
+      to <- from + dset(sigdiff, sigdiff)
     }
     
-    by <- (getRootTint(to) - getRootTint(Key)) + (by %maybe% tint(0, 0))
-    
+    by <- (getRootTint(to) - getRootTint(from)) + (by %maybe% tint(0, 0))
 
-    
-    
   } else {
-    to <- Key
+    to <- from
   }
   
+  ## Do transposition!
   x <- if (real) {
     x + by
   } else {
     
-    x <- tintPartition(x, Key = Key, 'specific')
+    x <- tintPartition(x, Key = from, 'specific')
     x$Generic <- x$Generic + by
     x$Generic <- x$Generic %% to
     
@@ -1598,10 +1591,32 @@ transpose.tonalInterval <- function(x, by = NULL, Key = NULL, to = NULL, real = 
     
   }
   
-  # if (!nullkey) attr(x, 'pass') <- c(attr(x, 'pass'), Key = to)
   x
   
 }
+
+transposeArgCheck <- function(args) {
+  argnames <- .names(args)
+    
+  
+  doubleswitch('tonal' %in% argnames, 'real' %in% argnames,
+               'neither' = {args$real <- TRUE},
+               'notxor' =  {.stop("In your call to transpose, you've specified contradictory 'real' and 'tonal' arguments...it has to be one or the other!")},
+               'first' = {args$real <- !args$tonal})
+  
+  doubleswitch('parallel' %in% argnames, 'relative' %in% argnames,
+               'neither' = {args$relative <- FALSE},
+               'notxor' =  {.stop("In your call to transpose, you've specified contradictory 'relative' and 'parallel' arguments...it has to be one or the other!")},
+               'first' = {args$relative <- !args$parallel})
+
+  
+  args
+}
+
+
+
+
+  
 
 
 
@@ -1618,7 +1633,7 @@ NULL
 
 
 tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'),
-                          roundContour = floor, Key = NULL, enharmonicWrap = 12L) {
+                          roundContour = floor, Key = NULL, enharmonicWrap = 12L, ...) {
   
    partitions <- matched(partitions, c('complex', 'harmonic', 'specific'))
    

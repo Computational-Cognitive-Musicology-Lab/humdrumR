@@ -265,6 +265,9 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
               callGeneric(getSignature(e1), getSignature(e2))
           })
 
+
+CKey <- function(dset) if (!is.null(dset)) dset - getRootTint(dset) 
+
 ###..arithmetic methods ####
 
 ##...addition ####

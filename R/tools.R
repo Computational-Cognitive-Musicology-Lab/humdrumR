@@ -13,6 +13,33 @@ with... <- function(arg, expression, orelse = NULL) {
 }
 
 
+doubleswitch <- function(pred1, pred2, ...) {
+    if (length(pred1) > 1 || length(pred2) > 1) .stop('doubleswitch predicates must be of length 1.')
+    exprs <- rlang::exprs(...)
+    
+    if (any(.names(exprs) == '')) .stop('doubleswitch requires all named arguments.')
+    
+    argnames <- .names(exprs)
+    
+    
+    order <- c('neither', 'either', 'both', 'xor', 'notxor', 'first', 'second', 'notfirst', 'notsecond')
+    preds <- c(!pred1 && !pred2,
+               pred1 || pred2,
+               pred1 && pred2,
+               xor(pred1,pred2),
+               !xor(pred1, pred2),
+               pred1,
+               pred2,
+               !pred1,
+               !pred2)
+    
+    hits <- order %in% argnames
+    hit <- which(preds[hits])[1]
+    
+    eval(exprs[[hit]], envir = parent.frame())
+    
+    
+}
 
 `%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
 `%fmap%` <- function(e1, e2) {
