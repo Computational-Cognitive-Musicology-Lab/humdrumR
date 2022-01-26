@@ -1086,6 +1086,40 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 ### Metaprogramming ----
 
+applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
+  # helper function
+  accum <- c()
+  
+  if (length(ex) <= 1L) {
+    return(func(ex))
+  } else {
+    for (i in (2 - !ignoreHead):length(ex)) {
+      missing <- rlang::is_missing(ex[[i]]) || is.null(ex[[i]])
+      
+      if (!missing) {
+        out <- Recall(ex[[i]], func, rebuild = rebuild) 
+        
+        if (rebuild) {
+          ex[[i]] <- out 
+        } else {
+          accum <- c(accum, out) 
+        }
+      }
+    }
+  }
+  
+  if (rebuild) ex else accum
+}
+
+apply2ExprAsString <- function(func, ...) {
+  function(expr) {
+    str <- func(deparse(expr), ...)
+    parse(text = str)[[1]]
+    
+  }
+}
+
+
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
 }

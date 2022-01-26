@@ -442,14 +442,20 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semit <- function(x, Key = NULL, ...) {
+tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
+  
   if (!is.null(Key)) x <- x + diatonicSet(Key)
+  
+  if (!specific) x <- tintPartition_specific(x, Key = Key, ...)$Generic
+  if (!complex) x <- tintPartition_complex(x, ...)$Simple
         
-  as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
+  semit <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
+  
+  
 }
 
 tint2midi <- function(x, ...) {
-  tint2semit(x) + 60L
+  tint2semit(x, ...) + 60L
 }
 
 
@@ -1667,7 +1673,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
 ###.. simple + octave = complex
 
 
-tintPartition_complex <- function(tint, octave.round = floor) {
+tintPartition_complex <- function(tint, octave.round = floor, ...) {
   octshift <- octave.round(tint2semit(tint %% dset(0, 0)) / 12)
   
   octavepart <- tint(octshift, 0L)
@@ -1705,9 +1711,9 @@ tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L
 
 ###.. generic + alteration = specific
 
-tintPartition_specific <- function(tint, Key = dset(0L, 0L)) {
+tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
  
-  genericpart    <-  (tint %% Key) 
+  genericpart    <-  tint %% (Key %maybe% dset(0L, 0L)) 
   alterationpart <- tint - genericpart
   
   struct2data.frame(Generic = genericpart,  Alteration = alterationpart)
