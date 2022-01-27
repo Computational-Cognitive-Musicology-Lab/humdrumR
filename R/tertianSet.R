@@ -762,6 +762,25 @@ tertianSet.tertianSet <- force
 #' @export
 tertianSet.numeric <- integer2tset %.% as.integer
 
+mapPartition <- function(func, split = '/') {
+    function(str) {
+        parts <- strPartition(str, split = split)
+        
+        # parts[] <- lapply(parts, func)
+        parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
+        parts %class% "partition"
+        
+    }
+}
+
+sum_diatonicPartition <- function(part) {
+    of <- Reduce('+', lapply(part[ , colnames(part) == 'of', drop = FALSE], getRoot))
+    
+    dset <- part$base
+    dset + dset(of, of, 0L)
+    
+}
+
 
 char2tset           <- humdrumDispatch(doExclusiveDispatch = FALSE,
                                        'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
