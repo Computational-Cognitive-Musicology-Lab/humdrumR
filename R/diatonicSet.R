@@ -298,7 +298,8 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               
               output <- integer(length(e1))
               
-              output[!is.na(alter) & alter == 0L] <- (((e1[!is.na(alter) & alter == 0L] + 1L) - signature) %% 7L) - 1 + signature
+              hits <- !is.na(alter) & alter == 0L
+              output[hits] <- (((e1[hits] + 1L) - signature[hits]) %% 7L) - 1 + signature[hits]
               if (any(!is.na(alter) & alter != 0L)) {
                   output[!is.na(alter) & alter != 0L] <- {
                       lof <- LO5th(e2[!is.na(alter) & alter != 0L])
@@ -307,14 +308,15 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               }
               
     
-              as.integer(output)
-      
+              as.integer(output) 
+              
           })
 
 
 #' @export
 setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
+              indim <- dim(e1)
               match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
               fifth <- getFifth(e1)
@@ -326,6 +328,14 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
               tint(round(e1@Octave - octdiff), simple) %dim% e1
               
               
+          })
+
+#' @export
+setMethod('%%', signature = c('matrix', 'diatonicSet'),
+          function(e1, e2) {
+            (c(e1) %% c(e2)) %dim% e1
+            
+            
           })
 
 
@@ -398,25 +408,10 @@ setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
 
 ## Key deparsers ####
 
-###. line-of-fifths to x ####
 
+### Extracting Pitches ####
 
-LO5th2mode <- function(LO5th, short = FALSE) {
-    
-    known <- LO5th > -7L & LO5th < 2L & !is.na(LO5th)
-    
-    LO5th <- LO5th %% 7L
-    
-    fullname <- rep('?', length(LO5th))
-    modes <- c('major', 'lydian',  'locrian', 'phyrgian', 'minor', 'dorian', 'mixolydian')
-    fullname[known] <- modes[LO5th[known] + 1]
-    
-    if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
-}
-
-
-
-###. x to line-of-fifths ####
+#### Line of Fifths ####
 
 #' @export
 setMethod('LO5th', 'diatonicSet',
@@ -454,9 +449,7 @@ setMethod('LO5th', 'diatonicSet',
 })
 
 
-##### To/From pitch representations ####    
-
-###. dset to pitches ####
+#### Tonal intervals ####    
 
 
 
@@ -476,21 +469,18 @@ dset2pitcher <- function(pitch.func) {
 dset2tonalChroma <- dset2pitcher(tint2tonalChroma)
 
 
-
-##### To/From diatonic sets ####  
-
-####. dset to x ####
+### Key Representations ####  
 
 
-dset2alterations <- function(dset, alteration.labels = c()) {
-    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+
+dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
 
     mode <- getMode(dset)
     
     altered <- !is.na(dset@Alteration) & dset@Alteration != 0L & mode > -7L & mode < 2L
     
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
-    alterations[] <- c(alteration.labels$augment, alteration.labels$diminish, "")[match(alterations, c(7, -7, 0))]
+    alterations[] <- c(augment, diminish, "")[match(alterations, c(7, -7, 0))]
 
     order <- lapply(mode[altered] %% 7L, function(m) ((0L:6L + m) %% 7L) + 1 )
         
@@ -507,7 +497,7 @@ dset2alterations <- function(dset, alteration.labels = c()) {
 
 }
 
-dset2modelabel <- function(dset) {
+dset2modelabel <- function(dset, ...) {
     mode <- getMode(dset)
     .ifelse(mode == 0L | mode == -3L,
             "",
@@ -515,16 +505,31 @@ dset2modelabel <- function(dset) {
     
 }
 
-###.. key signatures
+LO5th2mode <- function(LO5th, short = FALSE) {
+  
+  known <- LO5th > -7L & LO5th < 2L & !is.na(LO5th)
+  
+  LO5th <- LO5th %% 7L
+  
+  fullname <- rep('?', length(LO5th))
+  modes <- c('major', 'lydian',  'locrian', 'phyrgian', 'minor', 'dorian', 'mixolydian')
+  fullname[known] <- modes[LO5th[known] + 1]
+  
+  if (short) stringi::stri_sub(fullname, 1L, 3L) else fullname
+}
 
-dset2signature <- function(dset) {
+
+
+dset2signature <- function(dset, of = NULL, ...) {
+    if (!is.null(of)) dset <- dset + of
+  
     LO5ths <- LO5th(dset)
     LO5ths[] <- t(apply(LO5ths, 1, sort))
-    tints <- tint( , LO5ths) %dim% LO5ths
+    tints <- tint( , LO5ths) %dim% NULL
     
-    notes <- tonalChroma(tints, parts = c('steps', 'accidentals'),
-                   accidental.labels = c(flat = '-'),
-                   step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'))
+    notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
+                              flat = '-', accidentals = TRUE, Key = dset(0, 0),
+                              step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %dim% LO5ths
     
     notes[LO5ths <= 5L & LO5ths >= -1L] <- ""
     
@@ -534,11 +539,10 @@ dset2signature <- function(dset) {
 }
 
 
-###.. key indications
 
 
-dset2key <- function(dset, alteration.labels = c()) {
-    ## As kern key interpretation (i.e., *G:, *e-:)
+dset2key <- function(dset, of = NULL, ...) {
+    if (!is.null(of)) dset <- dset + getRootTint(of)
     
     root <- tint2kern(tint( , getRoot(dset)))
     mode <- getMode(dset)
@@ -546,7 +550,7 @@ dset2key <- function(dset, alteration.labels = c()) {
     
     modelab <- dset2modelabel(dset) 
     
-    alterations <- dset2alterations(dset, alteration.labels)
+    alterations <- dset2alterations(dset, ...)
     
     key <- .paste("*", root, ":", modelab, alterations) 
     
@@ -555,7 +559,6 @@ dset2key <- function(dset, alteration.labels = c()) {
 }
 
 
-###.. roman numerals
 
 #' Roman Numeral
 #' 
@@ -575,10 +578,12 @@ dset2key <- function(dset, alteration.labels = c()) {
 #' @name romanNumerals
 NULL
 
-dset2romanNumeral <- function(dset, ...) {
+dset2romanNumeral <- function(dset, flat = 'b', of = NULL, ...) {
+    if (!is.null(of)) dset <- dset + getRootTint(of)
+  
     tint <- getRootTint(dset)
     
-    numeral <- tint2romanRoot(tint, ...)
+    numeral <- tint2romanRoot(tint, flat = flat, ...)
     
     mode <- getMode(dset)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
@@ -598,6 +603,10 @@ dset2romanNumeral <- function(dset, ...) {
 ###################################################################### ###
 # Parsing key information (x2dest) #######################################
 ###################################################################### ###
+
+## Key parses ####
+
+### Key Representations ####  
 
 qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.labels = c(),  ...) {
     setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
@@ -715,7 +724,10 @@ alteration2trit <- function(str, mode = integer(length(str)), alteration.labels 
 
 ##... from key signature
 
-signature2dset <- function(str, mode = 0L) {
+signature2dset <- function(str, of = NULL, signature.mode = 0L, ...) {
+    if (!is.null(of)) dset <- dset + of
+  
+    str <- gsub('^\\*', '', str)
     signotes <- stringr::str_extract_all(str, '[a-g]([#-n])\\1*')
     
     sigs <- integer(length(str))
@@ -742,7 +754,7 @@ signature2dset <- function(str, mode = 0L) {
     
     sigs[!empty] <- .ifelse(sharp, ranges[2, ] - 5, ranges[1, ] + 1)
     
-    dsets <- dset(sigs - mode, sigs)
+    dsets <- dset(sigs - signature.mode, sigs)
     
     
     #
@@ -760,14 +772,14 @@ signature2dset <- function(str, mode = 0L) {
         
         
         # if root is altered
-        rootqual <- alterations[cbind(1:nrow(alterations), 2 - mode)]
+        rootqual <- alterations[cbind(1:nrow(alterations), 2 - signature.mode)]
         
         alterations <- as.integer(rowSums(sweep(alterations, 2, 3L^(6L:0L), `*`)))
         
         if (any(rootqual != 0L)) {
-           mode[rootqual != 0L] <- mode[rootqual != 0L] - 1L
+           signature.mode[rootqual != 0L] <- signature.mode[rootqual != 0L] - 1L
         }
-        dsets <- dset(sigs - mode, sigs, alterations)
+        dsets <- dset(sigs - signature.mode, sigs, alterations)
         
         # dsets@Alteration[altered] <- alterations
     }
@@ -781,30 +793,47 @@ signature2dset <- function(str, mode = 0L) {
 
 key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'), 
                      step.labels = c('C', 'D','E','F','G','A','B'),
+                     of = NULL, keyed = TRUE,
                      ...) {
     
-    str <- stringr::str_remove(str, '^\\*')
-    
+   
+  
+    # str <- stringr::str_remove(str, '^\\*')
+    if (!is.null(of)) of <- diatonicSet(of)
+  
     REs <- makeRE.key(..., parts = parts, step.labels = step.labels, collapse = FALSE)
     REparse(str, REs, parse.strict = FALSE, parse.exhaust = FALSE, toEnv = TRUE)
     
     # Root
     root <- local( {
       generic <- step2tint(toupper(step), step.labels = toupper(step.labels))
-      specifier <- specifier2tint(species, ..., qualities = FALSE)
+      specifier <- specifier2tint(species, step = generic, useKey = TRUE, Key = CKey(of), ..., qualities = FALSE)
       LO5th(generic + specifier)
       })
 
     
     # Signature
-    minor <- stringi::stri_detect_regex(str, '[a-g].*:|[iv]') * -3L
+    minor <- stringi::stri_detect_regex(str, '[a-g].*:?|[iv]') * -3L
     mode <- .ifelse(mode == "", 0 , c(dor = +1, mix = -1, lyd = +1, phr = -1, loc = -2)[mode])
     signature <- root + mode + minor
     
     ## Alterations
     alterations <- .ifelse(is.na(alterations), 0, alteration2trit(alterations, mode + minor))
     
-    dset(root, signature, alterations)
+    dset <- dset(root, signature, alterations)
+    
+   
+    if (keyed && !is.null(of)) dset <- dset - of
+    
+    # if (!is.null(of) && of != dset(0, 0)) {
+    #   of <- CKey(diatonicSet(of))
+    #   alter <- dset@Root - (dset@Root %% of)
+    #   dset@Root <- dset@Root - alter
+    #   dset@Signature <- dset@Signature - alter
+    # }
+    
+    
+    dset
     
 }
 
@@ -816,16 +845,10 @@ romanNumeral2dset <- function(str, of = NULL, flat = 'b', ...) {
     
     dset <- key2dset(str, c('species', 'step', 'mode', 'alterations'), 
                      step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-                     flat = flat,
-                     Key = of, ...)
+                     flat = flat, keyed = FALSE,
+                     of = of, ...)
     
-    if (!is.null(of)) {
-      of <- CKey(of)
-      alter <- dset@Root - (dset@Root %% of)
-      dset@Root <- dset@Root - alter
-      dset@Signature <- dset@Signature - alter
-    }
-    
+
     
     dset
     
@@ -866,14 +889,14 @@ char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
                              'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                              'signature: makeRE.signature(...)' = signature2dset)
 
-mapofdset <- function(..., split = '/') {
+mapofdset <- function(str, ..., split = '/') {
 
    parts <- strPartition(str, split = split)
     
     
-   parts[] <- head(Reduce(function(x, y) func(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
+   parts[] <- head(Reduce(function(x, y) char2dset(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
-   of <- Reduce('+', lapply(parts[ , colnames(part) == 'of', drop = FALSE], getRoot))
+   of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
     
    dset <- parts$base
    dset + dset(of, of, 0L)
@@ -924,12 +947,13 @@ makeKeyTransformer <- function(deparser, callname) {
                       rlang::expr( {
                         redim <- dimParse(x)
                         
+                        of <- if (is.null(of)) dset(0, 0) else diatonicSet(of)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
-                        parseArgs   <- pitchArgCheck(c(parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
-                        deparseArgs <- pitchArgCheck(args[!grepl('Args$', classes)], !!callname)
+                        parseArgs   <- pitchArgCheck(c(list(of = of), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
+                        deparseArgs <- pitchArgCheck(c(list(of = of), args[!grepl('Args$', classes)]), !!callname)
                         
                         # remove NA values
                         putNAback <- predicateParse(is.na, x = x, of = of, negate = TRUE)
@@ -940,7 +964,6 @@ makeKeyTransformer <- function(deparser, callname) {
                           parsedDset <- do.call(diatonicSet, c(list(x), parseArgs))
                           
                           if (!deparse) return(parsedDset)
-                          
                           output <- do.call(!!deparser, c(list(parsedDset), deparseArgs))
                         
                           output

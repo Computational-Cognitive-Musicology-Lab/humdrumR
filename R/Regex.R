@@ -560,7 +560,7 @@ makeRE.signature <- function(accidental.labels = c(), ...) {
     setoptions(accidental.labels) <- c(flat = '-')
     
     RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
-    paste0('^\\*k\\[(', RE, ')*\\]')
+    paste0('^\\*?k\\[(', RE, ')*\\]')
 }
 
 makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {

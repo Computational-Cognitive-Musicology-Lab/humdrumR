@@ -595,7 +595,7 @@ alteration.filter <- function(LO5th, Key, cautionary, memory) {
 }
 
 
-LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) (LO5th - (LO5th %% Key)) %/% 7L
+LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) ((LO5th - (LO5th %% Key)) %/% 7L)
 
 
 
