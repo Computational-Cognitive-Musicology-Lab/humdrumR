@@ -1929,7 +1929,7 @@ pitchArgCheck <- function(args,  callname) {
 
 
 
-makePitchTransformer <- function(deparser, callname) {
+makePitchTransformer <- function(deparser, callname, outputclass = 'character') {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -1941,7 +1941,7 @@ makePitchTransformer <- function(deparser, callname) {
                       rlang::expr( {
                         redim <- dimParse(x)
                         
-                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
+                        
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
                         classes <- sapply(args, \(arg) class(arg)[1]) 
@@ -1951,24 +1951,25 @@ makePitchTransformer <- function(deparser, callname) {
                         deparseArgs <- pitchArgCheck(args[!grepl('Args$', classes)], !!callname)
 
                         # Keys
-                        if (is.null(transposeArgs$from)) {
-                          parseArgs$Key <- Key
-                          transposeArgs$from <- CKey(Key)
-                        } else {
-                          parseArgs$Key <- transposeArgs$from
-                          transposeArgs$from <- CKey(transposeArgs$from)
-                        }
-                        if (is.null(transposeArgs$to)) {
-                          deparseArgs$Key <- Key
-                          transposeArgs$to <- CKey(Key)
-                        } else {
-                          deparseArgs$Key <- transposeArgs$to
-                          transposeArgs$to <- CKey(transposeArgs$to)
-                        }
-                      
+                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
+                        from <- if (is.null(transposeArgs$from)) Key else diatonicSet(transposeArgs$from)
+                        to   <- if (is.null(transposeArgs$to)) Key else diatonicSet(transposeArgs$to)
                         
-                        # remove NA values
-                        putNAback <- predicateParse(is.na, x = x, Key = Key, Exlusive = Exclusive, negate = TRUE)
+                        # automatically remove NA values
+                        putNAback <- predicateParse(Negate(is.na), all = FALSE,
+                                                    x = x, Key = Key, Exlusive = Exclusive,
+                                                    from = from, to = to)
+                        
+                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
+                        
+                        parseArgs$Key <- from
+                        deparseArgs$Key <- to 
+                        
+                        transposeArgs$from <- CKey(from)
+                        transposeArgs$to <- CKey(to)
+                        
+                        
+                        
                         
                         result <- {
                           
@@ -2004,8 +2005,8 @@ makePitchTransformer <- function(deparser, callname) {
 #' @name pitchTransformer
 #' @export semit midi
 #' @export pitch kern lilypond interval degree solfa
-semit <- makePitchTransformer(tint2semit, 'semit')
-midi  <- makePitchTransformer(tint2midi, 'midi')
+semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
+midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
 kern <- makePitchTransformer(tint2kern, 'kern') 
 lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')

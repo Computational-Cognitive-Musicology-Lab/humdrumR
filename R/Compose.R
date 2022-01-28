@@ -426,7 +426,7 @@ funcCall <- function(fname) {
 
 
 #' @export
-predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, negate = FALSE) {
+predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
   args <- list(...)
   
   if (is.null(names(args)) || any(names(args) == "")) .stop("predicateParse requires that all arguments are named.")
@@ -443,8 +443,7 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, 
   
   argnames <- names(args)
   
-  bool <- if (allargs) Reduce('&', lapply(args, predicateFunc)) else predicateFunc(target)
-  if (negate) bool <- !bool
+  bool <- Reduce(if (all) '&' else '|', lapply(args, predicateFunc)) 
   
   matchingArgs <- lapply(args, '[', i = bool)
   
@@ -454,7 +453,7 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, 
   
   function(result) {
     if (!(is.struct(result) || is.atomic(result)) || length(result) != sum(bool)) return(result)
-
+    
     output <- if (inPlace && class(target) == class(result)) target else vectorNA(length(target), class(result))
     
     output[bool] <- result
