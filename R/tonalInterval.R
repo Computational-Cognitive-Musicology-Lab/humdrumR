@@ -1941,6 +1941,7 @@ makePitchTransformer <- function(deparser, callname) {
                       rlang::expr( {
                         redim <- dimParse(x)
                         
+                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
                         classes <- sapply(args, \(arg) class(arg)[1]) 

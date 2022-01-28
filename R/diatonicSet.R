@@ -848,6 +848,7 @@ integer2dset <- function(x) dset(x, x)
 #' @export
 diatonicSet <- function(...) UseMethod('diatonicSet')
 
+
 #' @export
 diatonicSet.diatonicSet <- function(x, ...) x
 
