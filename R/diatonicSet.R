@@ -868,19 +868,16 @@ integer2dset <- function(x) dset(x, x)
 
 ### Parse 2dset generic and methods ####
 
-#' @export
-diatonicSet <- function(...) UseMethod('diatonicSet')
+diatonicSet_dispatch <- function(...) UseMethod('diatonicSet_dispatch')
 
-
-#' @export
-diatonicSet.diatonicSet <- function(x, ...) x
+diatonicSet_dispatch.diatonicSet <- function(x, ...) x
 
 #### Numbers ####
 
 #' @export
-diatonicSet.numeric <- function(x) integer2dset(as.integer(x))
+diatonicSet_dispatch.numeric <- function(x) integer2dset(as.integer(x))
 #' @export
-diatonicSet.integer <- integer2dset
+diatonicSet_dispatch.integer <- integer2dset
 
 #### Characters ####
 
@@ -902,14 +899,13 @@ mapofdset <- function(str, ..., split = '/') {
    dset + dset(of, of, 0L)
 }
 
-diatonicSet_humdrumDispatch  <- humdrumDispatch(doExclusiveDispatch = FALSE,
+diatonicSet_dispatch.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
                                                 'keyof: makeRE.diatonicPartition(...)' = mapofdset,
                                                 'key: makeRE.key(...)' = key2dset,
                                                 'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                                                 'signature: makeRE.signature(...)' = signature2dset)
 
-#' @export
-diatonicSet.character <- memoizeDispatch('diatonicSet_humdrumDispatch', c('x', 'of'))
+
 
 
 #### setAs diatonic set ####
@@ -939,15 +935,20 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   callname <- rlang::enexpr(callname)
   
   parse <- function(...) list(...) %class% 'parseArgs'
-  # transpose <- function(...) list(...) %class% 'transposeArgs'
   
-  rlang::new_function(alist(x = , ... = , of = NULL, dropNA = FALSE, deparse = TRUE, parseArgs = list(), memoise = TRUE),
+  args <- alist(x = , ... = , of = NULL, dropNA = FALSE,  parseArgs = list(), memoise = TRUE)
+
+  if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
+  
+  rlang::new_function(args,
                       rlang::expr( {
                         redim <- dimParse(x)
                         
                         of <- if (is.null(of)) dset(0, 0) else diatonicSet(of)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        do.call('checkTFs', list(memoise = memoise, dropNA = dropNA, callname = callname))
+                        
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
                         parseArgs   <- pitchArgCheck(c(list(of = of), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
@@ -962,11 +963,10 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                         
                         result <- {
                           
-                          parsedDset <- do.call(diatonicSet, c(list(x, memoise = FALSE), parseArgs))
+                          parsedDset <- do.call(diatonicSet_dispatch, c(list(x, memoise = FALSE), parseArgs))
                           
-                          if (!deparse) return(parsedDset)
-                          output <- do.call(!!deparser, c(list(parsedDset), deparseArgs))
-                        
+                          output <- if (deparse)  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
+                      
                           output
                         }
                         
@@ -980,7 +980,9 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
 
 ##
 #' @name keyTransformer
+#' @export diatonicSet
 #' @export key signature romanKey
+diatonicSet <- makeKeyTransformer(NULL, 'diatonicSet', 'diatonicSet')
 key <- makeKeyTransformer(dset2key, 'key')
 signature <- makeKeyTransformer(dset2signature, 'signature')
 romanKey <- makeKeyTransformer(dset2romanNumeral, 'romanKey')

@@ -1373,13 +1373,13 @@ checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, ma
     argNames <- if (length(args) > 1L) paste0('c(', glue::glue_collapse(quotemark(args), sep = ', '), ')') else quotemark(args)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
-    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
-    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few '{argname}' arguments."))
+    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many '{argname}' arguments."))
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
         classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
-        .stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+        .stop(callname, glue::glue("The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument."))
     }
     
     

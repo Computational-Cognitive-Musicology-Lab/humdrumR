@@ -1916,6 +1916,8 @@ pitchArgCheck <- function(args,  callname) {
     args$relative <- !args$absolute
   }
   
+ 
+  
   args 
   
 }
@@ -1942,6 +1944,9 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        do.call('checkTFs', c(args[names(args) %in% c('relative', 'absolute', 'simple', 'complex', 'generic', 'specific')],
+                                              memoise = memoise, inPlace = inPlace, dropNA = dropNA,
+                                              list(callname = callname)))
                         
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
