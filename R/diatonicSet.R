@@ -902,16 +902,14 @@ mapofdset <- function(str, ..., split = '/') {
    dset + dset(of, of, 0L)
 }
 
+diatonicSet_humdrumDispatch  <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                                'keyof: makeRE.diatonicPartition(...)' = mapofdset,
+                                                'key: makeRE.key(...)' = key2dset,
+                                                'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
+                                                'signature: makeRE.signature(...)' = signature2dset)
 
 #' @export
-diatonicSet.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                         'keyof: makeRE.diatonicPartition(...)' = mapofdset,
-                                         'key: makeRE.key(...)' = key2dset,
-                                         'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
-                                         'signature: makeRE.signature(...)' = signature2dset)
-  
-
-
+diatonicSet.character <- memoizeDispatch('diatonicSet_humdrumDispatch', c('x', 'of'))
 
 
 #### setAs diatonic set ####
@@ -935,7 +933,7 @@ setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 ## Key transform maker ####
 
 
-makeKeyTransformer <- function(deparser, callname) {
+makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -943,7 +941,7 @@ makeKeyTransformer <- function(deparser, callname) {
   parse <- function(...) list(...) %class% 'parseArgs'
   # transpose <- function(...) list(...) %class% 'transposeArgs'
   
-  rlang::new_function(alist(x = , ... = , of = NULL, dropNA = FALSE, deparse = TRUE, parseArgs = list()),
+  rlang::new_function(alist(x = , ... = , of = NULL, dropNA = FALSE, deparse = TRUE, parseArgs = list(), memoise = TRUE),
                       rlang::expr( {
                         redim <- dimParse(x)
                         
@@ -956,12 +954,15 @@ makeKeyTransformer <- function(deparser, callname) {
                         deparseArgs <- pitchArgCheck(c(list(of = of), args[!grepl('Args$', classes)]), !!callname)
                         
                         # remove NA values
-                        putNAback <- predicateParse(is.na, x = x, of = of, negate = TRUE)
+                        putNAback <- predicateParse(Negate(is.na), x = x, of = of)
+                        
+                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
+                        
+                        rebuild <- memoiseParse(x = x, of = of, memoise = memoise) 
                         
                         result <- {
                           
-                          #
-                          parsedDset <- do.call(diatonicSet, c(list(x), parseArgs))
+                          parsedDset <- do.call(diatonicSet, c(list(x, memoise = FALSE), parseArgs))
                           
                           if (!deparse) return(parsedDset)
                           output <- do.call(!!deparser, c(list(parsedDset), deparseArgs))
@@ -969,7 +970,7 @@ makeKeyTransformer <- function(deparser, callname) {
                           output
                         }
                         
-                        redim(if (dropNA) result else putNAback(result))
+                        redim(if (dropNA) result else putNAback(rebuild(result)))
                         
                       }))
   

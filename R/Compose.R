@@ -483,25 +483,29 @@ dimParse <- function(x) {
 ###### "Memoify" ----
 
 #' @export
-memoizeDispatch <- function(fname) {
+memoizeDispatch <- function(fname, memoizeArgs) {
     func <- match.fun(fname)
     #argnames
     argnames <- names(fargs(func))
     
+    if (length(memoizeArgs) == 0L) return(func)
     if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoizeDispatch a function with no arguments." )
     if (argnames[1] == '...') stop(call. = FALSE, "Can't memoizeDispatch a function if the first argument is ..." )
-    argnames <- argnames[argnames != "..."]
+    argnames <- argnames[argnames %in% memoizeArgs]
+    
+    argsyms <- setNames(rlang::syms(argnames), argnames)
     
     #
     fbody <- funcCall(fname)
     
     body <- rlang::quo({
-        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
+        rebuild <- memoiseParse(!!!argsyms)
         result <- {!!fbody}
         rebuild(result)
     })
     body(func) <- rlang::quo_squash(body)
     environment(func) <- new.env(parent = environment(func))
+    formals(func) <- c(formals(func), list(memoize = TRUE))
     
     assign('argnames', argnames, envir = environment(func))
     
@@ -518,7 +522,7 @@ memoizeDispatch.expr <- function(expr, argnames) {
        
   
   rlang::expr({
-    rememoise <- memoiseParse(!!!args)
+    rememoise <- memoiseParse(!!!args, memoize = memoize)
     memoizeResult <- {!!expr}
     rememoise(memoizeResult)
   })
@@ -529,7 +533,8 @@ memoizeDispatch.quosure <- function(quosure, argnames) {
   rlang::quo_set_expr(quosure, memoizeDispatch.expr(rlang::quo_get_expr(quosure), argnames))
 }
 
-memoiseParse <- function(..., minN = 100L) {
+memoiseParse <- function(..., minN = 100L, memoize = TRUE) {
+    if (!memoize) return(force)
     args <- list(...)
     
     if (is.null(names(args)) || any(names(args) == "")) .stop("memoiseParse requires that all arguments are named.")

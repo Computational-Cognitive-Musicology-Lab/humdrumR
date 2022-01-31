@@ -1937,7 +1937,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
   parse <- function(...) list(...) %class% 'parseArgs'
   transpose <- function(...) list(...) %class% 'transposeArgs'
   
-  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list(), transposeArgs = list()),
+  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list(), transposeArgs = list(), memoise = TRUE),
                       rlang::expr( {
                         redim <- dimParse(x)
                         
@@ -1962,19 +1962,17 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
                         
+                        rebuild <-  memoiseParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoise = memoise)
+                        
                         parseArgs$Key <- from
                         deparseArgs$Key <- to 
                         
                         transposeArgs$from <- CKey(from)
                         transposeArgs$to <- CKey(to)
                         
-                        
-                        
-                        
                         result <- {
-                          
                           #
-                          parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace), parseArgs))
+                          parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace, memoise = FALSE), parseArgs))
                           
                           if (length(transposeArgs) > 0L) {
                             parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
@@ -1991,7 +1989,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                           output
                         }
                         
-                        redim(if (dropNA) result else putNAback(result))
+                        redim(if (dropNA) result else putNAback(rebuild(result)))
                         
                       }))
   
