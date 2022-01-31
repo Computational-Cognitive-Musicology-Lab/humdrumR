@@ -1262,27 +1262,20 @@ solfa2tint <- function(str, ...) {
 
 ### Parse 2tint generic and methods ####
 
-#' @export
-tonalInterval <- function(...) UseMethod('tonalInterval')
+tonalInterval_dispatch <- function(...) UseMethod('tonalInterval_dispatch')
 
-#' @export
-tonalInterval.tonalInterval <- function(x, ...) x
+tonalInterval_dispatch.tonalInterval <- function(x, ...) x
 
 #### Numbers ####
 
-#' @export
-tonalInterval.numeric  <- decimal2tint
-#' @export
-tonalInterval.rational <- rational2tint
-#' @export
-tonalInterval.fraction <- fraction2tint
-#' @export
-tonalInterval.integer  <- semit2tint
+tonalInterval_dispatch.numeric  <- decimal2tint
+tonalInterval_dispatch.rational <- rational2tint
+tonalInterval_dispatch.fraction <- fraction2tint
+tonalInterval_dispatch.integer  <- semit2tint
 
 #### Characters ####
 
-#' @export
-tonalInterval.character <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
+tonalInterval_dispatch.character <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
                                            'pitch: makeRE.sciPitch(...)' = pitch2tint,
                                            'hint: makeRE.interval(...)'  = interval2tint,
                                            'mint: makeRE.interval(...)'  = interval2tint,
@@ -1937,13 +1930,19 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
   parse <- function(...) list(...) %class% 'parseArgs'
   transpose <- function(...) list(...) %class% 'transposeArgs'
   
-  rlang::new_function(alist(x = , ... = , Key = NULL, Exclusive = NULL, inPlace = FALSE, dropNA = FALSE, deparse = TRUE, parseArgs = list(), transposeArgs = list(), memoise = TRUE),
+  args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
+                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), memoise = TRUE)
+  
+  if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
+  
+  rlang::new_function(args,
                       rlang::expr( {
                         redim <- dimParse(x)
                         
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
                         transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
@@ -1972,16 +1971,12 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         result <- {
                           #
-                          parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace, memoise = FALSE), parseArgs))
+                          parsedTint <- do.call(tonalInterval_dispatch, c(list(x, inPlace = inPlace, memoise = FALSE), parseArgs))
                           
                           if (length(transposeArgs) > 0L) {
                             parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
                           }
-                          if (!deparse) return(parsedTint)
-                          
-                          output <- do.call(!!deparser, c(list(parsedTint), deparseArgs))
-                          
-                          
+                          output <- if (deparse) do.call(!!deparser, c(list(parsedTint), deparseArgs)) else parsedTint
                           
                           if (inPlace) output <- re.place(output, parsedTint)
                           
@@ -2001,8 +1996,10 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
 
 ##
 #' @name pitchTransformer
+#' @export tonalInterval
 #' @export semit midi
 #' @export pitch kern lilypond interval degree solfa
+tonalInterval <- makePitchTransformer(NULL, 'tonalInterval', 'tonalInterval')
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
@@ -2321,12 +2318,9 @@ transposeArgCheck <- function(args) {
 
 ### Transposition methods ####
 
-#' @export
-transpose.character <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.character
-#' @export
-transpose.numeric <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.numeric
-#' @export
-transpose.integer <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.integer
+#' transpose.character <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval_dispatch.character
+#' transpose.numeric <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.numeric
+#' transpose.integer <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInterval.integer
 
 
 ## Inverting tonal intervals ####
@@ -2348,12 +2342,9 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ### Inversion methods ####
 
-#' @export
-invert.character <- re.place %.% re.as %.% invert.tonalInterval %.% tonalInterval.character
-#' @export
-invert.numeric <- re.as %.% invert.tonalInterval %.% tonalInterval.numeric
-#' @export
-invert.integer <- re.as %.% invert.tonalInterval %.% tonalInterval.integer
+# invert.character <- re.place %.% re.as %.% invert.tonalInterval %.% tonalInterval.character
+# invert.numeric <- re.as %.% invert.tonalInterval %.% tonalInterval.numeric
+# invert.integer <- re.as %.% invert.tonalInterval %.% tonalInterval.integer
 
 
 
