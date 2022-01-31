@@ -1370,16 +1370,16 @@ overdot <- function(call) {
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
     if (length(sys.calls()) > 6L) return(args) 
     
-    argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
+    argNames <- if (length(args) > 1L) paste0('c(', glue::glue_collapse(quotemark(args), sep = ', '), ')') else quotemark(args)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
-    if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
-    if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
+    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
-        classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
-        stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+        classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
+        .stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
     }
     
     
@@ -1389,16 +1389,21 @@ checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, ma
     
     if (any(ill)) {
         case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
-        illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
-        legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
+        illNames <- glue::glue_collapse(quotemark(args[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
+        legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
         
+        message <- list(callname, illNames, case, 'Valid options are ', legalNames)
         
-        message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
-        
-        do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
+        do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
     }
     
     args[!ill]
+}
+
+checkTF <- function(x, argname, callname) checkArgs(x, c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
+checkTFs <- function(..., callname = NULL) {
+    args <- list(...)
+    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
 }
 
 checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
@@ -1457,6 +1462,8 @@ pasteordered <- function(order, ..., sep = '') {
 affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)
 
 plural <- function(n, then, els) .ifelse(n > 1, then, els)
+
+quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
 
 nth <- function(n) {
     affix <- rep('th', length(n))
