@@ -267,7 +267,7 @@ setMethod('sign', signature = c('tonalInterval'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval.character(e1, inPlace = TRUE)
+              e1 <- tonalInterval_dispatch.character(e1, inPlace = TRUE)
               e3 <- stickyApply(`+`, e1, e2)
               
               re.place(re.as(e3))
@@ -276,7 +276,7 @@ setMethod('+', signature = c('character', 'tonalInterval'),
 
 setMethod('+', signature = c('tonalInterval', 'character'),
           function(e1, e2) {
-              e2 <- tonalInterval.character(e2, inPlace = TRUE)
+              e2 <- tonalInterval_dispatch.character(e2, inPlace = TRUE)
               e3 <- stickyApply(`+`, e1, e2)
               
               re.place(re.as(e3))
@@ -289,7 +289,7 @@ setMethod('+', signature = c('tonalInterval', 'character'),
 
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval(e1)
+              e1 <- tonalInterval_dispatch(e1)
               e3 <- stickyApply(`-`, e1, e2)
               
               re.place(re.as(e3))
@@ -298,7 +298,7 @@ setMethod('-', signature = c('character', 'tonalInterval'),
 
 setMethod('-', signature = c('tonalInterval', 'character'),
           function(e1, e2) {
-            e2 <- tonalInterval(e2)
+            e2 <- tonalInterval_dispatch(e2)
             e3 <- stickyApply(`-`, e1, e2)
             
             re.place(re.as(e3))
