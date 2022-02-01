@@ -1933,7 +1933,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
   transpose <- function(...) list(...) %class% 'transposeArgs'
   
   args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
-                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), memoise = TRUE)
+                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), memoize = TRUE)
   
   if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
   
@@ -1945,7 +1945,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
                         do.call('checkTFs', c(args[names(args) %in% c('relative', 'absolute', 'simple', 'complex', 'generic', 'specific')],
-                                              memoise = memoise, inPlace = inPlace, dropNA = dropNA,
+                                              memoize = memoize, inPlace = inPlace, dropNA = dropNA,
                                               list(callname = callname)))
                         
                         classes <- sapply(args, \(arg) class(arg)[1]) 
@@ -1966,7 +1966,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
                         
-                        rebuild <-  memoiseParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoise = memoise)
+                        rebuild <-  memoizeParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoize = memoize)
                         
                         parseArgs$Key <- from
                         deparseArgs$Key <- to 
@@ -1976,7 +1976,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         result <- {
                           #
-                          parsedTint <- do.call(tonalInterval_dispatch, c(list(x, inPlace = inPlace, memoise = FALSE), parseArgs))
+                          parsedTint <- do.call(tonalInterval_dispatch, c(list(x, inPlace = inPlace, memoize = FALSE), parseArgs))
                           
                           if (length(transposeArgs) > 0L) {
                             parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))

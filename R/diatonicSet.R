@@ -936,7 +936,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   
   parse <- function(...) list(...) %class% 'parseArgs'
   
-  args <- alist(x = , ... = , of = NULL, dropNA = FALSE,  parseArgs = list(), memoise = TRUE)
+  args <- alist(x = , ... = , of = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE)
 
   if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
   
@@ -947,7 +947,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                         of <- if (is.null(of)) dset(0, 0) else diatonicSet(of)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        do.call('checkTFs', list(memoise = memoise, dropNA = dropNA, callname = callname))
+                        do.call('checkTFs', list(memoize = memoize, dropNA = dropNA, callname = callname))
                         
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
@@ -959,11 +959,11 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                         
                         if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
                         
-                        rebuild <- memoiseParse(x = x, of = of, memoise = memoise) 
+                        rebuild <- memoizeParse(x = x, of = of, memoize = memoize) 
                         
                         result <- {
                           
-                          parsedDset <- do.call(diatonicSet_dispatch, c(list(x, memoise = FALSE), parseArgs))
+                          parsedDset <- do.call(diatonicSet_dispatch, c(list(x, memoize = FALSE), parseArgs))
                           
                           output <- if (deparse)  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
                       

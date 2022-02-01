@@ -52,8 +52,8 @@ compose.default <- function(..., fenv = parent.frame()) {
     ### environment
     # fenv <- new.env() # parent.env(parent.frame())
     Map(function(fname, f) assign(fname, f, envir = fenv), 
-        c(fnames, 'memoiseParse', 'predicateParse'), 
-        c(fs, memoiseParse, predicateParse))
+        c(fnames, 'memoizeParse', 'predicateParse'), 
+        c(fs, memoizeParse, predicateParse))
     
     
     # Create the new function
@@ -499,7 +499,7 @@ memoizeDispatch <- function(fname, memoizeArgs) {
     fbody <- funcCall(fname)
     
     body <- rlang::quo({
-        rebuild <- memoiseParse(!!!argsyms)
+        rebuild <- memoizeParse(!!!argsyms)
         result <- {!!fbody}
         rebuild(result)
     })
@@ -522,9 +522,9 @@ memoizeDispatch.expr <- function(expr, argnames) {
        
   
   rlang::expr({
-    rememoise <- memoiseParse(!!!args, memoize = memoize)
+    rememoize <- memoizeParse(!!!args, memoize = memoize)
     memoizeResult <- {!!expr}
-    rememoise(memoizeResult)
+    rememoize(memoizeResult)
   })
   
 }
@@ -533,11 +533,11 @@ memoizeDispatch.quosure <- function(quosure, argnames) {
   rlang::quo_set_expr(quosure, memoizeDispatch.expr(rlang::quo_get_expr(quosure), argnames))
 }
 
-memoiseParse <- function(..., minN = 100L, memoize = TRUE) {
+memoizeParse <- function(..., minN = 100L, memoize = TRUE) {
     if (!memoize) return(force)
     args <- list(...)
     
-    if (is.null(names(args)) || any(names(args) == "")) .stop("memoiseParse requires that all arguments are named.")
+    if (is.null(names(args)) || any(names(args) == "")) .stop("memoizeParse requires that all arguments are named.")
     
     # only atomic/struct args that are longer than minN are affected
     args <- args[sapply(args, function(arg) (is.atomic(arg) || is.struct(arg)) && length(arg) >= minN)]
