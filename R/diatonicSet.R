@@ -2,7 +2,7 @@
 # diatonicSet S4 class ###############
 ################################## ###
 
-### Definition, validity, initialization ####
+## Definition, validity, initialization ####
 
 
 #' Tonal (diatonic) sets
@@ -136,7 +136,7 @@ setClass('diatonicSet',
 
 
 
-### Constructors ####
+## Constructors ####
 
 #' The basic constructor for \code{diatonicSet}s.
 #' The root argument can accept either an integer (line-of-fifths), a \code{\link[humdrumR:tonalInterval]{tonalInterval}}, 
@@ -155,7 +155,7 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 
 
-### Accessors ####
+## Accessors ####
 
 
 #' @export
@@ -193,7 +193,7 @@ getAlterations <- function(dset) {
 }
 
 
-### Formatting methods ####
+## Formatting methods ####
 
 
 #' @name diatonicSet
@@ -480,7 +480,7 @@ dset2pitcher <- function(pitch.func) {
 dset2tonalChroma <- dset2pitcher(tint2tonalChroma)
 
 
-### Key Representations ####  
+### Key representations ####  
 
 
 
@@ -615,24 +615,23 @@ dset2romanNumeral <- function(dset, flat = 'b', of = NULL, ...) {
 # Parsing key information (x2dest) #######################################
 ###################################################################### ###
 
-## Key parses ####
+## Key parsers ####
 
-### Key Representations ####  
+### Key representations ####  
 
-qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.labels = c(),  ...) {
-    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
-    
+qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, 
+                            major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', ...) {
     
     
     # modes are the 7 13th-chord/modes in L05th order
-    modes <- list(c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'augment'),
-                  c('perfect', 'perfect', 'major', 'major', 'major', 'major', 'perfect'),
-                  c('perfect', 'perfect', 'major', 'major', 'major', 'minor', 'perfect'),
-                  c('perfect', 'perfect', 'major', 'minor', 'major', 'minor', 'perfect'),
-                  c('perfect', 'perfect', 'major', 'minor', 'minor', 'minor', 'perfect'),
-                  c('perfect', 'perfect', 'minor', 'minor', 'minor', 'minor', 'perfect'),
-                  c('perfect', 'diminish', 'minor', 'minor', 'minor', 'minor', 'perfect'))
-    modes <- lapply(modes, function(labels) unlist(quality.labels[labels]))
+    modes <- list(c(perfect, perfect, major, major, major, major, augment),
+                  c(perfect, perfect, major, major, major, major, perfect),
+                  c(perfect, perfect, major, major, major, minor, perfect),
+                  c(perfect, perfect, major, minor, major, minor, perfect),
+                  c(perfect, perfect, major, minor, minor, minor, perfect),
+                  c(perfect, perfect, minor, minor, minor, minor, perfect),
+                  c(perfect, diminish, minor, minor, minor, minor, perfect))
+
     modes_int <- 1L:-5L
     names(modes) <- names(modes_int) <- sapply(modes, paste, collapse = '')
     
@@ -655,7 +654,7 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.
     alterations <- integer(length(str))
     if (any(is.na(mode))) {
       altered <- is.na(mode)
-      quality.labels <- quality.labels[c('diminish', 'minor', 'perfect', 'major', 'augment')] # reorder for rank
+      quality.labels <- c(diminish, minor, perfect, major, augment) # reorder for rank
       modes <- do.call('cbind', modes)
       
       mode_alterations <- lapply(strsplit(str[altered], split = ''),
@@ -697,30 +696,31 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, quality.
 }
 
 
-alteration2trit <- function(str, mode = integer(length(str)), alteration.labels = c()) {
-    setoptions(alteration.labels) <- c(augment = '#', diminish = 'b')
+alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat = 'b', ...) {
     
-    accidentalRE <- captureUniq(alteration.labels, zero = TRUE)
+    accidentalRE <- captureUniq(c(sharp, flat), zero = TRUE)
     
     str <- stringr::str_replace(str, '13', '6')
     str <- stringr::str_replace(str, '11', '4')
     str <- stringr::str_replace(str, '10', '3')
     str <- stringr::str_replace(str,  '9', '2')
     
+    hits <- str != ''
     # degrees
-    degrees <- stringr::str_extract_all(str,   paste0(accidentalRE, '[1234567]'))
+    degrees <- stringr::str_extract_all(str[hits],   paste0(accidentalRE, '[1234567]'))
     
     acc <- lapply(degrees, stringr::str_extract, accidentalRE)
-    acc <- lapply(acc, accidental2LO5th, accidental.labels = alteration.labels) 
+    acc <- lapply(acc, function(acc) specifier2tint(acc, qualities = FALSE, 
+                                                    sharp = sharp, flat = flat, ...)@Fifth) 
     degrees <- lapply(degrees, stringr::str_remove, accidentalRE)
     
     alterations <- matrix(0, nrow = length(str), ncol = 7)
     
     degrees <- data.frame(Accidentals = unlist(acc), 
                           Degrees = unlist(degrees),
-                          Row = rep(seq_along(str), lengths(acc)))
+                          Row = rep(seq_len(sum(hits)), lengths(acc)))
 
-    alterations[cbind(degrees$Row, match(degrees$Degrees, c(4, 1, 5, 2, 6, 3, 7, 4)))] <- degrees$Accidentals 
+    alterations[cbind(which(hits)[degrees$Row], match(degrees$Degrees, c(4, 1, 5, 2, 6, 3, 7, 4)))] <- degrees$Accidentals 
     alterations[] <- alterations %/% 7L
     
     ## rotate to appropriate mode
@@ -824,7 +824,7 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
 
     
     # Signature
-    minor <- stringi::stri_detect_regex(str, '[a-g].*:?|[iv]') * -3L
+    minor <- stringi::stri_detect_regex(step, '[a-g]|[iv]') * -3L
     mode <- .ifelse(mode == "", 0 , c(dor = +1, mix = -1, lyd = +1, phr = -1, loc = -2)[mode])
     signature <- root + mode + minor
     
@@ -999,7 +999,7 @@ signature <- makeKeyTransformer(dset2signature, 'signature')
 romanKey <- makeKeyTransformer(dset2romanNumeral, 'romanKey')
 
 ###################################################################### ### 
-# Manipulating Key Representations #######################################
+# Manipulating diatonic sets #############################################
 ###################################################################### ### 
 
 ###################################################################### ### 
@@ -1018,20 +1018,20 @@ romanKey <- makeKeyTransformer(dset2romanNumeral, 'romanKey')
 #' @export Bflatmajor Gsharpmajor Eflatminor Cdorian Asharpdorian Fmixolydian Dsharpmixolydian Bflatlydian Gsharplydian Eflatphrygian Clocrian Asharplocrian 
 #' @export Cflatmajor Aminor Fflatminor Ddorian Bsharpdorian Gmixolydian Esharpmixolydian Cflatlydian Aphrygian Fflatphrygian Dlocrian Bsharplocrian 
 #' @export Dflatmajor Bminor Gflatminor Edorian Csharpdorian Aflatmixolydian Fsharpmixolydian Dflatlydian Bphrygian Gflatphrygian Elocrian Csharplocrian 
-
-allkeys <- expand.grid(Step = LETTERS[1:7], stringsAsFactors = FALSE,
-                       Accidental = c('', 'flat', 'sharp'),
-                       Mode = c('major', 'minor', 'dorian', 'mixolydian', 'lydian', 'phrygian', 'locrian'))
-allkeys <- within(allkeys, Handle <- paste0(Step, Accidental, Mode))
-allkeys$Step <- ifelse(allkeys$Mode %in% c('minor', 'dorian', 'phrygian', 'locrian'), tolower(allkeys$Step), allkeys$Step)
-allkeys$Mode <- ifelse(allkeys$Mode %in% c('major', 'minor') , '', substr(allkeys$Mode, 1, 3))
-                      
-
-allkeys$Accidental <- c('', '-', '#')[match(allkeys$Accidental, c('', 'flat', 'sharp'))]
-                      
-allkeys <- within(allkeys, String <- paste0('*', Step, Accidental, ':', Mode))
-
-
-for (i in 1:nrow(allkeys)) {
-    assign(allkeys$Handle[i], key2dset(allkeys$String[i]))
-}
+# 
+# allkeys <- expand.grid(Step = LETTERS[1:7], stringsAsFactors = FALSE,
+#                        Accidental = c('', 'flat', 'sharp'),
+#                        Mode = c('major', 'minor', 'dorian', 'mixolydian', 'lydian', 'phrygian', 'locrian'))
+# allkeys <- within(allkeys, Handle <- paste0(Step, Accidental, Mode))
+# allkeys$Step <- ifelse(allkeys$Mode %in% c('minor', 'dorian', 'phrygian', 'locrian'), tolower(allkeys$Step), allkeys$Step)
+# allkeys$Mode <- ifelse(allkeys$Mode %in% c('major', 'minor') , '', substr(allkeys$Mode, 1, 3))
+#                       
+# 
+# allkeys$Accidental <- c('', '-', '#')[match(allkeys$Accidental, c('', 'flat', 'sharp'))]
+#                       
+# allkeys <- within(allkeys, String <- paste0('*', Step, Accidental, ':', Mode))
+# 
+# 
+# for (i in 1:nrow(allkeys)) {
+#     assign(allkeys$Handle[i], key2dset(allkeys$String[i]))
+# }

@@ -494,10 +494,10 @@ makeRE.alterations <- function(..., qualities = FALSE) {
 
     
     paste0('(', 
-           makeRE.tonalChroma(parts = c("species", "step"), ...,
-                              steps.sign = FALSE, qualities = qualities, 
+           overdot(makeRE.tonalChroma(parts = c("species", "step"), ...,
+                              steps.sign = FALSE, qualities = qualities, flat = 'b',
                               step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
-                              regexname = 'alterations'),
+                              regexname = 'alterations')),
            ')*')
 }
 
@@ -576,49 +576,41 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
 
 ####. REs for tertian sets ####
 
-makeRE.sciChord <- function(..., quality.labels = c(), collapse = TRUE) {
-    setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts = c("step", 'accidentals'),
-                              step.labels = '[A-G]',
+    REs <- makeRE.tonalChroma(parts = c("step", 'species'),
+                              step.labels = '[A-G]', accidentals = TRUE,
                               step.sign = FALSE, collapse = FALSE, ...)
     
-    qualityRE <- captureRE(quality.labels[c('major', 'minor', 'augment', 'diminish')])
-    REs['qualities'] <-  paste0('(', 
-                                qualityRE, '{3}',  
-                                captureRE(quality.labels[c('perfect', 'augment', 'diminish')]), 
-                                qualityRE, 
-                                '?)|(', 
-                                qualityRE, '{1,3})')
+    qualityRE <- captureRE(c(major, minor, augment, diminish))
+    REs['quality'] <-  paste0('(', 
+                              qualityRE, '{3}',  
+                              captureRE(c(perfect, augment, diminish)), 
+                              qualityRE, 
+                              '?)|(', 
+                              qualityRE, '{1,3})')
    
-    REs <- REs[c("step", 'accidentals', 'qualities')]
+    REs <- REs[c("step", "species", "quality")]
     
     if (collapse) setNames(cREs(REs), 'sciChord') else REs
 }
 
-makeRE.romanChord <- function(..., triad.labels = c(), collapse = TRUE) {
-    setoptions(triad.labels)      <- c(diminish = 'o', augment  = '+')
-    triad.labels$augment <- paste0('[', triad.labels$augment, ']') # because "+" is a special character!
+makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+    augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
-    REs$accidentals <- makeRE.accidentals(...)
+    REs$accidental <- makeRE.accidentals(...)
     
-    upper <- paste0('(?=[IV]+', triad.labels$augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
-    lower <- paste0('(?=[iv]+', triad.labels$diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
-    REs$numerals <- paste0('(', upper, '|', lower, ')')
+    upper <- paste0('(?=[IV]+', augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
+    lower <- paste0('(?=[iv]+', diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
+    REs$numeral <- paste0('(', upper, '|', lower, ')')
     
     
-    
-    # REs['triadalts'] <- paste0('(', 
-    #                           '(?<=[IV])', triad.labels['augment'],
-    #                           '|',
-    #                           '(?<=[iv])', triad.labels['diminish'],
-    #                           ')')
-    REs$triadalts <- captureRE(triad.labels, n = '?')
+    REs$triadalt <- captureRE(c(diminish, augment), n = '?')
 
     
     REs['figurations'] <- makeRE.alterations(...)
-    REs <- REs[c('accidentals', 'numerals', 'triadalts', 'figurations')]
+    REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
     if (collapse) setNames(cREs(REs), 'chord') else REs

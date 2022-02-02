@@ -152,7 +152,7 @@ setMethod("initialize",
           }) 
 
 
-### Constructors ####
+## Constructors ####
 
 #' The basic constructor for `tonalInterval`s.
 #' `tint` accepts integer values for octaves and LO5ths and numeric values for cent.
@@ -170,7 +170,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     if (partition) tintPartition(tint, Key = Key, roundContour = roundContour) else tint
 }
 
-### Accessors ####
+## Accessors ####
 
 #' @export
 setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
@@ -191,7 +191,7 @@ getOctave <- function(tint) tint@Octave %dim% tint
 
 
 
-### Formatting methods ####
+## Formatting methods ####
 
 setMethod('as.character', signature = c('tonalInterval'), 
           function(x) kern(x))
