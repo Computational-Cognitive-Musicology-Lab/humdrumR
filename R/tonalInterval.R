@@ -621,8 +621,7 @@ tint2specifier <- function(x, Key = NULL, ...,
   
   
   dontlabel <- if (truthy(parseWindows) && length(parseWindows) == length(LO5th)) {
-    unlist(tapply(LO5th, parseWindows, 
-                  \(x) alteration.filter(x, Key, cautionary, memory, implicitSpecies, explicitNaturals)))
+    tapply_inplace(LO5th, parseWindows,  \(x) alteration.filter(x, Key, cautionary, memory, implicitSpecies, explicitNaturals))
   } else {
     alteration.filter(LO5th, if (implicitSpecies) Key else dset(0, 0), cautionary, memory, implicitSpecies, explicitNaturals)
   }
@@ -1094,7 +1093,8 @@ accidental2LO5th <- function(str, accidental.labels = c(), ...) {
 
 specifier2tint <- function(str, step = NULL, Key = NULL, 
                            qualities = TRUE,
-                           speciesFromKey = FALSE, memory = FALSE, alterKey = FALSE,
+                           memory = FALSE, parseWindows = NULL,
+                           implicitSpecies = FALSE, absoluteSpecies = TRUE, 
                            sharp = '#', flat = '-', natural = 'n', 
                            doublesharp = FALSE, doubleflat = FALSE, 
                            perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
@@ -1103,7 +1103,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   # step is lof = -1:5
   step <- if (is.null(step)) 0L else getFifth(step)
    
-  if (qualities && alterKey) .stop("When parsing tonal information, you can't use the alterKey == TRUE if the specifier type is 'quality'.")
+  if (qualities && !absoluteSpecies) .stop("When parsing tonal information, you can't use the absoluteSpecies == FALSE if the specifier type is 'quality'.")
     
   # use double sharp/flats?
   if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
@@ -1112,13 +1112,19 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   
   
   # incorporate memory?
-  if (truthy(memory)) {
-    match_size(size.out = length(str),
-               step = step, 
-               memory = memory, 
-               toEnv = TRUE)
+  if (memory) {
+    str <- if (truthy(parseWindows) && length(parseWindows) == length(str)) {
+      match_size(size.out = length(str),
+                 step = step, 
+                 memory = memory, 
+                 toEnv = TRUE)
+      tapply_inplace(str, paste0(step, ':', parseWindows), fillForward, nonnull = \(x) x != '')
+    } else {
+      fillForward(str, nonnull = \(x) x != '')
+    }
+  
     
-    str <- unlist(tapply_inplace(str, paste0(step, ':', memory), fillForward, nonnull = function(x) x != ''))
+   
   } 
   
   # calculate lof
@@ -1134,12 +1140,12 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
   
   # incorporate key?
-  if (!is.null(Key) && speciesFromKey) {
+  if (!is.null(Key) && implicitSpecies) {
     keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
-    if (alterKey) {
-      lof <- lof + keyalt
-    } else {
+    if (absoluteSpecies) {
       lof[str == ''] <- keyalt[str == '']
+    } else {
+      lof <- lof + keyalt
     }
     
   }
@@ -1951,10 +1957,10 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        do.call('checkTFs', c(args[names(args) %in% c('relative', 'absolute', 'simple', 'complex', 'generic', 'specific')],
+                        do.call('checkTFs', c(args[names(args) %in% c('relative', 'absolute', 'simple', 'complex', 'generic', 'specific',
+                                                                      'implicitSpecies', 'absoluteSpecies', 'explicitNaturals')],
                                               memoize = memoize, inPlace = inPlace, dropNA = dropNA,
                                               list(callname = callname)))
-                        
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
                         transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
