@@ -2,7 +2,7 @@
 #' 
 #' Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
 #' 
-#' @param data The data to be transformed
+#' @param data The data to be transformed (for now, please read in your spine as a dataframe with 1 column)
 #' 
 #' @return the transformed data
 #' 
@@ -83,7 +83,36 @@ text <- function(data){
   }
   return(data)
 }
-
+#' silbeFormat
+#' 
+#' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
+#' 
+#' @param data The data to be checked for improper formatting (for now, please read in your spine as a dataframe with 1 column)
+#' 
+#' @return "Formatted properly." if the lyrics are formatted properly, else print error message with corrections.
+#' 
+#' @export
+#' 
+#' @example Spine with syllable labelling errors, with resulting error message
+#' # lyrics
+#' #  ya'll
+#' #    act
+#' #   like
+#' # you've
+#' #    ne-
+#' #    ver
+#' #   seen
+#' #      a
+#' #  white
+#' #   per-
+#' #    son
+#' #    be-
+#' #  fore
+#' 
+#' silbeFormat(data)
+#' 
+#' # error, improperly formatted **silbe: ne- ver should be ne- - ver and per- son should be per- - son and be- fore should be be- - fore
+#' 
 silbeFormat <- function(data){
   save_initials <- list()
   print_initial <- list()
@@ -106,7 +135,6 @@ silbeFormat <- function(data){
     return("Formatted properly.")
   }
   else{
-    #      print("error, improperly formatted **silbe:")
     cat("error, improperly formatted **silbe:", save_initials[1][[1]], "should be", save_corrected[1][[1]])
     if(counter > 1){
       for(i in 2:counter){
@@ -114,6 +142,15 @@ silbeFormat <- function(data){
       }
     }
   }
-  #  return(corrections)
 }
-silbeFormat(dummyData)
+
+# test
+# values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+# dummyData <- data.frame(values)
+# text(dummyData)
+# silbeFormat(dummyData)
+# 
+# values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
+# dummyData <- data.frame(values)
+# text(dummyData)
+# silbeFormat(dummyData)
