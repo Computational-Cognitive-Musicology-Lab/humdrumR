@@ -561,35 +561,32 @@ alteration.memory <- function(LO5th) {
 }
 
 alteration.inKey <- function(LO5th, Key) {
-  if (is.null(Key)) Key <- dset(0, 0)
-  
   LO5th2alterationN(LO5th, Key) == 0L
 }
 
 
 
-alteration.filter <- function(LO5th, Key, cautionary, memory) {
-  # determines which notes need an accidental label (FALSE) and which don't (TRUE)
+alteration.filter <- function(LO5th, Key, cautionary, memory, implicit, explicitNaturals) {
+  # determines which notes need an specifier (FALSE) and which don't (TRUE)
+  output <- logical(length(LO5th))
+  
+  if (!explicitNaturals) output[LO5th > -2L & LO5th < 6L] <- TRUE
+  
+  if (!(memory || cautionary || implicit)) return(output) 
+  
+  # implicit must be TRUE
+  output <- alteration.inKey(LO5th, Key) & output
+  if (!(memory || cautionary)) return(output)
+  
   
   conflicted <- alteration.conflicts(LO5th)
   mem  <- alteration.memory(LO5th)
-  inKey <- alteration.inKey(LO5th, Key) # if Key == NULL, inKey is now Cmajor
   
-  if (!(memory || cautionary)) return(inKey) 
-  
-  if (is.null(Key)) {
     
-    if ( cautionary & !memory) return(rep(FALSE, length(LO5th)))
-    if (!cautionary &  memory) return((mem$sameasbefore & !mem$new) | (mem$new & inKey))
-    if ( cautionary &  memory) return(mem$sameasbefore & !mem$new)
+  if ( cautionary & !memory) return(output & !conflicted)
+  if (!cautionary &  memory) return((mem$sameasbefore & !mem$new) | (mem$new & output))
+  if ( cautionary &  memory) return(mem$sameasbefore & !mem$new)
     
-  } else {
-    
-    if ( cautionary & !memory) return(inKey & !conflicted)
-    if (!cautionary &  memory) return(mem$sameasbefore & (!mem$new | (mem$new & inKey)))
-    if ( cautionary & memory) return(mem$sameasbefore & !xor(inKey, mem$new)) 
-    
-  }
   
   
 }
@@ -608,18 +605,30 @@ tint2accidental <- function(x, ...) tint2specifier(x, ..., qualities = FALSE)
 
 tint2specifier <- function(x, Key = NULL, ...,
                            qualities = FALSE,
-                           cautionary = FALSE, 
-                           useKey = FALSE, memory = FALSE, alterKey = FALSE,
+                           cautionary = FALSE, memory = FALSE, parseWindows = NULL,
+                           implicitSpecies = FALSE, absoluteSpecies = TRUE, explicitNaturals = FALSE,
                            sharp = '#', flat = '-', natural = 'n', 
                            doublesharp = FALSE, doubleflat = FALSE, 
                            perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
                            specifier.maximum = Inf, specifier.minimum = -specifier.maximum,
                            accidental.integer = FALSE) {
+  
   LO5th <- LO5th(x)
+  if (!absoluteSpecies) {
+    LO5th <- LO5th - getSignature(Key)
+    Key <- Key - getMode(Key)
+  }
   
-  dontlabel <- alterKey & alteration.filter(LO5th, Key, cautionary, memory)
   
-  specifiers <- ifelse(dontlabel, "", if (qualities) major else {if (cautionary) natural else ''})
+  dontlabel <- if (truthy(parseWindows) && length(parseWindows) == length(LO5th)) {
+    unlist(tapply(LO5th, parseWindows, 
+                  \(x) alteration.filter(x, Key, cautionary, memory, implicitSpecies, explicitNaturals)))
+  } else {
+    alteration.filter(LO5th, if (implicitSpecies) Key else dset(0, 0), cautionary, memory, implicitSpecies, explicitNaturals)
+  }
+  
+  
+  specifiers <- ifelse(dontlabel, "", if (qualities) major else natural)
   
   na <- is.na(LO5th)
   specifiers[na] <- NA_character_
@@ -658,9 +667,8 @@ tint2tonalChroma <- function(x,
                              parts = c("species", "step", "octave"), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
                              keyed = FALSE, Key = NULL,
-                             qualities = !accidentals, accidentals = !qualities, ...) {
+                             qualities = FALSE, ...) {
   
-  if (!xor(qualities, accidentals)) .stop("When deparsing pitch information, you must choose either 'accidentals' or 'qualities', not {if(qualities & accidentals) 'both' else 'neither'}!")
   
   if (keyed && !is.null(Key)) x <- x + diatonicSet(Key)
   
@@ -713,7 +721,7 @@ tint2lilypond <- function(x, relative = TRUE, ...) {
   overdot(tint2tonalChroma(x, 
                            step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                            up = "'", down = ",",
-                           accidentals = TRUE,
+                           qualities = FALSE,
                            relative = relative, octave.integer = FALSE,
                            octave.round = if (relative) round else floor,
                            sharp = 'is', flat = 'es',
@@ -1086,7 +1094,7 @@ accidental2LO5th <- function(str, accidental.labels = c(), ...) {
 
 specifier2tint <- function(str, step = NULL, Key = NULL, 
                            qualities = TRUE,
-                           useKey = FALSE, memory = FALSE, alterKey = FALSE,
+                           speciesFromKey = FALSE, memory = FALSE, alterKey = FALSE,
                            sharp = '#', flat = '-', natural = 'n', 
                            doublesharp = FALSE, doubleflat = FALSE, 
                            perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
@@ -1126,7 +1134,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
   
   # incorporate key?
-  if (!is.null(Key) && useKey) {
+  if (!is.null(Key) && speciesFromKey) {
     keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
     if (alterKey) {
       lof <- lof + keyalt
@@ -1146,13 +1154,12 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 
 tonalChroma2tint <- function(str,  
                              parts = c("step", "species", "octave"), 
-                             qualities = FALSE, accidentals = !qualities,
+                             qualities = FALSE, 
                              parse.exhaust = TRUE, 
                              keyed = FALSE, Key = NULL, 
                              ...) {
  
   
- if (!xor(qualities, accidentals)) .stop("When parsing pitch information, you must choose either 'accidentals' or 'qualities', not {if(qualities & accidentals) 'both' else 'neither'}!")
   
  parts <- matched(parts, c("sign", "step", "species", "octave"))
  
@@ -1187,7 +1194,7 @@ tonalChroma2tint <- function(str,
 pitch2tint <- function(str, ...) {
   overdot(tonalChroma2tint(str, parts = c("step", "species", "octave"), 
                            octave.offset = 4L, octave.integer = TRUE,
-                           accidentals = TRUE,
+                           qualities = FALSE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
                            keyed = TRUE,
@@ -1201,7 +1208,7 @@ kern2tint <- function(str, ...) {
   step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
   simple <- overdot(tonalChroma2tint(str, parts = c("step", "species"), 
                                      keyed = TRUE,  
-                                     accidentals = TRUE,
+                                     qualities = FALSE,
                                      step.labels = step.labels, steps.sign = TRUE, ...))
   
   # octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
@@ -1218,7 +1225,7 @@ interval2tint <- function(str, ...) {
 degree2tint <- function(str, ...) {
   
   overdot(tonalChroma2tint(str, parts = c("octave", "species", "step"), 
-                           accidentals = TRUE, 
+                           qualities = FALSE, 
                            keyed = FALSE,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
@@ -1248,7 +1255,7 @@ solfa2tint <- function(str, ...) {
   str_ <- stringr::str_replace(str, alt, sylalt)
   
   overdot(tonalChroma2tint(str_, parts = c("octave", "step", "species"),
-                           step.labels = rownames(alt.mat), accidentals = TRUE,
+                           step.labels = rownames(alt.mat), qualities = FALSE,
                            keyed = FALSE,
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
                            flat = 'b',

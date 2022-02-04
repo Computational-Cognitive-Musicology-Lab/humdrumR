@@ -165,8 +165,7 @@ getRoot <- function(dset) dset@Root %dim% dset
 getRootTint <- function(dset) {
     root <- getRoot(dset)
     
-    out <- LO5thNcentralOct2tint(root, 0L)
-    out %dim% dset
+    tint( , c(root)) %dim% dset
     
 }
 
@@ -539,7 +538,7 @@ dset2signature <- function(dset, of = NULL, ...) {
     tints <- tint( , LO5ths) %dim% NULL
     
     notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
-                              flat = '-', accidentals = TRUE, Key = dset(0, 0),
+                              flat = '-', qualities = FALSE, Key = dset(0, 0),
                               step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %dim% LO5ths
     
     notes[LO5ths <= 5L & LO5ths >= -1L] <- ""

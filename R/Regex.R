@@ -579,7 +579,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
 makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts = c("step", 'species'),
-                              step.labels = '[A-G]', accidentals = TRUE,
+                              step.labels = '[A-G]', qualities = FALSE,
                               step.sign = FALSE, collapse = FALSE, ...)
     
     qualityRE <- captureRE(c(major, minor, augment, diminish))

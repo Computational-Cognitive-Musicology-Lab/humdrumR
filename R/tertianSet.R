@@ -174,7 +174,7 @@ setMethod('LO5th', 'tertianSet',
     LO5ths <- LO5ths * thirds
     LO5ths[!thirds] <- NA_integer_
     
-    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)), accidentals = TRUE,
+    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)), qualities = FALSE,
                                         step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                                         parts = c('step', 'species'))
     
@@ -189,14 +189,13 @@ setMethod('LO5th', 'tertianSet',
 
 
 
-tset2alterations <- function(tset, parts = 'qualities', inversion = TRUE, Key = dset(0,0), accidental.naturals = TRUE, ...) {
+tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dset(0,0), useKey = FALSE, accidental.naturals = TRUE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
   if (!inversion) tset <- rootposition(tset)
   bass <- getBass(tset)
   
-  if (is.null(Key)) {
-    # Key <- dset(0, -1)
+  if (!useKey) {
     tset <- tset - getRoot(tset)
   }
   if (!accidental.naturals) {
@@ -205,12 +204,12 @@ tset2alterations <- function(tset, parts = 'qualities', inversion = TRUE, Key = 
   }
   
   LO5ths <- LO5th(tset)
-  tints <- tint( , LO5ths)
-  figures <- tint2tonalChroma(tints,  Key = Key, parts = parts, ...)
+  tints <- tint( , c(LO5ths))
+  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, useKey = useKey, ...)
   
   # colnames(figures) <- extensions
-  rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
-  figures
+  # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
+  figures %dim% LO5ths
   
 }
 
@@ -242,14 +241,12 @@ triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase 
   
 }
 
-tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...) {
-  setoptions(quality.labels) <- c(major = 'M', minor = 'm', 
-                                  diminish = 'o', augment = '+', 
-                                  perfect = 'P')
+tset2triadLabel <- function(tset, 
+                            major = 'M', minor = 'm', diminish = 'o', augment = '+', perfect = 'P',
+                            ...) {
   
-  setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
-  
-  qualities <- tset2alterations(tset, parts = 'qualities', inversion = FALSE, Key = NULL, quality.labels = quality.labels, quality.cautionary = TRUE, quality.memory = FALSE)
+  qualities <- tset2alterations(tset, qualities = TRUE, inversion = FALSE,  step = FALSE, ...,
+                                major = major, minor = minor, diminish = diminish, augment = augment, perfect = perfect)
   qualities[!is.na(qualities) & nchar(qualities) > 1L] <- .paste('(',  qualities[!is.na(qualities) & nchar(qualities) > 1L], ')')
   # rownames(qualities) <- root
   
@@ -265,15 +262,14 @@ tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...)
   }
   
   ##
-  reductions <- with(quality.labels, matrix(ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment))))
+  reductions <- matrix(ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment)))
   reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
   
-  reductions <- with(quality.labels,
-                     {
-                       reductions[minor, diminish] <- triad.labels$diminish
-                       reductions[minor, perfect] <- triad.labels$minor
-                       reductions[major, perfect] <- triad.labels$major
-                       reductions[major, augment] <- triad.labels$augment
+  reductions <- local({
+                       reductions[minor, diminish] <- diminish
+                       reductions[minor, perfect] <- minor
+                       reductions[major, perfect] <- major
+                       reductions[major, augment] <- augment
                        reductions[major, diminish] <- '(b5)'
                        reductions
                      }
@@ -340,38 +336,38 @@ reduceFigures <- function(alterations, extensions, inverted,
 }
 
 
-tset2tonalHarmony <- function(tset, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, 
-                               inversion = TRUE, inversion.labels = letters,
-                               qualifyTriad = triadQualify.Roman, figure.Key = TRUE, accidental.naturals = FALSE, sep = '', ...) {
-  parts <- matched(parts, c('root', 'qualities', 'accidentals', 'extensions', 'inversion'))
+tset2tonalHarmony <- function(tset,
+                              parts = c('root', 'quality', 'figuration'), 
+                              root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
+                              root_func = tint2romanRoot, bass_func = root_func, quality_func = tset2triadLabel,
+                              qualifyRoot = triadQualify.Roman, 
+                              keyed = FALSE, of = NULL, useKey = FALSE, 
+                              inversion.labels = letters,
+                              sep = '', ...) {
+  parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
-  qualoracc <- parts[parts %in% c('qualities', 'accidentals')]
+  
+  root      <- if (root) root_func(getRootTint(tset), Key = of, useKey = useKey, ...) 
+  bass      <- if (bass) .ifelse(getInversion(tset) > 0, bass_func(getBassTint(tset), Key = of, useKey = useKey, ...), "")
   
   
-  root        <- if ('root' %in% parts)      steps(getRootTint(tset), Key = if (figure.Key) Key, ...) 
-  alterations <- if (length(qualoracc) > 0L) tset2alterations(tset, parts = qualoracc[1], Key = Key, inversion = inversion,
-                                                              accidental.naturals = accidental.naturals, ...) 
-  extensions  <- if ('extensions' %in% parts) tset2extensions(tset, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
-  
-  inversion   <- if ('inversion' %in% parts) {
-    if (is.function(inversion.labels)) {
-      ifelse(inversion | getInversion(tset) > 0, inversion.labels(tint( , getBass(tset)), Key = NULL), "")
-    } else {
-      getInversion(tset, inversion.labels = inversion.labels)
-    }
+  quality  <- if (quality) {
+    quality <- quality_func(tset, Key = of, ...)
+    if (!is.null(qualifyRoot)) root <- qualifyRoot(root, quality) 
+    quality
   }
   
-  triad.quality <- tset2triadLabel(tset, Key = NULL, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
-  if (!is.null(qualifyTriad)) root <- qualifyTriad(root, triad.quality) 
-  
-  figures <- if (any(c('extensions', 'qualities') %in% parts)) {
-    parts[parts == qualoracc[1]] <- 'figures'
-    reduceFigures(alterations, extensions, getInversion(tset) > 0L, ...) %dots% (has.prefix('extension.') %.% names)
+  figuration <- if (figuration) {
+    extensions <- tset2extensions(tset, inversion = inversion, ...)
+    alterations <- tset2alterations(tset, qualities = FALSE, Key = of, useKey = useKey, step = FALSE, inversion = inversion, flat = 'b', ...) 
+    reduceFigures(alterations, extensions, getInversion(tset) > 0L, ...)
   }
   
-  tonalharmony <- pasteordered(parts, root = root, figures = figures, inversion = inversion, sep = sep)
+  inversion <- if (inversion) getInversion(tset, inversion.labels = inversion.labels)
   
-  tonalharmony  %dim% tset
+  tonalharmony <- pasteordered(parts, root = root, figuration = figuration, inversion = inversion, bass = 'bass', sep = sep)
+  
+  tonalharmony  
 }
 
 
@@ -399,16 +395,18 @@ tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
 
 
 tset2romanNumeral <- function(tset,  ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), qualifyTriad = triadQualify.Roman, 
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
+                            root_func = tint2romanRoot, 
+                            qualifyTriad = triadQualify.Roman, 
                             inversion.labels = letters,
                             extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=TRUE,
                             extension.sus = TRUE, extension.add = TRUE,
-                            inversion = FALSE, figure.Key = TRUE, Key = dset(0,0), ...))
+                            inversion = FALSE, useKey = FALSE, of = dset(0,0), ...))
   
 }
 
 tset2sciChord <- function(tset,  ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'qualities'), 
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality'), 
                             steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
                             qualifyTriad = paste0, quality.cautionary = TRUE,
                             extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
@@ -597,7 +595,7 @@ romanNumeral2tset <- function(str, Key = NULL, of = dset(0,0), diminish = 'd', a
           toEnv = TRUE)  # adds accidental numeral triadalt figurations to the environment
   
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
-                           parts = c('species', 'step'), accidentals = TRUE,
+                           parts = c('species', 'step'), qualities = FALSE,
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                            Key = of, ...)@Fifth
   
@@ -652,7 +650,7 @@ sciChord2tset <- function(str, ...) {
             makeRE.sciChord(..., collapse = FALSE),
             toEnv = TRUE) -> parsed
   
-    root <- tonalChroma2tint(paste0(step, species), parts = c('step', 'species'), accidentals = TRUE, ...)@Fifth
+    root <- tonalChroma2tint(paste0(step, species), parts = c('step', 'species'), qualities = FALSE, ...)@Fifth
     
     # qualities
     quality <- local({
