@@ -4,11 +4,13 @@
 #' 
 #' @param data The data to be transformed (for now, please read in your spine as a dataframe with 1 column)
 #' 
+#' @param nullTokens Boolean expression which determines whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. Default is TRUE
+#' 
 #' @return the transformed data
 #' 
 #' @export
 #' 
-#' @example Spine of syllabic form transformed into word/text form
+#' @example Spine of syllabic form transformed into word/text form with nullTokens = TRUE
 #'  # lyrics
 #'  #   Now
 #'  #   let
@@ -42,42 +44,69 @@
 #'  #      wild
 #'  #      wild
 #'  #     west.
-text <- function(data){
-  save_initial_row <- 0
-  save_word <- ""
-  save_value <- c()
-  iteration <- 1
-  for (i in iteration:nrow(data)){
-    splitString <- strsplit(data[i, 1], "")[[1]]
-    if(splitString[length(splitString)] == '-' ||  splitString[1] == '-'){
-      if(splitString[length(splitString)] == '-' && splitString[1] != '-') {
-        save_initial_row = i
-        save_value <- append(save_value, splitString)
-        splitStringBelow <- strsplit(data[i+1, 1], "")[[1]]
-        save_value <- append(save_value, splitStringBelow)
-        if(splitStringBelow[length(splitStringBelow)] != '-'){
+#'  @example Spine of syllabic form transformed into word/text form with nullTokens = FALSE
+#'  Same input as above.
+#'  
+#'  text(data, nullTokens = FALSE)
+#'  
+#'  # lyrics
+#'  #       Now
+#'  #       let
+#'  #        me
+#'  #   welcome 
+#'  # everybody 
+#'  #        to
+#'  #       the
+#'  #      wild
+#'  #      wild
+#'  #     west. 
+text <- function(data, nullTokens = TRUE){
+  if(nullTokens == FALSE){
+    data <- toString(data[,1])
+    data <- str_replace_all(data, "-, -", "")
+    data <- str_replace_all(data, ",", "")
+    data <- as.list(strsplit(data, '\\s+')[[1]])
+    transpose1 <- t(data)
+    transpose2 <- t(transpose1)
+    data <- as.data.frame(transpose2)
+  }
+  else{
+    save_initial_row <- 0
+    save_word <- ""
+    save_value <- c()
+    iteration <- 1
+    for (i in iteration:nrow(data)){
+      splitString <- strsplit(data[i, 1], "")[[1]]
+      if(splitString[length(splitString)] == '-' ||  splitString[1] == '-'){
+        if(splitString[length(splitString)] == '-' && splitString[1] != '-') {
+          save_initial_row = i
+          save_value <- append(save_value, splitString)
+          splitStringBelow <- strsplit(data[i+1, 1], "")[[1]]
+          save_value <- append(save_value, splitStringBelow)
+          if(splitStringBelow[length(splitStringBelow)] != '-'){
+            save_value <- save_value[save_value != "-"]
+            save_word <- paste(save_value, collapse = '')
+            data[save_initial_row,] <- save_word
+            data[save_initial_row+1,] <- "."
+            iteration = i + 1
+            save_value <- c()
+          }
+          else{
+            iteration <- i+1
+          }
+        }
+        if(splitString[length(splitString)] == '-' &&  splitString[1] == '-'){
+          save_value <- append(save_value, strsplit(data[i+1, 1], "")[[1]])
+          data[i,] = "."
+        }
+        if(splitString[length(splitString)] != '-' && splitString[1] == '-') {
+          data[i,] = "."
           save_value <- save_value[save_value != "-"]
           save_word <- paste(save_value, collapse = '')
-          data[save_initial_row,] <- save_word
-          data[save_initial_row+1,] <- "."
+          data[save_initial_row,] = save_word
           iteration = i + 1
           save_value <- c()
         }
-        else{
-          iteration <- i+1
-        }
-      }
-      if(splitString[length(splitString)] == '-' &&  splitString[1] == '-'){
-        save_value <- append(save_value, strsplit(data[i+1, 1], "")[[1]])
-        data[i,] = "."
-      }
-      if(splitString[length(splitString)] != '-' && splitString[1] == '-') {
-        data[i,] = "."
-        save_value <- save_value[save_value != "-"]
-        save_word <- paste(save_value, collapse = '')
-        data[save_initial_row,] = save_word
-        iteration = i + 1
-        save_value <- c()
       }
     }
   }
