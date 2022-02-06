@@ -69,46 +69,63 @@ text <- function(data, nullTokens = TRUE){
     transpose1 <- t(data)
     transpose2 <- t(transpose1)
     data <- as.data.frame(transpose2)
+    colnames(data) <- c('Lyrics')
   }
   else{
-    save_initial_row <- 0
-    save_word <- ""
-    save_value <- c()
-    iteration <- 1
-    for (i in iteration:nrow(data)){
-      splitString <- strsplit(data[i, 1], "")[[1]]
-      if(splitString[length(splitString)] == '-' ||  splitString[1] == '-'){
-        if(splitString[length(splitString)] == '-' && splitString[1] != '-') {
-          save_initial_row = i
-          save_value <- append(save_value, splitString)
-          splitStringBelow <- strsplit(data[i+1, 1], "")[[1]]
-          save_value <- append(save_value, splitStringBelow)
-          if(splitStringBelow[length(splitStringBelow)] != '-'){
-            save_value <- save_value[save_value != "-"]
-            save_word <- paste(save_value, collapse = '')
-            data[save_initial_row,] <- save_word
-            data[save_initial_row+1,] <- "."
-            iteration = i + 1
-            save_value <- c()
-          }
-          else{
-            iteration <- i+1
-          }
-        }
-        if(splitString[length(splitString)] == '-' &&  splitString[1] == '-'){
-          save_value <- append(save_value, strsplit(data[i+1, 1], "")[[1]])
-          data[i,] = "."
-        }
-        if(splitString[length(splitString)] != '-' && splitString[1] == '-') {
-          data[i,] = "."
-          save_value <- save_value[save_value != "-"]
-          save_word <- paste(save_value, collapse = '')
-          data[save_initial_row,] = save_word
-          iteration = i + 1
-          save_value <- c()
-        }
+    wordAddSpace <- function(value){
+      if(substr(value,1,1) == "-"){
+        return(TRUE)
+      }
+      else{
+        return(FALSE)
       }
     }
+    replaceWithNullToken <- function(booleanValue){
+      if(booleanValue == TRUE){
+        return(".")
+      }
+      else{
+        return("word")
+      }
+    }
+    save <- apply(data, 1, function(x){wordAddSpace(x)})
+    save <- as.data.frame(save)
+    # go through and if true then add space below
+    save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+    save2 <- as.data.frame(save2)
+    saveWords <- text(data, nullTokens = FALSE)
+    
+    newFunction <- function(dataValue, rowValue){
+      rowValueToString <- toString(rowValue)
+      dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+      return(dataValue[rowValue,1])
+    }
+    newFunction2 <- function(findRowValues, iteration){
+      getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+      return(getRowValueFinal)
+    }
+    newFunction4 <- function(iterate, final, wordsArray){
+      iterateToString <- toString(iterate)
+      if(iterateToString %in% final){
+        return(wordsArray[match(iterate,final),1])
+      }
+      else{
+        return(".")
+      }
+    }
+    numbers <- 1:nrow(save2)
+    numbers <- as.data.frame(numbers)
+    saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+    saveNew <- as.data.frame(saveNew)
+    saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+    finalData <- numbers
+    finalWordsLength <- 1:nrow(saveWords)
+    finalWordsLength <- as.data.frame(finalWordsLength)
+    saveNewDataFrame <- as.data.frame(saveNew)
+    finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+    finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+    data <- as.data.frame(unlist(finalDataComplete))
+    colnames(data) <- c('Lyrics')
   }
   return(data)
 }
@@ -172,15 +189,18 @@ silbeFormat <- function(data){
     }
   }
 }
+## Tests
 
+# test 1
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+dummyData <- data.frame(values)
+text(dummyData)
+text(dummyData, nullTokens = FALSE)
+silbeFormat(dummyData)
 
-# test
-# values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-# dummyData <- data.frame(values)
-# text(dummyData)
-# silbeFormat(dummyData)
-# 
-# values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
-# dummyData <- data.frame(values)
-# text(dummyData)
-# silbeFormat(dummyData)
+# test 2
+values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
+dummyData <- data.frame(values)
+text(dummyData)
+text(dummyData, nullTokens = FALSE)
+silbeFormat(dummyData)
