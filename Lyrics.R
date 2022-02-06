@@ -173,6 +173,7 @@ silbeFormat <- function(data){
   }
 }
 
+
 # test
 # values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # dummyData <- data.frame(values)
