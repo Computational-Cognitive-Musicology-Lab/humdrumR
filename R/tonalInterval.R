@@ -371,7 +371,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 
 
-
+`%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L
 
 
 
@@ -575,7 +575,7 @@ alteration.filter <- function(LO5th, Key, cautionary, memory, implicit, explicit
   if (!(memory || cautionary || implicit)) return(output) 
   
   # implicit must be TRUE
-  output <- alteration.inKey(LO5th, Key) & output
+  output <- alteration.inKey(LO5th, Key) 
   if (!(memory || cautionary)) return(output)
   
   
@@ -623,7 +623,7 @@ tint2specifier <- function(x, Key = NULL, ...,
   dontlabel <- if (truthy(parseWindows) && length(parseWindows) == length(LO5th)) {
     tapply_inplace(LO5th, parseWindows,  \(x) alteration.filter(x, Key, cautionary, memory, implicitSpecies, explicitNaturals))
   } else {
-    alteration.filter(LO5th, if (implicitSpecies) Key else dset(0, 0), cautionary, memory, implicitSpecies, explicitNaturals)
+    alteration.filter(LO5th, Key, cautionary, memory, implicitSpecies, explicitNaturals)
   }
   
   
@@ -1041,7 +1041,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
 
 ### Tonal ####
 
-
+genericstep <- function(x) ((x - 1L) %% 7L) + 1L
 
 step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...) {
   

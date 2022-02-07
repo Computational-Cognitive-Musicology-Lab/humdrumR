@@ -189,23 +189,23 @@ setMethod('LO5th', 'tertianSet',
 
 
 
-tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dset(0,0), useKey = FALSE, accidental.naturals = TRUE, ...) {
+tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dset(0,0), implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
   if (!inversion) tset <- rootposition(tset)
   bass <- getBass(tset)
   
-  if (!useKey) {
+  if (!implicitSpecies) {
     tset <- tset - getRoot(tset)
   }
-  if (!accidental.naturals) {
+  if (explicitNaturals) {
     tset <- tset - getRoot(Key)
     Key <- Key - getRoot(Key)
   }
   
   LO5ths <- LO5th(tset)
   tints <- tint( , c(LO5ths))
-  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, useKey = useKey, ...)
+  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, implicitSpecies = implicitSpecies, ...)
   
   # colnames(figures) <- extensions
   # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
@@ -288,13 +288,15 @@ tset2triadLabel <- function(tset,
 }
 
 
-reduceFigures <- function(alterations, extensions, inverted, 
-                          extension.which = c(3, 5, 7, 2, 4, 6), extension.shorthand = TRUE, 
+reduceFigures <- function(alterations, extensions, inversion, 
+                          extension.shorthand = TRUE, extension.simple = TRUE,
                           extension.add = TRUE, extension.sus = TRUE, 
+                          extension.decreasing = TRUE,
                           extension.sep = '', ...) {
   if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
   if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
   
+  inverted <- inversion > 0L
   
   present <- !is.na(alterations) 
   tags <- array("", dim = dim(alterations))
@@ -319,19 +321,29 @@ reduceFigures <- function(alterations, extensions, inverted,
   
   #
   if (extension.shorthand) {
-    topmost <- do.call('pmax', as.data.frame(col(present) * present))
-    nottopmost <- sweep(col(extensions), 1, topmost, '<') | col(extensions) <= 3L 
+    # if (!extension.simple && any(inverted)) {
+      # extensions[inverted, ] <- genericstep(extensions[inverted, ])
+    # }
+    chorddegree <- sweep(extensions, 1, 2L * inversion, '+')
+    chorddegree[chorddegree %in% c(8L, 10L, 12L)] <- chorddegree[chorddegree %in% c(8L, 10L, 12L)] - 7L
+    chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] <- chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] - 14L
     
-    extensions[nottopmost & alterations == ""] <- NA_integer_
+    hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, which.max), '<') | extensions == 1L
+    
+    extensions[hide & alterations == ""] <- NA_integer_
     
   }
   
+  
+  # order
+  orders <- apply(extensions, 1, order, decreasing = extension.decreasing, na.last = NA, simplify = FALSE)
+  
   alterations[] <- .paste(tags, alterations, extensions, fill = "")
-  figures <- alterations[ , nth(extension.which), drop = FALSE]
+  figures <- Map(\(i,j) alterations[i,j], 1:nrow(alterations), orders)
+  
+  sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
   
   #
-  figures[figures != ""] <- .paste(extension.sep[1], figures[figures != ""], extension.sep[2], na.if = all, sep = '')
-  Reduce(paste0, as.data.frame(figures))
   
 }
 
@@ -341,14 +353,14 @@ tset2tonalHarmony <- function(tset,
                               root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
                               root_func = tint2romanRoot, bass_func = root_func, quality_func = tset2triadLabel,
                               qualifyRoot = triadQualify.Roman, 
-                              keyed = FALSE, of = NULL, useKey = FALSE, 
-                              inversion.labels = letters,
+                              keyed = FALSE, of = NULL, 
+                              inversion.labels = NULL,
                               sep = '', ...) {
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
   
-  root      <- if (root) root_func(getRootTint(tset), Key = of, useKey = useKey, ...) 
-  bass      <- if (bass) .ifelse(getInversion(tset) > 0, bass_func(getBassTint(tset), Key = of, useKey = useKey, ...), "")
+  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...), "")
+  root      <- if (root) root_func(getRootTint(tset), Key = of, ...) 
   
   
   quality  <- if (quality) {
@@ -359,13 +371,13 @@ tset2tonalHarmony <- function(tset,
   
   figuration <- if (figuration) {
     extensions <- tset2extensions(tset, inversion = inversion, ...)
-    alterations <- tset2alterations(tset, qualities = FALSE, Key = of, useKey = useKey, step = FALSE, inversion = inversion, flat = 'b', ...) 
-    reduceFigures(alterations, extensions, getInversion(tset) > 0L, ...)
+    alterations <- overdot(tset2alterations(tset, qualities = FALSE, Key = of, step = FALSE, inversion = inversion, ...) )
+    reduceFigures(alterations, extensions, if (inversion) getInversion(tset) else 0L, ...)
   }
   
-  inversion <- if (inversion) getInversion(tset, inversion.labels = inversion.labels)
+  inversion.label <- if (!is.null(inversion.labels)) getInversion(tset, inversion.labels = inversion.labels)
   
-  tonalharmony <- pasteordered(parts, root = root, figuration = figuration, inversion = inversion, bass = 'bass', sep = sep)
+  tonalharmony <- pasteordered(parts, root = root, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
   
   tonalharmony  
 }
@@ -373,11 +385,11 @@ tset2tonalHarmony <- function(tset,
 
 
 tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('inversion','accidentals', 'extensions'), qualifyTriad = NULL, inversion.labels = tint2simplepitch,
-                            steps = tint2simplepitch,
-                            extension.shorthand = FALSE, extension.which = c(7,6,5,4,3,2), extension.simple=TRUE,
+  overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), qualifyTriad = NULL, inversion.labels = NULL,
+                            root = FALSE, bass = TRUE, bass_func = tint2kern,
+                            extension.shorthand = TRUE, extension.simple=TRUE,
                             extension.sus = FALSE, extension.add = FALSE,
-                            inversion = TRUE, figure.Key = TRUE, Key = dset(0, 0), 
+                            inversion = TRUE, figure.Key = TRUE, 
                             sep = '', ...)) -> figures
   
   if (extension.shorthand) {
@@ -398,10 +410,10 @@ tset2romanNumeral <- function(tset,  ...) {
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
                             root_func = tint2romanRoot, 
                             qualifyTriad = triadQualify.Roman, 
-                            inversion.labels = letters,
+                            inversion.labels = NULL,
                             extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=TRUE,
                             extension.sus = TRUE, extension.add = TRUE,
-                            inversion = FALSE, useKey = FALSE, of = dset(0,0), ...))
+                            inversion = TRUE, ...))
   
 }
 
