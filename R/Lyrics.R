@@ -63,28 +63,25 @@
 text <- function(data, nullTokens = TRUE){
   if(nullTokens == FALSE){
     data <- toString(data[,1])
-    data <- str_replace_all(data, "-, -", "")
-    data <- str_replace_all(data, ",", "")
+    data <- stringr::str_replace_all(data, "-, -", "")
+    data <- stringr::str_replace_all(data, ",", "")
     data <- as.list(strsplit(data, '\\s+')[[1]])
     transpose1 <- t(data)
     transpose2 <- t(transpose1)
     data <- as.data.frame(transpose2)
     colnames(data) <- c('Lyrics')
-  }
-  else{
+  } else {
     wordAddSpace <- function(value){
       if(substr(value,1,1) == "-"){
         return(TRUE)
-      }
-      else{
+      } else{
         return(FALSE)
       }
     }
     replaceWithNullToken <- function(booleanValue){
       if(booleanValue == TRUE){
         return(".")
-      }
-      else{
+      } else{
         return("word")
       }
     }
@@ -199,8 +196,18 @@ text(dummyData, nullTokens = FALSE)
 silbeFormat(dummyData)
 
 # test 2
-values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
+values <- c("ya'll", 'act', 'like', "you've", 'ne-', '-ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
 dummyData <- data.frame(values)
 text(dummyData)
 text(dummyData, nullTokens = FALSE)
 silbeFormat(dummyData)
+
+
+
+
+# c('ne-','-ver', 'seen','a','white','per-','-son', 'be-','-fore')
+# c('never','.','seen','a','white','person','.','before')
+# c('never[1]','never[2]', 'seen','a','white','person[1]',person[2]',
+#   'before[1]','before[2]')
+# c('never[2]', '.', 'seen','a','white','person[2]','.','before[2]')
+
