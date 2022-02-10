@@ -62,6 +62,7 @@
 #'  #     west. 
 text <- function(data, nullTokens = TRUE){
   if(nullTokens == FALSE){
+    data <- as.data.frame(data)
     data <- toString(data[,1])
     data <- str_replace_all(data, "-, -", "")
     data <- str_replace_all(data, ",", "")
@@ -88,6 +89,7 @@ text <- function(data, nullTokens = TRUE){
         return("word")
       }
     }
+    data <- as.data.frame(data)
     save <- apply(data, 1, function(x){wordAddSpace(x)})
     save <- as.data.frame(save)
     # go through and if true then add space below
@@ -124,8 +126,7 @@ text <- function(data, nullTokens = TRUE){
     saveNewDataFrame <- as.data.frame(saveNew)
     finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
     finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
-    data <- as.data.frame(unlist(finalDataComplete))
-    colnames(data) <- c('Lyrics')
+    data <- (unlist(finalDataComplete))
   }
   return(data)
 }
@@ -193,9 +194,8 @@ silbeFormat <- function(data){
 
 # test 1
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-dummyData <- data.frame(values)
-text(dummyData)
-text(dummyData, nullTokens = FALSE)
+save <- text(values)
+text(values, nullTokens = FALSE)
 silbeFormat(dummyData)
 
 # test 2
