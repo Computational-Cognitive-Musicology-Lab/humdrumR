@@ -189,7 +189,7 @@ setMethod('LO5th', 'tertianSet',
 
 
 
-tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dset(0,0), implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
+tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion = TRUE, implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
   if (!inversion) tset <- rootposition(tset)
@@ -197,6 +197,7 @@ tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dse
   
   if (!implicitSpecies) {
     tset <- tset - getRoot(tset)
+    Key <- dset(0, -1L)
   }
   if (explicitNaturals) {
     tset <- tset - getRoot(Key)
@@ -205,7 +206,8 @@ tset2alterations <- function(tset, qualities = TRUE, inversion = TRUE, Key = dse
   
   LO5ths <- LO5th(tset)
   tints <- tint( , c(LO5ths))
-  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, implicitSpecies = implicitSpecies, ...)
+  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, 
+                              implicitSpecies = TRUE, explicitNaturals = explicitNaturals, ...)
   
   # colnames(figures) <- extensions
   # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
@@ -230,69 +232,72 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
 
 
 
-triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase = c('diminish', 'minor'), triad.show = c('diminish', 'augment')) {
-  setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
-  triad.labels <- unlist(triad.labels)
-  
-  root[triad %in% triad.labels[triad.lowercase]] <- tolower(root[triad %in% triad.labels[triad.lowercase]])
-  triad[!triad %in% triad.labels[triad.show]] <- ""
-  
-  paste0(root, triad)
-  
-}
+# triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase = c('diminish', 'minor'), triad.show = c('diminish', 'augment')) {
+#   setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
+#   triad.labels <- unlist(triad.labels)
+#   
+#   root[triad %in% triad.labels[triad.lowercase]] <- tolower(root[triad %in% triad.labels[triad.lowercase]])
+#   triad[!triad %in% triad.labels[triad.show]] <- ""
+#   
+#   paste0(root, triad)
+#   
+# }
 
-tset2triadLabel <- function(tset, 
-                            major = 'M', minor = 'm', diminish = 'o', augment = '+', perfect = 'P',
-                            ...) {
+tset2triadLabel <- function(tset, root, root.case = TRUE, 
+                            major = 'M', minor = 'm', diminish = 'o', augment = '+') {
   
-  qualities <- tset2alterations(tset, qualities = TRUE, inversion = FALSE,  step = FALSE, ...,
+  perfect <- 'P'
+  
+  qualities <- tset2alterations(tset, qualities = TRUE, inversion = FALSE,  step = FALSE,
+                                explicitNaturals = TRUE, implicitSpecies = FALSE,
                                 major = major, minor = minor, diminish = diminish, augment = augment, perfect = perfect)
-  qualities[!is.na(qualities) & nchar(qualities) > 1L] <- .paste('(',  qualities[!is.na(qualities) & nchar(qualities) > 1L], ')')
-  # rownames(qualities) <- root
   
+  qualities <- qualities[ , c('3rd', '5th'), drop = FALSE]
+  thirds <- qualities[ , '3rd', drop = FALSE]
+  fifths <- qualities[ , '5th', drop = FALSE]
   
-  triadnotes <- qualities[ , c('3rd', '5th'), drop = FALSE]
-  triad <- character(nrow(triadnotes))
+  #
+  triadQuality <- rep('?', nrow(qualities))
   
-  # incomplete triads
-  incompletetriad <- rowSums(is.na(triadnotes)) > 0
-  if (any(incompletetriad)) {
-    inc <- which(!is.na(triadnotes), arr.ind = TRUE)
-    triad[inc[ , 'row']] <- paste0('(', triadnotes[inc], c(3,5)[inc[ , 'col']], ')')
-  }
+
   
-  ##
-  reductions <- matrix(ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment)))
-  reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
+  ## prepare labels for known combinations of third and fifth qualities
+  reductions <- matrix('?', ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment)))
+  # reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
   
   reductions <- local({
                        reductions[minor, diminish] <- diminish
                        reductions[minor, perfect] <- minor
                        reductions[major, perfect] <- major
                        reductions[major, augment] <- augment
-                       reductions[major, diminish] <- '(b5)'
                        reductions
                      }
   )
-  # BAD FIX:
-  # triadnotes[triadnotes[ , '5th'] == '','5th'] <- 'P'
-  known <- triadnotes[ , '3rd'] %in% rownames(reductions) & triadnotes[ , '5th'] %in% colnames(reductions)
-  triad[!incompletetriad & known] <- reductions[triadnotes[!incompletetriad & known, , drop = FALSE]]
-  triadnotes[is.na(triadnotes)] <- 'no'
-  triad[!incompletetriad & !known] <- paste0('(', triadnotes[!incompletetriad & !known , '3rd'], 
-                                             triadnotes[!incompletetriad & !known , '5th'], ')')
   
-  triad
+  ## get labels
+  known <- thirds %in% rownames(reductions) & fifths %in% colnames(reductions)
+  
+  triadQuality[known] <- reductions[cbind(thirds[known], fifths[known])]
+  
+  
+  if (!is.null(root) && root.case)  {
+    root[substr(thirds, 0, 1) %in% c(minor, diminish)] <- tolower(root[substr(thirds, 0, 1) %in% c(minor, diminish)])
+    triadQuality[triadQuality %in% c(major, minor)] <- ""
+  }
+  
+  list(triadQuality = triadQuality, root = root)
   
   
 }
 
 
-reduceFigures <- function(alterations, extensions, inversion, 
+reduceFigures <- function(alterations, extensions, 
+                          triadquality, root.case = FALSE,
+                          inversion, 
                           extension.shorthand = TRUE, extension.simple = TRUE,
                           extension.add = TRUE, extension.sus = TRUE, 
-                          extension.decreasing = TRUE,
-                          extension.sep = '', ...) {
+                          extension.decreasing = TRUE, 
+                          extension.sep = '', flat = '-', minor = 'm', diminish = 'o', ...) {
   if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
   if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
   
@@ -300,6 +305,20 @@ reduceFigures <- function(alterations, extensions, inversion,
   
   present <- !is.na(alterations) 
   tags <- array("", dim = dim(alterations))
+  
+  
+  # get rid of alterations that are already taken care of by the quality!
+  if (!is.null(triadquality)) {
+    if (root.case) {
+      alterations[col(alterations) == 2L & alterations %in% c(flat, minor)] <- ""
+      alterations[col(alterations) == 3L & alterations == diminish] <- ""
+    }
+    alterations[triadquality != '?', 1:3] <- ""
+    
+    alterations[col(alterations) <= 3L & alterations == 'n'] <- ""
+  }
+
+  
   
   if (any(!inverted) && extension.sus) {
     
@@ -328,9 +347,9 @@ reduceFigures <- function(alterations, extensions, inversion,
     chorddegree[chorddegree %in% c(8L, 10L, 12L)] <- chorddegree[chorddegree %in% c(8L, 10L, 12L)] - 7L
     chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] <- chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] - 14L
     
-    hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, which.max), '<') | extensions == 1L
+    hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<') 
     
-    extensions[hide & alterations == ""] <- NA_integer_
+    extensions[(hide & alterations == "") | extensions == 1L] <- NA_integer_
     
   }
   
@@ -351,10 +370,12 @@ reduceFigures <- function(alterations, extensions, inversion,
 tset2tonalHarmony <- function(tset,
                               parts = c('root', 'quality', 'figuration'), 
                               root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
-                              root_func = tint2romanRoot, bass_func = root_func, quality_func = tset2triadLabel,
-                              qualifyRoot = triadQualify.Roman, 
+                              figurationArgs = list(),
+                              root_func = tint2romanRoot, bass_func = root_func,
+                              root.case = TRUE,
                               keyed = FALSE, of = NULL, 
                               inversion.labels = NULL,
+                              major = 'M', minor = 'm',
                               sep = '', ...) {
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
@@ -362,22 +383,27 @@ tset2tonalHarmony <- function(tset,
   bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...), "")
   root      <- if (root) root_func(getRootTint(tset), Key = of, ...) 
   
-  
-  quality  <- if (quality) {
-    quality <- quality_func(tset, Key = of, ...)
-    if (!is.null(qualifyRoot)) root <- qualifyRoot(root, quality) 
+  quality   <- if (quality) {
+    {quality; root} %<-% tset2triadLabel(tset, root, root.case)
     quality
   }
+ 
   
   figuration <- if (figuration) {
-    extensions <- tset2extensions(tset, inversion = inversion, ...)
-    alterations <- overdot(tset2alterations(tset, qualities = FALSE, Key = of, step = FALSE, inversion = inversion, ...) )
-    reduceFigures(alterations, extensions, if (inversion) getInversion(tset) else 0L, ...)
+    extensions  <- do.call('tset2extensions', c(list(tset, inversion = inversion), figurationArgs))
+    alterations <- do.call('tset2alterations', c(list(tset, Key = of, inversion = inversion, step = FALSE), figurationArgs))
+    
+    figuration <- do.call('reduceFigures', c(list(alterations, extensions, quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
+    quality[quality == '?'] <- ""
+    figuration
+    
   }
+  
+  
   
   inversion.label <- if (!is.null(inversion.labels)) getInversion(tset, inversion.labels = inversion.labels)
   
-  tonalharmony <- pasteordered(parts, root = root, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
+  tonalharmony <- pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
   
   tonalharmony  
 }
@@ -406,12 +432,17 @@ tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
 }
 
 
-tset2romanNumeral <- function(tset,  ...) {
+tset2romanNumeral <- function(tset,  of = dset(0, 0), figurationArgs = c(), ...) {
+  
+  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
+  
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
-                            root_func = tint2romanRoot, 
-                            qualifyTriad = triadQualify.Roman, 
+                            root_func = tint2romanRoot, of = of,
+                            figurationArgs = figurationArgs, 
+                            implicitSpecies = TRUE,
+                            rootCase = TRUE,
                             inversion.labels = NULL,
-                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=TRUE,
+                            extension.shorthand = TRUE, extension.simple=TRUE,
                             extension.sus = TRUE, extension.add = TRUE,
                             inversion = TRUE, ...))
   
@@ -421,6 +452,7 @@ tset2sciChord <- function(tset,  ...) {
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality'), 
                             steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
                             qualifyTriad = paste0, quality.cautionary = TRUE,
+                            
                             extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
                             accidental.naturals = TRUE,
                             extension.add=FALSE, extension.sus = FALSE,
