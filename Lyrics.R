@@ -2,7 +2,7 @@
 #' 
 #' Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
 #' 
-#' @param data The data to be transformed (for now, please read in your spine as a dataframe with 1 column)
+#' @param data The data to be transformed (a character vector)
 #' 
 #' @param nullTokens Boolean expression which determines whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. Default is TRUE
 #' 
@@ -69,8 +69,77 @@ text <- function(data, nullTokens = TRUE){
     data <- as.list(strsplit(data, '\\s+')[[1]])
     transpose1 <- t(data)
     transpose2 <- t(transpose1)
-    data <- as.data.frame(transpose2)
-    colnames(data) <- c('Lyrics')
+    data <- as.character(transpose2)
+  }
+  else{
+    wordAddSpace <- function(value){
+      if(substr(value,1,1) == "-"){
+        return(TRUE)
+      }
+      else{
+        return(FALSE)
+      }
+    }
+    replaceWithNullToken <- function(booleanValue){
+      if(booleanValue == TRUE){
+        return(".")
+      }
+      else{
+        return("word")
+      }
+    }
+    data <- as.data.frame(data)
+    save <- apply(data, 1, function(x){wordAddSpace(x)})
+    save <- as.data.frame(save)
+    # go through and if true then add space below
+    save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+    save2 <- as.data.frame(save2)
+    saveWords <- text(data, nullTokens = FALSE)
+    
+    newFunction <- function(dataValue, rowValue){
+      rowValueToString <- toString(rowValue)
+      dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+      return(dataValue[rowValue,1])
+    }
+    newFunction2 <- function(findRowValues, iteration){
+      getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+      return(getRowValueFinal)
+    }
+    newFunction4 <- function(iterate, final, wordsArray){
+      iterateToString <- toString(iterate)
+      if(iterateToString %in% final){
+        return(wordsArray[match(iterate,final),1])
+      }
+      else{
+        return(".")
+      }
+    }
+    numbers <- 1:nrow(save2)
+    numbers <- as.data.frame(numbers)
+    saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+    saveNew <- as.data.frame(saveNew)
+    saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+    finalData <- numbers
+    finalWordsLength <- 1:nrow(saveWords)
+    finalWordsLength <- as.data.frame(finalWordsLength)
+    saveNewDataFrame <- as.data.frame(saveNew)
+    finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+    finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+    data <- (unlist(finalDataComplete))
+  }
+  return(data)
+}
+textKeepSilbe <- function(data, nullTokens = TRUE){
+  if(nullTokens == FALSE){
+    data2 <- as.data.frame(data)
+    data2 <- toString(data2[,1])
+    data2 <- str_replace_all(data2, "-, -", "12")
+    data2 <- str_replace_all(data2, ",", "")
+    data2 <- as.list(strsplit(data2, '\\s+')[[1]])
+    transpose1 <- t(data2)
+    transpose2 <- t(transpose1)
+    data2 <- as.data.frame(transpose2)
+    colnames(data2) <- c('Lyrics')
   }
   else{
     wordAddSpace <- function(value){
@@ -195,7 +264,7 @@ silbeFormat <- function(data){
 # test 1
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 save <- text(values)
-text(values, nullTokens = FALSE)
+save <- text(values, nullTokens = FALSE)
 silbeFormat(dummyData)
 
 # test 2
