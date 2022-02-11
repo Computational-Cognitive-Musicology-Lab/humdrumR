@@ -310,4 +310,14 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
   }
   return(list(data,save_indices))
 }
-textKeepSilbe(values)
+
+# keepSilbeFinal <- function(vector, index){
+
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+keepSilbeExample <- textKeepSilbe(values)
+save_index <- keepSilbeExample[[2]][1]
+values <- toString(values)
+values2 <- str_replace_all(values, "-, -", "")
+values3 <- str_replace_all(values2, ",", "")
+stringi::stri_sub(values3, save_index, save_index-1) <- "-"
+# }
