@@ -405,7 +405,7 @@ reference.humdrumR <- function(humdrumR) {
 #' @name humReference
 #' @usage NULL
 #' @export
-print.humReference <- function(refTable, showall = TRUE) {
+print.humReference <- function(refTable, showall = TRUE, screenmax = 200) {
           corpusName <- attr(refTable, 'corpusName')
           
           refTable <- data.table::copy(popclass(refTable))
@@ -469,7 +469,7 @@ print.humReference <- function(refTable, showall = TRUE) {
           ### Column widths
           lenCol <- do.call('pmax',
                             c(nchar(colNames),
-                              sapply(codeCounts, max %.% nchar),
+                              sapply(codeCounts, \(x) max(nchar(x))),
                               lapply(Totals, nchar))) + 1L # plus one to add space between lines
           
           # append filename, plus totals categories
@@ -484,20 +484,24 @@ print.humReference <- function(refTable, showall = TRUE) {
                     names(Totals) <- paste0(names(Totals), '  ')
           }
           
+          # shrink to screenmax size
+          screen <- cumsum(lenCol) <= screenmax
+          colNames <- colNames[screen]
+          lenCol <- lenCol[screen]
           colNames_str <- padder(colNames, lenCol)
-          ## PRINTING BEGINS:
           
+          ## PRINTING BEGINS:
           if (showall) {
                     cat(corpusMessage)
                     cat("###### By file:\n")
-                    
                     cat(colNames_str, '\n', sep = '')
-                    tab <- cbind(files, if (oneColumn) refTable else codeCounts)
-                    tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
+                    
+                    tab <- cbind(files, if (oneColumn) refTable else codeCounts)[, screen, with = FALSE]
+                    tab[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
+                    # tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
                     
                     if (nfiles > 10L) cat(colNames_str, '\n', sep = '')
           }
-         
           if (!showall || nfiles > 10L) {
                     cat(corpusMessage) 
           } else {
@@ -507,7 +511,7 @@ print.humReference <- function(refTable, showall = TRUE) {
           if (!showall) cat(colNames_str, '\n', sep = '')
           
           Map(function(tot, totname) {
-                    cat(padder(c(totname, tot), lenCol), '\n', sep = '')
+                    cat(padder(c(totname, tot)[screen], lenCol), '\n', sep = '')
                     },
               Totals, names(Totals)) 
           invisible(NULL)
@@ -569,7 +573,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
   
   
   if (nrow(spinemat) == 1) {
-    cat(spinemat$Filename, ': ', spinemat$Spines, ' spines', if (anypaths) paste0(' : ', spinemat$Columns, {if ( spinemat$Columns > 1) ' paths' else ' path'}) else '', '\n', sep = '')
+    cat(spinemat$Filename, ': ', spinemat$Spines, ' spines', if (anypaths) paste0(' + ', spinemat$Columns, {if ( spinemat$Columns > 1) ' paths:' else ' path:'}) else '', '\n', sep = '')
     where <- where[[1]]
     
     if (anypaths) {
@@ -584,9 +588,9 @@ print.humSpines <- function(spinemat, showall = TRUE) {
 
     cols <- if (anypaths) 1:7 else 1:3
     colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
-      
+    
     lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
-                   nchar(colNames), sapply(spinemat[ , cols, with = FALSE], max %.% nchar)) + 2
+                   nchar(colNames), sapply(spinemat[ , cols, with = FALSE], \(x) max(nchar(x)))) + 2L
     
     if (showall) {
       cat(padder(colNames, lenCol), '\n', sep = '')
@@ -614,7 +618,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
       row <- padder(row, lenCol[1:3])
       if (anypaths) {
         notzero <- which(tab[i, ] > 0)
-        row <- c(row, ' (', glue::collapse(paste0(tab[i, notzero], '*',  colnames(tab)[notzero]), sep = ' paths, ', last = ', and '), ')')
+        row <- c(row, ' (', glue::glue_collapse(paste0(tab[i, notzero], '*',  colnames(tab)[notzero]), sep = ' paths, ', last = ', and '), ')')
       }
       cat(row, '\n', sep = '')
     }
@@ -645,8 +649,8 @@ interpretations <- function(humdrumR) {
                    !grepl('\\*>.*', Token)]
   tandem[ , ID := factor(idTandem(Token))]
   tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = File]$V1)
-  rownames(tandemN) <- unique(humtab$Filename)
-  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, length %.% unique))), by = File]$V1)
+  
+  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, \(x) length(unique(x))))), by = File]$V1)
   tandemUN[is.na(tandemUN)] <- 0L
   
   tandIDs  <- levels(tandem$ID)
@@ -657,63 +661,58 @@ interpretations <- function(humdrumR) {
   exclusive <- humtab[grepl('^\\*\\*', Token)]
   exclusive$Token <- factor(exclusive$Token)
   exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = File]$V1)
-  rownames(exclusiveN) <- unique(humtab$File)
+  rownames(exclusiveN) <- unique(humtab$Filename)
   
-  list(Exclusive = exclusiveN, 
+  list(Filename = unique(humtab$Filename),
+       File = unique(humtab$File),
+       Exclusive = exclusiveN, 
        Tandem    = list(Number    = tandemN, 
                         NUnique   = tandemUN,
                         InNSpines = tandemIn)) %class% 'humInterpretations'
   
 }
 
+#' @export
 print.humInterpretations <- function(interps, showall = TRUE) {
-  #' @export
-  if (nrow(interps[[1]]) < 1 || any(sapply(interps[[2]], nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}
+  if (nrow(interps$Exclusive) < 1 || any(sapply(interps$Tandem, nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}
           
   tandems <- interps$Tandem[[1]]
   tandems[] <- do.call('paste', c(sep = '.', interps$Tandem))
   
   Nexclusive <- ncol(interps$Exclusive)
           
-  interpmat <- data.table(interps$Exclusive, tandems)
-  interpmat$File <- paste0(num2str(rownames(interps$Exclusive)), ":")
-  interpmat$Filename  <- rownames(interps$Tandem$Number)
-  setcolorder(interpmat, c('File', 'Filename', head(colnames(interpmat), -2)))
+  interpmat <- data.table(File = paste0(num2str(interps$File), ':'), Filename = interps$Filename, interps$Exclusive, tandems)
+  # interpmat$File <- paste0(num2str(rownames(interps$Exclusive)), ":")
+  # interpmat$Filename  <- rownames(interps$Tandem$Number)
+  # setcolorder(interpmat, c('File', 'Filename', head(colnames(interpmat), -2)))
   
-  if (nrow(interpmat) == 1) {
-    cat(interpmat$File, '\n')
-    cat("Exclusive: ")
-    interps$Exclusive[ , cat(Exclusive), by = Spine]
-    cat('\n')
-    cat("Tandems:")
-    interps$Tandem[ , cat(paste0(colnames(.SD), '\n')), by = Spine]
+  
+  colNames <- c('', 'Filename', colnames(interpmat)[-1:-2])
+  colKeys <- character(length(colNames))
+  colKeys[3 + Nexclusive] <-   '(Total.Unique.Spines)'
+  
+  lenCol <- pmax(interpmat[ , sapply(.SD, \(x) max(nchar(x)))],  
+                 nchar(colnames(interpmat)), 
+                 na.rm = TRUE) + 2
+  # lenCol[2] <- max(8, lenCol[2]) # to make enough room for "Unique:"
+  # lenCol[3] <- max(9, lenCol[3]) # to make enough room for "Unique:"
+  
+  if (nrow(interpmat) == 1L || showall) {
+    cat(padder(colNames, lenCol), '\n', sep = '')
+    cat(padder(colKeys, lenCol), '\n', sep = '')
+    cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
     
+    interpmat[ , { row <- unlist(.SD)
+    paste(padder(row, lenCol), collapse = '') 
+    }, 
+    by = 1:nrow(interpmat)]$V1 -> strs
     
-  } else  {
-    colNames <- c('', 'Filename', colnames(interpmat)[-1:-2])
-    colKeys <- character(length(colNames))
-    colKeys[3 + Nexclusive] <-   '(Total.Unique.Spines)'
+    cat(paste(strs, collapse = '\n'), '\n', sep = '')
     
-    lenCol <- pmax(interpmat[ , sapply(.SD, max %.% nchar)], 
-                   nchar(colnames(interpmat))) + 2
-    # lenCol[2] <- max(8, lenCol[2]) # to make enough room for "Unique:"
-    # lenCol[3] <- max(9, lenCol[3]) # to make enough room for "Unique:"
-    
-    if (showall) {
-      cat(padder(colNames, lenCol), '\n', sep = '')
-      cat(padder(colKeys, lenCol), '\n', sep = '')
-      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
-      
-      interpmat[ , { row <- unlist(.SD)
-      paste(padder(row, lenCol), collapse = '') 
-      }, 
-      by = 1:nrow(interpmat)]$V1 -> strs
-      
-      cat(paste(strs, collapse = '\n'), '\n', sep = '')
-      cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
-      
-    }
- 
+  }
+  
+  if (nrow(interpmat) > 1L) {
+    cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
     cat(padder(colNames, lenCol), '\n', sep = '')
     cat(padder(colKeys, lenCol), '\n\n', sep = '')
     cat(padder(c('',
@@ -721,13 +720,24 @@ print.humInterpretations <- function(interps, showall = TRUE) {
                  sapply(as.list(interpmat)[2 + seq_len(Nexclusive)],   function(col) sum(col > 0)),
                  colSums(interps$Tandem$NUnique  > 0)),
                lenCol), '\n', sep = '')
-    # cat(padder(c('', 'Total:', sapply(as.list(interpmat)[-1:-2], sum)), lenCol), '\n', sep = '')
-    # cat(padder(c('', '', 'Unique:', sapply(interps$Tandem, function(col) length(unique(col[!is.na(col)])))), lenCol), '\n', sep = '')
-    
-    
-    
-    
   }
+ 
+  # cat(padder(c('', 'Total:', sapply(as.list(interpmat)[-1:-2], sum)), lenCol), '\n', sep = '')
+  # cat(padder(c('', '', 'Unique:', sapply(interps$Tandem, function(col) length(unique(col[!is.na(col)])))), lenCol), '\n', sep = '')
   
+  
+}
+
+
+
+#### Sections ----
+
+#' @export
+sections <- function(humdrumR) {
+  checkhumdrumR(humdrumR, 'sections')
+  
+  cat('The sections function is under construction ;p')
+  
+  invisible(NULL)
 }
 
