@@ -220,7 +220,7 @@ silbeFormat(dummyData)
 library(stringr)
 
 
-
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 word_count <- str_count(dummyData, '\\w+')
 compare <- text(values)
 compare2 <- toString(compare)
@@ -315,9 +315,17 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
 
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 keepSilbeExample <- textKeepSilbe(values)
-save_index <- keepSilbeExample[[2]][1]
+save_index <- keepSilbeExample[[2]][2]
 values <- toString(values)
 values2 <- str_replace_all(values, "-, -", "")
 values3 <- str_replace_all(values2, ",", "")
-stringi::stri_sub(values3, save_index, save_index-1) <- "-"
+insertSilbes <- function(wordVector, index){
+  stringi::stri_sub(wordVector, index, index-1) <- "-"
+  return(wordVector)
+}
+iterations <- 1:length(keepSilbeExample[[2]])
+iterations <- as.data.frame(iterations)
+save_indices <- keepSilbeExample[[2]][1:length(keepSilbeExample[[2]])]
+dataIndices <- as.data.frame(save_indices)
+characterVectorWithSyllables <- apply(iterations, 1, function(x){insertSilbes(values3, dataIndices[x,])})
 # }
