@@ -173,22 +173,24 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 ## Accessors ####
 
 #' @export
-setGeneric("LO5th", function(x, ...) standardGeneric("LO5th"))
-setMethod("LO5th", 'partition',
-          function(x) LO5th(sum_diatonicPartition(x)))
+setGeneric("LO5th", function(x, generic = FALSE, ...) standardGeneric("LO5th"))
 setMethod("LO5th", "tonalInterval",
-          function(x) {
-            x@Fifth %dim% x
+          function(x, generic = FALSE) {
+            LO5th <- x@Fifth
+            if (generic) LO5th <- genericFifth(LO5th)
+            LO5th %dim% x
           })
 setMethod('LO5th', 'ANY',
-          function(x) {
+          function(x, generic = FALSE) {
             x <- as(x, 'tonalInterval')
-            LO5th(x)
+            LO5th(x, generic = generic)
           })
 
-getFifth  <- function(tint) LO5th(tint)
+getFifth  <- function(tint, generic = FALSE) LO5th(tint, generic = generic)
 getOctave <- function(tint) tint@Octave %dim% tint
 
+genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
+genericStep <- function(x) ((x - 1L) %% 7L) + 1L
 
 
 ## Formatting methods ####
@@ -397,11 +399,11 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 # }
 
 
-tint2octave <- function(x, 
-                         octave.integer = TRUE,
-                         up = '^', down = 'v', same = "",
-                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
-                         relative = FALSE, octave.round = floor, ...) {
+tint2octave <- function(x,
+                        octave.integer = TRUE,
+                        up = '^', down = 'v', same = "",
+                        octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
+                        relative = FALSE, octave.round = floor, ...) {
 
   
   if (relative) x <- delta(x)
@@ -409,7 +411,7 @@ tint2octave <- function(x,
   octn <- octave.offset + tintPartition_complex(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
   
-  if (octave.integer) return(octn)
+  if (octave.integer) return(as.integer(octn))
   
   out <- rep(NA_character_, length(octn))
   out[octn == 0L] <- same
@@ -419,10 +421,14 @@ tint2octave <- function(x,
   
 }
 
+tint2sign <- function(x, octave.offset = 0L, ...) {
+ sign(tint2semit(x) + octave.offset * 12L)
+}
 
-octave.kernstyle <- function(str, octn) {
+
+octave.kernstyle <- function(str, octn, step.case = TRUE) {
   char <- substr(str, 0L, 1L)
-  char <- .ifelse(octn >= 0L, tolower(char), toupper(char))
+  if (step.case) char <- .ifelse(octn >= 0L, tolower(char), toupper(char))
   
   octn[!is.na(octn) & octn >= 0L] <- octn[!is.na(octn) & octn >= 0L] + 1L # 0 -> 1
   
@@ -521,14 +527,16 @@ tint2frequency <- function(x, frequency.reference = 440L,
 
 ### Tonal ####
 
-tint2step  <- function(x, step.labels = 1L:7L, ...) {
+tint2step  <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+  
   step.labels[c(1L, 5L, 2L, 6L, 3L, 7L, 4L)][1 + (LO5th(x) %% 7)]
 } 
 
 
 ###### Alteration stuff ###
 
-genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
+
+
 
 alteration.conflicts <- function(LO5th) {
   # do two or more qualities of the same generic intervals appear in the input,
@@ -663,27 +671,44 @@ tint2specifier <- function(x, Key = NULL, ...,
 
 
 tint2tonalChroma <- function(x, 
-                             parts = c("species", "step", "octave"), sep = "", 
-                             step = TRUE, specific = TRUE, complex = TRUE,
+                             parts = c("direction", "species", "step", "octave"), sep = "", 
+                             directed = FALSE, step = TRUE, specific = TRUE, complex = TRUE,
                              keyed = FALSE, Key = NULL,
                              qualities = FALSE, ...) {
   
   
   if (keyed && !is.null(Key)) x <- x + diatonicSet(Key)
   
-  parts <- matched(parts, c("species", "step", "octave"))
+  parts <- matched(parts, c("direction", "species", "step", "octave"))
+  
+  # direction
+  directed <- if (directed) {
+    sign <- tint2sign(x, ...)
+    x <- abs(x * sign)
+    c('-', '', '+')[sign + 2L]
+  }
   
   # simple part
   step     <- if (step)        tint2step(x, ...) 
   species  <- if (specific)    tint2specifier(x, qualities = qualities, Key = Key, ...)   
   
+  
   # complex part
-  octave   <- if (complex)     tint2octave(x, ...)
+  octave  <- if (complex) {
+    octave <- tint2octave(x, ...)
+  if (is.integer(octave) && is.integer(step)) {
+    step <- step + octave * 7L
+    ""
+  } else {
+    octave
+  }
+  
+  
+  
+  }
 
-
-  tonalchroma <- pasteordered(parts, step = step, species = species, octave = octave, sep = sep)
-  tonalchroma 
-
+  pasteordered(parts, direction = directed, step = step, species = species, octave = if (complex) octave, sep = sep)
+    
   
 }
 
@@ -702,16 +727,35 @@ tint2pitch <- function(x, ...)  {
                            keyed = TRUE,
                            parts = c("step", "species", "octave"), ...))
 }
+tint2simplepitch <- function(x, ...)  {
+  overdot(tint2tonalChroma(x, 
+                           step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                           octave.offset = 4L, integer = TRUE, complex = FALSE,
+                           flat = 'b', qualities = FALSE,
+                           keyed = TRUE,
+                           parts = c("step", "species"), ...))
+}
 
-tint2kern <- function(x, complex = TRUE, Key = NULL, ...) {
+
+tint2kern <- function(x, complex = TRUE, Key = NULL, directed = FALSE, ...) {
   
   kern <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                   parts = c("step", "species"), qualities = FALSE, 
-                                   keyed = TRUE, Key = Key, ...))
+                                   parts = c("step", "species"), qualities = FALSE, complex = FALSE,
+                                   keyed = TRUE, Key = Key, directed = directed, ...))
   
-  if (complex) kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE)) 
+  if (directed) {
+    direction <- stringr::str_extract(kern, '^[+-]?')
+    kern <- tolower(stringr::str_remove(kern, '^[+-]'))
+  }  else {
+    direction <- ""
+  }
   
-  kern 
+  
+  if (complex) {
+    kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = !directed)
+  }
+  
+  paste0(direction, kern)
   
 }
 
@@ -752,21 +796,14 @@ tint2romanRoot <- function(x, ..., Key = NULL) {
 
 
 
-tint2interval <- function(x, direction = TRUE) {
-  octave <- tint2octave(x, octave.round = floor, octave.integer = TRUE)
-  direction <- .ifelse(x == tint(0, 0) | !direction, "", c('-', '+')[1 + (octave >= 0)])
+tint2interval <- function(x, directed = TRUE, ...) {
+  interval <- overdot(tint2tonalChroma(x, Key = Key, step.labels = 1L:7L,
+                                       parts = c("direction", "species", "step", "octave"),
+                                       complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
+                                       octave.integer = TRUE, relative = FALSE, octave.round = floor, ...))
   
-  x[octave < 0L] <- x[octave < 0L] * -1L
-  steps <- tint2step(x, step.labels = 1L:7L)
-  
-  octave[!is.na(octave) & octave < 0] <- octave[!is.na(octave) & octave < 0L] + 1L
-  steps <- steps + octave * 7
-  
-  qualities <- tint2quality(x, quality.cautionary = TRUE)
-  
-  
-  .paste(direction, qualities, steps) %dim% x
-  
+  if (!directed) interval <- stringr::str_remove(interval, '^[+-]?')
+  interval
 }
 
 
@@ -1041,7 +1078,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
 
 ### Tonal ####
 
-genericstep <- function(x) ((x - 1L) %% 7L) + 1L
+
 
 step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...) {
   
@@ -1053,7 +1090,7 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), s
   
   
   # generic
-  genericstep <- ((step - 1L) %% 7L) + 1L
+  genericstep <- genericStep(step)
   tint <- tint( , ifelse(is.na(genericstep), NA_integer_, c(0L, 2L, 4L, -1L, 1L, 3L, 5L)[genericstep]))
   
   # specific
@@ -1212,14 +1249,11 @@ kern2tint <- function(str, ...) {
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   
   step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-  simple <- overdot(tonalChroma2tint(str, parts = c("step", "species"), 
-                                     keyed = TRUE,  
-                                     qualities = FALSE,
-                                     step.labels = step.labels, steps.sign = TRUE, ...))
+  overdot(tonalChroma2tint(str, parts = c("step", "species"), 
+                           keyed = TRUE,  
+                           qualities = FALSE,
+                           step.labels = step.labels, steps.sign = TRUE, ...))
   
-  # octave <- kernOctave2tint(stringr::str_extract(str, '([A-Ga-g])\\1*'))
-  
-  simple #+ octave
   
 }
 

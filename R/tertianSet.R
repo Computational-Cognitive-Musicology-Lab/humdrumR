@@ -373,14 +373,14 @@ tset2tonalHarmony <- function(tset,
                               figurationArgs = list(),
                               root_func = tint2romanRoot, bass_func = root_func,
                               root.case = TRUE,
-                              keyed = FALSE, of = NULL, 
+                              of = NULL, 
                               inversion.labels = NULL,
                               major = 'M', minor = 'm',
                               sep = '', ...) {
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
   
-  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...), "")
+  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), paste0('/', bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...)), "")
   root      <- if (root) root_func(getRootTint(tset), Key = of, ...) 
   
   quality   <- if (quality) {
@@ -448,28 +448,31 @@ tset2romanNumeral <- function(tset,  of = dset(0, 0), figurationArgs = c(), ...)
   
 }
 
-tset2sciChord <- function(tset,  ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality'), 
-                            steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
-                            qualifyTriad = paste0, quality.cautionary = TRUE,
-                            
-                            extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
-                            accidental.naturals = TRUE,
-                            extension.add=FALSE, extension.sus = FALSE,
-                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...)) 
+tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
+  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, flat = 'b', qualities = TRUE)
+  
+  
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
+                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
+                            root = TRUE, quality = TRUE, figuration = FALSE, inversion = FALSE, bass = FALSE,
+                            implicitSpecies = FALSE,
+                            extension.shorthand = TRUE, extension.simple = FALSE,
+                            extension.add = TRUE, extension.sus = TRUE,
+                             ...)) 
 }
 
 
-tset2chordSymbol <- function(tset,  ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), 
-                            steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj', doubleflat = 'o', doublesharp = '+'),
-                            qualifyTriad = paste0,
-                            inversion.labels = function(x, ...) paste0('/', tint2simplepitch(x)),
-                            extension.shorthand = TRUE, extension.which = c(7, 2, 4, 6), extension.simple=FALSE,
-                            extension.sus = TRUE, extension.add = TRUE,
-                            triad.labels = c(major = ''),
-                            accidental.naturals = FALSE,
-                            inversion = FALSE, figure.Key = FALSE, Key = dset(getRoot(tset), getRoot(tset) - 1L), ...)) -> chords
+tset2chordSymbol <- function(tset, figurationArgs = c(), ...) {
+  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, flat = 'b', qualities = TRUE)
+  
+  
+  chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
+                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
+                            root = TRUE, quality = TRUE, figuration = FALSE, inversion = FALSE, bass = FALSE,
+                            implicitSpecies = FALSE, root.case=FALSE,
+                            extension.shorthand = TRUE, extension.simple = FALSE,
+                            extension.add = TRUE, extension.sus = TRUE,
+                            ...)) 
   
   stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
   
