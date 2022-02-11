@@ -131,76 +131,6 @@ text <- function(data, nullTokens = TRUE){
   }
   return(data)
 }
-textKeepSilbe <- function(data, nullTokens = TRUE){
-  if(nullTokens == FALSE){
-    data2 <- as.data.frame(data)
-    data2 <- toString(data2[,1])
-    data2 <- str_replace_all(data2, "-, -", "12")
-    data2 <- str_replace_all(data2, ",", "")
-    data2 <- as.list(strsplit(data2, '\\s+')[[1]])
-    transpose1 <- t(data2)
-    transpose2 <- t(transpose1)
-    data2 <- as.data.frame(transpose2)
-    colnames(data2) <- c('Lyrics')
-  }
-  else{
-    wordAddSpace <- function(value){
-      if(substr(value,1,1) == "-"){
-        return(TRUE)
-      }
-      else{
-        return(FALSE)
-      }
-    }
-    replaceWithNullToken <- function(booleanValue){
-      if(booleanValue == TRUE){
-        return(".")
-      }
-      else{
-        return("word")
-      }
-    }
-    data <- as.data.frame(data)
-    save <- apply(data, 1, function(x){wordAddSpace(x)})
-    save <- as.data.frame(save)
-    # go through and if true then add space below
-    save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
-    save2 <- as.data.frame(save2)
-    saveWords <- text(data, nullTokens = FALSE)
-    
-    newFunction <- function(dataValue, rowValue){
-      rowValueToString <- toString(rowValue)
-      dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
-      return(dataValue[rowValue,1])
-    }
-    newFunction2 <- function(findRowValues, iteration){
-      getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
-      return(getRowValueFinal)
-    }
-    newFunction4 <- function(iterate, final, wordsArray){
-      iterateToString <- toString(iterate)
-      if(iterateToString %in% final){
-        return(wordsArray[match(iterate,final),1])
-      }
-      else{
-        return(".")
-      }
-    }
-    numbers <- 1:nrow(save2)
-    numbers <- as.data.frame(numbers)
-    saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
-    saveNew <- as.data.frame(saveNew)
-    saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
-    finalData <- numbers
-    finalWordsLength <- 1:nrow(saveWords)
-    finalWordsLength <- as.data.frame(finalWordsLength)
-    saveNewDataFrame <- as.data.frame(saveNew)
-    finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
-    finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
-    data <- (unlist(finalDataComplete))
-  }
-  return(data)
-}
 #' silbeFormat
 #' 
 #' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
@@ -294,4 +224,78 @@ dummyData <- toString(dummyData[,1])
 dummyData <- str_replace_all(dummyData, "-, -", "-")
 dummyData <- str_replace_all(dummyData, ",", "")
 indices <- str_locate_all(dummyData, "-")
+save_length <- length(indices[[1]])/2
+save_indices <- indices[[1]][1:save_length]
 word_count <- str_count(dummyData, '\\w+')
+
+textKeepSilbe <- function(data, nullTokens = TRUE){
+  if(nullTokens == FALSE){
+    data <- as.data.frame(data)
+    data <- toString(data[,1])
+    data <- str_replace_all(data, "-, -", "")
+    data <- str_replace_all(data, ",", "")
+    data <- as.list(strsplit(data, '\\s+')[[1]])
+    transpose1 <- t(data)
+    transpose2 <- t(transpose1)
+    data <- as.character(transpose2)
+  }
+  else{
+    wordAddSpace <- function(value){
+      if(substr(value,1,1) == "-"){
+        return(TRUE)
+      }
+      else{
+        return(FALSE)
+      }
+    }
+    replaceWithNullToken <- function(booleanValue){
+      if(booleanValue == TRUE){
+        return(".")
+      }
+      else{
+        return("word")
+      }
+    }
+    saveData <- data
+    data <- as.data.frame(data)
+    save <- apply(data, 1, function(x){wordAddSpace(x)})
+    save <- as.data.frame(save)
+    # go through and if true then add space below
+    save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+    save2 <- as.data.frame(save2)
+    saveWords <- text(saveData, nullTokens = FALSE)
+    saveWords <- as.data.frame(saveWords)
+    
+    newFunction <- function(dataValue, rowValue){
+      rowValueToString <- toString(rowValue)
+      dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+      return(dataValue[rowValue,1])
+    }
+    newFunction2 <- function(findRowValues, iteration){
+      getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+      return(getRowValueFinal)
+    }
+    newFunction4 <- function(iterate, final, wordsArray){
+      iterateToString <- toString(iterate)
+      if(iterateToString %in% final){
+        return(wordsArray[match(iterate,final),1])
+      }
+      else{
+        return(".")
+      }
+    }
+    numbers <- 1:nrow(save2)
+    numbers <- as.data.frame(numbers)
+    saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+    saveNew <- as.data.frame(saveNew)
+    saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+    finalData <- numbers
+    finalWordsLength <- 1:nrow(saveWords)
+    finalWordsLength <- as.data.frame(finalWordsLength)
+    saveNewDataFrame <- as.data.frame(saveNew)
+    finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+    finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+    data <- (unlist(finalDataComplete))
+  }
+  return(data)
+}
