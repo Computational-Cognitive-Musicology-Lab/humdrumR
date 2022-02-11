@@ -88,13 +88,15 @@ text <- function(data, nullTokens = TRUE){
         return("word")
       }
     }
+    saveData <- data
     data <- as.data.frame(data)
     save <- apply(data, 1, function(x){wordAddSpace(x)})
     save <- as.data.frame(save)
     # go through and if true then add space below
     save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
     save2 <- as.data.frame(save2)
-    saveWords <- text(data, nullTokens = FALSE)
+    saveWords <- text(saveData, nullTokens = FALSE)
+    saveWords <- as.data.frame(saveWords)
     
     newFunction <- function(dataValue, rowValue){
       rowValueToString <- toString(rowValue)
@@ -263,9 +265,19 @@ silbeFormat <- function(data){
 
 # test 1
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-save <- text(values)
+new <- text(values)
 save <- text(values, nullTokens = FALSE)
 silbeFormat(dummyData)
+
+data <- as.data.frame(values)
+data <- toString(data[,1])
+data <- str_replace_all(data, "-, -", "")
+data <- str_replace_all(data, ",", "")
+data <- as.list(strsplit(data, '\\s+')[[1]])
+transpose1 <- t(data)
+transpose2 <- t(transpose1)
+data <- as.character(transpose2)
+data <- as.data.frame(data)
 
 # test 2
 values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
@@ -273,3 +285,13 @@ dummyData <- data.frame(values)
 text(dummyData)
 text(dummyData, nullTokens = FALSE)
 silbeFormat(dummyData)
+
+# text keep silbe
+library(stringr)
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+dummyData <- data.frame(values)
+dummyData <- toString(dummyData[,1])
+dummyData <- str_replace_all(dummyData, "-, -", "-")
+dummyData <- str_replace_all(dummyData, ",", "")
+indices <- str_locate_all(dummyData, "-")
+word_count <- str_count(dummyData, '\\w+')
