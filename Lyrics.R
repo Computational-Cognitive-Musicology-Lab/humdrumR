@@ -238,8 +238,13 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
   dummyData <- str_replace_all(dummyData, "-, -", "-")
   dummyData <- str_replace_all(dummyData, ",", "")
   indices <- str_locate_all(dummyData, "-")
+  getIndices <- function(index, iteration){
+    getIndex <- index - iteration + 1
+  }
   save_length <- length(indices[[1]])/2
-  save_indices <- indices[[1]][1:save_length]
+  iterations <- 1:save_length
+  iterations <- as.data.frame(iterations)
+  save_indices <- apply(iterations, 1, function(x){getIndices(indices[[1]][x], x)})
   if(nullTokens == FALSE){
     data <- as.data.frame(data)
     data <- toString(data[,1])
@@ -314,11 +319,17 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
 # keepSilbeFinal <- function(vector, index){
 
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+reverse <- function(string, index, replacement){
+  stringi::stri_sub_replace_all(string, from = index,
+                                to = index-1,
+                                replacement = replacement)
+}
 keepSilbeExample <- textKeepSilbe(values)
-save_index <- keepSilbeExample[[2]][2]
+save_index <- as.vector(keepSilbeExample[[2]])
 values <- toString(values)
 values2 <- str_replace_all(values, "-, -", "")
 values3 <- str_replace_all(values2, ",", "")
+reverseSave <- reverse(values3, save_index, "-")
 insertSilbes <- function(wordVector, index){
   stringi::stri_sub(wordVector, index, index-1) <- "-"
   return(wordVector)
