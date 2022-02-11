@@ -107,7 +107,7 @@ getInversion <- function(tset, inversion.labels = NULL) {
 }
 
 #' @export
-rootposition <- function(tset) {
+rootPosition <- function(tset) {
   tset@Inversion <- rep(0L, length(tset))
   tset
 }
@@ -189,13 +189,14 @@ setMethod('LO5th', 'tertianSet',
 
 
 
-tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion = TRUE, implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
+tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion = TRUE, absoluteSpecies = TRUE, 
+                             implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
-  if (!inversion) tset <- rootposition(tset)
+  if (!inversion) tset <- rootPosition(tset)
   bass <- getBass(tset)
   
-  if (!implicitSpecies) {
+  if (absoluteSpecies) {
     tset <- tset - getRoot(tset)
     Key <- dset(0, -1L)
   }
@@ -207,7 +208,7 @@ tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion
   LO5ths <- LO5th(tset)
   tints <- tint( , c(LO5ths))
   figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, 
-                              implicitSpecies = TRUE, explicitNaturals = explicitNaturals, ...)
+                              implicitSpecies = implicitSpecies, explicitNaturals = explicitNaturals, ...)
   
   # colnames(figures) <- extensions
   # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
@@ -218,9 +219,9 @@ tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion
 
 tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ...) {
   extensions <- c(1L, 3L, 5L, 7L, 9L, 11L, 13L)
-  if (extension.simple) extensions <- ((extensions - 1L) %% 7L) + 1L
+  if (extension.simple) extensions <- genericStep(extensions)
   
-  if (!inversion) tset <- rootposition(tset)
+  if (!inversion) tset <- rootPosition(tset)
   
   extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
   colnames(extensions) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
@@ -244,7 +245,7 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
 # }
 
 tset2triadLabel <- function(tset, root, root.case = TRUE, 
-                            major = 'M', minor = 'm', diminish = 'o', augment = '+') {
+                            major = 'M', minor = 'm', diminish = 'o', augment = '+', ...) {
   
   perfect <- 'P'
   
@@ -285,6 +286,7 @@ tset2triadLabel <- function(tset, root, root.case = TRUE,
     triadQuality[triadQuality %in% c(major, minor)] <- ""
   }
   
+  
   list(triadQuality = triadQuality, root = root)
   
   
@@ -292,8 +294,8 @@ tset2triadLabel <- function(tset, root, root.case = TRUE,
 
 
 reduceFigures <- function(alterations, extensions, 
-                          triadquality, root.case = FALSE,
-                          inversion, 
+                          triadQuality, root.case = FALSE,
+                          inversion, step = TRUE,
                           extension.shorthand = TRUE, extension.simple = TRUE,
                           extension.add = TRUE, extension.sus = TRUE, 
                           extension.decreasing = TRUE, 
@@ -308,12 +310,12 @@ reduceFigures <- function(alterations, extensions,
   
   
   # get rid of alterations that are already taken care of by the quality!
-  if (!is.null(triadquality)) {
+  if (!is.null(triadQuality)) {
     if (root.case) {
       alterations[col(alterations) == 2L & alterations %in% c(flat, minor)] <- ""
       alterations[col(alterations) == 3L & alterations == diminish] <- ""
     }
-    alterations[triadquality != '?', 1:3] <- ""
+    alterations[triadQuality != '?', 1:3] <- ""
     
     alterations[col(alterations) <= 3L & alterations == 'n'] <- ""
   }
@@ -357,7 +359,7 @@ reduceFigures <- function(alterations, extensions,
   # order
   orders <- apply(extensions, 1, order, decreasing = extension.decreasing, na.last = NA, simplify = FALSE)
   
-  alterations[] <- .paste(tags, alterations, extensions, fill = "")
+  alterations[] <- .paste(tags, alterations, if (step) extensions, fill = "", na.if = all)
   figures <- Map(\(i,j) alterations[i,j], 1:nrow(alterations), orders)
   
   sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
@@ -371,27 +373,26 @@ tset2tonalHarmony <- function(tset,
                               parts = c('root', 'quality', 'figuration'), 
                               root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
                               figurationArgs = list(),
-                              root_func = tint2romanRoot, bass_func = root_func,
+                              root_func = tint2romanRoot, bass_func = root_func, bass.sep = '/',
                               root.case = TRUE,
                               of = NULL, 
                               inversion.labels = NULL,
-                              major = 'M', minor = 'm',
                               sep = '', ...) {
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
   
-  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), paste0('/', bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...)), "")
+  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), paste0(bass.sep, bass_func(getBassTint(tset) - tint(1L, 0L), Key = of, ...)), "")
   root      <- if (root) root_func(getRootTint(tset), Key = of, ...) 
   
   quality   <- if (quality) {
-    {quality; root} %<-% tset2triadLabel(tset, root, root.case)
+    {quality; root} %<-% tset2triadLabel(tset, root, root.case, ...)
     quality
   }
  
   
   figuration <- if (figuration) {
     extensions  <- do.call('tset2extensions', c(list(tset, inversion = inversion), figurationArgs))
-    alterations <- do.call('tset2alterations', c(list(tset, Key = of, inversion = inversion, step = FALSE), figurationArgs))
+    alterations <- do.call('tset2alterations', c(list(tset, Key = of, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
     
     figuration <- do.call('reduceFigures', c(list(alterations, extensions, quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
     quality[quality == '?'] <- ""
@@ -410,22 +411,28 @@ tset2tonalHarmony <- function(tset,
 
 
 
-tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
-  overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), qualifyTriad = NULL, inversion.labels = NULL,
+tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
+  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE,
+                                     absoluteSpecies = FALSE, extension.decreasing = TRUE,
+                                     extension.simple = TRUE)
+  
+  overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), 
+                            figurationArgs = figurationArgs,  root.case = FALSE,
                             root = FALSE, bass = TRUE, bass_func = tint2kern,
+                            figuration = TRUE, quality = FALSE,
                             extension.shorthand = TRUE, extension.simple=TRUE,
                             extension.sus = FALSE, extension.add = FALSE,
-                            inversion = TRUE, figure.Key = TRUE, 
-                            sep = '', ...)) -> figures
+                            inversion = TRUE,
+                            sep = ' ', bass.sep = '', ...)) -> figures
   
-  if (extension.shorthand) {
-    figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
-    figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
-    figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
-    figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
-    figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
-  }
-  
+  # if (extension.shorthand) {
+  #   figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
+  #   figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
+  #   figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
+  #   figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
+  #   figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
+  # }
+  # 
   figures
   
   
@@ -449,12 +456,13 @@ tset2romanNumeral <- function(tset,  of = dset(0, 0), figurationArgs = c(), ...)
 }
 
 tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, flat = 'b', qualities = TRUE)
+  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
   
   
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
                             root_func = tint2simplepitch, figurationArgs = figurationArgs,
-                            root = TRUE, quality = TRUE, figuration = FALSE, inversion = FALSE, bass = FALSE,
+                            root.case = FALSE,
+                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
                             implicitSpecies = FALSE,
                             extension.shorthand = TRUE, extension.simple = FALSE,
                             extension.add = TRUE, extension.sus = TRUE,
@@ -462,17 +470,21 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
 }
 
 
-tset2chordSymbol <- function(tset, figurationArgs = c(), ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, flat = 'b', qualities = TRUE)
+tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
+  setoptions(figurationArgs) <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
+                                     flat = 'b', qualities = FALSE, natural = 'maj')
   
   
   chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
                             root_func = tint2simplepitch, figurationArgs = figurationArgs,
-                            root = TRUE, quality = TRUE, figuration = FALSE, inversion = FALSE, bass = FALSE,
+                            major = major %maybe% "MAJOR", minor = 'min', diminish = 'dim',
+                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
                             implicitSpecies = FALSE, root.case=FALSE,
                             extension.shorthand = TRUE, extension.simple = FALSE,
                             extension.add = TRUE, extension.sus = TRUE,
                             ...)) 
+  
+  if (is.null(major)) chords <- stringr::str_replace(chords, "MAJOR", '')
   
   stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
   
