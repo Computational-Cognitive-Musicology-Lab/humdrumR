@@ -233,8 +233,7 @@ stringi::stri_sub(compare2, 3, 2) <- 1
 # use the above to insert dashes at specific indices
 
 textKeepSilbe <- function(data, nullTokens = TRUE){
-  values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-  dummyData <- data.frame(values)
+  dummyData <- data.frame(data)
   dummyData <- toString(dummyData[,1])
   dummyData <- str_replace_all(dummyData, "-, -", "-")
   dummyData <- str_replace_all(dummyData, ",", "")
@@ -309,5 +308,6 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
     finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
     data <- (unlist(finalDataComplete))
   }
-  return(data)
+  return(list(data,save_indices))
 }
+textKeepSilbe(values)
