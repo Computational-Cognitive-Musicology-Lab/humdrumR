@@ -218,24 +218,29 @@ silbeFormat(dummyData)
 
 # text keep silbe
 library(stringr)
-values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-dummyData <- data.frame(values)
-dummyData <- toString(dummyData[,1])
-dummyData <- str_replace_all(dummyData, "-, -", "-")
-dummyData <- str_replace_all(dummyData, ",", "")
-indices <- str_locate_all(dummyData, "-")
-save_length <- length(indices[[1]])/2
-save_indices <- indices[[1]][1:save_length]
+
+
+
 word_count <- str_count(dummyData, '\\w+')
 compare <- text(values)
 compare2 <- toString(compare)
 compare2 <- str_replace_all(compare2, ",", "")
 word_count_2 <- str_count(compare2, '\\w+')
 library(stringi)
+values2 <- toString(values)
+values2 <- str_replace_all(values2, ",", "")
 stringi::stri_sub(compare2, 3, 2) <- 1
 # use the above to insert dashes at specific indices
 
 textKeepSilbe <- function(data, nullTokens = TRUE){
+  values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+  dummyData <- data.frame(values)
+  dummyData <- toString(dummyData[,1])
+  dummyData <- str_replace_all(dummyData, "-, -", "-")
+  dummyData <- str_replace_all(dummyData, ",", "")
+  indices <- str_locate_all(dummyData, "-")
+  save_length <- length(indices[[1]])/2
+  save_indices <- indices[[1]][1:save_length]
   if(nullTokens == FALSE){
     data <- as.data.frame(data)
     data <- toString(data[,1])
