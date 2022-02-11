@@ -530,8 +530,8 @@ LO5th2mode <- function(LO5th, short = FALSE) {
 
 
 
-dset2signature <- function(dset, of = NULL, ...) {
-    if (!is.null(of)) dset <- dset + of
+dset2signature <- function(dset, Key = NULL, ...) {
+    if (!is.null(Key)) dset <- dset + Key
   
     LO5ths <- LO5th(dset)
     LO5ths[] <- t(apply(LO5ths, 1, sort))
@@ -551,8 +551,8 @@ dset2signature <- function(dset, of = NULL, ...) {
 
 
 
-dset2key <- function(dset, of = NULL, ...) {
-    if (!is.null(of)) dset <- dset + getRootTint(of)
+dset2key <- function(dset, Key = NULL, ...) {
+    if (!is.null(Key)) dset <- dset + getRootTint(Key)
     
     root <- tint2kern(tint( , getRoot(dset)))
     mode <- getMode(dset)
@@ -588,8 +588,8 @@ dset2key <- function(dset, of = NULL, ...) {
 #' @name romanNumerals
 NULL
 
-dset2romanNumeral <- function(dset, flat = 'b', of = NULL, ...) {
-    if (!is.null(of)) dset <- dset + getRootTint(of)
+dset2romanNumeral <- function(dset, flat = 'b', Key = NULL, ...) {
+    if (!is.null(Key)) dset <- dset + getRootTint(Key)
   
     tint <- getRootTint(dset)
     
@@ -734,8 +734,8 @@ alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat 
 
 ##... from key signature
 
-signature2dset <- function(str, of = NULL, signature.mode = 0L, ...) {
-    if (!is.null(of)) dset <- dset + of
+signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
+    if (!is.null(Key)) dset <- dset + Key
   
     str <- gsub('^\\*', '', str)
     signotes <- stringr::str_extract_all(str, '[a-g]([#-n])\\1*')
@@ -803,13 +803,13 @@ signature2dset <- function(str, of = NULL, signature.mode = 0L, ...) {
 
 key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'), 
                      step.labels = c('C', 'D','E','F','G','A','B'),
-                     of = NULL, keyed = TRUE,
+                     Key = NULL, keyed = TRUE,
                      ...) {
     
    
   
     # str <- stringr::str_remove(str, '^\\*')
-    if (!is.null(of)) of <- diatonicSet(of)
+    if (!is.null(Key)) Key <- diatonicSet(Key)
   
     REs <- makeRE.key(..., parts = parts, step.labels = step.labels, collapse = FALSE)
     REparse(str, REs, parse.strict = FALSE, parse.exhaust = FALSE, toEnv = TRUE)
@@ -817,7 +817,7 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
     # Root
     root <- local( {
       generic <- step2tint(toupper(step), step.labels = toupper(step.labels))
-      specifier <- specifier2tint(species, step = generic, useKey = TRUE, Key = CKey(of), ..., qualities = FALSE)
+      specifier <- specifier2tint(species, step = generic, useKey = TRUE, Key = CKey(Key), ..., qualities = FALSE)
       LO5th(generic + specifier)
       })
 
@@ -833,11 +833,11 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
     dset <- dset(root, signature, alterations)
     
    
-    if (keyed && !is.null(of)) dset <- dset - of
+    if (keyed && !is.null(Key)) dset <- dset - Key
     
-    # if (!is.null(of) && of != dset(0, 0)) {
-    #   of <- CKey(diatonicSet(of))
-    #   alter <- dset@Root - (dset@Root %% of)
+    # if (!is.null(of) && Key != dset(0, 0)) {
+    #   of <- CKey(diatonicSet(Key))
+    #   alter <- dset@Root - (dset@Root %% Key)
     #   dset@Root <- dset@Root - alter
     #   dset@Signature <- dset@Signature - alter
     # }
@@ -850,13 +850,13 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
 
 ##... From roman numeral
 
-romanNumeral2dset <- function(str, of = NULL, flat = 'b', ...) {
+romanNumeral2dset <- function(str, Key = NULL, flat = 'b', ...) {
     
     
     dset <- key2dset(str, c('species', 'step', 'mode', 'alterations'), 
                      step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                      flat = flat, keyed = FALSE,
-                     of = of, ...)
+                     Key = Key, ...)
     
 
     
@@ -901,7 +901,7 @@ mapofdset <- function(str, ..., split = '/') {
    parts <- strPartition(str, split = split)
     
     
-   parts[] <- head(Reduce(function(x, y) char2dset(x, of = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
+   parts[] <- head(Reduce(function(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
     
@@ -910,8 +910,8 @@ mapofdset <- function(str, ..., split = '/') {
 }
 
 diatonicSet_dispatch.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                                'keyof: makeRE.diatonicPartition(...)' = mapofdset,
                                                 'key: makeRE.key(...)' = key2dset,
+                                                'keyof: makeRE.diatonicPartition(...)' = mapofdset,
                                                 'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                                                 'signature: makeRE.signature(...)' = signature2dset)
 
@@ -946,7 +946,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   
   parse <- function(...) list(...) %class% 'parseArgs'
   
-  args <- alist(x = , ... = , of = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE)
+  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE)
 
   if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
   
@@ -954,22 +954,22 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                       rlang::expr( {
                         redim <- dimParse(x)
                         
-                        of <- if (is.null(of)) dset(0, 0) else diatonicSet(of)
+                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
                         do.call('checkTFs', list(memoize = memoize, dropNA = dropNA, callname = callname))
                         
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
-                        parseArgs   <- pitchArgCheck(c(list(of = of), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
-                        deparseArgs <- pitchArgCheck(c(list(of = of), args[!grepl('Args$', classes)]), !!callname)
+                        parseArgs   <- pitchArgCheck(c(list(Key = Key), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
+                        deparseArgs <- pitchArgCheck(c(list(Key = Key), args[!grepl('Args$', classes)]), !!callname)
                         
                         # remove NA values
-                        putNAback <- predicateParse(Negate(is.na), x = x, of = of)
+                        putNAback <- predicateParse(Negate(is.na), x = x, Key = Key)
                         
-                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
+                        if (length(x) == 0L) return(putNAback(vectorNA(outputclass, 0L)))
                         
-                        rebuild <- memoizeParse(x = x, of = of, memoize = memoize) 
+                        rebuild <- memoizeParse(x = x, Key = Key, memoize = memoize) 
                         
                         result <- {
                           

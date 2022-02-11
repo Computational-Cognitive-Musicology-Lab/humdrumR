@@ -563,7 +563,7 @@ makeRE.signature <- function(accidental.labels = c(), ...) {
     paste0('^\\*?k\\[(', RE, ')*\\]')
 }
 
-makeRE.diatonicPartition <- function(..., split = '/', mustPartition = TRUE) {
+makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     key <- makeRE.key(...)
     romanNumeral <- makeRE.romanKey(...)
@@ -618,7 +618,7 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
 
 
 
-makeRE.tertianPartition <- function(..., split = '/') {
+makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     romanChord <- makeRE.romanChord(...)
     
@@ -626,7 +626,7 @@ makeRE.tertianPartition <- function(..., split = '/') {
     
     key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0('((', re, ')', split, ')+', key)
+    paste0('(', re, ')(', split, key, ')', if (!mustPartition) '?')
 }
 
 
