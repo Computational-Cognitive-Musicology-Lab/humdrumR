@@ -220,17 +220,17 @@ silbeFormat(dummyData)
 library(stringr)
 
 
-values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-word_count <- str_count(dummyData, '\\w+')
-compare <- text(values)
-compare2 <- toString(compare)
-compare2 <- str_replace_all(compare2, ",", "")
-word_count_2 <- str_count(compare2, '\\w+')
-library(stringi)
-values2 <- toString(values)
-values2 <- str_replace_all(values2, ",", "")
-stringi::stri_sub(compare2, 3, 2) <- 1
-# use the above to insert dashes at specific indices
+# values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+# word_count <- str_count(dummyData, '\\w+')
+# compare <- text(values)
+# compare2 <- toString(compare)
+# compare2 <- str_replace_all(compare2, ",", "")
+# word_count_2 <- str_count(compare2, '\\w+')
+# library(stringi)
+# values2 <- toString(values)
+# values2 <- str_replace_all(values2, ",", "")
+# stringi::stri_sub(compare2, 3, 2) <- 1
+# # use the above to insert dashes at specific indices
 
 textKeepSilbe <- function(data, nullTokens = TRUE){
   dummyData <- data.frame(data)
@@ -315,28 +315,20 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
   }
   return(list(data,save_indices))
 }
-
-# keepSilbeFinal <- function(vector, index){
-
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-reverse <- function(string, index, replacement){
-  stringi::stri_sub_replace_all(string, from = index,
-                                to = index-1,
-                                replacement = replacement)
+keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+printSilbeFormat <- function(keepSilbeOutput){
+  reverse <- function(string, index, replacement){
+    stringi::stri_sub_replace_all(string, from = index, to = index-1, replacement = replacement)
+  }
+  save_index <- as.vector(keepSilbeOutput[[2]])
+  values <- toString(values)
+  values2 <- str_replace_all(values, "-, -", "")
+  values3 <- str_replace_all(values2, ",", "")
+  reverseSave <- reverse(values3, save_index, "- -")
+  word_count <- str_count(reverseSave, '\\w+')
+  saveWords <- head(strsplit(reverseSave, split = "\ "), word_count)
+  saveWords2 <- unlist(saveWords)
+  return(saveWords2)
 }
-keepSilbeExample <- textKeepSilbe(values)
-save_index <- as.vector(keepSilbeExample[[2]])
-values <- toString(values)
-values2 <- str_replace_all(values, "-, -", "")
-values3 <- str_replace_all(values2, ",", "")
-reverseSave <- reverse(values3, save_index, "-")
-insertSilbes <- function(wordVector, index){
-  stringi::stri_sub(wordVector, index, index-1) <- "-"
-  return(wordVector)
-}
-iterations <- 1:length(keepSilbeExample[[2]])
-iterations <- as.data.frame(iterations)
-save_indices <- keepSilbeExample[[2]][1:length(keepSilbeExample[[2]])]
-dataIndices <- as.data.frame(save_indices)
-characterVectorWithSyllables <- apply(iterations, 1, function(x){insertSilbes(values3, dataIndices[x,])})
-# }
+printSilbeFormat(keepSilbeExample)
