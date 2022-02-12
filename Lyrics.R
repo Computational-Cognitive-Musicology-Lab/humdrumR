@@ -271,18 +271,25 @@ library(stringr)
 # # use the above to insert dashes at specific indices
 
 textKeepSilbe <- function(data, nullTokens = TRUE){
+  # same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
   dummyData <- data.frame(data)
   dummyData <- toString(dummyData[,1])
   dummyData <- str_replace_all(dummyData, "-, -", "-")
   dummyData <- str_replace_all(dummyData, ",", "")
   indices <- str_locate_all(dummyData, "-")
   getIndices <- function(index, iteration){
+    # get index where you should insert a - to indicate splitting into syllables.
     getIndex <- index - iteration + 1
   }
   save_length <- length(indices[[1]])/2
+  # length of indices will be the above length divided by 2 because it prints each index twice.
   iterations <- 1:save_length
+  # iterations for apply function will equal length of indices
   iterations <- as.data.frame(iterations)
+  # save as data frame so it can be read into apply function properly.
   save_indices <- apply(iterations, 1, function(x){getIndices(indices[[1]][x], x)})
+  # save indices in a vector
+  # all code below is the same as in the original text function
   if(nullTokens == FALSE){
     data <- as.data.frame(data)
     data <- toString(data[,1])
@@ -310,6 +317,7 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
         return("word")
       }
     }
+    # define the above functions in the same way as in the original text function
     saveData <- data
     data <- as.data.frame(data)
     save <- apply(data, 1, function(x){wordAddSpace(x)})
@@ -319,7 +327,7 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
     save2 <- as.data.frame(save2)
     saveWords <- text(saveData, nullTokens = FALSE)
     saveWords <- as.data.frame(saveWords)
-    
+    # the logic below is the same as in the original text function
     newFunction <- function(dataValue, rowValue){
       rowValueToString <- toString(rowValue)
       dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
@@ -355,17 +363,25 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
 }
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+# run the above function on an example for input into the print silbe format function
 printSilbeFormat <- function(keepSilbeOutput){
   reverse <- function(string, index, replacement){
     stringi::stri_sub_replace_all(string, from = index, to = index-1, replacement = replacement)
   }
+  # the above function is where the bijection occurs
   save_index <- as.vector(keepSilbeOutput[[2]])
-  values <- toString(values)
+  # save indices based on input
+  values <- toString(keepSilbeOutput[[1]])
+  # convert character vector to string for stringr usage
   values2 <- str_replace_all(values, "-, -", "")
   values3 <- str_replace_all(values2, ",", "")
+  # get just words with spaces in between each
   reverseSave <- reverse(values3, save_index, "- -")
+  # use reverse function to input dashes in correct spots
   word_count <- str_count(reverseSave, '\\w+')
+  # count number of words based on spaces
   saveWords <- head(strsplit(reverseSave, split = "\ "), word_count)
+  # save words in list
   saveWords2 <- unlist(saveWords)
   return(saveWords2)
 }
