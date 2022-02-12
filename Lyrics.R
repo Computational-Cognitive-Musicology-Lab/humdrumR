@@ -110,40 +110,62 @@ text <- function(data, nullTokens = TRUE){
     save <- as.data.frame(save)
     # go through and if true then add space below
     save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+    # save a vector with null tokens in the correct spots, and the spots that will be filled with words are each labeled "word"
     save2 <- as.data.frame(save2)
+    # transform to data frame
     saveWords <- text(saveData, nullTokens = FALSE)
+    # run this text function with null tokens = false to get the full words of the character vector
     saveWords <- as.data.frame(saveWords)
-    
+    # transform these words into a data frame
     newFunction <- function(dataValue, rowValue){
       rowValueToString <- toString(rowValue)
+      # save given row value as a string to be used below
       dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+      # paste the row value to each word for parsing and reading into final data frame/character vector later
       return(dataValue[rowValue,1])
     }
     newFunction2 <- function(findRowValues, iteration){
       getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+      # based on the row values of each word, replace each "word" with the row value corresponding to a word
       return(getRowValueFinal)
     }
     newFunction4 <- function(iterate, final, wordsArray){
       iterateToString <- toString(iterate)
+      # save iteration value as a string for comparison to what is in the data frame/character vector
       if(iterateToString %in% final){
+        # comparison for each cell
         return(wordsArray[match(iterate,final),1])
+        # return corresponding word
       }
       else{
         return(".")
+        # return null token if no match
       }
     }
     numbers <- 1:nrow(save2)
+    # number of rows to go through in apply function
     numbers <- as.data.frame(numbers)
+    # save as data frame so the apply function can work properly
     saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+    # apply function to paste row values to each word
     saveNew <- as.data.frame(saveNew)
+    # save as data frame for parsing below
     saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+    # save values that are not null tokens
     finalData <- numbers
+    # final data will have size nrows
     finalWordsLength <- 1:nrow(saveWords)
+    # final words length will have size of total words
     finalWordsLength <- as.data.frame(finalWordsLength)
+    # save as data frame for use in apply function
     saveNewDataFrame <- as.data.frame(saveNew)
+    # save as data frame for use in apply function
     finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+    # apply function to replace words with row values
     finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+    # apply function to match row numbers of words with corresponding words
     data <- (unlist(finalDataComplete))
+    # unlist to save as character vector
   }
   return(data)
 }
