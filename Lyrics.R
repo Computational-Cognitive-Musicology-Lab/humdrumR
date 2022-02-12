@@ -62,17 +62,27 @@
 #'  #     west. 
 text <- function(data, nullTokens = TRUE){
   if(nullTokens == FALSE){
+    # if the user does not want null tokens to replace instances of syllables occurring after the first syllable of a multi-syllable word
     data <- as.data.frame(data)
+    # transform character vector to data frame
     data <- toString(data[,1])
-    data <- str_replace_all(data, "-, -", "")
-    data <- str_replace_all(data, ",", "")
-    data <- as.list(strsplit(data, '\\s+')[[1]])
+    # transform character vector to string *seems as though we might not need to transform to data frame above then*
+    data <- stringr::str_replace_all(data, "-, -", "")
+    # remove all instances of -, -, which represents a space between two syllables which when combined form a word
+    data <- stringr::str_replace_all(data, ",", "")
+    # remove all instances of , which occur after every word except the last one
+    data <- as.list(stringr::strsplit(data, '\\s+')[[1]])
+    # get all of the words as a list
     transpose1 <- t(data)
     transpose2 <- t(transpose1)
     data <- as.character(transpose2)
+    # transform the data further to get desired character vector
   }
   else{
+    # if the user does want null tokens to replace instances of syllables occurring after the first syllable of a multi-syllable word
     wordAddSpace <- function(value){
+      # create function to be used later which will either print TRUE or FALSE, depending on if there is a - at the beginning of a syllable
+      # when we split up syllables from multi-syllable words, some will either have - at the beginning or - at the end.
       if(substr(value,1,1) == "-"){
         return(TRUE)
       }
@@ -81,16 +91,22 @@ text <- function(data, nullTokens = TRUE){
       }
     }
     replaceWithNullToken <- function(booleanValue){
+      # create a function for replacing cells with null tokens, to be used in an apply function later
       if(booleanValue == TRUE){
         return(".")
       }
       else{
         return("word")
+        # return "word" for identification/logic purposes later
       }
     }
     saveData <- data
+    # save current character vector ("data") in a new variable to be used later
     data <- as.data.frame(data)
+    # transform character vector ("data") into a data frame
     save <- apply(data, 1, function(x){wordAddSpace(x)})
+    # for each row value in the data frame (which in this case corresponds to a syllable) determine if this is a row that needs to be deleted in the future by returning TRUE for that
+    # index
     save <- as.data.frame(save)
     # go through and if true then add space below
     save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
