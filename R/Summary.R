@@ -405,7 +405,7 @@ reference.humdrumR <- function(humdrumR) {
 #' @name humReference
 #' @usage NULL
 #' @export
-print.humReference <- function(refTable, showall = TRUE, screenmax = 200) {
+print.humReference <- function(refTable, showall = TRUE, screenmax = options('width')$width - 10L) {
           corpusName <- attr(refTable, 'corpusName')
           
           refTable <- data.table::copy(popclass(refTable))
@@ -468,9 +468,7 @@ print.humReference <- function(refTable, showall = TRUE, screenmax = 200) {
                          
           ### Column widths
           lenCol <- do.call('pmax',
-                            c(nchar(colNames),
-                              sapply(codeCounts, \(x) max(nchar(x))),
-                              lapply(Totals, nchar))) + 1L # plus one to add space between lines
+                            c(list(nchar(colNames), sapply(codeCounts, \(x) max(nchar(x)))), lapply(Totals, nchar))) + 2L # plus one to add space between lines
           
           # append filename, plus totals categories
           colNames   <- c("", colNames) # don't print "Filename" as a header
@@ -486,27 +484,40 @@ print.humReference <- function(refTable, showall = TRUE, screenmax = 200) {
           
           # shrink to screenmax size
           screen <- cumsum(lenCol) <= screenmax
+          extracodes <- colNames[!screen]
           colNames <- colNames[screen]
           lenCol <- lenCol[screen]
           colNames_str <- padder(colNames, lenCol)
+          
+          circumscribed <- any(!screen)
           
           ## PRINTING BEGINS:
           if (showall) {
                     cat(corpusMessage)
                     cat("###### By file:\n")
-                    cat(colNames_str, '\n', sep = '')
+                    cat(colNames_str, if (circumscribed) '    ***', '\n', sep = '')
                     
                     tab <- cbind(files, if (oneColumn) refTable else codeCounts)[, screen, with = FALSE]
-                    tab[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
+                    tab[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), if (circumscribed) '    ***', '\n', sep = ''), by = seq_len(nfiles)]
                     # tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
                     
-                    if (nfiles > 10L) cat(colNames_str, '\n', sep = '')
+                    if (nfiles > 10L) cat(colNames_str, if (circumscribed) '    ***', '\n', sep = '')
           }
+          if (circumscribed) {
+            cat('\n')
+            extracodes <- paste0('***', glue::glue_collapse(extracodes, sep = ', ', last = ', and ', width = screenmax - 50L),
+                                 plural(length(extracodes), ' codes', ' code'), ' not displayed due to screensize',
+                                 '***')
+            extracodes <- stringr::str_pad(extracodes, width = sum(lenCol) + 7L, side = 'left')
+            cat(extracodes, '\n', sep = '')
+          }
+          
           if (!showall || nfiles > 10L) {
                     cat(corpusMessage) 
           } else {
                     cat('\n')
           }
+          
           cat("###### Totals:\n")
           if (!showall) cat(colNames_str, '\n', sep = '')
           
