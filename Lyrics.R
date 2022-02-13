@@ -270,6 +270,9 @@ library(stringr)
 # stringi::stri_sub(compare2, 3, 2) <- 1
 # # use the above to insert dashes at specific indices
 
+#'
+#'
+#' @export
 textKeepSilbe <- function(data, nullTokens = TRUE){
   # same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
   dummyData <- data.frame(data)
@@ -364,6 +367,9 @@ textKeepSilbe <- function(data, nullTokens = TRUE){
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
 # run the above function on an example for input into the print silbe format function
+#'
+#'
+#' @export
 printSilbeFormat <- function(keepSilbeOutput){
   reverse <- function(string, index, replacement){
     stringi::stri_sub_replace_all(string, from = index, to = index-1, replacement = replacement)
