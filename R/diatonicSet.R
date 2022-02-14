@@ -935,7 +935,15 @@ setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
 ## Key transform documentation ####
 
+
+#' Parsing and deparsing key information
+#' 
+#' XXX
+#' @rdname keyTransformer
+
 ## Key transform maker ####
+
+
 
 
 makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
@@ -973,7 +981,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                           
                           parsedDset <- do.call(diatonicSet, c(list(x, memoize = FALSE), parseArgs))
                           
-                          output <- if (deparse)  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
+                          output <- if (deparse && is.diatonicSet(parsedDset))  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
                       
                           output
                         }

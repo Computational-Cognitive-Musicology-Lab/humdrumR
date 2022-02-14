@@ -1396,10 +1396,10 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' | semit       | `0L`           | `1L`                |  `-2L`                   |  `6L`              |  `7L`          |  `9L`                  |  `15L`         |      
 #' | midi        | `60L`          | `61L`               |  `58L`                   |  `66L`             |  `67L`         |  `69L`                 |  `75L`         | 
 #' | kernPitch   | `"c"`          | `"d-"`              |  `"B-"`                  |  `"f#"`            |  `"g"`         |  `"b--"`               |  `"ee-"`       | 
-#' | pitch    | `"C4"`         | `"Db4"`             |  `"Bb3"`                 |  `"F#4"`           |  `"G4"`        |  `"Bbb4"`              |  `"Eb5"`       | 
+#' | pitch       | `"C4"`         | `"Db4"`             |  `"Bb3"`                 |  `"F#4"`           |  `"G4"`        |  `"Bbb4"`              |  `"Eb5"`       | 
 #' | lilyPitch   | `"c"`          | `"des"`             |  `"bes,"`                |  `"fis"`           |  `"g"`         |  `"beses"`             |  `"ees'"`      | 
 #' | interval    | `"P1"`         | `"+m2"`             |  `"-M2"`                 |  `"+A4"`           |  `"+P5"`       |  `"+d7"`               |  `"+m10"`      | 
-#' | degree | `"1"`          | `"m2"`              |  `"m7"`                  |  `"#4"`            |  `"5"`         |  `"b7"`                |  `"m3"`        | 
+#' | degree      | `"1"`          | `"m2"`              |  `"m7"`                  |  `"#4"`            |  `"5"`         |  `"b7"`                |  `"m3"`        | 
 #' | solfa       | `"do"`         |  `"ra"`             |  `"te"`                  |  `"fi"`            |  `"so"`        |  `"te-"`               |  `"me"`        | 
 #' | decimal     | `1`            | `1.059`             |  `0.891`                 |  `1.414`           |  `1.498`       |  `1.682`               |  `2.378`       | 
 #' | frequency   | `261.625`      | `277.182`           | `233.0819`               | `369.994`          |  `391.995`     |  `440`                 |  `622.253`     | 
@@ -1407,12 +1407,14 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' | `@Fifth`    | `0L`           | `-5L`               | `-2L`                    | `6L`               | `1L`           | `-9L`                  | `-3L`          |
 #' | `@Octave`   | `0L`           | `8L`                | `3L`                     | `-9L`              | `-1L`          | `15L`                  | `6L`           |
 #' 
-#' This table illustrates that some reprsentations are lossy, as they don't encode the full pitch information.
+#' This table illustrates that some representations are [lossy](https://en.wikipedia.org/wiki/Lossy_compression), as they don't encode the full pitch information.
 #' For instance, the *degree* representation drops octave information, while *semit* drops tonal information (i.e., that `C# != Db`).
+#' This means that translating a more complete representation to a lossy (less complete representation) is a
+#' non-[injective](https://en.wikipedia.org/wiki/Injective_function) function.
 #' 
 #' ## Pitch Translation
 #' 
-#' `humdrumR` exports functions to read and write all of the standard reprsentations above, as well as some custom non-standard representations (see `tonalChroma` below).
+#' `humdrumR` exports functions to read and write all of the standard representations above, as well as some custom non-standard representations (see `tonalChroma` below).
 #' An input can be converted to any representation by calling the appropriate function of the form `as.xxx`: for example, `solfa`.
 #' The complete list of `as.xxx` functions for pitch representations is:
 #' 
@@ -1432,17 +1434,17 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #'      + `degree`
 #'      + `solfa`
 #' + Frequency
-#'      + `as.decimal`
-#'      + `as.frequency`
-#'      + `as.fraction`
+#'      + `decimal`
+#'      + `frequency`
+#'      + `fraction`
 #' 
 #' Note that none of the functions have a plural name, so it's not `semits` or `intervals` even if you are applying them to multiple inputs!
 #' 
-#' Each of these `as.xxx` functions does *three* things: 
+#' Each of these functions does *three* things: 
 #' 
-#' 1. Read the input as a `tonalInterval` (details below).
+#' 1. Read and *parse* the input as a `tonalInterval` (details below).
 #' 2. If desired, transform the `tonalInterval` (see [tonalTransform]).
-#' 3. Write the `tonalInterval` to the output representation (details below).
+#' 3. *Deparse* and write the `tonalInterval` to the output representation (details below).
 #' 
 #' Each of these three steps has numerous options that you can control via special arguments.
 #' The details of the reading and writing stages, and all the associated arguments are described in subsequent sections.
@@ -1644,7 +1646,7 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' ```{r, echo = FALSE, comment = NA}
 #' 
 #' f <- tint(,-10:14)
-#' print(data.frame(`LO5th` = f, 
+#' print(data.frame(`LO5th` = LO5th(f), 
 #'                  Step = tint2step(f, c('C', 'D', 'E', 'F', 'G', 'A', 'B')), 
 #'                  Accidental = tint2accidental(f, accidental.cautionary = TRUE), 
 #'                  Quality = tint2quality(f, quality.cautionary = TRUE)), 
@@ -1691,43 +1693,6 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #'  
 #' ### Cautionary Alterations
 #' 
-#' The interplay between the `Key`, `_.cautionary`, and `_.memory` arguments control which accidentals/qualities are returned, allowing us to achieve various useful representations.
-#' Generally, the `Key` argument---if not `NULL`---causes only accidentals/qualities that are outside of the specified key (i.e., alterations) to print.
-#' The `cautionary` argument causes accidentals that would otherwise be suppressed to print---always *adding* accidentals to the output.
-#' Finally, the `_.memory` argument implements a common practice in music notation where alterations are only printed when the quality of a generic note is different than
-#' the last time that note appeared (i.e., earlier in the input vector). For instance, given an input with two F#s, the second F# will not be printed unless a F natural is sounded between them, 
-#' in which case, both the natural and the two sharps will print.
-#' Combinations of the `Key`, `_.cautionary` and `_.memory` arguments achieve the following effects:
-#' 
-#' In cases where `Key` is `NULL`:
-#' 
-#' + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the C major set are printed. No naturals are shown.
-#' + `_.cautionary == TRUE  & _.memory == FALSE`: **all** accidentals/qualities are printed (including all naturals).
-#' + `_.cautionary == FALSE & _.memory == TRUE`: alterations of C major set are printed, unless the previous instance of the step was already altered. 
-#'    (Natural notes occuring after a previous alteration are marked natural.)
-#' + `_.cautionary == TRUE  & _.memory == TRUE`: **all** accidentals/qualities print, unless the previous instance of note was already altered. 
-#' 
-#' If, on the other hand, if a `Key` is specified:
-#' 
-#' + `_.cautionary == FALSE & _.memory == FALSE`: only alterations of the key are printed. 
-#' + `_.cautionary == TRUE  & _.memory == FALSE`: any alterations of the key are printed as well as any instances of their corresponding in-key quality, so as to assure there is no ambiguity.
-#' + `_.cautionary == FALSE & _.memory == TRUE`: alterations of the key are printed, unless the previous instance of note was already altered. In-key accidentals *are* printed if the previous instance of the note
-#'    was altered.
-#' + `_.cautionary == TRUE  & _.memory == TRUE`: any alterations of the key are printed as well as their corresponding in-key quality, except for in-key accidentals that appear before any corresponding alterations.
-#'   In other words, the `cautionary` rule is applied for any generic note once an alteration is introduced, but not before.
-#' 
-#' 
-#' Some standard, useful represenations are:
-#' + `Key == NULL & _.cautionary == FALSE & _.memory == FALSE`: print all accidentals always, but no naturals (normal kern style).
-#' + `Key == NULL & quality.cautionary == TRUE & quality.memory == FALSE`: print all qualities always (normal humdrum style for intervals).
-#' + `Key == _ & _.cautionary == FALSE & _.memory == TRUE`: print out-of-key accidentals, unless previous note was the same alteration (normal style for music notation).
-#' 
-#' 
-#' The following tables illustrate the behaviors of the accidental/quality arguments in eight different conditions.
-#' In the first four conditions, the `Key` argument is NULL, while in the second group of four the key is Ab major.
-#' Each group of four columns represent the four possible combinations of the `_.cautionary` and `_.memory` arguments, in the pattern
-#' `c(_.cautionary = FALSE, _.memory = FALSE)`, `c(_.cautionary = FALSE, _.memory = TRUE)`, `c(_.cautionary = TRUE, _.memory = FALSE)`, `c(_.cautionary = TRUE, _.memory = TRUE)`.
-#'  
 #' #### Accidentals
 #'  
 #' 
@@ -1777,7 +1742,7 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' 
 #' ```
 #'  
-#' ## Contour (e.g., Octave)
+#' ## Octave
 #' 
 #' 
 #' When we *do* wish to represent concrete, frequency-ordered information about a pitch, we add additional *octave* information to the simple, line-of-fifth representation to 
@@ -1925,7 +1890,7 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' 
 #' #### Tonal Decisions
 #' 
-#' When interpreting an atonal reprsentation as a tonal one there are multiple possibilities (for instance, midi note 61 could
+#' When interpreting an atonal representation as a tonal one there are multiple possibilities (for instance, midi note 61 could
 #' be C# or Db).
 #' The process `humdrumR` uses to determine the tonal representation of atonal input is influenced by the `accidental.melodic` and
 #' `Key` arguments:
@@ -1938,9 +1903,9 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #' the appropriate accidental.
 #' However, equal temperament will not provide useful information, so the `Key` and `accidental.melodic` arguments can be used instead.
 #'   
-#'   
+#'  
 #' 
-#' @name pitchRepresentations
+#' @name pitchTransformer
 NULL
 
 ## Pitch transform maker ####
@@ -2023,10 +1988,10 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                           #
                           parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace, memoize = FALSE), parseArgs))
                           
-                          if (length(transposeArgs) > 0L) {
+                          if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
                             parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
                           }
-                          output <- if (deparse) do.call(!!deparser, c(list(parsedTint), deparseArgs)) else parsedTint
+                          output <- if (deparse && is.tonalInterval(parsedTint)) do.call(!!deparser, c(list(parsedTint), deparseArgs)) else parsedTint
                           
                           if (inPlace) output <- re.place(output, parsedTint)
                           
@@ -2217,15 +2182,15 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' tonally within C major by all seven possible generic intervals, with `enharmonicWrap = 12`:
 #' 
 #' 
-#' | Interval  | Output                                                                                                                                                              |
-#' | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-#' | Unison    | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 2nd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 3rd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 4th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 5th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 6th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')`  |
-#' | 7th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | Interval  | Output                                                                                                                                                              |
+# #' | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+# #' | Unison    | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 2nd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 3rd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 4th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 5th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 6th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')`  |
+# #' | 7th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')`  |
 #
 #' 
 #' # Specifying Transpositions
@@ -2345,6 +2310,8 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   x
   
 }
+
+
 
 transposeArgCheck <- function(args) {
   argnames <- .names(args)

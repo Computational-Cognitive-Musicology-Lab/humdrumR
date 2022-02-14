@@ -621,6 +621,7 @@ regexGeneric <- function(...) {
 .regexDispatch <- function(exprs) {
     rlang::expr({
         dispatchn <- regexFindMethod(x, c(regexes))
+        if (dispatchn == 0L) return(vectorNA(length(str)))
         switch(dispatchn,  
                !!! exprs )
     }) -> dispatchExpr

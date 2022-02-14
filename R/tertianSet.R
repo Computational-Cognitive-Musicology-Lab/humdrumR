@@ -649,7 +649,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 
 ### Chord representations ####  
 
-romanNumeral2tset <- function(str, Key = dset(0,0), diminish = 'd', augment = 'A', ...) {
+romanNumeral2tset <- function(str, Key = dset(0,0), ...) {
 
   
   Key <- CKey(Key)
@@ -673,8 +673,8 @@ romanNumeral2tset <- function(str, Key = dset(0,0), diminish = 'd', augment = 'A
   qualities <- local({
     triad <- rep('M', length(numeral))
     triad[numeral == tolower(numeral)] <- 'm'
-    triad[triadalt == diminish] <- diminish
-    triad[triadalt == augment]  <- augment
+    triad[triadalt == diminish] <- if (hasArg('diminish')) list(...)$diminish else 'o' 
+    triad[triadalt == augment]  <- if (hasArg('arugment')) list(...)$augment else '+'
     
     triad2sciQuality(triad, qualities, ...)
   })
@@ -750,6 +750,8 @@ tertianSet.tertianSet <- function(x, ...) x
 
 tertianSet.integer <- integer2tset
 
+tertianSet.logical <- function(x) tset(rep(NA_integer_, length(x)))
+
 #### Characters ####
 
 char2tset <- humdrumDispatch(doExclusiveDispatch = FALSE,
@@ -810,6 +812,13 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 ## Chord transform documentation ####
 
 
+#' Parsing and deparsing chord information.
+#' 
+#' XXXx
+#' 
+#' xxx
+#' @rdname chordTransformer
+
 #' Tertian set representations
 #' 
 #' Tertian sets can be read/wrote in various ways.
@@ -844,7 +853,6 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                                               memoize = memoize, inPlace = inPlace, dropNA = dropNA,
                                               list(callname = callname)))
                         classes <- sapply(args, \(arg) class(arg)[1]) 
-                        
                         transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
                         figurationArgs <- c(figurationArgs, unlist(args[classes == 'figurationArgs'], recursive = FALSE))
                         
@@ -877,7 +885,8 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                           # if (length(transposeArgs) > 0L) {
                             # parsedTint <- do.call('transpose.diatonicSet', c(list(parsedTint), transposeArgs))
                           # }
-                          output <- if (deparse) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
+                          
+                          output <- if (deparse && is.tertianSet(parsedTset)) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
                           
                           if (inPlace) output <- re.place(output, parsedTset)
                           
