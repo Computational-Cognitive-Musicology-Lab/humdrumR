@@ -86,7 +86,7 @@ showHumdrum = function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), 
              tokens = recordvecs[[i]]
              tokens[is.na(tokens)] = ''
              # cutoff tokens that are too long:
-             tokens = trimLongString(tokens)
+             tokens = trimTokens(tokens, 20L)
              
              text(x = X[seq_along(tokens)], 
                   y = i,

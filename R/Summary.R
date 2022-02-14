@@ -31,8 +31,8 @@ setMethod('summary', 'humdrumR',
             summaries <- lapply(funcs, function(f) f(object, ...))
             
             for (i in seq_along(summaries)) {
-              cat('\t', names(funcs)[i], ':\n', sep ='')
-              print(summaries[[i]], showall = FALSE)
+              # cat('\t', names(funcs)[i], ':\n', sep ='')
+              print(summaries[[i]], showEach = FALSE)
               cat('\n')
             }
             invisible(summaries)
@@ -93,16 +93,16 @@ setMethod('summary', 'humdrumR',
 #' 
 #' @name humCensus
 #' @export
-census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
+census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty = FALSE) {
+  ## This function creates a data.table of class humCensus
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
   checkhumdrumR(humdrumR, 'census')
   dataTypes <- checkTypes(dataTypes, 'census')
   
-  humdrumR <- removeEmptyFiles(humdrumR)
+  if (removeEmpty) humdrumR <- removeEmptyFiles(humdrumR)
           
-  ## This function creates a data.table of class humCensus
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
   
   
@@ -132,7 +132,8 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   if (missing(i)) return(if (drop) popclass(censusTable) else censusTable)
           
   corpusName <- attr(censusTable, 'corpusName')          
-  dataTypes  <- attr(censusTable, 'dataTypes')          
+  dataTypes  <- attr(censusTable, 'dataTypes')      
+  by <- attr(censusTable, 'by')
   
   if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
   if (is.character(i)) expr <- call('grepl', quote(i), as.symbol(attr(censusTable, 'by')))
@@ -156,14 +157,19 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   
 #' @name humCensus
 #' @export
-print.humCensus <- function(censusTable, showall = TRUE) {
+print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
    
-  corpusName <- attr(censusTable, 'corpusName')
-  dataTypes  <- attr(censusTable, 'dataTypes')
   
   censusTable <- data.table::copy(popclass(censusTable))
-  
   nfiles <- nrow(censusTable)
+  
+  # Corpus message (name and n files)
+  corpusMessage <- paste0("\n###### humdrumR census of ",
+                          attr(censusTable, 'dataTypes'), ' records in humdrumR corpus "',
+                          attr(censusTable, 'corpusName'), 
+                          '" (', num2print(nfiles, attr(censusTable, 'by')), ")\n")
+  
+  
   
   if (nfiles < 1L) {
             cat('Empty humdrum corpus.\n') 
@@ -172,7 +178,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   
   ##
   by <- attr(censusTable, 'by')
-  files <- censusTable[ , paste0(get(by), ' [', num2str(seq_along(get(by)), pad = TRUE), ']')]
+  files <- censusTable[ , paste0(trimTokens(get(by), 70L), ' [', num2str(seq_along(get(by)), pad = TRUE), ']')]
   censusTable[ , get('by') := NULL] # in place!
   
   #
@@ -205,31 +211,43 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   lenCol[colNames %in% c('(unique)', '(per token)')] <- lenCol[colNames %in% c('(unique)', '(per token)')] + 1L
   
   
-  
-  # Corpus message (name and n files)
-  corpusMessage <- paste0("\n###### humdrumR census of ",
-                          dataTypes, ' records',
-                          if (is.null(corpusName)) "" else glue::glue( " in {corpusName} object"), 
-                          glue::glue(" ({num2print(nfiles, by)})"),
-                          '\n')
-       
   colNames_str <- padder(colNames, lenCol)
+  
+  # shrink to screenWidth
+  screen <- cumsum(lenCol) <= screenWidth
+  colNames <- colNames[screen]
+  lenCol <- lenCol[screen]
+  colNames_str <- padder(colNames, lenCol)
+  stars <- if (any(!screen)) "    ***" else ""
+  
   ## PRINTING BEGINS:
   
-  if (showall) {
-    cat(corpusMessage)
+  cat(corpusMessage)
+  if (showEach) {
     cat("###### By", by, ":\n")
-    cat(colNames_str, '\n', sep = '')
+    cat(colNames_str, stars, '\n', sep = '')
   # 
-    censusTable[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
-    if (nfiles > 10L ) cat(colNames_str, '\n', sep = '')
+    censusTable[, cat(paste(padder(unlist(.SD)[screen], lenCol), collapse = ''), stars, '\n', sep = ''), by = seq_len(nfiles)]
+    if (nfiles > 10L ) cat(colNames_str, stars, '\n', sep = '')
     
   }
   
-  if (!showall || nfiles > 10L) cat(corpusMessage) else cat('\n')
+  
   cat("###### Totals:\n")
-  if (!showall) cat(colNames_str, '\n', sep = '')
-  cat(padder(sums, lenCol), '\n', sep = '') #sums
+  if (!showEach) cat(colNames_str, stars, '\n', sep = '')
+  cat(padder(sums[screen], lenCol), stars,  '\n', sep = '') #sums
+  
+  if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
+  
+  if (stars != '') {
+    cat('\n') 
+    extraCols <- paste0('(***', #glue::glue_collapse(extraCols, sep = ', ', last = ', and ', width = screenWidth - 50L),
+                        num2word(sum(!screen)),
+                        plural(sum(!screen), ' columns', ' column'), ' not displayed due to screensize',
+                        '***)')
+    extraCols <- stringr::str_pad(extraCols, width = sum(lenCol) + 8L, side = 'left')
+    cat(extraCols, '\n', sep = '')
+  }
   
   invisible(NULL)
 }
@@ -348,7 +366,8 @@ reference.character <- function(str) {
 #' @usage reference(humdata)
 #' @export
 reference.humdrumR <- function(humdrumR) {
-  # This funtion simply extracts the refernence columns from a humdrumR object
+  # This function simply extracts the refernence columns from a humdrumR object
+  
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
           
@@ -405,12 +424,15 @@ reference.humdrumR <- function(humdrumR) {
 #' @name humReference
 #' @usage NULL
 #' @export
-print.humReference <- function(refTable, showall = TRUE, screenmax = options('width')$width - 10L) {
-          corpusName <- attr(refTable, 'corpusName')
+print.humReference <- function(refTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
           
           refTable <- data.table::copy(popclass(refTable))
-          
           nfiles <- nrow(refTable)
+          
+          ### 
+          corpusMessage <- paste0('\n###### Reference records in humdrumR corpus "',
+                                  attr(refTable, 'corpusName'),
+                                  '" (', num2print(nfiles, 'file'), ")\n")
           
           if (nfiles < 1L) {
                     cat('Empty humdrumR object.\n') 
@@ -421,11 +443,7 @@ print.humReference <- function(refTable, showall = TRUE, screenmax = options('wi
           files <- paste0(refTable$Filename, " [", num2str(refTable$File, pad = TRUE), "]")
           refTable[ , c('File', 'Filename') := NULL] # in place!
           
-          ######### -
-          corpusMessage <- paste0("\n###### Reference records in humdrumR corpus ",
-                                  if (is.null(corpusName)) "" else glue::glue( "{corpusName}"), 
-                                  glue::glue(" ({num2print(nfiles, 'file')})"),
-                                  '\n')
+
           
           # If only one file, show actual reference records,
           # as they appear in the file
@@ -482,62 +500,62 @@ print.humReference <- function(refTable, showall = TRUE, screenmax = options('wi
                     names(Totals) <- paste0(names(Totals), '  ')
           }
           
-          # shrink to screenmax size
-          screen <- cumsum(lenCol) <= screenmax
-          extracodes <- colNames[!screen]
+          # shrink to screenWidth size
+          screen <- cumsum(lenCol) <= screenWidth
           colNames <- colNames[screen]
           lenCol <- lenCol[screen]
           colNames_str <- padder(colNames, lenCol)
-          
-          circumscribed <- any(!screen)
+          stars <- if (any(!screen)) "    ***" else ""
           
           ## PRINTING BEGINS:
-          if (showall) {
-                    cat(corpusMessage)
+          cat(corpusMessage)
+          if (showEach) {
                     cat("###### By file:\n")
-                    cat(colNames_str, if (circumscribed) '    ***', '\n', sep = '')
+                    cat(colNames_str, stars, '\n', sep = '')
                     
                     tab <- cbind(files, if (oneColumn) refTable else codeCounts)[, screen, with = FALSE]
-                    tab[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), if (circumscribed) '    ***', '\n', sep = ''), by = seq_len(nfiles)]
+                    tab[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), stars, '\n', sep = ''), by = seq_len(nfiles)]
                     # tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
                     
-                    if (nfiles > 10L) cat(colNames_str, if (circumscribed) '    ***', '\n', sep = '')
-          }
-          if (circumscribed) {
-            cat('\n')
-            extracodes <- paste0('***', glue::glue_collapse(extracodes, sep = ', ', last = ', and ', width = screenmax - 50L),
-                                 plural(length(extracodes), ' codes', ' code'), ' not displayed due to screensize',
-                                 '***')
-            extracodes <- stringr::str_pad(extracodes, width = sum(lenCol) + 7L, side = 'left')
-            cat(extracodes, '\n', sep = '')
-          }
-          
-          if (!showall || nfiles > 10L) {
-                    cat(corpusMessage) 
-          } else {
+                    if (nfiles > 10L) cat(colNames_str, stars, '\n', sep = '')
                     cat('\n')
           }
+         
           
           cat("###### Totals:\n")
-          if (!showall) cat(colNames_str, '\n', sep = '')
+          if (!showEach) cat(colNames_str, stars, '\n', sep = '')
           
           Map(function(tot, totname) {
-                    cat(padder(c(totname, tot)[screen], lenCol), '\n', sep = '')
+                    cat(padder(c(totname, tot)[screen], lenCol), stars, '\n', sep = '')
                     },
               Totals, names(Totals)) 
+          
+          if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
+          
+          
+          if (stars != "") {
+            cat('\n') 
+            extraCodes <- paste0('(', 
+                                 num2word(sum(!screen)),
+                                 plural(sum(!screen), ' columns', ' column'), ' not displayed due to screensize',
+                                 '***)')
+            extraCodes <- stringr::str_pad(extraCodes, width = sum(lenCol) + 8L, side = 'left')
+            cat(extraCodes, '\n', sep = '')
+          }
+          
+          
           invisible(NULL)
 }
 
 #### Spines ----
 
 spines  <- function(humdrumR) {
-  #' Summarize humdrum corpus spine paths.
-  #' 
-  #' This function provides summary of the spines and spine paths in the pieces of a humdrumR corpus.
-  #' @export
+  corpusName <- substitute(humdrumR)
+  corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
+  
   humtab <- getHumtab(humdrumR)
   
-  spins <- humtab[Global == FALSE , 
+  spines <- humtab[Global == FALSE , 
                     .(File            = unique(File),
                       Spines           = length(unique(Spine)),
                       Columns          = length(unique(Column)),
@@ -546,9 +564,11 @@ spines  <- function(humdrumR) {
                       Where            = list(.SD[ , length(unique(Path)) - 1, by = Spine]$V1)),
                   by = Filename]
   
-  setcolorder(spins, c('File', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
+  setcolorder(spines, c('File', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
   
-  spins %class% 'humSpines'
+  
+  attr(spines, 'corpusName') <- corpusName
+  spines %class% 'humSpines'
 }
 
 
@@ -562,37 +582,46 @@ spines  <- function(humdrumR) {
   if (is.character(j)) j <- pmatch(j, colnames(spines)) - 2
   if (is.character(i)) i <- pmatch(i, spines$Filename)
   
+  corpusName <- attr(spines, 'corpusName')
   spines <- popclass(spines)
   spines <- spines[i, c(1, 2, j + 2), with = FALSE]
   
+  attr(spines, 'corpusName') <- corpusName
   spines %class% 'humSpines'
 }
 
 
 
-print.humSpines <- function(spinemat, showall = TRUE) {
-  #' @export
-  if (nrow(spinemat) < 1) {cat('Empty humdrumR object.\n') ; return(invisible(NULL))}
+print.humSpines <- function(spineTable, showEach = TRUE) {
+  nfiles <- nrow(spineTable)
   
-  spinemat <- popclass(spinemat)
-  spinemat$File <- paste0(num2str(spinemat$File), ":")
-  spinemat[ , In := sapply(Where, function(x) sum(x > 0))]
-  where <- spinemat$Where
-  spinemat[ , 'Where' := NULL]
-  spinemat[ , Columns := Columns - Spines]
-  anypaths <- any(spinemat$Columns > 0)
+  if (nfiles < 1L) {cat('Empty humdrumR object.\n') ; return(invisible(NULL))}
+  
+  ### 
+  corpusMessage <- paste0('\n###### Spine structure in in humdrumR corpus "',
+                          attr(spineTable, 'corpusName'),
+                          '" (', num2print(nfiles, 'file'), ")\n")
+  
+  spineTable <- popclass(spineTable)
+  spineTable$File <- paste0(num2str(spineTable$File), ":")
+  spineTable[ , In := sapply(Where, function(x) sum(x > 0))]
+  where <- spineTable$Where
+  spineTable[ , 'Where' := NULL]
+  spineTable[ , Columns := Columns - Spines]
+  anypaths <- any(spineTable$Columns > 0)
   
   
-  if (nrow(spinemat) == 1) {
-    cat(spinemat$Filename, ': ', spinemat$Spines, ' spines', if (anypaths) paste0(' + ', spinemat$Columns, {if ( spinemat$Columns > 1) ' paths:' else ' path:'}) else '', '\n', sep = '')
+  cat(corpusMessage)
+  if (nrow(spineTable) == 1) {
+    cat(spineTable$Filename, ': ', spineTable$Spines, ' spines', if (anypaths) paste0(' + ', spineTable$Columns, {if ( spineTable$Columns > 1) ' paths:' else ' path:'}) else '', '\n', sep = '')
     where <- where[[1]]
     
     if (anypaths) {
-      cat(paste0('\tSpine ', 1:spinemat$Spines, ' : ', ifelse(where == 0, '', where), '\n'), sep = '')
+      cat(paste0('\tSpine ', 1:spineTable$Spines, ' : ', ifelse(where == 0, '', where), '\n'), sep = '')
     }
     
   } else {
-    setcolorder(spinemat,
+    setcolorder(spineTable,
                 c('File', 'Filename', 'Spines',
                   'Columns', 'In', 'Splits', 'Splices'))
   
@@ -601,29 +630,30 @@ print.humSpines <- function(spinemat, showall = TRUE) {
     colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
     
     lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
-                   nchar(colNames), sapply(spinemat[ , cols, with = FALSE], \(x) max(nchar(x)))) + 2L
+                   nchar(colNames), sapply(spineTable[ , cols, with = FALSE], \(x) max(nchar(x)))) + 2L
     
-    if (showall) {
+    if (showEach) {
       cat(padder(colNames, lenCol), '\n', sep = '')
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
-      spinemat[ , { row <- unlist(.SD)
+      spineTable[ , { row <- unlist(.SD)
                     if (Columns == 0) row[4:7] <- ' '
                     paste(padder(row[cols], lenCol), collapse = '') 
                   }, 
-                by = 1:nrow(spinemat)]$V1 -> strs
+                by = 1:nrow(spineTable)]$V1 -> strs
       
       cat(paste(strs, collapse = '\n'), '\n', sep = '')
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
     }
   
+    
     cat(padder(colNames, lenCol), '\n\n', sep = '')
   
     #
     cat(padder(c('Tallies:'), sum(lenCol[1:2])), '\n', sep = '')
     
-    tab <- spinemat[ , table(Spines, Columns)]
+    tab <- spineTable[ , table(Spines, Columns)]
     for (i in 1:nrow(tab)) {
       row <- c('', sum(tab[i, ]), paste0('with ', (rownames(tab)[i])))
       row <- padder(row, lenCol[1:3])
@@ -633,6 +663,8 @@ print.humSpines <- function(spinemat, showall = TRUE) {
       }
       cat(row, '\n', sep = '')
     }
+    
+    if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
   
   }
   invisible(NULL)
@@ -650,6 +682,9 @@ print.humSpines <- function(spinemat, showall = TRUE) {
 #' @export
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
+  
+  corpusName <- substitute(humdrumR)
+  corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
           
   # humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
   humtab <- getHumtab(humdrumR, dataTypes = 'I')
@@ -674,67 +709,95 @@ interpretations <- function(humdrumR) {
   exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = File]$V1)
   rownames(exclusiveN) <- unique(humtab$Filename)
   
-  list(Filename = unique(humtab$Filename),
-       File = unique(humtab$File),
-       Exclusive = exclusiveN, 
-       Tandem    = list(Number    = tandemN, 
-                        NUnique   = tandemUN,
-                        InNSpines = tandemIn)) %class% 'humInterpretations'
+  output <- list(Filename = unique(humtab$Filename),
+                 File = unique(humtab$File),
+                 Exclusive = exclusiveN, 
+                 Tandem    = list(Number    = tandemN, 
+                                  NUnique   = tandemUN,
+                                  InNSpines = tandemIn)) %class% 'humInterpretations'
+  
+  attr(output, 'corpusNames') <- corpusName
+  
+  output
   
 }
 
 #' @export
-print.humInterpretations <- function(interps, showall = TRUE) {
+print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = options('width')$width - 10L) {
   if (nrow(interps$Exclusive) < 1 || any(sapply(interps$Tandem, nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}
           
+  
   tandems <- interps$Tandem[[1]]
   tandems[] <- do.call('paste', c(sep = '.', interps$Tandem))
-  
-  Nexclusive <- ncol(interps$Exclusive)
           
   interpmat <- data.table(File = paste0(num2str(interps$File), ':'), Filename = interps$Filename, interps$Exclusive, tandems)
-  # interpmat$File <- paste0(num2str(rownames(interps$Exclusive)), ":")
-  # interpmat$Filename  <- rownames(interps$Tandem$Number)
-  # setcolorder(interpmat, c('File', 'Filename', head(colnames(interpmat), -2)))
+  nfiles <- nrow(interpmat)
+  
+  corpusMessage <- paste0('\n###### Interpretation content in humdrumR corpus "',
+                          attr(interps, 'corpusName'), 
+                          '" (', num2print(nfiles, 'file'), ")\n")
   
   
+  exclusive <- grepl('^\\*\\*', colnames(interpmat))
   colNames <- c('', 'Filename', colnames(interpmat)[-1:-2])
-  colKeys <- character(length(colNames))
-  colKeys[3 + Nexclusive] <-   '(Total.Unique.Spines)'
   
   lenCol <- pmax(interpmat[ , sapply(.SD, \(x) max(nchar(x)))],  
                  nchar(colnames(interpmat)), 
                  na.rm = TRUE) + 2
-  # lenCol[2] <- max(8, lenCol[2]) # to make enough room for "Unique:"
-  # lenCol[3] <- max(9, lenCol[3]) # to make enough room for "Unique:"
   
-  if (nrow(interpmat) == 1L || showall) {
-    cat(padder(colNames, lenCol), '\n', sep = '')
-    cat(padder(colKeys, lenCol), '\n', sep = '')
-    cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
+
+
+  # shrink to screenWidth size
+  screen <- cumsum(lenCol) <= screenWidth
+  interpmat <- interpmat[ , screen, with = FALSE]
+  colNames <- colNames[screen]
+  lenCol <- lenCol[screen]
+  colNames_str <- padder(colNames, lenCol)
+  stars <- if (any(!screen)) "    ***" else ""
+  
+  key <- if (ncol(tandems) > 0L && max(which(screen)) > max(which(exclusive))) paste0(stringr::str_pad('(Total.Unique.Spines)', width = sum(lenCol), side = 'left'), '\n') else ""
+  
+  
+  ## PRINTING BEGINS:
+  cat(corpusMessage)
+  
+  if (nfiles == 1L || showEach) {
+    cat(padder(colNames, lenCol), stars, '\n', sep = '')
+    cat(key)
     
-    interpmat[ , { row <- unlist(.SD)
-    paste(padder(row, lenCol), collapse = '') 
+    interpmat[ , { 
+      row <- unlist(.SD)[screen]
+      paste(padder(row, lenCol), collapse = '') 
     }, 
     by = 1:nrow(interpmat)]$V1 -> strs
     
-    cat(paste(strs, collapse = '\n'), '\n', sep = '')
+    cat(paste0(strs, stars), sep = '\n')
     
   }
   
-  if (nrow(interpmat) > 1L) {
-    cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
-    cat(padder(colNames, lenCol), '\n', sep = '')
-    cat(padder(colKeys, lenCol), '\n\n', sep = '')
+  if (nfiles > 1L) {
+    if (showEach) cat(key)
+    cat("###### Totals:\n")
+    cat(padder(colNames, lenCol), stars, '\n', sep = '')
     cat(padder(c('',
                  'Hits:',
-                 sapply(as.list(interpmat)[2 + seq_len(Nexclusive)],   function(col) sum(col > 0)),
-                 colSums(interps$Tandem$NUnique  > 0)),
-               lenCol), '\n', sep = '')
+                 sapply(as.list(interpmat)[exclusive & screen], function(col) sum(col > 0)),
+                 colSums(interps$Tandem$NUnique[ , seq_len(max(0L, max(which(screen)) - max(which(exclusive)))), drop = FALSE]  > 0)),
+               lenCol), stars,  '\n', sep = '')
+  }
+  
+  if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
+  
+  if (stars != "") {
+    cat('\n') 
+    message <- paste0('(***',
+                        num2word(sum(!screen)),
+                        plural(sum(!screen), ' columns', ' column'), ' not displayed due to screensize',
+                        '***)')
+    message <- stringr::str_pad(message, width = sum(lenCol) + 8L, side = 'left')
+    cat(message, '\n', sep = '')
   }
  
-  # cat(padder(c('', 'Total:', sapply(as.list(interpmat)[-1:-2], sum)), lenCol), '\n', sep = '')
-  # cat(padder(c('', '', 'Unique:', sapply(interps$Tandem, function(col) length(unique(col[!is.na(col)])))), lenCol), '\n', sep = '')
   
   
 }

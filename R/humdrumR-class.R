@@ -2110,23 +2110,6 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-trimTokens <- function(tokmat, max.token.length) {
-    # This function  trims strings that are too long, replacing the last
-    # three characters before the cuttoff with "..."
-    
-    toklen  <- nchar(tokmat)
-    
-    toklen[is.na(toklen)] <- 0L
-    
-    toolong <- toklen > max.token.length
-    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
-    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
-    tokmat[is.na(tokmat)] <- ''
-    
-    tokmat
-    
-}
-
 padColumns <- function(tokmat, global) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
