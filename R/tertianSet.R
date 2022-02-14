@@ -741,14 +741,14 @@ integer2tset <- function(x) tset(x, x)
 ### Parse 2tset generic and methods ####
 
 
-tertianSet_dispatch <- function(...) UseMethod('tertianSet_dispatch')
+tertianSet <- function(...) UseMethod('tertianSet')
 
-tertianSet_dispatch.tertianSet <- function(x, ...) x
+tertianSet.tertianSet <- function(x, ...) x
 
 
 #### Numbers ####
 
-tertianSet_dispatch.integer <- integer2tset
+tertianSet.integer <- integer2tset
 
 #### Characters ####
 
@@ -762,10 +762,15 @@ mapoftset <- function(str, ..., split = '/') {
   parts <- strPartition(str, split = split)
   
   Keys <- parts[-1]
-  Keys[] <- head(Reduce(function(x, y) {
-    y[!is.na(x)] <- char2dset(x[!is.na(x)], y[!is.na(x)], ...)
-    y
+  if (length(Keys) > 0L) {
+    Keys[] <- head(Reduce(function(x, y) {
+      y[!is.na(x)] <- char2dset(x[!is.na(x)], y[!is.na(x)], ...)
+      y
     }, right = TRUE, init = dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
+  } else {
+    Keys <- list(dset(integer(length(str)), 0))
+  }
+  
   
   Mode <- CKey(Keys[[1]])
   root <- Reduce('+', lapply(Keys, getRoot))
@@ -775,7 +780,7 @@ mapoftset <- function(str, ..., split = '/') {
   tset + dset(root, root, 0L)
 }
 
-tertianSet_dispatch.character <- humdrumDispatch(doExclusiveDispatch = FALSE,
+tertianSet.character <- humdrumDispatch(doExclusiveDispatch = FALSE,
                                                       'chordof: makeRE.tertianPartition(...)' = mapoftset,
                                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
                                                       'sciChord: makeRE.sciChord(...)' = sciChord2tset)
@@ -825,9 +830,8 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
   figuration <- function(...) list(...) %class% 'figurationArgs'
   
   args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
-                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), figurationArgs = list(), memoize = TRUE)
+                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), figurationArgs = list(), memoize = TRUE, deparse = TRUE)
   
-  if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
   
   rlang::new_function(args,
                       rlang::expr( {
@@ -868,7 +872,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         result <- {
                           #
-                          parsedTset <- do.call(tertianSet_dispatch, c(list(x, inPlace = inPlace, memoize = FALSE), parseArgs))
+                          parsedTset <- do.call(tertianSet, c(list(x, inPlace = inPlace, memoize = FALSE), parseArgs))
                           
                           # if (length(transposeArgs) > 0L) {
                             # parsedTint <- do.call('transpose.diatonicSet', c(list(parsedTint), transposeArgs))

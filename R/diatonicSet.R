@@ -332,7 +332,7 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
 #' @export
 setMethod('%%', signature = c('character', 'diatonicSet'),
           function(e1, e2) {
-            e1 <- tonalInterval_dispatch.character(c(e1), inPlace = TRUE)
+            e1 <- tonalInterval.character(c(e1), inPlace = TRUE)
             
             e3 <- stickyApply(`%%`, e1, c(e2))
             
@@ -878,16 +878,16 @@ integer2dset <- function(x) dset(x, x)
 
 ### Parse 2dset generic and methods ####
 
-diatonicSet_dispatch <- function(...) UseMethod('diatonicSet_dispatch')
+diatonicSet <- function(...) UseMethod('diatonicSet')
 
-diatonicSet_dispatch.diatonicSet <- function(x, ...) x
+diatonicSet.diatonicSet <- function(x, ...) x
 
 #### Numbers ####
 
 #' @export
-diatonicSet_dispatch.numeric <- function(x) integer2dset(as.integer(x))
+diatonicSet.numeric <- function(x) integer2dset(as.integer(x))
 #' @export
-diatonicSet_dispatch.integer <- integer2dset
+diatonicSet.integer <- integer2dset
 
 #### Characters ####
 
@@ -900,7 +900,6 @@ mapofdset <- function(str, ..., split = '/') {
 
    parts <- strPartition(str, split = split)
     
-    
    parts[] <- head(Reduce(function(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
@@ -909,11 +908,11 @@ mapofdset <- function(str, ..., split = '/') {
    dset + dset(of, of, 0L)
 }
 
-diatonicSet_dispatch.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                                'key: makeRE.key(...)' = key2dset,
-                                                'keyof: makeRE.diatonicPartition(...)' = mapofdset,
-                                                'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
-                                                'signature: makeRE.signature(...)' = signature2dset)
+diatonicSet.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                         'key: makeRE.key(...)' = key2dset,
+                                         'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
+                                         'keyof: makeRE.diatonicPartition(...)' = mapofdset,
+                                         'signature: makeRE.signature(...)' = signature2dset)
 
 
 
@@ -946,9 +945,8 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   
   parse <- function(...) list(...) %class% 'parseArgs'
   
-  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE)
+  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE, deparse = TRUE)
 
-  if (is.null(deparser)) deparse <- FALSE else args <- c(args, alist(deparse = TRUE))
   
   rlang::new_function(args,
                       rlang::expr( {
@@ -973,7 +971,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                         
                         result <- {
                           
-                          parsedDset <- do.call(diatonicSet_dispatch, c(list(x, memoize = FALSE), parseArgs))
+                          parsedDset <- do.call(diatonicSet, c(list(x, memoize = FALSE), parseArgs))
                           
                           output <- if (deparse)  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
                       
@@ -990,9 +988,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
 
 ##
 #' @name keyTransformer
-#' @export diatonicSet
 #' @export key signature romanKey
-diatonicSet <- makeKeyTransformer(NULL, 'diatonicSet', 'diatonicSet')
 key <- makeKeyTransformer(dset2key, 'key')
 signature <- makeKeyTransformer(dset2signature, 'signature')
 romanKey <- makeKeyTransformer(dset2romanNumeral, 'romanKey')
