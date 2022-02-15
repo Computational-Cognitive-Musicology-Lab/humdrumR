@@ -63,17 +63,7 @@ The resulting output is \verb{\{D G# A E F\}}.
 The size of \code{enharmonicWrap} effectively determines how extreme accidentals are allowed.
 The default value, \code{12}, assures that no output notes are enharmonically equivalent to notes in the key.
 To further illustrate, here is the sequence \verb{\{C F# G D# E, B- A A- G C# D, B D- C\}} transposed
-tonally within C major by all seven possible generic intervals, with \code{enharmonicWrap = 12}:\tabular{ll}{
-   Interval \tab Output \cr
-   Unison \tab {C  F# G  D  E  B- A  A  G  C# D  B  D  C  } \cr
-   2nd \tab {D  G# A  E  F  c  B  B- A  D  E  c  E- D  } \cr
-   3rd \tab {E  A  B  F# G  d  c  c  B  E  F  d  F  E  } \cr
-   4th \tab {F  B  c  G# A  e- d  d  c  F# G  e  G  F  } \cr
-   5th \tab {G  c# d  A  B  f  e  e- d  G# A  f  A  G  } \cr
-   6th \tab {A  d  e  B  c  g  f  f  e  A  B  g  B- A  } \cr
-   7th \tab {b  ee ff cc#dd aa gg gg ff b  cc aa cc b  } \cr
-}
-
+tonally within C major by all seven possible generic intervals, with \code{enharmonicWrap = 12}:
 }
 }
 

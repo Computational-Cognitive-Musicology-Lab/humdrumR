@@ -6,7 +6,7 @@
 \alias{is.tertianSet}
 \title{Tertian set}
 \usage{
-tertianSet(x, ...)
+tertianSet(...)
 
 tset(
   root = 0L,
@@ -18,8 +18,6 @@ tset(
 )
 
 is.tertianSet(x)
-
-tertianSet(x, ...)
 }
 \description{
 \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s

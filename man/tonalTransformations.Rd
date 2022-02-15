@@ -2,26 +2,15 @@
 % Please edit documentation in R/tonalInterval.R
 \name{tonalTransformations}
 \alias{tonalTransformations}
-\alias{tonalTransform}
 \alias{invert}
-\title{Tonal Transformations}
+\title{transpose.character <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.character
+transpose.numeric <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.numeric
+transpose.integer <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.integer}
 \usage{
-tonalTransform(
-  x,
-  direction = TRUE,
-  delta = FALSE,
-  sigma = Exclusive \%allin\% c("mint"),
-  generic = FALSE,
-  simple = FALSE,
-  roundContour = floor,
-  enharmonic = FALSE,
-  Key = NULL,
-  Exclusive = NULL,
-  ...
-)
-
 invert(tint, around, Key, ...)
 }
 \description{
-Various transformations of pitch information
+transpose.character <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.character
+transpose.numeric <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.numeric
+transpose.integer <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.integer
 }

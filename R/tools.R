@@ -1,5 +1,46 @@
 ### Null and NA values ----
 
+with... <- function(arg, expression, orelse = NULL) {
+    expression <- rlang::enexpr(expression)
+    
+    if (eval(rlang::expr(hasArg(!!arg)), envir = parent.frame())) {
+        expression <- substituteName(expression, setNames(list(rlang::expr(list(...)[[!!arg]])), arg))
+        eval(expression, envir = parent.frame())
+    } else {
+        orelse
+    }
+    
+}
+
+
+doubleswitch <- function(pred1, pred2, ...) {
+    if (length(pred1) > 1 || length(pred2) > 1) .stop('doubleswitch predicates must be of length 1.')
+    exprs <- rlang::exprs(...)
+    
+    if (any(.names(exprs) == '')) .stop('doubleswitch requires all named arguments.')
+    
+    argnames <- .names(exprs)
+    
+    
+    order <- c('neither', 'either', 'both', 'xor', 'notxor', 'first', 'second', 'notfirst', 'notsecond')
+    preds <- c(!pred1 && !pred2,
+               pred1 || pred2,
+               pred1 && pred2,
+               xor(pred1,pred2),
+               !xor(pred1, pred2),
+               pred1,
+               pred2,
+               !pred1,
+               !pred2)
+    
+    hits <- order %in% argnames
+    hit <- which(preds[hits])[1]
+    
+    eval(exprs[[hit]], envir = parent.frame())
+    
+    
+}
+
 `%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
 `%fmap%` <- function(e1, e2) {
     if (is.null(e1)) return(NULL)
@@ -27,9 +68,9 @@
     
     if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
 }
-
+truthy <- function(x) !is.null(x) && length(x) > 0L && ((!is.logical(x) && !(length(x) == 1 && x[1] == 0)) || (length(x) == 1L & x[1]))
 true <- function(x) is.logical(x) && x[1]
-false <- function(x) is.logical(x) && !x[1]
+false <- function(x) is.null(x) || is.logical(x) && !x[1]
 # these two functions allow us to test if a variable is 
 # a logical TRUE or FALSE, but not give an error if
 # the variable is NOT logical.
@@ -375,11 +416,17 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
-
+tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
+    
+    output <- tapply(X, INDEX, FUN, ...) |> unlist()
+    indices <- tapply(seq_along(X), INDEX, force) |> unlist()
+    
+    output[order(indices)]
+}
 
 
 segments <- function(x, reverse = FALSE) {
-    # x is logical
+    if (!is.logical(x)) x <- c(TRUE, head(x, -1L) != tail(x, -1L))
     if (reverse) x <- rev(x)
     
     x <- cumsum(x)
@@ -391,6 +438,8 @@ segments <- function(x, reverse = FALSE) {
     x
     
 }
+
+
 
 #' Propogate data points to "fill" null data.
 #' 
@@ -525,7 +574,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
-          if (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
+          if (is.function(size.out) && (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim)))) return(invisible(stuff))
           
           recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)
@@ -781,7 +830,7 @@ captureSymbols <- function(expr) {
 }
 
 
-### Math ----
+# Math ----
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
@@ -799,8 +848,13 @@ gcd <- function(x, y) {
     ifelse(r, Recall(y, r), y)
 }
 
+## new numeric representations ####
+
+#### decimal ####
+# this is just an extension of numeric to understand my fraction and rational representations
+
 #' @export
-as.decimal <- function(x, ...) UseMethod('as.decimal') # character string version of numeric 
+as.decimal <- function(x, ...) UseMethod('as.decimal')
 #' @export
 as.decimal.character <- function(x) {
     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
@@ -816,7 +870,8 @@ as.decimal.fraction <- function(x) {
     sapply(exprs, eval) %dim% x
 }
 
-
+#### rational ####
+# represent rational numbers as list of numerator and denominator
 
 #' @export
 as.rational <- function(x, ...) UseMethod('as.rational') 
@@ -839,6 +894,9 @@ as.rational.numeric <- function(x) {
     
     list(Numerator = num %dim% x, Denominator = den %dim% x) %class% 'rational'
 }
+
+#### fraction ####
+# rational numbers as character string
 
 #' @export
 as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
@@ -1027,6 +1085,40 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 
 ### Metaprogramming ----
+
+applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
+  # helper function
+  accum <- c()
+  
+  if (length(ex) <= 1L) {
+    return(func(ex))
+  } else {
+    for (i in (2 - !ignoreHead):length(ex)) {
+      missing <- rlang::is_missing(ex[[i]]) || is.null(ex[[i]])
+      
+      if (!missing) {
+        out <- Recall(ex[[i]], func, rebuild = rebuild) 
+        
+        if (rebuild) {
+          ex[[i]] <- out 
+        } else {
+          accum <- c(accum, out) 
+        }
+      }
+    }
+  }
+  
+  if (rebuild) ex else accum
+}
+
+apply2ExprAsString <- function(func, ...) {
+  function(expr) {
+    str <- func(deparse(expr), ...)
+    parse(text = str)[[1]]
+    
+  }
+}
+
 
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
@@ -1278,16 +1370,16 @@ overdot <- function(call) {
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
     if (length(sys.calls()) > 6L) return(args) 
     
-    argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
+    argNames <- if (length(args) > 1L) paste0('c(', glue::glue_collapse(quotemark(args), sep = ', '), ')') else quotemark(args)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
-    if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
-    if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few '{argname}' arguments."))
+    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many '{argname}' arguments."))
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
-        classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
-        stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+        classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
+        .stop(callname, glue::glue("The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument."))
     }
     
     
@@ -1297,16 +1389,21 @@ checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, ma
     
     if (any(ill)) {
         case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
-        illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
-        legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
+        illNames <- glue::glue_collapse(quotemark(args[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
+        legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
         
+        message <- list(callname, illNames, case, 'Valid options are ', legalNames)
         
-        message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
-        
-        do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
+        do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
     }
     
     args[!ill]
+}
+
+checkTF <- function(x, argname, callname) checkArgs(x, c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
+checkTFs <- function(..., callname = NULL) {
+    args <- list(...)
+    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
 }
 
 checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
@@ -1365,6 +1462,8 @@ pasteordered <- function(order, ..., sep = '') {
 affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)
 
 plural <- function(n, then, els) .ifelse(n > 1, then, els)
+
+quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
 
 nth <- function(n) {
     affix <- rep('th', length(n))

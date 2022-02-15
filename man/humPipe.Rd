@@ -32,11 +32,8 @@ list \%hums[]\% formula
 These infix operators make it possible to use
 the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
 functions in a piping style, similar to the \code{|} (pipe)
-in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
+in unix-style terminals, or the \code{|>}  pipe operator.
 from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
-(In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by
-\code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
-your \code{humdrumR} work flows.)
 }
 \details{
 The key is that the function \code{\link{withinHumdrum}} always returns a new
@@ -74,14 +71,14 @@ and pipe each element in the list to an expression/function.
 There are plural pipe versions of each singular pipe operator.
 Just add an "s" to make them plural:
 \itemize{
-\item \verb{\%>\%} (singular) : \verb{\%s>\%} (plural);
+\item \verb{|>} (singular) : \verb{\%s>\%} (plural);
 \item \verb{\%hum>\%} (singular) : \verb{\%hums>\%} (plural);
 \item \verb{\%hum<\%} (singular) : \verb{\%hums<\%} (plural);
 \item \verb{\%humT\%} (singular) : \verb{\%humsT\%} (plural);
 \item \verb{\%hum[]\%} (singular) : \verb{\%hums[]\%} (plural);
 }
 
-Note: \verb{\%s>\%} is an expansion of the \link[magrittr:pipe]{magrittr::\%>\%} pipe operator, which
+Note: \verb{\%s>\%} is an expansion of the \verb{\\>} pipe operator, which
 makes use of some clever meta-programming---we can't guarantee it will
 always behave the way we might like!
 }

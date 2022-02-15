@@ -6,20 +6,7 @@
 \alias{is.tonalInterval}
 \title{Representation of tonal pitch information}
 \usage{
-tonalInterval(
-  x,
-  direction,
-  delta,
-  sigma,
-  generic,
-  simple,
-  roundContour,
-  enharmonic.part,
-  Key,
-  Exclusive,
-  inPlace,
-  ...
-)
+tonalInterval(...)
 
 tint(
   octave,

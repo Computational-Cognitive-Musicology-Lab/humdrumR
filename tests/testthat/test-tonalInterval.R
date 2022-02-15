@@ -34,8 +34,3 @@ test_that("Functions are invertible", {
     expect_invertible(tint2kernPitch, kernPitch2tint, ex$tint, ex$kernPitch)
     expect_invertible(tint2interval,  interval2tint,  ex$tint, ex$interval)
 })
-
-
-test_that("tint partitions recombined properly",
-          expect_equal(rowSums(tintPartition(ex$tint)), cbind(ex$tint))
-          )
