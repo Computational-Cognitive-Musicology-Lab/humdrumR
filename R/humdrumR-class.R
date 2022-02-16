@@ -447,7 +447,8 @@ splitHumtab <- function(humtab, drop = FALSE) {
         output
     } else {
         split(humtab, 
-              f = factor(humtab$Type, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')), 
+              # by = 'Type', sorted = FALSE,
+              f = factor(humtab$Type, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')),
               drop = drop) 
     }
 }
@@ -1470,7 +1471,8 @@ Add a reference to some field, for instance Token.", call. = FALSE)
               || (!is.null(dim(act)) && dim(act)[1] == nrows)
               || (is.list(act) && length(act) == nrows)
               || (is.list(act) && all(lengths(act) == nrows))) {
-                    return(update_d(updateNull(humdrumR)))
+                    # return(update_d(updateNull(humdrumR)))
+              return(humdrumR)
           } else {
                     stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
           }
