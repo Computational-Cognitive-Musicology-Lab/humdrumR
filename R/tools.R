@@ -1560,6 +1560,30 @@ trimTokens <- function(tokmat, max.token.length) {
 }
 
 
+smartPadWrap <- function(str, width, side = 'left') {
+    
+    width <- width - 5L
+    
+    if (length(str) != 1L) .stop('In call to smartWrap, str argument must be a single character string.')
+    
+    if (nchar(str) <= width) return(stringr::str_pad(str, width = width, side = side))
+    
+    strs <- strsplit(str, split = '  *')[[1]]
+        
+    ns <- nchar(strs)
+    strs <- if (side == 'left') {
+        rev(tapply(strs, rev(cumsum(rev(ns) + 1L) %/% width), paste, collapse = ' '))
+    } else {
+        tapply(strs, cumsum(ns + 1L) %/% width, paste, collapse = ' ')
+    }
+    
+    
+    strs <- stringr::str_pad(strs, width = width, side = side)
+    
+    paste(strs, collapse = '\n')
+
+}
+
 strPartition <- function(str, split = '/') {
     # split strs into columns
     # if (hasdim(str)) {

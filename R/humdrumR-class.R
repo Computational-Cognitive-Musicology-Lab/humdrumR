@@ -1991,14 +1991,15 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 
 
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 10L) {
+                          max.records.file = 40L, max.token.length = 12L, collapseNull = 10L,
+                          screenWidth = options('width')$width - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
   
   #
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
-  Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
+  Filenames <- getHumtab(humdrumR)[ , Filename]
   File   <- gsub('\\..*$', '', rownames(tokmat))
   NRecord <- gsub('^[0-9]*\\.', '', rownames(tokmat))
   
@@ -2006,57 +2007,53 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   global <- stringr::str_detect(tokmat[ , 1], '^!!')
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
   
-  ## Trim any space lines
+  
+  ## censor lines beyond max.records.file
+  filei <- tapply_inplace(File, File, seq_along)
+  i <- ifelse(File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
+  tokmat <- tokmat[i, , drop = FALSE]
+  global <- global[i]
+  
+  ## Trim and align columns, and collopse to lines
   tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
-  tokmat <- padColumns(tokmat, global)
+  lines <- padColumns(tokmat, global, screenWidth)
   
-  ## collapse to lines
-  tokmat[global, -1L:-2L] <- ""
-  lines <- apply(tokmat, 1, paste, collapse = '')
+  maxwidth <- max(nchar(lines[!global]))
+  hash <- stringr::str_dup('#', maxwidth)
   
-  ellipsis <- stringr::str_dup('#', max(nchar(lines[!global])))
+  # put in censored ranges (if any)
+  ranges <- tapply(NRecord[!i], factor(File)[!i], 
+                   \(nr) {
+                       if (length(nr) == 0L) return("")
+                       if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
+                   })
   
-  ##
-  lines   <- split(lines, f = File)
-  NRecord <- split(NRecord, f = File)
+  ranges <- stringr::str_pad(ranges , width = stringr::str_locate(lines[1], ":")[1], side = 'left')
+  ranges <- paste0(ranges, stringi::stri_sub(hash, from = nchar(ranges) + 1L))
+  ranges <- stringr::str_pad(paste0(ranges, ' '), width = maxwidth, pad = '#', side = 'right')
+
+  firsts <- tapply(seq_along(lines), File[i], min)
+  lasts <- tapply(seq_along(lines), File[i], max)
+  lines[lasts[-length(lasts)]] <- paste0(lines[lasts[-length(lasts)]], '\n', ranges[-length(ranges)])
   
-  lines <- Map(f = function(l, rn, last, glob) { # hide the first or last lines of each file
-            if (length(l) <= max.records.file) return(l)
-            
-            # lines
-            l <- do.call(if (last) tail else head, list(l, n = max.records.file))
-            
-            # record numbers
-            # rn <- stringi::stri_trim_left(rn)
-            restRN <- do.call(if(last) head else tail, list(rn, n = -max.records.file))
-            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-', restRN[length(restRN)])
-            restRN <- paste0(restRN, ':')
-            
-            restRN <- stringr::str_pad(restRN, stringr::str_locate(l[1], ':')[1], side = 'left')
-            rest   <- paste0(restRN, stringi::stri_sub(ellipsis, nchar(restRN) + 1L))
-            
-            append(l, rest, after = if (last) 0L else length(l))
-            
-            },
-               lines, NRecord, seq_along(lines) == length(lines))
+  if (length(unique(File)) > 1L) {
+      firstoflast <- min(seq_along(lines)[File[i] == max(File)])
+      lines[firstoflast] <- paste0(tail(ranges, 1), '\n', lines[firstoflast])
+  }
+
   
-  
-  
-  ellipses <- paste0(ellipsis, ' ', Filenames)
-  lines    <- Map(append, lines, ellipses, after = 0L)
-  
+  # put filenames in
+  lines[firsts] <- paste0(stringr::str_pad(paste0(Filenames[i][firsts], '  '), width = maxwidth, pad = '#', side = 'right'), '\n', lines[firsts])
   
   ##
   if (Nmorefiles > 0L) {
    
-   message <- c(ellipsis,
-                '',
+   message <- c('',
                 paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more files...)")),
                 '')
-   lines <- append(lines, message, after = length(lines) - 1L)
+   lines <- append(lines, message, after = firstoflast - 1L)
   }
   
-  lines <- unlist(lines)
   cat(lines, sep = '\n')
   
 }
@@ -2112,18 +2109,53 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-padColumns <- function(tokmat, global) {
+padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
     # such that the lines will print as nicely aligned columns.
+    # it also adds "***" where there are too many columns to fit on the screen.
+    # Finally it collapses each row to a single line.
 
     toklen <- nchar(tokmat)
     
-    colMaxs <- apply(toklen[!global, ], 2, max) + 2L
+    lenCol <- sapply(as.data.frame(toklen[!global, ]), max) + 2L
+    # lenCol <- apply(toklen[!global, ], 2, max) + 2L
     
-    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], colMaxs)
-    tokmat[global, 1L] <- padder(tokmat[global, 1L], colMaxs[1])
+    screen <- cumsum(lenCol) <= screenWidth
+    lenCol <- lenCol[screen]
+    tokmat <- tokmat[ , screen, drop = FALSE]
+
     
-    tokmat
+    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], lenCol)
+    tokmat[global, 1L] <- padder(tokmat[global, 1L], lenCol[1]) # column 1 is record number!
+    
+
+    
+    # collapse to lines
+    tokmat[global, -1:-2L] <- ''
+    lines <- do.call('paste0', as.data.frame(tokmat))
+    
+
+    longGlobal <- global & nchar(lines) > screenWidth
+    longColumn <- !screen
+    if (any(longColumn) || any(longGlobal)) {
+        if (any(!screen)) {
+            lines[!global] <- paste0(lines[!global], '    ***')
+            lines[ global] <- stringr::str_trunc(lines[global], width = sum(lenCol) + 7L, ellipsis = '***')
+            
+            message <- paste0('(***', num2word(sum(!screen)), plural(sum(longColumn), ' spines/paths ' ,' spine/path '),  'not displayed due to screen size***)')
+            message <- smartPadWrap(message, width = screenWidth + 8L, side = 'left')
+        } else {
+            lines[ global] <- stringr::str_trunc(lines[global], width = screenWidth + 7L, ellipsis = '***')
+            message <- paste0('(***', num2word(sum(longGlobal)), ' global ', plural(sum(longGlobal), 'comments ' ,'comment '),  'truncated due to screen size***)')
+            message <- smartPadWrap(message, width = screenWidth + 8L, side = 'left')
+        }
+       
+        lines[length(lines)] <- paste0(lines[length(lines)], '\n', message)
+    } 
+    
+    
+                                           
+    lines
     
 }
