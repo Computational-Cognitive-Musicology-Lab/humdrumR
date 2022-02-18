@@ -160,9 +160,11 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 ##...accessors ####
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 getRoot <- function(dset) dset@Root %dim% dset
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 getRootTint <- function(dset) {
     root <- getRoot(dset)
@@ -172,9 +174,11 @@ getRootTint <- function(dset) {
     
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export getSignature
 getSignature <- function(dset)  dset@Signature %dim% dset
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 getMode <- function(dset) {
     # mode is sign - root (the signature RELATIVE to the root)
@@ -197,6 +201,7 @@ getAlterations <- function(dset) {
 ####. vector/core methods ####
     
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
 is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
@@ -204,6 +209,7 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 ###.. formatting methods ####
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
 setMethod('as.character', signature = c('diatonicSet'), function(x) dset2key(x))
@@ -238,6 +244,7 @@ order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasin
                     }
           }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
 setMethod('==', signature = c('diatonicSet', 'diatonicSet'),
@@ -257,6 +264,7 @@ setMethod('abs', signature = c('diatonicSet'),
               .ifelse(x@Root < 0, -x, x)
           })
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
 setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
@@ -271,6 +279,7 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
 
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('%%', signature = c('integer', 'diatonicSet'),
           function(e1, e2) {
@@ -295,6 +304,7 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
@@ -312,6 +322,7 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
@@ -322,6 +333,7 @@ setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
           function(e1, e2) {
@@ -331,6 +343,7 @@ setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
               
           })
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
           function(e1, e2) {
@@ -342,6 +355,7 @@ setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
               
           })
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('+', signature = c('diatonicSet', 'integer'),
           function(e1, e2) {
@@ -353,6 +367,7 @@ setMethod('+', signature = c('diatonicSet', 'integer'),
           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('-', signature = c('diatonicSet', 'integer'),
           function(e1, e2) {
@@ -364,6 +379,7 @@ setMethod('-', signature = c('diatonicSet', 'integer'),
           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
           function(e1, e2) {
@@ -398,6 +414,7 @@ LO5th2mode <- function(LO5th, short = FALSE) {
 
 ###. x to line-of-fifths ####
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setMethod('LO5th', 'diatonicSet',
           function(x, steporder = 2L, inversion = 0L) {
