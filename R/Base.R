@@ -49,7 +49,6 @@ classify <- function(..., other = 'Other') {
   humFunc(func)
 }
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 RErid <- function(...) {
   res <- unlist(list(...))
@@ -60,7 +59,6 @@ RErid <- function(...) {
     strs
   }) 
 }
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 REkeep <- function(re) {
   humFunc(function(strs) {
@@ -70,7 +68,6 @@ REkeep <- function(re) {
   } )
 }
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 humtable <- function(..., levels = NULL) {
   args <- list(...)
@@ -86,7 +83,6 @@ humtable <- function(..., levels = NULL) {
   do.call('table', c(args, useNA = na))
 }
 
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 append2string <- function(app, sep = '') {
  newfunc <- function(str) paste(str, sep, app, collapse = '')
@@ -129,7 +125,6 @@ append2string <- function(app, sep = '') {
 
 ###
 
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 applyto = (function(pattern, skip) {
   #creates function which takes and input function and creates a new function which ignores tokens matching, or not matching, regexs
@@ -153,7 +148,6 @@ applyto = (function(pattern, skip) {
 
 
 .reverse = (function(func) {
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
     function(vec) {
       rev(func(rev(vec)))
@@ -168,7 +162,6 @@ applyto = (function(pattern, skip) {
 
 
 
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 combinations = function(vec, n = 2, involving = NA) {
   if(any(!is.na(involving))) {
@@ -185,7 +178,6 @@ combinations = function(vec, n = 2, involving = NA) {
   Filter( function(comb) {  any(comb %in% hits)  },  out)
 }
 
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 .combinations = (function(n = 2, involving = NA) {
   function(func, ...) {
@@ -195,18 +187,15 @@ combinations = function(vec, n = 2, involving = NA) {
 } )
 
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 permutations = function(vec) {
   combinat::permn(vec)}
 
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 subTokens = (function(token) { 
   strsplit_single(token, pattern = ' ')  }) # %% Vectorize : c(SIMPLIFY = FALSE)
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 tokenCompare = function(func, token1, token2, ...) {
   output = outer(subTokens(token2), subTokens(token1), FUN = func, ...)
@@ -215,7 +204,6 @@ tokenCompare = function(func, token1, token2, ...) {
   output
 }
 
-#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #'  @export
 applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   # helper function
@@ -242,7 +230,6 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   if (rebuild) ex else accum
 }
 
-#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 apply2ExprAsString <- function(func, ...) {
   function(expr) {
