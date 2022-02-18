@@ -65,12 +65,10 @@ plotNotes <- function(rhythm, pitch, cex = 1, staffy = .5, staffx = c(0, 1)) {
 #' @export
 plotRhythm <- function(x, y, notes, ...) UseMethod('plotRhythm')
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name plotRhythm
 #' @export
 plotRhythm.default <- function(x, y, notes, ...) plotRhythm.rhythmInterval(x, y, notes, ...)
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name plotRhythm
 #' @export
 plotRhythm.rhythmInterval <- function(x, y, notes, ...) {
