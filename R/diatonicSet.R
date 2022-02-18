@@ -894,6 +894,7 @@ NULL
 
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export diatonicSet key signature romanKey
 diatonicSet  <- function(x, ...) UseMethod('diatonicSet')
@@ -906,9 +907,11 @@ romanKey     <- function(x, ...) UseMethod('romanKey')
 
 ###.. x as dset ####
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 diatonicSet.diatonicSet <- force
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 diatonicSet.numeric <- integer2dset %.% as.integer
 
@@ -926,30 +929,39 @@ char2dset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
                               'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
                               'signature: makeRE.signature(...)' = signature2dset)
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 diatonicSet.character <- char2dset_partition
 
 
 #.... set as
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setAs('integer', 'diatonicSet', function(from) integer2dset(from))
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setAs('numeric', 'diatonicSet', function(from) integer2dset(as.integer(from)))
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setAs('character', 'diatonicSet', function(from) char2dset(from))
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
 
 ###.. dset as x ####
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 key.diatonicSet          <- dset2key
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 signature.diatonicSet    <- dset2signature
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 romanKey.diatonicSet     <- dset2romanNumeral
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 kern.diatonicSet         <- dset2pitcher(tint2kern)
 
@@ -958,19 +970,25 @@ kern.diatonicSet         <- dset2pitcher(tint2kern)
 #.... numeric -> y ####
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 key.numeric <- dset2key %.% diatonicSet.numeric
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 signature.numeric <- dset2key %.% diatonicSet.numeric
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 romanKey.numeric <- dset2key %.% diatonicSet.numeric
 
 #.... character -> y ####
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 key.character          <- re.place %.% dset2key %.% diatonicSet.character
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------s
 #' @export
 signature.character    <- re.place %.% dset2signature %.% diatonicSet.character
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 romanKey.character     <- re.place %.% dset2romanNumeral %.% diatonicSet.character
 
@@ -978,35 +996,53 @@ romanKey.character     <- re.place %.% dset2romanNumeral %.% diatonicSet.charact
 ##### Tonal transform methods ####
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------s
 #' @export
 is.major <- function(x) UseMethod('is.major')
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 is.minor <- function(x) UseMethod('is.minor')
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 is.major.diatonicSet <- function(x) getMode(x) >= 1L
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 is.minor.diatonicSet <- function(x) getMode(x) < -1L
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 is.minor.diatonicSet <- function(x) getMode(x) == -3L
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 is.minor.character <- is.minor.diatonicSet %.% char2dset
 
 
 
 ##### Predefined diatonicSets ####
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Eflatmajor Cminor Asharpminor Fdorian Dsharpdorian Bflatmixolydian Gsharpmixolydian Eflatlydian Cphrygian Asharpphrygian Flocrian Dsharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Amajor Fflatmajor Dminor Bsharpminor Gdorian Esharpdorian Cflatmixolydian Alydian Fflatlydian Dphrygian Bsharpphrygian Glocrian Esharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Bmajor Gflatmajor Eminor Csharpminor Aflatdorian Fsharpdorian Dflatmixolydian Blydian Gflatlydian Ephrygian Csharpphrygian Aflatlocrian Fsharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Cmajor Asharpmajor Fminor Dsharpminor Bflatdorian Gsharpdorian Eflatmixolydian Clydian Asharplydian Fphrygian Dsharpphrygian Bflatlocrian Gsharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Dmajor Bsharpmajor Gminor Esharpminor Cflatdorian Amixolydian Fflatmixolydian Dlydian Bsharplydian Gphrygian Esharpphrygian Cflatlocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Emajor Csharpmajor Aflatminor Fsharpminor Dflatdorian Bmixolydian Gflatmixolydian Elydian Csharplydian Aflatphrygian Fsharpphrygian Dflatlocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Fmajor Dsharpmajor Bflatminor Gsharpminor Eflatdorian Cmixolydian Asharpmixolydian Flydian Dsharplydian Bflatphrygian Gsharpphrygian Eflatlocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Gmajor Esharpmajor Cflatminor Adorian Fflatdorian Dmixolydian Bsharpmixolydian Glydian Esharplydian Cflatphrygian Alocrian Fflatlocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Aflatmajor Fsharpmajor Dflatminor Bdorian Gflatdorian Emixolydian Csharpmixolydian Aflatlydian Fsharplydian Dflatphrygian Blocrian Gflatlocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Bflatmajor Gsharpmajor Eflatminor Cdorian Asharpdorian Fmixolydian Dsharpmixolydian Bflatlydian Gsharplydian Eflatphrygian Clocrian Asharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Cflatmajor Aminor Fflatminor Ddorian Bsharpdorian Gmixolydian Esharpmixolydian Cflatlydian Aphrygian Fflatphrygian Dlocrian Bsharplocrian 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export Dflatmajor Bminor Gflatminor Edorian Csharpdorian Aflatmixolydian Fsharpmixolydian Dflatlydian Bphrygian Gflatphrygian Elocrian Csharplocrian 
 #' 
 allkeys <- expand.grid(Step = LETTERS[1:7], stringsAsFactors = FALSE,
