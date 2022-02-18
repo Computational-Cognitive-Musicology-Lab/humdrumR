@@ -260,21 +260,18 @@ removeNull <- function(humdrumR, recordTypes = 'GLIMDd', ...) {
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 #' @rdname filterHumdrum
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File)
 }
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 #' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
 }
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 #' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
@@ -306,7 +303,6 @@ numericIndexCheck <- function(i) {
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[] # returns unchanged
 #' @export
@@ -316,7 +312,6 @@ setMethod('[',
 
 ##[numeric]
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------s
 #' @name filterHumdrum
 #' @usage humdata[x:y]
 #' @export
@@ -339,7 +334,6 @@ setMethod('[',
 
 ##[character]
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata['regex']
 #' @export
@@ -357,7 +351,6 @@ setMethod('[',
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[~expression]
 #' @export
@@ -379,7 +372,6 @@ setMethod('[',
 
 ##[[numeric]]
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[[x:y]]
 #' @export
@@ -398,7 +390,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
           })
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[[ , x:y]]
 #' @export
@@ -431,7 +422,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 # }
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[['regex']]
 #' @export
@@ -478,7 +468,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @usage humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
 #' @export
@@ -521,7 +510,6 @@ setMethod('[[',
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @usage humdata[[~expression]]
 #' @export
@@ -538,7 +526,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
                     x
           })
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @usage humdata[[ , ~expression]]
 #' @export
