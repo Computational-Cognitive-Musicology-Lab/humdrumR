@@ -574,7 +574,6 @@ setMethod('initialize', 'humdrumR',
 
 ####As/Is ####
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @export
 is.humdrumR <- function(x) inherits(x, 'humdrumR')
