@@ -19,6 +19,7 @@ REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead 
 #' Superfluous (non-match) characters at the begginning, end, or in bettween matches, will result in 
 #' all `NA` being returned.
 #' 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name REparser
 #' @export
 REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, reverse = FALSE, toEnv = FALSE) {
