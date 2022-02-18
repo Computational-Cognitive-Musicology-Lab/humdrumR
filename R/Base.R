@@ -22,6 +22,7 @@ setMethod('^', 'humdrumFunction',
 
 applyFunc <- function(func, x) func(x)
 
+#' --------------------------------------------->         NEEDS DOCUMENTATION            <----------------------------------------------
 #' @export
 classify <- function(..., other = 'Other') {
   #takes any number of predicate functions
@@ -48,6 +49,7 @@ classify <- function(..., other = 'Other') {
   humFunc(func)
 }
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 RErid <- function(...) {
   res <- unlist(list(...))
@@ -58,7 +60,8 @@ RErid <- function(...) {
     strs
   }) 
 }
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 REkeep <- function(re) {
   humFunc(function(strs) {
     matches <- stringr::str_extract(strs, re)
@@ -67,6 +70,7 @@ REkeep <- function(re) {
   } )
 }
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 humtable <- function(..., levels = NULL) {
   args <- list(...)
@@ -82,7 +86,8 @@ humtable <- function(..., levels = NULL) {
   do.call('table', c(args, useNA = na))
 }
 
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 append2string <- function(app, sep = '') {
  newfunc <- function(str) paste(str, sep, app, collapse = '')
  
@@ -124,7 +129,8 @@ append2string <- function(app, sep = '') {
 
 ###
 
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 applyto = (function(pattern, skip) {
   #creates function which takes and input function and creates a new function which ignores tokens matching, or not matching, regexs
   #if the output of this new function is the same length as the nonskipped tokens, then the original vec is returned with
@@ -147,7 +153,8 @@ applyto = (function(pattern, skip) {
 
 
 .reverse = (function(func) {
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
     function(vec) {
       rev(func(rev(vec)))
     }
@@ -161,7 +168,8 @@ applyto = (function(pattern, skip) {
 
 
 
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 combinations = function(vec, n = 2, involving = NA) {
   if(any(!is.na(involving))) {
     if(is.character(involving) || inherits(involving, 'regex')) {
@@ -177,7 +185,8 @@ combinations = function(vec, n = 2, involving = NA) {
   Filter( function(comb) {  any(comb %in% hits)  },  out)
 }
 
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 .combinations = (function(n = 2, involving = NA) {
   function(func, ...) {
     function(vec) { lapply(combinations(vec, n, involving), func, ...)
@@ -186,15 +195,18 @@ combinations = function(vec, n = 2, involving = NA) {
 } )
 
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 permutations = function(vec) {
   combinat::permn(vec)}
 
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 subTokens = (function(token) { 
   strsplit_single(token, pattern = ' ')  }) # %% Vectorize : c(SIMPLIFY = FALSE)
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 tokenCompare = function(func, token1, token2, ...) {
   output = outer(subTokens(token2), subTokens(token1), FUN = func, ...)
@@ -203,7 +215,8 @@ tokenCompare = function(func, token1, token2, ...) {
   output
 }
 
-#' @export
+#'------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
+#'  @export
 applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   # helper function
   accum <- c()
@@ -229,6 +242,7 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
   if (rebuild) ex else accum
 }
 
+#' ------------------------------------->                   NEEDS DOCUMENTATION            <-----------------------------------
 #' @export
 apply2ExprAsString <- function(func, ...) {
   function(expr) {

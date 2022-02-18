@@ -78,6 +78,7 @@ print.composed <- function(x) {
     
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 `%.%` <- function(e1, e2) { 
     f1name <- rlang::quo_text(rlang::enquo(e1))
@@ -91,6 +92,7 @@ print.composed <- function(x) {
 
 # "sticky attributes" 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 stickyApply <- function(func, ...) {
     pipe <- stickyAttrs(list(...)[[1]])
@@ -194,6 +196,7 @@ re.as <- function(vector) {
 }
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 re.place <- function(vector) {
     asfunc <- stickyAttrs(vector)$replace
@@ -246,6 +249,7 @@ setMethod('|', c('predicate.function', 'predicate.function'),
                   string = paste(s1, s2, sep = ' | '))
           })
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 EQ <- function(pat) {
   func <- function(x) {
@@ -257,6 +261,7 @@ EQ <- function(pat) {
   new('predicate.function', func, string = glue::glue('x == {deparse(pat)}'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 LEN <- function(p.f) {
     func <- function(x) p.f(length(x))
@@ -265,12 +270,14 @@ LEN <- function(p.f) {
         string = gsub('x', 'length(x)', p.f@string))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 ANY <- function(p.f) {
     func <- unclass(any %.% p.f)
     
     new('predicate.function', func, string = paste0('any(', p.f@string, ')'))
 }
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 ALL <- function(p.f) {
     func <- unclass(all %.% p.f)
@@ -278,6 +285,7 @@ ALL <- function(p.f) {
     new('predicate.function', func, string = paste0('all(', p.f@string, ')'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 GT <- function(n) {
   func <- function(x) x > n
@@ -285,6 +293,7 @@ GT <- function(n) {
   new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 GTET <- function(n) {
   func <- function(x) x >= n
@@ -293,6 +302,7 @@ GTET <- function(n) {
 }
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 LT <- function(n) {
   func <- function(x) x < n
@@ -300,6 +310,7 @@ LT <- function(n) {
   new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 LTET <- function(n) {
   func <- function(x) x <= n
@@ -307,6 +318,7 @@ LTET <- function(n) {
   new('predicate.function', func, string = glue::glue('x <= {deparse(n)}'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 RE <- function(pat) {
   func <- function(x)  grepl(pat, x) 
@@ -314,6 +326,7 @@ RE <- function(pat) {
   new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 na <- new('predicate.function', function(x) is.na(x), string = "x == NA")
 #' @export
@@ -323,6 +336,7 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 ############### Predicate dispatch ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name regexDispatch
 #' @export
 `%predate%` <- function(func, predicate) {
@@ -334,6 +348,7 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
   
@@ -420,6 +435,7 @@ funcCall <- function(fname) {
 # }
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, negate = FALSE) {
   args <- list(...)
@@ -464,6 +480,7 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, 
 
 ###### "Memoify" ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 memoizeDispatch <- function(fname) {
     func <- match.fun(fname)
