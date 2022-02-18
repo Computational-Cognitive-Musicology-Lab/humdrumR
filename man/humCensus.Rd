@@ -7,11 +7,11 @@
 \alias{print.humCensus}
 \title{Tabulate records and tokens in a humdrumR corpus}
 \usage{
-census(humdrumR, dataTypes = "GLIMDd", by = "Filename")
+census(humdrumR, dataTypes = "GLIMDd", by = "Filename", removeEmpty = FALSE)
 
 census(humdata)[i]
 
-\method{print}{humCensus}(censusTable, showall = TRUE)
+\method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \description{
 \code{census} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}

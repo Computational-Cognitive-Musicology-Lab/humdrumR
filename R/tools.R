@@ -1562,13 +1562,14 @@ trimTokens <- function(tokmat, max.token.length) {
 
 smartPadWrap <- function(str, width, side = 'left') {
     
-    width <- width - 5L
     
     if (length(str) != 1L) .stop('In call to smartWrap, str argument must be a single character string.')
     
     if (nchar(str) <= width) return(stringr::str_pad(str, width = width, side = side))
     
     strs <- strsplit(str, split = '  *')[[1]]
+    
+    # while (any(nchar(strs) >= width)) { }
         
     ns <- nchar(strs)
     strs <- if (side == 'left') {
