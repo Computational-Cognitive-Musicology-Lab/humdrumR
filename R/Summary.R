@@ -205,7 +205,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   ## how wide does each column need to be to accomodate longest strings in each column?
   lenCol <- pmax(nchar(colNames),
-                 sapply(censusTable, max %.% nchar),
+                 sapply(censusTable, \(x) max(nchar(x))),
                  nchar(sums))
   lenCol[colNames %in% c("Records", "Tokens", "Characters")] <- lenCol[colNames %in% c("Records", "Tokens", "Characters")] + 3L
   lenCol[colNames %in% c('(unique)', '(per token)')] <- lenCol[colNames %in% c('(unique)', '(per token)')] + 1L
@@ -481,7 +481,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
           
           ###Totals
           Totals <- list(`Any:` = sapply(codeCounts, function(col) num2str(sum(!is.na(col) & col > 0L))),
-                         `Sum:` = sapply(codeCounts, num2str %.% sum, na.rm = TRUE),
+                         `Sum:` = sapply(codeCounts, \(x) num2str(sum(x)), na.rm = TRUE),
                          `Unique:` = sapply(refTable, function(col) num2str(length(unique(col[!is.na(col)])))))
                          
           ### Column widths
