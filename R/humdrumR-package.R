@@ -42,6 +42,7 @@
 NULL
 
 
+#' ----------------------------------------------->      NEEDS DOCUMENTATION       <------------------------------------------------------
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
