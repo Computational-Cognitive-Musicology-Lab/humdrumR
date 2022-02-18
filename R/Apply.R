@@ -363,7 +363,6 @@ withinHumdrum <- function(humdrumR,  ...) {
 
 #' withHumdrum
 #' 
-#'------------------------------------>                                 NEEDS DOCUMENTATION                           <-----------------------------------
 #'
 #' @name with-in-Humdrum
 #' @export
