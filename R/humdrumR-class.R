@@ -574,6 +574,7 @@ setMethod('initialize', 'humdrumR',
 
 ####As/Is ####
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @export
 is.humdrumR <- function(x) inherits(x, 'humdrumR')
@@ -905,6 +906,7 @@ renumberSpines <- function(humdrumR) {
 
 #### Reshaping ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humColumns
 #' @export
 alignColumns <- function(humdrumR, padder = '_C') {
@@ -968,6 +970,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
 
 #' Merge two (or more) humdrumR datasets
 #'
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 #' @name humMerge
 mergeHumdrum <- function(...) {
@@ -993,6 +996,7 @@ mergeHumdrum <- function(...) {
 
 #########################################spinePipe ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
@@ -1628,6 +1632,7 @@ isField <- function(humdrumR, names) {
           names %in% fields(humdrumR)$Name 
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' Get named 
 #' @export
 getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
@@ -1898,6 +1903,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 #########################Print methods ----
 #########################################################-
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humPrint
 #' @export
 setMethod('show', signature = c(object = 'humdrumR'),
