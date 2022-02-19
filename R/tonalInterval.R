@@ -368,6 +368,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' The fundamental tonal space.
 #' 
+#' -------------------------------------->       NEEDS DOCUMENTATION       <------------------------------------------
+#' 
 #' @name line-of-fifths
 NULL
 
@@ -1184,6 +1186,8 @@ frequency2tint <- function(float, frequency.reference = 440L,
 #' Tonal Transformations
 #' 
 #' Various transformations of pitch information
+#' 
+#' ------------------------------------------------->      NEEDS DOCUMENTATION       <----------------------------------------------
 #' 
 #' @name tonalTransformations
 #' @export

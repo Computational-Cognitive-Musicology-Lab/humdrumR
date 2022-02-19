@@ -8,13 +8,41 @@
 #' functions for creating quick summaries of \code{\linkS4class{humdrumR}}
 #' corpora:
 #' \describe{
-#' \item{\link[humdrumR:humCensus]{census}}{Tabulates the raw size of the humdrumR corpus.}
-#' \item{\link[humdrumR:humReference]{reference}}{Tabulates reference records (metadata) for each file.}
-#' \item{\link[humdrumR:humPaths]{spines}}{Tabulates the number of spines and spine paths in files in the corpus.}
-#' \item{\link[humdrumR:humInterpretations]{interpretations}}{Tabulates the types of exclusive and tandem interpretations in the corpus.}
-#' \item{\link[humdrumR:humSections]{sections}}{Tabulates any formal data (\code{"*>"}) in the corpus.}
+#' \item{\link[humdrumR:humCensus]{census}}{Tabulates the raw size of the humdrumR corpus. An example of the first item of such output is below (taken from MCFlow corpus):
+#' ###### humdrumR census of GLIMDd records in mcf object (124 Filenames)
+###### By Filename :
+#'                                 Records    Tokens  (unique)  Characters (per token)
+#' 2pac_CaliforniaLove.rap [  1]       491      3802    (592)         7514      (1.98)
+#' ...                                 ...       ...      ...          ...         ...
+#' \item{\link[humdrumR:humReference]{reference}}{Tabulates reference records (metadata) for each file. An example of the first item of such output is below (taken from MCFlow corpus):
+#' File Filename                OTL             RTL            RRD        RRM       RC#    BPP BPD        COC  COL           COM                                     CDT                                         ENC                      EED                      RDT
+#' 1    2pac_CaliforniaLove.rap California Love All Eyez on Me 1995/12/28 Death Row 854652 6   1996/06/22 2Pac Dr. Dre; 2Pac Andre Romelle Young; Tupac Amaru Shakur 1965/02/18->2016/01/; 1971/06/16-1996/09/13 Nathaniel Condit-Schultz Nathaniel Condit-Schultz 2014/-2016/
+#' ...                     ...             ...            ...        ...       ...    ... ...        ...  ...           ...                                     ...                                         ...                      ...                      ... 
+#' }
+#' \item{\link[humdrumR:humPaths]{spines}}{Tabulates the number of spines and spine paths in files in the corpus. An example of the first item of such output is below 
+#' (taken from MCFlow corpus):
+#' File Filename                Spines Columns Splits Slices Where
+#' 1    2pac_CaliforniaLove.rap 8      8       0      0      c(0, 0, 0, 0, 0, 0, 0, 0)
+#' ...  ...                     ...    ...     ...    ...    ...
+#' }
+#' \item{\link[humdrumR:humInterpretations]{interpretations}}{Tabulates the types of exclusive and tandem interpretations in the corpus. An example of such output is below
+#' (taken from MCFlow corpus):
+#' }
+#' \item{\link[humdrumR:humSections]{sections}}{Tabulates any formal data (\code{"*>"}) in the corpus. An example of such output is below (taken from MCFlow corpus):
+#' }
 #' \item{summary}{Calls all of the above functions, and prints
 #' a condensed version of each.}
+#'                 Summary of humdrumR object
+#'         Token Census:
+#' 
+#' ###### humdrumR census of GLIMDd records in object object (124 Filenames)
+#' ###### Totals:
+#'                                  Records    Tokens (unique)   Characters (per token)
+#'                                   82,643   646,744 (13,177)    1,178,769      (1.82)
+#'         Reference Records:
+#'         ...
+#'         ...
+#'         ...
 #' }
 #' Each function takes a \code{\linkS4class{humdrumR}} object and returns a
 #' special class of data.table.
@@ -22,9 +50,9 @@
 #' @export 
 setMethod('summary', 'humdrumR',
           function(object, ...) {
-              cat('\t\tSummary of humdrumR object:\n\n')
-              
-              
+            cat('\t\tSummary of humdrumR object:\n\n')
+            
+            
             funcs <- c(`Token Census` = census, `Reference Records` = reference, 
                        `Spine Structure` = spines, `Intepretation Content` = interpretations) #, sections)
             
@@ -101,7 +129,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   dataTypes <- checkTypes(dataTypes, 'census')
   
   humdrumR <- removeEmptyFiles(humdrumR)
-          
+  
   ## This function creates a data.table of class humCensus
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
   
@@ -109,14 +137,14 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   ##ADD MULTISTOPS, MOVE BARS TO sections FUNCTION
   
   censusTable <- humtab[ , .(
-                      Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
-                      Tokens           = nrow(.SD),
-                      `(unique)`       = list(unique(Token)),
-                      Characters       = sum(nchar(Token)),
-                      `(per token)`    = round(mean(nchar(Token)), 2)
-                      ),
-                      # Bars             = length(unique(Bar))),
-                      by = by]
+    Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
+    Tokens           = nrow(.SD),
+    `(unique)`       = list(unique(Token)),
+    Characters       = sum(nchar(Token)),
+    `(per token)`    = round(mean(nchar(Token)), 2)
+  ),
+  # Bars             = length(unique(Bar))),
+  by = by]
   
   
   attr(censusTable, 'corpusName') <- corpusName
@@ -130,7 +158,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
 #' @export
 `[.humCensus` <- function(censusTable, i, drop = FALSE) {
   if (missing(i)) return(if (drop) popclass(censusTable) else censusTable)
-          
+  
   corpusName <- attr(censusTable, 'corpusName')          
   dataTypes  <- attr(censusTable, 'dataTypes')          
   
@@ -153,11 +181,11 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename') {
   censusTable
 }
 
-  
+
 #' @name humCensus
 #' @export
 print.humCensus <- function(censusTable, showall = TRUE) {
-   
+  
   corpusName <- attr(censusTable, 'corpusName')
   dataTypes  <- attr(censusTable, 'dataTypes')
   
@@ -166,8 +194,8 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   nfiles <- nrow(censusTable)
   
   if (nfiles < 1L) {
-            cat('Empty humdrum corpus.\n') 
-            return(invisible(NULL))
+    cat('Empty humdrum corpus.\n') 
+    return(invisible(NULL))
   }
   
   ##
@@ -177,13 +205,13 @@ print.humCensus <- function(censusTable, showall = TRUE) {
   
   #
   sums <- censusTable[, lapply(.SD,
-                        function(col) {
-                                  if (is.list(col)) { # for Unique Column
-                                            length(unique(unlist(col)))
-                                  } else {
-                                            sum(col, na.rm = TRUE)
-                                  }
-                                  })] 
+                               function(col) {
+                                 if (is.list(col)) { # for Unique Column
+                                   length(unique(unlist(col)))
+                                 } else {
+                                   sum(col, na.rm = TRUE)
+                                 }
+                               })] 
   pertoken <- paste0('(', round(sums$Characters / sums$Tokens, 2), ')')
   sums   <- c("", num2str(unlist(sums[ , 1:4, with = FALSE]), pad = FALSE), pertoken)
   sums['(unique)'] <- paste0("(", sums['(unique)'], ")")
@@ -212,7 +240,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
                           if (is.null(corpusName)) "" else glue::glue( " in {corpusName} object"), 
                           glue::glue(" ({num2print(nfiles, by)})"),
                           '\n')
-       
+  
   colNames_str <- padder(colNames, lenCol)
   ## PRINTING BEGINS:
   
@@ -220,7 +248,7 @@ print.humCensus <- function(censusTable, showall = TRUE) {
     cat(corpusMessage)
     cat("###### By", by, ":\n")
     cat(colNames_str, '\n', sep = '')
-  # 
+    # 
     censusTable[, cat(paste(padder(unlist(.SD), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
     if (nfiles > 10L ) cat(colNames_str, '\n', sep = '')
     
@@ -351,7 +379,7 @@ reference.humdrumR <- function(humdrumR) {
   # This funtion simply extracts the refernence columns from a humdrumR object
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
-          
+  
   humtab <- getHumtab(humdrumR)
   fieldtable <- fields(humdrumR, fieldTypes = 'Reference')
   
@@ -363,13 +391,13 @@ reference.humdrumR <- function(humdrumR) {
   attr(refTable, 'corpusName') <- corpusName
   refTable %class% 'humReference'
 }
-  
+
 
 #' @name humReference
 #' @export
 `[.humReference` <- function(refTable, i, j, drop = FALSE) {
   if (missing(i) && missing(j)) return(if (drop) popclass(refTable) else refTable)
-          
+  
   corpusName <- attr(refTable, 'corpusName')          
   
   
@@ -406,111 +434,111 @@ reference.humdrumR <- function(humdrumR) {
 #' @usage NULL
 #' @export
 print.humReference <- function(refTable, showall = TRUE) {
-          corpusName <- attr(refTable, 'corpusName')
-          
-          refTable <- data.table::copy(popclass(refTable))
-          
-          nfiles <- nrow(refTable)
-          
-          if (nfiles < 1L) {
-                    cat('Empty humdrumR object.\n') 
-                    return(invisible(NULL))
-          }
-          
-          ##
-          files <- paste0(refTable$Filename, " [", num2str(refTable$File, pad = TRUE), "]")
-          refTable[ , c('File', 'Filename') := NULL] # in place!
-          
-          ######### -
-          corpusMessage <- paste0("\n###### Reference records in humdrumR corpus ",
-                                  if (is.null(corpusName)) "" else glue::glue( "{corpusName}"), 
-                                  glue::glue(" ({num2print(nfiles, 'file')})"),
-                                  '\n')
-          
-          # If only one file, show actual reference records,
-          # as they appear in the file
-          # and then return invisible
-          if (nrow(refTable) == 1L) {
-                    cat(corpusMessage)
-                    cat(files, '\n', sep = '')
-                   
-                    refTable <- refTable[ , lapply(.SD, function(col) {
-                              if (is.list(col)) { col <- do.call('paste', 
-                                                                 c(col, 
-                                                          collapse = paste0('\n\t', 
-                                                                            stringr::str_dup(' ', max(nchar(colnames(refTable)))),
-                                                                            '   ')))
-                              }
-                              if (is.null(col) || all(is.na(col))) NULL else col
-                    })]
-                    
-                    colNames <- colnames(refTable)
-                    colNames <- padder(colNames, max(nchar(colNames)) + 1L)
-                    
-                    cat(paste(paste0('\t', colNames, ': ', unlist(refTable))), sep = '\n')
-                    return(invisible(NULL))
-          } 
-
-          # If more than one file, print the number of reference records (by code)
-          # in each file
-          codeCounts <- refTable[ , lapply(.SD, 
+  corpusName <- attr(refTable, 'corpusName')
+  
+  refTable <- data.table::copy(popclass(refTable))
+  
+  nfiles <- nrow(refTable)
+  
+  if (nfiles < 1L) {
+    cat('Empty humdrumR object.\n') 
+    return(invisible(NULL))
+  }
+  
+  ##
+  files <- paste0(refTable$Filename, " [", num2str(refTable$File, pad = TRUE), "]")
+  refTable[ , c('File', 'Filename') := NULL] # in place!
+  
+  ######### -
+  corpusMessage <- paste0("\n###### Reference records in humdrumR corpus ",
+                          if (is.null(corpusName)) "" else glue::glue( "{corpusName}"), 
+                          glue::glue(" ({num2print(nfiles, 'file')})"),
+                          '\n')
+  
+  # If only one file, show actual reference records,
+  # as they appear in the file
+  # and then return invisible
+  if (nrow(refTable) == 1L) {
+    cat(corpusMessage)
+    cat(files, '\n', sep = '')
+    
+    refTable <- refTable[ , lapply(.SD, function(col) {
+      if (is.list(col)) { col <- do.call('paste', 
+                                         c(col, 
+                                           collapse = paste0('\n\t', 
+                                                             stringr::str_dup(' ', max(nchar(colnames(refTable)))),
+                                                             '   ')))
+      }
+      if (is.null(col) || all(is.na(col))) NULL else col
+    })]
+    
+    colNames <- colnames(refTable)
+    colNames <- padder(colNames, max(nchar(colNames)) + 1L)
+    
+    cat(paste(paste0('\t', colNames, ': ', unlist(refTable))), sep = '\n')
+    return(invisible(NULL))
+  } 
+  
+  # If more than one file, print the number of reference records (by code)
+  # in each file
+  codeCounts <- refTable[ , lapply(.SD, 
                                    function(col) {
-                                             col <- if (is.list(col)) lengths(col) else ifelse(is.na(col), 0, 1)
-                                             col
+                                     col <- if (is.list(col)) lengths(col) else ifelse(is.na(col), 0, 1)
+                                     col
                                    })]
-       
-          colNames <- colnames(codeCounts)
-          
-          ###Totals
-          Totals <- list(`Any:` = sapply(codeCounts, function(col) num2str(sum(!is.na(col) & col > 0L))),
-                         `Sum:` = sapply(codeCounts, num2str %.% sum, na.rm = TRUE),
-                         `Unique:` = sapply(refTable, function(col) num2str(length(unique(col[!is.na(col)])))))
-                         
-          ### Column widths
-          lenCol <- do.call('pmax',
-                            c(nchar(colNames),
-                              sapply(codeCounts, max %.% nchar),
-                              lapply(Totals, nchar))) + 1L # plus one to add space between lines
-          
-          # append filename, plus totals categories
-          colNames   <- c("", colNames) # don't print "Filename" as a header
-          lenCol     <- c(max(nchar(c(files, names(Totals)))), lenCol)
-          
-          ## If there is only one column
-          oneColumn <- ncol(codeCounts) == 1L
-          if (oneColumn) {
-                    lenCol <- c(lenCol[1] + 1L, 0L)
-                    files <- paste0(files, '  ')
-                    names(Totals) <- paste0(names(Totals), '  ')
-          }
-          
-          colNames_str <- padder(colNames, lenCol)
-          ## PRINTING BEGINS:
-          
-          if (showall) {
-                    cat(corpusMessage)
-                    cat("###### By file:\n")
-                    
-                    cat(colNames_str, '\n', sep = '')
-                    tab <- cbind(files, if (oneColumn) refTable else codeCounts)
-                    tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
-                    
-                    if (nfiles > 10L) cat(colNames_str, '\n', sep = '')
-          }
-         
-          if (!showall || nfiles > 10L) {
-                    cat(corpusMessage) 
-          } else {
-                    cat('\n')
-          }
-          cat("###### Totals:\n")
-          if (!showall) cat(colNames_str, '\n', sep = '')
-          
-          Map(function(tot, totname) {
-                    cat(padder(c(totname, tot), lenCol), '\n', sep = '')
-                    },
-              Totals, names(Totals)) 
-          invisible(NULL)
+  
+  colNames <- colnames(codeCounts)
+  
+  ###Totals
+  Totals <- list(`Any:` = sapply(codeCounts, function(col) num2str(sum(!is.na(col) & col > 0L))),
+                 `Sum:` = sapply(codeCounts, num2str %.% sum, na.rm = TRUE),
+                 `Unique:` = sapply(refTable, function(col) num2str(length(unique(col[!is.na(col)])))))
+  
+  ### Column widths
+  lenCol <- do.call('pmax',
+                    c(nchar(colNames),
+                      sapply(codeCounts, max %.% nchar),
+                      lapply(Totals, nchar))) + 1L # plus one to add space between lines
+  
+  # append filename, plus totals categories
+  colNames   <- c("", colNames) # don't print "Filename" as a header
+  lenCol     <- c(max(nchar(c(files, names(Totals)))), lenCol)
+  
+  ## If there is only one column
+  oneColumn <- ncol(codeCounts) == 1L
+  if (oneColumn) {
+    lenCol <- c(lenCol[1] + 1L, 0L)
+    files <- paste0(files, '  ')
+    names(Totals) <- paste0(names(Totals), '  ')
+  }
+  
+  colNames_str <- padder(colNames, lenCol)
+  ## PRINTING BEGINS:
+  
+  if (showall) {
+    cat(corpusMessage)
+    cat("###### By file:\n")
+    
+    cat(colNames_str, '\n', sep = '')
+    tab <- cbind(files, if (oneColumn) refTable else codeCounts)
+    tab[, cat(paste(padder(sapply(.SD, paste, collapse = ', '), lenCol), collapse = ''), '\n', sep = ''), by = seq_len(nfiles)]
+    
+    if (nfiles > 10L) cat(colNames_str, '\n', sep = '')
+  }
+  
+  if (!showall || nfiles > 10L) {
+    cat(corpusMessage) 
+  } else {
+    cat('\n')
+  }
+  cat("###### Totals:\n")
+  if (!showall) cat(colNames_str, '\n', sep = '')
+  
+  Map(function(tot, totname) {
+    cat(padder(c(totname, tot), lenCol), '\n', sep = '')
+  },
+  Totals, names(Totals)) 
+  invisible(NULL)
 }
 
 #### Spines ----
@@ -523,12 +551,12 @@ spines  <- function(humdrumR) {
   humtab <- getHumtab(humdrumR)
   
   spins <- humtab[Global == FALSE , 
-                    .(File            = unique(File),
-                      Spines           = length(unique(Spine)),
-                      Columns          = length(unique(Column)),
-                      Splits           = sum(grepl('\\*\\^', Token)),
-                      Splices          = length(unique(Record[grepl('\\*v', Token)])),
-                      Where            = list(.SD[ , length(unique(Path)) - 1, by = Spine]$V1)),
+                  .(File            = unique(File),
+                    Spines           = length(unique(Spine)),
+                    Columns          = length(unique(Column)),
+                    Splits           = sum(grepl('\\*\\^', Token)),
+                    Splices          = length(unique(Record[grepl('\\*v', Token)])),
+                    Where            = list(.SD[ , length(unique(Path)) - 1, by = Spine]$V1)),
                   by = Filename]
   
   setcolorder(spins, c('File', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
@@ -580,11 +608,11 @@ print.humSpines <- function(spinemat, showall = TRUE) {
     setcolorder(spinemat,
                 c('File', 'Filename', 'Spines',
                   'Columns', 'In', 'Splits', 'Splices'))
-  
-
+    
+    
     cols <- if (anypaths) 1:7 else 1:3
     colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
-      
+    
     lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
                    nchar(colNames), sapply(spinemat[ , cols, with = FALSE], max %.% nchar)) + 2
     
@@ -593,18 +621,18 @@ print.humSpines <- function(spinemat, showall = TRUE) {
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
       spinemat[ , { row <- unlist(.SD)
-                    if (Columns == 0) row[4:7] <- ' '
-                    paste(padder(row[cols], lenCol), collapse = '') 
-                  }, 
-                by = 1:nrow(spinemat)]$V1 -> strs
+      if (Columns == 0) row[4:7] <- ' '
+      paste(padder(row[cols], lenCol), collapse = '') 
+      }, 
+      by = 1:nrow(spinemat)]$V1 -> strs
       
       cat(paste(strs, collapse = '\n'), '\n', sep = '')
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
     }
-  
+    
     cat(padder(colNames, lenCol), '\n\n', sep = '')
-  
+    
     #
     cat(padder(c('Tallies:'), sum(lenCol[1:2])), '\n', sep = '')
     
@@ -618,7 +646,7 @@ print.humSpines <- function(spinemat, showall = TRUE) {
       }
       cat(row, '\n', sep = '')
     }
-  
+    
   }
   invisible(NULL)
 }
@@ -635,14 +663,14 @@ print.humSpines <- function(spinemat, showall = TRUE) {
 #' @export
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
-          
+  
   # humdrumR <- indexGLIM(humdrumR, dataTypes = 'I')
   humtab <- getHumtab(humdrumR, dataTypes = 'I')
   
   # Tandem
   tandem <- humtab[!grepl('^\\*\\*', Token) &   
-                   !Token %in% c('*', '*-', '*v', '*^') &
-                   !grepl('\\*>.*', Token)]
+                     !Token %in% c('*', '*-', '*v', '*^') &
+                     !grepl('\\*>.*', Token)]
   tandem[ , ID := factor(idTandem(Token))]
   tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = File]$V1)
   rownames(tandemN) <- unique(humtab$Filename)
@@ -669,12 +697,12 @@ interpretations <- function(humdrumR) {
 print.humInterpretations <- function(interps, showall = TRUE) {
   #' @export
   if (nrow(interps[[1]]) < 1 || any(sapply(interps[[2]], nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}
-          
+  
   tandems <- interps$Tandem[[1]]
   tandems[] <- do.call('paste', c(sep = '.', interps$Tandem))
   
   Nexclusive <- ncol(interps$Exclusive)
-          
+  
   interpmat <- data.table(interps$Exclusive, tandems)
   interpmat$File <- paste0(num2str(rownames(interps$Exclusive)), ":")
   interpmat$Filename  <- rownames(interps$Tandem$Number)
@@ -713,7 +741,7 @@ print.humInterpretations <- function(interps, showall = TRUE) {
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
     }
- 
+    
     cat(padder(colNames, lenCol), '\n', sep = '')
     cat(padder(colKeys, lenCol), '\n\n', sep = '')
     cat(padder(c('',
@@ -730,4 +758,3 @@ print.humInterpretations <- function(interps, showall = TRUE) {
   }
   
 }
-
