@@ -61,6 +61,7 @@
 #'  #      wild
 #'  #     west. 
 text <- function(data, nullTokens = TRUE){
+  print(silbeFormat(as.data.frame(data)))
   if(nullTokens == FALSE){
     # if the user does not want null tokens to replace instances of syllables occurring after the first syllable of a multi-syllable word
     data <- as.data.frame(data)
@@ -205,15 +206,15 @@ silbeFormat <- function(data){
   save_corrected <- list()
   print_corrected <- list()
   counter <- 0
-  for(i in 1:nrow(data)){
-    splitString <- strsplit(data[i, 1], "")[[1]]
-    splitStringNext <- strsplit(data[i+1,1], "")[[1]]
+  for(i in 1:length(data)){
+    splitString <- strsplit(data[i], "")[[1]]
+    splitStringNext <- strsplit(data[i+1], "")[[1]]
     if(splitString[length(splitString)] == '-' && splitStringNext[1] != '-'){
       counter <- counter + 1
-      print_initial <- append(data[i,1], data[i+1,1])
+      print_initial <- append(data[i], data[i+1])
       save_initials[counter] <- list(print_initial)
-      print_corrected <- append(data[i,1], '-')
-      print_corrected <- append(print_corrected, data[i+1, 1])
+      print_corrected <- append(data[i], '-')
+      print_corrected <- append(print_corrected, data[i+1])
       save_corrected[counter] <- list(print_corrected)
     }
   }
@@ -229,13 +230,46 @@ silbeFormat <- function(data){
     }
   }
 }
+# silbeFormatVectorized <- function(data){
+data <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+  save_initials <- list()
+  print_initial <- list()
+  save_corrected <- list()
+  print_corrected <- list()
+  counter <- 0
+  iteration <- 1:length(data)
+  iteration <- cbind(iteration)
+  splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+    # splitStringNext <- strsplit(data[i+1], "")[[1]]
+  ifFunction <- function(splitStringInput){if(splitString[length(splitString)] == '-' && splitString[1] != '-'){
+      counter <- counter + 1
+      print_initial <- append(data[i], data[i+1])
+      save_initials[counter] <- list(print_initial)
+      print_corrected <- append(data[i], '-')
+      print_corrected <- append(print_corrected, data[i+1])
+      save_corrected[counter] <- list(print_corrected)
+    }
+  }
+  applyIf <- apply(iteration, 1, ifFunction(splitString[[iteration]]))  
+  if(counter == 0){
+    return("Formatted properly.")
+  }
+  else{
+    cat("error, improperly formatted **silbe:", save_initials[1][[1]], "should be", save_corrected[1][[1]])
+    if(counter > 1){
+      for(i in 2:counter){
+        cat(" and", save_initials[i][[1]], "should be", save_corrected[i][[1]])
+      }
+    }
+  }
+# }
 ## Tests
 
 # test 1
 values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 new <- text(values)
 save <- text(values, nullTokens = FALSE)
-silbeFormat(dummyData)
+silbeFormat(values)
 
 data <- as.data.frame(values)
 data <- toString(data[,1])
