@@ -230,16 +230,23 @@ silbeFormat <- function(data){
     }
   }
 }
-# silbeFormatVectorized <- function(data){
-data <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-  save_initials <- list()
-  print_initial <- list()
-  save_corrected <- list()
-  print_corrected <- list()
-  counter <- 0
-  iteration <- 1:length(data)
-  iteration <- cbind(iteration)
-  splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+save_initials <- list()
+print_initial <- list()
+save_corrected <- list()
+print_corrected <- list()
+counter <- 0
+iteration <- 1:length(data)
+iteration <- cbind(iteration)
+splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+indicesWithErrors <- apply(iteration, 1, function(x){
+  if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+    return(list(x, x+1))
+  }
+  else if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+    return(list(x, x-1))
+  }
+})
     # splitStringNext <- strsplit(data[i+1], "")[[1]]
   ifFunction <- function(splitStringInput){if(splitString[length(splitString)] == '-' && splitString[1] != '-'){
       counter <- counter + 1
@@ -250,7 +257,7 @@ data <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 't
       save_corrected[counter] <- list(print_corrected)
     }
   }
-  applyIf <- apply(iteration, 1, ifFunction(splitString[[iteration]]))  
+  applyIf <- apply(iteration, 1, ifFunction(splitString[iteration]))  
   if(counter == 0){
     return("Formatted properly.")
   }
@@ -262,7 +269,7 @@ data <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 't
       }
     }
   }
-# }
+
 ## Tests
 
 # test 1
