@@ -159,40 +159,39 @@
 #'          do ~ sd(semits)
 #'          where ~ semits > mean(semits), 
 #'          by ~ File) 
-#' wherein the standard deviation of \code{semits} is, again, calculated for each file,
-#' but this time wherever the \code{semits} field is greater than the mean value \emph{across all the data}.
+#' wherein the standard deviation of `semits` is, again, calculated for each file,
+#' but this time wherever the `semits` field is greater than the mean value *across all the data*.
 #' 
 #' @section Plotting:
-#' The \code{doplot} keyword behaves exactly like the \code{do} keyword, except that the result of the
-#' evaluation is ignored. This is useful for plotting \emph{as well as} other side-effects (like writing to a file).
-#' If \code{doplot} is used with \code{withHumdrum}, the function simply returns \code{NULL} (after executing the \code{doplot}
+#' The `doplot` keyword behaves exactly like the `do` keyword, except that the result of the
+#' evaluation is ignored. This is useful for plotting *as well as* other side-effects (like writing to a file).
+#' If `doplot` is used with `withHumdrum`, the function simply returns `NULL` (after executing the `doplot`
 #' expression
-#' If \code{doplot} is used with \code{withinHumdrum} (or \code{inHumdrum}), the function simply returns the unaltered
-#' \code{humdrumR} argument.
+#' If `doplot` is used with `withinHumdrum` (or `inHumdrum`), the function simply returns the unaltered
+#' `humdrumR` argument.
 #' 
-#' \code{withinHumdrum} also allows you to specify plotting options in line, without having to make a separate call
-#' to \code{\link[graphics]{par}}. Any \code{\link[graphics]{par}} argument can be specified as a \code{Keyword ~ Expression} pair
-#' in the \code{formulae} argument. For instance, if you call a \code{doplot} expression with a \code{by} expression
+#' `withinHumdrum` also allows you to specify plotting options in line, without having to make a separate call
+#' to `[graphics][par]`. Any `[graphics][par]` argument can be specified as a `Keyword ~ Expression` pair
+#' in the `formulae` argument. For instance, if you call a `doplot` expression with a `by` expression
 #' that creates four groups, R will create four plots---but you will only see the last one! Normally, you would need to
-#' call \code{par(mfcol = c(2,2))} \emph{before} calling your plotting function. However, with \code{withinHumdrum} you can
-#' soecific \code{mfcol = c(2,2)} right in a \code{formulae} formula:
-#' \preformatted{
+#' call `par(mfcol = c(2,2))` *before* calling your plotting function. However, with `withinHumdrum` you can
+#' soecific `mfcol = c(2,2)` right in a `formulae` formula:
 #'              withinHumdrum(humdata,
 #'                       doplot ~ fooplot(.),
 #'                       by ~ list(Two, byTwo),
-#'                       mfcol ~ c(2, 2))}
-#' The best part is \code{withinHumdrum} will reset \code{par} to it's previous state after \code{withinHumdrum} is done.
+#'                       mfcol ~ c(2, 2))
+#' The best part is `withinHumdrum` will reset `par` to it's previous state after `withinHumdrum` is done.
 #' 
 #' 
 #' @section Tandem interpretations:
 #' 
-#' The function \code{\link{readHumdrum}} automatically parses
+#' The function `[readHumdrum][readHumdrum]` automatically parses
 #' tandem interpretations (that it recognizes) into
-#' their own fields in the resulting \code{\linkS4class{humdrumR}} data.
-#' For instance, data with a \code{'*clefF4'} will show
-#' up as a \code{Clef} field. However, users might read humdrum data with their
-#' own custom tandem interpretations that are not built into \code{humdrumR}.
-#' \code{humdrumR} includes the function \code{\link{getTandem}} to help us
+#' their own fields in the resulting `[humdrumR][humdrumR]` data.
+#' For instance, data with a `'*clefF4'` will show
+#' up as a `Clef` field. However, users might read humdrum data with their
+#' own custom tandem interpretations that are not built into `humdrumR`.
+#' `humdrumR` includes the function `[getTandem][getTandem]` to help us
 #' extract arbitrary tandem intrpretation data.
 #' Luckily, \code{withinHumdrum} knows some
 #'  \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
