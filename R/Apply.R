@@ -62,103 +62,103 @@
 #' 
 #' Legal keywords, and their meanings are:
 #' 
-#' * `do` {An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").}
-#' * `doplot` {An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
-#' * `by` {An expression used to break the data into groups, with the `do` expression(s) evaluated 
+#' 1.  `do` {An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").}
+#' 2. `doplot` {An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
+#' 3. `by` {An expression used to break the data into groups, with the `do` expression(s) evaluated 
 #'   separately in each group (see "Partitioning").}
-#'   \item{where}{An expression indicating a subset of the data in which to evaluate the `do` expression (see "Partitioning").}
-#'   \item{ngrams}{A positive number *n*. The expression is evaluated across overlapping length-*n* windows.}
-#'   \item{recordtypes}{A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. These characters
-#'   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
-#'   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
+#' 4. `where`{An expression indicating a subset of the data in which to evaluate the `do` expression (see "Partitioning").}
+#' 5. `ngrams`{A positive number *n*. The expression is evaluated across overlapping length-*n* windows.}
+#' 6.  `recordtypes`{A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. These characters
+#' correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
+#'   **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
 #'   is only evaluated on data drawn from the specified record types (defaults to `"D"`).}
-#'   \item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+#' 7. {pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
 #'   or opening a graphing window. The `pre` expression is evaluated in the global environment.}
-#'   \item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
+#' 8. {post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
 #' 
 #' 
 #' @section Expression evaluation:
-#' The right-hand side of any formula in the \code{formulae} argument with the keyword \code{do} or \code{doplot} 
-#' (or with no keyword specified) is evaluated within the \code{humdrumR} data object.
+#' The right-hand side of any formula in the `formulae` argument with the keyword `do` or `doplot` 
+#' (or with no keyword specified) is evaluated within the `humdrumR` data object.
 #' The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.). 
-#' You can also include a \code{.} anywhere in the expression, which will be 
-#' interpreted as the humdrumR object's current \code{\link[dest=humdrumR]{Active}} 
+#' You can also include a `.` anywhere in the expression, which will be 
+#' interpreted as the humdrumR object's current `[dest=humdrumR][Active]` 
 #' expression.
-#' \preformatted{
+#' 
 #' humdata <- readHumdrum('directorywithdata/*.krn') # read some data
 #' 
 #' withinHumdrum(humdata, ~getPitch(Token)) # The most basic pattern
-#' withinHumdrum(humdata, ~getPitch(.)) # Same as previous (unless \code{Active} field has been changed))
+#' withinHumdrum(humdata, ~getPitch(.)) # Same as previous (unless `Active` field has been changed))
 #' 
 #' withinHumdrum(humdata, ~solfa(getPitch(Token), key = Key)) 
-#' # Assumes that the Key field was parsed during the call to \code{\link{readHumdrum}}
+#' # Assumes that the Key field was parsed during the call to `[readHumdrum][readHumdrum]`
 #' 
 #' withinHumdrum(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
-#' }
 #' 
-#' If multiple \code{do} expressions are provided, they are each evaluated one at a time,
-#' with the result of each piped into the next. Other, non-\code{do}, formulae (like \code{by~} or 
-#' \code{ngrams~}) are reused for each expression evaluated.
+#' 
+#' If multiple `do` expressions are provided, they are each evaluated one at a time,
+#' with the result of each piped into the next. Other, non-`do`, formulae (like `by~` or 
+#' `ngrams~`) are reused for each expression evaluated.
 #' 
 #' @section Partitioning:
 #' 
-#' A \code{by} expression is used to break the data into subsets, with the \code{do} expression(s) evaluated 
-#' separately within each subset. This works the similarly to the \code{by} argument in 
-#' \code{\link[data.table]{data.table}}s, the \code{INDEX} 
-#' argument of \code{\link[base]{tapply}}, or the \code{INDICES} argument of \code{\link[base]{by}}.
-#' Each \code{by} expression must evaluate, within the \code{humdrumR} data object, to a vector (or a list of vectors 
+#' A `by` expression is used to break the data into subsets, with the `do` expression(s) evaluated 
+#' separately within each subset. This works the similarly to the `by` argument in 
+#' `[data.table][data.table]`s, the `INDEX` 
+#' argument of `[base][tapply]`, or the `INDICES` argument of `[base][by]`.
+#' Each `by` expression must evaluate, within the `humdrumR` data object, to a vector (or a list of vectors 
 #' of equal length) of categories to group the data by.
-#' Most commonly, the \code{by} expression(s) are simply field(s) in the data: 
+#' Most commonly, the `by` expression(s) are simply field(s) in the data: 
 #' for instance, 
-#' \preformatted{withinHumdrum(humdata,
-#'                        do ~ table(Token),
-#'                        by ~ File)} 
-#' will apply the function \code{\link[base]{table}} to the \code{Token} field
-#' \emph{separately} for each file in the \code{humdrumR} data. 
+#' withinHumdrum(humdata,
+#'          do ~ table(Token),
+#'          by ~ File)
+#' will apply the function `[base][table]` to the `Token` field
+#' *separately* for each file in the `humdrumR` data. 
 #' However, we can also use more complex expressions like
-#' \preformatted{withinHumdrum(humdata,
-#'                        do ~ table(Token), 
-#'                        by ~ Spine > 3 | Record \%\% 2 == 0}
+#' withinHumdrum(humdata,
+#'          do ~ table(Token), 
+#'          by ~ Spine > 3 | Record \%\% 2 == 0)
 #' which will evaluate the do expression in two groups, one where either the spine number is 
-#' three or less \emph{or} the record number is even, and another group where the opposite is true. 
+#' three or less *or* the record number is even, and another group where the opposite is true. 
 #' 
-#' If the \code{by} expression evaluates to a list of grouping vectors,
-#' the \code{do} expressions are evaulated across every combination of categories in all the vectors.
+#' If the `by` expression evaluates to a list of grouping vectors,
+#' the `do` expressions are evaulated across every combination of categories in all the vectors.
 #' Thus,
-#' \preformatted{withinHumdrum(humdata, 
-#'                        do ~ table(Token),
-#'                        by ~ list(File, Spine))}
-#' will apply \code{table} to \code{Token} across each spine \emph{in} each file.
-#' As some \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}, if the 
-#' \code{by} expression has more than two parts, all parts except 
-#' the (leftmost) keyword part are combined in a list (i.e., \code{by ~ File ~ Spine} 
-#' becomes \code{by ~ list(File, Spine)}).
+#' withinHumdrum(humdata, 
+#'          do ~ table(Token),
+#'          by ~ list(File, Spine))
+#' will apply `table` to `Token` across each spine *in* each file.
+#' As some [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic), if the 
+#' `by` expression has more than two parts, all parts except 
+#' the (leftmost) keyword part are combined in a list (i.e., `by ~ File ~ Spine` 
+#' becomes `by ~ list(File, Spine)}`.
 #' Thus the previous example can also be written:
-#' \preformatted{withinHumdrum(humdata, 
-#'                        do ~ table(Token),
-#'                        by ~ File ~ Spine)}
+#' withinHumdrum(humdata, 
+#'          do ~ table(Token),
+#'          by ~ File ~ Spine)
 #'                      
-#' A \code{where} expression is used to identify a subset of the data and evaluate
-#' the \code{do} expression(s) \emph{only} in that subset. 
-#' \code{where} expressions must evaluated, within the \code{humdrumR} data object, to
-#' a single logical vector. The \code{do} expression(s) are only evaluated where this logical
-#' vector is \code{TRUE}.
-#' Wherever the \code{where} expression evaluates to \code{FALSE}, the original \code{humdrumR} data is 
+#' A `where` expression is used to identify a subset of the data and evaluate
+#' the `do` expression(s) *only* in that subset. 
+#' `where` expressions must evaluated, within the `humdrumR` data object, to
+#' a single logical vector. The `do` expression(s) are only evaluated where this logical
+#' vector is `TRUE`.
+#' Wherever the `where` expression evaluates to `FALSE`, the original `humdrumR` data is 
 #' kept unchanged.
 #' 
-#' If multiple partitioning formulae (i.e, \code{by} and \code{where}) expressions
+#' If multiple partitioning formulae (i.e, `by` and `where`) expressions
 #' are evaluated recursively, in order from left to right. Thus if you specify
-#' \preformatted{withinHumdrum(humdata,
-#'                        do ~ sd(semits),
-#'                        by ~ File, 
-#'                        where ~ semits > mean(semits))}
-#' a the standard deviation of the \code{semits} field will be calculated only in each file,
-#' but only where the \code{semits} field is greater than the mean \code{semits} value
-#' \emph{within that file}. Contrast this with this call:
-#' \preformatted{withinHumdrum(humdata,
-#'                        do ~ sd(semits)
-#'                        where ~ semits > mean(semits), 
-#'                        by ~ File)} 
+#' withinHumdrum(humdata,
+#'          do ~ sd(semits),
+#'          by ~ File, 
+#'          where ~ semits > mean(semits))
+#' a the standard deviation of the `semits` field will be calculated only in each file,
+#' but only where the `semits` field is greater than the mean `semits` value
+#' *within that file*. Contrast this with this call:
+#' withinHumdrum(humdata,
+#'          do ~ sd(semits)
+#'          where ~ semits > mean(semits), 
+#'          by ~ File) 
 #' wherein the standard deviation of \code{semits} is, again, calculated for each file,
 #' but this time wherever the \code{semits} field is greater than the mean value \emph{across all the data}.
 #' 
