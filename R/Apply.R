@@ -24,58 +24,58 @@
 
 #' with(in)Humdrum
 #' 
-#' Apply arbitrary expressions to fields within \code{\linkS4class{humdrumR}} data.
+#' Apply arbitrary expressions to fields within `[S4class][humdrumR]` data.
 #' 
 #' @section Overview:
 #' These functions are the primary means of working with
 #' humdrumR data. (They are analogous to the base functions
-#' \code{\link[base]{with}} and \code{\link[base]{within}} 
-#' as applied to \code{\link[base:data.frame]{data.frames}}.)
+#' `[base][with]` and `[base][within]`
+#' as applied to `[base:data.frame][data.frames]`.)
 #' Specifically they allow you to evaluate arbitrary
 #' expressions involving fields in a humdrumR data object.
 #' They also includes a number of special evaluation options:
-#' \itemize{
-#'   \item Evaluate an expression in only matching parts of the data.
-#'   \item Evaluate an expression separately in subsets of the data.
-#'   \item Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-#'   \item Evaluate an expression which produces a plot, with particular plotting parameters set using \code{\link[graphics]{par}}.
-#' }
 #' 
-#' The difference between \code{withHumdrum} and \code{withinHumdrum} is
-#' analogous to the difference between \code{\link[base]{with}} and \code{\link[base]{within}}.
-#' \code{withHumdrum} evaluates your expression(s) and then simply returns the result of
-#' the evaluation. \code{withinHumdrum} evaluates your expression(s) and then
+#' * Evaluate an expression in only matching parts of the data.
+#' * Evaluate an expression separately in subsets of the data.
+#' * Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
+#' * Evaluate an expression which produces a plot, with particular plotting parameters set using `[graphics][par]`.
+#' 
+#' 
+#' The difference between `withHumdrum` and `withinHumdrum` is
+#' analogous to the difference between `[base][with]` and `[base][within]`.
+#' `withHumdrum` evaluates your expression(s) and then simply returns the result of
+#' the evaluation. `withinHumdrum` evaluates your expression(s) and then
 #' (attempts) to insert the results back into the humdrumR object, generating new
-#' fields called \code{PipeX} (see details).
+#' fields called `PipeX` (see details).
 #' 
-#' \code{inHumdrum} is simply a short hand for \code{withinHumdrum}.
+#' `inHumdrum` is simply a short hand for `withinHumdrum`.
 #' 
-#' @section \code{Formulae}:
-#' Every formula in the \code{formulae} argument 
-#' is treated as a \code{Keyword ~ Expression(s)}
-#' pairing. Multiple expressions can be input using multiple \code{~} operators:
-#' \preformatted{Keyword ~ Expression1 [~ Expression2 ~ ... ~ ExpressionN]}
+#' @section `Formulae`:
+#' Every formula in the `formulae` argument 
+#' is treated as a `Keyword ~ Expression(s)`
+#' pairing. Multiple expressions can be input using multiple `~` operators:
+#' `Keyword ~ Expression1 [~ Expression2 ~ ... ~ ExpressionN]`
 #' (the leftmost expression is treated as the keyword.)
-#' If there is no leftmost expression (i.e., \code{~ Expression}), the Keyword
-#' defaults to "\code{do}." The keyword expression must be a single, simple name/symbol, following 
-#' standard R rules (i.e., "\code{.foobar}" is acceptable but "\code{3 + foobar}" is not).
+#' If there is no leftmost expression (i.e., `~ Expression`), the Keyword
+#' defaults to "`do`." The keyword expression must be a single, simple name/symbol, following 
+#' standard R rules (i.e., "`.foobar`" is acceptable but "`3 + foobar`" is not).
 #' 
 #' Legal keywords, and their meanings are:
-#' \describe{
-#'   \item{do}{An expression to be evaluated within the \code{humdrumR} data object (see "Expression evaluation").}
-#'   \item{doplot}{An expression to be evaluated within the \code{humdrumR} data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
-#'   \item{by}{An expression used to break the data into groups, with the \code{do} expression(s) evaluated 
+#' 
+#' * `do` {An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").}
+#' * `doplot` {An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
+#' * `by` {An expression used to break the data into groups, with the `do` expression(s) evaluated 
 #'   separately in each group (see "Partitioning").}
-#'   \item{where}{An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").}
-#'   \item{ngrams}{A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.}
-#'   \item{recordtypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
+#'   \item{where}{An expression indicating a subset of the data in which to evaluate the `do` expression (see "Partitioning").}
+#'   \item{ngrams}{A positive number *n*. The expression is evaluated across overlapping length-*n* windows.}
+#'   \item{recordtypes}{A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. These characters
 #'   correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations, 
 #'   \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
-#'   is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+#'   is only evaluated on data drawn from the specified record types (defaults to `"D"`).}
 #'   \item{pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
-#'   or opening a graphing window. The \code{pre} expression is evaluated in the global environment.}
+#'   or opening a graphing window. The `pre` expression is evaluated in the global environment.}
 #'   \item{post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
-#' }
+#' 
 #' 
 #' @section Expression evaluation:
 #' The right-hand side of any formula in the \code{formulae} argument with the keyword \code{do} or \code{doplot} 
