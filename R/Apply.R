@@ -193,83 +193,83 @@
 #' own custom tandem interpretations that are not built into `humdrumR`.
 #' `humdrumR` includes the function `[getTandem][getTandem]` to help us
 #' extract arbitrary tandem intrpretation data.
-#' Luckily, \code{withinHumdrum} knows some
-#'  \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
+#' Luckily, `withinHumdrum` knows some
+#'  [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
 #' which makes it easy to do this anywhere in our expressions, simply by putting a 
-#' named object beginning with the symbol \code{*}. Of course, R doesn't normally 
-#' allow names to begin with symbols like \code{*}, but you can force it by
-#' placing grave symbols around the name \code{`*name`}. If you do this in a \code{withinHumdrum}
-#' expression, \code{withinHumdrum} will treat this name as a 
-#' regular expression and substitute a call \code{getTandem(Tandem, 'regular expression')} in the expression.
+#' named object beginning with the symbol `*`. Of course, R doesn't normally 
+#' allow names to begin with symbols like `*`, but you can force it by
+#' placing grave symbols around the name ``*name``. If you do this in a `withinHumdrum`
+#' expression, `withinHumdrum` will treat this name as a 
+#' regular expression and substitute a call `getTandem(Tandem, 'regular expression')` in the expression.
 #' This means you can could do something like 
-#' \preformatted{withinHumdrum(humdata, 
-#'                        do ~ myFunction(Token, `*mytandempattern`))}
-#' and \code{myFunction} will be called with the first argument being the 
-#' \code{Token} field, and the second argument being tandem interpretations
-#' which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
+#' withinHumdrum(humdata, 
+#'          do ~ myFunction(Token, `*mytandempattern`))
+#' and `myFunction` will be called with the first argument being the 
+#' `Token` field, and the second argument being tandem interpretations
+#' which match `'mytandempattern'` (extracted from the `Tandem` field).
 #' 
 #' @section Splatting:
 #' 
 #' ("Splatting" refers to feeding a function a list/vector of arguments.)
-#' Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
+#' Sometimes we want to divide our data into pieces (a l\'a `partition` option), but
 #' rather than applying the same expression to each piece, we want to feed
 #' the separate pieces as separate arguments to the same function.
-#' In \code{withinHumdrum} you can use some 
-#' \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
-#' to do just this, using the \code{@} symbol in the format \code{myFunction(TargetExpr@GroupingExpr)}.
+#' In `withinHumdrum` you can use some 
+#' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
+#' to do just this, using the `@` symbol in the format `myFunction(TargetExpr@GroupingExpr)`.
 #' If we make this call
-#' \preformatted{
+#'
 #' withinHumdrum(humdata, 
 #'          do ~ myFunction(Token@Spine))
-#' }
+#'          
 #' and there are four spines
-#' this is how \code{withinHumdrum} will intepret the expression:
-#' \preformatted{
+#' this is how `withinHumdrum` will intepret the expression:
+#' 
 #' withinHumdrum(humData,
 #'          do ~ myFunction(Token[Spine == 1], # first argument when Spine == 1
 #'                          Token[Spine == 2], # second argument when Spine == 2
 #'                          Token[Spine == 3], # etc.
 #'                          Token[Spine == 4])) 
-#' }
+#' 
 #' 
 #' @section Argument interpolation:
 #' 
-#' Any named arguments to \code{withinHumdrum} are \code{\link[humdrumR:interpolateArguments]{interpolated}} into the
-#' \code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
-#' to make small changes to a function call within the \code{do} expressions, without starting from scratch.
+#' Any named arguments to `withinHumdrum` are `[humdrumR:interpolateArguments][interpolated]` into the
+#' `do` expressions. This is useful if you've already created a list of formulas that you like, but would like
+#' to make small changes to a function call within the `do` expressions, without starting from scratch.
 #' Examples:
-#' \preformatted{
+#' 
 #' mycommand <- c(do ~ mean(., na.rm = TRUE), by ~ Spine ~ File)
 #' withinHumdrum(humdata,
 #'               mycommand,
 #'               na.rm = FALSE)
 #' # mycommand is executed with na.rm changed to FALSE              
-#' }
+#' 
 #' 
 #' @section Piping:
 #' 
-#' For calls to \code{withinHumdrum}, the result of each \code{do} expression
-#' is insterted back into the \code{\link[humtable]{humdrum table}}. The results
+#' For calls to `withinHumdrum`, the result of each `do` expression
+#' is insterted back into the `[humtable][humdrum table]`. The results
 #' are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
-#' of the expression are shorter than the rows in the \link[humtable]{humdrum table},
-#' or an \code{object}, the humdrum table is shrunk to fit them.
+#' of the expression are shorter than the rows in the [humtable][humdrum table],
+#' or an `object`, the humdrum table is shrunk to fit them.
 #'     
-#' @param humdrumR A \code{\linkS4class{humdrumR}} data object.
-#' @param ...  \code{...} arguments to \code{withinHumdrum} are divided into either named or unnamed arguments.
+#' @param humdrumR A `[humdrumR][humdrumR]` data object.
+#' @param ...  `...` arguments to `withinHumdrum` are divided into either named or unnamed arguments.
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
-#' All functions are coerced to a formula as \code{~foo(.)}. The far left-hand side of each formula
-#' must be a name/symbol. Named arguments are \link[humdrumR:interpolateArguments]{interpolated} into and \code{do~X} formulas.
+#' All functions are coerced to a formula as `~foo(.)`. The far left-hand side of each formula
+#' must be a name/symbol. Named arguments are [humdrumR:interpolateArguments][interpolated] into and `do~X` formulas.
 
 #' 
 #' @param ... Additional formulas/functions, or lists of formulas/functions.
-#' These are all simply appended to the \code{formulae} argument.
+#' These are all simply appended to the `formulae` argument.
 #' 
-#' @param drop This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
-#' If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
+#' @param drop This argument is concetually similar to the `drop` argument in R matrices and data.frames.
+#' If `drop = TRUE`, the output of `withHumdrum` is simplified as much as possible (trying to return
 #' the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
-#' a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
-#' intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that 
+#' a `data.table`. The default value (`drop = TRUE`) is usually what we want because it is more
+#' intuitive, but in more complex code, it can be helpful to set `drop = FALSE` so that 
 #' the output is consistent.
 #' 
 #' @examples 
@@ -278,8 +278,8 @@
 #' withinHumdrum(humdata, ~nchar(.)) # counts characters in each data token.
 #' withinHumdrum(humdata, ~table(.), by ~ Spine) # Tabulates data tokens in each Spine.
 #' 
-#' @return From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
-#' From \code{withHumdrum}, whatever value is returned by expression.
+#' @return From `withinHumdrum` and `inHumdrum`, a new humdrumR data object.
+#' From `withHumdrum`, whatever value is returned by expression.
 #' 
 #' @name with-in-Humdrum
 NULL
