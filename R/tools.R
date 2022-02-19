@@ -860,6 +860,7 @@ print.rational <- function(x) print(as.fraction(x))
 # argument is NULL
 
 #' Interval "calculus"
+#' -------------------------------------->     NEEDS DOCUMENTATION         <---------------------------------------------
 #' @name intervalCalculus
 #' @export 
 integrate <- function(intervals, skip = list(is.na)) {
