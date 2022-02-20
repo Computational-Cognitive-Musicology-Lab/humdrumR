@@ -113,16 +113,16 @@ popRE <- function(str, regex) {
 
 #' Regular expression method dispatch and function application
 #' 
-#' The \code{\link{humdrumR}} \strong{regular-expression method dispatch}
+#' The `[humdrumR][humdrumR]` **regular-expression method dispatch**
 #' system is a simple system for making new functions which can by smartly
 #' applied to complex character strings.
 #' 
-#' The function \code{do2RE} accepts and arbitrary function
-#' and a \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expression} (regex)
+#' The function `do2RE` accepts and arbitrary function
+#' and a [regular expression](https://en.wikipedia.org/wiki/Regular_expression) (regex)
 #' and makes a new function that applies the original function only to
 #' any part of a string which matches the regex.
 #' 
-#' The function \code{regexDispatch} accepts a list
+#' The function `regexDispatch` accepts a list
 #' of functions, each with a matching regular expression,
 #' and creates a new function which applies whichever function
 #' based on which regexs it finds in its input.
