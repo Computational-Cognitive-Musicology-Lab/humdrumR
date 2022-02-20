@@ -16,8 +16,8 @@
 #' Throughout this documentation, you should keep in mind that a "token" refers
 #' to a *row* in the humdrum table while a "field" refers to a *column*:
 #' 
-#' + \eqn{Token = Row}
-#' + \eqn{Field = Column}
+#' * Token = Row
+#' * Field = Column
 #' 
 #' # Fields:
 #' 
@@ -46,7 +46,7 @@
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum]---which can also be called using the 
 #' [humdrumR:humPipe][\%hum>\%] piping 
-#' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
+#' operator---generates one or N new data fields named {Pipe1, Pipe2, ..., PipeN}. 
 #' These fields can be renamed using the `$<-` operator.
 #' 
 #' 
@@ -196,7 +196,7 @@
 #' Each type of humdrum record uses a different null token:
 #' 
 #' + *Intepretation*: `*`
-#' + *Comment*: `!`
+#'  *Comment*: `!`
 #' + *Barline*: `=`
 #' + *Data*: `.`
 #' 
@@ -237,7 +237,7 @@ NULL
 
 #' Spines vs Paths vs Columns 
 #' 
-#' In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
+#' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
 #' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
 #' tab-delineated group of values.
 #' "Spines" can be a single column, or they may (at any time) split into multiple columns,
@@ -582,21 +582,21 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' humdrumR Coercion.
 #' 
 #' Many users may wish to work with humdrum data without
-#' using the \code{\link[humdrumR:humdrumR]{humdrumR}} API, instead using 
+#' using the `[humdrumR:humdrumR][humdrumR]` API, instead using 
 #' basic `R` data types.
 #' For this purpose, [humdrumR-class] data objects can be coerced to 
 #' basic `R` data types.
 #' 
-#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR-class] object's
+#' `[base:vector][as.vector(humdata, types, mode, fields)]` evaluates the [humdrumR-class] object's
 #' **Active** expression, and (attempts) to force the result to a vector of mode. This
 #' method is essentially a wrapper for [evalActive].
 #' 
-#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR-class] object's
-#' **Active** expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
-#' Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines. 
+#' `[base:matrix][as.matrix(humdata, types, pad.files, pad.paths)]` also evaluates the [humdrumR-class] object's
+#' **Active** expression, but wraps it into a matrix of dimensions `c([humdrumR:humSize][nrow(humdata), ncol(humdata)])`.
+#' Note that "`[humdrumR:humTable][Columns]`" in humdrum data are not necesarily the same as spines. 
 #' 
-#' \code{\link[base:data.frame]{as.data.frame(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[base:data.frame]{data.frame}}.
-#' \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
+#' `[base:data.frame][as.data.frame(humdata)]` first calls `as.matrix` then converts the matrix to a `[base:data.frame][data.frame]`.
+#' `[data.table:data.table][as.data.table(humdata)]` first calls `as.matrix` then converts the matrix to a `[data.table:data.table][data.table]`.
 #' 
 #' `as.matrices`, `as.data.frames`, and `as.data.tables` call `as.matrix`/`as.data.frame`/`as.data.table`
 #' on each individual file in a [humdrumR-class] corpus, returning a list of matices/data.frames/data.tables.
@@ -604,13 +604,13 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
-#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
+#' (see the `[humdrumR:humTable][humdrum table]` documentation **Fields** section for explanation.).
 #' 
 #' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumR-class] corpus have fewer 
-#' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
+#' `[humdrumR:humTable][spines/columns]` than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
 #' 
-#' @param pad.paths `logical` If any spine path splits (\code{'*^'}) occur in the humdrumR data, should they be padded 
+#' @param pad.paths `logical` If any spine path splits (`'*^'`) occur in the humdrumR data, should they be padded 
 #' with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.paths == FALSE`)? 
 #' Note that these "padded" points are not represented in the original humdrum data.
@@ -619,12 +619,12 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' argument is used to fill in the desired gaps.
 #' 
 #' 
-#' @param mode If the `mode` argument is not \code{'any'}, it can be a single `character`
+#' @param mode If the `mode` argument is not `'any'`, it can be a single `character`
 #' string naming an atomic mode---the output will be coerced to this mode (if possible).
 #' 
 #' @param field(s) If the `field` argument is *not* `NULL`, it can instead be a `character` string matching
 #' the [humdrumR-class] object's fields. If so, these fields are extracted instead of the
-#' \code{\link[humdrumR:humdrumR-class]{Active expression}}.
+#' `[humdrumR:humdrumR-class][Active expression]`.
 #' For calls to `as.vector` and `as.data.frame`, only one field can be extracted.
 #' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
 #' returned in a third matrix dimension, each field forming one rectangular slice.
