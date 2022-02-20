@@ -8,29 +8,29 @@
 #' functions for creating quick summaries of `[humdrumR][humdrumR]`
 #' corpora:
 #' 1. [humdrumR:humCensus][census]
-#'      + Tabulates the raw size of the humdrumR corpus. An example of the first item of such output is below (taken from MCFlow corpus):
+#'     + Tabulates the raw size of the humdrumR corpus. An example of the first item of such output is below (taken from MCFlow corpus):
 #' ###### humdrumR census of GLIMDd records in mcf object (124 Filenames)
 ###### By Filename :
 #'                                 Records    Tokens  (unique)  Characters (per token)
 #' 2pac_CaliforniaLove.rap [  1]       491      3802    (592)         7514      (1.98)
 #' ...                                 ...       ...      ...          ...         ...
 #' 2. [humdrumR:humReference][reference]
-#'      + Tabulates reference records (metadata) for each file. An example of the first item of such output is below (taken from MCFlow corpus):
+#'     + Tabulates reference records (metadata) for each file. An example of the first item of such output is below (taken from MCFlow corpus):
 #' File Filename                OTL             RTL            RRD        RRM       RC#    BPP BPD        COC  COL           COM                                     CDT                                         ENC                      EED                      RDT
 #' 1    2pac_CaliforniaLove.rap California Love All Eyez on Me 1995/12/28 Death Row 854652 6   1996/06/22 2Pac Dr. Dre; 2Pac Andre Romelle Young; Tupac Amaru Shakur 1965/02/18->2016/01/; 1971/06/16-1996/09/13 Nathaniel Condit-Schultz Nathaniel Condit-Schultz 2014/-2016/
 #' ...                     ...             ...            ...        ...       ...    ... ...        ...  ...           ...                                     ...                                         ...                      ...                      ... 
 #' 3. [humdrumR:humPaths][spines]
-#'      + Tabulates the number of spines and spine paths in files in the corpus. An example of the first item of such output is below (taken from MCFlow corpus):
+#'     + Tabulates the number of spines and spine paths in files in the corpus. An example of the first item of such output is below (taken from MCFlow corpus):
 #' File Filename                Spines Columns Splits Slices Where
 #' 1    2pac_CaliforniaLove.rap 8      8       0      0      c(0, 0, 0, 0, 0, 0, 0, 0)
 #' ...  ...                     ...    ...     ...    ...    ...
 #' 4. [humdrumR:humInterpretations][interpretations]
-#'      + Tabulates the types of exclusive and tandem interpretations in the corpus. An example of such output is below
+#'     + Tabulates the types of exclusive and tandem interpretations in the corpus. An example of such output is below
 #' (taken from MCFlow corpus):
 #' 5. [humdrumR:humSections][sections]
-#'      + Tabulates any formal data (`"*>"`) in the corpus. An example of such output is below (taken from MCFlow corpus):
+#'     + Tabulates any formal data (`"*>"`) in the corpus. An example of such output is below (taken from MCFlow corpus):
 #' 6. [humdrumR:summary][summary]
-#'      + Calls all of the above functions, and prints a condensed version of each.}
+#'     + Calls all of the above functions, and prints a condensed version of each.}
 #'                 Summary of humdrumR object
 #'         Token Census:
 #' 
@@ -83,43 +83,43 @@ setMethod('summary', 'humdrumR',
 #' A `humCensus` table has five columns of information:
 #' 
 #' 1. Records
-#'    + The total number of records.
+#'     + The total number of records.
 #' 2. Tokens
-#'    + The total number of tokens.
+#'     + The total number of tokens.
 #' 3. (unique)
-#'    + The number of **unique** tokens
-#' + {Characters}{The total numbder of characters. This includes
+#'     + The number of **unique** tokens
+#' 4. Characters
+#'     + The total numbder of characters. This includes
 #' humdrum control characters like \code{"*"} and \code{"!!"}.}
-#' + {(per token)}{This is simply \code{Characters / Tokens},
-#' indicating the mean length of each token.}
+#' 5. (per token)
+#'     + This is simply \code{Characters / Tokens, indicating the mean length of each token.
 #' 
-
-#' A \code{humCensus} table has one row for each file in the corpus.
+#' A `humCensus` table has one row for each file in the corpus.
 #' Rows are labeled with each file's corresponding 
-#' number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{File} field)
-#'  and name (the \strong{Filename} field).
-#' In addition, when a \code{humCensus} object is printed,
+#' number (from the `[humdrumR:humTable][humTable's]` **File** field)
+#'  and name (the **Filename** field).
+#' In addition, when a `humCensus` object is printed,
 #' the totals across all files are printed as well---(unique) and (per token)
 #' across all files are calculated across all files as well, not summed.
 #'  
 #' @section Indexing:
-#' Rows of a \code{humCensus} object can be selected with a single argument \code{i}:
-#' e.g., \code{censusTable[i]}.
-#' If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by 
-#' \code{File} number).
-#' If \code{i} is a \code{character} string, this string is mached 
+#' Rows of a `humCensus` object can be selected with a single argument `i`:
+#' e.g., `censusTable[i]`.
+#' If `i` is `numeric`, the corresponding rows are selected ordinally (not by 
+#' `File` number).
+#' If `i` is a `character` string, this string is mached 
 #' as a regular expression against file names.
-#' If \code{i} is a formula, the right-hand side of the formula
+#' If `i` is a formula, the right-hand side of the formula
 #' is evaluated within the table---if it evaluates to a logical vector,
 #' files are selected accordingly. For instance,
-#' \code{censusTable[~Tokens > 100]} will select all files
+#' `censusTable[~Tokens > 100]` will select all files
 #' with more than 100 tokens. (The '(unique)' and '(per token)' columns
-#' must be referred to with their names enclosed in \code{``}---for example,
-#' \code{censusTable[~`(unique)` > 100]} will return all files with
+#' must be referred to with their names enclosed in ```---for example,
+#' `censusTable[~(unique) > 100]` will return all files with
 #' more than 100 unique tokens.
 #' 
-#' A \code{drop} argument is also available. If \code{TRUE}, a plain 
-#' \code{\link[data.table]{data.table}} is returned.
+#' A `drop` argument is also available. If `TRUE`, a plain 
+#' `[data.table][data.table]` is returned.
 #' 
 #' @name humCensus
 #' @export
@@ -269,61 +269,61 @@ print.humCensus <- function(censusTable, showall = TRUE) {
 
 #' Summarize reference records in a humdrumR corpus
 #' 
-#' \code{reference} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}
-#' \code{\link[humdrumR:humSummary]{summary functions}}, used to
+#' `reference` is one of `[humdrumR:humdrumR][humdrumR's]`
+#' `[humdrumR:humSummary][summary functions]`, used to
 #' tabulate the reference records
-#' present in a \code{\linkS4class{humdrumR}} corpus.
-#' \code{reference} takes a \code{\linkS4class{humdrumR}} object
-#' and and returns a \code{\strong{humReference}} table.
-#' Alternatively, \code{reference} can take a \code{character} string,
+#' present in a `[humdrumR][humdrumR]` corpus.
+#' `reference` takes a `[humdrumR][humdrumR]` object
+#' and and returns a **`humReference`** table.
+#' Alternatively, `reference` can take a `character` string,
 #' which it will check against known reference codes and print a
-#' information about matching codes. For instance, \code{reference('OTL')}
-#' returns a description of the standard humdrum \code{!!!OTL} reference record
+#' information about matching codes. For instance, `reference('OTL')`
+#' returns a description of the standard humdrum `!!!OTL` reference record
 #' (original title metadata).
 #' 
-#' A \code{humReference} table has one column for 
-#' each reference code that appears in a \code{\linkS4class{humdrumR}} corpus.
+#' A `humReference` table has one column for 
+#' each reference code that appears in a `[humdrumR][humdrumR]` corpus.
 #' Since reference records can be long (too much to print on one screen),
 #' and humdrum files can have multiple of the same type of reference code
 #' (for instance multiple composers annotated with "!!!COM"),
-#' by default, a \code{humReference} only prints the number of each type of 
+#' by default, a `humReference` only prints the number of each type of 
 #' reference record to appear in each file.
 #' However, if only one type of reference code is present in a
-#' \code{humReference} table, the complete reference records for that code
+#' `humReference` table, the complete reference records for that code
 #' will be printed for each file. Likewise, if only one file is present
 #' in the table, all of that file's complete reference records are printed.
 #' Thus, if you want to see actualy reference records, try indexing the
-#' \code{humReference} table down to one column or row (see below).
+#' `humReference` table down to one column or row (see below).
 #' 
-#' A \code{humReference} table has one row for each file in the corpus.
+#' A `humReference` table has one row for each file in the corpus.
 #' Rows are labeled with each file's corresponding 
-#' number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{File} field)
-#'  and name (the \strong{Filename} field).
-#' In addition, when a \code{humReference} object is printed,
+#' number (from the `[humdrumR:humTable][humTables]` **File** field)
+#'  and name (the **Filename** field).
+#' In addition, when a `humReference` object is printed,
 #' three different summary totals are printed for each reference code:
-#' \strong{Any} indicates how many files in the corpus have at least
+#' **Any** indicates how many files in the corpus have at least
 #' one example of each code in them. 
-#' \strong{Sum} indicates the total number of each reference code to appear
+#' **Sum** indicates the total number of each reference code to appear
 #' in the corpus, including multiple appearances in one file (like multiple "!!!COM"
 #' records).
-#' Finally, \strong{Unique} tabulates the number of unique tokens in each reference
+#' Finally, **Unique** tabulates the number of unique tokens in each reference
 #' code---if your corpus only hase two unique composers (encoded in "!!!COM"),
-#' the \strong{Unique} total will be \code{2}.
+#' the **Unique** total will be `2`.
 #' 
 #' @section Indexing:
 #' 
-#' \code{humReference} tables can be indexed much like base \code{R}
-#' \code{\link[base:data.frame]{data.frames}}, with two arguments: \code{i} (rows)
-#' and \code{j} (columns).
-#' If \code{i} or {j} are \code{numeric}, they select
+#' `humReference` tables can be indexed much like base `R`
+#' `[base:data.frame][data.frames]`, with two arguments: `i` (rows)
+#' and `j` (columns).
+#' If `i` or `j` are `numeric`, they select
 #' rows or columns respectively, ordinally.
-#' If \code{i} is a \code{character}, it is matched as a regular expression
+#' If `i` is a `character`, it is matched as a regular expression
 #' against filenames in the corpus.
-#' If \code{j} is a \code{character}, it is \code{\link[base:pmatch]{partially-matched}}
+#' If `j` is a `character`, it is `[base:pmatch][partially-matched]`
 #'  against column names.
 #' 
-#' A \code{drop} argument is also available. If \code{TRUE}, a plain 
-#' \code{\link[data.table]{data.table}} is returned.
+#' A `drop` argument is also available. If `TRUE`, a plain
+#' `[data.table][data.table]` is returned.
 #'       
 #' @name humReference
 #' @export
