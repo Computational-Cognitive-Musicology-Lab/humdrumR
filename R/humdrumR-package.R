@@ -42,7 +42,7 @@
 NULL
 
 
-#' ----------------------------------------------->      NEEDS DOCUMENTATION       <------------------------------------------------------
+#' ----------------------------------------------->      NEEDS DOCUMENTATION (A SECTION IS INCOMPLETE)       <------------------------------------------------------
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
