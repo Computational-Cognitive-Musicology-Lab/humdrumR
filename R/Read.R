@@ -434,10 +434,10 @@ shortFilenames <- function(fileFrame) {
 
 #' Find and read humdrum files into R
 #' 
-#' These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.
+#' These functions find valid humdrum files on your local machine and read them into `humdrumR`.
 #' 
-#' \code{findHumdrum} does the work of finding and reading the text files into R.
-#' \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
+#' `findHumdrum` does the work of finding and reading the text files into R.
+#' `readHumdrum` utilizes `findHumdrum` to read files, then parses them to
 #' create a [humTable] and build
 #' a [humdrumR][humdrumR::humdrumR-class] data object around the table.
 #' 
@@ -446,65 +446,65 @@ shortFilenames <- function(fileFrame) {
 #' For details: see the "REpath-patterns" section below.
 #' 
 #' @param recursive
-#' logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
+#' logical: If `TRUE`, the final part of the search pattern (i.e., the file search) is searched for
 #' recursively through all sub directories.
 #' 
-#' @param allowDuplicates \code{logical} of length one, indicating what should happen if multiple search patterns match the same files.
-#' If \code{allowDuplicates = TRUE},
-#' any such files are read multiple times, grouped into their respective corpora by the \code{Label} field. 
-#' If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they 
+#' @param allowDuplicates `logical` of length one, indicating what should happen if multiple search patterns match the same files.
+#' If `allowDuplicates = TRUE`,
+#' any such files are read multiple times, grouped into their respective corpora by the `Label` field. 
+#' If `allowDuplicates = FALSE`, any redundant files are only read into the corpus of the first pattern they 
 #' match.
 #' 
-#' @param contains \code{character}. If \code{!is.null(contains)}, the \code{contains} argument is
+#' @param contains `character`. If `!is.null(contains)`, the `contains` argument is
 #' is treated as regular expressions: only files which contain matches to
-#'  \emph{all} of these regular expressions are read.
-#' Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches 
-#' to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).
+#'  *all* of these regular expressions are read.
+#' Thus, `readHumdrum('.*krn$', contains = "EEE")` will only read kern files which contain matches 
+#' to `"EE"`---which is kern for the E two octaves below middle C (or lower).
 #' 
 #' 
 #' @param verbose
-#' logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
+#' logical: If `TRUE`, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
 #' 
-#' @param tandems \code{character}. This argument controls which, if any, tandem interpretations 
-#' are parsed into their own fields. The default value is \code{"known"}. 
+#' @param tandems `character`. This argument controls which, if any, tandem interpretations 
+#' are parsed into their own fields. The default value is `"known"`. 
 #' 
-#' @param reference \code{character}. This argument controls which, if any, reference records
-#' are parsed into their own fields. The default value is \code{"all"}. 
+#' @param reference `character`. This argument controls which, if any, reference records
+#' are parsed into their own fields. The default value is `"all"`. 
 #' 
 #' @section REpath-patterns:
 #' 
-#' "REpath-patterns" are specified using \code{...} arguments. 
-#' In combination, all the \code{...} arguments are used to search for file paths.
-#' Each part of the search path you specify (\code{"dirpart/dirpart/filepart"}, etc) are matched as regular expressions
+#' "REpath-patterns" are specified using `...` arguments. 
+#' In combination, all the `...` arguments are used to search for file paths.
+#' Each part of the search path you specify (`"dirpart/dirpart/filepart"`, etc) are matched as regular expressions
 #' against directories/files on your disc.
-#' Thus, we can say things like \code{findHumdrum("../^A.*/.*krn$")}, which would
-#' match any kern files in any directory beginning with a capital \code{"A"} in the 
+#' Thus, we can say things like `findHumdrum("../^A.*/.*krn$")`, which would
+#' match any kern files in any directory beginning with a capital `"A"` in the 
 #' directory above the current working directory.
 #' For conveniance, you can break the path across multiple arguments instead of using delimited strings: For example, the code
-#' \code{findHumdrum("..", "^A.*", ".*krn$")} will give an identical result as the previous example 
-#' (\code{findHumdrum("../^A.*/,*krn$")}).
+#' `findHumdrum("..", "^A.*", ".*krn$")` will give an identical result as the previous example 
+#' (`findHumdrum("../^A.*/,*krn$")`).
 #' This is useful when searching for more than one pattern (see next paragraph) in the same directory.
 #' 
-#' If you want to search for \emph{more than one} pattern, you can input them as a character vector:
-#' For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
+#' If you want to search for *more than one* pattern, you can input them as a character vector:
+#' For instance, `readHumdrum(c("mozart", "beethoven")`---this command will search for
 #' filenames containing "mozart" OR "beethoven."
-#' This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
+#' This works for directories too: `readHumdrum(c("Mozart", "Beethoven"), ".*krn$")` will
 #' look for any kern files in directories containing "Mozart" OR "Beethoven."
-#' If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
-#' \code{Label} field. Unnamed patterns are simply labeled with numbers.
+#' If patterns are named, these names will show up as identifying patterns in the `[humdrumR][humdrumR]` object's
+#' `Label` field. Unnamed patterns are simply labeled with numbers.
 #' 
-#' Normal (system appropriate) conventions (i.e., directories separated by \code{"/"}, 
-#' \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.)
+#' Normal (system appropriate) conventions (i.e., directories separated by `"/"`, 
+#' `'~'` at beginning to indicate home, `".."` to indicate directory above working directory, etc.)
 #' are followed.
-#' If a pattern contains a solo dot followed by a file sep---e.g., \code{"./"}, \code{"x/./y"}---this is 
+#' If a pattern contains a solo dot followed by a file sep---e.g., `"./"`, `"x/./y"`---this is 
 #' treated as the current directory, not a regular expression.
-#' If a pattern contains two dots---e.g., \code{"../"}---this is treated as the directory above, not a regular expression.
-#' If you want to create a regular expression to match any directory, use \code{".*/"}.
+#' If a pattern contains two dots---e.g., `"../"`---this is treated as the directory above, not a regular expression.
+#' If you want to create a regular expression to match any directory, use `".*/"`.
 #' 
-#' The regex pattern \code{""} matches any file (it is changed to \code{".*"}). If you don't specifiy any \code{...} argument,
-#' \code{findHumdrum} (or \code{readHumdrum}) will default to \code{".*"} as well.
-#' Thus, \code{readHumdrum()} will read any humdrum files in the working directory.
+#' The regex pattern `""` matches any file (it is changed to `".*"`). If you don't specifiy any `...` argument,
+#' `findHumdrum` (or `readHumdrum`) will default to `".*"` as well.
+#' Thus, `readHumdrum()` will read any humdrum files in the working directory.
 #' 
 #' (If two or more files in different directories share the same name, a unique name is created for 
 #' each file by appending the names of the directories they occupy, recursively
@@ -517,43 +517,43 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' @section Validity:
 #' 
-#' \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
-#' Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
-#' skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}} 
-#' directly and its \code{errorReport.path} argument.
+#' `findHumdrum` and `readHumdrum` automatically ignore non-text files.
+#' Whatsmore, any files which contain humdrum syntax errors (checked by `[validateHumdrum][validateHumdrum]`) are automatically
+#' skipped. If you want to see specifically what errors occured, call `[validateHumdrum][validateHumdrum]` 
+#' directly and its `errorReport.path` argument.
 #' 
 #' @section Tandem Interpretations:
 #' 
-#' The \code{tandems} argument controls which tandem interpretations
+#' The `tandems` argument controls which tandem interpretations
 #' parsed into their own fields. This can be helpful to either save processing time and memory
-#' by \emph{not} parsing interpretations you won't need, or to parse interpretations that 
+#' by *not* parsing interpretations you won't need, or to parse interpretations that 
 #' humdrumR doesn't recognize.
 #' The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
-#' table called \code{knownInterpretations}. 
+#' table called `knownInterpretations`. 
 #' Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
 #' associated with it.
-#' The default value for the \code{tandems} argument is \code{"known"}. If the \code{tandems} argument
-#' contains \code{"known"} \emph{all} tandem interpretations in the built-in \code{knownInterpretations} 
+#' The default value for the `tandems` argument is `"known"`. If the `tandems` argument
+#' contains `"known"` *all* tandem interpretations in the built-in `knownInterpretations` 
 #' table are parsed.
 #' Users may specify different interpretations to parse in two ways: 
 #' 
 #' 1) character strings 
-#' matching one of the name values from the \code{Name} column of \code{knownInterpretations}.
-#' For instance, if you specify \code{tandems = c('Clef', 'TimeSignature')}, only clef (e.g., \code{"*clefG2"}),
-#' and time signature (e.g., \code{"*M3/4"}) intepretations will be parsed.
+#' matching one of the name values from the `Name` column of `knownInterpretations`.
+#' For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
+#' and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
 #' 
-#' 2) if the chracter string(s) in \code{tandem} do not exactly match one of the names in 
-#' \code{knownInterpretations$Name}, they are treated as regular expressions and used to match
+#' 2) if the chracter string(s) in `tandem` do not exactly match one of the names in 
+#' `knownInterpretations$Name`, they are treated as regular expressions and used to match
 #' tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
 #' that humdrumR doesn't already know about.
 #' 
-#' If any values in \code{tandems} are named, these names will be used for resulting fields.
+#' If any values in `tandems` are named, these names will be used for resulting fields.
 #' If no matches to an given interpretation are found, no field is created for that interpretation.
-#' If \code{tandems = NULL}, then no tandem interpretations are parsed.
+#' If `tandems = NULL`, then no tandem interpretations are parsed.
 #' 
 #' @section Reference Records:
 #' 
-#' By default (\code{reference = "all"}), humdrumR reads all reference records in the data.
+#' By default (`reference = "all"`), humdrumR reads all reference records in the data.
 #' The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of 
 #' an associated field.
 #' (If a reference record has no reference code (i.e., it lacks a colon), the field is called "Unkeyed.")
@@ -561,12 +561,12 @@ shortFilenames <- function(fileFrame) {
 #' of the humdrum table, and eat up a lot of memory. In these cases, we might not want to read
 #' all (or any) reference records---we can instead read only the reference records that we are planning to use 
 #' in our analyses (if any).
-#' If \code{reference = NULL}, no reference records are parsed.
-#' Otherwise, the character values of \code{reference} are treated as reference codes and only
+#' If `reference = NULL`, no reference records are parsed.
+#' Otherwise, the character values of `reference` are treated as reference codes and only
 #' matching reference records are parsed.
-#' For instance, \code{readHumdrum(_, reference = "OTL")} will \emph{only} parse OTL reference records.
-#' If the values of \code{reference} are named, these names are used to name associated fields.
-#' Thus, by specifing \code{reference = c(Title = 'OTL')}, you can use "OTL" reference records to populate
+#' For instance, `readHumdrum(_, reference = "OTL")` will *only* parse OTL reference records.
+#' If the values of `reference` are named, these names are used to name associated fields.
+#' Thus, by specifing `reference = c(Title = 'OTL')`, you can use "OTL" reference records to populate
 #' a field called "Title".
 #' 
 #' If there are more than one reference records with the same reference code,
@@ -578,10 +578,10 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' @section Result:
 #' 
-#' \code{findHumdrum} returns a "fileFrame" (\code{data.table}), listing all file names,
-#' the patterns they match, the directories they were found in, \emph{and} the raw text content of these files.
+#' `findHumdrum` returns a "fileFrame" (`data.table`), listing all file names,
+#' the patterns they match, the directories they were found in, *and* the raw text content of these files.
 #' 
-#' \code{readHumdrum} returns a fully parsed \code{humdrumR} object.
+#' `readHumdrum` returns a fully parsed `humdrumR` object.
 #' 
 #' @examples 
 #' readHumdrum() # loads all valid humdrum files in the current directory.
