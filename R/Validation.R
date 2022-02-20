@@ -3,13 +3,13 @@
 #' This function checks files for violations of the 
 #' humdrum syntax.
 #' 
-#' @param patterns \code{character} vector. Search pattern(s) for identifying files 
-#' (see \code{\link{readHumdrum}}).
-#' @param recursive \code{logical}. If \code{TRUE}, the final part of the serach pattern (i.e., the file search) 
+#' @param patterns `character` vector. Search pattern(s) for identifying files 
+#' (see `[readHumdrum][readHumdrum]`).
+#' @param recursive `logical`. If `TRUE`, the final part of the search pattern (i.e., the file search) 
 #' is searched for recursively through all sub directories.
-#' @param errorReport.path \code{character}. A directory path which, if not \code{NULL}, an error report is written 
-#' in the file \code{'humdrumR_syntaxErrorReport_date.txt'}. In addition, all files with errors
-#' are written to this directory (with \code{'errorMarkup'} appended to their names), with 
+#' @param errorReport.path `character`. A directory path which, if not `NULL`, an error report is written 
+#' in the file `'humdrumR_syntaxErrorReport_date.txt'`. In addition, all files with errors
+#' are written to this directory (with `'errorMarkup'` appended to their names), with 
 #' errors annotated inline.
 #' 
 #' @param files A list of character strings, each representing a record in a file.
