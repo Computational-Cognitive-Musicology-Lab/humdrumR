@@ -4,34 +4,33 @@
 
 #' Summarize humdrumR corpora
 #' 
-#' \code{\link[humdrumR:humdrumR]{humdrumR}} includes a number of built in
-#' functions for creating quick summaries of \code{\linkS4class{humdrumR}}
+#' `[humdrumR:humdrumR][humdrumR]` includes a number of built in
+#' functions for creating quick summaries of `[humdrumR][humdrumR]`
 #' corpora:
-#' \describe{
-#' \item{\link[humdrumR:humCensus]{census}}{Tabulates the raw size of the humdrumR corpus. An example of the first item of such output is below (taken from MCFlow corpus):
+#' 1. [humdrumR:humCensus][census]
+#'      + Tabulates the raw size of the humdrumR corpus. An example of the first item of such output is below (taken from MCFlow corpus):
 #' ###### humdrumR census of GLIMDd records in mcf object (124 Filenames)
 ###### By Filename :
 #'                                 Records    Tokens  (unique)  Characters (per token)
 #' 2pac_CaliforniaLove.rap [  1]       491      3802    (592)         7514      (1.98)
 #' ...                                 ...       ...      ...          ...         ...
-#' \item{\link[humdrumR:humReference]{reference}}{Tabulates reference records (metadata) for each file. An example of the first item of such output is below (taken from MCFlow corpus):
+#' 2. [humdrumR:humReference][reference]
+#'      + Tabulates reference records (metadata) for each file. An example of the first item of such output is below (taken from MCFlow corpus):
 #' File Filename                OTL             RTL            RRD        RRM       RC#    BPP BPD        COC  COL           COM                                     CDT                                         ENC                      EED                      RDT
 #' 1    2pac_CaliforniaLove.rap California Love All Eyez on Me 1995/12/28 Death Row 854652 6   1996/06/22 2Pac Dr. Dre; 2Pac Andre Romelle Young; Tupac Amaru Shakur 1965/02/18->2016/01/; 1971/06/16-1996/09/13 Nathaniel Condit-Schultz Nathaniel Condit-Schultz 2014/-2016/
 #' ...                     ...             ...            ...        ...       ...    ... ...        ...  ...           ...                                     ...                                         ...                      ...                      ... 
-#' }
-#' \item{\link[humdrumR:humPaths]{spines}}{Tabulates the number of spines and spine paths in files in the corpus. An example of the first item of such output is below 
-#' (taken from MCFlow corpus):
+#' 3. [humdrumR:humPaths][spines]
+#'      + Tabulates the number of spines and spine paths in files in the corpus. An example of the first item of such output is below (taken from MCFlow corpus):
 #' File Filename                Spines Columns Splits Slices Where
 #' 1    2pac_CaliforniaLove.rap 8      8       0      0      c(0, 0, 0, 0, 0, 0, 0, 0)
 #' ...  ...                     ...    ...     ...    ...    ...
-#' }
-#' \item{\link[humdrumR:humInterpretations]{interpretations}}{Tabulates the types of exclusive and tandem interpretations in the corpus. An example of such output is below
+#' 4. [humdrumR:humInterpretations][interpretations]
+#'      + Tabulates the types of exclusive and tandem interpretations in the corpus. An example of such output is below
 #' (taken from MCFlow corpus):
-#' }
-#' \item{\link[humdrumR:humSections]{sections}}{Tabulates any formal data (\code{"*>"}) in the corpus. An example of such output is below (taken from MCFlow corpus):
-#' }
-#' \item{summary}{Calls all of the above functions, and prints
-#' a condensed version of each.}
+#' 5. [humdrumR:humSections][sections]
+#'      + Tabulates any formal data (`"*>"`) in the corpus. An example of such output is below (taken from MCFlow corpus):
+#' 6. [humdrumR:summary][summary]
+#'      + Calls all of the above functions, and prints a condensed version of each.}
 #'                 Summary of humdrumR object
 #'         Token Census:
 #' 
@@ -44,7 +43,7 @@
 #'         ...
 #'         ...
 #' }
-#' Each function takes a \code{\linkS4class{humdrumR}} object and returns a
+#' Each function takes a `[humdrumR][humdrumR]` object and returns a
 #' special class of data.table.
 #' @name humSummary
 #' @export 
@@ -71,26 +70,29 @@ setMethod('summary', 'humdrumR',
 
 #' Tabulate records and tokens in a humdrumR corpus
 #' 
-#' \code{census} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}
-#' \code{\link[humdrumR:humSummary]{summary functions}}, used to
-#' tabulate the raw size of a \code{\linkS4class{humdrumR}} corpus.
-#' \code{census} takes a \code{\linkS4class{humdrumR}} object
-#' and and returns a \code{\strong{humCensus}} table.
-#' The \code{dataType} argument controls what types of records to tabulate:
-#' legal values are \code{'G', 'L', 'I', 'M', 'D', 'd'} 
-#' or any combination of these (e.g., \code{"LIM"}).
-#' The default is \code{"D"}.
+#' `census` is one of `[humdrumR:humdrumR][humdrumR's]`
+#' `[humdrumR:humSummary][summary functions]`, used to
+#' tabulate the raw size of a `[humdrumR][humdrumR]` corpus.
+#' `census` takes a `[humdrumR][humdrumR]` object
+#' and and returns a **`humCensus`** table.
+#' The `dataType` argument controls what types of records to tabulate:
+#' legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' The default is `"D"`.
 #' 
-#' A \code{humCensus} table has five columns of information:
-#' \describe{
-#' \item{Records}{The total number of records.}
-#' \item{Tokens}{The total number of tokens.}
-#' \item{(unique)}{The number of \strong{unique} tokens}
-#' \item{Characters}{The total numbder of characters. This includes
+#' A `humCensus` table has five columns of information:
+#' 
+#' 1. Records
+#'    + The total number of records.
+#' 2. Tokens
+#'    + The total number of tokens.
+#' 3. (unique)
+#'    + The number of **unique** tokens
+#' + {Characters}{The total numbder of characters. This includes
 #' humdrum control characters like \code{"*"} and \code{"!!"}.}
-#' \item{(per token)}{This is simply \code{Characters / Tokens},
+#' + {(per token)}{This is simply \code{Characters / Tokens},
 #' indicating the mean length of each token.}
-#' }
+#' 
 
 #' A \code{humCensus} table has one row for each file in the corpus.
 #' Rows are labeled with each file's corresponding 
