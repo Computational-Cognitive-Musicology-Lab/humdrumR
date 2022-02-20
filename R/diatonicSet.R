@@ -45,13 +45,13 @@
 #' slid up and down the line-of-fifths.
 #' The [traditional diatonic modes](https://en.wikipedia.org/wiki/Mode_(music)) of Western music occur wherever `Signature - Tonic` is in the range `-5:1`:
 #' 
-#' + \eqn{Signature - Tonic = +1 \rightarrow} Lydian
-#' + \eqn{Signature - Tonic = +0 \rightarrow} Major (Ionian)
-#' + \eqn{Signature - Tonic = -1 \rightarrow} Mixolydian
-#' + \eqn{Signature - Tonic = -2 \rightarrow} Dorian
-#' + \eqn{Signature - Tonic = -3 \rightarrow} Minor (Aeolian)
-#' + \eqn{Signature - Tonic = -5 \rightarrow} Locrian
-#' + \eqn{Signature - Tonic = -4 \rightarrow} Phyrgian
+#' * Signature - Tonic = +1 => Lydian
+#' * Signature - Tonic = +0 => Major (Ionian)
+#' * Signature - Tonic = -1 => Mixolydian
+#' * Signature - Tonic = -2 => Dorian
+#' * Signature - Tonic = -3 => Minor (Aeolian)
+#' * Signature - Tonic = -5 => Locrian
+#' * Signature - Tonic = -4 => Phyrgian
 #' 
 #' *Note that you can make diatonicSets where the `Root` is outside the `Key`. This is unusual, and may result in sets you wouldn't predict.*
 #' 
@@ -68,13 +68,13 @@
 #' 
 #' The ternary arrangement maps powers of three to each scale degree, as so that in the `Alteration` integer:
 #' 
-#' + \eqn{\pm 1}: raise or flatten the **7th** scale degree.
-#' + \eqn{\pm 3}: raise or flatten the **3rd** scale degree.
-#' + \eqn{\pm 9}: raise or flatten the **6th** scale degree.
-#' + \eqn{\pm 27}: raise or flatten the **2nd** scale degree.
-#' + \eqn{\pm 81}: raise or flatten the **5th** scale degree.
-#' + \eqn{\pm 243}: raise or flatten the **1st** scale degree.
-#' + \eqn{\pm 749}: raise or flatten the **4th** scale degree.
+#' + ± 1: raise or flatten the **7th** scale degree.
+#' + ± 3: raise or flatten the **3rd** scale degree.
+#' + ± 9: raise or flatten the **6th** scale degree.
+#' + ± 27: raise or flatten the **2nd** scale degree.
+#' + ± 81: raise or flatten the **5th** scale degree.
+#' + ± 243: raise or flatten the **1st** scale degree.
+#' + ± 749: raise or flatten the **4th** scale degree.
 #' 
 #' For example, consider `Alteration == 26`:
 #' In a balanced ternary representation, the decimal integer 26 is represented as `1 0 0 1 0 -1 0`.
