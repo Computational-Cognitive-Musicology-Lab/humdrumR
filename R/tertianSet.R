@@ -9,9 +9,9 @@
 
 #' Tertian set
 #' 
-#' \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' `tertianSet` is one of `[humdrumR:humdrumR][humdrumR]`'s 
 #' types of tonal data, representing Western tertian harmonies.
-#' \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, `struct`).
+#' `tertianSet` is a subclass of `diatonicSet` (and thence, `struct`).
 #' 
 #' The only structural addition, compared to `diatonicSet`, is the `Extensions` slot.
 #' This slot indicates which tertian chord members are active in the chord.
