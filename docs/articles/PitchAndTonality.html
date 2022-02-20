@@ -4,121 +4,92 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="humdrumR">
 <title>Pitch and Tonality in humdrumR • humdrumR</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Pitch and Tonality in humdrumR">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Pitch and Tonality in humdrumR">
 <meta property="og:description" content="humdrumR">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-<body data-spy="scroll" data-target="#toc">
-    <div class="container template-article">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">humdrumR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
-      </span>
-    </div>
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
+    
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item">
+  <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li>
-  <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
-    </li>
-    <li>
-      <a href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
-    </li>
-    <li>
-      <a href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
-    </li>
-    <li>
-      <a href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/Overview.html">Overview of humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/Validation.html">Validating Humdrum Data</a>
-    </li>
-  </ul>
-</li>
-      </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/">
-    <span class="fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
-      </ul>
-</div>
-<!--/.nav-collapse -->
+<li class="active nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
+    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
+    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
+    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
+    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
+    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
+    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
+    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
-<!--/.container -->
+</li>
+      </ul>
+<form class="form-inline my-2 my-lg-0" role="search">
+        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
+</form>
+
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
-<!--/.navbar -->
 
-      
+    
+  </div>
+</nav><div class="container template-article">
 
-      </header><script src="PitchAndTonality_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Pitch and Tonality in humdrumR</h1>
-                        <h4 class="author">Nathaniel Condit-Schultz</h4>
+
+
+
+<div class="row">
+  <main id="main"><div class="page-header">
+      <img src="" class="logo" alt=""><h1>Pitch and Tonality in humdrumR</h1>
+                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 class="date">2021-07-21</h4>
+            <h4 data-toc-skip class="date">2022-02-20</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/master/vignettes/PitchAndTonality.Rmd"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
-      <div class="hidden name"><code>PitchAndTonality.Rmd</code></div>
-
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd" class="external-link"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
+      <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
     </div>
 
     
     
-<p>Pitch and the tonal organization of pitch is represented in <code>humdrumR</code> using three <code>S4</code> classes and associated methods:</p>
+<p>As a computational musicology toolkit, <code>humdrumR</code>’s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox. For the most part, <code>humdrumR</code>’s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of <em>this</em> vignette—we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.</p>
+<p>Pitch, and the tonal organization of pitch, is represented in <code>humdrumR</code> using three <code>S4</code> classes and associated methods:</p>
 <ul>
 <li>
 <code>struct</code>
@@ -136,58 +107,75 @@
 </li>
 </ul>
 <p><code>tertianSet</code> inherits from <code>diatonicSet</code>—thus any <code>tertianSet</code> is also a <code>diatonicSet</code>. (All three classes inherit from <code>struct</code>, giving them generic atomic-vector-like behavior.)</p>
-<div id="tonal-intervals" class="section level1">
-<h1 class="hasAnchor">
-<a href="#tonal-intervals" class="anchor"></a>Tonal Intervals</h1>
-<p>The <code>tonalInterval</code> class is the core pitch representation in <code>humdrumR</code>. As the name suggests, pitch is encoded <em>tonally</em>. What does that mean?</p>
-<div id="psychoacoustics-and-the-western-tuning-system" class="section level2">
-<h2 class="hasAnchor">
-<a href="#psychoacoustics-and-the-western-tuning-system" class="anchor"></a>Psychoacoustics and the Western Tuning System</h2>
+<p>If know Western music theory, how to Western read music, or even the basics of giving names to pitches and chords, you should be able to get started with <code>humdrumR</code> pitch tools very quickly. This vignette takes the time to really explain how and why the <code>humdrumR</code> tonal system is set up. Fortunately, many sections are marked with “tl;dr” summaries, so you can skip to (sub)sections that are relevant to you.</p>
+<ul>
+<li>Section xxx talks in detail about the music theoretic logic of the <code>humdrumR</code> system.</li>
+<li>Section xxx talks about how <code>humdrumR</code> encodes tonal logic.</li>
+<li>Section xxx talks about the functions and tools that <code>humdrumR</code> actually offers for you to work with tonal pitch data!</li>
+</ul>
+<p>If you really want to just get started coding ASAP, start with section XXX, and feel free to peruse the earlier sections at your leisure to get that deeper understanding.</p>
+<div class="section level2">
+<h2 id="tonal-intervals">Tonal Intervals<a class="anchor" aria-label="anchor" href="#tonal-intervals"></a>
+</h2>
+<blockquote>
+<p><strong>tl;dr</strong>: <code>humdrumR</code> encodes tonal pitch information as intervals on the fundamental line-of-fifths (tonal), combined with an octave value to indicate pitch height,.</p>
+</blockquote>
+<p>The <code>tonalInterval</code> class is the core pitch representation in <code>humdrumR</code>. As the name suggests, pitch is encoded <em>tonally</em>. That means that the <em>focus</em> of the representation is the <strong>line-of-fifths</strong> (LoF). Pitch names (letters and accidentals), intervals, diatonic keys and tertian harmonies all make the most logical sense defined on the line-of-fifths. When we want to define specific pitches in frequency space, we have to add <em>specific</em> “pitch-height” information, which is encoded as a separate <em>octaves</em> field.</p>
+<div class="section level3">
+<h3 id="psychoacoustics-and-the-western-tuning-system">Psychoacoustics and the Western Tuning System<a class="anchor" aria-label="anchor" href="#psychoacoustics-and-the-western-tuning-system"></a>
+</h3>
 <blockquote>
 <p><strong>tl;dr</strong>: Tonal intervals are represented as combinations of octaves (second harmonic, 2:1 ratio) and perfect 12ths (third harmonic, ~3:1 ratio). The perfect 12ths represent the circle-of-fifths and all diatonic collections while the octaves help specific specific pitch height.</p>
 </blockquote>
-<p>At first glance, pitch appears to by a straightforward, one-dimensional phenomenon: every harmonic “pitched event” has a frequency (perceptually) associated with it, with perceptible frequencies ranging from approximately <span class="math inline">\(20\)</span>–<span class="math inline">\(20,000_{Hz}\)</span>. (“Hz” is an abbreviation for <em>Hertz</em>; e.g. cycles-per-second.)</p>
+<p>At first glance, pitch appears to by a straightforward, one-dimensional phenomenon: every “pitched event” has a frequency (perceptually) associated with it. We refer to the frequency associated with an event as it’s “pitch”—here, we’ll use the term frequency and pitch interchangeably.</p>
+<p>Human can percieve frequencies ranging from approximately <span class="math inline">\(20\)</span>–<span class="math inline">\(20,000_{Hz}\)</span>. (“Hz” is an abbreviation for <em>Hertz</em>; e.g. cycles-per-second.)</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-2-1.png" width="2187.5"></p>
-<p>However, human pitch perception is predominantly <em>relative</em>—specifically <em>rational</em>, i.e. we perceive the <em>ratios</em> between pitches. This means that it makes more sense to think of that enormous <span class="math inline">\(20\)</span>–<span class="math inline">\(20,000_{Hz}\)</span> range on a logarithmic scale:</p>
+<p>However, our perception of pitch is predominantly <em>relative</em>, not absolute. In other words, (most of us) can’t identify specific frequenncies in isolation; instead, we percieve the “distance” between pitches, what we call an <em>interval</em>. More specfically, we percieved distance/intervals between frequencies <em>rationally</em>: the distance we percieve is the <em>ratio</em> between the pitches. For example, the “distance” between the frequencies <span class="math inline">\(200_{Hz}\)</span> and <span class="math inline">\(300_{Hz}\)</span> is the <em>same</em> as the distance between <span class="math inline">\(2,400_{Hz}\)</span> and <span class="math inline">\(3,600_{Hz}\)</span>. Why? Because they are the same ratios: <span class="math inline">\(\frac{200}{300} = \frac{2,400}{3,600}\)</span>! This means that it makes more sense to think of the enormous <span class="math inline">\(20\)</span>–<span class="math inline">\(20,000_{Hz}\)</span> frequency range we percieve on a logarithmic scale, which makes the equal distance look equal on paper:</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-3-1.png" width="2187.5"></p>
-<div id="octave-equivalence" class="section level3">
-<h3 class="hasAnchor">
-<a href="#octave-equivalence" class="anchor"></a>Octave Equivalence</h3>
-<p>But not just any ratios will do! The simplest, integer ratios are privileged in our perception—they simply sound better, more <em>consonant</em>, to us! Integer-number ratios between frequencies are called <a href="https://en.wikipedia.org/wiki/Harmonic">harmonics</a>. The simplest, purest harmonic is the 2-to-1 ratio known as an <a href="https://en.wikipedia.org/wiki/Octave">octave</a>: in fact, pitches separated by an octave are <em>so</em> consonant that they are actually perceived as being “the same” in some respect. We call this sameness “octave equivalence.” If two pitches are octave equivalent—i.e., the ratio between their frequencies is a power of two—we say that they are the same <em>pitch chroma</em>. In the following figure, the three rows of frequencies each represent groups of pitches that are equivalent chroma:</p>
+<div class="section level4">
+<h4 id="octave-equivalence">Octave Equivalence<a class="anchor" aria-label="anchor" href="#octave-equivalence"></a>
+</h4>
+<p>We perceive the distance (interval) between pitches based on the ratio between their frequencies. But not all ratios are created equal! The simplest, integer ratios are <strong>privileged</strong> in our perception—they simply sound better, more <em>consonant</em>, to us! Integer ratios between frequencies are called <a href="https://en.wikipedia.org/wiki/Harmonic" class="external-link">harmonics</a>. The simplest, purest harmonic relationship is the 2-to-1 ratio, which we call an <a href="https://en.wikipedia.org/wiki/Octave" class="external-link">octave</a>. Pitches separated by an octave are <em>so</em> consonant that we actually perceive them as being “the same pitch” (in some respects). We call this sameness <em>octave equivalence</em>. If two pitches are octave equivalent—i.e., the ratio between their frequencies is a power of two—we say that they are the same <em>pitch chroma</em>. In the following figure, the three rows of frequencies each represent groups of pitches that are equivalent chroma:</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-4-1.png" width="2187.5"></p>
-<p>Due to the perceptual reality of octave equivalence, most (essentially all) musical scales use the octave as a bounding point—the same patterns of pitch chroma (e.g., scales) are repeated in each octave we can perceive.</p>
+<p>Due to the perceptual reality of octave equivalence, most (essentially all) musical scales use the octave as a bounding point—the same patterns of pitch chroma (e.g., scales) are repeated in each octave we can perceive. Thus, even though we can perceive close to ten octaves worth of frequencies, the organization of pitch in music is mostly based on pitches that can be squeezed into a single octave.</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-5-1.png" width="2187.5"></p>
 </div>
-<div id="tonal-harmonics" class="section level3">
-<h3 class="hasAnchor">
-<a href="#tonal-harmonics" class="anchor"></a>Tonal Harmonics</h3>
-<p>The octave however, is not the whole story. The next couple of higher harmonic ratios are also special, perceptually: The third and the fifth harmonics—corresponding to the major scale degrees <span class="math inline">\(\hat{5}\)</span> (perfect fifth) and <span class="math inline">\(\hat{3}\)</span> (major third) respectively—have influenced the development of Western tonality. That is to say, most musical scales are tuned in such a way as to create ratios between scale degrees that are as close to the 3-to-1 or 5-to-1 as possible. “Just intonation” is the preeminent Western example.</p>
-<p>The third harmonic (<span class="math inline">\(\approx\hat{5}\)</span>) is the <strong>primary</strong> factor in the Western tonal system—we call it the <em>tonal harmonic</em>. The Western diatonic scale is constructed, fundamentally, from arranging 3rd-harmonic intervals within the octave. The logical result of this approach is an octave divided into five (pentatonic), seven (diatonic), or twelve (chromatic) <em>unequal</em> steps.</p>
+<div class="section level4">
+<h4 id="tonal-harmonics">Tonal Harmonics<a class="anchor" aria-label="anchor" href="#tonal-harmonics"></a>
+</h4>
+<p>The 2-to-1 harmonic octave, however, is not the whole story. The next couple of integer (harmonic) ratios are also special, perceptually: Both the third and the fifth harmonics—corresponding to the major scale degrees <span class="math inline">\(\hat{5}\)</span> (perfect fifth) and <span class="math inline">\(\hat{3}\)</span> (major third) respectively—have influenced the development of Western tonality. That is to say, most musical scales are tuned in such a way as to create ratios between scale degrees that are as close to the 3-to-1 or 5-to-1 as possible. “Just intonation” is the preeminent Western example.</p>
+<p>The third harmonic (<span class="math inline">\(\approx\hat{5}\)</span>) is the <strong>primary</strong> factor in the Western tonal system—in <code>humdruMR</code> we call it the <em>tonal harmonic</em>. The Western diatonic scale is constructed, fundamentally, from arranging 3rd-harmonic intervals within the octave. The logical result of this approach is an octave divided into five (pentatonic), seven (diatonic), or twelve (chromatic) <em>unequal</em> steps.</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-6-1.png" width="2187.5"></p>
 <p>The seven-note diatonic has been the fundamental unit of Western tonality for several thousand years. The chromatic (12-note) superset has gradually grown in prominence over the last five centuries, yet in most tonal contexts, the chromatic set is still distinctly a superset of the diatonic, seen as a diatonic set plus five “alterations.”</p>
 <p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-7-1.png" width="2187.5"></p>
-<p>Thus the 3rd-harmonic is the fundamental <em>generator</em> of the Western diatonic scale, diatonic keys, and tonality in general. Throughout <code>humdrumR</code> we often refer to the <em>line-of-fifths</em> (or <em>circle-of-fifths</em>), where the “fifths” are those stacked up 3rd harmonics.</p>
+<p>Thus, the 3rd-harmonic is the fundamental <em>generator</em> of the Western diatonic scale, diatonic keys, and tonality in general. Throughout <code>humdrumR</code> we often refer to the <em>line-of-fifths</em> (or <em>circle-of-fifths</em>), where the “fifths” are those stacked up 3rd harmonics.</p>
 </div>
-<div id="pythagorean-tuning" class="section level3">
-<h3 class="hasAnchor">
-<a href="#pythagorean-tuning" class="anchor"></a>Pythagorean Tuning</h3>
-<p>A scale <em>actually</em> tuned to “pure” 3rd-harmonics results in the <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning">pythagorean tuning</a>. However, a common practice is to systematically mistune, or <em>temper</em>, some of the 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament).</p>
-<p>If twelve fifths are flattened by <span class="math inline">\(\sqrt[{12}]{\frac{3^{19}}{2^{12}}}\)</span> (about 2 cents), the result is a chromatic scale which equally divides the octave—creating <em>semitones</em>. This <em>equal temperament</em> tuning system has been dominant in the West for less than 250 years.</p>
-<p>Despite the ubiquity of equal temperament in the modern era, Pythagorean tuning—and variants which incorporate the pure 5th harmonic—remains the <em>conceptual</em> basis for Western tonality. Notably, in Pythagorean tuning, pitches that are separated by twelve fifths <em>are not</em> the same. Traditional notation/theory reflects this in the distinction between, for example, G# and Ab, and between minor-3rd and augmented-2nd. In contrast, in equal temperament, these values are “<em>enharmonic</em>”—i.e., equivalent.</p>
+<div class="section level4">
+<h4 id="pythagorean-tuning">Pythagorean Tuning<a class="anchor" aria-label="anchor" href="#pythagorean-tuning"></a>
+</h4>
+<blockquote>
+<p><strong>tl;dr</strong>: This sections talks about how the abstract line-of-fifths of “tonal harmonics” is tuned to actual pitches. For the most part, it doesn’t really matter that much within Western music; we assume equal temperament most of the time. Most tonal analyses don’t really depend on the specific flavor of Western tuning/temperament you use.</p>
+</blockquote>
+<p>A scale <em>actually</em> tuned to “pure” 3rd-harmonics results in the <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">pythagorean tuning</a>. However, for centuries, Western musicians have systematically mistuned, or <em>tempered</em>, some of the 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament). For example, if twelve fifths are flattened by <span class="math inline">\(\sqrt[{12}]{\frac{3^{19}}{2^{12}}}\)</span> (about 2 cents), the result is a chromatic scale which equally divides the octave—creating <em>semitones</em>. This <em>equal temperament</em> tuning system has been dominant in the West for less than 250 years.</p>
+<p>Despite the ubiquity of equal temperament in the modern era, Pythagorean tuning—and variants which incorporate the pure 5th harmonic—remains the <em>conceptual</em> basis for Western tonality. Notably, in Pythagorean tuning, pitches that are separated by twelve fifths <em>are not</em> the same. This is why traditional notation and theory distinguishes between, for example, G# and Ab, and between minor-3rd and augmented-2nd. In contrast, in equal temperament, these values are “<em>enharmonic</em>”—i.e., equivalent. Equally-tempered G# and Ab are played as the same frequency <em>but</em> within the tonal organization of Western music they still reflect perceptually distinct categories: for example, G# in the key of E major and Ab in the key of F minor are quite distinct!</p>
+</div>
+<div class="section level4">
+<h4 id="line-of-fifths">Line-of-Fifths<a class="anchor" aria-label="anchor" href="#line-of-fifths"></a>
+</h4>
 <p>The fifth-based tonal system results in a general structure known as the <em>line of fifths</em> (LoF). Each “step” on the LoF corresponds to a fifth (i.e., a 3rd-harmonic ratio). The LoF ranges from <span class="math inline">\(-\infty\)</span>–<span class="math inline">\(\infty\)</span>, with zero corresponding to the “unison” interval, root, or the note C. A complete chromatic set consists of 12 contiguous steps on the LoF—if we apply a modulo 12 transformation, a chromatic the twelfth step is the same as the first “enharmonically.” This modulus operation turns the line-of-fifths into the <em>circle-of-fifths</em> (CoF).</p>
 <p>Seven contiguous values on the line-of-fifths form a diatonic scale, or tonal <em>key</em>. Shifting this contiguous block up/down on the line gets us the different keys of Western music. If we perform a modulo 7 operation on the LoF, we get a pure diatonic set—“chromatic” notes are mapped to their diatonic counterpoints.</p>
 </div>
 </div>
-<div id="encoding-tonal-pitches" class="section level2">
-<h2 class="hasAnchor">
-<a href="#encoding-tonal-pitches" class="anchor"></a>Encoding Tonal Pitches</h2>
-<p>To mimic the fundamental logic of Western tonality, <code>tonalIntervals</code> are represented by a combination of 2nd and 3rd harmonic powers. These are encoded as integers in the <code>Octave</code> and <code>Fifth</code> fields respectively. The <code>Fifth</code> slot represents “tonal chroma”—the line-of-fifths space in which diatonic and chromatic structures are defined. The <code>Octave</code> slot specifies specific shifts in absolute frequency. The <code>Fifth</code> and <code>Octave</code> fields are combined to represent specific notes. This combination is modeled on the way their harmonic ratios would combine in Pythagorean tuning. The <code>Octave</code> value represents a power of 2 (<span class="math inline">\(2^n\)</span>), while the <code>Fifth</code> value represents a power of 3 (<span class="math inline">\(3^n\)</span>), and the values are multiplied together (which is how human rational/logarithmic perception of pitch works). Thus,</p>
-<p><span class="math inline">\(2^{Octave} * 3^{Fifth} = \text{tonal ratio}\)</span></p>
+<div class="section level3">
+<h3 id="encoding-tonal-pitches">Encoding Tonal Pitches<a class="anchor" aria-label="anchor" href="#encoding-tonal-pitches"></a>
+</h3>
+<p>To mimic the fundamental logic of Western tonality, <code>tonalIntervals</code> are represented by a combination of 2nd- and 3rd- harmonic powers. These are encoded as integers in the <code>Octave</code> and <code>Fifth</code> fields respectively. The <code>Fifth</code> slot represents “tonal chroma”—the line-of-fifths space in which diatonic and chromatic structures are defined. The <code>Octave</code> slot specifies specific shifts in absolute frequency. The <code>Fifth</code> and <code>Octave</code> fields are combined to represent specific notes. This combination is modeled on the way their harmonic ratios would combine in Pythagorean tuning. The <code>Octave</code> value represents a power of 2 (<span class="math inline">\(2^n\)</span>), while the <code>Fifth</code> value represents a power of 3 (<span class="math inline">\(3^n\)</span>), and the values are multiplied together (which is how human rational/logarithmic perception of pitch works). Thus,</p>
+<p><span class="math inline">\(2^{Octave} * 3^{Fifth} = \text{tonal interval}\)</span></p>
 <p>For example, the <code>tonalInterval</code> <code>(Octave = -2, Fifth = 2)</code> represents</p>
 <p><span class="math inline">\(2^{-2} * 3^{2} = \frac{1}{4} * 9 = \frac{9}{4}\)</span></p>
 <p>which corresponds to a (Pythagorean) major-9th.</p>
 <p>The <code>tonalInterval</code> representation <em>is not</em> in any sense “locked” into Pythagorean tuning. Any “tempered fifth” can be used as the generating “tonal harmonic” ratio:</p>
-<p><span class="math inline">\(2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal ratio}\)</span></p>
+<p><span class="math inline">\(2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal interval}\)</span></p>
 <p>For instance, if the <span class="math inline">\(\text{tonalHarmonic} = 2^{\frac{19}{12}}\)</span>, the result is equal temperament. All <code>humdrumR</code> functions that relate to precise frequency values—such as <code>frequency</code>—have a <code>tonalHarmonic</code> argument. This discussion illustrates that what “actual” harmonic we use to generate frequencies is largely irrelevant. The combination of the <code>Octave</code> and <code>Fifth</code> integer slots represents Western “pitch space” abstractly. In many research use cases, we ignore the <code>Octave</code> field altogether, only considering the abstract “tonal chroma” (i.e., the line-of-fifths) described by the <code>Fifth</code> slot. (Indeed, the <code>diatonicSet</code> and <code>tertianSet</code> classes are <em>only</em> concerned with the abstract “tonal space.”)</p>
 <p>The following figure illustrate how the dimensions of a <code>tonalInterval</code> vector map to pitches as labeled in “scientific pitch notation.”</p>
 <div class="figure">
@@ -195,24 +183,26 @@
 Scientific Pitch representation in tonalIntervals
 </p>
 </div>
-<p>As you can see, the <code>Fifth</code> (x) dimension is simple the line-of-fifths. However, the way that the <code>Octave</code> dimension relates to specific pitches is not very intuitive. This is by design. The <code>tonalInterval</code> <span class="math inline">\(2^{Octave} * 3^{Fifth}\)</span> scheme is not meant to be engaged directly by users. Rather it is a back-end, with very nice properties.</p>
-<div id="algebra-and-arithmetic" class="section level4">
-<h4 class="hasAnchor">
-<a href="#algebra-and-arithmetic" class="anchor"></a>Algebra and Arithmetic</h4>
+<p>As you can see, the <code>Fifth</code> (x) dimension is simply the line-of-fifths. However, the way that the <code>Octave</code> dimension relates to specific pitches is not very intuitive. This is by design. The <code>tonalInterval</code> <span class="math inline">\(2^{Octave} * 3^{Fifth}\)</span> scheme is not meant to be engaged directly by users. Rather it is a back-end, with very nice properties:</p>
+<div class="section level5">
+<h5 id="algebra-and-arithmetic">Algebra and Arithmetic<a class="anchor" aria-label="anchor" href="#algebra-and-arithmetic"></a>
+</h5>
 <p>Tonal intervals as defined constitute an algebraic <em>module over integers</em> (module over <span class="math inline">\(\mathbb{Z}\)</span>), with appropriate arithmetic operations fully defined in <code>humdrumR</code>. As a module, they necessarily are abelian groups, with the requisite operations:</p>
 <ol style="list-style-type: decimal">
 <li>
-<code>tonalIntervals</code> can be added (<code><a href="https://rdrr.io/r/base/Arithmetic.html">+</a></code>) or subtracted (<code><a href="https://rdrr.io/r/base/Arithmetic.html">-</a></code>), resulting in new <code>tonalIntervals</code>. For example, <span class="math inline">\(\text{P5} + \text{M2} = \text{M6}\)</span>.</li>
+<code>tonalIntervals</code> can be added (<code>+</code>) or subtracted (<code>-</code>), resulting in new <code>tonalIntervals</code>. For example, <span class="math inline">\(\text{P5} + \text{M2} = \text{M6}\)</span>.</li>
 <li>All <code>tonalIntervals</code> have a “negative,” inverted counterpart. Summing a <code>tonalInterval</code> with it’s negative/inversion results in the identity element. For example, <span class="math inline">\(-\text{M3} + \text{M3} = \text{P1}\)</span>.</li>
 </ol>
 <ol start="3" style="list-style-type: decimal">
 <li>They have an identify element—“the reference point”, middle C, or unison. (<code>Octave</code><span class="math inline">\(= 0\)</span> and <code>Fifth</code> <span class="math inline">\(=0\)</span>.)</li>
 </ol>
-<p>As modules, <code>tonalIntervals</code> can also be multiplied by “scalar” integer values. For instance, <span class="math inline">\(\text{P5} * 2 = \text{M9}\)</span>. Finally, <code>tonalIntervals</code> have euclidean division (<code><a href="https://rdrr.io/r/base/Arithmetic.html">%/%</a></code>) and modulo/remainder (<code><a href="https://rdrr.io/r/base/Arithmetic.html">%%</a></code>) operations defined. (Rational division (<code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code> in R) is <em>not</em> defined.) Euclidean division of <code>tonalInterval</code>s is based on tonal (fifths) space, not frequency space. This is useful for articulating tonal structures (modulo 7 for example), but can unintuitive when applied to specific pitches.</p>
+<p>As modules, <code>tonalIntervals</code> can also be multiplied by “scalar” integer values. For instance, <span class="math inline">\(\text{P5} * 2 = \text{M9}\)</span>. Finally, <code>tonalIntervals</code> have euclidean division (<code>%/%</code>) and modulo/remainder (<code>%%</code>) operations defined. (Rational division (<code>/</code> in R) is <em>not</em> defined.) Euclidean division of <code>tonalInterval</code>s is based on tonal (fifths) space, not frequency space. This is useful for articulating tonal structures (modulo 7 for example), but can unintuitive when applied to specific pitches.</p>
 </div>
-<div id="tonal-intervals-1" class="section level3">
-<h3 class="hasAnchor">
-<a href="#tonal-intervals-1" class="anchor"></a>Tonal “Intervals”</h3>
+</div>
+</div>
+<div class="section level2">
+<h2 id="tonal-interval-representations">Tonal Interval Representations<a class="anchor" aria-label="anchor" href="#tonal-interval-representations"></a>
+</h2>
 <p>Western music theory/practice has a rich set of interrelated ways of describing pitch:</p>
 <ul>
 <li>Letter names (+ accidentals)
@@ -241,7 +231,7 @@ Scientific Pitch representation in tonalIntervals
 </ul>
 </li>
 </ul>
-<p>In <code>humdrumR</code> we note that all of these <em>concrete</em> representations are simply different perspectives on the same abstract information—they are all “tonal intervals” which can be represented as <code>tonalInterval</code>s. They differ only in 1) fixed-reference, dynamic-reference, or serial-reference interpretations; 2) whether <code>Octave</code> information is included; 3) what “tonal modulo” is used.</p>
+<p>In <code>humdrumR</code>, all of these <em>concrete</em> representations are simply different perspectives on the same abstract information—they are all “tonal intervals” which can be represented as <code>tonalInterval</code> objects. They differ only in 1) fixed-reference, dynamic-reference, or serial-reference interpretations; 2) whether <code>Octave</code> information is included; 3) what “tonal modulo” is used.</p>
 <p>At first, musicians may be taken aback by this system: we are accustomed to thinking of values like F# as “absolute” pitch representations, while “so” is a “relative” pitch representations, and melodic intervals as, well, melodic intervals. However, recognizing that they are all essentially equivalent is powerful. Thus, “middle C” is equivalent to “unison”, “do”, “P1”, and “Tonic.”</p>
 <table class="table">
 <thead><tr class="header">
@@ -284,16 +274,51 @@ Scientific Pitch representation in tonalIntervals
 Interval Representation of tonalIntervals
 </p>
 </div>
-</div>
-</div>
-<div id="tonalinterval-partitions" class="section level2">
-<h2 class="hasAnchor">
-<a href="#tonalinterval-partitions" class="anchor"></a>tonalInterval Partitions</h2>
+<div class="section level3">
+<h3 id="tonalinterval-partitions">tonalInterval Partitions<a class="anchor" aria-label="anchor" href="#tonalinterval-partitions"></a>
+</h3>
 <p>Many of the practical distinctions between different “concrete” representation of pitch (previous section) boil down to different ways we <em>partition</em> (or discard) <code>tonalInterval</code> information.</p>
-<div id="simple-and-complex" class="section level3">
-<h3 class="hasAnchor">
-<a href="#simple-and-complex" class="anchor"></a>Simple and Complex</h3>
-<p>HumdrumR <code>tonalIntervals</code> can represent any <em>complex</em> interval: i.e., intervals in any octave. For instance, we can distinguish between “M2” and “M9”. In many cases, we want to partition our intervals into a <em>simple</em> part and an <em>octave</em> part: The simple part is the interval “within” one octave; the general part is simply a number of octaves.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> When an interval includes it’s octave part, it is called a <em>complex</em> interval:</p>
+<p>To begin, we can distinguish between the tonal and height dimensions of pitch. Tonal pitch information (like “Major third” or “c#”) can be abstract, not corresponding to specific frequencies. Thus, an abstract c# is neither “above” nor “below” g#. However, tonal intervals <em>are</em> ordered into scales—wrapped within an octave. We can “round” differently to the unison.</p>
+<p>Scaled tonal intervals are still best regarded as abstract. Only with the combination of octave information do we get complex intervals.</p>
+<p><span class="math display">\[
+\begin{aligned}
+TonalInterval = Octave \times LoF
+Octave = \mathbb{Z}
+LoF = \mathbb{Z}
+\end{aligned}
+\]</span></p>
+<p>Every tonal interval combines a simple interval with an octave offset. A simple interval with octave is a complex interval.</p>
+<p><span class="math display">\[
+\begin{aligned}
+Complex = Simple \times Octave 
+Specific = Alteration + Quality + Generic
+Generic = Step
+Alteration = Comma + Accidental
+\end{aligned}
+\]</span></p>
+<p>A scale step is one of seven numbers on the line-of-fifths, 0 through 6, corresponding to seven scale steps: 0 = Unison, 2 = Second, 4 = Third, 6 = Fourth, 1 = Fifth, 3 = Sixth, 5 = Seventh. A</p>
+<p><span class="math display">\[
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+Step = \{0, 1, 2, 3, 4, 5 ,6\}
+Quality(Key) \subset Step \times \{7q\ |\ q \in \Mathbb{z}\}
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+Octave + (Key + (Quality + Step) + Alteration + Comma) = Pitch
+Pitch - Octave = Specific
+(Step + Quality) + Alteration = Specific
+\end{aligned}
+\]</span></p>
+<p><span class="math display">\[
+Amajor_{Key} + \hat{3}_{Step} + Major_{Quality} + Flat_{Alteration} = C natural
+\]</span></p>
+<div class="section level4">
+<h4 id="simple-and-complex">Simple and Complex<a class="anchor" aria-label="anchor" href="#simple-and-complex"></a>
+</h4>
+<p>HumdrumR <code>tonalIntervals</code> can represent any <em>complex</em> interval: i.e., intervals in any octave. For instance, we can distinguish between “M2” and “M9”. In many cases, we want to partition our intervals into a <em>simple</em> part and an <em>octave</em> part: The simple part is the interval “within” one octave; the general part is simply a number of octaves.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;This partition corresponds to euclidean division by the octave in frequency space. However, since this operation becomes meaningless when “dividing” by other intervals, we do not include a generalized version of this sort of euclidean division.)&lt;/p&gt;"><sup>1</sup></a> When an interval includes it’s octave part, it is called a <em>complex</em> interval:</p>
 <p><span class="math inline">\(\text{interval}_{simple} + \text{interval}_{octave} = \text{interval}_{complex}\)</span> <!--\_--></p>
 <p>There is actually four different ways to make the simple/octave partition, depending on how we “round” our intervals to an octave. These four methods correspond to four different ways of rounding numbers in general. In terms of <code>base::</code> R functions:</p>
 <ul>
@@ -458,17 +483,17 @@ Interval Representation of tonalIntervals
 </table>
 </li>
 </ul>
-<div id="contour" class="section level4">
-<h4 class="hasAnchor">
-<a href="#contour" class="anchor"></a>Contour</h4>
+<div class="section level5">
+<h5 id="contour">Contour<a class="anchor" aria-label="anchor" href="#contour"></a>
+</h5>
 <p>To completely represent a tonal interval, both the octave and specific parts are required. Many common analytical representations use only the “pure line-of-fifths,” simple part—solfege, scale degree, roman numerals, chord degrees, etc.. If the octave part is discarded, the (specific) original pitches cannot be reconstructed.</p>
 <p>Another useful representation is a combination of a fixed-reference simple part with the serial-reference (<code>delta</code>) octave part. In this representation, the octave part represents the contour of the melody. We call this a <em>derived contour</em>. Throughout <code>humdrumR</code>, we adopt the representation from the Rolling Stone dataset and use the <code>"^"</code> and <code>"v"</code> to represent upward or downward derived contours. Thus, <code>"vla"</code> means, go down to the nearest <code>"la"</code>.</p>
 <p>As <a href="#algebraandarithmetic">mentioned above</a>, <code>tonalIntervals</code> are invertible—they can be positive or negative. This corresponds to the “direction” of motion in frequency space, relative to the reference. If the reference is serial, then it corresponds to melodic <em>contour</em>. Throughout <code>humdrumR</code>, we adopt the standard (obvious) <code>**mint</code> representation’s use of <code>"+"</code> and <code>"-"</code> to represent true (<code>sigma</code>) contour.</p>
 </div>
 </div>
-<div id="generic-and-specific" class="section level3">
-<h3 class="hasAnchor">
-<a href="#generic-and-specific" class="anchor"></a>Generic and Specific</h3>
+<div class="section level4">
+<h4 id="generic-and-specific">Generic and Specific<a class="anchor" aria-label="anchor" href="#generic-and-specific"></a>
+</h4>
 <p>HumdrumR <code>tonalIntervals</code> can represent any <em>specific</em> tonal, interval: For instance, we can distinguish between “M2” and “m2”. In many cases, we want to partition our intervals tonally, into <em>generic</em> parts and <em>alteration</em> parts: The generic part is the interval within a (diatonic) key—also called a generic step; The alteration part represents the specific quality of the interval relative to the key (i.e., perfect/major/minor), including shifts outside of a key (augment/diminish, sharp/flat, etc.).</p>
 <p>A generic/alteration partition must be made given a <em>key</em>, including a root and a mode. This means that a generic/alteration partition can be lossy if the key used is lost—in other words, you need to know the key used in the partition to reconstruct the specific interval. The default key is C major (<span class="math inline">\(-1\)</span> through <span class="math inline">\(5\)</span> on the circle-of-fifths).</p>
 <p><span class="math inline">\(\text{key} + \text{interval}_{generic} + \text{interval}_{alteration} = \text{interval}_{specific}\)</span> <!--\_ --></p>
@@ -590,28 +615,28 @@ Interval Representation of tonalIntervals
 </tr>
 </tbody>
 </table>
-<div id="cautionary-qualities" class="section level4">
-<h4 class="hasAnchor">
-<a href="#cautionary-qualities" class="anchor"></a>Cautionary Qualities</h4>
+<div class="section level5">
+<h5 id="cautionary-qualities">Cautionary Qualities<a class="anchor" aria-label="anchor" href="#cautionary-qualities"></a>
+</h5>
 <p>In some cases we want to know how to tonally partition a <code>tonalInterval</code> relative to a key, which is relative to another key! One example of this is “cautionary” accidentals in music notation—“cautionary” accidentals involve pitches which are <em>generic</em> in a particular key (like A major), but not generic in C major. Another example would be chord quality annotations given a key (for instance, a major IV chord in a minor key has a raised 6th scale degree, or scale degrees in a secondary key.</p>
 <p>Condsider a piece written in C major, but with a subsection that modulates to E major. During the E major section, we observe a D natural—what generic interval is this? Obviously, for many analytical purposes, we’d want to think of it in Emajor, which would correspond to <span class="math inline">\(\text{Emaj} + \text{B}_{generic} + \text{b}_{alteration}\)</span>—i.e., flatted seventh degree of E major. However, what accidental should this note be notated with? Not a flat of course, even though it <em>is</em> a “flattened” seventh. The (C major) key signature would require no accidental for the D natural, but we’d like one to clarify the note’s relationship to the current key. If we first partition our note in E major, then partition again the resulting generic interval in C major, we get:</p>
 <p><span class="math inline">\(\text{Emaj} + (\text{Cmaj} + \text{D}_{generic} + \text{#}_{alteration}) + \text{b}_{alteration}\)</span></p>
 <p>A sharp <em>and</em> a flat—in these cases, we use the symbol natural.</p>
 </div>
 </div>
-<div id="enharmonic-and-comma" class="section level3">
-<h3 class="hasAnchor">
-<a href="#enharmonic-and-comma" class="anchor"></a>Enharmonic and Comma</h3>
-<p>HumdrumR <code>tonalIntervals</code> can represent <em>any</em> tonal pitch on the circle-of-fifths, even <code>G#######</code>! In the context of equal-temperament tuning, we consider tones separated by 12 steps on the circle-of-fifths to be “the same”—they are <em>enharmonic</em>. Thus, in equal temperament, the interval of a dimished second—also known as the <em>pythagorean comma</em>—is identical to a unison. We can thus partition notes as combinations of a <em>harmonic</em> part and a <em>comma</em> part.</p>
+<div class="section level4">
+<h4 id="enharmonic-and-comma">Enharmonic and Comma<a class="anchor" aria-label="anchor" href="#enharmonic-and-comma"></a>
+</h4>
+<p>HumdrumR <code>tonalIntervals</code> can represent <em>any</em> tonal pitch on the circle-of-fifths, even <code>G#######</code>! In the context of equal-temperament tuning, we consider tones separated by 12 steps on the circle-of-fifths to be “the same”—they are <em>enharmonic</em>. Thus, in equal temperament, the interval of a diminished second—also known as the <em>pythagorean comma</em>—is identical to a unison. We can thus partition notes as combinations of a <em>harmonic</em> part and a <em>comma</em> part.</p>
 <p><span class="math inline">\(\text{interval}_{enharmonic} + \text{interval}_{comma} = \text{interval}_{tonal}\)</span> <!--\_ --></p>
 <p>If we strictly wrap around every 12 steps in the line-of-fifths (i.e., modulo 12), we remove all enharmonic equivalencies, creating the circle-of-fifths. However, <em>where</em> we wrap matters: in musical practice, we typically aim to center our circle fifths around C, so we get a roughly equal number of flats and sharps. However, since there are five accidentals, strict enharmonics will have to be either 2-flats/3 sharps, or 3-flats/3-sharps. Since, the natural diatonic scale spans the range -1:5 on the line-of-fifths, the real center is 2 (D). (And when we change key signatures, we want to shift accordingly, allowing higher sharps in sharp key, for instance.) Thus, the default behavior in <code>humdrumR</code> is to center a set of tints relative to the center of the given key, and enharmonically shift any notes &gt;= 6 OR &lt; -6.</p>
 <p>In some cases, we don’t actually want to have strict enharmonicism. For instance, we might want to allow Dbi—or even Gb and Cbi—alongside C#, F#, and B, but still not want Bbb and Gbbb or A##. In <code>humdrumR</code>, we can specify I wider “<code>enharmonicWrap</code>” value as an argument to <code>enharmonicpart</code>. The <code>enharmonicWrap</code> argument specifies the width of the band of “legal” LoF values we want to allow. The default is 12, which results in a perfect enharmonic circle of fifths (Eb:G#), with no enharmonic equivalences. If we increase it to 13, we allow Ab and G# to both exist; If we increase it to 14, we allow Eb and D# to both exist; etc. An <code>enharmonicWrap</code> of 21 allows all single-flat and single-sharp notes, but no double flat/sharps.</p>
 </div>
 </div>
 </div>
-<div id="methods" class="section level1">
-<h1 class="hasAnchor">
-<a href="#methods" class="anchor"></a>Methods</h1>
+<div class="section level2">
+<h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a>
+</h2>
 <p><code>humdrumR</code> exports numerous functions for converting to/from <code>tonalInterval</code>s and various string representations, as well as integer/numeric representations:</p>
 <ul>
 <li>tonalInterval
@@ -714,9 +739,9 @@ Interval Representation of tonalIntervals
 </ul>
 </li>
 </ul>
-<div id="arguments" class="section level4">
-<h4 class="hasAnchor">
-<a href="#arguments" class="anchor"></a>Arguments</h4>
+<div class="section level5">
+<h5 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a>
+</h5>
 <p>Various tonal interval functions share a number of common arguments.</p>
 <table class="table">
 <thead><tr class="header">
@@ -747,14 +772,14 @@ Interval Representation of tonalIntervals
 </tr></tbody>
 </table>
 </div>
-<div id="diatonicset" class="section level2">
-<h2 class="hasAnchor">
-<a href="#diatonicset" class="anchor"></a>diatonicSet</h2>
+<div class="section level3">
+<h3 id="diatonicset">diatonicSet<a class="anchor" aria-label="anchor" href="#diatonicset"></a>
+</h3>
 <p>The <code>diatonicSet</code> S4 class represents diatonic keys. Like <code>tonalIntervals</code>, we conceptualize keys as an interval—their distance from the reference point, Cmajor. This means we can represent the key of “G major” and the key of “V” (the major dominant key) in the same way.</p>
 <p>A <code>diatonicSet</code> contains three <code>integer</code> slots: <code>Root</code>, <code>Mode</code>, <code>Alterations</code>. In addition, a <code>Of</code> slot can hold another <code>diatonicSet</code>, allowing the recursive representation, a la “V/V/V.”</p>
-<div id="root-and-key" class="section level3">
-<h3 class="hasAnchor">
-<a href="#root-and-key" class="anchor"></a>Root and Key</h3>
+<div class="section level4">
+<h4 id="root-and-key">Root and Key<a class="anchor" aria-label="anchor" href="#root-and-key"></a>
+</h4>
 <p>The <code>Root</code> integer slot is simply a line-of-fifths tonal chroma value representing the root of the key relative to 0 (C). The <code>Key</code> value represents the <em>key signature</em>: the number of sharps (positive integers) or flats (negative integers) in the key. Alternatively, and equivalently, you can think of <code>Key</code> like this: C major represents a contiguous block of seven fifths (-1–5), and the <code>Key</code> argument shifts this block up or down. So if <code>Key = 2</code>, our block on the line-of-fifths is 1–7 (a key signature with two sharps). The relationship between <code>Root</code> and <code>Key</code> determines the mode of the diatonic set. If <code>Root == Key</code>, the mode is major. Other modes can be created as:</p>
 <table class="table">
 <thead><tr class="header">
@@ -828,44 +853,41 @@ Interval Representation of tonalIntervals
 </tbody>
 </table>
 </div>
-<div id="alteration" class="section level3">
-<h3 class="hasAnchor">
-<a href="#alteration" class="anchor"></a>Alteration</h3>
+<div class="section level4">
+<h4 id="alteration">Alteration<a class="anchor" aria-label="anchor" href="#alteration"></a>
+</h4>
 <p>The <code>Alteration</code> slot of a <code>diatonicSet</code> allows the representation of “altered” diatonic scales. One way of thinking about the <code>Key</code> slot, is that it takes one edge of a 7-fifth contiguous block and moves it to the opposite side. The <code>Alteration</code> slot takes the <em>second from most extreme</em> element and moves it down 7 fifths.</p>
 </div>
 </div>
+<div class="section level3">
+<h3 id="tertianset">TertianSet<a class="anchor" aria-label="anchor" href="#tertianset"></a>
+</h3>
+<p>Roman numerals.</p>
 </div>
-<div class="footnotes">
-<hr>
-<ol>
-<li id="fn1"><p>This partition corresponds to euclidean division by the octave in frequency space. However, since this operation becomes meaningless when “dividing” by other intervals, we do not include a generalized version of this sort of euclidean division.)<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-</ol>
-</div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
 </div>
 
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
-      <footer><div class="copyright">
-  <p>Developed by <a href="http://fathermckenzie.net/">Nathaniel Condit-Schultz</a>.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p></p>
+<p>Developed by Nathaniel Condit-Schultz.</p>
 </div>
 
-<div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+<div class="pkgdown-footer-right">
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
 
   
 
+  
 
   </body>
 </html>
