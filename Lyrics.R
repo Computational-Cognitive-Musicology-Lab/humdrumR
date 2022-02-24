@@ -260,6 +260,7 @@ indicesWithErrors <- apply(iteration, 1, function(x){
   }
 })
 printErrors1 <- apply(iteration, 1, function(x){
+  # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
   if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] != "-"){
     if(x > 1 && x < length(iteration)){
       if(splitString[[x+1]][1] == "-"){
@@ -269,11 +270,25 @@ printErrors1 <- apply(iteration, 1, function(x){
   }
   if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] == "-"){
     if(x > 1 && x < length(iteration)){
-      if(splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+      if(splitString[[x+1]][length(splitString[[x+1]])] != "-"){
         cat("error, improperly formatted **silbe: ", data[x], " should be ",substring(data[x],2), sep = "")
       }
     }
   }
+  if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
+    if(x > 1 && x < length(iteration)){
+      if(splitString[[x+1]][1] != "-"){
+        cat("error, improperly formatted **silbe: ", data[x], " should be ",substr(data[x],1,nchar(data[x])-1), sep = "")
+      }
+    }
+  }
+  # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
+  #   if(x > 1 && x < length(iteration)){
+  #     if(splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+  #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substring(data[x],2), sep = "")
+  #     }
+  #   }
+  # }
 })
 printErrors <- apply(iteration, 1, function(x){
   # split into 4 main cases, each case has 16 possible nodes
