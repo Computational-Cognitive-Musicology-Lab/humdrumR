@@ -259,6 +259,11 @@ iteration <- 1:length(indicesWithErrorsSave)
 iteration <- as.data.frame(iteration)
 dup <- duplicated(indicesWithErrorsSave)
 removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
+iteration <- 1:length(removeDuplicated)
+iteration <- as.data.frame(iteration)
+printErrors <- apply(1, iteration, function(x){
+  
+})
     # splitStringNext <- strsplit(data[i+1], "")[[1]]
   ifFunction <- function(splitStringInput){if(splitString[length(splitString)] == '-' && splitString[1] != '-'){
       counter <- counter + 1
