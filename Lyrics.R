@@ -260,12 +260,11 @@ indicesWithErrors <- apply(iteration, 1, function(x){
   }
 })
 printErrors <- apply(iteration, 1, function(x){
-  if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-    if(splitString[[x+1]][length(splitString[[x+1]])] == "-"){
-      cat("error, improperly formatted **silbe: ", data[x+1], " should be -",data[x+1], sep = "")
-    }
+  # split into 4 main cases, each case has 16 possible nodes
+  if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+    
   }
-  if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] == "-"){
     return(x-1)
   }
   if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
@@ -283,6 +282,9 @@ printErrors <- apply(iteration, 1, function(x){
         }
       }
     }
+  }
+  if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] == "-"){
+    
   }
 })
 indicesWithErrorsSave <- unlist(indicesWithErrors)
