@@ -939,7 +939,8 @@ setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 #' Parsing and deparsing key information
 #' 
 #' XXX
-#' @rdname keyTransformer
+#' @name keyTransformer
+NULL
 
 ## Key transform maker ####
 
@@ -995,7 +996,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
 ### Key transformers ####
 
 ##
-#' @name keyTransformer
+#' @rdname keyTransformer
 #' @export key signature romanKey
 key <- makeKeyTransformer(dset2key, 'key')
 signature <- makeKeyTransformer(dset2signature, 'signature')

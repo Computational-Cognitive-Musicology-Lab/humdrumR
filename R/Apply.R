@@ -282,12 +282,12 @@
 #' @return From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
 #' From \code{withHumdrum}, whatever value is returned by expression.
 #' 
-#' @name with-in-Humdrum
+#' @name withinHumdrum
 NULL
 
 #' withinHumdrum
 #'
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
@@ -363,7 +363,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 
 #' withHumdrum
 #'
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     list2env(.withHumdrum(humdrumR, ..., withfunc = 'withHumdrum'), envir = environment())
@@ -462,7 +462,7 @@ parseArgs <- function(..., withfunc) {
          namedArgs  = namedArgs)
 }
  
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 inHumdrum <- withinHumdrum
           
@@ -1327,36 +1327,36 @@ collapse2n <- function(x, colname, class, n = 1) {
 # 
 #' 
 #' \code{humApply} is just a wrapper for 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
+#' \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}},
 #' included to parallel the \code{R} family of \code{\link[base:lapply]{_apply}} functions.
 #' \code{humApply} uses \href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
 #' to capture arguments fed to it without the user needing to make explicit 
 #' \code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work 
 #' in the \code{\link[base:environment]{global environment}}, so be careful. If you run into
-#' problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
+#' problems, switch over to \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}} and use
 #' explicit \code{\link[base:tilde]{X~formulas}}.
 #' 
 #' @param humdrumR A \code{\linkS4class{humdrumR}} data object.
 #' @param FUN A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
 #' in the \code{humdrumR} object.
 #' @param ... Any arguments which can be fed to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
+#' \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}} as formulae (except for
 #' \code{do} expressions, which are replaced by the \code{FUN} argument!). 
 #' However, rather that writinging formula in the format \code{Keyword ~ Expression},
 #' \code{humApply} arguments should be written as normal \code{R} arguments: 
 #' \code{Keyword = Expression}.
 #' Unnamed arguments are ignored.
 #' #' @param within A logical. If \code{TRUE} (the default), 
-#' \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the 
+#' \code{\link[humdrumR:withinHumdrum]{withinHumdrum}} is used to apply the 
 #' function---meaning that the output is reconstituted into a new field in the 
 #' \code{humdrumR} object. If \code{within == FALSE},
-#' \code{\link[humdrumR:with-in-Humdrum]{withHumdrum}} is used instead,
+#' \code{\link[humdrumR:withinHumdrum]{withHumdrum}} is used instead,
 #' which results in the function's output being returned inprocessed.
 #' @param doplot Boolean. If \code{TRUE} the \code{FUN} argument is treated
-#' as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
+#' as a \code{doplot} expression by \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}},
 #' so the result is ignored (for plotting or side-effects purposes).
 #' 
-#' @name with-in-humdrum
+#' @rdname withinHumdrum
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
           exprs <- rlang::quos(...)

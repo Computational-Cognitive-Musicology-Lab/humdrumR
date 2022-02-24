@@ -4,7 +4,7 @@
 
 #' Filter humdrum data
 #' 
-#' `filterHumdrum` is a command used to filter a [humdrumR corpus][humdrumR::humdrumR-class]
+#' `filterHumdrum` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass]
 #' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
 #' uses calls to `filterHumdrum`!
 #' 
@@ -32,7 +32,7 @@
 #' For many R data types (for instance, base R [lists][base::list])
 #' the **`[`single brackets`]`** are used for "shallower" extraction while the 
 #' **`[[`double brackets`]]`** are used for "deeper" extraction.
-#' [HumdrumR corpus][humdrumR::humdrumR-class] indexing follows this same basic pattern:
+#' [HumdrumR corpus][humdrumR::humdrumRclass] indexing follows this same basic pattern:
 #' **`[`single brackets`]`** are used to index `humdrumR` objects
 #' *by piece* while **`[[`double brackets`]]`** are used to index
 #' *within pieces*. (Accidentally writing `[]` when you need
@@ -74,7 +74,7 @@
 #'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
 #'   file in the corpus.
 #' 
-#' When indexing [humdrumR corpora][humdrumR::humdrumR-class] with numbers,
+#' When indexing [humdrumR corpora][humdrumR::humdrumRclass] with numbers,
 #' all `numeric` (double) inputs are converted to integers.
 #' 
 #' 
@@ -120,7 +120,7 @@
 #' 
 #' ### Character indexing:
 #' 
-#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
+#' Indexing [humdrumR objects][humdrumR:humdrumRclass] with 
 #' `[`single brackets`]` will accept one 
 #' vector of `character` strings. These strings are 
 #' treated as 
@@ -161,7 +161,7 @@
 #' 
 #' ### Formula indexing:
 #' 
-#' Indexing [humdrumR objects][humdrumR:humdrumR-class] with 
+#' Indexing [humdrumR objects][humdrumR:humdrumRclass] with 
 #' `formulae` is the most powerful, flexible indexing option.
 #' Either `[`single`]` or `[[`double`]]` brackets will accept
 #' a (single) formula. The formula are fed directly as arguments to 
@@ -469,7 +469,7 @@ function(x, i, removeEmpty = FALSE) {
 #           })
 
 
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @usage humdata[[ , 'regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
@@ -489,7 +489,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
 
 
 
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @usage humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
 #' @export
 setMethod('[[',
@@ -531,7 +531,7 @@ setMethod('[[',
 
 
 
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @usage humdata[[~expression]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
@@ -547,7 +547,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
                     x
           })
 
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @usage humdata[[ , ~expression]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 

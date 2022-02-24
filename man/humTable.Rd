@@ -30,11 +30,11 @@ In the \link{humdrumR} package, the fundamental data structure is called a \stro
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
 as a single \link[data.table:data.table]{data.table}
 (A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}).
-Humdrum tables are stored "inside" every \linkS4class{humdrumR} object that you will work with, and various \code{humdrumR}
+Humdrum tables are stored "inside" every \link{humdrumRclass} object that you will work with, and various \code{humdrumR}
 functions allow you to study or manipulate the them.
-If you want to directly access the humdrum table within a \linkS4class{humdrumR} object, use the \link{getHumtab} function.
+If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \link{getHumtab} function.
 
-\code{getHumtab} extracts a \link[=humTable]{humdrum table} from a \linkS4class{humdrumR} object.
+\code{getHumtab} extracts a \link[=humTable]{humdrum table} from a \link{humdrumRclass} object.
 }
 \details{
 In a humdrum table, each row represents a single "token"
@@ -289,7 +289,7 @@ All updates/changes to the \code{Null} field are also propogated to the \code{Ty
 a data record is \code{Null}.
 This is important/useful because \link{withinHumdrum} routines are, by default, only applied to \code{"D"} data, ignoring \code{"d"}.
 
-Whenever you \link[=humPrint]{print} or \link[=writeHumdrum]{export} a \linkS4class{humdrumR} object, null data in the active field
+Whenever you \link[=humPrint]{print} or \link[=writeHumdrum]{export} a \link{humdrumRclass} object, null data in the active field
 (i.e., \code{Null == TRUE}) print as \code{"."}.
 Thus, if you are working with numeric data, with \code{NA} values, these \code{NA} values will print as \code{"."}.
 }
