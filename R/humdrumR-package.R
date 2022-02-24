@@ -12,7 +12,7 @@
 #' 
 #' The package `humdrumR` has XXX main components:
 #' 
-#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumR-class] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
+#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumRclass] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].

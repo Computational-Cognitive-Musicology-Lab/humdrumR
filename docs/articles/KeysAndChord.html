@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,18 +33,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">humdrumR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="../reference/index.html">Reference</a>
 </li>
@@ -103,24 +99,24 @@
 
       
 
-      </header><script src="KeysAndChord_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Diatonic and Tertian Sets in humdrumR</h1>
-                        <h4 class="author">Nathaniel Condit-Schultz</h4>
+                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 class="date">2021-07-21</h4>
+            <h4 data-toc-skip class="date">2022-02-24</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/master/vignettes/KeysAndChord.Rmd"><code>vignettes/KeysAndChord.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/KeysAndChord.Rmd"><code>vignettes/KeysAndChord.Rmd</code></a></small>
       <div class="hidden name"><code>KeysAndChord.Rmd</code></div>
 
     </div>
 
     
     
-<div id="diatonic-sets" class="section level1">
-<h1 class="hasAnchor">
-<a href="#diatonic-sets" class="anchor"></a>Diatonic Sets</h1>
+<div class="section level2">
+<h2 id="diatonic-sets">Diatonic Sets<a class="anchor" aria-label="anchor" href="#diatonic-sets"></a>
+</h2>
 <p>As mentioned in the Pitch and Tonality vignette, a normative diatonic key consists of a set of seven consetutive pitch chroma on the Line of Fifths.</p>
 <p>A diatonic set can be orderd either by line-of-fifths position:</p>
 <table class="table">
@@ -181,9 +177,9 @@
 </tbody>
 </table>
 </div>
-<div id="tertian-sets" class="section level1">
-<h1 class="hasAnchor">
-<a href="#tertian-sets" class="anchor"></a>Tertian Sets</h1>
+<div class="section level2">
+<h2 id="tertian-sets">Tertian Sets<a class="anchor" aria-label="anchor" href="#tertian-sets"></a>
+</h2>
 <p>The set of seven notes in a diatonic key can be reimagined as a <em>chord</em>—a set of notes played at the same time. Specifically, a full seven-note diatonic chord is refered to as a 13th chord. However, most chords used in tonal music are subsets of the full diatonic set, in particular three-note <em>triads</em>.</p>
 <p>When viewing a diatonic set as a chord, we traditionally order the set as a sequence of ascending thirds, corresponding to intervals of <span class="math inline">\(+4\)</span> on the line-of-fifths, modulo 7. These <em>tertian</em> steps are usually not wrapped to the octave, resulting in steps 9, 11, and 13, instead of 2, 4, and 6.</p>
 <table class="table">
@@ -222,9 +218,9 @@
 </table>
 <p>There are <span class="math inline">\(2^7=\)</span> 128 possible subsets that can be formed from the full diatonic set. Of these, the seven possiblities that are built from consecutive tertian steps are theoritically priveledged : i.e., <span class="math inline">\(\{\{1\}, \{1,3\}, \{1,3,5\}, \{1,3,5,7\}, \{1,3,5,7,9\}, \{1,3,5,7,9,11\}, \{1,3,5,7,9,11,13\}\}\)</span>.</p>
 <p>A few other possible sets are fairly commonplace in Western theory as well: <span class="math inline">\(\{1,5, 11\}\)</span> (“sus4”), <span class="math inline">\(\{1,3,5,9\}\)</span> (“add9”), <span class="math inline">\(\{1,3,5,13\}\)</span> (“add6”), etc.</p>
-<div id="concrete-representations" class="section level2">
-<h2 class="hasAnchor">
-<a href="#concrete-representations" class="anchor"></a>Concrete Representations</h2>
+<div class="section level3">
+<h3 id="concrete-representations">Concrete Representations<a class="anchor" aria-label="anchor" href="#concrete-representations"></a>
+</h3>
 <p>There are numerous ways tertian sets of notes are traditionally notated or annotated as character strings. Unfortunately, these systems are not always rigorously consisistent or logical, with convenient shorthands for common chords which lead to ambiguity, and/or practices rooted in traditional practices with little relavance. <code>humdrumR</code> aims to provide a general approach to make reading/writing chord annotations in many forms possible.</p>
 <p>A chord representation is consists of set of at least one of the following elements:</p>
 <ul>
@@ -234,12 +230,12 @@
 <li>Qualities of the chord steps, relative to an implicit or explicit key.</li>
 </ul>
 <p>Traditional chord notation symbols often conflate or merge these various elements in various ways, with numerous common shorthands. In particular, the common diatonic traids—which are abstractly different combinations of qualities of the 3rd and 5th—are represented in various shorthands.</p>
-<div id="section" class="section level3">
-<h3></h3>
+<div class="section level4">
+<h4 id="section"></h4>
 <p>Chord symbols</p>
 <ul>
 <li>A tonal chroma</li>
-<li>If the bass note is different than the root note, the bass note is indicated as a separate tonal chroma, separated by a <code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code>.
+<li>If the bass note is different than the root note, the bass note is indicated as a separate tonal chroma, separated by a <code>/</code>.
 <ul>
 <li>This practice is often used to indicate a bass note which is not part of the ostensible chord. For instance, <code>C7/Ab</code>.</li>
 </ul>
@@ -252,14 +248,14 @@
 </ul>
 <p>Roman numerals</p>
 <p>7ths 753 7, 653 65, 643 43, 642 42 2</p>
-<pre><code>753:
-    1111000
-653:
-    1110001
-643:
-    1100011
-642:
-    1000111</code></pre>
+<pre><code><span class="fl">753</span><span class="op">:</span>
+    <span class="fl">1111000</span>
+<span class="fl">653</span><span class="op">:</span>
+    <span class="fl">1110001</span>
+<span class="fl">643</span><span class="op">:</span>
+    <span class="fl">1100011</span>
+<span class="fl">642</span><span class="op">:</span>
+    <span class="fl">1000111</span></code></pre>
 <p>9ths 9753: 1111100 7653: 1111001 6543: 1110011 6432: 1100111 7642: 1001111 11ths 11</p>
 </div>
 </div>
@@ -277,11 +273,13 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by <a href="http://fathermckenzie.net/">Nathaniel Condit-Schultz</a>.</p>
+  <p></p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -289,6 +287,8 @@
 
   
 
+
+  
 
   </body>
 </html>
