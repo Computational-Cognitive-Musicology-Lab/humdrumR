@@ -231,64 +231,123 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', 'very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
 # print_corrected <- list()
 # counter <- 0
-iteration1 <- 1:length(data)
-iteration1 <- cbind(iteration1)
-splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
-library(spelling)
-indicesWithErrors <- apply(iteration1, 1, function(x){
-  if(x < length(iteration1)){
-    if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-      return(x+1)
+
+  iteration1 <- 1:length(data)
+  iteration1 <- cbind(iteration1)
+  iteration1 <- as.data.frame(iteration1)
+  splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
+  library(spelling)
+  indicesWithErrors <- apply(iteration1, 1, function(x){
+    if(x < length(iteration1)){
+      if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+        return(x+1)
+      }
     }
-  }
-  if(x > 1){
-    if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-      return(x-1)
+    if(x > 1){
+      if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+        return(x-1)
+      }
     }
-  }
-  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-    if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
-      # if a value is not a word and does not have any dashes, print this index as having an error.
-      return(x)
+    if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+      if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+        # if a value is not a word and does not have any dashes, print this index as having an error.
+        return(x)
+      }
     }
+  })
+  indicesWithErrorsSave <- unlist(indicesWithErrors)
+  dup <- duplicated(indicesWithErrorsSave)
+  removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
+  splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+  printErrors1 <- function(iteration, df1, length1){
+
+      splitString <- strsplit(df1[iteration], "")[[1]]
+      # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
+      if(splitString[1] == "-" && splitString[length(splitString)] == "-"
+         || (splitString[1] != "-" && splitString[length(splitString)] == "-")){
+        if(iteration > 1 && iteration < length1){
+          if(splitString[1] != "-"){
+            cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+            value <- paste("-", df1[iteration+1], sep = "")
+            return(value)
+          }
+        }
+      }
   }
-})
-indicesWithErrorsSave <- unlist(indicesWithErrors)
-dup <- duplicated(indicesWithErrorsSave)
-removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
-iteration <- 1:length(removeDuplicated)
-iteration <- as.data.frame(iteration)
-printErrors1 <- function(iteration, df1, length1){
-  if(iteration == 1){
-    return(NULL)
-  }
-  else{
-    splitString <- apply(iteration1, 1, function(x){return(strsplit(df1[x], "")[[1]])})
-    # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
-    if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
-       || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
-      if(iteration > 1 && iteration < length1){
-        if(splitString[[iteration+1]][1] != "-"){
-          cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
-          value <- paste("-", df1[iteration+1], sep = "")
-          return(value)
+  saveNew <- apply(iteration1, 1, function(x){
+    printErrors1(x, data, length(data))
+  })
+  saveNew <- append(list(NULL), saveNew)
+  iteration2 <- 1:length(saveNew)
+  iteration2 <- as.data.frame(iteration2)
+  newData <- apply(iteration2, 1, function(x){
+      if(!is.null(saveNew[[x]])){
+        value <- saveNew[[x]]
+        return(value)
+      }
+      else{
+        return(data[x])
+      }
+  })
+  
+  iteration1 <- 1:length(newData)
+  iteration1 <- cbind(iteration1)
+  splitString <- apply(iteration1, 1, function(x){return(strsplit(newData[x], "")[[1]])})
+  library(spelling)
+  indicesWithErrors <- apply(iteration1, 1, function(x){
+    if(x < length(iteration1)){
+      if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+        return(x+1)
+      }
+    }
+    if(x > 1){
+      if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+        return(x-1)
+      }
+    }
+    if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+      if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+        # if a value is not a word and does not have any dashes, print this index as having an error.
+        return(x)
+      }
+    }
+  })
+  indicesWithErrorsSave <- unlist(indicesWithErrors)
+  dup <- duplicated(indicesWithErrorsSave)
+  removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
+  iteration <- 1:length(removeDuplicated)
+  iteration <- as.data.frame(iteration)
+  printErrors1 <- function(iteration, df1, length1){
+    if(iteration == 1){
+      return(NULL)
+    }
+    else{
+      splitString <- apply(iteration1, 1, function(x){return(strsplit(df1[x], "")[[1]])})
+      # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
+      if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
+         || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
+        if(iteration > 1 && iteration < length1){
+          if(splitString[[iteration+1]][1] != "-"){
+            cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+            value <- paste("-", df1[iteration+1], sep = "")
+            return(value)
+          }
         }
       }
     }
+    # return(df1[iteration])
   }
-  # return(df1[iteration])
-}
-saveNew <- apply(iteration1, 1, function(x){
-  printErrors1(x, data, length(data))
-})
-saveNew <- append(list(NULL), saveNew)
-newData <- apply(iteration1, 1, function(x){
+  saveNew2 <- apply(iteration1, 1, function(x){
+    printErrors1(x, newData, length(newData))
+  })
+  saveNew2 <- append(list(NULL), saveNew2)
+  newData2 <- apply(iteration1, 1, function(x){
     if(!is.null(saveNew[[x]])){
       value <- saveNew[[x]]
       return(value)
@@ -296,236 +355,69 @@ newData <- apply(iteration1, 1, function(x){
     else{
       return(data[x])
     }
-})
-saveNew2 <- apply(iteration1, 1, function(x){
-  printErrors1(x, newData, length(data))
-})
-whichIndices <- apply(iteration1, 1, function(x){
-  if(!is.null(saveNew[[x]])){
-    return(x)
-  }
-})
-whichIndices <- unlist(whichIndices)
-
-# then check below again?
-
-
-  # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
-  #   if(x > 1 && x < length(iteration)){
-  #     if(splitString[[x+1]][1] != "-"){
-  #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substr(data[x],1,nchar(data[x])-1), sep = "")
-  #     }
+  })
+  
+  
+  
+  
+  
+  # saveNew2 <- apply(iteration1, 1, function(x){
+  #   printErrors1(x, newData, length(data))
+  # })
+  # whichIndices <- apply(iteration1, 1, function(x){
+  #   if(!is.null(saveNew[[x]])){
+  #     return(x)
   #   }
-  # }
-  # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
-  #   if(x > 1 && x < length(iteration)){
-  #     if(splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-  #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substring(data[x],2), sep = "")
-  #     }
-  #   }
-  # }
-
-printErrors <- apply(iteration, 1, function(x){
-  # split into 4 main cases, each case has 16 possible nodes
-  if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
+  # })
+  # whichIndices <- unlist(whichIndices)
+  
+  # then check below again?
+  
+  
+    # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
+    #   if(x > 1 && x < length(iteration)){
+    #     if(splitString[[x+1]][1] != "-"){
+    #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substr(data[x],1,nchar(data[x])-1), sep = "")
+    #     }
+    #   }
+    # }
+    # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
+    #   if(x > 1 && x < length(iteration)){
+    #     if(splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+    #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substring(data[x],2), sep = "")
+    #     }
+    #   }
+    # }
+  iteration <- 1:length(newData)
+  iteration <- as.data.frame(iteration)
+  splitString <- apply(iteration, 1, function(x){return(strsplit(newData[x], "")[[1]])})
+  printErrors <- apply(iteration, 1, function(x){
+    # split into 4 main cases, each case has 16 possible nodes
+    if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+      if(x>1 && x < length(iteration)){
+        if(splitString[[x-1]][length(splitString[[x-1]])] == "-" && splitString[[x+1]][1] == "-"){
+          if(length(spell_check_text(newData[x])$word) == 1 && nchar(spell_check_text(newData[x])$word) > 1){
+            # if a value is not a word and does not have any dashes, print this index as having an error.
+            cat("error, improperly formatted **silbe: ", newData[x], " should be -",newData[x], "-", sep = "")
+          }
         }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
+        if(splitString[[x-1]][length(splitString[[x-1]])] != "-" && splitString[[x+1]][1] == "-"){
+          if(length(spell_check_text(newData[x])$word) == 1 && nchar(spell_check_text(newData[x])$word) > 1){
+            # if a value is not a word and does not have any dashes, print this index as having an error.
+            cat("error, improperly formatted **silbe: ", newData[x], " should be ",newData[x], "-", sep = "")
+          }
         }
       }
     }
-  }
-  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] == "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
+    if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] != "-"){
+      if(x > 1 && x < nrow(iteration)){
+        if(splitString[[x+1]][1] == "-"){
+          print(1)
+          cat("error, improperly formatted **silbe: ", newData[x], " should be ",newData[x], "-", sep = "")
         }
       }
     }
-  }
-  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-    if(x>1 && x < length(iteration)){
-      if(splitString[[x-1]][length(splitString[[x-1]])] == "-" && splitString[[x+1]][1] == "-"){
-        if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
-          # if a value is not a word and does not have any dashes, print this index as having an error.
-          cat("error, improperly formatted **silbe: ", data[x], " should be -",data[x], "-", sep = "")
-        }
-      }
-      if(splitString[[x-1]][length(splitString[[x-1]])] != "-" && splitString[[x+1]][1] == "-"){
-        if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
-          # if a value is not a word and does not have any dashes, print this index as having an error.
-          cat("error, improperly formatted **silbe: ", data[x], " should be ",data[x], "-", sep = "")
-        }
-      }
-    }
-  }
-  if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] == "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
-          
-        }
-        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
-          
-        }
-      }
-    }
-  }
-})
-
-
+  })
 
 ## Tests
 
