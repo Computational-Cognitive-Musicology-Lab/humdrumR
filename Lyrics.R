@@ -231,17 +231,17 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', '-e-', 'very', 'bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
 # print_corrected <- list()
 # counter <- 0
-iteration <- 1:length(data)
-iteration <- cbind(iteration)
-splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+iteration1 <- 1:length(data)
+iteration1 <- cbind(iteration1)
+splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
 library(spelling)
-indicesWithErrors <- apply(iteration, 1, function(x){
+indicesWithErrors <- apply(iteration1, 1, function(x){
   if(x < length(iteration)){
     if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
       return(x+1)
@@ -259,29 +259,31 @@ indicesWithErrors <- apply(iteration, 1, function(x){
     }
   }
 })
-printErrors1 <- apply(iteration, 1, function(x){
+printErrors1 <- function(iteration, df1, length1){
   # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
-  if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] != "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x+1]][1] == "-"){
-        cat("error, improperly formatted **silbe: ", data[x], " should be ",data[x], "-", sep = "")
+  if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
+     || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
+    if(iteration > 1 && iteration < length(length1)){
+      if(splitString[[iteration+1]][1] != "-"){
+        cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+        dfname <- deparse(substitute(df1))
+        df1[iteration+1] <- paste("-", df1[iteration+1], sep = "")
+        assign(dfname, df1, envir = envir)
       }
     }
   }
-  if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] == "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x+1]][length(splitString[[x+1]])] != "-"){
-        cat("error, improperly formatted **silbe: ", data[x], " should be ",substring(data[x],2), sep = "")
-      }
-    }
-  }
-  if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
-    if(x > 1 && x < length(iteration)){
-      if(splitString[[x+1]][1] != "-"){
-        cat("error, improperly formatted **silbe: ", data[x], " should be ",substr(data[x],1,nchar(data[x])-1), sep = "")
-      }
-    }
-  }
+  return(df1[iteration])
+}
+saveNew <- apply(iteration1, 1, function(x){
+  printErrors1(x, data, length(data))
+})
+  # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
+  #   if(x > 1 && x < length(iteration)){
+  #     if(splitString[[x+1]][1] != "-"){
+  #       cat("error, improperly formatted **silbe: ", data[x], " should be ",substr(data[x],1,nchar(data[x])-1), sep = "")
+  #     }
+  #   }
+  # }
   # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
   #   if(x > 1 && x < length(iteration)){
   #     if(splitString[[x-1]][length(splitString[[x-1]])] != "-"){
@@ -289,7 +291,7 @@ printErrors1 <- apply(iteration, 1, function(x){
   #     }
   #   }
   # }
-})
+
 printErrors <- apply(iteration, 1, function(x){
   # split into 4 main cases, each case has 16 possible nodes
   if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] != "-"){
