@@ -230,7 +230,7 @@ silbeFormat <- function(data){
     }
   }
 }
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', 'poasas', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 save_initials <- list()
 print_initial <- list()
 save_corrected <- list()
@@ -239,14 +239,23 @@ counter <- 0
 iteration <- 1:length(data)
 iteration <- cbind(iteration)
 splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+library(spelling)
 indicesWithErrors <- apply(iteration, 1, function(x){
   if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-    return(list(x, x+1))
+    return(x+1)
   }
-  else if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-    return(list(x, x-1))
+  if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+    return(x-1)
+  }
+  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+    if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+      # if a value is not a word and does not have any dashes, print this index as having an error.
+      return(x)
+    }
   }
 })
+indicesWithErrorsSave <- unlist(indicesWithErrors)
+
     # splitStringNext <- strsplit(data[i+1], "")[[1]]
   ifFunction <- function(splitStringInput){if(splitString[length(splitString)] == '-' && splitString[1] != '-'){
       counter <- counter + 1
