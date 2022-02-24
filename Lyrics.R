@@ -297,7 +297,9 @@ newData <- apply(iteration1, 1, function(x){
       return(data[x])
     }
 })
-
+saveNew2 <- apply(iteration1, 1, function(x){
+  printErrors1(x, newData, length(data))
+})
 whichIndices <- apply(iteration1, 1, function(x){
   if(!is.null(saveNew[[x]])){
     return(x)
