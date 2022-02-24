@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', 'bo', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -259,37 +259,134 @@ indicesWithErrors <- apply(iteration, 1, function(x){
     }
   }
 })
+printErrors1 <- apply(iteration, 1, function(x){
+  if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] != "-"){
+    if(x > 1 && x < length(iteration)){
+      if(splitString[[x+1]][1] == "-"){
+        cat("error, improperly formatted **silbe: ", data[x], " should be ",data[x], "-", sep = "")
+      }
+    }
+  }
+})
 printErrors <- apply(iteration, 1, function(x){
   # split into 4 main cases, each case has 16 possible nodes
   if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] != "-"){
     if(x > 1 && x < length(iteration)){
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
     }
   }
   if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] == "-"){
     if(x > 1 && x < length(iteration)){
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
     }
   }
@@ -312,16 +409,60 @@ printErrors <- apply(iteration, 1, function(x){
   if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] == "-"){
     if(x > 1 && x < length(iteration)){
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
       if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
-        
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] == "-"){
+          
+        }
+        if(splitString[[x+1]][1] == '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
+        if(splitString[[x+1]][1] != '-' && splitString[[x]][length(splitString[[x+1]])] != "-"){
+          
+        }
       }
     }
   }
