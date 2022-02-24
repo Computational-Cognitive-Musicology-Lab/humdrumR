@@ -262,10 +262,36 @@ indicesWithErrors <- apply(iteration, 1, function(x){
 printErrors <- apply(iteration, 1, function(x){
   # split into 4 main cases, each case has 16 possible nodes
   if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-    
+    if(x > 1 && x < length(iteration)){
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+    }
   }
   if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] == "-"){
-    return(x-1)
+    if(x > 1 && x < length(iteration)){
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+    }
   }
   if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
     if(x>1 && x < length(iteration)){
@@ -284,7 +310,20 @@ printErrors <- apply(iteration, 1, function(x){
     }
   }
   if(splitString[[x]][1] == '-' && splitString[[x]][length(splitString[[x]])] == "-"){
-    
+    if(x > 1 && x < length(iteration)){
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] == "-"){
+        
+      }
+      if(splitString[[x-1]][1] == '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+      if(splitString[[x-1]][1] != '-' && splitString[[x]][length(splitString[[x-1]])] != "-"){
+        
+      }
+    }
   }
 })
 indicesWithErrorsSave <- unlist(indicesWithErrors)
