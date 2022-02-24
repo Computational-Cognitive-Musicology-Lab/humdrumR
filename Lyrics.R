@@ -230,12 +230,13 @@ silbeFormat <- function(data){
     }
   }
 }
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', 'poasas', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-save_initials <- list()
-print_initial <- list()
-save_corrected <- list()
-print_corrected <- list()
-counter <- 0
+# silbe format vectorized
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very-', 'bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+# save_initials <- list()
+# print_initial <- list()
+# save_corrected <- list()
+# print_corrected <- list()
+# counter <- 0
 iteration <- 1:length(data)
 iteration <- cbind(iteration)
 splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
@@ -254,6 +255,22 @@ indicesWithErrors <- apply(iteration, 1, function(x){
     }
   }
 })
+printErrors <- apply(iteration, 1, function(x){
+  if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+    if(splitString[[x+1]][length(splitString[[x+1]])] == "-"){
+      cat("error, improperly formatted **silbe: ", data[x+1], " should be -",data[x+1], sep = "")
+    }
+  }
+  if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+    return(x-1)
+  }
+  if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+    if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+      # if a value is not a word and does not have any dashes, print this index as having an error.
+      return(x)
+    }
+  }
+})
 indicesWithErrorsSave <- unlist(indicesWithErrors)
 iteration <- 1:length(indicesWithErrorsSave)
 iteration <- as.data.frame(iteration)
@@ -261,31 +278,7 @@ dup <- duplicated(indicesWithErrorsSave)
 removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
 iteration <- 1:length(removeDuplicated)
 iteration <- as.data.frame(iteration)
-printErrors <- apply(1, iteration, function(x){
-  
-})
-    # splitStringNext <- strsplit(data[i+1], "")[[1]]
-  ifFunction <- function(splitStringInput){if(splitString[length(splitString)] == '-' && splitString[1] != '-'){
-      counter <- counter + 1
-      print_initial <- append(data[i], data[i+1])
-      save_initials[counter] <- list(print_initial)
-      print_corrected <- append(data[i], '-')
-      print_corrected <- append(print_corrected, data[i+1])
-      save_corrected[counter] <- list(print_corrected)
-    }
-  }
-  applyIf <- apply(iteration, 1, ifFunction(splitString[iteration]))  
-  if(counter == 0){
-    return("Formatted properly.")
-  }
-  else{
-    cat("error, improperly formatted **silbe:", save_initials[1][[1]], "should be", save_corrected[1][[1]])
-    if(counter > 1){
-      for(i in 2:counter){
-        cat(" and", save_initials[i][[1]], "should be", save_corrected[i][[1]])
-      }
-    }
-  }
+
 
 ## Tests
 
