@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very-', 'bo', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', 'bo', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -274,6 +274,12 @@ printErrors <- apply(iteration, 1, function(x){
         if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
           # if a value is not a word and does not have any dashes, print this index as having an error.
           cat("error, improperly formatted **silbe: ", data[x], " should be -",data[x], "-", sep = "")
+        }
+      }
+      if(splitString[[x-1]][length(splitString[[x-1]])] != "-" && splitString[[x+1]][1] == "-"){
+        if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+          # if a value is not a word and does not have any dashes, print this index as having an error.
+          cat("error, improperly formatted **silbe: ", data[x], " should be ",data[x], "-", sep = "")
         }
       }
     }
