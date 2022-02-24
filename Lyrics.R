@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', '-e-', 'very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', 'very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -242,7 +242,7 @@ iteration1 <- cbind(iteration1)
 splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
 library(spelling)
 indicesWithErrors <- apply(iteration1, 1, function(x){
-  if(x < length(iteration)){
+  if(x < length(iteration1)){
     if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
       return(x+1)
     }
@@ -259,26 +259,55 @@ indicesWithErrors <- apply(iteration1, 1, function(x){
     }
   }
 })
-printErrors1 <- function(iteration, df1, length1, envir = parent.frame()){
-  splitString <- apply(iteration1, 1, function(x){return(strsplit(df1[x], "")[[1]])})
-  # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
-  if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
-     || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
-    if(iteration > 1 && iteration < length1){
-      if(splitString[[iteration+1]][1] != "-"){
-        cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
-        dfname <- deparse(substitute(df1))
-        df1[iteration+1] <- paste("-", df1[iteration+1], sep = "")
-        assign(dfname, df1, envir = envir)
-        return(df1[iteration+1])
+indicesWithErrorsSave <- unlist(indicesWithErrors)
+dup <- duplicated(indicesWithErrorsSave)
+removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
+iteration <- 1:length(removeDuplicated)
+iteration <- as.data.frame(iteration)
+printErrors1 <- function(iteration, df1, length1){
+  if(iteration == 1){
+    return(NULL)
+  }
+  else{
+    splitString <- apply(iteration1, 1, function(x){return(strsplit(df1[x], "")[[1]])})
+    # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
+    if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
+       || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
+      if(iteration > 1 && iteration < length1){
+        if(splitString[[iteration+1]][1] != "-"){
+          cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+          value <- paste("-", df1[iteration+1], sep = "")
+          return(value)
+        }
       }
     }
   }
-  return(df1[iteration])
+  # return(df1[iteration])
 }
 saveNew <- apply(iteration1, 1, function(x){
   printErrors1(x, data, length(data))
 })
+saveNew <- append(list(NULL), saveNew)
+newData <- apply(iteration1, 1, function(x){
+    if(!is.null(saveNew[[x]])){
+      value <- saveNew[[x]]
+      return(value)
+    }
+    else{
+      return(data[x])
+    }
+})
+
+whichIndices <- apply(iteration1, 1, function(x){
+  if(!is.null(saveNew[[x]])){
+    return(x)
+  }
+})
+whichIndices <- unlist(whichIndices)
+
+# then check below again?
+
+
   # if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] == "-"){
   #   if(x > 1 && x < length(iteration)){
   #     if(splitString[[x+1]][1] != "-"){
@@ -493,13 +522,7 @@ printErrors <- apply(iteration, 1, function(x){
     }
   }
 })
-indicesWithErrorsSave <- unlist(indicesWithErrors)
-iteration <- 1:length(indicesWithErrorsSave)
-iteration <- as.data.frame(iteration)
-dup <- duplicated(indicesWithErrorsSave)
-removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
-iteration <- 1:length(removeDuplicated)
-iteration <- as.data.frame(iteration)
+
 
 
 ## Tests
