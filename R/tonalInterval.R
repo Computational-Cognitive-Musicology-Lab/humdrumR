@@ -465,10 +465,12 @@ tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
   if (!is.null(Key)) x <- x + diatonicSet(Key)
   
   if (!specific) x <- tintPartition_specific(x, Key = Key, ...)$Generic
-  if (!complex) x <- tintPartition_complex(x, ...)$Simple
         
   semit <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
+  if (!complex) semit <- semit %% 12L
+
+  semit
   
 }
 
