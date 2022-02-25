@@ -3,6 +3,9 @@ authors:
        href: http://fathermckenzie.net/
     Claire Arthur:
        href: https://clairearthur.com/
+template:
+  bootstrap: 5
+  bootswatch: solar 
 url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
 reference:
 - title: "Musical Tools"
@@ -14,6 +17,7 @@ reference:
   desc: "Pitch and tonality classes and functions."
   contents:
   - humdrumPitch
+  - pitch
   - tonalInterval
   - tonalTransformations
   - diatonicSet
@@ -57,6 +61,7 @@ reference:
 - subtitle: "Manipulating Vectors"
   contents:
   - fillThru
+  - lag
 - subtitle: "Regular Expressions"
   desc: >
      [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression) are essential tools for working with humdrum data.

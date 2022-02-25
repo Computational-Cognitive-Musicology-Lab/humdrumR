@@ -462,7 +462,7 @@ spliceHumtab <- function(humtab) {
 }
 
 orderHumtab <- function(humtab) {
-    orderingcols <- c('File', 'Record', 'Column', 'Stop')
+    orderingcols <- c('File', 'Column', 'Record', 'Stop')
     
     # can't sort by lists
     orderingcols <- orderingcols[sapply(humtab[ , orderingcols, with = FALSE], class) == 'integer']
