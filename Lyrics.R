@@ -294,7 +294,7 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e', '-very-', '-bo-', 'dy', 'to',
   saveNew <- apply(iteration1, 1, function(x){
     printErrors1(x, data, length(data))
   })
-  # above works
+  # above works without below
   saveNew <- append(list(NULL), saveNew)
   iteration2 <- 1:length(saveNew)
   iteration2 <- as.data.frame(iteration2)
