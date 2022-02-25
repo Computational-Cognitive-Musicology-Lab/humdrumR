@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -264,21 +264,23 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to'
   indicesWithErrorsSave <- unlist(indicesWithErrors)
   dup <- duplicated(indicesWithErrorsSave)
   removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
-  splitString <- apply(iteration, 1, function(x){return(strsplit(data[x], "")[[1]])})
+  splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
   printErrors1 <- function(iteration, df1, length1){
 
       splitString <- strsplit(df1[iteration], "")[[1]]
       # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
-      if(splitString[1] == "-" && splitString[length(splitString)] == "-"
+      if((splitString[1] == "-" && splitString[length(splitString)] == "-")
          || (splitString[1] != "-" && splitString[length(splitString)] == "-")){
         if(iteration > 1 && iteration < length1){
-          if(splitString[1] != "-"){
-            cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
-            value <- paste("-", df1[iteration+1], sep = "")
-            return(value)
-          }
+          splitString2 <- strsplit(df1[iteration+1], "")[[1]]
+            if(splitString2[1] != "-"){
+              cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+              value <- paste(df1[iteration+1], "-", sep = "")
+              return(value)
+            }
         }
       }
+      
   }
   saveNew <- apply(iteration1, 1, function(x){
     printErrors1(x, data, length(data))
@@ -295,9 +297,9 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to'
         return(data[x])
       }
   })
-  
-  iteration1 <- 1:length(newData)
+  iteration1 <- 1:(length(newData)-1)
   iteration1 <- cbind(iteration1)
+  iteration1 <- as.data.frame(iteration1)
   splitString <- apply(iteration1, 1, function(x){return(strsplit(newData[x], "")[[1]])})
   library(spelling)
   indicesWithErrors <- apply(iteration1, 1, function(x){
@@ -318,44 +320,46 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to'
       }
     }
   })
+  # works up to here
   indicesWithErrorsSave <- unlist(indicesWithErrors)
   dup <- duplicated(indicesWithErrorsSave)
   removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
-  iteration <- 1:length(removeDuplicated)
-  iteration <- as.data.frame(iteration)
-  printErrors1 <- function(iteration, df1, length1){
-    if(iteration == 1){
-      return(NULL)
-    }
-    else{
-      splitString <- apply(iteration1, 1, function(x){return(strsplit(df1[x], "")[[1]])})
-      # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
-      if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
-         || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
-        if(iteration > 1 && iteration < length1){
-          if(splitString[[iteration+1]][1] != "-"){
-            cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
-            value <- paste("-", df1[iteration+1], sep = "")
-            return(value)
-          }
-        }
-      }
-    }
-    # return(df1[iteration])
-  }
-  saveNew2 <- apply(iteration1, 1, function(x){
-    printErrors1(x, newData, length(newData))
-  })
-  saveNew2 <- append(list(NULL), saveNew2)
-  newData2 <- apply(iteration1, 1, function(x){
-    if(!is.null(saveNew[[x]])){
-      value <- saveNew[[x]]
-      return(value)
-    }
-    else{
-      return(data[x])
-    }
-  })
+  iteration2 <- 1:length(removeDuplicated)
+  iteration2 <- as.data.frame(iteration)
+  # printErrors1 <- function(iteration, df1, length1){
+  #   if(iteration == 1){
+  #     return(NULL)
+  #   }
+  #   else{
+  #     splitString <- apply(iteration, 1, function(x){return(strsplit(df1[x], "")[[1]])})
+  #     # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
+  #     if(splitString[[iteration]][1] == "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-"
+  #        || (splitString[[iteration]][1] != "-" && splitString[[iteration]][length(splitString[[iteration]])] == "-")){
+  #       if(iteration > 1 && iteration < length1){
+  #         if(splitString[[iteration+1]][1] != "-"){
+  #           cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
+  #           value <- paste("-", df1[iteration+1], sep = "")
+  #           return(value)
+  #         }
+  #       }
+  #     }
+  #   }
+  #   # return(df1[iteration])
+  # }
+  
+  # saveNew2 <- apply(iteration1, 1, function(x){
+  #   printErrors1(x, newData, length(newData)-1)
+  # })
+  # saveNew2 <- append(list(NULL), saveNew2)
+  # newData2 <- apply(iteration1, 1, function(x){
+  #   if(!is.null(saveNew[[x]])){
+  #     value <- saveNew[[x]]
+  #     return(value)
+  #   }
+  #   else{
+  #     return(data[x])
+  #   }
+  # })
   
   
   
@@ -388,13 +392,13 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to'
     #     }
     #   }
     # }
-  iteration <- 1:length(newData)
-  iteration <- as.data.frame(iteration)
-  splitString <- apply(iteration, 1, function(x){return(strsplit(newData[x], "")[[1]])})
-  printErrors <- apply(iteration, 1, function(x){
+  iteration4 <- 1:(length(newData)-1)
+  iteration4 <- as.data.frame(iteration4)
+  splitString <- apply(iteration4, 1, function(x){return(strsplit(newData[x], "")[[1]])})
+  printErrors <- apply(iteration4, 1, function(x){
     # split into 4 main cases, each case has 16 possible nodes
     if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-      if(x>1 && x < length(iteration)){
+      if(x>1 && x < nrow(iteration4)){
         if(splitString[[x-1]][length(splitString[[x-1]])] == "-" && splitString[[x+1]][1] == "-"){
           if(length(spell_check_text(newData[x])$word) == 1 && nchar(spell_check_text(newData[x])$word) > 1){
             # if a value is not a word and does not have any dashes, print this index as having an error.
@@ -410,7 +414,7 @@ data <- c('Now', 'let', 'me', 'wel', '-come', 'e-', '-very', '-bo-', '-dy', 'to'
       }
     }
     if(splitString[[x]][1] == "-" && splitString[[x]][length(splitString[[x]])] != "-"){
-      if(x > 1 && x < nrow(iteration)){
+      if(x > 1 && x < nrow(iteration4)){
         if(splitString[[x+1]][1] == "-"){
           print(1)
           cat("error, improperly formatted **silbe: ", newData[x], " should be ",newData[x], "-", sep = "")
