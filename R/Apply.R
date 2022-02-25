@@ -635,6 +635,9 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # turn . to active formula
   doQuo <- activateQuo(doQuo, active)
   
+  # lagged vectors
+  doQuo <- laggedQuo(doQuo)
+  
   # add in arguments that are already fields
   doQuo <- fieldsArgsQuo(doQuo, colnames(humtab))
   
@@ -785,6 +788,58 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
     
 }
 
+#### Lag/Led vectors
+
+laggedQuo <- function(funcQuosure) {
+  
+  predicate <- function(quo) { 
+    quo <- rlang::quo_squash(quo)
+    rlang::is_call(quo) && quo[[1]] == sym('[') && any(names(quo) == 'n')
+  }
+  
+  do <- function(quo) {
+    exp <- quo[[2]]
+    
+    args <- as.list(exp)[-1:-2]
+    if (!'windows' %in% names(args)) args$windows <- expr(list(File, Spine))
+    
+    indexedObject <- exp[[2]]
+    n <- eval_tidy(args$n)
+    args <- args[names(args) != 'n']
+    
+    exprs <- lapply(n, \(N) { if (N == 0L) expr(!!indexedObject) else expr(lag(!!indexedObject, n = !!N, !!!args)) })
+    
+    quo[[2]] <- if (length(n) == 1L) {
+      exprs[[1]]
+    } else {
+      expr(.SPLAT.(!!!exprs))
+    }
+    quo
+  
+  }
+  
+  funcQuosure <- recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
+  
+  # check for .SPLAT.
+  predicate <- function(quo) {
+    quo <- quo_squash(quo)
+    rlang::is_call(quo) &&
+      any(sapply(quo[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.')))
+  }
+  do <- function(quo) {
+    expr <- as.list(quo[[2]])
+    splats <- sapply(expr[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.'))
+    
+    for (i in which(splats)) expr[[i + 1L]] <- as.list(expr[[i + 1L]][-1])
+    expr <- unlist(expr, recursive = FALSE)
+    
+    quo[[2]] <- as.call(expr)
+    quo
+  }
+  
+  recurseQuosure(funcQuosure, predicate, do)
+   
+}
 
 #### Interpretations in expressions
 

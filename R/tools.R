@@ -1220,12 +1220,12 @@ recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     
     if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
     
-    
     s <- (rlang::as_label(quo[[2]][[1]]) %in% c('{', '(')) + 1L
     
     if (s == 1L) {
         pred <- predicate(quo) 
         if (pred) quo <- do(quo)
+        if (!rlang::is_call(quo[[2]])) return(quo)
     }
     
     if (s == 2L || !(stopOnHit && pred)) {

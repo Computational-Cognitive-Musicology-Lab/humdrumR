@@ -1,7 +1,8 @@
+#' 
 #' @export
 applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
-                       padder = NA, splat = !is.null(by), ...) {
-  # x is list of vectors of same length
+                       fill = NA, splat = !is.null(by), ...) {
+  # x is list of vectors  of same length
   if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
   
   if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
@@ -31,15 +32,15 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
                     lapply(inds, function(i) vec[i])
                   })
     .f <- if (splat) { 
-      function(...) {do.call('f', unlist(list(...), use.names = FALSE, recursive = FALSE)) }
+      function(...) {do.call('f', list(...)) }
       } else {
         f
       }
     output <- do.call('Map', c(.f, ngs))
     
-    if (pad && !is.na(padder)) output <- lapply(output,
+    if (pad && !is.na(fill)) output <- lapply(output,
                                                 function(out) {
-                                                  if (is.character(out)) gsub('NA', padder, out) else `[<-`(out, is.na(out), padder)
+                                                  if (is.character(out)) gsub('NA', fill, out) else `[<-`(out, is.na(out), fill)
                                                 })
                                                 
   } #end of if(n == 0) else
