@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -275,7 +275,7 @@ data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', '-dy', 'to'
           splitString2 <- strsplit(df1[iteration+1], "")[[1]]
             if(splitString2[1] != "-"){
               cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
-              value <- paste(df1[iteration+1], "-", sep = "")
+              value <- paste("-",df1[iteration+1], sep = "")
               return(value)
             }
         }
