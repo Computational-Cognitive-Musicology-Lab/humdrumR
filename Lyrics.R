@@ -231,7 +231,7 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
@@ -268,11 +268,11 @@ data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', 'dy', 'to',
   printErrors1 <- function(iteration, df1, length1){
 
       splitString <- strsplit(df1[iteration], "")[[1]]
+      splitString2 <- strsplit(df1[iteration+1], "")[[1]]
       # this function will assume that the first value in the character vector is input properly (need an assumption to implement such a function)
       if((splitString[1] == "-" && splitString[length(splitString)] == "-")
          || (splitString[1] != "-" && splitString[length(splitString)] == "-")){
         if(iteration > 1 && iteration < length1){
-          splitString2 <- strsplit(df1[iteration+1], "")[[1]]
             if(splitString2[1] != "-"){
               cat("error, improperly formatted **silbe: ", df1[iteration+1], " should be -",df1[iteration+1], sep = "")
               value <- paste("-",df1[iteration+1], sep = "")
@@ -280,11 +280,21 @@ data <- c('Now', 'let', 'me', 'wel-', 'come', 'e-', '-very', '-bo-', 'dy', 'to',
             }
         }
       }
+      if(splitString2[1] == "-" && splitString[length(splitString)] != "-"){
+        if(iteration > 1 && iteration < length1){
+          cat("error, improperly formatted **silbe: ", df1[iteration], " should be",df1[iteration], "-", sep = "")
+          value <- paste(df1[iteration+1], "-", sep = "")
+          return(value)
+        }
+      }
       
   }
+  iteration1 <- 1:(length(data)-1)
+  iteration1 <- as.data.frame(iteration1)
   saveNew <- apply(iteration1, 1, function(x){
     printErrors1(x, data, length(data))
   })
+  # above works
   saveNew <- append(list(NULL), saveNew)
   iteration2 <- 1:length(saveNew)
   iteration2 <- as.data.frame(iteration2)
