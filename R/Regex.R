@@ -136,7 +136,7 @@ NULL
 
 #' @name regexDispatch
 #' @export
-regexDispatch <- function(...) {
+regexDispatch <- function(..., defaultClass = 'character') {
           funcs <- Filter(is.function, list(...))
           if (length(funcs) == 0L) stop("Can't regexDispatch on zero functions.")
           
@@ -148,7 +148,7 @@ regexDispatch <- function(...) {
                                            "The regex-dispatch function you've called requires a character argument.")
               
               dispatch <- regexFindMethod(str, regexes)  
-              if (dispatch == 0L) return(if (inPlace) str else vectorNA(length(str), 'character'))
+              if (dispatch == 0L) return(if (inPlace) str else vectorNA(length(str), defaultClass))
               dispatchFunc <- funcs[[dispatch]]
               dispatchRE   <- regexes[[dispatch]]
               dispatchArgs <- funcsArgs[[dispatch]]

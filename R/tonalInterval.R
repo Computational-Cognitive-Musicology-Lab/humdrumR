@@ -32,8 +32,7 @@
 #' @slot Fifth integers representing the "line-of-fifths" value.
 #' @slot Cent numeric values representing cents (1200th of an octave).
 #' 
-#' 
-#' ### Arithmetic
+#' @section Arithmetic: 
 #' 
 #' Technically, `tonalInterval`s are examples of algebraic [modules over integers](https://en.wikipedia.org/wiki/Module_(mathematics)).
 #' This means that certain arithmetic operations are defined for `tonalIntervals` and can be called using standard arithmetic operators (`+`, `-`, etc.):
@@ -55,6 +54,12 @@
 #' the remainder to the match the appropriate octave.
 #' This definition has the useful properties that `specificinterval %% A1 = genericinterval` and `interval %% d2 = enharmonicinterval`.
 #' 
+#' Since basic data types can be parsed into `tonalInterval` (see below), `humdrumR` will attempt to automatically [coerce](https://en.wikipedia.org/wiki/Type_conversion)
+#' data to tonalIntervals when asked to perform arithmetic.
+#' This means that arithmetic can be applied when one of the two arguments is a `tonalInterval` and the other is a coercable atomic.
+#' For instance, `M3 + 2L` will interpret `2L` as two semitones and add a major-second to the major-third!
+#' The clever [dispatch system][humdrumR::regexDispatch] will even ignore character strings that are not recognized (see examples)!
+#' This is useful when combined with the "Predifined Intervals" (like `M3`), described below.
 #' 
 #' 
 #' ## Relational Operators
@@ -66,21 +71,6 @@
 #' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
-#' ## Coercion
-#' 
-#' `humdrumR` knows how to [coerce](https://en.wikipedia.org/wiki/Type_conversion) several [base-R atomic types][base::vector] into `tonalInterval`s.
-#' This can be done using the [as][methods::as] function---e.g., `as(3, "tonalInterval")`---or more intuitively using the function `tonalInterval()`.
-#' Coercision methods are defined for 
-#' 
-#' + [integer][base::integer]: interpreted as semitones
-#' + [numeric][base::numeric]: interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
-#' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
-#'   explained fully [here][pitchRepresentations].
-#'   
-#' Since, coersion is defined, `tonalInterval` arithmatic can be applied when one of the two arguments is a `tonalInterval` and the other is a coercable atomic.
-#' For instance, `M3 + 2L` will interpret `2L` as two semitones and add a major-second to the major-third!
-#' The clever [dispatch system][humdrumR::regexDispatch] will even ignore character strings that are not recognized (see examples)!
-#'
 #' 
 #' ## Predefined Intervals:
 #' 
@@ -121,7 +111,7 @@
 #' # = "4.bb"
 #' 
 #' 
-#' 
+#' @family {core pitch representation}
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 
@@ -154,11 +144,7 @@ setMethod("initialize",
 
 ## Constructors ####
 
-#' The basic constructor for `tonalInterval`s.
-#' `tint` accepts integer values for octaves and LO5ths and numeric values for cent.
-#' If the octave argument is missing a "simple" interval is constructed---i.e., an ascending interval less than one octave.
-#' (When appropriate, we can think of these generically as an interval with no specific octave.)
-#' @name tonalInterval
+#' @rdname tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
     if (missing(octave) || is.null(octave)) {
@@ -172,6 +158,34 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 
 ## Accessors ####
 
+#' Line of Fifths
+#' 
+#' The function `LO5th` is a S3-generic function with methods to extract
+#' the "line-of-fifths" value from various pitch objects and representations.
+#'
+#' ## The Line of Fifths
+#' 
+#' Every interval in Western music is associated with a integer on the line of fifths:
+#' 
+#' + Bb = m7 = -2 
+#' + F =  P4  = -1 
+#' + C =  P1 = 0
+#' + G =  P5 = 1
+#' + D =  M2 = 2
+#' + A =  M6 = 3
+#' + E =  M3 = 4
+#' + B =  M7 = 5
+#' + F# = A4 = 6
+#' + etc.
+#' 
+#' The natural notes of (C) major scale---which we also call the *generic intervals*---fall in the range `-1:5`.
+#' In fact, any diatonic key is a block of seven consecutive numbers of the line-of-fifths: for example, Eb major is `-4:2`.
+#' "Sharps" and "flats" represent `+7` or `-7` on the line-of-fifths respectively.
+#' 
+#' 
+#' @family {core pitch representation}
+#' @seealso [tint()] [tonalInterval]
+#' @return Returns an integer vector or array, matching the input.
 #' @export
 setGeneric("LO5th", function(x, generic = FALSE, ...) standardGeneric("LO5th"))
 setMethod("LO5th", "tonalInterval",
@@ -180,11 +194,18 @@ setMethod("LO5th", "tonalInterval",
             if (generic) LO5th <- genericFifth(LO5th)
             LO5th %dim% x
           })
+setMethod("LO5th", 'matrix',
+          function(x, generic = FALSE) {
+            lo5th <- LO5th(c(x))
+            lo5th %dim% x
+          })
 setMethod('LO5th', 'ANY',
           function(x, generic = FALSE) {
             x <- as(x, 'tonalInterval')
             LO5th(x, generic = generic)
           })
+
+
 
 getFifth  <- function(tint, generic = FALSE) LO5th(tint, generic = generic)
 getOctave <- function(tint) tint@Octave %dim% tint
@@ -1309,21 +1330,71 @@ solfa2tint <- function(str, ...) {
 
 ## Pitch Parsing Dispatch ######################################
 
+#' Parsing pitch information
+
 ### Parse 2tint generic and methods ####
 
+#' @section Parsing:
+#' 
+#' `humdrumR` includes a easy-to-use but powerful system for parsing pitch information into the `tonalInterval` representation.
+#' Basic methods are defined for numeric values representing atonal pitch information:
+#' 
+#' + [integer][base::integer] values are interpreted as semitones. Watch out! In R, you need to append an `L` to a number to make it an explicit integer:
+#'   For example, `tonalInterval(3L)`.
+#' + [numeric][base::numeric]/[decimal()] and [rational()] values are interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
+#'   For example, the value `2.0` will be interpreted as an octave (two to one ratio.)
+#' 
+#' However, the most useful tool for humdrum data is parsing pitch representations encoded in `character` tokens.
+#' The `humdrumR` regex/exclusive parsing system is used to interpret character strings as tonalIntervals.
+#' This includes character tokens with pitch information embedded alongside other information, like `"4.ee` in a kern token.
+#' There are six regex-patterns that `tonalInterval` known how to parse automatically:
+#' 
+#' | Representation                                                                     | Exclusive                 | Example    |
+#' | ---------------------------------------------------------------------------------- | :-----------------------: | ---------: |
+#' | Kern                                                                               | **kern                    | `ee-`      |
+#' | [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch)                 | **pitch                   | `Eb5`      |
+#' | Interval                                                                           | **hint/**mint/**int       | `+m3`      |
+#' | Scale degree                                                                       | **deg                     | `b3`       |
+#' | Solfege                                                                            | **solfa                   | `me`       |
+#' | [Lilypond pitch](https://lilypond.org/doc/v2.22/Documentation/notation/pitches)    | none                      | `ees'`     |
+#' 
+#' If you call `tonalInterval` (or [any function that uses tonalInterval as a parser][pitch]) on a `character` string,
+#' the regex-system will automatically (attempt) to interpret the tokens as on the pitch types above---if there is a conflict
+#' the representations are favored in the order they are presented in the table above.
+#' If a matching exclusive interpretation (see table above) is provided using the `Exclusive` argument,
+#' this choice overrides the regex-dispatch.
+#' If there is no match, an NA `tonalInterval` is returned.
+#' 
+#' ## Parsing with Options
+#' 
+#' The six tonal representations listed above function through a common parsing interface.
+#'
+#'
+
+#'
+#' 
+#' @rdname tonalInterval
+#' @export
 tonalInterval <- function(...) UseMethod('tonalInterval')
 
+#' @export
 tonalInterval.tonalInterval <- function(x, ...) x
 
 #### Numbers ####
 
+#' @export
 tonalInterval.numeric  <- decimal2tint
+#' @export
 tonalInterval.rational <- rational2tint
+#' @export
 tonalInterval.fraction <- fraction2tint
+#' @export
 tonalInterval.integer  <- semit2tint
 
 #### Characters ####
 
+
+#' @export
 tonalInterval.character <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
                                            'pitch: makeRE.sciPitch(...)' = pitch2tint,
                                            'hint: makeRE.interval(...)'  = interval2tint,
@@ -1332,17 +1403,14 @@ tonalInterval.character <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
                                            'deg: makeRE.scaleDegree(...)'  = degree2tint,
                                            'solfa: makeRE.solfa(...)' = solfa2tint,
                                            'freq: makeRE.decimal()' = semit2tint,
-                                           'fraction: makeRE.fraction(...)' = fraction2tint)
+                                           'fraction: makeRE.fraction(...)' = fraction2tint,
+                                           defaultClass = 'tonalInterval')
 
 #### setAs tonal interval ####
 
-#' @export
 setAs('integer', 'tonalInterval', function(from) semit2tint(from))
-#' @export
 setAs('numeric', 'tonalInterval', function(from) decimal2tint(from))
-#' @export
-setAs('character', 'tonalInterval', function(from) char2tint(from))
-#' @export
+setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% from)
 
 

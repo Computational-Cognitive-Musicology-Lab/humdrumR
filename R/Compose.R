@@ -593,10 +593,11 @@ exclusiveFunction <- function(...) {
     
 }
 
-.exclusiveDispatch <- function(exprs) {
+.exclusiveDispatch <- function(exprs, defaultClass = 'character') {
     rlang::expr({
         result <- .switch(x, Exclusive, !!!exprs, #inPlace = inPlace,  
-                          parallel = list(Exclusive = Exclusive))
+                          parallel = list(Exclusive = Exclusive),
+                          defaultClass = !!defaultClass)
         if (inPlace) {
             result <- inPlace(result, x, regexes[Exclusive])
         } 
@@ -618,10 +619,10 @@ regexGeneric <- function(...) {
     
 }
 
-.regexDispatch <- function(exprs) {
+.regexDispatch <- function(exprs, defaultClass = 'character') {
     rlang::expr({
         dispatchn <- regexFindMethod(x, c(regexes))
-        if (dispatchn == 0L) return(vectorNA(length(str)))
+        if (dispatchn == 0L) return(vectorNA(length(str), !!defaultClass))
         switch(dispatchn,  
                !!! exprs )
     }) -> dispatchExpr
@@ -652,7 +653,7 @@ regexGeneric <- function(...) {
 
 
 
-humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
+humdrumDispatch <- function(..., doExclusiveDispatch = TRUE, defaultClass = 'character') {
     exprs <- rlang::enexprs(...)
     
     
@@ -671,8 +672,8 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
     names(exprs) <- names(REexprs) <- dispatchExclusive
     
     #
-    regexDispatch     <- .regexDispatch(unname(exprs))
-    exclusiveDispatch <- .exclusiveDispatch(exprs)
+    regexDispatch     <- .regexDispatch(unname(exprs), defaultClass = defaultClass)
+    exclusiveDispatch <- .exclusiveDispatch(exprs, defaultClass = defaultClass)
    
     ## 
     body <- if (doExclusiveDispatch) {

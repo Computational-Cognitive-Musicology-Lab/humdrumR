@@ -4,6 +4,9 @@ authors:
     Claire Arthur:
        href: https://clairearthur.com/
 url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
+template:
+  bootstrap: 5
+  bootswatch: solar
 reference:
 - title: "Musical Tools"
   desc: >
@@ -16,6 +19,7 @@ reference:
   - humdrumPitch
   - tonalInterval
   - tonalTransformations
+  - LO5th
   - diatonicSet
   - tertianSet
   - romanNumerals
@@ -84,3 +88,9 @@ reference:
   - humSize
   - humTable
   - struct
+- title: "Other Functions"
+  desc: "Other useful tools"
+- subtitle: "Numeric values"
+  contents:
+  - rational
+  - decimal

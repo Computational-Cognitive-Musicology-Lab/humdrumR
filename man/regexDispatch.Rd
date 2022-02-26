@@ -8,7 +8,7 @@
 \usage{
 func \%predate\% predicate
 
-regexDispatch(...)
+regexDispatch(..., defaultClass = "character")
 
 REapply(x, regex, .func, inPlace = TRUE, ...)
 }
