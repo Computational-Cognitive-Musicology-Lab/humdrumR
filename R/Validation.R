@@ -100,7 +100,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         
         uniqFiles <- gsub(file.sep, '_', shortFilenames(unique(recordReports$Filename)))
         recordReports[ , Filename := paste0(annotation.path, uniqFiles[match(Filename, unique(Filename))], '_errorAnnotations')]
-        recordReports[ , Message := ifelse(is.na(Message), "", Message)]
+        recordReports[ , Message := "" %|% Message]
         recordReports <- recordReports[ , .(Filename = unique(Filename), Message = paste(Message, collapse = ' and '), 
                                             RecordN = unique(RecordN), Record = unique(Record)), by = Location]
         recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
