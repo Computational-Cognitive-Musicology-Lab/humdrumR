@@ -158,9 +158,7 @@ inPlace <- function(result, orig, regex) {
 
 inPlacer <- function(orig, regex) {
     function(result) {
-        .ifelse(is.na(result), 
-                orig,
-                stringi::stri_replace_first(str = orig,
+        .(orig %|% stringi::stri_replace_first(str = orig,
                                             replacement = result,
                                             regex = regex))
     }
@@ -255,7 +253,7 @@ setMethod('|', c('predicate.function', 'predicate.function'),
 EQ <- function(pat) {
   func <- function(x) {
     match_size(pat = pat,x = x, toEnv = TRUE)
-    ifelse(is.na(pat), is.na(x), x == pat)
+    is.na(x) %|% x == pat
   }
 
 
