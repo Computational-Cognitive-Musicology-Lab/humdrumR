@@ -1,3 +1,4 @@
+#' ------------------------------------>    NEEDS DOCUMENTATION      <------------------------------------------
 #' @export
 writeHumdrum <- function(humdrumR, fieldname = NULL,
                          affix = "_humdrumR", prefix = "", rename = NULL, extension = NULL, 

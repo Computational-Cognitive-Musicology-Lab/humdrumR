@@ -1,5 +1,3 @@
-
-
 ######### Function composition ----
 
 compose <- function(...) UseMethod('compose')
@@ -52,8 +50,8 @@ compose.default <- function(..., fenv = parent.frame()) {
     ### environment
     # fenv <- new.env() # parent.env(parent.frame())
     Map(function(fname, f) assign(fname, f, envir = fenv), 
-        c(fnames, 'memoizeParse', 'predicateParse'), 
-        c(fs, memoizeParse, predicateParse))
+        c(fnames, 'memoiseParse', 'predicateParse'), 
+        c(fs, memoiseParse, predicateParse))
     
     
     # Create the new function
@@ -80,6 +78,7 @@ print.composed <- function(x) {
     
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 `%.%` <- function(e1, e2) { 
     f1name <- rlang::quo_text(rlang::enquo(e1))
@@ -92,7 +91,6 @@ print.composed <- function(x) {
 
 
 # "sticky attributes" 
-
 #' @export
 stickyApply <- function(func, ...) {
     pipe <- stickyAttrs(list(...)[[1]])
@@ -141,10 +139,7 @@ passargs <- function(x) {
 
 ##### "restoring" ----
 
-
-
 inPlace <- function(result, orig, regex) {
-  
   
     if (is.null(stickyAttrs(result)$replace)) {
       stickyAttrs(result) <- c(replace = inPlacer(orig, getRE(regex)))
@@ -200,8 +195,8 @@ re.as <- function(vector) {
 
 
 #' @export
-re.place <- function(vector, reference = vector) {
-    asfunc <- stickyAttrs(reference)$replace
+re.place <- function(vector) {
+    asfunc <- stickyAttrs(vector)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
     asfunc(vector) %dim% vector
@@ -328,6 +323,7 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 ############### Predicate dispatch ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name regexDispatch
 #' @export
 `%predate%` <- function(func, predicate) {
@@ -370,7 +366,7 @@ predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
     rlang::new_function(fargs, body, newenv)
 }
 
-predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE, onlymatch = FALSE) {
+predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE) {
   if (argnames[1] == '...') return(expr)
   
   argnames <- argnames[argnames != '...']
@@ -379,7 +375,7 @@ predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = F
   predicateFuncName <- rlang::sym(predicateFuncName)
   
   rlang::expr({
-    rebuild <- predicateParse(!!predicateFuncName, !!!args, negate =  !!negate, allargs = FALSE, onlymatch = !!onlymatch)
+    rebuild <- predicateParse(!!predicateFuncName, !!!args, negate =  !!negate, allargs = FALSE)
     predicateResult <- {!!expr}
     rebuild(predicateResult)
   })
@@ -426,7 +422,7 @@ funcCall <- function(fname) {
 
 
 #' @export
-predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
+predicateParse <- function(predicateFunc, ..., inPlace = TRUE, allargs = FALSE, negate = FALSE) {
   args <- list(...)
   
   if (is.null(names(args)) || any(names(args) == "")) .stop("predicateParse requires that all arguments are named.")
@@ -443,7 +439,8 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
   
   argnames <- names(args)
   
-  bool <- Reduce(if (all) '&' else '|', lapply(args, predicateFunc)) 
+  bool <- if (allargs) Reduce('&', lapply(args, predicateFunc)) else predicateFunc(target)
+  if (negate) bool <- !bool
   
   matchingArgs <- lapply(args, '[', i = bool)
   
@@ -464,48 +461,30 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
   }
 }
 
-dimParse <- function(x) {
-  name <- as.character(rlang::enexpr(x))
-  olddim <- dim(x) 
-  
-  x <- dropdim(x)
-  
-  assign(name, value = x, envir = parent.frame())
-  
-  function(newx) {
-    if (length(newx) == prod(olddim))  dim(newx) <- olddim 
-    
-    newx
-    
-  }
-}
+
 
 ###### "Memoify" ----
 
 #' @export
-memoizeDispatch <- function(fname, memoizeArgs) {
+memoizeDispatch <- function(fname) {
     func <- match.fun(fname)
     #argnames
     argnames <- names(fargs(func))
     
-    if (length(memoizeArgs) == 0L) return(func)
     if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoizeDispatch a function with no arguments." )
     if (argnames[1] == '...') stop(call. = FALSE, "Can't memoizeDispatch a function if the first argument is ..." )
-    argnames <- argnames[argnames %in% memoizeArgs]
-    
-    argsyms <- setNames(rlang::syms(argnames), argnames)
+    argnames <- argnames[argnames != "..."]
     
     #
     fbody <- funcCall(fname)
     
     body <- rlang::quo({
-        rebuild <- memoizeParse(!!!argsyms)
+        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
         result <- {!!fbody}
         rebuild(result)
     })
     body(func) <- rlang::quo_squash(body)
     environment(func) <- new.env(parent = environment(func))
-    formals(func) <- c(formals(func), list(memoize = TRUE))
     
     assign('argnames', argnames, envir = environment(func))
     
@@ -522,9 +501,9 @@ memoizeDispatch.expr <- function(expr, argnames) {
        
   
   rlang::expr({
-    rememoize <- memoizeParse(!!!args, memoize = memoize)
+    rememoise <- memoiseParse(!!!args)
     memoizeResult <- {!!expr}
-    rememoize(memoizeResult)
+    rememoise(memoizeResult)
   })
   
 }
@@ -533,11 +512,10 @@ memoizeDispatch.quosure <- function(quosure, argnames) {
   rlang::quo_set_expr(quosure, memoizeDispatch.expr(rlang::quo_get_expr(quosure), argnames))
 }
 
-memoizeParse <- function(..., minN = 100L, memoize = TRUE) {
-    if (!memoize) return(force)
+memoiseParse <- function(..., minN = 100L) {
     args <- list(...)
     
-    if (is.null(names(args)) || any(names(args) == "")) .stop("memoizeParse requires that all arguments are named.")
+    if (is.null(names(args)) || any(names(args) == "")) .stop("memoiseParse requires that all arguments are named.")
     
     # only atomic/struct args that are longer than minN are affected
     args <- args[sapply(args, function(arg) (is.atomic(arg) || is.struct(arg)) && length(arg) >= minN)]
@@ -621,7 +599,6 @@ regexGeneric <- function(...) {
 .regexDispatch <- function(exprs) {
     rlang::expr({
         dispatchn <- regexFindMethod(x, c(regexes))
-        if (dispatchn == 0L) return(vectorNA(length(str)))
         switch(dispatchn,  
                !!! exprs )
     }) -> dispatchExpr
@@ -678,6 +655,7 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
     body <- if (doExclusiveDispatch) {
       rlang::expr({
         regexes <- list(!!!REexprs)
+        
         if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
         
       })

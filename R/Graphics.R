@@ -59,6 +59,7 @@ plotNotes <- function(rhythm, pitch, cex = 1, staffy = .5, staffx = c(0, 1)) {
 
 #### Plotting Rhythm Symbols
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' Plotting rhythmic symbols in R base graphics
 #' @name plotRhythm
 #' @export

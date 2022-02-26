@@ -16,8 +16,8 @@
 #' Throughout this documentation, you should keep in mind that a "token" refers
 #' to a *row* in the humdrum table while a "field" refers to a *column*:
 #' 
-#' + \eqn{Token = Row}
-#' + \eqn{Field = Column}
+#' * Token = Row
+#' * Field = Column
 #' 
 #' # Fields:
 #' 
@@ -46,7 +46,7 @@
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum]---which can also be called using the 
 #' [humdrumR:humPipe][\%hum>\%] piping 
-#' operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}. 
+#' operator---generates one or N new data fields named {Pipe1, Pipe2, ..., PipeN}. 
 #' These fields can be renamed using the `$<-` operator.
 #' 
 #' 
@@ -196,7 +196,7 @@
 #' Each type of humdrum record uses a different null token:
 #' 
 #' + *Intepretation*: `*`
-#' + *Comment*: `!`
+#'  *Comment*: `!`
 #' + *Barline*: `=`
 #' + *Data*: `.`
 #' 
@@ -237,7 +237,7 @@ NULL
 
 #' Spines vs Paths vs Columns 
 #' 
-#' In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
+#' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
 #' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
 #' tab-delineated group of values.
 #' "Spines" can be a single column, or they may (at any time) split into multiple columns,
@@ -447,8 +447,7 @@ splitHumtab <- function(humtab, drop = FALSE) {
         output
     } else {
         split(humtab, 
-              # by = 'Type', sorted = FALSE,
-              f = factor(humtab$Type, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')),
+              f = factor(humtab$Type, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')), 
               drop = drop) 
     }
 }
@@ -583,21 +582,21 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' humdrumR Coercion.
 #' 
 #' Many users may wish to work with humdrum data without
-#' using the \code{\link[humdrumR:humdrumR]{humdrumR}} API, instead using 
+#' using the `[humdrumR:humdrumR][humdrumR]` API, instead using 
 #' basic `R` data types.
 #' For this purpose, [humdrumR-class] data objects can be coerced to 
 #' basic `R` data types.
 #' 
-#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR-class] object's
+#' `[base:vector][as.vector(humdata, types, mode, fields)]` evaluates the [humdrumR-class] object's
 #' **Active** expression, and (attempts) to force the result to a vector of mode. This
 #' method is essentially a wrapper for [evalActive].
 #' 
-#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR-class] object's
-#' **Active** expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
-#' Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines. 
+#' `[base:matrix][as.matrix(humdata, types, pad.files, pad.paths)]` also evaluates the [humdrumR-class] object's
+#' **Active** expression, but wraps it into a matrix of dimensions `c([humdrumR:humSize][nrow(humdata), ncol(humdata)])`.
+#' Note that "`[humdrumR:humTable][Columns]`" in humdrum data are not necesarily the same as spines. 
 #' 
-#' \code{\link[base:data.frame]{as.data.frame(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[base:data.frame]{data.frame}}.
-#' \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
+#' `[base:data.frame][as.data.frame(humdata)]` first calls `as.matrix` then converts the matrix to a `[base:data.frame][data.frame]`.
+#' `[data.table:data.table][as.data.table(humdata)]` first calls `as.matrix` then converts the matrix to a `[data.table:data.table][data.table]`.
 #' 
 #' `as.matrices`, `as.data.frames`, and `as.data.tables` call `as.matrix`/`as.data.frame`/`as.data.table`
 #' on each individual file in a [humdrumR-class] corpus, returning a list of matices/data.frames/data.tables.
@@ -605,13 +604,13 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
-#' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
+#' (see the `[humdrumR:humTable][humdrum table]` documentation **Fields** section for explanation.).
 #' 
 #' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumR-class] corpus have fewer 
-#' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
+#' `[humdrumR:humTable][spines/columns]` than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
 #' 
-#' @param pad.paths `logical` If any spine path splits (\code{'*^'}) occur in the humdrumR data, should they be padded 
+#' @param pad.paths `logical` If any spine path splits (`'*^'`) occur in the humdrumR data, should they be padded 
 #' with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.paths == FALSE`)? 
 #' Note that these "padded" points are not represented in the original humdrum data.
@@ -620,12 +619,12 @@ is.humdrumR <- function(x) inherits(x, 'humdrumR')
 #' argument is used to fill in the desired gaps.
 #' 
 #' 
-#' @param mode If the `mode` argument is not \code{'any'}, it can be a single `character`
+#' @param mode If the `mode` argument is not `'any'`, it can be a single `character`
 #' string naming an atomic mode---the output will be coerced to this mode (if possible).
 #' 
 #' @param field(s) If the `field` argument is *not* `NULL`, it can instead be a `character` string matching
 #' the [humdrumR-class] object's fields. If so, these fields are extracted instead of the
-#' \code{\link[humdrumR:humdrumR-class]{Active expression}}.
+#' `[humdrumR:humdrumR-class][Active expression]`.
 #' For calls to `as.vector` and `as.data.frame`, only one field can be extracted.
 #' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
 #' returned in a third matrix dimension, each field forming one rectangular slice.
@@ -906,6 +905,7 @@ renumberSpines <- function(humdrumR) {
 
 #### Reshaping ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humColumns
 #' @export
 alignColumns <- function(humdrumR, padder = '_C') {
@@ -969,6 +969,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
 
 #' Merge two (or more) humdrumR datasets
 #'
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 #' @name humMerge
 mergeHumdrum <- function(...) {
@@ -994,6 +995,7 @@ mergeHumdrum <- function(...) {
 
 #########################################spinePipe ----
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
@@ -1471,8 +1473,7 @@ Add a reference to some field, for instance Token.", call. = FALSE)
               || (!is.null(dim(act)) && dim(act)[1] == nrows)
               || (is.list(act) && length(act) == nrows)
               || (is.list(act) && all(lengths(act) == nrows))) {
-                    # return(update_d(updateNull(humdrumR)))
-              return(humdrumR)
+                    return(update_d(updateNull(humdrumR)))
           } else {
                     stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
           }
@@ -1630,6 +1631,7 @@ isField <- function(humdrumR, names) {
           names %in% fields(humdrumR)$Name 
 }
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' Get named 
 #' @export
 getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
@@ -1900,6 +1902,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 #########################Print methods ----
 #########################################################-
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humPrint
 #' @export
 setMethod('show', signature = c(object = 'humdrumR'),
@@ -1991,8 +1994,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 
 
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                          max.records.file = 40L, max.token.length = 12L, collapseNull = 10L,
-                          screenWidth = options('width')$width - 10L) {
+                                        max.records.file = 40L, max.token.length = 12L, collapseNull = 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
   
   
@@ -2007,73 +2009,57 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   global <- stringr::str_detect(tokmat[ , 1], '^!!')
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
   
-  
-  ## censor lines beyond max.records.file
-  filei <- tapply_inplace(File, File, seq_along)
-  i <- ifelse(File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
-  tokmat <- tokmat[i, , drop = FALSE]
-  global <- global[i]
-  
-
-  
-  ## Trim and align columns, and collopse to lines
+  ## Trim any space lines
   tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
-  lines <- padColumns(tokmat, global, screenWidth)
-  starMessage <- attr(lines, 'message')
-  lines[global] <- gsub('\t', ' ', lines[global])
+  tokmat <- padColumns(tokmat, global)
   
-  # records of first and last non-censored lines of each file
-  firsts <- tapply(seq_along(lines), File[i], min)
-  lasts <- tapply(seq_along(lines), File[i], max)
-
+  ## collapse to lines
+  tokmat[global, -1L:-2L] <- ""
+  lines <- apply(tokmat, 1, paste, collapse = '')
   
-  #  censored ranges (if any)
-  ranges <- tapply(NRecord[!i], factor(File)[!i], 
-                   \(nr) {
-                       if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
-                   })
-  ranges[is.na(ranges)] <- ""
+  ellipsis <- stringr::str_dup('#', max(nchar(lines[!global])))
   
-  # align :
-  if (any(ranges != '')) {
-      line_colon <- stringr::str_locate(lines, ':')[ , 'start']
-      range_colon <- stringr::str_locate(ranges, ':')[ , 'start']
-      largest_colon <- max(line_colon, range_colon)
-      lines <- paste0(strrep(' ', largest_colon - line_colon), lines)
-      ranges <- paste0(strrep(' ', largest_colon - range_colon), ranges)
-  }
-
-  # 
-  # 
-  maxwidth <- max(nchar(lines))
+  ##
+  lines   <- split(lines, f = File)
+  NRecord <- split(NRecord, f = File)
   
-  ranges[ranges != ''] <- stringr::str_pad(paste0('\n', ranges[ranges != '']), width = maxwidth, pad = ':', side = 'right')
+  lines <- Map(f = function(l, rn, last, glob) { # hide the first or last lines of each file
+            if (length(l) <= max.records.file) return(l)
+            
+            # lines
+            l <- do.call(if (last) tail else head, list(l, n = max.records.file))
+            
+            # record numbers
+            # rn <- stringi::stri_trim_left(rn)
+            restRN <- do.call(if(last) head else tail, list(rn, n = -max.records.file))
+            if (length(restRN) > 1L) restRN <- paste0(restRN[1], '-', restRN[length(restRN)])
+            restRN <- paste0(restRN, ':')
+            
+            restRN <- stringr::str_pad(restRN, stringr::str_locate(l[1], ':')[1], side = 'left')
+            rest   <- paste0(restRN, stringi::stri_sub(ellipsis, nchar(restRN) + 1L))
+            
+            append(l, rest, after = if (last) 0L else length(l))
+            
+            },
+               lines, NRecord, seq_along(lines) == length(lines))
   
-  lines[lasts[-length(lasts)]] <- paste0(lines[lasts[-length(lasts)]], ranges[-length(ranges)])
   
   
-  if (length(unique(File)) > 1L && tail(ranges, 1) != '') {
-      lines[tail(firsts, 1)] <- paste0(gsub('^\n', '', tail(ranges, 1)), '\n', lines[tail(firsts, 1)])
-  }
+  ellipses <- paste0(ellipsis, ' ', Filenames)
+  lines    <- Map(append, lines, ellipses, after = 0L)
   
-  # put filenames in
-  lines[firsts] <- paste0(stringr::str_pad(paste0(' vvv ', Filenames, ' vvv '), width = maxwidth, pad = '#', side = 'both'), '\n', lines[firsts])
-  lines[lasts] <- paste0(lines[lasts], '\n', stringr::str_pad(paste0(' ^^^ ', Filenames, ' ^^^ '), width = maxwidth, pad = '#', side = 'both'))
-  
-  # if any lines have been censored due to screen size, put message at the end
-  if (!is.null(starMessage)) {
-      lines[length(lines)] <- paste0(lines[length(lines)], '\n', smartPadWrap(starMessage, maxwidth + 1L))
-  }
   
   ##
   if (Nmorefiles > 0L) {
    
-   message <- c('',
+   message <- c(ellipsis,
+                '',
                 paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more files...)")),
                 '')
-   lines <- append(lines, message, after = tail(firsts, 1) - 1L)
+   lines <- append(lines, message, after = length(lines) - 1L)
   }
   
+  lines <- unlist(lines)
   cat(lines, sep = '\n')
   
 }
@@ -2129,52 +2115,35 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L) {
+trimTokens <- function(tokmat, max.token.length) {
+    # This function  trims strings that are too long, replacing the last
+    # three characters before the cuttoff with "..."
+    
+    toklen  <- nchar(tokmat)
+    
+    toklen[is.na(toklen)] <- 0L
+    
+    toolong <- toklen > max.token.length
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
+    tokmat[is.na(tokmat)] <- ''
+    
+    tokmat
+    
+}
+
+padColumns <- function(tokmat, global) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
     # such that the lines will print as nicely aligned columns.
-    # it also adds "***" where there are too many columns to fit on the screen.
-    # Finally it collapses each row to a single line.
 
     toklen <- nchar(tokmat)
     
-    lenCol <- sapply(as.data.frame(toklen[!global, ]), max) + 2L
-    # lenCol <- apply(toklen[!global, ], 2, max) + 2L
+    colMaxs <- apply(toklen[!global, ], 2, max) + 2L
     
-    screen <- cumsum(lenCol) <= screenWidth
-    lenCol <- lenCol[screen]
-    tokmat <- tokmat[ , screen, drop = FALSE]
-
+    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], colMaxs)
+    tokmat[global, 1L] <- padder(tokmat[global, 1L], colMaxs[1])
     
-    tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], lenCol)
-    tokmat[global, 1L] <- padder(tokmat[global, 1L], lenCol[1]) # column 1 is record number!
-    
-
-    
-    # collapse to lines
-    tokmat[global, -1:-2L] <- ''
-    lines <- do.call('paste0', as.data.frame(tokmat))
-    
-
-    longGlobal <- global & nchar(lines) > screenWidth
-    longColumn <- !screen
-    if (any(longColumn) || any(longGlobal)) {
-        message <- if (any(!screen)) {
-            lines[!global] <- paste0(lines[!global], '    ***')
-            lines[ global] <- stringr::str_trunc(lines[global], width = sum(lenCol) + 7L, ellipsis = '***')
-            
-            paste0('(***', num2word(sum(!screen)), plural(sum(longColumn), ' spines/paths ' ,' spine/path '),  'not displayed due to screen size***)')
-        } else {
-            lines[ global] <- stringr::str_trunc(lines[global], width = screenWidth + 7L, ellipsis = '***')
-            paste0('(***', num2word(sum(longGlobal)), ' global ', plural(sum(longGlobal), 'comments ' ,'comment '),  'truncated due to screen size***)')
-        }
-       
-        attr(lines, 'message') <- message
-        # lines[length(lines)] <- paste0(lines[length(lines)], '\n', message)
-    } 
-    
-    
-                                           
-    lines
+    tokmat
     
 }

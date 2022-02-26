@@ -1,15 +1,17 @@
-################################## ###
-# tertianSet S4 class ################
-################################## ###
+##################################
+###### tertianSet S4 class    ####
+##################################
 
-## Definition, validity, initialization ####
+##### class methods ####
+
+####. definition, validity, initialization ####
 
 
 #' Tertian set
 #' 
-#' \code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s 
+#' `tertianSet` is one of `[humdrumR:humdrumR][humdrumR]`'s 
 #' types of tonal data, representing Western tertian harmonies.
-#' \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, `struct`).
+#' `tertianSet` is a subclass of `diatonicSet` (and thence, `struct`).
 #' 
 #' The only structural addition, compared to `diatonicSet`, is the `Extensions` slot.
 #' This slot indicates which tertian chord members are active in the chord.
@@ -49,8 +51,6 @@ setValidity('tertianSet',
                       object@Inversion < 7, na.rm = TRUE)
             })
 
-## Constructors ####
-
 #' @name tertianSet
 #' @export
 tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, extension = NULL, inversion = 0L) {
@@ -76,7 +76,7 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
         Inversion = as.integer(inversion))
 }
 
-## Accessors ####
+##...accessors ####
 
 #' @export
 getBass <- function(tset) LO5th(tset)[ , 1L]
@@ -98,6 +98,7 @@ getExtensions <- function(tset) {
    
 }
 
+# setAs('diatonicSet', 'tertianSet', function(from) tset(getRoot(from), getSignature(from), alterations = from@Alteration, cardinality = 3, inversion = 0L))
 
 getInversion <- function(tset, inversion.labels = NULL) {
   
@@ -107,30 +108,29 @@ getInversion <- function(tset, inversion.labels = NULL) {
 }
 
 #' @export
-rootPosition <- function(tset) {
+rootposition <- function(tset) {
   tset@Inversion <- rep(0L, length(tset))
   tset
 }
 
-
-## Formatting methods ####
-
-#' @name diatonicSet
-#' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) tset2chordSymbol(x))
-
-## Logic methods ####
-
-### is.methods #####
+####. vector/core methods ####
+    
 
 #' @name tertianSet
 #' @export
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 
+###.. formatting methods ####
 
 
-## Order/relations methods ####
+#' @name diatonicSet
+#' @export
+setMethod('as.character', signature = c('tertianSet'), function(x) tset2chordSymbol(x))
+
+####. logic methods ####
+
+###.. order/relations methods ####
 
 #' @name diatonicSet
 #' @export
@@ -145,22 +145,32 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
               rowSums(same, na.rm = TRUE) == 7L
           })
 
-## Arithmetic methods ###
+
+###.. arithmetic methods ####
+
+# #' @export
+# setMethod('Arith', c('diatonicSet', 'tertianSet'),
+#           function(e1, e2) {
+#             callGeneric(as(e1, 'tertianSet'), e2)
+#           })
+
+# #' @export
+# setMethod('Arith', c('tertianSet', 'diatonicSet'),
+#           function(e1, e2) {
+#             callGeneric(e1, as(e2, 'tertianSet'))
+#           })
+
+##... addition ####
 
 
-### Addition ###
+
+##### To/From line-of-fifths ####
+    
+###. line-of-fifths to x ####
 
 
-###################################################################### ###
-# Deparsing chord information (tset2x) ###################################
-###################################################################### ###
+###. x to line-of-fifths ####
 
-## Chord deparsers ####
-
-
-### Extracting Pitches ####
-
-#### Line of Fifths ####
 
 #' @export
 setMethod('LO5th', 'tertianSet',
@@ -174,341 +184,21 @@ setMethod('LO5th', 'tertianSet',
     LO5ths <- LO5ths * thirds
     LO5ths[!thirds] <- NA_integer_
     
-    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)), qualities = FALSE,
+    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)),
                                         step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                                        parts = c('step', 'species'))
+                                        parts = c('steps', 'accidentals'))
     
     LO5ths
 
 })
 
-#### Tonal intervals ####   
 
+##### To/From extensions ####    
 
-### Chord representations ####
-
-
-
-tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion = TRUE, absoluteSpecies = TRUE, 
-                             implicitSpecies = FALSE, explicitNaturals = FALSE, ...) {
-  # this produces either accidentals or qualities, depending on the parts argument
-  
-  if (!inversion) tset <- rootPosition(tset)
-  bass <- getBass(tset)
-  
-  if (absoluteSpecies) {
-    tset <- tset - getRoot(tset)
-    Key <- dset(0, -1L)
-  }
-  if (explicitNaturals) {
-    tset <- tset - getRoot(Key)
-    Key <- Key - getRoot(Key)
-  }
-  
-  LO5ths <- LO5th(tset)
-  tints <- tint( , c(LO5ths))
-  figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, 
-                              implicitSpecies = implicitSpecies, explicitNaturals = explicitNaturals, ...)
-  
-  # colnames(figures) <- extensions
-  # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
-  figures %dim% LO5ths
-  
-}
-
-
-tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ...) {
-  extensions <- c(1L, 3L, 5L, 7L, 9L, 11L, 13L)
-  if (extension.simple) extensions <- genericStep(extensions)
-  
-  if (!inversion) tset <- rootPosition(tset)
-  
-  extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
-  colnames(extensions) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
-  
-  extensions[!getExtensions(tset)] <- NA_integer_
-  
-  extensions
-}
-
-
-
-# triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase = c('diminish', 'minor'), triad.show = c('diminish', 'augment')) {
-#   setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
-#   triad.labels <- unlist(triad.labels)
-#   
-#   root[triad %in% triad.labels[triad.lowercase]] <- tolower(root[triad %in% triad.labels[triad.lowercase]])
-#   triad[!triad %in% triad.labels[triad.show]] <- ""
-#   
-#   paste0(root, triad)
-#   
-# }
-
-tset2triadLabel <- function(tset, root, root.case = TRUE, 
-                            major = 'M', minor = 'm', diminish = 'o', augment = '+', ...) {
-  
-  perfect <- 'P'
-  
-  qualities <- tset2alterations(tset, qualities = TRUE, inversion = FALSE,  step = FALSE,
-                                explicitNaturals = TRUE, implicitSpecies = FALSE,
-                                major = major, minor = minor, diminish = diminish, augment = augment, perfect = perfect)
-  
-  qualities <- qualities[ , c('3rd', '5th'), drop = FALSE]
-  thirds <- qualities[ , '3rd', drop = FALSE]
-  fifths <- qualities[ , '5th', drop = FALSE]
-  
-  #
-  triadQuality <- rep('?', nrow(qualities))
-  
-
-  
-  ## prepare labels for known combinations of third and fifth qualities
-  reductions <- matrix('?', ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment)))
-  # reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
-  
-  reductions <- local({
-                       reductions[minor, diminish] <- diminish
-                       reductions[minor, perfect] <- minor
-                       reductions[major, perfect] <- major
-                       reductions[major, augment] <- augment
-                       reductions
-                     }
-  )
-  
-  ## get labels
-  known <- thirds %in% rownames(reductions) & fifths %in% colnames(reductions)
-  
-  triadQuality[known] <- reductions[cbind(thirds[known], fifths[known])]
-  
-  
-  if (!is.null(root) && root.case)  {
-    root[substr(thirds, 0, 1) %in% c(minor, diminish)] <- tolower(root[substr(thirds, 0, 1) %in% c(minor, diminish)])
-    triadQuality[triadQuality %in% c(major, minor)] <- ""
-  }
-  
-  
-  list(triadQuality = triadQuality, root = root)
-  
-  
-}
-
-
-reduceFigures <- function(alterations, extensions, 
-                          triadQuality, root.case = FALSE,
-                          inversion, step = TRUE,
-                          extension.shorthand = TRUE, extension.simple = TRUE,
-                          extension.add = TRUE, extension.sus = TRUE, 
-                          extension.decreasing = TRUE, 
-                          extension.sep = '', flat = '-', minor = 'm', diminish = 'o', ...) {
-  if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
-  if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
-  
-  inverted <- inversion > 0L
-  
-  present <- !is.na(alterations) 
-  tags <- array("", dim = dim(alterations))
-  
-  
-  # get rid of alterations that are already taken care of by the quality!
-  if (!is.null(triadQuality)) {
-    if (root.case) {
-      alterations[col(alterations) == 2L & alterations %in% c(flat, minor)] <- ""
-      alterations[col(alterations) == 3L & alterations == diminish] <- ""
-    }
-    alterations[triadQuality != '?', 1:3] <- ""
-    
-    alterations[col(alterations) <= 3L & alterations == 'n'] <- ""
-  }
-
-  
-  
-  if (any(!inverted) && extension.sus) {
-    
-    nines.elevens <- col(extensions) %in% 5:6 & present
-    sus <- sweep(nines.elevens, 1, !present[ , '3rd'] & !inverted, `&`)
-    extensions[sus] <- ((extensions[sus] - 1L) %% 7L) + 1L
-    tags[sus] <- 'sus'
-  }
-  
-  if (any(!inverted) && extension.add) {
-    
-    nines.11s.13s <- col(extensions) %in% 5:7 & present
-    adds <- sweep(nines.11s.13s, 1, !present[ , '7th'] & !inverted, `&`) 
-    
-    if (extension.sus) adds <- adds & !sus
-    extensions[adds] <- ((extensions[adds] - 1L) %% 7L) + 1L
-    tags[adds] <- 'add'
-  }
-  
-  #
-  if (extension.shorthand) {
-    # if (!extension.simple && any(inverted)) {
-      # extensions[inverted, ] <- genericstep(extensions[inverted, ])
-    # }
-    chorddegree <- sweep(extensions, 1, 2L * inversion, '+')
-    chorddegree[chorddegree %in% c(8L, 10L, 12L)] <- chorddegree[chorddegree %in% c(8L, 10L, 12L)] - 7L
-    chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] <- chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] - 14L
-    
-    hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<') 
-    
-    extensions[(hide & alterations == "") | extensions == 1L] <- NA_integer_
-    
-  }
-  
-  
-  # order
-  orders <- apply(extensions, 1, order, decreasing = extension.decreasing, na.last = NA, simplify = FALSE)
-  
-  alterations[] <- .paste(tags, alterations, if (step) extensions, fill = "", na.if = all)
-  figures <- Map(\(i,j) alterations[i,j], 1:nrow(alterations), orders)
-  
-  sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
-  
-  #
-  
-}
-
-
-tset2tonalHarmony <- function(tset,
-                              parts = c('root', 'quality', 'figuration'), 
-                              root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
-                              figurationArgs = list(),
-                              root_func = tint2romanRoot, bass_func = root_func, bass.sep = '/',
-                              root.case = TRUE,
-                              Key = NULL, 
-                              inversion.labels = NULL,
-                              sep = '', ...) {
-  
-  parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
-  
-  
-  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), paste0(bass.sep, bass_func(getBassTint(tset) - tint(1L, 0L), Key = Key, ...)), "")
-  root      <- if (root) root_func(getRootTint(tset), Key = Key, ...) 
-  
-  quality   <- if (quality) {
-    {quality; root} %<-% tset2triadLabel(tset, root, root.case, ...)
-    quality
-  }
- 
-  
-  figuration <- if (figuration) {
-    extensions  <- do.call('tset2extensions', c(list(tset, inversion = inversion), figurationArgs))
-    alterations <- do.call('tset2alterations', c(list(tset, Key = Key, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
-    
-    figuration <- do.call('reduceFigures', c(list(alterations, extensions, quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
-    quality[quality == '?'] <- ""
-    figuration
-    
-  }
-  
-  
-  
-  inversion.label <- if (!is.null(inversion.labels)) getInversion(tset, inversion.labels = inversion.labels)
-  
-  tonalharmony <- pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
-  
-  tonalharmony  
-}
-
-
-
-tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE,
-                                     absoluteSpecies = FALSE, extension.decreasing = TRUE,
-                                     extension.simple = TRUE)
-  
-  overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), 
-                            figurationArgs = figurationArgs,  root.case = FALSE,
-                            root = FALSE, bass = TRUE, bass_func = tint2kern,
-                            figuration = TRUE, quality = FALSE,
-                            extension.shorthand = TRUE, extension.simple=TRUE,
-                            extension.sus = FALSE, extension.add = FALSE,
-                            inversion = TRUE,
-                            sep = ' ', bass.sep = '', ...)) -> figures
-  
-  # if (extension.shorthand) {
-  #   figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
-  #   figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
-  #   figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
-  #   figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
-  #   figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
-  # }
-  # 
-  figures
-  
-  
-}
-
-
-tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...) {
-  
-  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
-  
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
-                            root_func = tint2romanRoot, Key = Key,
-                            figurationArgs = figurationArgs, 
-                            implicitSpecies = TRUE,
-                            rootCase = TRUE,
-                            inversion.labels = NULL,
-                            extension.shorthand = TRUE, extension.simple=TRUE,
-                            extension.sus = TRUE, extension.add = TRUE,
-                            inversion = TRUE, ...))
-  
-}
-
-tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
-  
-  
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
-                            root.case = FALSE,
-                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
-                            implicitSpecies = FALSE,
-                            extension.shorthand = TRUE, extension.simple = FALSE,
-                            extension.add = TRUE, extension.sus = TRUE,
-                             ...)) 
-}
-
-
-tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
-  setoptions(figurationArgs) <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
-                                     flat = 'b', qualities = FALSE, natural = 'maj')
-  
-  
-  chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
-                            major = major %maybe% "MAJOR", minor = 'min', diminish = 'dim',
-                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
-                            implicitSpecies = FALSE, root.case=FALSE,
-                            extension.shorthand = TRUE, extension.simple = FALSE,
-                            extension.add = TRUE, extension.sus = TRUE,
-                            ...)) 
-  
-  if (is.null(major)) chords <- stringr::str_replace(chords, "MAJOR", '')
-  
-  stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
-  
-}
-
-
-
-  
-###################################################################### ###
-# Parsing chord information (x2tset) #####################################
-###################################################################### ###
-
-## Chord parsers ####
-
-
-### Numeric
-
-integer2tset <- function(int) tset(int, 0)
-
-### Extensions/Figuration ####
+###. extensions to x ####
 
 extension2bit <- function(str) {
-  
+ 
   extensions <- stringr::str_extract_all(str, captureRE(c('7', '9', '11', '13', 'sus4', 'add6', 'add2')))
   
   bit <- 7L # triad
@@ -532,20 +222,23 @@ extension2bit <- function(str) {
 }
 
 
+# romanNumeral2mode <- function(root, Key, TriadQuality) {
+  # mode <- getMode(Key)
+  # mode + root - mode + TriadQuality
+# }
 
 
-triad2sciQuality <- function(triad, extensionQualities, 
-                             major = 'M', minor = 'm', perfect = 'P', diminish = 'o', augment = '+',
-                             ...) {
+triad2sciQuality <- function(triad, extensionQualities, triad.labels) {
   
-  
-  triadQualities <- local({
-                           quals <- cbind(perfect, 
-                                          c(major, minor, minor, major), 
-                                          c(perfect, perfect, diminish, augment))
-                           rownames(quals) <- c(major, minor, diminish, augment)
-                           cbind(quals[triad, , drop = FALSE ], '.', '.', '.', '.')
-                         })
+
+  triadQualities <- with(triad.labels, 
+                     {
+                     quals <- cbind(perfect, 
+                                    c(major, minor, minor, major), 
+                                    c(perfect, perfect, diminish, augment))
+                      rownames(quals) <- c(major, minor, diminish, augment)
+                       cbind(quals[triad, , drop = FALSE ], '.', '.', '.', '.')
+                     })
   extensionQualities[col(extensionQualities) <= 3L & extensionQualities == '.'] <- triadQualities[col(extensionQualities) <= 3L & extensionQualities == '.']
   extensionQualities[ , 2L:3L] <- triadQualities[ , 2L:3L]
   
@@ -557,7 +250,7 @@ triad2sciQuality <- function(triad, extensionQualities,
 
 extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) {
   
-  
+
   mode <- if(is.null(Key)) 0L else getMode(Key)
   
   dots <- rep('.', 7L)
@@ -566,123 +259,422 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
     deg <- deg[!redundantroot]
     acc <- acc[!redundantroot]
     if (length(deg) == 0L) return(dots)
-    step <- step2tint(deg, step.labels = 1L:14L)
-    alterations <- specifier2tint(acc, step, qualities = FALSE,  ...)
+    LO5th <- step2LO5th(deg, step.labels = 1L:14L) #%% dset(0, m)
+    alterations <- accidental2LO5th(acc, ...)
     
-    qualities <- tint2specifier((step %% dset(-r, m - r)) + alterations, qualities = TRUE, ...)
+    qualities <- LO5th2quality(as.integer((LO5th %% dset(-r, m - r)) + alterations), ..., quality.cautionary = TRUE)
     
     dots[1L + ((deg - 1L) %/% 2L)] <- qualities
     dots
-  }, root, figurations$Degrees, figurations$Accidentals, rep(mode, length.out = length(root))) |> do.call(what = 'rbind')
+  }, root, figurations$Degrees, figurations$Accidentals, rep(mode, length(root))) |> do.call(what = 'rbind')
   
   
   
 }
 
-parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
+parseFiguration <- function(str, figureFill = TRUE, ...) {
   
   # str[str == ''] <- '35'
+  
   figures <- stringr::str_extract_all(str, 
                                       overdot(makeRE.tonalChroma(step.labels = 13:1, 
-                                                                 parts = c('species', 'step'), qualities = FALSE,
-                                                                 flat = flat,
+                                                                 parts = c('accidentals', 'steps'), 
                                                                  collapse = TRUE,
                                                                  ...)),
                                       simplify = FALSE)
   
   figures <- lapply(figures, REparse, res =  overdot(makeRE.tonalChroma(step.labels = 13:1, 
-                                                                        parts = c('species', 'step'), qualities = FALSE,
-                                                                        flat = flat, 
+                                                                        parts = c('accidentals', 'steps'), 
                                                                         collapse = FALSE,
                                                                         ...)))
   lapply(figures, 
          function(parsedfig) {
-           parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(species = character(2L), step = c('5', '3'))
+           parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(accidentals = character(2L), steps = c('5', '3'))
            parsedfig[ , Explicit := TRUE]
            
-           if (!any(parsedfig$step == '1')) parsedfig <- rbind(parsedfig, data.table(species = '', step = '1', Explicit = FALSE)) 
-           
+           if (!any(parsedfig$steps == '1')) parsedfig <- rbind(parsedfig, data.table(accidentals = '', steps = '1', Explicit = FALSE)) 
+            
            
            ## 
-           parsedfig[ , step := as.integer(step)]
-           parsedfig[ , third := ifelse(step %% 2L == 0L, step - 7L, step)]
-           parsedfig[ , third := as.integer((third - min(third)) %/% 2L)] # translates steps -> thirds
+           parsedfig[ , steps := as.integer(steps)]
+           parsedfig[ , thirds := ifelse(steps %% 2L == 0L, steps - 7L, steps)]
+           parsedfig[ , thirds := as.integer((thirds - min(thirds)) %/% 2L)] # translates steps -> thirds
            #
-           parsedfig <- parsedfig[!duplicated(third)]
-           inversion <- parsedfig[step %in% c(1L, 8L, 15L), third[1]]
+           parsedfig <- parsedfig[!duplicated(thirds)]
+           inversion <- parsedfig[steps %in% c(1L, 8L, 15L), thirds[1]]
            
            # extensions
-           setorder(parsedfig, step)
-           
+           setorder(parsedfig, steps)
+ 
            parsedfig <- parsedfig[  , {
-             newthird <- if (length(third) == 0L) {
+             newthirds <- if (length(thirds) == 0L) {
                0L:2L 
              } else {
-               newthird <- if (all(step <= 3L)) 0:max(third) else 0L:max(2L, max(third))
+               newthirds <- if (all(steps <= 3L)) 0:max(thirds) else 0L:max(2L, max(thirds))
                
-               if (all(step == 5L) && species[1] == "") newthird <- setdiff(newthird, 1L) 
-               gaps <- diff(step[Explicit])
-               skips <- gaps > 2L & head(species[Explicit] == '', -1L)
-               if (any(skips)) for (g in gaps[gaps > 2L]) newthird <- setdiff(newthird, third[Explicit][which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
-               newthird
+               if (all(steps == 5L) && accidentals[1] == "") newthirds <- setdiff(newthirds, 1L) 
+               gaps <- diff(steps[Explicit])
+               skips <- gaps > 2L & head(accidentals[Explicit] == '', -1L)
+               if (any(skips)) for (g in gaps[gaps > 2L]) newthirds <- setdiff(newthirds, thirds[Explicit][which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
+               newthirds
                
              }
              
-             newaccidentals <- species[match(newthird, third)]
+             newaccidentals <- accidentals[match(newthirds, thirds)]
              newaccidentals[is.na(newaccidentals)] <- ""
              
-             data.table(species = newaccidentals, step = newthird * 2L + 1L, third = newthird, Explicit = FALSE)
+             data.table(accidentals = newaccidentals, steps = newthirds * 2L + 1L, thirds = newthirds, Explicit = FALSE)
            }]
            
-           
-           extensionInt <- parsedfig[ , as.integer(sum(2^third))]
+             
+           extensionInt <- parsedfig[ , as.integer(sum(2^thirds))]
            #
            data.table(Inversion   = inversion, 
                       Extension   = extensionInt, 
-                      Degrees     = list(parsedfig$step),
-                      Accidentals = list(parsedfig$species))
+                      Degrees     = list(parsedfig$steps),
+                      Accidentals = list(parsedfig$accidentals))
            
            
          }) |> do.call(what = 'rbind')
 }
 
+##### To/From tertianSets ####    
 
-### Chord representations ####  
+###.. tset to pitches ####
 
-romanNumeral2tset <- function(str, Key = dset(0,0), ...) {
+
+####. tset to x ####
+
+tset2alterations <- function(tset, parts = 'qualities', inversion = TRUE, Key = dset(0,0), accidental.naturals = TRUE, ...) {
+  # this produces either accidentals or qualities, depending on the parts argument
+  
+  if (!inversion) tset <- rootposition(tset)
+  bass <- getBass(tset)
+  
+  if (is.null(Key)) {
+    # Key <- dset(0, -1)
+    tset <- tset - getRoot(tset)
+  }
+  if (!accidental.naturals) {
+    tset <- tset - getRoot(Key)
+    Key <- Key - getRoot(Key)
+  }
+  
+  LO5ths <- LO5th(tset)
+  tints <- tint( , LO5ths)
+  figures <- tint2tonalChroma(tints,  Key = Key, parts = parts, ...)
+  
+  # colnames(figures) <- extensions
+  rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
+  figures
+  
+}
+
+
+tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ...) {
+  extensions <- c(1L, 3L, 5L, 7L, 9L, 11L, 13L)
+  if (extension.simple) extensions <- ((extensions - 1L) %% 7L) + 1L
+  
+  if (!inversion) tset <- rootposition(tset)
+  
+  extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
+  colnames(extensions) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
+    
+  extensions[!getExtensions(tset)] <- NA_integer_
+  
+  extensions
+}
+# As "scientific chord label" (i.e., "Cmm" or "EbMm")
+
+
+
+## figurations/extensions
 
   
-  Key <- CKey(Key)
+  
+
+# (53) 6(3) 64
+# 7(53) 65(3) (6)43 (64)2
+# 9(753) 7653 6543 6432 7642
+# 11(9753) 76532 76543 65432 76432
+
+#t  ..5.3.  ......
+#7  7.5.3.  7.....
+#9  7.5.32  ....32
+#11 7.5432  7.54..
+#13 765432
+
+#t  .6..3.  .6....
+#7  .65.3.  .65...
+#9  765.3.  76....
+#11 765.32
+#13 765432
+
+#t  .6.4..  .6.4..
+#7  .6.43.  ...43.
+#9  .6543.  .654..
+#11 76543.
+#13 765432
+
+#7  .6.4.2  ...4.2
+#9  .6.432  ...432
+#11 .65432
+#13 765432
+
+#9  76.4.2  76.4..
+#11 76.432
+#13 765432
+
+#11 7654.2
+#13 765432
+
+#13 765432
+
+triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase = c('diminish', 'minor'), triad.show = c('diminish', 'augment')) {
+  setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
+  triad.labels <- unlist(triad.labels)
+  
+  root[triad %in% triad.labels[triad.lowercase]] <- tolower(root[triad %in% triad.labels[triad.lowercase]])
+  triad[!triad %in% triad.labels[triad.show]] <- ""
+  
+  paste0(root, triad)
+  
+}
+
+tset2triadLabel <- function(tset, quality.labels = c(), triad.labels = c(), ...) {
+  setoptions(quality.labels) <- c(major = 'M', minor = 'm', 
+                                  diminish = 'o', augment = '+', 
+                                  perfect = 'P')
+  
+  setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
+  
+  qualities <- tset2alterations(tset, parts = 'qualities', inversion = FALSE, Key = NULL, quality.labels = quality.labels, quality.cautionary = TRUE, quality.memory = FALSE)
+  qualities[!is.na(qualities) & nchar(qualities) > 1L] <- .paste('(',  qualities[!is.na(qualities) & nchar(qualities) > 1L], ')')
+  # rownames(qualities) <- root
+  
+  
+  triadnotes <- qualities[ , c('3rd', '5th'), drop = FALSE]
+  triad <- character(nrow(triadnotes))
+  
+  # incomplete triads
+  incompletetriad <- rowSums(is.na(triadnotes)) > 0
+  if (any(incompletetriad)) {
+    inc <- which(!is.na(triadnotes), arr.ind = TRUE)
+    triad[inc[ , 'row']] <- paste0('(', triadnotes[inc], c(3,5)[inc[ , 'col']], ')')
+  }
+  
+  ##
+  reductions <- with(quality.labels, matrix(ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment))))
+  reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
+  
+  reductions <- with(quality.labels,
+                     {
+                       reductions[minor, diminish] <- triad.labels$diminish
+                       reductions[minor, perfect] <- triad.labels$minor
+                       reductions[major, perfect] <- triad.labels$major
+                       reductions[major, augment] <- triad.labels$augment
+                       reductions[major, diminish] <- '(b5)'
+                       reductions
+                     }
+  )
+   # BAD FIX:
+  # triadnotes[triadnotes[ , '5th'] == '','5th'] <- 'P'
+  known <- triadnotes[ , '3rd'] %in% rownames(reductions) & triadnotes[ , '5th'] %in% colnames(reductions)
+  triad[!incompletetriad & known] <- reductions[triadnotes[!incompletetriad & known, , drop = FALSE]]
+  triadnotes[is.na(triadnotes)] <- 'no'
+  triad[!incompletetriad & !known] <- paste0('(', triadnotes[!incompletetriad & !known , '3rd'], 
+                                                  triadnotes[!incompletetriad & !known , '5th'], ')')
+  
+  triad
+  
+  
+}
+
+
+reduceFigures <- function(alterations, extensions, inverted, 
+                          extension.which = c(3, 5, 7, 2, 4, 6), extension.shorthand = TRUE, 
+                          extension.add = TRUE, extension.sus = TRUE, 
+                          extension.sep = '', ...) {
+  if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
+  if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
+  
+  
+  present <- !is.na(alterations) 
+  tags <- array("", dim = dim(alterations))
+  
+  if (any(!inverted) && extension.sus) {
+    
+    nines.elevens <- col(extensions) %in% 5:6 & present
+    sus <- sweep(nines.elevens, 1, !present[ , '3rd'] & !inverted, `&`)
+    extensions[sus] <- ((extensions[sus] - 1L) %% 7L) + 1L
+    tags[sus] <- 'sus'
+  }
+  
+  if (any(!inverted) && extension.add) {
+    
+    nines.11s.13s <- col(extensions) %in% 5:7 & present
+    adds <- sweep(nines.11s.13s, 1, !present[ , '7th'] & !inverted, `&`) 
+    
+    if (extension.sus) adds <- adds & !sus
+    extensions[adds] <- ((extensions[adds] - 1L) %% 7L) + 1L
+    tags[adds] <- 'add'
+  }
+  
+  #
+  if (extension.shorthand) {
+    topmost <- do.call('pmax', as.data.frame(col(present) * present))
+    nottopmost <- sweep(col(extensions), 1, topmost, '<') | col(extensions) <= 3L 
+    
+    extensions[nottopmost & alterations == ""] <- NA_integer_
+    
+  }
+
+  alterations[] <- .paste(tags, alterations, extensions, fill = "")
+  figures <- alterations[ , nth(extension.which), drop = FALSE]
+  
+  #
+  figures[figures != ""] <- .paste(extension.sep[1], figures[figures != ""], extension.sep[2], na.if = all, sep = '')
+  Reduce(paste0, as.data.frame(figures))
+  
+}
+
+
+tset2tonalHarmony <- (function(tset, parts = c('root', 'accidentals', 'extensions'), steps = tint2romanRoot, Key = NULL, 
+                              inversion = TRUE, inversion.labels = letters,
+                              qualifyTriad = triadQualify.Roman, figure.Key = TRUE, accidental.naturals = FALSE, sep = '', ...) {
+  parts <- matched(parts, c('root', 'qualities', 'accidentals', 'extensions', 'inversion'))
+  
+  qualoracc <- parts[parts %in% c('qualities', 'accidentals')]
+  
+  
+  root        <- if ('root' %in% parts)      steps(getRootTint(tset), Key = if (figure.Key) Key, ...) 
+  alterations <- if (length(qualoracc) > 0L) tset2alterations(tset, parts = qualoracc[1], Key = Key, inversion = inversion,
+                                                              accidental.naturals = accidental.naturals, ...) 
+  extensions  <- if ('extensions' %in% parts) tset2extensions(tset, inversion = inversion, ...)  %dots% (has.prefix('extension.') %.% names)
+  
+  inversion   <- if ('inversion' %in% parts) {
+    if (is.function(inversion.labels)) {
+      ifelse(inversion | getInversion(tset) > 0, inversion.labels(tint( , getBass(tset)), Key = NULL), "")
+    } else {
+      getInversion(tset, inversion.labels = inversion.labels)
+    }
+  }
+  
+  triad.quality <- tset2triadLabel(tset, Key = NULL, ...) %dots% (has.prefix('^qualities.|^triad.') %.% names)
+  if (!is.null(qualifyTriad)) root <- qualifyTriad(root, triad.quality) 
+  
+  figures <- if (any(c('extensions', 'qualities') %in% parts)) {
+    parts[parts == qualoracc[1]] <- 'figures'
+    reduceFigures(alterations, extensions, getInversion(tset) > 0L, ...) %dots% (has.prefix('extension.') %.% names)
+  }
+  
+  tonalharmony <- pasteordered(parts, root = root, figures = figures, inversion = inversion, sep = sep)
+  
+  tonalharmony  %dim% tset
+}) |> predicateDispatch('is.na', negate = TRUE)
+
+
+
+tset2figuredBass <- function(tset, extension.shorthand = TRUE, ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('inversion','accidentals', 'extensions'), qualifyTriad = NULL, inversion.labels = tint2simplepitch,
+                            steps = tint2simplepitch,
+                    extension.shorthand = FALSE, extension.which = c(7,6,5,4,3,2), extension.simple=TRUE,
+                    extension.sus = FALSE, extension.add = FALSE,
+                    inversion = TRUE, figure.Key = TRUE, Key = dset(0, 0), 
+                    sep = '', ...)) -> figures
+  
+  if (extension.shorthand) {
+    figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
+    figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
+    figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
+    figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
+    figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
+  }
+  
+  figures
+  
+  
+}
+
+
+tset2romanNumeral <- function(tset,  ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), qualifyTriad = triadQualify.Roman, 
+                            inversion.labels = letters,
+                            extension.shorthand = TRUE, extension.which = c(7,2,4,6), extension.simple=TRUE,
+                            extension.sus = TRUE, extension.add = TRUE,
+                            inversion = FALSE, figure.Key = TRUE, Key = dset(0,0), ...))
+  
+}
+
+tset2sciChord <- function(tset,  ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'qualities'), 
+                            steps = tint2simplepitch, quality.labels =c(diminish = 'o', augment = '+'),
+                            qualifyTriad = paste0, quality.cautionary = TRUE,
+                            extension.shorthand = FALSE, extension.which = c(7,2,4,6), extension.simple=FALSE,
+                            accidental.naturals = TRUE,
+                            extension.add=FALSE, extension.sus = FALSE,
+                            inversion = FALSE, figure.Key = FALSE, Key = NULL, ...)) 
+}
+
+
+tset2chordSymbol <- function(tset,  ...) {
+  overdot(tset2tonalHarmony(tset, parts = c('root', 'accidentals', 'extensions', 'inversion'), 
+                            steps = tint2simplepitch, accidental.labels =c(flat = 'b', natural = 'maj', doubleflat = 'o', doublesharp = '+'),
+                            qualifyTriad = paste0,
+                            inversion.labels = function(x, ...) paste0('/', tint2simplepitch(x)),
+                            extension.shorthand = TRUE, extension.which = c(7, 2, 4, 6), extension.simple=FALSE,
+                            extension.sus = TRUE, extension.add = TRUE,
+                            triad.labels = c(major = ''),
+                            accidental.naturals = FALSE,
+                            inversion = FALSE, figure.Key = FALSE, Key = dset(getRoot(tset), getRoot(tset) - 1L), ...)) -> chords
+  
+  stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
+  
+}
+
+
+####. x to text ####
+
+
+
+romanNumeral2tset <- function(str, Key = NULL, triad.labels = c(), of = dset(0,0), ...) {
+  setoptions(triad.labels) <- c(diminish = 'o', augment = '+')
+  
+  
+  of <- dset(0, getMode(of), of@Alteration)
   
   REparse(str,
-          makeRE.romanChord(..., diminish = diminish, augment = augment, collapse = FALSE),
+          makeRE.romanChord(triad.labels = triad.labels, ..., collapse = FALSE),
           parse.exhaust = FALSE, parse.strict = FALSE,
-          toEnv = TRUE)  # adds accidental numeral triadalt figurations to the environment
+          toEnv = TRUE)  # adds accidentals numerals triadalts figurations to the enviroment
   
-  root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
-                           parts = c('species', 'step'), qualities = FALSE,
+  root <- tonalChroma2tint(paste0(accidentals, toupper(numerals)), 
+                           parts = c('accidentals', 'steps'), 
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-                           Key = Key, ...)@Fifth
+                           Key = of, ...)@Fifth
   
   figurations <- parseFiguration(figurations)
   
   ### quality of degress
   # extension qualities
-  qualities <- extensions2qualities(root, figurations, triadalt, Key = Key, flat = 'b', diminish = diminish, augment = augment, ...)
+  quality.labels <- c(major = 'M', minor = 'm', perfect = 'P', triad.labels)
+  qualities <- extensions2qualities(root, figurations, triadalts,
+                                    Key = of, quality.labels = quality.labels)
   # incorporate quality of triad
   qualities <- local({
-    triad <- rep('M', length(numeral))
-    triad[numeral == tolower(numeral)] <- 'm'
-    triad[triadalt == diminish] <- if (hasArg('diminish')) list(...)$diminish else 'o' 
-    triad[triadalt == augment]  <- if (hasArg('arugment')) list(...)$augment else '+'
+    triad <- rep(quality.labels$major, length(numerals))
+    triad[numerals == tolower(numerals)] <- quality.labels$minor
+    triad[triadalts == triad.labels$diminish] <- triad.labels$diminish
+    triad[triadalts == triad.labels$augment]  <- triad.labels$augment
     
-    triad2sciQuality(triad, qualities, ...)
+    triad2sciQuality(triad, qualities, triad.labels = quality.labels)
   })
 
-  qualitytset <-  sciQualities2tset(qualities, ..., diminish = diminish, augment = augment)
+  qualitytset <-  sciQualities2tset(qualities, quality.labels = quality.labels)
   
   # if 1 is altered!
-  root <- root + setNames(c(-7L, 7L, 0L), c(diminish, augment, 'P'))[stringr::str_sub(qualities, 1L, 1L)]
+  root <- root + with(quality.labels, 
+                      setNames(c(-7L, 7L, 0L), c(diminish, augment, perfect))[stringr::str_sub(qualities, 1L, 1L)])
     
   ###
  
@@ -695,11 +687,13 @@ romanNumeral2tset <- function(str, Key = dset(0,0), ...) {
 
 
 
-sciQualities2tset <- function(str, ...) {
+sciQualities2tset <- function(str, quality.labels = c(), ...) {
+  setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
+  
   
   chord <- stringr::str_pad(str, width = 7L, side = 'right', pad = '.')
   
-  dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, ...)
+  dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, quality.labels = quality.labels)
   
   
   cardinalities <- sapply(stringr::str_locate_all(str, '[^.]'), function(x) x[nrow(x), 1L])
@@ -708,26 +702,27 @@ sciQualities2tset <- function(str, ...) {
   
 }
 
-sciChord2tset <- function(str, Key = dset(0, 0), ...) {
+sciChord2tset <- function(str, quality.labels = c(),  ...) {
+   setoptions(quality.labels) <- c(major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P')
 
    
     REparse(str,
-            makeRE.sciChord(..., collapse = FALSE),
+            makeRE.sciChord(..., quality.labels = quality.labels, collapse = FALSE),
             toEnv = TRUE) -> parsed
   
-    root <- tonalChroma2tint(paste0(step, species), parts = c('step', 'species'), qualities = FALSE, ...)@Fifth
+    root <- tonalChroma2tint(paste0(steps, accidentals), ...)@Fifth
     
     # qualities
-    quality <- local({
-      quality <- stringr::str_pad(quality, width = 5L, side = 'right', pad = '.')
-      quality <- do.call('rbind', strsplit(quality, split = ""))
-      triad <- quality[ , 1]
-      extensions <- cbind('.', '.', '.', quality[ , -1L, drop = FALSE])
+    qualities <- local({
+      qualities <- stringr::str_pad(qualities, width = 5L, side = 'right', pad = '.')
+      qualities <- do.call('rbind', strsplit(qualities, split = ""))
+      triad <- qualities[ , 1]
+      extensions <- cbind('.', '.', '.', qualities[ , -1L, drop = FALSE])
       
-      triad2sciQuality(triad, extensions, ...)
+      triad2sciQuality(triad, extensions, triad.labels = quality.labels)
     })
     
-    (sciQualities2tset(quality,  ...) + tset(root, root)) - getRoot(Key)
+    sciQualities2tset(qualities, quality.labels = quality.labels, ...) + tset(root, root)
     
 }
 
@@ -735,61 +730,52 @@ sciChord2tset <- function(str, Key = dset(0, 0), ...) {
 
 integer2tset <- function(x) tset(x, x)
 
-## Chord Parsing Dispatch ######################################
+##### Tertian transforms ####
+
+##### As x ####
+
+#' Tertian set representations
+#' 
+#' Tertian sets can be read/wrote in various ways.
+#' 
+#' @name tertianRepresentations
+NULL
+
+####. generics ####
+
+#' @name tertianSet
+#' @export tertianSet figuredBass sciChord chordSymbol romanChord
+tertianSet   <- function(x, ...) UseMethod('tertianSet')
+figuredBass  <- function(x, ...) UseMethod('figuredBass')
+sciChord     <- function(x, ...) UseMethod('sciChord')
+chordSymbol  <- function(x, ...) UseMethod('chordSymbol')
+romanChord   <- function(x, ...) UseMethod('romanChord')
 
 
-### Parse 2tset generic and methods ####
+####. methods ####  
+ 
+###.. x as tset ####
+
+#' @export
+tertianSet.tertianSet <- force
+
+#' @export
+tertianSet.numeric <- integer2tset %.% as.integer
 
 
-tertianSet <- function(...) UseMethod('tertianSet')
+char2tset           <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
+                                       'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
-tertianSet.tertianSet <- function(x, ...) x
+char2tset_partition <- humdrumDispatch(doExclusiveDispatch = FALSE,
+                                       'keyof: makeRE.tertianPartition(...)' = mapPartition(char2tset),
+                                       'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
+                                       'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
+#' @export
+tertianSet.character <- force %.% char2tset_partition
 
-#### Numbers ####
-
-tertianSet.integer <- integer2tset
-
-tertianSet.logical <- function(x) tset(rep(NA_integer_, length(x)))
-
-#### Characters ####
-
-char2tset <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                             'sciChord: makeRE.sciChord(...)' = sciChord2tset)
-
-
-mapoftset <- function(str, ..., split = '/') {
-  
-  parts <- strPartition(str, split = split)
-  
-  Keys <- parts[-1]
-  if (length(Keys) > 0L) {
-    Keys[] <- head(Reduce(function(x, y) {
-      y[!is.na(x)] <- char2dset(x[!is.na(x)], y[!is.na(x)], ...)
-      y
-    }, right = TRUE, init = dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
-  } else {
-    Keys <- list(dset(integer(length(str)), 0))
-  }
-  
-  
-  Mode <- CKey(Keys[[1]])
-  root <- Reduce('+', lapply(Keys, getRoot))
-  Key <- Mode + dset(root, root)
-  
-  tset <- char2tset(parts$base, Key = Key)
-  tset + dset(root, root, 0L)
-}
-
-tertianSet.character <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                                      'chordof: makeRE.tertianPartition(...)' = mapoftset,
-                                                      'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                                                      'sciChord: makeRE.sciChord(...)' = sciChord2tset)
-
-#### setAs tertianSet ####
-
-
+#.... set as
 
 #' @export
 setAs('integer', 'tertianSet', function(from) integer2tset(from))
@@ -802,123 +788,28 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 
 
 
+###.. tset as x ####
 
+#' @export
+romanChord.tertianSet <- tset2romanNumeral
+#' @export
+sciChord.tertianSet <- force %.% tset2sciChord
 
- 
-###################################################################### ### 
-# Translating Chord Representations (x2y) ################################
-###################################################################### ### 
+###. x as y ####
 
-## Chord transform documentation ####
+#.... numeric -> y ####
 
+#' @export
+romanChord.numeric <- tset2romanNumeral %.% tertianSet.numeric
+#' @export
+sciChord.numeric <- tset2sciChord %.% tertianSet.numeric
 
-#' Parsing and deparsing chord information.
-#' 
-#' XXXx
-#' 
-#' xxx
-#' @rdname chordTransformer
+#.... character -> y ####
 
-#' Tertian set representations
-#' 
-#' Tertian sets can be read/wrote in various ways.
-#' 
-#' @name tertianRepresentations
-NULL
-
-## Chord transform maker ####
-
-
-makeChordTransformer <- function(deparser, callname, outputclass = 'character') {
-  # this function will create various pitch transform functions
-  deparser <- rlang::enexpr(deparser)
-  callname <- rlang::enexpr(callname)
-  
-  parse <- function(...) list(...) %class% 'parseArgs'
-  transpose <- function(...) list(...) %class% 'transposeArgs'
-  figuration <- function(...) list(...) %class% 'figurationArgs'
-  
-  args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
-                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), figurationArgs = list(), memoize = TRUE, deparse = TRUE)
-  
-  
-  rlang::new_function(args,
-                      rlang::expr( {
-                        redim <- dimParse(x)
-                        
-                        
-                        # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        do.call('checkTFs', c(args[names(args) %in% c('implicitSpecies', 'absoluteSpecies', 'explicitNaturals')],
-                                              memoize = memoize, inPlace = inPlace, dropNA = dropNA,
-                                              list(callname = callname)))
-                        classes <- sapply(args, \(arg) class(arg)[1]) 
-                        transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
-                        figurationArgs <- c(figurationArgs, unlist(args[classes == 'figurationArgs'], recursive = FALSE))
-                        
-                        parseArgs   <- c(list(Exclusive = Exclusive), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE))
-                        deparseArgs <- c(args[!grepl('Args$', classes)], list(figurationArgs = figurationArgs))
-                        
-                        # Keys
-                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
-                        from <- if (is.null(transposeArgs$from)) Key else diatonicSet(transposeArgs$from)
-                        to   <- if (is.null(transposeArgs$to)) Key else diatonicSet(transposeArgs$to)
-                        
-                        # automatically remove NA values
-                        putNAback <- predicateParse(Negate(is.na), all = FALSE,
-                                                    x = x, Key = Key, Exlusive = Exclusive,
-                                                    from = from, to = to)
-                        
-                        if (length(x) == 0L) return(putNAback(vectorNA(outputclass, 0L)))
-                        
-                        rebuild <-  memoizeParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoize = memoize)
-                        parseArgs$Key <- from
-                        deparseArgs$Key <- to 
-                        
-                        transposeArgs$from <- CKey(from)
-                        transposeArgs$to <- CKey(to)
-                        
-                        result <- {
-                          #
-                          parsedTset <- do.call(tertianSet, c(list(x, inPlace = inPlace, memoize = FALSE), parseArgs))
-                          
-                          # if (length(transposeArgs) > 0L) {
-                            # parsedTint <- do.call('transpose.diatonicSet', c(list(parsedTint), transposeArgs))
-                          # }
-                          
-                          output <- if (deparse && is.tertianSet(parsedTset)) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
-                          
-                          if (inPlace) output <- re.place(output, parsedTset)
-                          
-                          
-                          output
-                        }
-                        
-                        redim(if (dropNA) result else putNAback(rebuild(result)))
-                        
-                      }))
-  
-  
-}
-
-
-
-
-### Chord transformers ####
-
-##
-#' @name chordTransformer
-#' @export figuredBass romanNumeral 
-#' @export sciChord chordSymbol
-figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
-romanNumeral <- makeChordTransformer(tset2romanNumeral, 'romanNumeral')
-sciChord <- makeChordTransformer(tset2sciChord, 'sciChord')
-chordSymbol <- makeChordTransformer(tset2chordSymbol, 'chordSymbol')
-
-###################################################################### ### 
-# Manipulating tertian sets ##############################################
-###################################################################### ### 
-
+#' @export
+romanChord.character <- re.place %.% tset2romanNumeral %.% tertianSet.character
+#' @export
+sciChord.character <- re.place %.% tset2sciChord %.% tertianSet.character
 
 
 

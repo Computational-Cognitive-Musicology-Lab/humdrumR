@@ -165,6 +165,7 @@ find.anchors <- function(vec, expr) {
 }
 
 #' Applying functions across arbitrary windows.
+#' ---------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------
 #' @export
 #' @name humWindows
 windows <- function(df, form, with = list(), ..., 

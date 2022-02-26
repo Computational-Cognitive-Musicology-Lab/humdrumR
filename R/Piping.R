@@ -4,36 +4,36 @@
 #' Piping humdrumR data
 #' 
 #' These infix operators make it possible to use
-#' the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
-#' functions in a piping style, similar to the \code{|} (pipe)
-#' in unix-style terminals, or the \code{|>}  pipe operator.
-#' from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
+#' the `[humdrumR:with-in-Humdrum][with(in)Humdrum]`
+#' functions in a piping style, similar to the `|` (pipe)
+#' in unix-style terminals, or the `|>`  pipe operator.
+#' from the R package [magrittr](https://cran.r-project.org/web/packages/magrittr/index.html).
 #' 
-#' The key is that the function \code{\link{withinHumdrum}} always returns a new
-#' \code{\linkS4class{humdrumR}} data object. Thus, you can always send the output
-#' of \code{\link{withinHumdrum}} back in to a new call of \code{\link{withinHumdrum}}.
+#' The key is that the function `[withinHumdrum][withinHumdrum]` always returns a new
+#' `[humdrumR][humdrumR]` data object. Thus, you can always send the output
+#' of `[withinHumdrum][withinHumdrum]` back in to a new call of `[withinHumdrum][withinHumdrum]`.
 #' This is exactly what the `%hum>%` is for: on the left-hand side,
-#' input a \code{\linkS4class{humdrumR}} object, on the right-hand side suitable
-#' arguments to \code{\link{withinHumdrum}} (i.e., a formula, a function, or list of formulae,
+#' input a `[humdrumR][humdrumR]` object, on the right-hand side suitable
+#' arguments to `[withinHumdrum][withinHumdrum]` (i.e., a formula, a function, or list of formulae,
 #' functions, and named arguments). You can then chain this call with another call to
-#' `%hum>%` and more \code{\link{withinHumdrum}} arguments.
+#' `%hum>%` and more `[withinHumdrum][withinHumdrum]` arguments.
 #' 
-#' `%hum<%` acts the same way as `%hum>%` except it calls \code{\link{withHumdrum}}.
-#' Since \code{\link{withHumdrum}} does \emph{not} return a \code{\linkS4class{humdrumR}},
+#' `%hum<%` acts the same way as `%hum>%` except it calls `[withHumdrum][withinHumdrum]`.
+#' Since `[withHumdrum][withinHumdrum]` does *not* return a `[humdrumR][humdrumR]`,
 #' the output can't be piped any further (using `%hum>%` or `%hum<%`).
 #' Thus, `\%hum<\%` should only be used as the last step in a pipe---you would do this
-#' if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
+#' if you want to extract the last step in your pipe from the data's `[humdrumR:humtable][Humdrum Table]` into
 #' a normal vector or list of R data.
 #' 
 #' ' `\%humT\%` creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered 
-#' humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
-#' \code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
-#' \href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
+#' humdrumR input object is returned. This works simply by replacing all `do~` with `doplot~` in a call to
+#' `[withinHumdrum][withinHumdrum]`. The purpose of this option, is if you want to apply expressions for their
+#' [side effects](https://en.wikipedia.org/wiki/Side_effect_(computer_science)),
 #' for instance, for plotting.
 #' 
 #' `%hum[]%` is similar to `%hum>%` except it apply the formulae on its right-hand
-#' side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
-#' a \code{\linkS4class{humdrumR}} data object on the fly.
+#' side using `[humdrumR][filterHumdrum]`. Thus, it can be used to filter/index
+#' a `[humdrumR][humdrumR]` data object on the fly.
 #' 
 #' @section Plural pipes:
 #' 

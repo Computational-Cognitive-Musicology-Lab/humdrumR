@@ -242,18 +242,16 @@ filterHumdrum <- function(humdrumR, ...) {
 # humdrumR filtering and application can result in lots of filtered tokens.
 # These functions remove parts that are entirely filtered
 
-removeNull <- function(humdrumR, by = 'File', recordTypes = 'GLIMDd', nullTypes = 'd', ...) {
+removeNull <- function(humdrumR, recordTypes = 'GLIMDd', ...) {
   checkhumdrumR(humdrumR, 'removeNull')
-  recordTypes <- checkTypes(recordTypes, 'removeNull', 'recordTypes')
-  nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
+  # checkTypes(recordTypes, 'removeNull', 'recordTypes')
+  
+  # recordtypesform <- rlang::new_formula(quote(recordtypes), rlang::expr(!!recordTypes))
+  remove <- withHumdrum(humdrumR, recordTypes ~ 'GLIMDd', dofill ~ !(any(Type == 'D')), ...)
   
   
   humtab <- getHumtab(humdrumR, recordTypes)
-  
-  targets <- humtab[ , by, with = FALSE]
-  targets <- unique(targets[!humtab$Type %in% nullTypes])
-  
-  humtab <- humtab[targets, on = by]
+  humtab <- humtab[remove == FALSE]
   
   putHumtab(humdrumR, drop = FALSE) <- humtab
   
@@ -264,20 +262,21 @@ removeNull <- function(humdrumR, by = 'File', recordTypes = 'GLIMDd', nullTypes 
 
 #' @export
 #' @rdname filterHumdrum
-removeEmptyFiles <- function(humdrumR) {
-  removeNull(humdrumR, 'GLIMDdP', 'GLIMd', by = 'File')
+removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File)
 }
 #' @export
 #' @rdname filterHumdrum
-removeEmptySpines <- function(humdrumR) {
-  # fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', 'GLIMd', by = c('File', 'Spine'))
+removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
 }
 #' @export
 #' @rdname filterHumdrum
-removeEmptyRecords <- function(humdrumR) {
-  # fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', 'd', by = c('File', 'Record'))
+removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
+  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Record)
 }
 
 #########################Indexing ----
@@ -321,21 +320,14 @@ setMethod('[',
           function(x, i, removeEmpty = TRUE) {
               i <- numericIndexCheck(i)
               
-              if (removeEmpty) {
-                humtab <- getHumtab(x, 'GLIMDdP')
-                
-                targets <- humtab[ , sort(unique(File))[i]]
-                humtab <- humtab[File %in% targets]
-                
-                putHumtab(x, drop = FALSE) <- humtab
-              } else {
-                form <- do ~ File %in% sort(unique(File))[i]
-                x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
-              }
-             
+              form <- do ~ File %in% sort(unique(File))[i]
+              
+              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+              
+              if (removeEmpty) x <- removeEmptyFiles(x)
               
               x
-
+              # removeNull(x, by ~ File)
           })
 
 
@@ -387,18 +379,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
           function(x, i, removeEmpty = TRUE) {
             i <- numericIndexCheck(i)    
             
-            if (removeEmpty) {
-              humtab <- getHumtab(x, 'GLIMDdP')
-              
-              humtab <- humtab[Record %in% i | Token == '*-']
-              
-              putHumtab(x, drop = FALSE) <- humtab
-            } else {
-              form <- do ~ Record %in% sort(unique(Record))[i]
-              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
-            }
-          
+            form <- do ~ Record %in% sort(unique(Record))[i]
             
+            x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+            
+            if (removeEmpty) x <- removeEmptyRecords(x)
             
             x
 
@@ -412,18 +397,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
           function(x, j, removeEmpty = TRUE) {
               j <- numericIndexCheck(j)    
               
-              if (removeEmpty) {
-                humtab <- getHumtab(x, 'GLIMDdP')
-                humtab <- humtab[is.na(Spine) | Spine %in% j]
-                
-                putHumtab(x, drop = FALSE) <- humtab
-              } else {
-                
-                form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
-                
-                x <- filterHumdrum(x, form, recordtypes ~ "D")
-              }
+              form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
               
+              x <- filterHumdrum(x, form, recordtypes ~ "D")
+              
+              if (removeEmpty) x <- removeEmptySpines(x)
               
               x
               
@@ -448,7 +426,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 #' @usage humdata[['regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
-function(x, i, removeEmpty = FALSE) {
+function(x, i, removeEmpty = TRUE) {
     # gets any record which contains match
   
     form <- do ~ Record %in% unique(Record[. %~% i])
@@ -469,11 +447,12 @@ function(x, i, removeEmpty = FALSE) {
 #           })
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name humdrumR-class
 #' @usage humdata[[ , 'regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-          function(x, j, removeEmpty = FALSE) {
+          function(x, j, removeEmpty = TRUE) {
             #gets any spine which contains match
             form <- do ~ Spine %in% unique(Spine[. %~% j])
             
@@ -494,7 +473,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
 #' @export
 setMethod('[[',
           signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
-          function(x, i, j, k, ..., removeEmpty = FALSE) {
+          definition = function(x, i, j, k, ..., removeEmpty = TRUE) {
               if (missing(k)) return(x)
               
               if (!(rlang::is_formula(k) || is.character(k)))  {
@@ -535,7 +514,7 @@ setMethod('[[',
 #' @usage humdata[[~expression]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
-          function(x, i, removeEmpty = FALSE) {
+          function(x, i, removeEmpty = TRUE) {
             
                     i <- rlang::as_quosure(i)
                     form <- rlang::new_formula(quote(dofill), rlang::expr(Record %in% unique(Record[!!i])))
@@ -551,7 +530,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @usage humdata[[ , ~expression]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
-          function(x, j, removeEmpty = FALSE) {
+          function(x, j, removeEmpty = TRUE) {
             j <- rlang::as_quosure(j)
             form <- rlang::new_formula(quote(dofill), rlang::expr(Spine %in% unique(Spine[!!j])))
             
@@ -565,15 +544,14 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'),
 
 
 
+#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name filterHumdrum
 #' @usage humdata[[x:y, l:m]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
-          function(x, i, j, removeEmpty = FALSE) {
+          function(x, i, j) {
             x <- x[[ , j]]
             x <- x[[i, ]]
-            
-            if (removeEmpty) x <- removeEmptyRecords(removeEmptySpines(x))
             x
           })
 

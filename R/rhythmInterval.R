@@ -8,55 +8,55 @@
 
 #' Representation of rhythmic information
 #' 
-#' This \emph{S4} class is the core rhythm representation in the 
-#' \code{\link[humdrumR:humdrumR]{humdrumR package}}.
+#' This *S4* class is the core rhythm representation in the 
+#' `[humdrumR:humdrumR][humdrumR package]`.
 #' The object is used to represent rhythmic durations 
 #' and metric positions.
 #' Each duration is represented in 
-#' \href{https://en.wikipedia.org/wiki/Whole_note}{whole note} units.
+#' [whole note](https://en.wikipedia.org/wiki/Whole_note) units.
 #' Numerically, these whole note units are represented as a ratio
-#' between integers, held in the slots \code{@Numerator} and \code{@Denominator}.
+#' between integers, held in the slots `@Numerator` and `@Denominator`.
 #' This allows use to represent any rational number with no loss of precision
-#' due to rounding errors and weak decimal expansions (like \code{0.333333}).
+#' due to rounding errors and weak decimal expansions (like `0.333333`).
 #' Rhythm intervals are similar to standard musical 
-#' termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
+#' termoniology (i.e, ``three eighth-notes'' is the ratio (3/8).
 #' 
 #' @section Vectorization:
-#' \code{rhythmInterval} inherits from the virtual class 
-#' \code{\linkS4class{struct}}.
-#' This means you can apply normal vectorized commands to \code{rhythmInterval}s, 
-#' and even put them in \code{\link[base:data.frame]{data.frames}}.
+#' `rhythmInterval` inherits from the virtual class 
+#' `[struct][struct]`.
+#' This means you can apply normal vectorized commands to `rhythmInterval`s, 
+#' and even put them in `[base:data.frame][data.frames]`.
 #' 
 #' @section Arithmetic:
-#' \code{rhythmInterval} objects have arithmetic operations defined.
-#' Addition and subtraction are straightword and intuitive (i.e., \eqn{\frac{1/8} + \frac{3/8} = \frac{1/2}}).
+#' `rhythmInterval` objects have arithmetic operations defined.
+#' Addition and subtraction are straightword and intuitive (i.e., (1/8) + (3/8) = (1/2)).
 #' 
 #' Multiplication and division are slightly more complicated: 
-#' \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
-#' is defined \emph{for rational numbers}: \eqn{\frac{3}{8} * 2 = \frac{3}{4}} 
-#' (the result is always a new \code{rhythmInterval}).
-#' However, note that a \code{rhythmInterval} cannot be multiplied by another
-#' \code{rhythmInterval}---afterall, what would a quarter-note times a quarter-note be? 
-#' A \code{rhythmInterval} can be divided by another \code{rhythmInterval} to produce
-#' a real number: \eqn{\frac{1}{2} / \frac{1}{4} = 2 }.
-#' Like other rational values in \code{R} we can also do either 
-#' ``true'' (rational) division (using the \code{\link[base:Arithmetic]{/}} operator)
-#' \emph{or} \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean} 
-#' division (using the \code{\link[base:Arithmetic]{\%/\%}} operator).
-#' Rational division (\code{/}) of a \code{rhythmInterval} by another \code{rhythmInterval}
-#' results in a rational number. For instance, \eqn{\frac{1}{2} / \frac{1}{4} = 2}.
-#' Rational division of a \code{rhythmInterval} by a rational number results in a
-#' new \code{rhythmInterval}: \eqn{\frac{1}{2} / 2 = \frac{1}{4}}.
-#' Eucliean (a.k.a., integer) division can only be applied between \code{rhythmInterval}s
-#' resulting in an integer quotient---the remainder, which is a \code{rhythmInterval},
-#' can be calculated with the \code{\link[base:Arithmetic]{\%\%}} operator.
-#' The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
+#' [scalar multiplication](https://en.wikipedia.org/wiki/Scalar_multiplication)
+#' is defined *for rational numbers*: (3/8) * 2 = (3/4) 
+#' (the result is always a new `rhythmInterval`).
+#' However, note that a `rhythmInterval` cannot be multiplied by another
+#' `rhythmInterval`---afterall, what would a quarter-note times a quarter-note be? 
+#' A `rhythmInterval` can be divided by another `rhythmInterval` to produce
+#' a real number: (1/2) / (1/4) = 2.
+#' Like other rational values in `R` we can also do either 
+#' ``true'' (rational) division (using the `[base:Arithmetic][/]` operator)
+#' *or* [Euclidean](https://en.wikipedia.org/wiki/Euclidean_division)
+#' division (using the `[base:Arithmetic][\%/\%]` operator).
+#' Rational division (`/`) of a `rhythmInterval` by another `rhythmInterval`
+#' results in a rational number. For instance, (1/2) / (1/4) = 2}.
+#' Rational division of a `rhythmInterval` by a rational number results in a
+#' new `rhythmInterval`: (1/2) / 2 = (1/4).
+#' Eucliean (a.k.a., integer) division can only be applied between `rhythmInterval`s
+#' resulting in an integer quotient---the remainder, which is a `rhythmInterval`,
+#' can be calculated with the `\link[base:Arithmetic][\%\%]` operator.
+#' The remainder (a.k.a., *modulo*) operator (`\%\%`) is especially
 #' useful, for instance in calculating metric positions.
 #' 
 #' @section Relational Operators:
-#' \code{rhythmInterval}s can be compared using the standard
-#' \code{\link[base:Comparison]{relational operators}}---\code{==},
-#' \code{!=}, \code{>}, \code{>=}, etc.
+#' `rhythmInterval`s can be compared using the standard
+#' `[base:Comparison][relational operators]`---`==`,
+#' `!=`, `>`, `>=`, etc.
 #' 
 #' @slot Numerator Integers 
 #' @slot Octave Integers
@@ -95,7 +95,7 @@ setMethod('initialize', 'rhythmInterval',
 ##...constructors ####
 
 
-#' The basic constructor for \code{\link[humdrumR:rhythmInterval]{rhythmIntervals}}.
+#' The basic constructor for `[humdrumR:rhythmInterval][rhythmIntervals]`.
 #' @name rhythmInterval
 #' @export
 rint <- function(denominator, numerator = 1L) {
@@ -704,25 +704,25 @@ metricPosition <- function(rints, bars = NULL,
 
 #' Calculate rhythmic "offset"
 #' 
-#' Borrowing the term from \code{music21}, rhythmic "offset"
+#' Borrowing the term from `music21`, rhythmic "offset"
 #' refers to a duration of time since a starting point (usually, the beginning
 #' of a piece).
-#' \code{rhythmOffset} takes a vector of numbers representing durations
-#' (maybe \code{\linkS4class{rhythmInterval}s}, maybe other
+#' `rhythmOffset` takes a vector of numbers representing durations
+#' (maybe `[rhythmInterval][rhythmInterval]s`, maybe other
 #' numeric values) and cummulatively sums them from a starting value.
 #' The output is a vector of durations of the same type as the input
 #' where each output value corresponds to the duration of time elapsed
 #' at that point.
 #' 
 #' @param durations A vector of numeric values representing durations.
-#' @param start A duration value (coerced to same class as \code{durations}), from which the
+#' @param start A duration value (coerced to same class as `durations`), from which the
 #' offset begins. 
-#' @param groups A vector of equal length as \code{durations} representing a grouping factor,
-#' usable by \code{\link[base]{tapply}}. If \code{!is.null(groups)}, offsets are calculated
-#' for duration values within each group. The \code{start} argument is recycle to match
+#' @param groups A vector of equal length as `durations` representing a grouping factor,
+#' usable by `[base][tapply]`. If `!is.null(groups)`, offsets are calculated
+#' for duration values within each group. The `start` argument is recycle to match
 #' the length of the number of groups, so a different start value can be applied to each group.
-#' If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the 
-#' first \code{start} value.
+#' If `is.null(groups)`, offsets are calculated for the whole `durations` vector, from the 
+#' first `start` value.
 #' 
 #' @family rhythm analysis tools
 #' @export
