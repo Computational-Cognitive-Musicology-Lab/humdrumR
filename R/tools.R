@@ -162,7 +162,7 @@ insert <- function(x, i, values) {
                           pairs <- strsplit(pairs, split = '\\|')
                           
                           pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
-                          ifelse(is.na(pick), '', pick)
+                          '' %|% pick
                           
                       })
     

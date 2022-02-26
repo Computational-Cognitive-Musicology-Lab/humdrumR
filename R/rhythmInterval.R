@@ -520,7 +520,7 @@ notevalue2rint <- function(notevalues) {
     
     #
     divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
-    rint / .ifelse(is.na(divides), 1, divides)
+    rint / .(1 %|% divides)
 }
 
 
