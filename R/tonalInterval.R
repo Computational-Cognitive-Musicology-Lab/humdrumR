@@ -1216,7 +1216,7 @@ tonalChroma2tint <- function(str,
  step    <- if ("step" %in% parts)    step2tint(step, ...) 
  species <- if ("species" %in% parts) specifier2tint(species, qualities = qualities, Key = Key, step = step, ...) 
  
- simpletint <- (step %maybe% tint( , 0L)) + (species %maybe%  tint( , 0L)) 
+ simpletint <- (step %||% tint( , 0L)) + (species %||%  tint( , 0L)) 
  
  # complex part
  tint <- if ("octave" %in% parts) octave2tint(octave, simpletint = simpletint, ...) + simpletint else simpletint
@@ -2048,7 +2048,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
   
   partitions <- matched(partitions, c('complex', 'harmonic', 'specific'))
   
-  Key <- diatonicSet(Key %maybe% dset(0, 0))
+  Key <- diatonicSet(Key %||% dset(0, 0))
   match_size(tint = tint, Key = Key, toEnv = TRUE)
   
   octave <- if ('complex' %in% partitions) {
@@ -2118,7 +2118,7 @@ tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L
 
 tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
   
-  genericpart    <-  tint %% (Key %maybe% dset(0L, 0L)) 
+  genericpart    <-  tint %% (Key %||% dset(0L, 0L)) 
   alterationpart <- tint - genericpart
   
   struct2data.frame(Generic = genericpart,  Alteration = alterationpart)
@@ -2271,7 +2271,7 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   relative <- args$relative
   
   ## Deal with keys
-  from <- diatonicSet(from %maybe% dset(0, 0))
+  from <- diatonicSet(from %||% dset(0, 0))
   
   if (!is.null(to)) {
     to <- diatonicSet(to)
@@ -2281,7 +2281,7 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
       to <- from + dset(sigdiff, sigdiff)
     }
     
-    by <- (getRootTint(to) - getRootTint(from)) + (by %maybe% tint(0, 0))
+    by <- (getRootTint(to) - getRootTint(from)) + (by %||% tint(0, 0))
     
   } else {
     to <- from

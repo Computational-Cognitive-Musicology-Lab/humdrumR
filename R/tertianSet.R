@@ -478,7 +478,7 @@ tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
   
   chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
                             root_func = tint2simplepitch, figurationArgs = figurationArgs,
-                            major = major %maybe% "MAJOR", minor = 'min', diminish = 'dim',
+                            major = major %||% "MAJOR", minor = 'min', diminish = 'dim',
                             root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
                             implicitSpecies = FALSE, root.case=FALSE,
                             extension.shorthand = TRUE, extension.simple = FALSE,
