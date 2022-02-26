@@ -559,7 +559,7 @@ partialMatchKeywords <- function(keys) {
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
-    ifelse(is.na(matches), keys, rep(names(standardkeys), lengths(standardkeys))[matches])
+    keys %|% rep(names(standardkeys), lengths(standardkeys))[matches]
     
     
 }
