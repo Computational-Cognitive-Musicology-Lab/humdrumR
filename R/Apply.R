@@ -314,7 +314,7 @@ withinHumdrum <- function(humdrumR,  ...) {
               #### Put new humtable back into humdrumR object
               newfields <- setdiff(colnames(newhumtab), colnames(humtab))
               
-              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
+              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], \(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
               newhumtab$Null[notnull] <- FALSE
               newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
@@ -342,7 +342,7 @@ withinHumdrum <- function(humdrumR,  ...) {
                   #     act <- ifelsecalls(parsedArgs$formulae$partitions['where'], 
                   #                        c(humdrumR@Active, 
                   #                          lapply(newfields, 
-                  #                                 function(nf) rlang::as_quosure(as.symbol(nf), 
+                  #                                 \(nf) rlang::as_quosure(as.symbol(nf), 
                   #                                                                environment(humdrumR)))))
                   #    
                   #      putActive(humdrumR, act)
@@ -471,7 +471,7 @@ anyfuncs2forms <- function(fs, parentenv) {
           areFuncs <- sapply(fs, is.function)
           
           fs[areFuncs] <- lapply(fs[areFuncs],
-                                 function(func) {
+                                 \(func) {
                                            expenv <- list2env(list(.func = func))
                                            parent.env(expenv) <- parentenv
                                            formula <- ~ .func(.)
@@ -509,7 +509,7 @@ parseKeywords <- function(formulae, withfunc) {
      stop(call. = FALSE, glue::glue("In your call to {withfunc}, the formula {plural(sum(unknownKeys), 'keywords', 'keyword')} {unknownKeynames} {plural(sum(unknownKeys), 'do', 'does')} not match any known formula keys." ))
  }
  
- values  <- lapply(boolean, function(b) formulargs[b])
+ values  <- lapply(boolean, \(b) formulargs[b])
  
  if (!any(boolean$doexpressions)) stop(call. = FALSE,
                                    glue::glue("Your call to {withfunc} doesn't include any do expressions to apply to the data!
@@ -796,7 +796,7 @@ tandemsQuo <- function(funcQuosure) {
  # (i.e., keeps it's environment).
           
  applyExpr(funcQuosure,
-           function(ex) {
+           \(ex) {
              exstr <- deparse(ex)
              interp <- grepl('^\\*[^*]', exstr)
              
@@ -872,8 +872,8 @@ splatQuo <- function(funcQuosure) {
   
   transform <- function(expr) {
       expr <- recurseQuosure(expr, 
-                     function(quo) is.givenCall(quo, '@'), 
-                     function(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
+                     \(quo) is.givenCall(quo, '@'), 
+                     \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
                          })
       expr <- as.list(expr)
       rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
@@ -914,11 +914,11 @@ xifyQuo <- function(expression, usedInExpr, depth = 1L) {
           expression <- substituteName(expression,
                                        setNames(lapply(names(fargs), as.symbol), usedInExpr))
           
-          lambdaexpression      <- quote(function() {} )
+          lambdaexpression      <- quote(\() {} )
           lambdaexpression[[2]] <- fargs
           lambdaexpression[[3]] <- rlang::quo_squash(expression)
           # 
-          # lambdaexpression <- rlang::new_quosure(quote(function() {}))
+          # lambdaexpression <- rlang::new_quosure(quote(\() {}))
           # lambdaexpression[[2]][[2]] <- fargs
           # lambdaexpression[[2]][[3]] <- expression
           
@@ -1216,7 +1216,7 @@ parseResult_other <- function(result) data.table(list(result))
           
           curpipen <- curPipeN(humtab) 
           
-          lengths_ <- function(ls) sapply(ls, function(v) if (is.object(v)) 1L else length(v)) # objects are length 1
+          lengths_ <- function(ls) sapply(ls, \(v) if (is.object(v)) 1L else length(v)) # objects are length 1
           
           ####
           if (!allsame(lengths_(value))) value <- list(value)
@@ -1366,7 +1366,7 @@ humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
           exprs    <- exprs[keywords != '']
           keywords <- keywords[keywords != '']
           
-          formulae <- Map(function(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
+          formulae <- Map(\(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
                                                               lhs = as.symbol(kw), 
                                                               env = rlang::quo_get_env(qu)), exprs, keywords) 
           formulae <- unname(formulae)
