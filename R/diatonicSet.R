@@ -197,7 +197,7 @@ getAlterations <- function(dset) {
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('diatonicSet'), function(x) dset2key(x))
+setMethod('as.character', signature = c('diatonicSet'), \(x) dset2key(x))
 
 ## Logic methods ####
 
@@ -206,18 +206,18 @@ setMethod('as.character', signature = c('diatonicSet'), function(x) dset2key(x))
 
 #' @name diatonicSet
 #' @export
-is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
+is.diatonicSet <- \(x) inherits(x, 'diatonicSet')
 
 #### Tonal is.methods ####
 
 #' @export is.major is.minor
-is.major <- function(x) UseMethod('is.major')
-is.minor <- function(x) UseMethod('is.minor')
+is.major <- \(x) UseMethod('is.major')
+is.minor <- \(x) UseMethod('is.minor')
 
 #' @export
-is.major.diatonicSet <- function(x) getMode(x) >= 1L
+is.major.diatonicSet <- \(x) getMode(x) >= 1L
 #' @export
-is.minor.diatonicSet <- function(x) getMode(x) < -1L
+is.minor.diatonicSet <- \(x) getMode(x) < -1L
 
 
 
@@ -265,7 +265,7 @@ setMethod('==', signature = c('diatonicSet', 'diatonicSet'),
 
 
 setMethod('abs', signature = c('diatonicSet'),
-          function(x) {
+          \(x) {
               .ifelse(x@Root < 0, -x, x)
           })
 
@@ -871,7 +871,7 @@ romanNumeral2dset <- function(str, Key = NULL, flat = 'b', ...) {
 
 ##... Numbers
 
-integer2dset <- function(x) dset(x, x)
+integer2dset <- \(x) dset(x, x)
 
 
 ## Key Parsing Dispatch ######################################
@@ -885,7 +885,7 @@ diatonicSet.diatonicSet <- function(x, ...) x
 #### Numbers ####
 
 #' @export
-diatonicSet.numeric <- function(x) integer2dset(as.integer(x))
+diatonicSet.numeric <- \(x) integer2dset(as.integer(x))
 #' @export
 diatonicSet.integer <- integer2dset
 
