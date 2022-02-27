@@ -462,7 +462,7 @@ function(x, i, removeEmpty = FALSE) {
 # setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
 #           function(x, i) {
 #             # gets any record which contains match
-#             grepingind(x, i,  function(sd) { 
+#             grepingind(x, i,  \(sd) { 
 #               recn <- unique(sd$Record[sd$.indhits])
 #               sd[Record %in% recn]
 #             })
