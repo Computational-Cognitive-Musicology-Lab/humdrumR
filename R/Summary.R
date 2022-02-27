@@ -28,7 +28,7 @@ setMethod('summary', 'humdrumR',
             funcs <- c(`Token Census` = census, `Reference Records` = reference, 
                        `Spine Structure` = spines, `Intepretation Content` = interpretations) #, sections)
             
-            summaries <- lapply(funcs, function(f) f(object, ...))
+            summaries <- lapply(funcs, \(f) f(object, ...))
             
             for (i in seq_along(summaries)) {
               # cat('\t', names(funcs)[i], ':\n', sep ='')
@@ -183,7 +183,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   #
   sums <- censusTable[, lapply(.SD,
-                        function(col) {
+                        \(col) {
                                   if (is.list(col)) { # for Unique Column
                                             length(unique(unlist(col)))
                                   } else {
@@ -333,7 +333,7 @@ reference.character <- function(str) {
   } 
   
   lapply(unique(hits$Category),
-         function(Cat) {
+         \(Cat) {
            curhits <- hits[hits$Category == Cat, ]
            
            cat('\n(', Cat, ')\n\n', sep = '')
@@ -452,7 +452,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
                     cat(corpusMessage)
                     cat(files, '\n', sep = '')
                    
-                    refTable <- refTable[ , lapply(.SD, function(col) {
+                    refTable <- refTable[ , lapply(.SD, \(col) {
                               if (is.list(col)) { col <- do.call('paste', 
                                                                  c(col, 
                                                           collapse = paste0('\n\t', 
@@ -472,7 +472,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
           # If more than one file, print the number of reference records (by code)
           # in each file
           codeCounts <- refTable[ , lapply(.SD, 
-                                   function(col) {
+                                   \(col) {
                                              col <- if (is.list(col)) lengths(col) else ifelse(is.na(col), 0, 1)
                                              col
                                    })]
@@ -480,9 +480,9 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
           colNames <- colnames(codeCounts)
           
           ###Totals
-          Totals <- list(`Any:` = sapply(codeCounts, function(col) num2str(sum(!is.na(col) & col > 0L))),
+          Totals <- list(`Any:` = sapply(codeCounts, \(col) num2str(sum(!is.na(col) & col > 0L))),
                          `Sum:` = sapply(codeCounts, \(x) num2str(sum(x)), na.rm = TRUE),
-                         `Unique:` = sapply(refTable, function(col) num2str(length(unique(col[!is.na(col)])))))
+                         `Unique:` = sapply(refTable, \(col) num2str(length(unique(col[!is.na(col)])))))
                          
           ### Column widths
           lenCol <- do.call('pmax',
@@ -604,7 +604,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
   
   spineTable <- popclass(spineTable)
   spineTable$File <- paste0(num2str(spineTable$File), ":")
-  spineTable[ , In := sapply(Where, function(x) sum(x > 0))]
+  spineTable[ , In := sapply(Where, \(x) sum(x > 0))]
   where <- spineTable$Where
   spineTable[ , 'Where' := NULL]
   spineTable[ , Columns := Columns - Spines]
@@ -781,7 +781,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
     cat(padder(colNames, lenCol), stars, '\n', sep = '')
     cat(padder(c('',
                  'Hits:',
-                 sapply(as.list(interpmat)[exclusive & screen], function(col) sum(col > 0)),
+                 sapply(as.list(interpmat)[exclusive & screen], \(col) sum(col > 0)),
                  colSums(interps$Tandem$NUnique[ , seq_len(max(0L, max(which(screen)) - max(which(exclusive)))), drop = FALSE]  > 0)),
                lenCol), stars,  '\n', sep = '')
   }
