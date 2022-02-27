@@ -88,7 +88,7 @@ NULL
 `%humT%` <- function(humdrumR, formula) {
     if (is.list(formula)) {
         formula <- lapply(formula,
-                          function(form) {
+                          \(form) {
                               lhs <- rlang::f_lhs(form)
                               
                               if (is.null(lhs) || rlang::as_name(lhs) %in% c('d' , 'do')) {
