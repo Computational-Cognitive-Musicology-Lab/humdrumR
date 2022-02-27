@@ -514,7 +514,7 @@ extension2bit <- function(str) {
   bit <- 7L # triad
   
   sapply(extensions,
-         function(exten) {
+         \(exten) {
            if (any(exten %in% c('9', '11', '13')) & !any(exten == '7')) bit <- bit + 8L
            
            if (any(stringr::str_detect(exten, 'sus'))) bit <- bit - 2L
@@ -596,7 +596,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
                                                                         collapse = FALSE,
                                                                         ...)))
   lapply(figures, 
-         function(parsedfig) {
+         \(parsedfig) {
            parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(species = character(2L), step = c('5', '3'))
            parsedfig[ , Explicit := TRUE]
            
@@ -702,7 +702,7 @@ sciQualities2tset <- function(str, ...) {
   dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, ...)
   
   
-  cardinalities <- sapply(stringr::str_locate_all(str, '[^.]'), function(x) x[nrow(x), 1L])
+  cardinalities <- sapply(stringr::str_locate_all(str, '[^.]'), \(x) x[nrow(x), 1L])
   
   tset(dset@Root, dset@Signature, dset@Alteration, cardinalities)
   
@@ -765,7 +765,7 @@ mapoftset <- function(str, ..., split = '/') {
   
   Keys <- parts[-1]
   if (length(Keys) > 0L) {
-    Keys[] <- head(Reduce(function(x, y) {
+    Keys[] <- head(Reduce(\(x, y) {
       y[!is.na(x)] <- char2dset(x[!is.na(x)], y[!is.na(x)], ...)
       y
     }, right = TRUE, init = dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
