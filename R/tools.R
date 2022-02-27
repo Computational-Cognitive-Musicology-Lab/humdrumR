@@ -157,7 +157,7 @@ insert <- function(x, i, values) {
     strs <- unlist(list(...))
     ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
     ifelses <- lapply(ifelses,
-                      function(pairs) {
+                      \(pairs) {
                           pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
                           pairs <- strsplit(pairs, split = '\\|')
                           
@@ -311,7 +311,7 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
         struct <- new(class(object))
         slots <- getSlots(struct)
         if (!is.null(dimen)) len <- prod(dimen)
-        setSlots(struct) <- lapply(slots, function(slot) rep(as(value, class(slot)), len))
+        setSlots(struct) <- lapply(slots, \(slot) rep(as(value, class(slot)), len))
         
         struct %dim% object
         
@@ -361,7 +361,7 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
           hits <- ifelse(intervals == 0,
                          if (direction %in% c(2,4)) Inf else 1,
                          if (direction == 1) {
-                                   intervals + mapply(FUN = function(a,b) which.min(c(a,b)) - 1,
+                                   intervals + mapply(FUN = \(a,b) which.min(c(a,b)) - 1,
                                                       abs(x - sortedwhere[intervals]),
                                                       abs(x - sortedwhere[intervals + 1]))
                          } else {
@@ -374,10 +374,10 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
 
 locate <- function(x, table) {
     if (is.null(dim(table)) || length(dim(x)) == 1) {
-        setNames(lapply(x, function(val) which(table == val)), x)
+        setNames(lapply(x, \(val) which(table == val)), x)
     } else {
         apply(x, 1, 
-              function(val) {
+              \(val) {
                   which(Reduce('&', Map('==', table, val)))
                   
                   })
@@ -530,7 +530,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
     targets <- list(...)
     targets <- if (hasdim(ref)) {
         lapply(targets, 
-               function(x) {
+               \(x) {
                    xdim <- ldim(x)
                    if (hasdim(x)) {
                        if (xdim$nrow != refdim$nrow) x <- Repeat(x, length.out = refdim$nrow, margin = 1L)
@@ -541,7 +541,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
                    }})
     } else {
         lapply(targets, 
-               function(x) {
+               \(x) {
                    if (hasdim(x)) x <- dropdim(x)
                    rep(x, length.out = refdim$length)
                    })
@@ -581,7 +581,7 @@ match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle =
           
           if (is.function(size.out)) {
                     sizes <- lapply(stuff[notnull],
-                                    function(thing) {
+                                    \(thing) {
                                               dim <- dim(thing)
                                               if (is.null(dim)) {
                                                   if (length(margin) == 1L) length(thing) else c(length(thing), 1L)
@@ -623,10 +623,10 @@ match_size2 <- function(..., toEnv = FALSE, byrow = FALSE) {
         
         size <- apply(sizes, 1, max)
         browser()
-        objects[nodim] <- lapply(objects[nodim], function(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
+        objects[nodim] <- lapply(objects[nodim], \(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
         
         objects[!nodim] <- lapply(objects[!nodim], 
-                                  function(x) {
+                                  \(x) {
                                       x <- Repeat(x, length.out = size[1], margin = 1)
                                       x <- Repeat(x, length.out = size[2], margin = 2)
                                       x
@@ -809,7 +809,7 @@ captureSymbols <- function(expr) {
     # makes sure there is a "nomatch" expr, and they are in right order
     frame <- parent.frame(1)
     results <- do.call('Map', 
-                       c(function(expr, ...) {
+                       c(\(expr, ...) {
                            exclgroup <- list(...)
                            
                            if (is.null(expr)) return(exclgroup$x)
@@ -923,10 +923,10 @@ print.rational <- function(x) print(as.fraction(x))
 integrate <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
     
     lapply(1:ncol(intmat),
-           function(j) {
+           \(j) {
                intmat[!skip[ , j], j] <<- cumsum(intmat[!skip[ , j], j])
            }
     ) 
@@ -943,10 +943,10 @@ sigma <- integrate
 derive <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
     
     lapply(1:ncol(intmat),
-           function(j) {
+           \(j) {
                intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
            }
     ) 
@@ -980,7 +980,7 @@ expand <- function(x) {
 # bitwise tools
 
 ints2bits <- function(n, nbits = 8) {
-    mat <- t(sapply(n, function(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
+    mat <- t(sapply(n, \(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
     
     rownames(mat) <- n
     colnames(mat) <- 2 ^ (0:(nbits - 1))
@@ -1064,8 +1064,8 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 #     positive <- floor(n)
 #     negative <- as.integer((n - positive) / 2^-31)
 #     # mat <- t(as.integer(sapply(positive, intToBits)) - as.integer(sapply(negative, intToBits)))[, 1:nbits, drop = FALSE]
-#     posmat <- t((sapply(positive, function(x) as.integer(intToBits(x)))))[ , 1:nbits, drop = FALSE]
-#     negmat <- t((sapply(negative, function(x) as.integer(intToBits(x)))))[ , 32:(32-nbits + 1), drop = FALSE]
+#     posmat <- t((sapply(positive, \(x) as.integer(intToBits(x)))))[ , 1:nbits, drop = FALSE]
+#     negmat <- t((sapply(negative, \(x) as.integer(intToBits(x)))))[ , 32:(32-nbits + 1), drop = FALSE]
 #     mat <- posmat - negmat
 #     rownames(mat) <- n
 #     colnames(mat) <- 2 ^ (0:(nbits - 1))
@@ -1112,7 +1112,7 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
 }
 
 apply2ExprAsString <- function(func, ...) {
-  function(expr) {
+  \(expr) {
     str <- func(deparse(expr), ...)
     parse(text = str)[[1]]
     
@@ -1132,7 +1132,7 @@ namesInExpr <- function(names, expr) {
     if (rlang::is_formula(expr)) expr <- rlang::f_rhs(expr)
     
     applyExpr(expr, rebuild = FALSE,
-              function(ex) {
+              \(ex) {
                   exstr <- deparse(ex)
                   match <- names[pmatch(exstr, names)]
                   if (is.na(match)) NULL else match
@@ -1334,7 +1334,7 @@ nestoptions <- function(opts, ...) {
     funccall <- deparse(call[[1]])
     
     call[[1]] <- quote(list)
-    call <- call[!sapply(call, function(x) deparse(x) == "...")]
+    call <- call[!sapply(call, \(x) deparse(x) == "...")]
     args <- eval(call, parent.frame())
     
     #
@@ -1354,7 +1354,7 @@ overdot <- function(call) {
     dots <- eval(quote(list(...)), envir = parent.frame())
     
     if (length(dots) > 0) {
-        call <- call[!sapply(call, function(x) deparse(x) == "...")]
+        call <- call[!sapply(call, \(x) deparse(x) == "...")]
         call <- call[!names(call) %in% names(dots)]
         
         call <- append2expr(call, dots)
@@ -1441,9 +1441,9 @@ matched <- function(x, table) table[pmatch(x, table)]
 
 has.prefix <- function(prefix, x) {
     prefix <- strsplit(prefix, split = '\\|')
-    prefix <- sapply(prefix, function(pre) paste(paste0('^', pre), collapse = '|'))
+    prefix <- sapply(prefix, \(pre) paste(paste0('^', pre), collapse = '|'))
     
-    if (missing(x))  function(x) grepl(prefix, x) else grepl(prefix, x)
+    if (missing(x))  \(x) grepl(prefix, x) else grepl(prefix, x)
 }
 
 pasteordered <- function(order, ..., sep = '') {
@@ -1515,7 +1515,7 @@ num2word <- function(num, capitalize = FALSE) {
 
   out = num
   out[num < 101] = unlist(lapply(num[num < 101],
-                                 function(n) {
+                                 \(n) {
                                    if(n == 100) return('one-hundred')
                                    if(n < 20) { words[n + 1]  } else {
                                     gsub('-zero$', '', paste0(tens[1 + floor(n / 10)], '-', words[n %% 10 + 1]))
@@ -1588,7 +1588,7 @@ smartPadWrap <- function(str, width, side = 'left') {
 strPartition <- function(str, split = '/') {
     # split strs into columns
     # if (hasdim(str)) {
-    #     output <- do.call('cbind', lapply(1:ncol(str), function(j) ofColumns(str[, j, drop = TRUE])))
+    #     output <- do.call('cbind', lapply(1:ncol(str), \(j) ofColumns(str[, j, drop = TRUE])))
     #     rownames(output) <- apply(str, 1, paste, collapse = '/')
     #     
     # } else {
@@ -1603,7 +1603,7 @@ strPartition <- function(str, split = '/') {
     
     maxdepth <- max(lengths(mat))
     df <- lapply(1:maxdepth,
-                               function(i) {
+                               \(i) {
                                    sapply(mat, '[', i = i) %dim% str
                                    
                                }) 
