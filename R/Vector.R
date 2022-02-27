@@ -189,7 +189,7 @@ setMethod('initialize',
               
               ## NA in any slot is NA in all slots
               na <- Reduce(`|`, lapply(slots, is.na))
-              slots <- lapply(slots, function(slot) `[<-`(slot, na, NA))
+              slots <- lapply(slots, \(slot) `[<-`(slot, na, NA))
               
               setSlots(.Object) <- slots
               validObject(.Object)
@@ -383,7 +383,7 @@ humvectorJ <- function(j, x) {
 }
 
 emptyslots <- function(x) {
-    setSlots(x) <- lapply(getSlots(x), function(slot) vector(class(slot), 0L))
+    setSlots(x) <- lapply(getSlots(x), \(slot) vector(class(slot), 0L))
     x
 }
 
@@ -651,7 +651,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
               
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
-              slots <- Map(function(slotx, slotv) {
+              slots <- Map(\(slotx, slotv) {
                                   slotx[i.internal] <- slotv
                                   slotx
                              },
@@ -719,7 +719,7 @@ setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
               j <- humvectorJ(j, x)
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
-              slots <- Map(function(slotx, slotv) {
+              slots <- Map(\(slotx, slotv) {
                   slotx[j] <- slotv
                   slotx
               },
@@ -773,7 +773,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
               
               slotsx <- getSlots(x)
               slotsv <- getSlots(value)
-              slots <- Map(function(slotx, slotv) {
+              slots <- Map(\(slotx, slotv) {
                   slotx[ij.internal] <- slotv
                   slotx
               }, slotsx, slotsv)
@@ -808,7 +808,7 @@ cartesianAssign <- function(x, i, j, value) {
     
     slotsx <- getSlots(x)
     slotsv <- getSlots(value)
-    slots <- Map(function(slotx, slotv) {
+    slots <- Map(\(slotx, slotv) {
         slotx[i.internal] <- slotv
         slotx
     }, slotsx, slotsv)
@@ -829,7 +829,7 @@ setMethod('rep', c(x = 'struct'),
               } else {
                   columns <- columns(x)
                   lapply(slots,
-                         function(slot) {
+                         \(slot) {
                              unlist(tapply(slot, columns, rep, ..., simplify = FALSE), use.names = FALSE)
                          })
               }
@@ -860,7 +860,7 @@ setMethod('c', 'struct',
               
               # make vectors into column vectors
               xs <- lapply(xs, 
-                           function(x) {
+                           \(x) {
                                if (!hasdim(x))  x@dim <- c(length(x), 1L)
                                x
                                })
@@ -881,11 +881,11 @@ setMethod('c', 'struct',
               x <- xs[[1]]
               
               xslots <- lapply(xs, getSlots) 
-              xslots <- Map(function(slots, curx) {
-                                    lapply(slots, function(slot) {slot %dim% curx})
+              xslots <- Map(\(slots, curx) {
+                                    lapply(slots, \(slot) {slot %dim% curx})
                                },
                                xslots, xs)
-              slots <- Reduce(function(cur, rest) Map(rbind, cur, rest), xslots)
+              slots <- Reduce(\(cur, rest) Map(rbind, cur, rest), xslots)
               slots <- lapply(slots, c)
               setSlots(x) <- slots
               
@@ -922,7 +922,7 @@ rbind.struct <- function(...) {
     maxcol <- if (any(hasdim)) max(0, ldims$ncol) else max(ldims$length)
     
     xs[!hasdim] <- lapply(xs[!hasdim],
-                          function(x) {
+                          \(x) {
                               if (length(x) == 1L && maxcol > 0) x <- rep(x, maxcol)
                               t(x) # make into row matrix
                           })
@@ -938,7 +938,7 @@ rbind.struct <- function(...) {
 cbind.struct <-  function(...) {
     xs <- list(...)
     xs <- Filter(Negate(is.null), xs)
-    xs <- lapply(xs, function(x) if (hasdim(x)) t(x) else x)
+    xs <- lapply(xs, \(x) if (hasdim(x)) t(x) else x)
     
     #
     x <- do.call('rbind', xs)
@@ -947,7 +947,7 @@ cbind.struct <-  function(...) {
     # new colnames
     existing <- sapply(xs, rownames) 
     new <- .names(xs)
-    new <- Map(function(old, new, len) if (new == '') old else rep(new, len %maybe% 1L), existing, new, lapply(xs, nrow))
+    new <- Map(\(old, new, len) if (new == '') old else rep(new, len %maybe% 1L), existing, new, lapply(xs, nrow))
     if (any(!sapply(new, is.null))) new[sapply(new, is.null)] <- list("")
     colnames(x) <- unlist(new)
     x
@@ -1014,7 +1014,7 @@ setMethod('as.list', signature = c('struct'),
               x <- list(x, ...)
               x <- do.call('c', x)
               
-              lapply(seq_along(x), function(i) x[i])
+              lapply(seq_along(x), \(i) x[i])
           })
 
 #' @export
@@ -1082,7 +1082,7 @@ list2dt <- function(l) {
     structs <- sapply(l, is.struct)
     
     l[structs] <- lapply(l[structs],
-                            function(struct) as.data.table(getSlots(struct)))
+                            \(struct) as.data.table(getSlots(struct)))
     
     as.data.table(l)
 }
@@ -1174,7 +1174,7 @@ setMethod('sum', signature = c('struct'),
           function(x, ..., na.rm = FALSE) {
               x <- c(list(x), ...)
               
-              x <- lapply(x, function(humv) {
+              x <- lapply(x, \(humv) {
                   setSlots(humv) <- lapply(getSlots(humv, c('numeric', 'integer', 'logical')), sum, na.rm = na.rm)
                   humv@dim <- humv@colnames <- humv@rownames <- NULL
                   humv
@@ -1194,7 +1194,7 @@ setMethod('colSums', signature = c('struct'),
           function(x, na.rm = FALSE, drop = FALSE) {
               if (!hasdim(x)) x <- cbind(x)
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
-                                    function(slot) {
+                                    \(slot) {
                                         as.integer(unname(c(colSums(slot %dim% x, na.rm = na.rm))))
                                     })
               rownames(x) <- NULL
@@ -1209,7 +1209,7 @@ setMethod('rowSums', signature = c('struct'),
               if (!hasdim(x)) x <- rbind(x)
               
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
-                                    function(slot) {
+                                    \(slot) {
                                         as.integer(unname(c(rowSums(slot %dim% x, na.rm = na.rm))))
                                     })
               colnames(x) <- NULL
@@ -1222,7 +1222,7 @@ setMethod('cumsum', signature = c('struct'),
           function(x) {
               
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
-                                    function(slot) {
+                                    \(slot) {
                                         if (hasdim(x)) {
                                             c(apply(slot %dim% x, 2, cumsum))
                                         } else {
@@ -1240,7 +1240,7 @@ setMethod('cumsum', signature = c('struct'),
 setMethod('diff', signature = c('struct'),
           function(x, lag = 1L) {
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
-                                    function(slot) {
+                                    \(slot) {
                                         c(diff(slot %dim% x, lag = lag))
                                     })
               x@dim[1] <- x@dim[1] - 1L
@@ -1277,7 +1277,7 @@ setMethod('-', signature = c('struct', 'struct'),
 setMethod('-', signature = c( 'struct', 'missing'),
           function(e1, e2) {
               
-              setSlots(e1) <- lapply(getSlots(e1), function(slot) -slot )
+              setSlots(e1) <- lapply(getSlots(e1), \(slot) -slot )
               e1
           })
 
@@ -1303,7 +1303,7 @@ setMethod('-', signature = c('ANY', 'struct'),
 setMethod('*', signature = c('struct', 'numeric'),
           function(e1, e2) {
               setSlots(e1) <- lapply(getSlots(e1, c('numeric', 'integer')), 
-                                     function(x) {
+                                     \(x) {
                                        as(x * e2, class(x))
                                          
                                      })
