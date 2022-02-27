@@ -443,7 +443,7 @@ recip2rint <- function(str) {
           ndots <- stringr::str_count(uniqstr, '\\.')
           rhythmInterval <- gsub('\\.+', '', uniqstr)
           
-          rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], function(f) eval(parse(text = gsub('%', '/', f)))))
+          rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], \(f) eval(parse(text = gsub('%', '/', f)))))
           
           rhythmInterval <- 1 / as.numeric(rhythmInterval)
           rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
@@ -470,7 +470,7 @@ numeric2rint <- function(n) {
 rational2rint <- function(str, split = '/') {
           split <- strsplit(str, split = split)
           
-          ns <- lapply(split, function(n) {
+          ns <- lapply(split, \(n) {
               if (all(is.na(n))) return(rint(NA))
               
               if (tail(n, 1) == '') n[length(n)] <- 1L
@@ -657,7 +657,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
           into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
-                 function(rs) {
+                 \(rs) {
                            divs <- rs %/% into
                            parts <- into * divs
                            
@@ -668,7 +668,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
                  }) -> decompositions
           
           lapply(1:length(into),
-                 function(j) {
+                 \(j) {
                            do.call('c', lapply(decompositions, '[', j))
                  }) -> decompositions
           
