@@ -577,7 +577,7 @@ setMethod('initialize', 'humdrumR',
 
 #' @name humdrumR-class
 #' @export
-is.humdrumR <- function(x) inherits(x, 'humdrumR')
+is.humdrumR <- \(x) inherits(x, 'humdrumR')
 
 
 #' humdrumR Coercion.
@@ -842,13 +842,13 @@ nfiles <- npieces
 #' @export
 setMethod('length',
           signature = c(x = 'humdrumR'),
-          function(x) npieces(x))
+          \(x) npieces(x))
 
 #' @name humSize
 #' @export
 setMethod('nrow', 
           signature = c(x = 'humdrumR'), 
-          function(x) nrecords(x, dataTypes = 'LIMDd'))
+          \(x) nrecords(x, dataTypes = 'LIMDd'))
 
 #' @name humSize
 #' @export
@@ -1017,7 +1017,7 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
     
     target[ , NewSpine := destinationSpines[match(Spine, targetSpines)]]
-    target <- target[ , sapply(target, function(x) !all(is.na(x))), with=FALSE]
+    target <- target[ , sapply(target, \(x) !all(is.na(x))), with=FALSE]
     
     oldspines <- split(target, by = 'Spine', keep.by = FALSE)
     oldspines <- lapply(oldspines, 
@@ -1404,7 +1404,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
           values <- if (all(lengths(values) == nrow(humtab)) && all(vectors)) {
               do.call('paste', c(values, sep = sep))
           } else {
-              sapply(values, function(x) if (is.object(x)) object2str(x) else paste(x, collapse = sep))
+              sapply(values, \(x) if (is.object(x)) object2str(x) else paste(x, collapse = sep))
           }
       }
       if (is.matrix(values)) {
@@ -2085,7 +2085,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     
     chunks <- segments(!null)
     
-    # newRN <- unlist(tapply(rownames(tokmat), chunks, function(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
+    # newRN <- unlist(tapply(rownames(tokmat), chunks, \(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
     
     tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
                                    function(i) {
