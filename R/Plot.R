@@ -17,7 +17,7 @@ showHumdrum = function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), 
   # recor types
   recordtypes = records$Type
   recordtypes[recordtypes == 'Comment' & records$Global] = 'Global Comment'
-  recordtypes[recordtypes == 'Interpretation' & unlist(lapply(recordvecs, function(rec) grepl('^\\*\\*', rec[1])))] = 'Exclusive Interpretation'
+  recordtypes[recordtypes == 'Interpretation' & unlist(lapply(recordvecs, \(rec) grepl('^\\*\\*', rec[1])))] = 'Exclusive Interpretation'
   
   #spine numbers
   spinens  = names(records$Tokens[[which.max(lengths(recordvecs))]])
@@ -52,7 +52,7 @@ showHumdrum = function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), 
     mtext(side = 3, text = unique(gsub('^.*/', '', records$FileName)), line = 2, cex = scale * 1.5)
   
     #
-    X = unlist(lapply(rle(cumsum(spinens != ''))$lengths, function(n) head(seq(from = 0, to = 1, length.out = n + 1), -1))) + cumsum(spinens != '')
+    X = unlist(lapply(rle(cumsum(spinens != ''))$lengths, \(n) head(seq(from = 0, to = 1, length.out = n + 1), -1))) + cumsum(spinens != '')
     
     # print spine numbers
     X_ = c(X, ceiling(max(X) + .01))
@@ -69,7 +69,7 @@ showHumdrum = function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), 
                                                     'Data', 'Interpretation', 'Exclusive Interpretation', 'Reference'))]
     
     lapply(top:1, # loop for each record
-           function(i) {
+           \(i) {
              if (recordtypes[i] != 'Data') { # add background color to record
                polycol = if (recordtypes[i] %in% c('Reference', 'Global Comment')) 'grey40' else setAlpha(linecolors[i], .3)
                polygon(x = c(1, 1, right + 1, right + 1),
