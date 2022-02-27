@@ -444,9 +444,9 @@ setMethod('LO5th', 'diatonicSet',
     root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
     
     order <- lapply(lapply(root_inkey[notna] + steporder * inversion[notna], seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
-    LO5ths[notna] <- Map(function(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths[notna], order)
+    LO5ths[notna] <- Map(\(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths[notna], order)
     
-    # LO5ths <- do.call('rbind', Map(function(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
+    # LO5ths <- do.call('rbind', Map(\(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
                                    # root %% 7L, 1:nrow(LO5ths), inversion))
     LO5ths <- do.call('rbind', LO5ths)
     LO5ths[cbind((1:nrow(LO5ths))[notna], 1L + ((7L - inversion[notna]) %% 7L))] <- root[notna]
@@ -492,9 +492,9 @@ dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(augment, diminish, "")[match(alterations, c(7, -7, 0))]
 
-    order <- lapply(mode[altered] %% 7L, function(m) ((0L:6L + m) %% 7L) + 1 )
+    order <- lapply(mode[altered] %% 7L, \(m) ((0L:6L + m) %% 7L) + 1 )
         
-    labs <- do.call('rbind', lapply(order, function(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
+    labs <- do.call('rbind', lapply(order, \(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
     labs[alterations == ''] <- ''
 
     alterations[] <- paste0(alterations, labs)
@@ -641,11 +641,11 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE,
     if (steporder != 1L) {
       str <- strsplit(str, split = '')
       ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
-      str <- sapply(str, function(s) paste(s[ord], collapse = ''))
+      str <- sapply(str, \(s) paste(s[ord], collapse = ''))
     }
     
     if (allow_partial) {
-      mode <- sapply(paste0('^', str), function(str) modes_int[which(stringr::str_detect(names(modes_int), str))[1]])
+      mode <- sapply(paste0('^', str), \(str) modes_int[which(stringr::str_detect(names(modes_int), str))[1]])
     } else {
       mode <- modes_int[str]
     }
@@ -657,7 +657,7 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE,
       modes <- do.call('cbind', modes)
       
       mode_alterations <- lapply(strsplit(str[altered], split = ''),
-                                 function(qualities) {
+                                 \(qualities) {
                                    hits <- qualities == modes[1L:length(qualities), ]
                                    
                                    # only want to alter 1 5 or 3 as last resort
@@ -709,7 +709,7 @@ alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat 
     degrees <- stringr::str_extract_all(str[hits],   paste0(accidentalRE, '[1234567]'))
     
     acc <- lapply(degrees, stringr::str_extract, accidentalRE)
-    acc <- lapply(acc, function(acc) specifier2tint(acc, qualities = FALSE, 
+    acc <- lapply(acc, \(acc) specifier2tint(acc, qualities = FALSE, 
                                                     sharp = sharp, flat = flat, ...)@Fifth) 
     degrees <- lapply(degrees, stringr::str_remove, accidentalRE)
     
@@ -723,8 +723,8 @@ alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat 
     alterations[] <- alterations %/% 7L
     
     ## rotate to appropriate mode
-    order <- lapply(-mode %% 7L, function(m) ((0L:6L + m) %% 7L) + 1 )
-    threes <- do.call('rbind', lapply(order, function(ord) (3^(6:0))[ord]))
+    order <- lapply(-mode %% 7L, \(m) ((0L:6L + m) %% 7L) + 1 )
+    threes <- do.call('rbind', lapply(order, \(ord) (3^(6:0))[ord]))
     
     rowSums(threes * alterations)
     
@@ -745,7 +745,7 @@ signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
     empty <- lengths(signotes) == 0L
     
     lof <- lapply(signotes[!empty], 
-                  function(notes) {
+                  \(notes) {
                       lof <- kern2tint(notes)@Fifth
                       lof[lof < -1L | lof > 5L]
                       })
@@ -755,7 +755,7 @@ signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
     
     sharp <- sapply(lof, mean) > 0
     
-    altered <- unlist(Map(function(fs, bound)  any(diff(sort(c(bound, fs))) > 1), 
+    altered <- unlist(Map(\(fs, bound)  any(diff(sort(c(bound, fs))) > 1), 
                           lof, 
                           c(-1, 5L)[sharp + 1L]))
     
@@ -772,7 +772,7 @@ signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
         
         alterations <- do.call('rbind',
                                Map( 
-                                   function(fth, sig) {
+                                   \(fth, sig) {
                                        alt <- unalt <- -1L:5L + sig
                                        natural <- alt > -2L & alt < 6L
                                        alt[!natural & !alt %in% fth] <-  alt[!natural & !alt %in% fth] + 7L
@@ -900,7 +900,7 @@ mapofdset <- function(str, ..., split = '/') {
 
    parts <- strPartition(str, split = split)
     
-   parts[] <- head(Reduce(function(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
+   parts[] <- head(Reduce(\(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
     
