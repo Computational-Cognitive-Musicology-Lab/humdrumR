@@ -112,7 +112,7 @@ findAfter <- function(vec, after, pattern, npattern = 1) {
 
 trans <- function(expr) {
  if (!is.call(expr) || !deparse(expr[[1]]) %in% c('+', '-')) {
-           return(function(x) x) 
+           return(\(x) x) 
  } else {
   val <- expr[[3]]
   if (is.call(val) && deparse(val[[1]]) == '*') {
@@ -241,11 +241,11 @@ hop <- function(vec, pattern, start = 1L, end = length(vec)) {
 
 windowEdges <- function(inds, start, end, bounds = 'exclude') {
           if (pmatch(bounds, 'exclude', 0L)) {
-                    ok <- !unlist(do.call('Map', c(`|`, lapply(inds, function(x) x < start | x > end | is.na(x)))))
+                    ok <- !unlist(do.call('Map', c(`|`, lapply(inds, \(x) x < start | x > end | is.na(x)))))
           } else {
           # if (pmatch(bounds, 'trim', 0L)) {
                     inds <- lapply(inds, 
-                                   function(x) {
+                                   \(x) {
                                              x[x < start] <- start
                                              x[x > end] <- end
                                              x
@@ -278,11 +278,11 @@ nest <- function(vec, open, close, depth = 1) {
                                                     " and ", 
                                                     close, " tokens."))
           
-          cdepth <- sapply(1:max(closes), function(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
-          odepth <- sapply(1:max(opens ), function(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
+          cdepth <- sapply(1:max(closes), \(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
+          odepth <- sapply(1:max(opens ), \(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
           
           lapply(1:max(depths),
-                 function(d) {
+                 \(d) {
                            cbind(opens = apply(odepth == d, 1, any),
                                  closes = apply(cdepth == d, 1, any))
                            
