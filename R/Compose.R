@@ -10,12 +10,12 @@ compose.default <- function(..., fenv = parent.frame()) {
     ### arguments
     fargs <- lapply(fs, fargs)
     fargs[-1] <- lapply(fargs[-1], 
-                        function(farg) {
+                        \(farg) {
                            if (names(farg)[[1]] == '...') farg <- c(alist(tmp = ), farg)
                          farg })
     
     fargNames <- lapply(fargs, 
-                        function(farg) {
+                        \(farg) {
                           names <- names(farg)
                           names(names) <- ifelse(names == '...', '', names)
                           rlang::syms(names)
@@ -23,18 +23,18 @@ compose.default <- function(..., fenv = parent.frame()) {
     
     
     args <- do.call('c', c(fargs[1], 
-                           lapply(fargs[-1], function(farg) farg[-1]),
+                           lapply(fargs[-1], \(farg) farg[-1]),
                            use.names = FALSE))
     args <- args[!duplicated(names(args)) & names(args) != 'tmp']
     
     # firstArg <- rlang::sym(names(args)[[1]])
-    pipeArgs <- rlang::syms(sapply(fargs, function(arg) names(arg)[[1]]))
+    pipeArgs <- rlang::syms(sapply(fargs, \(arg) names(arg)[[1]]))
     
     
     
     ### body
     body <- rlang::expr({
-        !!!Map(function(bod, arg, argnames) {
+        !!!Map(\(bod, arg, argnames) {
             rlang::expr(!!arg <- stickyApply(!!bod, !!!argnames))
             }, 
             rlang::syms(head(fnames, -1)), 
@@ -51,7 +51,7 @@ compose.default <- function(..., fenv = parent.frame()) {
     
     ### environment
     # fenv <- new.env() # parent.env(parent.frame())
-    Map(function(fname, f) assign(fname, f, envir = fenv), 
+    Map(\(fname, f) assign(fname, f, envir = fenv), 
         c(fnames, 'memoizeParse', 'predicateParse'), 
         c(fs, memoizeParse, predicateParse))
     
@@ -157,7 +157,7 @@ inPlace <- function(result, orig, regex) {
 }
 
 inPlacer <- function(orig, regex) {
-    function(result) {
+    \(result) {
         .ifelse(is.na(result), 
                 orig,
                 stringi::stri_replace_first(str = orig,
@@ -451,7 +451,7 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
   mapply(assign, argnames, matchingArgs, MoreArgs = list(envir = parent.frame())) 
   # THIS mapply DOES THE WORK OF SHRINKING THE ARGUMENTS IN THE PARENT FUNCTION
   
-  function(result) {
+  \(result) {
     if (!(is.struct(result) || is.atomic(result)) || length(result) != sum(bool)) return(result)
     
     output <- if (inPlace && class(target) == class(result)) target else vectorNA(length(target), class(result))
@@ -472,7 +472,7 @@ dimParse <- \(x) {
   
   assign(name, value = x, envir = parent.frame())
   
-  function(newx) {
+  \(newx) {
     if (length(newx) == prod(olddim))  dim(newx) <- olddim 
     
     newx
@@ -540,7 +540,7 @@ memoizeParse <- function(..., minN = 100L, memoize = TRUE) {
     if (is.null(names(args)) || any(names(args) == "")) .stop("memoizeParse requires that all arguments are named.")
     
     # only atomic/struct args that are longer than minN are affected
-    args <- args[sapply(args, function(arg) (is.atomic(arg) || is.struct(arg)) && length(arg) >= minN)]
+    args <- args[sapply(args, \(arg) (is.atomic(arg) || is.struct(arg)) && length(arg) >= minN)]
     
     if (length(args) == 0L) return(force)
     
@@ -559,7 +559,7 @@ memoizeParse <- function(..., minN = 100L, memoize = TRUE) {
     mapply(assign, argnames, uniqueArgs, MoreArgs = list(envir= parent.frame())) 
     # THIS mapply DOES THE WORK OF SHRINKING THE ARGUMENTS IN THE PARENT FUNCTION
     
-    function(result) {
+    \(result) {
         if (is.table(result) || length(result) != sum(!bool)) return(result)
         
         uniqueVals <- target[!bool] # may or may not be data.table, with structs squashed
@@ -661,7 +661,7 @@ humdrumDispatch <- function(..., doExclusiveDispatch = TRUE) {
     dispatchExclusive <- gsub(': .*', '', dispatchcode)
     
     REexprs <- rlang::parse_exprs(dispatchRE)
-    RElist <- lapply(dispatchExclusive, function(REname) rlang::expr(`$`(regexes, !!(rlang::sym(REname)))))
+    RElist <- lapply(dispatchExclusive, \(REname) rlang::expr(`$`(regexes, !!(rlang::sym(REname)))))
     
     
     arguments <- getAllArgs(exprs)
@@ -751,12 +751,12 @@ regexFindMethod <- function(str, regexes) {
     
     regexes <- getRE(regexes)
     
-    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
+    Nmatches <- sapply(regexes, \(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
     if (!any(Nmatches > 0L)) return(0L)
     
     #which function to dispatch
     Ncharmatches <- sapply(regexes[Nmatches > 0],
-                           function(re) {
+                           \(re) {
                                nchars <- nchar(stringi::stri_extract_first_regex(str, re))
                                nchars[is.na(nchars)] <- 0L
                                sum(nchars)
