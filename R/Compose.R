@@ -74,7 +74,7 @@ compose.composed <- function(...) {
 }
 
 #' @export
-print.composed <- function(x) {
+print.composed <- \(x) {
     attributes(x) <- NULL
     print(x)
     
@@ -102,7 +102,7 @@ stickyApply <- function(func, ...) {
 }
 
 
-stickyAttrs <- function(x) attr(x, 'sticky')
+stickyAttrs <- \(x) attr(x, 'sticky')
 
 `stickyAttrs<-` <- function(x, value) {
     sticky <- stickyAttrs(x)
@@ -112,12 +112,12 @@ stickyAttrs <- function(x) attr(x, 'sticky')
     x
 }
 
-unstick <- function(x) {
+unstick <- \(x) {
     attr(x, 'sticky') <- NULL
     x
 }
 
-passargs <- function(x) {
+passargs <- \(x) {
   # this COULD be incorporated into compose, but I'd rather not.
   # It allows one function in the chain to change an input argument for functiosn later in the chain.
   attrs <- attributes(x)
@@ -221,7 +221,7 @@ setMethod('&', c('predicate.function', 'predicate.function'),
           function(e1, e2) {
               f1 <- e1@.Data
               f2 <- e2@.Data
-              func <- function(x) {
+              func <- \(x) {
                   f1(x) & f2(x)
               }
               
@@ -238,7 +238,7 @@ setMethod('|', c('predicate.function', 'predicate.function'),
           function(e1, e2) {
               f1 <- e1@.Data
               f2 <- e2@.Data
-              func <- function(x) {
+              func <- \(x) {
                   f1(x) | f2(x)
               }
               
@@ -253,7 +253,7 @@ setMethod('|', c('predicate.function', 'predicate.function'),
 
 #' @export
 EQ <- function(pat) {
-  func <- function(x) {
+  func <- \(x) {
     match_size(pat = pat,x = x, toEnv = TRUE)
     ifelse(is.na(pat), is.na(x), x == pat)
   }
@@ -264,7 +264,7 @@ EQ <- function(pat) {
 
 #' @export
 LEN <- function(p.f) {
-    func <- function(x) p.f(length(x))
+    func <- \(x) p.f(length(x))
  
     new('predicate.function', func,
         string = gsub('x', 'length(x)', p.f@string))
@@ -285,14 +285,14 @@ ALL <- function(p.f) {
 
 #' @export
 GT <- function(n) {
-  func <- function(x) x > n
+  func <- \(x) x > n
 
   new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
 }
 
 #' @export
 GTET <- function(n) {
-  func <- function(x) x >= n
+  func <- \(x) x >= n
 
   new('predicate.function', func, string = glue::glue('x >= {deparse(n)}'))
 }
@@ -300,29 +300,29 @@ GTET <- function(n) {
 
 #' @export
 LT <- function(n) {
-  func <- function(x) x < n
+  func <- \(x) x < n
 
   new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
 }
 
 #' @export
 LTET <- function(n) {
-  func <- function(x) x <= n
+  func <- \(x) x <= n
 
   new('predicate.function', func, string = glue::glue('x <= {deparse(n)}'))
 }
 
 #' @export
 RE <- function(pat) {
-  func <- function(x)  grepl(pat, x) 
+  func <- \(x)  grepl(pat, x) 
 
   new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
 }
 
 #' @export
-na <- new('predicate.function', function(x) is.na(x), string = "x == NA")
+na <- new('predicate.function', \(x) is.na(x), string = "x == NA")
 #' @export
-notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
+notna <- new('predicate.function', \(x) !is.na(x), string = "x != NA")
 
 
 
@@ -464,7 +464,7 @@ predicateParse <- function(predicateFunc, ..., inPlace = TRUE, all = TRUE) {
   }
 }
 
-dimParse <- function(x) {
+dimParse <- \(x) {
   name <- as.character(rlang::enexpr(x))
   olddim <- dim(x) 
   
