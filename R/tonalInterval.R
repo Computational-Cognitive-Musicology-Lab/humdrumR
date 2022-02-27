@@ -131,13 +131,13 @@ setClass('tonalInterval',
                    Cent   = 'numeric')) -> tonalInterval
 
 setValidity('tonalInterval', 
-            function(object) {
+            \(object) {
               all(abs(object@Cent) <= 1200, na.rm = TRUE)
             })
 
 setMethod("initialize", 
           "tonalInterval",
-          function(.Object, Fifth = 0L, Octave = 0L, Cent = 0L) {
+          \(.Object, Fifth = 0L, Octave = 0L, Cent = 0L) {
               .Object <- callNextMethod() # call the struct initialize
               Cent <- .Object@Cent
               if (any(abs(Cent) >= 1200L, na.rm = TRUE)) {
@@ -558,7 +558,7 @@ alteration.memory <- function(LO5th) {
   
   generic <- genericFifth(LO5th)
   lapply(-1L:5L, # no need to consider intervals with no conflicts
-         function(gen) {
+         \(gen) {
            cur <- generic  == gen
            which(cur)[c(FALSE, diff(LO5th[cur]) == 0L)]
          }) |> unlist() -> hits
@@ -851,7 +851,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"
   str <- pasteordered(parts, contour = contours, accidental = accidentals, steps = .paste(steps, tails))
   
   if (factor) {
-    solfatails[] <- sweep(solfatails, 1, rownames(solfatails), function(x, y) paste0(y, x))
+    solfatails[] <- sweep(solfatails, 1, rownames(solfatails), \(x, y) paste0(y, x))
     factor(str, levels = c(t(solfatails)))
   } else {
     str
@@ -1044,7 +1044,7 @@ decimal2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melod
   whole <- round(logged)
   remain <- logged - whole
   
-  whichhit  <- applyrows(remain, function(row) {
+  whichhit  <- applyrows(remain, \(row) {
     hitind <- which(abs(row) == min(abs(row)))
     hitind[which.min(abs(octs[hitind]))]
   })
