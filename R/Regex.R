@@ -141,7 +141,7 @@ regexDispatch <- function(...) {
           if (length(funcs) == 0L) stop("Can't regexDispatch on zero functions.")
           
           regexes <- getRE(names(funcs))
-          funcsArgs <- lapply(funcs, function(rf) formals(args(rf))[-1])
+          funcsArgs <- lapply(funcs, \(rf) formals(args(rf))[-1])
           
           genericFunc <- function() {
               if (!is.character(str)) stop(call. = FALSE,
@@ -180,12 +180,12 @@ regexFindMethod <- function(str, regexes) {
     
     regexes <- getRE(regexes)
     
-    Nmatches <- sapply(regexes, function(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
+    Nmatches <- sapply(regexes, \(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
     if (!any(Nmatches > 0L)) return(0L)
     
     #which function to dispatch
     Ncharmatches <- sapply(regexes[Nmatches > 0],
-                           function(re) {
+                           \(re) {
                                nchars <- nchar(stringi::stri_extract_first_regex(str, re))
                                nchars[is.na(nchars)] <- 0L
                                sum(nchars)
@@ -203,7 +203,7 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     
     if (inherits(result, 'partition')) {
         result <- lapply(result,
-                         function(res) { res %dim% x})
+                         \(res) { res %dim% x})
     }
     as.re(result, regex) 
 }
@@ -220,7 +220,7 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
         if (inherits(hits_result, 'partition')) {
             result <- hits_result
             result <- lapply(hits_result,
-                             function(hresult) {
+                             \(hresult) {
                                  result <- vectorNA(length(x), class(hresult))
                                  result[hits] <- hresult
                                  result 
@@ -389,7 +389,7 @@ cREs <- function(REs, parse.exhaust = TRUE) {
     if (any(hasCapture)) {
         captures <-  stringr::str_extract_all(REs[hasCapture], '\\\\[1-9]')
         noCaptures <- stringr::str_split(REs[hasCapture], '\\\\[1-9]')
-        captures <- lapply(captures, function(cap) as.integer(factor(cap)))
+        captures <- lapply(captures, \(cap) as.integer(factor(cap)))
         
         shifts <- head(Reduce(function(a, b) a + max(b), captures, init = 0, accumulate = TRUE), length(captures))
         captures <- Map('+', captures, shifts)
