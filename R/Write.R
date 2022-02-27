@@ -104,7 +104,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     
     ### Write~
     cat(sep = '', 'Writing ', nrow(filenameTable), ' files...')
-    Map(function(str, path) {
+    Map(\(str, path) {
         if (verbose) {
             cat('\n\t\t', path, sep = '')
             
