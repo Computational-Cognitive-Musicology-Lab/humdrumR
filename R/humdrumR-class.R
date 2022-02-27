@@ -655,7 +655,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
           
           mat[is.na(mat)] <- "."
           
-          lines <- apply(mat, 1, function(row) paste(row, collapse = '\t'))
+          lines <- apply(mat, 1, \(row) paste(row, collapse = '\t'))
           lines[grepl('^!!', lines)] <- stringr::str_remove_all(lines[grepl('^!!', lines)], '\t\\.')
           
           names(lines) <- rownames(mat)
@@ -735,7 +735,7 @@ as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = N
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
           n <- length(humdrumR)
           lapply(1:n,
-                 function(i) as.matrix.humdrumR(humdrumR[i], dataTypes = dataTypes, 
+                 \(i) as.matrix.humdrumR(humdrumR[i], dataTypes = dataTypes, 
                                        fieldnames = fieldnames, 
                                        padder = padder, 
                                        path.fold = path.fold))
@@ -945,7 +945,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
                     newtab <- merge(.SD, all = TRUE,
                                     expand.grid(Column = missingColumns, Record = unique(Record)))
                     copyfields <- copyfields[sapply(.SD[ , copyfields, with = FALSE], 
-                                                    function(col) length(unique(col[!is.na(col)])) == 1L)]
+                                                    \(col) length(unique(col[!is.na(col)])) == 1L)]
                     
                     newtab[ , copyfields] <- .SD[1, copyfields, with = FALSE]
                     newtab
@@ -1021,13 +1021,13 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
     oldspines <- split(target, by = 'Spine', keep.by = FALSE)
     oldspines <- lapply(oldspines, 
-                        function(spine) {
+                        \(spine) {
                             datafields <- colnames(spine) %in% fields$Name
                             colnames(spine)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
                             spine
                             })
     
-    oldspines <- Reduce(function(x, y) y[x, on = c('File', 'NewSpine', 'Record', 'Stop')], oldspines)
+    oldspines <- Reduce(\(x, y) y[x, on = c('File', 'NewSpine', 'Record', 'Stop')], oldspines)
     colnames(oldspines)[colnames(oldspines) == 'NewSpine'] <- 'Spine'
     humtab <- oldspines[humtab, on = c('File', 'Spine', 'Record', 'Stop')]
     
@@ -1092,7 +1092,7 @@ foldHumdrum <- function(humdrumR, byfields,
           
           #### Construct the expressions which will do the work
           #This is a list of expressions, one to collapse each field.
-          foldexprs <- Map(function(name, type) {
+          foldexprs <- Map(\(name, type) {
                     name <- as.symbol(name) 
                     
                     if (type == 'list') return(call('catlists', name))
@@ -1390,7 +1390,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
     values[is.na(values)] <- nullAs
   } else {
     values[] <- lapply(values, 
-                       function(col) {
+                       \(col) {
                                  col[is.na(col)] <- nullAs
                                  col
                                  })
@@ -1409,8 +1409,8 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
       }
       if (is.matrix(values)) {
           out <- character(nrow(humtab))
-          out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, function(row) paste(unique(row), collapse = sep))
-          out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, function(row) paste(       row , collapse = sep))
+          out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, \(row) paste(unique(row), collapse = sep))
+          out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, \(row) paste(       row , collapse = sep))
           # rownames(out) <- locnames
           values <- out
       }   
@@ -1571,7 +1571,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
   if (any(lists <- classes == 'list')) {
     classes[lists] <- paste0('list (of ',
                              sapply(D[ , lists, with = FALSE],
-                                                function(col) {
+                                                \(col) {
                                                   glue::glue_collapse(paste0(unique(sapply(col, class)), "s"), sep = ', ', last = ', and ')
                                                 }),
                              ")")
@@ -1656,7 +1656,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
  
  active <- activeFields(humdrumR)
  humtab <- humtab[ , 
-                   Map(function(field, act) {
+                   Map(\(field, act) {
                              if (!act) return(field)
                              field <- as.character(field)
                              na <- is.na(field)
@@ -2088,7 +2088,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     # newRN <- unlist(tapply(rownames(tokmat), chunks, \(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
     
     tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
-                                   function(i) {
+                                   \(i) {
                                        if (sum(grepl('^=', tokmat[i, 1])) < 2 && length(i) <= collapseNull) {
                                            tokmat[i , , drop = FALSE] 
                                         } else {
