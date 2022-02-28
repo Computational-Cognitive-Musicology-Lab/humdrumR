@@ -748,7 +748,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   dispatchArgs <- genericArgs[!names(genericArgs) %in% c('str', 'Exclusive', '...') ]
   
   
-  #####################################################
+  ##################################################### #
   
   body <- rlang::expr({
     
@@ -780,20 +780,21 @@ print.humdrumDispatch <- function(x) {
   cat('humdrum-dispatch', call, '\n')
   
   exclusives <- sapply(dispatchDF$Exclusives, \(exc) paste(paste0('**', exc), collapse = '|'))
-  exclusives <- if (all(exclusives == '**any')) "\t" else paste0('\t', exclusives, ' >> ')
+  exclusives <- if (all(exclusives == '**any')) "    " else paste0('    ', exclusives, ' :: ')
   exclusives <- stringr::str_pad(exclusives, max(nchar(exclusives)), side = 'left')
   
   regexes <- sapply(dispatchDF$reGeneratorName, \(REgen) if (is.na(REgen)) '' else paste0(REgen, '(...)'))
   
-  dispatchDF$MethodName <- stringr::str_pad(dispatchDF$MethodName, max(nchar(dispatchDF$MethodName)), side = 'right')
+  dispatchDF$MethodName <- stringr::str_pad(dispatchDF$MethodName, max(nchar(dispatchDF$MethodName)), side = 'left')
   
   dispatchcalls <- Map(\(call, args, regex) {
     argnames <- names(args)
     argnames[1] <- paste0(argnames[1], if (regex != '') paste0(' %~m% ', regex))
-    args <- as.character(args)
-    paste0(call, '(', paste(argnames, ifelse(args == '', '', args), sep = '', collapse = ', '), ')')
+    if (length(argnames) > 1L ) argnames[1] <- stringr::str_pad(argnames[1], max(nchar(regexes)) + 10L, side = 'right')
+    paste0(call, '(', paste(argnames, collapse = ', '), ')')
     
     }, dispatchDF$MethodName, dispatchDF$Args, regexes)
+  
   
   cat(paste0(exclusives, dispatchcalls), sep = '\n')
   
