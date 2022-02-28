@@ -426,16 +426,18 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 
 
 segments <- function(x, reverse = FALSE) {
-    if (!is.logical(x)) x <- c(TRUE, head(x, -1L) != tail(x, -1L))
-    if (reverse) x <- rev(x)
+    if (!is.logical(x)) change <- c(TRUE, head(x, -1L) != tail(x, -1L))
+    if (reverse) change <- rev(change)
     
-    x <- cumsum(x)
+    seg <- cumsum(change)
     
     if (reverse) {
-        x <- rev(-x) + max(x) + 1
+        seg <- rev(-seg) + max(seg) + 1
     }
     
-    x
+    attr(seg, 'values') <- x[change]
+    
+    seg
     
 }
 
@@ -1301,6 +1303,16 @@ append2expr <- function(expr, exprs) {
 }
 
 ### Building smart functions ----
+
+callf... <- function(func, args) {
+    # calls func on args, even if some named arguments in args are not arguments of func
+    # (ignores those arguments)
+    if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
+    
+    do.call(func, args)
+
+
+}
 
 setoptions... <- function(options, defaults) {
     setoptions(options) <- defaults

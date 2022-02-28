@@ -882,6 +882,9 @@ diatonicSet <- function(...) UseMethod('diatonicSet')
 
 diatonicSet.diatonicSet <- function(x, ...) x
 
+#' @export 
+diatonicSet.logical <- function(x, ...) vectorNA(length(x), 'diatonicSet')
+
 #### Numbers ####
 
 #' @export
@@ -891,10 +894,12 @@ diatonicSet.integer <- integer2dset
 
 #### Characters ####
 
-char2dset <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'key: makeRE.key(...)' = key2dset,
-                             'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
-                             'signature: makeRE.signature(...)' = signature2dset)
+
+char2dset <- makeHumdrumDispatcher(list('any', 'makeRE.key',       'key2dset'),
+                                   list('any', 'makeRE.romanKey',  'romanNumeral2dset'),
+                                   list('any', 'makeRE.signature', 'signature2dset'),
+                                   funcName = 'char2dset',
+                                   outputClass = 'diatonicSet')
 
 mapofdset <- function(str, ..., split = '/') {
 
@@ -908,11 +913,13 @@ mapofdset <- function(str, ..., split = '/') {
    dset + dset(of, of, 0L)
 }
 
-diatonicSet.character  <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                         'key: makeRE.key(...)' = key2dset,
-                                         'romanNumeral: makeRE.romanKey(...)' = romanNumeral2dset,          
-                                         'keyof: makeRE.diatonicPartition(...)' = mapofdset,
-                                         'signature: makeRE.signature(...)' = signature2dset)
+diatonicSet.character <- makeHumdrumDispatcher(list('any', 'makeRE.key',       'key2dset'),
+                                               list('any', 'makeRE.romanKey',  'romanNumeral2dset'),
+                                               list('any', 'makeRE.diatonicPartition', 'mapofdset'),
+                                               list('any', 'makeRE.signature', 'signature2dset'),
+                                               funcName = 'diatonicSet.character',
+                                               outputClass = 'diatonicSet')
+
 
 
 

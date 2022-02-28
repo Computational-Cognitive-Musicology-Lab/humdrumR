@@ -778,7 +778,7 @@ tint2kern <- function(x, complex = TRUE, Key = NULL, directed = FALSE, ...) {
     kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = !directed)
   }
   
-  paste0(direction, kern)
+  .paste(direction, kern)
   
 }
 
@@ -1223,6 +1223,7 @@ tonalChroma2tint <- function(str,
                              qualities = FALSE, 
                              parse.exhaust = TRUE, 
                              keyed = FALSE, Key = NULL, 
+                             sep = NULL,
                              ...) {
  
   
@@ -1233,7 +1234,7 @@ tonalChroma2tint <- function(str,
  ############# parse string
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, qualities = qualities, ...)
- REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, toEnv = TRUE) ## save to environment!
+ REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, sep = sep, toEnv = TRUE) ## save to environment!
  
  ## simple part
  step    <- if ("step" %in% parts)    step2tint(step, ...) 
@@ -1371,14 +1372,15 @@ solfa2tint <- function(str, ...) {
 #'
 #'
 
-#'
-#' 
 #' @rdname tonalInterval
 #' @export
 tonalInterval <- function(...) UseMethod('tonalInterval')
 
 #' @export
 tonalInterval.tonalInterval <- function(x, ...) x
+
+#' @export 
+tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
 
 #### Numbers ####
 
@@ -1393,18 +1395,27 @@ tonalInterval.integer  <- semit2tint
 
 #### Characters ####
 
-
 #' @export
-tonalInterval.character <- humdrumDispatch('kern: makeRE.kern(...)' = kern2tint,
-                                           'pitch: makeRE.sciPitch(...)' = pitch2tint,
-                                           'hint: makeRE.interval(...)'  = interval2tint,
-                                           'mint: makeRE.interval(...)'  = interval2tint,
-                                           'int: makeRE.interval(...)'  = interval2tint,
-                                           'deg: makeRE.scaleDegree(...)'  = degree2tint,
-                                           'solfa: makeRE.solfa(...)' = solfa2tint,
-                                           'freq: makeRE.decimal()' = semit2tint,
-                                           'fraction: makeRE.fraction(...)' = fraction2tint,
-                                           defaultClass = 'tonalInterval')
+tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   'makeRE.kern',        'kern2tint'),
+                                                 list('pitch',                  'makeRE.sciPitch',    'pitch2tint'),
+                                                 list(c('hint', 'mint', 'int'), 'makeRE.interval',    'interval2tint'),
+                                                 list('deg',                    'makeRE.scaleDegree', 'degree2tint'),
+                                                 list('solfa',                  'makeRE.solfa',       'solfa2tint'),
+                                                 funcName = 'tonalInterval.character',
+                                                 outputClass = 'tonalInterval')
+
+
+
+# tonalInterval.character <- humdrumDispatch('kern: makeRE.kern' = kern2tint,
+#                                            'pitch: makeRE.sciPitch' = pitch2tint,
+#                                            'hint: makeRE.interval'  = interval2tint,
+#                                            'mint: makeRE.interval'  = interval2tint,
+#                                            'int: makeRE.interval'  = interval2tint,
+#                                            'deg: makeRE.scaleDegree'  = degree2tint,
+#                                            'solfa: makeRE.solfa' = solfa2tint,
+#                                            'freq: makeRE.decimal' = semit2tint,
+#                                            'fraction: makeRE.fraction' = fraction2tint,
+#                                            defaultClass = 'tonalInterval')
 
 #### setAs tonal interval ####
 
@@ -1423,558 +1434,8 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 
 ## Pitch transformer documentation ####
 
-#' Pitch representations and translations
-#' 
-#' Functions for creating and/or translating between numerous representations of pitch.
-#' 
-#' There are numerous ways that musicians and musicologists encode pitch information---solfege, scientific pitch,
-#' intervals, scale degrees, frequencies, etc.---each with different purposes and uses.
-#' Some of these representations are numeric, but most involve letters and other characters.
-#' Any of these concrete representations can be translated to and from
-#' abstract [tonalInterval] objects: `tonalInterval`s completely represent all/any of these standard representations,
-#' so *cocrete pitch representation -> tonalInterval* is guaranteed to be lossless.
-#' However, not all pitch representations encode complete tonal pitch information, so
-#' *tonalInterval -> concrete pitch representation* may be lossy.
-#' These caneats asside, `humdrumR` can, via the common `tonalInterval` representation, encode and translate *between* various 
-#' representations: we can read in data in any reprsentation, manipulate it, and write it to the same or a different representation.
-#' This documentation describes `humdrumR`'s pitch representation and translation features.
-#' (`tonalIntervals` also give us easy ways to **manipulate** pitch information---see the [tonalTransform] documentation.)
-#' 
-#' `humdrumR` currently recognizes XXX "standard" pitch representations:
-#' 
-#' | Name        | Class       | Description                                                                                                                             |
-#' | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------: |
-#' | semit       | `integer`   | [Semitones](https://en.wikipedia.org/wiki/Semitone)                                                                                     |
-#' | midi        | `integer`   | [MIDI](https://en.wikipedia.org/wiki/MIDI) note number                                                                                  |
-#' | kernPitch   | `character` | [Kern](https://www.humdrum.org/rep/kern/index.html) pitch representation                                                                |
-#' | pitch       | `character` | [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) representation                                                       |
-#' | lilyPitch   | `character` | [LilyPond](https://lilypond.org/doc/v2.20/Documentation/notation/pitches) pitch representation                                          |
-#' | interval    | `character` | Tonal [interval]("https://en.wikipedia.org/wiki/Interval_(music)#Interval_number_and_quality")                                          |
-#' | degree      | `character` | [Scale degree]("https://en.wikipedia.org/wiki/Degree_(music)")                                                                          |
-#' | solfa       | `character` | Humdrum [solfa](https://www.humdrum.org/rep/solfa/) representation of solfege                                                           |
-#' | decimal     | `numeric`   | [Frequency ratio](https://en.wikipedia.org/wiki/Interval_ratio) as R [numeric][base::numeric] (equal temperament)                       |
-#' | frequency   | `numeric`   | [Sound frequency](https://en.wikipedia.org/wiki/Frequency#Sound) ([equal temperament](https://en.wikipedia.org/wiki/Equal_temperament)) |
-#' | fraction    | `character` | Frequency ratio as fraction (Pythagorean tuning)                                                                                        |
-#  | rational    | `list`      | Frequency ratio as integer numerators and denominators ([Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning))         |
-#' 
-#' Below are equivalent examples of each of these standard pitch representation; all the representations in each column of the table are 
-#' represented by the same [tonalInterval]---the final
-#' two rows show the `tonalInterval` slot (`@Octave` and `@Fifth`) values associated with each interval as well (users should never really have to think about these).
-#' 
-#' | Name        |  Unison        | Minor second        | Descending major second  | Augmented fourth   | Perfect 5th    | Diminished 7th         | Minor 10th     |
-#' | ----------- | -------------- | ------------------- | ------------------------ | ------------------ | -------------- | ---------------------- | -------------- |
-#' | semit       | `0L`           | `1L`                |  `-2L`                   |  `6L`              |  `7L`          |  `9L`                  |  `15L`         |      
-#' | midi        | `60L`          | `61L`               |  `58L`                   |  `66L`             |  `67L`         |  `69L`                 |  `75L`         | 
-#' | kernPitch   | `"c"`          | `"d-"`              |  `"B-"`                  |  `"f#"`            |  `"g"`         |  `"b--"`               |  `"ee-"`       | 
-#' | pitch       | `"C4"`         | `"Db4"`             |  `"Bb3"`                 |  `"F#4"`           |  `"G4"`        |  `"Bbb4"`              |  `"Eb5"`       | 
-#' | lilyPitch   | `"c"`          | `"des"`             |  `"bes,"`                |  `"fis"`           |  `"g"`         |  `"beses"`             |  `"ees'"`      | 
-#' | interval    | `"P1"`         | `"+m2"`             |  `"-M2"`                 |  `"+A4"`           |  `"+P5"`       |  `"+d7"`               |  `"+m10"`      | 
-#' | degree      | `"1"`          | `"m2"`              |  `"m7"`                  |  `"#4"`            |  `"5"`         |  `"b7"`                |  `"m3"`        | 
-#' | solfa       | `"do"`         |  `"ra"`             |  `"te"`                  |  `"fi"`            |  `"so"`        |  `"te-"`               |  `"me"`        | 
-#' | decimal     | `1`            | `1.059`             |  `0.891`                 |  `1.414`           |  `1.498`       |  `1.682`               |  `2.378`       | 
-#' | frequency   | `261.625`      | `277.182`           | `233.0819`               | `369.994`          |  `391.995`     |  `440`                 |  `622.253`     | 
-#' | fraction    | `"1/1"`        | `"256/243"`         | `"8/9"`                  | `"729/512"`        | `"3/2"`        | `"32768/19683"`        | `"64/27"`      |
-#' | `@Fifth`    | `0L`           | `-5L`               | `-2L`                    | `6L`               | `1L`           | `-9L`                  | `-3L`          |
-#' | `@Octave`   | `0L`           | `8L`                | `3L`                     | `-9L`              | `-1L`          | `15L`                  | `6L`           |
-#' 
-#' This table illustrates that some representations are [lossy](https://en.wikipedia.org/wiki/Lossy_compression), as they don't encode the full pitch information.
-#' For instance, the *degree* representation drops octave information, while *semit* drops tonal information (i.e., that `C# != Db`).
-#' This means that translating a more complete representation to a lossy (less complete representation) is a
-#' non-[injective](https://en.wikipedia.org/wiki/Injective_function) function.
-#' 
-#' ## Pitch Translation
-#' 
-#' `humdrumR` exports functions to read and write all of the standard representations above, as well as some custom non-standard representations (see `tonalChroma` below).
-#' An input can be converted to any representation by calling the appropriate function of the form `as.xxx`: for example, `solfa`.
-#' The complete list of `as.xxx` functions for pitch representations is:
-#' 
-#' + Atonal
-#'     + `semit`
-#'     + `midi`
-#' + Tonal     
-#'      + `tonalChroma`
-#'           + `step`
-#'           + `as.accidental`
-#'           + `as.quality`
-#'           + `octave`
-#'      + `kern`
-#'      + `lilypond`
-#'      + `pitch`
-#'      + `interval`
-#'      + `degree`
-#'      + `solfa`
-#' + Frequency
-#'      + `decimal`
-#'      + `frequency`
-#'      + `fraction`
-#' 
-#' Note that none of the functions have a plural name, so it's not `semits` or `intervals` even if you are applying them to multiple inputs!
-#' 
-#' Each of these functions does *three* things: 
-#' 
-#' 1. Read and *parse* the input as a `tonalInterval` (details below).
-#' 2. If desired, transform the `tonalInterval` (see [tonalTransform]).
-#' 3. *Deparse* and write the `tonalInterval` to the output representation (details below).
-#' 
-#' Each of these three steps has numerous options that you can control via special arguments.
-#' The details of the reading and writing stages, and all the associated arguments are described in subsequent sections.
-#' All pitch translation functions *also* have arguments to perform various transformations on pitch data (i.e., inversion, transposition).
-#' All the transformation arguments of the [tonalTransform][tonalTransformations] function can be applied to any pitch translation function.
-#' For example, you can write `kern(x, generic = TRUE, Key = "A")` to extract generic intervals in the key of A major and output them in `kernPitch` format.
-#' These transformation arguments are listed as "common" arguments in the table below, and explained in more detail in the [tonalTransformations] documentation.
-#' 
-#' 
-#' ## Reading Pitch Information
-#' 
-#' The master function `tonalInterval` converts any recognized pitch input into a `tonalInterval` object.
-#' All the main `as.xxx` functions implicitely call `tonalInterval`.
-#' How `tonalInterval` interprets input as pitch information is determined by the base R [dispatch system][methods::Methods_Details] (interpreting the class of the input) and,
-#' if the input is a character-string, humdrumR's [regular expression dispatch system][humdrumR::regexDispatch].
-#' 
-#' The process of reading an input as a `tonalInterval` follows two steps:
-#' 
-#' First, the base R dispatch system checks the [class][base::class] of the input. There are currently methods for three recognized classes:
-#' + `integer`: integers are interpreted as semitones.
-#' + `numeric`: numeric (floating point, not integer values) are interpreted as frequency ratios. 
-#' + `character`: if the input is a character, humdrumRs dispatch system comes into play (see next paragraph).
-#' 
-#' Given an character-string input, the `humdrumR` [regular expression dispatch system][humdrumR::regexDispatch] determines the appropriate way to parse
-#' pitch information from the string using two criteria: 
-#' 1) matching known *regular expressions* in the string and 
-#' 2) based on the `Exclusive` argument, which indicates a *exclusive interpretations* associated with it (see our *The Humdrum Syntax* vingette if you don't know
-#' what an exclusive interpretation is).
-#' For any input string, humdrumR searches for known regular expressions and decides to interpret the input based on whichever regular expression matches the *most* input strings.
-#' For instance, if you call `kern("A4")` (or any `as.xxx` pitch function), the dispatcher will see that the `"A4"` string matches the regular expression for 
-#' scientific pitch notation (i.e., the A above middle C) and *also* the regular expression for intervals (i.e., an augmented fourth).
-#' In this case, there is only one input string, so humdrumR will five scientific notation precedence and interpret the input as the A above middle C.
-#' However, if we have an input with more information, like `kern(c("A4", "P5"))`, humdrumR will see that **both** inputs match intervals, but only the first one matches
-#' scientific pitch notation---therefore, humdrumR will interpret both strings as intervals (augmented fourth and perfect 5th).
-#' Note that humdrumR will *not* use two different interpretions of the same string.
-#' Also, any strings which match no known regular expressions, will result in `NA` (unless `inPlace = TRUE`; see below).
-#' 
-#' What if we want to interpret `kern("A4")` as an interval? Well, we can use the `Exculusive` argument.
-#' The `Exclusive` argument gives more information to the dispatcher, which will override the purely-regex based decisions.
-#' For instance, if we specify `kern("A4", Exclusive = 'interval')`, `humdrumR` will know that the exclusive interpretation "**interval" 
-#' should be interpreted as an interval.
-#' If we run `kern(c("A4", "P5"), Exclusive = 'pitch')`, humdrumR will return `("a", NA)`, because the second input can't be interpreted as a scientfic pitch.
-#' However, the `Exclusive` argument is vectorized, which gives us the option of using multiple input interpretations on different parts of the same input.
-#' For instance, `kern(c("A4", "A4"), Exclusive = c('pitch', 'int')` will return `("a", "f#")`---the `'pitch'` exclusive intepretation is 
-#' matched with the first `"A4"` while the `'int'` interpretation is matched with the second one!
-#' 
-#' The following regular expressions and exclusive interpretations are associated with each representation in humdrumR:
-#' 
-#' ```{r, echo = FALSE, comment=NA, results='asis'}
-#' 
-#'   known <- read.delim("./inst/extdata/KnownInterpretations.tsv", fill = TRUE, header=TRUE, quote = "", as.is=TRUE, comment.char = "")
-#'   known <- subset(known, Type == "Exclusive" & !Name %in% c("sciChord", "kern", "Slur"))
-#'   
-#'   rownames(known) <- known$Name
-#'   known$Type <- known$Name <- NULL
-#'   colnames(known) <- gsub('Pretty', 'Example', colnames(known))
-#'   known$Exclusive <- sapply(strsplit(known$Exclusive, split = ','), function(x) paste(paste0('**', x), collapse = ','))
-#'   known$RE <- gsub('<<', '', gsub('>>', '', known$RE))
-#'   
-#'   print(known, row.names = TRUE, right = FALSE)
-#'   
-#' ```
-#'
-#' 
-#' A final useful option is controlled using the logical `inPlace` argument.
-#' If `inPlace = TRUE` any extra characters in the input string which are *not* part of the matching regular expression will be left unchanged:
-#' for example, `kern("4.A5xxxv", inPlace = TRUE)` will output `"4.aaxxxv`---the `"A5"` (scientific pitch) is translated to `"aa"` (kern pitch)
-#' but the `"4."` and `"xxxv"` are not changed.
-#' In contrast, `kern("4.A5xxxv", inPlace = FALSE)` will just return `"aa"`, stripping away the `"4."` and `"xxxv"`.
-#' (Thus, the `inPlace` argument can be used as a tool to extract the desired part of strings.)
-#' Note that if `inPlace = TRUE`, any inputs which fail to match anything will just be left unchanged.
-#' 
-#'
-#' 
-#' ## Read/Writing Tonal Pitch Information
-#' 
-#' Most of the pitch representations defined in `humdrumR` are based in Western diatonic *tonality*---for info on our atonal representations, see the *Read/Writing Atonal Pitch Information* section below.
-#' The predefined `kernPitch`, `pitch`, `lilyPitch`, `helmholtz`, `interval`, `degree`, and `solfa` encodings are all tonal representations---in fact, they all represent *essentially* the same absract
-#' information,  which is exactly what `tonalInterval`s encode.
-#' Specifically, we condsider all of these representations to be different representations of what we call *tonal chroma*:
-#' as such, the `tonalChroma` function is the master function used to construct all of these specific representations.
-#' The following section(s) explain the abstract principles of pitch representation, how they function in standard representations, and how 
-#' we, in humdrumR, we can use `tonalChroma` and its arguments to create custom tonal representations of pitch.
-#' 
-#' #### Tonal Pitch "Partitions"
-#' 
-#' As discussed in the *Tonality in humdrumR* vignette, tonal intervals can be "partitioned"---i.e., broken into constituent logical pieces.
-#' There are two main "partitions" we frequently use:
-#' 
-#' 1. the partitioning of a *complex* interval into a *simple parts* and *octave* parts*.
-#' 2. the partitioning of a *specific* interval into a *generic part* and a *alteration* part.
-#' 
-#' Simple intervals are abstract ([line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths) ) information, without regards to a specific pitch in frequency space---i.e., actual "pitch height."
-#' The combination of a simple interval with an octave part creates a complex interval, which *does* include information about specific pitch height.
-#' Tonal "line-of-fifths space" can further be partitioned into [generic][tonalTransformations] (diatonic) information and *specific* interval information which describes the 
-#' *quality* of intervals, including zero or more [alterations]("https://en.wikipedia.org/wiki/Accidental_(music)") of the diatonic set.
-#' Thus, any tonal interval/pitch is composed of an **octave** part, a **generic** part, and a **quality** part.
-#' 
-#' Various pitch representation schemes (kern, solfege) represent the three different parts (octave/generic/quality) of `tonalInterval`s in various ways, though some representations are 
-#' lossy/incomplete, as they don't fully encode all three partitions.
-#' For example, scale degrees represent simple tonal information without complex octave information.
-#' In some schemes, each tonal partition is represented distinctly from others, allowing us to mix and match different sub-representation to create various full reprsentations.
-#' In other cases, representations blur partitions in ways that can not be broken apart.
-#' For instance, solfege syllables do not neatly delineate generic and quality information---the "e" vowel means different qualities depending on which leading consonant it is paired with
-#' (e.g., "re" vs "me").
-#' Since the logic of interval representation does not always conform to the more abstract logic of `tonalInterval` partitions, we use a different set of terms to
-#' refer to the *representation* of distinct partitions: scale-**step** for generic information,  **quality**/**alteration**/**accidental** for alteration information, and  **octave** for octave information,
-#' Thus, the terms `step`, `octave`, `quality`, `alteration`, `accidental` all appear as or in various pitch representation/translation function arguments (details below).
-#' 
-#' In humdrumR, a *tonal chroma* is a representation that combines some combination of the three representation partions (scale, alteration, and/or octave).
-#' The `tonalChroma` function is a master function for writing tonal chroma.
-#' The functions`kern`, `pitch`, `lilypond`, and `as.helmholtz` are all simply wrappers which call `tonalChroma` with various specific arguments.
-#' `tonalChroma` itself calls four constituent functions: `step`, `as.quality`/`as.accidental`, and `octave`/`octave`.
-#' The arguments to `tonalChroma`, derived from the constituent functions (details in the following sections) are:
-#' 
-#' + `tonalChroma`:
-#'     + `parts`: a character string of length 1--4, indicating which parts of the tonalChroma to print, and in which order.
-#'       Acceptable strings are `"step"`, `"qualities"`, `"accidentals"`, or `"octave"`.
-#'       ([Partial matches][base::pmatch] matches like `"ste"` or `"s"` for `step` will work too.)
-#'       The output tonal chroma string will have its part concatinated in the order they appear in the `parts` argument.
-#'       For instance, you could put `c("octave", 'step', 'accidental')` to put the octave before the simple interval,
-#'       or put `c('step', 'accidental', "octave")` to put it after.
-#'     + `sep`: a character string which will be used to separate the elements (the default is `""`).
-#' + from `step` (described below):
-#'     + `step.labels`
-#' + from `as.accidental` (described below):
-#'     + `accidental.labels` 
-#'     + `accidental.maximum` and `accidental.minimum`
-#'     + `accidental.cautionary`
-#'     + `accidental.memory`
-#'     + `Key`
-#' + from `as.quality` (described below):
-#'     + `quality.labels` 
-#'     + `quality.maximum` and `quality.minimum`
-#'     + `quality.cautionary`
-#'     + `quality.memory`
-#'     + `Key` 
-#' + from `octave` (described below):
-#'     + `octave.labels`
-#'     + `octave.maximum` and `octave.minimum`
-#'     + `octave.offset` 
-#'     + `octave.round` 
-#'     + `octave.delta` 
-#' 
-#' 
-#' ## Scale Steps
-#' 
-#' A particular area of confusion in pitch representation is in the relationship between tonal (line-of-fifths) space and octave (frequency) space.
-#' The line-of-fifths is an abstract space unrelated to specific frequencies---e.g., G is not inherently "above" or "below" C.
-#' Still, musicians do not play abstractions, so we must always realize our line-of-fifths space in concrete frequency space.
-#' By convention, collections from the line-of-fifths are conceptualized as frequency-orded "**scales**": folding the line-of-fifths into a sequence of intervals in the octave "above" the unison.
-#' In most theoretical contexts, the order/"height" of elements in the scale is actually completely irrelavant.
-#' Specifically, the first seven (diatonic) elements of the line-of-fifths are mapped into generic **scale-steps** in the order [0, 2, 4, 6, 1, 3, 5].
-#' Scale-steps are strictly limited to a this seven-step range of a single diatonic octave, and are always "*ascending*"/"*positive*"---as they are steps in a pseudo-octave "above" the unison.
-#' This representation of the line-of-fiths in terms of scale-steps is the most basic approach to representing pitch, and is associated with arguments containing `step`;
-#' The function `step` is the basic building block of scale-step representations in humdrumR.
-#' 
-#' If we apply the modulo-7 operation to the line-of-fifths space, all intervals are mapped to these seven generic steps.
-#' Alterations of the basic generic steps are represented separately (see **Qualities and Alterations** section below).
-#' However, we should note that scale order is defined entirely based on the generic interval: for example, C-flat is by convention positioned "below"
-#' C-natural in the scale, even though it (is often) equivalent to B-natural, which is at the "top" of the scale.
-#' 
-#' Generic, pseudo-ordered, scale-steps are conventionally represented in three forms: as letters (A-G), numbers (1-7 or I-VII), or conventional syllables (do, re, mi, fa...).
-#' HumdrumR predefines several representations which include letters (A-G) as their scale-step encoding: `kernPitch`, `lilyPitch`, `helmholtz`, and `pitch`.
-#' There are also standard numeric (`degree`) and syllable-based (`solfa`) based representations predefined.
-#' The more generic `step` function can be used to write other variations of the scale step representations.
-#' `step` includes two arguments:
-#' 
-#' + `step.labels`: a vector of seven elements (default = c('C', 'D', 'E', 'F', 'G', 'A', 'B')) representing the desired names for the seven steps in scale order.
-#' 
-#' 
-#' ## Quality and Alterations
-#' 
-#' Generically, a tonal interval's *quality* indicates its diatonic mode and relationship to that mode. 
-#' Specifically, alterations/accidentals indicate alterations of the key/mode while the quality indicates what the mode is.
-#' 
-#' 
-#' The diatonic set is primarily defined by the major mode, consisting of the line-of-fifth range -1 to +5.
-#' These seven intervals are the "*natural*" intervals---by default, unless a major context is specifically counter-indicated, the absence of an accidental
-#' indicates these natural steps.
-#' Any intervals outside of this scale can be indicated as alterations of the natural steps using accidentals:
-#' There are two primary accidentals, [sharp]("https://en.wikipedia.org/wiki/Sharp_(music)") and [flat]("https://en.wikipedia.org/wiki/Flat_(music)"),
-#' though they can be added together to create multi-sharps and multi-flats. (Sharps and flats cannot be mixed in `humdrumR`.)
-#' An alteration corresponds to adding or subtracting multiples of `7` from the generic values (e.g., to "sharpen" a note means to add 7 to the line-of-fifths value).
-#' Finally, a [natural]("https://en.wikipedia.org/wiki/Natural_(music)") accidental is used when the default natural step needs to be explicitely labeled.
-#' 
-#' The encoding of *qualities* is subtly distinct from alterations.
-#' Qualities encode information about the diatonic mode of intervals, as well as alterations of mode.
-#' The five consonant diatonic [modes]("https://en.wikipedia.org/wiki/Mode_(music)")---phyrigian (-5--+1), minor (-4--+2), dorian (-3--+3), mixolydian (-2--+4), and major (-1--+5)---all 
-#' share the same the "*perfect*" first, fourth, and  fifth scale-steps---corresponding to the central -1--+1 on the line-of-fifths.
-#' However, these five modes encompass two varieties of each of the "*imperfect*" second, third, sixth, and seventh scale steps:
-#' the **major** steps (+2--+5) and the **minor** steps (-2---5), which are (obviously) inverses on the line-of-fifths.
-#' Each minor/major pair is separated on line-of-fifths interval of `7`, and thus one can be altered into the other.
-#' Anything on the line-of-fifths outside of the -5--+5 range are represented as one or more alterations of the perfect/imperfect degree.
-#' Postive alterations (`+7`) are  **augmented** while negative alterations (`-7`) are **diminished**---like sharps and flat, augmentations and diminutions can be multipled.
-#' 
-#' The following table illustrates the relationship between the line-of-fifths, scale-steps, accidentals, and qualities:
-#' 
-#' ```{r, echo = FALSE, comment = NA}
-#' 
-#' f <- tint(,-10:14)
-#' print(data.frame(`LO5th` = LO5th(f), 
-#'                  Step = tint2step(f, c('C', 'D', 'E', 'F', 'G', 'A', 'B')), 
-#'                  Accidental = tint2accidental(f, accidental.cautionary = TRUE), 
-#'                  Quality = tint2quality(f, quality.cautionary = TRUE)), 
-#'       row.names = FALSE)
-#' 
-#' ```
-#' 
-#' Note that accidentals are symetrical around the dorian mode (D), while qualities are symetrical around the major mode.
-#' As a result, though sharp accidentals and augmentation qualities always correspond, flat accidentals are *not* equivalent to diminished qualities.
-#' 
-#' 
-#' HumdrumR's predefined tonal chroma representations (`kernPitch`, `lilyPitch`, `helmholtz`, and `pitch`) each include alteration information through three accidental 
-#' indications (sharp, flat, natural).
-#' The `degree` and `interval` representations encode more general qualities using five categories (major, minor, diminished, augmented, perfect).
-#' The `solfa` representation also encodes quality through conventional (non-systematic) vowel modifications.
-#' More generally, the `as.quality` and `as.accidental` functions can be used extract quality information in isolation.
-#' These functions use some (or all) of the following arguments:
-#' 
-#' + `_.labels`:
-#'      + `accidental.labels`: a [named][base::names()] character vector which controls the characters used to represent accidentals. 
-#'         The characters must be named either `flat`, `sharp`, `natural`, `doublesharp`, or `doubleflat`.
-#'         The defaults are `c(flat = "b", sharp = "#", natural = "n")`.
-#'         By default, `doubleflat` and `doublesharp` are not defined, and doubles are simply represented by two of the normal accidental symbols.
-#'         However, if either double accidental is defined, every pair of accidentals is collapsed to the double version.
-#'         
-#'         If `accidental.labels == FALSE`, returns an integer value counting the number of alterations (positive for sharps, negative for flats).
-#'      + `quality.labels`: a [named][base::names()] character vector which controls the characters used to represent qualities.
-#'         The characters must be named either `perfect`, `major`, `minor`, `augment`, or `diminish`, with defaults 
-#'         `c(perfect = "P", major = "M", minor = "m", augment = "A", diminish = "d")`.
-#' + `_.maximum` and `_.minimum`
-#'     + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
-#'     These arguments define the maximum number of multi-accidentals permitted.
-#'     For instance, if `accidental.maximum == 2L`, accidentals of at most `"##"` will be output; a triple sharp will be reduced to just a `"##"`.
-#'     The`_.minimum` argument must be negative (-2 == two flats).
-#'     By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
-#' + `Key`: a [diatonicSet] object describing the key and mode. Default is `NULL`. If `Key` is specified, only alterations relative to that key are printed 
-#'    (unless the `_.cautionary` or `_.memory` arguments override this).
-#' + `_.cautionary`: a single logical value. Causes *more* accidentals/qualities to print (details below). Default is `FALSE` for accidentals and `TRUE` for qualities.
-#' + `_.memory`: a single logical value (default is `FALSE`). Causes *fewer* accidentals/qualities to print (details below).
+#' Test
 #'  
-#' The master `tonalChroma` calls these functions, and can thus pass these arguments to them.
-#' For example, you could write `tonalChroma(x, accidental.maximum = 1)`.
-#' 
-#'  
-#' ### Cautionary Alterations
-#' 
-#' #### Accidentals
-#'  
-#' 
-#' ```{r, echo=FALSE, comment = NA}
-#' 
-#' kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
-#' tint <- tonalInterval(kern)
-#' mat <- rbind( 
-#'   NFF = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'   NFT = tint2accidental(tint, Key = NULL, accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'   NTF = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'   NTT = tint2accidental(tint, Key = NULL, accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'   AbFF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'   AbFT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = FALSE, accidental.memory = TRUE , accidental.labels = c(flat = '-')),
-#'   AbTF = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = FALSE, accidental.labels = c(flat = '-')),
-#'   AbTT = tint2accidental(tint, Key = dset(-4, -4), accidental.cautionary = TRUE , accidental.memory = TRUE , accidental.labels = c(flat = '-')))
-#' 
-#' mat <- t(apply(mat, 1, function(row) paste0(tint2step(tint, c('c', 'd', 'e', 'f', 'g', 'a', 'b')), row)))
-#' 
-#' colnames(mat) <- kern
-#' print(format(mat, width = 4), quote = FALSE)
-#' 
-#' ```
-#' 
-#' #### Qualities
-#' 
-#' ```{r, echo=FALSE, comment = NA}
-#' 
-#' kern <- c('a-', 'a', 'b-', 'a', 'b-', 'a-', 'e', 'f', 'f#', 'e-', 'g-', 'f', 'b', 'c', 'd-', 'b-', 'e-', 'b-', 'a-')
-#' tint <- tonalInterval(kern)
-#' 
-#' rbind( 
-#' NFF = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = FALSE),
-#' NFT = tint2quality(tint, Key = NULL, quality.cautionary = FALSE, quality.memory = TRUE ),
-#' NTF = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = FALSE),
-#' NTT = tint2quality(tint, Key = NULL, quality.cautionary = TRUE , quality.memory = TRUE ),
-#' AbFF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = FALSE),
-#' AbFT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = FALSE, quality.memory = TRUE ),
-#' AbTF = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = FALSE),
-#' AbTT = tint2quality(tint, Key = dset(-4, -4), quality.cautionary = TRUE , quality.memory = TRUE )
-#'       ) -> mat
-#'       
-#'       mat <- t(apply(mat, 1, function(row) paste0(row, tint2step(tint))))
-#'       
-#'     colnames(mat) <- kern
-#'     print(format(mat, width = 4), quote = FALSE)
-#' 
-#' ```
-#'  
-#' ## Octave
-#' 
-#' 
-#' When we *do* wish to represent concrete, frequency-ordered information about a pitch, we add additional *octave* information to the simple, line-of-fifth representation to 
-#' creating *complex intervals*.
-#' Since scale-step representations ostensibly encode frequency-space ordering already, the first step is to take the scale-ordering literally---e.g, G really is "above" D---, 
-#' creating what we call a **simple octave**.
-#' To fully represent a complex interval, we can append zero or more octaves to the simple octave, what we call the **octave octave**.
-#' 
-#' In humdrumR, the symbols `"+"` and `"-"` are used to indicate the direction of the simple octave, with various scale-step and quality/alterations used to indicate the simple interval.
-#' (In many representations, these symbols are implicit, and are thus ommitted.)
-#' In contrast, the *octave octave* of an interval is simply an integer value, and can be represented a variety of ways:
-#' either directly as an integer, or using repetitions of symbol pairs, most commonly `"^"`/`"v"` and `"'"`/`","`.
-#' Other approaches represent octave octave information by changing the case (upper or lower) or repeating parts of the simple-interval string.
-#' By default, the "same" option (i.e., a unison) for both types of octaves is left blank as an empty string `""`.
-#' 
-#' The relationship between the simple octave and the octave octave is determined by how the scale step is "rounded" to the octave (see the *Tonality in humdrumR* vignette), which
-#' is controlled by the `octave.round` argument.
-#' The standard approach, with the scale steps all ascending above the octave is achieved by the *floor* function: we call this a **scale octave**.
-#' Another approach is to use the *round* function, which rounds the nearest octave below **or** above, centering the steps around the unison instead of above it: the result is a 
-#' scale like [-P4, -m3, -m2, P1, M2, M3, P4], which we call a **central octave**.
-#' The difference between central octaves, scale octaves, and other simple octave options, are illustrated further below.
-#' 
-#' 
-#' #### Serial vs Fixed Octave Contour
-#' 
-#' #' As described in the *Tonality in humdrumR* vignette, there are two general approaches to representing intervals: fixed-reference and serial-reference.
-#' Most pitch representations are *fixed*-reference, with each token representing an interval relative to a common reference (middle-C, tonic, unison, etc.).
-#' In contrast, a *serial* representation represents each interval cummulatively, relative to the previous interval: the most common example being melodic intervals.
-#' TonalIntervals can be encode either fixed- or serial-reference intervals, and either approach can be partitioned into simple intervals and octave offsets.
-#' In the most common cases for representing pitch, the simple octave is treated as the "always ascending" scale octave, and the octave octave is simply kept fixed.
-#' Common approaches to pairing octave information with this include:
-#' 
-#' + **pitch** style: the octave offset is simply printed as an integer, though offset by +4 so that middle-C (unison) is `"4"`.
-#' + **kernPitch** style: the scale step is lowercase for octave octaves `>= 0` and uppercase otherwise. In addition, the scale step is repeated
-#'    the absolute value of the octave octave times (offset +1 for positive octaves).
-#'    For example, `(CCC = -3, CC = -2, C = -1, c = 0, cc = 1, ccc = 2)`.
-#' + **lilyAbsolute** absolute style: the charactes `"'"` (positive) or `","` are repeated the absolute value of the octave octave.
-#' + **helmholtz** style: an intersection of `lilyPitch`-absolute and `kernPitch` style, the case of the scale step is changed as in kern-style,
-#'   and the `"'"`/`","` characters are printed a la lilypond absolute style.
-#'   
-#' However, another particularly useful possibility is to encode the octave part in serial reference and the simple part in fixed reference.
-#' If we compute a serial-octave octave, and set our `octave.round` argument to `round`, the octave labels are blank (the "same" marker) if the interval has moved to the *closest* neighbor,
-#' with the octave octave indicating moves away to that "closest note."
-#' For instance, we can say, "play the F# above the previous note."
-#' This is known as "relative pitch" representation in [LilyPond](https://lilypond.org/doc/v2.20/Documentation/notation/pitches)]:
-#' If `relative = TRUE`, `lilypond` will compute markers labeled in this way.
-#' This approach is can be combined with with scale-octave (`octave.round = floor`) representation of pitch as *scale degrees*, resulting in a scale degree representation with lossless
-#' octave information!
-#' 
-#' To achieve these serial octaves, we use the `octave.delta` and `octave.round` arguments.
-#' If `delta = TRUE`, the octave of the serial representation of the input is computed, and the octave-part
-#' of the octave is computed using the `octave.round` rounding function.
-#' `floor` will create the "always ascending" scale octave, while `round` will achieve a centered octave.
-#' `expand` will label *all* octaves as ascending/descending except unisons.
-#'   
-#' The following table illustrates the different `octave.round` arguments when `delta = TRUE`:
-#'   
-#' ```{r, echo=FALSE, comment = NA}
-#' tonalInterval(c('c','A','A','c','d','G','G','A','B-','f','f','e','d','e','d','c','ff','ee','dd','cc')) -> x
-#' 
-#' print(row.names = FALSE, 
-#'       data.table(#Kern = kern(x), 
-#'                  round  = tint2octave(x, octave.delta = TRUE, octave.round = round),
-#'                  floor  = tint2octave(x, octave.delta = TRUE, octave.round = floor),
-#'                  expand = tint2octave(x, octave.delta = TRUE, octave.round = expand)
-#'                  ))
-#' 
-#' ```
-#' 
-#' The following table illustrates the same three rounding functions, but with `octave.delta = FALSE`.
-#' 
-#'  ```{r, echo=FALSE, comment = NA}
-#' tonalInterval(c('c','A','A','c','d','G','G','A','B-','f','f','e','d','e','d','c','ff','ee','dd','cc')) -> x
-#' 
-#' print(row.names = FALSE, 
-#'       data.table(Kern = kern(x), 
-#'                  round  = tint2octave(x, octave.delta = FALSE, octave.round = round),
-#'                  floor  = tint2octave(x, octave.delta = FALSE, octave.round = floor),
-#'                  expand = tint2octave(x, octave.delta = FALSE, octave.round = expand)
-#'                  ))
-#' 
-#' ```
-#' 
-#' 
-#' 
-#' 
-#' #### Complex Steps
-#' 
-#' The final standard approach to indicating complex octaves is through complex steps: i.e., 9ths, 11ths, etc.
-#' This approach directly represents full octave information as scale steps, with `+7` added for every octave octave.
-#' This representation can only be accessed via the `interval` function.
-#' To limit intervals to simple values, use the [tonalTransform] arguments `octave` and/or `roundMethod`.
-#' 
-#' 
-#' 
-#' ### octave
-#' 
-#' 
-#' The `octave` function can be used to directly generate representations of the octave/octave, or can be called indirectly via `tonalChroma` or one of the standard
-#' pitch representation functions (`kern`, `pitch`, etc.).
-#' The `octave` command is a synonym for `octave`.
-#' The following arguments are defined for as octave:
-#' 
-#' 
-#' + `octave.labels`: a [named][base::names()] `character` vector which controls the characters used to represent octave shifts.
-#'   The characters must be named either `up`, `down`, or `same`; the defaults are `c(up = "^", down = "v", same = "")`.
-#'   If `octave.labels = FALSE`, the octave offset (integer) itself is returned. 
-#'      + If `octave.labels == FALSE`, returns a integer value counting the octave offset number.
-#' + `octave.maximum` and `octave.minimum`
-#'      + Single integer values---defaults are `Inf` (maximum) and `-Inf` (minimum). 
-#'      These arguments define the maximum number of octave offset labels permitted.
-#'      If `maximum == 2L`, octave offsets of at most (`"^^"`) will be output; a triple octave mark will be reduced to just a `"^^`.
-#'      The`minimum` arguments should be negative.
-#'      By default, the minimum is the inverse of the maximum, so if you want them to be the same, just set the maximum.
-#' + `octave.offset`: a single integer, indicating the "center" octave. The default is `0L`, but *scientific pitch*
-#'   uses `4L` (because middle C is "C4").
-#' + `octave.delta`: a single logical vale. If `TRUE`, the *serial* octave is calculated.
-#' + `octave.round`: a function, either `floor`, `round`, `trunc`, `expand` (see *Tonality in humdrumR* vignette).
-#'   The default is `floor`, which is standard when `delta = FALSE`. 
-#' 
-#' 
-#' @section Reading/Writing Atonal Pitch Information:
-#' 
-#' 
-#' Atonal pitch representations predefined in `humdrumR` include `semit`, `midi`, `frequency`, `ratio`, and `fraction`.
-#' As mentioned above, `integer` inputs are interpreted as semitones while `numeric` are interpreted as frequency ratios.
-#' 
-#' 
-#'   
-#' #### Interpreting Frequencies/Ratios
-#' 
-#' 
-#' Four additional arguments help `humdrumR` determing how to interpret frequencies or ratios as `tonalInterval`s.
-#' 
-#' + `tonalHarmonic`: This determines the assumed tuning system by specifying the "tonal frequency ratio" associated 
-#'    with an interval of a perfect 12th.
-#'    The default is `3`, corresponding to pythagorean tuning; change it to `2^(19/12)` to use equal temeperament.
-#' + `centMargin`: this numeric argument determines how close `humdrumR` tries to get (in cents) to the input ratio (default is 10 cents).
-#'   If the `centMargin` is low, `humdrumR` may give you a crazy accidental like `A----` to get very close to the input ratio.
-#'   If the `centMargin` is higher, `humdrumR` will give the most reasonable (fewest accidentals) `tonalInterval` within that margin.
-#'   For example, `tonalInterval(1.44, centMargin = 10)` will return E##, because a pythagorean E## is within 10 cents of the ratio `1.44`.
-#'   However, `tonalInterval(1.44, centMargin = 20)` will return the more resonable `F#`.
-#' + `frequency.reference` and `frequencyTint`: these arguments determing what the reference frequency and note is for 
-#'   when reading frequencies. The standard A = 440Hz corresponds to `(frequency.reference = 440, frequencyTint = tonalInterval('a'))`.
-#' 
-#' #### Tonal Decisions
-#' 
-#' When interpreting an atonal representation as a tonal one there are multiple possibilities (for instance, midi note 61 could
-#' be C# or Db).
-#' The process `humdrumR` uses to determine the tonal representation of atonal input is influenced by the `accidental.melodic` and
-#' `Key` arguments:
-#' By default (`Key == NULL & accidental.melodic == FALSE`), the line-of-fifths range -3--8 (E flat to G sharp) is used.
-#' However, if a `Key` argument is specified, this line-of-fifths range will be shifted to match the corresponding key signature.
-#' For instance, the key Bb minor would read accidentals in the range -8--3 (Fb flat to A natural).
-#' If `accidental.melodic == TRUE`) the atonal notes are interpreted "melodically"---i.e., 
-#' ascending chromatic steps as sharps and descending chromatic steps as flats.
-#' When reading frequencies/ratios, a "pure" `tonalHarmonic` value---like the pure `3` of pythagorean tuning---will help determine
-#' the appropriate accidental.
-#' However, equal temperament will not provide useful information, so the `Key` and `accidental.melodic` arguments can be used instead.
-#'   
-#'  
-#' 
 #' @name pitch
 #' @seealso tonalInterval
 NULL

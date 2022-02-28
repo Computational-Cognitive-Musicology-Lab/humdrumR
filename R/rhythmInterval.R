@@ -530,34 +530,34 @@ notevalue2rint <- function(notevalues) {
 #### Augmentation and dimminution 
 
 
-#' augment <- function(x, scalar = 2, ...) UseMethod('augment')
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' augment.rhythmInterval <- function(rint, scalar) rint * scalar
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-#'                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
-#'                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-#'                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
-#'                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+# augment <- function(x, scalar = 2, ...) UseMethod('augment')
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# augment.rhythmInterval <- function(rint, scalar) rint * scalar
+# 
+# #' @name RhythmScaling
+# #' @export
+# augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
+#                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
+#                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish.rhythmInterval <- function(rint, scalar) rint / scalar
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
+#                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
+#                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
 
 
 
@@ -585,12 +585,13 @@ rhythmInterval.rhythmInterval <- force
 #' @export
 rhythmInterval.numeric <- numeric2rint
 
-char2rint <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'recip: makeRE.recip()' = recip2rint,
-                             'duration: makeRE.decimal()' = numeric2rint)
+
 
 #' @export
-rhythmInterval.character <- force %.% char2rint
+rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), 'makeRE.recip',  'recip2rint'),
+                                                  list('duration',                 'makeRE.decimal', 'numeric2rint'),
+                                                  outputClass = 'rhythmInterval',
+                                                  funcName = 'rhythmInterval.character')
 
 #.... set as
 

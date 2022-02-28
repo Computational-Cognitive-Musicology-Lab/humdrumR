@@ -328,7 +328,7 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 
 ############### Predicate dispatch ----
 
-#' @name regexDispatch
+#' @rdname humdrumDispatch
 #' @export
 `%predate%` <- function(func, predicate) {
     predicateExpr <- rlang::expr_text(rlang::enexpr(predicate))
@@ -649,62 +649,217 @@ regexGeneric <- function(...) {
 #   rlang::new_function(arguments, body)
 # }
 
-##### humdrum dispatch ----
+# Humdrum dispatch ----
 
-
-
-humdrumDispatch <- function(..., doExclusiveDispatch = TRUE, defaultClass = 'character') {
-    exprs <- rlang::enexprs(...)
+#' Regular expression method dispatch and function application
+#' 
+#' The \code{\link{humdrumR}} \strong{regular-expression method dispatch}
+#' system is a simple system for making new functions which can by smartly
+#' applied to complex character strings.
+#' 
+#' The function \code{do2RE} accepts and arbitrary function
+#' and a \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expression} (regex)
+#' and makes a new function that applies the original function only to
+#' any part of a string which matches the regex.
+#' 
+#' The function \code{regexDispatch} accepts a list
+#' of functions, each with a matching regular expression,
+#' and creates a new function which applies whichever function
+#' based on which regexs it finds in its input.
+#' @rdname humdrumDispatch
+#' @export
+humdrumDispatch <- function(str, dispatchDF,  Exclusive = NULL, ..., outputClass = 'character') {
+  if (is.null(str)) return(NULL)
+  if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
+  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
+  
+  
+  
+  if (is.null(Exclusive)) Exclusive <- rep('any', length(str))
+  
+  ### find places where str matches dispatch regex AND Exclusive matches dispatch exclusives
+  matches <-  Map(\(regex, exclusives) {
+    output <- character(length(str))
+    target <- 'any' %in% exclusives | Exclusive == "any" | Exclusive %in% exclusives 
     
-    
-    dispatchcode <- names(exprs)
-    dispatchRE <- gsub('^[^ ]+(: )?', '', dispatchcode)
-    dispatchExclusive <- gsub(': .*', '', dispatchcode)
-    
-    REexprs <- rlang::parse_exprs(dispatchRE)
-    RElist <- lapply(dispatchExclusive, function(REname) rlang::expr(`$`(regexes, !!(rlang::sym(REname)))))
-    
-    
-    arguments <- getAllArgs(exprs)
-    exprs <- lapply(exprs, makeCall)
-    exprs <- Map(REcall, RElist, exprs)
-    
-    names(exprs) <- names(REexprs) <- dispatchExclusive
-    
-    #
-    regexDispatch     <- .regexDispatch(unname(exprs), defaultClass = defaultClass)
-    exclusiveDispatch <- .exclusiveDispatch(exprs, defaultClass = defaultClass)
-   
-    ## 
-    body <- if (doExclusiveDispatch) {
-      rlang::expr({
-        regexes <- list(!!!REexprs)
-        if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
-        
-      })
-      
-    } else {
-      rlang::expr({
-        regexes <- list(!!!REexprs)
-        
-        !!regexDispatch
-      })
-    }
-    
-    
-    # body <- predicateDispatch.expr('is.na', body, 'x', negate = TRUE)
-    # body <- memoizeDispatch.expr(body, 'x')
-    #
-    arguments <- c(x = rlang::missing_arg(), 
-                   if (doExclusiveDispatch) list(Exclusive = NULL),
-                   arguments,
-                   inPlace = FALSE)
-    
-    rlang::new_function(arguments, body)
-    
-    
-    
+    output[target] <- stringi::stri_extract_first_regex(str[target], regex)
+    output
+  },
+  dispatchDF$regex, dispatchDF$Exclusives)
+  
+  exclusiveSeg <- segments(Exclusive)
+  Lmatches <- as.data.frame(lapply(matches, \(m) nchar(m) %|% 0L))
+  Mmatches <- as.data.frame(do.call('rbind', by(Lmatches, exclusiveSeg, colMeans, na.rm = TRUE)))
+  
+  #### Pick which dispatch is best
+  dispatch <- apply(Mmatches, 1, \(row) {
+    dispatch <- which.max(row)
+    if (length(dispatch) == 0L || row[dispatch] == 0L) 0L else dispatch 
+  })
+  
+  ### Extract matching vectors
+  matches <- Map(\(match, disp) if (disp > 0L) match[ , disp] else vectorNA(nrow(match), outputClass), 
+                 split(as.data.frame(matches), exclusiveSeg), 
+                 dispatch)
+  
+  ### call methods
+  result <- Map(\(method, strs) {
+    na <- is.na(strs)
+    output <- vectorNA(length(strs), outputClass)
+    output[!na] <- callf...(method, c(list(strs[!na]), list(...)))
+    output
+  },
+  c(list(force), dispatchDF$Method)[dispatch + 1L], matches)
+  
+  do.call('c', result)
+  
 }
+  
+  
+#' @rdname humdrumDispatch
+exclusiveDispatch <- function(str, dispatchDF, ..., outputClass = 'character') {
+  dispatchDF$generatorName <- NA
+  dispatchDF$reGenerator <- replicate(nrow(dispatchDF), \(...) '.*')
+  humdrumDispatch(str, dispatchDF, ..., outputClass = outputClass)
+}
+
+
+makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClass = 'character', args = alist()) {
+  dispatchDF <- as.data.table(do.call('rbind', list(...)))
+  
+  
+  colnames(dispatchDF) <- c('Exclusives', 'reGeneratorName', 'MethodName')
+  dispatchDF$reGenerator <- lapply(dispatchDF$reGeneratorName, match.fun)
+  dispatchDF$Method <- lapply(dispatchDF$MethodName, match.fun)
+  dispatchDF$Args <- lapply(dispatchDF$Method, fargs)
+
+                       
+  
+  # Assemble the new function's arguments
+  genericArgs <- local({
+    sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
+    args <- c(alist(str = , Exclusive = NULL, ... = ), args, unlist(dispatchDF$Args)[sharedArgNames])
+    args <- args[!duplicated(names(args))]
+    args <- args[names(args) != 'x']
+    args
+
+  })
+  
+  dispatchArgs <- genericArgs[!names(genericArgs) %in% c('str', 'Exclusive', '...') ]
+  
+  
+  #####################################################
+  
+  body <- rlang::expr({
+    
+    dispatchDF$regex <- lapply(dispatchDF$reGenerator, \(REgen) REgen(...))
+  
+    result <- humdrumDispatch(str, dispatchDF, Exclusive = Exclusive, !!!dispatchArgs, ..., 
+                              outputClass = !!outputClass, funcName = !!funcName)
+  
+    result
+
+    
+  })
+  
+  genericFunc <- rlang::new_function(genericArgs, body, 
+                                     rlang::new_environment(list(dispatchDF = dispatchDF, dispatchArgs = dispatchArgs), parent = parent.frame()))
+  
+  attr(genericFunc, 'dispatch') <- dispatchDF
+  genericFunc %class% 'humdrumDispatch'
+  
+  
+}
+
+#' @rdname humdrumDispatch
+#' @export
+print.humdrumDispatch <- function(x) {
+  dispatchDF <- attr(x, 'dispatch')
+  
+  call <- gsub(' NULL$', '', deparse(call('function', fargs(x))))
+  cat('humdrum-dispatch', call, '\n')
+  
+  exclusives <- sapply(dispatchDF$Exclusives, \(exc) paste(paste0('**', exc), collapse = '|'))
+  exclusives <- if (all(exclusives == '**any')) "\t" else paste0('\t', exclusives, ' >> ')
+  exclusives <- stringr::str_pad(exclusives, max(nchar(exclusives)), side = 'left')
+  
+  regexes <- sapply(dispatchDF$reGeneratorName, \(REgen) if (is.na(REgen)) '' else paste0(REgen, '(...)'))
+  
+  dispatchDF$MethodName <- stringr::str_pad(dispatchDF$MethodName, max(nchar(dispatchDF$MethodName)), side = 'right')
+  
+  dispatchcalls <- Map(\(call, args, regex) {
+    argnames <- names(args)
+    argnames[1] <- paste0(argnames[1], if (regex != '') paste0(' %~m% ', regex))
+    args <- as.character(args)
+    paste0(call, '(', paste(argnames, ifelse(args == '', '', args), sep = '', collapse = ', '), ')')
+    
+    }, dispatchDF$MethodName, dispatchDF$Args, regexes)
+  
+  cat(paste0(exclusives, dispatchcalls), sep = '\n')
+  
+  cat(stringr::str_pad('(See ?humdrumDispatch for info on how this works!)', options('width')$width - 1, side = 'left'), '\n')
+  
+  
+  # cat(deparse(body(x)), sep='\n')
+  
+
+  
+  
+  
+}
+# 
+# 
+# humdrumDispatch <- function(..., doExclusiveDispatch = TRUE, defaultClass = 'character') {
+#     exprs <- rlang::enexprs(...)
+#     
+#     
+#     dispatchcode <- names(exprs)
+#     dispatchRE <- gsub('^[^ ]+(: )?', '', dispatchcode)
+#     dispatchExclusive <- gsub(': .*', '', dispatchcode)
+#     
+#     REexprs <- rlang::parse_exprs(dispatchRE)
+#     RElist <- lapply(dispatchExclusive, function(REname) rlang::expr(`$`(regexes, !!(rlang::sym(REname)))))
+#     
+#     
+#     arguments <- getAllArgs(exprs)
+#     exprs <- lapply(exprs, makeCall)
+#     exprs <- Map(REcall, RElist, exprs)
+#     
+#     names(exprs) <- names(REexprs) <- dispatchExclusive
+#     #
+#     regexDispatch     <- .regexDispatch(unname(exprs), defaultClass = defaultClass)
+#     exclusiveDispatch <- .exclusiveDispatch(exprs, defaultClass = defaultClass)
+#    
+#     ## 
+#     body <- if (doExclusiveDispatch) {
+#       rlang::expr({
+#         regexes <- list(!!!REexprs)
+#         if (missing(Exclusive) || is.null(Exclusive)) !!regexDispatch else  !!exclusiveDispatch
+#         
+#       })
+#       
+#     } else {
+#       rlang::expr({
+#         regexes <- list(!!!REexprs)
+#         
+#         !!regexDispatch
+#       })
+#     }
+#     
+#     
+#     # body <- predicateDispatch.expr('is.na', body, 'x', negate = TRUE)
+#     # body <- memoizeDispatch.expr(body, 'x')
+#     #
+#     arguments <- c(x = rlang::missing_arg(), 
+#                    if (doExclusiveDispatch) list(Exclusive = NULL),
+#                    arguments,
+#                    inPlace = FALSE)
+#     
+#     rlang::new_function(arguments, body)
+#     
+#     
+#     
+# }
 
 
 getAllArgs <- function(exprs) {

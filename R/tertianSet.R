@@ -649,7 +649,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 
 ### Chord representations ####  
 
-romanNumeral2tset <- function(str, Key = dset(0,0), ...) {
+romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o', ...) {
 
   
   Key <- CKey(Key)
@@ -745,6 +745,9 @@ tertianSet <- function(...) UseMethod('tertianSet')
 
 tertianSet.tertianSet <- function(x, ...) x
 
+#' @export 
+tertianSet.logical <- function(x, ...) vectorNA(length(x), 'tertianSet')
+
 
 #### Numbers ####
 
@@ -754,10 +757,12 @@ tertianSet.logical <- function(x) tset(rep(NA_integer_, length(x)))
 
 #### Characters ####
 
-char2tset <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                             'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
+
+char2tset <- makeHumdrumDispatcher(list('any', 'makeRE.romanChord',  'romanNumeral2tset'),
+                                   list('any', 'makeRE.sciChord',    'sciChord2tset'),
+                                   funcName = 'char2tset',
+                                   outputClass = 'tertianSet')
 
 mapoftset <- function(str, ..., split = '/') {
   
@@ -782,10 +787,13 @@ mapoftset <- function(str, ..., split = '/') {
   tset + dset(root, root, 0L)
 }
 
-tertianSet.character <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                                      'chordof: makeRE.tertianPartition(...)' = mapoftset,
-                                                      'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                                                      'sciChord: makeRE.sciChord(...)' = sciChord2tset)
+tertianSet.character <- makeHumdrumDispatcher(list('any', 'makeRE.tertianPartition', 'mapoftset'),
+                                              list('any', 'makeRE.romanChord',       'romanNumeral2tset'),
+                                              list('any', 'makeRE.sciChord',         'sciChord2tset'),
+                                              funcName = 'tertianSet.character',
+                                              outputClass = 'tertianSet')
+  
+
 
 #### setAs tertianSet ####
 
