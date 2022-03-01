@@ -711,10 +711,20 @@ humdrumDispatch <- function(str, dispatchDF,  Exclusive = NULL, ..., outputClass
   },
   c(list(force), dispatchDF$Method)[dispatch + 1L], matches)
   
-  do.call('c', result)
+  result <- do.call('c', result)
   
+  attr(result, 'dispatch') <-  list(Original = split(str, exclusiveSeg), 
+                                    Regexes = dispatchDF$regex[dispatch],
+                                    Segments = exclusiveSeg)
+  result
 }
   
+rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
+  if (is.null(dispatched) || length(result) != sum(lengths(dispatched$Original)) || !is.atomic(result)) return(result)
+  
+  unlist(Map(stringi::stri_replace_first_regex, dispatched$Original, dispatched$Regexes, split(result, dispatched$Segments)))
+  
+}
   
 #' @rdname humdrumDispatch
 exclusiveDispatch <- function(str, dispatchDF, ..., outputClass = 'character') {

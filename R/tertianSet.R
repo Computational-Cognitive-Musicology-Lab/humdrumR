@@ -852,7 +852,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makeChordTransformer closure!
                         do.call('checkTFs', c(args[names(args) %in% c('implicitSpecies', 'absoluteSpecies', 'explicitNaturals')],
                                               memoize = memoize, inPlace = inPlace, dropNA = dropNA,
                                               list(callname = callname)))
@@ -892,7 +892,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                           
                           output <- if (deparse && is.tertianSet(parsedTset)) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
                           
-                          if (inPlace) output <- re.place(output, parsedTset)
+                          if (inPlace) output <- rePlace(output, attr(parsedTset, 'dispatch'))
                           
                           
                           output

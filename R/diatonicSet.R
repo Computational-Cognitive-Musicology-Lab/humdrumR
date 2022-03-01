@@ -961,7 +961,8 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   
   parse <- function(...) list(...) %class% 'parseArgs'
   
-  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE,  parseArgs = list(), memoize = TRUE, deparse = TRUE)
+  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE, inPlace = FALSE,
+                parseArgs = list(), memoize = TRUE, deparse = TRUE)
 
   
   rlang::new_function(args,
@@ -970,7 +971,7 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                         
                         Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makeKeyTransformer closure!
                         do.call('checkTFs', list(memoize = memoize, dropNA = dropNA, callname = callname))
                         
                         classes <- sapply(args, \(arg) class(arg)[1]) 
@@ -991,6 +992,8 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
                           
                           output <- if (deparse && is.diatonicSet(parsedDset))  do.call(!!deparser, c(list(parsedDset), deparseArgs)) else parsedDset
                       
+                          if (inPlace) output <- rePlace(output, attr(parsedDset, 'dispatch'))
+                          
                           output
                         }
                         

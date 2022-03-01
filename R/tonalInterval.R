@@ -1525,7 +1525,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                           }
                           output <- if (deparse && is.tonalInterval(parsedTint)) do.call(!!deparser, c(list(parsedTint), deparseArgs)) else parsedTint
                           
-                          if (inPlace) output <- re.place(output, parsedTint)
+                          if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
                           
                           
                           output
