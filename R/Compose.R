@@ -715,7 +715,8 @@ humdrumDispatch <- function(str, dispatchDF,  Exclusive = NULL, ..., outputClass
   
   attr(result, 'dispatch') <-  list(Original = split(str, exclusiveSeg), 
                                     Regexes = dispatchDF$regex[dispatch],
-                                    Segments = exclusiveSeg)
+                                    Segments = exclusiveSeg,
+                                    Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
   result
 }
   
@@ -723,6 +724,20 @@ rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
   if (is.null(dispatched) || length(result) != sum(lengths(dispatched$Original)) || !is.atomic(result)) return(result)
   
   unlist(Map(stringi::stri_replace_first_regex, dispatched$Original, dispatched$Regexes, split(result, dispatched$Segments)))
+  
+}
+
+reParse <- function(result, dispatched = attr(result, 'dispatched'), reParsers) {
+  if (is.null(dispatched) || length(result) != sum(lengths(dispatched$Original)) || is.character(result)) return(result)
+  
+  exclusives <- dispatched$Exclusives
+  
+  result <- split(result, dispatched$Segments)
+  
+  unlist(Map(\(res, excl) {
+    reParser <- match.fun(if (excl %in% reParsers)  excl else reParsers[1])
+    reParser(res, inPlace = FALSE)
+  }, result, exclusives))
   
 }
   

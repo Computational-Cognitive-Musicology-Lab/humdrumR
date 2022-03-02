@@ -290,19 +290,23 @@ setMethod('sign', signature = c('tonalInterval'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval.character(e1, inPlace = TRUE)
-              e3 <- stickyApply(`+`, e1, e2)
+              e1 <- tonalInterval.character(e1)
               
-              re.place(re.as(e3))
+              e3 <- e1 + e2
+              dispatch <- attr(e1, 'dispatch')
+              
+              rePlace(reParse(e3, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
               
           })
 
 setMethod('+', signature = c('tonalInterval', 'character'),
           function(e1, e2) {
-              e2 <- tonalInterval.character(e2, inPlace = TRUE)
-              e3 <- stickyApply(`+`, e1, e2)
-              
-              re.place(re.as(e3))
+            e2 <- tonalInterval.character(e2)
+            
+            e3 <- e1 + e2
+            dispatch <- attr(e2, 'dispatch')
+            
+            rePlace(reParse(e3, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
               
           })
 
@@ -312,19 +316,21 @@ setMethod('+', signature = c('tonalInterval', 'character'),
 
 setMethod('-', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval(e1)
-              e3 <- stickyApply(`-`, e1, e2)
-              
-              re.place(re.as(e3))
+            e1 <- tonalInterval.character(e1)
+            
+            e3 <- e1 - e2
+            dispatch <- attr(e1, 'dispatch')
+            rePlace(reParse(e3, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
           })
 
 
 setMethod('-', signature = c('tonalInterval', 'character'),
           function(e1, e2) {
-            e2 <- tonalInterval(e2)
-            e3 <- stickyApply(`-`, e1, e2)
+            e2 <- tonalInterval.character(e2)
             
-            re.place(re.as(e3))
+            e3 <- e1 - e2
+            dispatch <- attr(e2, 'dispatch')
+            rePlace(reParse(e3, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
           })
 
 
