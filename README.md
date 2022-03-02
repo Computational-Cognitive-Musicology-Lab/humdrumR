@@ -8,7 +8,7 @@
 
 ### Installing R
 
-To use `humdrumR`, you'll first need to install [R](https://www.r-project.org/), version 3.2 or later.
+To use `humdrumR`, you'll first need to install [R](https://www.r-project.org/), version 4.1 or later.
 We *highly* recommend that you install the Integrated Development Environment [Rstudio](https://rstudio.com/) as well!
 This link---[Installing R and RStudio](https://rstudio-education.github.io/hopr/starting.html)---is a good starting place.
 

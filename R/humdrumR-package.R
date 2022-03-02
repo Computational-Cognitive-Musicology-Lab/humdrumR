@@ -12,7 +12,7 @@
 #' 
 #' The package `humdrumR` has XXX main components:
 #' 
-#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumR-class] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
+#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumRclass] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
@@ -38,7 +38,8 @@
 #' @importFrom abind abind
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
-#' @importFrom data.table data.table rbindlist setorderv setcolorder copy as.data.table is.data.table
+#' @importFrom rlang %|% %||%
+#' @importFrom data.table data.table rbindlist setorderv setcolorder copy as.data.table is.data.table 
 NULL
 
 

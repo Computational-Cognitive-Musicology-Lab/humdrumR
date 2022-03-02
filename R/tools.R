@@ -218,69 +218,111 @@ applycols <- function(x, f, ...){
 }
 
 
+#' Shift data within a vector/matrix/data.frame
+#' 
+#' The `lag` and `lead` functions take input vectors, matrices, or data.frames and shifts their data
+#' by `n` indices. 
+#' They are similiar to the [data.table::shift] function, but with a few additional options:
+#' @param x The input argument. Should be vector (including lists), array, or data.frame
+#' @param n The amount to lag/lead the data. 
+#' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
+#' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
+#' within the data structure.
+#' @param windows A vector or list of vectors, all of th same length as `x`. Lags crossing the boundaries indicated in `windows`
+#' are filled.
+#' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
+#' 
+#' @seealso [data.table::shift()]
 #' @export
-rotate <- function(obj, rotation = 1, wrap = FALSE, pad = NA, ...) UseMethod('rotate')
+lag <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL, ...) UseMethod('lag')
 
+#' @rdname lag
+#' @export
+lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-rotate.data.frame <- function(df, rotation = 1, margin = 1, wrap = FALSE, pad = NA) {
-         df[] <- rotate.matrix(as.matrix(df), rotation = rotation, margin = margin, wrap = wrap, pad = pad)
-         Map(rotation, margin,
-             f = function(r, m) {
-                              newnames <- rotate(dimnames(df)[[m]], r, wrap = wrap, pad = '')
-                              dimnames(df)[[m]] <<- make.names(newnames, TRUE)
-                       }
-             )
-         df
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+         if (length(n) < length(margin)) n <- rep(n, length(margin))
+        
+         if (1L %in% margin) {
+             x[] <- lapply(x, rotate, n = n[margin == 1L], fill = fill, wrap = wrap, windows = windows)
+             rown <- rotate(rownames(x), n[margin == 1L], wrap = wrap, pad = '_')
+             rown[rown == '_'] <- make.unique(rown[rown == '_'])
+             rownames(x) <- rown
+         } 
+         if (2L %in% margin) {
+             cols <- rotate(colnames(x), n[margin == 2L], fill = 'XXX', wrap = wrap)
+             x[] <-if (wrap) x[cols] else c(list(XXX = rep(NA, nrow(x))),x)[cols]
+         }
+    
+         x
 }
 #' @export
-rotate.default <- function(obj, rotation = 1, wrap = FALSE, pad = NA) {
-          rotation <- rotation[1]
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
+          if (length(x) == 0L) return(x)
+          if (length(n) > 1L) .stop('rotate cannot accept multiple rotation values for a vector argument.')
 
-          size <- length(obj)
-          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
-          if (rotation == 0L) return(obj)
-
-          ind <- seq_len(size) - rotation
-
-          if (wrap) ind <- ((ind - 1L) %% size) + 1L else ind[ind > size | ind < 1] <- NA
-
-          output <- obj[ind]
-
-          if (!is.na(pad)) output[which(is.na(ind))] <- pad
+          if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
+          
+          output <- data.table::shift(x, n, type = 'lag', fill = fill)
+            
+            
+          if (wrap) {
+            if (n > 0) {
+                output[1:n] <- tail(x, n)
+            } else{
+                output[(length(output) - n):length(output)] <- head(x, abs(n))
+            }
+          }
+            
+          if (!is.null(windows)) {
+              if (!is.list(windows)) windows <- list(windows)
+              if (!all(lengths(windows) == length(x))) .stop('Windows must be same length as input vector.')
+              
+              boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE, windows = NULL)))
+              output[boundaries] <- fill
+          }
 
           output
 }
 
 #' @export
-rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA) {
-          if ( margin %len>% 1L ) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+    if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
+    
+    
+          if ( length(margin) > 1L) {
                     rest.mar <- margin[-1]
                     margin   <- margin[1]
 
-                    rest.rot <- if (rotation %len>% 1L ) rotation[-1] else rotation
+                    rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, rotation = rest.rot, margin = rest.mar, wrap = wrap))        )
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = windows)))
           }
-          rotation <- rotation[1]
+         if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
+         if (dim(x)[margin] == 0L) return(x)
+        
+          n <- n[1]
 
-          size <- dim(mat)[margin]
-          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
-          if (rotation == 0) return(mat)
+          size <- dim(x)[margin]
+          n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
+          if (n == 0L) {
+              return(if (wrap) x else matrix(vectorNA(length(x), class(x[1])), ncol = ncol(x), nrow = nrow(x)))
+          } 
 
-          ind <- seq_len(size) - rotation
+          ind <- seq_len(size) - n
 
-          if (wrap) ind <- ind %mod% size else ind[ind > size | ind < 1] <- NA
+          if (wrap) ind <- ((ind - 1L) %% size) + 1L else ind[ind > size | ind < 1] <- NA
 
-          calls <- alist(mat, i = , j = )
+          calls <- alist(x, i = , j = )
           calls[[margin + 1]] <- ind
 
           output <- do.call('[', calls)
 
-          if (!is.na(pad)) {
+          if (!is.na(fill)) {
                     calls[[margin + 1]] <- which(is.na(ind))
-                    calls$value <- pad
+                    calls$value <- fill
                     calls[[1]] <- output
                     output <- do.call('[<-', calls)
 
@@ -1178,12 +1220,12 @@ recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     
     if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
     
-    
     s <- (rlang::as_label(quo[[2]][[1]]) %in% c('{', '(')) + 1L
     
     if (s == 1L) {
         pred <- predicate(quo) 
         if (pred) quo <- do(quo)
+        if (!rlang::is_call(quo[[2]])) return(quo)
     }
     
     if (s == 2L || !(stopOnHit && pred)) {

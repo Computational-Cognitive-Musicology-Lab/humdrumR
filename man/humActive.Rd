@@ -23,7 +23,7 @@ setActive(humdrumR, form)
 setActiveFields(humdrumR, fieldnames)
 }
 \arguments{
-\item{humdrumR}{A \linkS4class{humdrumR} data object.}
+\item{humdrumR}{A \link{humdrumRclass} data object.}
 
 \item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
 or any combination of these in a single string (e.g., \code{"LIM"}).
@@ -41,7 +41,7 @@ This "Active" expression is used as the default value in a lot of humdrumR code.
 For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 i.e., whenever you return a \code{humdrumR} object in the terminal.
 In any expression within a call to
-\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
+\code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}}
 \code{.} is automatically replaced with the \code{Active} expression.
 }
 \details{

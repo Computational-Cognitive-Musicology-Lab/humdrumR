@@ -1905,7 +1905,8 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 #'   
 #'  
 #' 
-#' @name pitchTransformer
+#' @name pitch
+#' @seealso tonalInterval
 NULL
 
 ## Pitch transform maker ####
@@ -2010,7 +2011,7 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
 ### Pitch Transformers ####
 
 ##
-#' @name pitchTransformer
+#' @rdname pitch
 #' @export semit midi
 #' @export pitch kern lilypond interval degree solfa
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')

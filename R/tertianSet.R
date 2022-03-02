@@ -814,16 +814,12 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 
 #' Parsing and deparsing chord information.
 #' 
-#' XXXx
+#' These functions are used to work with chord information.
 #' 
 #' xxx
-#' @rdname chordTransformer
-
-#' Tertian set representations
-#' 
 #' Tertian sets can be read/wrote in various ways.
 #' 
-#' @name tertianRepresentations
+#' @name chordTransformer
 NULL
 
 ## Chord transform maker ####
@@ -907,7 +903,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
 ### Chord transformers ####
 
 ##
-#' @name chordTransformer
+#' @rdname chordTransformer
 #' @export figuredBass romanNumeral 
 #' @export sciChord chordSymbol
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
