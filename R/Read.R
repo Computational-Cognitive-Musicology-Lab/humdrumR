@@ -243,7 +243,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame <- as.list(fileFrame) # this stupidy (translatign to list and back) 
     # is because of annoying data.table assignment behavior, which acts differently
     # depending assiging columns of lists if nrow == 1.
-    fileFrame$Filepath <- lapply(fileFrame$Files, function(files) if (length(files)) names(files) else files)
+    fileFrame$Filepath <- lapply(fileFrame$Files, \(files) if (length(files)) names(files) else files)
     fileFrame <- as.data.table(fileFrame)
     
     if (!is.null(contains)) fileFrame <- filterFilesByContent(fileFrame, contains)
@@ -439,7 +439,7 @@ shortFilenames <- function(fileFrame) {
 #' \code{findHumdrum} does the work of finding and reading the text files into R.
 #' \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
 #' create a [humTable] and build
-#' a [humdrumR][humdrumR::humdrumR-class] data object around the table.
+#' a [humdrumR][humdrumR::humdrumRclass] data object around the table.
 #' 
 #' 
 #' @param ... character: One or more patterns used to identify files to read.
@@ -604,7 +604,7 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' @name readHumdrum
 #' @export
-readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
+readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
                        tandems = 'known', reference = 'all') {
     
     fileFrame <- findHumdrum(..., contains = contains, recursive = recursive, 

@@ -4,9 +4,9 @@
 #' A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
 #' as a single [data.table][data.table::data.table] 
 #' (A `data.table` is an "enhanced" version of R's standard [data.frame]).
-#' Humdrum tables are stored "inside" every [humdrumR-class] object that you will work with, and various `humdrumR`
+#' Humdrum tables are stored "inside" every [humdrumRclass] object that you will work with, and various `humdrumR`
 #' functions allow you to study or manipulate the them.
-#' If you want to directly access the humdrum table within a [humdrumR-class] object, use the [getHumtab] function.
+#' If you want to directly access the humdrum table within a [humdrumRclass] object, use the [getHumtab] function.
 #' 
 #' 
 #' In a humdrum table, each row represents a single "token"
@@ -213,7 +213,7 @@
 #' a data record is `Null`.
 #' This is important/useful because [withinHumdrum] routines are, by default, only applied to `"D"` data, ignoring `"d"`.
 #' 
-#' Whenever you [print][humPrint] or [export][writeHumdrum] a [humdrumR-class] object, null data in the active field 
+#' Whenever you [print][humPrint] or [export][writeHumdrum] a [humdrumRclass] object, null data in the active field 
 #' (i.e., `Null == TRUE`) print as `"."`.
 #' Thus, if you are working with numeric data, with `NA` values, these `NA` values will print as `"."`.
 #' 
@@ -427,7 +427,7 @@ NULL
 #'    0         1         0        1         Path
 #'    1         2         3        4         Column
 #'    ```
-#' Note that `alignColumns` actually adds rows to the [humdrumR-class] object's
+#' Note that `alignColumns` actually adds rows to the [humdrumRclass] object's
 #' internal [humdrum tables][humTable].
 #' @name humColumns
 NULL
@@ -462,7 +462,7 @@ spliceHumtab <- function(humtab) {
 }
 
 orderHumtab <- function(humtab) {
-    orderingcols <- c('File', 'Record', 'Column', 'Stop')
+    orderingcols <- c('File', 'Column', 'Record', 'Stop')
     
     # can't sort by lists
     orderingcols <- orderingcols[sapply(humtab[ , orderingcols, with = FALSE], class) == 'integer']
@@ -481,7 +481,7 @@ orderHumtab <- function(humtab) {
 #' [humdrumR] package.
 #' Each `humdrumR` object represents data [read][readHumdrum] from one or 
 #' more humdrum files.
-#' In the documentation we refer to the collection of files within a [humdrumR-class] object
+#' In the documentation we refer to the collection of files within a [humdrumRclass] object
 #' as a "**corpus**," and each file as a "**piece**."
 #' However, though humdrum data is *usually* encoded as one "piece" per file, this is not necessarily the case:
 #' files might represent movements within a piece, or even just a part of a score. Still, we tend to refer
@@ -492,7 +492,7 @@ orderHumtab <- function(humtab) {
 #' [humdrum tables][humTable] it holds within it.
 #' In essence, an `humdrumR` object is simply a wrapper around these
 #' humdrum tables, which helps users to
-#' to visualize, index, [summarize][humSummary], and [manipulate][humdrumR::with-in-Humdrum]
+#' to visualize, index, [summarize][humSummary], and [manipulate][humdrumR::withinHumdrum]
 #' the table in a variety of ways.
 #' 
 #' Basic information about the size and shape of `humdrumR` data can be
@@ -504,7 +504,7 @@ orderHumtab <- function(humtab) {
 #' The most powerful features of [humdrumR] are the tools it gives you to
 #' 
 #' 1. Filter humdrum data, using [filterHumdrum] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
-#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::with-in-humdrum] routines,
+#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::withinHumdrum] routines,
 #' and their associated [piping operators][humPipe].
 #' 
 #' 
@@ -532,7 +532,7 @@ orderHumtab <- function(humtab) {
 #' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
 #' 
-#' @name humdrumR-class
+#' @name humdrumRclass
 #' @aliases humdrumRS4
 #' @export
 setClass('humdrumR', 
@@ -575,7 +575,7 @@ setMethod('initialize', 'humdrumR',
 
 ####As/Is ####
 
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @export
 is.humdrumR <- \(x) inherits(x, 'humdrumR')
 
@@ -585,14 +585,14 @@ is.humdrumR <- \(x) inherits(x, 'humdrumR')
 #' Many users may wish to work with humdrum data without
 #' using the \code{\link[humdrumR:humdrumR]{humdrumR}} API, instead using 
 #' basic `R` data types.
-#' For this purpose, [humdrumR-class] data objects can be coerced to 
+#' For this purpose, [humdrumRclass] data objects can be coerced to 
 #' basic `R` data types.
 #' 
-#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumR-class] object's
+#' \code{\link[base:vector]{as.vector(humdata, types, mode, fields)}} evaluates the [humdrumRclass] object's
 #' **Active** expression, and (attempts) to force the result to a vector of mode. This
 #' method is essentially a wrapper for [evalActive].
 #' 
-#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumR-class] object's
+#' \code{\link[base:matrix]{as.matrix(humdata, types, pad.files, pad.paths)}} also evaluates the [humdrumRclass] object's
 #' **Active** expression, but wraps it into a matrix of dimensions \code{c(\link[humdrumR:humSize]{nrow(humdata), ncol(humdata)}}.
 #' Note that "\code{\link[humdrumR:humTable]{Columns}}" in humdrum data are not necesarrily the same as spines. 
 #' 
@@ -600,14 +600,14 @@ is.humdrumR <- \(x) inherits(x, 'humdrumR')
 #' \code{\link[data.table:data.table]{as.data.table(humdata)}} first calls `as.matrix` then converts the matrix to a \code{\link[data.table:data.table]{data.table}}.
 #' 
 #' `as.matrices`, `as.data.frames`, and `as.data.tables` call `as.matrix`/`as.data.frame`/`as.data.table`
-#' on each individual file in a [humdrumR-class] corpus, returning a list of matices/data.frames/data.tables.
+#' on each individual file in a [humdrumRclass] corpus, returning a list of matices/data.frames/data.tables.
 #' 
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
 #' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
 #' 
-#' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumR-class] corpus have fewer 
+#' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumRclass] corpus have fewer 
 #' \code{\link[humdrumR:humTable]{spines/columns}} than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
 #' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
 #' 
@@ -624,8 +624,8 @@ is.humdrumR <- \(x) inherits(x, 'humdrumR')
 #' string naming an atomic mode---the output will be coerced to this mode (if possible).
 #' 
 #' @param field(s) If the `field` argument is *not* `NULL`, it can instead be a `character` string matching
-#' the [humdrumR-class] object's fields. If so, these fields are extracted instead of the
-#' \code{\link[humdrumR:humdrumR-class]{Active expression}}.
+#' the [humdrumRclass] object's fields. If so, these fields are extracted instead of the
+#' \code{\link[humdrumR:humdrumRclass]{Active expression}}.
 #' For calls to `as.vector` and `as.data.frame`, only one field can be extracted.
 #' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
 #' returned in a third matrix dimension, each field forming one rectangular slice.
@@ -667,7 +667,6 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 
 
 #' @name humCoercion
-#' @usage as.matrix(humdata)
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
                    alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
@@ -716,7 +715,6 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
 }                   
 
 #' @name humCoercion
-#' @usage as.data.frame(humdata)
 #' @export
 setMethod('as.data.frame', 
           signature = c(x = 'humdrumR'),
@@ -768,7 +766,7 @@ isActiveAtomic <- function(humdrumR) {
 #' 
 #' These functions can be used to quickly
 #' get basic information about the size and "shape" of
-#' a [humdrumR-class] corpus.
+#' a [humdrumRclass] corpus.
 #' For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
 #' 
 #' A few common base `R` methods are defined
@@ -811,7 +809,7 @@ npieces <- function(humdrumR) {
 
 #' Does humdrumR corpus contain subcorpora?
 #' 
-#' [HumdrumR][humdrumR-class] objects can be divided into "subcorpora."
+#' [HumdrumR][humdrumRclass] objects can be divided into "subcorpora."
 #' These functions tell us if there are any subcorpora and, if so, what they are called.
 #' @name humSize
 #' @export
@@ -838,7 +836,6 @@ namesSubcorpora <- function(humdrumR) {
 nfiles <- npieces
 
 #' @name humSize
-#' @usage length(humdata)
 #' @export
 setMethod('length',
           signature = c(x = 'humdrumR'),
@@ -876,13 +873,8 @@ anyStops <- function(humdrumR) {
           
 }
 
-#' Does the corpus vary in the number of spines?
-#' 
-#' Some humdrum corpora are homogenous, with the same number of spines in each file.
-#' This function returns TRUE for corpora that are homogenous, and FALSE otherwise.
-#' @export
 is.ragged <- function(humdrumR) {
-          # Do the pieces in the corpus vary in number of columns?
+          # Do the pieces in the corpus vary in number of spines?
           
           humtab <- getD(humdrumR)
           
@@ -1053,13 +1045,13 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
 #'
 #' These functions are used to change the "shape"
 #' of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
-#' (held within [humdrumR-class] objects of course).
+#' (held within [humdrumRclass] objects of course).
 #' 
 #' The `foldXXX` family allows you collapse all 
 #' \code{\link[humdrumR:humTable]{user fields}}
 #' across groups in another field.
 #'
-#' @param humdrumR A [humdrumR-class] data object.
+#' @param humdrumR A [humdrumRclass] data object.
 #' (see the \code{\link[humdrumR:humTable]{humdrum table}} documentation **Fields** section for explanation.).
 #' @param foldAtomic `logical`. If `foldAtomic == TRUE`, each stop is collapsed to a single string
 #' `foldAtomic == FALSE`, each stop is collapsed to a list of tokens. 
@@ -1197,7 +1189,7 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 
 #' Access a Humdrum Table
 #' 
-#' `getHumtab` extracts a [humdrum table][humTable] from a [humdrumR-class] object.
+#' `getHumtab` extracts a [humdrum table][humTable] from a [humdrumRclass] object.
 #' 
 #' @param humdrumR A `humdrumR` object.
 #' @param dataTypes A `character` vector. Specifies which types of data tokens/records to extract.
@@ -1309,7 +1301,7 @@ update_d <- function(humdrumR) {
 #' For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
 #' i.e., whenever you return a `humdrumR` object in the terminal.
 #' In any expression within a call to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+#' \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}} 
 #' `.` is automatically replaced with the `Active` expression.
 #' 
 #' The active expression can be changed with the commands 
@@ -1365,10 +1357,10 @@ update_d <- function(humdrumR) {
 NULL
 
 #' `evalActive` evaluates the active expression in a
-#' [humdrumR object][humdrumR::humdrumR-class].
+#' [humdrumR object][humdrumR::humdrumRclass].
 #' 
 #' 
-#' @param humdrumR A [humdrumR-class] data object.
+#' @param humdrumR A [humdrumRclass] data object.
 #' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', 'P'` 
 #'        or any combination of these in a single string (e.g., `"LIM"`).
 #'        (see the [humdrum table][humTable] documentation **Fields** section for an explanation.).
@@ -1429,7 +1421,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
 getActive <- function(humdrumR) humdrumR@Active
 
 
-#' `setActive` takes a [humdrumR-class] object and a formula
+#' `setActive` takes a [humdrumRclass] object and a formula
 #' and sets the right side of formula as the object's Active expression.
 #' @name humActive
 #' @export
@@ -1441,7 +1433,7 @@ setActive <- function(humdrumR, form) {
 
 #' `setActiveFields` takes a character vector of strings representing current
 #' \code{\link[humdrumR:humTable]{field}} names
-#' and sets the [humdrumR-class] object's active expression
+#' and sets the [humdrumRclass] object's active expression
 #' to simply return those fields (as a list, if there are more than one).
 #' @name humActive
 #' @export
@@ -1509,7 +1501,7 @@ checkFieldTypes <- function(types, argname, callname) {
 }
 
 #' This controls which humdrumR data are printed and default target for pipe.
-#' @name humdrumR-class
+#' @rdname humdrumRclass
 #' @export
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
@@ -1551,8 +1543,8 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 }
 
 #' Use `fields` to list the current fields in 
-#' a [humdrumR-class] object.
-#' @name humdrumR-class
+#' a [humdrumRclass] object.
+#' @rdname humdrumRclass
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
   #
@@ -1714,7 +1706,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' 
 #' R objects often have ways of assigning new values to 
 #' *part* of the object using [indexing operators][base::Extract].
-#' [HumdrumR objects][humdrumR:humdrumR-class] objects are no different, as they allow us to insert
+#' [HumdrumR objects][humdrumR:humdrumRclass] objects are no different, as they allow us to insert
 #' new fields into them!
 #' 
 #' A new field can be inserted into a `humdrumR` object in two ways:
@@ -1744,7 +1736,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' 
 #' ### `humdrumR -> humdrumR` assignment:
 #' 
-#' Assigning a field from one [humdrumR object][humdrumR:humdrumR-class]
+#' Assigning a field from one [humdrumR object][humdrumR:humdrumRclass]
 #' to another works like this:
 #' (Recall that the two objects must have the exact same numbers of data tokens.)
 #' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
@@ -1791,7 +1783,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' 
 #' ### `humdrumR -> vector` assignment:
 #' 
-#' You can assign vectors or lists of vectors straight into a [humdrumR object][humdrumR:humdrumR-class].
+#' You can assign vectors or lists of vectors straight into a [humdrumR object][humdrumR:humdrumRclass].
 #' All vectors must be the same length as the number of data tokens
 #' in the target object.
 #' If you provide multiple vectors to assign (as a `list` or `data.frame` of vectors) 
@@ -1807,19 +1799,16 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 NULL
 
 ###$<- simply calls []<- indexing!
-#' @name humdrumR-class
-#' @usage humdata$name <- vector
+#' @rdname humdrumRclass
 #' @export
 setMethod('$<-',  signature = c(x = 'humdrumR', value = 'vector'), function(x, name, value) { x[name] <- value ; x  })
 
-#' @name humdrumR-class
-#' @usage humdata$name <- humdata2
+#' @rdname humdrumRclass
 #' @export
 setMethod('$<-',  signature = c(x = 'humdrumR', value = 'humdrumR'), function(x, name, value) { x[name] <- value ; x  })
 
 
-#' @name humdrumR-class
-#' @usage humdata['character'] <- vector
+#' @rdname humdrumRclass
 #' @export
 setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value = 'vector'),
           function(x, i, j, value) {
@@ -1854,8 +1843,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
           })
 
 
-#' @name humdrumR-class
-#' @usage humdata['character'] <- humdata2
+#' @rdname humdrumRclass
 #' @export
 setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value = 'humdrumR'),
           function(x, i, j, value) {
@@ -1929,7 +1917,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-#' Show a [humdrumR-class] object in the terminal.
+#' Show a [humdrumRclass] object in the terminal.
 #' 
 #' 
 #' @name humPrint

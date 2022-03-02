@@ -835,7 +835,7 @@ setMethod('rep', c(x = 'struct'),
               }
               
               setSlots(x) <- slots
-              x@dim[1]   %!<-% as.integer(length(slots[[1]]) / (ncol(x) %maybe% 1))
+              x@dim[1]   %!<-% as.integer(length(slots[[1]]) / (ncol(x) %||% 1))
               x@rownames %!<-% rep(rownames(x), ...)
               
               x
@@ -947,7 +947,7 @@ cbind.struct <-  function(...) {
     # new colnames
     existing <- sapply(xs, rownames) 
     new <- .names(xs)
-    new <- Map(\(old, new, len) if (new == '') old else rep(new, len %maybe% 1L), existing, new, lapply(xs, nrow))
+    new <- Map(\(old, new, len) if (new == '') old else rep(new, len %||% 1L), existing, new, lapply(xs, nrow))
     if (any(!sapply(new, is.null))) new[sapply(new, is.null)] <- list("")
     colnames(x) <- unlist(new)
     x
@@ -1020,7 +1020,7 @@ setMethod('as.list', signature = c('struct'),
 #' @export
 setGeneric('as.atomic', function(x, ...) standardGeneric('as.atomic'))
 setMethod('as.atomic', 'struct',
-          function(x,  collapse = function(x, y) .paste(x, y, sep = ',')) {
+          function(x,  collapse = \(x, y) .paste(x, y, sep = ',')) {
               slots <- getSlots(x)
               atom <- Reduce(collapse, slots)
               
@@ -1033,7 +1033,7 @@ setMethod('as.atomic', 'struct',
 
 
 #' @export
-as.matrix.struct <- function(x, ..., collapse = function(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
+as.matrix.struct <- function(x, ..., collapse = \(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
 
     mat <- as.atomic(x, collapse = collapse)
     
@@ -1050,7 +1050,7 @@ setAs('struct', 'data.frame', function(from) as.data.frame(from))
 #' @export
 setMethod('as.data.frame', 'struct',
           function(x, optional = FALSE, ...) {
-              row.names <- x@rownames %maybe% 1:length(x)
+              row.names <- x@rownames %||% 1:length(x)
               
               value <- list(x)
               attr(value, 'row.names') <- row.names

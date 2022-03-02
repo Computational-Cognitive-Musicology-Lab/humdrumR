@@ -4,7 +4,7 @@
 #' Piping humdrumR data
 #' 
 #' These infix operators make it possible to use
-#' the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} 
+#' the \code{\link[humdrumR:withinHumdrum]{with(in)Humdrum}} 
 #' functions in a piping style, similar to the \code{|} (pipe)
 #' in unix-style terminals, or the \code{|>}  pipe operator.
 #' from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.

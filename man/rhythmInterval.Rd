@@ -47,31 +47,6 @@ This allows use to represent any rational number with no loss of precision
 due to rounding errors and weak decimal expansions (like \code{0.333333}).
 Rhythm intervals are similar to standard musical
 termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
-
-#' @name RhythmScaling
-#' @export
-augment.rhythmInterval <- function(rint, scalar) rint * scalar
-}
-\details{
-#' @name RhythmScaling
-#' @export
-augment.character <- regexDispatch('Recip'   = recip.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.recip2rhythmInterval,
-'\link{0-9}+\link[=0-9]{\%/}+' = as.ratio.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.fraction2rhythmInterval,
-'Decimal' = as.decimal.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.numeric2rhythmInterval)
-
-#' @name RhythmScaling
-#' @export
-diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-
-#' @name RhythmScaling
-#' @export
-diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-
-#' @name RhythmScaling
-#' @export
-diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.recip2rhythmInterval,
-'\link{0-9}+\link[=0-9]{\%/}+' = as.ratio.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.fraction2rhythmInterval,
-'Decimal' = as.decimal.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.numeric2rhythmInterval)
 }
 \section{Slots}{
 

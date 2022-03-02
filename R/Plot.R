@@ -1,8 +1,8 @@
 #### humdrum plot function
 
-setAlpha = function(col, alpha) { do.call(rgb, c(as.list(col2rgb(col)[,1] / 255), alpha = alpha)) }
+setAlpha <- function(col, alpha) { do.call(rgb, c(as.list(col2rgb(col)[,1] / 255), alpha = alpha)) }
 
-showHumdrum = function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), '/humdrumDisplay.svg')) {
+showHumdrum <- function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), '/humdrumDisplay.svg')) {
   #' @export
   #only plot one file
   humdata = humdata[1]

@@ -17,7 +17,7 @@ makeStaff <- function(y, xlim = c(0, 1), nlines = 5, cex = 1) {
     ##
     xlim <- (diff(corners[1:2])* xlim) + corners[1]
     #
-    sapply(ylines, function(y) lines(xlim, c(y, y)))
+    sapply(ylines, \(y) lines(xlim, c(y, y)))
     
    
     list(X = xlim, 

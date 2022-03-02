@@ -188,7 +188,7 @@ E         _C        D        _P
 }
 }
 
-Note that \code{alignColumns} actually adds rows to the \linkS4class{humdrumR} object's
+Note that \code{alignColumns} actually adds rows to the \link{humdrumRclass} object's
 internal \link[=humTable]{humdrum tables}.
 }
 

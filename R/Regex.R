@@ -1,4 +1,4 @@
-####### Regex Parsing
+# Regex Parsing ----
 
 #' @name REparser
 #' @export
@@ -21,7 +21,10 @@ REparser <- function(res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead 
 #' 
 #' @name REparser
 #' @export
-REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.lead = FALSE, parse.rest = FALSE, reverse = FALSE, toEnv = FALSE) {
+REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
+                    parse.lead = FALSE, parse.rest = FALSE, reverse = FALSE, 
+                    sep = NULL,
+                    toEnv = FALSE) {
     res <- res[lengths(res) > 0]
     
     if (any(.names(res) == "")) .stop("In call to REparse, all arguments must be named.")
@@ -35,6 +38,8 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE, parse.l
     if (reverse) res <- rev(res)
     
     for (re in names(res)) {
+        if (!is.null(sep)) rest <- stringr::str_remove(rest, pattern = paste0('^', sep))
+        
         locs <- stringr::str_locate(rest, res[[re]])
         
         
@@ -108,25 +113,7 @@ popRE <- function(str, regex) {
 
 
 
-####### Regex dispatch ----
-
-#' Regular expression method dispatch and function application
-#' 
-#' The \code{\link{humdrumR}} \strong{regular-expression method dispatch}
-#' system is a simple system for making new functions which can by smartly
-#' applied to complex character strings.
-#' 
-#' The function \code{do2RE} accepts and arbitrary function
-#' and a \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expression} (regex)
-#' and makes a new function that applies the original function only to
-#' any part of a string which matches the regex.
-#' 
-#' The function \code{regexDispatch} accepts a list
-#' of functions, each with a matching regular expression,
-#' and creates a new function which applies whichever function
-#' based on which regexs it finds in its input.
-#' @name regexDispatch
-NULL
+# Regex dispatch ----
 
 
 
@@ -134,45 +121,7 @@ NULL
 
 
 
-#' @name regexDispatch
-#' @export
-regexDispatch <- function(...) {
-          funcs <- Filter(is.function, list(...))
-          if (length(funcs) == 0L) stop("Can't regexDispatch on zero functions.")
-          
-          regexes <- getRE(names(funcs))
-          funcsArgs <- lapply(funcs, \(rf) formals(args(rf))[-1])
-          
-          genericFunc <- function() {
-              if (!is.character(str)) stop(call. = FALSE,
-                                           "The regex-dispatch function you've called requires a character argument.")
-              
-              dispatch <- regexFindMethod(str, regexes)  
-              if (dispatch == 0L) return(if (inPlace) str else vectorNA(length(str), 'character'))
-              dispatchFunc <- funcs[[dispatch]]
-              dispatchRE   <- regexes[[dispatch]]
-              dispatchArgs <- funcsArgs[[dispatch]]
-              # ... args
-              elips <- names(dispatchArgs) == '...'
-              not_elips <- names(dispatchArgs)[!elips]
-              #
-              dispatchArgs <- setNames(lapply(not_elips, get, envir = environment()), not_elips)
-              dispatchArgs <- c(x = list(str), regex = dispatchRE, .func = dispatchFunc, inPlace = inPlace,
-                                dispatchArgs, if (any(elips)) list(...))
-              result <- do.call('.REapply', dispatchArgs)
-              
-              result %re.as% names(dispatch)
-          }
-          
-          # Assemble the new function's arguments
-          genericArgs <- do.call('c', c(funcsArgs, use.names = FALSE))
-          genericArgs <- genericArgs[!duplicated(names(genericArgs))]
-          formals(genericFunc) <- c(alist(str = ), genericArgs, alist(inPlace = FALSE))
-          
-          genericFunc
-}
 
-# 
 regexFindMethod <- function(str, regexes) {
     # this takes a str of character values and a string of REs
     # and returns a single interger value representing the 
@@ -194,8 +143,6 @@ regexFindMethod <- function(str, regexes) {
 }
 
 
-#' @name regexDispatch
-#' @export
 REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     if (!is.character(x)) stop(call. = FALSE,
                                "Sorry, REapply can only apply to an x argument that is a character vector.")
@@ -286,7 +233,7 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 
 
 
-###################  User Regex tools ----
+## %~% Regex tools ----
 
 
 #' Match strings against regular expression
@@ -295,11 +242,12 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 #' existing `R` regular expression matching functions.
 #' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
 #' 
-#' + `\%~l\%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl].
+#' + `\%~l\%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
 #' + `\%~\%`: The "default"---same as `\%~l\%`.
-#' + `\%~i\%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep].
+#' + `\%~i\%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
 #' + `\%~n\%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
-#'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex].
+#'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex()].
+#' + `\%~m\%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
 #' @export
 #' @name RegexFind
 `%~l%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
@@ -309,6 +257,9 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 #' @export
 #' @name RegexFind
 `%~n%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
+#' @export
+#' @name RegexFind
+`%~m%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
 #' @name RegexFind
 #' @export
 `%~%` <- `%~l%`
@@ -378,7 +329,7 @@ escaper <- function(str) {
 
 
 
-cREs <- function(REs, parse.exhaust = TRUE) {
+cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
     if (length(REs) == 0) return('')
     REs <- unlist(paste0('(?:', REs, ')'))
     
@@ -398,7 +349,7 @@ cREs <- function(REs, parse.exhaust = TRUE) {
         
     }
     
-    paste(REs, collapse = if (parse.exhaust) '' else '.*') 
+    paste(REs, collapse = if (is.null(sep)) {if (parse.exhaust) '' else '.*'} else {sep}) 
     
 }
 
@@ -431,14 +382,14 @@ makeRE.contours <- function(octave.integer = TRUE, up = '^', down = 'v', ...) {
     if (octave.integer) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
-makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities = FALSE, collapse = TRUE, ..., regexname = 'tonalChroma'){
+makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities = FALSE, collapse = TRUE, sep = NULL, ..., regexname = 'tonalChroma'){
     REs <-  list(sign    = if ('sign' %in% parts)       '[-+]?',
                  step    = if ("step" %in% parts)       makeRE.steps(...),
                  species = if ("species" %in% parts) {if (qualities) makeRE.qualities(...) else makeRE.accidentals(...)},
                  octave  = if ("octave" %in% parts)    makeRE.contours(...)
                  )[parts]
     
-    if (collapse) setNames(cREs(REs), regexname) else REs
+    if (collapse) setNames(cREs(REs, sep = sep), regexname) else REs
     
 }
 
@@ -482,7 +433,7 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse =
 
 ####
 
-makeRE.decimal <- function() c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
+makeRE.decimal <- function(...) c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
 makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
 
