@@ -16,12 +16,21 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
+<<<<<<< HEAD
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
+=======
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+
+>>>>>>> dispatchmod
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -89,7 +98,9 @@ a detailed explanation of the theory and specifics of <code>tonalInterval</code>
   roundContour <span class="op">=</span> <span class="va">floor</span>
 <span class="op">)</span>
 
-<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -116,8 +127,13 @@ Thus, if you return a <code>tonalInterval</code> on the command line (or call <a
 
 
 <dt><code>Cent</code></dt>
-<dd><p>numeric values representing cents (1200th of an octave).</p><div class="section">
-<h3 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a></h3>
+<dd><p>numeric values representing cents (1200th of an octave).</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a></h2>
+    
 
 
 <p>Technically, <code>tonalInterval</code>s are examples of algebraic <a href="https://en.wikipedia.org/wiki/Module_(mathematics)" class="external-link">modules over integers</a>.
@@ -136,9 +152,12 @@ For example, an augmented-fourth divided by a major-second <em>is</em> <code>3L<
 The division algorithm works by applying standard Euclidean division to the <code>@Fifth</code> slot (line-of-fifths tonal space), and shifting the <code>@Octave</code> value in
 the remainder to the match the appropriate octave.
 This definition has the useful properties that <code>specificinterval %% A1 = genericinterval</code> and <code>interval %% d2 = enharmonicinterval</code>.</p>
-</div>
-
-<div class="section">
+<p>Since basic data types can be parsed into <code>tonalInterval</code> (see below), <code>humdrumR</code> will attempt to automatically <a href="https://en.wikipedia.org/wiki/Type_conversion" class="external-link">coerce</a>
+data to tonalIntervals when asked to perform arithmetic.
+This means that arithmetic can be applied when one of the two arguments is a <code>tonalInterval</code> and the other is a coercable atomic.
+For instance, <code>M3 + 2L</code> will interpret <code>2L</code> as two semitones and add a major-second to the major-third!
+The clever dispatch system will even ignore character strings that are not recognized (see examples)!
+This is useful when combined with the "Predifined Intervals" (like <code>M3</code>), described below.</p><div class="section">
 <h3 id="relational-operators">Relational Operators<a class="anchor" aria-label="anchor" href="#relational-operators"></a></h3>
 
 
@@ -151,21 +170,6 @@ Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE<
 </div>
 
 <div class="section">
-<h3 id="coercion">Coercion<a class="anchor" aria-label="anchor" href="#coercion"></a></h3>
-
-
-<p><code>humdrumR</code> knows how to <a href="https://en.wikipedia.org/wiki/Type_conversion" class="external-link">coerce</a> several <a href="https://rdrr.io/r/base/vector.html" class="external-link">base-R atomic types</a> into <code>tonalInterval</code>s.
-This can be done using the <a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a> function---e.g., <code>as(3, "tonalInterval")</code>---or more intuitively using the function <code>tonalInterval()</code>.
-Coercision methods are defined for</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a>: interpreted as semitones</p></li>
-<li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>: interpreted as frequency ratios, assuming a <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">Pythagorean tuning</a>.</p></li>
-<li><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>: interpreted using <code>humdrumR</code>s <a href="regexDispatch.html">regular expression dispatch system</a>, as
-explained fully here.</p></li>
-</ul><p>Since, coersion is defined, <code>tonalInterval</code> arithmatic can be applied when one of the two arguments is a <code>tonalInterval</code> and the other is a coercable atomic.
-For instance, <code>M3 + 2L</code> will interpret <code>2L</code> as two semitones and add a major-second to the major-third!
-The clever <a href="regexDispatch.html">dispatch system</a> will even ignore character strings that are not recognized (see examples)!</p>
-</div>
-
-<div class="section">
 <h3 id="predefined-intervals-">Predefined Intervals:<a class="anchor" aria-label="anchor" href="#predefined-intervals-"></a></h3>
 
 
@@ -174,11 +178,44 @@ Every generic interval from 1 to 15 is combined with every interval quality <cod
 <code>AA</code> (doubly augmented).
 Thus, after loading <code>humdrumR</code>, you can type things like <code>M3 + M3</code> and get <code>A5</code>.
 In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),  <code>pythagorean.comma</code> (<code>= d2 = tint(-19,12)</code>), and <code>octave</code> (<code>tint(1, 0)</code>) are exported as well.</p>
-</div></dd>
+</div>
+
+    </div>
+    <div class="section level2">
+    <h2 id="parsing">Parsing<a class="anchor" aria-label="anchor" href="#parsing"></a></h2>
+    
 
 
-</dl></div>
+<<<<<<< HEAD
+=======
+<p><code>humdrumR</code> includes a easy-to-use but powerful system for parsing pitch information into the <code>tonalInterval</code> representation.
+Basic methods are defined for numeric values representing atonal pitch information:</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a> values are interpreted as semitones. Watch out! In R, you need to append an <code>L</code> to a number to make it an explicit integer:
+For example, <code>tonalInterval(3L)</code>.</p></li>
+<li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>/<code><a href="decimal.html">decimal()</a></code> and <code><a href="rational.html">rational()</a></code> values are interpreted as frequency ratios, assuming a <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">Pythagorean tuning</a>.
+For example, the value <code>2.0</code> will be interpreted as an octave (two to one ratio.)</p></li>
+</ul><p>However, the most useful tool for humdrum data is parsing pitch representations encoded in <code>character</code> tokens.
+The <code>humdrumR</code> regex/exclusive parsing system is used to interpret character strings as tonalIntervals.
+This includes character tokens with pitch information embedded alongside other information, like <code>"4.ee</code> in a kern token.
+There are six regex-patterns that <code>tonalInterval</code> known how to parse automatically:</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td>Kern</td><td>**kern</td><td><code>ee-</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a></td><td>**pitch</td><td><code>Eb5</code></td></tr><tr><td>Interval</td><td>**hint/**mint/**int</td><td><code>+m3</code></td></tr><tr><td>Scale degree</td><td>**deg</td><td><code>b3</code></td></tr><tr><td>Solfege</td><td>**solfa</td><td><code>me</code></td></tr><tr><td><a href="https://lilypond.org/doc/v2.22/Documentation/notation/pitches" class="external-link">Lilypond pitch</a></td><td>none</td><td><code>ees'</code></td></tr></table><p>If you call <code>tonalInterval</code> (or <a href="pitchFunctions.html">any function that uses tonalInterval as a parser</a>) on a <code>character</code> string,
+the regex-system will automatically (attempt) to interpret the tokens as on the pitch types above---if there is a conflict
+the representations are favored in the order they are presented in the table above.
+If a matching exclusive interpretation (see table above) is provided using the <code>Exclusive</code> argument,
+this choice overrides the regex-dispatch.
+If there is no match, an NA <code>tonalInterval</code> is returned.</p><div class="section">
+<h3 id="parsing-with-options">Parsing with Options<a class="anchor" aria-label="anchor" href="#parsing-with-options"></a></h3>
 
+
+<p>The six tonal representations listed above function through a common parsing interface.</p>
+</div>
+
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other core pitch representation: 
+<code><a href="LO5th.html">LO5th</a>()</code></p></div>
+    </div>
+
+>>>>>>> dispatchmod
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
@@ -215,9 +252,9 @@ In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),
 <span class="r-in"><span class="co"># = A B</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="st">"4.ee"</span> <span class="op">+</span> <span class="va">P5</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "4.bb"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] bb</span>
 <span class="r-in"><span class="co"># = "4.bb"</span></span>
-<span class="r-in"></span>
 <span class="r-in"></span>
 <span class="r-in"></span>
 </code></pre></div>

@@ -10,7 +10,11 @@ If the a vector of regexes is given as the right argument, matches to any of the
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
+<<<<<<< HEAD
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+=======
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
+>>>>>>> dispatchmod
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
@@ -75,17 +79,20 @@ If the a vector of regexes is given as the right argument, matches to <em>any</e
 
 <span class="va">x</span> <span class="op">%~n%</span> <span class="va">pattern</span>
 
+<span class="va">x</span> <span class="op">%~m%</span> <span class="va">pattern</span>
+
 <span class="va">x</span> <span class="op">%~%</span> <span class="va">pattern</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     
-<ul><li><p><code>\%~l\%</code>: Matches <code>pattern</code> in <code>x</code> and returns <code>logical</code>. Shorthand for <a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl</a>.</p></li>
+<ul><li><p><code>\%~l\%</code>: Matches <code>pattern</code> in <code>x</code> and returns <code>logical</code>. Shorthand for <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grepl()</a></code>.</p></li>
 <li><p><code>\%~\%</code>: The "default"---same as <code>\%~l\%</code>.</p></li>
-<li><p><code>\%~i\%</code>: Matches <code>pattern</code> in <code>x</code> and returns <code>integer</code> indices. Shorthand for <a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grep</a>.</p></li>
+<li><p><code>\%~i\%</code>: Matches <code>pattern</code> in <code>x</code> and returns <code>integer</code> indices. Shorthand for <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">base::grep()</a></code>.</p></li>
 <li><p><code>\%~n\%</code>: Matches <code>pattern</code> in <code>x</code> and returns <code>integer</code> counts (can be greater than one if more
-than one match occurs in the same token). Shorthand for <a href="https://rdrr.io/pkg/stringi/man/stri_count.html" class="external-link">stringi::stri_count_regex</a>.</p></li>
+than one match occurs in the same token). Shorthand for <code><a href="https://rdrr.io/pkg/stringi/man/stri_count.html" class="external-link">stringi::stri_count_regex()</a></code>.</p></li>
+<li><p><code>\%~m\%</code>: Matches <code>pattern</code> in <code>x</code> and returns matching strings (or NA if no match). Shorthand for <code><a href="https://rdrr.io/pkg/stringi/man/stri_extract.html" class="external-link">stringi::stri_extract_first_regex()</a></code></p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

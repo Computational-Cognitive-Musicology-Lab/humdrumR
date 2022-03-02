@@ -7,6 +7,12 @@ template:
   bootstrap: 5
   bootswatch: solar 
 url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev, toc]
+template:
+  bootstrap: 5
+  bootswatch: lumen
 reference:
 - title: "Musical Tools"
   desc: >
@@ -20,13 +26,14 @@ reference:
   - pitch
   - tonalInterval
   - tonalTransformations
+  - LO5th
   - diatonicSet
   - tertianSet
   - romanNumerals
   - transpose
   - chordTransformer
   - keyTransformer
-  - pitchTransformer
+  - pitchFunctions
 - subtitle: "Rhythm"
   desc: "Rhythm and meter classes and functions."
   contents:
@@ -68,7 +75,7 @@ reference:
      These functions provide functionality for working with regular expressions.
   contents:
   - RegexFind
-  - regexDispatch
+  - humdrumDispatch
   - regexConstruction
   - REparser
 - title: "Data Structures"
@@ -89,3 +96,9 @@ reference:
   - humSize
   - humTable
   - struct
+- title: "Other Functions"
+  desc: "Other useful tools"
+- subtitle: "Numeric values"
+  contents:
+  - rational
+  - decimal

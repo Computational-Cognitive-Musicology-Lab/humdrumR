@@ -468,16 +468,18 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 
 
 segments <- function(x, reverse = FALSE) {
-    if (!is.logical(x)) x <- c(TRUE, head(x, -1L) != tail(x, -1L))
-    if (reverse) x <- rev(x)
+    change <- if (!is.logical(x)) c(TRUE, head(x, -1L) != tail(x, -1L)) else x
+    if (reverse) change <- rev(change)
     
-    x <- cumsum(x)
+    seg <- cumsum(change)
     
     if (reverse) {
-        x <- rev(-x) + max(x) + 1
+        seg <- rev(-seg) + max(seg) + 1
     }
     
-    x
+    attr(seg, 'values') <- x[change]
+    
+    seg
     
 }
 
@@ -821,8 +823,10 @@ captureSymbols <- function(expr) {
 }
 
 
-.switch <- function(x, groups, ..., parallel = list()) {
+.switch <- function(x, groups, ..., parallel = list(), defaultClass = 'character') {
+    # this function plays a key role in Exclusive dispatch
     exprs <- rlang::enexprs(...)
+    
     missing <- sapply(exprs, rlang::is_missing)
     
     names(exprs)[.names(exprs) == ""] <- 'rest'
@@ -837,7 +841,7 @@ captureSymbols <- function(expr) {
     exprs <- exprs[switch %in% c(groups, if (rest) 'rest')]
     
     
-    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), class(x)))
+    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), defaultClass))
     
     groupvec <- c(if (rest) 'rest' else 'nomatch', switchg)[match(groups, switch, nomatch = 0) + 1] 
     
@@ -860,7 +864,6 @@ captureSymbols <- function(expr) {
                        }, 
                        c(list(exprs), 
                          grouped)))
-    
     results$nomatch <- vectorNA(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
     results <- unstick(do.call('c', unname(results )))
     
@@ -895,6 +898,18 @@ gcd <- function(x, y) {
 #### decimal ####
 # this is just an extension of numeric to understand my fraction and rational representations
 
+#' Decimal numbers
+#' 
+#' These functions create decimal numbers that are identical to base R
+#' `numeric` (real) numbers.
+#' However, these numbers are understood by the `humdrumR` [rational numbers][rational()].
+#' 
+#' @family {humdrumR numeric functions}
+#' @seealso [rational()]
+#' @export
+decimal <- function(x) (as.numeric(x) %class% 'decimal') %dim% x
+
+#' @rdname decimal
 #' @export
 as.decimal <- function(x, ...) UseMethod('as.decimal')
 #' @export
@@ -903,18 +918,42 @@ as.decimal.character <- function(x) {
     as.decimal.fraction(x)
 }
 #' @export
-as.decimal.numeric <- as.numeric
+as.decimal.numeric <- decimal
 #' @export
-as.decimal.rational <- function(x) (x$Numerator / x$Denominator) %dim% x[[1]]
+as.decimal.rational <- function(x) decimal((x$Numerator / x$Denominator) %dim% x$Numerator)
 #' @export
 as.decimal.fraction <- function(x) {
     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-    sapply(exprs, eval) %dim% x
+    decimal(sapply(exprs, eval) %dim% x)
 }
 
 #### rational ####
 # represent rational numbers as list of numerator and denominator
 
+#' Rational numbers
+#' 
+#' R has no built in rational number representation; `humdrumR` defines one.
+#' 
+#' 
+#' 
+#' @seealso [as.decimal()] [as.numeric()] 
+#' @family {humdrumR numeric functions}
+rational <- function(numerator, denominator = 1) {
+    if (!identical(dim(numerator), dim(denominator))) .stop("You can't create a rational number where the numerator and denominator have different dimensions!")
+    
+    frac <- attr(MASS::fractions(numerator / denominator, cycles = 15), 'fracs')
+    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
+    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
+    
+    numerator <- as.integer(frac[ , 1])
+    denominator <- as.integer(frac[ , 2])
+    
+    denominator[is.na(denominator)] <- 1L
+    
+    list(Numerator = numerator %dim% numerator, Denominator = denominator %dim% numerator) %class% 'rational'
+}
+
+#' @rdname rational
 #' @export
 as.rational <- function(x, ...) UseMethod('as.rational') 
 #' @export
@@ -925,27 +964,25 @@ as.rational.fraction <- function(x) as.rational.numeric(as.decimal.fraction(x))
 as.rational.rational <- force
 #' @export
 as.rational.numeric <- function(x) {
-    frac <- attr(MASS::fractions(x, cycles = 15), 'fracs')
-    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
-    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
-    
-    num <- as.integer(frac[ , 1])
-    den <- as.integer(frac[ , 2])
-    
-    den[is.na(den)] <- 1L
-    
-    list(Numerator = num %dim% x, Denominator = den %dim% x) %class% 'rational'
+    rational(x)
 }
 
 #### fraction ####
 # rational numbers as character string
 
+#' @rdname rational
+#' @export
+fraction <- function(numerator, denominator, sep = '/') {
+    .paste(numerator, denominator, sep = sep) %class% 'fraction'
+}
+
+#' @rdname rational
 #' @export
 as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
 #' @export
 as.fraction.character <- function(x, sep = '/') as.fraction.rational(as.rational.character(x), sep = sep) %dim% x
 #' @export
-as.fraction.rational  <- function(x, sep = '/') .paste(x$Numerator, x$Denominator, sep = sep) 
+as.fraction.rational  <- function(x, sep = '/') fraction(x$Numerator, x$Denominator, sep = sep) 
 #' @export
 as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
 #' @export
@@ -1308,6 +1345,16 @@ append2expr <- function(expr, exprs) {
 }
 
 ### Building smart functions ----
+
+callf... <- function(func, args) {
+    # calls func on args, even if some named arguments in args are not arguments of func
+    # (ignores those arguments)
+    if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
+    
+    do.call(func, args)
+
+
+}
 
 setoptions... <- function(options, defaults) {
     setoptions(options) <- defaults

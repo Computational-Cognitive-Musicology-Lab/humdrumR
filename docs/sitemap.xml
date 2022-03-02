@@ -49,6 +49,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/IfElse.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/LO5th.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/REparser.html</loc>
   </url>
   <url>
@@ -65,6 +68,9 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/curPipeN.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/decimal.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/diatonicRepresentations.html</loc>
@@ -148,6 +154,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/humWindows.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/humdrumDispatch.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/humdrumPitch.html</loc>
   </url>
   <url>
@@ -199,6 +208,12 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/pitch.html</loc>
   </url>
   <url>
+<<<<<<< HEAD
+=======
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/pitchFunctions.html</loc>
+  </url>
+  <url>
+>>>>>>> dispatchmod
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/pitchRepresentations.html</loc>
   </url>
   <url>
@@ -206,6 +221,9 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/plotRhythm.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/rational.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/readHumdrum.html</loc>
