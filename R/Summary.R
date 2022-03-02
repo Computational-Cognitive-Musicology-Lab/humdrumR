@@ -481,7 +481,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
           
           ###Totals
           Totals <- list(`Any:` = sapply(codeCounts, \(col) num2str(sum(!is.na(col) & col > 0L))),
-                         `Sum:` = sapply(codeCounts, \(x) num2str(sum(x)), na.rm = TRUE),
+                         `Sum:` = sapply(codeCounts, \(x) num2str(sum(x, na.rm = TRUE))),
                          `Unique:` = sapply(refTable, \(col) num2str(length(unique(col[!is.na(col)])))))
                          
           ### Column widths
