@@ -828,7 +828,7 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
     signature <- root + mode + minor
     
     ## Alterations
-    alterations <- .(0 %|%alteration2trit(alterations, mode + minor)
+    alterations <- alteration2trit(alterations, mode + minor) %|% 0
     
     dset <- dset(root, signature, alterations)
     

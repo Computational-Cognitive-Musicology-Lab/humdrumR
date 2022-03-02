@@ -157,10 +157,8 @@ inPlace <- function(result, orig, regex) {
 }
 
 inPlacer <- function(orig, regex) {
-    function(result) {
-        .(orig %|% stringi::stri_replace_first(str = orig,
-                                            replacement = result,
-                                            regex = regex))
+    function(result) { 
+         stringi::stri_replace_first(str = orig, replacement = result, regex = regex) %|% orig
     }
 }
 
