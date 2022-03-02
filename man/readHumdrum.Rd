@@ -58,7 +58,7 @@ These functions find valid humdrum files on your local machine and read them int
 \code{findHumdrum} does the work of finding and reading the text files into R.
 \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
 create a \link{humTable} and build
-a \link[=humdrumR-class]{humdrumR} data object around the table.
+a \link[=humdrumRclass]{humdrumR} data object around the table.
 }
 \section{REpath-patterns}{
 

@@ -25,7 +25,7 @@ namesSubcorpora(humdrumR)
 
 nfiles(humdrumR)
 
-length(humdata)
+\S4method{length}{humdrumR}(x)
 
 \S4method{nrow}{humdrumR}(x)
 
@@ -38,10 +38,10 @@ anyStops(humdrumR)
 \description{
 These functions can be used to quickly
 get basic information about the size and "shape" of
-a \linkS4class{humdrumR} corpus.
+a \link{humdrumRclass} corpus.
 For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
 
-\link[=humdrumR-class]{HumdrumR} objects can be divided into "subcorpora."
+\link[=humdrumRclass]{HumdrumR} objects can be divided into "subcorpora."
 These functions tell us if there are any subcorpora and, if so, what they are called.
 }
 \details{

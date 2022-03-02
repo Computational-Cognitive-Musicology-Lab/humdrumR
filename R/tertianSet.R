@@ -649,7 +649,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 
 ### Chord representations ####  
 
-romanNumeral2tset <- function(str, Key = dset(0,0), ...) {
+romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o', ...) {
 
   
   Key <- CKey(Key)
@@ -745,6 +745,9 @@ tertianSet <- function(...) UseMethod('tertianSet')
 
 tertianSet.tertianSet <- function(x, ...) x
 
+#' @export 
+tertianSet.logical <- function(x, ...) vectorNA(length(x), 'tertianSet')
+
 
 #### Numbers ####
 
@@ -754,10 +757,12 @@ tertianSet.logical <- function(x) tset(rep(NA_integer_, length(x)))
 
 #### Characters ####
 
-char2tset <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                             'sciChord: makeRE.sciChord(...)' = sciChord2tset)
 
+
+char2tset <- makeHumdrumDispatcher(list('any', makeRE.romanChord,  romanNumeral2tset),
+                                   list('any', makeRE.sciChord,    sciChord2tset),
+                                   funcName = 'char2tset',
+                                   outputClass = 'tertianSet')
 
 mapoftset <- function(str, ..., split = '/') {
   
@@ -782,10 +787,13 @@ mapoftset <- function(str, ..., split = '/') {
   tset + dset(root, root, 0L)
 }
 
-tertianSet.character <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                                                      'chordof: makeRE.tertianPartition(...)' = mapoftset,
-                                                      'romanChord: makeRE.romanChord(...)' = romanNumeral2tset,
-                                                      'sciChord: makeRE.sciChord(...)' = sciChord2tset)
+tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.tertianPartition, mapoftset),
+                                              list('any', makeRE.romanChord,       romanNumeral2tset),
+                                              list('any', makeRE.sciChord,         sciChord2tset),
+                                              funcName = 'tertianSet.character',
+                                              outputClass = 'tertianSet')
+  
+
 
 #### setAs tertianSet ####
 
@@ -814,16 +822,12 @@ setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 
 #' Parsing and deparsing chord information.
 #' 
-#' XXXx
+#' These functions are used to work with chord information.
 #' 
 #' xxx
-#' @rdname chordTransformer
-
-#' Tertian set representations
-#' 
 #' Tertian sets can be read/wrote in various ways.
 #' 
-#' @name tertianRepresentations
+#' @name chordTransformer
 NULL
 
 ## Chord transform maker ####
@@ -848,7 +852,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makeChordTransformer closure!
                         do.call('checkTFs', c(args[names(args) %in% c('implicitSpecies', 'absoluteSpecies', 'explicitNaturals')],
                                               memoize = memoize, inPlace = inPlace, dropNA = dropNA,
                                               list(callname = callname)))
@@ -869,7 +873,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                                                     x = x, Key = Key, Exlusive = Exclusive,
                                                     from = from, to = to)
                         
-                        if (length(x) == 0L) return(putNAback(vectorNA(outputclass, 0L)))
+                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
                         
                         rebuild <-  memoizeParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoize = memoize)
                         parseArgs$Key <- from
@@ -886,9 +890,16 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                             # parsedTint <- do.call('transpose.diatonicSet', c(list(parsedTint), transposeArgs))
                           # }
                           
-                          output <- if (deparse && is.tertianSet(parsedTset)) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
+                          output <- if (deparse && is.tertianSet(parsedTset)) {
+                            na <- is.na(parsedTset)
+                            output <- vectorNA(length(parsedTset), outputclass)
+                            if (any(!na)) output[!na] <- do.call(!!deparser, c(list(parsedTset[!na]), deparseArgs))
+                            output
+                            } else {
+                              parsedTset
+                            }
                           
-                          if (inPlace) output <- re.place(output, parsedTset)
+                          if (inPlace) output <- rePlace(output, attr(parsedTset, 'dispatch'))
                           
                           
                           output
@@ -907,7 +918,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
 ### Chord transformers ####
 
 ##
-#' @name chordTransformer
+#' @rdname chordTransformer
 #' @export figuredBass romanNumeral 
 #' @export sciChord chordSymbol
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
