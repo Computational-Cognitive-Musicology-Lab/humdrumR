@@ -12,15 +12,11 @@ new fields into them!"><!-- mathjax --><script src="https://cdnjs.cloudflare.com
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-<<<<<<< HEAD
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-=======
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
->>>>>>> dispatchmod
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,15 +104,6 @@ or its convenient pipe operator <a href="humPipe.html">%hum&gt;%</a>
 When <code>withinHumdrum</code> creates new fields, it calls them $Pipe1 ... Pipe2 ... PipeN$.
 Since the output of <code>withinHumdrum</code> is always the same as the input except with these new "Pipe" fields,
 Byou can use <code>humdrumR &lt;- humdrumR</code> assignment to immediately assign these pipe fields more meaningful names in the original object.
-<<<<<<< HEAD
-This makes the most sense with an example:</p><div class="sourceCode"><pre><code><span class="va">humdata</span><span class="op">$</span><span class="va">Semits</span> <span class="op">&lt;-</span> <span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitch.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></code></pre></div>
-
-<p>In humdrumR, we actually favor the left-to-right "piping" style.
-Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitch.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">humdata</span><span class="op">$</span><span class="va">Semits</span></code></pre></div>
-
-<p>Calls to <code>withinHumdrum</code> (or <code>%hum&gt;%</code>) keep producing new pipe fields.
-If there are more than one pipe fields, you can assign multiple fields at once using the <code>[]&lt;-</code> syntax:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitch.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">humdata</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'semit'</span>, <span class="st">'pitch'</span><span class="op">)</span><span class="op">]</span></code></pre></div>
-=======
 This makes the most sense with an example:</p><div class="sourceCode"><pre><code><span class="va">humdata</span><span class="op">$</span><span class="va">Semits</span> <span class="op">&lt;-</span> <span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitchFunctions.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></code></pre></div>
 
 <p>In humdrumR, we actually favor the left-to-right "piping" style.
@@ -124,7 +111,6 @@ Luckily, R allows you to assign left-to-right, so the proper humdrumR style is a
 
 <p>Calls to <code>withinHumdrum</code> (or <code>%hum&gt;%</code>) keep producing new pipe fields.
 If there are more than one pipe fields, you can assign multiple fields at once using the <code>[]&lt;-</code> syntax:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitchFunctions.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitchFunctions.html">pitch</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">humdata</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'semit'</span>, <span class="st">'pitch'</span><span class="op">)</span><span class="op">]</span></code></pre></div>
->>>>>>> dispatchmod
 
 <p>#' <strong>IMPORTANT NOTE!</strong>: Any "PipeN" fields in the humdrumR object you assign from
 that you don't assign field names are simply dropped.
