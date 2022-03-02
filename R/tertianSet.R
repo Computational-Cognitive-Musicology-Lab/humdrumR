@@ -759,8 +759,8 @@ tertianSet.logical <- function(x) tset(rep(NA_integer_, length(x)))
 
 
 
-char2tset <- makeHumdrumDispatcher(list('any', 'makeRE.romanChord',  'romanNumeral2tset'),
-                                   list('any', 'makeRE.sciChord',    'sciChord2tset'),
+char2tset <- makeHumdrumDispatcher(list('any', makeRE.romanChord,  romanNumeral2tset),
+                                   list('any', makeRE.sciChord,    sciChord2tset),
                                    funcName = 'char2tset',
                                    outputClass = 'tertianSet')
 
@@ -787,9 +787,9 @@ mapoftset <- function(str, ..., split = '/') {
   tset + dset(root, root, 0L)
 }
 
-tertianSet.character <- makeHumdrumDispatcher(list('any', 'makeRE.tertianPartition', 'mapoftset'),
-                                              list('any', 'makeRE.romanChord',       'romanNumeral2tset'),
-                                              list('any', 'makeRE.sciChord',         'sciChord2tset'),
+tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.tertianPartition, mapoftset),
+                                              list('any', makeRE.romanChord,       romanNumeral2tset),
+                                              list('any', makeRE.sciChord,         sciChord2tset),
                                               funcName = 'tertianSet.character',
                                               outputClass = 'tertianSet')
   
@@ -873,7 +873,7 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                                                     x = x, Key = Key, Exlusive = Exclusive,
                                                     from = from, to = to)
                         
-                        if (length(x) == 0L) return(putNAback(vectorNA(outputclass, 0L)))
+                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
                         
                         rebuild <-  memoizeParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoize = memoize)
                         parseArgs$Key <- from
@@ -890,7 +890,14 @@ makeChordTransformer <- function(deparser, callname, outputclass = 'character') 
                             # parsedTint <- do.call('transpose.diatonicSet', c(list(parsedTint), transposeArgs))
                           # }
                           
-                          output <- if (deparse && is.tertianSet(parsedTset)) do.call(!!deparser, c(list(parsedTset), deparseArgs)) else parsedTset
+                          output <- if (deparse && is.tertianSet(parsedTset)) {
+                            na <- is.na(parsedTset)
+                            output <- vectorNA(length(parsedTset), outputclass)
+                            if (any(!na)) output[!na] <- do.call(!!deparser, c(list(parsedTset[!na]), deparseArgs))
+                            output
+                            } else {
+                              parsedTset
+                            }
                           
                           if (inPlace) output <- rePlace(output, attr(parsedTset, 'dispatch'))
                           

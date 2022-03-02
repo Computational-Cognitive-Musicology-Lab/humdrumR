@@ -1377,7 +1377,6 @@ solfa2tint <- function(str, ...) {
 #' The six tonal representations listed above function through a common parsing interface.
 #'
 #'
-
 #' @rdname tonalInterval
 #' @export
 tonalInterval <- function(...) UseMethod('tonalInterval')
@@ -1402,11 +1401,11 @@ tonalInterval.integer  <- semit2tint
 #### Characters ####
 
 #' @export
-tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   'makeRE.kern',        'kern2tint'),
-                                                 list('pitch',                  'makeRE.sciPitch',    'pitch2tint'),
-                                                 list(c('hint', 'mint', 'int'), 'makeRE.interval',    'interval2tint'),
-                                                 list('deg',                    'makeRE.scaleDegree', 'degree2tint'),
-                                                 list('solfa',                  'makeRE.solfa',       'solfa2tint'),
+tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   makeRE.kern,        kern2tint),
+                                                 list('pitch',                  makeRE.sciPitch,    pitch2tint),
+                                                 list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
+                                                 list('deg',                    makeRE.scaleDegree, degree2tint),
+                                                 list('solfa',                  makeRE.solfa,       solfa2tint),
                                                  funcName = 'tonalInterval.character',
                                                  outputClass = 'tonalInterval')
 
@@ -1440,9 +1439,9 @@ setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% fro
 
 ## Pitch transformer documentation ####
 
-#' Test
+#' Manipulate pitch data
 #'  
-#' @name pitch
+#' @name pitchFunctions
 #' @seealso tonalInterval
 NULL
 
@@ -1529,7 +1528,14 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                           if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
                             parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
                           }
-                          output <- if (deparse && is.tonalInterval(parsedTint)) do.call(!!deparser, c(list(parsedTint), deparseArgs)) else parsedTint
+                          output <- if (deparse && is.tonalInterval(parsedTint)) {
+                            na <- is.na(parsedTint)
+                            output <- vectorNA(length(parsedTint), outputclass)
+                            if (any(!na)) output[!na] <- do.call(!!deparser, c(list(parsedTint[!na]), deparseArgs))
+                            output
+                            } else {
+                              parsedTint
+                            }
                           
                           if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
                           
@@ -1548,16 +1554,29 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
 ### Pitch Transformers ####
 
 ##
-#' @rdname pitch
-#' @export semit midi
-#' @export pitch kern lilypond interval degree solfa
+#' @rdname pitchFunctions
+#' @export 
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
+#' @rdname pitchFunctions
+#' @export 
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
+#' @rdname pitchFunctions
+#' @export 
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
+#' @rdname pitchFunctions
+#' @export 
 kern <- makePitchTransformer(tint2kern, 'kern') 
+#' @rdname pitchFunctions
+#' @export 
 lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
+#' @rdname pitchFunctions
+#' @export 
 interval <- makePitchTransformer(tint2interval, 'interval')
+#' @rdname pitchFunctions
+#' @export 
 degree <- makePitchTransformer(tint2degree, 'degree')
+#' @rdname pitchFunctions
+#' @export 
 solfa <- makePitchTransformer(tint2solfa, 'solfa')
 
 

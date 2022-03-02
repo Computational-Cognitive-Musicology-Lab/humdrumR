@@ -147,7 +147,7 @@ This definition has the useful properties that <code>specificinterval %% A1 = ge
 data to tonalIntervals when asked to perform arithmetic.
 This means that arithmetic can be applied when one of the two arguments is a <code>tonalInterval</code> and the other is a coercable atomic.
 For instance, <code>M3 + 2L</code> will interpret <code>2L</code> as two semitones and add a major-second to the major-third!
-The clever <a href="regexDispatch.html">dispatch system</a> will even ignore character strings that are not recognized (see examples)!
+The clever dispatch system will even ignore character strings that are not recognized (see examples)!
 This is useful when combined with the "Predifined Intervals" (like <code>M3</code>), described below.</p><div class="section">
 <h3 id="relational-operators">Relational Operators<a class="anchor" aria-label="anchor" href="#relational-operators"></a></h3>
 
@@ -185,7 +185,7 @@ For example, the value <code>2.0</code> will be interpreted as an octave (two to
 </ul><p>However, the most useful tool for humdrum data is parsing pitch representations encoded in <code>character</code> tokens.
 The <code>humdrumR</code> regex/exclusive parsing system is used to interpret character strings as tonalIntervals.
 This includes character tokens with pitch information embedded alongside other information, like <code>"4.ee</code> in a kern token.
-There are six regex-patterns that <code>tonalInterval</code> known how to parse automatically:</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td>Kern</td><td>**kern</td><td><code>ee-</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a></td><td>**pitch</td><td><code>Eb5</code></td></tr><tr><td>Interval</td><td>**hint/**mint/**int</td><td><code>+m3</code></td></tr><tr><td>Scale degree</td><td>**deg</td><td><code>b3</code></td></tr><tr><td>Solfege</td><td>**solfa</td><td><code>me</code></td></tr><tr><td><a href="https://lilypond.org/doc/v2.22/Documentation/notation/pitches" class="external-link">Lilypond pitch</a></td><td>none</td><td><code>ees'</code></td></tr></table><p>If you call <code>tonalInterval</code> (or <a href="pitch.html">any function that uses tonalInterval as a parser</a>) on a <code>character</code> string,
+There are six regex-patterns that <code>tonalInterval</code> known how to parse automatically:</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td>Kern</td><td>**kern</td><td><code>ee-</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a></td><td>**pitch</td><td><code>Eb5</code></td></tr><tr><td>Interval</td><td>**hint/**mint/**int</td><td><code>+m3</code></td></tr><tr><td>Scale degree</td><td>**deg</td><td><code>b3</code></td></tr><tr><td>Solfege</td><td>**solfa</td><td><code>me</code></td></tr><tr><td><a href="https://lilypond.org/doc/v2.22/Documentation/notation/pitches" class="external-link">Lilypond pitch</a></td><td>none</td><td><code>ees'</code></td></tr></table><p>If you call <code>tonalInterval</code> (or <a href="pitchFunctions.html">any function that uses tonalInterval as a parser</a>) on a <code>character</code> string,
 the regex-system will automatically (attempt) to interpret the tokens as on the pitch types above---if there is a conflict
 the representations are favored in the order they are presented in the table above.
 If a matching exclusive interpretation (see table above) is provided using the <code>Exclusive</code> argument,
@@ -240,7 +240,8 @@ If there is no match, an NA <code>tonalInterval</code> is returned.</p><div clas
 <span class="r-in"><span class="co"># = A B</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="st">"4.ee"</span> <span class="op">+</span> <span class="va">P5</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "4.bb"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] bb</span>
 <span class="r-in"><span class="co"># = "4.bb"</span></span>
 <span class="r-in"></span>
 <span class="r-in"></span>

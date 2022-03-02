@@ -426,7 +426,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 
 
 segments <- function(x, reverse = FALSE) {
-    if (!is.logical(x)) change <- c(TRUE, head(x, -1L) != tail(x, -1L))
+    change <- if (!is.logical(x)) c(TRUE, head(x, -1L) != tail(x, -1L)) else x
     if (reverse) change <- rev(change)
     
     seg <- cumsum(change)

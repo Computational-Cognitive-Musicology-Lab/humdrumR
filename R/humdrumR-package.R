@@ -22,7 +22,7 @@
 #' + A set of ["pipe" operators][humdrumR::humPipe] (`%hum>%`, `%hum<%`, etc.), so that `humdrumR` data can be manipulated and filtered in concise, 
 #'   [bash-style pipes](https://en.wikipedia.org/wiki/Vertical_bar#Pipe).
 #' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
-#'   a useful API we call our [regular-expression dispatch system][humdrumR::regexDispatch].
+#'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 
 #'   including our core [tonalInterval] class to represent tonal pitch.
 #' + A [module][humdrumR::humRhythm] for representing and manipulating musical rhythm information, 

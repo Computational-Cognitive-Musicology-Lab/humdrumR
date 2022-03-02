@@ -123,12 +123,6 @@ popRE <- function(str, regex) {
 
 
 
-#' @name humdrumDispatch
-#' @export
-regexDispatch <- function(str, dispatchDF, ..., outputClass = 'character') {
-    dispatchDF[ , Exclusives := 'any']
-    humdrumDispatch(str, dispatchDF,  ..., outputClass = outputClass)
-}
 # 
 regexFindMethod <- function(str, regexes) {
     # this takes a str of character values and a string of REs
@@ -151,8 +145,6 @@ regexFindMethod <- function(str, regexes) {
 }
 
 
-#' @name humdrumDispatch
-#' @export
 REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     if (!is.character(x)) stop(call. = FALSE,
                                "Sorry, REapply can only apply to an x argument that is a character vector.")

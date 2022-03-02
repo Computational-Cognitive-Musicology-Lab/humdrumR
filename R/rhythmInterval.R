@@ -588,8 +588,8 @@ rhythmInterval.numeric <- numeric2rint
 
 
 #' @export
-rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), 'makeRE.recip',  'recip2rint'),
-                                                  list('duration',                 'makeRE.decimal', 'numeric2rint'),
+rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
+                                                  list('duration',                 makeRE.decimal, numeric2rint),
                                                   outputClass = 'rhythmInterval',
                                                   funcName = 'rhythmInterval.character')
 
