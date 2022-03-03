@@ -231,13 +231,43 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
 # print_corrected <- list()
 # counter <- 0
-
+  checkIsCharacter <- function(df){
+    value <- FALSE
+    iteration <- 1:length(df)
+    iteration <- as.data.frame(iteration)
+    booleanValues <- apply(iteration, 1, function(x){
+      if(!is.character(df[x])){
+        cat(df[x], " is not a character. Please input a character vector.")
+      }
+      })
+  }
+  checkLength <- function(df){
+    iteration <- 1:length(df)
+    iteration <- as.data.frame(df)
+    booleanValues <- apply(iteration, 1, function(x){
+      if(length(df) <= 1){
+        cat("Your input must be a character vector of length greater than 1. Please input a character vector of length greater than 1.")
+      }
+    })
+  }
+  checkNumberOfDashes <- function(df){
+    iteration <- 1:length(df)
+    iteration <- as.data.frame(iteration)
+    booleanValues <- apply(iteration, 1, function(x){
+      if(str_count(df[x], "-") > 2){
+        cat(df[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly.")
+      }
+    })
+  }
+  if(!is.null(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))){
+    print(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))
+  }
   iteration1 <- 1:length(data)
   iteration1 <- cbind(iteration1)
   iteration1 <- as.data.frame(iteration1)
