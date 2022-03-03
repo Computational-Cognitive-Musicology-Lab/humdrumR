@@ -263,18 +263,32 @@ data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 't
       if(str_count(df[x], "-") > 2){
         cat(df[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly.")
       }
+      if(str_count(df[x], "-") == 2){
+        strsplit1 <- strsplit(df[x], "")
+        iteration1 <- 1:length(strsplit1[[1]])
+        iteration1 <- as.data.frame(iteration1)
+        checkIfRepeating <- apply(iteration1, 1, function(x){
+          if(x < nrow(iteration1)){
+            if(strsplit1[[1]][x] == "-" && strsplit1[[1]][x+1] == "-"){
+              cat(df[x], "has repeating -'s"," you cannot have repeating -'s. ")
+            }
+          }
+        })
+      }
     })
   }
   if(!is.null(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))){
+    # return in actual function
     print(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))
   }
-  iteration1 <- 1:length(data)
-  iteration1 <- cbind(iteration1)
-  iteration1 <- as.data.frame(iteration1)
+  index <- 1:length(data)
+  index <- cbind(index)
+  index <- as.data.frame(index)
   splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
   library(spelling)
-  indicesWithErrors <- apply(iteration1, 1, function(x){
-    if(x < length(iteration1)){
+  data <- c('-Now-', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+  indicesWithErrors <- apply(index, 1, function(x){
+    if(x < nrow(iteration1)){
       if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
         return(x+1)
       }
@@ -284,10 +298,38 @@ data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 't
         return(x-1)
       }
     }
-    if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
-      if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
-        # if a value is not a word and does not have any dashes, print this index as having an error.
+    if(x == 1){
+      if(splitString[[x]][1] == '-'){
         return(x)
+      }
+    }
+  
+    
+    
+    
+    # if(splitString[[x]][1] != '-' && splitString[[x]][length(splitString[[x]])] != "-"){
+    #   if(length(spell_check_text(data[x])$word) == 1 && nchar(spell_check_text(data[x])$word) > 1){
+    #     # if a value is not a word and does not have any dashes, print this index as having an error.
+    #     return(x)
+    #   }
+    # }
+  })
+  data <- c('Now--', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+  splitString <- apply(index, 1, function(x){return(strsplit(data[x], "")[[1]])})
+  printErrors <- apply(index, 1, function(x){
+    if(x == 1){
+      if(splitString[[x]][1] == '-'){
+        print(c(cat(data[x], " has a - in the front. The first character input should not have - in the front. Please adjust your input accordingly. "), x))
+      }
+    }
+    if(x < nrow(iteration1)){
+      if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+        print(c(cat("error: ", data[x+1], " should be -", data[x+1], ". ", sep = ""),x+1))
+      }
+    }
+    if(x > 1){
+      if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+        return(x-1)
       }
     }
   })
