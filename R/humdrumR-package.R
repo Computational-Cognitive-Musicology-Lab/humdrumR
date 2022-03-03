@@ -12,7 +12,7 @@
 #' 
 #' The package `humdrumR` has XXX main components:
 #' 
-#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumR-class] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
+#' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumRclass] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
@@ -22,7 +22,7 @@
 #' + A set of ["pipe" operators][humdrumR::humPipe] (`%hum>%`, `%hum<%`, etc.), so that `humdrumR` data can be manipulated and filtered in concise, 
 #'   [bash-style pipes](https://en.wikipedia.org/wiki/Vertical_bar#Pipe).
 #' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
-#'   a useful API we call our [regular-expression dispatch system][humdrumR::regexDispatch].
+#'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 
 #'   including our core [tonalInterval] class to represent tonal pitch.
 #' + A [module][humdrumR::humRhythm] for representing and manipulating musical rhythm information, 
@@ -38,11 +38,15 @@
 #' @importFrom abind abind
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
-#' @importFrom data.table data.table rbindlist setorderv setcolorder copy as.data.table is.data.table
+#' @importFrom rlang %|% %||%
+#' @importFrom data.table data.table rbindlist setorderv setcolorder copy as.data.table is.data.table 
 NULL
 
 
-#' ----------------------------------------------->      NEEDS DOCUMENTATION (A SECTION IS INCOMPLETE)       <------------------------------------------------------
+#' `humdrumR`'s root directory on your machine.
+#'
+#' `humdrumRroot` is the path to where the `humdrumR` package is install on your machine.
+#' A few simple humdrum files are stored here.
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 

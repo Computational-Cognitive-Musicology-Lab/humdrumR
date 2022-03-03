@@ -100,7 +100,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         
         uniqFiles <- gsub(file.sep, '_', shortFilenames(unique(recordReports$Filename)))
         recordReports[ , Filename := paste0(annotation.path, uniqFiles[match(Filename, unique(Filename))], '_errorAnnotations')]
-        recordReports[ , Message := ifelse(is.na(Message), "", Message)]
+        recordReports[ , Message := Message %|% ""]
         recordReports <- recordReports[ , .(Filename = unique(Filename), Message = paste(Message, collapse = ' and '), 
                                             RecordN = unique(RecordN), Record = unique(Record)), by = Location]
         recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
@@ -142,7 +142,7 @@ hitsTable <- function(hits, indices, messages) {
 validate_File <- function(records, local, filevec) {
     ## Could improve this to give more specific messages?
  tapply(records[local], filevec[local],
-        function(file) {
+        \(file) {
                   opens  <- grepl('^\\*\\*', file)
                   closes <- grepl('^\\*-', file)
                   
@@ -217,12 +217,12 @@ validate_recordTypes <- function(records, local, ...) {
           
           types <- c("*", "!", "=")
           types <- sapply(firsttoks, 
-                          function(toks) {
+                          \(toks) {
                                     typ <- c("interpretation", "comment", "barline", "data")[match(unique(toks), c("*","!","="), nomatch = 4)]
                                     glue::glue_collapse(typ, sep = ', ', last = ' and ')
                                     })
           
-          toks <- sapply(firsttoks, function(x) paste0("(", glue::glue_collapse(x, sep = ' '), ')'))
+          toks <- sapply(firsttoks, \(x) paste0("(", glue::glue_collapse(x, sep = ' '), ')'))
           
           hitsTable(hits, which(local)[hits], glue::glue("mixes {types} tokens {toks}"))
 }
@@ -232,7 +232,7 @@ validate_spinePaths <- function(records, local, filevec) {
           locrecords <- records[local]
           
           ntab <- stringi::stri_count_fixed(locrecords, '\t') + 1L
-          diffs <- unlist(tapply(ntab, filevec[local], function(nt) (diff(c(0L, nt, 0L)))))
+          diffs <- unlist(tapply(ntab, filevec[local], \(nt) (diff(c(0L, nt, 0L)))))
           
           locrecords <- unlist(tapply(locrecords, filevec[local], append, values = 'XXX_padding', after = 0L))
           

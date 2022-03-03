@@ -25,7 +25,7 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
  
  interpPattern <- tolower(pattern)
  hits <- sapply(interpPattern,
-                function(pat) {
+                \(pat) {
                   hits <- which(pat == tolower(known$Name))
                   if (length(hits) == 0) hits <- pmatch(pat, tolower(known$Name))
                   hits
@@ -36,7 +36,7 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
  if (strict) {
            ressplit <- strsplit(unlist(res), split = '\\|')
            
-           res <- sapply(ressplit, function(re) paste(paste0('^(', re, ')$'), collapse = '|'))
+           res <- sapply(ressplit, \(re) paste(paste0('^(', re, ')$'), collapse = '|'))
  }
  names(res) <- pattern # interpPattern
  

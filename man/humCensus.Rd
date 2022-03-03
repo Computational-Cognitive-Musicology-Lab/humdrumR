@@ -14,53 +14,69 @@ census(humdata)[i]
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \description{
-\code{census} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}
-\code{\link[humdrumR:humSummary]{summary functions}}, used to
-tabulate the raw size of a \code{\linkS4class{humdrumR}} corpus.
-\code{census} takes a \code{\linkS4class{humdrumR}} object
-and and returns a \code{\strong{humCensus}} table.
+\code{census} is one of \link{humdrumR}'s
+\link[=humSummary]{summary functions}, used to
+tabulate the raw size of a \link[=humdrumRclass]{humdrumR} corpus.
+\code{census} takes a \link[=humdrumRclass]{humdrumR} object
+and and returns a \code{humCensus} table.
 The \code{dataType} argument controls what types of records to tabulate:
-legal values are \code{'G', 'L', 'I', 'M', 'D', 'd'}
+legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 The default is \code{"D"}.
 }
 \details{
 A \code{humCensus} table has five columns of information:
-\describe{
-\item{Records}{The total number of records.}
-\item{Tokens}{The total number of tokens.}
-\item{(unique)}{The number of \strong{unique} tokens}
-\item{Characters}{The total numbder of characters. This includes
-humdrum control characters like \code{"*"} and \code{"!!"}.}
-\item{(per token)}{This is simply \code{Characters / Tokens},
-indicating the mean length of each token.}
+\enumerate{
+\item Records
+\itemize{
+\item The total number of records.
 }
+\item Tokens
+\itemize{
+\item The total number of tokens.
+}
+\item (unique)
+\itemize{
+\item The number of \strong{unique} tokens
+}
+\item Characters
+\itemize{
+\item The total numder of characters. This includes humdrum control characters like \code{*} and \verb{!!}.
+}
+\item (per token)
+\itemize{
+\item This is simply \code{Characters / Tokens}, indicating the mean length of each token.
+}
+}
+
 A \code{humCensus} table has one row for each file in the corpus.
 Rows are labeled with each file's corresponding
-number (from the \code{\link[humdrumR:humTable]{humTable's}} \strong{File} field)
-and name (the \strong{Filename} field).
+number (from the \link[=humTable]{humTable's} \strong{File} field) and name (the \strong{Filename} field).
 In addition, when a \code{humCensus} object is printed,
 the totals across all files are printed as well---(unique) and (per token)
 across all files are calculated across all files as well, not summed.
 }
 \section{Indexing}{
 
-Rows of a \code{humCensus} object can be selected with a single argument \code{i}:
-e.g., \code{censusTable[i]}.
-If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by
-\code{File} number).
-If \code{i} is a \code{character} string, this string is mached
-as a regular expression against file names.
-If \code{i} is a formula, the right-hand side of the formula
-is evaluated within the table---if it evaluates to a logical vector,
+
+Rows of a \code{humCensus} object can be selected with a single argument \code{i}: e.g., \code{censusTable[i]}.
+If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by \code{File} number).
+If \code{i} is a \code{character} string, this string is mached as a regular expression against file names.
+If \code{i} is a formula, the right-hand side of the formula is evaluated within the table---if it evaluates to a logical vector,
 files are selected accordingly. For instance,
 \code{censusTable[~Tokens > 100]} will select all files
 with more than 100 tokens. (The '(unique)' and '(per token)' columns
-must be referred to with their names enclosed in \code{``}---for example,
-\code{censusTable[~`(unique)` > 100]} will return all files with
+must be referred to with their names enclosed in \verb{\\``---for example, }censusTable\link[=~\\`(unique)\\` > 100]{~\\verb{(unique)\\} > 100}` will return all files with
 more than 100 unique tokens.
 
 A \code{drop} argument is also available. If \code{TRUE}, a plain
-\code{\link[data.table]{data.table}} is returned.
+\code{\link[data.table:data.table]{data.table::data.table()}} is returned.
 }
 
+\seealso{
+Other humdrum data summary functions: 
+\code{\link{humInterpretations}},
+\code{\link{humSpines}},
+\code{\link{humSummary}}
+}
+\concept{humdrum data summary functions}

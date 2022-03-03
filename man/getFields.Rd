@@ -2,10 +2,12 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{getFields}
 \alias{getFields}
-\title{Get named}
+\title{------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+Get named}
 \usage{
 getFields(humdrumR, fieldnames = NULL, dataTypes = "D")
 }
 \description{
+------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 Get named
 }

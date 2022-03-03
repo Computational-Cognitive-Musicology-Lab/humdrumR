@@ -4,7 +4,8 @@
 \alias{plotRhythm}
 \alias{plotRhythm.default}
 \alias{plotRhythm.rhythmInterval}
-\title{Plotting rhythmic symbols in R base graphics}
+\title{------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+Plotting rhythmic symbols in R base graphics}
 \usage{
 plotRhythm(x, y, notes, ...)
 
@@ -13,5 +14,6 @@ plotRhythm(x, y, notes, ...)
 \method{plotRhythm}{rhythmInterval}(x, y, notes, ...)
 }
 \description{
+------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 Plotting rhythmic symbols in R base graphics
 }

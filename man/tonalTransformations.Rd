@@ -3,14 +3,10 @@
 \name{tonalTransformations}
 \alias{tonalTransformations}
 \alias{invert}
-\title{transpose.character <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.character
-transpose.numeric <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.numeric
-transpose.integer <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.integer}
+\title{Invert or transpose tonal intervals.}
 \usage{
 invert(tint, around, Key, ...)
 }
 \description{
-transpose.character <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.character
-transpose.numeric <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.numeric
-transpose.integer <- re.place \%.\% re.as \%.\% transpose.tonalInterval \%.\% tonalInterval.integer
+Invert or transpose tonal intervals.
 }

@@ -7,7 +7,7 @@
 getTandem(tandem, regex)
 }
 \description{
-The every \code{\linkS4class{humdrumR}} object has a field called
+Every \link{humdrumRclass} object has a field called
 \code{Tandem} which is a vector of strings which accumulates
 tandem interpretations in each Spine. This function (\code{getTandem})
 extracts tandem interpretations from this field, based on a matching

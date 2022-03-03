@@ -4,123 +4,93 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="humdrumR">
 <title>Diatonic and Tertian Sets in humdrumR • humdrumR</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Diatonic and Tertian Sets in humdrumR">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Diatonic and Tertian Sets in humdrumR">
 <meta property="og:description" content="humdrumR">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
-<body data-spy="scroll" data-target="#toc">
-    <div class="container template-article">
-      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">humdrumR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
-      </span>
-    </div>
+<body>
+    <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
+    
 
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-<li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar" class="collapse navbar-collapse ms-3">
+      <ul class="navbar-nav me-auto">
+<li class="nav-item">
+  <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li>
-  <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
-    </li>
-    <li>
-      <a href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
-    </li>
-    <li>
-      <a href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
-    </li>
-    <li>
-      <a href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/Overview.html">Overview of humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    </li>
-    <li>
-      <a href="../articles/Validation.html">Validating Humdrum Data</a>
-    </li>
-  </ul>
-</li>
-      </ul>
-<ul class="nav navbar-nav navbar-right">
-<li>
-  <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/">
-    <span class="fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
-      </ul>
-</div>
-<!--/.nav-collapse -->
+<li class="active nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
+    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
+    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
+    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
+    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
+    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
+    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
+    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
-<!--/.container -->
+</li>
+      </ul>
+<form class="form-inline my-2 my-lg-0" role="search">
+        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
+</form>
+
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
-<!--/.navbar -->
 
-      
+    
+  </div>
+</nav><div class="container template-article">
 
-      </header><script src="KeysAndChord_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
-  <div class="col-md-9 contents">
-    <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Diatonic and Tertian Sets in humdrumR</h1>
-                        <h4 class="author">Nathaniel Condit-Schultz</h4>
+
+
+
+<div class="row">
+  <main id="main"><div class="page-header">
+      <img src="" class="logo" alt=""><h1>Diatonic and Tertian Sets in humdrumR</h1>
+                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 class="date">2021-07-21</h4>
+            <h4 data-toc-skip class="date">2022-03-03</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/master/vignettes/KeysAndChord.Rmd"><code>vignettes/KeysAndChord.Rmd</code></a></small>
-      <div class="hidden name"><code>KeysAndChord.Rmd</code></div>
-
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/KeysAndChord.Rmd"><code>vignettes/KeysAndChord.Rmd</code></a></small>
+      <div class="d-none name"><code>KeysAndChord.Rmd</code></div>
     </div>
 
     
     
-<div id="diatonic-sets" class="section level1">
-<h1 class="hasAnchor">
-<a href="#diatonic-sets" class="anchor"></a>Diatonic Sets</h1>
+<div class="section level2">
+<h2 id="diatonic-sets">Diatonic Sets<a class="anchor" aria-label="anchor" href="#diatonic-sets"></a>
+</h2>
 <p>As mentioned in the Pitch and Tonality vignette, a normative diatonic key consists of a set of seven consetutive pitch chroma on the Line of Fifths.</p>
 <p>A diatonic set can be orderd either by line-of-fifths position:</p>
 <table class="table">
@@ -181,9 +151,9 @@
 </tbody>
 </table>
 </div>
-<div id="tertian-sets" class="section level1">
-<h1 class="hasAnchor">
-<a href="#tertian-sets" class="anchor"></a>Tertian Sets</h1>
+<div class="section level2">
+<h2 id="tertian-sets">Tertian Sets<a class="anchor" aria-label="anchor" href="#tertian-sets"></a>
+</h2>
 <p>The set of seven notes in a diatonic key can be reimagined as a <em>chord</em>—a set of notes played at the same time. Specifically, a full seven-note diatonic chord is refered to as a 13th chord. However, most chords used in tonal music are subsets of the full diatonic set, in particular three-note <em>triads</em>.</p>
 <p>When viewing a diatonic set as a chord, we traditionally order the set as a sequence of ascending thirds, corresponding to intervals of <span class="math inline">\(+4\)</span> on the line-of-fifths, modulo 7. These <em>tertian</em> steps are usually not wrapped to the octave, resulting in steps 9, 11, and 13, instead of 2, 4, and 6.</p>
 <table class="table">
@@ -222,9 +192,9 @@
 </table>
 <p>There are <span class="math inline">\(2^7=\)</span> 128 possible subsets that can be formed from the full diatonic set. Of these, the seven possiblities that are built from consecutive tertian steps are theoritically priveledged : i.e., <span class="math inline">\(\{\{1\}, \{1,3\}, \{1,3,5\}, \{1,3,5,7\}, \{1,3,5,7,9\}, \{1,3,5,7,9,11\}, \{1,3,5,7,9,11,13\}\}\)</span>.</p>
 <p>A few other possible sets are fairly commonplace in Western theory as well: <span class="math inline">\(\{1,5, 11\}\)</span> (“sus4”), <span class="math inline">\(\{1,3,5,9\}\)</span> (“add9”), <span class="math inline">\(\{1,3,5,13\}\)</span> (“add6”), etc.</p>
-<div id="concrete-representations" class="section level2">
-<h2 class="hasAnchor">
-<a href="#concrete-representations" class="anchor"></a>Concrete Representations</h2>
+<div class="section level3">
+<h3 id="concrete-representations">Concrete Representations<a class="anchor" aria-label="anchor" href="#concrete-representations"></a>
+</h3>
 <p>There are numerous ways tertian sets of notes are traditionally notated or annotated as character strings. Unfortunately, these systems are not always rigorously consisistent or logical, with convenient shorthands for common chords which lead to ambiguity, and/or practices rooted in traditional practices with little relavance. <code>humdrumR</code> aims to provide a general approach to make reading/writing chord annotations in many forms possible.</p>
 <p>A chord representation is consists of set of at least one of the following elements:</p>
 <ul>
@@ -234,12 +204,12 @@
 <li>Qualities of the chord steps, relative to an implicit or explicit key.</li>
 </ul>
 <p>Traditional chord notation symbols often conflate or merge these various elements in various ways, with numerous common shorthands. In particular, the common diatonic traids—which are abstractly different combinations of qualities of the 3rd and 5th—are represented in various shorthands.</p>
-<div id="section" class="section level3">
-<h3></h3>
+<div class="section level4">
+<h4 id="section"></h4>
 <p>Chord symbols</p>
 <ul>
 <li>A tonal chroma</li>
-<li>If the bass note is different than the root note, the bass note is indicated as a separate tonal chroma, separated by a <code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code>.
+<li>If the bass note is different than the root note, the bass note is indicated as a separate tonal chroma, separated by a <code>/</code>.
 <ul>
 <li>This practice is often used to indicate a bass note which is not part of the ostensible chord. For instance, <code>C7/Ab</code>.</li>
 </ul>
@@ -252,43 +222,40 @@
 </ul>
 <p>Roman numerals</p>
 <p>7ths 753 7, 653 65, 643 43, 642 42 2</p>
-<pre><code>753:
-    1111000
-653:
-    1110001
-643:
-    1100011
-642:
-    1000111</code></pre>
+<pre><code><span class="fl">753</span><span class="op">:</span>
+    <span class="fl">1111000</span>
+<span class="fl">653</span><span class="op">:</span>
+    <span class="fl">1110001</span>
+<span class="fl">643</span><span class="op">:</span>
+    <span class="fl">1100011</span>
+<span class="fl">642</span><span class="op">:</span>
+    <span class="fl">1000111</span></code></pre>
 <p>9ths 9753: 1111100 7653: 1111001 6543: 1110011 6432: 1100111 7642: 1001111 11ths 11</p>
 </div>
 </div>
 </div>
-  </div>
-
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
-
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
 
-      <footer><div class="copyright">
-  <p>Developed by <a href="http://fathermckenzie.net/">Nathaniel Condit-Schultz</a>.</p>
+    <footer><div class="pkgdown-footer-left">
+  <p></p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
 </div>
 
-<div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+<div class="pkgdown-footer-right">
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
-      </footer>
+    </footer>
 </div>
 
   
 
+  
 
   </body>
 </html>

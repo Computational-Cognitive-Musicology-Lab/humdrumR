@@ -6,7 +6,7 @@
 \description{
 R objects often have ways of assigning new values to
 \emph{part} of the object using \link[base:Extract]{indexing operators}.
-\link[=humdrumR:humdrumR-class]{HumdrumR objects} objects are no different, as they allow us to insert
+\link[=humdrumR:humdrumRclass]{HumdrumR objects} objects are no different, as they allow us to insert
 new fields into them!
 }
 \details{
@@ -31,7 +31,7 @@ or\preformatted{humdata$fieldname <- x
 where "fieldname" can be whatever you want it to be, of course!
 \subsection{\code{humdrumR -> humdrumR} assignment:}{
 
-Assigning a field from one \link[=humdrumR:humdrumR-class]{humdrumR object}
+Assigning a field from one \link[=humdrumR:humdrumRclass]{humdrumR object}
 to another works like this:
 (Recall that the two objects must have the exact same numbers of data tokens.)
 The name(s) given in the indexing expression on the left side of the assignment (i.e., \code{humdata[c('name1', 'name2')]} or
@@ -69,7 +69,7 @@ or assign them all names using the \verb{->[c("name1", "name2", "name3", ...)]} 
 
 \subsection{\code{humdrumR -> vector} assignment:}{
 
-You can assign vectors or lists of vectors straight into a \link[=humdrumR:humdrumR-class]{humdrumR object}.
+You can assign vectors or lists of vectors straight into a \link[=humdrumR:humdrumRclass]{humdrumR object}.
 All vectors must be the same length as the number of data tokens
 in the target object.
 If you provide multiple vectors to assign (as a \code{list} or \code{data.frame} of vectors)

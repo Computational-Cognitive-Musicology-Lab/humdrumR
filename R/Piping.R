@@ -88,7 +88,7 @@ NULL
 `%humT%` <- function(humdrumR, formula) {
     if (is.list(formula)) {
         formula <- lapply(formula,
-                          function(form) {
+                          \(form) {
                               lhs <- rlang::f_lhs(form)
                               
                               if (is.null(lhs) || rlang::as_name(lhs) %in% c('d' , 'do')) {
@@ -199,7 +199,7 @@ removeParentheses <- function(expr) {
     if (!is.list(e1)) stop(call. = FALSE,
                            'If using %s>% ("multi-pipe"), the left-side must be a list of values.')
     e2 <- rlang::enquo(e2)
-    lapply(e1, function(x) eval(rlang::quo_squash(rlang::quo(!!(e2(x))))))
+    lapply(e1, \(x) eval(rlang::quo_squash(rlang::quo(!!(e2(x))))))
     
 }
 
@@ -217,7 +217,7 @@ removeParentheses <- function(expr) {
 #' @name humPipe
 #' @export
 `%humsT%` <- function(list, formula) {
-    lapply(list, function(x) x %humT% formula)
+    lapply(list, \(x) x %humT% formula)
 }
 #' @name humPipe
 #' @export

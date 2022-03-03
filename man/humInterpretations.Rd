@@ -3,10 +3,20 @@
 \name{humInterpretations}
 \alias{humInterpretations}
 \alias{interpretations}
+\alias{print.humInterpretations}
 \title{Summarize humdrum corpus interpretations.}
 \usage{
 interpretations(humdrumR)
+
+\method{print}{humInterpretations}(interps, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \description{
 This function provides a summary of the interpretations in the pieces of a humdrumR corpus.
 }
+\seealso{
+Other humdrum data summary functions: 
+\code{\link{humCensus}},
+\code{\link{humSpines}},
+\code{\link{humSummary}}
+}
+\concept{humdrum data summary functions}

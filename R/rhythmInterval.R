@@ -8,8 +8,7 @@
 
 #' Representation of rhythmic information
 #' 
-#' This *S4* class is the core rhythm representation in the 
-#' `[humdrumR:humdrumR][humdrumR package]`.
+#' This *S4* class is the core rhythm representation in the [humdrumR] package.
 #' The object is used to represent rhythmic durations 
 #' and metric positions.
 #' Each duration is represented in 
@@ -19,15 +18,17 @@
 #' This allows use to represent any rational number with no loss of precision
 #' due to rounding errors and weak decimal expansions (like `0.333333`).
 #' Rhythm intervals are similar to standard musical 
-#' termoniology (i.e, ``three eighth-notes'' is the ratio (3/8).
+#' termoniology (i.e, "three eighth-notes" is the ratio (3/8).
 #' 
 #' @section Vectorization:
+#'
 #' `rhythmInterval` inherits from the virtual class 
-#' `[struct][struct]`.
+#' [struct].
 #' This means you can apply normal vectorized commands to `rhythmInterval`s, 
-#' and even put them in `[base:data.frame][data.frames]`.
+#' and even put them in [base::data.frame()].
 #' 
 #' @section Arithmetic:
+#'
 #' `rhythmInterval` objects have arithmetic operations defined.
 #' Addition and subtraction are straightword and intuitive (i.e., (1/8) + (3/8) = (1/2)).
 #' 
@@ -40,23 +41,23 @@
 #' A `rhythmInterval` can be divided by another `rhythmInterval` to produce
 #' a real number: (1/2) / (1/4) = 2.
 #' Like other rational values in `R` we can also do either 
-#' ``true'' (rational) division (using the `[base:Arithmetic][/]` operator)
+#' ``true'' (rational) division (using the [/][base::Arithmetic] operator)
 #' *or* [Euclidean](https://en.wikipedia.org/wiki/Euclidean_division)
-#' division (using the `[base:Arithmetic][\%/\%]` operator).
+#' division (using the [%%][base::Arithmetic] operator).
 #' Rational division (`/`) of a `rhythmInterval` by another `rhythmInterval`
-#' results in a rational number. For instance, (1/2) / (1/4) = 2}.
+#' results in a rational number. For instance, $(1/2) / (1/4) = 2$.
 #' Rational division of a `rhythmInterval` by a rational number results in a
-#' new `rhythmInterval`: (1/2) / 2 = (1/4).
+#' new `rhythmInterval`: $(1/2) / 2 = (1/4)$.
 #' Eucliean (a.k.a., integer) division can only be applied between `rhythmInterval`s
 #' resulting in an integer quotient---the remainder, which is a `rhythmInterval`,
-#' can be calculated with the `\link[base:Arithmetic][\%\%]` operator.
-#' The remainder (a.k.a., *modulo*) operator (`\%\%`) is especially
+#' can be calculated with the [%%][base::Arithmetic] operator.
+#' The remainder (a.k.a., *modulo*) operator (`%%`) is especially
 #' useful, for instance in calculating metric positions.
 #' 
 #' @section Relational Operators:
+#'
 #' `rhythmInterval`s can be compared using the standard
-#' `[base:Comparison][relational operators]`---`==`,
-#' `!=`, `>`, `>=`, etc.
+#' [relational operators][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
 #' 
 #' @slot Numerator Integers 
 #' @slot Octave Integers
@@ -443,7 +444,7 @@ recip2rint <- function(str) {
           ndots <- stringr::str_count(uniqstr, '\\.')
           rhythmInterval <- gsub('\\.+', '', uniqstr)
           
-          rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], function(f) eval(parse(text = gsub('%', '/', f)))))
+          rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], \(f) eval(parse(text = gsub('%', '/', f)))))
           
           rhythmInterval <- 1 / as.numeric(rhythmInterval)
           rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
@@ -470,7 +471,7 @@ numeric2rint <- function(n) {
 rational2rint <- function(str, split = '/') {
           split <- strsplit(str, split = split)
           
-          ns <- lapply(split, function(n) {
+          ns <- lapply(split, \(n) {
               if (all(is.na(n))) return(rint(NA))
               
               if (tail(n, 1) == '') n[length(n)] <- 1L
@@ -520,7 +521,7 @@ notevalue2rint <- function(notevalues) {
     
     #
     divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
-    rint / .ifelse(is.na(divides), 1, divides)
+    rint / (divides %|% 1)
 }
 
 
@@ -530,34 +531,34 @@ notevalue2rint <- function(notevalues) {
 #### Augmentation and dimminution 
 
 
-#' augment <- function(x, scalar = 2, ...) UseMethod('augment')
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' augment.rhythmInterval <- function(rint, scalar) rint * scalar
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-#'                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
-#'                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-#' 
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-#' 
-#' #' @name RhythmScaling
-#' #' @export
-#' diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-#'                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
-#'                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+# augment <- function(x, scalar = 2, ...) UseMethod('augment')
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# augment.rhythmInterval <- function(rint, scalar) rint * scalar
+# 
+# #' @name RhythmScaling
+# #' @export
+# augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
+#                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
+#                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
+# 
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish.rhythmInterval <- function(rint, scalar) rint / scalar
+# 
+# #' @name RhythmScaling
+# #' @export
+# diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
+#                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
+#                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
 
 
 
@@ -585,12 +586,13 @@ rhythmInterval.rhythmInterval <- force
 #' @export
 rhythmInterval.numeric <- numeric2rint
 
-char2rint <- humdrumDispatch(doExclusiveDispatch = FALSE,
-                             'recip: makeRE.recip()' = recip2rint,
-                             'duration: makeRE.decimal()' = numeric2rint)
+
 
 #' @export
-rhythmInterval.character <- force %.% char2rint
+rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
+                                                  list('duration',                 makeRE.decimal, numeric2rint),
+                                                  outputClass = 'rhythmInterval',
+                                                  funcName = 'rhythmInterval.character')
 
 #.... set as
 
@@ -637,12 +639,11 @@ duration.character <- rint2decimal %.% rhythmInterval.character
 
 #' Tools for analyzing rhythm and meter.
 #' 
-#' \code{\link[humdrumR:humdrumR]{humdrumR}} includes a number of useful
+#' [humdrumR] includes a number of useful
 #' functions for working with rhythms and meter.
-#' \describe{
-#' \item{\code{\link{rhythmDecompose}}}{Decomposes a series of rhythms in terms of desired pulses.}
-#' \item{\code{\link{rhythmOffset}}}{Calculates the cummulative offset of durations from a starting point.}
-#' }
+#'
+#' + [rhythmDecompose()] decomposes a series of rhythms in terms of desired pulses.
+#' + [rhythmOffset()] Calculates the cummulative offset of durations from a starting point.
 #' 
 #' 
 #' @name humMeter
@@ -657,7 +658,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
           into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
-                 function(rs) {
+                 \(rs) {
                            divs <- rs %/% into
                            parts <- into * divs
                            
@@ -668,7 +669,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
                  }) -> decompositions
           
           lapply(1:length(into),
-                 function(j) {
+                 \(j) {
                            do.call('c', lapply(decompositions, '[', j))
                  }) -> decompositions
           

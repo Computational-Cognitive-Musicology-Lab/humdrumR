@@ -1,6 +1,46 @@
 ### Null and NA values ----
 
-`%maybe%` <- function(e1, e2) if (is.null(e1)) e2 else e1
+with... <- function(arg, expression, orelse = NULL) {
+    expression <- rlang::enexpr(expression)
+    
+    if (eval(rlang::expr(hasArg(!!arg)), envir = parent.frame())) {
+        expression <- substituteName(expression, setNames(list(rlang::expr(list(...)[[!!arg]])), arg))
+        eval(expression, envir = parent.frame())
+    } else {
+        orelse
+    }
+    
+}
+
+
+doubleswitch <- function(pred1, pred2, ...) {
+    if (length(pred1) > 1 || length(pred2) > 1) .stop('doubleswitch predicates must be of length 1.')
+    exprs <- rlang::exprs(...)
+    
+    if (any(.names(exprs) == '')) .stop('doubleswitch requires all named arguments.')
+    
+    argnames <- .names(exprs)
+    
+    
+    order <- c('neither', 'either', 'both', 'xor', 'notxor', 'first', 'second', 'notfirst', 'notsecond')
+    preds <- c(!pred1 && !pred2,
+               pred1 || pred2,
+               pred1 && pred2,
+               xor(pred1,pred2),
+               !xor(pred1, pred2),
+               pred1,
+               pred2,
+               !pred1,
+               !pred2)
+    
+    hits <- order %in% argnames
+    hit <- which(preds[hits])[1]
+    
+    eval(exprs[[hit]], envir = parent.frame())
+    
+    
+}
+
 `%fmap%` <- function(e1, e2) {
     if (is.null(e1)) return(NULL)
     
@@ -27,9 +67,9 @@
     
     if (!is.null(e1) && e1) eval(expr, parent.frame()) else NULL
 }
-
+truthy <- function(x) !is.null(x) && length(x) > 0L && ((!is.logical(x) && !(length(x) == 1 && x[1] == 0)) || (length(x) == 1L & x[1]))
 true <- function(x) is.logical(x) && x[1]
-false <- function(x) is.logical(x) && !x[1]
+false <- function(x) is.null(x) || is.logical(x) && !x[1]
 # these two functions allow us to test if a variable is 
 # a logical TRUE or FALSE, but not give an error if
 # the variable is NOT logical.
@@ -116,12 +156,12 @@ insert <- function(x, i, values) {
     strs <- unlist(list(...))
     ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
     ifelses <- lapply(ifelses,
-                      function(pairs) {
+                      \(pairs) {
                           pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
                           pairs <- strsplit(pairs, split = '\\|')
                           
                           pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
-                          ifelse(is.na(pick), '', pick)
+                          pick %|% ""
                           
                       })
     
@@ -177,69 +217,111 @@ applycols <- function(x, f, ...){
 }
 
 
+#' Shift data within a vector/matrix/data.frame
+#' 
+#' The `lag` and `lead` functions take input vectors, matrices, or data.frames and shifts their data
+#' by `n` indices. 
+#' They are similiar to the [data.table::shift] function, but with a few additional options:
+#' @param x The input argument. Should be vector (including lists), array, or data.frame
+#' @param n The amount to lag/lead the data. 
+#' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
+#' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
+#' within the data structure.
+#' @param windows A vector or list of vectors, all of th same length as `x`. Lags crossing the boundaries indicated in `windows`
+#' are filled.
+#' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
+#' 
+#' @seealso [data.table::shift()]
 #' @export
-rotate <- function(obj, rotation = 1, wrap = FALSE, pad = NA, ...) UseMethod('rotate')
+lag <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL, ...) UseMethod('lag')
 
+#' @rdname lag
+#' @export
+lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-rotate.data.frame <- function(df, rotation = 1, margin = 1, wrap = FALSE, pad = NA) {
-         df[] <- rotate.matrix(as.matrix(df), rotation = rotation, margin = margin, wrap = wrap, pad = pad)
-         Map(rotation, margin,
-             f = function(r, m) {
-                              newnames <- rotate(dimnames(df)[[m]], r, wrap = wrap, pad = '')
-                              dimnames(df)[[m]] <<- make.names(newnames, TRUE)
-                       }
-             )
-         df
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+         if (length(n) < length(margin)) n <- rep(n, length(margin))
+        
+         if (1L %in% margin) {
+             x[] <- lapply(x, rotate, n = n[margin == 1L], fill = fill, wrap = wrap, windows = windows)
+             rown <- rotate(rownames(x), n[margin == 1L], wrap = wrap, pad = '_')
+             rown[rown == '_'] <- make.unique(rown[rown == '_'])
+             rownames(x) <- rown
+         } 
+         if (2L %in% margin) {
+             cols <- rotate(colnames(x), n[margin == 2L], fill = 'XXX', wrap = wrap)
+             x[] <-if (wrap) x[cols] else c(list(XXX = rep(NA, nrow(x))),x)[cols]
+         }
+    
+         x
 }
 #' @export
-rotate.default <- function(obj, rotation = 1, wrap = FALSE, pad = NA) {
-          rotation <- rotation[1]
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
+          if (length(x) == 0L) return(x)
+          if (length(n) > 1L) .stop('rotate cannot accept multiple rotation values for a vector argument.')
 
-          size <- length(obj)
-          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
-          if (rotation == 0L) return(obj)
-
-          ind <- seq_len(size) - rotation
-
-          if (wrap) ind <- ((ind - 1L) %% size) + 1L else ind[ind > size | ind < 1] <- NA
-
-          output <- obj[ind]
-
-          if (!is.na(pad)) output[which(is.na(ind))] <- pad
+          if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
+          
+          output <- data.table::shift(x, n, type = 'lag', fill = fill)
+            
+            
+          if (wrap) {
+            if (n > 0) {
+                output[1:n] <- tail(x, n)
+            } else{
+                output[(length(output) - n):length(output)] <- head(x, abs(n))
+            }
+          }
+            
+          if (!is.null(windows)) {
+              if (!is.list(windows)) windows <- list(windows)
+              if (!all(lengths(windows) == length(x))) .stop('Windows must be same length as input vector.')
+              
+              boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE, windows = NULL)))
+              output[boundaries] <- fill
+          }
 
           output
 }
 
 #' @export
-rotate.matrix <- function(mat, rotation = 1, margin = 1, wrap = FALSE, pad = NA) {
-          if ( margin %len>% 1L ) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+    if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
+    
+    
+          if ( length(margin) > 1L) {
                     rest.mar <- margin[-1]
                     margin   <- margin[1]
 
-                    rest.rot <- if (rotation %len>% 1L ) rotation[-1] else rotation
+                    rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, rotation = rest.rot, margin = rest.mar, wrap = wrap))        )
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = windows)))
           }
-          rotation <- rotation[1]
+         if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
+         if (dim(x)[margin] == 0L) return(x)
+        
+          n <- n[1]
 
-          size <- dim(mat)[margin]
-          rotation <- sign(rotation) * (abs(rotation) %% size) #if rotation is greater than size, or negative, modulo
-          if (rotation == 0) return(mat)
+          size <- dim(x)[margin]
+          n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
+          if (n == 0L) {
+              return(if (wrap) x else matrix(vectorNA(length(x), class(x[1])), ncol = ncol(x), nrow = nrow(x)))
+          } 
 
-          ind <- seq_len(size) - rotation
+          ind <- seq_len(size) - n
 
-          if (wrap) ind <- ind %mod% size else ind[ind > size | ind < 1] <- NA
+          if (wrap) ind <- ((ind - 1L) %% size) + 1L else ind[ind > size | ind < 1] <- NA
 
-          calls <- alist(mat, i = , j = )
+          calls <- alist(x, i = , j = )
           calls[[margin + 1]] <- ind
 
           output <- do.call('[', calls)
 
-          if (!is.na(pad)) {
+          if (!is.na(fill)) {
                     calls[[margin + 1]] <- which(is.na(ind))
-                    calls$value <- pad
+                    calls$value <- fill
                     calls[[1]] <- output
                     output <- do.call('[<-', calls)
 
@@ -270,7 +352,7 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
         struct <- new(class(object))
         slots <- getSlots(struct)
         if (!is.null(dimen)) len <- prod(dimen)
-        setSlots(struct) <- lapply(slots, function(slot) rep(as(value, class(slot)), len))
+        setSlots(struct) <- lapply(slots, \(slot) rep(as(value, class(slot)), len))
         
         struct %dim% object
         
@@ -320,7 +402,7 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
           hits <- ifelse(intervals == 0,
                          if (direction %in% c(2,4)) Inf else 1,
                          if (direction == 1) {
-                                   intervals + mapply(FUN = function(a,b) which.min(c(a,b)) - 1,
+                                   intervals + mapply(FUN = \(a,b) which.min(c(a,b)) - 1,
                                                       abs(x - sortedwhere[intervals]),
                                                       abs(x - sortedwhere[intervals + 1]))
                          } else {
@@ -333,10 +415,10 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
 
 locate <- function(x, table) {
     if (is.null(dim(table)) || length(dim(x)) == 1) {
-        setNames(lapply(x, function(val) which(table == val)), x)
+        setNames(lapply(x, \(val) which(table == val)), x)
     } else {
         apply(x, 1, 
-              function(val) {
+              \(val) {
                   which(Reduce('&', Map('==', table, val)))
                   
                   })
@@ -375,22 +457,32 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
-
+tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
+    
+    output <- tapply(X, INDEX, FUN, ...) |> unlist()
+    indices <- tapply(seq_along(X), INDEX, force) |> unlist()
+    
+    output[order(indices)]
+}
 
 
 segments <- function(x, reverse = FALSE) {
-    # x is logical
-    if (reverse) x <- rev(x)
+    change <- if (!is.logical(x)) c(TRUE, head(x, -1L) != tail(x, -1L)) else x
+    if (reverse) change <- rev(change)
     
-    x <- cumsum(x)
+    seg <- cumsum(change)
     
     if (reverse) {
-        x <- rev(-x) + max(x) + 1
+        seg <- rev(-seg) + max(seg) + 1
     }
     
-    x
+    attr(seg, 'values') <- x[change]
+    
+    seg
     
 }
+
+
 
 #' Propogate data points to "fill" null data.
 #' 
@@ -407,7 +499,7 @@ segments <- function(x, reverse = FALSE) {
 #' 
 #' @export
 #' @name fillThru
-fillThru <- function(x, nonnull = function(x) !is.na(x) & x != '.', reverse = FALSE) {
+fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE) {
     
     if (is.function(nonnull)) nonnull <- nonnull(x)
     
@@ -481,7 +573,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
     targets <- list(...)
     targets <- if (hasdim(ref)) {
         lapply(targets, 
-               function(x) {
+               \(x) {
                    xdim <- ldim(x)
                    if (hasdim(x)) {
                        if (xdim$nrow != refdim$nrow) x <- Repeat(x, length.out = refdim$nrow, margin = 1L)
@@ -492,7 +584,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
                    }})
     } else {
         lapply(targets, 
-               function(x) {
+               \(x) {
                    if (hasdim(x)) x <- dropdim(x)
                    rep(x, length.out = refdim$length)
                    })
@@ -525,14 +617,14 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
           stuff   <- list(...)
-          if (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim))) return(invisible(stuff))
+          if (is.function(size.out) && (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim)))) return(invisible(stuff))
           
           recycle <- rep(recycle, length.out = length(margin))
           notnull <- !sapply(stuff, is.null)
           
           if (is.function(size.out)) {
                     sizes <- lapply(stuff[notnull],
-                                    function(thing) {
+                                    \(thing) {
                                               dim <- dim(thing)
                                               if (is.null(dim)) {
                                                   if (length(margin) == 1L) length(thing) else c(length(thing), 1L)
@@ -574,10 +666,10 @@ match_size2 <- function(..., toEnv = FALSE, byrow = FALSE) {
         
         size <- apply(sizes, 1, max)
         browser()
-        objects[nodim] <- lapply(objects[nodim], function(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
+        objects[nodim] <- lapply(objects[nodim], \(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
         
         objects[!nodim] <- lapply(objects[!nodim], 
-                                  function(x) {
+                                  \(x) {
                                       x <- Repeat(x, length.out = size[1], margin = 1)
                                       x <- Repeat(x, length.out = size[2], margin = 2)
                                       x
@@ -730,8 +822,10 @@ captureSymbols <- function(expr) {
 }
 
 
-.switch <- function(x, groups, ..., parallel = list()) {
+.switch <- function(x, groups, ..., parallel = list(), defaultClass = 'character') {
+    # this function plays a key role in Exclusive dispatch
     exprs <- rlang::enexprs(...)
+    
     missing <- sapply(exprs, rlang::is_missing)
     
     names(exprs)[.names(exprs) == ""] <- 'rest'
@@ -746,7 +840,7 @@ captureSymbols <- function(expr) {
     exprs <- exprs[switch %in% c(groups, if (rest) 'rest')]
     
     
-    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), class(x)))
+    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), defaultClass))
     
     groupvec <- c(if (rest) 'rest' else 'nomatch', switchg)[match(groups, switch, nomatch = 0) + 1] 
     
@@ -760,7 +854,7 @@ captureSymbols <- function(expr) {
     # makes sure there is a "nomatch" expr, and they are in right order
     frame <- parent.frame(1)
     results <- do.call('Map', 
-                       c(function(expr, ...) {
+                       c(\(expr, ...) {
                            exclgroup <- list(...)
                            
                            if (is.null(expr)) return(exclgroup$x)
@@ -769,7 +863,6 @@ captureSymbols <- function(expr) {
                        }, 
                        c(list(exprs), 
                          grouped)))
-    
     results$nomatch <- vectorNA(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
     results <- unstick(do.call('c', unname(results )))
     
@@ -781,7 +874,7 @@ captureSymbols <- function(expr) {
 }
 
 
-### Math ----
+# Math ----
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
@@ -799,25 +892,67 @@ gcd <- function(x, y) {
     ifelse(r, Recall(y, r), y)
 }
 
+## new numeric representations ####
+
+#### decimal ####
+# this is just an extension of numeric to understand my fraction and rational representations
+
+#' Decimal numbers
+#' 
+#' These functions create decimal numbers that are identical to base R
+#' `numeric` (real) numbers.
+#' However, these numbers are understood by the `humdrumR` [rational numbers][rational()].
+#' 
+#' @family {humdrumR numeric functions}
+#' @seealso [rational()]
 #' @export
-as.decimal <- function(x, ...) UseMethod('as.decimal') # character string version of numeric 
+decimal <- function(x) (as.numeric(x) %class% 'decimal') %dim% x
+
+#' @rdname decimal
+#' @export
+as.decimal <- function(x, ...) UseMethod('as.decimal')
 #' @export
 as.decimal.character <- function(x) {
     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
     as.decimal.fraction(x)
 }
 #' @export
-as.decimal.numeric <- as.numeric
+as.decimal.numeric <- decimal
 #' @export
-as.decimal.rational <- function(x) (x$Numerator / x$Denominator) %dim% x[[1]]
+as.decimal.rational <- function(x) decimal((x$Numerator / x$Denominator) %dim% x$Numerator)
 #' @export
 as.decimal.fraction <- function(x) {
     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-    sapply(exprs, eval) %dim% x
+    decimal(sapply(exprs, eval) %dim% x)
 }
 
+#### rational ####
+# represent rational numbers as list of numerator and denominator
 
+#' Rational numbers
+#' 
+#' R has no built in rational number representation; `humdrumR` defines one.
+#' 
+#' 
+#' 
+#' @seealso [as.decimal()] [as.numeric()] 
+#' @family {humdrumR numeric functions}
+rational <- function(numerator, denominator = 1) {
+    if (!identical(dim(numerator), dim(denominator))) .stop("You can't create a rational number where the numerator and denominator have different dimensions!")
+    
+    frac <- attr(MASS::fractions(numerator / denominator, cycles = 15), 'fracs')
+    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
+    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
+    
+    numerator <- as.integer(frac[ , 1])
+    denominator <- as.integer(frac[ , 2])
+    
+    denominator[is.na(denominator)] <- 1L
+    
+    list(Numerator = numerator %dim% numerator, Denominator = denominator %dim% numerator) %class% 'rational'
+}
 
+#' @rdname rational
 #' @export
 as.rational <- function(x, ...) UseMethod('as.rational') 
 #' @export
@@ -828,24 +963,25 @@ as.rational.fraction <- function(x) as.rational.numeric(as.decimal.fraction(x))
 as.rational.rational <- force
 #' @export
 as.rational.numeric <- function(x) {
-    frac <- attr(MASS::fractions(x, cycles = 15), 'fracs')
-    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
-    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
-    
-    num <- as.integer(frac[ , 1])
-    den <- as.integer(frac[ , 2])
-    
-    den[is.na(den)] <- 1L
-    
-    list(Numerator = num %dim% x, Denominator = den %dim% x) %class% 'rational'
+    rational(x)
 }
 
+#### fraction ####
+# rational numbers as character string
+
+#' @rdname rational
+#' @export
+fraction <- function(numerator, denominator, sep = '/') {
+    .paste(numerator, denominator, sep = sep) %class% 'fraction'
+}
+
+#' @rdname rational
 #' @export
 as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
 #' @export
 as.fraction.character <- function(x, sep = '/') as.fraction.rational(as.rational.character(x), sep = sep) %dim% x
 #' @export
-as.fraction.rational  <- function(x, sep = '/') .paste(x$Numerator, x$Denominator, sep = sep) 
+as.fraction.rational  <- function(x, sep = '/') fraction(x$Numerator, x$Denominator, sep = sep) 
 #' @export
 as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
 #' @export
@@ -860,16 +996,15 @@ print.rational <- function(x) print(as.fraction(x))
 # argument is NULL
 
 #' Interval "calculus"
-#' -------------------------------------->     NEEDS DOCUMENTATION         <---------------------------------------------
 #' @name intervalCalculus
 #' @export 
 integrate <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
     
     lapply(1:ncol(intmat),
-           function(j) {
+           \(j) {
                intmat[!skip[ , j], j] <<- cumsum(intmat[!skip[ , j], j])
            }
     ) 
@@ -886,10 +1021,10 @@ sigma <- integrate
 derive <- function(intervals, skip = list(is.na)) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
-    skip <- Reduce('any', lapply(skip,  function(f) f(intmat)))
+    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
     
     lapply(1:ncol(intmat),
-           function(j) {
+           \(j) {
                intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
            }
     ) 
@@ -923,7 +1058,7 @@ expand <- function(x) {
 # bitwise tools
 
 ints2bits <- function(n, nbits = 8) {
-    mat <- t(sapply(n, function(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
+    mat <- t(sapply(n, \(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
     
     rownames(mat) <- n
     colnames(mat) <- 2 ^ (0:(nbits - 1))
@@ -1007,8 +1142,8 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 #     positive <- floor(n)
 #     negative <- as.integer((n - positive) / 2^-31)
 #     # mat <- t(as.integer(sapply(positive, intToBits)) - as.integer(sapply(negative, intToBits)))[, 1:nbits, drop = FALSE]
-#     posmat <- t((sapply(positive, function(x) as.integer(intToBits(x)))))[ , 1:nbits, drop = FALSE]
-#     negmat <- t((sapply(negative, function(x) as.integer(intToBits(x)))))[ , 32:(32-nbits + 1), drop = FALSE]
+#     posmat <- t((sapply(positive, \(x) as.integer(intToBits(x)))))[ , 1:nbits, drop = FALSE]
+#     negmat <- t((sapply(negative, \(x) as.integer(intToBits(x)))))[ , 32:(32-nbits + 1), drop = FALSE]
 #     mat <- posmat - negmat
 #     rownames(mat) <- n
 #     colnames(mat) <- 2 ^ (0:(nbits - 1))
@@ -1029,6 +1164,40 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 ### Metaprogramming ----
 
+applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
+  # helper function
+  accum <- c()
+  
+  if (length(ex) <= 1L) {
+    return(func(ex))
+  } else {
+    for (i in (2 - !ignoreHead):length(ex)) {
+      missing <- rlang::is_missing(ex[[i]]) || is.null(ex[[i]])
+      
+      if (!missing) {
+        out <- Recall(ex[[i]], func, rebuild = rebuild) 
+        
+        if (rebuild) {
+          ex[[i]] <- out 
+        } else {
+          accum <- c(accum, out) 
+        }
+      }
+    }
+  }
+  
+  if (rebuild) ex else accum
+}
+
+apply2ExprAsString <- function(func, ...) {
+  \(expr) {
+    str <- func(deparse(expr), ...)
+    parse(text = str)[[1]]
+    
+  }
+}
+
+
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
 }
@@ -1041,7 +1210,7 @@ namesInExpr <- function(names, expr) {
     if (rlang::is_formula(expr)) expr <- rlang::f_rhs(expr)
     
     applyExpr(expr, rebuild = FALSE,
-              function(ex) {
+              \(ex) {
                   exstr <- deparse(ex)
                   match <- names[pmatch(exstr, names)]
                   if (is.na(match)) NULL else match
@@ -1087,12 +1256,12 @@ recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     
     if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
     
-    
     s <- (rlang::as_label(quo[[2]][[1]]) %in% c('{', '(')) + 1L
     
     if (s == 1L) {
         pred <- predicate(quo) 
         if (pred) quo <- do(quo)
+        if (!rlang::is_call(quo[[2]])) return(quo)
     }
     
     if (s == 2L || !(stopOnHit && pred)) {
@@ -1176,6 +1345,16 @@ append2expr <- function(expr, exprs) {
 
 ### Building smart functions ----
 
+callf... <- function(func, args) {
+    # calls func on args, even if some named arguments in args are not arguments of func
+    # (ignores those arguments)
+    if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
+    
+    do.call(func, args)
+
+
+}
+
 setoptions... <- function(options, defaults) {
     setoptions(options) <- defaults
     options
@@ -1243,7 +1422,7 @@ nestoptions <- function(opts, ...) {
     funccall <- deparse(call[[1]])
     
     call[[1]] <- quote(list)
-    call <- call[!sapply(call, function(x) deparse(x) == "...")]
+    call <- call[!sapply(call, \(x) deparse(x) == "...")]
     args <- eval(call, parent.frame())
     
     #
@@ -1263,7 +1442,7 @@ overdot <- function(call) {
     dots <- eval(quote(list(...)), envir = parent.frame())
     
     if (length(dots) > 0) {
-        call <- call[!sapply(call, function(x) deparse(x) == "...")]
+        call <- call[!sapply(call, \(x) deparse(x) == "...")]
         call <- call[!names(call) %in% names(dots)]
         
         call <- append2expr(call, dots)
@@ -1279,16 +1458,16 @@ overdot <- function(call) {
 checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
     if (length(sys.calls()) > 6L) return(args) 
     
-    argNames <- paste0('c(', glue::glue_collapse(paste0("'", args, "'"), sep = ', '), ')')
+    argNames <- if (length(args) > 1L) paste0('c(', glue::glue_collapse(quotemark(args), sep = ', '), ')') else quotemark(args)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
-    if (length(args) <  min.length) stop(callname, glue::glue("{length(args)} is too few {argname} arguments."))
-    if (length(args) >  max.length) stop(callname, glue::glue("{length(args)} is too many {argname} arguments."))
+    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few '{argname}' arguments."))
+    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many '{argname}' arguments."))
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
-        classNames <- glue::glue_collapse(classes, sep = ', ', ', or ')
-        stop(callname, glue::glue("The {argname} argument must inherit {classNames}, but you have input a {class(args)}."))
+        classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
+        .stop(callname, glue::glue("The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument."))
     }
     
     
@@ -1298,16 +1477,21 @@ checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, ma
     
     if (any(ill)) {
         case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
-        illNames <- glue::glue_collapse(paste0("'", args[ill], "'"), sep = ', ', last = ', and ')
-        legalNames <-  glue::glue_collapse(paste0("'", valid, "'"), sep = ', ', last = ', and ')
+        illNames <- glue::glue_collapse(quotemark(args[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
+        legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
         
+        message <- list(callname, illNames, case, 'Valid options are ', legalNames)
         
-        message <- list(callname, illNames, case, 'Valid options are ', legalNames, '.', call. = FALSE)
-        
-        do.call(if (warnSuperfluous && any(!ill)) 'warning' else 'stop', message)
+        do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
     }
     
     args[!ill]
+}
+
+checkTF <- function(x, argname, callname) checkArgs(x, c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
+checkTFs <- function(..., callname = NULL) {
+    args <- list(...)
+    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
 }
 
 checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
@@ -1345,9 +1529,9 @@ matched <- function(x, table) table[pmatch(x, table)]
 
 has.prefix <- function(prefix, x) {
     prefix <- strsplit(prefix, split = '\\|')
-    prefix <- sapply(prefix, function(pre) paste(paste0('^', pre), collapse = '|'))
+    prefix <- sapply(prefix, \(pre) paste(paste0('^', pre), collapse = '|'))
     
-    if (missing(x))  function(x) grepl(prefix, x) else grepl(prefix, x)
+    if (missing(x))  \(x) grepl(prefix, x) else grepl(prefix, x)
 }
 
 pasteordered <- function(order, ..., sep = '') {
@@ -1366,6 +1550,8 @@ pasteordered <- function(order, ..., sep = '') {
 affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)
 
 plural <- function(n, then, els) .ifelse(n > 1, then, els)
+
+quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
 
 nth <- function(n) {
     affix <- rep('th', length(n))
@@ -1417,7 +1603,7 @@ num2word <- function(num, capitalize = FALSE) {
 
   out = num
   out[num < 101] = unlist(lapply(num[num < 101],
-                                 function(n) {
+                                 \(n) {
                                    if(n == 100) return('one-hundred')
                                    if(n < 20) { words[n + 1]  } else {
                                     gsub('-zero$', '', paste0(tens[1 + floor(n / 10)], '-', words[n %% 10 + 1]))
@@ -1442,16 +1628,55 @@ padder <- function(strs, sizes = max(nchar(strs)) + 1) {
     
 }
 
-trimLongString <- function(strs, n = 20L) {
-  strs[str_length(strs) > n] <- paste0(stri_trim_both(str_sub(strs[str_length(strs) > n], end = n)), '...')
-  strs
+
+
+trimTokens <- function(tokmat, max.token.length) {
+    # This function  trims strings that are too long, replacing the last
+    # three characters before the cuttoff with "..."
+    
+    toklen  <- nchar(tokmat)
+    
+    toklen[is.na(toklen)] <- 0L
+    
+    toolong <- toklen > max.token.length
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
+    tokmat[is.na(tokmat)] <- ''
+    
+    tokmat
+    
 }
 
+
+smartPadWrap <- function(str, width, side = 'left') {
+    
+    
+    if (length(str) != 1L) .stop('In call to smartWrap, str argument must be a single character string.')
+    
+    if (nchar(str) <= width) return(stringr::str_pad(str, width = width, side = side))
+    
+    strs <- strsplit(str, split = '  *')[[1]]
+    
+    # while (any(nchar(strs) >= width)) { }
+        
+    ns <- nchar(strs)
+    strs <- if (side == 'left') {
+        rev(tapply(strs, rev(cumsum(rev(ns) + 1L) %/% width), paste, collapse = ' '))
+    } else {
+        tapply(strs, cumsum(ns + 1L) %/% width, paste, collapse = ' ')
+    }
+    
+    
+    strs <- stringr::str_pad(strs, width = width, side = side)
+    
+    paste(strs, collapse = '\n')
+
+}
 
 strPartition <- function(str, split = '/') {
     # split strs into columns
     # if (hasdim(str)) {
-    #     output <- do.call('cbind', lapply(1:ncol(str), function(j) ofColumns(str[, j, drop = TRUE])))
+    #     output <- do.call('cbind', lapply(1:ncol(str), \(j) ofColumns(str[, j, drop = TRUE])))
     #     rownames(output) <- apply(str, 1, paste, collapse = '/')
     #     
     # } else {
@@ -1466,7 +1691,7 @@ strPartition <- function(str, split = '/') {
     
     maxdepth <- max(lengths(mat))
     df <- lapply(1:maxdepth,
-                               function(i) {
+                               \(i) {
                                    sapply(mat, '[', i = i) %dim% str
                                    
                                }) 

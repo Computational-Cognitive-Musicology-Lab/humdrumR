@@ -20,7 +20,7 @@ tset(
 is.tertianSet(x)
 }
 \description{
-\code{tertianSet} is one of \code{\link[humdrumR:humdrumR]{humdrumR}}'s
+\code{tertianSet} is one of \link[=humdrumR]{humdrumR's}
 types of tonal data, representing Western tertian harmonies.
 \code{tertianSet} is a subclass of \code{diatonicSet} (and thence, \code{struct}).
 }

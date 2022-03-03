@@ -243,7 +243,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame <- as.list(fileFrame) # this stupidy (translatign to list and back) 
     # is because of annoying data.table assignment behavior, which acts differently
     # depending assiging columns of lists if nrow == 1.
-    fileFrame$Filepath <- lapply(fileFrame$Files, function(files) if (length(files)) names(files) else files)
+    fileFrame$Filepath <- lapply(fileFrame$Files, \(files) if (length(files)) names(files) else files)
     fileFrame <- as.data.table(fileFrame)
     
     if (!is.null(contains)) fileFrame <- filterFilesByContent(fileFrame, contains)
@@ -286,7 +286,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame[ , Directories := NULL]
     
     fileFrame <- as.data.table(lapply(fileFrame, 
-                                      function(col) {
+                                      \(col) {
                                           if (is.list(col)) {
                                               unlist(col) 
                                               } else {
@@ -365,7 +365,7 @@ duplicateWarnings <- function(matchTable, allowDuplicates, verbose) {
     if (verbose) {
         uniqcombos <- unique.matrix(duptable)
         for (i in 1:nrow(uniqcombos)) {
-            curdup <- rownames(duptable)[apply(duptable, 1, function(row) all(row == uniqcombos[i,]))]
+            curdup <- rownames(duptable)[apply(duptable, 1, \(row) all(row == uniqcombos[i,]))]
             cat('\n',
                 glue::glue("The following files match patterns ", 
                                     glue::glue_collapse(colnames(duptable)[uniqcombos[i, ] > 0L],
@@ -439,7 +439,7 @@ shortFilenames <- function(fileFrame) {
 #' `findHumdrum` does the work of finding and reading the text files into R.
 #' `readHumdrum` utilizes `findHumdrum` to read files, then parses them to
 #' create a [humTable] and build
-#' a [humdrumR][humdrumR::humdrumR-class] data object around the table.
+#' a [humdrumR][humdrumR::humdrumRclass] data object around the table.
 #' 
 #' 
 #' @param ... character: One or more patterns used to identify files to read.
@@ -584,6 +584,7 @@ shortFilenames <- function(fileFrame) {
 #' `readHumdrum` returns a fully parsed `humdrumR` object.
 #' 
 #' @examples 
+#' 
 #' readHumdrum() # loads all valid humdrum files in the current directory.
 #' 
 #' readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
@@ -600,11 +601,11 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") 
 #' # exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
-#' in the Label field as "Beethoven" and "Mozart" respectively.
+#' # in the Label field as "Beethoven" and "Mozart" respectively.
 #' 
 #' @name readHumdrum
 #' @export
-readHumdrum = function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
+readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates = FALSE, verbose = FALSE, 
                        tandems = 'known', reference = 'all') {
     
     fileFrame <- findHumdrum(..., contains = contains, recursive = recursive, 
@@ -807,7 +808,7 @@ parseLocal <- function(records) {
   barlines <- barlines[recordns, , drop = FALSE] # so I'm really just copying the first spine...maybe change this to work like tandems (below)?
  
   
-  spineLengths <- nrow(mat) + apply(mat[!grepl('^[*!=]', mat[ , 1]), , drop = FALSE], 2, function(col) sum(stringi::stri_count_fixed(col, ' ')))
+  spineLengths <- nrow(mat) + apply(mat[!grepl('^[*!=]', mat[ , 1]), , drop = FALSE], 2, \(col) sum(stringi::stri_count_fixed(col, ' ')))
   Columns      <- rep(Columns, spineLengths)
   
   tandems  <- tandems[paste0(SpineNumbers[Columns], '_', recordns)] # These are different in each spine
@@ -841,13 +842,13 @@ separatePieces <- function(fileFrame) {
     filelines <- fileFrame$FileLines
     
     containmultiple <- sapply(filelines, 
-                              function(lines) {
+                              \(lines) {
                                   sum(stringi::stri_detect_regex(lines, '^\\*\\*')) > 1L
                               })
     
     filelines[containmultiple] <-
         lapply(filelines[containmultiple], 
-           function(lines) {
+           \(lines) {
                open  <- stringi::stri_count_regex(lines,'\\*\\*')
                close <- stringi::stri_count_regex(lines,'\\*-')
                nspines <- open - close
@@ -913,11 +914,11 @@ padSpinePaths <- function(local) {
   # identifies spine paths in them, and pads the records with "_P" such that 
   # subspines (spine paths) are grouped within their spine, and all rows are the same length.
   ####NEED TO ADD OPTIONS FOR ** AND *-
-  minpath <- min(sapply(local, Position, f = function(x) x %in% c('*^', '*v', '*+', '*-')), na.rm = TRUE)
+  minpath <- min(sapply(local, Position, f = \(x) x %in% c('*^', '*v', '*+', '*-')), na.rm = TRUE)
   lapply(minpath:max(lengths(local)),
-         function(j) {
-           open  <- sapply(local, function(row) length(row) >= j && (row[j] == '*^' || row[j] == '*+'))
-           close <- sapply(local, function(row) length(row) > j && all(row[j:(j + 1)] == '*v'))
+         \(j) {
+           open  <- sapply(local, \(row) length(row) >= j && (row[j] == '*^' || row[j] == '*+'))
+           close <- sapply(local, \(row) length(row) > j && all(row[j:(j + 1)] == '*v'))
            if (any(open) | any(close)) {
              
              open  <- c(FALSE, head(open, -1))
@@ -928,11 +929,11 @@ padSpinePaths <- function(local) {
              
              local[pad > 0] <<- Map(append, 
                                     x = local[pad > 0], 
-                                    values = lapply(pad[pad > 0], function(n) rep('_P', n)), 
+                                    values = lapply(pad[pad > 0], \(n) rep('_P', n)), 
                                     after = j)
            }
            
-           close <- sapply(local, function(row) length(row) > j && all(row[j] == '*-'))
+           close <- sapply(local, \(row) length(row) > j && all(row[j] == '*-'))
            if (any(head(close, -1))) {
              pad <- cumsum(c(FALSE, head(close, -1)))
              local[pad > 0] <<- Map(append, x = local[pad > 0], values = '_P', after = j - 1)
@@ -957,7 +958,7 @@ parseInterpretations <- function(spinemat) {
   spinemat[is.na(spinemat)] <- '_P' # Not sure why this is necassary (Nat, December 2018)
   
   lapply(1:ncol(spinemat), 
-         function(j) { 
+         \(j) { 
            if (j > 1 && any(spinemat[ , j] == '_P')) {
              spinemat[spinemat[ , j] == '_P', j] <<- spinemat[spinemat[ , j] == '_P', j - 1] 
            }
@@ -967,13 +968,13 @@ parseInterpretations <- function(spinemat) {
            interpind <- interpind[interpind > tail(stringi::stri_startswith_fixed(spine, '**'), 1)]
            interps <- stringr::str_sub(spine[interpind], start = 2L)
            
-           setNames(sapply(seq_along(spine), function(i) paste(interps[i >= interpind], collapse = ',')), 
+           setNames(sapply(seq_along(spine), \(i) paste(interps[i >= interpind], collapse = ',')), 
                     paste0(j, '_', rownames(spinemat)))
          } 
   ) -> tandemIs
   
   # exclusive
-  exclusiveI <- apply(spinemat, 2, function(spine) tail(spine[stringi::stri_startswith_fixed(spine, '**')], 1))
+  exclusiveI <- apply(spinemat, 2, \(spine) tail(spine[stringi::stri_startswith_fixed(spine, '**')], 1))
   exclusiveI <- stringr::str_sub(exclusiveI, start = 3) # strip away **
   
   list(Exclusive = exclusiveI, 
@@ -1006,7 +1007,7 @@ parseTandem <- function(tandems, known) {
     REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
     
     tandemMat <- lapply(REs,
-                        function(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance
+                        \(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance
     
     names(tandemMat) <- names(REs)
     
@@ -1050,7 +1051,7 @@ parseSections <- function(spine) {
   nesting <- max(stringi::stri_count_fixed(stringr::str_sub(grep('^\\*>', spine, value = TRUE), 3L), '>'))
   
   matrices <- lapply(sectionTypes, 
-                     function(type) {
+                     \(type) {
                        hits  <- grepl(type, spine)
                        if (!any(hits)) return(data.frame(row.names = names(spine)))
                        
@@ -1059,7 +1060,7 @@ parseSections <- function(spine) {
                        
                        typemat <- if (any(depth != 0, na.rm = TRUE)) { 
                          sapply(sort(unique(depth[depth != 0])), 
-                                function(N) { 
+                                \(N) { 
                                   cats <- c(NA_character_, spine[hits & depth <= N])
                                   cats[which((hits & depth <  N)[hits & depth <= N]) + 1] <- "" # NA_character_
                                   cats[cumsum(hits & depth <= N) + 1]

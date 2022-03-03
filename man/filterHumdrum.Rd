@@ -5,6 +5,14 @@
 \alias{removeEmptyFiles}
 \alias{removeEmptySpines}
 \alias{removeEmptyRecords}
+\alias{[,humdrumR,missing,ANY-method}
+\alias{[,humdrumR,numeric,ANY-method}
+\alias{[,humdrumR,character,ANY-method}
+\alias{[,humdrumR,formula,ANY-method}
+\alias{[[,humdrumR,numeric,missing-method}
+\alias{[[,humdrumR,missing,numeric-method}
+\alias{[[,humdrumR,character,missing-method}
+\alias{[[,humdrumR,ANY,ANY-method}
 \title{Filter humdrum data}
 \usage{
 filterHumdrum(humdrumR, ...)
@@ -32,7 +40,7 @@ humdata[['regex']]
 humdata[[x:y, l:m]]
 }
 \description{
-\code{filterHumdrum} is a command used to filter a \link[=humdrumR-class]{humdrumR corpus}
+\code{filterHumdrum} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}
 Indexing a humdrumR corpus (using the \verb{[]} or \verb{[[]]} operators)
 uses calls to \code{filterHumdrum}!
 }
@@ -62,7 +70,7 @@ are used to select subsets of data.
 For many R data types (for instance, base R \link[base:list]{lists})
 the \strong{\code{[}single brackets\verb{]}} are used for "shallower" extraction while the
 \strong{\code{[[}double brackets\verb{]]}} are used for "deeper" extraction.
-\link[=humdrumR-class]{HumdrumR corpus} indexing follows this same basic pattern:
+\link[=humdrumRclass]{HumdrumR corpus} indexing follows this same basic pattern:
 \strong{\code{[}single brackets\verb{]}} are used to index \code{humdrumR} objects
 \emph{by piece} while \strong{\code{[[}double brackets\verb{]]}} are used to index
 \emph{within pieces}. (Accidentally writing \verb{[]} when you need
@@ -103,7 +111,7 @@ Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from ea
 file in the corpus.
 }
 
-When indexing \link[=humdrumR-class]{humdrumR corpora} with numbers,
+When indexing \link[=humdrumRclass]{humdrumR corpora} with numbers,
 all \code{numeric} (double) inputs are converted to integers.
 
 Note that numeric \code{humdrumR} indexing is entirely \strong{ordinal}, meaning
@@ -142,7 +150,7 @@ data records.
 
 \subsection{Character indexing:}{
 
-Indexing \link[=humdrumR:humdrumR-class]{humdrumR objects} with
+Indexing \link[=humdrumR:humdrumRclass]{humdrumR objects} with
 \code{[}single brackets\verb{]} will accept one
 vector of \code{character} strings. These strings are
 treated as
@@ -183,7 +191,7 @@ regardless of their spine or record number(s).
 
 \subsection{Formula indexing:}{
 
-Indexing \link[=humdrumR:humdrumR-class]{humdrumR objects} with
+Indexing \link[=humdrumR:humdrumRclass]{humdrumR objects} with
 \code{formulae} is the most powerful, flexible indexing option.
 Either \code{[}single\verb{]} or \code{[[}double\verb{]]} brackets will accept
 a (single) formula. The formula are fed directly as arguments to

@@ -18,12 +18,12 @@ reference(humdata)
 \method{[}{humReference}(refTable, i, j, drop = FALSE)
 }
 \description{
-\code{reference} is one of \code{\link[humdrumR:humdrumR]{humdrumR's}}
-\code{\link[humdrumR:humSummary]{summary functions}}, used to
+\code{reference} is one of \link{humdrumR}'s
+\link[=humSummary]{summary functions}, used to
 tabulate the reference records
-present in a \code{\linkS4class{humdrumR}} corpus.
-\code{reference} takes a \code{\linkS4class{humdrumR}} object
-and and returns a \code{\strong{humReference}} table.
+present in a \link[=humdrumRclass]{humdrumR} corpus.
+\code{reference} takes a \link[=humdrumRclass]{humdrumR} object
+and and returns a \code{humReference} table.
 Alternatively, \code{reference} can take a \code{character} string,
 which it will check against known reference codes and print a
 information about matching codes. For instance, \code{reference('OTL')}
@@ -32,7 +32,7 @@ returns a description of the standard humdrum \code{!!!OTL} reference record
 }
 \details{
 A \code{humReference} table has one column for
-each reference code that appears in a \code{\linkS4class{humdrumR}} corpus.
+each reference code that appears in a \link[=humdrumRclass]{humdrumR} corpus.
 Since reference records can be long (too much to print on one screen),
 and humdrum files can have multiple of the same type of reference code
 (for instance multiple composers annotated with "!!!COM"),
@@ -47,8 +47,7 @@ Thus, if you want to see actualy reference records, try indexing the
 
 A \code{humReference} table has one row for each file in the corpus.
 Rows are labeled with each file's corresponding
-number (from the \code{\link[humdrumR:humTable]{humTables}} \strong{File} field)
-and name (the \strong{Filename} field).
+number (from the \link{humTable}'s \strong{File} field) and name (the \strong{Filename} field).
 In addition, when a \code{humReference} object is printed,
 three different summary totals are printed for each reference code:
 \strong{Any} indicates how many files in the corpus have at least
@@ -63,17 +62,10 @@ the \strong{Unique} total will be \code{2}.
 \section{Indexing}{
 
 
-\code{humReference} tables can be indexed much like base \code{R}
-\code{\link[base:data.frame]{data.frames}}, with two arguments: \code{i} (rows)
-and \code{j} (columns).
-If \code{i} or {j} are \code{numeric}, they select
-rows or columns respectively, ordinally.
-If \code{i} is a \code{character}, it is matched as a regular expression
-against filenames in the corpus.
-If \code{j} is a \code{character}, it is \code{\link[base:pmatch]{partially-matched}}
+\code{humReference} tables can be indexed much like base \code{R} \verb{[data.frames][base::data.frame()],  with two arguments: }i\verb{(rows) and}j\verb{(columns). If}i\code{or}j\code{are}numeric\verb{, they select rows or columns respectively, ordinally. If }i\verb{is a}character\verb{, it is matched as a regular expression against filenames in the corpus. If }j\verb{is a}character`, it is \link[base:pmatch]{partially matched}
 against column names.
 
 A \code{drop} argument is also available. If \code{TRUE}, a plain
-\code{\link[data.table]{data.table}} is returned.
+\verb{[data.table][data.table::data.table()]} is returned.
 }
 

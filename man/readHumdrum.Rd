@@ -58,7 +58,7 @@ These functions find valid humdrum files on your local machine and read them int
 \code{findHumdrum} does the work of finding and reading the text files into R.
 \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
 create a \link{humTable} and build
-a \link[=humdrumR-class]{humdrumR} data object around the table.
+a \link[=humdrumRclass]{humdrumR} data object around the table.
 }
 \section{REpath-patterns}{
 
@@ -76,11 +76,11 @@ For conveniance, you can break the path across multiple arguments instead of usi
 This is useful when searching for more than one pattern (see next paragraph) in the same directory.
 
 If you want to search for \emph{more than one} pattern, you can input them as a character vector:
-For instance, \code{readHumdrum(c("mozart", "beethoven")}---this command will search for
+For instance, \verb{readHumdrum(c("mozart", "beethoven")}---this command will search for
 filenames containing "mozart" OR "beethoven."
 This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
 look for any kern files in directories containing "Mozart" OR "Beethoven."
-If patterns are named, these names will show up as identifying patterns in the \code{\linkS4class{humdrumR}} object's
+If patterns are named, these names will show up as identifying patterns in the \verb{[humdrumR][humdrumR]} object's
 \code{Label} field. Unnamed patterns are simply labeled with numbers.
 
 Normal (system appropriate) conventions (i.e., directories separated by \code{"/"},
@@ -109,8 +109,8 @@ If there are no multi-piece files, \code{Piece} and \code{File} will be identica
 
 
 \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
-Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link{validateHumdrum}}) are automatically
-skipped. If you want to see specifically what errors occured, call \code{\link{validateHumdrum}}
+Whatsmore, any files which contain humdrum syntax errors (checked by \verb{[validateHumdrum][validateHumdrum]}) are automatically
+skipped. If you want to see specifically what errors occured, call \verb{[validateHumdrum][validateHumdrum]}
 directly and its \code{errorReport.path} argument.
 }
 
@@ -159,7 +159,7 @@ in our analyses (if any).
 If \code{reference = NULL}, no reference records are parsed.
 Otherwise, the character values of \code{reference} are treated as reference codes and only
 matching reference records are parsed.
-For instance, \code{readHumdrum(_, reference = "OTL")} will \emph{only} parse OTL reference records.
+For instance, \verb{readHumdrum(_, reference = "OTL")} will \emph{only} parse OTL reference records.
 If the values of \code{reference} are named, these names are used to name associated fields.
 Thus, by specifing \code{reference = c(Title = 'OTL')}, you can use "OTL" reference records to populate
 a field called "Title".
@@ -179,6 +179,7 @@ the patterns they match, the directories they were found in, \emph{and} the raw 
 }
 
 \examples{
+
 readHumdrum() # loads all valid humdrum files in the current directory.
 
 readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
@@ -195,6 +196,6 @@ readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")
 
 readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") 
 # exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
-in the Label field as "Beethoven" and "Mozart" respectively.
+# in the Label field as "Beethoven" and "Mozart" respectively.
 
 }

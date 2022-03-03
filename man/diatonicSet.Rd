@@ -3,8 +3,11 @@
 \name{diatonicSet}
 \alias{diatonicSet}
 \alias{dset}
+\alias{as.character,diatonicSet-method}
 \alias{is.diatonicSet}
 \alias{order.diatonicSet}
+\alias{==,diatonicSet,diatonicSet-method}
+\alias{Compare,diatonicSet,diatonicSet-method}
 \title{Tonal (diatonic) sets}
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)

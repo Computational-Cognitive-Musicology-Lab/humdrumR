@@ -25,7 +25,7 @@ namesSubcorpora(humdrumR)
 
 nfiles(humdrumR)
 
-length(humdata)
+\S4method{length}{humdrumR}(x)
 
 \S4method{nrow}{humdrumR}(x)
 
@@ -38,22 +38,22 @@ anyStops(humdrumR)
 \description{
 These functions can be used to quickly
 get basic information about the size and "shape" of
-a \linkS4class{humdrumR} corpus.
-For more details, use the \code{\link[humdrumR:humSummary]{census}} function.
+a \link{humdrumRclass} corpus.
+For more details, use the \link[=humSummary]{census} function.
 
-\link[=humdrumR-class]{HumdrumR} objects can be divided into "subcorpora."
-These functions tell us if there are any subcorpora and, if so, what they are called.
+\link[=humdrumRclass]{HumdrumR} objects can be divided into "subcorpora."
+\code{anySubcorpora} and \code{namesSubcorpora} functions tell us if there are any subcorpora and, if so, what they are called.
 }
 \details{
 A few common base \code{R} methods are defined
 as synonyms for the humdrumR-specific sizing functions:
-\code{\link[base:length]{length(humdata)}} is equivalent to \code{npieces(humdata)};
-\code{\link[base:nrow]{nrow(humdata)}} is shortand for \code{nrecords(., dataTypes = 'LIMDd')} (i.e., local records only).
-\code{\link[base:ncol]{ncol(humdata)}} returns the \emph{maximum} value of the \code{\link[humdrumR:humTable]{Column}} fields---the maximum number of
+\link[base:length]{length(humdata)} is equivalent to \code{npieces(humdata)};
+\link[base:nrow]{nrow(humdata)} is shortand for \code{nrecords(., dataTypes = 'LIMDd')} (i.e., local records only).
+\link[base:nrow]{ncol(humdata)} returns the \emph{maximum} value of the \link[=humTable]{Column} field---the maximum number of
 tab-delineated columns in the humdrum files (irrespective of Spines/Paths).
-The results of \code{\link[base:nrow]{nrow}} and \code{\link[base:ncol]{ncol}} will match
-up with the dimensions of matrices/data.frames produced by calls to \code{\link[humdrumR:humAs]{as.matrix/as.data.frame}}.
-\code{\link[base:dim]{dim(humdata)}} returns \code{c(nrow(humdata), ncol(humdata))}, as usual.
+The results of \code{nrow} and \code{ncol} will match
+up with the dimensions of matrices/data.frames produced by calls to \link[=as.matrix]{as.matrix/as.data.frame}.
+\link[base:dim]{dim(humdata)} returns \code{c(nrow(humdata), ncol(humdata))}, as usual.
 
 \code{is.empty(humdata)} asks if \code{ntokens(humdata, dataTypes = 'D') == 0L}.
 }
