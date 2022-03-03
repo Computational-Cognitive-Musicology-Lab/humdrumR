@@ -240,6 +240,8 @@ data <- c('Now', 'let', 'me---', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy',
 #' 
 #' @return "Formatted properly." if the lyrics are formatted properly, else print error message with corrections.
 #' 
+#' @note This function might detect multiple inconsistencies in a given value at a particular index, which could help the user determine the exact issue(s) with their transcription. 
+#' 
 #' @export
 #' 
 #' @example Spine with syllable labelling errors, with resulting error message
