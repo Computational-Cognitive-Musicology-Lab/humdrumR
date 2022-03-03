@@ -231,45 +231,43 @@ silbeFormat <- function(data){
   }
 }
 # silbe format vectorized
-data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+data <- c('Now', 'let', 'me---', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
 # save_initials <- list()
 # print_initial <- list()
 # save_corrected <- list()
 # print_corrected <- list()
 # counter <- 0
+silbeFormat2 <- function(df){
+  index <- 1:length(df)
+  index <- cbind(index)
+  index <- as.data.frame(index)
+  splitString <- apply(index, 1, function(x){return(strsplit(df[x], "")[[1]])})
   checkIsCharacter <- function(df){
     value <- FALSE
-    iteration <- 1:length(df)
-    iteration <- as.data.frame(iteration)
-    booleanValues <- apply(iteration, 1, function(x){
+    booleanValues <- apply(index, 1, function(x){
       if(!is.character(df[x])){
         cat(df[x], " is not a character. Please input a character vector.")
       }
       })
   }
   checkLength <- function(df){
-    iteration <- 1:length(df)
-    iteration <- as.data.frame(df)
-    booleanValues <- apply(iteration, 1, function(x){
+    booleanValues <- apply(index, 1, function(x){
       if(length(df) <= 1){
         cat("Your input must be a character vector of length greater than 1. Please input a character vector of length greater than 1.")
       }
     })
   }
   checkNumberOfDashes <- function(df){
-    iteration <- 1:length(df)
-    iteration <- as.data.frame(iteration)
-    booleanValues <- apply(iteration, 1, function(x){
+    booleanValues <- apply(index, 1, function(x){
       if(str_count(df[x], "-") > 2){
-        cat(df[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly.")
+        print(c(cat(df[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly."),x))
       }
       if(str_count(df[x], "-") == 2){
-        strsplit1 <- strsplit(df[x], "")
-        iteration1 <- 1:length(strsplit1[[1]])
+        iteration1 <- 1:length(splitString[[x]])
         iteration1 <- as.data.frame(iteration1)
-        checkIfRepeating <- apply(iteration1, 1, function(x){
-          if(x < nrow(iteration1)){
-            if(strsplit1[[1]][x] == "-" && strsplit1[[1]][x+1] == "-"){
+        checkIfRepeating <- apply(iteration1, 1, function(y){
+          if(y < nrow(iteration1)){
+            if(splitString[[x]][y] == "-" && splitString[[x]][y+1] == "-"){
               cat(df[x], "has repeating -'s"," you cannot have repeating -'s. ")
             }
           }
@@ -277,32 +275,29 @@ data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 't
       }
     })
   }
-  if(!is.null(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))){
+  if(!is.null(c(checkIsCharacter(df), checkLength(df), checkNumberOfDashes(df)))){
     # return in actual function
-    print(c(checkIsCharacter(data), checkLength(data), checkNumberOfDashes(data)))
+    print(c(checkIsCharacter(df), checkLength(df), checkNumberOfDashes(df)))
   }
-  index <- 1:length(data)
-  index <- cbind(index)
-  index <- as.data.frame(index)
-  splitString <- apply(iteration1, 1, function(x){return(strsplit(data[x], "")[[1]])})
-  library(spelling)
-  data <- c('-Now-', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
-  indicesWithErrors <- apply(index, 1, function(x){
-    if(x < nrow(iteration1)){
-      if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-        return(x+1)
-      }
-    }
-    if(x > 1){
-      if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-        return(x-1)
-      }
-    }
-    if(x == 1){
-      if(splitString[[x]][1] == '-'){
-        return(x)
-      }
-    }
+
+  # library(spelling)
+  # data <- c('-Now-', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
+  # indicesWithErrors <- apply(index, 1, function(x){
+  #   if(x < nrow(iteration1)){
+  #     if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
+  #       return(x+1)
+  #     }
+  #   }
+  #   if(x > 1){
+  #     if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
+  #       return(x-1)
+  #     }
+  #   }
+  #   if(x == 1){
+  #     if(splitString[[x]][1] == '-'){
+  #       return(x)
+  #     }
+  #   }
   
     
     
@@ -313,26 +308,25 @@ data <- c('Now', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 't
     #     return(x)
     #   }
     # }
-  })
-  data <- c('Now--', 'let', 'me', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
-  splitString <- apply(index, 1, function(x){return(strsplit(data[x], "")[[1]])})
+  # })
   printErrors <- apply(index, 1, function(x){
     if(x == 1){
       if(splitString[[x]][1] == '-'){
         print(c(cat(data[x], " has a - in the front. The first character input should not have - in the front. Please adjust your input accordingly. "), x))
       }
     }
-    if(x < nrow(iteration1)){
+    if(x < nrow(index)){
       if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
         print(c(cat("error: ", data[x+1], " should be -", data[x+1], ". ", sep = ""),x+1))
       }
     }
     if(x > 1){
       if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-        return(x-1)
+        print(c(cat("error: ", data[x-1], " should be ", data[x-1], "-. ", sep = ""),x-1))
       }
     }
   })
+}
   indicesWithErrorsSave <- unlist(indicesWithErrors)
   dup <- duplicated(indicesWithErrorsSave)
   removeDuplicated <- indicesWithErrorsSave[-which(dup == TRUE)]
