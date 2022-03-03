@@ -232,11 +232,41 @@ silbeFormat <- function(data){
 }
 # silbe format vectorized
 data <- c('Now', 'let', 'me---', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy', 'to', 'the', 'wild', 'wild', 'west.')
-# save_initials <- list()
-# print_initial <- list()
-# save_corrected <- list()
-# print_corrected <- list()
-# counter <- 0
+#' silbeFormat2
+#' 
+#' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
+#' 
+#' @param data The data to be checked for improper formatting (for now, please read in your spine as a dataframe with 1 column)
+#' 
+#' @return "Formatted properly." if the lyrics are formatted properly, else print error message with corrections.
+#' 
+#' @export
+#' 
+#' @example Spine with syllable labelling errors, with resulting error message
+#' # lyrics
+#' #  ya'll
+#' #    act
+#' #   like
+#' # you've
+#' #    ne-
+#' #    ver
+#' #   seen
+#' #      a
+#' #  white
+#' #   per-
+#' #    son
+#' #    be-
+#' #  fore
+#' 
+#' silbeFormat(data)
+#' 
+#' error: ver should be -ver. index 
+#' 6 
+#' error: son should be -son. index 
+#' 11 
+#' error: fore should be -fore. index 
+#' 13
+#' 
 silbeFormat2 <- function(df){
   index <- 1:length(df)
   index <- cbind(index)
