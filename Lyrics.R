@@ -347,12 +347,17 @@ silbeFormat2 <- function(df){
     }
     if(x < nrow(index)){
       if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-        print(c(cat("error: ", data[x+1], " should be -", data[x+1], ". ", sep = ""),x+1))
+        print(c(cat("error: ", df[x+1], " should be -", df[x+1], ". ", sep = ""),x+1))
       }
     }
     if(x > 1){
       if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-        print(c(cat("error: ", data[x-1], " should be ", data[x-1], "-. ", sep = ""),x-1))
+        print(c(cat("error: ", df[x-1], " should be ", df[x-1], "-. ", sep = ""),x-1))
+      }
+    }
+    if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
+      if(length(spell_check_text(df[x])$word) != 0){
+        print(c(cat("You might want to double check the transcription of", df[x], "because it was detected as not being a word. It is only possible for words to not have -'s."), x))
       }
     }
   })
