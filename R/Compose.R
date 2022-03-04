@@ -639,7 +639,7 @@ predicateParse <- function(predicateFunc, ..., negate = FALSE, inPlace = TRUE, a
   }
 }
 
-dimParse <- \(x) {
+dimParse <- function(x) {
   name <- as.character(rlang::enexpr(x))
   olddim <- dim(x) 
   
@@ -655,6 +655,21 @@ dimParse <- \(x) {
   }
 }
 
+dimParse2 <- function(args) {
+  firstArg <- args[[1]]
+  if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
+  
+  olddim <- dim(firstArg)
+  
+  args[[1]] <- dropdim(firstArg)
+  
+  restorer <- function(result) {
+    if (length(result) == prod(olddim))  dim(result) <- olddim 
+    result
+  }
+  
+  list(Restore = restorer, Args = args)
+}
 
 predicateParse2 <- function(predicateFunc, args, anyMatch = FALSE, 
                             dispatchArgs = c(), verbose = FALSE, ...) {
@@ -890,7 +905,9 @@ do... <- function(func, args) {
 
 do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE) {
   
-  memoize <- memoizeParse2(args, dispatchArgs = doArgs, ...)
+  dimension <- dimParse2(args)
+  
+  memoize <- memoizeParse2(dimension$Args, dispatchArgs = doArgs, ...)
   
   naskip <- predicateParse2(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
@@ -898,7 +915,9 @@ do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE) {
   
   result <- if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
   
-  memoize$Restore(naskip$Restore(result))
+  dimension$Restore(memoize$Restore(naskip$Restore(result)))
+  
+  
   
 }
 
