@@ -1473,35 +1473,46 @@ pitchArgCheck <- function(args,  callname) {
 }
 
 
-
 makePitchTransformer <- function(deparser, callname, outputclass = 'character') {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  parse <- function(...) list(...) %class% 'parseArgs'
-  transpose <- function(...) list(...) %class% 'transposeArgs'
   
   args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, deparse = TRUE,
-                inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), memoize = TRUE)
-  
+                inPlace = FALSE, parseArgs = list(), transposeArgs = list(), memoize = TRUE)
   
   rlang::new_function(args,
                       rlang::expr( {
-                        redim <- dimParse(x)
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        classes <- sapply(args, \(arg) class(arg)[1]) 
+                        # args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+                        # classes <- sapply(args, \(arg) class(arg)[1]) 
+                        # envir <- rlang::current_env()
+                        args <- lapply(rlang::enexprs(...),
+                                       \(argExpr) {
+                                         if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'transpose')) {
+                                           type <- as.character(argExpr[[1]])
+                                           argExpr[[1]] <- quote(list)
+                                           assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
+                                           NULL
+                                         } else {
+                                           rlang::eval_tidy(argExpr)
+                                         }
+                  
+                                       })
                         
-                        transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
-                        parseArgs   <- pitchArgCheck(c(list(Exclusive = Exclusive), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
-                        deparseArgs <- pitchArgCheck(args[!grepl('Args$', classes)], !!callname)
-
+                        args <- args[!sapply(args, is.null)]
+                        
+                        args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
+                        
+                        parseArgs   <- pitchArgCheck(parseArgs, !!callname)
+                        deparseArgs <- pitchArgCheck(args,      !!callname)
+                        
                         # Keys
-                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
-                        from <- if (is.null(transposeArgs$from)) Key else diatonicSet(transposeArgs$from)
-                        to   <- if (is.null(transposeArgs$to)) Key else diatonicSet(transposeArgs$to)
+                        Key  <- diatonicSet(Key %||% dset(0L, 0L))
+                        from <- diatonicSet(transposeArgs$from %||% Key)
+                        to   <- diatonicSet(transposeArgs$to   %||% Key)
                         
                         parseArgs$Key <- from
                         deparseArgs$Key <- to 
@@ -1509,32 +1520,87 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         transposeArgs$from <- CKey(from)
                         transposeArgs$to <- CKey(to)
                         
-                          ### parse
-                          parsedTint <- do.call(tonalInterval, c(list(x), parseArgs))
-                          
-                          rebuild <- predicateParse(is.na, negate = TRUE, 
-                                                    parsedTint = parsedTint, Exclusive = Exclusive, Key = Key)
-                          result <- {
-                            if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
-                              parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
-                            }
-                            
-                            deparseArgs <- c(list(parsedTint), deparseArgs)
-                          output <- if (deparse && is.tonalInterval(parsedTint))  do.call(!!deparser, deparseArgs) else parsedTint
-                          
-                          if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
-                          
-                          
-                          output
-                          }
+                        ### parse
+                        parsedTint <- do(tonalInterval, c(list(x), parseArgs))
                         
-                        
-                        redim(if (dropNA) result else rebuild(result))
-                        
+                        if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
+                            parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
+                        }
+                          
+                        deparseArgs <- c(list(parsedTint), deparseArgs)
+                        output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs) else parsedTint
+                          
+                        if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
+
+                        output
+              
                       }))
   
-
+  
 }
+# 
+# 
+# makePitchTransformer <- function(deparser, callname, outputclass = 'character') {
+#   # this function will create various pitch transform functions
+#   deparser <- rlang::enexpr(deparser)
+#   callname <- rlang::enexpr(callname)
+#   
+#   parse <- function(...) list(...) %class% 'parseArgs'
+#   transpose <- function(...) list(...) %class% 'transposeArgs'
+#   
+#   args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, deparse = TRUE,
+#                 inPlace = FALSE, dropNA = FALSE, parseArgs = list(), transposeArgs = list(), memoize = TRUE)
+#   
+#   
+#   rlang::new_function(args,
+#                       rlang::expr( {
+#                         redim <- dimParse(x)
+#                         
+#                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
+#                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
+#                         classes <- sapply(args, \(arg) class(arg)[1]) 
+#                         
+#                         transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
+#                         parseArgs   <- pitchArgCheck(c(list(Exclusive = Exclusive), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
+#                         deparseArgs <- pitchArgCheck(args[!grepl('Args$', classes)], !!callname)
+# 
+#                         # Keys
+#                         Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
+#                         from <- if (is.null(transposeArgs$from)) Key else diatonicSet(transposeArgs$from)
+#                         to   <- if (is.null(transposeArgs$to)) Key else diatonicSet(transposeArgs$to)
+#                         
+#                         parseArgs$Key <- from
+#                         deparseArgs$Key <- to 
+#                         
+#                         transposeArgs$from <- CKey(from)
+#                         transposeArgs$to <- CKey(to)
+#                         
+#                           ### parse
+#                           parsedTint <- do.call(tonalInterval, c(list(x), parseArgs))
+#                           
+#                           rebuild <- predicateParse(is.na, negate = TRUE, 
+#                                                     parsedTint = parsedTint, Exclusive = Exclusive, Key = Key)
+#                           result <- {
+#                             if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
+#                               parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
+#                             }
+#                             
+#                             deparseArgs <- c(list(parsedTint), deparseArgs)
+#                           output <- if (deparse && is.tonalInterval(parsedTint))  do.call(!!deparser, deparseArgs) else parsedTint
+#                           
+#                           if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
+#                           
+#                           
+#                           output
+#                           }
+#                         
+#                         
+#                         redim(if (dropNA) result else rebuild(result))
+#                         
+#                       }))
+#   
+# 
+# }
 
 
 ### Pitch Transformers ####

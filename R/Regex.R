@@ -306,11 +306,11 @@ captureRE <- function(strs, n = '') {
     
     if (length(strs) > 1) {
         multi <- nchar(strs) > 1L & !grepl('-', strs)
-        strs <- paste(c(if (any(multi)) paste0('(', paste(collapse = '|', strs[multi]), ')'),
+        strs <- paste(c(if (any(multi)) paste0('(?:', paste(collapse = '|', strs[multi]), ')'),
                         if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
                       collapse = '|')
         
-        if (any(multi)) strs <- paste0('(', strs, ')')
+        if (any(multi)) strs <- paste0('(?:', strs, ')')
     }
     
     escaper(paste0(strs, n))

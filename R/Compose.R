@@ -813,6 +813,7 @@ memoizeParse2 <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize =
   if (!any(targets)) return(list(Restore = force, Args = args))
   
   memoizeArgs <- list2dt(args[targets])
+  names(memoizeArgs)[.names(memoizeArgs) == ""] <- cumsum(.names(memoizeArgs) == "")
   duplicates <- duplicated(memoizeArgs) 
   
   if (verbose) cat('memoizeParse has removed', 
@@ -903,7 +904,10 @@ do... <- function(func, args) {
   
 }
 
-do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE) {
+do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
+  firstArg <- args[[1]]
+  if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
+  if (is.null(firstArg)) return(NULL)
   
   dimension <- dimParse2(args)
   
@@ -1153,7 +1157,8 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   body <- rlang::expr({
     args <- list(str = str, dispatchDF = dispatchDF, Exclusive = Exclusive, 
                  !!!dispatchArgs, multiDispatch = multiDispatch,
-                 outputClass = !!outputClass, funcName = !!funcName)
+                 outputClass = !!outputClass, funcName = !!funcName,
+                 ...)
     do(humdrumDispatch, args, ...)
     
   })
