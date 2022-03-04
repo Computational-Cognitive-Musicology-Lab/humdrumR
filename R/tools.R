@@ -1540,7 +1540,7 @@ pasteordered <- function(order, ..., sep = '') {
 
 affixer <- function(str, fix, prefix = TRUE, sep = "") .paste(if (prefix) fix, str, if (!prefix) fix, sep = sep)
 
-plural <- function(n, then, els) .ifelse(n > 1, then, els)
+plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
 
 quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
 

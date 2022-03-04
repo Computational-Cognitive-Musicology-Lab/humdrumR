@@ -888,11 +888,11 @@ do... <- function(func, args) {
   
 }
 
-do <- function(func, args, dispatchArgs = c(), ..., ignoreUnkownArgs = TRUE) {
+do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE) {
   
-  memoize <- memoizeParse2(args, dispatchArgs = dispatchArgs, ...)
+  memoize <- memoizeParse2(args, dispatchArgs = doArgs, ...)
   
-  naskip <- predicateParse2(Negate(is.na), memoize$Args, dispatchArgs = dispatchArgs, 
+  naskip <- predicateParse2(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
   
   
@@ -901,6 +901,8 @@ do <- function(func, args, dispatchArgs = c(), ..., ignoreUnkownArgs = TRUE) {
   memoize$Restore(naskip$Restore(result))
   
 }
+
+`%do%` <- function(e1, e2) do(e1, e2)
 
 # regexDispatch <- function(...) {
 #   exprs <- rlang::enexprs(...)
@@ -990,9 +992,8 @@ do <- function(func, args, dispatchArgs = c(), ..., ignoreUnkownArgs = TRUE) {
 #' 
 #' @name humdrumDispatch
 #' @export
-humdrumDispatch <- smartDispatch(c('str', 'Exclusive'),
-                                 function(str, dispatchDF,  Exclusive = NULL, 
-                                          multiDispatch = FALSE, ..., outputClass = 'character') {
+humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, 
+                             multiDispatch = FALSE, ..., outputClass = 'character') {
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
   if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
@@ -1056,7 +1057,7 @@ humdrumDispatch <- smartDispatch(c('str', 'Exclusive'),
                                     Segments = segments,
                                     Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
   result
-})
+}
 
 
 rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
@@ -1131,12 +1132,10 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   ##################################################### #
   
   body <- rlang::expr({
-    result <- humdrumDispatch(str, dispatchDF, Exclusive = Exclusive, !!!dispatchArgs, ..., 
-                              multiDispatch = multiDispatch,
-                              outputClass = !!outputClass, funcName = !!funcName)
-  
-    result
-
+    args <- list(str = str, dispatchDF = dispatchDF, Exclusive = Exclusive, 
+                 !!!dispatchArgs, multiDispatch = multiDispatch,
+                 outputClass = !!outputClass, funcName = !!funcName)
+    do(humdrumDispatch, args, ...)
     
   })
   
