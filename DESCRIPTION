@@ -33,6 +33,7 @@ Collate: humdrumR-package.R
          Metric.R
          Graphics.R
          Formulae.R
+	 Lyrics.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Suggests: 
