@@ -155,15 +155,15 @@ insert <- function(x, i, values) {
 .glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
     strs <- unlist(list(...))
     ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
-    ifelses <- lapply(ifelses,
-                      \(pairs) {
-                          pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
-                          pairs <- strsplit(pairs, split = '\\|')
-                          
-                          pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
-                          pick %|% ""
-                          
-                      })
+    ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
+                                       \(pairs) {
+                                           pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
+                                           pairs <- strsplit(pairs, split = '\\|')
+                                           
+                                           pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
+                                           pick %|% ""
+                                           
+                                       })
     
     strs <- Map(function(s, r) {
         while (length(r) > 0) {
@@ -1345,15 +1345,6 @@ append2expr <- function(expr, exprs) {
 
 ### Building smart functions ----
 
-callf... <- function(func, args) {
-    # calls func on args, even if some named arguments in args are not arguments of func
-    # (ignores those arguments)
-    if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
-    
-    do.call(func, args)
-
-
-}
 
 setoptions... <- function(options, defaults) {
     setoptions(options) <- defaults

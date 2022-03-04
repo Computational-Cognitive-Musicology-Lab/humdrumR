@@ -1385,6 +1385,8 @@ tonalInterval.tonalInterval <- function(x, ...) x
 
 #' @export 
 tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
+#' @export
+tonalInterval.NULL <- function(x, ...) NULL
 
 #### Numbers ####
 
@@ -1490,10 +1492,6 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
                         args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        do.call('checkTFs', c(args[names(args) %in% c('relative', 'absolute', 'simple', 'complex', 'generic', 'specific',
-                                                                      'implicitSpecies', 'absoluteSpecies', 'explicitNaturals')],
-                                              memoize = memoize, inPlace = inPlace, dropNA = dropNA,
-                                              list(callname = callname)))
                         classes <- sapply(args, \(arg) class(arg)[1]) 
                         
                         transposeArgs <- c(transposeArgs, unlist(args[classes == 'transposeArgs'], recursive = FALSE))
@@ -1505,49 +1503,33 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                         from <- if (is.null(transposeArgs$from)) Key else diatonicSet(transposeArgs$from)
                         to   <- if (is.null(transposeArgs$to)) Key else diatonicSet(transposeArgs$to)
                         
-                        # automatically remove NA values
-                        putNAback <- predicateParse(Negate(is.na), all = FALSE,
-                                                    x = x, Key = Key, Exlusive = Exclusive,
-                                                    from = from, to = to)
-                        
-                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
-                        
-                        rebuild <-  memoizeParse(x = x, Key = Key, Exclusive = Exclusive, from  = from, to = to, memoize = memoize)
-                        
                         parseArgs$Key <- from
-                        parseArgs$Exclusive <- deparseArgs$Exclusive <- Exclusive
                         deparseArgs$Key <- to 
                         
                         transposeArgs$from <- CKey(from)
                         transposeArgs$to <- CKey(to)
                         
-                        result <- {
-                          #
-                          parsedTint <- do.call(tonalInterval, c(list(x, inPlace = inPlace), parseArgs))
+                          ### parse
+                          parsedTint <- do.call(tonalInterval, c(list(x), parseArgs))
                           
-                          if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
-                            parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
-                          }
-                          output <- if (deparse && is.tonalInterval(parsedTint)) {
-                            na <- is.na(parsedTint)
-                            output <- vectorNA(length(parsedTint), outputclass)
-                            deparseArgs <- c(list(parsedTint), deparseArgs)
-                            
-                            if (any(na)) deparseArgs <- lapply(deparseArgs,  \(arg) if (length(arg) == length(na)) arg[!na] else arg)
-                            
-                            output[!na] <- do.call(!!deparser, deparseArgs)
-                            output
-                            } else {
-                              parsedTint
+                          rebuild <- predicateParse(is.na, negate = TRUE, 
+                                                    parsedTint = parsedTint, Exclusive = Exclusive, Key = Key)
+                          result <- {
+                            if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
+                              parsedTint <- do.call('transpose.tonalInterval', c(list(parsedTint), transposeArgs))
                             }
+                            
+                            deparseArgs <- c(list(parsedTint), deparseArgs)
+                          output <- if (deparse && is.tonalInterval(parsedTint))  do.call(!!deparser, deparseArgs) else parsedTint
                           
                           if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
                           
                           
                           output
-                        }
+                          }
                         
-                        redim(if (dropNA) result else putNAback(rebuild(result)))
+                        
+                        redim(if (dropNA) result else rebuild(result))
                         
                       }))
   
