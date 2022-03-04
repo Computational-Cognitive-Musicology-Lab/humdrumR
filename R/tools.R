@@ -179,6 +179,14 @@ insert <- function(x, i, values) {
 }
 
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
+    stack <- rlang::call_stack()
+    stack <- stack[!duplicated(stack)]
+    calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
+    calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
+    
+    cat('HumdrumR error in call stack:\n')
+    cat(calls, sep = '\n')
+    
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
      stop(call. = FALSE, message)
@@ -1444,56 +1452,88 @@ overdot <- function(call) {
 }
 
 
-### Checking arguments
+# Checking arguments ----
 
-checkArgs <- function(args, valid, argname, callname = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
-    if (length(sys.calls()) > 6L) return(args) 
+
+checkArg <- function(arg,  argname, callname = NULL, 
+                     atomic = FALSE,
+                     valid, validoptions = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
+    # arg a argument to check
+    # valid
+    if (length(sys.calls()) > 6L) return(arg) 
     
-    argNames <- if (length(args) > 1L) paste0('c(', glue::glue_collapse(quotemark(args), sep = ', '), ')') else quotemark(args)
+    argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
-    if (length(args) <  min.length) .stop(callname, glue::glue("{length(args)} is too few '{argname}' arguments."))
-    if (length(args) >  max.length) .stop(callname, glue::glue("{length(args)} is too many '{argname}' arguments."))
+    if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
+    
+    if (length(arg) <  min.length) .stop(callname, "length(args)} is too few '{argname}' arguments.")
+    if (length(arg) >  max.length) .stop(callname, "length(args)} is too many '{argname}' arguments.")
     
     
-    if (!is.null(classes) && !any(sapply(classes, inherits, x = args))) {
+    if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
         classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
-        .stop(callname, glue::glue("The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument."))
+        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument.")
     }
     
     
-    
-    ill <- !args %in% valid
-    
+    ill <- !valid(arg)
     
     if (any(ill)) {
-        case <- glue::glue(if (sum(ill) == 1) "is not a valid {argname} value. " else " are not valid {argname} values. ")
-        illNames <- glue::glue_collapse(quotemark(args[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
-        legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+        if (is.null(validoptions)) {
+            .stop(callname, "{arg} is not a valid value for the {argname} argument.")
+        } else {
+            case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
+            illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
+            legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+            
+            message <- list(callname, illNames, case, 'Valid options are ', legalNames)
+            
+            do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
+        }
         
-        message <- list(callname, illNames, case, 'Valid options are ', legalNames)
-        
-        do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
     }
     
-    args[!ill]
+    arg[!ill]
+    
+    
 }
 
-checkTF <- function(x, argname, callname) checkArgs(x, c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
+checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
+    checkArg(x, argname = argname, callname = callname,
+             classes = c('numeric', 'integer'), 
+             valid = \(arg) arg >= minval & arg <= maxval,
+             ...)
+}
+checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
+    checkArg(x, argname = argname, callname = callname,
+             classes = c('integer'), 
+             valid = \(arg) arg >= minval & arg <= maxval & !is.double(x),
+             ...)
+}
+checkCharacter <- function(x, argname, callname = NULL, ...) {
+    checkArg(x, argname = argname, callname = callname, classes = c('character'), ...)
+}
+checkLogical <- function(x, argname, callname = NULL, ...) {
+    checkArg(x, argname = argname, callname = callname, classes = c('logical'), ...)
+}
+
+checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) arg %in% c(TRUE, FALSE), 
+                                                   validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
 checkTFs <- function(..., callname = NULL) {
     args <- list(...)
     mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
 }
 
 checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
-    if (!is.humdrumR((x))) stop(call. = FALSE,
-                                glue::glue("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object."))         
+    if (!is.humdrumR((x))) .stop("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object.")      
 }
 
 checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
-    checkArgs(dataTypes,
-              c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
+    checkArg(dataTypes,
+             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
+              validoptions = c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
               argname, callname, warnSuperfluous = TRUE, 
               min.length = 1L, max.length = 7L,
               classes = "character")
