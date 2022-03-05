@@ -959,7 +959,6 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  parse <- function(...) list(...) %class% 'parseArgs'
   
   args <- alist(x = , ... = , Key = NULL, dropNA = FALSE, inPlace = FALSE,
                 parseArgs = list(), memoize = TRUE, deparse = TRUE)

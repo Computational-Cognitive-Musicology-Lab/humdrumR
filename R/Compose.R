@@ -918,8 +918,12 @@ do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE, outputCl
   
   
   result <- if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
+  humattr <- humdrumRattr(result)
   
-  dimension$Restore(memoize$Restore(naskip$Restore(result)))
+  result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
+  humdrumRattr(result) <- humattr
+  
+  result
   
   
   
@@ -1082,6 +1086,18 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   result
 }
 
+
+humdrumRattr <- function(x) {
+  known <- c('dispatch', 'dispatched')
+  attr <- attributes(x)
+  
+  attr[names(attr) %in% known]
+}
+`humdrumRattr<-` <- function(x, value) {
+  
+  for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
+  x
+}
 
 rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
   if (is.null(dispatched) || length(result) != length(dispatched$Original) || !is.atomic(result)) return(result)

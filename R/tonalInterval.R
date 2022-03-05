@@ -1473,7 +1473,7 @@ pitchArgCheck <- function(args,  callname) {
 }
 
 
-makePitchTransformer <- function(deparser, callname, outputclass = 'character') {
+makePitchTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -1486,9 +1486,6 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                       rlang::expr( {
                         
                         # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        # args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makePitchTransformer closure!
-                        # classes <- sapply(args, \(arg) class(arg)[1]) 
-                        # envir <- rlang::current_env()
                         args <- lapply(rlang::enexprs(...),
                                        \(argExpr) {
                                          if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'transpose')) {
@@ -1529,7 +1526,6 @@ makePitchTransformer <- function(deparser, callname, outputclass = 'character') 
                           
                         deparseArgs <- c(list(parsedTint), deparseArgs)
                         output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs) else parsedTint
-                          
                         if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
 
                         output
