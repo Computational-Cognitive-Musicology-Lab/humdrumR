@@ -1459,7 +1459,7 @@ checkArg <- function(arg,  argname, callname = NULL,
                      atomic = FALSE,
                      valid, validoptions = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
     # arg a argument to check
-    # valid
+    # 
     if (length(sys.calls()) > 6L) return(arg) 
     
     argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
@@ -1473,30 +1473,38 @@ checkArg <- function(arg,  argname, callname = NULL,
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
         classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
-        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(args)}> argument.")
+        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
     }
     
-    
-    ill <- !valid(arg)
-    
-    if (any(ill)) {
-        if (is.null(validoptions)) {
-            .stop(callname, "{arg} is not a valid value for the {argname} argument.")
-        } else {
-            case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
-            illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
-            legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+    if (!missing(valid) && !is.null(valid)) {
+        ill <- !valid(arg)
+        
+        if (any(ill)) {
+            if (is.null(validoptions)) {
+                .stop(callname, "{arg} is not a valid value for the {argname} argument.")
+            } else {
+                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
+                illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
+                legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+                
+                message <- list(callname, illNames, case, 'Valid options are ', legalNames)
+                
+                do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
+            }
             
-            message <- list(callname, illNames, case, 'Valid options are ', legalNames)
-            
-            do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
         }
         
+        arg[!ill]
+    } else {
+        arg
     }
     
-    arg[!ill]
     
     
+}
+
+test <- function(x) {
+    checkNumeric(x, 'x', callname = 'test', minval = 0)
 }
 
 checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
@@ -1511,14 +1519,15 @@ checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = In
              valid = \(arg) arg >= minval & arg <= maxval & !is.double(x),
              ...)
 }
-checkCharacter <- function(x, argname, callname = NULL, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('character'), ...)
+checkCharacter <- function(x, argname, callname = NULL, allowEmpty = TRUE, ...) {
+    checkArg(x, argname = argname, callname = callname, classes = c('character'),
+             valid = if (!allowEmpty) \(arg) arg != "", ...)
 }
 checkLogical <- function(x, argname, callname = NULL, ...) {
     checkArg(x, argname = argname, callname = callname, classes = c('logical'), ...)
 }
 
-checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) arg %in% c(TRUE, FALSE), 
+checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) !is.na(arg), 
                                                    validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
 checkTFs <- function(..., callname = NULL) {
     args <- list(...)

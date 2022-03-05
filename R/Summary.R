@@ -79,6 +79,11 @@ setMethod('summary', 'humdrumR',
 #' the totals across all files are printed as well---(unique) and (per token)
 #' across all files are calculated across all files as well, not summed.
 #'  
+#' @param humdrumR A humdrumR object
+#' @param dataTypes A `character` string of length 1. 
+#' @param by A `character` string of length 1. Must be a [field][humdrumRclass] in the humdrumR object.
+#'  
+#'  
 #' @section Indexing:
 #'
 #' Rows of a `humCensus` object can be selected with a single argument `i`: e.g., `censusTable[i]`.
@@ -103,8 +108,12 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
+  ## ARGUMENT CHECKS:
   checkhumdrumR(humdrumR, 'census')
   dataTypes <- checkTypes(dataTypes, 'census')
+  checkTF(removeEmpty, 'removeEmpty', 'census')
+  
+  ##
   
   if (removeEmpty) humdrumR <- removeEmptyFiles(humdrumR)
   
