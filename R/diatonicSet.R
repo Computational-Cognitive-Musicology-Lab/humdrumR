@@ -334,9 +334,10 @@ setMethod('%%', signature = c('character', 'diatonicSet'),
           function(e1, e2) {
             e1 <- tonalInterval.character(c(e1), inPlace = TRUE)
             
-            e3 <- stickyApply(`%%`, e1, c(e2))
+            e3 <- e1 %% e2
+            dispatch <- attr(e1, 'dispatch')
             
-            re.place(re.as(e3))  %dim% e1
+            rePlace(reParse(e3, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
           })
 
 
@@ -413,7 +414,7 @@ setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
           })
 
 ###################################################################### ###
-# Deparsing key information (dset2x) #####################################
+# Deparsing Key Representations (dset2x) #################################
 ###################################################################### ###
 
 ## Key deparsers ####
@@ -611,7 +612,7 @@ dset2romanNumeral <- function(dset, flat = 'b', Key = NULL, ...) {
 
 
 ###################################################################### ###
-# Parsing key information (x2dest) #######################################
+# Parsing Key Representations (x2dest) ###################################
 ###################################################################### ###
 
 ## Key parsers ####
@@ -927,13 +928,9 @@ diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.key,       key
 
 #### setAs diatonic set ####
 
-#' @export
 setAs('integer', 'diatonicSet', function(from) integer2dset(from))
-#' @export
 setAs('numeric', 'diatonicSet', function(from) integer2dset(from))
-#' @export
 setAs('character', 'diatonicSet', function(from) diatonicSet.character(from))
-#' @export
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
 
 

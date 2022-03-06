@@ -607,4 +607,4 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for durations ####
 
-makeRE.recip <- function() getRE('recip')
+makeRE.recip <- function(...) getRE('recip')

@@ -39,6 +39,7 @@ reference:
   - time
   - metricPosition
   - rhythmDecompose
+  - rhythmFunctions
   - rhythmOffset
   - plotRhythm
 - title: "Reading and Summarizing Data"

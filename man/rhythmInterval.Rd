@@ -3,22 +3,33 @@
 \name{rhythmInterval}
 \alias{rhythmInterval}
 \alias{rint}
-\alias{is.rhythmInterval}
+\alias{as.character,rhythmInterval-method}
 \alias{as.double.rhythmInterval}
+\alias{is.rhythmInterval}
+\alias{is.numeric,rhythmInterval-method}
 \alias{order.rhythmInterval}
+\alias{Compare,rhythmInterval,rhythmInterval-method}
+\alias{Summary,rhythmInterval-method}
+\alias{rhythmInterval.logical}
+\alias{rhythmInterval.NULL}
+\alias{rhythmInterval.numeric}
+\alias{rhythmInterval.rational}
+\alias{rhythmInterval.fraction}
+\alias{rhythmInterval.integer}
+\alias{rhythmInterval.character}
 \title{Representation of rhythmic information}
 \usage{
 rhythmInterval(x, ...)
 
 rint(denominator, numerator = 1L)
 
-is.rhythmInterval(x)
-
-\S4method{is.numeric}{rhythmInterval}(x)
-
 \S4method{as.character}{rhythmInterval}(x)
 
 \method{as.double}{rhythmInterval}(x)
+
+is.rhythmInterval(x)
+
+\S4method{is.numeric}{rhythmInterval}(x)
 
 order.rhythmInterval(
   x,
@@ -33,6 +44,20 @@ order.rhythmInterval(
 \S4method{Summary}{rhythmInterval}(x)
 
 rhythmInterval(x, ...)
+
+\method{rhythmInterval}{logical}(x, ...)
+
+\method{rhythmInterval}{`NULL`}(x, ...)
+
+\method{rhythmInterval}{numeric}(n)
+
+\method{rhythmInterval}{rational}(x)
+
+\method{rhythmInterval}{fraction}(x)
+
+\method{rhythmInterval}{integer}(x)
+
+\method{rhythmInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
 \description{
 This \emph{S4} class is the core rhythm representation in the \link{humdrumR} package.
@@ -100,3 +125,4 @@ useful, for instance in calculating metric positions.
 \link[base:Comparison]{relational operators}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
 }
 
+\concept{{core rhythm representation}}

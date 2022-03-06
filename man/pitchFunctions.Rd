@@ -17,11 +17,11 @@ semit(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 midi(
@@ -29,11 +29,11 @@ midi(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 pitch(
@@ -41,11 +41,11 @@ pitch(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 kern(
@@ -53,11 +53,11 @@ kern(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 lilypond(
@@ -65,11 +65,11 @@ lilypond(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 interval(
@@ -77,11 +77,11 @@ interval(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 degree(
@@ -89,11 +89,11 @@ degree(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 
 solfa(
@@ -101,11 +101,11 @@ solfa(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  deparse = TRUE,
-  inPlace = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  memoize = TRUE
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
 )
 }
 \description{

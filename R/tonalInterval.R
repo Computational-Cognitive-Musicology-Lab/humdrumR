@@ -334,6 +334,10 @@ setMethod('-', signature = c('tonalInterval', 'character'),
           })
 
 
+### Multiplication ####
+
+# Inherits struct methods!
+
 ### Division/modulo  ####
 
  
@@ -400,30 +404,17 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 
 
-`%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L
+
 
 
 
 ###################################################################### ###
-# Deparsing pitch information (tint2x) ###################################
+# Deparsing Pitch Representations (tint2x) ###############################
 ###################################################################### ###
 
 ## Pitch deparsers ####
 
 ### Octaves ####
-
-
-# tint2centralOctave <- function(x) {
-#   # centralOctave is octave surrounding unison (above and below, from -6semits to +6 semits)
-#   generic <- x %% dset(0L, 0L)
-#   (round(tint2semit(generic) / 12L)) %dim% x
-# }
-# 
-# tint2scaleOctave <- function(x) {
-#   # scaleOctave is octave from unison and above 
-#   generic <- x %% tint(-11L, 7L)
-#   (tint2semit(generic)) %/% 12L %dim% x
-# }
 
 
 tint2octave <- function(x,
@@ -632,11 +623,6 @@ alteration.filter <- function(LO5th, Key, cautionary, memory, implicit, explicit
 LO5th2alterationN        <- function(LO5th, Key = dset(0L, 0L)) ((LO5th - (LO5th %% Key)) %/% 7L)
 
 
-
-
-
-
-
 tint2quality <- function(x, ...) tint2specifier(x, ..., qualities = TRUE)
 tint2accidental <- function(x, ...) tint2specifier(x, ..., qualities = FALSE)
 
@@ -696,9 +682,6 @@ tint2specifier <- function(x, Key = NULL, ...,
 
 
 
-
-
-
 tint2tonalChroma <- function(x, 
                              parts = c("direction", "species", "step", "octave"), sep = "", 
                              directed = FALSE, step = TRUE, specific = TRUE, complex = TRUE,
@@ -740,9 +723,6 @@ tint2tonalChroma <- function(x,
     
   
 }
-
-
-
 
 
 
@@ -821,8 +801,6 @@ tint2romanRoot <- function(x, ..., Key = NULL) {
   
 }
 
-#.... intervals
-
 
 
 tint2interval <- function(x, directed = TRUE, ...) {
@@ -836,8 +814,6 @@ tint2interval <- function(x, directed = TRUE, ...) {
 }
 
 
-#.... scale degrees 
-
 tint2degree <- function(x, Key = Key, parts = c("octave", "species", "step"), ...) {
   # Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
   # x <- x - Key
@@ -848,11 +824,6 @@ tint2degree <- function(x, Key = Key, parts = c("octave", "species", "step"), ..
                            octave.integer = FALSE, relative = TRUE, octave.round = round, ...))
 
 }
-
-# 
-
-
-#....
 
 
 
@@ -891,12 +862,8 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"
 
 
 
-
-
-
-
 ###################################################################### ### 
-# Parsing Pitch Representation (x2tint) ##################################
+# Parsing Pitch Representations (x2tint) #################################
 ###################################################################### ### 
 
 ## Pitch parsers ####
@@ -1336,7 +1303,6 @@ solfa2tint <- function(str, ...) {
 
 ## Pitch Parsing Dispatch ######################################
 
-#' Parsing pitch information
 
 ### Parse 2tint generic and methods ####
 
@@ -1375,7 +1341,7 @@ solfa2tint <- function(str, ...) {
 #' 
 #' The six tonal representations listed above function through a common parsing interface.
 #'
-#'
+#' @rdname tonalInterval
 #' @export
 tonalInterval <- function(...) UseMethod('tonalInterval')
 
@@ -1386,6 +1352,7 @@ tonalInterval.tonalInterval <- function(x, ...) x
 #' @rdname tonalInterval
 #' @export 
 tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
+
 #' @rdname tonalInterval
 #' @export
 tonalInterval.NULL <- function(x, ...) NULL
@@ -1534,7 +1501,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
 
 ### Pitch Transformers ####
 
-##
 #' @rdname pitchFunctions
 #' @export 
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')

@@ -10,11 +10,10 @@ figuredBass(
   ...,
   Key = NULL,
   Exclusive = NULL,
-  inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   figurationArgs = list(),
+  inPlace = FALSE,
   memoize = TRUE,
   deparse = TRUE
 )

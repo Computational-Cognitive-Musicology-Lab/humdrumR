@@ -152,7 +152,7 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
 
 
 ###################################################################### ###
-# Deparsing chord information (tset2x) ###################################
+# Deparsing Chord Representations (tset2x) ###############################
 ###################################################################### ###
 
 ## Chord deparsers ####
@@ -495,7 +495,7 @@ tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
 
   
 ###################################################################### ###
-# Parsing chord information (x2tset) #####################################
+# Parsing Chord Representations (x2tset) #################################
 ###################################################################### ###
 
 ## Chord parsers ####
@@ -773,6 +773,7 @@ mapoftset <- function(str, Key = NULL, ..., split = '/') {
   
   parts <- strPartition(str, split = split)
   Keys <- parts[-1]
+  
   if (length(Keys) > 0L) {
     Keys[] <- head(Reduce(\(x, y) {
       y[!is.na(x)] <- char2dset(x[!is.na(x)], Key = y[!is.na(x)], ...)
@@ -803,13 +804,9 @@ tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.romanChord,    
 
 
 
-#' @export
 setAs('integer', 'tertianSet', function(from) integer2tset(from))
-#' @export
 setAs('numeric', 'tertianSet', function(from) integer2tset(as.integer(from)))
-#' @export
 setAs('character', 'tertianSet', function(from) char2tset(from))
-#' @export
 setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
 
 

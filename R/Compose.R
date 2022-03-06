@@ -1,139 +1,6 @@
 
 
-######### Function composition ----
 
-compose <- function(...) UseMethod('compose')
-compose.default <- function(..., fenv = parent.frame()) {
-# accepts a NAMED ... of functions
-    fs <- rev(list(...))
-    fnames <- names(fs)
-    ### arguments
-    fargs <- lapply(fs, fargs)
-    fargs[-1] <- lapply(fargs[-1], 
-                        \(farg) {
-                           if (names(farg)[[1]] == '...') farg <- c(alist(tmp = ), farg)
-                         farg })
-    
-    fargNames <- lapply(fargs, 
-                        \(farg) {
-                          names <- names(farg)
-                          names(names) <- ifelse(names == '...', '', names)
-                          rlang::syms(names)
-                          })
-    
-    
-    args <- do.call('c', c(fargs[1], 
-                           lapply(fargs[-1], \(farg) farg[-1]),
-                           use.names = FALSE))
-    args <- args[!duplicated(names(args)) & names(args) != 'tmp']
-    
-    # firstArg <- rlang::sym(names(args)[[1]])
-    pipeArgs <- rlang::syms(sapply(fargs, \(arg) names(arg)[[1]]))
-    
-    
-    
-    ### body
-    body <- rlang::expr({
-        !!!Map(\(bod, arg, argnames) {
-            rlang::expr(!!arg <- stickyApply(!!bod, !!!argnames))
-            }, 
-            rlang::syms(head(fnames, -1)), 
-            pipeArgs[-1], 
-            head(fargNames, -1))
-      
-        
-        # stickyApply(!!(rlang::sym(tail(fnames,1))), !!!fargNames[[length(fargNames)]])
-        (!!tail(fnames,1))(!!!fargNames[[length(fargNames)]])
-        })
-    
-    
-    ### environment
-    # fenv <- new.env() # parent.env(parent.frame())
-    Map(\(fname, f) assign(fname, f, envir = fenv), 
-        c(fnames, 'memoizeParse', 'predicateParse'), 
-        c(fs, memoizeParse, predicateParse))
-    
-    
-    # Create the new function
-    newfunc <- rlang::new_function(args, body, fenv)
-    
-    attr(newfunc, 'composition') <- list(...)
-    
-    
-    newfunc %class% 'composed'
-}
-
-compose.composed <- function(...) {
-    fs <- list(...)
-    
-    fs <- c(attr(fs[[1]], 'composition'), fs[-1])
-    do.call('compose.default', fs)
-    
-}
-
-print.composed <- \(x) {
-    attributes(x) <- NULL
-    print(x)
-    
-}
-
-`%.%` <- function(e1, e2) { 
-    f1name <- rlang::quo_text(rlang::enquo(e1))
-    f2name <- rlang::quo_text(rlang::enquo(e2))
-    
-    fs <- setNames(c(e1, e2), c(f1name, f2name))
-    do.call('compose', c(fs, list(fenv = parent.frame())))
-    }
-
-
-
-# "sticky attributes" 
-
-#' @export
-stickyApply <- function(func, ...) {
-    pipe <- stickyAttrs(list(...)[[1]])
-    result <- func(...)
-    stickyAttrs(result) <- pipe
-    result
-}
-
-
-stickyAttrs <- \(x) attr(x, 'sticky')
-
-`stickyAttrs<-` <- function(x, value) {
-    sticky <- stickyAttrs(x)
-    sticky <- sticky[!names(sticky) %in% names(value)]
-  
-    attr(x, 'sticky') <- c(sticky, value)
-    x
-}
-
-unstick <- \(x) {
-    attr(x, 'sticky') <- NULL
-    x
-}
-
-passargs <- \(x) {
-  # this COULD be incorporated into compose, but I'd rather not.
-  # It allows one function in the chain to change an input argument for functiosn later in the chain.
-  attrs <- attributes(x)
-  pass <- attrs$pass
-  if (length(pass) == 0L) return(x)
-  
-  attr(x, 'pass') <- NULL
-  
-  parentargs <- names(formals(sys.function(1L)))
-  
-  pass <- pass[names(pass) %in% parentargs]
-  
-  for (arg in names(pass)) {
-    assign(arg, pass[[arg]], parent.frame())
-    
-  }
-
-  x  
-}
-   
 
 # Smart dispatch/function application ----
 
@@ -220,7 +87,7 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
   if (!any(targets)) return(list(Restore = force, Args = args))
   
   memoizeArgs <- list2dt(args[targets])
-  names(memoizeArgs)[.names(memoizeArgs) == ""] <- cumsum(.names(memoizeArgs) == "")
+  names(memoizeArgs)[.names(memoizeArgs) == ""] <- cumsum(.names(memoizeArgs) == "")[.names(memoizeArgs) == ""]
   duplicates <- duplicated(memoizeArgs) 
   
   if (verbose) cat('memoizeParse has removed', 
@@ -579,80 +446,14 @@ print.humdrumDispatch <- function(x) {
   
   # cat(deparse(body(x)), sep='\n')
   
-
-  
-  
   
 }
 
 
-getAllArgs <- function(exprs) {
-    
-    # arguments
-    arguments <- lapply(exprs, callArgs)
-    arguments <- unlist(unname(arguments), recursive = FALSE)
-    arguments <- arguments[!duplicated(names(arguments))]
-    arguments <- arguments[order(names(arguments) == '...')]
-    arguments
-}
-
-callArgs <- function(call) {
-    call <- if (is.call(call)) call[[1]] else call
-    func <- rlang::eval_tidy(call)
-    fargs <- fargs(func)
-    fargs[-1]
-    
-}
-makeCall <- function(expr, arg1 = rlang::sym('x')) {
-    if (rlang::is_missing(expr)) return(expr)
-    
-    
-    func <- rlang::eval_tidy(expr)
-    fargs <- names(fargs(func))
-                   
-    args <- setNames(rlang::syms(fargs), fargs)
-    args[[1]] <- arg1
-    names(args)[names(args) == "..."] <- ""
-    rlang::expr((!!expr)(!!!args))
-    
-}
 
 
-REcall <- function(regex, expr) {
-    if (rlang::is_missing(expr)) return(expr)
-    fun <- expr[[1]]
-    rlang::expr(REapply(!!expr[[2]], !!regex, !!fun, !!!as.list(expr[-1:-2]), inPlace = inPlace))
-}
-
-regexFindMethod <- function(str, regexes) {
-    # this takes a str of character values and a string of REs
-    # and returns a single interger value representing the 
-    # index (of regexes) to dispatch.
-    
-    regexes <- getRE(regexes)
-    
-    Nmatches <- sapply(regexes, \(regex) sum(stringi::stri_detect_regex(str, regex), na.rm = TRUE))
-    if (!any(Nmatches > 0L)) return(0L)
-    
-    #which function to dispatch
-    Ncharmatches <- sapply(regexes[Nmatches > 0],
-                           \(re) {
-                               nchars <- nchar(stringi::stri_extract_first_regex(str, re))
-                               nchars[is.na(nchars)] <- 0L
-                               sum(nchars)
-                           })
-    which(Nmatches > 0L)[which.max(Ncharmatches)]
-}
 
 
-partialApply <- function(func, ...) {
-    fargs <- fargs(func)
-    newargs <- list(...)
-    
-    hits <- names(fargs)[names(fargs) %in% names(newargs)]
-    fargs[hits] <- newargs[hits]
-    
-    formals(func) <- fargs
-    func
-    
-}
+
+
+
