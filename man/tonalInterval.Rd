@@ -4,6 +4,14 @@
 \alias{tonalInterval}
 \alias{tint}
 \alias{is.tonalInterval}
+\alias{tonalInterval.tonalInterval}
+\alias{tonalInterval.logical}
+\alias{tonalInterval.NULL}
+\alias{tonalInterval.numeric}
+\alias{tonalInterval.rational}
+\alias{tonalInterval.fraction}
+\alias{tonalInterval.integer}
+\alias{tonalInterval.character}
 \title{Representation of tonal pitch information}
 \usage{
 tonalInterval(...)
@@ -20,6 +28,28 @@ tint(
 is.tonalInterval(x)
 
 tonalInterval(...)
+
+\method{tonalInterval}{tonalInterval}(x, ...)
+
+\method{tonalInterval}{logical}(x, ...)
+
+\method{tonalInterval}{`NULL`}(x, ...)
+
+\method{tonalInterval}{numeric}(
+  x,
+  tonalHarmonic = 3,
+  centMargin = 10,
+  accidental.melodic = FALSE,
+  ...
+)
+
+\method{tonalInterval}{rational}(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...)
+
+\method{tonalInterval}{fraction}(x, tonalHarmonic = 3)
+
+\method{tonalInterval}{integer}(n, accidental.melodic = FALSE, ...)
+
+\method{tonalInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
 \description{
 The \code{tonalInterval} is the core tonal pitch representation in \link[=humdrumR]{humdrumR}.

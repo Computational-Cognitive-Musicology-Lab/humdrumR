@@ -10,7 +10,6 @@ key(
   ...,
   Key = NULL,
   dropNA = FALSE,
-  inPlace = FALSE,
   parseArgs = list(),
   memoize = TRUE,
   deparse = TRUE

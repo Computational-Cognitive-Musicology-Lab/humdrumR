@@ -19,7 +19,6 @@ semit(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -32,7 +31,6 @@ midi(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -45,7 +43,6 @@ pitch(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -58,7 +55,6 @@ kern(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -71,7 +67,6 @@ lilypond(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -84,7 +79,6 @@ interval(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -97,7 +91,6 @@ degree(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE
@@ -110,7 +103,6 @@ solfa(
   Exclusive = NULL,
   deparse = TRUE,
   inPlace = FALSE,
-  dropNA = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
   memoize = TRUE

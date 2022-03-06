@@ -473,8 +473,10 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
         res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
         
+        majors <- cREs(REs[parts[parts %in% names(REs)]])
+        minors <- cREs(res[parts[parts %in% names(REs)]])
         
-        REs <- c(step = paste0('(', cREs(REs[parts[parts %in% names(REs)]]),  '|', cREs(res[parts[parts %in% names(REs)]]), ')'))
+        REs <- c(step =  cREs(c(majors, minors), sep = '|'))
     } else {
         REs <- makeRE.tonalChroma(parts = parts[parts %in% c("step", "species")],
                                   step.labels = step.labels, qualities = FALSE,
@@ -519,9 +521,9 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     key <- makeRE.key(...)
     romanNumeral <- makeRE.romanKey(...)
     
-    re <- paste0('(', key, '|', romanNumeral, ')')
+    re <- paste0('(?:', cREs(c(key, romanNumeral), sep = '|'), ')')
     
-    paste0('((', re, ')', split, ')', if (mustPartition) '+' else '?', re)
+    paste0('(?:', cREs(c(re, re), sep = paste0('(?:', split)), if (mustPartition) '+' else '?', '))')
 }
 
 

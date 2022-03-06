@@ -820,7 +820,6 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
       specifier <- specifier2tint(species, step = generic, useKey = TRUE, Key = CKey(Key), ..., qualities = FALSE)
       LO5th(generic + specifier)
       })
-
     
     # Signature
     minor <- stringi::stri_detect_regex(step, '[a-g]|[iv]') * -3L
@@ -851,8 +850,6 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
 ##... From roman numeral
 
 romanNumeral2dset <- function(str, Key = NULL, flat = 'b', ...) {
-    
-    
     dset <- key2dset(str, c('species', 'step', 'mode', 'alterations'), 
                      step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                      flat = flat, keyed = FALSE,
@@ -861,10 +858,6 @@ romanNumeral2dset <- function(str, Key = NULL, flat = 'b', ...) {
 
     
     dset
-    
-    
-    
-    
 }
 
 
@@ -878,17 +871,23 @@ integer2dset <- \(x) dset(x, x)
 
 ### Parse 2dset generic and methods ####
 
+#' @export
 diatonicSet <- function(...) UseMethod('diatonicSet')
 
+#' @rdname diatonicSet
+#' @export
 diatonicSet.diatonicSet <- function(x, ...) x
 
+#' @rdname diatonicSet
 #' @export 
 diatonicSet.logical <- function(x, ...) vectorNA(length(x), 'diatonicSet')
 
 #### Numbers ####
 
+#' @rdname diatonicSet
 #' @export
 diatonicSet.numeric <- \(x) integer2dset(as.integer(x))
+#' @rdname diatonicSet
 #' @export
 diatonicSet.integer <- integer2dset
 
@@ -904,7 +903,7 @@ char2dset <- makeHumdrumDispatcher(list('any', makeRE.key,       key2dset),
 mapofdset <- function(str, ..., split = '/') {
 
    parts <- strPartition(str, split = split)
-    
+   
    parts[] <- head(Reduce(\(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
@@ -913,6 +912,8 @@ mapofdset <- function(str, ..., split = '/') {
    dset + dset(of, of, 0L)
 }
 
+#' @rdname diatonicSet
+#' @export
 diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.key,       key2dset),
                                                list('any', makeRE.romanKey,  romanNumeral2dset),
                                                list('any', makeRE.diatonicPartition, mapofdset),
@@ -959,58 +960,43 @@ makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  
-  args <- alist(x = , ... = , Key = NULL, dropNA = FALSE, inPlace = FALSE,
-                parseArgs = list(), memoize = TRUE, deparse = TRUE)
-
-  
-  rlang::new_function(args,
-                      rlang::expr( {
-                        redim <- dimParse(x)
-                        
-                        Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
-                        # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-                        args <- lapply(rlang::enexprs(...), eval, envir = environment()) # this evals in the makeKeyTransformer closure!
-                        do.call('checkTFs', list(memoize = memoize, dropNA = dropNA, callname = callname))
-                        
-                        classes <- sapply(args, \(arg) class(arg)[1]) 
-                        
-                        parseArgs   <- pitchArgCheck(c(list(Key = Key), parseArgs, unlist(args[classes == 'parseArgs'], recursive = FALSE)), !!callname)
-                        deparseArgs <- pitchArgCheck(c(list(Key = Key), args[!grepl('Args$', classes)]), !!callname)
-                        
-                        # remove NA values
-                        putNAback <- predicateParse(Negate(is.na), x = x, Key = Key)
-                        
-                        if (length(x) == 0L) return(putNAback(vector(outputclass, 0L)))
-                        
-                        rebuild <- memoizeParse(x = x, Key = Key, memoize = memoize) 
-                        
-                        result <- {
-                          
-                          parsedDset <- do.call(diatonicSet, c(list(x, memoize = FALSE), parseArgs))
-                          
-                          output <- if (deparse && is.diatonicSet(parsedDset))  {
-                            na <- is.na(parsedDset)
-                            output <- vectorNA(length(parsedDset), outputclass)
-                            deparseArgs <- c(list(parsedDset), deparseArgs)
-                            
-                            if (any(na)) deparseArgs <- lapply(deparseArgs,  \(arg) if (length(arg) == length(na)) arg[!na] else arg)
-                              
-                            output[!na] <- do.call(!!deparser, deparseArgs)
-                            output
-                          } else {
-                            parsedDset
-                          }
-                          if (inPlace) output <- rePlace(output, attr(parsedDset, 'dispatch'))
-                          
-                          output
-                        }
-                        
-                        redim(if (dropNA) result else putNAback(rebuild(result)))
-                        
-                      }))
+  args <- alist(x = , ... = , Key = NULL, 
+                parseArgs = list(), 
+                memoize = TRUE, deparse = TRUE)
   
   
+  rlang::new_function(args, rlang::expr({
+    
+    # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
+    args <- lapply(rlang::enexprs(...),
+                   \(argExpr) {
+                     if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'transpose')) {
+                       type <- as.character(argExpr[[1]])
+                       argExpr[[1]] <- quote(list)
+                       assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
+                       NULL
+                     } else {
+                       rlang::eval_tidy(argExpr)
+                     }
+                   })
+    
+    args <- args[!sapply(args, is.null)]
+    
+    parseArgs   <- pitchArgCheck(parseArgs, !!callname)
+    deparseArgs <- pitchArgCheck(args,      !!callname)
+    
+    Key  <- diatonicSet(Key %||% dset(0L, 0L))
+    
+    # Parse
+    parsedDset <- do(diatonicSet, c(list(x), parseArgs), memoize = memoize)
+    
+    deparseArgs <- c(list(parsedDset), deparseArgs)
+    
+    output <- if (deparse && is.diatonicSet(parsedDset)) do(!!deparser, deparseArgs, memoize = FALSE) else parsedDset
+    
+    
+    output
+  }))
 }
 ### Key transformers ####
 
