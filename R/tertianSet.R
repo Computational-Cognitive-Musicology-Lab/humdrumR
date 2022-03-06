@@ -649,7 +649,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 
 ### Chord representations ####  
 
-romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o', ...) {
+romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
   
   Key <- CKey(Key)
   
@@ -685,10 +685,15 @@ romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o
     
   ###
  
-  return(tset(root, root + getMode(qualitytset),
-              alterations = qualitytset@Alteration,
-              extension = figurations$Extension,  
-              inversion = figurations$Inversion) + Key)
+  output <- tset(root, 
+                 root + getMode(qualitytset),
+                 alterations = qualitytset@Alteration,
+                 extension = figurations$Extension,  
+                 inversion = figurations$Inversion)
+
+  if (implicitSpecies) output <- output + Key
+
+  output
   
 }
 
