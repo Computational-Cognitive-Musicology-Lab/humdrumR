@@ -318,8 +318,17 @@ captureRE <- function(strs, n = '') {
 
 #' @name regexConstruction
 #' @export
-captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
-# takes a RE capture group and makes it so it will only match one or more of the same character
+captureUniq <- function(strs, zero = TRUE) {
+# takes a RE capture group and makes it so it will only match one or more of the SAME character
+    
+    strs <- paste0(strs, '+')
+    
+    strs <- paste(strs, collapse = '|')
+    
+    paste0('(', strs, ')', if (zero) '?')
+    
+}
+# captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
 
 escaper <- function(str) {
     stringr::str_replace_all(str, '\\[\\^', '[\\\\^')
