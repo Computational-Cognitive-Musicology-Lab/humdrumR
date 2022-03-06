@@ -13,6 +13,13 @@ census(humdata)[i]
 
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
+\arguments{
+\item{humdrumR}{A humdrumR object}
+
+\item{dataTypes}{A \code{character} string of length 1.}
+
+\item{by}{A \code{character} string of length 1. Must be a \link[=humdrumRclass]{field} in the humdrumR object.}
+}
 \description{
 \code{census} is one of \link{humdrumR}'s
 \link[=humSummary]{summary functions}, used to

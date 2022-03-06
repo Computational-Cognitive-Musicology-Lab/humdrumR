@@ -502,7 +502,7 @@ parseKeywords <- function(formulae, withfunc) {
  
  #
  
- knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill', 'domemory'),
+ knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill'),
                        ordoexpression  = c('ordo', 'ordofill'),
                        partitions      = c('by', 'where'),
                        graphics        = names(par()),
@@ -555,7 +555,6 @@ partialMatchKeywords <- function(keys) {
     # define standard keys and alternatives
     standardkeys <- list(do          = c('do', 'd', 'eval', 'apply'),
                          dofill      = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         domemory    = c('domemoizeDispatch', 'domem'),
                          dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
                                       'doplots', 'plots',
                                       'evalfxs', 'evalsidefxs', 'evalsideeffects',
@@ -682,8 +681,6 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   } 
   
   
-  # do memory
-  if (any(names(doQuos) == 'domemory')) doQuo <- memoizeDispatch.quosure(doQuo, usedInExpr)
 
   doQuo
 }

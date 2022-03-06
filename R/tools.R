@@ -900,6 +900,9 @@ gcd <- function(x, y) {
     ifelse(r, Recall(y, r), y)
 }
 
+# modulo starting from 1
+`%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L
+
 ## new numeric representations ####
 
 #### decimal ####
@@ -1335,12 +1338,24 @@ getArglist <- function(form) {
     x
 }
 
-`partialApply<-` <- function(x, values) {
-    cur <- formals(x)
-    cur[.names(values)[.names(values) %in% .names(cur)]] <- values[.names(values) %in% .names(cur)]
+
+partialApply <- function(func, ...) {
+    fargs <- fargs(func)
+    newargs <- list(...)
     
-    formals(x) <- c(cur, values[!.names(values) %in% names(cur)])
-    x
+    hits <- names(fargs)[names(fargs) %in% names(newargs)]
+    fargs[hits] <- newargs[hits]
+    
+    formals(func) <- fargs
+    func
+    
+}
+
+callArgs <- function(call) {
+    call <- if (is.call(call)) call[[1]] else call
+    func <- rlang::eval_tidy(call)
+    fargs <- fargs(func)
+    fargs[-1]
     
 }
 
@@ -1503,9 +1518,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     
 }
 
-test <- function(x) {
-    checkNumeric(x, 'x', callname = 'test', minval = 0)
-}
+
 
 checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
     checkArg(x, argname = argname, callname = callname,

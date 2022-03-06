@@ -1,10 +1,9 @@
-###################################
-###### rhythmInterval S4 class ####
-###################################
+#################################### ###
+# rhythmInterval S4 class ##############
+#################################### ###
 
-##### class methods ####
+## Definition, validity, initialization ####
 
-####. definition, validity, initialization ####
 
 #' Representation of rhythmic information
 #' 
@@ -62,6 +61,8 @@
 #' @slot Numerator Integers 
 #' @slot Octave Integers
 #' 
+#' @family {core rhythm representation}
+#' @name rhythmInterval
 #' @export
 setClass('rhythmInterval', 
          contains = 'struct', 
@@ -93,11 +94,11 @@ setMethod('initialize', 'rhythmInterval',
             
           })
 
-##...constructors ####
+## Constructors ####
 
 
 #' The basic constructor for `[humdrumR:rhythmInterval][rhythmIntervals]`.
-#' @name rhythmInterval
+#' @rdname rhythmInterval
 #' @export
 rint <- function(denominator, numerator = 1L) {
     # reduced <- reduce_fraction(numerator, denominator)
@@ -108,41 +109,37 @@ rint <- function(denominator, numerator = 1L) {
         Numerator = as.integer(numerator))
 }
 
-##...accessors ####
+## Accessors ####
 
 
+## Formatting methods ####
 
-####. vector/core methods ####
+#' @rdname rhythmInterval
+#' @export
+setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
 
+#' @rdname rhythmInterval
+#' @export
+as.double.rhythmInterval <-  function(x) as.decimal(x)
 
+## Logic methods ####
 
-#' @name rhythmInterval
+### is.methods ####
+
+#' @rdname rhythmInterval
 #' @export
 is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 
-#' @name rhythmInterval
+#' @rdname rhythmInterval
 #' @export
 setMethod('is.numeric', signature = c('rhythmInterval'),
           function(x) { TRUE })
 
-###.. formatting methods ####
-
-#' @name rhythmInterval
-#' @export
-setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
-
-#' @name rhythmInterval
-#' @export
-as.double.rhythmInterval <-  function(x) as.decimal(x)
+## Order/relations methods ####
 
 
-####. logic methods ####
-
-###.. order/relations methods ####
-
-
-#' @name rhythmInterval
+#' @rdname rhythmInterval
 #' @export
 order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
@@ -153,7 +150,7 @@ order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                     )
           }
 
-#' @name rhythmInterval
+#' @rdname rhythmInterval
 #' @export
 setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
           function(e1, e2) {
@@ -161,16 +158,16 @@ setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
               callGeneric(as.double(e1), as.double(e2))
           })
 
-#' @name rhythmInterval
+#' @rdname rhythmInterval
 #' @export
 setMethod('Summary', signature = c('rhythmInterval'),
           function(x) {
               read.numeric2rhythmInterval(callGeneric(as.double(x)))
           })
 
-###.. arithmetic methods ####
+## Arithmetic methods ####
 
-##... addition ####
+### Addition ####
 
 #' @export
 setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
@@ -195,9 +192,8 @@ setMethod('Math', signature = c(x = 'rhythmInterval'),
                     read.numeric2rhythmInterval(callGeneric(as.double(x)))
           })
 
-# 
 
-##... subtraction ####
+### Subtraction ####
 
 #' @export
 setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
@@ -216,7 +212,7 @@ setMethod('diff', signature = c('rhythmInterval'),
             rhythmInterval(diff(as.double(x), na.rm = na.rm))
           })
 
-##... multiplication ####
+### Multiplication ####
 
 
 #' @export
@@ -247,7 +243,7 @@ setMethod('*', signature = c(e1 = 'numeric', e2 = 'rhythmInterval'),
               e2 * e1
           })
 
-##...division/modulo  ####
+### Division/modulo  ####
 
 #' @export
 setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
@@ -301,9 +297,14 @@ setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 
 
 
-##### To/From rhythm intervals ####
+###################################################################### ###
+# Deparsing Rhythm Representations (rint2x) ##############################
+###################################################################### ###
 
-####. rint to x ####
+
+## Rhythm deparsers ####
+
+### Symbolic ####
 
 
 rint2recip <- function(rint) {
@@ -414,7 +415,7 @@ rint2notevalue <- function(rint) {
 
 
 
-###.. numbers
+### Numeric ####
 
 
 
@@ -429,106 +430,329 @@ rint2integer <- function(rint) {
 }
 
 
-####. x to rint ####
 
+
+
+
+###################################################################### ### 
+# Parsing Rhythm Representations (x2rint) ################################
+###################################################################### ### 
+
+## Rhythm parsers ####
+
+### Symbolic ####
 
 recip2rint <- function(str) {
-          
-          uniqstr <- unique(str)
-          
-          # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
-          uniqstr <- .ifelse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
-          uniqstr <- .ifelse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
-          uniqstr <- .ifelse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
-          
-          ndots <- stringr::str_count(uniqstr, '\\.')
-          rhythmInterval <- gsub('\\.+', '', uniqstr)
-          
-          rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], \(f) eval(parse(text = gsub('%', '/', f)))))
-          
-          rhythmInterval <- 1 / as.numeric(rhythmInterval)
-          rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
-          
-          rhythmInterval <- rhythmInterval(rhythmInterval)
-          
-          rhythmInterval[match(str, unique(str))]
-          
+  
+  uniqstr <- unique(str)
+  
+  # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
+  uniqstr <- .ifelse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
+  uniqstr <- .ifelse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
+  uniqstr <- .ifelse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
+  
+  ndots <- stringr::str_count(uniqstr, '\\.')
+  rhythmInterval <- gsub('\\.+', '', uniqstr)
+  
+  rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], \(f) eval(parse(text = gsub('%', '/', f)))))
+  
+  rhythmInterval <- 1 / as.numeric(rhythmInterval)
+  rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
+  
+  rhythmInterval <- rhythmInterval(rhythmInterval)
+  
+  rhythmInterval[match(str, unique(str))]
+  
 }
 
-###.. numbers
+
+
+notevalue2rint <- function(notevalues) {
+  
+  
+  
+  parsed <- REparse(notevalues,
+                    list(notevalue = paste0('^[', 
+                                            paste(notevalue.unicode$Unicode, collapse = ''), 
+                                            ']'),
+                         divide = "(\U2215[1-9][0-9]*)?",
+                         multiples = "(\U2217[1-9][0-9]*)?",
+                         dots = '\U1D16D*'))
+  
+  
+  # 
+  symbols <- setNames(notevalue.unicode$Recip, notevalue.unicode$Unicode)
+  notevalue <- symbols[parsed[ , 'notevalue']]
+  dots  <- gsub('\U1D16D', '.', parsed[ , 'dots'])
+  multiples <- gsub('\U2217', '%', parsed[ , 'multiples'])
+  
+  recip <- paste0(notevalue, multiples, dots)
+  
+  rint <- read.recip2rhythmInterval(recip)
+  
+  #
+  divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
+  rint / (divides %|% 1)
+}
+
+
+### Numeric ####
 
 numeric2rint <- function(n) {
-          if (!is.numeric(n)) n <- as.numeric(n)
-          
-          frac <- as.rational(n)
-          
-          frac$Denominator[frac$Numerator == frac$Denominator] <- 1L
-          
-          rint(frac$Denominator, frac$Numerator)
+  if (!is.numeric(n)) n <- as.numeric(n)
+  
+  frac <- as.rational(n)
+  
+  frac$Denominator[frac$Numerator == frac$Denominator] <- 1L
+  
+  rint(frac$Denominator, frac$Numerator)
 }
 
 
 rational2rint <- function(str, split = '/') {
-          split <- strsplit(str, split = split)
-          
-          ns <- lapply(split, \(n) {
-              if (all(is.na(n))) return(rint(NA))
-              
-              if (tail(n, 1) == '') n[length(n)] <- 1L
-              if (n[1] == '') n[1] <- '1'
-              if (any(n == '')) n <- n[n != '']
-              
-              if (length(n) == 1) n <- c(n, '1') 
-              
-              n <- as.numeric(n)
-              
-              ## if more than two numbers in any token, 
-              ## evaluate all but the rightmost as division
-              if (length(n) >  2L) n <- c(Reduce(`/`, head(n, -1)), tail(n, 1))
-              
-              rint(n[2], n[1])
-          })
-          
-          do.call('c', ns)
-          
+  split <- strsplit(str, split = split)
+  
+  ns <- lapply(split, \(n) {
+    if (all(is.na(n))) return(rint(NA))
+    
+    if (tail(n, 1) == '') n[length(n)] <- 1L
+    if (n[1] == '') n[1] <- '1'
+    if (any(n == '')) n <- n[n != '']
+    
+    if (length(n) == 1) n <- c(n, '1') 
+    
+    n <- as.numeric(n)
+    
+    ## if more than two numbers in any token, 
+    ## evaluate all but the rightmost as division
+    if (length(n) >  2L) n <- c(Reduce(`/`, head(n, -1)), tail(n, 1))
+    
+    rint(n[2], n[1])
+  })
+  
+  do.call('c', ns)
+  
+}
+
+## Rhythm Parsing Dispatch ######################################
+
+
+### Parse 2rint generic and methods ####
+
+
+##### As x #####
+
+
+####. generics ####
+
+
+#' @rdname rhythmInterval
+#' @export 
+rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
+
+#' @rdname tonalInterval
+#' @export
+rhythmInterval.rhythmInterval <- function(x, ...) x
+
+#' @rdname rhythmInterval
+#' @export 
+rhythmInterval.logical <- function(x, ...) vectorNA(length(x), 'rhythmInterval')
+
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.NULL <- function(x, ...) NULL
+
+
+#### Numbers ####
+
+
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.numeric <- numeric2rint
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.rational <- \(x) .stop("There is no rational -> rhythmInterval method")
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.fraction <- \(x) .stop("There is no fraction -> rhythmInterval method")
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.integer  <- \(x) .stop("There is no integer -> rhythmInterval method")
+
+
+#### Characters ####
+
+#' @rdname rhythmInterval
+rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
+                                                  list('duration',                 makeRE.decimal, numeric2rint),
+                                                  funcName = 'rhythmInterval.character',
+                                                  outputClass = 'rhythmInterval')
+
+#### setAs tonal interval ####
+
+setAs('integer', 'rhythmInterval', function(from) numeric2rint(from))
+setAs('numeric', 'rhythmInterval', function(from) numeric2rint(from))
+setAs('character', 'rhythmInterval', function(from) char2rint(from))
+setAs('matrix', 'rhythmInterval', function(from) rhythmInterval(c(from)) %dim% from)
+
+###################################################################### ### 
+# Translating Rhythm Representations (x2y) ###############################
+###################################################################### ### 
+
+## Rhythm transformer documentation ####
+
+#' Manipulate pitch data
+#'  
+#' @name rhythmFunctions
+#' @seealso rhythmInterval
+NULL
+
+## Rhythm transform maker ####
+
+
+
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character') {
+  # this function will create various pitch transform functions
+  deparser <- rlang::enexpr(deparser)
+  callname <- rlang::enexpr(callname)
+  
+  args <- alist(x = , ... = , Exclusive = NULL,
+                parseArgs = list(), timeArgs = list(),
+                inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
+  
+  rlang::new_function(args, rlang::expr( {
+    
+    # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
+    args <- lapply(rlang::enexprs(...),
+                   \(argExpr) {
+                     if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'time')) {
+                       type <- as.character(argExpr[[1]])
+                       argExpr[[1]] <- quote(list)
+                       assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
+                       NULL
+                     } else {
+                       rlang::eval_tidy(argExpr)
+                     }
+                     
+                   })
+    
+    args <- args[!sapply(args, is.null)]
+    args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
+    deparseArgs <- args
+    # parseArgs   <- rhythmArgCheck(parseArgs, !!callname)
+    # deparseArgs <- rhythmArgCheck(args,      !!callname)
+    
+  
+    
+    # Parse
+    parsedRint <- do(rhythmInterval, c(list(x), parseArgs), memoize = memoize)
+    
+    # if (length(transposeArgs) > 0L && is.tonalInterval(parsedRint)) {
+    #   parsedRint <- do(transpose.tonalInterval, c(list(parsedRint), transposeArgs))
+    # }
+    
+    deparseArgs <- c(list(parsedRint), deparseArgs)
+    output <- if (deparse && is.rhythmInterval(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedRint
+    if (deparse && inPlace) output <- rePlace(output, attr(parsedRint, 'dispatch'))
+    
+    output
+    
+  }))
 }
 
 
-#### From unicode note values.
+### Rhythm Transformers ####
 
-notevalue2rint <- function(notevalues) {
+#' @rdname rhythmFunctions
+#' @export 
+recip <- makeRhythmTransformer(rint2recip, 'recip')
+#' @rdname rhythmFunctions
+#' @export 
+duration <- makeRhythmTransformer(rint2decimal, 'duration')
+
+
+
+
+
+
+
+
+
+###################################################################### ###
+# Manipulating rhythm intervals ##########################################
+###################################################################### ###
+
+## Time ####
+
+
+#' Time transformations
+#' 
+#' @name time
+#' @export
+bpm2ms <- function(bpm) 60000/bpm
+
+#' @name time
+#' @export
+ms2bpm <- function(ms) 60000/ms
+
+
+
+### Offset ####
+
+
+#' Calculate rhythmic "offset"
+#' 
+#' Borrowing the term from `music21`, rhythmic "offset"
+#' refers to a duration of time since a starting point (usually, the beginning
+#' of a piece).
+#' `rhythmOffset` takes a vector of numbers representing durations
+#' (maybe `[rhythmInterval][rhythmInterval]s`, maybe other
+#' numeric values) and cummulatively sums them from a starting value.
+#' The output is a vector of durations of the same type as the input
+#' where each output value corresponds to the duration of time elapsed
+#' at that point.
+#' 
+#' @param durations A vector of numeric values representing durations.
+#' @param start A duration value (coerced to same class as `durations`), from which the
+#' offset begins. 
+#' @param groups A vector of equal length as `durations` representing a grouping factor,
+#' usable by `[base][tapply]`. If `!is.null(groups)`, offsets are calculated
+#' for duration values within each group. The `start` argument is recycle to match
+#' the length of the number of groups, so a different start value can be applied to each group.
+#' If `is.null(groups)`, offsets are calculated for the whole `durations` vector, from the 
+#' first `start` value.
+#' 
+#' @family rhythm analysis tools
+#' @export
+rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
+  durations <- as.decimal(durations)
+  start <- as.decimal(start)
+  tatum <- as.decimal(tatum)
+  
+  durations <- durations / tatum
+  
+  
+  off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
+  
+  offsets <- if (is.null(bars)) {
+    off(durations, start)
     
+  }   else {
+    if (length(bars) != length(durations)) {
+      stop(call. = FALSE,
+           "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
+    }
     
+    dur.groups <- split(as.numeric(durations), as.numeric(bars))
+    durs <- unlist(Map(off, dur.groups, as.numeric(start)))
+    as(durs, class(durations))
     
-    parsed <- REparse(notevalues,
-                      list(notevalue = paste0('^[', 
-                                          paste(notevalue.unicode$Unicode, collapse = ''), 
-                                          ']'),
-                       divide = "(\U2215[1-9][0-9]*)?",
-                       multiples = "(\U2217[1-9][0-9]*)?",
-                       dots = '\U1D16D*'))
-    
-    
-    # 
-    symbols <- setNames(notevalue.unicode$Recip, notevalue.unicode$Unicode)
-    notevalue <- symbols[parsed[ , 'notevalue']]
-    dots  <- gsub('\U1D16D', '.', parsed[ , 'dots'])
-    multiples <- gsub('\U2217', '%', parsed[ , 'multiples'])
-    
-    recip <- paste0(notevalue, multiples, dots)
-    
-    rint <- read.recip2rhythmInterval(recip)
-    
-    #
-    divides <- as.numeric(gsub('\U2215', '', parsed[ , 'divide']))
-    rint / (divides %|% 1)
+  }
+  
+  if (identical(as, as.decimal)) offsets else as(offsets)
 }
 
-
-##### Rhythm transforms ####
-
-
-#### Augmentation and dimminution 
+### Augmentation and Dimminution  ####
 
 
 # augment <- function(x, scalar = 2, ...) UseMethod('augment')
@@ -562,80 +786,9 @@ notevalue2rint <- function(notevalues) {
 
 
 
-##### As x #####
 
 
-####. generics ####
-
-
-#' @name rhythmInterval
-#' @export rhythmInterval
-#' @export recip duration
-rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
-recip    <- function(x, ...) UseMethod('recip')
-duration <- function(x, ...) UseMethod('duration')
-
-
-####. methods ####
-
-###.. x as rint ###
-
-#' @export
-rhythmInterval.rhythmInterval <- force
-
-#' @export
-rhythmInterval.numeric <- numeric2rint
-
-
-
-#' @export
-rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
-                                                  list('duration',                 makeRE.decimal, numeric2rint),
-                                                  outputClass = 'rhythmInterval',
-                                                  funcName = 'rhythmInterval.character')
-
-#.... set as
-
-#' @export 
-setAs('numeric', 'rhythmInterval', function(from) numeric2rint(from))
-#' @export 
-setAs('character', 'rhythmInterval', function(from) char2rint(from))
-#' @export 
-setAs('matrix', 'rhythmInterval', function(from) rhythmInterval(c(from)) %dim% from)
-
-
-###.. rint as x ####
-
-#' @export 
-recip.rhythmInterval <- rint2recip
-#' @export 
-duration.rhythmInteval <- rint2decimal
-
-
-###.. x as y ####
-
-#.... numeric -> y ####
-
-#' @export 
-recip.numeric <- rint2recip %.% rhythmInterval.numeric
-#' @export 
-duration.numeric <- force
-
-
-###.. character -> y ####
-
-
-#' @export 
-recip.character <- rint2recip %.% rhythmInterval.character
-#' @export 
-duration.character <- rint2decimal %.% rhythmInterval.character
-
-
-
-
-#################################################-
-######Special rhythm functions ####----
-##################################################-
+## Meter ####
 
 #' Tools for analyzing rhythm and meter.
 #' 
@@ -682,6 +835,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 
 #' Calculate metric positions from duration data.
 #' 
+#' 
 #' @family rhythm analysis tools
 #' @export
 metricPosition <- function(rints, bars = NULL, 
@@ -703,69 +857,6 @@ metricPosition <- function(rints, bars = NULL,
 }
 
 
-#' Calculate rhythmic "offset"
-#' 
-#' Borrowing the term from `music21`, rhythmic "offset"
-#' refers to a duration of time since a starting point (usually, the beginning
-#' of a piece).
-#' `rhythmOffset` takes a vector of numbers representing durations
-#' (maybe `[rhythmInterval][rhythmInterval]s`, maybe other
-#' numeric values) and cummulatively sums them from a starting value.
-#' The output is a vector of durations of the same type as the input
-#' where each output value corresponds to the duration of time elapsed
-#' at that point.
-#' 
-#' @param durations A vector of numeric values representing durations.
-#' @param start A duration value (coerced to same class as `durations`), from which the
-#' offset begins. 
-#' @param groups A vector of equal length as `durations` representing a grouping factor,
-#' usable by `[base][tapply]`. If `!is.null(groups)`, offsets are calculated
-#' for duration values within each group. The `start` argument is recycle to match
-#' the length of the number of groups, so a different start value can be applied to each group.
-#' If `is.null(groups)`, offsets are calculated for the whole `durations` vector, from the 
-#' first `start` value.
-#' 
-#' @family rhythm analysis tools
-#' @export
-rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
-          durations <- as.decimal(durations)
-          start <- as.decimal(start)
-          tatum <- as.decimal(tatum)
-          
-          durations <- durations / tatum
-          
-          
-          off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
-                 
-          offsets <- if (is.null(bars)) {
-             off(durations, start)
-                    
-          }   else {
-                    if (length(bars) != length(durations)) {
-                              stop(call. = FALSE,
-                                   "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
-                    }
-                    
-                    dur.groups <- split(as.numeric(durations), as.numeric(bars))
-                    durs <- unlist(Map(off, dur.groups, as.numeric(start)))
-                    as(durs, class(durations))
-                    
-          }
-          
-          if (identical(as, as.decimal)) offsets else as(offsets)
-}
-
-#### Miscalaneous (however that is supposed to be spelled)
-
-#' Time transformations
-#' 
-#' @name time
-#' @export
-bpm2ms <- function(bpm) 60000/bpm
-
-#' @name time
-#' @export
-ms2bpm <- function(ms) 60000/ms
 
 
 

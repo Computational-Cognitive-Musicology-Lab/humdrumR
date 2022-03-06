@@ -4,11 +4,14 @@
 \alias{regexConstruction}
 \alias{captureRE}
 \alias{captureUniq}
+\alias{orRE}
 \title{Making Regular Expressions}
 \usage{
 captureRE(strs, n = "")
 
 captureUniq(strs, zero = TRUE)
+
+orRE(...)
 }
 \description{
 \code{humdrumR} includes some helpful functions for creating new regular expressions which work with the

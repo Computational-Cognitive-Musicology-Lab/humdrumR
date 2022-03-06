@@ -306,11 +306,10 @@ captureRE <- function(strs, n = '') {
     
     if (length(strs) > 1) {
         multi <- nchar(strs) > 1L & !grepl('-', strs)
-        strs <- paste(c(if (any(multi)) paste0('(?:', paste(collapse = '|', strs[multi]), ')'),
-                        if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')),
-                      collapse = '|')
+        strs <- orRE(orRE(strs[multi], 
+                     if (any(!multi)) paste0('[', paste(collapse = '', strs[!multi]), ']')))
         
-        if (any(multi)) strs <- paste0('(?:', strs, ')')
+        # if (any(multi)) strs <- paste0('(?:', strs, ')')
     }
     
     escaper(paste0(strs, n))
@@ -318,8 +317,30 @@ captureRE <- function(strs, n = '') {
 
 #' @name regexConstruction
 #' @export
-captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
-# takes a RE capture group and makes it so it will only match one or more of the same character
+captureUniq <- function(strs, zero = TRUE) {
+# takes a RE capture group and makes it so it will only match one or more of the SAME character
+    
+    strs <- paste0(strs, '+')
+    
+    strs <- paste(strs, collapse = '|')
+    
+    paste0('(', strs, ')', if (zero) '?')
+    
+}
+
+#' @name regexConstruction
+#' @export
+orRE <- function(...) {
+    res <- unlist(list(...))
+    res <- res[lengths(res) > 0L]
+    if (length(res) == 0L) return(NULL)
+    if (length(res) == 1L) return(res[[1]])
+    
+    paste0('(', do.call('paste', c(as.list(res), sep = '|')), ')')
+    
+}
+
+# captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
 
 escaper <- function(str) {
     stringr::str_replace_all(str, '\\[\\^', '[\\\\^')
@@ -331,7 +352,8 @@ escaper <- function(str) {
 
 cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
     if (length(REs) == 0) return('')
-    REs <- unlist(paste0('(?:', REs, ')'))
+    # REs <- unlist(paste0('(?:', REs, ')'))
+    REs <- unlist(REs)
     
     ## if the regexes use capture groups, we must increment groups in later expressions
     # for instance, if the first regex has (x)\\1 and the second has (.*)\\1,
@@ -473,8 +495,10 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
         res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
         
+        majors <- cREs(REs[parts[parts %in% names(REs)]])
+        minors <- cREs(res[parts[parts %in% names(REs)]])
         
-        REs <- c(step = paste0('(', cREs(REs[parts[parts %in% names(REs)]]),  '|', cREs(res[parts[parts %in% names(REs)]]), ')'))
+        REs <- c(step =  cREs(c(majors, minors), sep = '|'))
     } else {
         REs <- makeRE.tonalChroma(parts = parts[parts %in% c("step", "species")],
                                   step.labels = step.labels, qualities = FALSE,
@@ -519,9 +543,9 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     key <- makeRE.key(...)
     romanNumeral <- makeRE.romanKey(...)
     
-    re <- paste0('(', key, '|', romanNumeral, ')')
+    re <- orRE(key, romanNumeral)
     
-    paste0('((', re, ')', split, ')', if (mustPartition) '+' else '?', re)
+    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '*')
 }
 
 
@@ -554,7 +578,7 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
     
     upper <- paste0('(?=[IV]+', augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
     lower <- paste0('(?=[iv]+', diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
-    REs$numeral <- paste0('(', upper, '|', lower, ')')
+    REs$numeral <- orRE(upper, lower)
     
     
     REs$triadalt <- captureRE(c(diminish, augment), n = '?')
@@ -573,15 +597,14 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     romanChord <- makeRE.romanChord(...)
     
-    re <- paste0('(', romanChord, ')')
     
     key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0('(', re, ')(', split, key, ')', if (!mustPartition) '?')
+    paste0(romanChord, '(', split, key, ')', if (!mustPartition) '?')
 }
 
 
 
 ####. REs for durations ####
 
-makeRE.recip <- function() getRE('recip')
+makeRE.recip <- function(...) getRE('recip')
