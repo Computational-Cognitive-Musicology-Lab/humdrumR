@@ -8,6 +8,11 @@
 \alias{order.diatonicSet}
 \alias{==,diatonicSet,diatonicSet-method}
 \alias{Compare,diatonicSet,diatonicSet-method}
+\alias{diatonicSet.diatonicSet}
+\alias{diatonicSet.logical}
+\alias{diatonicSet.numeric}
+\alias{diatonicSet.integer}
+\alias{diatonicSet.character}
 \title{Tonal (diatonic) sets}
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)
@@ -28,6 +33,16 @@ order.diatonicSet(
 \S4method{==}{diatonicSet,diatonicSet}(e1, e2)
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
+
+\method{diatonicSet}{diatonicSet}(x, ...)
+
+\method{diatonicSet}{logical}(x, ...)
+
+\method{diatonicSet}{numeric}(x)
+
+\method{diatonicSet}{integer}(x)
+
+\method{diatonicSet}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 
 \S4method{as.character}{tertianSet}(x)
 
