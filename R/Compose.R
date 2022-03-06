@@ -516,14 +516,13 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
     args <- c(alist(str = , Exclusive = NULL), 
               args, 
-              unlist(dispatchDF$Args)[sharedArgNames], 
+              unlist(dispatchDF$Args, recursive = FALSE)[sharedArgNames], 
               alist(... = , multiDispatch = FALSE))
     args <- args[!duplicated(names(args))]
     args <- args[names(args) != 'x']
     args
 
   })
-  
   dispatchArgs <- genericArgs[!names(genericArgs) %in% c('str', 'Exclusive', '...', 'multiDispatch')]
   dispatchArgs[names(dispatchArgs) %in% names(args)] <- lapply(names(dispatchArgs[names(dispatchArgs) %in% names(args)]),
                                                                rlang::sym)

@@ -660,9 +660,9 @@ romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o
   
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
                            parts = c('species', 'step'), qualities = FALSE,
+                           implicitSpecies = implicitSpecies,
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                            Key = Key, ...)@Fifth
-  
   figurations <- parseFiguration(figurations)
   
   ### quality of degress
@@ -691,7 +691,7 @@ romanNumeral2tset <- function(str, Key = dset(0,0), augment = '+', diminish = 'o
                  extension = figurations$Extension,  
                  inversion = figurations$Inversion)
 
-  if (implicitSpecies) output <- output + Key
+  # if (implicitSpecies) output <- output + Key
 
   output
   
@@ -769,26 +769,24 @@ char2tset <- makeHumdrumDispatcher(list('any', makeRE.romanChord,  romanNumeral2
                                    outputClass = 'tertianSet',
                                    args = alist(Key = NULL))
 
-mapoftset <- function(str, ..., split = '/') {
+mapoftset <- function(str, Key = NULL, ..., split = '/') {
   
   parts <- strPartition(str, split = split)
-  
   Keys <- parts[-1]
   if (length(Keys) > 0L) {
     Keys[] <- head(Reduce(\(x, y) {
-      y[!is.na(x)] <- char2dset(x[!is.na(x)], y[!is.na(x)], ...)
+      y[!is.na(x)] <- char2dset(x[!is.na(x)], Key = y[!is.na(x)], ...)
       y
-    }, right = TRUE, init = dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
+    }, right = TRUE, init = Key %||% dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
   } else {
     Keys <- list(dset(integer(length(str)), 0))
   }
-  
   
   Mode <- CKey(Keys[[1]])
   root <- Reduce('+', lapply(Keys, getRoot))
   Key <- Mode + dset(root, root)
   
-  tset <- char2tset(parts$base, Key = Key)
+  tset <- char2tset(parts$base, Key = Key, ...)
   tset + dset(root, root, 0L)
 }
 

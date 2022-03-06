@@ -545,7 +545,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     re <- orRE(key, romanNumeral)
     
-    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '?')
+    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '*')
 }
 
 

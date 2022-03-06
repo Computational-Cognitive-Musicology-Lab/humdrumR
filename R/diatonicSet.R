@@ -900,11 +900,11 @@ char2dset <- makeHumdrumDispatcher(list('any', makeRE.key,       key2dset),
                                    funcName = 'char2dset',
                                    outputClass = 'diatonicSet')
 
-mapofdset <- function(str, ..., split = '/') {
+mapofdset <- function(str, Key = NULL, ..., split = '/') {
 
    parts <- strPartition(str, split = split)
    
-   parts[] <- head(Reduce(\(x, y) char2dset(x, Key = y), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
+   parts[] <- head(Reduce(\(x, y) char2dset(x, Key = y, ...), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
    
    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
     
