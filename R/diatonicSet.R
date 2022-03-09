@@ -454,7 +454,7 @@ setMethod('LO5th', 'diatonicSet',
     
 
     rownames(LO5ths) <- dset2key(dset)
-    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+    colnames(LO5ths) <- c('Root', nthfix(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
     # 
     LO5ths
 })

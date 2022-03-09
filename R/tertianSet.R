@@ -92,7 +92,7 @@ getExtensions <- function(tset) {
    inverted <- inverted + ((inverted - 1) %% 2) # make sure root position is there always 
 
    bits <- ints2bits(inverted, nbits = 7L) == 1L
-   colnames(bits) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
+   colnames(bits) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
    rownames(bits) <- NULL
    bits
    
@@ -224,7 +224,7 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
   if (!inversion) tset <- rootPosition(tset)
   
   extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
-  colnames(extensions) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
+  colnames(extensions) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
   
   extensions[!getExtensions(tset)] <- NA_integer_
   

@@ -406,7 +406,7 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
           
           
           sortedwhere <- sort(where)
-          intervals <- findInterval(x, sortedwhere, )
+          intervals <- findInterval(x, sortedwhere)
           hits <- ifelse(intervals == 0,
                          if (direction %in% c(2,4)) Inf else 1,
                          if (direction == 1) {
@@ -474,6 +474,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 }
 
 
+
 segments <- function(x, reverse = FALSE) {
     change <- if (!is.logical(x)) c(TRUE, head(x, -1L) != tail(x, -1L)) else x
     if (reverse) change <- rev(change)
@@ -489,6 +490,9 @@ segments <- function(x, reverse = FALSE) {
     seg
     
 }
+
+
+
 
 
 
@@ -1259,6 +1263,36 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
     
 }
 
+symbolApply <- function(expr, func) {
+    if (is.call(expr)) {
+        for (i in 1:length(expr)) {
+            expr[[i]] <- Recall(expr[[i]], func)
+        }
+        expr
+    } else {
+        func(expr)
+    }
+}
+
+recurseExpr <- function(expr, predicate, do, stopOnHit = TRUE) {
+    
+    if (!is.call(expr)) return(expr)
+    
+    if (rlang::as_label(expr[[1]]) %in% c('{', '(')) {
+        for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
+        return(expr)
+    }
+    
+    pred <- predicate(expr) 
+    if (pred) expr <- do(expr)
+    
+    if (!(stopOnHit && pred)) {
+        for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
+    }
+    
+    
+    expr
+}
 
 recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
     isquo <- rlang::is_quosure(quo)
@@ -1606,7 +1640,7 @@ plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
 
 quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
 
-nth <- function(n) {
+nthfix <- function(n) {
     affix <- rep('th', length(n))
     mod10 <- abs(n) %% 10
     mod100 <- abs(n) %% 100

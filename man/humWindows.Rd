@@ -4,7 +4,7 @@
 \alias{humWindows}
 \alias{windows}
 \alias{hop}
-\alias{nest}
+\alias{nested}
 \title{Applying functions across arbitrary windows.
 ---------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------}
 \usage{
@@ -20,9 +20,11 @@ windows(
 
 hop(vec, pattern, start = 1L, end = length(vec))
 
-nest(vec, open, close, depth = 1)
+nested(vec, open = "(", close = ")", depth = 1L, nested = TRUE)
 }
 \description{
 Applying functions across arbitrary windows.
 ---------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------
+
+Windowing data
 }

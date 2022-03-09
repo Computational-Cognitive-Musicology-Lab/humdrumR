@@ -242,27 +242,44 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 #' existing `R` regular expression matching functions.
 #' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
 #' 
-#' + `%~l%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
-#' + `%~%`: The "default"---same as `%~l%`.
-#' + `%~i%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
-#' + `%~n%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
+#' + `%grepl%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
+#' + `%grep%`: The "default"---same as `%grepl%`.
+#' + `%grepi%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
+#' + `%grepn%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
 #'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex()].
-#' + `%~m%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#' + `%grepm%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#'
+#' Each regex infix has an "lapply" version, called `%lgrepx%`.
+#' 
+#' @param x A vector to search in
+#' @param list A list of vectors (all the same length) to search in
+#' @param pattern One or more regular expression
+#'
 #' @export
 #' @name RegexFind
-`%~l%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
+`%grepl%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
 #' @export
-#' @name RegexFind
-`%~i%` <- function(x, pattern) which(x %~l% pattern)
+#' @rdname RegexFind
+`%grepi%` <- function(x, pattern) which(x %grepl% pattern)
 #' @export
-#' @name RegexFind
-`%~n%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
+#' @rdname RegexFind
+`%grepn%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
 #' @export
-#' @name RegexFind
-`%~m%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
-#' @name RegexFind
+#' @rdname RegexFind
+`%grepm%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
+#' @rdname RegexFind
 #' @export
-`%~%` <- `%~l%`
+`%grep%` <- `%grepl%`
+#' @export
+#' @rdname RegexFind
+`%lgrepl%` <- function(list, pattern) Reduce(`|`, lapply(list, `%grepl%`, pattern = pattern)) 
+#' @export
+#' @rdname RegexFind
+`%lgrepi%` <- function(list, pattern) which(list %lgrepl% pattern)
+#' @export
+#' @rdname RegexFind
+`%lgrepn%` <- function(list, pattern) Reduce('+', lapply(list, `%grepn%`, pattern = pattern))
+
 
 
 # regexParse <- function(str, ..., toEnv = TRUE) {

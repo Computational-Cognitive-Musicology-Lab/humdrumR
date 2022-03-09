@@ -236,7 +236,7 @@ hop <- function(vec, pattern, start = 1L, end = length(vec)) {
 
 
 
-windowEdges <- function(inds, start, end, bounds = 'exclude') {
+windowEdges <- function(inds, start, end, bounds = 'exclude', nested = TRUE) {
           if (pmatch(bounds, 'exclude', 0L)) {
                     ok <- !unlist(do.call('Map', c(`|`, lapply(inds, \(x) x < start | x > end | is.na(x)))))
           } else {
@@ -255,49 +255,170 @@ windowEdges <- function(inds, start, end, bounds = 'exclude') {
           return(lapply(inds, '[', ok)) 
 }
 
+#' Windowing data
+#' 
+#' @name humWindows
+NULL
 
 #' @export
-#' @name humWindows
-nest <- function(vec, open, close, depth = 1) {
-          opens <- stringi::stri_count_regex(vec, open)
-          closes <- stringi::stri_count_regex(vec, close)
-          
-          if (!any(opens) && !any(closes)) return(list(Open = c(), Close = c()))
-          
-          openscum  <- cumsum(opens)
-          closescum <- head(cumsum(c(0, closes)), -1)
-          depths <- openscum - closescum
-          if (tail(depths, 1) != 0L && 
-              tail(closescum, 1) == 0L) stop(call. = FALSE,
-                                             paste0("In your call to humdrumR::nest", 
-                                                    "the input vector does not have matching ", 
-                                                    open, 
-                                                    " and ", 
-                                                    close, " tokens."))
-          
-          cdepth <- sapply(1:max(closes), \(m) (depths * (closes >= m)) - (closes > 0) * (m - 1))
-          odepth <- sapply(1:max(opens ), \(m) (depths * (opens >= m)) - (opens > 0) * (m - 1))
-          
-          lapply(1:max(depths),
-                 \(d) {
-                           cbind(opens = apply(odepth == d, 1, any),
-                                 closes = apply(cdepth == d, 1, any))
-                           
-                 }) -> hits
-          
-          out <- do.call('abind', c(hits, along = 3))
-          
-          dimnames(out) <- list(Vector = vec,
-                                Bound = c('Open', 'Close'),
-                                Depth = 1:dim(out)[3])
-          
-          if (!any(depth <= length(dim(out)))) return(list(Open = c(), Close = c()))
-          
-          list(Open  = which(out[ , 1, depth, drop = FALSE], arr.ind = T)[ , 'Vector'],
-               Close = which(out[ , 2, depth, drop = FALSE], arr.ind = T)[ , 'Vector'])
-          
-          
+#' @rdname humWindows
+nested <- function(x, open = '(', close = ')', depth = 1L) {
+  open <- gsub('\\(', '\\\\(', open)
+  opens <- stringi::stri_count_regex(x, open)
+  
+  close <- gsub('\\)', '\\\\)', close)
+  closes <- stringi::stri_count_regex(x, close)
+  
+  if (!any(opens) && !any(closes)) return(integer(length(x)))
+  
+  openscum  <- cumsum(opens)
+  closescum <- cumsum(lag(closes, 1L, fill = 0L))
+  depth_vec <- openscum - closescum
+  if (tail(depth_vec, 1L) != 0L && 
+      tail(closescum, 1L) == 0L) .stop("In your call to humdrumR::nest", 
+                                       "the input vector does not have matching {open}", 
+                                       " and {close} tokens.")
+  
+  indices <- rbindlist(c(list(data.table(Open = integer(0L), Close = integer(0L), Depth = integer(0L))),
+                         lapply(setdiff(intersect(depth_vec, depth), 0L),
+                                \(d) {
+                                  
+                                  dhit <- ifelse(pmax(opens - 1, 0) == d, depth_vec - pmax(opens - 1, 0), depth_vec) == d
+                                  data.table(Open = which(as.logical(opens) & dhit),
+                                             Close = which(as.logical(closes) & dhit),
+                                             Depth = d)
+                                })))  
+  
+  if (0L %in% depth && 0L %in% depth_vec) {
+    zeroblocks <- segments(as.integer(depth_vec == 0L)) * (depth_vec == 0L)
+    zeroblocks[zeroblocks == 0L] <- NA_integer_
+    zeroblocks <- tapply(seq_along(x), zeroblocks, simplify = FALSE,
+                         \(block) {
+                           data.table(Open = min(block),
+                                      Close = max(block),
+                                      Depth = 0L)
+                           })
+    indices <- rbindlist(c(list(indices), zeroblocks))
+  }
+ 
+  setorder(indices, Open, Depth) 
+  indices
+
+  
+}
+
+
+# context ~ open('(') ~ close(next(open) - 1)
+# context ~ open('(') ~ close(')')
+# context ~ close(';') ~ open(next(close) - 5)
+# context ~ close(';') ~ open(next(close) - 'IV|ii')
+# context ~ open(hop = 1, start = 'a', end = ';') ~ close(open + 4)
+# context ~ open(hop = 1, start = 'a', end = ';') ~ close(open + ';', open + 4)
+# context ~ open('1') ~ close(';') ~ open(close + next('1'))
+
+# context ~ '(' ~ Next(open) - 1
+# context ~ '(' ~ ')'
+# context ~ '(' ~ ')' ~ nested(depth = 1)
+# context ~ Next(close) - 5       ~ ';'
+# context ~ Next(close) - 'IV|ii' ~ ';'
+# context ~ 'a' ~ hop(5) ~ open + 4 ~ ';'
+
+# context ~ windower(Token, '(', Next(open) - 1L))
+# context ~ windower(Token, '(', ')')
+# context ~ windower(Token, '(', ')', nested = TRUE, depth = 1:2)
+# context ~ windower(Token, close - 5, ';')
+# context ~ windower(Token, before(close, 'IV|ii'), ';')
+
+windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x)) {
+  open <- rlang::enexpr(open)
+  close <- rlang::enexpr(close)
+  
+  openexpr <- deparse(open)
+  closeexpr <- deparse(close)
+  
+  open_depends  <- !is.null(namesInExpr('close', open))
+  close_depends <- !is.null(namesInExpr('open', close))
+  
+  if (open_depends && close_depends) .stop("Contextual window anchors (open or close) can't refer to each other.")
+  
+  open  <- symbolApply(open,  \(atom) if (is.character(atom)) rlang::expr({grepi_multi(x, !!atom)}) else atom)
+  open <- recurseExpr(open, \(expr) expr[[1]] == quote(hop), \(expr) rlang::expr(seq(!!start, !!end, by = !!expr[[2]])))
+  close <- symbolApply(close, \(atom) if (is.character(atom)) rlang::expr({grepi_multi(x, !!atom)}) else atom)
+  close <- recurseExpr(close, \(expr) expr[[1]] == quote(hop), \(expr) rlang::expr(seq(!!start, !!end, by = !!expr[[2]])))
+  
+  if (open_depends) {
+    close <- eval(close)
+    open <- eval(open)
+    
+  } else {
+    open <- eval(open)
+    close <- eval(close)
+  }
+  
+  if (length(open) != length(close)) {
+    if (open_depends || close_depends) {
+      .stop("Sorry, in the windower function, if use open or close arguments that refer to each other,",
+            "the resulting dependent must be the same length as the thing it depends on.",
+            "In this case, {{ {openexpr} }} evaluates with length {length(open)}, while {{ {closeexpr} }}",
+            "evaluates with length {length(close)}.",
+            "It's best to stick with the basic usages of windower described in the documentation (?windower).",
+            "More sophisticated things are possible, but you'll need to do a little more 'manual' wrangling.")
+    } 
+    
+    close <- close %after% open
+    
+  }
+
+  
+  
+  
+  data.frame(Open = open, Close = close)
+  
+  
+}
+
+
+nest <- function(ind, x) {
+  open <- ind$Open
+  close <- ind$Close
+  
+  depth <- cumsum(c(rep(1,length(b)), rep(-1,length(d)))[order(c(b,d))])
+  
+  cbind(sort(c(open, close)), depth)
+}
+grepi_multi <- function(x, pattern) {
+  pattern <- stringr::str_replace_all(pattern, '\\(' , '\\\\(')
+  pattern <- stringr::str_replace_all(pattern, '\\)' , '\\\\)')
+  
+  ns <- x %grepn% pattern
+  rep(x %grepi% pattern, ns[ns > 0L])
 }
 
 
 
+
+
+
+first <- function(x) nth(x, 1L)
+last  <- function(x) lth(x, 1L)
+nth <- first <- function(x, n) {
+  if (n > length(x)) return(vectorNA(1L, class(x)))
+  x[n]
+}
+lth  <- function(x, n) {
+  if (n > length(x)) return(vectorNA(1L, class(x))) 
+  x[(length(x) + 1L) - n]
+  }
+  
+Next <- function(x) lead(x, 1L)
+Prev <- function(x) lag(x, 1L)
+
+
+`%before%` <- function(hits, anchors) {
+  i <- findInterval(anchors, hits, left.open = T)
+  i[i == 0 | i > length(hits)] <- NA_integer_
+  hits[i]
+}
+`%after%` <- function(hits, anchors) {
+  -rev(sort(-hits) %before% sort(-anchors))
+}
