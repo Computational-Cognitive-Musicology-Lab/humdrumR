@@ -20,7 +20,7 @@ windows(
 
 hop(vec, pattern, start = 1L, end = length(vec))
 
-nested(vec, open = "(", close = ")", depth = 1L, nested = TRUE)
+nested(x, open = "(", close = ")", depth = 1L)
 }
 \description{
 Applying functions across arbitrary windows.

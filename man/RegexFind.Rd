@@ -2,22 +2,38 @@
 % Please edit documentation in R/Regex.R
 \name{RegexFind}
 \alias{RegexFind}
-\alias{\%~l\%}
-\alias{\%~i\%}
-\alias{\%~n\%}
-\alias{\%~m\%}
-\alias{\%~\%}
+\alias{\%grepl\%}
+\alias{\%grepi\%}
+\alias{\%grepn\%}
+\alias{\%grepm\%}
+\alias{\%grep\%}
+\alias{\%lgrepl\%}
+\alias{\%lgrepi\%}
+\alias{\%lgrepn\%}
 \title{Match strings against regular expression}
 \usage{
-x \%~l\% pattern
+x \%grepl\% pattern
 
-x \%~i\% pattern
+x \%grepi\% pattern
 
-x \%~n\% pattern
+x \%grepn\% pattern
 
-x \%~m\% pattern
+x \%grepm\% pattern
 
-x \%~\% pattern
+x \%grep\% pattern
+
+list \%lgrepl\% pattern
+
+list \%lgrepi\% pattern
+
+list \%lgrepn\% pattern
+}
+\arguments{
+\item{x}{A vector to search in}
+
+\item{pattern}{One or more regular expression}
+
+\item{list}{A list of vectors (all the same length) to search in}
 }
 \description{
 These infix functions are simply syntactic sugar for
@@ -26,11 +42,13 @@ If the a vector of regexes is given as the right argument, matches to \emph{any}
 }
 \details{
 \itemize{
-\item \verb{\%~l\%}: Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base:grep]{base::grepl()}}.
-\item \verb{\%~\%}: The "default"---same as \verb{\%~l\%}.
-\item \verb{\%~i\%}: Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base:grep]{base::grep()}}.
-\item \verb{\%~n\%}: Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more
+\item \verb{\%grepl\%}: Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base:grep]{base::grepl()}}.
+\item \verb{\%grep\%}: The "default"---same as \verb{\%grepl\%}.
+\item \verb{\%grepi\%}: Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base:grep]{base::grep()}}.
+\item \verb{\%grepn\%}: Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more
 than one match occurs in the same token). Shorthand for \code{\link[stringi:stri_count]{stringi::stri_count_regex()}}.
-\item \verb{\%~m\%}: Matches \code{pattern} in \code{x} and returns matching strings (or NA if no match). Shorthand for \code{\link[stringi:stri_extract]{stringi::stri_extract_first_regex()}}
+\item \verb{\%grepm\%}: Matches \code{pattern} in \code{x} and returns matching strings (or NA if no match). Shorthand for \code{\link[stringi:stri_extract]{stringi::stri_extract_first_regex()}}
 }
+
+Each regex infix has an "lapply" version, called \verb{\%lgrepx\%}.
 }
