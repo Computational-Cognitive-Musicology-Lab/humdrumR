@@ -329,7 +329,7 @@ nested <- function(x, open = '(', close = ')', depth = 1L) {
 # context ~ windower(Token, close - 5, ';')
 # context ~ windower(Token, before(close, 'IV|ii'), ';')
 
-windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x)) {
+windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x), nest = FALSE, depth = NULL) {
   open <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   
@@ -364,28 +364,62 @@ windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x)
             "It's best to stick with the basic usages of windower described in the documentation (?windower).",
             "More sophisticated things are possible, but you'll need to do a little more 'manual' wrangling.")
     } 
-    
-    close <- close %after% open
+    close <- close[close > min(open)]
+    # close <- close %after% open
     
   }
 
   
+  output <- data.table(Open = open, Close = close)
+  output <- depth(output, nest = nest, depth = depth)
   
   
-  data.frame(Open = open, Close = close)
-  
+  attr(output, 'vector') <- x
+  output
   
 }
 
+print.windows <- function(x) {
+  plot.new()
+  vec <- attr(x, 'vector')
+  
+  plot.window(ylim = c(0, max(x$Depth)),xlim = c(0, length(vec)))
+  
+  text(1:length(vec), rep(0, length(vec)), vec)
+  y <- x$Depth
+  graphics::arrows(x$Open, x$Close, y0 = y, y1= y, angle = 90, code = 3)
+  
+ 
+}
 
-nest <- function(ind, x) {
+
+depth <- function(ind, nest = FALSE, depth = NULL) {
   open <- ind$Open
   close <- ind$Close
   
-  depth <- cumsum(c(rep(1,length(b)), rep(-1,length(d)))[order(c(b,d))])
+  steps <- c(rep(1, length(open)), rep(-1, length(close)))[order(c(open, close))]
+  contour <- cumsum(steps)
   
-  cbind(sort(c(open, close)), depth)
+  ind$Depth <- contour[steps == 1L]
+  depthclose <- contour[steps == -1L]
+  
+  if (nest) {
+    matches <- which(outer(ind$Close, ind$Open, `>`) & outer(depthclose + 1L, ind$Depth, '=='), arr.ind = TRUE)
+    newind <- matches[ !duplicated(matches[ , 'col']), 'row']
+    
+    ind$Close <- ind$Close[newind]
+    depthclose <- depthclose[newind]
+    
+  }
+  
+  if (!is.null(depth)) {
+    depth <- ifelse(depth < 0L, max(ind$Depth) + 1L + depth, depth)
+    ind <- ind[Depth %in% depth]
+  }
+  
+  ind 
 }
+
 grepi_multi <- function(x, pattern) {
   pattern <- stringr::str_replace_all(pattern, '\\(' , '\\\\(')
   pattern <- stringr::str_replace_all(pattern, '\\)' , '\\\\)')
