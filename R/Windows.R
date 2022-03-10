@@ -1,58 +1,3 @@
-#' 
-#' @export
-applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
-                       fill = NA, splat = !is.null(by), ...) {
-  # vecs is list of vectors  of same length
-  if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
-  
-  if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
-  if (!allsame(lengths(vecs))) stop("You have tried to applyNgram across multiple vectors of different lengths, but this is not supported.", .call = FALSE)
-  
-  n <- n - (sign(n))
-  
-  
-  if (n == 0) { 
-    output <- do.call('Map', c(f, vecs))
-  } else {
-    
-    starts <- seq_along(vecs[[1]])
-    if (pad) {
-      vecs <- lapply(vecs, \(vec) c(rep(NA, abs(n)), vec, rep(NA, abs(n))))
-      starts <- starts + abs(n)
-    } else {
-      starts <- starts[ (starts + n) <= length(vecs[[1]]) & starts + n >= 1]
-    }
-    
-    inds   <- if (sign(n) == 1) Map(`:`, starts, starts + n) else Map(`:`, starts + n, starts)
-    
-    #
-    
-    ngs <- lapply(vecs, 
-                  function(vec) {
-                    lapply(inds, \(i) vec[i])
-                  })
-    .f <- if (splat) { 
-      function(...) {do.call('f', list(...)) }
-      } else {
-        f
-      }
-    output <- do.call('Map', c(.f, ngs))
-    
-    if (pad && !is.na(fill)) output <- lapply(output,
-                                                function(out) {
-                                                  if (is.character(out)) gsub('NA', fill, out) else `[<-`(out, is.na(out), fill)
-                                                })
-                                                
-  } #end of if(n == 0) else
-  
-  if (all(lengths(output) == 1)) output <- unlist(output)
-  
-  output
-  
-}
-
-
-
 
 
 
@@ -125,15 +70,15 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 # context ~ Next(close) - 'IV|ii' ~ ';'
 # context ~ 'a' ~ hop(5) ~ open + 4 ~ ';'
 
-# context ~ windower(Token, '(', Next(open) - 1L))
-# context ~ windower(Token, '(', ')')
-# context ~ windower(Token, '(', ')', nested = TRUE, depth = 1:2)
-# context ~ windower(Token, close - 5, ';')
-# context ~ windower(Token, before(close, 'IV|ii'), ';')
+# context ~ findWindows(Token, '(', Next(open) - 1L))
+# context ~ findWindows(Token, '(', ')')
+# context ~ findWindows(Token, '(', ')', nested = TRUE, depth = 1:2)
+# context ~ findWindows(Token, close - 5, ';')
+# context ~ findWindows(Token, before(close, 'IV|ii'), ';')
 #' Create arbitrary "windows" across vectors.
 #' @export
 #' @name humWindows
-windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x), nest = FALSE, depth = NULL, boundaries = NULL) {
+findWindows <- function(x, open, close = Next(open) - 1L, start =1, end = length(x), nest = FALSE, depth = NULL, boundaries = NULL) {
   open <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   
@@ -161,14 +106,14 @@ windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x)
   
   if (length(open) != length(close)) {
     if (open_depends || close_depends) {
-      .stop("Sorry, in the windower function, if use open or close arguments that refer to each other,",
+      .stop("Sorry, in the findWindows function, if use open or close arguments that refer to each other,",
             "the resulting dependent must be the same length as the thing it depends on.",
             "In this case, {{ {openexpr} }} evaluates with length {length(open)}, while {{ {closeexpr} }}",
             "evaluates with length {length(close)}.",
-            "It's best to stick with the basic usages of windower described in the documentation (?windower).",
+            "It's best to stick with the basic usages of findWindows described in the documentation (?findWindows).",
             "More sophisticated things are possible, but you'll need to do a little more 'manual' wrangling.")
     } 
-    close <- close[close > min(open)]
+    close <- close[close >= min(open)]
     # close <- close %after% open
     
   }
@@ -179,9 +124,9 @@ windower <- function(x, open, close = Next(open) - 1L, start =1, end = length(x)
   
   
   if (!is.null(boundaries)) {
-    if (any(lengths(boundaries) != length(x))) .stop("In a call to windower, all vectors in the list boundaries must be", 
+    if (any(lengths(boundaries) != length(x))) .stop("In a call to findWindows, all vectors in the list boundaries must be", 
                                                      "the same length as x.")
-    output <- removeCrossings(output, boundaries)
+    output <- removeCrossing(output, boundaries)
   }
   
   attr(output, 'vector') <- x
@@ -222,9 +167,11 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
     
   }
   
+  maxdepths <- tapply_inplace(contour, segments(contour ==0),\(x) rep(max(x), length(x)))[steps == 1]
+  ind$RevDepth <- ind$Depth - maxdepths - 1L
+  
   if (!is.null(depth)) {
-    depth <- ifelse(depth < 0L, max(ind$Depth) + 1L + depth, depth)
-    ind <- ind[Depth %in% depth]
+    ind <- ind[Depth %in% depth | RevDepth %in% depth]
   }
   
   ind 
@@ -251,6 +198,98 @@ removeCrossing <- function(x, boundaries) {
   x
   
 }
+
+# Applying functions across windows ----
+
+#' @rdname humWindows
+#' @export
+windowApply <- function(x, func = c, windows, ..., reference = x, rebuild = TRUE, leftEdge = TRUE) {
+  if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
+  
+  if (missing(windows)) windows <- findWindows(reference, ...)
+  
+  indices <- Map(':', windows$Open, windows$Close)
+  
+  x_windowed <- lapply(indices, \(i) x[i])
+  
+  result_windowed <- lapply(x_windowed, func)
+  
+  if (rebuild) {
+    
+    if (all(lengths(result_windowed) == 1L)) {
+      result <- unlist(result_windowed)
+      x[if (leftEdge) windows$Open else windows$Close ] <- result
+      notstarts <- unlist(lapply(indices, '[', i = -1L))
+      notstarts <- notstarts[!notstarts %in% unique(if (leftEdge) windows$Open else windows$Close)]
+      x[notstarts] <- NA
+    } else {
+      Map(\(i, v) x[i] <<- v[1:min(length(i), length(v))], indices, result_windowed)
+    }
+    
+    
+  
+    x 
+  } else {
+    result_windowed
+  }
+}
+
+#' @rdname humWindows
+#' @export
+applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
+                       fill = NA, splat = !is.null(by), ...) {
+  # vecs is list of vectors  of same length
+  if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
+  
+  if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
+  if (!allsame(lengths(vecs))) stop("You have tried to applyNgram across multiple vectors of different lengths, but this is not supported.", .call = FALSE)
+  
+  n <- n - (sign(n))
+  
+  
+  if (n == 0) { 
+    output <- do.call('Map', c(f, vecs))
+  } else {
+    
+    starts <- seq_along(vecs[[1]])
+    if (pad) {
+      vecs <- lapply(vecs, \(vec) c(rep(NA, abs(n)), vec, rep(NA, abs(n))))
+      starts <- starts + abs(n)
+    } else {
+      starts <- starts[ (starts + n) <= length(vecs[[1]]) & starts + n >= 1]
+    }
+    
+    inds   <- if (sign(n) == 1) Map(`:`, starts, starts + n) else Map(`:`, starts + n, starts)
+    
+    #
+    
+    ngs <- lapply(vecs, 
+                  function(vec) {
+                    lapply(inds, \(i) vec[i])
+                  })
+    .f <- if (splat) { 
+      function(...) {do.call('f', list(...)) }
+    } else {
+      f
+    }
+    output <- do.call('Map', c(.f, ngs))
+    
+    if (pad && !is.na(fill)) output <- lapply(output,
+                                              function(out) {
+                                                if (is.character(out)) gsub('NA', fill, out) else `[<-`(out, is.na(out), fill)
+                                              })
+    
+  } #end of if(n == 0) else
+  
+  if (all(lengths(output) == 1)) output <- unlist(output)
+  
+  output
+  
+}
+
+
+
+
 
 # Tools ----
 
