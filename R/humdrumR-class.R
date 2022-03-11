@@ -1999,7 +1999,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   
   ## censor lines beyond max.records.file
   filei <- tapply_inplace(File, File, seq_along)
-  i <- ifelse(File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
+  i <- ifelse(length(unique(File)) == 1L | File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
   tokmat <- tokmat[i, , drop = FALSE]
   global <- global[i]
   
@@ -2078,37 +2078,38 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     
     tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
                                    \(i) {
-                                       if (sum(grepl('^=', tokmat[i, 1])) < 2 && length(i) <= collapseNull) {
-                                           tokmat[i , , drop = FALSE] 
-                                        } else {
-                                           fill <- if (any(grepl('^=', tokmat[i, 1]))) {
-                                               bars <- tokmat[i, , drop = FALSE][grepl('^=', tokmat[i, 1]), 1]
-                                               barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
-                                               base <- strrep('=', length(bars))
-                                               
-                                               if (any(!is.na(barnums))) {
-                                                   barnums <- barnums[!is.na(barnums)]
-                                                   base <- paste0(base, paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-'))
-                                               } 
-                                               newRN <- paste(names(bars)[c(1, length(bars))], collapse = '-')
-                                               base
-                                               
-                                           } else {
-                                               newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
-                                               
-                                               strrep('.', length(i) - 1)
-                                           }
+                                       nbars <- sum(grepl('^=', tokmat[i, 1]))
+                                       
+                                       if (nbars == 1 || length(i) <= collapseNull) return(tokmat[i, , drop = FALSE])
+                                       
+                                       fill <- if (nbars > 0L) {
+                                           bars <- tokmat[i, , drop = FALSE][grepl('^=', tokmat[i, 1]), 1]
+                                           barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
+                                           base <- strrep('=', length(bars))
                                            
-                                           newRN <- c(rownames(tokmat)[i[1]], newRN)
-                                           # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
-                                           tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
-                                           rownames(tokmat) <- newRN
+                                           if (any(!is.na(barnums))) {
+                                               barnums <- barnums[!is.na(barnums)]
+                                               barnums <- paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-')
+                                           } 
+                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
                                            
-                                           tokmat
+                                           paste0(base, barnums)
                                            
+                                       } else {
+                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
                                            
-                                           
-                                        }
+                                           strrep('.', length(i) - 1)
+                                       }
+                                       newRN <- c(rownames(tokmat)[i[1]], newRN)
+                                       # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
+                                       tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
+                                       rownames(tokmat) <- newRN
+                                       
+                                       tokmat
+                                       
+                                       
+                                       
+                                       
                                        
                      })
     tokmat <- do.call('rbind', tokmat)
