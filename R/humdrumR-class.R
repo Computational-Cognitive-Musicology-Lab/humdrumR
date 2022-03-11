@@ -704,9 +704,15 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     outMat[outMat == '_C'] <- padder
                     outMat[outMat == '_P'] <- padder
                     outMat[outMat == 'NA'] <- padder
-                    dimnames(outMat) <- c(list(File.Record = with(getHumtab(x, dataTypes = dataTypes), paste0(File, '.', Record)),
+                    
+                    ## dimnames and sort
+                    humtab <- getHumtab(x, dataTypes = dataTypes)
+                    
+                    dimnames(outMat) <- c(list(File.Record = humtab[ , paste0(File, '.', Record)],
                                                Column = 1:ncol(outMat)),
                                           if (length(dim(outMat)) == 3L) list(Field = colnames(records)) else NULL)
+                    outMat <- outMat[order(humtab$File, humtab$Record), , drop = FALSE]
+                        
                     
                     outMat
                     
