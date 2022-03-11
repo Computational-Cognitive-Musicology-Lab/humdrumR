@@ -400,7 +400,7 @@ makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 
     paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
 }
 
-makeRE.contours <- function(octave.integer = TRUE, up = '^', down = 'v', ...) {
+makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) {
     if (octave.integer) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
@@ -437,7 +437,7 @@ makeRE.interval <- function(parts = c("species", "step"), collapse = TRUE, quali
 }
 
 makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, ..., regexname = 'scaleDegree')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, ..., regexname = 'scaleDegree')
 }
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse = TRUE) {

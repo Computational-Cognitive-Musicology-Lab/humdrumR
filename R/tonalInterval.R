@@ -148,7 +148,7 @@ setMethod("initialize",
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
     if (missing(octave) || is.null(octave)) {
-      octave <- -floor(tint2semit(tint(0L, LO5th) %% tint(-11L, 7L)) / 12)
+      octave <- -floor(tint2semit(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12)
     }
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
