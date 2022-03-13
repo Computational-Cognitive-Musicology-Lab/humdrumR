@@ -289,6 +289,7 @@ NULL
 #' @name with-in-Humdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
+          checkhumdrumR(humdrumR)
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
          
           ###
@@ -366,6 +367,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' @name with-in-Humdrum
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
+    checkhumdrumR(humdrumR)
     list2env(.withHumdrum(humdrumR, ..., withfunc = 'withHumdrum'), envir = environment())
   
     result[ , `_rowKey_` := NULL]
@@ -829,6 +831,8 @@ getTandem <- function(tandem, regex) {
   # it so the user doesn't have to think about these commas,
   # but they get taken into account...I'm not sure if it 
   # will always work the way we want.
+  
+  checkArgs(tandem, valid = c("L"))
           
   tandem <- paste0(',', tandem, ',')
   
@@ -1014,6 +1018,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' 
 #' @export
 interpolateArguments <- function(quo, namedArgs) {
+    checkArgs(namedArgs)
     expr <- rlang::quo_get_expr(quo)
     expr <- .interpolateArguments(expr, namedArgs)
     
@@ -1359,6 +1364,7 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' @name with-in-humdrum
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
+          checkhumdrumR(humdrumR)
           exprs <- rlang::quos(...)
           keywords <- names(exprs)
           
