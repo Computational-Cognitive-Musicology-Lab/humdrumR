@@ -161,10 +161,14 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 
 #' @export
-getRoot <- function(dset) dset@Root %dim% dset
+getRoot <- function(dset){
+  checkArgs(dset)
+  dset@Root %dim% dset
+} 
 
 #' @export
 getRootTint <- function(dset) {
+    checkArgs(dset)
     root <- getRoot(dset)
     
     out <- LO5thNcentralOct2tint(root, 0L)
@@ -173,10 +177,14 @@ getRootTint <- function(dset) {
 }
 
 #' @export getSignature
-getSignature <- function(dset)  dset@Signature %dim% dset
+getSignature <- function(dset){
+    checkArgs(dset)
+    dset@Signature %dim% dset
+}  
 
 #' @export
 getMode <- function(dset) {
+    checkArgs(dset)
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset)
     sign <- getSignature(dset)
@@ -200,7 +208,10 @@ getAlterations <- function(dset) {
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
-is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
+is.diatonicSet <- function(x){
+    checkArgs(x)
+    inherits(x, 'diatonicSet')
+} 
 
 ###.. formatting methods ####
 
@@ -225,6 +236,7 @@ setMethod('as.character', signature = c('diatonicSet'), function(x) dset2key(x))
 #' @export
 order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
+                    checkArgs(x)
                     x <- do.call('c', list(x, ...))
                     if (parallel) {
                       order(x@Root, -x@Signature,
@@ -848,6 +860,7 @@ integer2dset <- function(x) dset(x, x)
 # romanKey.character <- romanKey.tertianSet %.% as.tertianSet
 
 mapPartition <- function(func, split = '/') {
+    checkArgs(func)
     function(str) {
         parts <- strPartition(str, split = split)
         
@@ -970,11 +983,20 @@ is.major <- function(x) UseMethod('is.major')
 #' @export
 is.minor <- function(x) UseMethod('is.minor')
 #' @export
-is.major.diatonicSet <- function(x) getMode(x) >= 1L
+is.major.diatonicSet <- function(x){
+    checkArgs(x)
+    getMode(x) >= 1L
+} 
 #' @export
-is.minor.diatonicSet <- function(x) getMode(x) < -1L
+is.minor.diatonicSet <- function(x){
+    checkArgs(x)
+    getMode(x) < -1L
+} 
 #' @export
-is.minor.diatonicSet <- function(x) getMode(x) == -3L
+is.minor.diatonicSet <- function(x){
+    checkArgs(x)
+    getMode(x) == -3L
+} 
 #' @export
 is.minor.character <- is.minor.diatonicSet %.% char2dset
 

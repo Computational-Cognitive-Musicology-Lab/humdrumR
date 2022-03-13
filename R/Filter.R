@@ -263,18 +263,21 @@ removeNull <- function(humdrumR, recordTypes = 'GLIMDd', ...) {
 #' @export
 #' @rdname filterHumdrum
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
+  checkhumdrumR(humdrumR, 'removeEmptyFiles')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File)
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
+  checkhumdrumR(humdrumR, 'removeEmptySpines')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
+  checkhumdrumR(humdrumR, 'removeEmptyRecords')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
   removeNull(humdrumR, 'GLIMDd', by ~ File ~ Record)
 }
