@@ -576,7 +576,10 @@ setMethod('initialize', 'humdrumR',
 
 #' @name humdrumR-class
 #' @export
-is.humdrumR <- function(x) inherits(x, 'humdrumR')
+is.humdrumR <- function(x){
+    checkArgs(x)
+    inherits(x, 'humdrumR')  
+} 
 
 
 #' humdrumR Coercion.
@@ -646,6 +649,9 @@ setMethod('as.vector',
 #' @export
 as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
                      alignColumns = FALSE, padPaths = FALSE, padder = '') {
+    
+          checkhumdrumR(humdrumR, 'as.lines')
+            
           dataTypes <- checkTypes(dataTypes, 'as.lines')
           
           mat <- as.matrix(humdrumR, dataTypes = dataTypes, padder = padder,
