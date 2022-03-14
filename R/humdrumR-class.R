@@ -676,6 +676,8 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
                    alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
+                    
+                    checkArgs(x, valid = c('D'))
     
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
@@ -737,6 +739,7 @@ setMethod('as.data.frame',
 #' @name humCoercion
 #' @export
 as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
+          checkhumdrumR(humdrumR, 'as.matrices')
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
           n <- length(humdrumR)
           lapply(1:n,
@@ -749,6 +752,7 @@ as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = N
 #' @name humCoercion
 #' @export 
 as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
+          checkhumdrumR(humdrumR, 'as.data.frames')
           lapply(as.matrices(humdrumR, dataTypes = 'D', fieldnames = NULL, 
                              padder = NA, path.fold = TRUE), as.data.frame)
 }
@@ -760,6 +764,7 @@ as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder 
 # this function tests if the active column is a vector or not
 #' @export
 isActiveAtomic <- function(humdrumR) {
+          checkhumdrumR(humdrumR, 'isActiveAtomic')
           act <- evalActive(humdrumR)
           !is.object(act) && !is.list(act) 
 }
@@ -791,6 +796,7 @@ isActiveAtomic <- function(humdrumR) {
 #' @name humSize
 #' @export
 nrecords <- function(humdrumR, dataTypes = 'D') {
+          checkhumdrumR(humdrumR, 'nrecords')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
           n <- humtab[Stop == 1L | is.na(Stop) , .(NR = length(unique(Record))), by = Filename] 
@@ -801,6 +807,7 @@ nrecords <- function(humdrumR, dataTypes = 'D') {
 #' @name humSize
 #' @export
 ntokens <- function(humdrumR, dataTypes = 'D') {
+          checkhumdrumR(humdrumR, 'ntokens')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
           
           nrow(humtab)
@@ -809,6 +816,7 @@ ntokens <- function(humdrumR, dataTypes = 'D') {
 #' @name humSize
 #' @export
 npieces <- function(humdrumR) {
+          checkhumdrumR(humdrumR, 'npieces')
           humtab <- getD(humdrumR)
           
           length(unique(humtab$File))
@@ -888,6 +896,8 @@ anyStops <- function(humdrumR) {
 #' @export
 is.ragged <- function(humdrumR) {
           # Do the pieces in the corpus vary in number of columns?
+            
+          checkhumdrumR(humdrumR, 'is.ragged')
           
           humtab <- getD(humdrumR)
           
@@ -1004,6 +1014,8 @@ mergeHumdrum <- function(...) {
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
+    
+    checkhumdrumR(humdrumR, 'spinePipe')
     
     if (any(destinationSpines %in% targetSpines)) stop(call. = FALSE, 
                                                        "In your call to spinePipe, the target and destination spines can't overlap.")
@@ -1387,6 +1399,8 @@ NULL
 #' @name humActive
 #' @export
 evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA)  {
+  checkhumdrumR(humdrumR, 'evalActive')
+    
   dataTypes <- checkTypes(dataTypes, 'evalActive')
   
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
@@ -1434,7 +1448,10 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
 #' `getActive(humdata)` is simply an accessor for the humdrumR object's Active quosure.
 #' @name humActive
 #' @export
-getActive <- function(humdrumR) humdrumR@Active
+getActive <- function(humdrumR){
+    checkhumdrumR(humdrumR)
+    humdrumR@Active 
+} 
 
 
 #' `setActive` takes a [humdrumR-class] object and a formula
@@ -1442,6 +1459,7 @@ getActive <- function(humdrumR) humdrumR@Active
 #' @name humActive
 #' @export
 setActive <- function(humdrumR, form) {
+  checkhumdrumR(humdrumR, 'setActive')
   putActive(humdrumR, rlang::as_quosure(form))
 }
 
@@ -1454,6 +1472,7 @@ setActive <- function(humdrumR, form) {
 #' @name humActive
 #' @export
 setActiveFields <- function(humdrumR, fieldnames) {
+  checkhumdrumR(humdrumR, 'setActiveFields')
   fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'setActiveFields', argname = 'fieldnames')
   actquo <- if (length(fieldnames) > 1L) {
             rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
@@ -1563,6 +1582,9 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
   #
+
+  checkhumdrumR(humdrumR, 'fields')
+    
   D <- getD(humdrumR)
  
   valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
@@ -1641,6 +1663,9 @@ isField <- function(humdrumR, names) {
 #' Get named 
 #' @export
 getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
+          
+          checkhumdrumR(humdrumR, 'getFields')
+    
           dataTypes <- checkTypes(dataTypes, 'getFields')
           
           if (is.null(fieldnames)) fieldnames <- activeFields(humdrumR)
@@ -1945,6 +1970,9 @@ setMethod('show', signature = c(object = 'humdrumR'),
 #' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
                          max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
+    
+  checkhumdrumR(humdrumR, 'print_humtab')
+    
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   
   
