@@ -433,11 +433,13 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
 }
 
 makeRE.interval <- function(parts = c("species", "step"), collapse = TRUE, qualities = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99, ..., regexname = 'interval')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99,
+                       flat = 'b', ..., regexname = 'interval')
 }
 
 makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, ..., regexname = 'scaleDegree')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, 
+                       flat = 'b', ..., regexname = 'scaleDegree')
 }
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse = TRUE) {
