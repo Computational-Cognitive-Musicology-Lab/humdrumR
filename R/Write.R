@@ -1,4 +1,7 @@
-#' ------------------------------------>    NEEDS DOCUMENTATION      <------------------------------------------
+
+#' Write `humdrumR` data to humdrum files.
+#' 
+#' ----------NEEDS DOCUMENTATION------------
 #' @export
 writeHumdrum <- function(humdrumR, fieldname = NULL,
                          affix = "_humdrumR", prefix = "", rename = NULL, extension = NULL, 
@@ -40,7 +43,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
                                        prefix, 
                                        if (is.null(rename)) Filename else rename, 
                                        affix, 
-                                       ifelse(is.na(Extension), '', Extension))]
+                                       Extension %|% "")]
     
     
     filenameTable <- filenameTable[ , .SD[1], by = Filename] # get unique value for each file!
@@ -105,7 +108,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     
     ### Write~
     cat(sep = '', 'Writing ', nrow(filenameTable), ' files...')
-    Map(function(str, path) {
+    Map(\(str, path) {
         if (verbose) {
             cat('\n\t\t', path, sep = '')
             

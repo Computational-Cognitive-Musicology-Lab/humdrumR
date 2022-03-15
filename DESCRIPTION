@@ -1,6 +1,6 @@
 Package: humdrumR
 Title: humdrumR
-Version: 0.1.0.9000
+Version: 0.3.0.9000
 Authors@R: person("Nathaniel", "Condit-Schultz", email = "natsguitar@gmail.com", role = c("aut", "cre"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
 Depends: R(>= 4.1), rlang
@@ -12,7 +12,6 @@ StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
          Compose.R
-         Base.R
          humdrumR-class.R
          Summary.R
          Read.R
@@ -35,7 +34,7 @@ Collate: humdrumR-package.R
          Formulae.R
 	 Lyrics.R
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

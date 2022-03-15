@@ -15,6 +15,7 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
 <![endif]--></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
+<<<<<<< HEAD
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
@@ -27,6 +28,20 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
       <span class="navbar-toggler-icon"></span>
     </button>
 
+=======
+
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+>>>>>>> master
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
@@ -50,7 +65,11 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
+<<<<<<< HEAD
   <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+=======
+  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+>>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -63,7 +82,11 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Transpose pitches and keys</h1>
+<<<<<<< HEAD
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R" class="external-link"><code>R/tonalInterval.R</code></a></small>
+=======
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R"><code>R/tonalInterval.R</code></a></small>
+>>>>>>> master
       <div class="d-none name"><code>transpose.Rd</code></div>
     </div>
 
@@ -72,7 +95,11 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
 by various intervals or to target keys.
 Inside the box, inputs and transpositions take place as <code>tonalInterval</code>s or <code>diatonicSet</code>s,
 but any numeric or character string representation of pitches can be transposed as well.
+<<<<<<< HEAD
 This function is incorporated directly into <a href="tonalTransformations.html">tonalTransform</a>, and thence, all <a href="pitchRepresentations.html">pitch translation</a>
+=======
+This function is incorporated directly into tonalTransform, and thence, all pitch translation
+>>>>>>> master
 functions, so you probably won't call it directly very often.</p>
     </div>
 
@@ -130,7 +157,12 @@ The resulting output is <code>{D G# A E F}</code>.</p></li>
 </ol><p>The size of <code>enharmonicWrap</code> effectively determines how extreme accidentals are allowed.
 The default value, <code>12</code>, assures that no output notes are enharmonically equivalent to notes in the key.
 To further illustrate, here is the sequence <code>{C F# G D# E, B- A A- G C# D, B D- C}</code> transposed
+<<<<<<< HEAD
 tonally within C major by all seven possible generic intervals, with <code>enharmonicWrap = 12</code>:</p><table class="table table"><tr><td>Interval</td><td>Output</td></tr><tr><td>Unison</td><td>C  F# G  D  E  B- A  A  G  C# D  B  D  C</td></tr><tr><td>2nd</td><td>D  G# A  E  F  c  B  B- A  D  E  c  E- D</td></tr><tr><td>3rd</td><td>E  A  B  F# G  d  c  c  B  E  F  d  F  E</td></tr><tr><td>4th</td><td>F  B  c  G# A  e- d  d  c  F# G  e  G  F</td></tr><tr><td>5th</td><td>G  c# d  A  B  f  e  e- d  G# A  f  A  G</td></tr><tr><td>6th</td><td>A  d  e  B  c  g  f  f  e  A  B  g  B- A</td></tr><tr><td>7th</td><td>b  ee ff cc#dd aa gg gg ff b  cc aa cc b</td></tr></table></div>
+=======
+tonally within C major by all seven possible generic intervals, with <code>enharmonicWrap = 12</code>:</p>
+</div>
+>>>>>>> master
 
     </div>
     <div class="section level2">
@@ -143,7 +175,11 @@ and tranposition takes place within the key indicated by the <code>Key</code> ar
 For example, if the input is in the key of E major but we want it transposed to G major, we could say <code>to = '*E:'</code>.
 If <code>real = TRUE</code>, input is simply translated to the root of the <code>to</code> key, with all the exact same intervals.
 If <code>real = FALSE</code>, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
+<<<<<<< HEAD
 In either case, the result depends on what the input's key is, which is indicated by the <a href="tonalTransformations.html">standard</a> <code>Key</code> argument.
+=======
+In either case, the result depends on what the input's key is, which is indicated by the standard <code>Key</code> argument.
+>>>>>>> master
 The <code>Key</code> arguments is like the "from" key.
 If <code>Key = NULL</code>, the input key is interpreted as C major.</p>
 <p>Consider the input notes <code>{D B C A# B, D C# D E D}</code> in the key of the G major.
@@ -190,7 +226,11 @@ Thus, you can type commands like <code>"c#" + M2</code> to get <code>d#</code>, 
 
 
     <footer><div class="pkgdown-footer-left">
+<<<<<<< HEAD
   <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
+=======
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+>>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

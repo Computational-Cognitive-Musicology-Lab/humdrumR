@@ -7,18 +7,41 @@
 \S4method{summary}{humdrumR}(object, ...)
 }
 \description{
-\code{\link[humdrumR:humdrumR]{humdrumR}} includes a number of built in
-functions for creating quick summaries of \code{\linkS4class{humdrumR}}
+\link{humdrumR} includes a number of built in functions for creating quick summaries of \link[=humdrumRclass]{humdrumR}
 corpora:
-\describe{
-\item{\link[humdrumR:humCensus]{census}}{Tabulates the raw size of the humdrumR corpus.}
-\item{\link[humdrumR:humReference]{reference}}{Tabulates reference records (metadata) for each file.}
-\item{\link[humdrumR:humPaths]{spines}}{Tabulates the number of spines and spine paths in files in the corpus.}
-\item{\link[humdrumR:humInterpretations]{interpretations}}{Tabulates the types of exclusive and tandem interpretations in the corpus.}
-\item{\link[humdrumR:humSections]{sections}}{Tabulates any formal data (\code{"*>"}) in the corpus.}
-\item{summary}{Calls all of the above functions, and prints
-a condensed version of each.}
 }
-Each function takes a \code{\linkS4class{humdrumR}} object and returns a
+\details{
+\enumerate{
+\item \link[=humCensus]{census}
+\itemize{
+\item Tabulates the raw size of the humdrumR corpus.
+}
+\item \link[=humReference]{reference}
+\itemize{
+\item Tabulates reference records (metadata) for each file.
+}
+\item \link[=humSpines]{spines}
+\itemize{
+\item Tabulates the number of spines and spine paths in files in the corpus.
+}
+\item \link[=humInterpretations]{interpretations}
+\itemize{
+\item Tabulates the types of exclusive and tandem interpretations in the corpus.
+}
+\item \link[=humSections]{sections}
+\itemize{
+\item Tabulates any formal data (\verb{*>}) in the corpus.
+}
+}
+
+Each function takes a \link[=humdrumRclass]{humdrumR} object and returns a
 special class of data.table.
+The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} calls all of the above functions and prints a condensed version of each.
 }
+\seealso{
+Other humdrum data summary functions: 
+\code{\link{humCensus}},
+\code{\link{humInterpretations}},
+\code{\link{humSpines}}
+}
+\concept{humdrum data summary functions}

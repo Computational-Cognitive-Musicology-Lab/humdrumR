@@ -6,6 +6,7 @@
 \alias{foldStops}
 \alias{foldPaths}
 \alias{foldRecords}
+\alias{spinePipe}
 \title{HumdrumR data "Shape"}
 \usage{
 foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
@@ -15,25 +16,29 @@ foldStops(humdrumR, foldAtomic = TRUE, sep = " ")
 foldPaths(humdrumR, foldAtomic = TRUE, sep = " ")
 
 foldRecords(humdrumR, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
+
+spinePipe(humdrumR, targetSpines, destinationSpines)
 }
 \arguments{
-\item{humdrumR}{A \linkS4class{humdrumR} data object.
-(see the \code{\link[humdrumR:humTable]{humdrum table}} documentation \strong{Fields} section for explanation.).}
+\item{humdrumR}{A \link{humdrumRclass} data object.
+(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
 
 \item{foldAtomic}{\code{logical}. If \code{foldAtomic == TRUE}, each stop is collapsed to a single string
 \code{foldAtomic == FALSE}, each stop is collapsed to a list of tokens.}
 
 \item{sep}{\code{character}. If \code{foldAtomic == TRUE}, collapsed tokens are separated by this string.}
 
-\item{pad}{\code{logical}. Should \code{\link[humdrumR:humColumns]{path/column padding tokens}} be included?}
+\item{pad}{\code{logical}. Should \link[=humColumns]{path/column padding tokens} be included?}
 }
 \description{
 These functions are used to change the "shape"
-of data stored in \code{\link[humdrumR:humTable]{humdrum tables}}
-(held within \linkS4class{humdrumR} objects of course).
+of data stored in \link[=humTable]{humdrum tables}
+(held within \link{humdrumRclass} objects of course).
+
+------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 }
 \details{
 The \code{foldXXX} family allows you collapse all
-\code{\link[humdrumR:humTable]{user fields}}
+\link[=humTable]{user fields}
 across groups in another field.
 }

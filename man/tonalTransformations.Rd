@@ -2,26 +2,11 @@
 % Please edit documentation in R/tonalInterval.R
 \name{tonalTransformations}
 \alias{tonalTransformations}
-\alias{tonalTransform}
 \alias{invert}
-\title{Tonal Transformations}
+\title{Invert or transpose tonal intervals.}
 \usage{
-tonalTransform(
-  x,
-  direction = TRUE,
-  delta = FALSE,
-  sigma = Exclusive \%allin\% c("mint"),
-  generic = FALSE,
-  simple = FALSE,
-  roundContour = floor,
-  enharmonic = FALSE,
-  Key = NULL,
-  Exclusive = NULL,
-  ...
-)
-
 invert(tint, around, Key, ...)
 }
 \description{
-Various transformations of pitch information
+Invert or transpose tonal intervals.
 }

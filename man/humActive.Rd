@@ -23,7 +23,7 @@ setActive(humdrumR, form)
 setActiveFields(humdrumR, fieldnames)
 }
 \arguments{
-\item{humdrumR}{A \linkS4class{humdrumR} data object.}
+\item{humdrumR}{A \link{humdrumRclass} data object.}
 
 \item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
 or any combination of these in a single string (e.g., \code{"LIM"}).
@@ -38,22 +38,22 @@ between tokens that are collapsed.}
 }
 \description{
 This "Active" expression is used as the default value in a lot of humdrumR code.
-For one, it is the data which is printed by \code{\link[methods:show]{show}} calls,
+For one, it is the data which is printed by \link[methods:show]{show} calls,
 i.e., whenever you return a \code{humdrumR} object in the terminal.
 In any expression within a call to
-\code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
+\link[=withinHumdrum]{with(in)Humdrum}
 \code{.} is automatically replaced with the \code{Active} expression.
 }
 \details{
 The active expression can be changed with the commands
-\code{\link[humdrumR:setActive]{setActive or the $ operator}}.
+\link[=humdrumRclass]{setActive or the $ operator}.
 This is a handy way to quickly look at different fields in your data.
 
 The \code{Active} expression is often just the name of a
-\code{\link[humdrumR:humTable]{field}}:
+\link[=humTable]{field}:
 for instance, the default value is \code{Token}.
 However, it can actually be any complex expression which evaluates
-within the \code{\link[humdrum:humTable]{humdrum table}}.
+within the \link[=humTable]{humdrum table}.
 For instance, the \code{Active} expression could be:
 \code{paste0(Token, " ", Record)}, which would automatically
 print each Token with its record number pasted to it.

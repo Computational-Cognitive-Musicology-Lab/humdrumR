@@ -13,7 +13,7 @@ validateHumdrum(
 )
 }
 \arguments{
-\item{recursive}{\code{logical}. If \code{TRUE}, the final part of the serach pattern (i.e., the file search)
+\item{recursive}{\code{logical}. If \code{TRUE}, the final part of the search pattern (i.e., the file search)
 is searched for recursively through all sub directories.}
 
 \item{errorReport.path}{\code{character}. A directory path which, if not \code{NULL}, an error report is written
@@ -22,7 +22,7 @@ are written to this directory (with \code{'errorMarkup'} appended to their names
 errors annotated inline.}
 
 \item{patterns}{\code{character} vector. Search pattern(s) for identifying files
-(see \code{\link{readHumdrum}}).}
+(see \verb{[readHumdrum][readHumdrum]}).}
 
 \item{files}{A list of character strings, each representing a record in a file.}
 }

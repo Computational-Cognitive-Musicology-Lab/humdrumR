@@ -5,7 +5,8 @@
 \alias{windows}
 \alias{hop}
 \alias{nest}
-\title{Applying functions across arbitrary windows.}
+\title{Applying functions across arbitrary windows.
+---------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------}
 \usage{
 windows(
   df,
@@ -23,4 +24,5 @@ nest(vec, open, close, depth = 1)
 }
 \description{
 Applying functions across arbitrary windows.
+---------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------
 }

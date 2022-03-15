@@ -2,11 +2,7 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humColumns}
 \alias{humColumns}
-\alias{alignColumns}
 \title{Spines vs Paths vs Columns}
-\usage{
-alignColumns(humdrumR, padder = "_C")
-}
 \description{
 In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
 which are not the same as "columns" in a spreadsheet. A "column" refers to a
@@ -188,7 +184,7 @@ E         _C        D        _P
 }
 }
 
-Note that \code{alignColumns} actually adds rows to the \linkS4class{humdrumR} object's
+Note that \code{alignColumns} actually adds rows to the \link{humdrumRclass} object's
 internal \link[=humTable]{humdrum tables}.
 }
 

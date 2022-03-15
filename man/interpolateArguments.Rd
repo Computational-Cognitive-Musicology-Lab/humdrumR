@@ -22,24 +22,21 @@ the name of the list as a function call, and inserts/swaps any arguments
 in that list into any instances of that function call within the \code{expr}.
 Named arguments are inserted or substituted if already present in expression.
 Unnamed argmuments are simply added to the call.
-Examples:
-\preformatted{
-myexpr <- quote(dnorm(x, mean = 5))
+Examples:\preformatted{myexpr <- quote(dnorm(x, mean = 5))
 interpolateArguments(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
 
 # result is new expresson: dnorm(x, mean = 2, sd = 5, TRUE)
 }
+
 If a named valued in the \code{namedArgs} argument is not a list,
 that name/value pair is substituted anywhere it is present in the expression.
 This approach is often more conscise, but arguments cannot be added to an
 expression this way, only substituted if already present.
-Examples:
-\preformatted{
-myexpr <- quote(dnorm(x, mean = 5))
+Examples:\preformatted{myexpr <- quote(dnorm(x, mean = 5))
 interpolateArguments(myexpr, mean = 2)
 
 # result is new expression: dnorm(x, mean = 2)
-
+\}
 }
 }
 \examples{

@@ -24,7 +24,11 @@
 
 #' with(in)Humdrum
 #' 
+<<<<<<< HEAD
 #' Apply arbitrary expressions to fields within `[S4class][humdrumR]` data.
+=======
+#' Apply arbitrary expressions to fields within `[S4class][humdrumRclass]` data.
+>>>>>>> master
 #' 
 #' @section Overview:
 #' These functions are the primary means of working with
@@ -62,6 +66,7 @@
 #' 
 #' Legal keywords, and their meanings are:
 #' 
+<<<<<<< HEAD
 #' 1.  `do` {An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").}
 #' 2. `doplot` {An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
 #' 3. `by` {An expression used to break the data into groups, with the `do` expression(s) evaluated 
@@ -78,6 +83,25 @@
 #' 
 #' 
 #' @section Expression evaluation:
+=======
+#' 1. `do` An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").
+#' 2. `doplot` An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".
+#' 3. `by` An expression used to break the data into groups, with the `do` expression(s) evaluated 
+#'   separately in each group (see "Partitioning").
+#' 4. `where` An expression indicating a subset of the data in which to evaluate the `do` expression (see "Partitioning").
+#' 5. `ngrams` A positive number *n*. The expression is evaluated across overlapping length-*n* windows.
+#' 6.  `recordtypes` A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. These characters
+#' correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
+#'   **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
+#'   is only evaluated on data drawn from the specified record types (defaults to `"D"`).
+#' 7. `pre` An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+#'   or opening a graphing window. The `pre` expression is evaluated in the global environment.
+#' 8. `post` An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.
+#' 
+#' 
+#' @section Expression evaluation:
+#'
+>>>>>>> master
 #' The right-hand side of any formula in the `formulae` argument with the keyword `do` or `doplot` 
 #' (or with no keyword specified) is evaluated within the `humdrumR` data object.
 #' The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.). 
@@ -85,6 +109,10 @@
 #' interpreted as the humdrumR object's current `[dest=humdrumR][Active]` 
 #' expression.
 #' 
+<<<<<<< HEAD
+=======
+#' ```
+>>>>>>> master
 #' humdata <- readHumdrum('directorywithdata/*.krn') # read some data
 #' 
 #' withinHumdrum(humdata, ~getPitch(Token)) # The most basic pattern
@@ -95,6 +123,10 @@
 #' 
 #' withinHumdrum(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
 #' 
+<<<<<<< HEAD
+=======
+#' ```
+>>>>>>> master
 #' 
 #' If multiple `do` expressions are provided, they are each evaluated one at a time,
 #' with the result of each piped into the next. Other, non-`do`, formulae (like `by~` or 
@@ -110,6 +142,7 @@
 #' of equal length) of categories to group the data by.
 #' Most commonly, the `by` expression(s) are simply field(s) in the data: 
 #' for instance, 
+<<<<<<< HEAD
 #' withinHumdrum(humdata,
 #'          do ~ table(Token),
 #'          by ~ File)
@@ -119,6 +152,25 @@
 #' withinHumdrum(humdata,
 #'          do ~ table(Token), 
 #'          by ~ Spine > 3 | Record \%\% 2 == 0)
+=======
+#' 
+#' ```
+#' withinHumdrum(humdata,
+#'          do ~ table(Token),
+#'          by ~ File)
+#' ```
+#'
+#' will apply the function `[base][table]` to the `Token` field
+#' *separately* for each file in the `humdrumR` data. 
+#' However, we can also use more complex expressions like
+#' 
+#' ```
+#' withinHumdrum(humdata,
+#'          do ~ table(Token), 
+#'          by ~ Spine > 3 | Record \%\% 2 == 0)
+#' ```
+#'
+>>>>>>> master
 #' which will evaluate the do expression in two groups, one where either the spine number is 
 #' three or less *or* the record number is even, and another group where the opposite is true. 
 #' 
@@ -187,7 +239,11 @@
 #' 
 #' The function `[readHumdrum][readHumdrum]` automatically parses
 #' tandem interpretations (that it recognizes) into
+<<<<<<< HEAD
 #' their own fields in the resulting `[humdrumR][humdrumR]` data.
+=======
+#' their own fields in the resulting `[humdrumR][humdrumRclass]` data.
+>>>>>>> master
 #' For instance, data with a `'*clefF4'` will show
 #' up as a `Clef` field. However, users might read humdrum data with their
 #' own custom tandem interpretations that are not built into `humdrumR`.
@@ -239,11 +295,19 @@
 #' to make small changes to a function call within the `do` expressions, without starting from scratch.
 #' Examples:
 #' 
+<<<<<<< HEAD
+=======
+#' ```
+>>>>>>> master
 #' mycommand <- c(do ~ mean(., na.rm = TRUE), by ~ Spine ~ File)
 #' withinHumdrum(humdata,
 #'               mycommand,
 #'               na.rm = FALSE)
 #' # mycommand is executed with na.rm changed to FALSE              
+<<<<<<< HEAD
+=======
+#' ```
+>>>>>>> master
 #' 
 #' 
 #' @section Piping:
@@ -254,7 +318,11 @@
 #' of the expression are shorter than the rows in the [humtable][humdrum table],
 #' or an `object`, the humdrum table is shrunk to fit them.
 #'     
+<<<<<<< HEAD
 #' @param humdrumR A `[humdrumR][humdrumR]` data object.
+=======
+#' @param humdrumR A `[humdrumR][humdrumRclass]` data object.
+>>>>>>> master
 #' @param ...  `...` arguments to `withinHumdrum` are divided into either named or unnamed arguments.
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
@@ -267,7 +335,11 @@
 #' 
 #' @param drop This argument is concetually similar to the `drop` argument in R matrices and data.frames.
 #' If `drop = TRUE`, the output of `withHumdrum` is simplified as much as possible (trying to return
+<<<<<<< HEAD
 #' the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
+=======
+#' the "raw" vector, list, table, etc. within it). If `drop = FALSE`, the result is *always*
+>>>>>>> master
 #' a `data.table`. The default value (`drop = TRUE`) is usually what we want because it is more
 #' intuitive, but in more complex code, it can be helpful to set `drop = FALSE` so that 
 #' the output is consistent.
@@ -281,12 +353,12 @@
 #' @return From `withinHumdrum` and `inHumdrum`, a new humdrumR data object.
 #' From `withHumdrum`, whatever value is returned by expression.
 #' 
-#' @name with-in-Humdrum
+#' @name withinHumdrum
 NULL
 
 #' withinHumdrum
 #'
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
           checkhumdrumR(humdrumR)
@@ -314,7 +386,7 @@ withinHumdrum <- function(humdrumR,  ...) {
               #### Put new humtable back into humdrumR object
               newfields <- setdiff(colnames(newhumtab), colnames(humtab))
               
-              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], function(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
+              notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], \(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
               newhumtab$Null[notnull] <- FALSE
               newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
               
@@ -342,7 +414,7 @@ withinHumdrum <- function(humdrumR,  ...) {
                   #     act <- ifelsecalls(parsedArgs$formulae$partitions['where'], 
                   #                        c(humdrumR@Active, 
                   #                          lapply(newfields, 
-                  #                                 function(nf) rlang::as_quosure(as.symbol(nf), 
+                  #                                 \(nf) rlang::as_quosure(as.symbol(nf), 
                   #                                                                environment(humdrumR)))))
                   #    
                   #      putActive(humdrumR, act)
@@ -364,7 +436,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' withHumdrum
 #' 
 #'
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     checkhumdrumR(humdrumR)
@@ -464,7 +536,7 @@ parseArgs <- function(..., withfunc) {
          namedArgs  = namedArgs)
 }
  
-#' @name with-in-Humdrum
+#' @rdname withinHumdrum
 #' @export
 inHumdrum <- withinHumdrum
           
@@ -473,7 +545,7 @@ anyfuncs2forms <- function(fs, parentenv) {
           areFuncs <- sapply(fs, is.function)
           
           fs[areFuncs] <- lapply(fs[areFuncs],
-                                 function(func) {
+                                 \(func) {
                                            expenv <- list2env(list(.func = func))
                                            parent.env(expenv) <- parentenv
                                            formula <- ~ .func(.)
@@ -491,7 +563,7 @@ parseKeywords <- function(formulae, withfunc) {
  
  #
  
- knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill', 'domemory'),
+ knownKeywords <- list(doexpressions   = c('do', 'dofx', 'dofill'),
                        ordoexpression  = c('ordo', 'ordofill'),
                        partitions      = c('by', 'where'),
                        graphics        = names(par()),
@@ -511,7 +583,7 @@ parseKeywords <- function(formulae, withfunc) {
      stop(call. = FALSE, glue::glue("In your call to {withfunc}, the formula {plural(sum(unknownKeys), 'keywords', 'keyword')} {unknownKeynames} {plural(sum(unknownKeys), 'do', 'does')} not match any known formula keys." ))
  }
  
- values  <- lapply(boolean, function(b) formulargs[b])
+ values  <- lapply(boolean, \(b) formulargs[b])
  
  if (!any(boolean$doexpressions)) stop(call. = FALSE,
                                    glue::glue("Your call to {withfunc} doesn't include any do expressions to apply to the data!
@@ -544,7 +616,6 @@ partialMatchKeywords <- function(keys) {
     # define standard keys and alternatives
     standardkeys <- list(do          = c('do', 'd', 'eval', 'apply'),
                          dofill      = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         domemory    = c('domemoizeDispatch', 'domem'),
                          dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
                                       'doplots', 'plots',
                                       'evalfxs', 'evalsidefxs', 'evalsideeffects',
@@ -561,7 +632,7 @@ partialMatchKeywords <- function(keys) {
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
-    ifelse(is.na(matches), keys, rep(names(standardkeys), lengths(standardkeys))[matches])
+    rep(names(standardkeys), lengths(standardkeys))[matches] %|% keys
     
     
 }
@@ -621,8 +692,8 @@ splitFormula <- function(form) {
 ##### Preparing doQuo ----
 
 prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
-  # This is the main function used by \code{\link{withinHumdrum}} to prepare the current
-  # do expression argument for application to a \code{\linkS4class{humdrumR}} object.
+  # This is the main function used by [withinHumdrum()] to prepare the current
+  # do expression argument for application to a [humdrumR][humdrumRclass] object.
   if (length(doQuos) == 0L) return(NULL)
   
   # do fill 
@@ -636,6 +707,9 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
 
   # turn . to active formula
   doQuo <- activateQuo(doQuo, active)
+  
+  # lagged vectors
+  doQuo <- laggedQuo(doQuo)
   
   # add in arguments that are already fields
   doQuo <- fieldsArgsQuo(doQuo, colnames(humtab))
@@ -668,8 +742,6 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   } 
   
   
-  # do memory
-  if (any(names(doQuos) == 'domemory')) doQuo <- memoizeDispatch.quosure(doQuo, usedInExpr)
 
   doQuo
 }
@@ -723,11 +795,11 @@ concatDoQuos <- function(doQuos) {
 ####################### Functions used inside prepareQuo
 
 activateQuo <- function(funcQuosure, active) {
-  # This function takes the \code{expression} argument
-  # from the parent \code{\link{withinHumdrum}} call and 
-  # inserts the \code{Active} expression from the 
-  # target \code{\linkS4class{humdrumR}} object in place 
-  # of any \code{.} subexpressions.
+  # This function takes the `expression` argument
+  # from the parent [withinHumdrum()] call and 
+  # inserts the `Active` expression from the 
+  # target [humdrumRclass] object in place 
+  # of any `.` subexpressions.
   active <- rlang::f_rhs(active)
   substituteName(funcQuosure, list(. = active))
 }
@@ -787,6 +859,58 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
     
 }
 
+#### Lag/Led vectors
+
+laggedQuo <- function(funcQuosure) {
+  
+  predicate <- function(quo) { 
+    quo <- rlang::quo_squash(quo)
+    rlang::is_call(quo) && quo[[1]] == sym('[') && any(names(quo) == 'n')
+  }
+  
+  do <- function(quo) {
+    exp <- quo[[2]]
+    
+    args <- as.list(exp)[-1:-2]
+    if (!'windows' %in% names(args)) args$windows <- expr(list(File, Spine))
+    
+    indexedObject <- exp[[2]]
+    n <- eval_tidy(args$n)
+    args <- args[names(args) != 'n']
+    
+    exprs <- lapply(n, \(N) { if (N == 0L) expr(!!indexedObject) else expr(lag(!!indexedObject, n = !!N, !!!args)) })
+    
+    quo[[2]] <- if (length(n) == 1L) {
+      exprs[[1]]
+    } else {
+      expr(.SPLAT.(!!!exprs))
+    }
+    quo
+  
+  }
+  
+  funcQuosure <- recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
+  
+  # check for .SPLAT.
+  predicate <- function(quo) {
+    quo <- quo_squash(quo)
+    rlang::is_call(quo) &&
+      any(sapply(quo[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.')))
+  }
+  do <- function(quo) {
+    expr <- as.list(quo[[2]])
+    splats <- sapply(expr[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.'))
+    
+    for (i in which(splats)) expr[[i + 1L]] <- as.list(expr[[i + 1L]][-1])
+    expr <- unlist(expr, recursive = FALSE)
+    
+    quo[[2]] <- as.call(expr)
+    quo
+  }
+  
+  recurseQuosure(funcQuosure, predicate, do)
+   
+}
 
 #### Interpretations in expressions
 
@@ -798,7 +922,7 @@ tandemsQuo <- function(funcQuosure) {
  # (i.e., keeps it's environment).
           
  applyExpr(funcQuosure,
-           function(ex) {
+           \(ex) {
              exstr <- deparse(ex)
              interp <- grepl('^\\*[^*]', exstr)
              
@@ -814,14 +938,14 @@ tandemsQuo <- function(funcQuosure) {
 
 #' Get tandem interpretation information from humdrum data.
 #' 
-#' The every \code{\linkS4class{humdrumR}} object has a field called
-#' \code{Tandem} which is a vector of strings which accumulates
-#' tandem interpretations in each Spine. This function (\code{getTandem}) 
+#' Every [humdrumRclass] object has a field called
+#' `Tandem` which is a vector of strings which accumulates
+#' tandem interpretations in each Spine. This function (`getTandem`) 
 #' extracts tandem interpretations from this field, based on a matching
-#' regular expression. The obligatory \code{'*'} \emph{does not} need to 
-#' be included in the \code{regex}, as it is added automatically. Thus,
+#' regular expression. The obligatory `'*'` *does not* need to 
+#' be included in the `regex`, as it is added automatically. Thus,
 #' if you want to find tandem interpretations that match '*clef..', you
-#' just have to write \code{regex = 'clef..'}.
+#' just have to write `regex = 'clef..'`.
 #' 
 #' @export
 getTandem <- function(tandem, regex) {
@@ -863,12 +987,12 @@ getTandem <- function(tandem, regex) {
 
 splatQuo <- function(funcQuosure) {
   # This function takes an expression,
-  # and replaces any subexpression of the form \code{funccall(TargetExpr@GroupingExpr)},
-  # with \code{do.call('funccall', tapply(TargetExpr, GroupingExpr, c))}.
-  # The result is that \code{TargetExpr} is broken into a list of vectors by the
-  # \code{GroupingExpr}, and each group is fed to \code{funccall} as a separate
-  # argument. See the docementation for \code{\link{withinHumdrum}}.
-  # This does not look for \code{@} sub expression within branches of a \code{@} expression!
+  # and replaces any subexpression of the form `funccall(TargetExpr@GroupingExpr)`,
+  # with `do.call('funccall', tapply(TargetExpr, GroupingExpr, c))`.
+  # The result is that `TargetExpr` is broken into a list of vectors by the
+  # `GroupingExpr`, and each group is fed to `funccall` as a separate
+  # argument. See the docementation for [withinHumdrum()].
+  # This does not look for `@` sub expression within branches of a `@` expression!
   # 
   
   
@@ -876,8 +1000,8 @@ splatQuo <- function(funcQuosure) {
   
   transform <- function(expr) {
       expr <- recurseQuosure(expr, 
-                     function(quo) is.givenCall(quo, '@'), 
-                     function(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
+                     \(quo) is.givenCall(quo, '@'), 
+                     \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
                          })
       expr <- as.list(expr)
       rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
@@ -889,8 +1013,8 @@ splatQuo <- function(funcQuosure) {
 
 parseAt <- function(atExpr) {
  # This function is used by splatQuo
- # It replaces an expression of the form \code{TargetExpr@GroupingExpr}
- # with \code{tapply(TargetExpr, GroupingExpr, c)}.
+ # It replaces an expression of the form `TargetExpr@GroupingExpr`
+ # with `tapply(TargetExpr, GroupingExpr, c)`.
 
  expr  <- atExpr[[2]]
  group <- atExpr[[3]]
@@ -918,11 +1042,11 @@ xifyQuo <- function(expression, usedInExpr, depth = 1L) {
           expression <- substituteName(expression,
                                        setNames(lapply(names(fargs), as.symbol), usedInExpr))
           
-          lambdaexpression      <- quote(function() {} )
+          lambdaexpression      <- quote(\() {} )
           lambdaexpression[[2]] <- fargs
           lambdaexpression[[3]] <- rlang::quo_squash(expression)
           # 
-          # lambdaexpression <- rlang::new_quosure(quote(function() {}))
+          # lambdaexpression <- rlang::new_quosure(quote(\() {}))
           # lambdaexpression[[2]][[2]] <- fargs
           # lambdaexpression[[2]][[3]] <- expression
           
@@ -978,31 +1102,35 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' This function can be used to modify arguments to a functions
 #' within an existing expression (or quosure/formula).
 #' 
-#' \code{interpolateArguments} inteprets named value in its \code{namedArgs} 
+#' `interpolateArguments` inteprets named value in its `namedArgs` 
 #' argument in one of two ways: If the named value is a list, it interprets
 #' the name of the list as a function call, and inserts/swaps any arguments
-#' in that list into any instances of that function call within the \code{expr}.
+#' in that list into any instances of that function call within the `expr`.
 #' Named arguments are inserted or substituted if already present in expression.
 #' Unnamed argmuments are simply added to the call.
 #' Examples:
-#' \preformatted{
+#'
+#' ```
 #' myexpr <- quote(dnorm(x, mean = 5))
 #' interpolateArguments(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
 #' 
 #' # result is new expresson: dnorm(x, mean = 2, sd = 5, TRUE)
-#' }
-#' If a named valued in the \code{namedArgs} argument is not a list,
+#' ```
+#'
+#' If a named valued in the `namedArgs` argument is not a list,
 #' that name/value pair is substituted anywhere it is present in the expression.
 #' This approach is often more conscise, but arguments cannot be added to an 
 #' expression this way, only substituted if already present.
 #' Examples:
-#' \preformatted{
+#' 
+#' ```
 #' myexpr <- quote(dnorm(x, mean = 5))
 #' interpolateArguments(myexpr, mean = 2)
 #' 
 #' # result is new expression: dnorm(x, mean = 2)
-#' 
 #' }
+#' ```
+#'
 #' @examples
 #' myexpr2 <- quote(A + b*x + rnorm(length(a), mean(Z), sd = 2))
 #' 
@@ -1221,7 +1349,7 @@ parseResult_other <- function(result) data.table(list(result))
           
           curpipen <- curPipeN(humtab) 
           
-          lengths_ <- function(ls) sapply(ls, function(v) if (is.object(v)) 1L else length(v)) # objects are length 1
+          lengths_ <- function(ls) sapply(ls, \(v) if (is.object(v)) 1L else length(v)) # objects are length 1
           
           ####
           if (!allsame(lengths_(value))) value <- list(value)
@@ -1331,37 +1459,37 @@ collapse2n <- function(x, colname, class, n = 1) {
 ################################humApply ----
 # 
 #' 
-#' \code{humApply} is just a wrapper for 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
-#' included to parallel the \code{R} family of \code{\link[base:lapply]{_apply}} functions.
-#' \code{humApply} uses \href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
+#' `humApply` is just a wrapper for 
+#' `[humdrumR:with-in-Humdrum][with(in)Humdrum]`,
+#' included to parallel the `R` family of `[base:lapply][_apply]` functions.
+#' `humApply` uses [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html)
 #' to capture arguments fed to it without the user needing to make explicit 
-#' \code{\link[base:tilde]{formula}} using \code{~}. This is only guaranteed to work 
-#' in the \code{\link[base:environment]{global environment}}, so be careful. If you run into
-#' problems, switch over to \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} and use
-#' explicit \code{\link[base:tilde]{X~formulas}}.
+#' `[base:tilde][formula]` using `~`. This is only guaranteed to work 
+#' in the `[base:environment][global environment]`, so be careful. If you run into
+#' problems, switch over to `[humdrumR:with-in-Humdrum][with(in)Humdrum]` and use
+#' explicit `[base:tilde][X~formulas]`.
 #' 
-#' @param humdrumR A \code{\linkS4class{humdrumR}} data object.
-#' @param FUN A function to apply to the \code{\link[humdrumR:humdrumR]{Active}} field(s)
-#' in the \code{humdrumR} object.
+#' @param humdrumR A [humdrumRclass] data object.
+#' @param FUN A function to apply to the [humdrumR:humdrumR][Active]` field(s)
+#' in the `humdrumR` object.
 #' @param ... Any arguments which can be fed to 
-#' \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}} as formulae (except for
-#' \code{do} expressions, which are replaced by the \code{FUN} argument!). 
-#' However, rather that writinging formula in the format \code{Keyword ~ Expression},
-#' \code{humApply} arguments should be written as normal \code{R} arguments: 
-#' \code{Keyword = Expression}.
+#' `[humdrumR:with-in-Humdrum][with(in)Humdrum]` as formulae (except for
+#' `do` expressions, which are replaced by the `FUN` argument!). 
+#' However, rather that writinging formula in the format `Keyword ~ Expression`,
+#' `humApply` arguments should be written as normal `R` arguments: 
+#' `Keyword = Expression`.
 #' Unnamed arguments are ignored.
-#' #' @param within A logical. If \code{TRUE} (the default), 
-#' \code{\link[humdrumR:with-in-Humdrum]{withinHumdrum}} is used to apply the 
+#' #' @param within A logical. If `TRUE` (the default), 
+#' `[humdrumR:with-in-Humdrum][withinHumdrum]` is used to apply the 
 #' function---meaning that the output is reconstituted into a new field in the 
-#' \code{humdrumR} object. If \code{within == FALSE},
-#' \code{\link[humdrumR:with-in-Humdrum]{withHumdrum}} is used instead,
+#' `humdrumR` object. If `within == FALSE`,
+#' `[humdrumR:with-in-Humdrum][withHumdrum]` is used instead,
 #' which results in the function's output being returned inprocessed.
-#' @param doplot Boolean. If \code{TRUE} the \code{FUN} argument is treated
-#' as a \code{doplot} expression by \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}},
+#' @param doplot Boolean. If `TRUE` the `FUN` argument is treated
+#' as a `doplot` expression by `[humdrumR:with-in-Humdrum][with(in)Humdrum]`,
 #' so the result is ignored (for plotting or side-effects purposes).
 #' 
-#' @name with-in-humdrum
+#' @rdname withinHumdrum
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
           checkhumdrumR(humdrumR)
@@ -1372,7 +1500,7 @@ humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
           exprs    <- exprs[keywords != '']
           keywords <- keywords[keywords != '']
           
-          formulae <- Map(function(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
+          formulae <- Map(\(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
                                                               lhs = as.symbol(kw), 
                                                               env = rlang::quo_get_env(qu)), exprs, keywords) 
           formulae <- unname(formulae)

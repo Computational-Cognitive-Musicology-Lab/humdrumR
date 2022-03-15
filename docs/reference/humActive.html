@@ -16,11 +16,19 @@ with(in)Humdrum
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
+<<<<<<< HEAD
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+=======
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+>>>>>>> master
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +58,11 @@ with(in)Humdrum
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
+<<<<<<< HEAD
   <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+=======
+  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+>>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -63,16 +75,27 @@ with(in)Humdrum
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>The "Active expression" of a humdrumR object.</h1>
+<<<<<<< HEAD
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R" class="external-link"><code>R/humdrumR-class.R</code></a></small>
+=======
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R"><code>R/humdrumR-class.R</code></a></small>
+>>>>>>> master
       <div class="d-none name"><code>humActive.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
     <p>This "Active" expression is used as the default value in a lot of humdrumR code.
+<<<<<<< HEAD
 For one, it is the data which is printed by <code><a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a></code> calls,
 i.e., whenever you return a <code>humdrumR</code> object in the terminal.
 In any expression within a call to
 <code><a href="with-in-Humdrum.html">with(in)Humdrum</a></code>
+=======
+For one, it is the data which is printed by <a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a> calls,
+i.e., whenever you return a <code>humdrumR</code> object in the terminal.
+In any expression within a call to
+<a href="withinHumdrum.html">with(in)Humdrum</a>
+>>>>>>> master
 <code>.</code> is automatically replaced with the <code>Active</code> expression.</p>
     </div>
 
@@ -96,7 +119,11 @@ In any expression within a call to
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
+<<<<<<< HEAD
 <dd><p>A <a href="humdrumR-class.html">humdrumR</a> data object.</p></dd>
+=======
+<dd><p>A <a href="humdrumRclass.html">humdrumRclass</a> data object.</p></dd>
+>>>>>>> master
 <dt>dataTypes</dt>
 <dd><p>Which dataTypes of humdrum records to include. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd', 'P'</code>
 or any combination of these in a single string (e.g., <code>"LIM"</code>).
@@ -112,13 +139,17 @@ between tokens that are collapsed.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The active expression can be changed with the commands
-<code>setActive or the $ operator</code>.
+<a href="humdrumRclass.html">setActive or the $ operator</a>.
 This is a handy way to quickly look at different fields in your data.</p>
 <p>The <code>Active</code> expression is often just the name of a
+<<<<<<< HEAD
 <code><a href="humTable.html">field</a></code>:
+=======
+<a href="humTable.html">field</a>:
+>>>>>>> master
 for instance, the default value is <code>Token</code>.
 However, it can actually be any complex expression which evaluates
-within the <code>humdrum table</code>.
+within the <a href="humTable.html">humdrum table</a>.
 For instance, the <code>Active</code> expression could be:
 <code>paste0(Token, " ", Record)</code>, which would automatically
 print each Token with its record number pasted to it.</p>
@@ -141,7 +172,11 @@ not <code>NA</code> if you call <code>recip</code> (rhythm).</p><div class="sour
 <p>Now, if you change the active field between <code>Pitch</code> and <code>Rhythm</code> you'll see that there
 are different numbers of (non-null) data tokens: <code>ntokens(kerndata$Pitch)</code> vs <code>ntokens(kerndata$Rhythm)</code> will return different numbers!
 (The different would be the number of rest tokens.)
+<<<<<<< HEAD
 Similarly, if you apply functions/expressions to this data (using <a href="with-in-Humdrum.html">withinHumdrum</a> for example), the result will depend on
+=======
+Similarly, if you apply functions/expressions to this data (using <a href="withinHumdrum.html">withinHumdrum</a> for example), the result will depend on
+>>>>>>> master
 what the active field is:</p><div class="sourceCode"><pre><code><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span> <span class="op"><a href="../reference/humPipe.html">%hum&lt;%</a></span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>
 <span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span> <span class="op"><a href="../reference/humPipe.html">%hum&lt;%</a></span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></code></pre></div>
 
@@ -155,7 +190,11 @@ If <code>Pitch</code> is the active field the rest tokens are null-data and will
 
 
     <footer><div class="pkgdown-footer-left">
+<<<<<<< HEAD
   <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
+=======
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+>>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

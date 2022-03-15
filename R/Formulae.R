@@ -2,5 +2,14 @@
 
 
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+#' Standard humdrumR formulae.
+#'
+#' `humdrumR` predefines a few [with(in)humdrum][withinHumdrum()] command combinations, as R formulae or lists of formulae.
+#' 
+#' + `ditto` calls [fillThru()] across pieces/spines/paths, replicating the classic humdrum toolkit ditto command.
+#' @name humFormulae
+NULL
+
+#' @rdname humFormulae
 #' @export
-ditto <- c(do ~ ditto(.), by ~ Spine ~ Piece ~ Path)
+ditto <- c(do ~ fillThru(.), by ~ Spine ~ Piece ~ Path, recordTypes ~ 'Dd')

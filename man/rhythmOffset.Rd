@@ -13,7 +13,7 @@ rhythmOffset(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal)
 offset begins.}
 
 \item{groups}{A vector of equal length as \code{durations} representing a grouping factor,
-usable by \code{\link[base]{tapply}}. If \code{!is.null(groups)}, offsets are calculated
+usable by \verb{[base][tapply]}. If \code{!is.null(groups)}, offsets are calculated
 for duration values within each group. The \code{start} argument is recycle to match
 the length of the number of groups, so a different start value can be applied to each group.
 If \code{is.null(groups)}, offsets are calculated for the whole \code{durations} vector, from the
@@ -24,7 +24,7 @@ Borrowing the term from \code{music21}, rhythmic "offset"
 refers to a duration of time since a starting point (usually, the beginning
 of a piece).
 \code{rhythmOffset} takes a vector of numbers representing durations
-(maybe \code{\linkS4class{rhythmInterval}s}, maybe other
+(maybe \verb{[rhythmInterval][rhythmInterval]s}, maybe other
 numeric values) and cummulatively sums them from a starting value.
 The output is a vector of durations of the same type as the input
 where each output value corresponds to the duration of time elapsed

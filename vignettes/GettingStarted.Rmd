@@ -109,6 +109,7 @@ Luckily, humdrumR makes this very easy.
 Check out this next command:
 
 ```{r}
+
 readHumdrum('HumdrumData/BachChorales/chor0') -> chorales
 ```
 
@@ -158,6 +159,7 @@ For example, consider this simple, humdrum-syntax file:
 
 
 ```{r echo=FALSE, results='none'}
+
 ex1 <- readLines('examples/BasicExample.krn')
 
 rest <- ex1[-1]
@@ -203,7 +205,6 @@ So what happens when `humdrumR` reads this file?
 (This file is bundled with `humdrumR` in the `"humdrumRroot/examples"` directory.)
 
 ```{r}
-setwd(humdrumRroot)
 
 example1 <- readHumdrum('examples/BasicExample.krn')
 
@@ -306,10 +307,10 @@ In much data, all/most tokens are simply `Stop == 1` (the first position), but i
 Let's look at an example to make sense of this!
 
 ```{r}
+
 stops <- readHumdrum('examples/Stops.krn')
 
 stops
-
 ```
 
 

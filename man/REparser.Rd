@@ -22,6 +22,7 @@ REparse(
   parse.lead = FALSE,
   parse.rest = FALSE,
   reverse = FALSE,
+  sep = NULL,
   toEnv = FALSE
 )
 }

@@ -3,7 +3,7 @@
 \name{humPrint}
 \alias{humPrint}
 \alias{print_humtab}
-\title{Show a \linkS4class{humdrumR} object in the terminal.}
+\title{------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------}
 \usage{
 \S4method{show}{humdrumR}(object)
 
@@ -17,5 +17,7 @@ print_humtab(
 )
 }
 \description{
-Show a \linkS4class{humdrumR} object in the terminal.
+------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+
+Show a \link{humdrumRclass} object in the terminal.
 }

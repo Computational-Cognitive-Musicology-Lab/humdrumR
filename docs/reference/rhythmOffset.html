@@ -3,7 +3,7 @@
 refers to a duration of time since a starting point (usually, the beginning
 of a piece).
 rhythmOffset takes a vector of numbers representing durations
-(maybe rhythmIntervals, maybe other
+(maybe [rhythmInterval][rhythmInterval]s, maybe other
 numeric values) and cummulatively sums them from a starting value.
 The output is a vector of durations of the same type as the input
 where each output value corresponds to the duration of time elapsed
@@ -11,7 +11,11 @@ at that point.'><title>Calculate rhythmic "offset" — rhythmOffset • humdrumR
 refers to a duration of time since a starting point (usually, the beginning
 of a piece).
 rhythmOffset takes a vector of numbers representing durations
+<<<<<<< HEAD
 (maybe rhythmIntervals, maybe other
+=======
+(maybe [rhythmInterval][rhythmInterval]s, maybe other
+>>>>>>> master
 numeric values) and cummulatively sums them from a starting value.
 The output is a vector of durations of the same type as the input
 where each output value corresponds to the duration of time elapsed
@@ -21,6 +25,7 @@ at that point.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
 <![endif]--></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
+<<<<<<< HEAD
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
@@ -33,6 +38,20 @@ at that point.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
       <span class="navbar-toggler-icon"></span>
     </button>
 
+=======
+
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+>>>>>>> master
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
@@ -56,7 +75,11 @@ at that point.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
+<<<<<<< HEAD
   <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+=======
+  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+>>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -69,7 +92,11 @@ at that point.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Calculate rhythmic "offset"</h1>
+<<<<<<< HEAD
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/rhythmInterval.R" class="external-link"><code>R/rhythmInterval.R</code></a></small>
+=======
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/rhythmInterval.R"><code>R/rhythmInterval.R</code></a></small>
+>>>>>>> master
       <div class="d-none name"><code>rhythmOffset.Rd</code></div>
     </div>
 
@@ -78,7 +105,7 @@ at that point.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
 refers to a duration of time since a starting point (usually, the beginning
 of a piece).
 <code>rhythmOffset</code> takes a vector of numbers representing durations
-(maybe <code>rhythmIntervals</code>, maybe other
+(maybe <code>[rhythmInterval][rhythmInterval]s</code>, maybe other
 numeric values) and cummulatively sums them from a starting value.
 The output is a vector of durations of the same type as the input
 where each output value corresponds to the duration of time elapsed
@@ -99,7 +126,11 @@ at that point.</p>
 offset begins.</p></dd>
 <dt>groups</dt>
 <dd><p>A vector of equal length as <code>durations</code> representing a grouping factor,
+<<<<<<< HEAD
 usable by <code><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></code>. If <code>!is.null(groups)</code>, offsets are calculated
+=======
+usable by <code>[base][tapply]</code>. If <code>!is.null(groups)</code>, offsets are calculated
+>>>>>>> master
 for duration values within each group. The <code>start</code> argument is recycle to match
 the length of the number of groups, so a different start value can be applied to each group.
 If <code>is.null(groups)</code>, offsets are calculated for the whole <code>durations</code> vector, from the
@@ -111,6 +142,7 @@ first <code>start</code> value.</p></dd>
 <code><a href="metricPosition.html">metricPosition</a>()</code>,
 <code><a href="rhythmDecompose.html">rhythmDecompose</a>()</code></p></div>
     </div>
+<<<<<<< HEAD
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
@@ -120,6 +152,17 @@ first <code>start</code> value.</p></dd>
   <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
 </div>
 
+=======
+
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
+
+
+    <footer><div class="pkgdown-footer-left">
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+</div>
+
+>>>>>>> master
 <div class="pkgdown-footer-right">
   <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>

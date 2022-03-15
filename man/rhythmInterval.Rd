@@ -3,22 +3,33 @@
 \name{rhythmInterval}
 \alias{rhythmInterval}
 \alias{rint}
-\alias{is.rhythmInterval}
+\alias{as.character,rhythmInterval-method}
 \alias{as.double.rhythmInterval}
+\alias{is.rhythmInterval}
+\alias{is.numeric,rhythmInterval-method}
 \alias{order.rhythmInterval}
+\alias{Compare,rhythmInterval,rhythmInterval-method}
+\alias{Summary,rhythmInterval-method}
+\alias{rhythmInterval.logical}
+\alias{rhythmInterval.NULL}
+\alias{rhythmInterval.numeric}
+\alias{rhythmInterval.rational}
+\alias{rhythmInterval.fraction}
+\alias{rhythmInterval.integer}
+\alias{rhythmInterval.character}
 \title{Representation of rhythmic information}
 \usage{
 rhythmInterval(x, ...)
 
 rint(denominator, numerator = 1L)
 
-is.rhythmInterval(x)
-
-\S4method{is.numeric}{rhythmInterval}(x)
-
 \S4method{as.character}{rhythmInterval}(x)
 
 \method{as.double}{rhythmInterval}(x)
+
+is.rhythmInterval(x)
+
+\S4method{is.numeric}{rhythmInterval}(x)
 
 order.rhythmInterval(
   x,
@@ -33,45 +44,33 @@ order.rhythmInterval(
 \S4method{Summary}{rhythmInterval}(x)
 
 rhythmInterval(x, ...)
+
+\method{rhythmInterval}{logical}(x, ...)
+
+\method{rhythmInterval}{`NULL`}(x, ...)
+
+\method{rhythmInterval}{numeric}(n)
+
+\method{rhythmInterval}{rational}(x)
+
+\method{rhythmInterval}{fraction}(x)
+
+\method{rhythmInterval}{integer}(x)
+
+\method{rhythmInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
 \description{
-This \emph{S4} class is the core rhythm representation in the
-\code{\link[humdrumR:humdrumR]{humdrumR package}}.
+This \emph{S4} class is the core rhythm representation in the \link{humdrumR} package.
 The object is used to represent rhythmic durations
 and metric positions.
 Each duration is represented in
 \href{https://en.wikipedia.org/wiki/Whole_note}{whole note} units.
 Numerically, these whole note units are represented as a ratio
-between integers, held in the slots \code{@Numerator} and \code{@Denominator}.
+between integers, held in the slots \verb{@Numerator} and \verb{@Denominator}.
 This allows use to represent any rational number with no loss of precision
 due to rounding errors and weak decimal expansions (like \code{0.333333}).
 Rhythm intervals are similar to standard musical
-termoniology (i.e, ``three eighth-notes'' is the ratio \eqn{\frac{3}{8}}).
-
-#' @name RhythmScaling
-#' @export
-augment.rhythmInterval <- function(rint, scalar) rint * scalar
-}
-\details{
-#' @name RhythmScaling
-#' @export
-augment.character <- regexDispatch('Recip'   = recip.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.recip2rhythmInterval,
-'\link{0-9}+\link[=0-9]{\%/}+' = as.ratio.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.fraction2rhythmInterval,
-'Decimal' = as.decimal.rhythmInterval \%.\% augment.rhythmInterval \%.\% read.numeric2rhythmInterval)
-
-#' @name RhythmScaling
-#' @export
-diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-
-#' @name RhythmScaling
-#' @export
-diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-
-#' @name RhythmScaling
-#' @export
-diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.recip2rhythmInterval,
-'\link{0-9}+\link[=0-9]{\%/}+' = as.ratio.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.fraction2rhythmInterval,
-'Decimal' = as.decimal.rhythmInterval \%.\% diminish.rhythmInterval \%.\% read.numeric2rhythmInterval)
+termoniology (i.e, "three eighth-notes" is the ratio (3/8).
 }
 \section{Slots}{
 
@@ -83,44 +82,47 @@ diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval \%.\% dimin
 
 \section{Vectorization}{
 
+
 \code{rhythmInterval} inherits from the virtual class
-\code{\linkS4class{struct}}.
+\link{struct}.
 This means you can apply normal vectorized commands to \code{rhythmInterval}s,
-and even put them in \code{\link[base:data.frame]{data.frames}}.
+and even put them in \code{\link[base:data.frame]{base::data.frame()}}.
 }
 
 \section{Arithmetic}{
 
+
 \code{rhythmInterval} objects have arithmetic operations defined.
-Addition and subtraction are straightword and intuitive (i.e., \eqn{\frac{1/8} + \frac{3/8} = \frac{1/2}}).
+Addition and subtraction are straightword and intuitive (i.e., (1/8) + (3/8) = (1/2)).
 
 Multiplication and division are slightly more complicated:
 \href{https://en.wikipedia.org/wiki/Scalar_multiplication}{scalar multiplication}
-is defined \emph{for rational numbers}: \eqn{\frac{3}{8} * 2 = \frac{3}{4}}
+is defined \emph{for rational numbers}: (3/8) * 2 = (3/4)
 (the result is always a new \code{rhythmInterval}).
 However, note that a \code{rhythmInterval} cannot be multiplied by another
 \code{rhythmInterval}---afterall, what would a quarter-note times a quarter-note be?
 A \code{rhythmInterval} can be divided by another \code{rhythmInterval} to produce
-a real number: \eqn{\frac{1}{2} / \frac{1}{4} = 2 }.
+a real number: (1/2) / (1/4) = 2.
 Like other rational values in \code{R} we can also do either
-``true'' (rational) division (using the \code{\link[base:Arithmetic]{/}} operator)
+``true'' (rational) division (using the \link[base:Arithmetic]{/} operator)
 \emph{or} \href{https://en.wikipedia.org/wiki/Euclidean_division}{Euclidean}
-division (using the \code{\link[base:Arithmetic]{\%/\%}} operator).
-Rational division (\code{/}) of a \code{rhythmInterval} by another \code{rhythmInterval}
-results in a rational number. For instance, \eqn{\frac{1}{2} / \frac{1}{4} = 2}.
-Rational division of a \code{rhythmInterval} by a rational number results in a
-new \code{rhythmInterval}: \eqn{\frac{1}{2} / 2 = \frac{1}{4}}.
-Eucliean (a.k.a., integer) division can only be applied between \code{rhythmInterval}s
-resulting in an integer quotient---the remainder, which is a \code{rhythmInterval},
-can be calculated with the \code{\link[base:Arithmetic]{\%\%}} operator.
-The remainder (a.k.a., \emph{modulo}) operator (\code{\%\%}) is especially
+division (using the \link[base:Arithmetic]{\%\%} operator).
+Rational division (\code{/}) of a `rhythmInterval` by another `rhythmInterval`
+results in a rational number. For instance, $(1/2) / (1/4) = 2$.
+Rational division of a `rhythmInterval` by a rational number results in a
+new `rhythmInterval`: $(1/2) / 2 = (1/4)$.
+Eucliean (a.k.a., integer) division can only be applied between `rhythmInterval`s
+resulting in an integer quotient---the remainder, which is a `rhythmInterval`,
+can be calculated with the \link[base:Arithmetic]{\%\%} operator.
+The remainder (a.k.a., \emph{modulo}) operator (`\%\%`) is especially
 useful, for instance in calculating metric positions.
 }
 
 \section{Relational Operators}{
 
+
 \code{rhythmInterval}s can be compared using the standard
-\code{\link[base:Comparison]{relational operators}}---\code{==},
-\code{!=}, \code{>}, \code{>=}, etc.
+\link[base:Comparison]{relational operators}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
 }
 
+\concept{{core rhythm representation}}

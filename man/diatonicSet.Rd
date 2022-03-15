@@ -3,16 +3,23 @@
 \name{diatonicSet}
 \alias{diatonicSet}
 \alias{dset}
+\alias{as.character,diatonicSet-method}
 \alias{is.diatonicSet}
 \alias{order.diatonicSet}
-\alias{mapPartition}
+\alias{==,diatonicSet,diatonicSet-method}
+\alias{Compare,diatonicSet,diatonicSet-method}
+\alias{diatonicSet.diatonicSet}
+\alias{diatonicSet.logical}
+\alias{diatonicSet.numeric}
+\alias{diatonicSet.integer}
+\alias{diatonicSet.character}
 \title{Tonal (diatonic) sets}
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)
 
-is.diatonicSet(x)
-
 \S4method{as.character}{diatonicSet}(x)
+
+is.diatonicSet(x)
 
 order.diatonicSet(
   x,
@@ -27,9 +34,15 @@ order.diatonicSet(
 
 \S4method{Compare}{diatonicSet,diatonicSet}(e1, e2)
 
-mapPartition(func, split = "/")
+\method{diatonicSet}{diatonicSet}(x, ...)
 
-diatonicSet(x, ...)
+\method{diatonicSet}{logical}(x, ...)
+
+\method{diatonicSet}{numeric}(x)
+
+\method{diatonicSet}{integer}(x)
+
+\method{diatonicSet}{character}(str, Exclusive = NULL, Key = NULL, ..., multiDispatch = FALSE)
 
 \S4method{as.character}{tertianSet}(x)
 
@@ -41,8 +54,6 @@ types of tonal data, representing Western diatonic keys.
 For the most part, users should not need to interact with diatonicSets directly---rather, diatonicSets work behind the scene in numerous \code{humdrumR} pitch functions.
 See the \link{keyRepresentations} and \link{keyTransformations} documentation for details of usage and functionality or the \emph{Tonality in humdrumR} vignette for
 a detailed explanation of the theory and specifics of diatonicSets.
-
-These functions translate various pitch representations
 }
 \details{
 \code{diatonicSet} is a \href{https://adv-r.had.co.nz/S4.html}{S4} subclass of \code{humdrumR}'s virtual class \link{struct},
@@ -57,10 +68,6 @@ By default, the \link[base:character]{as.character} method, and thus (via \link{
 for diatonicSets call \link[=diatonicRepresentations]{key()}.
 Thus, if you return a \code{diatonicSet} on the command line (or call \link[base:print]{print} one one),
 you'll see the \link[=diatonicRepresentations]{key interpretation} representation printed.
-
-Under the hood, these functions use the \code{\link{humdrumR}}
-\code{\link[humdrumR:tonalInterval]{tonalInterval}} \code{S4} class as the
-fundamental, \emph{lingua franca} representation of pitch.
 }
 \section{Slots}{
 

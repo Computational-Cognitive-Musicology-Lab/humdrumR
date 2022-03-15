@@ -30,40 +30,37 @@ list \%hums[]\% formula
 }
 \description{
 These infix operators make it possible to use
-the \code{\link[humdrumR:with-in-Humdrum]{with(in)Humdrum}}
+the \verb{[humdrumR:with-in-Humdrum][with(in)Humdrum]}
 functions in a piping style, similar to the \code{|} (pipe)
-in unix-style terminals, or the \code{\link[magrittr:\%>\%]{pipe operator}}
+in unix-style terminals, or the \verb{|>}  pipe operator.
 from the R package \href{https://cran.r-project.org/web/packages/magrittr/index.html}{magrittr}.
-(In fact, the \code{\link[magrittr:\%>\%]{magrittr}} pipe is imported by
-\code{\link[humdrumR:humdrumR-package]{humdrumR}}, and we encourage you to incorporate it into
-your \code{humdrumR} work flows.)
 }
 \details{
-The key is that the function \code{\link{withinHumdrum}} always returns a new
-\code{\linkS4class{humdrumR}} data object. Thus, you can always send the output
-of \code{\link{withinHumdrum}} back in to a new call of \code{\link{withinHumdrum}}.
+The key is that the function \verb{[withinHumdrum][withinHumdrum]} always returns a new
+\verb{[humdrumR][humdrumR]} data object. Thus, you can always send the output
+of \verb{[withinHumdrum][withinHumdrum]} back in to a new call of \verb{[withinHumdrum][withinHumdrum]}.
 This is exactly what the \verb{\%hum>\%} is for: on the left-hand side,
-input a \code{\linkS4class{humdrumR}} object, on the right-hand side suitable
-arguments to \code{\link{withinHumdrum}} (i.e., a formula, a function, or list of formulae,
+input a \verb{[humdrumR][humdrumR]} object, on the right-hand side suitable
+arguments to \verb{[withinHumdrum][withinHumdrum]} (i.e., a formula, a function, or list of formulae,
 functions, and named arguments). You can then chain this call with another call to
-\verb{\%hum>\%} and more \code{\link{withinHumdrum}} arguments.
+\verb{\%hum>\%} and more \verb{[withinHumdrum][withinHumdrum]} arguments.
 
-\verb{\%hum<\%} acts the same way as \verb{\%hum>\%} except it calls \code{\link{withHumdrum}}.
-Since \code{\link{withHumdrum}} does \emph{not} return a \code{\linkS4class{humdrumR}},
+\verb{\%hum<\%} acts the same way as \verb{\%hum>\%} except it calls \verb{[withHumdrum][withinHumdrum]}.
+Since \verb{[withHumdrum][withinHumdrum]} does \emph{not} return a \verb{[humdrumR][humdrumR]},
 the output can't be piped any further (using \verb{\%hum>\%} or \verb{\%hum<\%}).
 Thus, \verb{\\\%hum<\\\%} should only be used as the last step in a pipe---you would do this
-if you want to extract the last step in your pipe from the data's \code{\link[humdrumR:humtable]{Humdrum Table}} into
+if you want to extract the last step in your pipe from the data's \verb{[humdrumR:humtable][Humdrum Table]} into
 a normal vector or list of R data.
 
 ' \verb{\\\%humT\\\%} creates a "T" in the pipe, applying the desired expression but not keeping the result---the unaltered
-humdrumR input object is returned. This works simply by replacing all \code{do~} with \code{doplot~} in a call to
-\code{\link{withinHumdrum}}. The purpose of this option, is if you want to apply expressions for their
+humdrumR input object is returned. This works simply by replacing all \verb{do~} with \verb{doplot~} in a call to
+\verb{[withinHumdrum][withinHumdrum]}. The purpose of this option, is if you want to apply expressions for their
 \href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effects},
 for instance, for plotting.
 
 \verb{\%hum[]\%} is similar to \verb{\%hum>\%} except it apply the formulae on its right-hand
-side using \code{\link[humdrumR]{filterHumdrum}}. Thus, it can be used to filter/index
-a \code{\linkS4class{humdrumR}} data object on the fly.
+side using \verb{[humdrumR][filterHumdrum]}. Thus, it can be used to filter/index
+a \verb{[humdrumR][humdrumR]} data object on the fly.
 }
 \section{Plural pipes}{
 
@@ -74,14 +71,14 @@ and pipe each element in the list to an expression/function.
 There are plural pipe versions of each singular pipe operator.
 Just add an "s" to make them plural:
 \itemize{
-\item \verb{\%>\%} (singular) : \verb{\%s>\%} (plural);
+\item \verb{|>} (singular) : \verb{\%s>\%} (plural);
 \item \verb{\%hum>\%} (singular) : \verb{\%hums>\%} (plural);
 \item \verb{\%hum<\%} (singular) : \verb{\%hums<\%} (plural);
 \item \verb{\%humT\%} (singular) : \verb{\%humsT\%} (plural);
 \item \verb{\%hum[]\%} (singular) : \verb{\%hums[]\%} (plural);
 }
 
-Note: \verb{\%s>\%} is an expansion of the \link[magrittr:pipe]{magrittr::\%>\%} pipe operator, which
+Note: \verb{\%s>\%} is an expansion of the \verb{\\>} pipe operator, which
 makes use of some clever meta-programming---we can't guarantee it will
 always behave the way we might like!
 }

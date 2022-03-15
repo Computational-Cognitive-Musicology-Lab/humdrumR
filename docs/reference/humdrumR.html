@@ -12,11 +12,19 @@ KernScores."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
+<<<<<<< HEAD
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+=======
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    
+    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+>>>>>>> master
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +54,11 @@ KernScores."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
+<<<<<<< HEAD
   <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+=======
+  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+>>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -59,7 +71,11 @@ KernScores."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>humdrumR</h1>
+<<<<<<< HEAD
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-package.R" class="external-link"><code>R/humdrumR-package.R</code></a></small>
+=======
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-package.R"><code>R/humdrumR-package.R</code></a></small>
+>>>>>>> master
       <div class="d-none name"><code>humdrumR.Rd</code></div>
     </div>
 
@@ -81,6 +97,7 @@ the power of R to give us enprecedented power to manipulate and analyze humdrum 
     
 
 
+<<<<<<< HEAD
 <p>The package <code>humdrumR</code> has XXX main components:</p><ul><li><p>To represent humdrum data in R, we have the <a href="humdrumR-class.html">humdrumR</a> <a href="http://adv-r.had.co.nz/S4.html" class="external-link">S4 class</a>, and it's core component
 the <a href="humTable.html">humdrum table</a>.</p></li>
 <li><p>To create <code>humdrumR</code> data, a sophisticated humdrum data parser: <a href="readHumdrum.html">readHumdrum</a>.
@@ -92,6 +109,19 @@ short hands using R's standard <a href="https://rdrr.io/r/base/Extract.html" cla
 <a href="https://en.wikipedia.org/wiki/Vertical_bar#Pipe" class="external-link">bash-style pipes</a>.</p></li>
 <li><p>To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our <a href="regexDispatch.html">regular-expression dispatch system</a>.</p></li>
+=======
+<p>The package <code>humdrumR</code> has XXX main components:</p><ul><li><p>To represent humdrum data in R, we have the <a href="humdrumRclass.html">humdrumR</a> <a href="http://adv-r.had.co.nz/S4.html" class="external-link">S4 class</a>, and it's core component
+the <a href="humTable.html">humdrum table</a>.</p></li>
+<li><p>To create <code>humdrumR</code> data, a sophisticated humdrum data parser: <a href="readHumdrum.html">readHumdrum</a>.
+<code>humdrumR</code> data can also be written back to humdrum-syntax text files using <a href="writeHumdrum.html">writeHumdrum</a>.</p></li>
+<li><p>To filter and "index" <code>humdrumR</code> data, we have the <a href="filterHumdrum.html">filterHumdrum</a> function, which can also be called in a variety of
+short hands using R's standard <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a>: <code>[]</code> and <code>[[]]</code>.</p></li>
+<li><p>To manipulate and modify <code>humdrumR</code> data, we have the with(in)Humdrum and <a href="withinHumdrum.html">humApply</a> functions.</p></li>
+<li><p>A set of <a href="humPipe.html">"pipe" operators</a> (<code>%hum&gt;%</code>, <code>%hum&lt;%</code>, etc.), so that <code>humdrumR</code> data can be manipulated and filtered in concise,
+<a href="https://en.wikipedia.org/wiki/Vertical_bar#Pipe" class="external-link">bash-style pipes</a>.</p></li>
+<li><p>To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
+a useful API we call our <a href="humdrumDispatch.html">regular-expression dispatch system</a>.</p></li>
+>>>>>>> master
 <li><p>Several <a href="humdrumPitch.html">modules</a> for representing and manipulating musical pitch information,
 including our core <a href="tonalInterval.html">tonalInterval</a> class to represent tonal pitch.</p></li>
 <li><p>A module for representing and manipulating musical rhythm information,
@@ -103,7 +133,11 @@ with a core <a href="rhythmInterval.html">rhythmInterval</a> class to represent 
 
 
     <footer><div class="pkgdown-footer-left">
+<<<<<<< HEAD
   <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
+=======
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+>>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">
