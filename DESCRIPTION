@@ -26,8 +26,8 @@ Collate: humdrumR-package.R
          Validation.R
          Vector.R
          tonalInterval.R
-         rhythmInterval.R
          diatonicSet.R
+         rhythmInterval.R
          tertianSet.R
          Metric.R
          Graphics.R

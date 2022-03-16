@@ -417,7 +417,7 @@ makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 
     paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
 }
 
-makeRE.contours <- function(octave.integer = TRUE, up = '^', down = 'v', ...) {
+makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) {
     if (octave.integer) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
@@ -434,7 +434,7 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
 
 makeRE.kern <- function(parts = c("step", "species"), qualities = FALSE, ...) {
     
-    step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+    step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
     makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, 
                        qualities = qualities,
                        octave.integer = FALSE, ..., regexname = 'kern')
@@ -450,11 +450,13 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
 }
 
 makeRE.interval <- function(parts = c("species", "step"), collapse = TRUE, qualities = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99, ..., regexname = 'interval')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99,
+                       flat = 'b', ..., regexname = 'interval')
 }
 
 makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, ..., regexname = 'scaleDegree')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, 
+                       flat = 'b', ..., regexname = 'scaleDegree')
 }
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse = TRUE) {
@@ -510,7 +512,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['star'] <- res['star'] <- '\\*?'
         
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
-        res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
+        res['mode'] <- captureRE(c('phr', 'aeo', 'loc', 'dor'), n = '?')
         
         majors <- cREs(REs[parts[parts %in% names(REs)]])
         minors <- cREs(res[parts[parts %in% names(REs)]])
@@ -523,7 +525,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
                                   ...)
         REs['colon'] <-  ':?'
         REs['star']  <- '\\*?'
-        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phy', 'aeo', 'loc', 'dor'), n = '?')
+        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phr', 'aeo', 'loc', 'dor'), n = '?')
     }
     
     
