@@ -233,7 +233,7 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 
 
 
-## %~% Regex tools ----
+## %% Regex tools ----
 
 
 #' Match strings against regular expression

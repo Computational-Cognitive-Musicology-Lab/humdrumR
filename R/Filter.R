@@ -348,7 +348,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- filterHumdrum(x, dofill ~ any(. %~% i),  by ~ File, recordtypes ~ "D")
+            x <- filterHumdrum(x, dofill ~ any(. %grepl% i),  by ~ File, recordtypes ~ "D")
             
             if (removeEmpty) x <- removeEmptyFiles(x)
             
@@ -451,7 +451,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    form <- do ~ Record %in% unique(Record[. %~% i])
+    form <- do ~ Record %in% unique(Record[. %grepl% i])
     x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
@@ -475,7 +475,7 @@ function(x, i, removeEmpty = FALSE) {
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
           function(x, j, removeEmpty = FALSE) {
             #gets any spine which contains match
-            form <- do ~ Spine %in% unique(Spine[. %~% j])
+            form <- do ~ Spine %in% unique(Spine[. %grepl% j])
             
             x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
             
@@ -502,7 +502,7 @@ setMethod('[[',
               }
               
               if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %~% k, recordtypes ~ "D")
+                  x <- filterHumdrum(x, do ~ . %grepl% k, recordtypes ~ "D")
               }
               if (rlang::is_formula(k)) {
                   # x <- do.call('filterHumdrum', c(x, k,  recordtypes ~ "D", list(...)))
