@@ -417,7 +417,7 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
 
 makeRE.kern <- function(parts = c("step", "species"), qualities = FALSE, ...) {
     
-    step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+    step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
     makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, 
                        qualities = qualities,
                        octave.integer = FALSE, ..., regexname = 'kern')
@@ -495,7 +495,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['star'] <- res['star'] <- '\\*?'
         
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
-        res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
+        res['mode'] <- captureRE(c('phr', 'aeo', 'loc', 'dor'), n = '?')
         
         majors <- cREs(REs[parts[parts %in% names(REs)]])
         minors <- cREs(res[parts[parts %in% names(REs)]])
@@ -508,7 +508,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
                                   ...)
         REs['colon'] <-  ':?'
         REs['star']  <- '\\*?'
-        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phy', 'aeo', 'loc', 'dor'), n = '?')
+        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phr', 'aeo', 'loc', 'dor'), n = '?')
     }
     
     

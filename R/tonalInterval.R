@@ -290,7 +290,7 @@ setMethod('sign', signature = c('tonalInterval'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval.character(e1)
+              e1 <- tonalInterval.character(e1, memoize = FALSE)
               
               e3 <- e1 + e2
               dispatch <- attr(e1, 'dispatch')
@@ -873,7 +873,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"
 
 
 
-octave2tint <- function(str, simpletint, 
+octave2tint <- function(str, simpletint, roottint,
                         octave.integer = TRUE,
                         up = '^', down = 'v', same = "",
                         octave.offset = 0L, octave.round = floor,
@@ -886,15 +886,14 @@ octave2tint <- function(str, simpletint,
   }
   
   #
-  steps <- tint2step(simpletint, 1:7)
+  steps <- tint2step(simpletint, 0:6) + tint2step(roottint, 0:6)
   n <- if (relative) {
     steps <- delta(steps)
     
     stepOct <- octave.round(steps / 7) 
     sigma(n - stepOct)
-    
   } else {
-    n - octave.round(steps / 8)
+    n - octave.round(steps / 7)
   }
 
   
@@ -1162,6 +1161,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   
 }
 
+CKey <- function(dset) if (!is.null(dset)) dset - getRootTint(dset) 
 
 
 tonalChroma2tint <- function(str,  
@@ -1184,12 +1184,13 @@ tonalChroma2tint <- function(str,
  
  ## simple part
  step    <- if ("step" %in% parts)    step2tint(step, ...) 
- species <- if ("species" %in% parts) specifier2tint(species, qualities = qualities, Key = Key, step = step, ...) 
+ species <- if ("species" %in% parts) specifier2tint(species, qualities = qualities, 
+                                                     Key = if (keyed) Key else CKey(Key), step = step, ...) 
  
  simpletint <- (step %||% tint( , 0L)) + (species %||%  tint( , 0L)) 
  
  # complex part
- tint <- if ("octave" %in% parts) octave2tint(octave, simpletint = simpletint, ...) + simpletint else simpletint
+ tint <- if ("octave" %in% parts) octave2tint(octave, simpletint = simpletint, root = getRootTint(Key %||% dset(0L, 0L)), ...) + simpletint else simpletint
  
  if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
@@ -1217,7 +1218,7 @@ pitch2tint <- function(str, ...) {
 kern2tint <- function(str, ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
-  step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+  step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
   overdot(tonalChroma2tint(str, parts = c("step", "species"), 
                            keyed = TRUE,  
                            qualities = FALSE,
@@ -1231,11 +1232,11 @@ interval2tint <- function(str, ...) {
 }
 
 
-degree2tint <- function(str, ...) {
+degree2tint <- function(str, Key = NULL, ...) {
   
   overdot(tonalChroma2tint(str, parts = c("octave", "species", "step"), 
                            qualities = FALSE, 
-                           keyed = FALSE,
+                           keyed = FALSE, Key = Key,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
                            flat = 'b',
@@ -1422,7 +1423,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
                 inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
   
   rlang::new_function(args, rlang::expr( {
-    
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
     args <- lapply(rlang::enexprs(...),
                    \(argExpr) {

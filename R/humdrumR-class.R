@@ -646,19 +646,22 @@ setMethod('as.vector',
 #' @name humCoercion
 #' @export
 as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
-                     alignColumns = FALSE, padPaths = FALSE, padder = '') {
+                     alignColumns = FALSE, padPaths = FALSE, padder = '.') {
           dataTypes <- checkTypes(dataTypes, 'as.lines')
           
-          mat <- as.matrix(humdrumR, dataTypes = dataTypes, padder = padder,
-                           fieldnames = fieldname[1], alignColumns = alignColumns,
-                           path.fold = !padPaths)
+          mats <- as.matrices(humdrumR, dataTypes = dataTypes, padder = padder,
+                              fieldnames = fieldname[1], alignColumns = alignColumns,
+                              path.fold = !padPaths)
           
-          mat[is.na(mat)] <- "."
-          
-          lines <- apply(mat, 1, \(row) paste(row, collapse = '\t'))
+         
+          lines <- unlist(lapply(mats, 
+                                  \(mat) {
+                                      mat[is.na(mat)] <- "."
+                                      apply(mat, 1, \(row) paste(row, collapse = '\t'))
+                                  }))
           lines[grepl('^!!', lines)] <- stringr::str_remove_all(lines[grepl('^!!', lines)], '\t\\.')
           
-          names(lines) <- rownames(mat)
+          names(lines) <- unlist(lapply(mats, rownames))
           
           lines
                            
@@ -669,7 +672,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 #' @name humCoercion
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
-                   alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
+                               alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
     
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
@@ -703,7 +706,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     outMat[outMat == '_C'] <- padder
                     outMat[outMat == '_P'] <- padder
-                    outMat[outMat == 'NA'] <- padder
+                    outMat[is.na(outMat)] <- padder
                     
                     ## dimnames and sort
                     humtab <- getHumtab(x, dataTypes = dataTypes)
@@ -735,14 +738,18 @@ setMethod('as.data.frame',
 
 #' @name humCoercion
 #' @export
-as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
+as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE, alignColumns = FALSE) {
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
-          n <- length(humdrumR)
-          lapply(1:n,
-                 \(i) as.matrix.humdrumR(humdrumR[i], dataTypes = dataTypes, 
-                                       fieldnames = fieldnames, 
-                                       padder = padder, 
-                                       path.fold = path.fold))
+          mat <- as.matrix(humdrumR, dataTypes = dataTypes,
+                           padder = padder, fieldnames = fieldnames, path.fold = path.fold, alignColumns = alignColumns)
+          
+          file <- as.integer(gsub('\\..*', '', rownames(mat)))
+          lapply(tapply(seq_along(file), file, list),
+                 \(i) {
+                     m <- mat[i, , drop = FALSE]
+                     m[ , colSums(if (is.na(padder)) {is.na(m)} else {m == padder}) != nrow(m), drop = FALSE]
+                     
+                 })
           
 }
 #' @name humCoercion
@@ -2075,14 +2082,14 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
 
 
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
-    
+    if (nrow(tokmat) < 50) return(tokmat)
     null <- apply(matrix(grepl('^\\.( \\.)*$', tokmat) | grepl('^=', tokmat), nrow = nrow(tokmat)), 1, all, na.rm = TRUE)
     
     chunks <- segments(!null)
     
     # newRN <- unlist(tapply(rownames(tokmat), chunks, \(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
     
-    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
+    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, simplify = FALSE, 
                                    \(i) {
                                        nbars <- sum(grepl('^=', tokmat[i, 1]))
                                        
@@ -2113,13 +2120,8 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
                                        
                                        tokmat
                                        
-                                       
-                                       
-                                       
-                                       
                      })
     tokmat <- do.call('rbind', tokmat)
-    
     rownames(tokmat) <- stringr::str_replace(rownames(tokmat), '-[0-9]+\\.', '-') # replace redundant fileNumber
     
     tokmat
