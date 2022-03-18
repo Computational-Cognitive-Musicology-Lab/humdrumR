@@ -1252,22 +1252,15 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
           humdrumR
 }
 
-matchGLIMfields <- function(humdrumR, from = 'D', to = c('G', 'L', 'I', 'M', 'd', 'P') ) {
-    # make sure all the tables in humTable (i.e., G L I M D and P) all have the same fields
-    # usual case is that fields have been added to D but are missing from other tables.
-    # 
-    putHumtab(humdrumR, drop = FALSE) <- data.table::rbindlist(humdrumR@Humtable, fill = TRUE)
-    
-    humdrumR
-}
 
-`addNulld<-` <- function(humdrumR, value) {
-    old <- getHumtab(humdrumR, 'd')
-    value <- value[ , colnames(old), with = FALSE]
-    humdrumR@Humtable$d <- rbind(old, value)
-    humdrumR
-    
-}
+
+# `addNulld<-` <- function(humdrumR, value) {
+#     old <- getHumtab(humdrumR, 'd')
+#     value <- value[ , colnames(old), with = FALSE]
+#     humdrumR@Humtable$d <- rbind(old, value)
+#     humdrumR
+#     
+# }
 
 
 `putD<-` <- function(humdrumR, value) { 
@@ -1627,12 +1620,7 @@ activeFields <- function(humdrumR) {
 }
 
 
-isField <- function(humdrumR, names) {
-          ## checks if character strings in "names"
-          ## argument match the names of any fields
-          ## in the humdrumR argument
-          names %in% fields(humdrumR)$Name 
-}
+
 
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' Get named 
@@ -1692,25 +1680,6 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
   ## (columns) of data from a humdrum table.
   object@Fields$Data <- object@Fields$Data[!object@Fields$Data %in% value]
   object
-}
-
-`padGLIMfields<-` <- function(object, value)  {
-  # This function is used be indexGLIM
-  # It is used to add empty fields to a humtable.
-  # withinHumdrum (or humApply) may add new fields to the 'D' (data)
-  # humtable, and we need to add these same fields to the other 
-  # humtables (i.e., GLIMdP)
-  # By default, these blank fields are null tokens.
-  # The argument copyField can be the name of another field, which is 
-  # copied instead of null tokens.
-  humtab <- object
-  # nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
-  for (name in names(value)) {
-    # newfield <- if (value[name] == 'character') nulltypes[humtab$Type] else as(NA, value[name])
-    humtab[[name]] <- as(NA, if (value[name] == 'factor') 'character' else value[name])
-  }
-  
-  humtab
 }
 
 

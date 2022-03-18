@@ -805,7 +805,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
     }
     
-    modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+    applyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
     
 }
 
@@ -827,10 +827,10 @@ laggedQuo <- function(funcQuosure) {
                        
                        indexedObject <- expr[[2]]
                        n <- eval_tidy(expr$n)
-                       if (!is.numeric(n) || (n != round(n))) .stop('Invalid [n = ] lag expression.')
+                       if (!is.numeric(n) || (n != (n %% 1))) .stop('Invalid [n = ] lag expression.')
                        expr <- expr[.names(expr) != 'n']
                        
-                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!args[-1:-2])) })
+                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!args)) })
                        
                        exprs
                      })
@@ -841,7 +841,7 @@ laggedQuo <- function(funcQuosure) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+  applyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
 
   
 }
@@ -1285,63 +1285,10 @@ parseResult_table <- function(result) {
 parseResult_list  <- function(result) data.table(result) 
 parseResult_other <- function(result) data.table(list(result))
 
-`pipeIn<-` <- function(object, value) {
-          # This is the main function for taking the output of a
-          # function or expression applied to humtable data and putting
-          # it back into the humtable. If the output and input are the same length,
-          # it's easy. The hard part is what to do when the output is different than
-          # the input. This function hard codes a few common possibilities,
-          # but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
-          humtab <- object # R requires the names object and value for x<- functions
-          
-          curpipen <- curPipeN(humtab) 
-          
-          lengths_ <- function(ls) sapply(ls, \(v) if (is.object(v)) 1L else length(v)) # objects are length 1
-          
-          ####
-          if (!allsame(lengths_(value))) value <- list(value)
-          
-          
-          ## at this point, value should:
-          # be a list with all elements of the same length.
-          # may or may not be named
-          # each element in this list will be a new field in the humtable
-          
-          lenvalue <- lengths_(value)[1]
-          if (lenvalue < nrow(humtab)) humtab <- collapseHumtab(humtab, n = lenvalue)
-          
-          # What will the pipes be named
-          nnewfields   <- length(value)
-          targetfields <- if (allnamed(value)) names(value) else paste0('Pipe', (curpipen + seq_len(nnewfields)))
-          
-          humtab[ , targetfields] <- value
-          
-          #humtab[ , newfields := paste(targetfields, collapse = ' ')]
-          
-          humtab
-          
-} 
 
 
 
 
-ifelsecalls <- function(calls, fields) {
-          # function used within withinHumdrum, as part of 
-          # humdrumR (re)assembly process.
-    
-          conditionexpr <- calls[[1]]
-          
-          ifexpr <- if (length(calls) == 1L) {
-              fields[[2]]
-          } else {
-              Recall(calls[-1], fields[-1])
-          }
-          
-          elseexpr <- fields[[1]]
-          
-          #
-          rlang::quo(ifelse(!!conditionexpr, !!ifexpr, !!elseexpr))
-}
 
 pipeFields <- function(humtab) {
   # Another function used by pipeIn<- (withing curePipeN)
@@ -1366,41 +1313,6 @@ curPipeN <- function(humtab) {
 
 
 
-
-collapseHumtab <- function(humtab, n = 1L) {
-  # This is the biggest part of pipeIn<-'s work.
-  # It's the trickiest part of the process, shrinking
-  # the existing humtable to match the size of the new fields.
-  # 
-  # This function really only passes information into collapse2n, which
-  # is the really workhorse.
-  # 
-  humtab[ , Map(f = collapse2n, 
-            .SD, # Each field/column
-            colnames(humtab), # the field name
-            lapply(humtab, class), # the class of each field (important because data.table doesn't like columns to change class
-            n = n
-            )] 
-  }
-
-collapse2n <- function(x, colname, class, n = 1) {
-  # This is the function that actually collapses a field
-  # (column in humtable) to a smaller length. 
-  # Certain structural fields are treated differently,
-  # so that (hopefully) things like record and spine numbers
-  # still make sense after collapse.  
-  uniqx <- unique(x)
-  uniqx <- uniqx[!is.na(uniqx)]
-  if (length(uniqx) == 0) return(rep(as(NA, class), n))
-  
-  if (colname %in% c('Record', 'Spine', 'Path', 'ColumnNumber', 
-                     'StopNumber', 'Bar', 'DoubleBarline', 'NData', 'File')) {
-    uniqx[1:n]
-  } else {
-    rep( if (length(uniqx) == 1) uniqx else as(NA, class) , n)
-  }
-  
-}
 
 
 ################################humApply ----

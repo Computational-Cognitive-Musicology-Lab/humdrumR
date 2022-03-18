@@ -156,20 +156,6 @@ matchFiles <- function(filepattern, matchingdirs, recursive) {
     
 }
 
-istextFile <- function(fpaths) {
-    # given file path, asks if the file is a text file
-    # returns logical
-    # findFiles already checks that files are not directories, so this function doesn't
-    
-    # directories <- list.dirs(dirname(fpath), full.names = FALSE, recursive = FALSE)
-    # if (fpath %in% directories) return(FALSE)
-    
-    raw <- lapply(fpaths, stringi::stri_read_raw)
-    enc <- data.table::rbindlist(stringi::stri_enc_detect2(raw))
-    
-    !is.na(enc$Encoding) & enc$Confidence > 0.8
-}
-
 filterFilesByContent <- function(fileFrame, patterns, combine = `&`) {
     # takes a data.table with filenames 
     # and removes those that don't contain matches to (regex) patterns args.
@@ -307,16 +293,16 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
 }
 
 
-readLinesFast <- function(fpath, lines = TRUE) {
-    # This function is awesomely fast, but doesn't check if the file are proper text files
-    
-    s <- file.info(fpath)$size 
-      
-    buf <- readChar(fpath, s, useBytes = TRUE)
-    buf <- stringi::stri_enc_tonative(buf)
-    if (lines) stringi::stri_split_fixed(buf, "\n", omit_empty = TRUE)[[1]] else buf
-}
-
+# readLinesFast <- function(fpath, lines = TRUE) {
+#     # This function is awesomely fast, but doesn't check if the file are proper text files
+#     
+#     s <- file.info(fpath)$size 
+#       
+#     buf <- readChar(fpath, s, useBytes = TRUE)
+#     buf <- stringi::stri_enc_tonative(buf)
+#     if (lines) stringi::stri_split_fixed(buf, "\n", omit_empty = TRUE)[[1]] else buf
+# }
+# 
 
 readTextFiles <- function(fpaths) {
     # This function reads files, 

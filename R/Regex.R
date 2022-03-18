@@ -192,42 +192,6 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 
 
 
-normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
-    # this takes the name of a function (as a string)
-    # and creates a usable function body
-    # including jumping through hoops to for
-    # primitives and generics
-    
-    if (is.null(func)) func <- match.fun(fname)
-    fname <- rlang::sym(fname)
-    ftext <- rlang::quo_text(func)
-    
-    
-    # args
-    argnames <- names(fargs(func))
-    if (argnames[[1]] == '...' && removeElips) argnames[[1]] <- 'tmp'
-    argnames <- rlang::syms(argnames)
-    
-    namedfuncexpr <- rlang::expr((!!fname)(!!!argnames))
-    
-    if (is.primitive(func) | 
-        grepl('\\.Internal|\\.Primitive', ftext) |
-        grepl('UseMethod|standardGeneric', ftext)) {
-        namedfuncexpr
-        
-    } else {
-        
-        body <- rlang::fn_body(func)
-        if (sum(stringi::stri_count_fixed(as.character(body), '\n')) > 1 ||
-            !grepl('function\\(', as.character(body))) {
-            namedfuncexpr
-        } else {
-            body
-        }
-    }
-}
-
-
 
 
 
