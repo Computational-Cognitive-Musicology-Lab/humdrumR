@@ -1167,24 +1167,50 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 ### Metaprogramming ----
 
 
+applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
+    exprA <- analyzeExpr(expr)
+    output <- NULL
+    if (exprA$Type %in% applyTo) {
+        hit <- do...(predicate, exprA, envir = parent.frame())
+        if (hit) {
+            output <- func(exprA)
+        } 
+    } else {
+        hit <- FALSE
+    }
+    
+    if (exprA$Type == 'call' && !hit) {
+        output <- list()
+        for (i in seq_along(exprA$Args)) {
+            output[[i]] <- Recall(exprA$Args[[i]], 
+                                      func = func, 
+                                      predicate = predicate, 
+                                      applyTo = applyTo)
+        }
+        if (length(output) == 0L || all(lengths(output) == 0L)) output <- NULL
+        
+    }
+    output
+}
+
+
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
 }
 
-namesInExpr <- function(names, expr) {
+namesInExpr <- function(names, expr, applyTo = 'symbol') {
     ## This function identifies which, if any,
     ## of a character vector ("names") are referenced as a name 
     ## (not including things called as functions) in an expression 
     ## (or rhs for formula).
-    if (rlang::is_formula(expr)) expr <- rlang::f_rhs(expr)
     
-    applyExpr(expr, rebuild = FALSE,
-              \(ex) {
-                  exstr <- deparse(ex)
-                  match <- names[pmatch(exstr, names)]
-                  if (is.na(match)) NULL else match
-              }) -> usedInExpr
-    unique(unlist(usedInExpr))
+    unlist(applyExpr(expr, applyTo = applyTo,
+              \(Head) Head %in% names,
+              \(exprA) {
+                  matches <- names[pmatch(exprA$Head, names)]
+                  
+                  matches
+              }))
 }
 
 substituteName <- function(expr, subs) {
@@ -1299,23 +1325,27 @@ unanalyzeExpr <- function(exprA) {
     expr
 }
 
-applyExpression <- function(expr, predicate = \(...) TRUE, func, onlyCalls = TRUE, stopOnHit = TRUE) {
+
+
+modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
     exprA <- analyzeExpr(expr)
     
-    if (onlyCalls && exprA$Type == 'symbol') return(expr)
+    if (exprA$Type %in% applyTo) {
+        hit <- do...(predicate, exprA, envir = parent.frame())
+        if (hit) {
+            exprA <- func(exprA)
+        } 
+    } else {
+        hit <- FALSE
+    }
     
-    hit <- do...(predicate, exprA, envir = parent.frame())
-    
-    if (hit) {
-        exprA <- func(exprA)
-    } 
     if (exprA$Type == 'call' && !(hit && stopOnHit)) {
         for (i in seq_along(exprA$Args)) {
             exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
                                       func = func, 
                                       predicate = predicate, 
                                       onlyCalls = onlyCalls, 
-                                      stopOnHit = stopOnHit)
+                                      applyTo = applyTo)
         }
        
     }

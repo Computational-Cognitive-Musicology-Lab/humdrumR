@@ -805,7 +805,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
     }
     
-    applyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+    modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
     
 }
 
@@ -841,7 +841,7 @@ laggedQuo <- function(funcQuosure) {
     exprA
   }
   
-  applyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
 
   
 }
