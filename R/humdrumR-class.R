@@ -2104,7 +2104,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
                                                barnums <- barnums[!is.na(barnums)]
                                                barnums <- paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-')
                                            } 
-                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
+                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], , drop = FALSE]), collapse = '-')
                                            
                                            paste0(base, barnums)
                                            

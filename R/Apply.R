@@ -422,7 +422,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     ###########################-
     ### Preparing the "do" expression
     doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions, 
-                            humdrumR@Active, parsedArgs$formulae$ngram)
+                            humdrumR@Active, parsedArgs$formulae$ngram, parsedArgs$formulae$windows)
     ordoQuosure <- prepareQuo(humtab, parsedArgs$formulae$ordoexpression,
                               humdrumR@Active, parsedArgs$formulae$ngram)
     
@@ -433,7 +433,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
                         ordoQuosure)
-    data.table::setorder(result, `_rowKey_`)
+    if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
     as.list(environment())
     
 }
@@ -538,7 +538,8 @@ parseKeywords <- function(formulae, withfunc) {
  # These keywords must always have exactly one evaluated value.
  #        If there are more than one, take the first.
  #        If there are none, some categories have defaults
- values$ngram       <- if (length(values$ngram)       == 0L) NULL else values$ngram[[1]]
+ values$ngram       <- if (length(values$ngram)       != 0L) values$ngram[[1]]
+ values$windows     <- if (length(values$windows)     != 0L) values$windows[[1]]
  values$recordtypes <- if (length(values$recordtypes) == 0L) rlang::quo('D') else values$recordtypes[[1]]
  
  # Other keywords (e.g., windows and partitions) can be of any length, including 0
@@ -565,7 +566,7 @@ partialMatchKeywords <- function(keys) {
                          ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
                          recordtypes = 'recordtypes',
                          ngram    = 'ngrams',
-                         windows  = 'windows',
+                         windows  = c('windows', 'context', 'window'),
                          pre      = 'pre', 
                          post     = 'post')
     
@@ -630,7 +631,7 @@ splitFormula <- function(form) {
 
 ##### Preparing doQuo ----
 
-prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
+prepareQuo <- function(humtab, doQuos, active, ngram = NULL, windows = NULL) {
   # This is the main function used by [withinHumdrum()] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   if (length(doQuos) == 0L) return(NULL)
@@ -657,7 +658,7 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # funcQuosure <- unnestQuo(funcQuosure)
   
   # tandem interpretations
-  doQuo <- tandemsQuo(doQuo)
+  #doQuo <- tandemsQuo(doQuo)
   
   # splats
 #  doQuo <- splatQuo(doQuo)
@@ -675,11 +676,14 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
     
   # if ngram is present
   if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
-            doQuo <- ngramifyQuo(doQuo, 
-                                        ngram, usedInExpr, 
-                                        depth = 1L + any(lists))
+    doQuo <- ngramifyQuo(doQuo, 
+                         ngram, usedInExpr, 
+                         depth = 1L + any(lists))
   } 
   
+  if (!is.null(windows)) {
+    doQuo <- windowfyQuo(doQuo, windows, usedInExpr, depth = 1L + any(lists))
+  }
   
 
   doQuo
@@ -768,33 +772,40 @@ activateQuo <- function(funcQuosure, active) {
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
     
-    predicate <- function(quo) !is.null(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
+    predicate <- function(Type, Head) {
+       Type == 'call' &&
+        !is.null(fargs(Head)) && # uses arguments
+        any(.names(fargs(Head)) %in% fields)
+    }
       
     
-    do <- function(quo) {
-        formNames <- names(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
-        
-        hits <- fields %in% formNames
-        
-        if (!any(hits)) return(quo)
-        
-        namedArgs <- .names(quo[[2]][-1])
-        
-        formNames <- formNames[!formNames %in% namedArgs] 
-        
-        usedArgs <- c(namedArgs, head(head(formNames, 
-                                           min(which(formNames == '...'), 
-                                               length(formNames))), 
-                                      sum(namedArgs == "")))
-        
-        hits <- hits & !(fields %in% usedArgs)
-        hits <- fields[hits]
-        quo[[2]][hits] <- rlang::syms(hits)
 
-        quo
+
+    do <- function(exprA) {
+         fargNames <- .names(fargs(exprA$Head))
+         hits <- fields %in% fargNames
+
+         if (!any(hits)) return(exprA)
+
+         namedArgs <- .names(exprA$Args)
+
+         fargNames <- fargNames[!fargNames %in% namedArgs]
+         usedArgs <- c(namedArgs, 
+                       head(head(fargNames,
+                                 min(which(fargNames == '...'),
+                                     length(fargNames))),
+                            sum(namedArgs == ""))) 
+  
+         hits <- hits & !(fields %in% usedArgs)
+         hits <- fields[hits]
+
+         exprA$Args <- c(exprA$Args, setNames(rlang::syms(hits), hits))
+         exprA
+
+
     }
     
-    recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
+    applyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
     
 }
 
@@ -802,77 +813,61 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
 laggedQuo <- function(funcQuosure) {
   
-  predicate <- function(quo) { 
-    quo <- rlang::quo_squash(quo)
-    rlang::is_call(quo) && quo[[1]] == sym('[') && any(names(quo) == 'n')
+  predicate <- function(Args) { 
+    any(sapply(Args, \(arg) as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n'))
   }
   
-  do <- function(quo) {
-    exp <- quo[[2]]
+  do <- function(exprA) {
+    args <- exprA$Args
+    target <- sapply(args, \(arg) as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n')
     
-    args <- as.list(exp)[-1:-2]
-    if (!'windows' %in% names(args)) args$windows <- expr(list(File, Spine))
-    
-    indexedObject <- exp[[2]]
-    n <- eval_tidy(args$n)
-    args <- args[names(args) != 'n']
-    
-    exprs <- lapply(n, \(N) { if (N == 0L) expr(!!indexedObject) else expr(lag(!!indexedObject, n = !!N, !!!args)) })
-    
-    quo[[2]] <- if (length(n) == 1L) {
-      exprs[[1]]
-    } else {
-      expr(.SPLAT.(!!!exprs))
-    }
-    quo
-  
-  }
-  
-  funcQuosure <- recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
-  
-  # check for .SPLAT.
-  predicate <- function(quo) {
-    quo <- quo_squash(quo)
-    rlang::is_call(quo) &&
-      any(sapply(quo[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.')))
-  }
-  do <- function(quo) {
-    expr <- as.list(quo[[2]])
-    splats <- sapply(expr[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.'))
-    
-    for (i in which(splats)) expr[[i + 1L]] <- as.list(expr[[i + 1L]][-1])
-    expr <- unlist(expr, recursive = FALSE)
-    
-    quo[[2]] <- as.call(expr)
-    quo
-  }
-  
-  recurseQuosure(funcQuosure, predicate, do)
+    lagged <- lapply(args[target],
+                     \(expr) {
+                       if (!'windows' %in% .names(expr)) expr$windows <- expr(list(File, Spine))
+                       
+                       indexedObject <- expr[[2]]
+                       n <- eval_tidy(expr$n)
+                       if (!is.numeric(n) || (n != round(n))) .stop('Invalid [n = ] lag expression.')
+                       expr <- expr[.names(expr) != 'n']
+                       
+                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!args[-1:-2])) })
+                       
+                       exprs
+                     })
    
+    args[target] <- lagged
+    exprA$Args <- unlist(args, recursive = FALSE)
+  
+    exprA
+  }
+  
+  applyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+
+  
 }
 
 #### Interpretations in expressions
 
-tandemsQuo <- function(funcQuosure) {
+#tandemsQuo <- function(funcQuosure) {
  # This function inserts calls to getTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
  # If input is a quosure (it should be), it keeps the quosure intact,
  # (i.e., keeps it's environment).
           
- applyExpr(funcQuosure,
-           \(ex) {
-             exstr <- deparse(ex)
-             interp <- grepl('^\\*[^*]', exstr)
-             
-             if (interp) {
-               regex <- stringr::str_sub(exstr, start = 2L)
-               rlang::expr(getTandem(Tandem, !!regex))
-             } else {
-               ex
-             }
-           }) 
-}
+# applyExpr(funcQuosure,
+#           \(ex) {
+#             exstr <- deparse(ex)
+#             interp <- grepl('^\\*[^*]', exstr)
+#             
+#             if (interp) {
+#               regex <- stringr::str_sub(exstr, start = 2L)
+#               rlang::expr(getTandem(Tandem, !!regex))
+#             } else {
+#               ex
+#             }
+#           }) 
+#}
 
 
 #' Get tandem interpretation information from humdrum data.
@@ -922,31 +917,31 @@ getTandem <- function(tandem, regex) {
 # feed each group as an argument to a function.
 #
 
-splatQuo <- function(funcQuosure) {
-  # This function takes an expression,
-  # and replaces any subexpression of the form `funccall(TargetExpr@GroupingExpr)`,
-  # with `do.call('funccall', tapply(TargetExpr, GroupingExpr, c))`.
-  # The result is that `TargetExpr` is broken into a list of vectors by the
-  # `GroupingExpr`, and each group is fed to `funccall` as a separate
-  # argument. See the docementation for [withinHumdrum()].
-  # This does not look for `@` sub expression within branches of a `@` expression!
-  # 
-  
-  
-  predicate <- function(expr) any(sapply(expr, is.givenCall, call = '@'))
-  
-  transform <- function(expr) {
-      expr <- recurseQuosure(expr, 
-                     \(quo) is.givenCall(quo, '@'), 
-                     \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
-                         })
-      expr <- as.list(expr)
-      rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
-  }
-  
-  recurseQuosure(funcQuosure, predicate, transform)
- 
-}
+# splatQuo <- function(funcQuosure) {
+#   # This function takes an expression,
+#   # and replaces any subexpression of the form `funccall(TargetExpr@GroupingExpr)`,
+#   # with `do.call('funccall', tapply(TargetExpr, GroupingExpr, c))`.
+#   # The result is that `TargetExpr` is broken into a list of vectors by the
+#   # `GroupingExpr`, and each group is fed to `funccall` as a separate
+#   # argument. See the docementation for [withinHumdrum()].
+#   # This does not look for `@` sub expression within branches of a `@` expression!
+#   # 
+#   
+#   
+#   predicate <- function(expr) any(sapply(expr, is.givenCall, call = '@'))
+#   
+#   transform <- function(expr) {
+#       expr <- recurseQuosure(expr, 
+#                      \(quo) is.givenCall(quo, '@'), 
+#                      \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
+#                          })
+#       expr <- as.list(expr)
+#       rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
+#   }
+#   
+#   recurseQuosure(funcQuosure, predicate, transform)
+#  
+# }
 
 parseAt <- function(atExpr) {
  # This function is used by splatQuo
@@ -1029,7 +1024,23 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
   
 }
 
-
+windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+  
+  if (!'boundaries' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['boundaries']] <- quote(list(File,Spine))
+  if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
+  
+  applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild')])
+  windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild')]
+  
+  
+  rlang::quo(
+    windowApply(func = !!funcQuosure,
+                x = !!rlang::sym(usedInExpr[1]),
+                windows = !!windowQuosure,
+                !!!applyArgs))
+  
+}
 
 
 

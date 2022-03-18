@@ -41,22 +41,6 @@ doubleswitch <- function(pred1, pred2, ...) {
     
 }
 
-`%fmap%` <- function(e1, e2) {
-    if (is.null(e1)) return(NULL)
-    
-    e2 <- rlang::enexpr(e2)
-    
-    if (length(e2) == 1L) {
-        e2 <- eval(e2, envir = parent.frame(1))
-        if (is.function(e2)) e2(e1) else e2
-        
-    } else {
-        e1 <- rlang::enexpr(e1)
-        eval(substituteName(e2, list(. = e1)))
-        
-    }
-    
-}
 `%==%` <- function(e1, e2) !is.null(e1) &&  e1 == e2 
 `%iN%` <- function(e1, e2) !is.null(e1) && e1 %in% e2 
 
@@ -110,7 +94,7 @@ false <- function(x) is.null(x) || is.logical(x) && !x[1]
 
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
-fargs <- function(func)  args(func) %fmap% formals  
+fargs <- function(func)  formals(args(func))
 
 
 
@@ -473,10 +457,13 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
+changes <- function(x) {
+    c(TRUE, head(x, -1L) != tail(x, -1L))
+}
 
 
 segments <- function(x, reverse = FALSE) {
-    change <- if (!is.logical(x)) c(TRUE, head(x, -1L) != tail(x, -1L)) else x
+    change <- if (!is.logical(x)) changes(x) else x
     if (reverse) change <- rev(change)
     
     seg <- cumsum(change)
@@ -1179,39 +1166,6 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 ### Metaprogramming ----
 
-applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
-  # helper function
-  accum <- c()
-  
-  if (length(ex) <= 1L) {
-    return(func(ex))
-  } else {
-    for (i in (2 - !ignoreHead):length(ex)) {
-      missing <- rlang::is_missing(ex[[i]]) || is.null(ex[[i]])
-      
-      if (!missing) {
-        out <- Recall(ex[[i]], func, rebuild = rebuild) 
-        
-        if (rebuild) {
-          ex[[i]] <- out 
-        } else {
-          accum <- c(accum, out) 
-        }
-      }
-    }
-  }
-  
-  if (rebuild) ex else accum
-}
-
-apply2ExprAsString <- function(func, ...) {
-  \(expr) {
-    str <- func(deparse(expr), ...)
-    parse(text = str)[[1]]
-    
-  }
-}
-
 
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
@@ -1294,30 +1248,80 @@ recurseExpr <- function(expr, predicate, do, stopOnHit = TRUE) {
     expr
 }
 
-recurseQuosure <- function(quo, predicate, do, stopOnHit = TRUE) {
-    isquo <- rlang::is_quosure(quo)
+analyzeExpr <- function(expr) {
+    exprA <- list()
     
-    if (!isquo)  quo <- rlang::new_quosure(quo)
-    
-    if (!is.call(quo[[2]])) return(if (isquo) quo else quo[[2]])
-    
-    s <- (rlang::as_label(quo[[2]][[1]]) %in% c('{', '(')) + 1L
-    
-    if (s == 1L) {
-        pred <- predicate(quo) 
-        if (pred) quo <- do(quo)
-        if (!rlang::is_call(quo[[2]])) return(quo)
-    }
-    
-    if (s == 2L || !(stopOnHit && pred)) {
-        for (i in s:length(quo[[2]])) {
-            if (!is.null(quo[[2]][[i]]))  quo[[2]][[i]] <- Recall(quo[[2]][[i]], predicate, do, stopOnHit)
+    exprA$Form <- if (!rlang::is_formula(expr)) {
+        'expression'
+    } else {
+        exprA$Environment <- environment(expr)
+        exprA$Original <- expr
+        if (rlang::is_quosure(expr)) {
+            expr <- rlang::quo_get_expr(expr)
+            'quosure'
+        } else {
+            exprA$LHS <- rlang::f_lhs(expr)
+            expr <- rlang::f_rhs(expr)
+            'formula'
         }
+        
     }
+    
+    exprA$Type <- if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
+    exprA$Head <- switch(exprA$Type,
+                         call = as.character(expr[[1]]),
+                         atomic = expr,
+                         symbol = as.character(expr))
+    exprA$Args <- if (exprA$Type == 'call') as.list(expr[-1]) else list()
 
     
-    if (isquo) quo else quo[[2]]
+    
+    exprA
+    
+    
+    
+}
+
+unanalyzeExpr <- function(exprA) {
+    expr <- switch(exprA$Type,
+                   call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
+                   atomic = exprA$Head,
+                   symbol = rlang::sym(exprA$Head))
+    
+    if (exprA$Form != 'expression') {
+        expr <- if (exprA$Form == 'formula') {
+            rlang::new_formula(exprA$LHS, expr, env = exprA$Environment)
+        }   else {
+            rlang::new_quosure(expr, env = exprA$Environment)
+        }
+    }
+    
+    expr
+}
+
+applyExpression <- function(expr, predicate = \(...) TRUE, func, onlyCalls = TRUE, stopOnHit = TRUE) {
+    exprA <- analyzeExpr(expr)
+    
+    if (onlyCalls && exprA$Type == 'symbol') return(expr)
+    
+    hit <- do...(predicate, exprA, envir = parent.frame())
+    
+    if (hit) {
+        exprA <- func(exprA)
+    } 
+    if (exprA$Type == 'call' && !(hit && stopOnHit)) {
+        for (i in seq_along(exprA$Args)) {
+            exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
+                                      func = func, 
+                                      predicate = predicate, 
+                                      onlyCalls = onlyCalls, 
+                                      stopOnHit = stopOnHit)
+        }
        
+    }
+    
+    unanalyzeExpr(exprA)
+    
 }
 
 is.givenCall <- function(expr, call) {

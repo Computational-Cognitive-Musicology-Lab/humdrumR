@@ -2,52 +2,13 @@
 % Please edit documentation in R/Windows.R
 \name{humWindows}
 \alias{humWindows}
-\alias{findWindows}
+\alias{windows}
 \alias{windowApply}
 \alias{applyNgram}
 \alias{hop}
-\title{nested <- function(x, open = '(', close = ')', depth = 1L) {
-open <- gsub('\\(', '\\\\(', open)
-opens <- stringi::stri_count_regex(x, open)
-
-close <- gsub('\\)', '\\\\)', close)
-closes <- stringi::stri_count_regex(x, close)
-
-if (!any(opens) && !any(closes)) return(integer(length(x)))
-
-openscum  <- cumsum(opens)
-closescum <- cumsum(lag(closes, 1L, fill = 0L))
-depth_vec <- openscum - closescum
-if (tail(depth_vec, 1L) != 0L &&
-tail(closescum, 1L) == 0L) .stop("In your call to humdrumR::nest",
-"the input vector does not have matching {open}",
-" and {close} tokens.")
-
-indices <- rbindlist(c(list(data.table(Open = integer(0L), Close = integer(0L), Depth = integer(0L))),
-lapply(setdiff(intersect(depth_vec, depth), 0L),
-\(d) {\preformatted{                              dhit <- ifelse(pmax(opens - 1, 0) == d, depth_vec - pmax(opens - 1, 0), depth_vec) == d
-                              data.table(Open = which(as.logical(opens) & dhit),
-                                         Close = which(as.logical(closes) & dhit),
-                                         Depth = d)
-                            \})))  
-}
-
-if (0L \%in\% depth && 0L \%in\% depth_vec) {
-zeroblocks <- segments(as.integer(depth_vec == 0L)) * (depth_vec == 0L)
-zeroblocks\link{zeroblocks == 0L} <- NA_integer_
-zeroblocks <- tapply(seq_along(x), zeroblocks, simplify = FALSE,
-\(block) {
-data.table(Open = min(block),
-Close = max(block),
-Depth = 0L)
-})
-indices <- rbindlist(c(list(indices), zeroblocks))
-}
-
-setorder(indices, Open, Depth)
-indices}
+\title{Create arbitrary "windows" across vectors.}
 \usage{
-findWindows(
+windows(
   x,
   open,
   close = Next(open) - 1L,
@@ -82,5 +43,5 @@ applyNgram(
 hop(along, pattern = 1, start = 1L, end = length(along))
 }
 \description{
-
+Create arbitrary "windows" across vectors.
 }

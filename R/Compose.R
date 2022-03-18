@@ -115,12 +115,12 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
 
 
 
-do... <- function(func, args) {
+do... <- function(func, args, envir = parent.frame()) {
   # calls func on args, even if some named arguments in args are not arguments of func
   # (ignores those arguments)
   if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
   
-  do.call(func, args)
+  do.call(func, args, envir = envir)
   
   
 }

@@ -8,79 +8,10 @@
 
 
 
-
-#' nested <- function(x, open = '(', close = ')', depth = 1L) {
-#'   open <- gsub('\\(', '\\\\(', open)
-#'   opens <- stringi::stri_count_regex(x, open)
-#'   
-#'   close <- gsub('\\)', '\\\\)', close)
-#'   closes <- stringi::stri_count_regex(x, close)
-#'   
-#'   if (!any(opens) && !any(closes)) return(integer(length(x)))
-#'   
-#'   openscum  <- cumsum(opens)
-#'   closescum <- cumsum(lag(closes, 1L, fill = 0L))
-#'   depth_vec <- openscum - closescum
-#'   if (tail(depth_vec, 1L) != 0L && 
-#'       tail(closescum, 1L) == 0L) .stop("In your call to humdrumR::nest", 
-#'                                        "the input vector does not have matching {open}", 
-#'                                        " and {close} tokens.")
-#'   
-#'   indices <- rbindlist(c(list(data.table(Open = integer(0L), Close = integer(0L), Depth = integer(0L))),
-#'                          lapply(setdiff(intersect(depth_vec, depth), 0L),
-#'                                 \(d) {
-#'                                   
-#'                                   dhit <- ifelse(pmax(opens - 1, 0) == d, depth_vec - pmax(opens - 1, 0), depth_vec) == d
-#'                                   data.table(Open = which(as.logical(opens) & dhit),
-#'                                              Close = which(as.logical(closes) & dhit),
-#'                                              Depth = d)
-#'                                 })))  
-#'   
-#'   if (0L %in% depth && 0L %in% depth_vec) {
-#'     zeroblocks <- segments(as.integer(depth_vec == 0L)) * (depth_vec == 0L)
-#'     zeroblocks[zeroblocks == 0L] <- NA_integer_
-#'     zeroblocks <- tapply(seq_along(x), zeroblocks, simplify = FALSE,
-#'                          \(block) {
-#'                            data.table(Open = min(block),
-#'                                       Close = max(block),
-#'                                       Depth = 0L)
-#'                            })
-#'     indices <- rbindlist(c(list(indices), zeroblocks))
-#'   }
-#'  
-#'   setorder(indices, Open, Depth) 
-#'   indices
-#' 
-#'   
-#' }
-
-
-# context ~ open('(') ~ close(next(open) - 1)
-# context ~ open('(') ~ close(')')
-# context ~ close(';') ~ open(next(close) - 5)
-# context ~ close(';') ~ open(next(close) - 'IV|ii')
-# context ~ open(hop = 1, start = 'a', end = ';') ~ close(open + 4)
-# context ~ open(hop = 1, start = 'a', end = ';') ~ close(open + ';', open + 4)
-# context ~ open('1') ~ close(';') ~ open(close + next('1'))
-
-# context ~ '(' ~ Next(open) - 1
-# context ~ '(' ~ ')'
-# context ~ '(' ~ ')' ~ nested(depth = 1)
-# context ~ Next(close) - 5       ~ ';'
-# context ~ Next(close) - 'IV|ii' ~ ';'
-# context ~ 'a' ~ hop(5) ~ open + 4 ~ ';'
-
-# context ~ findWindows(Token, '(', Next(open) - 1L))
-# context ~ findWindows(Token, '(', ')')
-# context ~ findWindows(Token, '(', ')', nested = TRUE, depth = 1:2)
-# context ~ findWindows(Token, close - 5, ';')
-# context ~ findWindows(Token, before(close, 'IV|ii'), ';')
 #' Create arbitrary "windows" across vectors.
 #' @export
 #' @name humWindows
-findWindows <- function(x, open, close = Next(open) - 1L, start =1, end = length(x), nest = FALSE, depth = NULL, boundaries = NULL) {
-  open <- rlang::enexpr(open)
-  close <- rlang::enexpr(close)
+windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), nest = FALSE, depth = NULL, boundaries = NULL) {
   
   openexpr <- deparse(open)
   closeexpr <- deparse(close)
@@ -106,25 +37,27 @@ findWindows <- function(x, open, close = Next(open) - 1L, start =1, end = length
   
   if (length(open) != length(close)) {
     if (open_depends || close_depends) {
-      .stop("Sorry, in the findWindows function, if use open or close arguments that refer to each other,",
+      .stop("Sorry, in the windows function, if use open or close arguments that refer to each other,",
             "the resulting dependent must be the same length as the thing it depends on.",
             "In this case, {{ {openexpr} }} evaluates with length {length(open)}, while {{ {closeexpr} }}",
             "evaluates with length {length(close)}.",
-            "It's best to stick with the basic usages of findWindows described in the documentation (?findWindows).",
+            "It's best to stick with the basic usages of windows described in the documentation (?windows).",
             "More sophisticated things are possible, but you'll need to do a little more 'manual' wrangling.")
     } 
     close <- close[close >= min(open)]
+    close <- close[1:length(open)]
     # close <- close %after% open
     
   }
 
   
   output <- data.table(Open = open, Close = close)
+  output <- output[Reduce('&', lapply(output, Negate(is.na)))]
   output <- depth(output, nest = nest, depth = depth)
   
   
   if (!is.null(boundaries)) {
-    if (any(lengths(boundaries) != length(x))) .stop("In a call to findWindows, all vectors in the list boundaries must be", 
+    if (any(lengths(boundaries) != length(x))) .stop("In a call to windows, all vectors in the list boundaries must be", 
                                                      "the same length as x.")
     output <- removeCrossing(output, boundaries)
   }
@@ -132,6 +65,12 @@ findWindows <- function(x, open, close = Next(open) - 1L, start =1, end = length
   attr(output, 'vector') <- x
   output
   
+}
+
+#' @export
+#' @rdname humWindows
+nested <- function(x, open, close, depth = 1L) {
+  windows(x, open, close, depth, nest = TRUE)
 }
 
 print.windows <- function(x) {
@@ -147,6 +86,7 @@ print.windows <- function(x) {
  
 }
 
+### Sorting, filtering, or modifying windows ----
 
 depth <- function(ind, nest = FALSE, depth = NULL) {
   open <- ind$Open
@@ -177,15 +117,6 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
   ind 
 }
 
-grepi_multi <- function(x, pattern) {
-  pattern <- stringr::str_replace_all(pattern, '\\(' , '\\\\(')
-  pattern <- stringr::str_replace_all(pattern, '\\)' , '\\\\)')
-  
-  ns <- x %grepn% pattern
-  rep(x %grepi% pattern, ns[ns > 0L])
-}
-
-
 removeCrossing <- function(x, boundaries) {
   
   boundaries <- sort(unlist(lapply(boundaries, \(b) which(b != lag(b)))))
@@ -199,6 +130,67 @@ removeCrossing <- function(x, boundaries) {
   
 }
 
+### Window finding rules ----
+
+grepi_multi <- function(x, pattern) {
+  if (pattern %in% c('(', ')', '[', ']')) pattern <- paste0('\\', pattern)
+  
+  ns <- x %grepn% pattern
+  rep(x %grepi% pattern, ns[ns > 0L])
+}
+
+
+# Tools ----
+
+
+#' @export
+#' @name humWindows
+hop <- function(along, pattern = 1, start = 1L, end = length(along)) {
+  if (is.character(start)) start <- grep(start, along)
+  if (is.character(end))   end <- grep(end, along)
+  
+  interval <- sum(pattern)
+  
+  if (interval == 0L) stop("In call to humdrumR::hop, pattern argument cannot sum to zero")
+  
+  fullpattern <- rep_len(pattern, ((end - start) / abs(interval)) * length(pattern))
+  ind <- if (interval > 0L) {
+    cumsum(c(start, fullpattern))
+  } else {
+    cumsum(c(end, fullpattern))
+  }
+  
+  ind
+}
+
+
+first <- function(x) nth(x, 1L)
+last  <- function(x) lth(x, 1L)
+nth <- first <- function(x, n) {
+  if (n > length(x)) return(vectorNA(1L, class(x)))
+  x[n]
+}
+lth  <- function(x, n) {
+  if (n > length(x)) return(vectorNA(1L, class(x))) 
+  x[(length(x) + 1L) - n]
+}
+
+Next <- function(x) lead(x, 1L)
+Prev <- function(x) lag(x, 1L)
+
+
+`%before%` <- function(hits, anchors) {
+  i <- findInterval(anchors, hits, left.open = T)
+  i[i == 0 | i > length(hits)] <- NA_integer_
+  hits[i]
+}
+`%after%` <- function(hits, anchors) {
+  -rev(sort(-hits) %before% sort(-anchors))
+}
+
+
+
+
 # Applying functions across windows ----
 
 #' @rdname humWindows
@@ -206,7 +198,7 @@ removeCrossing <- function(x, boundaries) {
 windowApply <- function(x, func = c, windows, ..., reference = x, rebuild = TRUE, leftEdge = TRUE) {
   if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
   
-  if (missing(windows)) windows <- findWindows(reference, ...)
+  if (missing(windows)) windows <- windows(reference, ...)
   
   indices <- Map(':', windows$Open, windows$Close)
   
@@ -219,7 +211,7 @@ windowApply <- function(x, func = c, windows, ..., reference = x, rebuild = TRUE
     if (all(lengths(result_windowed) == 1L)) {
       result <- unlist(result_windowed)
       x[if (leftEdge) windows$Open else windows$Close ] <- result
-      notstarts <- unlist(lapply(indices, '[', i = -1L))
+      notstarts <- seq_along(x)
       notstarts <- notstarts[!notstarts %in% unique(if (leftEdge) windows$Open else windows$Close)]
       x[notstarts] <- NA
     } else {
@@ -290,51 +282,3 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 
 
 
-
-# Tools ----
-
-
-#' @export
-#' @name humWindows
-hop <- function(along, pattern = 1, start = 1L, end = length(along)) {
-  if (is.character(start)) start <- grep(start, along)
-  if (is.character(end))   end <- grep(end, along)
-  
-  interval <- sum(pattern)
-  
-  if (interval == 0L) stop("In call to humdrumR::hop, pattern argument cannot sum to zero")
-  
-  fullpattern <- rep_len(pattern, ((end - start) / abs(interval)) * length(pattern))
-  ind <- if (interval > 0L) {
-    cumsum(c(start, fullpattern))
-  } else {
-    cumsum(c(end, fullpattern))
-  }
-  
-  ind
-}
-
-
-first <- function(x) nth(x, 1L)
-last  <- function(x) lth(x, 1L)
-nth <- first <- function(x, n) {
-  if (n > length(x)) return(vectorNA(1L, class(x)))
-  x[n]
-}
-lth  <- function(x, n) {
-  if (n > length(x)) return(vectorNA(1L, class(x))) 
-  x[(length(x) + 1L) - n]
-  }
-  
-Next <- function(x) lead(x, 1L)
-Prev <- function(x) lag(x, 1L)
-
-
-`%before%` <- function(hits, anchors) {
-  i <- findInterval(anchors, hits, left.open = T)
-  i[i == 0 | i > length(hits)] <- NA_integer_
-  hits[i]
-}
-`%after%` <- function(hits, anchors) {
-  -rev(sort(-hits) %before% sort(-anchors))
-}
