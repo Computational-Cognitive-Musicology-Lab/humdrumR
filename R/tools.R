@@ -1,4 +1,4 @@
-### Null and NA values ----
+# Null and NA values ----
 
 
 doubleswitch <- function(pred1, pred2, ...) {
@@ -137,7 +137,7 @@ fargs <- function(func)  formals(args(func))
      stop(call. = FALSE, message)
 }
 
-### Names ----
+# Names ----
 
 .names <- function(x) { #:: a -> character
     # gets names with no possibility of NULL
@@ -151,7 +151,7 @@ fargs <- function(func)  formals(args(func))
 
 allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
-### Arrays/Vectors
+# Arrays/Vectors ----
 
 applyrows <- function(x, f, ...){
     result <- apply(x, 1, f, ...)
@@ -283,7 +283,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = 
           output
 }
 
-### Vectors ----
+## Vectors ----
 
 
 
@@ -314,10 +314,10 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
 padNA <- function(x, n, before = TRUE, margin = 1L) {
 ### pad vector with NA
     if (is.null(dim(x)) && margin == 1L) {
-        padding <- vector(class(x), n - length(x))
+        padding <- vectorNA(n - length(x), class(x))
         func <- `c`
     }
-    if (margin == 1L) {
+    if (!is.null(dim(x)) && margin == 1L) {
         padding <- matrix(as(NA, class(x)), n - nrow(x), ncol(x))
         func <- `rbind`
     }
@@ -460,7 +460,8 @@ fillForward <- function(...) fillThru(..., reverse = FALSE)
 #' @name fillThru
 fillBackwards <- function(...) fillThru(..., reverse = TRUE)
 
-##### Dimensions ----
+## Dimensions ----
+
 ldim <- function(x) {
     ldim <- if (hasdim(x)) c(0L, dim(x)) else c(length(x), 0L, 0L)
     ldim[4] <- if (ldim[1] == 0L) prod(ldim[-1]) else ldim[1]
@@ -776,6 +777,7 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 
 # Math ----
+
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
@@ -1066,7 +1068,7 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 
 
-### Metaprogramming ----
+# Metaprogramming ----
 
 
 applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
@@ -1145,36 +1147,6 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
     
 }
 
-symbolApply <- function(expr, func) {
-    if (is.call(expr)) {
-        for (i in 1:length(expr)) {
-            expr[[i]] <- Recall(expr[[i]], func)
-        }
-        expr
-    } else {
-        func(expr)
-    }
-}
-
-recurseExpr <- function(expr, predicate, do, stopOnHit = TRUE) {
-    
-    if (!is.call(expr)) return(expr)
-    
-    if (rlang::as_label(expr[[1]]) %in% c('{', '(')) {
-        for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
-        return(expr)
-    }
-    
-    pred <- predicate(expr) 
-    if (pred) expr <- do(expr)
-    
-    if (!(stopOnHit && pred)) {
-        for (i in 2:length(expr)) expr[[i]] <- Recall(expr[[i]], predicate, do, stopOnHit)
-    }
-    
-    
-    expr
-}
 
 analyzeExpr <- function(expr) {
     exprA <- list()
@@ -1196,6 +1168,7 @@ analyzeExpr <- function(expr) {
     }
     
     exprA$Type <- if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
+    exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
                          call = as.character(expr[[1]]),
                          atomic = expr,
@@ -1246,7 +1219,7 @@ modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
             exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
                                       func = func, 
                                       predicate = predicate, 
-                                      onlyCalls = onlyCalls, 
+                                      stopOnHit = stopOnHit,
                                       applyTo = applyTo)
         }
        
@@ -1315,16 +1288,159 @@ append2expr <- function(expr, exprs) {
     as.call(append(expr, exprs, 2))
 }
 
-### Building smart functions ----
+## Splitting expressions 
+
+ast <- function(expr) {
+    if (!is.call(expr)) return(expr)
+    
+    if (rlang::is_formula(expr)) {
+        env <- environment(expr)
+        expr <-  if (rlang::is_quosure(expr)) {
+            rlang::quo_get_expr(expr) 
+        } else {
+            rlang::f_rhs(expr) 
+        }
+        ast <- Recall(expr)
+        attr(ast, 'environment') <- env
+        return(ast)
+    }
+    
+    call <- deparse(expr[[1]])
+    
+    ast <- list()
+    
+    for (i in 2:length(expr)) ast[[i - 1]] <- Recall(expr[[i]])
+    names(ast)[1] <- call
+    
+    ast %class% 'ast'
+    
+    
+    
+    
+}
 
 
+print.ast <- function(x, depth = 0L) {
+    pad <- strrep(' ', depth)
+    if (!inherits(x, 'ast')) {
+        local({
+            if (!is.atomic(x)) x <- deparse(x)
+            cat(pad, x, sep = '', '\n')
+        })
+        
+       return(invisible(x))
+    }
+    
+    
+    env <- attr(x, 'environment')
+    env <- if (!is.null(env)) paste0('  <environment: ', rlang::env_label(env), '>')
+    cat(pad, names(x)[1], env, '\n', sep = '')
+    
+    for (i in 1:length(x)) print.ast(x[[i]], depth + 2L)
+    invisible(ast)
+}
+
+collapseAST <- function(ast, calls = NULL) {
+    if (!inherits(ast, 'ast')) return(ast)
+    
+    collapse <- is.null(calls) || !names(ast)[1] %in% calls
+    
+    if (length(ast)) {
+        for(i in seq_along(ast)) {
+            ast[[i]] <- Recall(ast[[i]], calls = if (collapse) NULL else calls)
+        }
+    }
+    
+    
+    if (collapse) {
+        do.call('call', c(names(ast)[1], unname(ast)), quote = TRUE)
+        
+    } else {
+        ast
+    }
+    
+}
+
+splitExpression <- function(expr, on = '|') {
+    dexpr <- deparse(expr)
+    exprs <- strsplit(dexpr, split = on)[[1]]
+    if (length(exprs) == 1L) return(list(expr))
+    on <- unlist(stringr::str_extract_all(dexpr, on))
+    exprs <- paste0('(', exprs, ')')
+    newexpr <- paste(paste(exprs,  c(on, ''), sep = ' '), collapse = ' ')
+               
+    newexpr <- parse(text = newexpr)[[1]]
+    
+    
+    ast <- ast(newexpr)
+    ast <- collapseAST(ast, calls = on)
+    
+    exprs <- unlist(unclass(ast))
+    exprs <- rapply(exprs, \(x) if (as.character(x[[1]]) == '(') x[[2]] else x)
+    
+    names(exprs) <- sapply(strsplit(names(exprs), split = '.', fixed = TRUE), \(n) tail(n[n != 'NA'], 1L))
+    
+    if (rlang::is_formula(expr)) {
+        lhs <- rlang::f_lhs(expr)
+        env <- rlang::f_env(expr)
+        exprs <- lapply(exprs, \(ex) rlang::new_formula(lhs, ex, env))
+        
+    }
+    exprs
+}
 
 
+# splitExpression <- function(expr, on = '|', keepenv = FALSE) {
+#     # This function takes an expression and
+#     # and breaks it into separate expressions based on
+#     # top level calls to an infix function.
+#     if (!is.call(expr)) return(expr)
+#     
+#     if (rlang::is_formula(expr)) {
+#         return(
+#             if (rlang::is_quosure(expr)) {
+#                 exprs <- Recall(rlang::quo_get_expr(expr), on = on)
+#                 if (keepenv) as_quosures(exprs,  rlang::quo_get_env(expr)) else exprs
+#             } else {
+#                 lhs <- rlang::f_lhs(expr)
+#                 rhs <- rlang::f_rhs(expr) 
+#                 env <- rlang::f_env(expr)
+#                 exprs <- Recall(rhs, on = on)
+#                 if (keepenv) lapply(exprs, \(ex) rlang::new_formula(lhs, ex, env = env)) else exprs
+#                 
+#             })
+#     }
+#     
+#     call <- deparse(expr[[1]])
+# 
+#     if (!(call %in% c('|', '+', '&', '-', '^') | grepl('%', call))) return(expr)
+#     
+#     output <- c(Recall(expr[[2]], on = on), if (length(expr) > 2L) Recall(expr[[3]], on = on))
+#     needname <- .names(output) == ''
+#     names(output)[which(needname)[1]] <- call
+#     if (sum(needname) > 1L) names(output)[which(needname)[-1]] <- 'X'
+#     
+#     
+#     #
+#     names <- .names(output)
+#     bad <- which(!names %in% on & names != 'X')
+#     remove <- c()
+#     if (length(bad)) {
+#         for (i in bad) {
+#             collapse <- call(names[i], output[[i]], if (length(output) >= (i + 1)) output[[i + 1]])
+#             output[[i]] <- collapse
+#             remove <- c(remove, i + 1)
+#         }
+#     }
+#     if (length(remove)) output[-remove] else output
+#     
+#     
+#   
+#     
+# }
 
 
-
-
-
+## Building smart functions ----
 
 
 
@@ -1442,7 +1558,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
               classes = "character")
 }
 
-### Strings ----
+# Strings ----
 
 
 matched <- function(x, table) table[pmatch(x, table)]

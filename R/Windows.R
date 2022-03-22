@@ -4,66 +4,167 @@
 
 # Finding windows ----
 
+## Parsing "anchor" ----
+
+parseAnchors <- function(x, open, close, start = 1, end = length(x)) {
+ 
+  
+  open <- parseAnchor(open, x, 'open')
+  close <- parseAnchor(close, x, 'close')
+  start <- parseAnchor(start, x, 'start')
+  end <- parseAnchor(end, x, 'end')
+  
+  anchors <- list(open, close, start, end)
+  names(anchors) <-  names <- c('open', 'close', 'start', 'end')
+  references <- lapply(anchors,
+                       \(anchor) {
+                         if (rlang::is_formula(anchor)) {
+                           names %in% namesInExprs(names, anchor)
+                         } else {
+                           logical(length(names))
+                         }
+                       })
+  references <- do.call('cbind', references)
+  colnames(references) <- names
+  
+  # check that formulae can be evaluated in a safe order
+  if (any(references)) {
+    bad <- abs(eigen(diag(nrow(references)) - references)$values) < .00001 # is graph connected?!
+    if (any(bad)) .stop("In your calls to windows, your formulae arguments are mutually referential in a circular manner.")
+    
+    anchors <- local({
+      forms <- list()
+      while(length(forms) < length(anchors)) {
+        safe <- colSums(references) == 0L
+        forms <- c(forms, anchors[colnames(references)[safe]])
+        references <- references[!safe, , drop = FALSE]
+        references <- references[, !safe, drop = FALSE]
+      }
+      forms
+    })
+    
+  }
+  
+   
+  
+  evaled <- local( {
+    env <- new.env()
+    for (arg in names(anchors)) {
+      anchor <- anchors[[arg]]
+      if (rlang::is_formula(anchor)) {
+        assign(arg, eval_tidy(anchor, data = env), envir = env)
+      } else {
+        assign(arg, anchor, envir = env)
+      }
+      
+    }
+    as.list(env)
+  })
+  evaled
+}
+
+parseAnchor <- function(anchor, x, name)  UseMethod('parseAnchor')
+  
+parseAnchor.list <- function(anchor, x, name) {
+  do.call('c', lapply(anchor, parseAnchor, x = x, name = name))
+}
+parseAnchor.logical <- function(anchor, x, name) {
+  if(length(anchor) != length(x)) .stop("If the {name} argument in a call to windows is logical", 
+                                        "it must be the same length as the vector you are windowing across.")
+  
+  which(anchor)
+}
+parseAnchor.numeric <- function(anchor, x, name) {
+
+    if (any(anchor != round(anchor))) .stop("In a call to windows, a numeric {name} argument needs to be an integer value.")
+    anchor <- as.integer(anchor)
+    
+    if (any(anchor < 0) && any(anchor > 0)) .stop("In a call to windows, you can't mix negative and positive numbers in a {name} argument.")
+    if (any(length(abs(anchor)) > length(x))) .stop("In a call to windows, the {name} argument can't be numeric values greater than the length",
+                                                    "of the vector you are windowing across.")
+    
+    if (all(anchor < 0)) anchor <- 1L + length(x) + anchor 
+    anchor
+}
+
+parseAnchor.character <- function(anchor, x, name) {
+  anchor <- grepi_multi(x, anchor)
+  anchor
+}
+  
+parseAnchor.formula <- function(anchor, x, name){ 
+    env <- environment(anchor)
+    env$x <- x
+    env$name <- name
+    anchors <- splitExpression(anchor, on = '\\|')
+    if (length(anchors) > 1L) {
+      
+      anchors <- parseAnchor(unname(anchors), x, name)
+      anchors <- lapply(anchors, rlang::f_rhs)
+      # anchors <- lapply(anchors, \(expr) call('parseAnchor', expr, x = quote(x), name = quote(name)))
+      anchors <- do.call('call', c('c', anchors, use.names = FALSE), quote = TRUE)
+      return(rlang::new_quosure(anchors, env = env))
+    }
+    anchor <- rlang::f_rhs(anchor)
+    anchor <- modifyExpression(anchor, 
+                               \(Head) Head == 'hop', 
+                               \(exprA) {
+                                 exprA$Args <- c(quote(x), exprA$Args)
+                                 exprA
+                                 })
+    
+    anchor <- modifyExpression(anchor, applyTo = 'atomic',
+                               \(Class) Class == 'character',
+                               \(exprA) {
+                                 exprA$Args <- list(quote(x), exprA$Head)
+                                 exprA$Head <- 'grepi_multi'
+                                 exprA$Type <- 'call'
+                                 exprA
+                               })
+    rlang::new_quosure(anchor, env)
+}
 
 
+grepi_multi <- function(x, pattern) {
+  pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
+  
+  ns <- x %grepn% pattern
+  rep(x %grepi% pattern, ns[ns > 0L])
+  
+}
 
+## Actual window finding ----
 
 #' Create arbitrary "windows" across vectors.
 #' @export
 #' @name humWindows
-windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), nest = FALSE, depth = NULL, boundaries = NULL) {
+windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
+                    nest = FALSE, depth = NULL, boundaries = NULL,
+                    min_length = 1L, max_length = Inf) {
   
-  openexpr <- deparse(open)
-  closeexpr <- deparse(close)
   
-  open_depends  <- !is.null(namesInExpr('close', open))
-  close_depends <- !is.null(namesInExpr('open', close))
+  list2env(parseAnchors(x, open = open, close = close, start = start, end = end), envir = environment())
   
-  if (open_depends && close_depends) .stop("Contextual window anchors (open or close) can't refer to each other.")
   
-  open  <- symbolApply(open,  \(atom) if (is.character(atom)) rlang::expr({grepi_multi(x, !!atom)}) else atom)
-  open <- recurseExpr(open, \(expr) expr[[1]] == quote(hop), \(expr) rlang::expr(seq(!!start, !!end, by = !!expr[[2]])))
-  close <- symbolApply(close, \(atom) if (is.character(atom)) rlang::expr({grepi_multi(x, !!atom)}) else atom)
-  close <- recurseExpr(close, \(expr) expr[[1]] == quote(hop), \(expr) rlang::expr(seq(!!start, !!end, by = !!expr[[2]])))
-  
-  if (open_depends) {
-    close <- eval(close)
-    open <- eval(open)
-    
-  } else {
-    open <- eval(open)
-    close <- eval(close)
-  }
-  
-  if (length(open) != length(close)) {
-    if (open_depends || close_depends) {
-      .stop("Sorry, in the windows function, if use open or close arguments that refer to each other,",
-            "the resulting dependent must be the same length as the thing it depends on.",
-            "In this case, {{ {openexpr} }} evaluates with length {length(open)}, while {{ {closeexpr} }}",
-            "evaluates with length {length(close)}.",
-            "It's best to stick with the basic usages of windows described in the documentation (?windows).",
-            "More sophisticated things are possible, but you'll need to do a little more 'manual' wrangling.")
-    } 
-    close <- close[close >= min(open)]
-    close <- close[1:length(open)]
-    # close <- close %after% open
-    
-  }
+  windowFrame <- align(open, close)
 
+  windowFrame <- windowFrame[Open <= end & Close <= end & Open >= start & Close >= start]
+
+  windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
+  windowFrame[ , Length := Close - Open]
+  windowFrame <- windowFrame[Length >= min_length & Length <= max_length]
   
-  output <- data.table(Open = open, Close = close)
-  output <- output[Reduce('&', lapply(output, Negate(is.na)))]
-  output <- depth(output, nest = nest, depth = depth)
+  windowFrame <- depth(windowFrame, nest = nest, depth = depth)
   
   
   if (!is.null(boundaries)) {
     if (any(lengths(boundaries) != length(x))) .stop("In a call to windows, all vectors in the list boundaries must be", 
                                                      "the same length as x.")
-    output <- removeCrossing(output, boundaries)
+    windowFrame <- removeCrossing(windowFrame, boundaries)
   }
   
-  attr(output, 'vector') <- x
-  output
+  attr(windowFrame, 'vector') <- x
+  windowFrame[ , list(Open, Close)]
   
 }
 
@@ -107,12 +208,18 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
     
   }
   
-  maxdepths <- tapply_inplace(contour, segments(contour ==0),\(x) rep(max(x), length(x)))[steps == 1]
+
+  maxdepths <- tapply_inplace(contour, segments(contour == 0),\(x) rep(max(x), length(x)))[steps == 1]
   ind$RevDepth <- ind$Depth - maxdepths - 1L
   
   if (!is.null(depth)) {
     ind <- ind[Depth %in% depth | RevDepth %in% depth]
   }
+  
+  ind[ , OpenDepth := Depth - min(Depth), by = Open]
+  ind[ , CloseDepth := Depth - min(Depth), by = Open]
+  ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
+  ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
   
   ind 
 }
@@ -132,12 +239,6 @@ removeCrossing <- function(x, boundaries) {
 
 ### Window finding rules ----
 
-grepi_multi <- function(x, pattern) {
-  if (pattern %in% c('(', ')', '[', ']')) pattern <- paste0('\\', pattern)
-  
-  ns <- x %grepn% pattern
-  rep(x %grepi% pattern, ns[ns > 0L])
-}
 
 
 # Tools ----
@@ -188,6 +289,39 @@ Prev <- function(x) lag(x, 1L)
   -rev(sort(-hits) %before% sort(-anchors))
 }
 
+align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateClose = FALSE) {
+  
+  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close)) {
+    data.table(Open = open, Close = close) 
+  } else {
+    if (is.null(nearest)) nearest <- 0L
+    
+    close <- close[!is.na(close)]
+    open <- open[!is.na(open)]
+    i <- findInterval(close, open)
+    
+    dts <- lapply(nearest,
+                  \(o) {
+                    i <- i - o
+                    i[i <= 0L] <- NA_integer_
+                    data.table(Open = open[i], Close = ifelse(is.na(i), NA_integer_, close))
+                  })
+    
+    rbindlist(dts)
+  }
+  
+  output <- output[!Reduce('|', lapply(output, is.na))]
+  
+  setorder(output, Open, Close)
+  
+  dups <- output[ , list(Open = !duplicateOpen & duplicated(Open),
+                         Close = !duplicateClose & duplicated(Close))]
+    
+  output <- output[!Reduce('|', dups)]
+  # 
+  output
+  
+}
 
 
 

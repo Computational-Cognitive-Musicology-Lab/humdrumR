@@ -774,6 +774,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
     
     predicate <- function(Type, Head) {
        Type == 'call' &&
+        !Head %in% c('(', '{') &&
         !is.null(fargs(Head)) && # uses arguments
         any(.names(fargs(Head)) %in% fields)
     }
@@ -805,7 +806,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
     }
     
-    applyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+    modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
     
 }
 
@@ -841,7 +842,7 @@ laggedQuo <- function(funcQuosure) {
     exprA
   }
   
-  applyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
 
   
 }
