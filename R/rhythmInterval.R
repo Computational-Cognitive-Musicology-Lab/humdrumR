@@ -143,7 +143,7 @@ setMethod('is.numeric', signature = c('rhythmInterval'),
 #' @export
 order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
-                    order(as.double(x), 
+                    order(duration(x), 
                           na.last = na.last,
                           decreasing = decreasing,
                           method = method
@@ -155,14 +155,14 @@ order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
 setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
           function(e1, e2) {
               checkSame(e1, e2, 'Compare')
-              callGeneric(as.double(e1), as.double(e2))
+              callGeneric(as.double(e1), duration(e2))
           })
 
 #' @rdname rhythmInterval
 #' @export
 setMethod('Summary', signature = c('rhythmInterval'),
           function(x) {
-              read.numeric2rhythmInterval(callGeneric(as.double(x)))
+              rhythmInterval(callGeneric(duration(x)))
           })
 
 ## Arithmetic methods ####
@@ -189,7 +189,7 @@ setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 #' @export
 setMethod('Math', signature = c(x = 'rhythmInterval'),
           function(x) {
-                    read.numeric2rhythmInterval(callGeneric(as.double(x)))
+                    rhythmInterval(callGeneric(duration(x)))
           })
 
 
@@ -230,7 +230,7 @@ setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
               # multiplying by float can be hard
               # use MASS::fractions to do hard work
               
-              frac <- numeric2fraction(e2) 
+              frac <- as.rational(e2)
               
               e1 <- rint(.ifelse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
                          e1@Numerator   * frac$Numerator)
@@ -724,10 +724,10 @@ ms2bpm <- function(ms) 60000/ms
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
-  durations <- as.decimal(durations)
-  start <- as.decimal(start)
-  tatum <- as.decimal(tatum)
+rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = duration) {
+  durations <- duration(durations)
+  start <- duration(start)
+  tatum <- duration(tatum)
   
   durations <- durations / tatum
   
@@ -808,7 +808,7 @@ NULL
 #' @family rhythm analysis tools
 #' @export
 rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
-          into <- sort(into, decreasing = TRUE)
+          # into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
                  \(rs) {
@@ -827,7 +827,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
                  }) -> decompositions
           
           
-          decompositions <- do.call('data.frame', decompositions)
+          decompositions <- do.call('struct2data.frame', decompositions)
           colnames(decompositions) <- as.character(into)
           rownames(decompositions) <- make.unique(as.character(rhythmInterval))
           decompositions

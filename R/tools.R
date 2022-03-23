@@ -960,6 +960,18 @@ expand <- function(x) {
     .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
 }
 
+locate <- function(x, table) {
+    if (is.null(dim(table)) || length(dim(x)) == 1) {
+        setNames(lapply(x, \(val) which(table == val)), x)
+    } else {
+        apply(x, 1, 
+              \(val) {
+                  which(Reduce('&', Map('==', table, val)))
+                  
+              })
+    }
+}
+
 
 # bitwise tools
 
