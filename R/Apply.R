@@ -772,18 +772,17 @@ activateQuo <- function(funcQuosure, active) {
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
     
-    predicate <- function(Type, Head) {
+    predicate <- function(Type, Head, Environment) {
+      args <- formals(Head, if (missing(Environment)) parent.frame() else Environment)
        Type == 'call' &&
         !Head %in% c('(', '{') &&
-        !is.null(fargs(Head)) && # uses arguments
-        any(.names(fargs(Head)) %in% fields)
+        !is.null(args) && # uses arguments
+        any(.names(args) %in% fields)
     }
       
-    
-
-
     do <- function(exprA) {
-         fargNames <- .names(fargs(exprA$Head))
+      
+         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else Environment))
          hits <- fields %in% fargNames
 
          if (!any(hits)) return(exprA)

@@ -55,7 +55,7 @@ false <- function(x) is.null(x) || is.logical(x) && !x[1]
 
 popclass <- function(object) `class<-`(object, class(object)[-1])
 
-fargs <- function(func)  formals(args(func))
+fargs <- function(func) formals(args(func))
 
 `%!<-%` <- function(e1, e2) {
     # this assigns e2 to e1, UNLESS e1 is NULL
@@ -1228,11 +1228,11 @@ modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
     
     if (exprA$Type == 'call' && !(hit && stopOnHit)) {
         for (i in seq_along(exprA$Args)) {
-            exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
-                                      func = func, 
-                                      predicate = predicate, 
-                                      stopOnHit = stopOnHit,
-                                      applyTo = applyTo)
+            if (!is.null(exprA$Args[[i]])) exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
+                                                                     func = func, 
+                                                                     predicate = predicate, 
+                                                                     stopOnHit = stopOnHit,
+                                                                     applyTo = applyTo)
         }
        
     }
