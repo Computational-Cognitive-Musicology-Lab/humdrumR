@@ -120,7 +120,7 @@ setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
 
 #' @rdname rhythmInterval
 #' @export
-as.double.rhythmInterval <-  function(x) as.decimal(x)
+as.double.rhythmInterval <-  function(x) duration(x)
 
 ## Logic methods ####
 
@@ -749,7 +749,7 @@ rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = dura
     
   }
   
-  if (identical(as, as.decimal)) offsets else as(offsets)
+  if (identical(as, duration)) offsets else as(offsets)
 }
 
 ### Augmentation and Dimminution  ####
@@ -856,6 +856,36 @@ metricPosition <- function(rints, bars = NULL,
 
 }
 
+
+# M4/4
+# 0/1  1/8 1/4 3/8 1/2 5/8 3/4 7/8
+
+# M3/4
+
+# 0/2.  1/8 1/4 3/8 2/4 5/8
+
+# M6/8
+
+# 0/2.  1/8 2/8 1/4. 4/8 5/8
+
+# M9/8
+
+# 0/%9 1/8 2/8 1/4. 4/8 5/8 6/8 2/4. 7/8 8/8
+
+# M5/8
+
+# 0/8&5 1/8 1/4 3/8 4/8
+# 0/8%5 1/8 2/8 1/4. 4/8
+
+
+
+f <- function(off, pattern = c(2,3)) {
+  measures <- length(pattern) * (off %/% sum(pattern))
+  modoff <- off %% sum(pattern)
+  
+  pattern <- pattern - pattern[1]
+  measures + pattern[findInterval(modoff,pattern, rightmost.closed = TRUE)]
+}
 
 
 
