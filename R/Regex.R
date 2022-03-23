@@ -514,10 +514,9 @@ makeRE.romanKey <- function(..., flat = 'b') {
 
 
 
-makeRE.signature <- function(accidental.labels = c(), ...) {
-    setoptions(accidental.labels) <- c(flat = '-')
+makeRE.signature <- function(flat = '-', ...) {
     
-    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
+    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(flat = flat, ...)))
     paste0('^\\*?k\\[(', RE, ')*\\]')
 }
 

@@ -1079,21 +1079,6 @@ updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, u
 
 
 
-accidental2LO5th <- function(str, accidental.labels = c(), ...) {
-  setoptions(accidental.labels) <- c(sharp = '#', flat = 'b', natural = 'n')
-  
-  
-  if ('doublesharp' %in% names(accidental.labels)) str <- gsub(accidental.labels['doublesharp'], strrep(accidental.labels['sharp'], 2), str)
-  if ('doubleflat'  %in% names(accidental.labels)) str <- gsub(accidental.labels['doubleflat'],  strrep(accidental.labels['flat'], 2), str)
-  
-  n <- updownN(str, up = accidental.labels['sharp'], down = accidental.labels['flat'])
-  
-  names(n) <- names(accidental.labels)[match(str, accidental.labels)]
-  names(n)[is.na(names(n))] <- ""
-  
-  n * 7L
-  
-}
 
 
 specifier2tint <- function(str, step = NULL, Key = NULL, 

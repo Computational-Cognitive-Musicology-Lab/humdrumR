@@ -815,7 +815,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 laggedQuo <- function(funcQuosure) {
   
   predicate <- function(Args) { 
-    any(sapply(Args, \(arg) as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n'))
+    any(sapply(Args, \(arg) is.call(arg) && length(arg) > 2 && as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n'))
   }
   
   do <- function(exprA) {
