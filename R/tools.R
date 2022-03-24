@@ -796,17 +796,36 @@ pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(
 
 is.whole <- function(x) x %% 1 == 0
 
-reduce_fraction <- function(n ,d) {
-    # Used by rhythmInterval initialize method
-    gcds <- gcd(n, d)
+reduce_fraction <- function(n, d) {
+    # Used by rational initialize method
+    na <- is.na(n) | is.na(d)
+    gcds <- gcd(n[!na], d[!na])
     
-    list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
+    num <- den <- vectorNA(length(n), 'integer')
+    num[!na] <- as.integer(n[!na] / gcds)
+    den[!na] <- as.integer(d[!na] / gcds)
+    list(Numerator = num, Denominator = den)
 }
 
-gcd <- function(x, y) {
-    # Used by reduce_fraction
-    r <- x %% y
-    ifelse(r, Recall(y, r), y)
+gcd <- function(...) {
+    x <- list(...)
+    x <- x[lengths(x) > 0]
+    if (length(x) == 1L) return(x[[1]])
+    if (length(x) == 0L) return(numeric(0))
+    
+    na <- Reduce('|', lapply(x, is.na))
+    output <- vector(class(x[[1]]), length(x[[1]]))
+    output[!na] <- Reduce(pracma::gcd, lapply(x, '[', !na))
+    output
+}
+
+lcm <- function(...) {
+    x <- list(...)
+    na <- Reduce('|', lapply(x, is.na))
+    
+    output <- vector(class(x[[1]]), length(x[[1]]))
+    output[!na] <- Reduce(pracma::Lcm, lapply(x, '[', !na))
+    output
 }
 
 # modulo starting from 1
@@ -846,45 +865,8 @@ as.decimal.fraction <- function(x) {
     decimal(sapply(exprs, eval) %dim% x)
 }
 
-#### rational ####
-# represent rational numbers as list of numerator and denominator
 
-#' Rational numbers
-#' 
-#' R has no built in rational number representation; `humdrumR` defines one.
-#' 
-#' 
-#' 
-#' @seealso [as.decimal()] [as.numeric()] 
-#' @family {humdrumR numeric functions}
-rational <- function(numerator, denominator = 1) {
-    if (!identical(dim(numerator), dim(denominator))) .stop("You can't create a rational number where the numerator and denominator have different dimensions!")
-    
-    frac <- attr(MASS::fractions(numerator / denominator, cycles = 15), 'fracs')
-    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
-    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
-    
-    numerator <- as.integer(frac[ , 1])
-    denominator <- as.integer(frac[ , 2])
-    
-    denominator[is.na(denominator)] <- 1L
-    
-    list(Numerator = numerator %dim% numerator, Denominator = denominator %dim% numerator) %class% 'rational'
-}
 
-#' @rdname rational
-#' @export
-as.rational <- function(x, ...) UseMethod('as.rational') 
-#' @export
-as.rational.character <- function(x) as.rational.numeric(as.decimal.character(x))
-#' @export
-as.rational.fraction <- function(x) as.rational.numeric(as.decimal.fraction(x))
-#' @export
-as.rational.rational <- force
-#' @export
-as.rational.numeric <- function(x) {
-    rational(x)
-}
 
 #### fraction ####
 # rational numbers as character string

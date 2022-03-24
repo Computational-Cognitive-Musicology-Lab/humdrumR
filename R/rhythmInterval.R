@@ -1,3 +1,4 @@
+
 #################################### ###
 # rhythmInterval S4 class ##############
 #################################### ###
@@ -65,34 +66,8 @@
 #' @name rhythmInterval
 #' @export
 setClass('rhythmInterval', 
-         contains = 'struct', 
-         slots = c(Numerator = 'integer', Denominator = 'integer')) -> rhythmInterval
+         contains = 'rational') -> rhythmInterval
 
-setValidity('rhythmInterval', 
-            function(object) {
-                all(object@Denominator[!is.na(object@Denominator)] != 0L)
-            }
-)
-
-setMethod('initialize', 'rhythmInterval',
-          function(.Object, Denominator = 4L, Numerator = 1L) {
-            .Object <- callNextMethod()
-              
-            # negative numbers should live in the numeratora
-            Numerator[Denominator < 0L] <- -Numerator[Denominator < 0L]
-            Denominator <- abs(Denominator)
-            
-            fraction <- reduce_fraction(.Object@Numerator, .Object@Denominator)
-            fraction <- do.call('match_size', fraction) 
-            fraction <- lapply(fraction, as.integer)
-            max_length <- max(lengths(fraction))
-            fraction <- lapply(fraction, rep, length.out = max_length)
-            
-            .Object@Numerator <- fraction$Numerator
-            .Object@Denominator <- fraction$Denominator
-            .Object
-            
-          })
 
 ## Constructors ####
 
@@ -118,9 +93,6 @@ rint <- function(denominator, numerator = 1L) {
 #' @export
 setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
 
-#' @rdname rhythmInterval
-#' @export
-as.double.rhythmInterval <-  function(x) duration(x)
 
 ## Logic methods ####
 
@@ -131,86 +103,17 @@ as.double.rhythmInterval <-  function(x) duration(x)
 is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 
-#' @rdname rhythmInterval
-#' @export
-setMethod('is.numeric', signature = c('rhythmInterval'),
-          function(x) { TRUE })
-
-## Order/relations methods ####
 
 
-#' @rdname rhythmInterval
-#' @export
-order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
-                   method = c("auto", "shell", "radix")) {
-                    order(duration(x), 
-                          na.last = na.last,
-                          decreasing = decreasing,
-                          method = method
-                    )
-          }
-
-#' @rdname rhythmInterval
-#' @export
-setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
-          function(e1, e2) {
-              checkSame(e1, e2, 'Compare')
-              callGeneric(as.double(e1), duration(e2))
-          })
-
-#' @rdname rhythmInterval
-#' @export
-setMethod('Summary', signature = c('rhythmInterval'),
-          function(x) {
-              rhythmInterval(callGeneric(duration(x)))
-          })
 
 ## Arithmetic methods ####
 
 ### Addition ####
 
-#' @export
-setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
-                    
-            d1 <- e1@Denominator
-            d2 <- e2@Denominator
-            
-            d3 <- d1 * d2
-            n1 <- e1@Numerator * (d3 / d1)
-            n2 <- e2@Numerator * (d3 / d2)
-            
-            rint(d3, n1 + n2)
-          })
-
-
-
-#' @export
-setMethod('Math', signature = c(x = 'rhythmInterval'),
-          function(x) {
-                    rhythmInterval(callGeneric(duration(x)))
-          })
-
-
-### Subtraction ####
-
-#' @export
-setMethod('-', signature = c(e1 = 'rhythmInterval', e2 = 'missing'),
-          function(e1) {
-              e1@Numerator <- e1@Numerator * -1L
-              e1
-          })
 
 
 
 
-#' @export
-setMethod('diff', signature = c('rhythmInterval'),
-          function(x, ..., na.rm = TRUE) {
-            x <- do.call('c', list(x, ...))
-            rhythmInterval(diff(as.double(x), na.rm = na.rm))
-          })
 
 ### Multiplication ####
 
@@ -927,5 +830,5 @@ meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {
  beats
   
 }
-test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
-                   Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
+# test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
+                   # Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
