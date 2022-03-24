@@ -399,13 +399,27 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
-changes <- function(x) {
-    c(TRUE, head(x, -1L) != tail(x, -1L))
+changes <- function(x, value = FALSE) {
+    change <- c(TRUE, head(x, -1L) != tail(x, -1L))
+    
+    if (value) {
+        output <- vectorNA(length(x), class(x))
+        output[change] <- x[change]
+        output
+    } else {
+        attr(change, 'values') <- x[change]
+        change
+    }
+    
+    
+    
 }
 
 
 segments <- function(x, reverse = FALSE) {
     change <- if (!is.logical(x)) changes(x) else x
+    values <- attr(change, 'values')
+    
     if (reverse) change <- rev(change)
     
     seg <- cumsum(change)
@@ -414,7 +428,7 @@ segments <- function(x, reverse = FALSE) {
         seg <- rev(-seg) + max(seg) + 1
     }
     
-    attr(seg, 'values') <- x[change]
+    attr(seg, 'values') <- values
     
     seg
     

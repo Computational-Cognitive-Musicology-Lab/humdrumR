@@ -879,14 +879,53 @@ metricPosition <- function(rints, bars = NULL,
 
 
 
-f <- function(off, pattern = c(2,3)) {
-  measures <- length(pattern) * (off %/% sum(pattern))
-  modoff <- off %% sum(pattern)
+beats <- function(moff,  beats = c(.25), subdiv = 1/8, measure = 1) {
   
-  pattern <- pattern - pattern[1]
-  measures + pattern[findInterval(modoff,pattern, rightmost.closed = TRUE)]
+  
+  
+  span <- sum(beats)
+  beats <- rep(beats, measure / span)
+  if (sum(beats) != measure) .stop('In call to beats, the beats argument cannot evenly divide the measure span.')
+  
+  durs <- unique(c(delta(beats), subdiv))
+  durs <- durs[durs != 0]
+  if (Reduce('gcd', durs) != subdiv) .stop('{subbeat} is not a valid subdivider of the beats pattern.')
+  
+  beat <- findInterval(moff, cumsum(beats), rightmost.closed = TRUE)
+  
+  subbeat <- floor(sigma(c(0, head(beats, -1))) / subdiv)
+  subbeat <- round(moff / subdiv) - subbeat[beat + 1]
+  data.table(Moffset = moff,
+             Beat = beat,
+             Subbeat = subbeat,
+             Remainder = moff %% subdiv)
 }
 
 
+measureOffset <- function(dur, meter = 1) {
+  meter <- rep_along(dur, meter)
+  
+  dur <- dur / meter
+  
+  offset <- sigma(c(0, dur))
+  
+  moffset <- offset %% 1
+  
+  head(moffset, -1) * meter
+  
+}
 
-
+meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {
+ measure <- sum(meter)
+ 
+ moff <- measureOffset(dur, measure)
+ 
+ beats <- beats(moff, meter, subdiv = subdiv, measure = measure)
+ 
+ beats$Dur <- dur
+ beats$Moff <- moff
+ beats
+  
+}
+test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
+                   Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
