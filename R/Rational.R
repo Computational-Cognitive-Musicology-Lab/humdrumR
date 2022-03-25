@@ -330,9 +330,14 @@ setAs('character', 'rational', function(from) as.rational(from))
 #' @export
 setGeneric('as.rational', \(x, ...) standardGeneric('as.rational'))
 
+#' @rdname
+#' @export
+setMethod('as.rational', 'matrix', \(x) rational(c(x), 1L) %dim% x)
+
 #' @rdname rational
 #' @export
 setMethod('as.rational', 'integer', \(x) rational(x, 1L))
+
 
 #' @rdname rational
 #' @export
@@ -392,8 +397,8 @@ setMethod('as.rational', 'character',
               # nonwhole values are just computed as real and converted to rational
               realrat <- do.call('c', (lapply(Reduce('/', dfx[!whole & !na, ]), as.rational)))
               output <- vectorNA(length(x), 'rational')
-              output[ whole & !na] <- wholerat
-              output[!whole & !na] <- realrat
+              if (length(wholerat) > 0L) output[ whole & !na] <- wholerat
+              if (length(realrat) > 0L) output[!whole & !na] <- realrat
               
               output
               
@@ -461,6 +466,9 @@ as.fraction <- function(x, sep = '/') {
     as.character(x, sep = sep) %class% 'fraction'
 }
 
+as.double.fraction <- function(x) as.double(as.rational(x))
+as.integer.fraction <- function(x) as.integer(as.rational(x))
+
+
 #' @export
 print.fraction <- function(x) print(unclass(x))
-
