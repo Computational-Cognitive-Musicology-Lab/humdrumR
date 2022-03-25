@@ -10,7 +10,7 @@
 #' 
 #' 
 #' 
-#' @seealso [as.decimal()] [as.numeric()] 
+#' @seealso [as.real()] [as.numeric()] 
 #' @family {humdrumR numeric functions}
 #' @name rational
 setClass('rational', 
@@ -76,12 +76,7 @@ setMethod('numerator', 'numeric', \(x) numerator(as.rational(x)))
 setMethod('denominator', 'numeric', \(x) denominator(as.rational(x)))
 
 
-## Formatting methods ####
 
-
-#' @rdname rational
-#' @export
-setMethod('as.character', c(x = 'rational'), \(x, sep = '/') paste0(numerator(x), sep, denominator(x)))
 
 
 
@@ -148,6 +143,48 @@ setMethod('sum', 'rational', \(x, ...) {
     }
     
 })
+
+
+#' @rdname rational
+#' @export
+setMethod('prod', 'rational', \(x, ...) {
+    rational(prod(x@Numerator), prod(x@Denominator))
+    
+})
+
+#' @rdname rational
+#' @export
+setMethod('abs', 'rational', \(x) {
+    x@Numerator <- abs(x@Numerator)
+    x
+})
+
+#' @rdname rational
+#' @export
+setMethod('sign', 'rational', \(x) {
+    sign(x@Numerator)
+})
+
+#' @rdname rational
+#' @export
+setMethod('max', 'rational', \(x) {
+    x[which.max(as.double(x))]
+})
+
+#' @rdname rational
+#' @export
+setMethod('min', 'rational', \(x) {
+    x[which.min(as.double(x))]
+})
+
+#' @rdname rational
+#' @export
+setMethod('mean', 'rational', \(x) {
+    sum(x) / rational(length(x))
+})
+
+
+
 
 ## Arithmetic methods ####
 
@@ -273,13 +310,25 @@ setMethod('as.double', 'rational', \(x) x@Numerator / x@Denominator)
 
 setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)))
 
+setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator))
+
+setMethod('as.logical', 'rational', \(x) x != rational(0))
+
+
+#### setAs tonal rational ####
+
+setAs('integer', 'rational', function(from) as.rational(from))
+setAs('numeric', 'rational', function(from) as.rational(from))
+setAs('logical', 'rational', function(from) as.rational(from))
+setAs('character', 'rational', function(from) as.rational(from))
+
 ###################################################################### ### 
 # Parsing Rational Representations (x2rational) ##########################
 ###################################################################### ### 
 
 #' @rdname rational
 #' @export
-setGeneric('as.rational', \(x) standardGeneric('as.rational'))
+setGeneric('as.rational', \(x, ...) standardGeneric('as.rational'))
 
 #' @rdname rational
 #' @export
@@ -315,4 +364,103 @@ setMethod('as.rational', 'logical',
               as.rational(as.integer(x))
           })
 
+#' @rdname rational
+#' @export
+setMethod('as.rational', 'character', 
+          \(x, sep = '/|%') {
+              x <- strsplit(x, split = sep)
+              
+              x <- suppressWarnings(lapply(x, as.numeric))
+              na <- sapply(x, \(x) any(is.na(x)))
+              if (any(na)) warning(call. = FALSE, 'When converting character strings to rational numbers, NAs introduced because ' ,
+                                   num2word(sum(na)), plural(sum(na), 
+                                                             " strings couldn't be interpreted as numbers.", 
+                                                             " string couldn't be interpreted as a number."))
+              
+              matx <- do.call('cbind', lapply(1:max(2L, max(lengths(x))), \(i) sapply(x, '[', i = i)))
+              matx[is.na(matx)] <- 1
+              matx[na, ] <- NA
+              
+              dfx <- as.data.frame(matx)
+              
+              # whole values interpreted directly as rational
+              whole <- sapply(x, \(x) all(is.whole(x))) 
+              
+              
+              wholerat <- Reduce('rational', dfx[whole & !na, ])
+              
+              # nonwhole values are just computed as real and converted to rational
+              realrat <- do.call('c', (lapply(Reduce('/', dfx[!whole & !na, ]), as.rational)))
+              output <- vectorNA(length(x), 'rational')
+              output[ whole & !na] <- wholerat
+              output[!whole & !na] <- realrat
+              
+              output
+              
+              
+              
+          })
+
+
+
+
+#################################### ###
+# Other numeric S3 classes #############
+#################################### ###
+
+## Real ----
+
+# this is just an extension of numeric to understand my fraction and rational representations
+
+# #' Real numbers
+# #' 
+# #' These functions create real numbers that are identical to base R
+# #' `numeric` (real) numbers.
+# #' However, these numbers are understood by the `humdrumR` [rational numbers][rational()].
+# #' 
+# #' @family {humdrumR numeric functions}
+# #' @seealso [rational()]
+# #' @export
+#' real <- function(x) (as.numeric(x) %class% 'real') %dim% x
+#' 
+#' #' @rdname real
+#' #' @export
+#' as.real <- function(x, ...) UseMethod('as.real')
+#' #' @export
+#' as.real.character <- function(x) {
+#'     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
+#'     as.real.fraction(x)
+#' }
+#' #' @export
+#' as.real.numeric <- real
+#' #' @export
+#' as.real.rational <- function(x) real(as.double(x))
+#' #' @export
+#' as.real.fraction <- function(x) {
+#'     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
+#'     real(sapply(exprs, eval) %dim% x)
+#' }
+
+
+
+
+## Fractions ----
+
+# rational numbers as character string
+
+#' @rdname rational
+#' @export
+fraction <- function(numerator, denominator, sep = '/') {
+    .paste(numerator, denominator, sep = sep) %class% 'fraction'
+}
+
+#' @rdname rational
+#' @export
+as.fraction <- function(x, sep = '/') {
+    if (!is.rational(x)) x <- as.rational(x)
+    as.character(x, sep = sep) %class% 'fraction'
+}
+
+#' @export
+print.fraction <- function(x) print(unclass(x))
 

@@ -222,6 +222,7 @@ columns <- function(humvec) {
     rep(1:ncol, each = length(humvec))
 }
 
+vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
 ########## shape ----
 
@@ -1107,7 +1108,7 @@ setMethod('show', signature = c(object = 'struct'),
                   if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
                   '\n', sep = '')
               if (length(object) > 0L) {
-                  print(as.character(object), quote = FALSE)
+                  print(ifelse(is.na(object), 'NA', as.character(object)), quote = FALSE)
               }
             invisible(object)
             }  )

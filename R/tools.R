@@ -291,7 +291,7 @@ allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
 
-vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
+
 
 empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
     if (is.atomic(object)) {
@@ -830,66 +830,6 @@ lcm <- function(...) {
 
 # modulo starting from 1
 `%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L
-
-## new numeric representations ####
-
-#### decimal ####
-# this is just an extension of numeric to understand my fraction and rational representations
-
-#' Decimal numbers
-#' 
-#' These functions create decimal numbers that are identical to base R
-#' `numeric` (real) numbers.
-#' However, these numbers are understood by the `humdrumR` [rational numbers][rational()].
-#' 
-#' @family {humdrumR numeric functions}
-#' @seealso [rational()]
-#' @export
-decimal <- function(x) (as.numeric(x) %class% 'decimal') %dim% x
-
-#' @rdname decimal
-#' @export
-as.decimal <- function(x, ...) UseMethod('as.decimal')
-#' @export
-as.decimal.character <- function(x) {
-    x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
-    as.decimal.fraction(x)
-}
-#' @export
-as.decimal.numeric <- decimal
-#' @export
-as.decimal.rational <- function(x) decimal((x$Numerator / x$Denominator) %dim% x$Numerator)
-#' @export
-as.decimal.fraction <- function(x) {
-    exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-    decimal(sapply(exprs, eval) %dim% x)
-}
-
-
-
-
-#### fraction ####
-# rational numbers as character string
-
-#' @rdname rational
-#' @export
-fraction <- function(numerator, denominator, sep = '/') {
-    .paste(numerator, denominator, sep = sep) %class% 'fraction'
-}
-
-#' @rdname rational
-#' @export
-as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
-#' @export
-as.fraction.character <- function(x, sep = '/') as.fraction.rational(as.rational.character(x), sep = sep) %dim% x
-#' @export
-as.fraction.rational  <- function(x, sep = '/') fraction(x$Numerator, x$Denominator, sep = sep) 
-#' @export
-as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
-#' @export
-as.fraction.fraction  <- function(x, sep = '/') as.fraction.rational(as.rational.fraction(x), sep = sep) %dim% x %class% 'fraction'
-#' @export
-print.rational <- function(x) print(as.fraction(x))
 
 #### calculus
 
