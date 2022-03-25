@@ -3,21 +3,28 @@
 \name{humWindows}
 \alias{humWindows}
 \alias{windows}
+\alias{nested}
+\alias{hop}
 \alias{windowApply}
 \alias{applyNgram}
-\alias{hop}
 \title{Create arbitrary "windows" across vectors.}
 \usage{
 windows(
   x,
   open,
-  close = Next(open) - 1L,
+  close = ~Next(open) - 1L,
   start = 1,
   end = length(x),
   nest = FALSE,
   depth = NULL,
-  boundaries = NULL
+  boundaries = NULL,
+  min_length = 1L,
+  max_length = Inf
 )
+
+nested(x, open, close, depth = 1L)
+
+hop(along, pattern = 1, start = 1L, end = length(along))
 
 windowApply(
   x,
@@ -39,8 +46,6 @@ applyNgram(
   splat = !is.null(by),
   ...
 )
-
-hop(along, pattern = 1, start = 1L, end = length(along))
 }
 \description{
 Create arbitrary "windows" across vectors.

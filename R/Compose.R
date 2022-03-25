@@ -359,11 +359,12 @@ makeDispatchDF <- function(...) {
   if (length(quoted) == 0L) .stop("You can't make a dispatchDF with zero dispatch options!")
   
   
-  dispatchDF <- as.data.table(do.call('rbind', list(...)))
+  dispatchDF <- data.table::as.data.table(do.call('rbind', list(...)))
   colnames(dispatchDF) <- c('Exclusives', 'regex', 'method')
   
   dispatchDF$regexPrint <- sapply(quoted, \(row) as.character(row[[3]])[1])
-  dispatchDF[ , regexPrint := unlist(Map(\(regex, print) if (rlang::is_function(regex)) paste0(print, '(...)') else print, regex, regexPrint))]
+  dispatchDF$regexPrint <-  unlist(Map(\(regex, print) if (rlang::is_function(regex)) paste0(print, '(...)') else print, dispatchDF$regex, dispatchDF$regexPrint))
+  
   
   dispatchDF$methodPrint <- sapply(quoted, \(row) as.character(row[[4]])[1])
   

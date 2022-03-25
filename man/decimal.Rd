@@ -18,6 +18,6 @@ However, these numbers are understood by the \code{humdrumR} \link[=rational]{ra
 \code{\link[=rational]{rational()}}
 
 Other {humdrumR numeric functions}: 
-\code{\link{rational}()}
+\code{\link{fraction}()}
 }
 \concept{{humdrumR numeric functions}}

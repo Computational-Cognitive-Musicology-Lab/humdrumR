@@ -267,12 +267,10 @@ setMethod('%%', signature = c(e1 = 'rational', e2 = 'rational'),
 # Deparsing Rational Representations (rational2x) ########################
 ###################################################################### ###
 
-#' @rdname rational
-#' @export
+
+
 setMethod('as.double', 'rational', \(x) x@Numerator / x@Denominator)
 
-#' @rdname rational
-#' @export
 setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)))
 
 ###################################################################### ### 

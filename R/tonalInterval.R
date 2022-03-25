@@ -245,7 +245,6 @@ is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
 
 #' @export order.tonalInterval
 #' @exportMethod > >= < <= Summary abs sign
- 
 order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
               

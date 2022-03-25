@@ -4,12 +4,7 @@
 \alias{rhythmInterval}
 \alias{rint}
 \alias{as.character,rhythmInterval-method}
-\alias{as.double.rhythmInterval}
 \alias{is.rhythmInterval}
-\alias{is.numeric,rhythmInterval-method}
-\alias{order.rhythmInterval}
-\alias{Compare,rhythmInterval,rhythmInterval-method}
-\alias{Summary,rhythmInterval-method}
 \alias{rhythmInterval.logical}
 \alias{rhythmInterval.NULL}
 \alias{rhythmInterval.numeric}
@@ -25,23 +20,7 @@ rint(denominator, numerator = 1L)
 
 \S4method{as.character}{rhythmInterval}(x)
 
-\method{as.double}{rhythmInterval}(x)
-
 is.rhythmInterval(x)
-
-\S4method{is.numeric}{rhythmInterval}(x)
-
-order.rhythmInterval(
-  x,
-  ...,
-  na.last = TRUE,
-  decreasing = FALSE,
-  method = c("auto", "shell", "radix")
-)
-
-\S4method{Compare}{rhythmInterval,rhythmInterval}(e1, e2)
-
-\S4method{Summary}{rhythmInterval}(x)
 
 rhythmInterval(x, ...)
 
