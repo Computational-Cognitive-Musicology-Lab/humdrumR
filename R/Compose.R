@@ -245,7 +245,7 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
-  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
+  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{list(...)$funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   

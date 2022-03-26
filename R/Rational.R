@@ -356,6 +356,12 @@ setGeneric('as.rational', \(x, ...) standardGeneric('as.rational'))
 
 #' @rdname
 #' @export
+setMethod('as.rational', 'rational', force)
+
+
+
+#' @rdname
+#' @export
 setMethod('as.rational', 'matrix', \(x) rational(c(x), 1L) %dim% x)
 
 #' @rdname rational

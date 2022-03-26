@@ -1,209 +1,3 @@
-
-#################################### ###
-# rhythmInterval S4 class ##############
-#################################### ###
-
-## Definition, validity, initialization ####
-
-
-#' Representation of rhythmic information
-#' 
-#' This *S4* class is the core rhythm representation in the [humdrumR] package.
-#' The object is used to represent rhythmic durations 
-#' and metric positions.
-#' Each duration is represented in 
-#' [whole note](https://en.wikipedia.org/wiki/Whole_note) units.
-#' Numerically, these whole note units are represented as a ratio
-#' between integers, held in the slots `@Numerator` and `@Denominator`.
-#' This allows use to represent any rational number with no loss of precision
-#' due to rounding errors and weak decimal expansions (like `0.333333`).
-#' Rhythm intervals are similar to standard musical 
-#' termoniology (i.e, "three eighth-notes" is the ratio (3/8).
-#' 
-#' @section Vectorization:
-#'
-#' `rhythmInterval` inherits from the virtual class 
-#' [struct].
-#' This means you can apply normal vectorized commands to `rhythmInterval`s, 
-#' and even put them in [base::data.frame()].
-#' 
-#' @section Arithmetic:
-#'
-#' `rhythmInterval` objects have arithmetic operations defined.
-#' Addition and subtraction are straightword and intuitive (i.e., (1/8) + (3/8) = (1/2)).
-#' 
-#' Multiplication and division are slightly more complicated: 
-#' [scalar multiplication](https://en.wikipedia.org/wiki/Scalar_multiplication)
-#' is defined *for rational numbers*: (3/8) * 2 = (3/4) 
-#' (the result is always a new `rhythmInterval`).
-#' However, note that a `rhythmInterval` cannot be multiplied by another
-#' `rhythmInterval`---afterall, what would a quarter-note times a quarter-note be? 
-#' A `rhythmInterval` can be divided by another `rhythmInterval` to produce
-#' a real number: (1/2) / (1/4) = 2.
-#' Like other rational values in `R` we can also do either 
-#' ``true'' (rational) division (using the [/][base::Arithmetic] operator)
-#' *or* [Euclidean](https://en.wikipedia.org/wiki/Euclidean_division)
-#' division (using the [%%][base::Arithmetic] operator).
-#' Rational division (`/`) of a `rhythmInterval` by another `rhythmInterval`
-#' results in a rational number. For instance, $(1/2) / (1/4) = 2$.
-#' Rational division of a `rhythmInterval` by a rational number results in a
-#' new `rhythmInterval`: $(1/2) / 2 = (1/4)$.
-#' Eucliean (a.k.a., integer) division can only be applied between `rhythmInterval`s
-#' resulting in an integer quotient---the remainder, which is a `rhythmInterval`,
-#' can be calculated with the [%%][base::Arithmetic] operator.
-#' The remainder (a.k.a., *modulo*) operator (`%%`) is especially
-#' useful, for instance in calculating metric positions.
-#' 
-#' @section Relational Operators:
-#'
-#' `rhythmInterval`s can be compared using the standard
-#' [relational operators][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
-#' 
-#' @slot Numerator Integers 
-#' @slot Octave Integers
-#' 
-#' @family {core rhythm representation}
-#' @name rhythmInterval
-#' @export
-setClass('rhythmInterval', 
-         contains = 'rational') -> rhythmInterval
-
-setMethod('initialize', 'rhythmInterval',
-          function(.Object, rational) {
-            .Object@Numerator <- rational@Numerator
-            .Object@Denominator <- rational@Denominator
-            .Object
-          })
-
-## Constructors ####
-
-
-#' The basic constructor for `[humdrumR:rhythmInterval][rhythmIntervals]`.
-#' @rdname rhythmInterval
-#' @export
-rint <- function(denominator, numerator = 1L) {
-    if (any(denominator == 0L, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
-    
-    new('rhythmInterval', rational(numerator, denominator))
-}
-
-## Accessors ####
-
-
-## Formatting methods ####
-
-#' @rdname rhythmInterval
-#' @export
-setMethod('as.character', c(x = 'rhythmInterval'), function(x) rint2recip(x))
-
-
-## Logic methods ####
-
-### is.methods ####
-
-#' @rdname rhythmInterval
-#' @export
-is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
-
-
-as.rational <- function(x) new('rational', x@Numerator, x@Denominator)
-
-
-
-## Arithmetic methods ####
-
-### Addition ####
-
-
-
-
-
-
-### Multiplication ####
-
-
-#' @export
-setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
-          function(e1, e2) {
-             # multiplying by integers is simple!
-            rint(.ifelse(e2 == 0, 1L, e1@Denominator), 
-                 e1@Numerator * e2)
-          })
-
-
-#' @export
-setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
-          function(e1, e2) {
-              # multiplying by float can be hard
-              # use MASS::fractions to do hard work
-              
-              frac <- as.rational(e2)
-              
-              e1 <- rint(.ifelse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
-                         e1@Numerator   * frac$Numerator)
-              e1
-          })
-
-#' @export
-setMethod('*', signature = c(e1 = 'numeric', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-              e2 * e1
-          })
-
-### Division/modulo  ####
-
-#' @export
-setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'integer'),
-          function(e1, e2) {
-              if (any(e2 == 0L)) stop(call. = FALSE, "You can't divide a rhythmInterval by zero.")
-              
-              rint(e1@Denominator * e2, e1@Numerator)
-
-          })
-
-#' @export
-setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
-          function(e1, e2) {
-            if (any(e2 == 0)) stop(call. = FALSE, "You can't divide a rhythmInterval by zero.")
-              
-              frac <- numeric2fraction(e2) 
-              
-              rint(e1@Denominator * frac$Numerator,
-                   e1@Numerator * frac$Denominator)
-          })
-
-#' @export
-setMethod('/', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            
-            (e1@Numerator * e2@Denominator) / (e2@Numerator * e1@Denominator)
-          })
-
-
-#' @export
-setMethod('%/%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-            if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            
-            (e1@Numerator * e2@Denominator) %/% (e2@Numerator * e1@Denominator)
-          })
-          
-#' @export
-setMethod('%%', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
-          function(e1, e2) {
-                    if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-                    n <- e1@Numerator * e2@Denominator
-                    d <- e2@Numerator * e1@Denominator
-                    
-                    n <- n %% d
-                    
-                    rint(d * e2@Denominator,
-                         n * e2@Numerator)
-          })
-
-
-
 ###################################################################### ###
 # Deparsing Rhythm Representations (rint2x) ##############################
 ###################################################################### ###
@@ -321,20 +115,13 @@ rint2notevalue <- function(rint) {
 }
 
 
-
 ### Numeric ####
 
 
+rint2double <- function(x) as.double(x)
 
-rint2rational <- function(rint) .paste(rint@Numerator, '/', rint@Denominator)
 
-rint2double <- function(rint) as.double(rint@Numerator / rint@Denominator)
 
-rint2integer <- function(rint) {
-  dub <- rint2double
-  
-  as.integer(dub * (1 / min(dub)))
-}
 
 
 
@@ -351,24 +138,23 @@ rint2integer <- function(rint) {
 
 recip2rint <- function(str) {
   
-  uniqstr <- unique(str)
   
   # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
-  uniqstr <- .ifelse(grepl('^0\\.|^0$', uniqstr), gsub('^0', '1%2', uniqstr), uniqstr)
-  uniqstr <- .ifelse(grepl('^00\\.|^00$', uniqstr), gsub('^00', '1%4', uniqstr), uniqstr)
-  uniqstr <- .ifelse(grepl('^000\\.|^000$', uniqstr), gsub('^000', '1%8', uniqstr), uniqstr)
+  str <- .ifelse(grepl('^0\\.|^0$', str),     gsub('^0',   '1%2', str), str)
+  str <- .ifelse(grepl('^00\\.|^00$', str),   gsub('^00',  '1%4', str), str)
+  str <- .ifelse(grepl('^000\\.|^000$', str), gsub('^000', '1%8', str), str)
   
-  ndots <- stringr::str_count(uniqstr, '\\.')
-  rhythmInterval <- gsub('\\.+', '', uniqstr)
+  ndots <- stringr::str_count(str, '\\.')
+  str <- gsub('\\.+', '', str)
   
-  rhythmInterval[grepl('%', rhythmInterval)] <- unlist(lapply(rhythmInterval[grepl('%', uniqstr)], \(f) eval(parse(text = gsub('%', '/', f)))))
+  rational <- as.rational(str, sep = '%')
+  rational <- reciprocal(rational)
   
-  rhythmInterval <- 1 / as.numeric(rhythmInterval)
-  rhythmInterval <- rhythmInterval * (2 - (0.5 ^ (ndots)))
   
-  rhythmInterval <- rhythmInterval(rhythmInterval)
-  
-  rhythmInterval[match(str, unique(str))]
+  dots <- 2L ^ ndots
+  dotscale <- rational((2L * dots) - 1L, dots)
+
+  rational * dotscale
   
 }
 
@@ -402,44 +188,9 @@ notevalue2rint <- function(notevalues) {
   rint / (divides %|% 1)
 }
 
+### Numbers ####
 
-### Numeric ####
-
-numeric2rint <- function(n) {
-  if (!is.numeric(n)) n <- as.numeric(n)
-  
-  frac <- as.rational(n)
-  
-  frac$Denominator[frac$Numerator == frac$Denominator] <- 1L
-  
-  rint(frac$Denominator, frac$Numerator)
-}
-
-
-rational2rint <- function(str, split = '/') {
-  split <- strsplit(str, split = split)
-  
-  ns <- lapply(split, \(n) {
-    if (all(is.na(n))) return(rint(NA))
-    
-    if (tail(n, 1) == '') n[length(n)] <- 1L
-    if (n[1] == '') n[1] <- '1'
-    if (any(n == '')) n <- n[n != '']
-    
-    if (length(n) == 1) n <- c(n, '1') 
-    
-    n <- as.numeric(n)
-    
-    ## if more than two numbers in any token, 
-    ## evaluate all but the rightmost as division
-    if (length(n) >  2L) n <- c(Reduce(`/`, head(n, -1)), tail(n, 1))
-    
-    rint(n[2], n[1])
-  })
-  
-  do.call('c', ns)
-  
-}
+duration2rint <- function(x, ...) as.rational(x)
 
 ## Rhythm Parsing Dispatch ######################################
 
@@ -457,50 +208,26 @@ rational2rint <- function(str, split = '/') {
 #' @export 
 rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
 
-#' @rdname tonalInterval
-#' @export
-rhythmInterval.rhythmInterval <- function(x, ...) x
-
 #' @rdname rhythmInterval
 #' @export 
-rhythmInterval.logical <- function(x, ...) vectorNA(length(x), 'rhythmInterval')
+rhythmInterval.default <- function(x, ...) as.rational(x, ...)
 
 #' @rdname rhythmInterval
 #' @export
 rhythmInterval.NULL <- function(x, ...) NULL
 
 
-#### Numbers ####
-
-
-#' @rdname rhythmInterval
-#' @export
-rhythmInterval.numeric <- numeric2rint
-#' @rdname rhythmInterval
-#' @export
-rhythmInterval.rational <- \(x) .stop("There is no rational -> rhythmInterval method")
-#' @rdname rhythmInterval
-#' @export
-rhythmInterval.fraction <- \(x) .stop("There is no fraction -> rhythmInterval method")
-#' @rdname rhythmInterval
-#' @export
-rhythmInterval.integer  <- \(x) .stop("There is no integer -> rhythmInterval method")
-
 
 #### Characters ####
 
 #' @rdname rhythmInterval
+#' @export
 rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
-                                                  list('duration',                 makeRE.double, numeric2rint),
+                                                  list('duration',                 makeRE.double, duration2rint),
                                                   funcName = 'rhythmInterval.character',
-                                                  outputClass = 'rhythmInterval')
+                                                  outputClass = 'rational')
 
-#### setAs tonal interval ####
 
-setAs('integer', 'rhythmInterval', function(from) numeric2rint(from))
-setAs('numeric', 'rhythmInterval', function(from) numeric2rint(from))
-setAs('character', 'rhythmInterval', function(from) char2rint(from))
-setAs('matrix', 'rhythmInterval', function(from) rhythmInterval(c(from)) %dim% from)
 
 ###################################################################### ### 
 # Translating Rhythm Representations (x2y) ###############################
@@ -559,7 +286,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
     # }
     
     deparseArgs <- c(list(parsedRint), deparseArgs)
-    output <- if (deparse && is.rhythmInterval(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedRint
+    output <- if (deparse && is.rational(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedRint
     if (deparse && inPlace) output <- rePlace(output, attr(parsedRint, 'dispatch'))
     
     output

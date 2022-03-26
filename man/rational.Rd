@@ -14,6 +14,13 @@
 \alias{Compare,rational,rational-method}
 \alias{Summary,rational-method}
 \alias{sum,rational-method}
+\alias{cumsum,rational-method}
+\alias{prod,rational-method}
+\alias{abs,rational-method}
+\alias{sign,rational-method}
+\alias{max,rational-method}
+\alias{min,rational-method}
+\alias{mean,rational-method}
 \alias{as.rational}
 \alias{as.rational,integer-method}
 \alias{as.rational,numeric-method}
@@ -52,6 +59,20 @@ order.rational(
 \S4method{Summary}{rational}(x)
 
 \S4method{sum}{rational}(x, ..., na.rm = FALSE)
+
+\S4method{cumsum}{rational}(x)
+
+\S4method{prod}{rational}(x, ..., na.rm = FALSE)
+
+\S4method{abs}{rational}(x)
+
+\S4method{sign}{rational}(x)
+
+\S4method{max}{rational}(x)
+
+\S4method{min}{rational}(x)
+
+\S4method{mean}{rational}(x)
 
 as.rational(x, ...)
 
