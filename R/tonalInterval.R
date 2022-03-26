@@ -220,7 +220,7 @@ setMethod('as.character', signature = c('tonalInterval'),
           function(x) kern(x))
 
 setMethod('as.numeric', signature = c('tonalInterval'), 
-          function(x) tint2decimal(x))
+          function(x) tint2double(x))
 
 
 ## Logic methods ####
@@ -510,18 +510,19 @@ tint2rational <-  function(x, tonalHarmonic = 3L) {
   
   
   if (any(Cent != 0)) {
-    floats <- as.rational.numeric(tint2decimal(x[Cent != 0], tonalHarmonic))
-    num[Cent != 0] <- floats$Numerator
-    den[Cent != 0] <- floats$Denominator
+    floats <- as.rational.numeric(tint2double(x[Cent != 0], tonalHarmonic))
+    num[Cent != 0] <- floats@Numerator
+    den[Cent != 0] <- floats@Denominator
     
   } 
-  list(Numerator = as.integer(num) %dim% x, Denominator = as.integer(den) %dim% x) %class% 'rational'
+  
+  rational(as.integer(num), as.integer(den)) %dim% x
   
 }
 
-tint2fraction <- function(x, tonalHarmonic = 3) as.fraction.rational(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
+tint2fraction <- function(x, tonalHarmonic = 3) as.fraction(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
 
-tint2decimal <-  function(x, tonalHarmonic = 2^(19/12)) {
+tint2double <-  function(x, tonalHarmonic = 2^(19/12)) {
   LO5th <- x@Fifth
   oct   <- x@Octave
   cent  <- x@Cent
@@ -536,7 +537,7 @@ tint2frequency <- function(x, frequency.reference = 440L,
                            tonalHarmonic = 2^(19/12)) {
   x <- x - frequencyTint
   
-  ratio <- tint2decimal(x, tonalHarmonic = tonalHarmonic)
+  ratio <- tint2double(x, tonalHarmonic = tonalHarmonic)
   attributes(ratio) <- NULL
   
   frequency.reference * ratio %dim% x
@@ -954,12 +955,12 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
 
 #### Frequency ####
 
-fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational.character(x), tonalHarmonic) %dim% x
+fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational(x), tonalHarmonic) %dim% x
 
 rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...) {
-  if (x$Numerator == 0 || (x$Numerator < 0 & x$Denominator > 0)) .stop('Rational values can only be interpreted as tonalIntervals if they are positive.')
+  if (x@Numerator == 0 || (x@Numerator < 0 & x@Denominator > 0)) .stop('Rational values can only be interpreted as tonalIntervals if they are positive.')
   
-  fracs <- do.call('cbind', x)
+  fracs <- cbind(x@Numerator, x@Denominator)
   
   # octaves
   octaves    <- log(fracs, base = 2)
@@ -987,19 +988,20 @@ rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...)
     
     fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
   }
+  tint <- tint(octs, fifs)
   
   tint <- atonal2tint(tint, accidental.melodic, ...)
   
   tint(octs, fifs)
 }
 
-decimal2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melodic = FALSE, ...) {
-  if (x <= 0) .stop('Decimal (numeric) values can only be interpreted as tonalIntervals if they are positive.')
+double2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melodic = FALSE, ...) {
+  if (x <= 0) .stop('Double (numeric) values can only be interpreted as tonalIntervals if they are positive.')
   
   octrange <- attr(centMargin, 'octrange')
   if (is.null(octrange)) octrange <- 5L
   if (octrange > 150) stop(call. = FALSE,
-                           "decimal2tint can't find a note corresponding exactly to this frequency/ratio. ",
+                           "double2tint can't find a note corresponding exactly to this frequency/ratio. ",
                            "Try raising the centMargin.")
   
   #
@@ -1040,7 +1042,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
                            frequencyTint = tint(-4, 3), tonalHarmonic = 3,
                            centMargin = 10) {
   
-  ( decimal2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %dim% float
+  ( double2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %dim% float
 }
 
 ### Tonal ####
@@ -1272,7 +1274,7 @@ solfa2tint <- function(str, ...) {
 #' 
 #' + [integer][base::integer] values are interpreted as semitones. Watch out! In R, you need to append an `L` to a number to make it an explicit integer:
 #'   For example, `tonalInterval(3L)`.
-#' + [numeric][base::numeric]/[decimal()] and [rational()] values are interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
+#' + [numeric][base::numeric]/[double()] and [rational()] values are interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
 #'   For example, the value `2.0` will be interpreted as an octave (two to one ratio.)
 #' 
 #' However, the most useful tool for humdrum data is parsing pitch representations encoded in `character` tokens.
@@ -1320,7 +1322,7 @@ tonalInterval.NULL <- function(x, ...) NULL
 
 #' @rdname tonalInterval
 #' @export
-tonalInterval.numeric  <- decimal2tint
+tonalInterval.numeric  <- double2tint
 #' @rdname tonalInterval
 #' @export
 tonalInterval.rational <- rational2tint
@@ -1330,6 +1332,9 @@ tonalInterval.fraction <- fraction2tint
 #' @rdname tonalInterval
 #' @export
 tonalInterval.integer  <- semit2tint
+
+
+
 
 #### Characters ####
 
@@ -1349,10 +1354,13 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 #### setAs tonal interval ####
 
 setAs('integer', 'tonalInterval', function(from) semit2tint(from))
-setAs('numeric', 'tonalInterval', function(from) decimal2tint(from))
+setAs('numeric', 'tonalInterval', function(from) double2tint(from))
 setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% from)
 
+setMethod('as.rational', 'tonalInterval', tint2rational)
+setMethod('as.double', 'tonalInterval', tint2double)
+setMethod('as.integer', 'tonalInterval', tint2semit)
 
 
 

@@ -438,7 +438,7 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse =
 
 ####
 
-makeRE.decimal <- function(...) c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
+makeRE.double <- function(...) c(double = "[+-]?[0-9]+(\\.[0-9]+)?" )
 makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
 

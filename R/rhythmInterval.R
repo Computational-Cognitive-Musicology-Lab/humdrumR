@@ -68,6 +68,12 @@
 setClass('rhythmInterval', 
          contains = 'rational') -> rhythmInterval
 
+setMethod('initialize', 'rhythmInterval',
+          function(.Object, rational) {
+            .Object@Numerator <- rational@Numerator
+            .Object@Denominator <- rational@Denominator
+            .Object
+          })
 
 ## Constructors ####
 
@@ -76,12 +82,9 @@ setClass('rhythmInterval',
 #' @rdname rhythmInterval
 #' @export
 rint <- function(denominator, numerator = 1L) {
-    # reduced <- reduce_fraction(numerator, denominator)
+    if (any(denominator == 0L, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
     
-    if (any(denominator == 0, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
-    new('rhythmInterval', 
-        Denominator = as.integer(denominator), 
-        Numerator = as.integer(numerator))
+    new('rhythmInterval', rational(numerator, denominator))
 }
 
 ## Accessors ####
@@ -91,7 +94,7 @@ rint <- function(denominator, numerator = 1L) {
 
 #' @rdname rhythmInterval
 #' @export
-setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
+setMethod('as.character', c(x = 'rhythmInterval'), function(x) rint2recip(x))
 
 
 ## Logic methods ####
@@ -103,6 +106,7 @@ setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
 is.rhythmInterval <- function(x) inherits(x, 'rhythmInterval')
 
 
+as.rational <- function(x) new('rational', x@Numerator, x@Denominator)
 
 
 
@@ -324,10 +328,10 @@ rint2notevalue <- function(rint) {
 
 rint2rational <- function(rint) .paste(rint@Numerator, '/', rint@Denominator)
 
-rint2decimal <- function(rint) as.double(rint@Numerator / rint@Denominator)
+rint2double <- function(rint) as.double(rint@Numerator / rint@Denominator)
 
 rint2integer <- function(rint) {
-  dub <- rint2decimal
+  dub <- rint2double
   
   as.integer(dub * (1 / min(dub)))
 }
@@ -487,7 +491,7 @@ rhythmInterval.integer  <- \(x) .stop("There is no integer -> rhythmInterval met
 
 #' @rdname rhythmInterval
 rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
-                                                  list('duration',                 makeRE.decimal, numeric2rint),
+                                                  list('duration',                 makeRE.double, numeric2rint),
                                                   funcName = 'rhythmInterval.character',
                                                   outputClass = 'rhythmInterval')
 
@@ -571,7 +575,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
 recip <- makeRhythmTransformer(rint2recip, 'recip')
 #' @rdname rhythmFunctions
 #' @export 
-duration <- makeRhythmTransformer(rint2decimal, 'duration')
+duration <- makeRhythmTransformer(rint2double, 'duration')
 
 
 
@@ -669,7 +673,7 @@ rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = dura
 # #' @export
 # augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
 #                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
-#                                    'Decimal' = as.decimal.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
+#                                    'Decimal' = as.double.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
 # 
 # 
 # #' @name RhythmScaling
@@ -685,7 +689,7 @@ rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = dura
 # #' @export
 # diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
 #                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
-#                                     'Decimal' = as.decimal.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+#                                     'Decimal' = as.double.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
 
 
 

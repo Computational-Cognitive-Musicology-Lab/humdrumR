@@ -116,6 +116,18 @@ setMethod('Compare', signature = c('rational', 'rational'),
               callGeneric(as.double(e1), as.double(e2))
           })
 
+
+## Arithmetic methods ####
+
+
+setGeneric('reciprocal', \(x) standardGeneric('reciprocal'))
+
+setMethod('reciprocal', 'rational', \(x) rational(x@Denominator, x@Numerator))
+setMethod('reciprocal', 'numeric', \(x) 1/x)
+
+### Math
+
+
 #' @rdname rational
 #' @export
 setMethod('Summary', signature = c('rational'),
@@ -143,6 +155,24 @@ setMethod('sum', 'rational', \(x, ...) {
     }
     
 })
+
+#' @rdname rational
+#' @export
+setMethod('cumsum', 'rational', \(x) {
+    nums <- x@Numerator
+    dens <- x@Denominator
+    
+    
+    den <- do.call('lcm', as.list(unique(dens)))
+    if (den > 1e6) {
+        as.rational(cumsum(as.double(x)))
+    } else {
+        rational(cumsum(nums * (den / dens)), den)
+    }
+    
+})
+
+
 
 
 #' @rdname rational
@@ -185,12 +215,6 @@ setMethod('mean', 'rational', \(x) {
 
 
 
-
-## Arithmetic methods ####
-
-setGeneric('reciprocal', \(x) standardGeneric('reciprocal'))
-
-setMethod('reciprocal', 'rational', \(x) rational(x@Denominator, x@Numerator))
 
 ### Addition ####
 
