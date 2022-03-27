@@ -830,8 +830,12 @@ lcm <- function(...) {
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vector(class(x[[1]]), length(x[[1]]))
-    output[!na] <- Reduce(pracma::Lcm, lapply(x, '[', !na))
+    output[!na] <- Reduce(.Lcm, lapply(x, '[', !na))
     output
+}
+
+.lcm <- function(x, y) {
+    abs(x * y) / .gcd(x, y)
 }
 
 # modulo starting from 1
