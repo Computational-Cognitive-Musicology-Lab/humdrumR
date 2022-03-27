@@ -32,7 +32,7 @@ setMethod('initialize', 'rational',
               Denominator <- abs(Denominator)
               
               fraction <- reduce_fraction(.Object@Numerator, .Object@Denominator)
-              fraction <- do.call('match_size', fraction) 
+              # fraction <- do.call('match_size', fraction) 
               fraction <- lapply(fraction, as.integer)
               
               .Object@Numerator <- fraction$Numerator
@@ -54,7 +54,7 @@ rational <- function(numerator, denominator = 1L) {
 
 #' @rdname rational
 #' @export
-`%r%` <- function(e1, e2) rational(e1, e2)
+`%R%` <- function(e1, e2) rational(e1, e2)
 
 ## Accessors ####
 
@@ -122,7 +122,7 @@ setMethod('Compare', signature = c('rational', 'rational'),
 
 setGeneric('reciprocal', \(x) standardGeneric('reciprocal'))
 
-setMethod('reciprocal', 'rational', \(x) rational(x@Denominator, x@Numerator))
+setMethod('reciprocal', 'rational', \(x) rational(x@Denominator, ifelse(x@Numerator == 0L, NA_integer_, x@Numerator)))
 setMethod('reciprocal', 'numeric', \(x) 1/x)
 
 ### Math
@@ -135,42 +135,6 @@ setMethod('Summary', signature = c('rational'),
               as.rational(callGeneric(as.double(x)))
           })
 
-
-#' @rdname rational
-#' @export
-setMethod('sum', 'rational', \(x, ...) {
-    x <- do.call('c', list(x, ...))
-    
-    nums <- x@Numerator
-    dens <- x@Denominator
-    
-    
-    nums <- tapply(nums, dens, sum)
-    dens <- tapply(dens, dens, unique)
-    den <- do.call('lcm', as.list(dens))
-    if (den > 1e6) {
-        as.rational(sum(as.double(x)))
-    } else {
-        rational(sum(nums * (den / dens)), den)
-    }
-    
-})
-
-#' @rdname rational
-#' @export
-setMethod('cumsum', 'rational', \(x) {
-    nums <- x@Numerator
-    dens <- x@Denominator
-    
-    
-    den <- do.call('lcm', as.list(unique(dens)))
-    if (den > 1e6) {
-        as.rational(cumsum(as.double(x)))
-    } else {
-        rational(cumsum(nums * (den / dens)), den)
-    }
-    
-})
 
 
 
@@ -221,7 +185,7 @@ setMethod('mean', 'rational', \(x) {
 #' @export
 setMethod('+', signature = c(e1 = 'rational', e2 = 'rational'),
           function(e1, e2) {
-              if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
+              # if (length(e1) != length(e2)) match_size(e1, e2, toEnv = TRUE)
               
               d1 <- e1@Denominator
               d2 <- e2@Denominator
@@ -232,6 +196,44 @@ setMethod('+', signature = c(e1 = 'rational', e2 = 'rational'),
               
               rational(n1 + n2, d3)
           })
+
+
+
+#' @rdname rational
+#' @export
+setMethod('sum', 'rational', \(x, ...) {
+    x <- do.call('c', list(x, ...))
+    
+    nums <- x@Numerator
+    dens <- x@Denominator
+    
+    
+    nums <- tapply(nums, dens, sum)
+    dens <- tapply(dens, dens, unique)
+    den <- do.call('lcm', as.list(dens))
+    if (den > 1e6) {
+        as.rational(sum(as.double(x)))
+    } else {
+        rational(sum(nums * (den / dens)), den)
+    }
+    
+})
+
+#' @rdname rational
+#' @export
+setMethod('cumsum', 'rational', \(x) {
+    nums <- x@Numerator
+    dens <- x@Denominator
+    
+    
+    den <- do.call('lcm', as.list(unique(dens)))
+    if (den > 1e6) {
+        as.rational(cumsum(as.double(x)))
+    } else {
+        rational(cumsum(nums * (den / dens)), den)
+    }
+    
+})
 
 
 
@@ -308,11 +310,10 @@ setMethod('/', signature = c(e1 = 'numeric', e2 = 'rational'),
 #' @export
 setMethod('%/%', signature = c(e1 = 'rational', e2 = 'rational'),
           function(e1, e2) {
-              if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+              # if (length(e1) != length(e2)) match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
-              e3 <- e1 / e2
+              (e1@Numerator * e2@Denominator) %/% (e1@Denominator * e2@Numerator)
               
-              e3@Numerator %/% e3@Denominator
           })
 
 #' @export

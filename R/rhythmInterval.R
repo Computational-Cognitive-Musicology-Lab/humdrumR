@@ -536,14 +536,14 @@ beats <- function(moff,  beats = c(.25), subdiv = 1/8, measure = 1) {
 }
 
 
-measureOffset <- function(dur, meter = 1) {
-  meter <- rep_along(dur, meter)
+measureOffset <- function(dur, meter = rational(1)) {
+  if (length(meter) > 1L && length(meter) != length(dur)) meter <- rep(meter, length.out = length(dur))
   
   dur <- dur / meter
   
-  offset <- sigma(c(0, dur))
+  offset <- sigma(c(rational(0L), dur))
   
-  moffset <- offset %% 1
+  moffset <- offset %% rational(1L)
   
   head(moffset, -1) * meter
   

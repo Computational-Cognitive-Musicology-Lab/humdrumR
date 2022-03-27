@@ -798,12 +798,10 @@ is.whole <- function(x) x %% 1 == 0
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
-    na <- is.na(n) | is.na(d)
-    gcds <- gcd(n[!na], d[!na])
+    gcds <- do(gcd, list(n, d))
     
-    num <- den <- vectorNA(length(n), 'integer')
-    num[!na] <- as.integer(n[!na] / gcds)
-    den[!na] <- as.integer(d[!na] / gcds)
+    num <- as.integer(n / gcds)
+    den <- as.integer(d / gcds)
     list(Numerator = num, Denominator = den)
 }
 
@@ -815,8 +813,16 @@ gcd <- function(...) {
     
     na <- Reduce('|', lapply(x, is.na))
     output <- vector(class(x[[1]]), length(x[[1]]))
-    output[!na] <- Reduce(pracma::gcd, lapply(x, '[', !na))
+    output[!na] <- Reduce(.gcd, lapply(x, '[', !na))
     output
+}
+
+.gcd <- function(x, y) {
+    r <- x %% y
+    
+    notyet <- r > 0
+    if (any(notyet)) y[notyet] <- Recall(y[notyet], r[notyet])
+    y
 }
 
 lcm <- function(...) {
