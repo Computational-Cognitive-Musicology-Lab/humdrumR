@@ -674,6 +674,24 @@ printSilbeFormat(keepSilbeExample)
 textIndices <- function(data, nullTokens = TRUE){
     save <- text(data, nullTokens = TRUE)
     save2 <- text(data, nullTokens = FALSE)
+    save2 <- save2[-which(save2=="_")]
+    words <- text(save2, nullTokens = FALSE)
+    iteration <- 1:length(data)
+    iteration <- as.data.frame(iteration)
+    iteration2 <- 1:length(words)
+    iteration2 <- as.data.frame(iteration2)
+    returnValue <- apply(iteration2, 1, function(x){
+        returnValue2 <- apply(iteration, 1, function(y){
+            if(grepl("-", data[y])){
+                return(paste(words[x],"[", x, "]", sep = "" ))
+            }
+            if(gregexpr(pattern = "-", data[y])[[1]][1] == 1){
+                return(paste(words[x],"[", x, "]", sep = "" ))
+            }
+        })
+        return(returnValue2)
+    })
+    return(returnValue)
 }
 
 # test 3 for text indices
