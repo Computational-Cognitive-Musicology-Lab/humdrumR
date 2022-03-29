@@ -61,7 +61,7 @@
 #'  #      wild
 #'  #     west. 
 text <- function(data, nullTokens = TRUE){
-  print(silbeFormat(as.data.frame(data)))
+  print(silbeFormat2(data))
   if(nullTokens == FALSE){
     # if the user does not want null tokens to replace instances of syllables occurring after the first syllable of a multi-syllable word
     data <- as.data.frame(data)
@@ -72,7 +72,7 @@ text <- function(data, nullTokens = TRUE){
     # remove all instances of -, -, which represents a space between two syllables which when combined form a word
     data <- stringr::str_replace_all(data, ",", "")
     # remove all instances of , which occur after every word except the last one
-    data <- as.list(stringr::strsplit(data, '\\s+')[[1]])
+    data <- as.list(strsplit(data, '\\s+')[[1]])
     # get all of the words as a list
     transpose1 <- t(data)
     transpose2 <- t(transpose1)
@@ -530,6 +530,8 @@ text(dummyData)
 text(dummyData, nullTokens = FALSE)
 silbeFormat(dummyData)
 
+
+
 # text keep silbe
 library(stringr)
 
@@ -668,3 +670,15 @@ printSilbeFormat <- function(keepSilbeOutput){
   return(saveWords2)
 }
 printSilbeFormat(keepSilbeExample)
+
+textIndices <- function(data, nullTokens = TRUE){
+    save <- text(data, nullTokens = TRUE)
+    save2 <- text(data, nullTokens = FALSE)
+}
+
+# test 3 for text indices
+
+values <- c('op-', '-por-', '_', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
+            '-time')
+
+textIndices(values)
