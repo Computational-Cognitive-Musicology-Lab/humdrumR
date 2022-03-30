@@ -685,14 +685,24 @@ textIndices <- function(data, nullTokens = TRUE){
     returnValue2 <- function(randomValue){
         value <- randomValue
         if(grepl("-", data[y]) && x == 1){
+            
             assign('y', y+1, envir = globalenv())
-            return(paste(words[x],"[", y-1, "]", sep = "" ))
+            saveValue <- y
+            if(y > 2 && data[y-2] == "_"){
+                assign('y', y-1, envir = globalenv())
+                saveValue <- y
+                assign('y', y+1, envir = globalenv())
+            }
+            return(paste(words[x],"[", saveValue-1, "]", sep = "" ))
         }
         else if(data[y-1] == "_" && !grepl("-", data[y])){
             assign('y', y+1, envir = globalenv())
             assign('x', x+1, envir = globalenv())
             return(paste(words[x]))
         }
+        # else if(data[y-1] == "_" && grepl("-", data[y])){
+        #     return(paste(words[x],"[", y-1, "]", sep = "" ))
+        # }
         else if(data[y] == "_"){
             assign('y', y+1, envir = globalenv())
             return("_")
