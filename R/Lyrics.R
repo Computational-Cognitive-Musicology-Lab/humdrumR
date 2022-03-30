@@ -697,28 +697,36 @@ textIndices <- function(data, nullTokens = TRUE){
             assign('y', y+1, envir = globalenv())
             return("_")
         }
-        else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
-            assign('x', x+1, envir = globalenv())
-            assign('y', y+1, envir = globalenv())
-            return(paste(words[x-1],"[", y-1, "]", sep = "" ))
-        }
+        # else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
+        #     assign('x', x+1, envir = globalenv())
+        #     assign('y', y+1, envir = globalenv())
+        #     return(paste(words[x-1],"[", y-1, "]", sep = "" ))
+        # }
         # else if(gregexpr(pattern = "-", data[y])[[1]][1] != 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
         #     assign('x', x+1, envir = globalenv())
         #     assign('y', y+1, envir = globalenv())
         #     return(paste(words[x-1],"[", y-1, "]", sep = "" ))
         # }
-        else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) != nchar(data[y])){
-            assign('x', x+1, envir = globalenv())
-            assign('y', y+1, envir = globalenv())
-            return(paste(words[x-1],"[", y-1, "]", sep = "" ))
-        }
+        # else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) != nchar(data[y])){
+        #     assign('x', x+1, envir = globalenv())
+        #     saveValue <- y
+        #     assign('y', 1, envir = globalenv())
+        #     return(paste(words[x-1],"[", saveValue-1, "]", sep = "" ))
+        # }
         else if(length(spell_check_text(data[y])[1]$word) == 0 && !grepl("-", data[y])){
             assign('x', x+1, envir = globalenv())
             assign('y', y+1, envir = globalenv())
             return(words[x])
         }
         else if(grepl("-", data[y]) && length(spell_check_text(data[y-1])[1]$word) == 0){
-            return(paste(words[x+1],"[", 1, "]", sep = "" ))
+            if(y > 2){
+                assign('y', 1, envir = globalenv()) 
+            }
+            else{
+                assign('y', y+1, envir = globalenv())
+            }
+            
+            return(paste(words[x+1],"[", y, "]", sep = "" ))
         }
     }
     saveValue = sapply(1:length(data),returnValue2)
