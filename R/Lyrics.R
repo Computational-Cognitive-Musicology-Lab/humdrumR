@@ -671,6 +671,8 @@ printSilbeFormat <- function(keepSilbeOutput){
 }
 printSilbeFormat(keepSilbeExample)
 
+x = 1
+y = 1
 textIndices <- function(data, nullTokens = TRUE){
     save <- text(data, nullTokens = TRUE)
     save2 <- text(data, nullTokens = FALSE)
@@ -680,30 +682,47 @@ textIndices <- function(data, nullTokens = TRUE){
     iteration <- as.data.frame(iteration)
     iteration2 <- 1:length(words)
     iteration2 <- as.data.frame(iteration2)
-    returnValue <- apply(iteration2, 1, function(x){
-        returnValue2 <- apply(iteration, 1, function(y){
-            save4 <- y
-            if(grepl("-", data[y]) && x == 1){
-                return(paste(words[x],"[", y, "]", sep = "" ))
-            }
-            if(data[y] == "_"){
-                return("_")
-            }
-            if(gregexpr(pattern = "-", data[y])[[1]][1] == 1){
-                save3 <- paste(words[x],"[", y, "]", sep = "" )
-                words[x] <- words[x+1]
-                return(save3)
-            }
-            if(length(spell_check_text(data[y])[1]$word) == 0){
-                return(data[y])
-            }
-            # if(grepl("-", data[y]) && data[y-1] == "_"){
-            #     return(paste(words[x],"[", y-1, "]", sep = "" ))
-            # }
-        })
-        return(returnValue2)
-    })
-    return(returnValue)
+    returnValue2 <- function(randomValue){
+        value <- randomValue
+        if(grepl("-", data[y]) && x == 1){
+            assign('y', y+1, envir = globalenv())
+            return(paste(words[x],"[", y-1, "]", sep = "" ))
+        }
+        else if(data[y-1] == "_" && !grepl("-", data[y])){
+            assign('y', y+1, envir = globalenv())
+            assign('x', x+1, envir = globalenv())
+            return(paste(words[x]))
+        }
+        else if(data[y] == "_"){
+            assign('y', y+1, envir = globalenv())
+            return("_")
+        }
+        else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
+            assign('x', x+1, envir = globalenv())
+            assign('y', y+1, envir = globalenv())
+            return(paste(words[x-1],"[", y-1, "]", sep = "" ))
+        }
+        # else if(gregexpr(pattern = "-", data[y])[[1]][1] != 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
+        #     assign('x', x+1, envir = globalenv())
+        #     assign('y', y+1, envir = globalenv())
+        #     return(paste(words[x-1],"[", y-1, "]", sep = "" ))
+        # }
+        else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) != nchar(data[y])){
+            assign('x', x+1, envir = globalenv())
+            assign('y', y+1, envir = globalenv())
+            return(paste(words[x-1],"[", y-1, "]", sep = "" ))
+        }
+        else if(length(spell_check_text(data[y])[1]$word) == 0 && !grepl("-", data[y])){
+            assign('x', x+1, envir = globalenv())
+            assign('y', y+1, envir = globalenv())
+            return(words[x])
+        }
+        else if(grepl("-", data[y]) && length(spell_check_text(data[y-1])[1]$word) == 0){
+            return(paste(words[x+1],"[", 1, "]", sep = "" ))
+        }
+    }
+    saveValue = sapply(1:length(data),returnValue2)
+    return(saveValue)
 }
 
 # test 3 for text indices
@@ -712,3 +731,14 @@ values <- c('op-', '-por-', '_', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', '
             '-time')
 
 textIndices(values)
+idx=1
+
+f <- function(x){
+    
+    assign('idx', idx+1, envir = globalenv())
+    print(c("current progress", idx))
+    return(idx)
+    
+}
+
+res=sapply(1:3,f)
