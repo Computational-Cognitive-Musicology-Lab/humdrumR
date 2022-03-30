@@ -682,6 +682,7 @@ textIndices <- function(data, nullTokens = TRUE){
     iteration2 <- as.data.frame(iteration2)
     returnValue <- apply(iteration2, 1, function(x){
         returnValue2 <- apply(iteration, 1, function(y){
+            save4 <- y
             if(grepl("-", data[y]) && x == 1){
                 return(paste(words[x],"[", y, "]", sep = "" ))
             }
