@@ -682,12 +682,23 @@ textIndices <- function(data, nullTokens = TRUE){
     iteration2 <- as.data.frame(iteration2)
     returnValue <- apply(iteration2, 1, function(x){
         returnValue2 <- apply(iteration, 1, function(y){
-            if(grepl("-", data[y])){
-                return(paste(words[x],"[", x, "]", sep = "" ))
+            if(grepl("-", data[y]) && x == 1){
+                return(paste(words[x],"[", y, "]", sep = "" ))
+            }
+            if(data[y] == "_"){
+                return("_")
             }
             if(gregexpr(pattern = "-", data[y])[[1]][1] == 1){
-                return(paste(words[x],"[", x, "]", sep = "" ))
+                save3 <- paste(words[x],"[", y, "]", sep = "" )
+                words[x] <- words[x+1]
+                return(save3)
             }
+            if(length(spell_check_text(data[y])[1]$word) == 0){
+                return(data[y])
+            }
+            # if(grepl("-", data[y]) && data[y-1] == "_"){
+            #     return(paste(words[x],"[", y-1, "]", sep = "" ))
+            # }
         })
         return(returnValue2)
     })
