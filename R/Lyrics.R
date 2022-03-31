@@ -676,6 +676,8 @@ printSilbeFormat(keepSilbeExample)
 #' @export
 x = 1
 y = 1
+z = 1
+save = FALSE
 textIndices <- function(data, nullTokens = TRUE){
     save <- text(data, nullTokens = TRUE)
     save2 <- text(data, nullTokens = FALSE)
@@ -697,10 +699,24 @@ textIndices <- function(data, nullTokens = TRUE){
             }
             return(paste(words[x],"[", saveValue-1, "]", sep = "" ))
         }
-        else if(data[y-1] == "_" && !grepl("-", data[y])){
+        else if(words[x] == data[y]){
+            saveValue <- x
+            assign('x', x+1, envir = globalenv())
+            assign('y', y+1, envir = globalenv())
+            return(words[saveValue])
+        }
+        else if(y > 1 && data[y-1] == "_" && !grepl("-", data[y])){
             assign('y', y+1, envir = globalenv())
             assign('x', x+1, envir = globalenv())
             return(paste(words[x]))
+        }
+        else if(y > 1 && data[y-1] == "_" && grepl("-", data[y])){
+            #assign('z', y, envir = globalenv())
+            assign('y', 1, envir = globalenv())
+            saveValue <- y
+            assign('y', y+1, envir = globalenv())
+            assign('save', TRUE, envir = globalenv())
+            return(paste(words[x],"[", saveValue, "]", sep = "" ))
         }
         # else if(data[y-1] == "_" && grepl("-", data[y])){
         #     return(paste(words[x],"[", y-1, "]", sep = "" ))
@@ -708,6 +724,13 @@ textIndices <- function(data, nullTokens = TRUE){
         else if(data[y] == "_"){
             assign('y', y+1, envir = globalenv())
             return("_")
+        }
+        else if (save == TRUE && gregexpr(pattern = "-", data[z])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[z])[[1]] == nchar(data[y])) != nchar(data[y])){
+            assign('save', FALSE, envir = globalenv())
+        }
+        else if(save == TRUE && grepl("-", data[y])){
+            assign('y', y+1, envir = globalenv())
+            return(paste(words[x],"[", saveValue, "]", sep = "" ))
         }
         # else if(gregexpr(pattern = "-", data[y])[[1]][1] == 1 && which(gregexpr(pattern = "-", data[y])[[1]] == nchar(data[y])) == nchar(data[y])){
         #     assign('x', x+1, envir = globalenv())
@@ -726,6 +749,7 @@ textIndices <- function(data, nullTokens = TRUE){
         #     return(paste(words[x-1],"[", saveValue-1, "]", sep = "" ))
         # }
         else if(length(spell_check_text(data[y])[1]$word) == 0 && !grepl("-", data[y])){
+            saveValue <- x
             assign('x', x+1, envir = globalenv())
             assign('y', y+1, envir = globalenv())
             return(words[x])
@@ -750,6 +774,11 @@ textIndices <- function(data, nullTokens = TRUE){
 values <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
             '-time')
 
+values2 <- c('Now', 'let', 'me', '_', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+
+x=1
+y=1
+z=1
 textIndices(values)
 idx=1
 
