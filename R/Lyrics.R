@@ -685,10 +685,9 @@ textIndices <- function(data, nullTokens = TRUE){
     returnValue2 <- function(randomValue){
         value <- randomValue
         if(grepl("-", data[y]) && x == 1){
-            
             assign('y', y+1, envir = globalenv())
             saveValue <- y
-            if(y > 2 && data[y-2] == "_"){
+            if(y > 2){
                 assign('y', y-1, envir = globalenv())
                 saveValue <- y
                 assign('y', y+1, envir = globalenv())
@@ -745,7 +744,7 @@ textIndices <- function(data, nullTokens = TRUE){
 
 # test 3 for text indices
 
-values <- c('op-', '-por-', '_', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
+values <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
             '-time')
 
 textIndices(values)
