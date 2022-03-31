@@ -671,6 +671,9 @@ printSilbeFormat <- function(keepSilbeOutput){
 }
 printSilbeFormat(keepSilbeExample)
 
+#'
+#'
+#' @export
 x = 1
 y = 1
 textIndices <- function(data, nullTokens = TRUE){
@@ -687,7 +690,7 @@ textIndices <- function(data, nullTokens = TRUE){
         if(grepl("-", data[y]) && x == 1){
             assign('y', y+1, envir = globalenv())
             saveValue <- y
-            if(y > 2){
+            if(y > which(data == "_")[1]){
                 assign('y', y-1, envir = globalenv())
                 saveValue <- y
                 assign('y', y+1, envir = globalenv())
