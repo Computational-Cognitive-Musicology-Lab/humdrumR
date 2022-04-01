@@ -393,7 +393,7 @@ remove.duplicates <- function(listofvalues) {
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     
-    output <- tapply(X, INDEX, FUN, ...) |> unlist()
+    output <- do.call('c', tapply(X, INDEX, FUN, ...))
     indices <- tapply(seq_along(X), INDEX, force) |> unlist()
     
     output[order(indices)]
@@ -830,7 +830,7 @@ lcm <- function(...) {
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vector(class(x[[1]]), length(x[[1]]))
-    output[!na] <- Reduce(.Lcm, lapply(x, '[', !na))
+    output[!na] <- Reduce(.lcm, lapply(x, '[', !na))
     output
 }
 

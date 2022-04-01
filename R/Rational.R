@@ -114,6 +114,17 @@ setMethod('Compare', signature = c('rational', 'rational'),
           function(e1, e2) {
               checkSame(e1, e2, 'Compare')
               callGeneric(as.double(e1), as.double(e2))
+              # 
+              # d1 <- denominator(e1)
+              # d2 <- denominator(e2)
+              # 
+              # d3 <- lcm(d1, d2)
+              # 
+              # x1 <- numerator(e1) * (d3 / d1)
+              # x2 <- numerator(e2) * (d3 / d2)
+              # 
+              # callGeneric(x1, x2)
+              
           })
 
 

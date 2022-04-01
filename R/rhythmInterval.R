@@ -158,6 +158,10 @@ recip2rint <- function(str) {
   
 }
 
+timesignature2rint <- function(str, sep = '/') {
+  str <- stringr::str_remove(str, '^\\*?M?')
+  as.rational(str)
+}
 
 
 notevalue2rint <- function(notevalues) {
@@ -223,6 +227,7 @@ rhythmInterval.NULL <- function(x, ...) NULL
 #' @rdname rhythmInterval
 #' @export
 rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
+                                                  list('any',                      makeRE.timeSignature, timesignature2rint),
                                                   list('duration',                 makeRE.double, duration2rint),
                                                   funcName = 'rhythmInterval.character',
                                                   outputClass = 'rational')
@@ -358,32 +363,12 @@ ms2bpm <- function(ms) 60000/ms
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = duration) {
-  durations <- duration(durations)
-  start <- duration(start)
-  tatum <- duration(tatum)
+rhythmOffset <- function(durations, start = rational(0), tatum = rational(1), phase = rational(0)) {
+  durations <- rhythmInterval(durations)
   
   durations <- durations / tatum
   
-  
-  off <- function(d, s) cumsum(c(s, d))[seq_len(length(d))]
-  
-  offsets <- if (is.null(bars)) {
-    off(durations, start)
-    
-  }   else {
-    if (length(bars) != length(durations)) {
-      stop(call. = FALSE,
-           "In call to rhythmOffset, length of durations argument and length of groups argument are different.")
-    }
-    
-    dur.groups <- split(as.numeric(durations), as.numeric(bars))
-    durs <- unlist(Map(off, dur.groups, as.numeric(start)))
-    as(durs, class(durations))
-    
-  }
-  
-  if (identical(as, duration)) offsets else as(offsets)
+  head(sigma(c(start, durations)), -1L) + phase
 }
 
 ### Augmentation and Dimminution  ####
@@ -511,18 +496,36 @@ metricPosition <- function(rints, bars = NULL,
 # 0/8&5 1/8 1/4 3/8 4/8
 # 0/8%5 1/8 2/8 1/4. 4/8
 
-
-
-beats <- function(moff,  beats = c(.25), subdiv = 1/8, measure = 1) {
+beats <- function(dur, beat = rational(1, 4), phase = rational(0), ...) {
   
+  beatsize <- sum(beat)
   
+  offset <- rhythmOffset(dur, phase = phase, ...)
+  
+  beatcount <- offset %/% beatsize
+  beatoffset <- offset %% beatsize
+  
+  if (length(beat) > 1L) {
+    beatoff <- rhythmOffset(beat)
+    subbeat <- Reduce('+', lapply(as.list(beatoff), `<=`, e2 = beatoffset)) 
+    
+    beatcount <- beatcount * length(beat)
+    beatcount <- beatcount + subbeat - 1
+    beatoffset <- beatoffset - beatoff[subbeat]
+    
+  }
+  struct2data.frame(beatcount, beatoffset)
+  
+}
+
+beats2 <- function(moff,  beats = rational(1,4), subdiv = rational(1,8), measure = rational(1)) {
   
   span <- sum(beats)
-  beats <- rep(beats, measure / span)
+  beats <- rep(beats, measure %/% span)
   if (sum(beats) != measure) .stop('In call to beats, the beats argument cannot evenly divide the measure span.')
   
   durs <- unique(c(delta(beats), subdiv))
-  durs <- durs[durs != 0]
+  durs <- durs[durs != rational(0)]
   if (Reduce('gcd', durs) != subdiv) .stop('{subbeat} is not a valid subdivider of the beats pattern.')
   
   beat <- findInterval(moff, cumsum(beats), rightmost.closed = TRUE)
@@ -536,18 +539,28 @@ beats <- function(moff,  beats = c(.25), subdiv = 1/8, measure = 1) {
 }
 
 
-measureOffset <- function(dur, meter = rational(1)) {
-  if (length(meter) > 1L && length(meter) != length(dur)) meter <- rep(meter, length.out = length(dur))
+measure <- function(dur, tatum = rational(1L), start = rational(0L), phase = rational(0L)) {
+  # if correct meter is known (and aligned with dur)
+  if (length(tatum) > 1L && length(tatum) != length(dur)) tatum <- rep(tatum, length.out = length(dur))
   
-  dur <- dur / meter
+  dur <- dur / tatum
+  # 
+  offset <- sigma(c(start, dur)) + phase
   
-  offset <- sigma(c(rational(0L), dur))
-  
+  mcount <- offset %/% rational(1L)
   moffset <- offset %% rational(1L)
   
-  head(moffset, -1) * meter
+  
+  struct2data.frame(N = head(mcount, -1), Offset = head(moffset, -1) * tatum)
+  
+  # if (length(tatum) > 1L && length(unique(tatum)) > 1L) {
+    # Reduce(\(x, y) {y + max(x)}, tapply(dur, tatum, \(d) sigma(c(rational(0L), d)) %/% tatum), accumulate = TRUE)
+  # } else {
+    # sigma(c(rational(0L), dur)) %/% tatum
+  # }
   
 }
+
 
 meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {
  measure <- sum(meter)
