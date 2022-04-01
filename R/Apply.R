@@ -782,7 +782,7 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
       
     do <- function(exprA) {
       
-         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else Environment))
+         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else exprA$Environment))
          hits <- fields %in% fargNames
 
          if (!any(hits)) return(exprA)
