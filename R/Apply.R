@@ -916,7 +916,7 @@ splatQuo <- function(funcQuosure, fields) {
     inExprA <- analyzeExpr(exprA$Args[[2]])
     
     if (inExprA$Head != '%in%') .stop('splat expression must use %in%')
-    if (!as.character(inExprA$Args[[1]]) %in% fields) .stop('splat expression must use existing field.')
+    # if (!as.character(inExprA$Args[[1]]) %in% fields) .stop('splat expression must use existing field.')
     
     inVals <- eval(inExprA$Args[[2]])
     if (!is.atomic(inVals)) .stop('splat %in% expression must be atomic values.')
