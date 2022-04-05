@@ -661,15 +661,15 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL, windows = NULL) {
   #doQuo <- tandemsQuo(doQuo)
   
   # update what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
   
   # splats
-  doQuo <- splatQuo(doQuo, unlist(usedInExprs))
+  doQuo <- splatQuo(doQuo, humtab)
   
   
   # if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
   #                                       Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
   #                                       call. = FALSE)
+  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
@@ -901,7 +901,7 @@ getTandem <- function(tandem, regex) {
 # rlang's unquoting operator !!!.
 # humdrumR has another syntactic sugar for this:
 
-splatQuo <- function(funcQuosure, fields) {
+splatQuo <- function(funcQuosure, humtab) {
   # This function takes an expression,
   # and replaces any subexpression of the form `func(splat(x, y, z))`
   # with `func(x, y, z)`.
@@ -916,7 +916,7 @@ splatQuo <- function(funcQuosure, fields) {
     inExprA <- analyzeExpr(exprA$Args[[2]])
     
     if (inExprA$Head != '%in%') .stop('splat expression must use %in%')
-    # if (!as.character(inExprA$Args[[1]]) %in% fields) .stop('splat expression must use existing field.')
+    if (length(fieldsInExpr(humtab, inExprA$Args[[1]])) == 0L) .stop('splat expression must reference an existing field')
     
     inVals <- eval(inExprA$Args[[2]])
     if (!is.atomic(inVals)) .stop('splat %in% expression must be atomic values.')
