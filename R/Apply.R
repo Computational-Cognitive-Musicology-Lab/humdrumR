@@ -660,15 +660,16 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL, windows = NULL) {
   # tandem interpretations
   #doQuo <- tandemsQuo(doQuo)
   
-  # splats
-#  doQuo <- splatQuo(doQuo)
+  # update what fields (if any) are used in formula
   
-  # find what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
+  # splats
+  doQuo <- splatQuo(doQuo, humtab)
+  
   
   # if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
   #                                       Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
   #                                       call. = FALSE)
+  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
@@ -772,7 +773,7 @@ activateQuo <- function(funcQuosure, active) {
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
     
-    predicate <- function(Type, Head, Environment) {
+    predicate <- \(Type, Head, Environment) {
       args <- formals(Head, if (missing(Environment)) parent.frame() else Environment)
        Type == 'call' &&
         !Head %in% c('(', '{') &&
@@ -780,9 +781,9 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
         any(.names(args) %in% fields)
     }
       
-    do <- function(exprA) {
+    do <- \(exprA) {
       
-         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else Environment))
+         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else exprA$Environment))
          hits <- fields %in% fargNames
 
          if (!any(hits)) return(exprA)
@@ -813,36 +814,27 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
 laggedQuo <- function(funcQuosure) {
   
-  predicate <- function(Args) { 
-    any(sapply(Args, \(arg) is.call(arg) && length(arg) > 2 && as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n'))
-  }
+  predicate <- \(Head, Args) Head == '[' && any(names(Args) %in% c('n', 'N')) 
   
-  do <- function(exprA) {
-    args <- exprA$Args
-    target <- sapply(args, \(arg) as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n')
+  do <- \(exprA) {
     
-    lagged <- lapply(args[target],
-                     \(expr) {
-                       if (!'windows' %in% .names(expr)) expr$windows <- expr(list(File, Spine))
-                       
-                       indexedObject <- expr[[2]]
-                       n <- eval_tidy(expr$n)
-                       if (!is.numeric(n) || (n != (n %% 1))) .stop('Invalid [n = ] lag expression.')
-                       expr <- expr[.names(expr) != 'n']
-                       
-                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!args)) })
-                       
-                       exprs
-                     })
-   
-    args[target] <- lagged
-    exprA$Args <- unlist(args, recursive = FALSE)
-  
+    args <- exprA$Args
+    if (!'windows' %in% .names(args)) args$windows <- expr(list(File, Spine))
+    
+    names(args)[names(args) == 'N'] <- 'n'
+    n <- rlang::eval_tidy(args$n)
+    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [n = ] lag expression.')
+    args$n <- NULL
+    
+    lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
+
+    exprA$Head <- 'splat'
+    exprA$Args <- lagExprs
+    
     exprA
   }
   
   modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
-
   
 }
 
@@ -903,45 +895,62 @@ getTandem <- function(tandem, regex) {
 
 
 #### Splatting in expressions
-# "splatting" refers to giving a function which takes
-# multiple arguments a list or vector which is interpreted
-# as a list/vector of arguments, rather than a single argument.
-# For instance, the function log takes two arguments, x and base.
-# Imagine that I have a vector like this 
-# myvector <- list(x = 3, base = 2), which
-# I want to apply log to. The traditional R way is 
-# do.call('log', as.list(myvector)).
-# This is essentially splatting. What I want is syntactic sugar to
-# go log(myvector) and have it work. splatQuo allows exactly this in a 
-# call to withinHumdrum. We can group one field by another field, then
-# feed each group as an argument to a function.
-#
+# "splatting" refers to spreading a list of values expressions 
+# into arguments to of a call.
+# This is usually done in R using do.call, and can also be done useing
+# rlang's unquoting operator !!!.
+# humdrumR has another syntactic sugar for this:
 
-# splatQuo <- function(funcQuosure) {
-#   # This function takes an expression,
-#   # and replaces any subexpression of the form `funccall(TargetExpr@GroupingExpr)`,
-#   # with `do.call('funccall', tapply(TargetExpr, GroupingExpr, c))`.
-#   # The result is that `TargetExpr` is broken into a list of vectors by the
-#   # `GroupingExpr`, and each group is fed to `funccall` as a separate
-#   # argument. See the docementation for [withinHumdrum()].
-#   # This does not look for `@` sub expression within branches of a `@` expression!
-#   # 
-#   
-#   
-#   predicate <- function(expr) any(sapply(expr, is.givenCall, call = '@'))
-#   
-#   transform <- function(expr) {
-#       expr <- recurseQuosure(expr, 
-#                      \(quo) is.givenCall(quo, '@'), 
-#                      \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
-#                          })
-#       expr <- as.list(expr)
-#       rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
-#   }
-#   
-#   recurseQuosure(funcQuosure, predicate, transform)
-#  
-# }
+splatQuo <- function(funcQuosure, humtab) {
+  # This function takes an expression,
+  # and replaces any subexpression of the form `func(splat(x, y, z))`
+  # with `func(x, y, z)`.
+  # This is basically unquoting, like rlang's !!!.
+  # Splat also understands some special syntactic sugar, which is called BEFORE the unquoting:
+  # Index expressions of the form `func(atomic[Field == x])`
+  # are converted to `func(splat(atomic[Field == x[1], atomic[Field == x[2], etc.]))`
+
+  predicate <- \(Head, Args) Head == '[' && all(.names(Args)[-1L] == 'splat')
+  
+  do <- \(exprA) {
+    inExprA <- analyzeExpr(exprA$Args[[2]])
+    
+    if (inExprA$Head != '%in%') .stop('splat expression must use %in%')
+    if (length(fieldsInExpr(humtab, inExprA$Args[[1]])) == 0L) .stop('splat expression must reference an existing field')
+    
+    inVals <- eval(inExprA$Args[[2]])
+    if (!is.atomic(inVals)) .stop('splat %in% expression must be atomic values.')
+    
+    indexed <- exprA$Args[[1]]
+    field <- inExprA$Args[[1]]
+    splatArgs <- lapply(inVals, \(val) rlang::expr((!!indexed)[!!field == !!val]))
+    
+    exprA$Head <- 'splat'
+    exprA$Args <- splatArgs
+    exprA
+  }
+  
+  funcQuosure <- modifyExpression(funcQuosure, predicate, do)
+
+  # turn splat(x,y,z) to x,y,z
+  predicate <- \(Args) any(sapply(Args, \(arg) analyzeExpr(arg)$Head == 'splat'))
+
+  do <- \(exprA) {
+      args <- exprA$Args
+      
+      args <- lapply(args, \(arg) {
+        argA <- analyzeExpr(arg)
+        if (argA$Head == 'splat') argA$Args else arg
+      })
+      exprA$Args <- unlist(args, recursive = FALSE)
+      exprA
+  }
+
+  modifyExpression(funcQuosure, predicate, do)
+  
+}
+
+splat <- list
 
 parseAt <- function(atExpr) {
  # This function is used by splatQuo
