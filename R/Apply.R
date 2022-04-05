@@ -819,7 +819,7 @@ laggedQuo <- function(funcQuosure) {
   
   do <- function(exprA) {
     args <- exprA$Args
-    target <- sapply(args, \(arg) as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n')
+    target <- sapply(args, \(arg) is.call(arg) && as.character(arg[[1]]) == '[' && .names(arg)[3] == 'n')
     
     lagged <- lapply(args[target],
                      \(expr) {
@@ -827,10 +827,11 @@ laggedQuo <- function(funcQuosure) {
                        
                        indexedObject <- expr[[2]]
                        n <- eval_tidy(expr$n)
-                       if (!is.numeric(n) || (n != (n %% 1))) .stop('Invalid [n = ] lag expression.')
-                       expr <- expr[.names(expr) != 'n']
+                       if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [n = ] lag expression.')
+                       expr <- as.list(expr)
+                       expr <- expr[.names(expr) != 'n'][-1L:-2L]
                        
-                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!args)) })
+                       exprs <- lapply(n, \(N) { if (N == 0L) rlang::expr(!!indexedObject) else rlang::expr(lag(!!indexedObject, n = !!N, !!!(as.list(expr)))) })
                        
                        exprs
                      })
