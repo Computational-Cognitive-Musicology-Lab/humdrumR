@@ -28,7 +28,7 @@ classify <- function(..., other = 'Other') {
   #takes any number of predicate functions
   funcs <- list(...)
   
-  checkArgs(funcs, valid = c("L"))
+  checkArg(funcs, valid = c("L"))
   
   funcs <- lapply(funcs, function(func) if (is.function(func)) func else EQ(func))
   
@@ -55,7 +55,7 @@ classify <- function(..., other = 'Other') {
 RErid <- function(...) {
   res <- unlist(list(...))
   
-  checkArgs(res)
+  checkArg(res)
   
   humFunc(function(strs) {
     for (re in res) strs <- gsub(re, '', strs)
@@ -65,7 +65,7 @@ RErid <- function(...) {
 }
 #'  @export
 REkeep <- function(re) {
-  checkArgs(re)
+  checkArg(re)
   humFunc(function(strs) {
     matches <- stringr::str_extract(strs, re)
     matches[is.na(matches)] <- ''
@@ -77,7 +77,7 @@ REkeep <- function(re) {
 humtable <- function(..., levels = NULL) {
   args <- list(...)
   
-  checkArgs(args, valid = c("L"))
+  checkArg(args, valid = c("L"))
   
   if (!is.null(levels)) {
     if (!is.list(levels)) levels <- list(levels)
@@ -94,7 +94,7 @@ humtable <- function(..., levels = NULL) {
 append2string <- function(app, sep = '') {
  newfunc <- function(str) paste(str, sep, app, collapse = '')
  
- checkArgs(newfunc)
+ checkArg(newfunc)
  
  if (is.function(newfunc)) body(newfunc) <- call('{', quote(app <- app(str)), body(newfunc))
  
@@ -136,7 +136,7 @@ append2string <- function(app, sep = '') {
 
 #'  @export
 applyto = (function(pattern, skip) {
-  checkArgs(pattern)
+  checkArg(pattern)
   #creates function which takes and input function and creates a new function which ignores tokens matching, or not matching, regexs
   #if the output of this new function is the same length as the nonskipped tokens, then the original vec is returned with
   #only the changes to the nonskipped tokens. Otherwise, just the output of the function is returned
@@ -174,7 +174,7 @@ applyto = (function(pattern, skip) {
 
 #'  @export
 combinations = function(vec, n = 2, involving = NA) {
-  checkArgs(vec)
+  checkArg(vec)
   if(any(!is.na(involving))) {
     if(is.character(involving) || inherits(involving, 'regex')) {
       hits = greps(involving, vec, value = TRUE)
@@ -200,18 +200,18 @@ combinations = function(vec, n = 2, involving = NA) {
 
 #' @export
 permutations = function(vec) {
-  checkArgs(vec)
+  checkArg(vec)
   combinat::permn(vec)}
 
 
 #' @export
 subTokens = (function(token) { 
-  checkArgs(token)
+  checkArg(token)
   strsplit_single(token, pattern = ' ')  }) # %% Vectorize : c(SIMPLIFY = FALSE)
 
 #' @export
 tokenCompare = function(func, token1, token2, ...) {
-  checkArgs(func)
+  checkArg(func)
   output = outer(subTokens(token2), subTokens(token1), FUN = func, ...)
   rownames(output) = subTokens(token2)
   colnames(output) = subTokens(token1)
@@ -220,7 +220,7 @@ tokenCompare = function(func, token1, token2, ...) {
 
 #'  @export
 applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
-  checkArgs(ex)
+  checkArg(ex)
   # helper function
   accum <- c()
   
@@ -247,7 +247,7 @@ applyExpr <- function(ex, func, rebuild = TRUE, ignoreHead = TRUE) {
 
 #' @export
 apply2ExprAsString <- function(func, ...) {
-  checkArgs(func)
+  checkArg(func)
   function(expr) {
     str <- func(deparse(expr), ...)
     parse(text = str)[[1]]

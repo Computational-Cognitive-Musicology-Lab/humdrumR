@@ -160,13 +160,13 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 #' @export
 getRoot <- function(dset){
-  checkArgs(dset)
+  checkArg(dset)
   dset@Root %dim% dset
 } 
 
 #' @export
 getRootTint <- function(dset) {
-    checkArgs(dset)
+    checkArg(dset)
     root <- getRoot(dset)
     
     tint( , c(root)) %dim% dset
@@ -175,13 +175,13 @@ getRootTint <- function(dset) {
 
 #' @export getSignature
 getSignature <- function(dset){
-    checkArgs(dset)
+    checkArg(dset)
     dset@Signature %dim% dset
 }  
 
 #' @export
 getMode <- function(dset) {
-    checkArgs(dset)
+    checkArg(dset)
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset)
     sign <- getSignature(dset)
@@ -204,7 +204,7 @@ getAlterations <- function(dset) {
 #' @name diatonicSet
 #' @export
 is.diatonicSet <- function(x){
-    checkArgs(x)
+    checkArg(x)
     inherits(x, 'diatonicSet')
 } 
 
@@ -244,7 +244,7 @@ is.minor.diatonicSet <- \(x) getMode(x) < -1L
 #' @export
 order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
-                    checkArgs(x)
+                    checkArg(x)
                     x <- do.call('c', list(x, ...))
                     if (parallel) {
                       order(x@Root, -x@Signature,

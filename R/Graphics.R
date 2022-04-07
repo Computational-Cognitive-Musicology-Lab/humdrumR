@@ -68,11 +68,11 @@ plotRhythm <- function(x, y, notes, ...) UseMethod('plotRhythm')
 #' @name plotRhythm
 #' @export
 plotRhythm.default <- function(x, y, notes, ...){
-    checkArgs(x)
+    checkArg(x)
     
-    checkArgs(y)
+    checkArg(y)
     
-    checkArgs(notes)
+    checkArg(notes)
     
     plotRhythm.rhythmInterval(x, y, notes, ...)
 } 
@@ -80,11 +80,11 @@ plotRhythm.default <- function(x, y, notes, ...){
 #' @name plotRhythm
 #' @export
 plotRhythm.rhythmInterval <- function(x, y, notes, ...) {
-    checkArgs(x)
+    checkArg(x)
     
-    checkArgs(y)
+    checkArg(y)
     
-    checkArgs(notes)
+    checkArg(notes)
     
     symbols <- as.notevalue(notes)
     

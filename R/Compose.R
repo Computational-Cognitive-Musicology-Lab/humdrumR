@@ -2,7 +2,7 @@
 
 #' @export
 print.composed <- function(x) {
-    checkArgs(x)
+    checkArg(x)
     attributes(x) <- NULL
     print(x)
     
@@ -11,8 +11,8 @@ print.composed <- function(x) {
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
 `%.%` <- function(e1, e2) {
-    checkArgs(e1)
-    checkArgs(e2)
+    checkArg(e1)
+    checkArg(e2)
     f1name <- rlang::quo_text(rlang::enquo(e1))
     f2name <- rlang::quo_text(rlang::enquo(e2))
     
@@ -26,7 +26,7 @@ print.composed <- function(x) {
 # "sticky attributes" 
 #' @export
 stickyApply <- function(func, ...) {
-    checkArgs(func)
+    checkArg(func)
     pipe <- stickyAttrs(list(...)[[1]])
     result <- func(...)
     stickyAttrs(result) <- pipe
@@ -107,7 +107,7 @@ re.as <- function(vector) {
 
 #' @export
 re.place <- function(vector) {
-    checkArgs(vector)
+    checkArg(vector)
     asfunc <- stickyAttrs(vector)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
@@ -160,7 +160,7 @@ setMethod('|', c('predicate.function', 'predicate.function'),
 
 #' @export
 EQ <- function(pat) {
-  checkArgs(pat)
+  checkArg(pat)
   func <- function(x) {
     match_size(pat = pat,x = x, toEnv = TRUE)
     ifelse(is.na(pat), is.na(x), x == pat)
@@ -172,7 +172,7 @@ EQ <- function(pat) {
 
 #' @export
 LEN <- function(p.f) {
-    checkArgs(p.f)
+    checkArg(p.f)
     func <- function(x) p.f(length(x))
  
     new('predicate.function', func,
@@ -181,14 +181,14 @@ LEN <- function(p.f) {
 
 #' @export
 ANY <- function(p.f) {
-    checkArgs(p.f)
+    checkArg(p.f)
     func <- unclass(any %.% p.f)
     
     new('predicate.function', func, string = paste0('any(', p.f@string, ')'))
 }
 #' @export
 ALL <- function(p.f) {
-    checkArgs(p.f)
+    checkArg(p.f)
     func <- unclass(all %.% p.f)
     
     new('predicate.function', func, string = paste0('all(', p.f@string, ')'))
@@ -196,7 +196,7 @@ ALL <- function(p.f) {
 
 #' @export
 GT <- function(n) {
-  checkArgs(n)
+  checkArg(n)
   func <- function(x) x > n
 
   new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
@@ -204,7 +204,7 @@ GT <- function(n) {
 
 #' @export
 GTET <- function(n) {
-  checkArgs(n)
+  checkArg(n)
   func <- function(x) x >= n
 
   new('predicate.function', func, string = glue::glue('x >= {deparse(n)}'))
@@ -213,7 +213,7 @@ GTET <- function(n) {
 
 #' @export
 LT <- function(n) {
-  checkArgs(n)
+  checkArg(n)
   func <- function(x) x < n
 
   new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
@@ -221,7 +221,7 @@ LT <- function(n) {
 
 #' @export
 LTET <- function(n) {
-  checkArgs(n)
+  checkArg(n)
   func <- function(x) x <= n
 
   new('predicate.function', func, string = glue::glue('x <= {deparse(n)}'))
@@ -229,7 +229,7 @@ LTET <- function(n) {
 
 #' @export
 RE <- function(pat) {
-  checkArgs(pat)
+  checkArg(pat)
   func <- function(x)  grepl(pat, x) 
 
   new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
@@ -248,8 +248,8 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 #' @name regexDispatch
 #' @export
 `%predate%` <- function(func, predicate) {
-    checkArgs(func)
-    checkArgs(predicate)
+    checkArg(func)
+    checkArg(predicate)
     predicateExpr <- rlang::expr_text(rlang::enexpr(predicate))
     if (grepl('function\\(', predicateExpr)) predicateExpr <- 'lambda'
     
@@ -261,9 +261,9 @@ notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
 #' @export
 predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
     
-    checkArgs(func)
+    checkArg(func)
   
-    checkArgs(predicateFunc)
+    checkArg(predicateFunc)
   
     fbody <- if (is.character(func)) {
        func <- match.fun(fname)
@@ -331,7 +331,7 @@ predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = F
 memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, ...) {
   
 <<<<<<< HEAD
-  checkArgs(args)
+  checkArg(args)
   
   if (is.null(names(args)) || any(names(args) == "")) .stop("predicateParse requires that all arguments are named.")
 =======
@@ -382,7 +382,7 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
 <<<<<<< HEAD
 #' @export
 memoizeDispatch <- function(fname) {
-    checkArgs(fname)
+    checkArg(fname)
     func <- match.fun(fname)
     #argnames
     argnames <- names(fargs(func))

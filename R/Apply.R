@@ -956,7 +956,7 @@ getTandem <- function(tandem, regex) {
   # but they get taken into account...I'm not sure if it 
   # will always work the way we want.
   
-  checkArgs(tandem, valid = c("L"))
+  checkArg(tandem, valid = c("L"))
           
   tandem <- paste0(',', tandem, ',')
   
@@ -1146,7 +1146,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 #' 
 #' @export
 interpolateArguments <- function(quo, namedArgs) {
-    checkArgs(namedArgs)
+    checkArg(namedArgs)
     expr <- rlang::quo_get_expr(quo)
     expr <- .interpolateArguments(expr, namedArgs)
     

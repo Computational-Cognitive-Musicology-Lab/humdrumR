@@ -578,7 +578,7 @@ setMethod('initialize', 'humdrumR',
 #' @rdname humdrumRclass
 #' @export
 is.humdrumR <- function(x){
-    checkArgs(x)
+    checkArg(x)
     inherits(x, 'humdrumR')  
 } 
 is.humdrumR <- \(x) inherits(x, 'humdrumR')
@@ -678,7 +678,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
                    alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
                     
-                    checkArgs(x, valid = c('D'))
+                    checkArg(x, valid = c('D'))
     
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
