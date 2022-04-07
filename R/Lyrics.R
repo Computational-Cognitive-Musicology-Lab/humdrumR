@@ -201,6 +201,7 @@ text <- function(data, nullTokens = TRUE){
 #' # error, improperly formatted **silbe: ne- ver should be ne- - ver and per- son should be per- - son and be- fore should be be- - fore
 #' 
 silbeFormat <- function(data){
+  checkArg(data, classes = c('character'))
   save_initials <- list()
   print_initial <- list()
   save_corrected <- list()
@@ -270,6 +271,7 @@ data <- c('Now', 'let', 'me---', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy',
 #' 13
 #' 
 silbeFormat2 <- function(df){
+  checkArg(df, classes = c('character'))
   index <- 1:length(df)
   index <- cbind(index)
   index <- as.data.frame(index)
@@ -552,12 +554,13 @@ library(stringr)
 #'
 #' @export
 textKeepSilbe <- function(data, nullTokens = TRUE){
+  checkArg(data, classes = c('character'))
   # same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
   dummyData <- data.frame(data)
   dummyData <- toString(dummyData[,1])
-  dummyData <- str_replace_all(dummyData, "-, -", "-")
-  dummyData <- str_replace_all(dummyData, ",", "")
-  indices <- str_locate_all(dummyData, "-")
+  dummyData <- stringr::str_replace_all(dummyData, "-, -", "-")
+  dummyData <- stringr::str_replace_all(dummyData, ",", "")
+  indices <- stringr::str_locate_all(dummyData, "-")
   getIndices <- function(index, iteration){
     # get index where you should insert a - to indicate splitting into syllables.
     getIndex <- index - iteration + 1
@@ -649,6 +652,7 @@ keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
 #'
 #' @export
 printSilbeFormat <- function(keepSilbeOutput){
+  checkArg(keepSilbeOutput[[1]], classes = c('character'))
   reverse <- function(string, index, replacement){
     stringi::stri_sub_replace_all(string, from = index, to = index-1, replacement = replacement)
   }
@@ -679,6 +683,7 @@ y = 1
 z = 1
 save = FALSE
 textIndices <- function(data, nullTokens = TRUE){
+    checkArg(data, classes = c('character'))
     save <- text(data, nullTokens = TRUE)
     save2 <- text(data, nullTokens = FALSE)
     save2 <- save2[-which(save2=="_")]
