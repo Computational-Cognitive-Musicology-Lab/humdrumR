@@ -983,6 +983,8 @@ as.rational.numeric <- function(x) {
 #' @rdname rational
 #' @export
 fraction <- function(numerator, denominator, sep = '/') {
+    checkNumeric(numerator)
+    checkNumeric(denominator)
     .paste(numerator, denominator, sep = sep) %class% 'fraction'
 }
 

@@ -361,7 +361,7 @@ NULL
 #' @rdname withinHumdrum
 #' @export
 withinHumdrum <- function(humdrumR,  ...) {
-          checkhumdrumR(humdrumR)
+          checkhumdrumR(humdrumR, 'withinHumdrum')
           list2env(.withHumdrum(humdrumR, ..., withfunc = 'withinHumdrum'), envir = environment())
          
           ###
@@ -439,7 +439,7 @@ withinHumdrum <- function(humdrumR,  ...) {
 #' @rdname withinHumdrum
 #' @export
 withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
-    checkhumdrumR(humdrumR)
+    checkhumdrumR(humdrumR, 'withHumdrum')
     list2env(.withHumdrum(humdrumR, ..., withfunc = 'withHumdrum'), envir = environment())
   
     result[ , `_rowKey_` := NULL]
@@ -956,7 +956,7 @@ getTandem <- function(tandem, regex) {
   # but they get taken into account...I'm not sure if it 
   # will always work the way we want.
   
-  checkArg(tandem, valid = c("L"))
+  checkArg(tandem, classes = c('list'))
           
   tandem <- paste0(',', tandem, ',')
   
@@ -1492,7 +1492,7 @@ collapse2n <- function(x, colname, class, n = 1) {
 #' @rdname withinHumdrum
 #' @export
 humApply <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
-          checkhumdrumR(humdrumR)
+          checkhumdrumR(humdrumR, 'humApply')
           exprs <- rlang::quos(...)
           keywords <- names(exprs)
           

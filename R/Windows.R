@@ -3,6 +3,7 @@
 applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
                        fill = NA, splat = !is.null(by), ...) {
   # x is list of vectors  of same length
+  if(!is.vector(df)) return(c("you did not enter a vector, you entered a ",class(df)))
   if (!is.null(by)) vecs <- lapply(vecs, split, f = by)
   
   if (n == 0) stop("You called applyNgram with n = 0, but you can't make an 0-gram!", call. = FALSE)
@@ -166,6 +167,7 @@ find.anchors <- function(vec, expr) {
 #' @name humWindows
 windows <- function(df, form, with = list(), ..., 
                     start = 1L, end = nrow(df), bounds = 'exclude') {
+          if(!is.data.frame(df)) return(c("you did not enter a data frame, you entered a ",class(df)))
           if (start < 1) start <- 1L
           if (end > nrow(df)) end <- nrow(df)
           
@@ -217,6 +219,7 @@ parseWindowExpression <- function(expr) {
 #' @export
 #' @name humWindows
 hop <- function(vec, pattern, start = 1L, end = length(vec)) {
+    if(!is.vector(df)) return(c("you did not enter a vector, you entered a ",class(df)))
           if (is.character(start)) start <- grep(start, vec)
           if (is.character(end))   end <- grep(end, vec)
           
@@ -259,6 +262,7 @@ windowEdges <- function(inds, start, end, bounds = 'exclude') {
 #' @export
 #' @name humWindows
 nest <- function(vec, open, close, depth = 1) {
+    if(!is.vector(vec)) return(c("you did not enter a vector, you entered a ",class(vec)))
           opens <- stringi::stri_count_regex(vec, open)
           closes <- stringi::stri_count_regex(vec, close)
           
