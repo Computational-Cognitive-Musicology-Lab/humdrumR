@@ -73,6 +73,7 @@ NULL
 #' @name humPipe
 #' @export
 `%hum>%` <- function(humdrumR, formula) {
+    checkhumdrumR(humdrumR, '`%hum>%`')
     doPipe(humdrumR, formula, '%hum>%', 'withinHumdrum')
 }
 
@@ -80,12 +81,14 @@ NULL
 #' @name humPipe
 #' @export
 `%hum<%` <- function(humdrumR, formula) {
+     checkhumdrumR(humdrumR, '`%hum<%`')
      doPipe(humdrumR, formula, '%hum<%', 'withHumdrum')
 }
 
 #' @name humPipe
 #' @export
 `%humT%` <- function(humdrumR, formula) {
+    checkhumdrumR(humdrumR, '`%humT%`')
     if (is.list(formula)) {
         formula <- lapply(formula,
                           \(form) {
@@ -105,6 +108,7 @@ NULL
 
 #' @export
 `%hum[]%` <- function(humdrumR, formula) {
+    checkhumdrumR(humdrumR, '`%hum[]%`')
     doPipe(humdrumR, formula, '%hum[]%', 'filterHumdrum')
 }
 
@@ -206,21 +210,25 @@ removeParentheses <- function(expr) {
 #' @name humPipe
 #' @export
 `%hums>%` <- function(list, formula) {
+    checkArg(list, classes = c('list'))
     lapply(list, doPipe, formula = formula, pipename = '%hums>%', call = 'withinHumdrum')
 }
 
 #' @name humPipe
 #' @export
 `%hums<%` <- function(list, formula) {
+    checkArg(list, classes = c('list'))
     lapply(list, doPipe, formula = formula, pipename = '%hums<%', call = 'withHumdrum')
 }
 #' @name humPipe
 #' @export
 `%humsT%` <- function(list, formula) {
+    checkArg(list, classes = c('list'))
     lapply(list, \(x) x %humT% formula)
 }
 #' @name humPipe
 #' @export
 `%hums[]%` <- function(list, formula) {
+    checkArg(list, classes = c('list'))
     lapply(list, doPipe, formula = formula, pipename = '%hums[]%', call = 'filterHumdrum')
 }

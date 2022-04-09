@@ -103,6 +103,8 @@ setMethod('initialize', 'rhythmInterval',
 rint <- function(denominator, numerator = 1L) {
     # reduced <- reduce_fraction(numerator, denominator)
     
+    checkNumeric(denominator)
+    
     if (any(denominator == 0, na.rm = TRUE)) stop(call. = FALSE, "Can't have rhythmInterval with denominator of 0.")
     new('rhythmInterval', 
         Denominator = as.integer(denominator), 
@@ -689,11 +691,17 @@ duration <- makeRhythmTransformer(rint2decimal, 'duration')
 #' 
 #' @name time
 #' @export
-bpm2ms <- function(bpm) 60000/bpm
+bpm2ms <- function(bpm){
+    checkNumeric(bpm)
+    60000/bpm 
+} 
 
 #' @name time
 #' @export
-ms2bpm <- function(ms) 60000/ms
+ms2bpm <- function(ms){
+    checkNumeric(ms)
+    60000/ms
+} 
 
 
 
@@ -726,6 +734,7 @@ ms2bpm <- function(ms) 60000/ms
 #' @export
 rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
   durations <- as.decimal(durations)
+  checkNumeric(durations)
   start <- as.decimal(start)
   tatum <- as.decimal(tatum)
   
@@ -808,6 +817,8 @@ NULL
 #' @family rhythm analysis tools
 #' @export
 rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
+          is.rhythmInterval(rhythmInterval)
+    
           into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
@@ -840,6 +851,10 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 #' @export
 metricPosition <- function(rints, bars = NULL, 
                            beats = rint(c(2, 4, 8, 16, 32))) {
+  
+  for(i in length(rints)){
+      is.rhythmInterval(rints[i])
+  }
   
   offset <- rhythmOffset(rints, bars = bars, as = rhythmInterval)
   

@@ -333,6 +333,7 @@ reference <- function(x) UseMethod('reference')
 #' @usage reference('OTL')
 #' @export
 reference.character <- function(str) {
+  checkArg(str, classes = c('string'))
   str <- gsub('^!*', '', str)
   
   ReferenceCodes[] <- lapply(ReferenceCodes, as.character)
@@ -377,6 +378,9 @@ reference.character <- function(str) {
 #' @usage reference(humdata)
 #' @export
 reference.humdrumR <- function(humdrumR) {
+
+  checkhumdrumR(humdrumR, 'reference.humdrumR')
+    
   # This function simply extracts the refernence columns from a humdrumR object
   
   corpusName <- substitute(humdrumR)
@@ -568,6 +572,8 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' @family humdrum data summary functions
 #' @export
 spines  <- function(humdrumR) {
+
+  checkhumdrumR(humdrumR, 'spines')
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   

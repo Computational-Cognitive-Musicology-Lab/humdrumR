@@ -5,6 +5,7 @@ setAlpha <- function(col, alpha) { do.call(rgb, c(as.list(col2rgb(col)[,1] / 255
 showHumdrum <- function(humdata, scale = 1, svg = TRUE, file = paste0(tempdir(), '/humdrumDisplay.svg')) {
   #' @export
   #only plot one file
+  checkhumdrumR(humdata, 'showHumdrum')
   humdata = humdata[1]
   if (nrow(humdata) == 0) invisible(NULL)
   
