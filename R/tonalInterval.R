@@ -160,6 +160,7 @@ setMethod("initialize",
 #' @name tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
+    checkInteger(octave)
     if (missing(octave)) octave <- -LO5th2contourN(LO5th, contour.round = floor)
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
@@ -1359,9 +1360,13 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' 
 #' @seealso tonalTransformations
 #' @export
-transpose <- function(x, by, Key, to, real, relative, ...) UseMethod('transpose')
+transpose <- function(x, by, Key, to, real, relative, ...){
+    is.tonalInterval(x)
+    UseMethod('transpose') 
+} 
 #' @export
 transpose.tonalInterval <- function(x, by = NULL, Key = NULL, to = NULL, real = TRUE, relative = FALSE, ...) {
+  is.tonalInterval(x)
   if (is.null(by) && is.null(to)) return(x)
   
   # nullkey <- is.null(Key)
@@ -2361,7 +2366,10 @@ transpose.integer <- re.place %.% re.as %.% transpose.tonalInterval %.% tonalInt
 
 is.simple <- function(tint) UseMethod('is.simple')
 #' @export
-is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
+is.simple.tonalInterval <- function(tint){
+    is.tonalInterval(tint)
+    abs(tint2semit(tint)) < 12
+} 
 
 
 
