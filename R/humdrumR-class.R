@@ -578,7 +578,6 @@ setMethod('initialize', 'humdrumR',
 #' @rdname humdrumRclass
 #' @export
 is.humdrumR <- function(x){
-    checkArg(x)
     inherits(x, 'humdrumR')  
 } 
 is.humdrumR <- \(x) inherits(x, 'humdrumR')
@@ -678,7 +677,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
                    alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
                     
-                    checkArg(x, valid = c('D'))
+                    checkhumdrumR(x, 'as.matrix.humdrumR')
     
                     dataTypes <- checkTypes(dataTypes, 'as.matrix')
                     
@@ -866,7 +865,10 @@ setMethod('nrow',
 
 #' @name humSize
 #' @export
-is.empty <- function(humdrumR) ntokens(humdrumR, 'D') == 0L
+is.empty <- function(humdrumR){
+    checkhumdrumR(humdrumR, 'is.empty')
+    ntokens(humdrumR, 'D') == 0L 
+} 
 
 
 
