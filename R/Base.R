@@ -28,8 +28,6 @@ classify <- function(..., other = 'Other') {
   #takes any number of predicate functions
   funcs <- list(...)
   
-  checkArg(funcs, valid = c("L"))
-  
   funcs <- lapply(funcs, function(func) if (is.function(func)) func else EQ(func))
   
   classes <- names(funcs)
@@ -77,8 +75,6 @@ REkeep <- function(re) {
 humtable <- function(..., levels = NULL) {
   args <- list(...)
   
-  checkArg(args, valid = c("L"))
-  
   if (!is.null(levels)) {
     if (!is.list(levels)) levels <- list(levels)
     if (length(levels) < length(args)) match_size(args = args, levels = levels, toEnv = TRUE)
@@ -92,9 +88,10 @@ humtable <- function(..., levels = NULL) {
 
 #'  @export
 append2string <- function(app, sep = '') {
+
+ checkArg(app)
+    
  newfunc <- function(str) paste(str, sep, app, collapse = '')
- 
- checkArg(newfunc)
  
  if (is.function(newfunc)) body(newfunc) <- call('{', quote(app <- app(str)), body(newfunc))
  
@@ -174,7 +171,7 @@ applyto = (function(pattern, skip) {
 
 #'  @export
 combinations = function(vec, n = 2, involving = NA) {
-  checkArg(vec)
+  if(!is.vector(vec) return(c("you did not enter a vector, you entered a ", class(vec))))
   if(any(!is.na(involving))) {
     if(is.character(involving) || inherits(involving, 'regex')) {
       hits = greps(involving, vec, value = TRUE)
@@ -200,7 +197,7 @@ combinations = function(vec, n = 2, involving = NA) {
 
 #' @export
 permutations = function(vec) {
-  checkArg(vec)
+  if(!is.vector(vec) return(c("you did not enter a vector, you entered a ", class(vec))))
   combinat::permn(vec)}
 
 

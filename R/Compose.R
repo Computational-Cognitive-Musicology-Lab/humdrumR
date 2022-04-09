@@ -107,7 +107,7 @@ re.as <- function(vector) {
 
 #' @export
 re.place <- function(vector) {
-    checkArg(vector)
+    if(!is.vector(vector) return(c("you did not enter a vector, you entered a ", class(vector))))
     asfunc <- stickyAttrs(vector)$replace
     if (is.null(asfunc)) return(unstick(vector))
     
@@ -196,7 +196,7 @@ ALL <- function(p.f) {
 
 #' @export
 GT <- function(n) {
-  checkArg(n)
+  checkNumeric(n)
   func <- function(x) x > n
 
   new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
@@ -204,7 +204,7 @@ GT <- function(n) {
 
 #' @export
 GTET <- function(n) {
-  checkArg(n)
+  checkNumeric(n)
   func <- function(x) x >= n
 
   new('predicate.function', func, string = glue::glue('x >= {deparse(n)}'))
@@ -213,7 +213,7 @@ GTET <- function(n) {
 
 #' @export
 LT <- function(n) {
-  checkArg(n)
+  checkNumeric(n)
   func <- function(x) x < n
 
   new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
@@ -221,7 +221,7 @@ LT <- function(n) {
 
 #' @export
 LTET <- function(n) {
-  checkArg(n)
+  checkNumeric(n)
   func <- function(x) x <= n
 
   new('predicate.function', func, string = glue::glue('x <= {deparse(n)}'))
@@ -538,6 +538,8 @@ do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE, outputCl
 #' @export
 humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, 
                              multiDispatch = FALSE, ..., outputClass = 'character') {
+
+  checkArg(str, classes = c('string'))
   
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
