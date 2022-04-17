@@ -773,20 +773,21 @@ textIndices <- function(data, nullTokens = TRUE){
     saveValue = sapply(1:length(data),returnValue2)
     return(saveValue)
 }
-
-#textIndices2 <- function(data, nullTokens = TRUE){
+#'
+#'
+#' @export
+textIndices2 <- function(data, nullTokens = TRUE){
     #checkArg(data, classes = c('character'))
-    save <- text(values2, nullTokens = TRUE)
-    save2 <- text(values2, nullTokens = FALSE)
-    words <- save2[-which(save2=="_")]
-    iteration2 <- 1:length(words)
-    iteration2 <- as.data.frame(iteration2)
+    save <- text(data, nullTokens = TRUE)
+    save2 <- text(data, nullTokens = FALSE)
+    save2 <- save2[-which(save2=="_")]
+    words <- text(save2, nullTokens = FALSE)
     j <- 1
     p <- 1
-    for(i in 1:length(values2)){
-        if(grepl("-", values2[i])){
-            if(gregexpr(pattern = "-", values2[i])[[1]][1] == 1){
-                if(length(gregexpr(pattern = "-", values2[i])[[1]]) > 1 && gregexpr(pattern = "-", values2[i])[[1]][2] == nchar(values2[i])){
+    for(i in 1:length(data)){
+        if(grepl("-", data[i])){
+            if(gregexpr(pattern = "-", data[i])[[1]][1] == 1){
+                if(length(gregexpr(pattern = "-", data[i])[[1]]) > 1 && gregexpr(pattern = "-", data[i])[[1]][2] == nchar(data[i])){
                     print(paste(words[j], "[", p, "]", sep = ""))
                     p <- p + 1
                 }
@@ -801,7 +802,7 @@ textIndices <- function(data, nullTokens = TRUE){
                 p <- p + 1
             }
         }
-        else if(grepl("_", values2[i])){
+        else if(grepl("_", data[i])){
             print("_")
         }
         else{
@@ -810,7 +811,7 @@ textIndices <- function(data, nullTokens = TRUE){
             j <- j + 1
         }
     }
-#}
+}
 
 # test 3 for text indices
 
