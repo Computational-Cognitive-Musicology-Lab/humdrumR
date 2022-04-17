@@ -201,7 +201,7 @@ text <- function(data, nullTokens = TRUE){
 #' # error, improperly formatted **silbe: ne- ver should be ne- - ver and per- son should be per- - son and be- fore should be be- - fore
 #' 
 silbeFormat <- function(data){
-  checkArg(data, classes = c('character'))
+  #checkArg(data, classes = c('character'))
   save_initials <- list()
   print_initial <- list()
   save_corrected <- list()
@@ -271,7 +271,7 @@ data <- c('Now', 'let', 'me---', 'wel---', '-come', 'e', '-very-', '-bo-', 'dy',
 #' 13
 #' 
 silbeFormat2 <- function(df){
-  checkArg(df, classes = c('character'))
+  #checkArg(df, classes = c('character'))
   index <- 1:length(df)
   index <- cbind(index)
   index <- as.data.frame(index)
@@ -554,7 +554,7 @@ library(stringr)
 #'
 #' @export
 textKeepSilbe <- function(data, nullTokens = TRUE){
-  checkArg(data, classes = c('character'))
+  #checkArg(data, classes = c('character'))
   # same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
   dummyData <- data.frame(data)
   dummyData <- toString(dummyData[,1])
@@ -652,7 +652,7 @@ keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
 #'
 #' @export
 printSilbeFormat <- function(keepSilbeOutput){
-  checkArg(keepSilbeOutput[[1]], classes = c('character'))
+  #checkArg(keepSilbeOutput[[1]], classes = c('character'))
   reverse <- function(string, index, replacement){
     stringi::stri_sub_replace_all(string, from = index, to = index-1, replacement = replacement)
   }
@@ -683,7 +683,7 @@ y = 1
 z = 1
 save = FALSE
 textIndices <- function(data, nullTokens = TRUE){
-    checkArg(data, classes = c('character'))
+    #checkArg(data, classes = c('character'))
     save <- text(data, nullTokens = TRUE)
     save2 <- text(data, nullTokens = FALSE)
     save2 <- save2[-which(save2=="_")]
@@ -774,6 +774,32 @@ textIndices <- function(data, nullTokens = TRUE){
     return(saveValue)
 }
 
+#textIndices2 <- function(data, nullTokens = TRUE){
+    #checkArg(data, classes = c('character'))
+    save <- text(values2, nullTokens = TRUE)
+    save2 <- text(values2, nullTokens = FALSE)
+    words <- save2[-which(save2=="_")]
+    iteration <- 1:length(values2)
+    iteration <- as.data.frame(iteration)
+    iteration2 <- 1:length(words)
+    iteration2 <- as.data.frame(iteration2)
+    j <- 1
+    for(i in length(iteration)){
+        if(grepl("-", values2[i])){
+            if(gregexpr(pattern = "-", values2[i])[[1]][1] == 1){
+                if(gregexpr(pattern = "-", values2[i])[[1]][1] == nchar(values2[i])){
+                    
+                }
+            }
+        }
+        else{
+            saveValues <- words[j]
+            print(paste(words[j], "[", j, "]", sep = "")
+            j <- j + 1
+        }
+    }
+#}
+
 # test 3 for text indices
 
 values <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
@@ -784,7 +810,7 @@ values2 <- c('Now', 'let', 'me', '_', 'wel-', '-come', 'e-', '-very-', '-bo-', '
 x=1
 y=1
 z=1
-textIndices(values)
+textIndices(values2)
 idx=1
 
 f <- function(x){
@@ -795,4 +821,4 @@ f <- function(x){
     
 }
 
-res=sapply(1:3,f)
+#res=sapply(1:3,f)
