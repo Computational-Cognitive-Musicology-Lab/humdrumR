@@ -779,22 +779,34 @@ textIndices <- function(data, nullTokens = TRUE){
     save <- text(values2, nullTokens = TRUE)
     save2 <- text(values2, nullTokens = FALSE)
     words <- save2[-which(save2=="_")]
-    iteration <- 1:length(values2)
-    iteration <- as.data.frame(iteration)
     iteration2 <- 1:length(words)
     iteration2 <- as.data.frame(iteration2)
     j <- 1
-    for(i in length(iteration)){
+    p <- 1
+    for(i in 1:length(values2)){
         if(grepl("-", values2[i])){
             if(gregexpr(pattern = "-", values2[i])[[1]][1] == 1){
-                if(gregexpr(pattern = "-", values2[i])[[1]][1] == nchar(values2[i])){
-                    
+                if(length(gregexpr(pattern = "-", values2[i])[[1]]) > 1 && gregexpr(pattern = "-", values2[i])[[1]][2] == nchar(values2[i])){
+                    print(paste(words[j], "[", p, "]", sep = ""))
+                    p <- p + 1
+                }
+                else{
+                    print(paste(words[j], "[", p, "]", sep = ""))
+                    p <- 1
+                    j <- j + 1
                 }
             }
+            else{
+                print(paste(words[j], "[", 1, "]", sep = ""))
+                p <- p + 1
+            }
+        }
+        else if(grepl("_", values2[i])){
+            print("_")
         }
         else{
             saveValues <- words[j]
-            print(paste(words[j], "[", j, "]", sep = "")
+            print(paste(words[j], "[", 1, "]", sep = ""))
             j <- j + 1
         }
     }
