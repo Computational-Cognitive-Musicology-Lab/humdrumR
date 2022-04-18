@@ -127,6 +127,19 @@ setMethod('Compare', signature = c('rational', 'rational'),
               
           })
 
+#' @rdname rational
+#' @export
+setMethod('Compare', signature = c('rational', 'ANY'),
+          function(e1, e2) {
+              callGeneric(as.double(e1), as.double(e2))
+          })
+
+#' @rdname rational
+#' @export
+setMethod('Compare', signature = c('ANY', 'rational'),
+          function(e1, e2) {
+              callGeneric(as.double(e1), as.double(e2))
+          })
 
 ## Arithmetic methods ####
 

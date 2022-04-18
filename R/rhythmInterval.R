@@ -539,27 +539,51 @@ beats2 <- function(moff,  beats = rational(1,4), subdiv = rational(1,8), measure
 }
 
 
-measure <- function(dur, tatum = rational(1L), start = rational(0L), phase = rational(0L)) {
+# normalizeMeasures <- function(dur, )
+
+measure <- function(dur, tatum = rational(1L), start = rational(0L), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
   if (length(tatum) > 1L && length(tatum) != length(dur)) tatum <- rep(tatum, length.out = length(dur))
   
   dur <- dur / tatum
   # 
-  offset <- sigma(c(start, dur)) + phase
+  offset <- head(sigma(c(start, dur)), -1L)
+  if (!is.null(Bar)) offset <- offset - offset[which(Bar > 0)[1]]
   
-  mcount <- offset %/% rational(1L)
-  moffset <- offset %% rational(1L)
+  mcount <- ((offset + phase) %/% rational(1L)) 
+  moffset <- offset - rational(mcount) 
   
   
-  struct2data.frame(N = head(mcount, -1), Offset = head(moffset, -1) * tatum)
+  output <- struct2data.frame(Offset = offset, N = mcount + 1L, Remainder = moffset * tatum)
   
-  # if (length(tatum) > 1L && length(unique(tatum)) > 1L) {
-    # Reduce(\(x, y) {y + max(x)}, tapply(dur, tatum, \(d) sigma(c(rational(0L), d)) %/% tatum), accumulate = TRUE)
-  # } else {
-    # sigma(c(rational(0L), dur)) %/% tatum
-  # }
   
+  if (!is.null(Bar)) {
+    newBar <- changes(Bar)
+    downbeats <- moffset == rational(0L)
+    
+    barLengths <- diff(offset[newBar]) # these are normalized to the tatum! So a complete 3/4 measure is rational(1)
+    incomplete <- which(barLengths != rational(1L))
+    
+    # look for consecutive pairs of measures that sum up properly
+    if (any(incomplete > 1 & delta(incomplete) == 1)) {
+      incomplete <- local({
+        sec <- which(incomplete > 1 & delta(incomplete) == 1)
+        frst <- sec - 1L
+        
+        good <- (dur[incomplete][frst] + dur[incomplete][sec]) == 1
+    browser()
+        
+        # morethantwo <- sec %in% frst
+        # frst <- frst[!morethantwo]
+        # sec <- sec[!morethantwo]
+        
+      })
+    }
+    
+  }
+  output
 }
+
 
 
 meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {

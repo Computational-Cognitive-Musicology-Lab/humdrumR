@@ -3,7 +3,7 @@
 \docType{class}
 \name{rational}
 \alias{rational}
-\alias{\%r\%}
+\alias{\%R\%}
 \alias{numerator}
 \alias{denominator}
 \alias{numerator,rational-method}
@@ -12,15 +12,17 @@
 \alias{is.numeric,rational-method}
 \alias{order.rational}
 \alias{Compare,rational,rational-method}
+\alias{Compare,rational,ANY-method}
+\alias{Compare,ANY,rational-method}
 \alias{Summary,rational-method}
-\alias{sum,rational-method}
-\alias{cumsum,rational-method}
 \alias{prod,rational-method}
 \alias{abs,rational-method}
 \alias{sign,rational-method}
 \alias{max,rational-method}
 \alias{min,rational-method}
 \alias{mean,rational-method}
+\alias{sum,rational-method}
+\alias{cumsum,rational-method}
 \alias{as.rational}
 \alias{as.rational,integer-method}
 \alias{as.rational,numeric-method}
@@ -32,7 +34,7 @@
 \usage{
 rational(numerator, denominator = 1L)
 
-e1 \%r\% e2
+e1 \%R\% e2
 
 numerator(x)
 
@@ -56,11 +58,11 @@ order.rational(
 
 \S4method{Compare}{rational,rational}(e1, e2)
 
+\S4method{Compare}{rational,ANY}(e1, e2)
+
+\S4method{Compare}{ANY,rational}(e1, e2)
+
 \S4method{Summary}{rational}(x)
-
-\S4method{sum}{rational}(x, ..., na.rm = FALSE)
-
-\S4method{cumsum}{rational}(x)
 
 \S4method{prod}{rational}(x, ..., na.rm = FALSE)
 
@@ -73,6 +75,10 @@ order.rational(
 \S4method{min}{rational}(x)
 
 \S4method{mean}{rational}(x)
+
+\S4method{sum}{rational}(x, ..., na.rm = FALSE)
+
+\S4method{cumsum}{rational}(x)
 
 as.rational(x, ...)
 
