@@ -212,8 +212,8 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, window
 }
 #' @export
 lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
-          if (length(x) == 0L) return(x)
           if (length(n) > 1L) .stop('rotate cannot accept multiple rotation values for a vector argument.')
+          if (length(x) == 0L || n == 0) return(x)
 
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
           
