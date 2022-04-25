@@ -850,8 +850,6 @@ textIndices3 <- function(silbe){
     
     words_with_dashes_numbers_2_unlisted <- unlist(words_with_dashes_numbers)
     
-    silbe_grouped2_unlisted <- unlist(silbe_grouped2)
-    
     single_words_df <- as.data.frame(single_words)
     
     words_with_dashes_numbers_2_unlisted_df <- as.data.frame(words_with_dashes_numbers_2_unlisted)
