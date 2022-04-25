@@ -813,6 +813,59 @@ textIndices2 <- function(data, nullTokens = TRUE){
     }
 }
 
+silbe1 <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
+            '-time')
+#'
+#'
+#' @export
+textIndices3 <- function(silbe){
+    open <- grepl('-$', silbe)
+    close <- grepl('^-', silbe)
+    continue <- open & close
+    single <- !open & !close
+    
+    underscore <- grepl("_", silbe)
+    
+    underscore_print <- ifelse(underscore, "_", "")
+    single_words <- ifelse(single, silbe, "")
+    
+    single_words_boolean <- ifelse(single_words != "", TRUE, FALSE)
+    
+    silbe_grouped <- ifelse(!single_words_boolean, silbe, "")
+    
+    remove_empty_space <- silbe_grouped[-which(silbe_grouped == "")]
+    
+    open2 <- grepl("-$", remove_empty_space)
+    close2 <- grepl('^-', remove_empty_space)
+    
+    continue2 <- open2 & close2
+    
+    silbe_grouped2 <- tapply(remove_empty_space, cumsum(open2 & !close2), list)
+    
+    words <- sapply(silbe_grouped2, \(x) gsub('-*', '', paste(x, collapse = '')))
+    
+    numbers <- lapply(silbe_grouped2, seq_along)
+    
+    words_with_dashes_numbers <- Map(\(w,n) paste(w, '[', n, ']', sep = ''), words, numbers)
+    
+    words_with_dashes_numbers_2_unlisted <- unlist(words_with_dashes_numbers)
+    
+    silbe_grouped2_unlisted <- unlist(silbe_grouped2)
+    
+    single_words_df <- as.data.frame(single_words)
+    
+    words_with_dashes_numbers_2_unlisted_df <- as.data.frame(words_with_dashes_numbers_2_unlisted)
+    
+    is.na(single_words_df) <- single_words_df == ""
+    
+    indx <- is.na(single_words_df)
+    
+    single_words_df[which(indx == TRUE),] <- words_with_dashes_numbers_2_unlisted_df
+    
+    as.vector(single_words_df[,1])
+}
+
+
 # test 3 for text indices
 
 values <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
