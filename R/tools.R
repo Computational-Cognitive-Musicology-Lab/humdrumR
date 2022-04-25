@@ -812,7 +812,7 @@ gcd <- function(...) {
     if (length(x) == 0L) return(numeric(0))
     
     na <- Reduce('|', lapply(x, is.na))
-    output <- vector(class(x[[1]]), length(x[[1]]))
+    output <- vectorNA(length(x[[1]]), class(x[[1]]))
     output[!na] <- Reduce(.gcd, lapply(x, '[', !na))
     output
 }

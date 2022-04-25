@@ -185,13 +185,15 @@ setMethod('sign', 'rational', \(x) {
 
 #' @rdname rational
 #' @export
-setMethod('max', 'rational', \(x) {
+setMethod('max', 'rational', \(x, ...) {
+    x <- c(x, ...)
     x[which.max(as.double(x))]
 })
 
 #' @rdname rational
 #' @export
-setMethod('min', 'rational', \(x) {
+setMethod('min', 'rational', \(x, ...) {
+    x <- c(x, ...)
     x[which.min(as.double(x))]
 })
 

@@ -539,48 +539,86 @@ beats2 <- function(moff,  beats = rational(1,4), subdiv = rational(1,8), measure
 }
 
 
+rhythmAlign <- function(x, y) {
+  tick <- gcd(min(x), min(y))
+  xi <- as.integer(x / tick)
+  yi <- as.integer(y / tick)
+  
+  xi <- offset(xi)$On
+  yi <- offset(yi)$On
+  
+  alli <- union(xi, yi)
+  
+  ox <- vectorNA(length(alli), class(x))
+  oy <- vectorNA(length(alli), class(y))
+  ox[match(xi, alli)] <- x
+  oy[match(yi, alli)] <- y
+  
+  remove <- is.na(ox) & is.na(oy)
+  
+  
+  struct2data.frame(ox[!remove], oy[!remove])
+  
+  
+  
+  
+}
+
+offset <- function(dur, start = as(0, class(dur))) {
+ offset <- sigma(c(start, dur))
+ struct2data.frame(On = head(offset, -1), Off = tail(offset, -1))
+}
+
+IOIs <- function(offset) {
+  offset$Off - Offset$On
+}
 # normalizeMeasures <- function(dur, )
 
-measure <- function(dur, tatum = rational(1L), start = rational(0L), phase = rational(0L), Bar = NULL) {
+measure <- function(dur, tatum = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
   if (length(tatum) > 1L && length(tatum) != length(dur)) tatum <- rep(tatum, length.out = length(dur))
   
-  dur <- dur / tatum
+  offset <- offset(dur, start)$On
   # 
-  offset <- head(sigma(c(start, dur)), -1L)
-  if (!is.null(Bar)) offset <- offset - offset[which(Bar > 0)[1]]
-  
-  mcount <- ((offset + phase) %/% rational(1L)) 
-  moffset <- offset - rational(mcount) 
-  
-  
-  output <- struct2data.frame(Offset = offset, N = mcount + 1L, Remainder = moffset * tatum)
-  
-  
-  if (!is.null(Bar)) {
-    newBar <- changes(Bar)
-    downbeats <- moffset == rational(0L)
-    
-    barLengths <- diff(offset[newBar]) # these are normalized to the tatum! So a complete 3/4 measure is rational(1)
-    incomplete <- which(barLengths != rational(1L))
-    
-    # look for consecutive pairs of measures that sum up properly
-    if (any(incomplete > 1 & delta(incomplete) == 1)) {
-      incomplete <- local({
-        sec <- which(incomplete > 1 & delta(incomplete) == 1)
-        frst <- sec - 1L
-        
-        good <- (dur[incomplete][frst] + dur[incomplete][sec]) == 1
-    browser()
-        
-        # morethantwo <- sec %in% frst
-        # frst <- frst[!morethantwo]
-        # sec <- sec[!morethantwo]
-        
-      })
-    }
-    
+  scaled_dur <- dur / tatum
+  scaled_offset <- head(sigma(c(start, scaled_dur)), -1L)
+  if (!is.null(Bar) & any(Bar > 0, na.rm = TRUE)) {
+    scaled_offset <- scaled_offset - scaled_offset[which(Bar > 0)[1]]
+    offset <- offset - offset[which(Bar > 0)[1]]
   }
+  
+  mcount <- ((scaled_offset + phase) %/% rational(1L)) 
+  moffset <- scaled_offset - rational(mcount) 
+  
+  
+  output <- struct2data.frame(Offset = offset, Duration = dur,N = mcount + 1L, Remainder = moffset * tatum)
+  
+  
+  # if (!is.null(Bar)) {
+  #   newBar <- changes(Bar)
+  #   downbeats <- moffset == rational(0L)
+  #   
+  #   barLengths <- diff(scaled_offset[newBar]) # these are normalized to the tatum! So a complete 3/4 measure is rational(1)
+  #   incomplete <- which(barLengths != rational(1L))
+  #   
+  #   # look for consecutive pairs of measures that sum up properly
+  #   if (any(incomplete > 1 & delta(incomplete) == 1)) {
+  #     incomplete <- local({
+  #       sec <- which(incomplete > 1 & delta(incomplete) == 1)
+  #       frst <- sec - 1L
+  #       
+  #       good <- (scaled_dur[incomplete][frst] + scaled_dur[incomplete][sec]) == 1
+  #   browser()
+  #       
+  #       # morethantwo <- sec %in% frst
+  #       # frst <- frst[!morethantwo]
+  #       # sec <- sec[!morethantwo]
+  #       
+  #     })
+  #   }
+  #   
+  # }
+  # output$Bar <- Bar
   output
 }
 
