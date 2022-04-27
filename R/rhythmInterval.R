@@ -403,142 +403,6 @@ rhythmOffset <- function(durations, start = rational(0), tatum = rational(1), ph
 #                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
 #                                     'Decimal' = as.double.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
 
-
-
-
-
-## Meter ####
-
-#' Tools for analyzing rhythm and meter.
-#' 
-#' [humdrumR] includes a number of useful
-#' functions for working with rhythms and meter.
-#'
-#' + [rhythmDecompose()] decomposes a series of rhythms in terms of desired pulses.
-#' + [rhythmOffset()] Calculates the cummulative offset of durations from a starting point.
-#' 
-#' 
-#' @name humMeter
-NULL
-
-#' Decompose durations in terms of other durations
-#' 
-#' 
-#' @family rhythm analysis tools
-#' @export
-rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
-          # into <- sort(into, decreasing = TRUE)
-          
-          lapply(as.list(rhythmInterval), 
-                 \(rs) {
-                           divs <- rs %/% into
-                           parts <- into * divs
-                           
-                           for (i in 2:length(parts)) {
-                                     parts[i] <- parts[i] - sum(parts[1:(i - 1)])       
-                           }
-                           parts
-                 }) -> decompositions
-          
-          lapply(1:length(into),
-                 \(j) {
-                           do.call('c', lapply(decompositions, '[', j))
-                 }) -> decompositions
-          
-          
-          decompositions <- do.call('struct2data.frame', decompositions)
-          colnames(decompositions) <- as.character(into)
-          rownames(decompositions) <- make.unique(as.character(rhythmInterval))
-          decompositions
-}
-
-#' Calculate metric positions from duration data.
-#' 
-#' 
-#' @family rhythm analysis tools
-#' @export
-metricPosition <- function(rints, bars = NULL, 
-                           beats = rint(c(2, 4, 8, 16, 32))) {
-  
-  offset <- rhythmOffset(rints, bars = bars, as = rhythmInterval)
-  
-  output <- rhythmDecompose(offset, into = beats)
-  # durnames <- as.character(rints)
-  
-  output <- output[1:(nrow(output) - 1), ] 
-  # rownames(output) <- make.unique(durnames)
-  
-  for (j in 1:ncol(output)) {
-   output[ , j] <- output[ , j] / beats[j]         
-  }
-  output
-
-}
-
-
-# M4/4
-# 0/1  1/8 1/4 3/8 1/2 5/8 3/4 7/8
-
-# M3/4
-
-# 0/2.  1/8 1/4 3/8 2/4 5/8
-
-# M6/8
-
-# 0/2.  1/8 2/8 1/4. 4/8 5/8
-
-# M9/8
-
-# 0/%9 1/8 2/8 1/4. 4/8 5/8 6/8 2/4. 7/8 8/8
-
-# M5/8
-
-# 0/8&5 1/8 1/4 3/8 4/8
-# 0/8%5 1/8 2/8 1/4. 4/8
-
-beats <- function(dur, beat = rational(1, 4), phase = rational(0), ...) {
-  
-  beatsize <- sum(beat)
-  
-  offset <- rhythmOffset(dur, phase = phase, ...)
-  
-  beatcount <- offset %/% beatsize
-  beatoffset <- offset %% beatsize
-  
-  if (length(beat) > 1L) {
-    beatoff <- rhythmOffset(beat)
-    subbeat <- Reduce('+', lapply(as.list(beatoff), `<=`, e2 = beatoffset)) 
-    
-    beatcount <- beatcount * length(beat)
-    beatcount <- beatcount + subbeat - 1
-    beatoffset <- beatoffset - beatoff[subbeat]
-    
-  }
-  struct2data.frame(beatcount, beatoffset)
-  
-}
-
-beats2 <- function(moff,  beats = rational(1,4), subdiv = rational(1,8), measure = rational(1)) {
-  
-  span <- sum(beats)
-  beats <- rep(beats, measure %/% span)
-  if (sum(beats) != measure) .stop('In call to beats, the beats argument cannot evenly divide the measure span.')
-  
-  durs <- unique(c(delta(beats), subdiv))
-  durs <- durs[durs != rational(0)]
-  if (Reduce('gcd', durs) != subdiv) .stop('{subbeat} is not a valid subdivider of the beats pattern.')
-  
-  beat <- findInterval(moff, cumsum(beats), rightmost.closed = TRUE)
-  
-  subbeat <- floor(sigma(c(0, head(beats, -1))) / subdiv)
-  subbeat <- round(moff / subdiv) - subbeat[beat + 1]
-  data.table(Moffset = moff,
-             Beat = beat,
-             Subbeat = subbeat,
-             Remainder = moff %% subdiv)
-}
-
-
 rhythmAlign <- function(x, y) {
   tick <- gcd(min(x), min(y))
   xi <- as.integer(x / tick)
@@ -561,71 +425,16 @@ rhythmAlign <- function(x, y) {
   
   
   
-  
 }
 
+
+
+
 offset <- function(dur, start = as(0, class(dur))) {
- offset <- sigma(c(start, dur))
- struct2data.frame(On = head(offset, -1), Off = tail(offset, -1)) %class% "rhythmOffset"
+  offset <- sigma(c(start, dur))
+  struct2data.frame(On = head(offset, -1), Off = tail(offset, -1)) %class% "rhythmOffset"
 }
 
 IOIs <- function(offset) {
   offset$Off - offset$On
 }
-# normalizeMeasures <- function(dur, )
-
-#' Measure
-#' 
-#' Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
-#' how many beats have passed, and the offset between each attack and the nearest beat.
-measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
-  # if correct meter is known (and aligned with dur)
-  dur <- IOIs(offset)
-  offset <- offset$On
-  totalTatum <- sum(beat)
-  
-  
-  # 
-  if (!is.null(Bar) & any(Bar > 0, na.rm = TRUE)) {
-    offset <- offset - offset[which(Bar > 0)[1]]
-  }
-  
-  mcount <- ((offset + phase) %/% totalTatum) 
-  mremain <- (offset - totalTatum * mcount)
-  
-  
-  if (length(beat) > 1L) {
-    
-    beatoff <- offset(beat)
-    
-    subcount <-  outer(beatoff$Off, mremain, '<=') |> colSums()
-    mcount <- mcount * length(beat) + subcount
-    
-    
-    mremain <- mremain - (beatoff$On[1L + subcount])
-    
-  }
-  
-  output <- struct2data.frame(Offset = offset, N = mcount + 1L, Remainder = mremain)
-  
-  attr(output, 'beat') <- beat
-
-  output
-}
-
-
-
-meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {
- measure <- sum(meter)
- 
- moff <- measureOffset(dur, measure)
- 
- beats <- beats(moff, meter, subdiv = subdiv, measure = measure)
- 
- beats$Dur <- dur
- beats$Moff <- moff
- beats
-  
-}
-# test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
-                   # Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
