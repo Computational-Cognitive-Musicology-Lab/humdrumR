@@ -566,59 +566,50 @@ rhythmAlign <- function(x, y) {
 
 offset <- function(dur, start = as(0, class(dur))) {
  offset <- sigma(c(start, dur))
- struct2data.frame(On = head(offset, -1), Off = tail(offset, -1))
+ struct2data.frame(On = head(offset, -1), Off = tail(offset, -1)) %class% "rhythmOffset"
 }
 
 IOIs <- function(offset) {
-  offset$Off - Offset$On
+  offset$Off - offset$On
 }
 # normalizeMeasures <- function(dur, )
 
-measure <- function(dur, tatum = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
+#' Measure
+#' 
+#' Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
+#' how many beats have passed, and the offset between each attack and the nearest beat.
+measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
-  if (length(tatum) > 1L && length(tatum) != length(dur)) tatum <- rep(tatum, length.out = length(dur))
+  dur <- IOIs(offset)
+  offset <- offset$On
+  totalTatum <- sum(beat)
   
-  offset <- offset(dur, start)$On
+  
   # 
-  scaled_dur <- dur / tatum
-  scaled_offset <- head(sigma(c(start, scaled_dur)), -1L)
   if (!is.null(Bar) & any(Bar > 0, na.rm = TRUE)) {
-    scaled_offset <- scaled_offset - scaled_offset[which(Bar > 0)[1]]
     offset <- offset - offset[which(Bar > 0)[1]]
   }
   
-  mcount <- ((scaled_offset + phase) %/% rational(1L)) 
-  moffset <- scaled_offset - rational(mcount) 
+  mcount <- ((offset + phase) %/% totalTatum) 
+  mremain <- (offset - totalTatum * mcount)
   
   
-  output <- struct2data.frame(Offset = offset, Duration = dur,N = mcount + 1L, Remainder = moffset * tatum)
+  if (length(beat) > 1L) {
+    
+    beatoff <- offset(beat)
+    
+    subcount <-  outer(beatoff$Off, mremain, '<=') |> colSums()
+    mcount <- mcount * length(beat) + subcount
+    
+    
+    mremain <- mremain - (beatoff$On[1L + subcount])
+    
+  }
   
+  output <- struct2data.frame(Offset = offset, N = mcount + 1L, Remainder = mremain)
   
-  # if (!is.null(Bar)) {
-  #   newBar <- changes(Bar)
-  #   downbeats <- moffset == rational(0L)
-  #   
-  #   barLengths <- diff(scaled_offset[newBar]) # these are normalized to the tatum! So a complete 3/4 measure is rational(1)
-  #   incomplete <- which(barLengths != rational(1L))
-  #   
-  #   # look for consecutive pairs of measures that sum up properly
-  #   if (any(incomplete > 1 & delta(incomplete) == 1)) {
-  #     incomplete <- local({
-  #       sec <- which(incomplete > 1 & delta(incomplete) == 1)
-  #       frst <- sec - 1L
-  #       
-  #       good <- (scaled_dur[incomplete][frst] + scaled_dur[incomplete][sec]) == 1
-  #   browser()
-  #       
-  #       # morethantwo <- sec %in% frst
-  #       # frst <- frst[!morethantwo]
-  #       # sec <- sec[!morethantwo]
-  #       
-  #     })
-  #   }
-  #   
-  # }
-  # output$Bar <- Bar
+  attr(output, 'beat') <- beat
+
   output
 }
 
