@@ -405,21 +405,21 @@ silbeFormat <- function(cVector){
     value <- FALSE
     booleanValues <- apply(index, 1, function(x){
       if(!is.character(cVector[x])){
-        cat(cVector[x], " is not a character. Please input a character vector.")
+        stop(c(cVector[x], " is not a character. Please input a character vector."))
       }
       })
   }
   checkLength <- function(cVector){
     booleanValues <- apply(index, 1, function(x){
       if(length(cVector) <= 1){
-        cat("Your input must be a character vector of length greater than 1. Please input a character vector of length greater than 1.")
+        stop("Your input must be a character vector of length greater than 1. Please input a character vector of length greater than 1.")
       }
     })
   }
   checkNumberOfDashes <- function(cVector){
     booleanValues <- apply(index, 1, function(x){
       if(str_count(cVector[x], "-") > 2){
-        print(c(cat(cVector[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly."),x))
+        stop(c(cVector[x], " has more than 2 -'s", "Each character cannot have more than 2 -'s. Please adjust your input accordingly."))
       }
       if(str_count(cVector[x], "-") == 2){
         iteration1 <- 1:length(splitString[[x]])
@@ -427,7 +427,7 @@ silbeFormat <- function(cVector){
         checkIfRepeating <- apply(iteration1, 1, function(y){
           if(y < nrow(iteration1)){
             if(splitString[[x]][y] == "-" && splitString[[x]][y+1] == "-"){
-              cat(cVector[x], "has repeating -'s"," you cannot have repeating -'s. ")
+              stop(c(cVector[x], "has repeating -'s"," you cannot have repeating -'s. "))
             }
           }
         })
@@ -440,22 +440,22 @@ silbeFormat <- function(cVector){
   printErrors <- apply(index, 1, function(x){
     if(x == 1){
       if(splitString[[x]][1] == '-'){
-        print(c(cat(data[x], " has a - in the front. The first character input should not have - in the front. Please adjust your input accordingly. "), x))
+        stop(c(cVector[x], " has a - in the front. The first character input should not have - in the front. Please adjust your input accordingly. "))
       }
     }
     if(x < nrow(index)){
       if(splitString[[x]][length(splitString[[x]])] == '-' && splitString[[x+1]][1] != "-"){
-        print(c(cat("error: ", cVector[x+1], " should be -", cVector[x+1], ". ", sep = ""),x+1))
+        stop(c(cVector[x+1], " should be -", cVector[x+1], ". ", sep = ""))
       }
     }
     if(x > 1){
       if(splitString[[x]][1] == '-' && splitString[[x-1]][length(splitString[[x-1]])] != "-"){
-        print(c(cat("error: ", cVector[x-1], " should be ", cVector[x-1], "-. ", sep = ""),x-1))
+        stop(c(cVector[x-1], " should be ", cVector[x-1], "-. ", sep = ""))
       }
     }
     if(splitString[[x]][1] != "-" && splitString[[x]][length(splitString[[x]])] != "-"){
       if(length(spell_check_text(cVector[x])$word) != 0){
-        print(c(cat("You might want to double check the transcription of", cVector[x], "because it was detected as not being a word. It is only possible for words to not have -'s."), x))
+        stop(c("You might want to double check the transcription of", cVector[x], "because it was detected as not being a word. It is only possible for words to not have -'s."))
       }
     }
   })
