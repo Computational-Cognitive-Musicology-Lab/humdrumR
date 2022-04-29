@@ -66,8 +66,6 @@
 #'  #     west. 
 #'  @example Spine of syllabic form transformed into word/text with nullTokens = FALSE and keepSilbe = TRUE
 #'  
-#'  text(silbe, nullTokens = FALSE, keepSilbe = TRUE)
-#'  
 #'  # lyrics
 #'  #   Now
 #'  #   let
@@ -83,6 +81,41 @@
 #'  #   wild
 #'  #   wild
 #'  #  west.
+#'  
+#'  text(silbe, nullTokens = FALSE, keepSilbe = TRUE)
+#'  
+#' # [[1]]
+#' # [1] "Now"       "let"       "me"        "welcome"   "everybody" "to"        "the"       "wild"     
+#' # [9] "wild"      "west."    
+#' 
+#' # [[2]]
+#' # [1] 15 21 25 27
+#' 
+#' @example Spine of syllabic form transformed into word/text with nullTokens = FALSE and indices = TRUE
+#' 
+#' #  lyrics
+#' #     op-
+#' #      _
+#' #   -por-
+#' #    -tu-
+#' #    -ni-
+#' #     -ty
+#' #  knocks
+#' #    once
+#' #       _
+#' #      in
+#' #       a
+#' #   life-
+#' #   -time
+#'    
+#' text(silbe, nullTokens = FALSE, indices = TRUE) 
+#' 
+#' # [1] "opportunity[1]" "_"              "opportunity[2]" "opportunity[3]" "opportunity[4]"
+#' # [6] "opportunity[5]" "knocks"         "once"           "_"              "in"            
+#' # [11] "a"              "lifetime[1]"    "lifetime[2]" 
+#' 
+#' 
+#' 
 text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
   print(silbeFormat(silbe))
   if(indices){
@@ -324,6 +357,7 @@ text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
     return(data)
   }
 }
+
 #' silbeFormat
 #' 
 #' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
@@ -496,40 +530,3 @@ textIndices <- function(silbe){
     
     as.vector(single_words_df[,1])
 }
-
-
-# tests
-
-values <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
-            '-time')
-
-values2 <- c('Now', 'let', 'me', '_', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-
-# test 1
-silbe1 <- c('op-', '_', '-por-', '-tu-', '-ni-', '-ty', 'knocks', 'once', '_', 'in', 'a', 'life-',
-            '-time')
-values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-new <- text(values)
-save <- text(values, nullTokens = FALSE)
-silbeFormat(values)
-
-values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
-keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
-printSilbeFormat(keepSilbeExample)
-
-data <- as.data.frame(values)
-data <- toString(data[,1])
-data <- str_replace_all(data, "-, -", "")
-data <- str_replace_all(data, ",", "")
-data <- as.list(strsplit(data, '\\s+')[[1]])
-transpose1 <- t(data)
-transpose2 <- t(transpose1)
-data <- as.character(transpose2)
-data <- as.data.frame(data)
-
-# test 2
-values <- c("ya'll", 'act', 'like', "you've", 'ne-', 'ver', 'seen', 'a', 'white', 'per-', 'son', 'be-', 'fore')
-dummyData <- data.frame(values)
-text(dummyData)
-text(dummyData, nullTokens = FALSE)
-silbeFormat(dummyData)
