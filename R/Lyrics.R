@@ -357,7 +357,6 @@ text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
     return(data)
   }
 }
-
 #' silbeFormat
 #' 
 #' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
@@ -460,7 +459,6 @@ silbeFormat <- function(cVector){
     }
   })
 }
-
 #'
 #'
 #' @export
@@ -486,7 +484,6 @@ printSilbeFormat <- function(keepSilbeOutput){
     saveWords2 <- unlist(saveWords)
     return(saveWords2)
 }
-
 #'
 #'
 #' @export
