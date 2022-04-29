@@ -8,7 +8,7 @@
 #' 
 #' @param keepSilbe Boolean expression which determines whether the user wants to save silbe format in the output in case needed for back translation later or other uses. Default is FALSE
 #' 
-#' @param indices Boolean expression which determines whether the linguistics version of the text will be printed. Default is FALSE
+#' @param indices Boolean expression which determines whether the linguistics version of the text will be printed. Default is FALSE.
 #' 
 #' @return the transformed data
 #' 
