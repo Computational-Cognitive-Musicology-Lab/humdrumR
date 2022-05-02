@@ -606,7 +606,6 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
               checkSame(x, value, '[i , ]<-')
               
               if (length(value) == 0 || any(dim(value) == 0L)) return(x)
-              
               # if either are vectors, make them into column vectors
               dimx <- dim(x)
               if (!hasdim(x)) x@dim <- c(length(x), 1L)
@@ -784,7 +783,18 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
 
 setMethod('[<-', c(x = 'struct', i = 'matrix'),
           function(x, i, value) {
-            .stop("Assignment to a matrix index is not (yet) defined for {class(x)} objects.")  
+              
+            xdim <- dim(x)
+            idim <- dim(i)
+            
+            if (!identical(xdim, idim)) .stop("Can't assign to a strcut using a matrix index which doesn't have the same dimensions as the struct.") 
+             
+            xflat <- x %dim% NULL
+            iflat <- i %dim% NULL
+            xflat[iflat] <- value
+            
+            xflat %dim% x
+            
               
           })
 
