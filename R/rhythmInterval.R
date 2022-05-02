@@ -438,3 +438,8 @@ offset <- function(dur, start = as(0, class(dur))) {
 IOIs <- function(offset) {
   offset$Off - offset$On
 }
+
+
+tatum <- function(dur) {
+  gcd(unique(dur))
+}

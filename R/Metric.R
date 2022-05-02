@@ -111,8 +111,13 @@ metricPosition <- function(offset, meter = duple(5), ...) {
   do.call('cbind', Reduce( \(off, lev) {
            measure(off, lev)
           }, 
-          levels, init = offset, accumulate = TRUE))
+          levels, init = offset, accumulate = TRUE)) -> output
   
+  count <- as.matrix(output[ , seq(4, ncol(output), by = 3L)])
+  offset <- do.call('cbind', output[ , seq(5, ncol(output), by = 3L)])
+  onbeat <- (offset == rational(0)) %dim% count
+  
+  list(count, offset, onbeat)
   
 
 }
@@ -152,7 +157,7 @@ measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phas
     
   }
   
-  output <- struct2data.frame(Offset = offset, N = mcount + 1L, On = mremain)
+  output <- struct2data.frame(Offset = offset, N = mcount, On = mremain)
   colnames(output)[colnames(output) == 'N'] <- paste(rint2recip(beat), collapse = '+')
   
   attr(output, 'beat') <- beat
@@ -162,17 +167,5 @@ measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phas
 
 
 
-meterAnalyze <- function(dur, meter = c(.25, .25, .25, .25), subdiv = 1/16) {
- measure <- sum(meter)
- 
- moff <- measureOffset(dur, measure)
- 
- beats <- beats(moff, meter, subdiv = subdiv, measure = measure)
- 
- beats$Dur <- dur
- beats$Moff <- moff
- beats
-  
-}
 # test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
                    # Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
