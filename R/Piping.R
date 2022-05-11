@@ -168,17 +168,6 @@ splitPipe <- function(formula) {
           
 }
 
-splitExpression <- function(expr, on = '|') {
-  # This function takes an expression and
-  # and breaks it into separate expressions based on
-  # top level calls to a infix function.
-  if (!is.call(expr) || !deparse(expr[[1]]) %in% on) return(expr)
-          
-          ls <- Recall(expr[[2]], on)
-          rs <- Recall(expr[[3]], on)
-          c(ls, rs)
-          
-}
 
 
 

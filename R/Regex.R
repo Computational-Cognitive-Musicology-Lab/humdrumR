@@ -193,48 +193,12 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
 
 
 
-normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
-    # this takes the name of a function (as a string)
-    # and creates a usable function body
-    # including jumping through hoops to for
-    # primitives and generics
-    
-    if (is.null(func)) func <- match.fun(fname)
-    fname <- rlang::sym(fname)
-    ftext <- rlang::quo_text(func)
-    
-    
-    # args
-    argnames <- names(fargs(func))
-    if (argnames[[1]] == '...' && removeElips) argnames[[1]] <- 'tmp'
-    argnames <- rlang::syms(argnames)
-    
-    namedfuncexpr <- rlang::expr((!!fname)(!!!argnames))
-    
-    if (is.primitive(func) | 
-        grepl('\\.Internal|\\.Primitive', ftext) |
-        grepl('UseMethod|standardGeneric', ftext)) {
-        namedfuncexpr
-        
-    } else {
-        
-        body <- rlang::fn_body(func)
-        if (sum(stringi::stri_count_fixed(as.character(body), '\n')) > 1 ||
-            !grepl('function\\(', as.character(body))) {
-            namedfuncexpr
-        } else {
-            body
-        }
-    }
-}
 
 
 
 
 
-
-
-## %~% Regex tools ----
+## %% Regex tools ----
 
 
 #' Match strings against regular expression
@@ -243,27 +207,44 @@ normalizeBody <- function(fname, func = NULL, removeElips = TRUE) {
 #' existing `R` regular expression matching functions.
 #' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
 #' 
-#' + `%~l%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
-#' + `%~%`: The "default"---same as `%~l%`.
-#' + `%~i%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
-#' + `%~n%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
+#' + `%grepl%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
+#' + `%grep%`: The "default"---same as `%grepl%`.
+#' + `%grepi%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
+#' + `%grepn%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
 #'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex()].
-#' + `%~m%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#' + `%grepm%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#'
+#' Each regex infix has an "lapply" version, called `%lgrepx%`.
+#' 
+#' @param x A vector to search in
+#' @param list A list of vectors (all the same length) to search in
+#' @param pattern One or more regular expression
+#'
 #' @export
 #' @name RegexFind
-`%~l%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
+`%grepl%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
 #' @export
-#' @name RegexFind
-`%~i%` <- function(x, pattern) which(x %~l% pattern)
+#' @rdname RegexFind
+`%grepi%` <- function(x, pattern) which(x %grepl% pattern)
 #' @export
-#' @name RegexFind
-`%~n%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
+#' @rdname RegexFind
+`%grepn%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
 #' @export
-#' @name RegexFind
-`%~m%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
-#' @name RegexFind
+#' @rdname RegexFind
+`%grepm%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
+#' @rdname RegexFind
 #' @export
-`%~%` <- `%~l%`
+`%grep%` <- `%grepl%`
+#' @export
+#' @rdname RegexFind
+`%lgrepl%` <- function(list, pattern) Reduce(`|`, lapply(list, `%grepl%`, pattern = pattern)) 
+#' @export
+#' @rdname RegexFind
+`%lgrepi%` <- function(list, pattern) which(list %lgrepl% pattern)
+#' @export
+#' @rdname RegexFind
+`%lgrepn%` <- function(list, pattern) Reduce('+', lapply(list, `%grepn%`, pattern = pattern))
+
 
 
 # regexParse <- function(str, ..., toEnv = TRUE) {
@@ -401,7 +382,7 @@ makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 
     paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
 }
 
-makeRE.contours <- function(octave.integer = TRUE, up = '^', down = 'v', ...) {
+makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) {
     if (octave.integer) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
@@ -418,7 +399,7 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
 
 makeRE.kern <- function(parts = c("step", "species"), qualities = FALSE, ...) {
     
-    step.labels <- unlist(lapply(1:10, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+    step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
     makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, 
                        qualities = qualities,
                        octave.integer = FALSE, ..., regexname = 'kern')
@@ -434,11 +415,13 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
 }
 
 makeRE.interval <- function(parts = c("species", "step"), collapse = TRUE, qualities = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99, ..., regexname = 'interval')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99,
+                       flat = 'b', ..., regexname = 'interval')
 }
 
 makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, ..., regexname = 'scaleDegree')
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, 
+                       flat = 'b', ..., regexname = 'scaleDegree')
 }
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse = TRUE) {
@@ -494,7 +477,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['star'] <- res['star'] <- '\\*?'
         
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
-        res['mode'] <- captureRE(c('phy', 'aeo', 'loc', 'dor'), n = '?')
+        res['mode'] <- captureRE(c('phr', 'aeo', 'loc', 'dor'), n = '?')
         
         majors <- cREs(REs[parts[parts %in% names(REs)]])
         minors <- cREs(res[parts[parts %in% names(REs)]])
@@ -507,7 +490,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
                                   ...)
         REs['colon'] <-  ':?'
         REs['star']  <- '\\*?'
-        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phy', 'aeo', 'loc', 'dor'), n = '?')
+        REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phr', 'aeo', 'loc', 'dor'), n = '?')
     }
     
     
@@ -532,10 +515,9 @@ makeRE.romanKey <- function(..., flat = 'b') {
 
 
 
-makeRE.signature <- function(accidental.labels = c(), ...) {
-    setoptions(accidental.labels) <- c(flat = '-')
+makeRE.signature <- function(flat = '-', ...) {
     
-    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(accidental.labels = accidental.labels)))
+    RE <- cREs(list(steps = '[A-Ga-g]',  accidentals = makeRE.accidentals(flat = flat, ...)))
     paste0('^\\*?k\\[(', RE, ')*\\]')
 }
 

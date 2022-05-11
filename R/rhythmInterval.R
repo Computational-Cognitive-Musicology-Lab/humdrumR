@@ -122,7 +122,7 @@ setMethod('as.character', c(x = 'rhythmInterval'), function(x) recip(x))
 
 #' @rdname rhythmInterval
 #' @export
-as.double.rhythmInterval <-  function(x) as.decimal(x)
+as.double.rhythmInterval <-  function(x) duration(x)
 
 ## Logic methods ####
 
@@ -145,7 +145,7 @@ setMethod('is.numeric', signature = c('rhythmInterval'),
 #' @export
 order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
-                    order(as.double(x), 
+                    order(duration(x), 
                           na.last = na.last,
                           decreasing = decreasing,
                           method = method
@@ -157,14 +157,14 @@ order.rhythmInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
 setMethod('Compare', signature = c('rhythmInterval', 'rhythmInterval'),
           function(e1, e2) {
               checkSame(e1, e2, 'Compare')
-              callGeneric(as.double(e1), as.double(e2))
+              callGeneric(as.double(e1), duration(e2))
           })
 
 #' @rdname rhythmInterval
 #' @export
 setMethod('Summary', signature = c('rhythmInterval'),
           function(x) {
-              read.numeric2rhythmInterval(callGeneric(as.double(x)))
+              rhythmInterval(callGeneric(duration(x)))
           })
 
 ## Arithmetic methods ####
@@ -191,7 +191,7 @@ setMethod('+', signature = c(e1 = 'rhythmInterval', e2 = 'rhythmInterval'),
 #' @export
 setMethod('Math', signature = c(x = 'rhythmInterval'),
           function(x) {
-                    read.numeric2rhythmInterval(callGeneric(as.double(x)))
+                    rhythmInterval(callGeneric(duration(x)))
           })
 
 
@@ -232,7 +232,7 @@ setMethod('*', signature = c(e1 = 'rhythmInterval', e2 = 'numeric'),
               # multiplying by float can be hard
               # use MASS::fractions to do hard work
               
-              frac <- numeric2fraction(e2) 
+              frac <- as.rational(e2)
               
               e1 <- rint(.ifelse(e2 == 0, 1L, e1@Denominator * frac$Denominator),
                          e1@Numerator   * frac$Numerator)
@@ -732,11 +732,10 @@ ms2bpm <- function(ms){
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.decimal) {
-  durations <- as.decimal(durations)
-  checkNumeric(durations)
-  start <- as.decimal(start)
-  tatum <- as.decimal(tatum)
+rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = duration) {
+  durations <- duration(durations)
+  start <- duration(start)
+  tatum <- duration(tatum)
   
   durations <- durations / tatum
   
@@ -758,7 +757,7 @@ rhythmOffset <- function(durations, start = 0, bars = NULL, tatum = 1, as = as.d
     
   }
   
-  if (identical(as, as.decimal)) offsets else as(offsets)
+  if (identical(as, duration)) offsets else as(offsets)
 }
 
 ### Augmentation and Dimminution  ####
@@ -817,9 +816,7 @@ NULL
 #' @family rhythm analysis tools
 #' @export
 rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
-          is.rhythmInterval(rhythmInterval)
-    
-          into <- sort(into, decreasing = TRUE)
+          # into <- sort(into, decreasing = TRUE)
           
           lapply(as.list(rhythmInterval), 
                  \(rs) {
@@ -838,7 +835,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
                  }) -> decompositions
           
           
-          decompositions <- do.call('data.frame', decompositions)
+          decompositions <- do.call('struct2data.frame', decompositions)
           colnames(decompositions) <- as.character(into)
           rownames(decompositions) <- make.unique(as.character(rhythmInterval))
           decompositions
@@ -871,6 +868,36 @@ metricPosition <- function(rints, bars = NULL,
 
 }
 
+
+# M4/4
+# 0/1  1/8 1/4 3/8 1/2 5/8 3/4 7/8
+
+# M3/4
+
+# 0/2.  1/8 1/4 3/8 2/4 5/8
+
+# M6/8
+
+# 0/2.  1/8 2/8 1/4. 4/8 5/8
+
+# M9/8
+
+# 0/%9 1/8 2/8 1/4. 4/8 5/8 6/8 2/4. 7/8 8/8
+
+# M5/8
+
+# 0/8&5 1/8 1/4 3/8 4/8
+# 0/8%5 1/8 2/8 1/4. 4/8
+
+
+
+f <- function(off, pattern = c(2,3)) {
+  measures <- length(pattern) * (off %/% sum(pattern))
+  modoff <- off %% sum(pattern)
+  
+  pattern <- pattern - pattern[1]
+  measures + pattern[findInterval(modoff,pattern, rightmost.closed = TRUE)]
+}
 
 
 

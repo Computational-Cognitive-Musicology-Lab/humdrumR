@@ -3,26 +3,45 @@
 \name{humWindows}
 \alias{humWindows}
 \alias{windows}
+\alias{windowApply}
+\alias{applyNgram}
 \alias{hop}
-\alias{nest}
-\title{Applying functions across arbitrary windows.
----------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------}
+\title{Create arbitrary "windows" across vectors.}
 \usage{
 windows(
-  df,
-  form,
-  with = list(),
-  ...,
-  start = 1L,
-  end = nrow(df),
-  bounds = "exclude"
+  x,
+  open,
+  close = Next(open) - 1L,
+  start = 1,
+  end = length(x),
+  nest = FALSE,
+  depth = NULL,
+  boundaries = NULL
 )
 
-hop(vec, pattern, start = 1L, end = length(vec))
+windowApply(
+  x,
+  func = c,
+  windows,
+  ...,
+  reference = x,
+  rebuild = TRUE,
+  leftEdge = TRUE
+)
 
-nest(vec, open, close, depth = 1)
+applyNgram(
+  n = 2,
+  vecs,
+  f = c,
+  by = NULL,
+  pad = TRUE,
+  fill = NA,
+  splat = !is.null(by),
+  ...
+)
+
+hop(along, pattern = 1, start = 1L, end = length(along))
 }
 \description{
-Applying functions across arbitrary windows.
----------------------------------------------->      NEEDS DOCUMENTATION          <----------------------------------------------------
+Create arbitrary "windows" across vectors.
 }

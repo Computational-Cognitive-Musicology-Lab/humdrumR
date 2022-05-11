@@ -24,11 +24,7 @@
 
 #' with(in)Humdrum
 #' 
-<<<<<<< HEAD
-#' Apply arbitrary expressions to fields within `[S4class][humdrumR]` data.
-=======
 #' Apply arbitrary expressions to fields within `[S4class][humdrumRclass]` data.
->>>>>>> master
 #' 
 #' @section Overview:
 #' These functions are the primary means of working with
@@ -66,24 +62,6 @@
 #' 
 #' Legal keywords, and their meanings are:
 #' 
-<<<<<<< HEAD
-#' 1.  `do` {An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").}
-#' 2. `doplot` {An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".}
-#' 3. `by` {An expression used to break the data into groups, with the `do` expression(s) evaluated 
-#'   separately in each group (see "Partitioning").}
-#' 4. `where`{An expression indicating a subset of the data in which to evaluate the `do` expression (see "Partitioning").}
-#' 5. `ngrams`{A positive number *n*. The expression is evaluated across overlapping length-*n* windows.}
-#' 6.  `recordtypes`{A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. These characters
-#' correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
-#'   **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
-#'   is only evaluated on data drawn from the specified record types (defaults to `"D"`).}
-#' 7. {pre}{An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
-#'   or opening a graphing window. The `pre` expression is evaluated in the global environment.}
-#' 8. {post}{An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.}
-#' 
-#' 
-#' @section Expression evaluation:
-=======
 #' 1. `do` An expression to be evaluated within the `humdrumR` data object (see "Expression evaluation").
 #' 2. `doplot` An expression to be evaluated within the `humdrumR` data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".
 #' 3. `by` An expression used to break the data into groups, with the `do` expression(s) evaluated 
@@ -101,7 +79,6 @@
 #' 
 #' @section Expression evaluation:
 #'
->>>>>>> master
 #' The right-hand side of any formula in the `formulae` argument with the keyword `do` or `doplot` 
 #' (or with no keyword specified) is evaluated within the `humdrumR` data object.
 #' The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.). 
@@ -109,10 +86,7 @@
 #' interpreted as the humdrumR object's current `[dest=humdrumR][Active]` 
 #' expression.
 #' 
-<<<<<<< HEAD
-=======
 #' ```
->>>>>>> master
 #' humdata <- readHumdrum('directorywithdata/*.krn') # read some data
 #' 
 #' withinHumdrum(humdata, ~getPitch(Token)) # The most basic pattern
@@ -123,10 +97,7 @@
 #' 
 #' withinHumdrum(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
 #' 
-<<<<<<< HEAD
-=======
 #' ```
->>>>>>> master
 #' 
 #' If multiple `do` expressions are provided, they are each evaluated one at a time,
 #' with the result of each piped into the next. Other, non-`do`, formulae (like `by~` or 
@@ -142,17 +113,6 @@
 #' of equal length) of categories to group the data by.
 #' Most commonly, the `by` expression(s) are simply field(s) in the data: 
 #' for instance, 
-<<<<<<< HEAD
-#' withinHumdrum(humdata,
-#'          do ~ table(Token),
-#'          by ~ File)
-#' will apply the function `[base][table]` to the `Token` field
-#' *separately* for each file in the `humdrumR` data. 
-#' However, we can also use more complex expressions like
-#' withinHumdrum(humdata,
-#'          do ~ table(Token), 
-#'          by ~ Spine > 3 | Record \%\% 2 == 0)
-=======
 #' 
 #' ```
 #' withinHumdrum(humdata,
@@ -170,7 +130,6 @@
 #'          by ~ Spine > 3 | Record \%\% 2 == 0)
 #' ```
 #'
->>>>>>> master
 #' which will evaluate the do expression in two groups, one where either the spine number is 
 #' three or less *or* the record number is even, and another group where the opposite is true. 
 #' 
@@ -239,11 +198,7 @@
 #' 
 #' The function `[readHumdrum][readHumdrum]` automatically parses
 #' tandem interpretations (that it recognizes) into
-<<<<<<< HEAD
-#' their own fields in the resulting `[humdrumR][humdrumR]` data.
-=======
 #' their own fields in the resulting `[humdrumR][humdrumRclass]` data.
->>>>>>> master
 #' For instance, data with a `'*clefF4'` will show
 #' up as a `Clef` field. However, users might read humdrum data with their
 #' own custom tandem interpretations that are not built into `humdrumR`.
@@ -295,19 +250,13 @@
 #' to make small changes to a function call within the `do` expressions, without starting from scratch.
 #' Examples:
 #' 
-<<<<<<< HEAD
-=======
 #' ```
->>>>>>> master
 #' mycommand <- c(do ~ mean(., na.rm = TRUE), by ~ Spine ~ File)
 #' withinHumdrum(humdata,
 #'               mycommand,
 #'               na.rm = FALSE)
 #' # mycommand is executed with na.rm changed to FALSE              
-<<<<<<< HEAD
-=======
 #' ```
->>>>>>> master
 #' 
 #' 
 #' @section Piping:
@@ -318,11 +267,7 @@
 #' of the expression are shorter than the rows in the [humtable][humdrum table],
 #' or an `object`, the humdrum table is shrunk to fit them.
 #'     
-<<<<<<< HEAD
-#' @param humdrumR A `[humdrumR][humdrumR]` data object.
-=======
 #' @param humdrumR A `[humdrumR][humdrumRclass]` data object.
->>>>>>> master
 #' @param ...  `...` arguments to `withinHumdrum` are divided into either named or unnamed arguments.
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
@@ -335,11 +280,7 @@
 #' 
 #' @param drop This argument is concetually similar to the `drop` argument in R matrices and data.frames.
 #' If `drop = TRUE`, the output of `withHumdrum` is simplified as much as possible (trying to return
-<<<<<<< HEAD
-#' the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
-=======
 #' the "raw" vector, list, table, etc. within it). If `drop = FALSE`, the result is *always*
->>>>>>> master
 #' a `data.table`. The default value (`drop = TRUE`) is usually what we want because it is more
 #' intuitive, but in more complex code, it can be helpful to set `drop = FALSE` so that 
 #' the output is consistent.
@@ -483,7 +424,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     ###########################-
     ### Preparing the "do" expression
     doQuosure <- prepareQuo(humtab, parsedArgs$formulae$doexpressions, 
-                            humdrumR@Active, parsedArgs$formulae$ngram)
+                            humdrumR@Active, parsedArgs$formulae$ngram, parsedArgs$formulae$windows)
     ordoQuosure <- prepareQuo(humtab, parsedArgs$formulae$ordoexpression,
                               humdrumR@Active, parsedArgs$formulae$ngram)
     
@@ -494,7 +435,7 @@ withHumdrum <- function(humdrumR,  ..., drop = TRUE) {
     result <- evalDoQuo(doQuosure, humtab, 
                         parsedArgs$formulae$partitions, 
                         ordoQuosure)
-    data.table::setorder(result, `_rowKey_`)
+    if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
     as.list(environment())
     
 }
@@ -599,7 +540,8 @@ parseKeywords <- function(formulae, withfunc) {
  # These keywords must always have exactly one evaluated value.
  #        If there are more than one, take the first.
  #        If there are none, some categories have defaults
- values$ngram       <- if (length(values$ngram)       == 0L) NULL else values$ngram[[1]]
+ values$ngram       <- if (length(values$ngram)       != 0L) values$ngram[[1]]
+ values$windows     <- if (length(values$windows)     != 0L) values$windows[[1]]
  values$recordtypes <- if (length(values$recordtypes) == 0L) rlang::quo('D') else values$recordtypes[[1]]
  
  # Other keywords (e.g., windows and partitions) can be of any length, including 0
@@ -626,7 +568,7 @@ partialMatchKeywords <- function(keys) {
                          ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
                          recordtypes = 'recordtypes',
                          ngram    = 'ngrams',
-                         windows  = 'windows',
+                         windows  = c('windows', 'context', 'window'),
                          pre      = 'pre', 
                          post     = 'post')
     
@@ -691,7 +633,7 @@ splitFormula <- function(form) {
 
 ##### Preparing doQuo ----
 
-prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
+prepareQuo <- function(humtab, doQuos, active, ngram = NULL, windows = NULL) {
   # This is the main function used by [withinHumdrum()] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   if (length(doQuos) == 0L) return(NULL)
@@ -718,17 +660,18 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
   # funcQuosure <- unnestQuo(funcQuosure)
   
   # tandem interpretations
-  doQuo <- tandemsQuo(doQuo)
+  #doQuo <- tandemsQuo(doQuo)
+  
+  # update what fields (if any) are used in formula
   
   # splats
-#  doQuo <- splatQuo(doQuo)
+  doQuo <- splatQuo(doQuo, humtab)
   
-  # find what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
   
   # if (length(usedInExpr) == 0L) stop("The do expression in your call to withinHumdrum doesn't reference any fields in your humdrum data.
   #                                       Add a field somewhere or add a dot (.), which will automatically grab the default, 'Active' expression.",
   #                                       call. = FALSE)
+  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
 
   # if the targets are lists, Map
   lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
@@ -736,11 +679,14 @@ prepareQuo <- function(humtab, doQuos, active, ngram = NULL) {
     
   # if ngram is present
   if (!is.null(ngram) && rlang::eval_tidy(ngram) > 1L) {
-            doQuo <- ngramifyQuo(doQuo, 
-                                        ngram, usedInExpr, 
-                                        depth = 1L + any(lists))
+    doQuo <- ngramifyQuo(doQuo, 
+                         ngram, usedInExpr, 
+                         depth = 1L + any(lists))
   } 
   
+  if (!is.null(windows)) {
+    doQuo <- windowfyQuo(doQuo, windows, usedInExpr, depth = 1L + any(lists))
+  }
   
 
   doQuo
@@ -829,33 +775,40 @@ activateQuo <- function(funcQuosure, active) {
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
     
-    predicate <- function(quo) !is.null(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
+    predicate <- \(Type, Head, Environment) {
+      args <- formals(Head, if (missing(Environment)) parent.frame() else Environment)
+       Type == 'call' &&
+        !Head %in% c('(', '{') &&
+        !is.null(args) && # uses arguments
+        any(.names(args) %in% fields)
+    }
       
-    
-    do <- function(quo) {
-        formNames <- names(fargs(rlang::eval_tidy(quo[[2]][[1]], env = quo_get_env(quo))))
-        
-        hits <- fields %in% formNames
-        
-        if (!any(hits)) return(quo)
-        
-        namedArgs <- .names(quo[[2]][-1])
-        
-        formNames <- formNames[!formNames %in% namedArgs] 
-        
-        usedArgs <- c(namedArgs, head(head(formNames, 
-                                           min(which(formNames == '...'), 
-                                               length(formNames))), 
-                                      sum(namedArgs == "")))
-        
-        hits <- hits & !(fields %in% usedArgs)
-        hits <- fields[hits]
-        quo[[2]][hits] <- rlang::syms(hits)
+    do <- \(exprA) {
+      
+         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else exprA$Environment))
+         hits <- fields %in% fargNames
 
-        quo
+         if (!any(hits)) return(exprA)
+
+         namedArgs <- .names(exprA$Args)
+
+         fargNames <- fargNames[!fargNames %in% namedArgs]
+         usedArgs <- c(namedArgs, 
+                       head(head(fargNames,
+                                 min(which(fargNames == '...'),
+                                     length(fargNames))),
+                            sum(namedArgs == ""))) 
+  
+         hits <- hits & !(fields %in% usedArgs)
+         hits <- fields[hits]
+
+         exprA$Args <- c(exprA$Args, setNames(rlang::syms(hits), hits))
+         exprA
+
+
     }
     
-    recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
+    modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
     
 }
 
@@ -863,77 +816,52 @@ fieldsArgsQuo <- function(funcQuosure, fields) {
 
 laggedQuo <- function(funcQuosure) {
   
-  predicate <- function(quo) { 
-    quo <- rlang::quo_squash(quo)
-    rlang::is_call(quo) && quo[[1]] == sym('[') && any(names(quo) == 'n')
+  predicate <- \(Head, Args) Head == '[' && any(names(Args) %in% c('n', 'N')) 
+  
+  do <- \(exprA) {
+    
+    args <- exprA$Args
+    if (!'windows' %in% .names(args)) args$windows <- expr(list(File, Spine))
+    
+    names(args)[names(args) == 'N'] <- 'n'
+    n <- rlang::eval_tidy(args$n)
+    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [n = ] lag expression.')
+    args$n <- NULL
+    
+    lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
+
+    exprA$Head <- 'splat'
+    exprA$Args <- lagExprs
+    
+    exprA
   }
   
-  do <- function(quo) {
-    exp <- quo[[2]]
-    
-    args <- as.list(exp)[-1:-2]
-    if (!'windows' %in% names(args)) args$windows <- expr(list(File, Spine))
-    
-    indexedObject <- exp[[2]]
-    n <- eval_tidy(args$n)
-    args <- args[names(args) != 'n']
-    
-    exprs <- lapply(n, \(N) { if (N == 0L) expr(!!indexedObject) else expr(lag(!!indexedObject, n = !!N, !!!args)) })
-    
-    quo[[2]] <- if (length(n) == 1L) {
-      exprs[[1]]
-    } else {
-      expr(.SPLAT.(!!!exprs))
-    }
-    quo
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
   
-  }
-  
-  funcQuosure <- recurseQuosure(funcQuosure, predicate, do, stopOnHit = FALSE)
-  
-  # check for .SPLAT.
-  predicate <- function(quo) {
-    quo <- quo_squash(quo)
-    rlang::is_call(quo) &&
-      any(sapply(quo[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.')))
-  }
-  do <- function(quo) {
-    expr <- as.list(quo[[2]])
-    splats <- sapply(expr[-1], \(arg) rlang::is_call(arg) && arg[[1]] == sym('.SPLAT.'))
-    
-    for (i in which(splats)) expr[[i + 1L]] <- as.list(expr[[i + 1L]][-1])
-    expr <- unlist(expr, recursive = FALSE)
-    
-    quo[[2]] <- as.call(expr)
-    quo
-  }
-  
-  recurseQuosure(funcQuosure, predicate, do)
-   
 }
 
 #### Interpretations in expressions
 
-tandemsQuo <- function(funcQuosure) {
+#tandemsQuo <- function(funcQuosure) {
  # This function inserts calls to getTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
  # If input is a quosure (it should be), it keeps the quosure intact,
  # (i.e., keeps it's environment).
           
- applyExpr(funcQuosure,
-           \(ex) {
-             exstr <- deparse(ex)
-             interp <- grepl('^\\*[^*]', exstr)
-             
-             if (interp) {
-               regex <- stringr::str_sub(exstr, start = 2L)
-               rlang::expr(getTandem(Tandem, !!regex))
-             } else {
-               ex
-             }
-           }) 
-}
+# applyExpr(funcQuosure,
+#           \(ex) {
+#             exstr <- deparse(ex)
+#             interp <- grepl('^\\*[^*]', exstr)
+#             
+#             if (interp) {
+#               regex <- stringr::str_sub(exstr, start = 2L)
+#               rlang::expr(getTandem(Tandem, !!regex))
+#             } else {
+#               ex
+#             }
+#           }) 
+#}
 
 
 #' Get tandem interpretation information from humdrum data.
@@ -971,45 +899,62 @@ getTandem <- function(tandem, regex) {
 
 
 #### Splatting in expressions
-# "splatting" refers to giving a function which takes
-# multiple arguments a list or vector which is interpreted
-# as a list/vector of arguments, rather than a single argument.
-# For instance, the function log takes two arguments, x and base.
-# Imagine that I have a vector like this 
-# myvector <- list(x = 3, base = 2), which
-# I want to apply log to. The traditional R way is 
-# do.call('log', as.list(myvector)).
-# This is essentially splatting. What I want is syntactic sugar to
-# go log(myvector) and have it work. splatQuo allows exactly this in a 
-# call to withinHumdrum. We can group one field by another field, then
-# feed each group as an argument to a function.
-#
+# "splatting" refers to spreading a list of values expressions 
+# into arguments to of a call.
+# This is usually done in R using do.call, and can also be done useing
+# rlang's unquoting operator !!!.
+# humdrumR has another syntactic sugar for this:
 
-splatQuo <- function(funcQuosure) {
+splatQuo <- function(funcQuosure, humtab) {
   # This function takes an expression,
-  # and replaces any subexpression of the form `funccall(TargetExpr@GroupingExpr)`,
-  # with `do.call('funccall', tapply(TargetExpr, GroupingExpr, c))`.
-  # The result is that `TargetExpr` is broken into a list of vectors by the
-  # `GroupingExpr`, and each group is fed to `funccall` as a separate
-  # argument. See the docementation for [withinHumdrum()].
-  # This does not look for `@` sub expression within branches of a `@` expression!
-  # 
+  # and replaces any subexpression of the form `func(splat(x, y, z))`
+  # with `func(x, y, z)`.
+  # This is basically unquoting, like rlang's !!!.
+  # Splat also understands some special syntactic sugar, which is called BEFORE the unquoting:
+  # Index expressions of the form `func(atomic[Field == x])`
+  # are converted to `func(splat(atomic[Field == x[1], atomic[Field == x[2], etc.]))`
+
+  predicate <- \(Head, Args) Head == '[' && all(.names(Args)[-1L] == 'splat')
   
-  
-  predicate <- function(expr) any(sapply(expr, is.givenCall, call = '@'))
-  
-  transform <- function(expr) {
-      expr <- recurseQuosure(expr, 
-                     \(quo) is.givenCall(quo, '@'), 
-                     \(quo) {rlang::quo(unname(tapply(!!quo[[2]], !!quo[[3]], list)))
-                         })
-      expr <- as.list(expr)
-      rlang::quo(do.call(!!(as_string(expr[[1]])), !!!expr[-1]))
+  do <- \(exprA) {
+    inExprA <- analyzeExpr(exprA$Args[[2]])
+    
+    if (inExprA$Head != '%in%') .stop('splat expression must use %in%')
+    if (length(fieldsInExpr(humtab, inExprA$Args[[1]])) == 0L) .stop('splat expression must reference an existing field')
+    
+    inVals <- eval(inExprA$Args[[2]])
+    if (!is.atomic(inVals)) .stop('splat %in% expression must be atomic values.')
+    
+    indexed <- exprA$Args[[1]]
+    field <- inExprA$Args[[1]]
+    splatArgs <- lapply(inVals, \(val) rlang::expr((!!indexed)[!!field == !!val]))
+    
+    exprA$Head <- 'splat'
+    exprA$Args <- splatArgs
+    exprA
   }
   
-  recurseQuosure(funcQuosure, predicate, transform)
- 
+  funcQuosure <- modifyExpression(funcQuosure, predicate, do)
+
+  # turn splat(x,y,z) to x,y,z
+  predicate <- \(Args) any(sapply(Args, \(arg) analyzeExpr(arg)$Head == 'splat'))
+
+  do <- \(exprA) {
+      args <- exprA$Args
+      
+      args <- lapply(args, \(arg) {
+        argA <- analyzeExpr(arg)
+        if (argA$Head == 'splat') argA$Args else arg
+      })
+      exprA$Args <- unlist(args, recursive = FALSE)
+      exprA
+  }
+
+  modifyExpression(funcQuosure, predicate, do)
+  
 }
+
+splat <- list
 
 parseAt <- function(atExpr) {
  # This function is used by splatQuo
@@ -1092,7 +1037,23 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
   
 }
 
-
+windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
+  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+  
+  if (!'boundaries' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['boundaries']] <- quote(list(File,Spine))
+  if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
+  
+  applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild')])
+  windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild')]
+  
+  
+  rlang::quo(
+    windowApply(func = !!funcQuosure,
+                x = !!rlang::sym(usedInExpr[1]),
+                windows = !!windowQuosure,
+                !!!applyArgs))
+  
+}
 
 
 
@@ -1338,63 +1299,10 @@ parseResult_table <- function(result) {
 parseResult_list  <- function(result) data.table(result) 
 parseResult_other <- function(result) data.table(list(result))
 
-`pipeIn<-` <- function(object, value) {
-          # This is the main function for taking the output of a
-          # function or expression applied to humtable data and putting
-          # it back into the humtable. If the output and input are the same length,
-          # it's easy. The hard part is what to do when the output is different than
-          # the input. This function hard codes a few common possibilities,
-          # but deserves thorough updating (11/29/2018, Nat Condit-Schultz).
-          humtab <- object # R requires the names object and value for x<- functions
-          
-          curpipen <- curPipeN(humtab) 
-          
-          lengths_ <- function(ls) sapply(ls, \(v) if (is.object(v)) 1L else length(v)) # objects are length 1
-          
-          ####
-          if (!allsame(lengths_(value))) value <- list(value)
-          
-          
-          ## at this point, value should:
-          # be a list with all elements of the same length.
-          # may or may not be named
-          # each element in this list will be a new field in the humtable
-          
-          lenvalue <- lengths_(value)[1]
-          if (lenvalue < nrow(humtab)) humtab <- collapseHumtab(humtab, n = lenvalue)
-          
-          # What will the pipes be named
-          nnewfields   <- length(value)
-          targetfields <- if (allnamed(value)) names(value) else paste0('Pipe', (curpipen + seq_len(nnewfields)))
-          
-          humtab[ , targetfields] <- value
-          
-          #humtab[ , newfields := paste(targetfields, collapse = ' ')]
-          
-          humtab
-          
-} 
 
 
 
 
-ifelsecalls <- function(calls, fields) {
-          # function used within withinHumdrum, as part of 
-          # humdrumR (re)assembly process.
-    
-          conditionexpr <- calls[[1]]
-          
-          ifexpr <- if (length(calls) == 1L) {
-              fields[[2]]
-          } else {
-              Recall(calls[-1], fields[-1])
-          }
-          
-          elseexpr <- fields[[1]]
-          
-          #
-          rlang::quo(ifelse(!!conditionexpr, !!ifexpr, !!elseexpr))
-}
 
 pipeFields <- function(humtab) {
   # Another function used by pipeIn<- (withing curePipeN)
@@ -1419,41 +1327,6 @@ curPipeN <- function(humtab) {
 
 
 
-
-collapseHumtab <- function(humtab, n = 1L) {
-  # This is the biggest part of pipeIn<-'s work.
-  # It's the trickiest part of the process, shrinking
-  # the existing humtable to match the size of the new fields.
-  # 
-  # This function really only passes information into collapse2n, which
-  # is the really workhorse.
-  # 
-  humtab[ , Map(f = collapse2n, 
-            .SD, # Each field/column
-            colnames(humtab), # the field name
-            lapply(humtab, class), # the class of each field (important because data.table doesn't like columns to change class
-            n = n
-            )] 
-  }
-
-collapse2n <- function(x, colname, class, n = 1) {
-  # This is the function that actually collapses a field
-  # (column in humtable) to a smaller length. 
-  # Certain structural fields are treated differently,
-  # so that (hopefully) things like record and spine numbers
-  # still make sense after collapse.  
-  uniqx <- unique(x)
-  uniqx <- uniqx[!is.na(uniqx)]
-  if (length(uniqx) == 0) return(rep(as(NA, class), n))
-  
-  if (colname %in% c('Record', 'Spine', 'Path', 'ColumnNumber', 
-                     'StopNumber', 'Bar', 'DoubleBarline', 'NData', 'File')) {
-    uniqx[1:n]
-  } else {
-    rep( if (length(uniqx) == 1) uniqx else as(NA, class) , n)
-  }
-  
-}
 
 
 ################################humApply ----

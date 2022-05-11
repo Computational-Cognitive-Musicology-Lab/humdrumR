@@ -1,0 +1,512 @@
+cdfy
+xy <- x + y
+xy
+xy <- c(x,y)
+xy
+boot.samples = matrix(sample(xy,
+size = B * (n+m), replace = TRUE), B, n)
+boot.samples
+xy <- as.matrix(x,y)
+xy
+x <- c(1:n)
+y <- c(1:m)
+xy
+x
+y
+xy <- as.matrix(nrow = 10, ncol =2)
+xy <- as.matrix(rep(1:10,2),nrow = 10, ncol =2)
+xy
+xy <- as.matrix(1:20,nrow = 10, ncol =2)
+xy
+xy <- as.matrix(1:20, nrow = 10, ncol = 2)
+xy
+xy <- cbind(1:10, 1:10)
+xy
+boot.samples = matrix(sample(xy,
+size = B * (n+m), replace = TRUE), B, n)
+boot.statistics <- cbind(1:10, 1:10)
+boot.statistics
+boot.statistics[1][2]
+boot.statistics[1,2]
+boot.statistics[2,2]
+boot.statistics[2,3]
+boot.statistics[3,2]
+boot.samples = matrix(sample(xy,
+size = B * (n+m), replace = TRUE), B, n)
+boot.samples
+boot.samplesx = matrix(sample(x,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesx
+B = 1000 # number of bootstrap replicates
+n = length(time)
+samples <- time - mean(time) - 29.61
+boot.samples = matrix(sample(samples,
+size = B * n, replace = TRUE), B, n)
+boot.statistics = apply(boot.samples, 1, t.test)
+boot.statistics
+boot.samplesx = matrix(sample(x,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesy = matrix(sample(y,
+size = B * (m), replace = TRUE), B, m)
+for(i in (1:1000)){
+boot.statistics[i] <- t.test(boot.samplesx[i], boot.samplesy[i])
+}
+boot.samplesx
+boot.samplesx[1]
+boot.samplesx[2]
+boot.samplesx[3]
+for(i in (1:1000)){
+boot.statistics[i] <- t.test(boot.samplesx, boot.samplesy)
+}
+boot.statistics[1]
+boot.statistics[2]
+boot.statistics[3]
+boot.statistics[4]
+boot.samplesx = matrix(sample(cdfx,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesy = matrix(sample(cdfy,
+size = B * (m), replace = TRUE), B, m)
+ttestfunction(boot.samplesx, boot.samplesy)
+ttestfunction <- function(x, y){
+return(t.test(x,y))
+}
+ttestfunction(boot.samplesx, boot.samplesy)
+boot.statistics <- apply(boot.samplesx, ttestfunction, y=boot.samplesy)
+boot.statistics <- sapply(boot.samplesx, ttestfunction, y=boot.samplesy)
+boot.samplesx = matrix(sample(cdfx,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesy = matrix(sample(cdfy,
+size = B * (m), replace = TRUE), B, m)
+ttestfunction <- function(x, y){
+return(t.test(x,y))
+}
+boot.statistics <- sapply(boot.samplesx, ttestfunction, y=boot.samplesy)
+boot.statistics <- mapply(ttestfunction, boot.samplesx, boot.samplesy)
+boot.samplesx
+cdfx
+boot.statistics <- mapply(ttestfunction, boot.samplesx, boot.samplesy)
+boot.statistics <- apply(ttestfunction, boot.samplesx, boot.samplesy)
+boot.statistics <- mapply(ttestfunction, boot.samplesx, boot.samplesy)
+boot.statistics <- mapply(ttestfunction, 1, boot.samplesx, boot.samplesy)
+B = 1000 # number of bootstrap replicates
+n = length(time)
+samples <- time - mean(time) - 29.61
+boot.samples = matrix(sample(samples,
+size = B * n, replace = TRUE), B, n)
+boot.samples
+apply(boot.samples, 1, t.test)
+boot.samplesx = matrix(sample(cdfx,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesy = matrix(sample(cdfy,
+size = B * (m), replace = TRUE), B, m)
+ttestfunction <- function(x, y){
+return(t.test(x,y))
+}
+boot.statisticsxy <- mapply(ttestfunction, boot.samplesx, boot.samplesy)
+t.test(bootsamplesx[1], bootsamplesy[1])
+t.test(boot.samplesx[1], boot.samplesy[1])
+boot.samples[1]
+boot.samples[,1]
+t.test(boot.samplesx[,1], boot.samplesy[,1])
+boot.samplesx = matrix(sample(cdfx,
+size = B * (n), replace = TRUE), B, n)
+boot.samplesy = matrix(sample(cdfy,
+size = B * (m), replace = TRUE), B, m)
+for(i in (1:10)){
+boot.statisticsxy <- t.test(boot.samplesx[,i], boot.samplesy[,i])
+}
+pvalues <- c()
+for(i in (1:B)){
+pvalues[i] <- boot.statistics[[i]]$p.value
+}
+for(i in (1:B)){
+pvalues[i] <- boot.statisticsxy[[i]]$p.value
+}
+boot.statisticsxy
+boot.statisticsxy <- c()
+for(i in (1:10)){
+boot.statisticsxy[i] <- t.test(boot.samplesx[,i], boot.samplesy[,i])
+}
+boot.statisticsxy[1]
+boot.statisticsxy[2]
+for(i in (1:10)){
+boot.statisticsxy <- t.test(boot.samplesx[,i], boot.samplesy[,i])
+}
+pvalues <- c()
+for(i in (1:10)){
+boot.statisticsxy <- t.test(boot.samplesx[,i], boot.samplesy[,i])
+pvalues[i] <- boot.statisticsxy$p.value
+}
+pvalues
+bootapproximate = mean(pvalues) # bootstrap p value approximate
+bootapproximate
+print(biasestimate)
+```{r}
+mixturemodel <- function(z, mu1=7,mu2=10,sigma1=0.5,sigma2=0.5){
+return(0.7*dnorm(z, mu1, sigma1) + 0.3*dnorm(z, mu2, sigma2))
+}
+metropolisHastingsMixture <- function(z, chainLength, target, sigma1, burnin){
+chain <- c()
+for(i in ((burnin):chainLength)){
+# do not include the burn in values
+proposed = rnorm(1,z,sigma1)
+if(log(runif(1))<log(min(1,target(proposed)/target(z)))){
+# implement stopping criterion
+chain[i] <- proposed
+# set new value in chain
+}
+else{
+chain[i] <- z
+# keep z value for the chain
+}
+}
+return(chain)
+}
+chain1 <- metropolisHastingsMixture(0,10000,mixturemodel,0.01,3)
+plot(chain1, type = "l")
+# trace plot
+hist(chain1)
+lines(density(chain1[3:10000]), lwd = 2, col = "blue")
+install.packages('devtools')
+sample(1:8, 8, replace = FALSE)
+sample(1:8, 8, replace = FALSE)
+sample(1:8, 8, replace = FALSE)
+order(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27)
+as.data.frame(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27)
+list(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27)
+order(list(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27))
+as.data.frame(list(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27))
+order(as.data.frame(list(6,11,36,31,32,24,35,1,8,3,15,34,7,9,12,4,5,2,33,28,27)))
+str_replace_all()
+gerwd()
+getwd()
+setwd("/Users/robbyice/Desktop/GTPortfolio/humdrumRRobert")
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+#'
+#'
+#' @export
+textKeepSilbe <- function(data, nullTokens = TRUE){
+checkArg(data, classes = c('character'))
+# same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
+dummyData <- data.frame(data)
+dummyData <- toString(dummyData[,1])
+dummyData <- str_replace_all(dummyData, "-, -", "-")
+dummyData <- str_replace_all(dummyData, ",", "")
+indices <- str_locate_all(dummyData, "-")
+getIndices <- function(index, iteration){
+# get index where you should insert a - to indicate splitting into syllables.
+getIndex <- index - iteration + 1
+}
+save_length <- length(indices[[1]])/2
+# length of indices will be the above length divided by 2 because it prints each index twice.
+iterations <- 1:save_length
+# iterations for apply function will equal length of indices
+iterations <- as.data.frame(iterations)
+# save as data frame so it can be read into apply function properly.
+save_indices <- apply(iterations, 1, function(x){getIndices(indices[[1]][x], x)})
+# save indices in a vector
+# all code below is the same as in the original text function
+if(nullTokens == FALSE){
+data <- as.data.frame(data)
+data <- toString(data[,1])
+data <- str_replace_all(data, "-, -", "")
+data <- str_replace_all(data, ",", "")
+data <- as.list(strsplit(data, '\\s+')[[1]])
+transpose1 <- t(data)
+transpose2 <- t(transpose1)
+data <- as.character(transpose2)
+}
+else{
+wordAddSpace <- function(value){
+if(substr(value,1,1) == "-"){
+return(TRUE)
+}
+else{
+return(FALSE)
+}
+}
+replaceWithNullToken <- function(booleanValue){
+if(booleanValue == TRUE){
+return(".")
+}
+else{
+return("word")
+}
+}
+# define the above functions in the same way as in the original text function
+saveData <- data
+data <- as.data.frame(data)
+save <- apply(data, 1, function(x){wordAddSpace(x)})
+save <- as.data.frame(save)
+# go through and if true then add space below
+save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+save2 <- as.data.frame(save2)
+saveWords <- text(saveData, nullTokens = FALSE)
+saveWords <- as.data.frame(saveWords)
+# the logic below is the same as in the original text function
+newFunction <- function(dataValue, rowValue){
+rowValueToString <- toString(rowValue)
+dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+return(dataValue[rowValue,1])
+}
+newFunction2 <- function(findRowValues, iteration){
+getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+return(getRowValueFinal)
+}
+newFunction4 <- function(iterate, final, wordsArray){
+iterateToString <- toString(iterate)
+if(iterateToString %in% final){
+return(wordsArray[match(iterate,final),1])
+}
+else{
+return(".")
+}
+}
+numbers <- 1:nrow(save2)
+numbers <- as.data.frame(numbers)
+saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+saveNew <- as.data.frame(saveNew)
+saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+finalData <- numbers
+finalWordsLength <- 1:nrow(saveWords)
+finalWordsLength <- as.data.frame(finalWordsLength)
+saveNewDataFrame <- as.data.frame(saveNew)
+finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+data <- (unlist(finalDataComplete))
+}
+return(list(data,save_indices))
+}
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+#'
+#'
+#' @export
+textKeepSilbe <- function(data, nullTokens = TRUE){
+#checkArg(data, classes = c('character'))
+# same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
+dummyData <- data.frame(data)
+dummyData <- toString(dummyData[,1])
+dummyData <- str_replace_all(dummyData, "-, -", "-")
+dummyData <- str_replace_all(dummyData, ",", "")
+indices <- str_locate_all(dummyData, "-")
+getIndices <- function(index, iteration){
+# get index where you should insert a - to indicate splitting into syllables.
+getIndex <- index - iteration + 1
+}
+save_length <- length(indices[[1]])/2
+# length of indices will be the above length divided by 2 because it prints each index twice.
+iterations <- 1:save_length
+# iterations for apply function will equal length of indices
+iterations <- as.data.frame(iterations)
+# save as data frame so it can be read into apply function properly.
+save_indices <- apply(iterations, 1, function(x){getIndices(indices[[1]][x], x)})
+# save indices in a vector
+# all code below is the same as in the original text function
+if(nullTokens == FALSE){
+data <- as.data.frame(data)
+data <- toString(data[,1])
+data <- str_replace_all(data, "-, -", "")
+data <- str_replace_all(data, ",", "")
+data <- as.list(strsplit(data, '\\s+')[[1]])
+transpose1 <- t(data)
+transpose2 <- t(transpose1)
+data <- as.character(transpose2)
+}
+else{
+wordAddSpace <- function(value){
+if(substr(value,1,1) == "-"){
+return(TRUE)
+}
+else{
+return(FALSE)
+}
+}
+replaceWithNullToken <- function(booleanValue){
+if(booleanValue == TRUE){
+return(".")
+}
+else{
+return("word")
+}
+}
+# define the above functions in the same way as in the original text function
+saveData <- data
+data <- as.data.frame(data)
+save <- apply(data, 1, function(x){wordAddSpace(x)})
+save <- as.data.frame(save)
+# go through and if true then add space below
+save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+save2 <- as.data.frame(save2)
+saveWords <- text(saveData, nullTokens = FALSE)
+saveWords <- as.data.frame(saveWords)
+# the logic below is the same as in the original text function
+newFunction <- function(dataValue, rowValue){
+rowValueToString <- toString(rowValue)
+dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+return(dataValue[rowValue,1])
+}
+newFunction2 <- function(findRowValues, iteration){
+getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+return(getRowValueFinal)
+}
+newFunction4 <- function(iterate, final, wordsArray){
+iterateToString <- toString(iterate)
+if(iterateToString %in% final){
+return(wordsArray[match(iterate,final),1])
+}
+else{
+return(".")
+}
+}
+numbers <- 1:nrow(save2)
+numbers <- as.data.frame(numbers)
+saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+saveNew <- as.data.frame(saveNew)
+saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+finalData <- numbers
+finalWordsLength <- 1:nrow(saveWords)
+finalWordsLength <- as.data.frame(finalWordsLength)
+saveNewDataFrame <- as.data.frame(saveNew)
+finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+data <- (unlist(finalDataComplete))
+}
+return(list(data,save_indices))
+}
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+library(stringr)
+str_replace_all
+#'
+#'
+#' @export
+textKeepSilbe <- function(data, nullTokens = TRUE){
+#checkArg(data, classes = c('character'))
+# same function as text but it returns a list with the first element being the character vector of words and the second item being the indices at which to insert -'s.
+dummyData <- data.frame(data)
+dummyData <- toString(dummyData[,1])
+dummyData <- stringr::str_replace_all(dummyData, "-, -", "-")
+dummyData <- stringr::str_replace_all(dummyData, ",", "")
+indices <- stringr::str_locate_all(dummyData, "-")
+getIndices <- function(index, iteration){
+# get index where you should insert a - to indicate splitting into syllables.
+getIndex <- index - iteration + 1
+}
+save_length <- length(indices[[1]])/2
+# length of indices will be the above length divided by 2 because it prints each index twice.
+iterations <- 1:save_length
+# iterations for apply function will equal length of indices
+iterations <- as.data.frame(iterations)
+# save as data frame so it can be read into apply function properly.
+save_indices <- apply(iterations, 1, function(x){getIndices(indices[[1]][x], x)})
+# save indices in a vector
+# all code below is the same as in the original text function
+if(nullTokens == FALSE){
+data <- as.data.frame(data)
+data <- toString(data[,1])
+data <- str_replace_all(data, "-, -", "")
+data <- str_replace_all(data, ",", "")
+data <- as.list(strsplit(data, '\\s+')[[1]])
+transpose1 <- t(data)
+transpose2 <- t(transpose1)
+data <- as.character(transpose2)
+}
+else{
+wordAddSpace <- function(value){
+if(substr(value,1,1) == "-"){
+return(TRUE)
+}
+else{
+return(FALSE)
+}
+}
+replaceWithNullToken <- function(booleanValue){
+if(booleanValue == TRUE){
+return(".")
+}
+else{
+return("word")
+}
+}
+# define the above functions in the same way as in the original text function
+saveData <- data
+data <- as.data.frame(data)
+save <- apply(data, 1, function(x){wordAddSpace(x)})
+save <- as.data.frame(save)
+# go through and if true then add space below
+save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
+save2 <- as.data.frame(save2)
+saveWords <- text(saveData, nullTokens = FALSE)
+saveWords <- as.data.frame(saveWords)
+# the logic below is the same as in the original text function
+newFunction <- function(dataValue, rowValue){
+rowValueToString <- toString(rowValue)
+dataValue[rowValue,1] <- paste(dataValue[rowValue,1], rowValueToString, sep = "")
+return(dataValue[rowValue,1])
+}
+newFunction2 <- function(findRowValues, iteration){
+getRowValueFinal <- sub("word*", "", findRowValues[iteration,1])
+return(getRowValueFinal)
+}
+newFunction4 <- function(iterate, final, wordsArray){
+iterateToString <- toString(iterate)
+if(iterateToString %in% final){
+return(wordsArray[match(iterate,final),1])
+}
+else{
+return(".")
+}
+}
+numbers <- 1:nrow(save2)
+numbers <- as.data.frame(numbers)
+saveNew <- apply(numbers, 1, function(x){newFunction(save2,x)})
+saveNew <- as.data.frame(saveNew)
+saveNew <- saveNew[!grepl(".", saveNew$saveNew, fixed = TRUE),]
+finalData <- numbers
+finalWordsLength <- 1:nrow(saveWords)
+finalWordsLength <- as.data.frame(finalWordsLength)
+saveNewDataFrame <- as.data.frame(saveNew)
+finalData <- apply(finalWordsLength, 1, function(x){newFunction2(saveNewDataFrame, x)})
+finalDataComplete <- apply(numbers, 1, function(x){newFunction4(x, finalData, saveWords)})
+data <- (unlist(finalDataComplete))
+}
+return(list(data,save_indices))
+}
+values <- c('Now', 'let', 'me', 'wel-', '-come', 'e-', '-very-', '-bo-', '-dy', 'to', 'the', 'wild', 'wild', 'west.')
+keepSilbeExample <- textKeepSilbe(values, nullTokens = FALSE)
+keepSilbeExample
+mcf <- readHumdrum('.*rap')
+spinePipe(mcf, 2:8, 1) -> mcf[rev(c('Stress', 'Tone', 'Break', 'Rhyme', 'IPA', 'Lyrics', 'Hype'))]
+mcf$Token %hum>% c(~segments(Break %in% c('3', '4','5')), by ~ File) -> mcf$Phrase
+mcf$Token %hum<% c(~list(paste(Lyrics, collapse = ' ')), by ~ File ~ Phrase)
+rhymeSchemes <- mcf$Token %hum<% c(~list(Rhyme), by ~ File ~ Phrase)
+lyrics <- mcf$Token %hum<% c(~list(Lyrics), by ~ File ~ Phrase)
+library(humdrumR)
+mcf <- readHumdrum('.*rap')
+spinePipe(mcf, 2:8, 1) -> mcf[rev(c('Stress', 'Tone', 'Break', 'Rhyme', 'IPA', 'Lyrics', 'Hype'))]
+mcf$Token %hum>% c(~segments(Break %in% c('3', '4','5')), by ~ File) -> mcf$Phrase
+mcf$Token %hum<% c(~list(paste(Lyrics, collapse = ' ')), by ~ File ~ Phrase)
+rhymeSchemes <- mcf$Token %hum<% c(~list(Rhyme), by ~ File ~ Phrase)
+lyrics <- mcf$Token %hum<% c(~list(Lyrics), by ~ File ~ Phrase)
+getwd()
+setwd("/Users/robbyice/Desktop/GTPortfolio/humdrumR")
+mcf <- readHumdrum('.*rap')
+spinePipe(mcf, 2:8, 1) -> mcf[rev(c('Stress', 'Tone', 'Break', 'Rhyme', 'IPA', 'Lyrics', 'Hype'))]
+segments <- function(x, reverse = FALSE) {
+if (!is.logical(x)) x <- c(TRUE, head(x, -1L) != tail(x, -1L))
+if (reverse) x <- rev(x)
+x <- cumsum(x)
+if (reverse) {
+x <- rev(-x) + max(x) + 1
+}
+x
+}
+mcf$Token %hum>% c(~segments(Break %in% c('3', '4','5')), by ~ File) -> mcf$Phrase
+mcf$Token %hum<% c(~list(paste(Lyrics, collapse = ' ')), by ~ File ~ Phrase)
+lyrics <- mcf$Token %hum<% c(~list(Lyrics), by ~ File ~ Phrase)
+lyrics
+setwd("/Users/robbyice/desktop")
+setwd("/Users/robbyice/desktop/gtportfolio")
+setwd("/Users/robbyice/desktop/gtportfolio/humdrumrrobert")

@@ -649,22 +649,25 @@ setMethod('as.vector',
 #' @name humCoercion
 #' @export
 as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
-                     alignColumns = FALSE, padPaths = FALSE, padder = '') {
+                     alignColumns = FALSE, padPaths = FALSE, padder = '.') {
     
           checkhumdrumR(humdrumR, 'as.lines')
             
           dataTypes <- checkTypes(dataTypes, 'as.lines')
           
-          mat <- as.matrix(humdrumR, dataTypes = dataTypes, padder = padder,
-                           fieldnames = fieldname[1], alignColumns = alignColumns,
-                           path.fold = !padPaths)
+          mats <- as.matrices(humdrumR, dataTypes = dataTypes, padder = padder,
+                              fieldnames = fieldname[1], alignColumns = alignColumns,
+                              path.fold = !padPaths)
           
-          mat[is.na(mat)] <- "."
-          
-          lines <- apply(mat, 1, \(row) paste(row, collapse = '\t'))
+         
+          lines <- unlist(lapply(mats, 
+                                  \(mat) {
+                                      mat[is.na(mat)] <- "."
+                                      apply(mat, 1, \(row) paste(row, collapse = '\t'))
+                                  }))
           lines[grepl('^!!', lines)] <- stringr::str_remove_all(lines[grepl('^!!', lines)], '\t\\.')
           
-          names(lines) <- rownames(mat)
+          names(lines) <- unlist(lapply(mats, rownames))
           
           lines
                            
@@ -711,10 +714,16 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     outMat[outMat == '_C'] <- padder
                     outMat[outMat == '_P'] <- padder
-                    outMat[outMat == 'NA'] <- padder
-                    dimnames(outMat) <- c(list(File.Record = with(getHumtab(x, dataTypes = dataTypes), paste0(File, '.', Record)),
+                    outMat[is.na(outMat)] <- padder
+                    
+                    ## dimnames and sort
+                    humtab <- getHumtab(x, dataTypes = dataTypes)
+                    
+                    dimnames(outMat) <- c(list(File.Record = humtab[ , paste0(File, '.', Record)],
                                                Column = 1:ncol(outMat)),
                                           if (length(dim(outMat)) == 3L) list(Field = colnames(records)) else NULL)
+                    outMat <- outMat[order(humtab$File, humtab$Record), , drop = FALSE]
+                        
                     
                     outMat
                     
@@ -737,15 +746,20 @@ setMethod('as.data.frame',
 
 #' @name humCoercion
 #' @export
-as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
+as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE, alignColumns = FALSE) {
           checkhumdrumR(humdrumR, 'as.matrices')
+
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
-          n <- length(humdrumR)
-          lapply(1:n,
-                 \(i) as.matrix.humdrumR(humdrumR[i], dataTypes = dataTypes, 
-                                       fieldnames = fieldnames, 
-                                       padder = padder, 
-                                       path.fold = path.fold))
+          mat <- as.matrix(humdrumR, dataTypes = dataTypes,
+                           padder = padder, fieldnames = fieldnames, path.fold = path.fold, alignColumns = alignColumns)
+          
+          file <- as.integer(gsub('\\..*', '', rownames(mat)))
+          lapply(tapply(seq_along(file), file, list),
+                 \(i) {
+                     m <- mat[i, , drop = FALSE]
+                     m[ , colSums(if (is.na(padder)) {is.na(m)} else {m == padder}) != nrow(m), drop = FALSE]
+                     
+                 })
           
 }
 #' @name humCoercion
@@ -1264,22 +1278,15 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
           humdrumR
 }
 
-matchGLIMfields <- function(humdrumR, from = 'D', to = c('G', 'L', 'I', 'M', 'd', 'P') ) {
-    # make sure all the tables in humTable (i.e., G L I M D and P) all have the same fields
-    # usual case is that fields have been added to D but are missing from other tables.
-    # 
-    putHumtab(humdrumR, drop = FALSE) <- data.table::rbindlist(humdrumR@Humtable, fill = TRUE)
-    
-    humdrumR
-}
 
-`addNulld<-` <- function(humdrumR, value) {
-    old <- getHumtab(humdrumR, 'd')
-    value <- value[ , colnames(old), with = FALSE]
-    humdrumR@Humtable$d <- rbind(old, value)
-    humdrumR
-    
-}
+
+# `addNulld<-` <- function(humdrumR, value) {
+#     old <- getHumtab(humdrumR, 'd')
+#     value <- value[ , colnames(old), with = FALSE]
+#     humdrumR@Humtable$d <- rbind(old, value)
+#     humdrumR
+#     
+# }
 
 
 `putD<-` <- function(humdrumR, value) { 
@@ -1649,12 +1656,7 @@ activeFields <- function(humdrumR) {
 }
 
 
-isField <- function(humdrumR, names) {
-          ## checks if character strings in "names"
-          ## argument match the names of any fields
-          ## in the humdrumR argument
-          names %in% fields(humdrumR)$Name 
-}
+
 
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' Get named 
@@ -1717,25 +1719,6 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
   ## (columns) of data from a humdrum table.
   object@Fields$Data <- object@Fields$Data[!object@Fields$Data %in% value]
   object
-}
-
-`padGLIMfields<-` <- function(object, value)  {
-  # This function is used be indexGLIM
-  # It is used to add empty fields to a humtable.
-  # withinHumdrum (or humApply) may add new fields to the 'D' (data)
-  # humtable, and we need to add these same fields to the other 
-  # humtables (i.e., GLIMdP)
-  # By default, these blank fields are null tokens.
-  # The argument copyField can be the name of another field, which is 
-  # copied instead of null tokens.
-  humtab <- object
-  # nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA, M = '=', P = "_P")
-  for (name in names(value)) {
-    # newfield <- if (value[name] == 'character') nulltypes[humtab$Type] else as(NA, value[name])
-    humtab[[name]] <- as(NA, if (value[name] == 'factor') 'character' else value[name])
-  }
-  
-  humtab
 }
 
 
@@ -2040,7 +2023,7 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
   
   ## censor lines beyond max.records.file
   filei <- tapply_inplace(File, File, seq_along)
-  i <- ifelse(File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
+  i <- ifelse(length(unique(File)) == 1L | File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
   tokmat <- tokmat[i, , drop = FALSE]
   global <- global[i]
   
@@ -2110,50 +2093,46 @@ print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
 
 
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
-    
+    if (nrow(tokmat) < 50) return(tokmat)
     null <- apply(matrix(grepl('^\\.( \\.)*$', tokmat) | grepl('^=', tokmat), nrow = nrow(tokmat)), 1, all, na.rm = TRUE)
     
     chunks <- segments(!null)
     
     # newRN <- unlist(tapply(rownames(tokmat), chunks, \(x) if (length(x) <= collapseNull) x else c(x[1], paste0(x[2], '-', tail(x, 1)))))
     
-    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, 
+    tokmat <- tapply(seq_len(nrow(tokmat)), chunks, simplify = FALSE, 
                                    \(i) {
-                                       if (sum(grepl('^=', tokmat[i, 1])) < 2 && length(i) <= collapseNull) {
-                                           tokmat[i , , drop = FALSE] 
-                                        } else {
-                                           fill <- if (any(grepl('^=', tokmat[i, 1]))) {
-                                               bars <- tokmat[i, , drop = FALSE][grepl('^=', tokmat[i, 1]), 1]
-                                               barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
-                                               base <- strrep('=', length(bars))
-                                               
-                                               if (any(!is.na(barnums))) {
-                                                   barnums <- barnums[!is.na(barnums)]
-                                                   base <- paste0(base, paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-'))
-                                               } 
-                                               newRN <- paste(names(bars)[c(1, length(bars))], collapse = '-')
-                                               base
-                                               
-                                           } else {
-                                               newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
-                                               
-                                               strrep('.', length(i) - 1)
-                                           }
+                                       nbars <- sum(grepl('^=', tokmat[i, 1]))
+                                       
+                                       if (nbars == 1 || length(i) <= collapseNull) return(tokmat[i, , drop = FALSE])
+                                       
+                                       fill <- if (nbars > 0L) {
+                                           bars <- tokmat[i, , drop = FALSE][grepl('^=', tokmat[i, 1]), 1]
+                                           barnums <- stringr::str_extract(bars, '[0-9a-zA-Z]+')
+                                           base <- strrep('=', length(bars))
                                            
-                                           newRN <- c(rownames(tokmat)[i[1]], newRN)
-                                           # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
-                                           tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
-                                           rownames(tokmat) <- newRN
+                                           if (any(!is.na(barnums))) {
+                                               barnums <- barnums[!is.na(barnums)]
+                                               barnums <- paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-')
+                                           } 
+                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], , drop = FALSE]), collapse = '-')
                                            
-                                           tokmat
+                                           paste0(base, barnums)
                                            
+                                       } else {
+                                           newRN <- paste(rownames(tokmat[i[c(2, length(i))], ]), collapse = '-')
                                            
-                                           
-                                        }
+                                           strrep('.', length(i) - 1)
+                                       }
+                                       newRN <- c(rownames(tokmat)[i[1]], newRN)
+                                       # rbind(tokmat[i[1], , drop = FALSE], paste0('(', fill, ')'))
+                                       tokmat <- rbind(tokmat[i[1], , drop = FALSE], fill)
+                                       rownames(tokmat) <- newRN
+                                       
+                                       tokmat
                                        
                      })
     tokmat <- do.call('rbind', tokmat)
-    
     rownames(tokmat) <- stringr::str_replace(rownames(tokmat), '-[0-9]+\\.', '-') # replace redundant fileNumber
     
     tokmat

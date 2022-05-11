@@ -16,7 +16,7 @@ as.lines(
   fieldname = NULL,
   alignColumns = FALSE,
   padPaths = FALSE,
-  padder = ""
+  padder = "."
 )
 
 \method{as.matrix}{humdrumR}(
@@ -41,7 +41,8 @@ as.matrices(
   dataTypes = "D",
   fieldnames = NULL,
   padder = NA,
-  path.fold = TRUE
+  path.fold = TRUE,
+  alignColumns = FALSE
 )
 
 as.data.frames(

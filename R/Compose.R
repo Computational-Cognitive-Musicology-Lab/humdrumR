@@ -411,24 +411,24 @@ memoizeDispatch <- function(fname) {
 >>>>>>> master
 
 
-do... <- function(func, args) {
+do... <- function(func, args, envir = parent.frame()) {
   # calls func on args, even if some named arguments in args are not arguments of func
   # (ignores those arguments)
   if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
   
-  do.call(func, args)
+  do.call(func, args, envir = envir)
   
   
 }
 
-do <- function(func, args, doArgs = c(), ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
+do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
   if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
   dimension <- dimParse(args)
   
-  memoize <- memoizeParse(dimension$Args, dispatchArgs = doArgs, ...)
+  memoize <- memoizeParse(dimension$Args, dispatchArgs = doArgs, memoize = memoize, ...)
   
   naskip <- predicateParse(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
@@ -548,7 +548,7 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
   if (is.null(Exclusive)) Exclusive <- rep('any', length(str))
-  
+  if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   ### find places where str matches dispatch regex AND Exclusive matches dispatch exclusives
   matches <-  Map(\(regex, exclusives) {
     output <- character(length(str))

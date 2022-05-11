@@ -289,7 +289,6 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
           })
 
 
-CKey <- function(dset) if (!is.null(dset)) dset - getRootTint(dset) 
 
 ## Arithmetic methods ####
 
@@ -312,8 +311,8 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               output[hits] <- (((e1[hits] + 1L) - signature[hits]) %% 7L) - 1 + signature[hits]
               if (any(!is.na(alter) & alter != 0L)) {
                   output[!is.na(alter) & alter != 0L] <- {
-                      lof <- LO5th(e2[!is.na(alter) & alter != 0L])
-                      lof[sweep(lof %% 7L, 1, e1[!is.na(alter) & alter != 0L] %% 7L, `==`)]
+                      lof <- t(LO5th(e2[!is.na(alter) & alter != 0L]))
+                      lof[sweep(lof %% 7L, 2, e1[!is.na(alter) & alter != 0L] %% 7L, `==`)]
                   }
               }
               
@@ -465,7 +464,7 @@ setMethod('LO5th', 'diatonicSet',
     
 
     rownames(LO5ths) <- dset2key(dset)
-    colnames(LO5ths) <- c('Root', nth(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+    colnames(LO5ths) <- c('Root', nthfix(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
     # 
     LO5ths
 })
@@ -546,7 +545,8 @@ dset2signature <- function(dset, Key = NULL, ...) {
     if (!is.null(Key)) dset <- dset + Key
   
     LO5ths <- LO5th(dset)
-    LO5ths[] <- t(apply(LO5ths, 1, sort))
+    LO5ths[] <- t(apply(LO5ths, 1, \(row) row[order(sign(row), (abs(row) + ifelse(row > 1, 1L, -2L)) %% 7L)])) 
+    # this puts accidentals in absolute ascending order, but putting double flats/sharps in the right place
     tints <- tint( , LO5ths) %dim% NULL
     
     notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
@@ -557,7 +557,7 @@ dset2signature <- function(dset, Key = NULL, ...) {
     
     notes <- apply(notes, 1, paste, collapse = '')
         
-    .paste("*k[", notes, ']')
+    .paste("k[", notes, ']')
 }
 
 

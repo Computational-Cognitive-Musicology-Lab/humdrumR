@@ -98,7 +98,7 @@ getExtensions <- function(tset) {
    inverted <- inverted + ((inverted - 1) %% 2) # make sure root position is there always 
 
    bits <- ints2bits(inverted, nbits = 7L) == 1L
-   colnames(bits) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
+   colnames(bits) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
    rownames(bits) <- NULL
    bits
    
@@ -231,7 +231,7 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
   if (!inversion) tset <- rootPosition(tset)
   
   extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
-  colnames(extensions) <- c('Root', nth(c(3, 5, 7, 9, 11, 13)))
+  colnames(extensions) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
   
   extensions[!getExtensions(tset)] <- NA_integer_
   
@@ -240,16 +240,6 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
 
 
 
-# triadQualify.Roman <- function(root, triad, triad.labels = c(), triad.lowercase = c('diminish', 'minor'), triad.show = c('diminish', 'augment')) {
-#   setoptions(triad.labels) <- c(major = 'M', minor = 'm', diminish = 'o', augment = '+')
-#   triad.labels <- unlist(triad.labels)
-#   
-#   root[triad %in% triad.labels[triad.lowercase]] <- tolower(root[triad %in% triad.labels[triad.lowercase]])
-#   triad[!triad %in% triad.labels[triad.show]] <- ""
-#   
-#   paste0(root, triad)
-#   
-# }
 
 tset2triadLabel <- function(tset, root, root.case = TRUE, 
                             major = 'M', minor = 'm', diminish = 'o', augment = '+', ...) {
@@ -420,12 +410,14 @@ tset2tonalHarmony <- function(tset,
 
 
 tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE,
-                                     absoluteSpecies = FALSE, extension.decreasing = TRUE,
-                                     extension.simple = TRUE)
+  figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE,
+                  absoluteSpecies = FALSE, extension.decreasing = TRUE,
+                  extension.simple = TRUE)
+
+  figArgs[names(figurationArgs)] <- figurationArgs
   
   overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), 
-                            figurationArgs = figurationArgs,  root.case = FALSE,
+                            figurationArgs = figArgs,  root.case = FALSE,
                             root = FALSE, bass = TRUE, bass_func = tint2kern,
                             figuration = TRUE, quality = FALSE,
                             extension.shorthand = TRUE, extension.simple=TRUE,
@@ -449,11 +441,12 @@ tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
 
 tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
-  setoptions(figurationArgs) <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
+  figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
+  figArgs[names(figurationArgs)] <- figurationArgs
   
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
                             root_func = tint2romanRoot, Key = Key,
-                            figurationArgs = figurationArgs, 
+                            figurationArgs = figArgs, 
                             implicitSpecies = TRUE,
                             rootCase = TRUE,
                             inversion.labels = NULL,
@@ -464,11 +457,14 @@ tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...
 }
 
 tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
-  setoptions(figurationArgs) <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
+  figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
+                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
+
+  figArgs[names(figurationArgs)] <- figurationArgs
   
   
   overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
+                            root_func = tint2simplepitch, figurationArgs = figArgs,
                             root.case = FALSE,
                             root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
                             implicitSpecies = FALSE,
@@ -479,12 +475,12 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
 
 
 tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
-  setoptions(figurationArgs) <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
-                                     flat = 'b', qualities = FALSE, natural = 'maj')
-  
+  figArgs <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
+                  flat = 'b', qualities = FALSE, natural = 'maj')
+  figArgs[names(figurationArgs)] <- figurationArgs
   
   chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figurationArgs,
+                            root_func = tint2simplepitch, figurationArgs = figArgs,
                             major = major %||% "MAJOR", minor = 'min', diminish = 'dim',
                             root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
                             implicitSpecies = FALSE, root.case=FALSE,
