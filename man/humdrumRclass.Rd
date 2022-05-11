@@ -103,7 +103,7 @@ called to create this \code{humdrumR} object.}
 \section{Active field}{
 
 
-The \code{Active} slot of a \link{humdrumR} object contains an \link[rlang:quosure]{expression}
+The \code{Active} slot of a \link{humdrumR} object contains an \link[rlang:quosure-tools]{expression}
 which refers to fields in the internal \link[=humTable]{humdrum table}.
 Go to the dedicated \link[=humActive]{active field} documentation to learn more about this important slot!
 }

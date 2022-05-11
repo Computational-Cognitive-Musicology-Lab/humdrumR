@@ -70,9 +70,9 @@ order.rational(
 
 \S4method{sign}{rational}(x)
 
-\S4method{max}{rational}(x)
+\S4method{max}{rational}(x, ..., na.rm = FALSE)
 
-\S4method{min}{rational}(x)
+\S4method{min}{rational}(x, ..., na.rm = FALSE)
 
 \S4method{mean}{rational}(x)
 

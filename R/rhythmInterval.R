@@ -396,6 +396,12 @@ rhythmAlign <- function(x, y) {
   
 }
 
+timestamp <- function(durations, whole = 4) {
+  if (!is.period(whole)) whole <- lubridate::period(whole, 'second')
+  OIs <- OIs(durations)
+  
+  as.numeric(OIs$Onset) * whole
+}
 
 durations <- function(ois) {
   ois$Offset - ois$Onset
@@ -404,7 +410,7 @@ durations <- function(ois) {
 
 
 IOIs <- function(ois) {
-  c(diff(ois$Onset), as(NA, class(ois$Onset)))
+  c(diff(ois$Onset), as(NA, class(os$Onset)))
 }
 
 
