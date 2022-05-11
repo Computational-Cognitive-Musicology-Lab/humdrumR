@@ -923,6 +923,11 @@ setMethod('c', 'struct',
           })
 
 #' @export
+unique.struct <- function(x) {
+  x[!duplicated(x)]
+}
+
+#' @export
 rbind.struct <- function(...) {
     xs <- list(...)
     
