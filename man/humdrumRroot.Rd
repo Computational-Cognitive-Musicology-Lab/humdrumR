@@ -3,7 +3,8 @@
 \docType{data}
 \name{humdrumRroot}
 \alias{humdrumRroot}
-\title{\code{humdrumR}'s root directory on your machine.}
+\title{----------------------------------------------->      NEEDS DOCUMENTATION (A SECTION IS INCOMPLETE)       <------------------------------------------------------
+\code{humdrumR}'s root directory on your machine.}
 \format{
 An object of class \code{character} of length 1.
 }

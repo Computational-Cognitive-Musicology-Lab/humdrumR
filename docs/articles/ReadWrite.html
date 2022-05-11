@@ -22,19 +22,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-<<<<<<< HEAD
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
-    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
-
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
-=======
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
->>>>>>> master
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,11 +60,7 @@
 
       <ul class="navbar-nav">
 <li class="nav-item">
-<<<<<<< HEAD
-  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
-=======
   <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
->>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -92,15 +80,9 @@
       <img src="" class="logo" alt=""><h1>Reading and writing data with humdrumR</h1>
                         <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-<<<<<<< HEAD
-            <h4 data-toc-skip class="date">2022-02-20</h4>
-      
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd" class="external-link"><code>vignettes/ReadWrite.Rmd</code></a></small>
-=======
-            <h4 data-toc-skip class="date">2022-03-06</h4>
+            <h4 data-toc-skip class="date">2022-05-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd"><code>vignettes/ReadWrite.Rmd</code></a></small>
->>>>>>> master
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
     </div>
 
@@ -108,11 +90,7 @@
     
 <p>Welcome to “Reading and writing data with humdrumR”! This document will give you a detailed overview of humdrumR’s data reading and writing functionality. This document closely parallels parts of humdrumR’s code documentation; within an R session, you can read more concise version the material in this document by calling:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<<<<<<< HEAD
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
-=======
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
->>>>>>> master
 
 <span class="op">?</span><span class="va">readHumdrum</span>
 <span class="op">?</span><span class="va">writeHumdrum</span></code></pre></div>
@@ -129,20 +107,12 @@
 </h4>
 <p>In the following examples, we will make use the small number of raw humdrum data files which are included with humdrumR. To access these files, we need to navigate to the directory where your computer installed humdrumR—fortunately, humdrumR records where this directory is on your computer in a variable called <code>humdrumRroot</code>. Once we load the humdrumR library, we just need to set our R “working directory” to that location using the command <code>setwd</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<<<<<<< HEAD
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span></code></pre></div>
-<p>The humdrum data is stored in a subdirectory called “HumdrumData”—we can look at the contents of this directory using <code>dir(recursive = TRUE)</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-=======
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span></code></pre></div>
 <p>The humdrum data is stored in a subdirectory called “HumdrumData”—we can look at the contents of this directory using <code>dir(recursive = TRUE)</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
->>>>>>> master
 <span class="co">#&gt;  [1] "BachChorales/chor001.krn"                  </span>
 <span class="co">#&gt;  [2] "BachChorales/chor002.krn"                  </span>
 <span class="co">#&gt;  [3] "BachChorales/chor003.krn"                  </span>
@@ -200,11 +170,7 @@
 </h3>
 <p>To use <code>readHumdrum</code> we call the function with one (or more) character-string arguments. (In the function documentation (<code><a href="../reference/readHumdrum.html">?readHumdrum</a></code>), you’ll see these arguments called <code>...</code>—in R, <code>...</code> means <em>any</em> number of arguments.) These arguments are interpreted as <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external-link">regular expressions</a>, and matched against directories and files on your system. We call these “<strong>REpath-patterns</strong>,” short for Regular Expression directory-path patterns. For example,</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<<<<<<< HEAD
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
-=======
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
->>>>>>> master
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/BachChorales/chor.*.krn'</span><span class="op">)</span>
@@ -221,15 +187,6 @@
 <span class="co">#&gt;      5:  !!!SCT: BWV 269</span>
 <span class="co">#&gt;      6:  !!!PC#: 1</span>
 <span class="co">#&gt;      7:  !!!AGN: chorale</span>
-<span class="co">#&gt;    126:  !!!hum2abc: -Q ''</span>
-<span class="co">#&gt;    127:  !!!title: @{PC#}. @{OTL@@DE}</span>
-<span class="co">#&gt;    128:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
-<span class="co">#&gt;    129:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
-<span class="co">#&gt;    130:  !!!YOR3: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
-<span class="co">#&gt;    131:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
-<span class="co">#&gt;    132:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
-<span class="co">#&gt;    133:  !!!EED:  Craig Stuart Sapp</span>
-<span class="co">#&gt;    134:  !!!EEV:  2009/05/22</span>
 <span class="co">#&gt;      8:          **kern        **kern        **kern        **kern</span>
 <span class="co">#&gt;      9:          *ICvox        *ICvox        *ICvox        *ICvox</span>
 <span class="co">#&gt;     10:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
@@ -254,22 +211,22 @@
 <span class="co">#&gt;     29:              4D           4F#             .             .</span>
 <span class="co">#&gt;     30:               .             .             .            8a</span>
 <span class="co">#&gt;     31:              4E            4G            4B            4g</span>
-<span class="co">#&gt; 32-125:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;     32:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     33:              4C           8cL           8eL           4.g</span>
+<span class="co">#&gt;     34:               .           8BJ            8d             .</span>
+<span class="co">#&gt;     35:            8BBL            4c            8e             .</span>
+<span class="co">#&gt;     36:            8AAJ             .          8f#J            8a</span>
+<span class="co">#&gt;     37:             4GG            4d            4g            4b</span>
+<span class="co">#&gt;     38:              =4            =4            =4            =4</span>
+<span class="co">#&gt;     39:             2D;           2d;          2f#;           2a;</span>
+<span class="co">#&gt;     40:             4GG            4d            4g            4b</span>
+<span class="co">#&gt; 41-134:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ############################# ^^^ chor001.krn ^^^ #############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (8 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############################# vvv chor010.krn vvv #############################</span>
-<span class="co">#&gt;   1-51:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;     52:               .             .          8f#J             .</span>
-<span class="co">#&gt;     53:              =7            =7            =7            =7</span>
-<span class="co">#&gt;     54:              4G            4d            4g            4b</span>
-<span class="co">#&gt;     55:           8FnXL           8dL            4a            4a</span>
-<span class="co">#&gt;     56:             8EJ           8eJ             .             .</span>
-<span class="co">#&gt;     57:              4D            4f           8bL          8ddL</span>
-<span class="co">#&gt;     58:               .             .           8aJ          8ccJ</span>
-<span class="co">#&gt;     59:              4E            4B           4g#            4b</span>
-<span class="co">#&gt;     60:              =8            =8            =8            =8</span>
+<span class="co">#&gt;   1-60:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;     61:            2AA;           2c;           2e;           2a;</span>
 <span class="co">#&gt;     62:              2A            2e            2a           2cc</span>
 <span class="co">#&gt;     63:              =9            =9            =9            =9</span>
@@ -301,17 +258,22 @@
 <span class="co">#&gt;     89:            2EE;         2G#X;           2B;             .</span>
 <span class="co">#&gt;     90:              ==            ==            ==            ==</span>
 <span class="co">#&gt;     91:              *-            *-            *-            *-</span>
+<span class="co">#&gt;     92:  !!!hum2abc: -Q ''</span>
+<span class="co">#&gt;     93:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="co">#&gt;     94:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="co">#&gt;     95:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="co">#&gt;     96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="co">#&gt;     97:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="co">#&gt;     98:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="co">#&gt;     99:  !!!EED:  Craig Stuart Sapp</span>
+<span class="co">#&gt;    100:  !!!EEV:  2009/05/22</span>
 <span class="co">#&gt; ############################# ^^^ chor010.krn ^^^ #############################</span>
 <span class="co">#&gt;                        (***four global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of ten files.</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<<<<<<< HEAD
-<p>uses the REpath-pattern <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in the ‘HumdrumData/BachChorales’ directory whose name matches the regular expression “chor.<em>.krn." As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)—using your operating system’s appopriate delimeter ("" for windows, "/" for everybody else)—</em>and* a pattern for matching file paths. <em>Each</em> directory is also treated as a regular expression, possibly matching multiple directories. Let’s break this down: <code>humdrumR</code> splits your REpath-pattern input string into three parts: <code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and treats <em>each</em> of the three as regular expressions. The the first two expressions are used to match directories, while the last expression is used to match files. So, while <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code> matches all the files with the”.krn" extension in the “BeethovenVariations” directories and <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches all the files in the “MozartVariations” directories, the command <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code> will match all kern files in both directories!</p>
-=======
 <p>uses the REpath-pattern <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in the ‘HumdrumData/BachChorales’ directory whose name matches the regular expression “chor.<em>.krn.” As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)—using your operating system’s appopriate delimeter (”" for windows, ”/” for everybody else)—</em>and* a pattern for matching file paths. <em>Each</em> directory is also treated as a regular expression, possibly matching multiple directories. Let’s break this down: <code>humdrumR</code> splits your REpath-pattern input string into three parts: <code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and treats <em>each</em> of the three as regular expressions. The the first two expressions are used to match directories, while the last expression is used to match files. So, while <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code> matches all the files with the”.krn” extension in the “BeethovenVariations” directories and <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches all the files in the “MozartVariations” directories, the command <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code> will match all kern files in both directories!</p>
->>>>>>> master
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*Variations/.*.krn'</span><span class="op">)</span>
 <span class="co">#&gt; Finding and reading files...</span>
@@ -417,113 +379,103 @@
 </blockquote>
 <p>To read <em>all</em> of our test files we can enter:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*/.*'</span><span class="op">)</span>
+<code class="sourceCode R">
+<span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*/.*'</span><span class="op">)</span>
 <span class="co">#&gt; Finding and reading files...</span>
 <span class="co">#&gt;  REpath-pattern 'HumdrumData/.*/.*' matches 50 text files in 5 directories.</span>
 <span class="co">#&gt; Fifty files read from disk. </span>
 <span class="co">#&gt; Validating fifty files...all valid.</span>
 <span class="co">#&gt; Parsing fifty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ############################ vvv your_song.hum vvv ############################</span>
-<span class="co">#&gt; NA     1:  !!!COM: Bach, Johann Sebastian</span>
-<span class="co">#&gt; NA     2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
-<span class="co">#&gt; NA     3:  !!!OTL@@DE: Aus meines Herzens Grunde</span>
-<span class="co">#&gt; NA     4:  !!!OTL@EN:      From the Depths of My Heart</span>
-<span class="co">#&gt; NA     5:  !!!SCT: BWV 269</span>
-<span class="co">#&gt; NA     6:  !!!PC#: 1</span>
-<span class="co">#&gt; NA     7:  !!!AGN: chorale</span>
-<span class="co">#&gt; NA   126:  !!!hum2abc: -Q ''</span>
-<span class="co">#&gt; NA   127:  !!!title: @{PC#}. @{OTL@@DE}</span>
-<span class="co">#&gt; NA   128:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian***</span>
-<span class="co">#&gt; NA   129:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H***</span>
-<span class="co">#&gt; NA   130:  !!!YOR3: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 37***</span>
-<span class="co">#&gt; NA   131:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c***</span>
-<span class="co">#&gt; NA   132:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
-<span class="co">#&gt; NA   133:  !!!EED:  Craig Stuart Sapp</span>
-<span class="co">#&gt; NA   134:  !!!EEV:  2009/05/22</span>
-<span class="co">#&gt; NA     8:          **kern        **kern        **kern        **kern</span>
-<span class="co">#&gt; NA     9:          *ICvox        *ICvox        *ICvox        *ICvox</span>
-<span class="co">#&gt; NA    10:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
-<span class="co">#&gt; NA    11:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
-<span class="co">#&gt; NA    12:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
-<span class="co">#&gt; NA    13:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
-<span class="co">#&gt; NA    14:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
-<span class="co">#&gt; NA    15:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
-<span class="co">#&gt; NA    16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
-<span class="co">#&gt; NA    17:             *G:           *G:           *G:           *G:</span>
-<span class="co">#&gt; NA    18:             *F:             *             *             *</span>
-<span class="co">#&gt; NA    19:           *M3/4         *M3/4         *M3/4         *M3/4</span>
-<span class="co">#&gt; NA    20:          *MM100        *MM100        *MM100        *MM100</span>
-<span class="co">#&gt; NA    21:             4GG            4B            4d            4g</span>
-<span class="co">#&gt; NA    22:              =1            =1            =1            =1</span>
-<span class="co">#&gt; NA    23:              4G            4B            4d            2g</span>
-<span class="co">#&gt; NA    24:              4E           8cL            4e             .</span>
-<span class="co">#&gt; NA    25:               .           8BJ             .             .</span>
-<span class="co">#&gt; NA    26:             4F#            4A            4d           4dd</span>
-<span class="co">#&gt; NA    27:              =2            =2            =2            =2</span>
-<span class="co">#&gt; NA    28:              4G            4G            2d           4.b</span>
-<span class="co">#&gt; NA    29:              4D           4F#             .             .</span>
-<span class="co">#&gt; NA    30:               .             .             .            8a</span>
-<span class="co">#&gt; NA    31:              4E            4G            4B            4g</span>
-<span class="co">#&gt; NA32-125:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ############################ ^^^ your_song.hum ^^^ ############################</span>
-<span class="co">#&gt; ############################# vvv chor001.krn vvv #############################</span>
-<span class="co">#&gt; NA      :              =7            =7            =7            =7</span>
-<span class="co">#&gt; NA      :             =17           =17           =17           =17</span>
-<span class="co">#&gt; NA      :             =43           =43           =43           =43</span>
-<span class="co">#&gt; NA      :             =47           =47           =47           =47</span>
-<span class="co">#&gt; NA      :             =69           =69           =69           =69</span>
-<span class="co">#&gt; NA      :             =86           =86           =86           =86</span>
-<span class="co">#&gt; NA      :             =99           =99           =99           =99</span>
-<span class="co">#&gt; NA      :            =103          =103          =103          =103</span>
-<span class="co">#&gt; NA:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ############################# ^^^ chor001.krn ^^^ #############################</span>
+<span class="co">#&gt; ############################ vvv chor001.krn vvv ############################</span>
+<span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
+<span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
+<span class="co">#&gt;      3:  !!!OTL@@DE: Aus meines Herzens Grunde</span>
+<span class="co">#&gt;      4:  !!!OTL@EN:      From the Depths of My Heart</span>
+<span class="co">#&gt;      5:  !!!SCT: BWV 269</span>
+<span class="co">#&gt;      6:  !!!PC#: 1</span>
+<span class="co">#&gt;      7:  !!!AGN: chorale</span>
+<span class="co">#&gt;      8:          **kern        **kern        **kern        **kern</span>
+<span class="co">#&gt;      9:          *ICvox        *ICvox        *ICvox        *ICvox</span>
+<span class="co">#&gt;     10:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
+<span class="co">#&gt;     11:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
+<span class="co">#&gt;     12:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
+<span class="co">#&gt;     13:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
+<span class="co">#&gt;     14:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
+<span class="co">#&gt;     15:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
+<span class="co">#&gt;     16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
+<span class="co">#&gt;     17:             *G:           *G:           *G:           *G:</span>
+<span class="co">#&gt;     18:             *F:             *             *             *</span>
+<span class="co">#&gt;     19:           *M3/4         *M3/4         *M3/4         *M3/4</span>
+<span class="co">#&gt;     20:          *MM100        *MM100        *MM100        *MM100</span>
+<span class="co">#&gt;     21:             4GG            4B            4d            4g</span>
+<span class="co">#&gt;     22:              =1            =1            =1            =1</span>
+<span class="co">#&gt;     23:              4G            4B            4d            2g</span>
+<span class="co">#&gt;     24:              4E           8cL            4e             .</span>
+<span class="co">#&gt;     25:               .           8BJ             .             .</span>
+<span class="co">#&gt;     26:             4F#            4A            4d           4dd</span>
+<span class="co">#&gt;     27:              =2            =2            =2            =2</span>
+<span class="co">#&gt;     28:              4G            4G            2d           4.b</span>
+<span class="co">#&gt;     29:              4D           4F#             .             .</span>
+<span class="co">#&gt;     30:               .             .             .            8a</span>
+<span class="co">#&gt;     31:              4E            4G            4B            4g</span>
+<span class="co">#&gt;     32:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     33:              4C           8cL           8eL           4.g</span>
+<span class="co">#&gt;     34:               .           8BJ            8d             .</span>
+<span class="co">#&gt;     35:            8BBL            4c            8e             .</span>
+<span class="co">#&gt;     36:            8AAJ             .          8f#J            8a</span>
+<span class="co">#&gt;     37:             4GG            4d            4g            4b</span>
+<span class="co">#&gt;     38:              =4            =4            =4            =4</span>
+<span class="co">#&gt;     39:             2D;           2d;          2f#;           2a;</span>
+<span class="co">#&gt;     40:             4GG            4d            4g            4b</span>
+<span class="co">#&gt; 41-134:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ############################ ^^^ chor001.krn ^^^ ############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (48 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ############################# vvv chor001.krn vvv #############################</span>
-<span class="co">#&gt; NA1-1189:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; NA  1190:               .             .             .             .</span>
-<span class="co">#&gt; NA  1191:            =118          =118          =118          =118</span>
-<span class="co">#&gt; NA  1192:              I6            I6             5       220.457</span>
-<span class="co">#&gt; NA  1193:               .             .             .             .</span>
-<span class="co">#&gt; NA  1194:               .             .             .             .</span>
-<span class="co">#&gt; NA  1195:               .             .             3             .</span>
-<span class="co">#&gt; NA  1196:               .             .             .             .</span>
-<span class="co">#&gt; NA  1197:               .             .             2             .</span>
-<span class="co">#&gt; NA  1198:               .             .             1             .</span>
-<span class="co">#&gt; NA  1199:               .             .             .             .</span>
-<span class="co">#&gt; NA  1200:            =119          =119          =119          =119</span>
-<span class="co">#&gt; NA  1201:            ii65            IV             2       222.340</span>
-<span class="co">#&gt; NA  1202:               .             .             .             .</span>
-<span class="co">#&gt; NA  1203:               .             .             .             .</span>
-<span class="co">#&gt; NA  1204:               .             .             6             .</span>
-<span class="co">#&gt; NA  1205:               .             .             .             .</span>
-<span class="co">#&gt; NA  1206:               .             .             .             .</span>
-<span class="co">#&gt; NA  1207:               .             .             .             .</span>
-<span class="co">#&gt; NA  1208:               .             .             6             .</span>
-<span class="co">#&gt; NA  1209:            =120          =120          =120          =120</span>
-<span class="co">#&gt; NA  1210:               .             .            b3       224.253</span>
-<span class="co">#&gt; NA  1211:               .             .             2             .</span>
-<span class="co">#&gt; NA  1212:               .             .             .             .</span>
-<span class="co">#&gt; NA  1213:               .             .             1             .</span>
-<span class="co">#&gt; NA  1214:               .             .             .             .</span>
-<span class="co">#&gt; NA  1215:               .             .             1             .</span>
-<span class="co">#&gt; NA  1216:               .             .             1             .</span>
-<span class="co">#&gt; NA  1217:               .             .             .             .</span>
-<span class="co">#&gt; NA  1218:            =121          =121          =121          =121</span>
-<span class="co">#&gt; NA  1219:            *tb1          *tb1          *tb1             *</span>
-<span class="co">#&gt; NA  1220:               I             I             .       226.135</span>
-<span class="co">#&gt; NA  1221:            =122          =122          =122          =122</span>
-<span class="co">#&gt; NA  1222:              IV          IV64             .       228.013</span>
-<span class="co">#&gt; NA  1223:            =123          =123          =123          =123</span>
-<span class="co">#&gt; NA  1224:               V           Vs4             .       229.838</span>
-<span class="co">#&gt; NA  1225:            =124          =124          =124          =124</span>
-<span class="co">#&gt; NA  1226:              IV          IV64             .       231.691</span>
-<span class="co">#&gt; NA  1227:            =125          =125          =125          =125</span>
-<span class="co">#&gt; NA  1228:               I             I             .       233.583</span>
-<span class="co">#&gt; NA  1229:              *-            *-            *-            *-</span>
-<span class="co">#&gt; ############################# ^^^ chor001.krn ^^^ #############################</span>
-<span class="co">#&gt;                        (***five global comments truncated due to screen size***)</span>
+<span class="co">#&gt; ########################### vvv your_song.hum vvv ###########################</span>
+<span class="co">#&gt; 1-1194:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;   1195:               .             .             3             .</span>
+<span class="co">#&gt;   1196:               .             .             .             .</span>
+<span class="co">#&gt;   1197:               .             .             2             .</span>
+<span class="co">#&gt;   1198:               .             .             1             .</span>
+<span class="co">#&gt;   1199:               .             .             .             .</span>
+<span class="co">#&gt;   1200:            =119          =119          =119          =119</span>
+<span class="co">#&gt;   1201:            ii65            IV             2       222.340</span>
+<span class="co">#&gt;   1202:               .             .             .             .</span>
+<span class="co">#&gt;   1203:               .             .             .             .</span>
+<span class="co">#&gt;   1204:               .             .             6             .</span>
+<span class="co">#&gt;   1205:               .             .             .             .</span>
+<span class="co">#&gt;   1206:               .             .             .             .</span>
+<span class="co">#&gt;   1207:               .             .             .             .</span>
+<span class="co">#&gt;   1208:               .             .             6             .</span>
+<span class="co">#&gt;   1209:            =120          =120          =120          =120</span>
+<span class="co">#&gt;   1210:               .             .            b3       224.253</span>
+<span class="co">#&gt;   1211:               .             .             2             .</span>
+<span class="co">#&gt;   1212:               .             .             .             .</span>
+<span class="co">#&gt;   1213:               .             .             1             .</span>
+<span class="co">#&gt;   1214:               .             .             .             .</span>
+<span class="co">#&gt;   1215:               .             .             1             .</span>
+<span class="co">#&gt;   1216:               .             .             1             .</span>
+<span class="co">#&gt;   1217:               .             .             .             .</span>
+<span class="co">#&gt;   1218:            =121          =121          =121          =121</span>
+<span class="co">#&gt;   1219:            *tb1          *tb1          *tb1             *</span>
+<span class="co">#&gt;   1220:               I             I             .       226.135</span>
+<span class="co">#&gt;   1221:            =122          =122          =122          =122</span>
+<span class="co">#&gt;   1222:              IV          IV64             .       228.013</span>
+<span class="co">#&gt;   1223:            =123          =123          =123          =123</span>
+<span class="co">#&gt;   1224:               V           Vs4             .       229.838</span>
+<span class="co">#&gt;   1225:            =124          =124          =124          =124</span>
+<span class="co">#&gt;   1226:              IV          IV64             .       231.691</span>
+<span class="co">#&gt;   1227:            =125          =125          =125          =125</span>
+<span class="co">#&gt;   1228:               I             I             .       233.583</span>
+<span class="co">#&gt;   1229:              *-            *-            *-            *-</span>
+<span class="co">#&gt;   1230:  !!!ONB: Translated from original encodings in the Rolling Stone C***</span>
+<span class="co">#&gt;   1231:  !!!ONB: Original transcribers noted in comments in each spine: !D***</span>
+<span class="co">#&gt;   1232:  !!!YOE: David Temperley, Trevor de Clercq</span>
+<span class="co">#&gt;   1233:  !!!EED: Nathaniel Condit-Schultz (fathermckenzie.net)</span>
+<span class="co">#&gt;   1234:  !!!ENC: Nathaniel Condit-Schultz (fathermckenzie.net), automated</span>
+<span class="co">#&gt; ########################### ^^^ your_song.hum ^^^ ###########################</span>
+<span class="co">#&gt;                     (***three global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of fifty files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -798,16 +750,6 @@
 <span class="co">#&gt;      6:  !!!SCT: BWV 153/1</span>
 <span class="co">#&gt;      7:  !!!PC#: 3</span>
 <span class="co">#&gt;      8:  !!!AGN: chorale</span>
-<span class="co">#&gt;    101:  !!!hum2abc: -Q ''</span>
-<span class="co">#&gt;    102:  !!!title: @{PC#}. @{OTL@@DE}</span>
-<span class="co">#&gt;    103:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
-<span class="co">#&gt;    104:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
-<span class="co">#&gt;    105:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
-<span class="co">#&gt;    106:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
-<span class="co">#&gt;    107:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
-<span class="co">#&gt;    108:  !!!PC#2: 7 (Budapest/Imre, 1982) with first part written with repeats.</span>
-<span class="co">#&gt;    109:  !!!EED:  Craig Stuart Sapp</span>
-<span class="co">#&gt;    110:  !!!EEV:  2009/05/22</span>
 <span class="co">#&gt;      9:          **kern        **kern        **kern        **kern</span>
 <span class="co">#&gt;     10:          *ICvox        *ICvox        *ICvox        *ICvox</span>
 <span class="co">#&gt;     11:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
@@ -830,22 +772,23 @@
 <span class="co">#&gt;     28:             8BL           8dL          8g#L           4ee</span>
 <span class="co">#&gt;     29:             8AJ           8cJ           8aJ             .</span>
 <span class="co">#&gt;     30:              =2            =2            =2            =2</span>
-<span class="co">#&gt; 31-100:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;     31:             4G#            4B            4b          8eeL</span>
+<span class="co">#&gt;     32:               .             .             .          8ddJ</span>
+<span class="co">#&gt;     33:              4A           8cL           8eL           4cc</span>
+<span class="co">#&gt;     34:               .           8dJ          8f#J             .</span>
+<span class="co">#&gt;     35:             4E;           4e;          4g#;           4b;</span>
+<span class="co">#&gt;     36:             4BB            4f           4g#           4dd</span>
+<span class="co">#&gt;     37:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     38:             8CL            4e            4a           4cc</span>
+<span class="co">#&gt;     39:             8DJ             .             .             .</span>
+<span class="co">#&gt;     40:              4E           8eL           4g#            4b</span>
+<span class="co">#&gt; 41-110:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ############################# ^^^ chor003.krn ^^^ #############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (1 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############################# vvv chor010.krn vvv #############################</span>
-<span class="co">#&gt;   1-51:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;     52:               .             .          8f#J             .</span>
-<span class="co">#&gt;     53:              =7            =7            =7            =7</span>
-<span class="co">#&gt;     54:              4G            4d            4g            4b</span>
-<span class="co">#&gt;     55:           8FnXL           8dL            4a            4a</span>
-<span class="co">#&gt;     56:             8EJ           8eJ             .             .</span>
-<span class="co">#&gt;     57:              4D            4f           8bL          8ddL</span>
-<span class="co">#&gt;     58:               .             .           8aJ          8ccJ</span>
-<span class="co">#&gt;     59:              4E            4B           4g#            4b</span>
-<span class="co">#&gt;     60:              =8            =8            =8            =8</span>
+<span class="co">#&gt;   1-60:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;     61:            2AA;           2c;           2e;           2a;</span>
 <span class="co">#&gt;     62:              2A            2e            2a           2cc</span>
 <span class="co">#&gt;     63:              =9            =9            =9            =9</span>
@@ -877,8 +820,17 @@
 <span class="co">#&gt;     89:            2EE;         2G#X;           2B;             .</span>
 <span class="co">#&gt;     90:              ==            ==            ==            ==</span>
 <span class="co">#&gt;     91:              *-            *-            *-            *-</span>
+<span class="co">#&gt;     92:  !!!hum2abc: -Q ''</span>
+<span class="co">#&gt;     93:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="co">#&gt;     94:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="co">#&gt;     95:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="co">#&gt;     96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="co">#&gt;     97:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="co">#&gt;     98:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="co">#&gt;     99:  !!!EED:  Craig Stuart Sapp</span>
+<span class="co">#&gt;    100:  !!!EEV:  2009/05/22</span>
 <span class="co">#&gt; ############################# ^^^ chor010.krn ^^^ #############################</span>
-<span class="co">#&gt;                        (***five global comments truncated due to screen size***)</span>
+<span class="co">#&gt;                        (***four global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of three files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -1159,28 +1111,28 @@ D:,MM100,M4/4,C:</code></pre>
 <p>Fortunately, <code>humdrumR</code> <em>does</em> know how to parse many standard tandem interpretations. If you run the command</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">knownInterpretations</span><span class="op">[</span><span class="va">Type</span> <span class="op">==</span> <span class="st">'Tandem'</span><span class="op">]</span> 
-<span class="co">#&gt;                      Name Exclusive                              RE Pretty</span>
-<span class="co">#&gt;  1:                   Key                           [A-Ga-g][-#b]*:     _:</span>
-<span class="co">#&gt;  2:          KeySignature                    k\\[([a-g][#-]* *)*\\]   k[_]</span>
-<span class="co">#&gt;  3:                  Clef                         clef[A-G]v*[1-5]*  clef_</span>
-<span class="co">#&gt;  4:         TimeSignature           M[1-9][0-9]*/((16)|(32)|[1248])   M_/_</span>
-<span class="co">#&gt;  5:           Mensuration                            met\\([^)]*\\) met(_)</span>
-<span class="co">#&gt;  6:                   BPM                                  MM[0-9]+    MM_</span>
-<span class="co">#&gt;  7:              Timebase           tb[1-9][0-9]*%?[1-9]?[0-9]*[.]*    tb_</span>
-<span class="co">#&gt;  8:            Instrument                                   I[^C,]+     I_</span>
-<span class="co">#&gt;  9:       InstrumentClass                                   IC[^,]*    IC_</span>
-<span class="co">#&gt; 10: TransposingInstrument                                  ITr[^,]*   ITr_</span>
-<span class="co">#&gt;       Type</span>
-<span class="co">#&gt;  1: Tandem</span>
-<span class="co">#&gt;  2: Tandem</span>
-<span class="co">#&gt;  3: Tandem</span>
-<span class="co">#&gt;  4: Tandem</span>
-<span class="co">#&gt;  5: Tandem</span>
-<span class="co">#&gt;  6: Tandem</span>
-<span class="co">#&gt;  7: Tandem</span>
-<span class="co">#&gt;  8: Tandem</span>
-<span class="co">#&gt;  9: Tandem</span>
-<span class="co">#&gt; 10: Tandem</span></code></pre></div>
+<span class="co">#&gt;                      Name Exclusive</span>
+<span class="co">#&gt;  1:                   Key          </span>
+<span class="co">#&gt;  2:          KeySignature          </span>
+<span class="co">#&gt;  3:                  Clef          </span>
+<span class="co">#&gt;  4:         TimeSignature          </span>
+<span class="co">#&gt;  5:           Mensuration          </span>
+<span class="co">#&gt;  6:                   BPM          </span>
+<span class="co">#&gt;  7:              Timebase          </span>
+<span class="co">#&gt;  8:            Instrument          </span>
+<span class="co">#&gt;  9:       InstrumentClass          </span>
+<span class="co">#&gt; 10: TransposingInstrument          </span>
+<span class="co">#&gt;                                                      RE Pretty   Type</span>
+<span class="co">#&gt;  1: [A-Ga-g][-#b]*:(mix|dor|phr|lyd|loc)?([#bn]?[1-7])*     _: Tandem</span>
+<span class="co">#&gt;  2:                              k\\[([a-g][#-]* *)*\\]   k[_] Tandem</span>
+<span class="co">#&gt;  3:                                   clef[A-G]v*[1-5]*  clef_ Tandem</span>
+<span class="co">#&gt;  4:                     M[1-9][0-9]*/((16)|(32)|[1248])   M_/_ Tandem</span>
+<span class="co">#&gt;  5:                                      met\\([^)]*\\) met(_) Tandem</span>
+<span class="co">#&gt;  6:                                            MM[0-9]+    MM_ Tandem</span>
+<span class="co">#&gt;  7:                     tb[1-9][0-9]*%?[1-9]?[0-9]*[.]*    tb_ Tandem</span>
+<span class="co">#&gt;  8:                                             I[^C,]+     I_ Tandem</span>
+<span class="co">#&gt;  9:                                             IC[^,]*    IC_ Tandem</span>
+<span class="co">#&gt; 10:                                            ITr[^,]*   ITr_ Tandem</span></code></pre></div>
 <p>we see that there are currently ten classes of tandem interpretations that <code>humdrumR</code> recognizes, each associated with a regular expression. Thus, if we really apply <code>readHumdrum</code> to this file</p>
 <pre><code>**kern
 *C:
@@ -1219,11 +1171,7 @@ D:</code></pre>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<<<<<<< HEAD
-<p>Developed by Nathaniel Condit-Schultz.</p>
-=======
 <p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
->>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

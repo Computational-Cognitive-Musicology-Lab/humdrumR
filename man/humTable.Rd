@@ -44,8 +44,8 @@ piece of information associated with each token, which we call a \strong{field}.
 Throughout this documentation, you should keep in mind that a "token" refers
 to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 \itemize{
-\item \eqn{Token = Row}
-\item \eqn{Field = Column}
+\item Token = Row
+\item Field = Column
 }
 }
 \section{Fields:}{
@@ -74,7 +74,7 @@ contains character strings representing the original strings read from the humdr
 Users can create as many additional data fields as they like. Every call to
 \link{withinHumdrum}---which can also be called using the
 \link[=\\\%hum>\\\%]{humdrumR:humPipe} piping
-operator---generates one or \eqn{N} new data fields named \eqn{{Pipe1, Pipe2, ..., PipeN}}.
+operator---generates one or N new data fields named {Pipe1, Pipe2, ..., PipeN}.
 These fields can be renamed using the \verb{$<-} operator.
 }
 
@@ -270,7 +270,7 @@ In some cases, entire records may be padded with null tokens.
 Each type of humdrum record uses a different null token:
 \itemize{
 \item \emph{Intepretation}: \code{*}
-\item \emph{Comment}: \code{!}
+\emph{Comment}: \code{!}
 \item \emph{Barline}: \code{=}
 \item \emph{Data}: \code{.}
 }

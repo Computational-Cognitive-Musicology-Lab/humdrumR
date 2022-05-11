@@ -3,10 +3,8 @@
 \name{diatonicSet}
 \alias{diatonicSet}
 \alias{dset}
-\alias{as.character,diatonicSet-method}
 \alias{is.diatonicSet}
 \alias{order.diatonicSet}
-\alias{==,diatonicSet,diatonicSet-method}
 \alias{Compare,diatonicSet,diatonicSet-method}
 \alias{diatonicSet.diatonicSet}
 \alias{diatonicSet.logical}
@@ -17,7 +15,7 @@
 \usage{
 dset(root = 0L, signature = root, alterations = 0L)
 
-\S4method{as.character}{diatonicSet}(x)
+is.diatonicSet(x)
 
 is.diatonicSet(x)
 
@@ -87,13 +85,13 @@ You can also think of the signature as indicating how much the "natural key" (C 
 slid up and down the line-of-fifths.
 The \href{https://en.wikipedia.org/wiki/Mode_(music)}{traditional diatonic modes} of Western music occur wherever \code{Signature - Tonic} is in the range \code{-5:1}:
 \itemize{
-\item \eqn{Signature - Tonic = +1 \rightarrow} Lydian
-\item \eqn{Signature - Tonic = +0 \rightarrow} Major (Ionian)
-\item \eqn{Signature - Tonic = -1 \rightarrow} Mixolydian
-\item \eqn{Signature - Tonic = -2 \rightarrow} Dorian
-\item \eqn{Signature - Tonic = -3 \rightarrow} Minor (Aeolian)
-\item \eqn{Signature - Tonic = -5 \rightarrow} Locrian
-\item \eqn{Signature - Tonic = -4 \rightarrow} Phyrgian
+\item Signature - Tonic = +1 => Lydian
+\item Signature - Tonic = +0 => Major (Ionian)
+\item Signature - Tonic = -1 => Mixolydian
+\item Signature - Tonic = -2 => Dorian
+\item Signature - Tonic = -3 => Minor (Aeolian)
+\item Signature - Tonic = -5 => Locrian
+\item Signature - Tonic = -4 => Phyrgian
 }
 
 \emph{Note that you can make diatonicSets where the \code{Root} is outside the \code{Key}. This is unusual, and may result in sets you wouldn't predict.}}
@@ -113,13 +111,13 @@ lowest to hightest on the line-of-fifths, not relative to the root.
 
 The ternary arrangement maps powers of three to each scale degree, as so that in the \code{Alteration} integer:
 \itemize{
-\item \eqn{\pm 1}: raise or flatten the \strong{7th} scale degree.
-\item \eqn{\pm 3}: raise or flatten the \strong{3rd} scale degree.
-\item \eqn{\pm 9}: raise or flatten the \strong{6th} scale degree.
-\item \eqn{\pm 27}: raise or flatten the \strong{2nd} scale degree.
-\item \eqn{\pm 81}: raise or flatten the \strong{5th} scale degree.
-\item \eqn{\pm 243}: raise or flatten the \strong{1st} scale degree.
-\item \eqn{\pm 749}: raise or flatten the \strong{4th} scale degree.
+\item ± 1: raise or flatten the \strong{7th} scale degree.
+\item ± 3: raise or flatten the \strong{3rd} scale degree.
+\item ± 9: raise or flatten the \strong{6th} scale degree.
+\item ± 27: raise or flatten the \strong{2nd} scale degree.
+\item ± 81: raise or flatten the \strong{5th} scale degree.
+\item ± 243: raise or flatten the \strong{1st} scale degree.
+\item ± 749: raise or flatten the \strong{4th} scale degree.
 }
 
 For example, consider \code{Alteration == 26}:

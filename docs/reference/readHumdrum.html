@@ -6,19 +6,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-<<<<<<< HEAD
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
-    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
-
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
-=======
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
->>>>>>> master
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,11 +40,7 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-<<<<<<< HEAD
-  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
-=======
   <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
->>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -65,11 +53,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Find and read humdrum files into R</h1>
-<<<<<<< HEAD
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Read.R" class="external-link"><code>R/Read.R</code></a></small>
-=======
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Read.R"><code>R/Read.R</code></a></small>
->>>>>>> master
       <div class="d-none name"><code>readHumdrum.Rd</code></div>
     </div>
 
@@ -133,11 +117,7 @@ are parsed into their own fields. The default value is <code>"all"</code>.</p></
     <p><code>findHumdrum</code> does the work of finding and reading the text files into R.
 <code>readHumdrum</code> utilizes <code>findHumdrum</code> to read files, then parses them to
 create a <a href="humTable.html">humTable</a> and build
-<<<<<<< HEAD
-a <a href="humdrumR-class.html">humdrumR</a> data object around the table.</p>
-=======
 a <a href="humdrumRclass.html">humdrumR</a> data object around the table.</p>
->>>>>>> master
     </div>
     <div class="section level2">
     <h2 id="repath-patterns">REpath-patterns<a class="anchor" aria-label="anchor" href="#repath-patterns"></a></h2>
@@ -160,11 +140,7 @@ For instance, <code>readHumdrum(c("mozart", "beethoven")</code>---this command w
 filenames containing "mozart" OR "beethoven."
 This works for directories too: <code>readHumdrum(c("Mozart", "Beethoven"), ".*krn$")</code> will
 look for any kern files in directories containing "Mozart" OR "Beethoven."
-<<<<<<< HEAD
-If patterns are named, these names will show up as identifying patterns in the <code><a href="humdrumR-class.html">humdrumR</a></code> object's
-=======
 If patterns are named, these names will show up as identifying patterns in the <code>[humdrumR][humdrumR]</code> object's
->>>>>>> master
 <code>Label</code> field. Unnamed patterns are simply labeled with numbers.</p>
 <p>Normal (system appropriate) conventions (i.e., directories separated by <code>"/"</code>,
 <code>'~'</code> at beginning to indicate home, <code>".."</code> to indicate directory above working directory, etc.)
@@ -190,13 +166,8 @@ If there are no multi-piece files, <code>Piece</code> and <code>File</code> will
 
 
 <p><code>findHumdrum</code> and <code>readHumdrum</code> automatically ignore non-text files.
-<<<<<<< HEAD
-Whatsmore, any files which contain humdrum syntax errors (checked by <code><a href="humValidation.html">validateHumdrum</a></code>) are automatically
-skipped. If you want to see specifically what errors occured, call <code><a href="humValidation.html">validateHumdrum</a></code>
-=======
 Whatsmore, any files which contain humdrum syntax errors (checked by <code>[validateHumdrum][validateHumdrum]</code>) are automatically
 skipped. If you want to see specifically what errors occured, call <code>[validateHumdrum][validateHumdrum]</code>
->>>>>>> master
 directly and its <code>errorReport.path</code> argument.</p>
     </div>
     <div class="section level2">
@@ -263,15 +234,12 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-<<<<<<< HEAD
-    
-=======
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="op">)</span> <span class="co"># loads all valid humdrum files in the current directory.</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 87 text files in 1 directory.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Eighty-Seven files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Validating eighty-seven files...18,669 errors in eighty-eight files...zero valid files.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 89 text files in 1 directory.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Eighty-Nine files read from disk. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Validating eighty-nine files...19,456 errors in ninety files...zero valid files.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="st">".*krn$"</span><span class="op">)</span> <span class="co"># loads all files ending with "krn" in the currect directory</span></span>
@@ -312,18 +280,13 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
 <span class="r-in"><span class="co"># in the Label field as "Beethoven" and "Mozart" respectively.</span></span>
 <span class="r-in"></span>
 </code></pre></div>
->>>>>>> master
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-<<<<<<< HEAD
-  <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
-=======
   <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
->>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

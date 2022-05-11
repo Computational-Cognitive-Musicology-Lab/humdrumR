@@ -7,7 +7,8 @@
 \alias{derive}
 \alias{delta}
 \alias{calculus}
-\title{Interval "calculus"}
+\title{Interval "calculus"
+-------------------------------------->     NEEDS DOCUMENTATION         <---------------------------------------------}
 \usage{
 integrate(intervals, skip = list(is.na))
 
@@ -21,4 +22,5 @@ calculus(x, n, skip = list(na))
 }
 \description{
 Interval "calculus"
+-------------------------------------->     NEEDS DOCUMENTATION         <---------------------------------------------
 }

@@ -12,7 +12,7 @@
 \alias{$<-,humdrumR,humdrumR-method}
 \alias{[<-,humdrumR,character,ANY,vector-method}
 \alias{[<-,humdrumR,character,ANY,humdrumR-method}
-\alias{[[,humdrumR,missing,character-method}
+\alias{humdrumR-class}
 \alias{[[,humdrumR,missing,missing-method}
 \alias{[[,humdrumR,formula,missing-method}
 \alias{[[,humdrumR,missing,formula-method}
@@ -103,7 +103,7 @@ called to create this \code{humdrumR} object.}
 \section{Active field}{
 
 
-The \code{Active} slot of a \link{humdrumR} object contains an \link[rlang:quosure]{expression}
+The \code{Active} slot of a \link{humdrumR} object contains an \link[rlang:quosure-tools]{expression}
 which refers to fields in the internal \link[=humTable]{humdrum table}.
 Go to the dedicated \link[=humActive]{active field} documentation to learn more about this important slot!
 }

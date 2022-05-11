@@ -17,11 +17,11 @@
 \usage{
 filterHumdrum(humdrumR, ...)
 
-removeEmptyFiles(humdrumR)
+removeEmptyFiles(humdrumR, fillfromTypes = "D")
 
-removeEmptySpines(humdrumR)
+removeEmptySpines(humdrumR, fillfromTypes = "D")
 
-removeEmptyRecords(humdrumR)
+removeEmptyRecords(humdrumR, fillfromTypes = "D")
 
 humdata[] # returns unchanged
 

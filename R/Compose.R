@@ -1,35 +1,21 @@
 
 
-#' @export
-print.composed <- function(x) {
-    checkArg(x)
-    attributes(x) <- NULL
-    print(x)
-    
-}
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @export
-`%.%` <- function(e1, e2) {
-    checkArg(e1)
-    checkArg(e2)
-    f1name <- rlang::quo_text(rlang::enquo(e1))
-    f2name <- rlang::quo_text(rlang::enquo(e2))
-    
-    fs <- setNames(c(e1, e2), c(f1name, f2name))
-    do.call('compose', c(fs, list(fenv = parent.frame())))
-    }
 
 # Smart dispatch/function application ----
 
 
-# "sticky attributes" 
-#' @export
-stickyApply <- function(func, ...) {
-    checkArg(func)
-    pipe <- stickyAttrs(list(...)[[1]])
-    result <- func(...)
-    stickyAttrs(result) <- pipe
+
+dimParse <- function(args) {
+  firstArg <- args[[1]]
+  if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
+  
+  olddim <- dim(firstArg)
+  
+  args[[1]] <- dropdim(firstArg)
+  
+  restorer <- function(result) {
+    if (length(result) == prod(olddim))  dim(result) <- olddim 
     result
   }
   
@@ -51,253 +37,7 @@ predicateParse <- function(predicateFunc, args, anyMatch = FALSE,
   
   if (length(dispatchArgs) > 0L) targets <- targets & .names(args) %in% dispatchArgs
   
-<<<<<<< HEAD
-    if (is.null(stickyAttrs(result)$replace)) {
-      stickyAttrs(result) <- c(replace = inPlacer(orig, getRE(regex)))
-    } 
-    
-    if (is.character(result)) return(stickyAttrs(result)$replace(result))
-    
-    result
-    
-}
-
-inPlacer <- function(orig, regex) {
-    function(result) {
-        .ifelse(is.na(result), 
-                orig,
-                stringi::stri_replace_first(str = orig,
-                                            replacement = result,
-                                            regex = regex))
-    }
-}
-
-as.re <- function(x, as) {
-    stickyAttrs(x) <- list(as = names(as))
-   x
-}
-
-`%re.place%` <- function(e1, e2) {
-    stickyAttrs(e1) <- list(replace = e2)
-    e1
-}
-
-re.as <- function(vector) {
-    sticky <- stickyAttrs(vector)
-    asfunc <- sticky$as
-    if (is.null(asfunc)) return(vector)
-    
-    match_size(vector = vector, asfunc = asfunc, toEnv = TRUE)
-    
-    splitvector <- split(vector, asfunc)
-    
-    splitvector <- Map(stickyApply, lapply(names(splitvector), match.fun), splitvector)
-    
-    output <- setNames(unlist(splitvector), names(vector))
-    
-    sticky$as <- NULL
-    stickyAttrs(output) <- sticky
-    
-    output %dim% vector
-    
-    
-    
-}
-
-
-#' @export
-re.place <- function(vector) {
-    if(!is.vector(vector) return(c("you did not enter a vector, you entered a ", class(vector))))
-    asfunc <- stickyAttrs(vector)$replace
-    if (is.null(asfunc)) return(unstick(vector))
-    
-    asfunc(vector) %dim% vector
-}
-
-
-################## Predicate function generators ----
-
-
-setClass('predicate.function', contains = 'function', 
-         slots = c(string = 'character'))
-
-setMethod('show', 'predicate.function',
-          function(object) cat(c('f(x) =', object@string)) )
-
-setMethod('&', c('predicate.function', 'predicate.function'),
-          function(e1, e2) {
-              f1 <- e1@.Data
-              f2 <- e2@.Data
-              func <- function(x) {
-                  f1(x) & f2(x)
-              }
-              
-              s1 <- e1@string
-              s2 <- e2@string
-              
-              if (grepl('&|\\|', s1)) s1 <- paste0('(', s1, ')')
-              if (grepl('&|\\|', s2)) s2 <- paste0('(', s2, ')')
-              new('predicate.function', func,
-                  string = paste(s1, s2, sep = ' & '))
-          })
-
-setMethod('|', c('predicate.function', 'predicate.function'),
-          function(e1, e2) {
-              f1 <- e1@.Data
-              f2 <- e2@.Data
-              func <- function(x) {
-                  f1(x) | f2(x)
-              }
-              
-              s1 <- e1@string
-              s2 <- e2@string
-              
-              if (grepl('&|\\|', s1)) s1 <- paste0('(', s1, ')')
-              if (grepl('&|\\|', s2)) s2 <- paste0('(', s2, ')')
-              new('predicate.function', func,
-                  string = paste(s1, s2, sep = ' | '))
-          })
-
-#' @export
-EQ <- function(pat) {
-  checkArg(pat)
-  func <- function(x) {
-    match_size(pat = pat,x = x, toEnv = TRUE)
-    ifelse(is.na(pat), is.na(x), x == pat)
-  }
-
-
-  new('predicate.function', func, string = glue::glue('x == {deparse(pat)}'))
-}
-
-#' @export
-LEN <- function(p.f) {
-    checkArg(p.f)
-    func <- function(x) p.f(length(x))
- 
-    new('predicate.function', func,
-        string = gsub('x', 'length(x)', p.f@string))
-}
-
-#' @export
-ANY <- function(p.f) {
-    checkArg(p.f)
-    func <- unclass(any %.% p.f)
-    
-    new('predicate.function', func, string = paste0('any(', p.f@string, ')'))
-}
-#' @export
-ALL <- function(p.f) {
-    checkArg(p.f)
-    func <- unclass(all %.% p.f)
-    
-    new('predicate.function', func, string = paste0('all(', p.f@string, ')'))
-}
-
-#' @export
-GT <- function(n) {
-  checkNumeric(n)
-  func <- function(x) x > n
-
-  new('predicate.function', func, string = glue::glue('x > {deparse(n)}'))
-}
-
-#' @export
-GTET <- function(n) {
-  checkNumeric(n)
-  func <- function(x) x >= n
-
-  new('predicate.function', func, string = glue::glue('x >= {deparse(n)}'))
-}
-
-
-#' @export
-LT <- function(n) {
-  checkNumeric(n)
-  func <- function(x) x < n
-
-  new('predicate.function', func, string = glue::glue('x < {deparse(n)}'))
-}
-
-#' @export
-LTET <- function(n) {
-  checkNumeric(n)
-  func <- function(x) x <= n
-
-  new('predicate.function', func, string = glue::glue('x <= {deparse(n)}'))
-}
-
-#' @export
-RE <- function(pat) {
-  checkArg(pat)
-  func <- function(x)  grepl(pat, x) 
-
-  new('predicate.function', func, string = glue::glue('x ~ {deparse(pat)}'))
-}
-
-#' @export
-na <- new('predicate.function', function(x) is.na(x), string = "x == NA")
-#' @export
-notna <- new('predicate.function', function(x) !is.na(x), string = "x != NA")
-
-
-
-############### Predicate dispatch ----
-
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @name regexDispatch
-#' @export
-`%predate%` <- function(func, predicate) {
-    checkArg(func)
-    checkArg(predicate)
-    predicateExpr <- rlang::expr_text(rlang::enexpr(predicate))
-    if (grepl('function\\(', predicateExpr)) predicateExpr <- 'lambda'
-    
-    predicateDispatch(rlang::expr_text(rlang::enexpr(func)), predicate, predicateExpr)
-}
-
-
-
-#' @export
-predicateDispatch <- function(func, predicateFunc, negate = FALSE) {
-    
-    checkArg(func)
-  
-    checkArg(predicateFunc)
-  
-    fbody <- if (is.character(func)) {
-       func <- match.fun(fname)
-       funcCall(fname)
-    } else {
-       body(func)
-    }
-    
-    #argnames
-    fargs <- fargs(func)
-    argnames <- names(fargs)
-    
-    if (length(argnames) == 0L) stop(call. = FALSE, "predicateDispatch (%predicate%) can't add a predicate to a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "predicateDispatch (%predicate%) doesn't work if the first argument of the method is ..." )
-    argnames <- argnames[argnames != "..."]
-    
-    newenv <- new.env(parent = parent.frame())
-    #### 
-    if (is.function(predicateFunc)) {
-      assign('predicate', predicateFunc, envir = newenv)
-      predicateFunc <- 'predicate'
-    }
-
-    body <- predicateDispatch.expr(predicateFunc, fbody, argnames, negate = negate)
-
-    
-    rlang::new_function(fargs, body, newenv)
-}
-
-predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = FALSE) {
-  if (argnames[1] == '...') return(expr)
-=======
   if (!any(targets)) return(list(Restore = force, Args = args))
->>>>>>> master
   
   hits <- list2dt(lapply(args[targets], predicateFunc))
   hits <- Reduce(if (anyMatch) `|` else `&`, hits)
@@ -330,13 +70,7 @@ predicateDispatch.expr <- function(predicateFuncName, expr, argnames, negate = F
 
 memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, ...) {
   
-<<<<<<< HEAD
-  checkArg(args)
-  
-  if (is.null(names(args)) || any(names(args) == "")) .stop("predicateParse requires that all arguments are named.")
-=======
   firstArg <- args[[1]]
->>>>>>> master
   
   if (length(firstArg) < minMemoize || !memoize || !(is.atomic(firstArg) || is.struct(firstArg))) return(list(Restore = force, Args = args))
   
@@ -379,36 +113,6 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
 
 
 
-<<<<<<< HEAD
-#' @export
-memoizeDispatch <- function(fname) {
-    checkArg(fname)
-    func <- match.fun(fname)
-    #argnames
-    argnames <- names(fargs(func))
-    
-    if (length(argnames) == 0L) stop(call. = FALSE, "Can't memoizeDispatch a function with no arguments." )
-    if (argnames[1] == '...') stop(call. = FALSE, "Can't memoizeDispatch a function if the first argument is ..." )
-    argnames <- argnames[argnames != "..."]
-    
-    #
-    fbody <- funcCall(fname)
-    
-    body <- rlang::quo({
-        rebuild <- memoiseParse(argnames, !!!rlang::syms(argnames[argnames != '...']))
-        result <- {!!fbody}
-        rebuild(result)
-    })
-    body(func) <- rlang::quo_squash(body)
-    environment(func) <- new.env(parent = environment(func))
-    
-    assign('argnames', argnames, envir = environment(func))
-    
-    func
-    
-}
-=======
->>>>>>> master
 
 
 do... <- function(func, args, envir = parent.frame()) {
@@ -538,8 +242,6 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
 #' @export
 humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, 
                              multiDispatch = FALSE, ..., outputClass = 'character') {
-
-  checkArg(str, classes = c('string'))
   
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))

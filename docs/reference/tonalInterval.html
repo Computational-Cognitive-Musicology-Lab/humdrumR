@@ -16,19 +16,11 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-<<<<<<< HEAD
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
-    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
-
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
-=======
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
->>>>>>> master
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,11 +50,7 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-<<<<<<< HEAD
-  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
-=======
   <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
->>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -75,11 +63,7 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Representation of tonal pitch information</h1>
-<<<<<<< HEAD
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R" class="external-link"><code>R/tonalInterval.R</code></a></small>
-=======
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R"><code>R/tonalInterval.R</code></a>, <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/rhythmInterval.R"><code>R/rhythmInterval.R</code></a></small>
->>>>>>> master
       <div class="d-none name"><code>tonalInterval.Rd</code></div>
     </div>
 
@@ -88,34 +72,13 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
 A <code>tonalInterval</code> is an abstract representation of tonal pitch, which can be translated to/from all standard "concrete" pitch representations:
 solfege, scientific pitch, semitones, frequencies, scale degrees, intervals, etc.
 For the most part, users should not need to interact with <code>tonalInterval</code>s directly---rather, <code>tonalInterval</code>s work behind the scene in numerous <code>humdrumR</code> pitch functions.
-<<<<<<< HEAD
-See the <a href="pitchRepresentations.html">pitchRepresentations</a> and <a href="tonalTransformations.html">tonalTransformations</a> documentation for details of usage and functionality or the <em>Tonality in humdrumR</em> vignette for
-=======
 See the pitchRepresentations and <a href="tonalTransformations.html">tonalTransformations</a> documentation for details of usage and functionality or the <em>Tonality in humdrumR</em> vignette for
->>>>>>> master
 a detailed explanation of the theory and specifics of <code>tonalInterval</code>s.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-<<<<<<< HEAD
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tonalInterval</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">direction</span>,
-  <span class="va">delta</span>,
-  <span class="va">sigma</span>,
-  <span class="va">generic</span>,
-  <span class="va">simple</span>,
-  <span class="va">roundContour</span>,
-  <span class="va">enharmonic.part</span>,
-  <span class="va">Key</span>,
-  <span class="va">Exclusive</span>,
-  <span class="va">inPlace</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-=======
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tonalInterval</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
->>>>>>> master
 
 <span class="fu">tint</span><span class="op">(</span>
   <span class="va">octave</span>,
@@ -126,9 +89,6 @@ a detailed explanation of the theory and specifics of <code>tonalInterval</code>
   roundContour <span class="op">=</span> <span class="va">floor</span>
 <span class="op">)</span>
 
-<<<<<<< HEAD
-<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
-=======
 <span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
 
 <span class="fu">tonalInterval</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
@@ -165,7 +125,6 @@ a detailed explanation of the theory and specifics of <code>tonalInterval</code>
 
 <span class="co"># S3 method for rhythmInterval</span>
 <span class="fu"><a href="rhythmInterval.html">rhythmInterval</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
->>>>>>> master
     </div>
 
     <div class="section level2">
@@ -176,13 +135,8 @@ The three arguments corespond to the three slots: <code>octave</code>, <code>LO5
 All inputs will be coerced to match in length.
 What's more, the <code>octave</code> argument can be left blank, in which case the appropriate octave will automatically be computed
 to place the interval in the octave above middle-C.</p>
-<<<<<<< HEAD
-<p>By default, the <a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a> method, and thus (via <a href="struct.html">struct</a>) the <a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a> method, for <code>tonalInterval</code>s call <a href="pitchRepresentations.html">kern()</a>.
-Thus, if you return a <code>tonalInterval</code> on the command line (or call <a href="https://rdrr.io/r/base/print.html" class="external-link">print</a> one one) you'll see the <a href="pitchRepresentations.html">kern pitch</a> representation printed.</p>
-=======
 <p>By default, the <a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a> method, and thus (via <a href="struct.html">struct</a>) the <a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a> method, for <code>tonalInterval</code>s call kern().
 Thus, if you return a <code>tonalInterval</code> on the command line (or call <a href="https://rdrr.io/r/base/print.html" class="external-link">print</a> one one) you'll see the kern pitch representation printed.</p>
->>>>>>> master
     </div>
     <div class="section level2">
     <h2 id="slots">Slots<a class="anchor" aria-label="anchor" href="#slots"></a></h2>
@@ -190,17 +144,6 @@ Thus, if you return a <code>tonalInterval</code> on the command line (or call <a
 
 <dl><dt><code>Octave</code></dt>
 <dd><p>integers representing the octave offset.</p></dd>
-<<<<<<< HEAD
-
-
-<dt><code>Fifth</code></dt>
-<dd><p>integers representing the "line-of-fifths" value.</p></dd>
-
-
-<dt><code>Cent</code></dt>
-<dd><p>numeric values representing cents (1200th of an octave).</p><div class="section">
-<h3 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a></h3>
-=======
 
 
 <dt><code>Fifth</code></dt>
@@ -215,7 +158,6 @@ Thus, if you return a <code>tonalInterval</code> on the command line (or call <a
     <div class="section level2">
     <h2 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a></h2>
     
->>>>>>> master
 
 
 <p>Technically, <code>tonalInterval</code>s are examples of algebraic <a href="https://en.wikipedia.org/wiki/Module_(mathematics)" class="external-link">modules over integers</a>.
@@ -234,39 +176,6 @@ For example, an augmented-fourth divided by a major-second <em>is</em> <code>3L<
 The division algorithm works by applying standard Euclidean division to the <code>@Fifth</code> slot (line-of-fifths tonal space), and shifting the <code>@Octave</code> value in
 the remainder to the match the appropriate octave.
 This definition has the useful properties that <code>specificinterval %% A1 = genericinterval</code> and <code>interval %% d2 = enharmonicinterval</code>.</p>
-<<<<<<< HEAD
-</div>
-
-<div class="section">
-<h3 id="relational-operators">Relational Operators<a class="anchor" aria-label="anchor" href="#relational-operators"></a></h3>
-
-
-<p><code>tonalInterval</code>s can be compared using the standard <a href="https://rdrr.io/r/base/Comparison.html" class="external-link">relational operations</a>---<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, etc.
-Two <code>tonalInterval</code>s are equal (according to <code>==</code>) only if all their slots (<code>Octave</code>, <code>Fifth</code>, and <code>Cent</code>)
-are exactly identical.
-Thus, enharmonic notes (like C# and Db) are <em>not</em> equal.
-In contrast, ordinal comparisons (e.g., <code>&gt;</code>, <code>&lt;=</code>) between <code>tonalInterval</code>s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
-Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE</code>, even though <code>m3 == A2</code> is not.</p>
-</div>
-
-<div class="section">
-<h3 id="coercion">Coercion<a class="anchor" aria-label="anchor" href="#coercion"></a></h3>
-
-
-<p><code>humdrumR</code> knows how to <a href="https://en.wikipedia.org/wiki/Type_conversion" class="external-link">coerce</a> several <a href="https://rdrr.io/r/base/vector.html" class="external-link">base-R atomic types</a> into <code>tonalInterval</code>s.
-This can be done using the <a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a> function---e.g., <code>as(3, "tonalInterval")</code>---or more intuitively using the function <code>tonalInterval()</code>.
-Coercision methods are defined for</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a>: interpreted as semitones</p></li>
-<li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>: interpreted as frequency ratios, assuming a <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">Pythagorean tuning</a>.</p></li>
-<li><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>: interpreted using <code>humdrumR</code>s <a href="regexDispatch.html">regular expression dispatch system</a>, as
-explained fully <a href="pitchRepresentations.html">here</a>.</p></li>
-</ul><p>Since, coersion is defined, <code>tonalInterval</code> arithmatic can be applied when one of the two arguments is a <code>tonalInterval</code> and the other is a coercable atomic.
-For instance, <code>M3 + 2L</code> will interpret <code>2L</code> as two semitones and add a major-second to the major-third!
-The clever <a href="regexDispatch.html">dispatch system</a> will even ignore character strings that are not recognized (see examples)!</p>
-</div>
-
-<div class="section">
-<h3 id="predefined-intervals-">Predefined Intervals:<a class="anchor" aria-label="anchor" href="#predefined-intervals-"></a></h3>
-=======
 <p>Since basic data types can be parsed into <code>tonalInterval</code> (see below), <code>humdrumR</code> will attempt to automatically <a href="https://en.wikipedia.org/wiki/Type_conversion" class="external-link">coerce</a>
 data to tonalIntervals when asked to perform arithmetic.
 This means that arithmetic can be applied when one of the two arguments is a <code>tonalInterval</code> and the other is a coercable atomic.
@@ -320,7 +229,6 @@ If there is no match, an NA <code>tonalInterval</code> is returned.</p><div clas
 
 <p>The six tonal representations listed above function through a common parsing interface.</p>
 </div>
->>>>>>> master
 
     </div>
     <div class="section level2">
@@ -329,19 +237,6 @@ If there is no match, an NA <code>tonalInterval</code> is returned.</p><div clas
 <code><a href="LO5th.html">LO5th</a>()</code></p></div>
     </div>
 
-<<<<<<< HEAD
-<p><code>humdrumR</code> automatically exports a bunch of <code>tonalInterval</code>s, named by their musical interval representation.
-Every generic interval from 1 to 15 is combined with every interval quality <code>dd</code> (doubly diminished), <code>d</code> (diminished), <code>m</code> (minor), <code>M</code> (major), <code>A</code> (augumented)
-<code>AA</code> (doubly augmented).
-Thus, after loading <code>humdrumR</code>, you can type things like <code>M3 + M3</code> and get <code>A5</code>.
-In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),  <code>pythagorean.comma</code> (<code>= d2 = tint(-19,12)</code>), and <code>octave</code> (<code>tint(1, 0)</code>) are exported as well.</p>
-</div></dd>
-
-
-</dl></div>
-
-=======
->>>>>>> master
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
@@ -382,10 +277,6 @@ In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),
 <span class="r-in"><span class="co"># = "4.bb"</span></span>
 <span class="r-in"></span>
 <span class="r-in"></span>
-<<<<<<< HEAD
-<span class="r-in"></span>
-=======
->>>>>>> master
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -393,11 +284,7 @@ In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),
 
 
     <footer><div class="pkgdown-footer-left">
-<<<<<<< HEAD
-  <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
-=======
   <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
->>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

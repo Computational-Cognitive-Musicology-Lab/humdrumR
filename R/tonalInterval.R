@@ -147,11 +147,11 @@ setMethod("initialize",
 #' @rdname tonalInterval
 #' @export
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, roundContour = floor) {
-    checkInteger(octave)
 
     if (missing(octave) || is.null(octave)) {
       octave <- -floor(tint2semit(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12)
     }
+    checkInteger(octave)
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
     tint <- tint %dim% (if (size(tint) == size(LO5th)) LO5th else octave)

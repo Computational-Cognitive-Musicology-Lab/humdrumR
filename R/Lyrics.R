@@ -1,4 +1,4 @@
-#' text
+#' Extract words from syllables
 #' 
 #' Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
 #' 
@@ -8,13 +8,13 @@
 #' 
 #' @param keepSilbe Boolean expression which determines whether the user wants to save silbe format in the output in case needed for back translation later or other uses. Default is FALSE
 #' 
-#' @param indices Boolean expression which determines whether the linguistics version of the text will be printed. Default is FALSE.
+#' @param indices Boolean expression which determines whether the linguistics version of the word will be printed. Default is FALSE.
 #' 
 #' @return the transformed data
 #' 
 #' @export
 #' 
-#' @example Spine of syllabic form transformed into word/text form with nullTokens = TRUE
+#' @example Spine of syllabic form transformed into word form with nullTokens = TRUE
 #'  # lyrics
 #'  #   Now
 #'  #   let
@@ -31,7 +31,7 @@
 #'  #   wild
 #'  #  west.
 #' 
-#' text(silbe)
+#' wort(silbe)
 #' 
 #'  # lyrics
 #'  #       Now
@@ -48,10 +48,10 @@
 #'  #      wild
 #'  #      wild
 #'  #     west.
-#'  @example Spine of syllabic form transformed into word/text form with nullTokens = FALSE
+#'  @example Spine of syllabic form transformed into word form with nullTokens = FALSE
 #'  Same input as above.
 #'  
-#'  text(silbe, nullTokens = FALSE)
+#'  wort(silbe, nullTokens = FALSE)
 #'  
 #'  # lyrics
 #'  #       Now
@@ -64,7 +64,7 @@
 #'  #      wild
 #'  #      wild
 #'  #     west. 
-#'  @example Spine of syllabic form transformed into word/text with nullTokens = FALSE and keepSilbe = TRUE
+#'  @example Spine of syllabic form transformed into word with nullTokens = FALSE and keepSilbe = TRUE
 #'  
 #'  # lyrics
 #'  #   Now
@@ -82,7 +82,7 @@
 #'  #   wild
 #'  #  west.
 #'  
-#'  text(silbe, nullTokens = FALSE, keepSilbe = TRUE)
+#'  wort(silbe, nullTokens = FALSE, keepSilbe = TRUE)
 #'  
 #' # [[1]]
 #' # [1] "Now"       "let"       "me"        "welcome"   "everybody" "to"        "the"       "wild"     
@@ -91,7 +91,7 @@
 #' # [[2]]
 #' # [1] 15 21 25 27
 #' 
-#' @example Spine of syllabic form transformed into word/text with nullTokens = FALSE and indices = TRUE
+#' @example Spine of syllabic form transformed into word with nullTokens = FALSE and indices = TRUE
 #' 
 #' #  lyrics
 #' #     op-
@@ -108,7 +108,7 @@
 #' #   life-
 #' #   -time
 #'    
-#' text(silbe, nullTokens = FALSE, indices = TRUE) 
+#' wort(silbe, nullTokens = FALSE, indices = TRUE) 
 #' 
 #' # [1] "opportunity[1]" "_"              "opportunity[2]" "opportunity[3]" "opportunity[4]"
 #' # [6] "opportunity[5]" "knocks"         "once"           "_"              "in"            
@@ -116,7 +116,7 @@
 #' 
 #' 
 #' 
-text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
+wort <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
   print(silbeFormat(silbe))
   if(indices){
       open <- grepl('-$', silbe)
@@ -212,7 +212,7 @@ text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
           # go through and if true then add space below
           save2 <- apply(save, 1, function(x){replaceWithNullToken(x)})
           save2 <- as.data.frame(save2)
-          saveWords <- text(saveData, nullTokens = FALSE)
+          saveWords <- wort(saveData, nullTokens = FALSE)
           saveWords <- as.data.frame(saveWords)
           # the logic below is the same as in the original text function
           newFunction <- function(dataValue, rowValue){
@@ -301,7 +301,7 @@ text <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
     # save a vector with null tokens in the correct spots, and the spots that will be filled with words are each labeled "word"
     save2 <- as.data.frame(save2)
     # transform to data frame
-    saveWords <- text(saveData, nullTokens = FALSE)
+    saveWords <- wort(saveData, nullTokens = FALSE)
     # run this text function with null tokens = false to get the full words of the character vector
     saveWords <- as.data.frame(saveWords)
     # transform these words into a data frame

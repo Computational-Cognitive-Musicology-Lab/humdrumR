@@ -5,17 +5,6 @@ as a single data.table
 (A data.table is an &quot;enhanced&quot; version of R's standard data.frame).
 Humdrum tables are stored &quot;inside&quot; every humdrumRclass object that you will work with, and various humdrumR
 functions allow you to study or manipulate the them.
-<<<<<<< HEAD
-If you want to directly access the humdrum table within a humdrumR object, use the getHumtab function.
-getHumtab extracts a humdrum table from a humdrumR object."><title>Humdrum Tables — humTable • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Humdrum Tables — humTable"><meta property="og:description" content="In the humdrumR package, the fundamental data structure is called a Humdrum Table.
-A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
-as a single data.table
-(A data.table is an &quot;enhanced&quot; version of R's standard data.frame).
-Humdrum tables are stored &quot;inside&quot; every humdrumR object that you will work with, and various humdrumR
-functions allow you to study or manipulate the them.
-If you want to directly access the humdrum table within a humdrumR object, use the getHumtab function.
-getHumtab extracts a humdrum table from a humdrumR object."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-=======
 If you want to directly access the humdrum table within a humdrumRclass object, use the getHumtab function.
 getHumtab extracts a humdrum table from a humdrumRclass object."><title>Humdrum Tables — humTable • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Humdrum Tables — humTable"><meta property="og:description" content="In the humdrumR package, the fundamental data structure is called a Humdrum Table.
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
@@ -25,26 +14,11 @@ Humdrum tables are stored &quot;inside&quot; every humdrumRclass object that you
 functions allow you to study or manipulate the them.
 If you want to directly access the humdrum table within a humdrumRclass object, use the getHumtab function.
 getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
->>>>>>> master
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
-<<<<<<< HEAD
-
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
-    
-    <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
-
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
-
-    
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-=======
 
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
     
@@ -57,7 +31,6 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
       <span class="navbar-toggler-icon"></span>
     </button>
 
->>>>>>> master
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
@@ -81,11 +54,7 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-<<<<<<< HEAD
-  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
-=======
   <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
->>>>>>> master
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -98,11 +67,7 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Humdrum Tables</h1>
-<<<<<<< HEAD
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R" class="external-link"><code>R/humdrumR-class.R</code></a></small>
-=======
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R"><code>R/humdrumR-class.R</code></a></small>
->>>>>>> master
       <div class="d-none name"><code>humTable.Rd</code></div>
     </div>
 
@@ -111,17 +76,10 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
 as a single <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a>
 (A <code>data.table</code> is an "enhanced" version of R's standard <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a>).
-<<<<<<< HEAD
-Humdrum tables are stored "inside" every <a href="humdrumR-class.html">humdrumR</a> object that you will work with, and various <code>humdrumR</code>
-functions allow you to study or manipulate the them.
-If you want to directly access the humdrum table within a <a href="humdrumR-class.html">humdrumR</a> object, use the getHumtab function.</p>
-<p><code>getHumtab</code> extracts a humdrum table from a <a href="humdrumR-class.html">humdrumR</a> object.</p>
-=======
 Humdrum tables are stored "inside" every <a href="humdrumRclass.html">humdrumRclass</a> object that you will work with, and various <code>humdrumR</code>
 functions allow you to study or manipulate the them.
 If you want to directly access the humdrum table within a <a href="humdrumRclass.html">humdrumRclass</a> object, use the getHumtab function.</p>
 <p><code>getHumtab</code> extracts a humdrum table from a <a href="humdrumRclass.html">humdrumRclass</a> object.</p>
->>>>>>> master
     </div>
 
     <div class="section level2">
@@ -151,8 +109,8 @@ in the original humdrum data. Even multistops---tokens separated by spaces---are
 their own rows. Meanwhile, each column in the humdrum table represents a single
 piece of information associated with each token, which we call a <strong>field</strong>.
 Throughout this documentation, you should keep in mind that a "token" refers
-to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</em>:</p><ul><li><p>\(Token = Row\)</p></li>
-<li><p>\(Field = Column\)</p></li>
+to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</em>:</p><ul><li><p>Token = Row</p></li>
+<li><p>Field = Column</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="fields-">Fields:<a class="anchor" aria-label="anchor" href="#fields-"></a></h2>
@@ -176,13 +134,9 @@ Every humdrum table starts with a data
 field called <strong>Token</strong>, which
 contains character strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
-<<<<<<< HEAD
-<a href="with-in-Humdrum.html">withinHumdrum</a>---which can also be called using the
-=======
 <a href="withinHumdrum.html">withinHumdrum</a>---which can also be called using the
->>>>>>> master
 humdrumR:humPipe piping
-operator---generates one or \(N\) new data fields named \({Pipe1, Pipe2, ..., PipeN}\).
+operator---generates one or N new data fields named Pipe1, Pipe2, ..., PipeN.
 These fields can be renamed using the <code>$&lt;-</code> operator.</p>
 </div>
 
@@ -330,8 +284,8 @@ Any humdrum data with these records will end up having <code>COM</code> and <cod
     <p>In humdrum syntax, there is no requirement that every spine-path contains data
 in every record. Rather, spines are often padded with <em>null tokens</em>.
 In some cases, entire records may be padded with null tokens.
-Each type of humdrum record uses a different null token:</p><ul><li><p><em>Intepretation</em>: <code>*</code></p></li>
-<li><p><em>Comment</em>: <code>!</code></p></li>
+Each type of humdrum record uses a different null token:</p><ul><li><p><em>Intepretation</em>: <code>*</code>
+<em>Comment</em>: <code>!</code></p></li>
 <li><p><em>Barline</em>: <code>=</code></p></li>
 <li><p><em>Data</em>: <code>.</code></p></li>
 </ul><p>Null tokens in a humdrum table are identified in the logical <code>Null</code> field.
@@ -342,13 +296,8 @@ a new <a href="humdrumR.html">active</a> field is set.
 </ul><p>In parallel to the <code>Null</code> field, null <em>data</em> tokens (<code>"."</code>) are identified as their own record type: <code>"d"</code>.
 All updates/changes to the <code>Null</code> field are also propogated to the <code>Type</code> field---i.e., setting <code>Type == d</code> wherever
 a data record is <code>Null</code>.
-<<<<<<< HEAD
-This is important/useful because <a href="with-in-Humdrum.html">withinHumdrum</a> routines are, by default, only applied to <code>"D"</code> data, ignoring <code>"d"</code>.</p>
-<p>Whenever you <a href="humPrint.html">print</a> or export a <a href="humdrumR-class.html">humdrumR</a> object, null data in the active field
-=======
 This is important/useful because <a href="withinHumdrum.html">withinHumdrum</a> routines are, by default, only applied to <code>"D"</code> data, ignoring <code>"d"</code>.</p>
 <p>Whenever you <a href="humPrint.html">print</a> or <a href="writeHumdrum.html">export</a> a <a href="humdrumRclass.html">humdrumRclass</a> object, null data in the active field
->>>>>>> master
 (i.e., <code>Null == TRUE</code>) print as <code>"."</code>.
 Thus, if you are working with numeric data, with <code>NA</code> values, these <code>NA</code> values will print as <code>"."</code>.</p>
     </div>
@@ -368,11 +317,7 @@ or otherwise <a href="humCoercion.html">reshaping humdrum data</a> into data for
 
 
     <footer><div class="pkgdown-footer-left">
-<<<<<<< HEAD
-  <p></p><p>Developed by Nathaniel Condit-Schultz.</p>
-=======
   <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
->>>>>>> master
 </div>
 
 <div class="pkgdown-footer-right">

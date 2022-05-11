@@ -33,4 +33,6 @@ Takes an input string and parses it into a sequence of regular expressions.
 If \code{exhaustive} is TRUE, the string must be exhaustively broken up by the matching regular expressions.
 Superfluous (non-match) characters at the begginning, end, or in bettween matches, will result in
 all \code{NA} being returned.
+
+------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 }

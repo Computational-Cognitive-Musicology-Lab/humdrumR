@@ -43,6 +43,11 @@ reference:
   - rhythmFunctions
   - rhythmOffset
   - plotRhythm
+- subtitle: "Lyrics"
+  desc: "Lyrics and text functions."
+  contents:
+  - wort
+  - silbeFormat
 - title: "Reading and Summarizing Data"
   desc: "These tools allow you to import, validate, and abstractly summarize the content of humdrum data."
 - subtitle: "Reading and Writing"

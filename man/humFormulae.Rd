@@ -4,7 +4,8 @@
 \name{humFormulae}
 \alias{humFormulae}
 \alias{ditto}
-\title{Standard humdrumR formulae.}
+\title{------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+Standard humdrumR formulae.}
 \format{
 An object of class \code{list} of length 3.
 }
