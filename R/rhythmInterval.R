@@ -339,77 +339,46 @@ ms2bpm <- function(ms) 60000/ms
 ### Offset ####
 
 
-#' Calculate rhythmic "offset"
+#' Onset/Offset interval since beginning.
 #' 
-#' Borrowing the term from `music21`, rhythmic "offset"
-#' refers to a duration of time since a starting point (usually, the beginning
+#' Refers to a duration of rhythmic time elapsed since a starting point (usually, the beginning
 #' of a piece).
-#' `rhythmOffset` takes a vector of numbers representing durations
-#' (maybe `[rhythmInterval][rhythmInterval]s`, maybe other
-#' numeric values) and cummulatively sums them from a starting value.
-#' The output is a vector of durations of the same type as the input
-#' where each output value corresponds to the duration of time elapsed
-#' at that point.
+#' In `music21` these are described as "offsets"---however,
+#' we prefer to reserve the words "onset" and "offset" to refer
+#' to the beginning (attacK) and end (release) of rhythmic events.
+
+#' `elapsed` takes a vector of numbers representing durations
+#' (numeric values) and cummulatively sums them from a starting value.
+#' Unlike [sigma()], `elapsed` returns both the timestamp of the onset of 
+#' each rhythmic duration *and* the offset.
+#' `elapsed` interprets the first duration as starting at zero---or a different
+#' value specified by the `start` argument.
+#' 
+#' @return A S3 object of class `"rhythmOffset"`, which
+#' is essentially a data.frame with two columns---`Onset` and `Offset`---
+#' of numeric values of the same class as the input `durations` argument.
+#' 
 #' 
 #' @param durations A vector of numeric values representing durations.
 #' @param start A duration value (coerced to same class as `durations`), from which the
 #' offset begins. 
-#' @param groups A vector of equal length as `durations` representing a grouping factor,
-#' usable by `[base][tapply]`. If `!is.null(groups)`, offsets are calculated
-#' for duration values within each group. The `start` argument is recycle to match
-#' the length of the number of groups, so a different start value can be applied to each group.
-#' If `is.null(groups)`, offsets are calculated for the whole `durations` vector, from the 
-#' first `start` value.
 #' 
 #' @family rhythm analysis tools
 #' @export
-rhythmOffset <- function(durations, start = rational(0), tatum = rational(1), phase = rational(0)) {
-  durations <- rhythmInterval(durations)
+OIs <- function(durations, start = 0L) {
+  start <- as(start, class(durations))
   
-  durations <- durations / tatum
-  
-  head(sigma(c(start, durations)), -1L) + phase
-}
-
-### Augmentation and Dimminution  ####
-
-
-# augment <- function(x, scalar = 2, ...) UseMethod('augment')
-# 
-# 
-# #' @name RhythmScaling
-# #' @export
-# augment.rhythmInterval <- function(rint, scalar) rint * scalar
-# 
-# #' @name RhythmScaling
-# #' @export
-# augment.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% augment.rhythmInterval %.% read.recip2rhythmInterval, 
-#                                    '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% augment.rhythmInterval %.% read.fraction2rhythmInterval, 
-#                                    'Decimal' = as.double.rhythmInterval %.% augment.rhythmInterval %.% read.numeric2rhythmInterval)
-# 
-# 
-# #' @name RhythmScaling
-# #' @export
-# diminish <- function(x, scalar = 2, ...) UseMethod('diminish')
-# 
-# 
-# #' @name RhythmScaling
-# #' @export
-# diminish.rhythmInterval <- function(rint, scalar) rint / scalar
-# 
-# #' @name RhythmScaling
-# #' @export
-# diminish.character <- regexDispatch('Recip'   = recip.rhythmInterval %.% diminish.rhythmInterval %.% read.recip2rhythmInterval, 
-#                                     '[0-9]+[%/][0-9]+' = as.ratio.rhythmInterval %.% diminish.rhythmInterval %.% read.fraction2rhythmInterval, 
-#                                     'Decimal' = as.double.rhythmInterval %.% diminish.rhythmInterval %.% read.numeric2rhythmInterval)
+  offset <- sigma(c(start, durations))
+  struct2data.frame(Onset = head(offset, -1), Offset = tail(offset, -1)) %class% "rhythmOffset"
+}                           
 
 rhythmAlign <- function(x, y) {
   tick <- gcd(min(x), min(y))
   xi <- as.integer(x / tick)
   yi <- as.integer(y / tick)
   
-  xi <- offset(xi)$On
-  yi <- offset(yi)$On
+  xi <- elapsed(xi)$On
+  yi <- elapsed(yi)$On
   
   alli <- union(xi, yi)
   
@@ -428,15 +397,14 @@ rhythmAlign <- function(x, y) {
 }
 
 
-
-
-offset <- function(dur, start = as(0, class(dur))) {
-  offset <- sigma(c(start, dur))
-  struct2data.frame(On = head(offset, -1), Off = tail(offset, -1)) %class% "rhythmOffset"
+durations <- function(ois) {
+  ois$Offset - ois$Onset
 }
 
-IOIs <- function(offset) {
-  offset$Off - offset$On
+
+
+IOIs <- function(ois) {
+  c(diff(ois$Onset), as(NA, class(ois$Onset)))
 }
 
 
