@@ -28,7 +28,8 @@ setMethod('initialize', 'rational',
           function(.Object, Numerator = 1L, Denominator = 4L) {
               .Object <- callNextMethod()
               # negative numbers should live in the numerator
-              Numerator[Denominator < 0L] <- -Numerator[Denominator < 0L]
+              na <- is.na(Numerator) | is.na(Denominator)
+              Numerator[!na & Denominator < 0L] <- -Numerator[!na & Denominator < 0L]
               Denominator <- abs(Denominator)
               
               fraction <- reduce_fraction(.Object@Numerator, .Object@Denominator)
@@ -389,7 +390,7 @@ setMethod('as.rational', 'rational', force)
 
 #' @rdname
 #' @export
-setMethod('as.rational', 'matrix', \(x) rational(c(x), 1L) %dim% x)
+setMethod('as.rational', 'matrix', \(x) rational(dropdim(x), 1L) %dim% x)
 
 #' @rdname rational
 #' @export

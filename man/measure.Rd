@@ -5,7 +5,7 @@
 \title{Measure}
 \usage{
 measure(
-  offset,
+  soi,
   beat = rational(1L),
   start = as(0, class(dur)),
   phase = rational(0L),

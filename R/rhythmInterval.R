@@ -347,11 +347,11 @@ ms2bpm <- function(ms) 60000/ms
 #' we prefer to reserve the words "onset" and "offset" to refer
 #' to the beginning (attacK) and end (release) of rhythmic events.
 
-#' `elapsed` takes a vector of numbers representing durations
+#' `STO` takes a vector of numbers representing durations
 #' (numeric values) and cummulatively sums them from a starting value.
-#' Unlike [sigma()], `elapsed` returns both the timestamp of the onset of 
+#' Unlike [sigma()], `SOI` returns both the timestamp of the onset of 
 #' each rhythmic duration *and* the offset.
-#' `elapsed` interprets the first duration as starting at zero---or a different
+#' `SOI` interprets the first duration as starting at zero---or a different
 #' value specified by the `start` argument.
 #' 
 #' @return A S3 object of class `"rhythmOffset"`, which
@@ -365,11 +365,11 @@ ms2bpm <- function(ms) 60000/ms
 #' 
 #' @family rhythm analysis tools
 #' @export
-OIs <- function(durations, start = 0L) {
+SOI <- function(durations, start = 0L) {
   start <- as(start, class(durations))
   
   offset <- sigma(c(start, durations))
-  struct2data.frame(Onset = head(offset, -1), Offset = tail(offset, -1)) %class% "rhythmOffset"
+  .data.frame(Onset = head(offset, -1), Offset = tail(offset, -1)) %class% "rhythmOffset"
 }                           
 
 rhythmAlign <- function(x, y) {
@@ -377,8 +377,8 @@ rhythmAlign <- function(x, y) {
   xi <- as.integer(x / tick)
   yi <- as.integer(y / tick)
   
-  xi <- elapsed(xi)$On
-  yi <- elapsed(yi)$On
+  xi <- SOI(xi)$On
+  yi <- SOI(yi)$On
   
   alli <- union(xi, yi)
   
@@ -390,7 +390,7 @@ rhythmAlign <- function(x, y) {
   remove <- is.na(ox) & is.na(oy)
   
   
-  struct2data.frame(ox[!remove], oy[!remove])
+  .data.frame(ox[!remove], oy[!remove])
   
   
   
@@ -398,22 +398,22 @@ rhythmAlign <- function(x, y) {
 
 timestamp <- function(durations, whole = 4) {
   if (!is.period(whole)) whole <- lubridate::period(whole, 'second')
-  OIs <- OIs(durations)
+  soi <- SOI(durations)
   
-  as.numeric(OIs$Onset) * whole
+  as.numeric(soi$Onset) * whole
 }
 
-durations <- function(ois) {
-  ois$Offset - ois$Onset
+durations <- function(soi) {
+  soi$Offset - soi$Onset
 }
 
 
 
-IOIs <- function(ois) {
-  c(diff(ois$Onset), as(NA, class(os$Onset)))
+IOI <- function(ois) {
+  c(diff(soi$Onset), as(NA, class(soi$Onset)))
 }
 
 
 tatum <- function(dur) {
-  gcd(unique(dur))
+  do.call('gcd', as.list(unique(dur)))
 }

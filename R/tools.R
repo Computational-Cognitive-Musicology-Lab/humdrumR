@@ -124,13 +124,13 @@ fargs <- function(func) formals(args(func))
 }
 
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
-    stack <- rlang::call_stack()
-    stack <- stack[!duplicated(stack)]
-    calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
-    calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
-    
-    cat('HumdrumR error in call stack:\n')
-    cat(calls, sep = '\n')
+    # stack <- rlang::caller_call()
+    # stack <- stack[!duplicated(stack)]
+    # calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
+    # calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
+    # 
+    # cat('HumdrumR error in call stack:\n')
+    # cat(calls, sep = '\n')
     
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
@@ -811,6 +811,7 @@ gcd <- function(...) {
     if (length(x) == 1L) return(x[[1]])
     if (length(x) == 0L) return(numeric(0))
     
+    x <- do.call('match_size', x)
     na <- Reduce('|', lapply(x, is.na))
     output <- vectorNA(length(x[[1]]), class(x[[1]]))
     output[!na] <- Reduce(.gcd, lapply(x, '[', !na))
@@ -841,6 +842,8 @@ lcm <- function(...) {
 .lcm <- function(x, y) {
     abs(x * y) / .gcd(x, y)
 }
+
+`%divides%` <- function(e1, e2) gcd(e1, e2) == e1
 
 # modulo starting from 1
 `%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L

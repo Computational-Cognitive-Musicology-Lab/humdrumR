@@ -88,7 +88,7 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
                  }) -> decompositions
           
           
-          decompositions <- do.call('struct2data.frame', decompositions)
+          decompositions <- do.call('.data.frame', decompositions)
           colnames(decompositions) <- as.character(into)
           rownames(decompositions) <- make.unique(as.character(rhythmInterval))
           decompositions
@@ -99,27 +99,44 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 #' 
 #' @family rhythm analysis tools
 #' @export
-metricPosition <- function(offset, meter = duple(5), ...) {
+metricPosition <- function(soi, meter = duple(5), ...) {
   
 
-  if (!inherits(offset, 'rhythmOffset')) offset <- offset(offset)
+  if (!inherits(soi, 'rhythmOffset')) soi <- SOI(soi)
   
   
 
   levels <- meter@Levels
   
-  do.call('cbind', Reduce( \(off, lev) {
-           measure(off, lev)
-          }, 
-          levels, init = offset, accumulate = TRUE)) -> output
+  measured <- Reduce(\(off, lev) {
+    measure(off, lev)
+  }, 
+  levels, init = soi, accumulate = TRUE)[-1]
   
-  count <- as.matrix(output[ , seq(4, ncol(output), by = 3L)])
-  offset <- do.call('cbind', output[ , seq(5, ncol(output), by = 3L)])
-  onbeat <- (offset == rational(0)) %dim% count
+  ois <- lapply(measured, `[[`, 'Onset')
   
-  list(count, offset, onbeat)
   
-
+  oiRatios <- Map('/', tail(ois, -1), head(ois, -1))
+  
+  minlevel <- Reduce('+', Map('!=', oiRatios, levels[-1L])) + 1L
+  minlevel[is.na(minlevel)] <- length(levels)
+  
+  oi <- do.call('cbind', ois)[cbind(1:nrow(soi), minlevel)]
+ 
+  # 
+  counts <- do.call('cbind', lapply(measured, `[[`, 2L))
+  counts[sweep(col(counts), 1L, minlevel, '>')] <- 0L
+  
+  list(Count = counts, Remainder = oi)
+  
+  
+  beats <- sapply(seq_along(levels),
+                  \(j) recip(levels[[j]] * counts[ , j]))
+  beats[counts == 0L] <- ""
+  # 
+  # final <- soi[ , ncol(soi)]
+  cbind(beats, ifelse(oi == 0, "", recip(oi)))
+  
 }
 
 
@@ -130,24 +147,24 @@ metricPosition <- function(offset, meter = duple(5), ...) {
 #' 
 #' Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
 #' how many beats have passed, and the offset between each attack and the nearest beat.
-measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
+measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
-  offset <- offset$On
+  soi <- soi$On
   totalTatum <- sum(beat)
   
   
   # 
   if (!is.null(Bar) & any(Bar > 0, na.rm = TRUE)) {
-    offset <- offset - offset[which(Bar > 0)[1]]
+    soi <- soi - soi[which(Bar > 0)[1]]
   }
   
-  mcount <- ((offset + phase) %/% totalTatum) 
-  mremain <- (offset - totalTatum * mcount)
+  mcount <- ((soi + phase) %/% totalTatum) 
+  mremain <- (soi - totalTatum * mcount)
   
   
   if (length(beat) > 1L) {
     
-    beatoff <- offset(beat)
+    beatoff <- soi(beat)
     
     subcount <-  outer(beatoff$Off, mremain, '<=') |> colSums()
     mcount <- mcount * length(beat) + subcount
@@ -157,7 +174,7 @@ measure <- function(offset, beat = rational(1L), start = as(0, class(dur)), phas
     
   }
   
-  output <- struct2data.frame(Offset = offset, N = mcount, On = mremain)
+  output <- .data.frame(SOI = soi, N = mcount, Onset = mremain)
   colnames(output)[colnames(output) == 'N'] <- paste(rint2recip(beat), collapse = '+')
   
   attr(output, 'beat') <- beat

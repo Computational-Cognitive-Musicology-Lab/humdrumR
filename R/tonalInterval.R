@@ -1541,7 +1541,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
   
   if (!is.null(tint) && !is.data.frame(tint)) tint <- as.data.frame(tint)
   
-  .cbind(struct2data.frame(Key = getRootTint(Key)), octave, specific, tint, comma) %class% 'partition'
+  .cbind(.data.frame(Key = getRootTint(Key)), octave, specific, tint, comma) %class% 'partition'
   
 }
 
@@ -1554,7 +1554,7 @@ tintPartition_complex <- function(tint, octave.round = floor, ...) {
   octavepart <- tint(octshift, 0L)
   simplepart <- tint - octavepart
   
-  struct2data.frame(Octave = octavepart, Simple = simplepart)
+  .data.frame(Octave = octavepart, Simple = simplepart)
   
 }
 
@@ -1580,7 +1580,7 @@ tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L
   enharmonicpart <- (entint + modeoffset) %dim% tint
   commapart <- tint - enharmonicpart
   
-  struct2data.frame(Enharmonic = enharmonicpart,  Comma = commapart)
+  .data.frame(Enharmonic = enharmonicpart,  Comma = commapart)
 }
 
 
@@ -1591,7 +1591,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
   genericpart    <-  tint %% (Key %||% dset(0L, 0L)) 
   alterationpart <- tint - genericpart
   
-  struct2data.frame(Generic = genericpart,  Alteration = alterationpart)
+  .data.frame(Generic = genericpart,  Alteration = alterationpart)
   
 }
 

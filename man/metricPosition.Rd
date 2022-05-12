@@ -4,14 +4,14 @@
 \alias{metricPosition}
 \title{Calculate metric positions from duration data.}
 \usage{
-metricPosition(offset, meter = duple(5), ...)
+metricPosition(soi, meter = duple(5), ...)
 }
 \description{
 Calculate metric positions from duration data.
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{OIs}()},
+\code{\link{SOI}()},
 \code{\link{rhythmDecompose}()}
 }
 \concept{rhythm analysis tools}
