@@ -283,6 +283,57 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = 
           output
 }
 
+## Matrices ----
+
+
+most <- function(mat, whatmost = 'right', which = FALSE) {
+  # returns the column which is the rightmost, leftmost, topmost, or bottommost, TRUE in each row/col
+  
+  kind <- pmatch(whatmost, c('right', 'left', 'bottom', 'top'))
+  if (!hasdim(mat)) {
+    ind <- switch(kind,
+           max(which(mat)),
+           which(mat)[1],
+           .stop("A dimensionless vector has no 'topmost'"),
+           .stop("A dimensionless vector as no 'bottomost'"))  
+    
+    if (which) ind else seq_along(mat) == ind
+    
+  } else {
+    if (kind > 2) mat <- t(mat)
+    
+    rows <- rowSums(mat) > 0
+    ind <- ifelse(rows,
+                  max.col(mat, ties.method = c('last', 'first', 'last', 'first')[kind]),
+                  0)
+    
+    ind <- cbind(seq_along(rows), ind)
+    
+    if (kind > 2) ind <- ind[ , 2:1]
+    
+    colnames(ind) <- c('row', 'col')
+    
+    if (which) return(ind)
+    
+    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
+    output[ind] <- TRUE
+    
+    output
+    
+    
+  }
+  
+
+  
+  
+  
+}
+
+rightmost <- function(mat, which = FALSE) most(mat, 'right', which = which)
+leftmost  <- function(mat, which = FALSE) most(mat, 'left', which = which)
+topmost <- function(mat, which = FALSE) most(mat, 'top', which = which)
+bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
+
 ## Vectors ----
 
 
