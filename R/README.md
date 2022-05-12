@@ -679,3 +679,30 @@ In this `GOOD` example, once `c` is calculated, we can forget about `a` and `b`-
 
 
 
+# Vectorization
+
+Vectorization should be used wherever possible.
+This means that functions should accept a vector ($length \geq 0$) as their input arguments and return a vector of the same length as output.
+If there are multiple input arguments, the first argument is the "main" vectorized arguments---other arguments are either vectorized (must be the same length as the first argument) or $length = 1$.
+
+
+Generally, functions and expressions in `humdrumR` should be purely vectorized.
+I.e., create expressions between vectors as objects.
+When repeated evaluation is needed, use `lapply`, `sapply` (only if *certain* that the output will always be at least one vector, and all the same length), and `tapply`.
+
+
+## Loops
+
+
+`for` and `while` loops should only be used in very restrictive circumstances.
+
+`for` should only be used in cases where the `n` is very small ($n < 10$), a few hundred at most.
+
+
+### Index Arguments 
+
+When using `for`, or doing `lapply`/`sapply` across indices, the index argument should be named in an informative way.
+
+`i` and `j` should only be used when the index number is an integer index (`i` for rows and `j` for columns, if those dimensions make sense).
+Otherwise, the argument should named to reflect that the thing is.
+

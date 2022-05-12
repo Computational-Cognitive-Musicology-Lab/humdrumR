@@ -1175,11 +1175,12 @@ setMethod('sort', signature = c(x = 'struct'),
 setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
-              
+              browser()
               match_size(e1 = e1, e2 = e2, margin = 1:2, toEnv = TRUE)
               
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
+              
               mat <- Reduce(`&`, Map(`==`, slots1, slots2))
               mat %dim% e1
               
@@ -1204,6 +1205,26 @@ setMethod('<', signature = c('struct', 'struct'),
 setMethod('<=', signature = c('struct', 'struct'),
           function(e1, e2) {
               !(e1 > e2)
+          })
+
+#' @export
+setMethod('Compare', signature = c('struct', 'matrix'),
+          function(e1, e2) {
+            v1 <- rep(e1, length(e2)) 
+            v2 <- e2 %dim% NULL
+            
+            (v1 == v2) %dim% e2
+            
+          })
+
+#' @export
+setMethod('Compare', signature = c('matrix', 'struct'),
+          function(e1, e2) {
+            v2 <- rep(e2, length(e1)) 
+            v1 <- e1 %dim% NULL
+            
+            (v1 == v2) %dim% e1
+            
           })
 
 
