@@ -5,6 +5,11 @@ All code for the humdrumR R package is kept in this directory.
 
 # Code Style
 
+## Pipes
+
+Pipes are great for on-the-fly coding, but for consistency, we don't use pipes in the codebase.
+This means that ALL function calls are of the standard form: `f(...)`, never `... |> f()`.
+
 ## Assignment
 
 The `<-` assignment operator should be used for all assignments.
@@ -42,6 +47,29 @@ list(mean = 5, sd = 2)
 
 
 ```
+
+----
+
+
+Functions should always be named across multiple lines, even if they are very short:
+
+```
+#BAD
+
+myFunc <- function(x, y) x + y
+
+#GOOD
+
+myFunc <- function(x, y) {
+	x + y
+}
+
+```
+
+This is because the Rstudio editors doesn't recognize the one-line functions in some contexts!
+
+
+
 
 
 ## Space
@@ -170,6 +198,17 @@ local({
 
 ## If 
 
+
+Generally avoid nested if/else branches.
+A single layer of nesting is the best sollution sometimes, and is acceptable, but beyond that, try to avoid it.
+
+---
+
+Generally, you should attempt to make different if/else branches roughly equivalent in scope/complexity.
+If you have cases where one branch is much more complex than the other, can you break it down into smaller pieces in some way?
+
+---
+
 If the true or false blocks consist of single short expressions, write the whole thing on one line:
 
 ```
@@ -194,6 +233,133 @@ if (TRUE) {
 }
 
 ```
+
+---
+
+Remember, if `if(FALSE)` and there is no `else`, the expression evaluates as `NULL`.
+Use this!
+
+```
+#BAD
+if (predicate) {
+	x <- # blah
+} else {
+	x <- NULL
+}
+
+
+#GOOD
+
+x <- if (predicate) {
+	#blah
+}
+	
+
+#BETTER if blah is short
+
+x <- if (predicate) # blah
+
+
+
+```
+
+---
+
+
+
+## Return
+
+`return()` should only be explicitely called for an early return.
+At the end of a function, the output should just be the last evaluated line.
+
+```
+#BAD
+
+func <- function(x) {
+	y <- # dostuff(x)
+	
+	return(y)
+
+}
+
+
+#GOOD
+
+func <- function(x) {
+	y <- # dostuff(x)
+	
+	y
+
+}
+
+#BETTER (don't assign to y at all, if there's no reason to)
+
+func <- function(x) {
+	dostuff(x)
+}
+
+```
+
+
+Early returns should generally be used near the beginning of the function---especially based on an argument check.
+
+```
+#GOOD
+
+f <- function(x) {
+	if (!predicate(x)) return(# blah)
+
+	# do complex stuff!
+}
+
+
+```
+
+
+However, there are many cases where early returns are useful, can they can be used anywhere.
+For example, anytime you are using an if-else to choose between returning two things, but one branch is much shorter/simpler than the other, it is better to use an early return.
+Sometimes, this can mean flipping the predicate from TRUE to FALSE.
+
+```
+#BAD
+f <- function(...) {
+
+	x <- # doComplexStuff(...)
+
+	if (x > 0) {
+		# a lot more complex code
+		# a lot more complex code
+		# a lot more complex code
+		# a lot more complex code
+	} else {
+		-x
+	}
+
+
+
+}
+
+#GOOD
+
+f <- function(...) {
+
+	x <- # doComplexStuff(...)
+
+	if (x <= 0) return(-x)
+
+	# a lot more complex code
+	# a lot more complex code
+	# a lot more complex code
+	# a lot more complex code
+
+
+
+
+}
+
+
+```
+
 
 ## Blocks as Expression
 
@@ -279,5 +445,237 @@ mean(x - (if (TRUE) 10 else y))
 
 
 ```
+
+
+# Naming
+
+Generally, few variables should be used.
+If there is no reason to assign a value to a new variable, don't.
+In particular, the last value in a function doesn't generally need to be named.
+
+```
+#BAD
+
+f <- function(data) {
+
+	nextStep <- doStuff(data)
+	anotherStep <- doMoreStuff(nextStep)
+	
+	output <- doFinalStep(anotherStep)
+}
+
+#GOOD
+
+f <- function(data) {
+
+	nextStep <- doStuff(data)
+	anotherStep <- doMoreStuff(nextStep)
+	
+	doFinalStep(anotherStep)
+
+}
+
+#IF "doStuff" and "doMoreStuff" are really this simple and concise, this would be even BETTER:
+
+f <- function(data) {
+	doFinalStep(doMoreStuff(doStuff(data)))
+}
+
+
+
+```
+
+
+
+
+
+## Upper and Lower Case
+
+Single-word names should be all lowercase.
+Use lower camelcase for multi-word names: 
+
+```
+#BAD:
+
+inputdata
+
+time_series_data
+
+
+
+#GOOD:
+
+inputData
+
+timeSeriesData
+
+```
+
+
+However, (col)names of items within lists/data.frames should be captilized (upper camel case).
+An object created first as a local variable will have a lower-camel-case name, but change to the same name but upper camel case if put into a list or data.frame.
+(This means that calls to `$` should always have a capital letter after the `$`.)
+
+```
+#GOOD
+
+inputData <- # 
+
+outputData1 <- # f(inputData)
+outputAnotherDim <- # h(inputData)
+
+list(OutputData = outputData1, OutputAnotherDim = outputAnotherDim)
+
+
+```
+
+----
+
++ `x` is an appropriate name for the first (main) argument of a method, because different methods of that function will all have different types of input, but need to share the same argument name.
+
+---
+
+Argument/variable names representing vectorized objects should not be pluralized, even though they may represent a collection of data.
+The whole point of vectorization is to allow us to think of a collection (vector) as a single piece of data---and in some cases, a vector might be of length one, so it *is* a single datapoint.
+We reflect that in a singular name.
+
+```
+#BAD
+
+f <- function(notes) {
+	# do stuff to notes
+}
+
+#GOOD
+
+f <- function(note) {
+	# do stuff to note
+}
+
+
+```
+
+Plurals can and should be used for collections of more than one vectors of similar data.
+For example, a data.frame where each column is a different collection of rhythmic values might be called `rhythms`.
+
+
+---
+
+## Functions
+
+Functions should be named to reflect what they do.
+Since functions should do only *one* job, this should be easy---if a function's functionality can't be expressed in single, simple name, the function should probably be factored.
+
+In some cases, there is a need for a parent function to offload *most* of it's functionality to a subfunction.
+The subfunction "does" the same thing as the parent, and should be given the same name as the parent function, appended with a `.`.
+For example, `.withHumdrum` does the bulk of the work for `withHumdrum`.
+
+
+
+
+
+----
+
+
+Variables should be given informative names, describing what they are.
+
+Variables representing equivalent types of information should be given consistent (same) names across different functions.
+This means that functions which work together in pipelines, with the output of function1 becoming the input to function2, the output variable of function1 should have the same name as the input variable (argument) of function2.
+
+```
+step1 <- function(originaldata) {
+	nextdata <- # result of some processes
+	
+	nextdata
+}
+
+```
+
+If a serious of commands modify values, while still representing conceptually the same information, and the original values are never used again, reuse the same variable name.
+Thus, names should reflect abstractly and generally what the data is, not what it is at a particular point.
+For example, `input` is a bad name because a value is only `input` at the beginning of the function---as you modify it, it is not longer just input.
+Instead, name it after what it *is*.
+
+```
+#BAD
+
+analyze <- function(data) {
+	centeredData <- data - mean(data)
+        normalizedData <- data / sd(data)
+
+        roundedData <- round(normalizedData, 2)
+
+        ### etc.
+	
+}
+
+#GOOD
+
+analyze <- function(data) {
+	data <- data - mean(data)
+	data <- data / sd(data)
+	data <- round(data, 2)
+
+	### etc.
+
+
+}
+
+#BETTER (group conceptually similar processes)
+
+analyze <- function(data) {
+
+	data <- (data - mean(data)) / sd(data)
+	data <- round(data, 2)
+
+	### etc.
+
+```
+
+
+## Scope
+
+Never assign global variables
+
+----
+
+When you need to calculate and assign a set of variables as *only* as stepping stones to a final resulting variable, wrap the whole process in a `local` environment.
+This makes sure these stepping-stone variables don't clutter the local namespace.
+Why do we care?
+It means that as a coder, if you reading a function and see the `local({###})` you know you can ignore everything inside the `local`---none of those variables are being used somewhere else in the function.
+
+```
+#BAD
+
+f <- function(x, y) {
+
+	a <- doSomething(x)
+	b <- doSomethingElse(x, a, ...)
+	c <- doSomethingAgain(a, b)
+	
+	mainPointOfFunction(c, y)
+
+
+}
+
+
+#GOOD
+
+f <- function(x, y) {
+
+	c <- local({
+		a <- doSomething(x)
+		b <- doSomethingElse(x, a, ...)
+		doSomethingAgain(a, b)
+	})
+	
+	mainPointOfFunction(c, y)
+
+
+}
+```
+
+In this `GOOD` example, once `c` is calculated, we can forget about `a` and `b`---we know they aren't being used anywhere else.
+
 
 
