@@ -154,7 +154,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     checkInteger(octave)
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
-    tint <- tint %dim% (if (size(tint) == size(LO5th)) LO5th else octave)
+    tint <- tint %<-matchdim% (if (size(tint) == size(LO5th)) LO5th else octave)
     if (partition) tintPartition(tint, Key = Key, roundContour = roundContour) else tint
 }
 
@@ -194,12 +194,12 @@ setMethod("LO5th", "tonalInterval",
           function(x, generic = FALSE) {
             LO5th <- x@Fifth
             if (generic) LO5th <- genericFifth(LO5th)
-            LO5th %dim% x
+            LO5th %<-matchdim% x
           })
 setMethod("LO5th", 'matrix',
           function(x, generic = FALSE) {
             lo5th <- LO5th(c(x))
-            lo5th %dim% x
+            lo5th %<-matchdim% x
           })
 setMethod('LO5th', 'ANY',
           function(x, generic = FALSE) {
@@ -210,7 +210,7 @@ setMethod('LO5th', 'ANY',
 
 
 getFifth  <- function(tint, generic = FALSE) LO5th(tint, generic = generic)
-getOctave <- function(tint) tint@Octave %dim% tint
+getOctave <- function(tint) tint@Octave %<-matchdim% tint
 
 genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 genericStep <- function(x) ((x - 1L) %% 7L) + 1L
@@ -363,7 +363,7 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               
               tint <- tint(e1@Octave - (e2@Octave * LO5thDivs), LO5thMods)
               
-              tint %dim% e1
+              tint %<-matchdim% e1
               
           })
 
@@ -377,7 +377,7 @@ setMethod('%/%', signature = c('tonalInterval', 'tonalInterval'),
               f2 <- e2@Fifth
               
               f3 <-  f1 %/% f2
-              f3 %dim% e1
+              f3 %<-matchdim% e1
           })
 
 
@@ -388,7 +388,7 @@ setMethod('%%', signature = c('tonalInterval', 'integer'),
             
             minusremain <- (e1 %/% e2) * e2
             
-            (e1 - minusremain) %dim% e1
+            (e1 - minusremain) %<-matchdim% e1
           })
 
 setMethod('%/%', signature = c('tonalInterval', 'integer'),
@@ -400,7 +400,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
             
             tint <- tint(e1@Octave %/% e2, e1@Fifth %/% e2)
             
-            tint %dim% e1
+            tint %<-matchdim% e1
           })
 
 
@@ -451,7 +451,7 @@ octave.kernstyle <- function(str, octn, step.case = TRUE) {
   
   octn[!is.na(octn) & octn >= 0L] <- octn[!is.na(octn) & octn >= 0L] + 1L # 0 -> 1
   
-  .paste(strrep(char, abs(octn)), stringr::str_sub(str, start = 2L)) %dim% str
+  .paste(strrep(char, abs(octn)), stringr::str_sub(str, start = 2L)) %<-matchdim% str
 }
 
 
@@ -518,7 +518,7 @@ tint2rational <-  function(x, tonalHarmonic = 3L) {
     
   } 
   
-  rational(as.integer(num), as.integer(den)) %dim% x
+  rational(as.integer(num), as.integer(den)) %<-matchdim% x
   
 }
 
@@ -531,7 +531,7 @@ tint2double <-  function(x, tonalHarmonic = 2^(19/12)) {
   
   .ifelse(is.na(LO5th), 
           NA_real_, 
-          (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %dim% x
+          (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %<-matchdim% x
 }
 
 tint2frequency <- function(x, frequency.reference = 440L, 
@@ -542,7 +542,7 @@ tint2frequency <- function(x, frequency.reference = 440L,
   ratio <- tint2double(x, tonalHarmonic = tonalHarmonic)
   attributes(ratio) <- NULL
   
-  frequency.reference * ratio %dim% x
+  frequency.reference * ratio %<-matchdim% x
 }
 
 
@@ -957,7 +957,7 @@ midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
 
 #### Frequency ####
 
-fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational(x), tonalHarmonic) %dim% x
+fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational(x), tonalHarmonic) %<-matchdim% x
 
 rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...) {
   if (x@Numerator == 0 || (x@Numerator < 0 & x@Denominator > 0)) .stop('Rational values can only be interpreted as tonalIntervals if they are positive.')
@@ -1044,7 +1044,7 @@ frequency2tint <- function(float, frequency.reference = 440L,
                            frequencyTint = tint(-4, 3), tonalHarmonic = 3,
                            centMargin = 10) {
   
-  ( double2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %dim% float
+  ( double2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %<-matchdim% float
 }
 
 ### Tonal ####
@@ -1358,7 +1358,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 setAs('integer', 'tonalInterval', function(from) semit2tint(from))
 setAs('numeric', 'tonalInterval', function(from) double2tint(from))
 setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
-setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %dim% from)
+setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %<-matchdim% from)
 
 setMethod('as.rational', 'tonalInterval', tint2rational)
 setMethod('as.double', 'tonalInterval', tint2double)
@@ -1566,7 +1566,7 @@ tintPartition_complex <- function(tint, octave.round = floor, ...) {
 tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L), ...) {
   
   modeoffset <- tint( , getSignature(Key)) + tint(, 2) # because 2 fifths is the "center" of the diatonic set
-  entint <- (tint - modeoffset) %dim% NULL
+  entint <- (tint - modeoffset) %<-matchdim% NULL
   
   enharmonicbound <- enharmonicWrap %/% 2
   sharpshift <-  tint( , enharmonicbound) # this makes it so an odd number (like 13) is biased towards sharp side
@@ -1579,7 +1579,7 @@ tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L
   entint[sharp] <- ((entint[sharp] + sharpshift) %%  pythagorean.comma) - sharpshift 
   entint[ flat] <- ((entint[ flat] + flatshift)  %% -pythagorean.comma) - flatshift
   
-  enharmonicpart <- (entint + modeoffset) %dim% tint
+  enharmonicpart <- (entint + modeoffset) %<-matchdim% tint
   commapart <- tint - enharmonicpart
   
   .data.frame(Enharmonic = enharmonicpart,  Comma = commapart)

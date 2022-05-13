@@ -355,7 +355,7 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
         if (!is.null(dimen)) len <- prod(dimen)
         setSlots(struct) <- lapply(slots, \(slot) rep(as(value, class(slot)), len))
         
-        struct %dim% object
+        struct %<-matchdim% object
         
     }
     
@@ -528,6 +528,10 @@ fillBackwards <- function(...) fillThru(..., reverse = TRUE)
 ## Dimensions ----
 
 ldim <- function(x) {
+  # ldim is like dim, but it always counts length,
+  # regardless of dimensions
+  # So all vector/matrices always have a ldim
+  
     ldim <- if (hasdim(x)) c(0L, dim(x)) else c(length(x), 0L, 0L)
     ldim[4] <- if (ldim[1] == 0L) prod(ldim[-1]) else ldim[1]
     names(ldim) <- c('length', 'nrow', 'ncol', 'size')
@@ -538,17 +542,17 @@ ldims <- function(xs) do.call('rbind', lapply(xs, ldim))
 
 size <- function(x) ldim(x)$size
 
-`%dim%` <- function(x, value) {
+`%<-matchdim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
     if (inherits(x, 'partition')) {
-        x[] <- lapply(x, `%dim%`, value =value)
+        x[] <- lapply(x, `%<-matchdim%`, value =value)
         return(x)
     }
     
     if (is.null(value)) {dim(x) <- NULL; return(x)}
     
-    if (size(x) != size(value)) .stop("%dim% is trying to match the dimensions of two objects, but the target object is not the right size.")
+    if (size(x) != size(value)) .stop("%<-matchdim% is trying to match the dimensions of two objects, but the target object is not the right size.")
     
 	dim(x) <- dim(value)
 	if (hasdim(x)) {
@@ -559,6 +563,11 @@ size <- function(x) ldim(x)$size
 	} 
 	
 	x
+}
+
+`%<-dim%` <- function(x, value) {
+  dim(x) <- value
+  x
 }
 
 dropdim <- function(x) {
@@ -574,7 +583,7 @@ dropdim <- function(x) {
 }
 
 forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
-    # the same as %dim%, except it forces all the ... to be the same dim as ref (recycling if necessary)
+    # the same as %<-matchdim%, except it forces all the ... to be the same dim as ref (recycling if necessary)
     refdim <- ldim(ref)
     
     targets <- list(...)
@@ -745,7 +754,7 @@ Repeat <- function(x, ..., margin = 1L) {
         output[bool] <- t
     }
     if (any(!bool))  output[!bool] <- f
-    output %dim% bool
+    output %<-matchdim% bool
 }
 
 
@@ -918,7 +927,7 @@ integrate <- function(intervals, skip = list(is.na)) {
                intmat[!skip[ , j], j] <<- cumsum(intmat[!skip[ , j], j])
            }
     ) 
-    intmat %dim% intervals
+    intmat %<-matchdim% intervals
 
 }
 
@@ -938,7 +947,7 @@ derive <- function(intervals, skip = list(is.na)) {
                intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
            }
     ) 
-    intmat %dim% intervals
+    intmat %<-matchdim% intervals
     
 }
 
@@ -1746,12 +1755,12 @@ strPartition <- function(str, split = '/') {
     # output[output == ""] <- NA_character_
     # output
     
-    mat <- stringi::stri_split_fixed(str, pattern = split, simplify = FALSE) %dim% str
+    mat <- stringi::stri_split_fixed(str, pattern = split, simplify = FALSE) %<-matchdim% str
     
     maxdepth <- max(lengths(mat))
     df <- lapply(1:maxdepth,
                                \(i) {
-                                   sapply(mat, '[', i = i) %dim% str
+                                   sapply(mat, '[', i = i) %<-matchdim% str
                                    
                                }) 
     

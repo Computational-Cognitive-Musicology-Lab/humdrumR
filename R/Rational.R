@@ -358,13 +358,13 @@ setMethod('%%', signature = c(e1 = 'rational', e2 = 'rational'),
 
 
 
-setMethod('as.double', 'rational', \(x) (x@Numerator / x@Denominator) %dim% x)
+setMethod('as.double', 'rational', \(x) (x@Numerator / x@Denominator) %<-matchdim% x)
 
-setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)) %dim% x)
+setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)) %<-matchdim% x)
 
-setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator) %dim% x)
+setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator) %<-matchdim% x)
 
-setMethod('as.logical', 'rational', \(x) (x != rational(0)) %dim% x)
+setMethod('as.logical', 'rational', \(x) (x != rational(0)) %<-matchdim% x)
 
 
 #### setAs tonal rational ####
@@ -390,7 +390,7 @@ setMethod('as.rational', 'rational', force)
 
 #' @rdname
 #' @export
-setMethod('as.rational', 'matrix', \(x) rational(dropdim(x), 1L) %dim% x)
+setMethod('as.rational', 'matrix', \(x) rational(dropdim(x), 1L) %<-matchdim% x)
 
 #' @rdname rational
 #' @export
@@ -484,7 +484,7 @@ setMethod('as.rational', 'character',
 # #' @family {humdrumR numeric functions}
 # #' @seealso [rational()]
 # #' @export
-#' real <- function(x) (as.numeric(x) %class% 'real') %dim% x
+#' real <- function(x) (as.numeric(x) %class% 'real') %<-matchdim% x
 #' 
 #' #' @rdname real
 #' #' @export
@@ -501,7 +501,7 @@ setMethod('as.rational', 'character',
 #' #' @export
 #' as.real.fraction <- function(x) {
 #'     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-#'     real(sapply(exprs, eval) %dim% x)
+#'     real(sapply(exprs, eval) %<-matchdim% x)
 #' }
 
 

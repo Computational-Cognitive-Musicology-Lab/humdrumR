@@ -100,11 +100,11 @@ popRE <- function(str, regex) {
     # match if any
     match <- character(length(str))
     match[hits] <- stringi::stri_sub(c(str)[hits], loc[hits, 'start'], loc[hits , 'end'])
-    match <- match %dim% str
+    match <- match %<-matchdim% str
     
     # rest if any
     str[hits] <- stringi::stri_sub(str[hits], loc[hits , 'end'] + 1L)
-    str <- str %dim% match
+    str <- str %<-matchdim% match
     
     if (length(var) == 1L && !is.atomic(var)) eval(rlang::expr(!!var <- !!str), envir = parent.frame())
     
@@ -151,7 +151,7 @@ REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
     
     if (inherits(result, 'partition')) {
         result <- lapply(result,
-                         \(res) { res %dim% x})
+                         \(res) { res %<-matchdim% x})
     }
     as.re(result, regex) 
 }

@@ -219,7 +219,7 @@ tset2alterations <- function(tset, Key = dset(0,0), qualities = FALSE, inversion
   
   # colnames(figures) <- extensions
   # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
-  figures %dim% LO5ths
+  figures %<-matchdim% LO5ths
   
 }
 
@@ -810,7 +810,7 @@ tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.romanChord,    
 setAs('integer', 'tertianSet', function(from) integer2tset(from))
 setAs('numeric', 'tertianSet', function(from) integer2tset(as.integer(from)))
 setAs('character', 'tertianSet', function(from) char2tset(from))
-setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %dim% from)
+setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %<-matchdim% from)
 
 
 

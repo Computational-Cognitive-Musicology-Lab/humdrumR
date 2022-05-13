@@ -161,7 +161,7 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 #' @export
 getRoot <- function(dset){
   checkArg(dset)
-  dset@Root %dim% dset
+  dset@Root %<-matchdim% dset
 } 
 
 #' @export
@@ -169,14 +169,14 @@ getRootTint <- function(dset) {
     checkArg(dset)
     root <- getRoot(dset)
     
-    tint( , c(root)) %dim% dset
+    tint( , c(root)) %<-matchdim% dset
     
 }
 
 #' @export getSignature
 getSignature <- function(dset){
     checkArg(dset)
-    dset@Signature %dim% dset
+    dset@Signature %<-matchdim% dset
 }  
 
 #' @export
@@ -190,7 +190,7 @@ getMode <- function(dset) {
 
 getAlterations <- function(dset) {
     # colnames represent the MAJOR degrees
-    alterations <- dset@Alteration %dim% dset
+    alterations <- dset@Alteration %<-matchdim% dset
     
     output <- ints2baltern(alterations, 7L) * 7L
     rownames(output) <- NULL
@@ -334,7 +334,7 @@ setMethod('%%', signature = c('tonalInterval', 'diatonicSet'),
               
               octdiff <- ((simple - fifth) * 19) / 12
               
-              tint(round(e1@Octave - octdiff), simple) %dim% e1
+              tint(round(e1@Octave - octdiff), simple) %<-matchdim% e1
               
               
           })
@@ -354,7 +354,7 @@ setMethod('%%', signature = c('character', 'diatonicSet'),
 #' @export
 setMethod('%%', signature = c('matrix', 'diatonicSet'),
           function(e1, e2) {
-            (c(e1) %% c(e2)) %dim% e1
+            (c(e1) %% c(e2)) %<-matchdim% e1
             
             
           })
@@ -547,11 +547,11 @@ dset2signature <- function(dset, Key = NULL, ...) {
     LO5ths <- LO5th(dset)
     LO5ths[] <- t(apply(LO5ths, 1, \(row) row[order(sign(row), (abs(row) + ifelse(row > 1, 1L, -2L)) %% 7L)])) 
     # this puts accidentals in absolute ascending order, but putting double flats/sharps in the right place
-    tints <- tint( , LO5ths) %dim% NULL
+    tints <- tint( , LO5ths) %<-matchdim% NULL
     
     notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
                               flat = '-', qualities = FALSE, Key = dset(0, 0),
-                              step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %dim% LO5ths
+                              step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %<-matchdim% LO5ths
     
     notes[LO5ths <= 5L & LO5ths >= -1L] <- ""
     
@@ -942,7 +942,7 @@ diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.key,       key
 setAs('integer', 'diatonicSet', function(from) integer2dset(from))
 setAs('numeric', 'diatonicSet', function(from) integer2dset(from))
 setAs('character', 'diatonicSet', function(from) diatonicSet.character(from))
-setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %dim% from)
+setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %<-matchdim% from)
 
 
 ###################################################################### ### 

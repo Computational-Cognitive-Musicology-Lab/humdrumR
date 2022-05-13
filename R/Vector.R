@@ -391,7 +391,7 @@ emptyslots <- function(x) {
 ### [i, ] ----
 
 setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
-          function(x, i) {
+          function(x, i, drop = FALSE) {
             i <- i[i != 0] # zeros are ignored
             
             ### First, special cases where i is empty
@@ -424,11 +424,11 @@ setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
             # do it! 
             setSlots(x) <- lapply(getSlots(x), '[', i = i.internal)
             
-            x
+            if (drop) dropdim(x) else x
           })
 
 setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
-          function(x, i) {
+          function(x, i, drop = FALSE) {
               if (is.null(rownames(x))) {
                        .stop(ifelse = !hasdim(x),
                              "You can't <|row->index a {class(x)} (i.e. {class(x)}[i<|, >])", 
@@ -447,17 +447,18 @@ setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
                                        ' in the {class(x)} object.')
               
               i <- unlist(i)
-              x[i, ]
+              x[i, drop = drop]
           })
 setMethod('[', c(x = 'struct', i = 'logical', j = 'missing'),
-          function(x, i) {
+          function(x, i, drop = FALSE) {
               if (length(i) != length(x)) .stop(ifelse = !hasdim(x),
                                               "Can't index[i<|, >] a {class(x)} with a logical vector of a length that does not match <length|nrow>({class(x)}).")
-              x[which(i), ]
+              
+            x[which(i), drop = FALSE]
           })
 
 setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
-          function(x, i ) {
+          function(x, i) {
               if (!hasdim(x)) .stop("You can't index a dimensionless {class(x)} object with a matrix.")
               matclass <- class(i[1, 1])
               
@@ -553,9 +554,9 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'character'),
 
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'logical'),
-          function(x, j ) {
+          function(x, j, drop = FALSE) {
               if (length(j) != ncol(x)) .stop("Can't index a {class(x)} (i.e., {class(x)}[ , j]) with a logical vector that is a different length than ncol({class(x)}).")
-              x[ , which(j)]
+              x[ , which(j), drop = drop]
           })
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'matrix'),
@@ -567,7 +568,7 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'matrix'),
 
 
 setMethod('[', c(x = 'struct'),
-          function(x, i, j, cartesian = FALSE) {
+          function(x, i, j, cartesian = FALSE, drop = FALSE) {
               if (is.numeric(i)) i <- i[i != 0] # zeros are ignored
               if (is.numeric(j)) j <- j[j != 0]
               
@@ -589,13 +590,11 @@ setMethod('[', c(x = 'struct'),
                   setSlots(x) <- lapply(getSlots(x), '[', i.internal)
                   x@rownames %!<-% rownames(x)[i]
                   x@colnames   <- NULL
-                  
-                  x
-                             
+             
                   
               } else {
                  x <- x[i,  ]
-                 x <- x[ , j]
+                 x <- x[ , j, drop = drop]
               }
               
               x
@@ -791,11 +790,11 @@ setMethod('[<-', c(x = 'struct', i = 'matrix'),
             
             if (!identical(xdim, idim)) .stop("Can't assign to a strcut using a matrix index which doesn't have the same dimensions as the struct.") 
              
-            xflat <- x %dim% NULL
-            iflat <- i %dim% NULL
+            xflat <- x %<-matchdim% NULL
+            iflat <- i %<-matchdim% NULL
             xflat[iflat] <- value
             
-            xflat %dim% x
+            xflat %<-matchdim% x
             
               
           })
@@ -880,10 +879,6 @@ setMethod('rev', c(x = 'struct'),
               x[length(x):1]
           })
 
-#' @export
-unlist.struct <- function(struct) {
-  do.call('c', struct)
-}
 
 #' @export
 setMethod('c', 'struct',
@@ -921,7 +916,7 @@ setMethod('c', 'struct',
               
               xslots <- lapply(xs, getSlots) 
               xslots <- Map(\(slots, curx) {
-                                    lapply(slots, \(slot) {slot %dim% curx})
+                                    lapply(slots, \(slot) {slot %<-matchdim% curx})
                                },
                                xslots, xs)
               slots <- Reduce(\(cur, rest) Map(rbind, cur, rest), xslots)
@@ -1006,7 +1001,7 @@ setMethod('t', signature = 'struct',
               
               setSlots(x) <- lapply(getSlots(x),
                      function(slot) {
-                         slot <- slot %dim% x
+                         slot <- slot %<-matchdim% x
                          c(t(slot))
                      })
               
@@ -1036,7 +1031,7 @@ setMethod('diag', signature = 'struct',
 setMethod('is.na', signature = 'struct',
           function(x) {
               na <- is.na(getSlots(x)[[1]])
-              na %dim% x
+              na %<-matchdim% x
           })
 
 
@@ -1102,6 +1097,7 @@ setMethod('as.data.frame', 'struct',
               class(value) <- c('data.frame')
               value
           })
+
 .unlist <- function(x, recursive = TRUE, use.names = TRUE) {
   if (is.struct(x[[1]])) do.call('c', x) else unlist(x, recursive, use.names)
   
@@ -1182,7 +1178,7 @@ setMethod('==', signature = c('struct', 'struct'),
               slots2 <- getSlots(e2)
               
               mat <- Reduce(`&`, Map(`==`, slots1, slots2))
-              mat %dim% e1
+              mat %<-matchdim% e1
               
           })
 
@@ -1211,9 +1207,9 @@ setMethod('<=', signature = c('struct', 'struct'),
 setMethod('Compare', signature = c('struct', 'matrix'),
           function(e1, e2) {
             v1 <- rep(e1, length(e2)) 
-            v2 <- e2 %dim% NULL
+            v2 <- e2 %<-matchdim% NULL
             
-            (v1 == v2) %dim% e2
+            (v1 == v2) %<-matchdim% e2
             
           })
 
@@ -1221,9 +1217,9 @@ setMethod('Compare', signature = c('struct', 'matrix'),
 setMethod('Compare', signature = c('matrix', 'struct'),
           function(e1, e2) {
             v2 <- rep(e2, length(e1)) 
-            v1 <- e1 %dim% NULL
+            v1 <- e1 %<-matchdim% NULL
             
-            (v1 == v2) %dim% e1
+            (v1 == v2) %<-matchdim% e1
             
           })
 
@@ -1263,7 +1259,7 @@ setMethod('colSums', signature = c('struct'),
               if (!hasdim(x)) x <- cbind(x)
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     \(slot) {
-                                        as.integer(unname(c(colSums(slot %dim% x, na.rm = na.rm))))
+                                        as.integer(unname(c(colSums(slot %<-matchdim% x, na.rm = na.rm))))
                                     })
               rownames(x) <- NULL
               x@dim <- c(1L, ncol(x))
@@ -1278,7 +1274,7 @@ setMethod('rowSums', signature = c('struct'),
               
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     \(slot) {
-                                        as.integer(unname(c(rowSums(slot %dim% x, na.rm = na.rm))))
+                                        as.integer(unname(c(rowSums(slot %<-matchdim% x, na.rm = na.rm))))
                                     })
               colnames(x) <- NULL
               x@dim <- c(nrow(x), 1L)
@@ -1292,7 +1288,7 @@ setMethod('cumsum', signature = c('struct'),
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     \(slot) {
                                         if (hasdim(x)) {
-                                            c(apply(slot %dim% x, 2, cumsum))
+                                            c(apply(slot %<-matchdim% x, 2, cumsum))
                                         } else {
                                             cumsum(slot)
                                         }
@@ -1309,7 +1305,7 @@ setMethod('diff', signature = c('struct'),
           function(x, lag = 1L) {
               setSlots(x) <- lapply(getSlots(x, c('numeric', 'integer', 'logical')),
                                     \(slot) {
-                                        c(diff(slot %dim% x, lag = lag))
+                                        c(diff(slot %<-matchdim% x, lag = lag))
                                     })
               x@dim[1] <- x@dim[1] - 1L
               x@rownames <- x@rownames[-1]
