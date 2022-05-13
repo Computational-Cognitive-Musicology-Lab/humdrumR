@@ -358,13 +358,13 @@ setMethod('%%', signature = c(e1 = 'rational', e2 = 'rational'),
 
 
 
-setMethod('as.double', 'rational', \(x) x@Numerator / x@Denominator)
+setMethod('as.double', 'rational', \(x) (x@Numerator / x@Denominator) %dim% x)
 
-setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)))
+setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)) %dim% x)
 
-setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator))
+setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator) %dim% x)
 
-setMethod('as.logical', 'rational', \(x) x != rational(0))
+setMethod('as.logical', 'rational', \(x) (x != rational(0)) %dim% x)
 
 
 #### setAs tonal rational ####

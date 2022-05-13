@@ -1,6 +1,17 @@
 #' @name humMetric
 #' @export
-setClass('meter', slots = c(Levels = 'list', Tactus = 'integer')) -> meter
+setClass('meter', slots = c(Levels = 'list', Tactus = 'integer'))
+
+
+meter <- function(...) {
+  levels <- lapply(list(...), rhythmInterval)
+  
+  ord <- order(sapply(levels, \(l) sum(as.double(l))), decreasing = TRUE)
+  
+  
+  new('meter', Levels = levels[ord], Tactus = ord[1])
+  
+}
 
 
 
@@ -99,46 +110,91 @@ rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) 
 #' 
 #' @family rhythm analysis tools
 #' @export
-metricPosition <- function(soi, meter = duple(5), ...) {
+metric <- function(ioi, meter = duple(5), ..., remainderSubdivides = TRUE ) {
+  
+  soi <- SOI(ioi)$Onset
   
 
-  if (!inherits(soi, 'rhythmOffset')) soi <- SOI(soi)
-  
-  
 
   levels <- meter@Levels
+  tatum <- .unlist(lapply(levels, sum))
   
-  measured <- Reduce(\(off, lev) {
-    measure(off, lev)
-  }, 
-  levels, init = soi, accumulate = TRUE)[-1]
+  parent <- bottommost(outer(tatum, tatum, \(x, y) x > y & y %divides% x), TRUE)[ , 'row']
   
-  ois <- lapply(measured, `[[`, 'Onset')
+  ois <- counts <- vector('list', length(levels))
+  
+  for (i in seq_along(levels)) {
+    higherLevel <- max(0L, which(tatum[i] < tatum & tatum[i] %divides% tatum))
+    
+    curMeasure <- measure(if (higherLevel == 0L) soi else ois[[higherLevel]], 
+                          levels[[i]])
+    
+    counts[[i]] <- curMeasure$N
+    ois[[i]] <- curMeasure$SOI
+  }
+  
+  counts <- do.call('cbind', counts)
+  ois <- do.call('cbind', ois)
+  
+  lowestLevel <- leftmost(ois == 0, which = TRUE)[,'col']
+  
+  remainders <- lowestLevel == 0L
+  
+  if (any(remainders)) {
+    remains <- as.double(ois[remainders, ])
+    
+    ranked <- t(apply(remains, 1, order, decreasing = TRUE))
+    
+    if (remainderSubdivides) {
+      subdivide <- sapply(as.list(tatum), \(tat) ioi[remainders] %divides% tat)
+      ranked[!subdivide] <- 1L
+    }
+    lowestLevel[remainders] <- max.col(ranked, ties.method = 'last')
+  }
+  
+    # remainderLevel <- local({
+    #   
+    #   subind <- which(subdivide, arr.ind = TRUE)
+    #   subind <- subind[order(subind[ , 'col'], subind[ , 'row'], decreasing = TRUE), ]
+    #   subind <- subind[!duplicated(subind[ , 'row']), ]
+    #   
+    #   subind[order(subind[ , 'row']), 'col']
+    # }) 
+  
+  remainder <- ois[cbind(seq_along(soi), lowestLevel)]
+  
+  # remove redundant counts
+  counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
+  counts[sweep(col(counts), 1L, parent[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
   
-  oiRatios <- Map('/', tail(ois, -1), head(ois, -1))
-  
-  minlevel <- Reduce('+', Map('!=', oiRatios, levels[-1L])) + 1L
-  minlevel[is.na(minlevel)] <- length(levels)
-  
-  oi <- do.call('cbind', ois)[cbind(1:nrow(soi), minlevel)]
- 
-  # 
-  counts <- do.call('cbind', lapply(measured, `[[`, 2L))
-  counts[sweep(col(counts), 1L, minlevel, '>')] <- 0L
-  
-  list(Count = counts, Remainder = oi)
+  # counts[!matrix(tatum[remainderJ] %divides% tatum[c(col(counts))],ncol=ncol(counts))] <- 0
   
   
-  beats <- sapply(seq_along(levels),
-                  \(j) recip(levels[[j]] * counts[ , j]))
+  
+  
+  beats <- sapply(seq_along(tatum),
+                  \(j) recip(tatum[j] * counts[ , j]))
   beats[counts == 0L] <- ""
-  # 
-  # final <- soi[ , ncol(soi)]
-  cbind(beats, ifelse(oi == 0, "", recip(oi)))
+  
+  output <- cbind(beats, ifelse(remainder == 0, "", recip(remainder)))
+  
+  colnames(output) <- c(sapply(levels, \(l) paste(recip(l), collapse = '+')), 'Remainder')
+  output
   
 }
 
+metricPlot <- function(metric) {
+  metric[metric == ""] <- NA
+  
+  durations <- duration(metric)
+  durations[is.na(durations)] <- 0
+  y <- barplot(t(durations), horiz = TRUE, col = c(gray.colors(ncol(metric) - 1), 'red'))
+  
+  x <- t(apply(durations,1,cumsum))
+  y <- replicate(ncol(x), y)
+  text(x[x != 0], y[x != 0], metric[x != 0], pos = 2, cex=.5)
+}
 
 
 # normalizeMeasures <- function(dur, )
@@ -149,7 +205,6 @@ metricPosition <- function(soi, meter = duple(5), ...) {
 #' how many beats have passed, and the offset between each attack and the nearest beat.
 measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
-  soi <- soi$On
   totalTatum <- sum(beat)
   
   
@@ -174,8 +229,7 @@ measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase =
     
   }
   
-  output <- .data.frame(SOI = soi, N = mcount, Onset = mremain)
-  colnames(output)[colnames(output) == 'N'] <- paste(rint2recip(beat), collapse = '+')
+  output <- .data.frame(N = mcount, SOI = mremain)
   
   attr(output, 'beat') <- beat
 

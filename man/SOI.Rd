@@ -32,7 +32,7 @@ value specified by the \code{start} argument.
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{metricPosition}()},
+\code{\link{metric}()},
 \code{\link{rhythmDecompose}()}
 }
 \concept{rhythm analysis tools}

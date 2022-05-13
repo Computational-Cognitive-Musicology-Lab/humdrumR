@@ -12,6 +12,6 @@ Decompose durations in terms of other durations
 \seealso{
 Other rhythm analysis tools: 
 \code{\link{SOI}()},
-\code{\link{metricPosition}()}
+\code{\link{metric}()}
 }
 \concept{rhythm analysis tools}
