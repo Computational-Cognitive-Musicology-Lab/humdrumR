@@ -97,15 +97,20 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
   args[targets] <- lapply(args[targets], '[', i = !duplicates)
   
   uniqueArgs <- memoizeArgs[!duplicates]
-  # uniqueArgs$i <- seq_len(nrow(uniqueArgs))
   
   
   restorer <- function(result) {
     if (is.table(result) || length(result) != sum(!duplicates)) return(result)
     
-    uniqueArgs[ , Result := result]
-    merge(memoizeArgs, uniqueArgs, on = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
-    # result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+    if (is.struct(result)) {
+      uniqueArgs$i <- seq_len(nrow(uniqueArgs))
+      result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+      
+    } else {
+      uniqueArgs[ , Result := result]
+      merge(memoizeArgs, uniqueArgs, on = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
+      
+    }
     
   }
   
