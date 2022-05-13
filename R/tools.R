@@ -610,15 +610,17 @@ match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
   
           x <- list(...)
           
-          target <- .dim(x[[1]])
+          ldims <- ldims(x)
+          target <- order(ldims[ , 'size'], ldims[ , 'nrow'], decreasing = TRUE)[1]
+          targetdim <- .dim(x[[target]])
           
-          x[-1] <- lapply(x[-1], if (hasdim(x[[1]])) cbind else c)
+          x[-target] <- lapply(x[-target], if (hasdim(x[[target]])) cbind else c)
           
           
           recycleF <- if (recycle) match.fun('recycle') else match.fun('stretch')
-          x[-1] <- lapply(x[-1],
+          x[-target] <- lapply(x[-target],
                          \(y) {
-                           recycleF(y, target)
+                           recycleF(y, targetdim)
                      })
           
           
@@ -1500,7 +1502,7 @@ overdot <- function(call) {
 
 checkArg <- function(arg,  argname, callname = NULL, 
                      atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = 1L, warnSuperfluous = TRUE, classes = NULL) {
+                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, warnSuperfluous = TRUE, classes = NULL) {
     # arg a argument to check
     # 
     if (length(sys.calls()) > 6L) return(arg) 

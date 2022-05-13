@@ -180,6 +180,7 @@ setMethod('initialize',
               slots <- list(...)
               slots <- lapply(slots, unname)
               if (length(slots) == 0L) return(.Object)
+              
               slots <- do.call('match_size', slots)
               
               .Object@dim <- dim
@@ -249,6 +250,8 @@ setMethod('dim<-', 'struct',
               x
               
           })
+
+
 
 ### tools 
 
@@ -953,7 +956,6 @@ cbind.struct <-  function(...) {
     xs <- list(...)
     xs <- Filter(Negate(is.null), xs)
     xs <- lapply(xs, \(x) if (hasdim(x)) t(x) else x)
-    
     #
     x <- do.call('rbind', xs)
     x <- t(x)
@@ -1045,6 +1047,11 @@ setMethod('as.atomic', 'struct',
               atom
           })
 
+setMethod('matrix', 'struct',
+          function(data, nrow, ncol, byrow = FALSE) {
+            data %<-dim% c(nrow, ncol)
+          })
+
 
 #' @export
 as.matrix.struct <- function(x, ..., collapse = \(x, y) .paste(x, y, sep = ',', na.rm = TRUE)) {
@@ -1065,7 +1072,6 @@ setAs('struct', 'data.frame', function(from) as.data.frame(from))
 setMethod('as.data.frame', 'struct',
           function(x, optional = FALSE, ...) {
               row.names <- x@rownames %||% 1:length(x)
-              
               value <- list(x)
               attr(value, 'row.names') <- row.names
               if (!optional) attr(value, 'names') <- class(x)[1]
@@ -1291,7 +1297,8 @@ setMethod('diff', signature = c('struct'),
 setMethod('+', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '+')
-              recycledim(e1 = e1, e2 = e2, funccall = '+')
+              # recycledim(e1 = e1, e2 = e2, funccall = '+')
+              match_size(e1 = e1, e2 = e2)
               
               slots <- Map(`+`, getSlots(e1, c('numeric', 'integer', 'logical')), getSlots(e2, c('numeric', 'integer', 'logical')))
               setSlots(e1) <- slots

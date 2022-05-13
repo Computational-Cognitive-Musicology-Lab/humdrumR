@@ -151,7 +151,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     if (missing(octave) || is.null(octave)) {
       octave <- -floor(tint2semit(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12)
     }
-    checkInteger(octave)
+    checkInteger(octave, 'octave')
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
     tint <- tint %<-matchdim% (if (size(tint) == size(LO5th)) LO5th else octave)
@@ -1107,7 +1107,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   # incorporate memory?
   if (memory) {
     str <- if (truthy(parseWindows) && length(parseWindows) == length(str)) {
-      match_size(size.out = length(str),
+      match_size(str,
                  step = step, 
                  memory = memory, 
                  toEnv = TRUE)
