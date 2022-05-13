@@ -3,3 +3,4 @@ docs
 *tmp
 *.tmp.*
 *docx
+.Rproj.user

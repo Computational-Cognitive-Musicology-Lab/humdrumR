@@ -621,7 +621,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
               
               # recycle columns
               if (length(value) %in% c(1, length(i)) && ncol(value) == 1L && ncol(x) > 1L) {
-                  value <- Repeat(value, length.out = ncol(x), margin = 2)
+                  value <- .rep(value, length.out = ncol(x), margin = 2)
               }
               
               # sizes still don't match
@@ -700,7 +700,7 @@ setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
               
               # recycle rows
               if (ncol(value) %in% c(1, length(j)) && nrow(value) == 1L && nrow(x) > 1L) {
-                  value <- Repeat(value, length.out = nrow(x), margin = 1)
+                  value <- .rep(value, length.out = nrow(x), margin = 1)
               }
               
               # sizes still don't match
@@ -882,66 +882,41 @@ setMethod('rev', c(x = 'struct'),
 
 #' @export
 setMethod('c', 'struct',
-          function(x, ..., rbind = FALSE) {
+          function(x, ...) {
               xs <- list(x, ...)
-              classes <- unique(sapply(xs, class))
-              if (length(classes) > 1L) .stop(ifelse = length(classes) > 1L,
-                                              "You can't concatinate a {class(x)} object with objects of class<|es> ",
-                                              glue::glue_collapse(classes[-1], sep = ', ', last = ', or '), '.', sep = '')
+              xs <- lapply(xs, dropdim)
               
-              #
-              nulldim <- !hasdim(xs[[1]])
-              
-              # make vectors into column vectors
-              xs <- lapply(xs, 
-                           \(x) {
-                               if (!hasdim(x))  x@dim <- c(length(x), 1L)
-                               x
-                               })
-              dims <- t(sapply(xs, dim))
-              # row vectors can be transposed to fit in
-              if (!rbind) {
-                  rowvectors <- dims[ , 1] == 1L
-                  
-                  if(any(!rowvectors) && all(dims[!rowvectors, 2] == 1L)) {
-                      xs[rowvectors] <- lapply(xs[rowvectors], t)
-                      dims[rowvectors, ] <- apply(dims[rowvectors, , drop = FALSE], 1, rev)
-                      
-                  }
+              classes <- lapply(xs, class)
+              if (length(unique(classes)) > 1L) {
+                outclass <- classes[[1]]
+                sameclass <- sapply(classes, \(class) class == outclass)
+                
+                xs[!sameclass] <- lapply(xs[!sameclass],
+                                         function(y) {
+                                           y <- try(as(y, outclass))
+                                           
+                                           if (class(y) == 'try-error') {
+                                             .stop(ifelse = length(class(y)) > 1L,
+                                                   "You can't concatinate a {class(x)} struct object with objects of class<|es> ",
+                                                   glue::glue_collapse(class(y), sep = ', ', last = ', or '), '.', sep = '')
+                                           }
+                                           
+                                           y
+                                           
+                                         })
+                       
+                
+                
               }
-              if (length(unique(dims[ , 2])) != 1L) .stop( "Can't concatinate {class(x)} objects with different numbers of columns.")
               
+           
               # do it
-              x <- xs[[1]]
               
               xslots <- lapply(xs, getSlots) 
-              xslots <- Map(\(slots, curx) {
-                                    lapply(slots, \(slot) {slot %<-matchdim% curx})
-                               },
-                               xslots, xs)
-              slots <- Reduce(\(cur, rest) Map(rbind, cur, rest), xslots)
-              slots <- lapply(slots, c)
+              slots <- Reduce(\(cur, rest) Map(c, cur, rest), xslots)
               setSlots(x) <- slots
               
-              # rownames
-              rownames <- lapply(xs, rownames)
-              x@rownames <-  if (all(!sapply(rownames, is.null))) do.call('c', rownames) else NULL 
-              
-              if (nulldim) {
-                  x@dim <- NULL
-                  x@colnames <- NULL
-                  
-              } else {
-                  #dim
-                  x@dim[1] <- sum(lengths(xs))
-                  x@dim[2] <- dims[1, 2]
-                  
-                  # colnames
-                  colnames <- lapply(xs, colnames)
-                  colnames <- Filter(Negate(is.null), colnames)
-                  x@colnames <- if (length(colnames) == 1L || (length(colnames) > 0L && Reduce(identical, colnames))) colnames[[1]] else NULL
-              }
-              x
+              dropdim(x)
               
           })
 

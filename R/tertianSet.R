@@ -811,7 +811,8 @@ setAs('integer', 'tertianSet', function(from) integer2tset(from))
 setAs('numeric', 'tertianSet', function(from) integer2tset(as.integer(from)))
 setAs('character', 'tertianSet', function(from) char2tset(from))
 setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %<-matchdim% from)
-
+setAs('diatonicSet', 'tertianSet', function(from) dset(from@Root, from@Signature, from@Alterations) %<-matchdim% from)
+setAs('tertianSet', 'diatonicSet', function(from) tset(from@Root, from@Signature, from@Alterations) %<-matchdim% from)
 
 
 

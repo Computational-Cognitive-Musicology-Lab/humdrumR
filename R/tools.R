@@ -362,25 +362,6 @@ empty <- function(object, len = length(object), dimen = dim(object), value = NA)
     
 } 
 
-padNA <- function(x, n, before = TRUE, margin = 1L) {
-### pad vector with NA
-    if (is.null(dim(x)) && margin == 1L) {
-        padding <- vectorNA(n - length(x), class(x))
-        func <- `c`
-    }
-    if (!is.null(dim(x)) && margin == 1L) {
-        padding <- matrix(as(NA, class(x)), n - nrow(x), ncol(x))
-        func <- `rbind`
-    }
-    if (margin == 2L) {
-        padding <- matrix(as(NA, class(x)), nrow(x), n - ncol(x))
-        func <- `cbind`
-    }
-    
-    
-   if (before) func(padding, x) else func(x, padding)
-}
-
 catlists <- function(lists) {
     # this is just like do.call('c', lists) except it never returns NULL
     # and always returns a list.
@@ -540,6 +521,8 @@ ldim <- function(x) {
 
 ldims <- function(xs) do.call('rbind', lapply(xs, ldim))
 
+.dim <- function(x) if (hasdim(x)) dim(x) else length(x)
+
 size <- function(x) ldim(x)$size
 
 `%<-matchdim%` <- function(x, value) {
@@ -574,9 +557,7 @@ dropdim <- function(x) {
     if (is.atomic(x)) {
         c(x) 
     } else {
-        dim(x) <- NULL
-        dimnames(x) <- NULL
-        x
+        x %<-dim% NULL
         
     }
     
@@ -592,8 +573,8 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
                \(x) {
                    xdim <- ldim(x)
                    if (hasdim(x)) {
-                       if (xdim$nrow != refdim$nrow) x <- Repeat(x, length.out = refdim$nrow, margin = 1L)
-                       if (xdim$ncol != refdim$ncol) x <- Repeat(x, length.out = refdim$ncol, margin = 2L)
+                       if (xdim$nrow != refdim$nrow) x <- .rep(x, length.out = refdim$nrow, margin = 1L)
+                       if (xdim$ncol != refdim$ncol) x <- .rep(x, length.out = refdim$ncol, margin = 2L)
                        x
                    } else {
                        matrix(rep(x, length.out = refdim$size), refdim$nrow, refdim$ncol, byrow = byrow)
@@ -625,91 +606,116 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 
 ## My versions of some standard utitilies
 
-match_size <- function(..., size.out = max, margin = 1, toEnv = FALSE, recycle = TRUE) {
-          stuff   <- list(...)
-          if (is.function(size.out) && (length(stuff) <= 1L || Reduce('identical', lapply(stuff, ldim)))) return(invisible(stuff))
+match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
+  
+          x <- list(...)
           
-          recycle <- rep(recycle, length.out = length(margin))
-          notnull <- !sapply(stuff, is.null)
+          target <- .dim(x[[1]])
           
-          if (is.function(size.out)) {
-                    sizes <- lapply(stuff[notnull],
-                                    \(thing) {
-                                              dim <- dim(thing)
-                                              if (is.null(dim)) {
-                                                  if (length(margin) == 1L) length(thing) else c(length(thing), 1L)
-                                              } else {
-                                                  dim[margin]
-                                              }
-                                    })
-                    
-                    size.out <- apply(do.call('rbind', sizes), 2, size.out)
+          x[-1] <- lapply(x[-1], if (hasdim(x[[1]])) cbind else c)
+          
+          
+          recycleF <- if (recycle) match.fun('recycle') else match.fun('stretch')
+          x[-1] <- lapply(x[-1],
+                         \(y) {
+                           recycleF(y, target)
+                     })
+          
+          
+  
+          if (toEnv) {
+            list2env(x[.names(x) != ''], envir = parent.frame(1))
+            invisible(x)
+          } else {
+            x
           }
-          
-          for (i in seq_along(margin)) {
-              stuff[notnull] <- if (recycle[i]) {
-                 lapply(stuff[notnull], Repeat, length.out = size.out[i], margin = margin[i])
-              } else {
-                 lapply(stuff[notnull], padNA, before = FALSE, n = size.out[i], margin = margin[i])
-                  
-              }
-          }
-          if (toEnv) list2env(stuff[names(stuff != '')], envir = parent.frame(1))
-          
-          if (toEnv) invisible(stuff) else stuff
           
 }
 
-match_size2 <- function(..., toEnv = FALSE, byrow = FALSE) {
-    objects <- list(...)
-    
-    nodim <- !sapply(objects, hasdim)
-    
-    sizes <- vector('list', length(objects))
-    sizes[nodim]  <- lapply(objects[nodim],  length)
-    sizes[!nodim] <- lapply(objects[!nodim], dim)
-    
-    if (all(nodim)) {
-        size <- max(unlist(sizes))
-        objects <- lapply(objects, rep, length.out = size)
+recycle <- function(x,length.out = if (hasdim(x)) dim(x) else length(x)) {
+  .fillout(x, length.out, recycle = TRUE)
+}
+
+stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
+  .fillout(x, length.out, recycle = FALSE)
+}
+
+.fillout <- function(x, length.out, recycle = TRUE) {
+  if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
+  if (!hasdim(x)) {
+    if (length(length.out) > 1) {
+      x <- cbind(x) 
     } else {
-        
-        size <- apply(sizes, 1, max)
-        browser()
-        objects[nodim] <- lapply(objects[nodim], \(x) matrix(rep(x, length.out = prod(size)), nrow = size[1], ncol = size[2]))
-        
-        objects[!nodim] <- lapply(objects[!nodim], 
-                                  \(x) {
-                                      x <- Repeat(x, length.out = size[1], margin = 1)
-                                      x <- Repeat(x, length.out = size[2], margin = 2)
-                                      x
-                                  })
-        
+      return (if (recycle) rep_len(x, length.out) else x[seq_len(length.out)])
     }
-    objects
+  } 
+  dim <- dim(x)
+  dim[seq_along(length.out) > length(dim)] <- 1
+  dim(x) <- dim
+  
+  length.out[seq_along(dim) > length(length.out)] <- dim[seq_along(dim) > length(length.out)]
+  length.out[is.na(length.out)] <- dim[is.na(length.out)]
+  a
+  if (recycle) .recycle(x, length.out, dim) else .stretch(x, length.out, dim) 
+}
+
+.recycle <- function(x, length.out, dim) {  
+  
+  ind <- Map(\(d, l) rlang::expr(rep_len(seq_len(!!d), !!l)), dim, length.out )
+  rlang::eval_tidy(rlang::expr(`[`(x, !!!ind, drop = FALSE)))
+
 }
 
 
-Repeat <- function(x, ..., margin = 1L) {
+.stretch <- function(x, length.out, dim) {
+
+  pad <- length.out - dim
+  # if length.out is smaller in any dimension!
+  ind <- Map(\(l, d) if (l < d) seq_len(l) else rlang::missing_arg(),
+             length.out, dim)
+  x <- rlang::eval_tidy(rlang::expr(`[`(x, !!!ind, drop = FALSE)))
+  
+  class <- class(c(x))
+  Reduce(\(cur, pmar) {
+    p <- pmar[1]
+    margin <- pmar[2] 
+    if (p <= 0) {
+      cur
+    } else {
+      dim <- dim(cur)
+      
+      dim[margin] <- p
+      pad <- array(as(NA, class), dim =dim)
+      
+      abind(cur, pad, along = margin)
+      
+    }
+  }, Map(c, pad, seq_along(pad)), init = x)
+  
+}
+
+
+
+.rep <- function(x, ..., margin = 1L) {
 # Smart version of base::repeat which replicates things in any
 # dimension
   if (is.null(dim(x))) {
      # out <- do.call('rep', list(x = x, ...)) 
-     out <- if (margin == 1L) do.call('rep', list(x = x, ...)) else x
+     if (margin == 1L) do.call('rep', list(x = x, ...)) else x
   } else {
       
-    out <- if (margin == 1) {
-        x[rep(seq_len(nrow(x)), ...), , drop = FALSE]
-    } else {
-        x[ , rep(seq_len(ncol(x)), ...), drop = FALSE]
-    }
+    dim <- dim(x)
+    dim[margin] <- ifelse(margin %in% seq_along(dim), dim[margin], 1)
+    dim(x) <- dim
+    
+    ind <- replicate(length(dim), rlang::missing_arg())
+    ind[margin] <- lapply(dim[margin], \(d) rlang::expr(rep(seq_len(!!d), ...)))
+    
+    rlang::eval_tidy(rlang::expr(`[`(x, !!!ind)))
+    
 
-    if (is.data.frame(x)) out <- as.data.frame(out, stringsAsFactors = FALSE)
-
-    if (!is.null(rownames(out)))  rownames(out) <- make.unique(rownames(out))
-    if (!is.null(colnames(out)))  colnames(out) <- make.unique(colnames(out))
   }
-  out
+
 }
 
 

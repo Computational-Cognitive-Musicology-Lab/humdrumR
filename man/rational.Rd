@@ -112,7 +112,7 @@ as.real.rational <- function(x) real(as.double(x))
 #' @export
 as.real.fraction <- function(x) {
 exprs <- parse(text = stringi::stri_replace_all_fixed(x, '\%', '/'))
-real(sapply(exprs, eval) \%dim\% x)
+real(sapply(exprs, eval) \%<-matchdim\% x)
 }
 }
 \seealso{
