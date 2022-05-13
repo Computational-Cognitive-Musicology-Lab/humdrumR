@@ -124,13 +124,13 @@ fargs <- function(func) formals(args(func))
 }
 
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
-    stack <- rlang::call_stack()
-    stack <- stack[!duplicated(stack)]
-    calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
-    calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
-    
-    cat('HumdrumR error in call stack:\n')
-    cat(calls, sep = '\n')
+    # stack <- rlang::caller_call()
+    # stack <- stack[!duplicated(stack)]
+    # calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
+    # calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
+    # 
+    # cat('HumdrumR error in call stack:\n')
+    # cat(calls, sep = '\n')
     
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
@@ -283,6 +283,57 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = 
           output
 }
 
+## Matrices ----
+
+
+most <- function(mat, whatmost = 'right', which = FALSE) {
+  # returns the column which is the rightmost, leftmost, topmost, or bottommost, TRUE in each row/col
+  
+  kind <- pmatch(whatmost, c('right', 'left', 'bottom', 'top'))
+  if (!hasdim(mat)) {
+    ind <- switch(kind,
+           max(which(mat)),
+           which(mat)[1],
+           .stop("A dimensionless vector has no 'topmost'"),
+           .stop("A dimensionless vector as no 'bottomost'"))  
+    
+    if (which) ind else seq_along(mat) == ind
+    
+  } else {
+    if (kind > 2) mat <- t(mat)
+    
+    rows <- rowSums(mat) > 0
+    ind <- ifelse(rows,
+                  max.col(mat, ties.method = c('last', 'first', 'last', 'first')[kind]),
+                  0)
+    
+    ind <- cbind(seq_along(rows), ind)
+    
+    if (kind > 2) ind <- ind[ , 2:1]
+    
+    colnames(ind) <- c('row', 'col')
+    
+    if (which) return(ind)
+    
+    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
+    output[ind] <- TRUE
+    
+    output
+    
+    
+  }
+  
+
+  
+  
+  
+}
+
+rightmost <- function(mat, which = FALSE) most(mat, 'right', which = which)
+leftmost  <- function(mat, which = FALSE) most(mat, 'left', which = which)
+topmost <- function(mat, which = FALSE) most(mat, 'top', which = which)
+bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
+
 ## Vectors ----
 
 
@@ -291,7 +342,7 @@ allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
 
-vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
+
 
 empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
     if (is.atomic(object)) {
@@ -393,19 +444,33 @@ remove.duplicates <- function(listofvalues) {
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     
-    output <- tapply(X, INDEX, FUN, ...) |> unlist()
+    output <- do.call('c', tapply(X, INDEX, FUN, ...))
     indices <- tapply(seq_along(X), INDEX, force) |> unlist()
     
     output[order(indices)]
 }
 
-changes <- function(x) {
-    c(TRUE, head(x, -1L) != tail(x, -1L))
+changes <- function(x, value = FALSE) {
+    change <- c(TRUE, head(x, -1L) != tail(x, -1L))
+    
+    if (value) {
+        output <- vectorNA(length(x), class(x))
+        output[change] <- x[change]
+        output
+    } else {
+        attr(change, 'values') <- x[change]
+        change
+    }
+    
+    
+    
 }
 
 
 segments <- function(x, reverse = FALSE) {
     change <- if (!is.logical(x)) changes(x) else x
+    values <- attr(change, 'values')
+    
     if (reverse) change <- rev(change)
     
     seg <- cumsum(change)
@@ -414,7 +479,7 @@ segments <- function(x, reverse = FALSE) {
         seg <- rev(-seg) + max(seg) + 1
     }
     
-    attr(seg, 'values') <- x[change]
+    attr(seg, 'values') <- values
     
     seg
     
@@ -782,120 +847,57 @@ pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(
 
 is.whole <- function(x) x %% 1 == 0
 
-reduce_fraction <- function(n ,d) {
-    # Used by rhythmInterval initialize method
-    gcds <- gcd(n, d)
+reduce_fraction <- function(n, d) {
+    # Used by rational initialize method
+    gcds <- do(gcd, list(n, d))
     
-    list(Numerator = as.integer(n / gcds), Denominator = as.integer(d / gcds))
+    num <- as.integer(n / gcds)
+    den <- as.integer(d / gcds)
+    list(Numerator = num, Denominator = den)
 }
 
-gcd <- function(x, y) {
-    # Used by reduce_fraction
-    r <- x %% y
-    ifelse(r, Recall(y, r), y)
+gcd <- function(...) {
+    x <- list(...)
+    x <- x[lengths(x) > 0]
+    if (length(x) == 1L) return(x[[1]])
+    if (length(x) == 0L) return(numeric(0))
+    
+    x <- do.call('match_size', x)
+    na <- Reduce('|', lapply(x, is.na))
+    output <- vectorNA(length(x[[1]]), class(x[[1]]))
+    output[!na] <- Reduce(.gcd, lapply(x, '[', !na))
+    output
 }
+
+.gcd <- function(x, y) {
+    r <- x %% y
+    
+    notyet <- r > 0
+    if (any(notyet)) y[notyet] <- Recall(y[notyet], r[notyet])
+    y
+}
+
+lcm <- function(...) {
+    x <- list(...)
+    x <- x[lengths(x) > 0]
+    if (length(x) == 1L) return(x[[1]])
+    if (length(x) == 0L) return(numeric(0))
+    
+    na <- Reduce('|', lapply(x, is.na))
+    
+    output <- vectorNA(length(x[[1]]), class(x[[1]]))
+    output[!na] <- Reduce(.lcm, lapply(x, '[', !na))
+    output
+}
+
+.lcm <- function(x, y) {
+    abs(x * y) / .gcd(x, y)
+}
+
+`%divides%` <- function(e1, e2) gcd(e1, e2) == e1
 
 # modulo starting from 1
 `%1%` <- function(e1, e2) ((e1 - 1L) %% e2) + 1L
-
-## new numeric representations ####
-
-#### decimal ####
-# this is just an extension of numeric to understand my fraction and rational representations
-
-#' Decimal numbers
-#' 
-#' These functions create decimal numbers that are identical to base R
-#' `numeric` (real) numbers.
-#' However, these numbers are understood by the `humdrumR` [rational numbers][rational()].
-#' 
-#' @family {humdrumR numeric functions}
-#' @seealso [rational()]
-#' @export
-decimal <- function(x) (as.numeric(x) %class% 'decimal') %dim% x
-
-#' @rdname decimal
-#' @export
-as.decimal <- function(x, ...) UseMethod('as.decimal')
-#' @export
-as.decimal.character <- function(x) {
-    x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
-    as.decimal.fraction(x)
-}
-#' @export
-as.decimal.numeric <- decimal
-#' @export
-as.decimal.rational <- function(x) decimal((x$Numerator / x$Denominator) %dim% x$Numerator)
-#' @export
-as.decimal.fraction <- function(x) {
-    exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-    decimal(sapply(exprs, eval) %dim% x)
-}
-
-#### rational ####
-# represent rational numbers as list of numerator and denominator
-
-#' Rational numbers
-#' 
-#' R has no built in rational number representation; `humdrumR` defines one.
-#' 
-#' 
-#' 
-#' @seealso [as.decimal()] [as.numeric()] 
-#' @family {humdrumR numeric functions}
-rational <- function(numerator, denominator = 1) {
-    if (!identical(dim(numerator), dim(denominator))) .stop("You can't create a rational number where the numerator and denominator have different dimensions!")
-    
-    frac <- attr(MASS::fractions(numerator / denominator, cycles = 15), 'fracs')
-    frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
-    if (ncol(frac) == 1L) frac <- cbind(frac, '1')
-    
-    numerator <- as.integer(frac[ , 1])
-    denominator <- as.integer(frac[ , 2])
-    
-    denominator[is.na(denominator)] <- 1L
-    
-    list(Numerator = numerator %dim% numerator, Denominator = denominator %dim% numerator) %class% 'rational'
-}
-
-#' @rdname rational
-#' @export
-as.rational <- function(x, ...) UseMethod('as.rational') 
-#' @export
-as.rational.character <- function(x) as.rational.numeric(as.decimal.character(x))
-#' @export
-as.rational.fraction <- function(x) as.rational.numeric(as.decimal.fraction(x))
-#' @export
-as.rational.rational <- force
-#' @export
-as.rational.numeric <- function(x) {
-    rational(x)
-}
-
-#### fraction ####
-# rational numbers as character string
-
-#' @rdname rational
-#' @export
-fraction <- function(numerator, denominator, sep = '/') {
-    checkNumeric(numerator)
-    checkNumeric(denominator)
-    .paste(numerator, denominator, sep = sep) %class% 'fraction'
-}
-
-#' @rdname rational
-#' @export
-as.fraction <- function(x, sep, ...) UseMethod('as.fraction')
-#' @export
-as.fraction.character <- function(x, sep = '/') as.fraction.rational(as.rational.character(x), sep = sep) %dim% x
-#' @export
-as.fraction.rational  <- function(x, sep = '/') fraction(x$Numerator, x$Denominator, sep = sep) 
-#' @export
-as.fraction.numeric   <- function(x, sep = '/') as.fraction.rational(as.rational.numeric(x), sep = sep) %dim% x
-#' @export
-as.fraction.fraction  <- function(x, sep = '/') as.fraction.rational(as.rational.fraction(x), sep = sep) %dim% x %class% 'fraction'
-#' @export
-print.rational <- function(x) print(as.fraction(x))
 
 #### calculus
 
@@ -904,7 +906,6 @@ print.rational <- function(x) print(as.fraction(x))
 # argument is NULL
 
 #' Interval "calculus"
-#' -------------------------------------->     NEEDS DOCUMENTATION         <---------------------------------------------
 #' @name intervalCalculus
 #' @export 
 integrate <- function(intervals, skip = list(is.na)) {

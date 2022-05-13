@@ -97,13 +97,20 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
   args[targets] <- lapply(args[targets], '[', i = !duplicates)
   
   uniqueArgs <- memoizeArgs[!duplicates]
-  uniqueArgs$i <- seq_len(nrow(uniqueArgs))
   
   
   restorer <- function(result) {
     if (is.table(result) || length(result) != sum(!duplicates)) return(result)
     
-    result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+    if (is.struct(result)) {
+      uniqueArgs$i <- seq_len(nrow(uniqueArgs))
+      result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+      
+    } else {
+      uniqueArgs[ , Result := result]
+      merge(memoizeArgs, uniqueArgs, on = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
+      
+    }
     
   }
   
@@ -245,7 +252,7 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
-  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
+  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{list(...)$funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
@@ -359,11 +366,12 @@ makeDispatchDF <- function(...) {
   if (length(quoted) == 0L) .stop("You can't make a dispatchDF with zero dispatch options!")
   
   
-  dispatchDF <- as.data.table(do.call('rbind', list(...)))
+  dispatchDF <- data.table::as.data.table(do.call('rbind', list(...)))
   colnames(dispatchDF) <- c('Exclusives', 'regex', 'method')
   
   dispatchDF$regexPrint <- sapply(quoted, \(row) as.character(row[[3]])[1])
-  dispatchDF[ , regexPrint := unlist(Map(\(regex, print) if (rlang::is_function(regex)) paste0(print, '(...)') else print, regex, regexPrint))]
+  dispatchDF$regexPrint <-  unlist(Map(\(regex, print) if (rlang::is_function(regex)) paste0(print, '(...)') else print, dispatchDF$regex, dispatchDF$regexPrint))
+  
   
   dispatchDF$methodPrint <- sapply(quoted, \(row) as.character(row[[4]])[1])
   

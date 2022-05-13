@@ -222,6 +222,7 @@ columns <- function(humvec) {
     rep(1:ncol, each = length(humvec))
 }
 
+vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
 
 ########## shape ----
 
@@ -492,7 +493,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
 ### [ , j] ----
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
-          function(x, j) {
+          function(x, j, drop = FALSE) {
               if (!hasdim(x)) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
               
               j <- j[j != 0] # zeros are ignored
@@ -525,13 +526,13 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
               # do it! 
               setSlots(x) <- lapply(getSlots(x), '[', i = j.internal)
               
-              x
+              if (drop) dropdim(x) else x
           })
 
 
 
 setMethod('[', c(x = 'struct', i = 'missing', j = 'character'),
-          function(x, j) {
+          function(x, j, drop = FALSE) {
               if (is.null(colnames(x))) .stop("You can't column-index a {class(x)} (i.e. {class(x)}[ , j])", 
                                               " with a character string if the {class(x)} has no colnames (i.e., colnames({class(x)}) = NULL).")
               if (is.numeric(colnames(x))) colnames(x) <- as.character(colnames(x))
@@ -546,7 +547,8 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'character'),
                                        ' in the {class(x)} object.')
               
               j <- unlist(j)
-              x[ , j]
+              x[ , j, drop = drop]
+          
           })
 
 
@@ -851,10 +853,37 @@ setMethod('rep', c(x = 'struct'),
               x
           })
 
+
+setMethod('rep_len', c(x = 'struct'),
+          function(x, length.out) {
+            slots <- getSlots(x)
+            
+            slots <- if (!hasdim(x)) {
+              lapply(slots, rep_len, length.out = length.out)
+            } else {
+              columns <- columns(x)
+              lapply(slots,
+                     \(slot) {
+                       unlist(tapply(slot, columns, rep_len, length.out = length.out, simplify = FALSE), use.names = FALSE)
+                     })
+            }
+            
+            setSlots(x) <- slots
+            x@dim[1]   %!<-% as.integer(length(slots[[1]]) / (ncol(x) %||% 1))
+            x@rownames %!<-% rep_len(rownames(x), length.out = length.out)
+            
+            x
+          })
+
 setMethod('rev', c(x = 'struct'),
           function(x) {
               x[length(x):1]
           })
+
+#' @export
+unlist.struct <- function(struct) {
+  do.call('c', struct)
+}
 
 #' @export
 setMethod('c', 'struct',
@@ -920,6 +949,11 @@ setMethod('c', 'struct',
               x
               
           })
+
+#' @export
+unique.struct <- function(x) {
+  x[!duplicated(x)]
+}
 
 #' @export
 rbind.struct <- function(...) {
@@ -1068,8 +1102,11 @@ setMethod('as.data.frame', 'struct',
               class(value) <- c('data.frame')
               value
           })
-
-struct2data.frame <- function(...) {
+.unlist <- function(x, recursive = TRUE, use.names = TRUE) {
+  if (is.struct(x[[1]])) do.call('c', x) else unlist(x, recursive, use.names)
+  
+}
+.data.frame <- function(...) {
     structs <- list(...)
     
     names <- names(structs)
@@ -1117,7 +1154,7 @@ setMethod('show', signature = c(object = 'struct'),
                   if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
                   '\n', sep = '')
               if (length(object) > 0L) {
-                  print(as.character(object), quote = FALSE)
+                  print(ifelse(is.na(object), 'NA', as.character(object)), quote = FALSE)
               }
             invisible(object)
             }  )
@@ -1138,11 +1175,12 @@ setMethod('sort', signature = c(x = 'struct'),
 setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
-              
+              browser()
               match_size(e1 = e1, e2 = e2, margin = 1:2, toEnv = TRUE)
               
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)
+              
               mat <- Reduce(`&`, Map(`==`, slots1, slots2))
               mat %dim% e1
               
@@ -1167,6 +1205,26 @@ setMethod('<', signature = c('struct', 'struct'),
 setMethod('<=', signature = c('struct', 'struct'),
           function(e1, e2) {
               !(e1 > e2)
+          })
+
+#' @export
+setMethod('Compare', signature = c('struct', 'matrix'),
+          function(e1, e2) {
+            v1 <- rep(e1, length(e2)) 
+            v2 <- e2 %dim% NULL
+            
+            (v1 == v2) %dim% e2
+            
+          })
+
+#' @export
+setMethod('Compare', signature = c('matrix', 'struct'),
+          function(e1, e2) {
+            v2 <- rep(e2, length(e1)) 
+            v1 <- e1 %dim% NULL
+            
+            (v1 == v2) %dim% e1
+            
           })
 
 

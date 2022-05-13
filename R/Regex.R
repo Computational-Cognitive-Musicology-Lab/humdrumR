@@ -437,9 +437,10 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse =
 }
 
 
-####
+#### REs for numbers ----
 
-makeRE.decimal <- function(...) c(decimal = "[+-]?[0-9]+(\\.[0-9]+)?" )
+
+makeRE.double <- function(...) c(double = "[+-]?[0-9]+(\\.[0-9]+)?" )
 makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
 
@@ -591,3 +592,16 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 ####. REs for durations ####
 
 makeRE.recip <- function(...) getRE('recip')
+
+
+makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
+    REs <- list(star = '\\*?',
+         em   = 'M?',
+         numerator = '[1-9][0-9]*',
+         sep = sep,
+         denominator = '[1-9][0-9]*'
+         )
+    
+    if (collapse) setNames(cREs(REs), 'timeSignature') else REs
+    
+}
