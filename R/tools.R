@@ -1183,12 +1183,13 @@ analyzeExpr <- function(expr) {
         
     }
     
-    exprA$Type <- if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
+    exprA$Type <- if (is.null(expr)) 'NULL' else if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
     exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
                          call = as.character(expr[[1]]),
                          atomic = expr,
-                         symbol = as.character(expr))
+                         symbol = as.character(expr),
+                         'NULL' = 'NULL')
     exprA$Args <- if (exprA$Type == 'call') as.list(expr[-1]) else list()
 
     
@@ -1219,6 +1220,7 @@ unanalyzeExpr <- function(exprA) {
 
 
 modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
+    if (is.null(expr)) return(expr)
     exprA <- analyzeExpr(expr)
     
     if (exprA$Type %in% applyTo) {

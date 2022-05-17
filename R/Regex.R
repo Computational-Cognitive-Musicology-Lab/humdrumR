@@ -397,12 +397,18 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
     
 }
 
-makeRE.kern <- function(parts = c("step", "species"), qualities = FALSE, ...) {
+makeRE.kern <- function(parts = c("step", "species"), 
+                        step.labels = unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B'))),
+                        steps.sign = TRUE,
+                        qualities = FALSE, 
+                        octave.integer = FALSE,
+                        
+                        ...) {
     
-    step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-    makeRE.tonalChroma(parts, step.labels = step.labels, steps.sign = TRUE, 
+    makeRE.tonalChroma(parts, step.labels = step.labels, 
+                       steps.sign = steps.sign, 
                        qualities = qualities,
-                       octave.integer = FALSE, ..., regexname = 'kern')
+                       octave.integer = octave.integer, ..., regexname = 'kern')
     
 }
 
@@ -414,19 +420,20 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
                       qualities = qualities, flat = flat, ..., regexname = 'pitch')
 }
 
-makeRE.interval <- function(parts = c("species", "step"), collapse = TRUE, qualities = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = 1:99,
-                       flat = 'b', ..., regexname = 'interval')
+makeRE.interval <- function(parts = c("species", "step"), step.labels = 1:99, collapse = TRUE, qualities = TRUE, flat = 'b', ...) {
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = step.labels,
+                       flat = flat, ..., regexname = 'interval')
 }
 
-makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = 1:7, octave.integer = FALSE, 
-                       flat = 'b', ..., regexname = 'scaleDegree')
+makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), step.labels = 1:7, octave.integer = FALSE,
+                               flat = 'b', qualities = FALSE, collapse = TRUE, ...) {
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = step.labels, octave.integer = octave.integer, 
+                       flat = flat, ..., regexname = 'scaleDegree')
 }
 
-makeRE.solfa <- function(parts = c("octave", "step", "species"), ..., collapse = TRUE) {
+makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer = FALSE, ..., collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts[parts != "step"], octave.integer = FALSE, ..., collapse = FALSE)
+    REs <- makeRE.tonalChroma(parts[parts != "step"], octave.integer = octave.integer, ..., collapse = FALSE)
     
     if ("step" %in% parts) {
         REs$step <- "[sd][eoi]|[fl][eai]|[mt][eiy]|r[aei]"

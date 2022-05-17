@@ -1418,17 +1418,22 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   
   rlang::new_function(args, rlang::expr( {
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-    args <- lapply(rlang::enexprs(...),
+    args <- lapply(rlang::enquos(...),
                    \(argExpr) {
-                     if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'transpose')) {
-                       type <- as.character(argExpr[[1]])
-                       argExpr[[1]] <- quote(list)
-                       assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
+                     exprA <- analyzeExpr(argExpr)
+                     
+                     if (exprA$Type == 'call' && exprA$Head %in% c('parse', 'transpose')) {
+                       type <- exprA$Head
+                       exprA$Head <- 'list'
+
+                       assign(paste0(type, 'Args'), 
+                              rlang::eval_tidy(unanalyzeExpr(exprA)),
+                              envir = parent.frame(2))
                        NULL
                      } else {
                        rlang::eval_tidy(argExpr)
                      }
-                     
+      
                    })
     
     args <- args[!sapply(args, is.null)]
@@ -1451,7 +1456,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     
     # Parse
     parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize)
-    
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
