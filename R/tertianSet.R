@@ -416,14 +416,16 @@ tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
 
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  overdot(tset2tonalHarmony(tset, parts = c('bass','figuration'), 
-                            figurationArgs = figArgs,  root.case = FALSE,
-                            root = FALSE, bass = TRUE, bass_func = tint2kern,
-                            figuration = TRUE, quality = FALSE,
-                            extension.shorthand = TRUE, extension.simple=TRUE,
-                            extension.sus = FALSE, extension.add = FALSE,
-                            inversion = TRUE,
-                            sep = ' ', bass.sep = '', ...)) -> figures
+  t2tH <- partialApply(tset2tonalHarmony, parts = c('bass','figuration'),
+                       root.case = FALSE,
+                       root = FALSE, bass = TRUE, bass_func = tint2kern,
+                       figuration = TRUE, quality = FALSE,
+                       extension.shorthand = TRUE, extension.simple=TRUE,
+                       extension.sus = FALSE, extension.add = FALSE,
+                       inversion = TRUE,
+                       sep = ' ', bass.sep = '')
+  figures <- t2tH(tset, figurationArgs = figArgs, ...)
+  
   
   # if (extension.shorthand) {
   #   figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
@@ -444,33 +446,36 @@ tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...
   figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'inversion'), 
-                            root_func = tint2romanRoot, Key = Key,
-                            figurationArgs = figArgs, 
-                            implicitSpecies = TRUE,
-                            rootCase = TRUE,
-                            inversion.labels = NULL,
-                            extension.shorthand = TRUE, extension.simple=TRUE,
-                            extension.sus = TRUE, extension.add = TRUE,
-                            inversion = TRUE, ...))
+  t2tH <- partialApply(tset2tonalHarmony, 
+                       parts = c('root', 'quality', 'figuration', 'inversion'), 
+                       root_func = tint2romanRoot, 
+                       implicitSpecies = TRUE,
+                       rootCase = TRUE,
+                       inversion.labels = NULL,
+                       extension.shorthand = TRUE, extension.simple=TRUE,
+                       extension.sus = TRUE, extension.add = TRUE,
+                       inversion = TRUE)
+  
+  t2tH(tset, figurationArgs = figArgs, Key = Key, ...)
   
 }
 
 tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
   figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
-                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
-
+                  absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
+  
   figArgs[names(figurationArgs)] <- figurationArgs
   
   
-  overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figArgs,
-                            root.case = FALSE,
-                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
-                            implicitSpecies = FALSE,
-                            extension.shorthand = TRUE, extension.simple = FALSE,
-                            extension.add = TRUE, extension.sus = TRUE,
-                             ...)) 
+  t2tH <- partialApply(tset2tonalHarmony,
+                       parts = c('root', 'quality', 'figuration', 'bass'), 
+                       root_func = tint2simplepitch, 
+                       root.case = FALSE,
+                       root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
+                       implicitSpecies = FALSE,
+                       extension.shorthand = TRUE, extension.simple = FALSE,
+                       extension.add = TRUE, extension.sus = TRUE)(tset, figurationArgs = figArgs, ...)
+  t2tH(tset, figurationArgs = figArgs, ...)
 }
 
 
@@ -479,14 +484,16 @@ tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
                   flat = 'b', qualities = FALSE, natural = 'maj')
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  chords <- overdot(tset2tonalHarmony(tset, parts = c('root', 'quality', 'figuration', 'bass'), 
-                            root_func = tint2simplepitch, figurationArgs = figArgs,
-                            major = major %||% "MAJOR", minor = 'min', diminish = 'dim',
-                            root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
-                            implicitSpecies = FALSE, root.case=FALSE,
-                            extension.shorthand = TRUE, extension.simple = FALSE,
-                            extension.add = TRUE, extension.sus = TRUE,
-                            ...)) 
+  t2tH <- partialApply(tset2tonalHarmony,
+                       parts = c('root', 'quality', 'figuration', 'bass'), 
+                       root_func = tint2simplepitch, 
+                       major = major %||% "MAJOR", minor = 'min', diminish = 'dim',
+                       root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = TRUE,
+                       implicitSpecies = FALSE, root.case=FALSE,
+                       extension.shorthand = TRUE, extension.simple = FALSE,
+                       extension.add = TRUE, extension.sus = TRUE)
+  
+  chords <- t2tH(tset, figurationArgs = figArgs, ...)
   
   if (is.null(major)) chords <- stringr::str_replace(chords, "MAJOR", '')
   
@@ -585,19 +592,16 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
 parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
   
   # str[str == ''] <- '35'
-  figures <- stringr::str_extract_all(str, 
-                                      overdot(makeRE.tonalChroma(step.labels = 13:1, 
-                                                                 parts = c('species', 'step'), qualities = FALSE,
-                                                                 flat = flat,
-                                                                 collapse = TRUE,
-                                                                 ...)),
-                                      simplify = FALSE)
   
-  figures <- lapply(figures, REparse, res =  overdot(makeRE.tonalChroma(step.labels = 13:1, 
-                                                                        parts = c('species', 'step'), qualities = FALSE,
-                                                                        flat = flat, 
-                                                                        collapse = FALSE,
-                                                                        ...)))
+  makeRE <- partialApply(makeRE.tonalChroma, step.labels = 13:1, 
+                         parts = c('species', 'step'), qualities = FALSE,
+                         flat = flat,
+                         collapse = TRUE)
+  
+  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE), simplify = FALSE)
+
+  figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE))
+  
   lapply(figures, 
          \(parsedfig) {
            parsedfig <- if(!is.null(parsedfig)) as.data.table(parsedfig) else data.table(species = character(2L), step = c('5', '3'))

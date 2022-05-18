@@ -1279,17 +1279,7 @@ wrapInCall <- function(call, x, ...) {
 
 
 
-partialApply <- function(func, ...) {
-    fargs <- fargs(func)
-    newargs <- list(...)
-    
-    hits <- names(fargs)[names(fargs) %in% names(newargs)]
-    fargs[hits] <- newargs[hits]
-    
-    formals(func) <- fargs
-    func
-    
-}
+
 
 callArgs <- function(call) {
     call <- if (is.call(call)) call[[1]] else call
@@ -1462,24 +1452,6 @@ splitExpression <- function(expr, on = '|') {
 
 
 
-overdot <- function(call) {
-    # this function removes redundant arguments 
-    # in ldots 
-    
-    call <- rlang::enexpr(call)
-    
-    dots <- eval(quote(list(...)), envir = parent.frame())
-    
-    if (length(dots) > 0) {
-        call <- call[!sapply(call, \(x) deparse(x) == "...")]
-        call <- call[!names(call) %in% names(dots)]
-        
-        call <- append2expr(call, dots)
-    }    
-    eval(call, envir = parent.frame())
-    
-    
-}
 
 
 # Checking arguments ----

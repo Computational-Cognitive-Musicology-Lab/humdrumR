@@ -122,15 +122,19 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
 
 
 
-do... <- function(func, args, envir = parent.frame()) {
+do... <- function(func, args = list(), ..., envir = parent.frame()) {
   # calls func on args, even if some named arguments in args are not arguments of func
   # (ignores those arguments)
+  
+  args <- c(args, list(...))
   if (!'...' %in% names(fargs(func))) formals(func) <- c(fargs(func), alist(... = ))
   
   do.call(func, args, envir = envir)
   
   
 }
+
+
 
 do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
@@ -157,8 +161,133 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   
 }
 
+
 `%do%` <- function(e1, e2) do(e1, e2)
 
+partialApply <- function(func, ...) {
+  # partial apply accepts a function and returns the same function, but with different default arguments
+  # named arguments in ... are used to set the function's default arguments
+  # unnamed functions are also set, if any
+  
+  fargs <- fargs(func)
+  pargs <- rlang::enexprs(...)
+  
+  
+  nfargs <- sum(names(fargs) != '...')
+  
+  # partial matching
+  hits <- pmatch(.names(pargs), names(fargs), nomatch = 0L)
+  names(pargs)[hits > 0L] <- names(fargs)[hits[hits > 0L]]
+
+  
+  # explicit partial args
+  fargs[.names(pargs)[.names(pargs) %in% names(fargs)]] <- pargs[.names(pargs) %in% names(fargs)]
+  
+  # 
+  notNamed <- .names(pargs) == ""
+  unfilled <- sapply(fargs, rlang::is_missing) & .names(fargs) != "..."
+  remaining <- pargs[names(pargs) != "" & !.names(pargs) %in% names(fargs)]
+  
+  unnamedN <- min(sum(notNamed), sum(unfilled))
+  
+  fargs[names(fargs)[head(which(unfilled), unnamedN)]] <- pargs[head(which(notNamed), unnamedN)]
+  rest <- pargs[tail(which(notNamed), -unnamedN)]
+  
+  ### 
+  stillmissing <- sapply(fargs, rlang::is_missing) & names(fargs) != "..."
+  fargs <- fargs[order(stillmissing, names(fargs) == "...", decreasing = TRUE)]
+  
+  
+  formals(func) <- fargs
+  
+  # if (any(stillmissing)) func else do.call('func', c(fargs[names(fargs) != "..."], rest))
+  func
+}
+
+
+partialApply2 <- function(func, ...) {
+  # partial apply accepts a function and returns the same function, but with different default arguments
+  # named arguments in ... are used to set the function's default arguments
+  # unnamed functions are also set, if any
+  
+  
+  fcall <- rlang::enexpr(func)
+  fargs <- fargs(func)
+  pargs <- rlang::enexprs(...)
+  
+  fargNames <- names(fargs)
+  pargNames <- .names(pargs)
+  
+  ldots <- any(fargNames == "...")
+               
+  # partial matching
+  hits <- pmatch(pargNames, fargNames, nomatch = 0L)
+  pargNames[hits > 0L] <- fargNames[hits[hits > 0L]]
+  
+  namedPargs <- pargs[pargNames != ""]
+  unnamedPargs <- pargs[pargNames == ""]
+  
+  # explicit partial args
+  
+  if (any(fargNames == '...')) {
+    fargs[names(namedPargs)] <- namedPargs
+  } else {
+    hits <- names(namedPargs) %in% fargNames
+    fargs[names(namedPargs[hits])] <- namedPargs[hits]
+  }
+  
+  # other (positional) partial args
+  unfilledPositions <- !names(fargs) %in% .names(namedPargs) & names(fargs) != '...'
+  
+  positionalN <- min(length(unnamedPargs), sum(unfilledPositions))
+  
+  fargs[fargNames[head(which(unfilledPositions), positionalN)]] <- head(unnamedPargs, positionalN)
+  
+  ### reorder args
+  missing <- sapply(fargs, rlang::is_missing)
+  
+  notmissing <- fargs[!missing  & .names(fargs) != '...']
+  passed <- fargs[missing  & .names(fargs) != '...']
+  passed <- setNames(rlang::syms(names(passed)), names(passed))
+  
+  fargs <- fargs[missing ]
+  
+  
+  
+ 
+  
+  
+  body <- if (ldots) rlang::expr((!!fcall)(!!!passed, ..., !!!notmissing)) else rlang::expr((!!fcall)(!!!passed))
+  
+  
+  rlang::new_function(fargs, body)
+}
+
+partialApply3 <- function(func, ...) {
+  # partial apply accepts a function and returns the same function, but with different default arguments
+  # named arguments in ... are used to set the function's default arguments
+  # unnamed functions are also set, if any
+  
+  args <- rlang::enexprs(...)
+  fargs <- fargs(func)
+  
+  fenv <- rlang::env(fullFunc = func)
+  
+  applied <- args[.names(args) %in% names(fargs)]
+  others <- args[!.names(args) %in% names(fargs)]
+  
+  for (arg in names(applied)) assign(arg, rlang::eval_tidy(applied[[arg]]), envir = fenv)
+  
+  
+  fargExpr <- names(fargs)[names(fargs) != '...']
+  fargExpr <- setNames(rlang::syms(fargExpr), fargExpr)
+  
+  
+  
+  body <- if ('...' %in% names(fargs)) rlang::expr(fullFunc(!!!fargExpr, ..., !!!others)) else rlang::expr(fullFunc(!!!fargExpr, !!!others))
+  
+  rlang::new_function(fargs[!names(fargs) %in% names(applied)], body, fenv)
+}
 # regexDispatch <- function(...) {
 #   exprs <- rlang::enexprs(...)
 #   
@@ -406,10 +535,12 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   
   body <- rlang::expr({
     args <- list(str = str, dispatchDF = dispatchDF, Exclusive = Exclusive,
-                 !!!dispatchArgs, multiDispatch = multiDispatch,
+                 multiDispatch = multiDispatch,
                  outputClass = !!outputClass, funcName = !!funcName,
                  ...)
-    do(humdrumDispatch, args, ...)
+    # dispatchArgs <- list(!!!dispatchArgs)
+    # for (name in .names(dispatchArgs)) if (hasArg(name)) dispatchArgs[[name]] <- get(name0)
+    do(humdrumDispatch, c(args, dispatchArgs), ...)
     
   })
   

@@ -730,29 +730,32 @@ tint2tonalChroma <- function(x,
 
 
 
-tint2pitch <- function(x, ...)  {
-  overdot(tint2tonalChroma(x, 
+tint2pitch <- partialApply(tint2tonalChroma,  
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                            octave.offset = 4L, integer = TRUE,
                            flat = 'b', qualities = FALSE,
                            keyed = TRUE,
-                           parts = c("step", "species", "octave"), ...))
-}
-tint2simplepitch <- function(x, ...)  {
-  overdot(tint2tonalChroma(x, 
-                           step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
-                           octave.offset = 4L, integer = TRUE, complex = FALSE,
-                           flat = 'b', qualities = FALSE,
-                           keyed = TRUE,
-                           parts = c("step", "species"), ...))
-}
+                           parts = c("step", "species", "octave"))
+
+
+tint2simplepitch <- partialApply(tint2tonalChroma,
+                                 step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                                 octave.offset = 4L, integer = TRUE, complex = FALSE,
+                                 flat = 'b', qualities = FALSE,
+                                 keyed = TRUE,
+                                 parts = c("step", "species"))
+
 
 
 tint2kern <- function(x, complex = TRUE, Key = NULL, directed = FALSE, ...) {
   
-  kern <- overdot(tint2tonalChroma(x, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                   parts = c("step", "species"), qualities = FALSE, complex = FALSE,
-                                   keyed = TRUE, Key = Key, directed = directed, ...))
+  t2tC <- partialApply(tint2tonalChroma,
+                       step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                       parts = c("step", "species"), qualities = FALSE, complex = FALSE,
+                       keyed = TRUE)
+  
+  kern <- t2tC(x, Key = Key, directed = directed, ...)
+  
   
   if (directed) {
     direction <- stringr::str_extract(kern, '^[+-]?')
@@ -771,22 +774,22 @@ tint2kern <- function(x, complex = TRUE, Key = NULL, directed = FALSE, ...) {
 }
 
 
-tint2lilypond <- function(x, relative = TRUE, ...) {
-  overdot(tint2tonalChroma(x, 
-                           step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                           up = "'", down = ",",
-                           qualities = FALSE,
-                           relative = relative, octave.integer = FALSE,
-                           octave.round = if (relative) round else floor,
-                           sharp = 'is', flat = 'es',
-                           parts = c("step", 'species', "octave"), ...))
-} 
+
+tint2lilypond <- partialApply(tint2tonalChroma, 
+                              step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                              up = "'", down = ",",
+                              qualities = FALSE,
+                              relative = TRUE, octave.integer = FALSE,
+                              octave.round = if (relative) round else floor,
+                              sharp = 'is', flat = 'es',
+                              parts = c("step", 'species', "octave"))
 
 tint2helmholtz <- function(x, ...) {
-  notes <- overdot(tint2tonalChroma(x, 
-                                    step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                    up = "'", down = ",", octave.offset = 1L,
-                                    ...))
+  t2tC <- partialApply(tint2tonalChroma,  
+                       step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                       up = "'", down = ",", octave.offset = 1L)
+  
+  notes <- t2tC(x, ...)
   
   octn <- tint2octave(x, octave.integer = FALSE, octave.offset = 1L)
   notes[octn < 0L] <- stringr::str_to_title(notes[octn < 0L]) 
@@ -794,38 +797,36 @@ tint2helmholtz <- function(x, ...) {
 }
                                                                 
 
-tint2romanRoot <- function(x, ..., Key = NULL) {
-  overdot(tint2tonalChroma(x, 
-                           step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'), 
-                           octave.integer = TRUE, octave.offset = 4L, 
-                           qualities = FALSE,
-                           parts = c('species', "step"), ..., Key = Key))
-  
-}
+tint2romanRoot <- partialApply(tint2tonalChroma, 
+                               step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'), 
+                               octave.integer = TRUE, octave.offset = 4L, 
+                               qualities = FALSE,
+                               parts = c('species', "step"), Key = NULL)
+
 
 
 
 tint2interval <- function(x, directed = TRUE, ...) {
-  interval <- overdot(tint2tonalChroma(x, Key = Key, step.labels = 1L:7L,
-                                       parts = c("direction", "species", "step", "octave"),
-                                       complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
-                                       octave.integer = TRUE, relative = FALSE, octave.round = floor, ...))
+  
+  t2tC <- partialApply(tint2tonalChroma,
+                       step.labels = 1L:7L,
+                       parts = c("direction", "species", "step", "octave"),
+                       complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
+                       octave.integer = TRUE, relative = FALSE, 
+                       octave.round = floor)
+  
+  interval <- t2tC(x, directed = TRUE, ...)
   
   if (!directed) interval <- stringr::str_remove(interval, '^[+-]?')
   interval
 }
 
 
-tint2degree <- function(x, Key = Key, parts = c("octave", "species", "step"), ...) {
-  # Key <- if (is.null(Key)) dset(0, 0) else diatonicSet(Key)
-  # x <- x - Key
-  # Key <- Key - getRoot(Key)
-  
-  overdot(tint2tonalChroma(x, Key = Key, parts = parts, 
-                           complex = FALSE, keyed = FALSE,
-                           octave.integer = FALSE, relative = TRUE, octave.round = round, ...))
+tint2degree <- partialApply(tint2tonalChroma, parts = c("octave", "species", "step"), 
+                            complex = FALSE, keyed = FALSE,
+                            octave.integer = FALSE, relative = TRUE, octave.round = round)
 
-}
+
 
 
 
@@ -1193,44 +1194,41 @@ tonalChroma2tint <- function(str,
 
 
 
-pitch2tint <- function(str, ...) {
-  overdot(tonalChroma2tint(str, parts = c("step", "species", "octave"), 
+pitch2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octave"), 
                            octave.offset = 4L, octave.integer = TRUE,
                            qualities = FALSE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
-                           keyed = TRUE,
-                           ...))
-}
+                           keyed = TRUE)
 
-kern2tint <- function(str, ...) {
+kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
-  step.labels <- unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-  overdot(tonalChroma2tint(str, parts = c("step", "species"), 
-                           keyed = TRUE,  
-                           qualities = FALSE,
-                           step.labels = step.labels, steps.sign = TRUE, ...))
+  step.labels <- unlist(lapply(1:50, strrep, x = step.labels))
+  
+  tC2t <- partialApply(tonalChroma2tint,
+                       parts = c("step", "species"), 
+                       keyed = TRUE,  
+                       qualities = FALSE,
+                       steps.sign = TRUE)
+  tC2t(str, step.labels = step.labels, ...)
   
   
 }
 
-interval2tint <- function(str, ...) {
-  overdot(tonalChroma2tint(str, parts = c('sign', 'species', "step"), qualities = TRUE, step.labels = NULL, ...))
-}
+interval2tint <- partialApply(tonalChroma2tint,
+                              parts = c('sign', 'species', "step"), 
+                              qualities = TRUE, step.labels = NULL)
 
 
-degree2tint <- function(str, Key = NULL, ...) {
-  
-  overdot(tonalChroma2tint(str, parts = c("octave", "species", "step"), 
+
+degree2tint <- partialApply(tonalChroma2tint, parts = c("octave", "species", "step"), 
                            qualities = FALSE, 
-                           keyed = FALSE, Key = Key,
+                           keyed = FALSE, Key = NULL,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                            octave.integer = FALSE, relative = TRUE, octave.round = round,
-                           flat = 'b',
-                           ...))
+                           flat = 'b')
   
-}
 
 
 solfa2tint <- function(str, ...) {
@@ -1253,12 +1251,15 @@ solfa2tint <- function(str, ...) {
   
   str_ <- stringr::str_replace(str, alt, sylalt)
   
-  overdot(tonalChroma2tint(str_, parts = c("octave", "step", "species"),
-                           step.labels = rownames(alt.mat), qualities = FALSE,
-                           keyed = FALSE,
-                           octave.integer = FALSE, relative = TRUE, octave.round = round,
-                           flat = 'b',
-                             ...))
+  
+  tC2t <- partialApply(tonalChroma2tint,
+                       parts = c("octave", "step", "species"),
+                       step.labels = rownames(alt.mat), qualities = FALSE,
+                       keyed = FALSE,
+                       octave.integer = FALSE, relative = TRUE, octave.round = round,
+                       flat = 'b')
+  
+  tC2t(str_, step.labels = rownames(alt.mat), ...)
   
 }
 

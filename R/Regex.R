@@ -369,7 +369,6 @@ makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ste
 
     captureRE(step.labels) 
 
-    
 
 }
 
@@ -458,12 +457,12 @@ makeRE.alterations <- function(..., qualities = FALSE) {
     # names(alteration.labels) <- gsub('diminish', 'flat', names(alteration.labels))
 
     
-    paste0('(', 
-           overdot(makeRE.tonalChroma(parts = c("species", "step"), ...,
-                              steps.sign = FALSE, qualities = qualities, flat = 'b',
-                              step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
-                              regexname = 'alterations')),
-           ')*')
+    makeRE <- partialApply(makeRE.tonalChroma,
+                       parts = c("species", "step"), steps.sign = FALSE, flat = 'b',
+                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
+                       regexname = 'alterations')
+    
+    paste0('(', makeRE(..., qualities = qualities), ')*')
 }
 
 makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
