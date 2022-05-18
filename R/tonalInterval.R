@@ -151,7 +151,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     if (missing(octave) || is.null(octave)) {
       octave <- -floor(tint2semit(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12)
     }
-    checkInteger(octave, 'octave')
+    
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
     tint <- tint %<-matchdim% (if (size(tint) == size(LO5th)) LO5th else octave)
@@ -822,11 +822,25 @@ tint2interval <- function(x, directed = TRUE, ...) {
 }
 
 
+
+
 tint2degree <- partialApply(tint2tonalChroma, parts = c("octave", "species", "step"), 
                             complex = FALSE, keyed = FALSE,
                             octave.integer = FALSE, relative = TRUE, octave.round = round)
 
 
+tint2bhatk <- function(x, ...) {
+  t2tC <- partialApply(tint2tonalChroma,
+                       step.labels = c('S', 'R', 'G', 'M', 'P', 'D', 'N'), 
+                       octave.integer = FALSE, 
+                       up = "'", down = ',')
+  bhatk <- t2tC(x, ...)
+  
+  bhatk[grepl('[-#]', bhatk)] <- tolower(bhatk[grepl('[-#]', bhatk)])
+  
+  gsub('[-#]*', '', bhatk)
+  
+}
 
 
 
@@ -940,7 +954,7 @@ semit2tint <- function(n, accidental.melodic = FALSE, ...) {
           pitchclass <- wholen %% 12L
           
           LO5ths <- .ifelse(pitchclass %% 2L == 0L, pitchclass, pitchclass - 6L)
-          octaves <- (wholen - (LO5ths * 19)) %/% 12
+          octaves <- as.integer((wholen - (LO5ths * 19)) %/% 12)
           tints <- tint(octaves, LO5ths)
           
           ##
@@ -1263,6 +1277,26 @@ solfa2tint <- function(str, ...) {
   
 }
 
+bhatk2tint <- function(str, ...) {
+  
+  tC2t <- partialApply(tonalChroma2tint,
+                       parts = c('step', 'octave'),
+                       step.labels = c('S', 'R', 'G', 'M', 'P', 'D', 'N'),
+                       octave.integer = FALSE,
+                       up = "'", down = ',')
+  
+  tint <- tC2t(toupper(str))
+  
+  
+  perfects <- abs(LO5th(tint)) <= 1L
+  altered <- str == tolower(str)
+  
+  tint[altered] <- tint[altered] + tint( , ifelse(perfects[altered], 7L, -7L))
+  
+  tint
+  
+}
+
 
 
 ## Pitch Parsing Dispatch ######################################
@@ -1348,6 +1382,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
                                                  list('deg',                    makeRE.scaleDegree, degree2tint),
                                                  list('solfa',                  makeRE.solfa,       solfa2tint),
+                                                 list('bhatk',                  makeRE.bhatk,       bhatk2tint),
                                                  funcName = 'tonalInterval.character',
                                                  outputClass = 'tonalInterval')
 
@@ -1498,7 +1533,9 @@ degree <- makePitchTransformer(tint2degree, 'degree')
 #' @rdname pitchFunctions
 #' @export 
 solfa <- makePitchTransformer(tint2solfa, 'solfa')
-
+#' @rdname pitchFunctions
+#' @export 
+bhatk <- makePitchTransformer(tint2bhatk, 'bhatk')
 
 
 
@@ -1556,7 +1593,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
 
 
 tintPartition_complex <- function(tint, octave.round = floor, ...) {
-  octshift <- octave.round(tint2semit(tint %% dset(0, 0)) / 12)
+  octshift <- as.integer(octave.round(tint2semit(tint %% dset(0, 0)) / 12))
   
   octavepart <- tint(octshift, 0L)
   simplepart <- tint - octavepart

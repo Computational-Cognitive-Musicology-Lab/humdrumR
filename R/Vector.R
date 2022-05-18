@@ -1152,7 +1152,7 @@ setMethod('sort', signature = c(x = 'struct'),
 setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
-              browser()
+            
               match_size(e1 = e1, e2 = e2, margin = 1:2, toEnv = TRUE)
               
               slots1 <- getSlots(e1)

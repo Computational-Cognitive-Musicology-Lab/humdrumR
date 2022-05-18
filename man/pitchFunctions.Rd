@@ -10,6 +10,7 @@
 \alias{interval}
 \alias{degree}
 \alias{solfa}
+\alias{bhatk}
 \title{Manipulate pitch data}
 \usage{
 semit(
@@ -97,6 +98,18 @@ degree(
 )
 
 solfa(
+  x,
+  ...,
+  Key = NULL,
+  Exclusive = NULL,
+  parseArgs = list(),
+  transposeArgs = list(),
+  inPlace = FALSE,
+  memoize = TRUE,
+  deparse = TRUE
+)
+
+bhatk(
   x,
   ...,
   Key = NULL,

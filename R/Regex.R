@@ -394,6 +394,7 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
     
     if (collapse) setNames(cREs(REs, sep = sep), regexname) else REs
     
+    
 }
 
 makeRE.kern <- function(parts = c("step", "species"), 
@@ -442,7 +443,18 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer 
     if (collapse) setNames(cREs(REs), 'solfa') else REs
 }
 
+makeRE.bhatk <- function(parts = c("step", "octave"), up = "'", down = ',', 
+                         step.labels = c('S', 'r', 'R', 'G', 'g', 'M', 'm', 'P', 'D', 'd', 'N', 'n'),
+                         octave.integer = FALSE, ..., collapse = TRUE) {
+    
+    REs <- makeRE.tonalChroma(parts = parts, step.labels = step.labels,
+                              up = up, down = down,
+                              octave.integer = octave.integer, 
+                              ..., collapse = FALSE)
+    
 
+    if (collapse) setNames(cREs(REs), 'bhatk') else REs
+}
 #### REs for numbers ----
 
 
