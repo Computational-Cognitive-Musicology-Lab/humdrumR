@@ -164,52 +164,8 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
 
 `%do%` <- function(e1, e2) do(e1, e2)
 
+
 partialApply <- function(func, ...) {
-  # partial apply accepts a function and returns the same function, but with different default arguments
-  # named arguments in ... are used to set the function's default arguments
-  # unnamed functions are also set, if any
-  
-  fargs <- fargs(func)
-  pargs <- rlang::enexprs(...)
-  
-  
-  nfargs <- sum(names(fargs) != '...')
-  
-  # partial matching
-  hits <- pmatch(.names(pargs), names(fargs), nomatch = 0L)
-  names(pargs)[hits > 0L] <- names(fargs)[hits[hits > 0L]]
-
-  
-  # explicit partial args
-  fargs[.names(pargs)[.names(pargs) %in% names(fargs)]] <- pargs[.names(pargs) %in% names(fargs)]
-  
-  # 
-  notNamed <- .names(pargs) == ""
-  unfilled <- sapply(fargs, rlang::is_missing) & .names(fargs) != "..."
-  remaining <- pargs[names(pargs) != "" & !.names(pargs) %in% names(fargs)]
-  
-  unnamedN <- min(sum(notNamed), sum(unfilled))
-  
-  fargs[names(fargs)[head(which(unfilled), unnamedN)]] <- pargs[head(which(notNamed), unnamedN)]
-  rest <- pargs[tail(which(notNamed), -unnamedN)]
-  
-  ### 
-  stillmissing <- sapply(fargs, rlang::is_missing) & names(fargs) != "..."
-  fargs <- fargs[order(stillmissing, names(fargs) == "...", decreasing = TRUE)]
-  
-  
-  formals(func) <- fargs
-  
-  # if (any(stillmissing)) func else do.call('func', c(fargs[names(fargs) != "..."], rest))
-  func
-}
-
-
-partialApply2 <- function(func, ...) {
-  # partial apply accepts a function and returns the same function, but with different default arguments
-  # named arguments in ... are used to set the function's default arguments
-  # unnamed functions are also set, if any
-  
   
   fcall <- rlang::enexpr(func)
   fargs <- fargs(func)
@@ -244,50 +200,48 @@ partialApply2 <- function(func, ...) {
   fargs[fargNames[head(which(unfilledPositions), positionalN)]] <- head(unnamedPargs, positionalN)
   
   ### reorder args
+
+  
+  
+  
+  
   missing <- sapply(fargs, rlang::is_missing)
   
-  notmissing <- fargs[!missing  & .names(fargs) != '...']
-  passed <- fargs[missing  & .names(fargs) != '...']
-  passed <- setNames(rlang::syms(names(passed)), names(passed))
+ if (ldots) {
+   
+   notmissing <- fargs[!missing  & .names(fargs) != '...']
+   passed <- fargs[missing  & .names(fargs) != '...']
+   passed <- setNames(rlang::syms(names(passed)), names(passed))
+   fargs <- fargs[missing ]
+   body <- rlang::expr({
+     
+     passedArgs <- list(!!!passed)
+     partialArgs <- list(!!!notmissing)
+     curArgs <- list(...)
+     
+     
+     args <- c(passedArgs, curArgs, partialArgs)
+     args <- args[!duplicated(names(args)) | .names(args) == '']
+     
+     do.call(!!(as.character(fcall)), args)
+     
+   })
+   
+ } else {
+   fargs <- fargs[order(missing, decreasing = TRUE)]
+   passed <- setNames(rlang::syms(names(fargs)), names(fargs)) 
+   body <- rlang::expr({
+     (!!fcall)(!!!passed)
+     
+   })
+ } 
+
   
-  fargs <- fargs[missing ]
   
-  
-  
- 
-  
-  
-  body <- if (ldots) rlang::expr((!!fcall)(!!!passed, ..., !!!notmissing)) else rlang::expr((!!fcall)(!!!passed))
-  
-  
-  rlang::new_function(fargs, body)
+  rlang::new_function(fargs, body) %class% "partiallyApplied"
 }
 
-partialApply3 <- function(func, ...) {
-  # partial apply accepts a function and returns the same function, but with different default arguments
-  # named arguments in ... are used to set the function's default arguments
-  # unnamed functions are also set, if any
-  
-  args <- rlang::enexprs(...)
-  fargs <- fargs(func)
-  
-  fenv <- rlang::env(fullFunc = func)
-  
-  applied <- args[.names(args) %in% names(fargs)]
-  others <- args[!.names(args) %in% names(fargs)]
-  
-  for (arg in names(applied)) assign(arg, rlang::eval_tidy(applied[[arg]]), envir = fenv)
-  
-  
-  fargExpr <- names(fargs)[names(fargs) != '...']
-  fargExpr <- setNames(rlang::syms(fargExpr), fargExpr)
-  
-  
-  
-  body <- if ('...' %in% names(fargs)) rlang::expr(fullFunc(!!!fargExpr, ..., !!!others)) else rlang::expr(fullFunc(!!!fargExpr, !!!others))
-  
-  rlang::new_function(fargs[!names(fargs) %in% names(applied)], body, fenv)
-}
+
 # regexDispatch <- function(...) {
 #   exprs <- rlang::enexprs(...)
 #   
