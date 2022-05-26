@@ -805,9 +805,9 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, melodic = FALSE, ...) {
+tint2interval <- function(x, directed = TRUE, melodic = FALSE, File = NULL, Spine = NULL, ...) {
   
-  if (melodic) x <- delta(x)
+  if (melodic) x <- delta(x, boundaries = list(File, Spine))
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
@@ -1401,6 +1401,7 @@ setAs('integer', 'tonalInterval', function(from) semit2tint(from))
 setAs('numeric', 'tonalInterval', function(from) double2tint(from))
 setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %<-matchdim% from)
+setAs('logical', 'tonalInterval', function(from) tint(rep(NA, length(from))) %<-matchdim% from)
 
 setMethod('as.rational', 'tonalInterval', tint2rational)
 setMethod('as.double', 'tonalInterval', tint2double)

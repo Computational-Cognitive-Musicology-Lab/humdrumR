@@ -431,17 +431,25 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
-changes <- function(x, value = FALSE) {
-    change <- c(TRUE, head(x, -1L) != tail(x, -1L))
+changes <- function(..., value = FALSE, first = TRUE) {
+    xs <- list(...)
     
-    if (value) {
-        output <- vectorNA(length(x), class(x))
-        output[change] <- x[change]
-        output
-    } else {
-        attr(change, 'values') <- x[change]
-        change
-    }
+    changes <- lapply(xs, 
+           \(x) {
+             change <- c(first, head(x, -1L) != tail(x, -1L))
+             
+             if (value) {
+               output <- vectorNA(length(x), class(x))
+               output[change] <- x[change]
+               output
+             } else {
+               attr(change, 'values') <- x[change]
+               change
+             }
+           })
+    
+    Reduce(if (value) union else '|', changes)
+ 
     
     
     
@@ -945,7 +953,7 @@ sigma <- integrate
 
 #' @name intervalCalculus
 #' @export 
-derive <- function(intervals, skip = list(is.na)) {
+derive <- function(intervals, skip = list(is.na), boundaries = NULL) {
     intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
     
     skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
@@ -955,6 +963,15 @@ derive <- function(intervals, skip = list(is.na)) {
                intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
            }
     ) 
+    
+    if (!is.null(boundaries) && any(!sapply(boundaries, is.null))) {
+      boundaries <- boundaries[!sapply(boundaries, is.null)]
+      if (any(lengths(boundaries) != nrow(intmat))) .stop("In a call to derive, all vectors in the list boundaries must be", 
+                                                          "the same length as intervals.")
+      changes <- do.call('changes', c(boundaries, first = TRUE))
+      intmat[changes, ] <- as(NA, class(intmat))
+    }
+    
     intmat %<-matchdim% intervals
     
 }

@@ -242,7 +242,7 @@ filterHumdrum <- function(humdrumR, ...) {
 # humdrumR filtering and application can result in lots of filtered tokens.
 # These functions remove parts that are entirely filtered
 
-removeNull <- function(humdrumR, by = 'File', recordTypes = 'GLIMDd', nullTypes = 'd', ...) {
+removeNull <- function(humdrumR, recordTypes = 'GLIMDd', by = 'File', nullTypes = 'd', ...) {
   checkhumdrumR(humdrumR, 'removeNull')
   recordTypes <- checkTypes(recordTypes, 'removeNull', 'recordTypes')
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
@@ -267,21 +267,21 @@ removeNull <- function(humdrumR, by = 'File', recordTypes = 'GLIMDd', nullTypes 
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', by ~ File)
+  removeNull(humdrumR, 'GLIMDd', 'File')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Spine)
+  removeNull(humdrumR, 'GLIMDd', c('File', 'Spine'), 'GLIMd')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyRecords')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', by ~ File ~ Record)
+  removeNull(humdrumR, 'GLIMDd', c('File', 'Record'))
 }
 
 #########################Indexing ----
@@ -428,7 +428,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
                 x <- filterHumdrum(x, form, recordtypes ~ "D")
               }
               
-              
+              if (removeEmpty) x <- removeEmptySpines(x)
               x
               
               
@@ -479,9 +479,15 @@ function(x, i, removeEmpty = FALSE) {
 #' @usage humdata[[ , 'regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-          function(x, j, removeEmpty = FALSE) {
+          function(x, j, removeEmpty = TRUE) {
             #gets any spine which contains match
-            form <- do ~ Spine %in% unique(Spine[. %grepl% j])
+            
+            form <- if (all(grepl('^\\*\\*', j))) {
+              j <- gsub('^\\*\\**', '', j)
+              do ~ Spine %in% unique(Spine[Exclusive %grepl% j])
+            } else {
+              do ~ Spine %in% unique(Spine[. %grepl% j])
+            }
             
             x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
             
@@ -557,8 +563,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'),
 #' @usage humdata[[ , ~expression]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
-          function(x, j, removeEmpty = FALSE) {
+          function(x, j, removeEmpty = TRUE) {
             j <- rlang::as_quosure(j)
+            
             form <- rlang::new_formula(quote(dofill), rlang::expr(Spine %in% unique(Spine[!!j])))
             
             x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
