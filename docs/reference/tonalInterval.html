@@ -63,7 +63,7 @@ a detailed explanation of the theory and specifics of tonalIntervals.'><!-- math
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Representation of tonal pitch information</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R"><code>R/tonalInterval.R</code></a>, <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/rhythmInterval.R"><code>R/rhythmInterval.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R"><code>R/tonalInterval.R</code></a></small>
       <div class="d-none name"><code>tonalInterval.Rd</code></div>
     </div>
 
@@ -121,10 +121,7 @@ a detailed explanation of the theory and specifics of <code>tonalInterval</code>
 <span class="fu">tonalInterval</span><span class="op">(</span><span class="va">n</span>, accidental.melodic <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">str</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co"># S3 method for rhythmInterval</span>
-<span class="fu"><a href="rhythmInterval.html">rhythmInterval</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">str</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -213,7 +210,7 @@ In addition, the variables <code>unison</code> (<code>= P1 = tint(0, 0)</code>),
 <p><code>humdrumR</code> includes a easy-to-use but powerful system for parsing pitch information into the <code>tonalInterval</code> representation.
 Basic methods are defined for numeric values representing atonal pitch information:</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a> values are interpreted as semitones. Watch out! In R, you need to append an <code>L</code> to a number to make it an explicit integer:
 For example, <code>tonalInterval(3L)</code>.</p></li>
-<li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>/<code><a href="decimal.html">decimal()</a></code> and <code><a href="rational.html">rational()</a></code> values are interpreted as frequency ratios, assuming a <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">Pythagorean tuning</a>.
+<li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>/<code><a href="https://rdrr.io/r/base/double.html" class="external-link">double()</a></code> and <code><a href="rational.html">rational()</a></code> values are interpreted as frequency ratios, assuming a <a href="https://en.wikipedia.org/wiki/Pythagorean_tuning" class="external-link">Pythagorean tuning</a>.
 For example, the value <code>2.0</code> will be interpreted as an octave (two to one ratio.)</p></li>
 </ul><p>However, the most useful tool for humdrum data is parsing pitch representations encoded in <code>character</code> tokens.
 The <code>humdrumR</code> regex/exclusive parsing system is used to interpret character strings as tonalIntervals.
@@ -261,6 +258,23 @@ If there is no match, an NA <code>tonalInterval</code> is returned.</p><div clas
 <span class="r-in"><span class="co">###</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">cMajor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu">tint</span><span class="op">(</span> , <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>the condition has length &gt; 1 and only the first element will be used</span>
 <span class="r-in"><span class="va">eMajor</span> <span class="op">&lt;-</span> <span class="va">cMajor</span> <span class="op">+</span> <span class="va">M3</span></span>
 <span class="r-in"><span class="va">eMajor</span> <span class="op">+</span> <span class="fl">2L</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval[ , ]</span>

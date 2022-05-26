@@ -58,6 +58,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/RegexFind.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/SOI.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/chordTransformer.html</loc>
   </url>
   <url>
@@ -206,6 +209,12 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/line-of-fifths.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/measure.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/metric.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/metricPosition.html</loc>

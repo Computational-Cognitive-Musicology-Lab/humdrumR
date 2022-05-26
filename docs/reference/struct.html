@@ -79,7 +79,7 @@ and it is all taken care of. (To do this, specify <code>contains = "struct"</cod
 <p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="tonalInterval.html">tonalInterval</a></p></li>
 <li><p><a href="diatonicSet.html">diatonicSet</a></p></li>
 <li><p><a href="tertianSet.html">tertianSet</a></p></li>
-<li><p><a href="rhythmInterval.html">rhythmInterval</a></p></li>
+<li><p>rhythmInterval</p></li>
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
 The most important limitation of <code>struct</code> that you may encounter is that, though <code>struct</code> classes work (ok) in <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frames</a>,
@@ -171,7 +171,7 @@ If these definitions don't work for your subclass, you'll need to create your ow
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="tonalInterval.html">tonalInterval</a> <a href="rhythmInterval.html">rhythmInterval</a> <a href="diatonicSet.html">diatonicSet</a> <a href="tertianSet.html">tertianSet</a></p></div>
+    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="tonalInterval.html">tonalInterval</a> rhythmInterval <a href="diatonicSet.html">diatonicSet</a> <a href="tertianSet.html">tertianSet</a></p></div>
     </div>
 
     <div class="section level2">
@@ -187,18 +187,9 @@ If these definitions don't work for your subclass, you'll need to create your ow
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test</span><span class="op">)</span>  <span class="op">==</span> <span class="va">test</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 1,10 1,10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 2,9  2,9 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 3,8  3,8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 4,7  4,7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 5,6  5,6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 6,5  6,5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 7,4  7,4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 8,3  8,3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 9,2  9,2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 10,1 10,1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Error in as(y, outclass) : </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   no method or default for coercing “logical” to “mynewsubclass”</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> You can't concatinate a mynewsubclass struct object with objects of classes try-error.</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1,10 2,9  3,8  4,7  5,6  6,5  7,4  8,3  9,2  10,1 1,10 2,9  3,8  4,7  5,6 </span>

@@ -43,6 +43,9 @@ reference:
   - rhythmFunctions
   - rhythmOffset
   - plotRhythm
+  - SOI
+  - measure
+  - metric
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:
