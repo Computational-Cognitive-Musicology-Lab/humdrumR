@@ -378,7 +378,7 @@ makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
 }
 
 makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {
-    paste0(captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)))
+    paste0('(', captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)), ')')
 }
 
 makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) {
@@ -421,7 +421,7 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
 }
 
 makeRE.interval <- function(parts = c("species", "step"), step.labels = 1:99, collapse = TRUE, qualities = TRUE, flat = 'b', ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities =qualities, step.labels = step.labels,
+    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = step.labels,
                        flat = flat, ..., regexname = 'interval')
 }
 

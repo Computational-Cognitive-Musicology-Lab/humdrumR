@@ -200,11 +200,6 @@ partialApply <- function(func, ...) {
   fargs[fargNames[head(which(unfilledPositions), positionalN)]] <- head(unnamedPargs, positionalN)
   
   ### reorder args
-
-  
-  
-  
-  
   missing <- sapply(fargs, rlang::is_missing)
   
  if (ldots) {

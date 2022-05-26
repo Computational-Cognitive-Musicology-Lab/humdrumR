@@ -637,7 +637,6 @@ tint2specifier <- function(x, Key = NULL, ...,
                            perfect = 'P', major = 'M', minor = 'm', augment = 'A', diminish = 'd',
                            specifier.maximum = Inf, specifier.minimum = -specifier.maximum,
                            accidental.integer = FALSE) {
-  
   LO5th <- LO5th(x)
   if (!absoluteSpecies) {
     LO5th <- LO5th - getSignature(Key)
@@ -814,7 +813,7 @@ tint2interval <- function(x, directed = TRUE, melodic = FALSE, ...) {
                        step.labels = 1L:7L,
                        parts = c("direction", "species", "step", "octave"),
                        complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
-                       octave.integer = TRUE, relative = FALSE, 
+                       octave.integer = TRUE, relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
   interval <- t2tC(x, directed = TRUE, ...)
@@ -1232,9 +1231,14 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), .
   
 }
 
-interval2tint <- partialApply(tonalChroma2tint,
+interval2tint <- function(str, melodic = FALSE, ...) {
+  
+  tC2t <- partialApply(tonalChroma2tint,
                               parts = c('sign', 'species', "step"), 
                               qualities = TRUE, step.labels = NULL)
+  tint <- tC2t(str, ...)
+  if (melodic) sigma(tint) else tint
+}
 
 
 
@@ -1270,7 +1274,7 @@ solfa2tint <- function(str, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c("octave", "step", "species"),
-                       step.labels = rownames(alt.mat), qualities = FALSE,
+                      qualities = FALSE,
                        keyed = FALSE,
                        octave.integer = FALSE, relative = TRUE, octave.round = round,
                        flat = 'b')
@@ -1451,7 +1455,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   
   
   args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
-                parseArgs = list(), transposeArgs = list(),
+                parseArgs = list(), transposeArgs = list(), 
                 inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
   
   rlang::new_function(args, rlang::expr( {
