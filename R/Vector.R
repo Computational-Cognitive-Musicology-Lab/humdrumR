@@ -932,42 +932,34 @@ unique.struct <- function(x) {
 rbind.struct <- function(...) {
     xs <- list(...)
     
-    xs <- xs[sapply(xs, size) > 0]
+    xs <- lapply(xs, \(x) if (hasdim(x)) t(x) else x) # keep vectors as vectors
     
-    ldims <- ldims(xs)
-    hasdim <- ldims$length == 0L
-    maxcol <- if (any(hasdim)) max(0, ldims$ncol) else max(ldims$length)
-    
-    xs[!hasdim] <- lapply(xs[!hasdim],
-                          \(x) {
-                              if (length(x) == 1L && maxcol > 0) x <- rep(x, maxcol)
-                              t(x) # make into row matrix
-                          })
-    
-    x <- do.call('c', c(unname(xs), list(rbind = TRUE)))
-    
-    if (!hasdim(x)) x@dim <- c(length(x), 1L)
-    
-    x
+    t(do.call('cbind.struct', xs))
 }
 
 #' @export
 cbind.struct <-  function(...) {
     xs <- list(...)
     xs <- Filter(Negate(is.null), xs)
-    xs <- lapply(xs, \(x) if (hasdim(x)) t(x) else x)
-    #
-    x <- do.call('rbind', xs)
-    x <- t(x)
     
-    # new colnames
-    existing <- sapply(xs, rownames) 
-    new <- .names(xs)
-    new <- Map(\(old, new, len) if (new == '') old else rep(new, len %||% 1L), existing, new, lapply(xs, nrow))
-    if (any(!sapply(new, is.null))) new[sapply(new, is.null)] <- list("")
-    colnames(x) <- unlist(new)
+    ldims <- ldims(xs)
+    
+    nrow <- unique(sapply(xs, \(x) if (hasdim(x)) nrow(x) else length(x)))
+    if (length(nrow) > 1L) .stop("Can't cbind matrices/vectors of mismatching dimensions.")
+    
+    xs[!sapply(xs, hasdim)] <-lapply(xs[!sapply(xs, hasdim)], \(x) {x %<-dim% c(nrow, 1L)})
+    
+    x <- do.call('c', xs)
+    
+    dim(x) <- c(nrow, sum(sapply(xs, ncol)))
+    
+    # dimnames
+    colnames <- c(sapply(xs, \(x) colnames(x) %||% rep("", ncol(x))))
+    colnames(x) <- if (!all(colnames == "")) colnames
+      
+    rownames(x) <- do.call('rbind', lapply(xs, rownames))[1, ]
+    
     x
-    
 }
 
 

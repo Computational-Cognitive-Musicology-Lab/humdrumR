@@ -806,7 +806,9 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, ...) {
+tint2interval <- function(x, directed = TRUE, melodic = FALSE, ...) {
+  
+  if (melodic) x <- delta(x)
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
