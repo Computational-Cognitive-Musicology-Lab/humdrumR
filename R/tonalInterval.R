@@ -479,7 +479,8 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
+tint2semit <- function(x, melodic = FALSE, Key = NULL, specific = TRUE, complex = TRUE, ..., File = NULL, Spine = NULL) {
+  if (melodic) x <- delta(x, boundaries = list(File, Spine))
   
   if (!is.null(Key)) x <- x + diatonicSet(Key)
   
@@ -806,7 +807,6 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 tint2interval <- function(x, directed = TRUE, melodic = FALSE, File = NULL, Spine = NULL, ...) {
-  
   if (melodic) x <- delta(x, boundaries = list(File, Spine))
   
   t2tC <- partialApply(tint2tonalChroma,
@@ -1451,13 +1451,19 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various pitch transform functions
+  fargs <- fargs(deparser)
+  
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  
-  args <- alist(x = , ... = , Key = NULL, Exclusive = NULL, 
+  args <- alist(... = , Key = NULL, Exclusive = NULL, 
                 parseArgs = list(), transposeArgs = list(), 
-                inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
+                inPlace = FALSE,
+                deparse = TRUE)
+  args <- c(alist(x = ), fargs[!names(fargs) %in% c('x', names(args))], args)
+  args$memoize <- if ('melodic' %in% names(fargs)) quote(!melodic) else TRUE
+  
+  fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
   
   rlang::new_function(args, rlang::expr( {
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
@@ -1484,7 +1490,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
-    deparseArgs <- pitchArgCheck(args,      !!callname)
+    deparseArgs <- pitchArgCheck(c(args, !!!fargcall),      !!callname)
     
     # Keys
     Key  <- diatonicSet(Key %||% dset(0L, 0L))

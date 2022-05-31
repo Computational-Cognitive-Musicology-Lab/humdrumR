@@ -68,7 +68,7 @@ predicateParse <- function(predicateFunc, args, anyMatch = FALSE,
 
 ###### "Memoify" ----
 
-memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, ...) {
+memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, lag = 0L, ...) {
   
   firstArg <- args[[1]]
   
@@ -86,6 +86,11 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
   
   if (!any(targets)) return(list(Restore = force, Args = args))
   
+  if (lag != 0L) {
+    args <- c(args, Lagged = list(lag(firstArg, lag)))
+    targets <- c(targets, TRUE)
+  }
+  
   memoizeArgs <- list2dt(args[targets])
   names(memoizeArgs)[.names(memoizeArgs) == ""] <- cumsum(.names(memoizeArgs) == "")[.names(memoizeArgs) == ""]
   duplicates <- duplicated(memoizeArgs) 
@@ -98,8 +103,16 @@ memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = 
   
   uniqueArgs <- memoizeArgs[!duplicates]
   
+  if (lag != 0L) {
+    args[[1]] <- c(rbind(args$Lagged, args[[1]]))
+    args$Lagged <- NULL
+    targets <- head(tail(which(targets), -1L), -1L)
+    args[targets] <- lapply(args[targets], rep, each = 2)
+  }
   
   restorer <- function(result) {
+    if (lag) result <- result[seq_along(result) %% 2L == 0L]
+    
     if (is.table(result) || length(result) != sum(!duplicates)) return(result)
     
     if (is.struct(result)) {
