@@ -806,8 +806,8 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, melodic = FALSE, ...) {
-  if (melodic) x <- delta(x, boundaries = getArgs(c('File', 'Spine', 'Path')))
+tint2interval <- function(x, directed = TRUE, melodic = FALSE, ..., File = NULL, Spine = NULL, Path = NULL) {
+  if (melodic) x <- delta(x, boundaries = list(File, Spine, Path))
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
@@ -1271,10 +1271,9 @@ solfa2tint <- function(str, ...) {
   
   str_ <- stringr::str_replace(str, alt, sylalt)
   
-  
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c("octave", "step", "species"),
-                      qualities = FALSE,
+                       qualities = FALSE,
                        keyed = FALSE,
                        octave.integer = FALSE, relative = TRUE, octave.round = round,
                        flat = 'b')

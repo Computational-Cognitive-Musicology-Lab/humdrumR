@@ -1309,18 +1309,16 @@ wrapInCall <- function(call, x, ...) {
 }
 
 
+getStructure <- function(...) {
+  getArgs(c('File', 'Spine', 'Patch'), ...)
+}
 
-
-
-getArgs <- function(args) {
+getArgs <- function(args, ...) {
   # gets arguments from ... if they exist
-  results <- list()
-  for (arg in args) {
-    hit <-  eval(rlang::expr(hasArg(!!arg)), envir = parent.frame(1))
-    
-    if (hit) results[[arg]] <- eval(rlang::expr(list(...)[[!!arg]]), envir = parent.frame(1))
-  }
-  results
+  ldots <- list(...)
+  
+  ldots <- ldots[.names(ldots) != '']
+  ldots[args[args %in% names(ldots)]]
 }
 
 

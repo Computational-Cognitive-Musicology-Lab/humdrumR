@@ -436,7 +436,7 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer 
     REs <- makeRE.tonalChroma(parts[parts != "step"], octave.integer = octave.integer, ..., collapse = FALSE)
     
     if ("step" %in% parts) {
-        REs$step <- "[sd][eoi]|[fl][eai]|[mt][eiy]|r[aei]"
+        REs$step <- "([sd][eoi]|[fl][eai]|[mt][eiy]|r[aei])"
         REs <- REs[parts]
     }
     
