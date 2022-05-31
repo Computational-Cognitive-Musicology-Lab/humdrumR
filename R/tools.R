@@ -1312,6 +1312,17 @@ wrapInCall <- function(call, x, ...) {
 
 
 
+getArgs <- function(args) {
+  # gets arguments from ... if they exist
+  results <- list()
+  for (arg in args) {
+    hit <-  eval(rlang::expr(hasArg(!!arg)), envir = parent.frame(1))
+    
+    if (hit) results[[arg]] <- eval(rlang::expr(list(...)[[!!arg]]), envir = parent.frame(1))
+  }
+  results
+}
+
 
 
 

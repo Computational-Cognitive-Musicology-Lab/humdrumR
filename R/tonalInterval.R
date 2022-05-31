@@ -806,8 +806,8 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, melodic = FALSE, File = NULL, Spine = NULL, ...) {
-  if (melodic) x <- delta(x, boundaries = list(File, Spine))
+tint2interval <- function(x, directed = TRUE, melodic = FALSE, ...) {
+  if (melodic) x <- delta(x, boundaries = getArgs(c('File', 'Spine', 'Path')))
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
