@@ -420,9 +420,14 @@ makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = 
                       qualities = qualities, flat = flat, ..., regexname = 'pitch')
 }
 
-makeRE.interval <- function(parts = c("species", "step"), step.labels = 1:99, collapse = TRUE, qualities = TRUE, flat = 'b', ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = step.labels,
-                       flat = flat, ..., regexname = 'interval')
+makeRE.interval <- function(parts = c("direction", "species", "step"), step.labels = 1:99, collapse = TRUE, qualities = TRUE, flat = 'b', ...) {
+    REs <- makeRE.tonalChroma(parts[parts != 'direction'], collapse  = FALSE, qualities = qualities, step.labels = step.labels,
+                              flat = flat, ..., regexname = 'interval')
+    
+    if ('direction' %in% parts) REs$direction <- '[+-]?'
+    REs <- REs[parts]
+    
+    if (collapse) setNames(cREs(REs), 'solfa') else REs
 }
 
 makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), step.labels = 1:7, octave.integer = FALSE,

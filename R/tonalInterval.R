@@ -747,29 +747,29 @@ tint2simplepitch <- partialApply(tint2tonalChroma,
 
 
 
-tint2kern <- function(x, complex = TRUE, Key = NULL, directed = FALSE, ...) {
+tint2kern <- function(x, complex = TRUE, Key = NULL, ...) {
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                        parts = c("step", "species"), qualities = FALSE, complex = FALSE,
                        keyed = TRUE)
   
-  kern <- t2tC(x, Key = Key, directed = directed, ...)
+  kern <- t2tC(x, Key = Key, ...)
   
   
-  if (directed) {
-    direction <- stringr::str_extract(kern, '^[+-]?')
-    kern <- tolower(stringr::str_remove(kern, '^[+-]'))
-  }  else {
-    direction <- ""
-  }
+  # if (directed) {
+  #   direction <- stringr::str_extract(kern, '^[+-]?')
+  #   kern <- tolower(stringr::str_remove(kern, '^[+-]'))
+  # }  else {
+  #   direction <- ""
+  # }
   
   
   if (complex) {
-    kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = !directed)
+    kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = TRUE)
   }
   
-  .paste(direction, kern)
+  kern
   
 }
 
@@ -1216,7 +1216,7 @@ pitch2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octav
                            flat = 'b',
                            keyed = TRUE)
 
-kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   step.labels <- unlist(lapply(1:50, strrep, x = step.labels))
@@ -1226,7 +1226,7 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), .
                        keyed = TRUE,  
                        qualities = FALSE,
                        steps.sign = TRUE)
-  tC2t(str, step.labels = step.labels, ...)
+  tint <- tC2t(str, step.labels = step.labels, ...)
   
   
 }
@@ -1450,16 +1450,18 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various pitch transform functions
-  fargs <- fargs(deparser)
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
+  fargs <- fargs(eval(deparser))
+  fargs <- fargs[!names(fargs) %in% c('x', '...')]
   
-  args <- alist(... = , Key = NULL, Exclusive = NULL, 
-                parseArgs = list(), transposeArgs = list(), 
-                inPlace = FALSE,
-                deparse = TRUE)
-  args <- c(alist(x = ), fargs[!names(fargs) %in% c('x', names(args))], args)
+  args <- c(alist(x = , ... = ), 
+            fargs,
+            alist(Key = NULL, Exclusive = NULL, 
+                  parseArgs = list(), transposeArgs = list(), 
+                  inPlace = FALSE,
+                  deparse = TRUE))
   args$memoize <- if ('melodic' %in% names(fargs)) quote(!melodic) else TRUE
   
   fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
@@ -1474,6 +1476,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
                        type <- exprA$Head
                        exprA$Head <- 'list'
 
+                       # this assigns straight to the parseArgs or transposeArgs lists!
                        assign(paste0(type, 'Args'), 
                               rlang::eval_tidy(unanalyzeExpr(exprA)),
                               envir = parent.frame(2))
@@ -1485,11 +1488,10 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
                    })
     
     args <- args[!sapply(args, is.null)]
-    
     args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
-    deparseArgs <- pitchArgCheck(c(args, !!!fargcall),      !!callname)
+    deparseArgs <- pitchArgCheck(c(args, list(!!!fargcall)),      !!callname)
     
     # Keys
     Key  <- diatonicSet(Key %||% dset(0L, 0L))
