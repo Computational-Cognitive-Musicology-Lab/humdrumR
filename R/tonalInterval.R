@@ -275,7 +275,9 @@ setMethod('Summary', signature = c('tonalInterval'),
 
 setMethod('abs', signature = c('tonalInterval'),
           function(x) {
-              .ifelse(x < tint(0, 0), -x, x)
+            neg <- x < tint(0L, 0L)
+            x[neg] <- -x[neg]
+            x
           })
 
 setMethod('sign', signature = c('tonalInterval'),
@@ -684,15 +686,15 @@ tint2specifier <- function(x, Key = NULL, ...,
 
 
 tint2tonalChroma <- function(x, 
-                             parts = c("direction", "species", "step", "octave"), sep = "", 
-                             directed = FALSE, step = TRUE, specific = TRUE, complex = TRUE,
+                             parts = c("species", "step", "octave"), sep = "", 
+                             step = TRUE, specific = TRUE, complex = TRUE,
                              keyed = FALSE, Key = NULL,
                              qualities = FALSE, ...) {
   
   
   if (keyed && !is.null(Key)) x <- x + diatonicSet(Key)
   
-  parts <- matched(parts, c("direction", "species", "step", "octave"))
+  parts <- matched(parts, c( "species", "step", "octave"))
   
 
   
@@ -714,13 +716,13 @@ tint2tonalChroma <- function(x,
   }
 
   # direction
-  directed <- if (directed) {
-    sign <- tint2sign(x, ...)
-    x <- abs(x * sign)
-    c('-', '', '+')[sign + 2L]
-  }
+  # directed <- if (directed) {
+  #   sign <- tint2sign(x, ...)
+  #   x <- abs(x * sign)
+  #   c('-', '', '+')[sign + 2L]
+  # }
   
-  pasteordered(parts, direction = directed, step = step, species = species, octave = if (complex) octave, sep = sep)
+  pasteordered(parts, step = step, species = species, octave = if (complex) octave, sep = sep)
     
   
 }
@@ -810,15 +812,21 @@ tint2interval <- function(x, directed = TRUE, melodic = FALSE, ..., File = NULL,
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
-                       ,
-                       complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
+                       parts = c("species", "step", "octave"),
+                       complex = TRUE, keyed = FALSE, qualities = TRUE, 
                        octave.integer = TRUE, relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
-  interval <- t2tC(x, directed = directed, 
-                   parts = c(if (directed) "direction", "species", "step", "octave"), ...)
+  direction <- if (directed) {
+    c('-', '', '+')[sign(x) + 2L]
+  } else {
+    ""
+  }
+  x <- abs(x)
   
-  interval
+  interval <- t2tC(x, ...)
+  
+  paste0(direction, interval)
 }
 
 
