@@ -1,12 +1,17 @@
-ex <- list(
-    semit = -30L:30L,
-    tint = tint(c(0, 1, 2, -11, 8, NA, 6, 6, -13, -26, 3, 15, 6, -6, 13, 12), 
-                c(0, 0, 0, 7, -5, NA, -5, -4, 8, 15, -2, -9, -2, 5, -8, -8)),
-    kernPitch = c('c','cc','ccc','c#','d-',NA, 'DD-','A-','G#','GGG##','B-','b--','bbb-','bb','f-','F-'),
-    sciPitch = c('C4', 'C5', 'C6','C#4', 'Db4',NA, 'Db2','Ab3','G#3','G##1','Bb3','Bbb4','Bb6','B5','Fb4','Fb3'),
-    tonalChroma = c('C','C#','Db',NA,'Ab','G#','G##','Bb','B','Fb'),
-    interval = c('P1', '+P8', '+P15', '+A1', '+m2', NA, '-M14', '-M3', '-d4', '-d18', '-M2', '+d7', '+m21', '+M14', '+d4', '-A5')
-)
+# generate examples ----
+
+
+scale <- sort(tint( , -12L:12L))
+scale <- c(scale - octave*2, scale - octave, scale, scale + octave)
+
+correct <- data.frame(kern = tint2kern(scale),
+                      interval = tint2interval(scale),
+                      solfa = tint2solfa(scale),
+                      semit = tint2semit(scale),
+                      lilypond = tint2lilypond(scale),
+                      helmholtz = tint2helmholtz(scale),
+                      degree = tint2degree(scale)
+                      )
 
 test_that("Input -> Output maintains struture", {
     expect_throughput <-function(func, x) {

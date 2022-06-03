@@ -218,18 +218,16 @@ partialApply <- function(func, ...) {
  if (ldots) {
    
    notmissing <- fargs[!missing  & .names(fargs) != '...']
-   passed <- fargs[missing  & .names(fargs) != '...']
+   passed <- fargs[.names(fargs) != '...']
    passed <- setNames(rlang::syms(names(passed)), names(passed))
-   fargs <- fargs[missing ]
+   fargs <- fargs#[missing ]
    body <- rlang::expr({
      
      passedArgs <- list(!!!passed)
-     partialArgs <- list(!!!notmissing)
      curArgs <- list(...)
      
-     
-     args <- c(passedArgs, curArgs, partialArgs)
-     args <- args[!duplicated(names(args)) | .names(args) == '']
+     args <- c(passedArgs, curArgs)
+     args <- args[!duplicated(names(args)) | .names(args) == ''] #curArgs (ldots) may need to overwrite default args
      
      do.call(!!(as.character(fcall)), args)
      

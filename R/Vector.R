@@ -1134,7 +1134,7 @@ setMethod('show', signature = c(object = 'struct'),
 #' @export
 setMethod('sort', signature = c(x = 'struct'),
           function(x, decreasing = FALSE) {
-              x[order(x, decreasing = decreasing), ]
+              x[order(x, decreasing = decreasing)]
           })
 
 ##### comparisons ----

@@ -424,7 +424,6 @@ tint2octave <- function(x,
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
                         relative = FALSE, octave.round = floor, ...) {
 
-  
   if (relative) x <- delta(x)
   #
   octn <- octave.offset + tintPartition_complex(x, octave.round = octave.round)$Octave@Octave
@@ -695,12 +694,7 @@ tint2tonalChroma <- function(x,
   
   parts <- matched(parts, c("direction", "species", "step", "octave"))
   
-  # direction
-  directed <- if (directed) {
-    sign <- tint2sign(x, ...)
-    x <- abs(x * sign)
-    c('-', '', '+')[sign + 2L]
-  }
+
   
   # simple part
   step     <- if (step)        tint2step(x, ...) 
@@ -710,17 +704,22 @@ tint2tonalChroma <- function(x,
   # complex part
   octave  <- if (complex) {
     octave <- tint2octave(x, ...)
-  if (is.integer(octave) && is.integer(step)) {
-    step <- step + octave * 7L
-    ""
-  } else {
-    octave
-  }
-  
-  
-  
+    if (is.integer(octave) && is.integer(step)) {
+      step <- step + octave * 7L
+      ""
+    } else {
+      octave
+    }
+    
   }
 
+  # direction
+  directed <- if (directed) {
+    sign <- tint2sign(x, ...)
+    x <- abs(x * sign)
+    c('-', '', '+')[sign + 2L]
+  }
+  
   pasteordered(parts, direction = directed, step = step, species = species, octave = if (complex) octave, sep = sep)
     
   
@@ -738,12 +737,6 @@ tint2pitch <- partialApply(tint2tonalChroma,
                            parts = c("step", "species", "octave"))
 
 
-tint2simplepitch <- partialApply(tint2tonalChroma,
-                                 step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
-                                 octave.offset = 4L, integer = TRUE, complex = FALSE,
-                                 flat = 'b', qualities = FALSE,
-                                 keyed = TRUE,
-                                 parts = c("step", "species"))
 
 
 
@@ -785,13 +778,19 @@ tint2lilypond <- partialApply(tint2tonalChroma,
                               parts = c("step", 'species', "octave"))
 
 tint2helmholtz <- function(x, ...) {
+  
+  octn <- tint2octave(x, octave.integer = TRUE, octave.offset = 1L)
+  
+  
+  x[octn < 0L] <- x[octn < 0L] + tint(1L, 0L)
+  
   t2tC <- partialApply(tint2tonalChroma,  
                        step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                       up = "'", down = ",", octave.offset = 1L)
+                       flat = 'b', parts = c('step', 'species', 'octave'),
+                       up = "'", down = ",", octave.offset = 1L, octave.integer = FALSE)
   
   notes <- t2tC(x, ...)
   
-  octn <- tint2octave(x, octave.integer = FALSE, octave.offset = 1L)
   notes[octn < 0L] <- stringr::str_to_title(notes[octn < 0L]) 
   notes
 }
@@ -811,14 +810,14 @@ tint2interval <- function(x, directed = TRUE, melodic = FALSE, ..., File = NULL,
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
-                       parts = c("direction", "species", "step", "octave"),
+                       ,
                        complex = TRUE, keyed = FALSE, qualities = TRUE, directed = TRUE,
                        octave.integer = TRUE, relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
-  interval <- t2tC(x, directed = TRUE, ...)
+  interval <- t2tC(x, directed = directed, 
+                   parts = c(if (directed) "direction", "species", "step", "octave"), ...)
   
-  if (!directed) interval <- stringr::str_remove(interval, '^[+-]?')
   interval
 }
 
@@ -826,7 +825,7 @@ tint2interval <- function(x, directed = TRUE, melodic = FALSE, ..., File = NULL,
 
 
 tint2degree <- partialApply(tint2tonalChroma, parts = c("octave", "species", "step"), 
-                            complex = FALSE, keyed = FALSE,
+                            complex = FALSE, keyed = FALSE, step.labels = 1L:7L, flat = 'b',
                             octave.integer = FALSE, relative = TRUE, octave.round = round)
 
 
