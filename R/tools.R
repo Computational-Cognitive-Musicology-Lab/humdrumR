@@ -927,58 +927,60 @@ lcm <- function(...) {
 #### calculus
 
 # sigma (integrate) and delta (derive) should be perfect inverses, 
-# so long as their skip arguments are the same, and the scalar
-# argument is NULL
+# so long as their skip arguments are the same
 
-#' Interval "calculus"
+# Interval "calculus"
 #' @name intervalCalculus
-#' @export 
-integrate <- function(intervals, skip = list(is.na)) {
-    intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
-    
-    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
-    
-    lapply(1:ncol(intmat),
-           \(j) {
-               intmat[!skip[ , j], j] <<- cumsum(intmat[!skip[ , j], j])
-           }
-    ) 
-    intmat %<-matchdim% intervals
-
+#' @export
+sigma <- function(x, skip, boundaries) UseMethod('sigma')
+#' @name intervalCalculus
+#' @export
+sigma.default <- function(x, skip = list(is.na), boundaries = NULL) {
+  
+  skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
+  
+  x[!skip] <- if (is.null(boundaries)) {
+    cumsum(x[!skip])
+  } else {
+    tapply_inplace(x[!skip], lapply(boundaries, \(b) b[!skip]), cumsum)
+  }
+  
+  x
+}
+#' @name intervalCalculus
+#' @export
+sigma.matrix <- function(x, skip = list(is.na), 
+                             boundaries = NULL) {
+  
+  do.call('cbind', apply(x, 2, sigma.default, skip = skip, boundaries = boundaries, simplify = FALSE))
 }
 
 #' @name intervalCalculus
-#' @export 
-sigma <- integrate
-
+#' @export
+delta <- function(x, skip, boundaries) UseMethod('delta') 
 #' @name intervalCalculus
-#' @export 
-derive <- function(intervals, skip = list(is.na), boundaries = NULL) {
-    intmat <-  if (hasdim(intervals)) intervals else cbind(intervals) 
+#' @export
+delta.default <- function(x, skip = list(is.na), boundaries = NULL) {
+    skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
     
-    skip <- Reduce('any', lapply(skip,  \(f) f(intmat)))
+    x[!skip] <- c(x[1], 
+                  if (is.null(boundaries)) {
+      diff(x[!skip])
+    } else {
+      tapply_inplace(x[!skip], lapply(boundaries, \(b) b[!skip]), diff)
+    })
     
-    lapply(1:ncol(intmat),
-           \(j) {
-               intmat[which(!skip[ , j])[-1], j] <<- diff(intmat[!skip[ , j], j])
-           }
-    ) 
-    
-    if (!is.null(boundaries) && any(!sapply(boundaries, is.null))) {
-      boundaries <- boundaries[!sapply(boundaries, is.null)]
-      if (any(lengths(boundaries) != nrow(intmat))) .stop("In a call to derive, all vectors in the list boundaries must be", 
-                                                          "the same length as intervals.")
-      changes <- do.call('changes', c(boundaries, first = TRUE))
-      intmat[changes, ] <- as(NA, class(intmat))
-    }
-    
-    intmat %<-matchdim% intervals
+    x
     
 }
 
 #' @name intervalCalculus
-#' @export 
-delta <- derive
+#' @export
+delta.matrix <- function(x, skip = list(is.na), boundaries = NULL) {
+  do.call('cbind', apply(x, 2, delta.default, skip = skip, boundaries = boundaries, simplify = FALSE))
+}
+
+
 
 #' @name intervalCalculus
 #' @export 
@@ -987,9 +989,9 @@ calculus <- function(x, n, skip = list(na)) {
     if (n == 0L) return(x)
     
     if (n > 0L) {
-        Recall(derive(x, skip), n - 1L)
+        Recall(delta(x, skip), n - 1L)
     } else {
-        Recall(integrate(x, skip), n + 1L)
+        Recall(sigma(x, skip), n + 1L)
     }
 }
 

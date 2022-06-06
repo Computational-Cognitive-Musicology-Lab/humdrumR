@@ -16,13 +16,19 @@
 semit(
   x,
   ...,
+  melodic = FALSE,
+  Key = NULL,
+  specific = TRUE,
+  complex = TRUE,
+  File = NULL,
+  Spine = NULL,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = !melodic
 )
 
 midi(
@@ -33,80 +39,131 @@ midi(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 pitch(
   x,
   ...,
+  parts = c("step", "species", "octave"),
+  sep = "",
+  step = TRUE,
+  specific = TRUE,
+  complex = TRUE,
+  keyed = TRUE,
+  Key = NULL,
+  qualities = FALSE,
+  step.labels = c("C", "D", "E", "F", "G", "A", "B"),
+  octave.offset = 4L,
+  integer = TRUE,
+  flat = "b",
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 kern(
   x,
   ...,
+  complex = TRUE,
+  Key = NULL,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 lilypond(
   x,
   ...,
+  parts = c("step", "species", "octave"),
+  sep = "",
+  step = TRUE,
+  specific = TRUE,
+  complex = TRUE,
+  keyed = FALSE,
+  Key = NULL,
+  qualities = FALSE,
+  step.labels = c("c", "d", "e", "f", "g", "a", "b"),
+  up = "'",
+  down = ",",
+  relative = TRUE,
+  octave.integer = FALSE,
+  octave.round = if (relative) round else floor,
+  sharp = "is",
+  flat = "es",
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 interval(
   x,
   ...,
+  directed = TRUE,
+  melodic = FALSE,
+  File = NULL,
+  Spine = NULL,
+  Path = NULL,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = !melodic
 )
 
 degree(
   x,
   ...,
+  parts = c("octave", "species", "step"),
+  sep = "",
+  step = TRUE,
+  specific = TRUE,
+  complex = FALSE,
+  keyed = FALSE,
+  Key = NULL,
+  qualities = FALSE,
+  step.labels = 1L:7L,
+  flat = "b",
+  octave.integer = FALSE,
+  relative = TRUE,
+  octave.round = round,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 solfa(
   x,
   ...,
   Key = NULL,
+  parts = c("octave", "accidentals", "step"),
+  factor = FALSE,
+  Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 bhatk(
@@ -117,8 +174,8 @@ bhatk(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 }
 \description{

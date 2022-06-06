@@ -1238,13 +1238,19 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  
   
 }
 
-interval2tint <- function(str, melodic = FALSE, ...) {
+interval2tint <- function(str, melodic = FALSE, Exclusive = NULL, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                               parts = c('sign', 'species', "step"), 
                               qualities = TRUE, step.labels = NULL)
   tint <- tC2t(str, ...)
-  if (melodic) sigma(tint) else tint
+  
+  if (melodic) Exclusive <- rep('mint', length(str))
+  
+  if ((!is.null(Exclusive) && any(Exclusive == 'mint'))) {
+    tint[Exclusive == 'mint'] <- sigma(tint[Exclusive == 'mint'])
+  }
+  tint
 }
 
 
@@ -1469,6 +1475,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
                   parseArgs = list(), transposeArgs = list(), 
                   inPlace = FALSE,
                   deparse = TRUE))
+  
   args$memoize <- if ('melodic' %in% names(fargs)) quote(!melodic) else TRUE
   
   fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
@@ -1511,8 +1518,9 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     transposeArgs$from <- CKey(from)
     transposeArgs$to <- CKey(to)
     
+    
     # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize)
+    parsedTint <- do(tonalInterval, c(list(x, memoize = !parseArgs$melodic), parseArgs), memoize = !parseArgs$melodic)
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
