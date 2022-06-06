@@ -387,7 +387,7 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   result <- Map(\(method, strs) {
     na <- is.na(strs)
     output <- vectorNA(length(strs), outputClass)
-    args <- c(list(strs), list(Exclusive = Exclusive, ...))
+    args <- c(list(strs), list(...))
     
     if (any(na)) args <- lapply(args, \(arg) if (length(arg) == length(na)) arg[!na] else arg)
     

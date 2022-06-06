@@ -807,8 +807,7 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, melodic = FALSE, ..., File = NULL, Spine = NULL, Path = NULL) {
-  if (melodic) x <- delta(x, boundaries = list(File, Spine, Path))
+tint2interval <- function(x, directed = TRUE, ...) {
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
@@ -1238,19 +1237,13 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  
   
 }
 
-interval2tint <- function(str, melodic = FALSE, Exclusive = NULL, ...) {
+interval2tint <- function(str, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                               parts = c('sign', 'species', "step"), 
                               qualities = TRUE, step.labels = NULL)
-  tint <- tC2t(str, ...)
+  tC2t(str, ...)
   
-  if (melodic) Exclusive <- rep('mint', length(str))
-  
-  if ((!is.null(Exclusive) && any(Exclusive == 'mint'))) {
-    tint[Exclusive == 'mint'] <- sigma(tint[Exclusive == 'mint'])
-  }
-  tint
 }
 
 
@@ -1473,13 +1466,9 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
             fargs,
             alist(Key = NULL, Exclusive = NULL, 
                   parseArgs = list(), transposeArgs = list(), 
-                  inPlace = FALSE,
+                  inPlace = FALSE, memoize = TRUE,
                   deparse = TRUE))
   
-  args$memoize <- if ('melodic' %in% names(fargs)) quote(!melodic) else TRUE
-  
-  if (callname == 'interval') args <- c(args[1], alist(from = lag(x, 1L, windows = list(File, Spine, Path))),
-                                        args[-1], File = NULL, Spine = NULL, Path = NULL)
   
   fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
   
@@ -1511,15 +1500,15 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     deparseArgs <- pitchArgCheck(c(args, list(!!!fargcall)),      !!callname)
     
     # Keys
-    Key  <- diatonicSet(Key %||% dset(0L, 0L))
+    Key     <- diatonicSet(Key %||% dset(0L, 0L))
     fromKey <- diatonicSet(transposeArgs$from %||% Key)
     toKey   <- diatonicSet(transposeArgs$to   %||% Key)
     
-    parseArgs$Key <- fromKey
+    parseArgs$Key   <- fromKey
     deparseArgs$Key <- toKey 
     
     transposeArgs$from <- CKey(fromKey)
-    transposeArgs$to <- CKey(toKey)
+    transposeArgs$to   <- CKey(toKey)
     
     memoize <- !parseArgs$melodic %||% TRUE
     # Parse
@@ -1528,10 +1517,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
     
-    if (callname == 'interval' && !is.null(from)) {
-      fromTint <- do(tonalInterval, c(list(from, memoize = memoize), parseArgs), memoize = memoize)
-      parsedTint <- do(\(a, b) a - b, args = list(parsedTint, fromTint), memoize = FALSE)
-    }
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
     output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedTint
