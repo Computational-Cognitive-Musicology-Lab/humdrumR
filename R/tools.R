@@ -214,7 +214,7 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, window
 lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
           if (length(n) > 1L) .stop('rotate cannot accept multiple rotation values for a vector argument.')
           if (length(x) == 0L || n == 0) return(x)
-
+  
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
           
           output <- data.table::shift(x, n, type = 'lag', fill = fill)
@@ -230,6 +230,7 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
             
           if (!is.null(windows)) {
               if (!is.list(windows)) windows <- list(windows)
+              windows <- windows[!sapply(windows, is.null)]
               if (!all(lengths(windows) == length(x))) .stop('Windows must be same length as input vector.')
               
               boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE, windows = NULL)))
@@ -939,9 +940,10 @@ sigma.default <- function(x, skip = list(is.na), boundaries = NULL) {
   
   skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
   
-  x[!skip] <- if (is.null(boundaries)) {
+  x[!skip] <- if (is.null(boundaries) || all(sapply(boundaries, is.null))) {
     cumsum(x[!skip])
   } else {
+    boundaries <- boundaries[!sapply(boundaries, is.null)]
     tapply_inplace(x[!skip], lapply(boundaries, \(b) b[!skip]), cumsum)
   }
   
@@ -963,12 +965,14 @@ delta <- function(x, skip, boundaries) UseMethod('delta')
 delta.default <- function(x, skip = list(is.na), boundaries = NULL) {
     skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
     
-    x[!skip] <- c(x[1], 
-                  if (is.null(boundaries)) {
-      diff(x[!skip])
-    } else {
-      tapply_inplace(x[!skip], lapply(boundaries, \(b) b[!skip]), diff)
-    })
+    x[!skip] <- c(as(NA, class(x)), diff(x[!skip]))
+    
+    
+    if (!is.null(boundaries) && !all(sapply(boundaries, is.null))) {
+      boundaries <- boundaries[!sapply(boundaries, is.null)]
+      boundaries <- do.call('changes', boundaries)
+      x[boundaries] <- as(NA, class(x))
+    }
     
     x
     

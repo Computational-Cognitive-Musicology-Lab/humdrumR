@@ -1478,6 +1478,9 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   
   args$memoize <- if ('melodic' %in% names(fargs)) quote(!melodic) else TRUE
   
+  if (callname == 'interval') args <- c(args[1], alist(from = lag(x, 1L, windows = list(File, Spine, Path))),
+                                        args[-1], File = NULL, Spine = NULL, Path = NULL)
+  
   fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
   
   rlang::new_function(args, rlang::expr( {
@@ -1509,20 +1512,25 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     
     # Keys
     Key  <- diatonicSet(Key %||% dset(0L, 0L))
-    from <- diatonicSet(transposeArgs$from %||% Key)
-    to   <- diatonicSet(transposeArgs$to   %||% Key)
+    fromKey <- diatonicSet(transposeArgs$from %||% Key)
+    toKey   <- diatonicSet(transposeArgs$to   %||% Key)
     
-    parseArgs$Key <- from
-    deparseArgs$Key <- to 
+    parseArgs$Key <- fromKey
+    deparseArgs$Key <- toKey 
     
-    transposeArgs$from <- CKey(from)
-    transposeArgs$to <- CKey(to)
+    transposeArgs$from <- CKey(fromKey)
+    transposeArgs$to <- CKey(toKey)
     
-    
+    memoize <- !parseArgs$melodic %||% TRUE
     # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = !parseArgs$melodic), parseArgs), memoize = !parseArgs$melodic)
+    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize)
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
+    }
+    
+    if (callname == 'interval' && !is.null(from)) {
+      fromTint <- do(tonalInterval, c(list(from, memoize = memoize), parseArgs), memoize = memoize)
+      parsedTint <- do(\(a, b) a - b, args = list(parsedTint, fromTint), memoize = FALSE)
     }
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
