@@ -815,57 +815,6 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 
 
-.switch <- function(x, groups, ..., parallel = list(), defaultClass = 'character') {
-    # this function plays a key role in Exclusive dispatch
-    exprs <- rlang::enexprs(...)
-    
-    missing <- sapply(exprs, rlang::is_missing)
-    
-    names(exprs)[.names(exprs) == ""] <- 'rest'
-    switch <- names(exprs)
-    rest <- any(switch == 'rest')
-    
-    switchg <- segments(!missing)
-    switchg <- tapply(switch, switchg, paste, collapse = ' | ')[as.character(switchg)]
-    # used to group missing arguments in with the next non missing expression
-    
-    exprs <- exprs[!missing]
-    exprs <- exprs[switch %in% c(groups, if (rest) 'rest')]
-    
-    
-    if (length(exprs) == 0L) return(if (rest) x else vectorNA(length(x), defaultClass))
-    
-    groupvec <- c(if (rest) 'rest' else 'nomatch', switchg)[match(groups, switch, nomatch = 0) + 1] 
-    
-    # this maps unkown exclusives to "nomatch"
-    grouped <- lapply(c(list(i = seq_along(x), 
-                             group = groupvec,
-                             x = x), 
-                        parallel), split, f = groupvec )
-    
-    exprs <- setNames(exprs[names(grouped$group)], names(grouped$group)) 
-    # makes sure there is a "nomatch" expr, and they are in right order
-    frame <- parent.frame(1)
-    results <- do.call('Map', 
-                       c(\(expr, ...) {
-                           exclgroup <- list(...)
-                           
-                           if (is.null(expr)) return(exclgroup$x)
-                           
-                           rlang::eval_tidy(expr, exclgroup, env = frame)
-                       }, 
-                       c(list(exprs), 
-                         grouped)))
-    results$nomatch <- vectorNA(length(results$nomatch), class(results[names(results) != 'nomatch'][[1]]))
-    results <- unstick(do.call('c', unname(results )))
-    
-    i <- order(unlist(grouped$i))
-    results <- results[i]
-    
-    
-    results
-}
-
 
 # Math ----
 

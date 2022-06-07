@@ -1892,7 +1892,9 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 ## Melodic Intervals ####
 
 #' @export
-mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, parseArgs = list(), Exclusive = NULL, Key = NULL, File = NULL, Spine = NULL, Path = NULL) {
+mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+                 classify = FALSE,
+                 parseArgs = list(), Exclusive = NULL, Key = NULL, File = NULL, Spine = NULL, Path = NULL) {
   
   lagged <- lag(x, lag, windows = list(File, Spine, Path))
   
@@ -1917,12 +1919,25 @@ mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket =
     }, 
     args = list(x, lagged, Exclusive, Key)) # Use do so memoize is invoked
   
-  
+  if (classify) minterval[!is.na(minterval)] <- mintClass(minterval[!is.na(minterval)], ...)
   minterval
   
 }
 
-
+mintClass <- function(x, directed = TRUE, skips = TRUE) {
+  int <- interval(x, generic = TRUE)
+  int <- as.integer(int)
+  
+  sign <- if (directed)  c('-', '', '+')[sign(int - 1L) + 2L] else ""
+  int <- abs(int)
+   
+ 
+  
+  intClass <- cut(int, breaks = c(0, 1, 2, 3, Inf), labels = c('Unison', 'Step', 'Skip', 'Leap'))
+  
+  
+  paste0(sign, intClass)
+}
 
 
 ###################################################################### ### 
