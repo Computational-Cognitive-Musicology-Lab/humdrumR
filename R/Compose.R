@@ -12,6 +12,7 @@ dimParse <- function(args) {
   
   olddim <- dim(firstArg)
   
+  
   args[[1]] <- dropdim(firstArg)
   
   restorer <- function(result) {
