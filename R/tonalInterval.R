@@ -480,8 +480,8 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semit <- function(x, melodic = FALSE, Key = NULL, specific = TRUE, complex = TRUE, ..., File = NULL, Spine = NULL) {
-  if (melodic) x <- delta(x, boundaries = list(File, Spine))
+tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
+
   
   if (!is.null(Key)) x <- x + diatonicSet(Key)
   
@@ -1496,14 +1496,16 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     
     memoize <- !parseArgs$melodic %||% TRUE
     # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize)
+    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
     
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
-    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedTint
+    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
+                                                               memoize = memoize, 
+                                                               outputClass = !!outputClass) else parsedTint
     if (deparse && inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
     
     output

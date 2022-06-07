@@ -272,14 +272,15 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
   
     
     # Parse
-    parsedRint <- do(rhythmInterval, c(list(x), parseArgs), memoize = memoize)
+    parsedRint <- do(rhythmInterval, c(list(x), parseArgs), memoize = memoize, outputClass = 'rhythmInterval')
     
     # if (length(transposeArgs) > 0L && is.tonalInterval(parsedRint)) {
     #   parsedRint <- do(transpose.tonalInterval, c(list(parsedRint), transposeArgs))
     # }
     
     deparseArgs <- c(list(parsedRint), deparseArgs)
-    output <- if (deparse && is.rational(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize) else parsedRint
+    output <- if (deparse && is.rational(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize, 
+                                                          outputClass = !!outputClass) else parsedRint
     if (deparse && inPlace) output <- rePlace(output, attr(parsedRint, 'dispatch'))
     
     output

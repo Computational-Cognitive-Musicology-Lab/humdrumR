@@ -162,7 +162,12 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
                             verboseMessage = '"not NA"', ...)
   
   
-  result <- if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
+  result <- if (length(naskip$Args[[1]])) {
+    if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
+  } else {
+    vectorNA(0L, mode = outputClass)
+  }
+  
   humattr <- humdrumRattr(result)
   
   result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
