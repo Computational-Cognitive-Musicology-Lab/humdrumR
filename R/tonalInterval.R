@@ -483,7 +483,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
 
   
-  if (!is.null(Key)) x <- x + diatonicSet(Key)
+  if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
   
   if (!specific) x <- tintPartition_specific(x, Key = Key, ...)$Generic
         
@@ -692,7 +692,10 @@ tint2tonalChroma <- function(x,
                              qualities = FALSE, ...) {
   
   
-  if (keyed && !is.null(Key)) x <- x + diatonicSet(Key)
+  if (keyed && !is.null(Key)) {
+    Key <- rep(Key, length.out = length(x))
+    x[!is.na(Key)] <- x[!is.na(Key)] + diatonicSet(Key[!is.na(Key)])
+  }
   
   parts <- matched(parts, c( "species", "step", "octave"))
   
@@ -1204,7 +1207,12 @@ tonalChroma2tint <- function(str,
  
  if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
- if (keyed && !is.null(Key)) tint <- tint - diatonicSet(Key)
+ 
+ if (keyed && !is.null(Key)) {
+  Key <- rep(Key, length.out = length(tint))
+  tint[!is.na(Key)] <- tint[!is.na(Key)] - diatonicSet(Key[!is.na(Key)])
+  
+ }
  
  tint
 
@@ -1468,7 +1476,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
                   inPlace = FALSE, memoize = TRUE,
                   deparse = TRUE))
   
-  
+  args <- args[!duplicated(names(args))]
   fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
   
   rlang::new_function(args, rlang::expr( {
@@ -1500,7 +1508,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
-    
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
     output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
@@ -1793,10 +1800,13 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   relative <- args$relative
   
   ## Deal with keys
-  from <- diatonicSet(from %||% dset(0, 0))
+  from <- diatonicSet((from %||% dset(0, 0)))
+  from[is.na(from)] <- dset(0, 0)
+  
   
   if (!is.null(to)) {
     to <- diatonicSet(to)
+    to[is.na(to)] <- dset(0, 0)
     
     if (relative) {
       sigdiff <- getSignature(to) - getSignature(from)
@@ -1881,6 +1891,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
+#' @export
 mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, parseArgs = list(), Exclusive = NULL, Key = NULL, File = NULL, Spine = NULL, Path = NULL) {
   
   lagged <- lag(x, lag, windows = list(File, Spine, Path))
@@ -1904,7 +1915,7 @@ mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket =
       }
       output
     }, 
-    args = list(x, lagged, Exclusive, Key), anyMatch = TRUE) # Use do so memoize is invoked
+    args = list(x, lagged, Exclusive, Key)) # Use do so memoize is invoked
   
   
   minterval

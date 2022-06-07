@@ -4,3 +4,4 @@ docs
 *.tmp.*
 *docx
 .Rproj.user
+.Rhistory

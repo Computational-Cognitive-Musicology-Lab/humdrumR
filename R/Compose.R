@@ -39,7 +39,7 @@ dimParse <- function(args) {
   list(Restore = restorer, Args = args)
 }
 
-predicateParse <- function(predicateFunc, args, anyMatch = FALSE, 
+predicateParse <- function(predicateFunc, args, anyMatch = NULL, 
                             dispatchArgs = c(), verbose = FALSE, ...) {
   
   firstArg <- args[[1]]
@@ -56,8 +56,13 @@ predicateParse <- function(predicateFunc, args, anyMatch = FALSE,
   
   if (!any(targets)) return(list(Restore = force, Args = args))
   
-  hits <- list2dt(lapply(args[targets], predicateFunc))
-  hits <- Reduce(if (anyMatch) `|` else `&`, hits)
+  hits <- if (is.null(anyMatch)) {
+    predicateFunc(firstArg)
+  } else {
+    hits <- list2dt(lapply(args[targets], predicateFunc))
+    hits <- Reduce(if (anyMatch) `|` else `&`, hits)
+  }
+
   
   if (verbose) cat('predicateParse has removed ', 
                    num2word(sum(!hits)), 
