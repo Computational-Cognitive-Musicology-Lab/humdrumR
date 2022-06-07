@@ -8,16 +8,32 @@
 
 dimParse <- function(args) {
   firstArg <- args[[1]]
-  if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
+  # if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
   
-  olddim <- dim(firstArg)
   
+  
+  if (hasdim(firstArg)) {
+    names <- dimnames(firstArg) 
+    olddim <- dim(firstArg)
+    } else {
+    names <- names(firstArg)
+    olddim <- length(firstArg)
+    }
   
   args[[1]] <- dropdim(firstArg)
   
   restorer <- function(result) {
-    if (length(result) == prod(olddim))  dim(result) <- olddim 
+    if (length(result) == prod(olddim)) {
+      if (hasdim(firstArg) )  {
+        dim(result) <- olddim 
+        dimnames(result) <- names
+      } else {
+        names(result) <- names
+      }
+      
+    }
     result
+    
   }
   
   list(Restore = restorer, Args = args)
