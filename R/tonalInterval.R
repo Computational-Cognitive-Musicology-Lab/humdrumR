@@ -1263,7 +1263,6 @@ solfa2tint <- function(str, ...) {
   base <- stringr::str_sub(syl, 1L, 1L)
   alt  <- stringr::str_sub(syl, 2L, 2L)
   
-  
   alt.mat <- rbind(d = c(NA,  'b', '#', '', '##'),
                    r = c('b', '',  '#', NA, '##'),
                    m = c(NA,  'b',  '', NA, '#'),
@@ -1276,7 +1275,7 @@ solfa2tint <- function(str, ...) {
   sylalt <- alt.mat[cbind(base, alt)]
   
   str_ <- stringr::str_replace(str, alt, sylalt)
-  
+ 
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c("octave", "step", "species"),
                        qualities = FALSE,

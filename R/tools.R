@@ -963,10 +963,11 @@ sigma.matrix <- function(x, ..., skip = list(is.na)) {
 delta <- function(x, skip, boundaries) UseMethod('delta') 
 #' @name intervalCalculus
 #' @export
-delta.default <- function(x, skip = list(is.na), windows = list()) {
+delta.default <- function(x, skip = list(is.na), windows = list(), firstNA = FALSE) {
     skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
     
-    x[!skip] <- c(as(NA, class(x)), diff(x[!skip]))
+    x[!skip] <- c(if (firstNA) as(NA, class(x)) else x[1], 
+                  diff(x[!skip]))
     
     windows <- .windows(x, windows)
     
@@ -1413,7 +1414,7 @@ collapseAST <- function(ast, calls = NULL) {
     
     if (collapse) {
         do.call('call', c(names(ast)[1], unname(ast)), quote = TRUE)
-        
+      
     } else {
         ast
     }
