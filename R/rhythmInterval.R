@@ -262,20 +262,8 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
   rlang::new_function(args, rlang::expr( {
     
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-    args <- lapply(rlang::enexprs(...),
-                   \(argExpr) {
-                     if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'time')) {
-                       type <- as.character(argExpr[[1]])
-                       argExpr[[1]] <- quote(list)
-                       assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
-                       NULL
-                     } else {
-                       rlang::eval_tidy(argExpr)
-                     }
-                     
-                   })
-    
-    args <- args[!sapply(args, is.null)]
+    c('args', 'parseArgs', 'timeArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs, time = timeArgs)
+
     args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
     deparseArgs <- args
     # parseArgs   <- rhythmArgCheck(parseArgs, !!callname)

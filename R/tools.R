@@ -1449,6 +1449,50 @@ splitExpression <- function(expr, on = '|') {
 }
 
 
+specialArgs <- function(quos, ...) {
+  argLists <- list(...)
+  listNames <- names(argLists)
+  
+  if (length(quos) == 0L) return(c(list(args = list()), argLists))
+  
+  # divide arguments into those that match one (or more) of the "listNames'
+  # and those that do not (the normal "args")
+  argTable <- as.data.table(do.call('rbind', lapply(quos,
+         \(argExpr) {
+           exprA <- analyzeExpr(argExpr)
+           
+           if (exprA$Type == 'call' && exprA$Head %in% listNames) {
+             type <- exprA$Head
+             exprA$Head <- 'list'
+             argExpr <- unanalyzeExpr(exprA)
+
+             NULL
+           } else {
+             type <- 'normal'
+           }
+           
+           result <- rlang::eval_tidy(argExpr)
+           
+           list(Type = type, Result = result)
+         })))
+  
+  argTable$Type <- unlist(argTable$Type)
+  
+  # add "special args" to existing argLists
+  specials <- argTable[Type %in% listNames , list(list(do.call('c', Result))), by = Type]
+  specials <- setNames(specials$V1, specials$Type)
+  
+  for (list in listNames) argLists[[list]] <- c(specials[[list]], argLists[[list]])
+  
+  names(argLists)[names(argLists) %in% listNames] <- paste0(names(argLists)[names(argLists) %in% listNames], 'Args')
+  argLists <- lapply(argLists, \(aL) aL[!duplicated(names(aL))])
+  
+  #
+  normalArgs <- setNames(argTable[Type == 'normal']$Result, names(quos)[argTable$Type == 'normal'])
+  c(list(args = normalArgs), argLists)
+  
+}
+
 # splitExpression <- function(expr, on = '|', keepenv = FALSE) {
 #     # This function takes an expression and
 #     # and breaks it into separate expressions based on

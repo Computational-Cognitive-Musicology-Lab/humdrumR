@@ -1474,26 +1474,11 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   
   rlang::new_function(args, rlang::expr( {
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-    args <- lapply(rlang::enquos(...),
-                   \(argExpr) {
-                     exprA <- analyzeExpr(argExpr)
-                     
-                     if (exprA$Type == 'call' && exprA$Head %in% c('parse', 'transpose')) {
-                       type <- exprA$Head
-                       exprA$Head <- 'list'
-
-                       # this assigns straight to the parseArgs or transposeArgs lists!
-                       assign(paste0(type, 'Args'), 
-                              rlang::eval_tidy(unanalyzeExpr(exprA)),
-                              envir = parent.frame(2))
-                       NULL
-                     } else {
-                       rlang::eval_tidy(argExpr)
-                     }
-      
-                   })
     
-    args <- args[!sapply(args, is.null)]
+    c('args', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
+                                                             parse = parseArgs, transpose = transposeArgs)
+    
+
     args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
@@ -1895,30 +1880,30 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
-mint <- function(x, lag = 1, deparser = interval, initial = kern, ..., parseArgs = list(), Exclusive = NULL, Key, File = NULL, Spine = NULL, Path = NULL) {
+mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, parseArgs = list(), Exclusive = NULL, Key = NULL, File = NULL, Spine = NULL, Path = NULL) {
   
   lagged <- lag(x, lag, windows = list(File, Spine, Path))
   
-
+  c('args', 'parseArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs)
   
   minterval <- do(
-    \(X, L, exclusive, key, ...) {
+    \(X, L, exclusive, key) {
       Xtint <- do.call('tonalInterval', c(list(X, Exclusive = exclusive, Key = key), parseArgs))
       Ltint <- do.call('tonalInterval', c(list(L, Exclusive = exclusive, Key = key), parseArgs))
       tint <- Xtint - Ltint
       
-      output <- deparser(tint, ...)
+      output <- do(deparser, c(list(tint), args))
       
       singletons <- !is.na(Xtint) & is.na(Ltint)
       
       if (!is.null(initial) && any(singletons)) {
         
-        if (is.function(initial)) output[singletons] <- paste0('[', initial(Xtint[singletons], ...), ']')
+        if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', do(initial, c(list(Xtint[singletons]), args)), if (bracket) ']')
         if (is.atomic(initial)) output[singletons] <- initial
       }
       output
     }, 
-    args = list(x, lagged, Exclusive, Key, ...), anyMatch = TRUE) # Use do so memoize is invoked
+    args = list(x, lagged, Exclusive, Key), anyMatch = TRUE) # Use do so memoize is invoked
   
   
   minterval
