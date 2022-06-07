@@ -186,7 +186,7 @@ applycols <- function(x, f, ...){
 #' 
 #' @seealso [data.table::shift()]
 #' @export
-lag <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL, ...) UseMethod('lag')
+lag <- function(x, n = 1, ..., fill = NA, wrap = FALSE) UseMethod('lag')
 
 #' @rdname lag
 #' @export
@@ -194,25 +194,25 @@ lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = list()) {
          if (length(n) < length(margin)) n <- rep(n, length(margin))
         
          if (1L %in% margin) {
-             x[] <- lapply(x, rotate, n = n[margin == 1L], fill = fill, wrap = wrap, windows = windows)
-             rown <- rotate(rownames(x), n[margin == 1L], wrap = wrap, pad = '_')
+             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, windows = windows)
+             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', windows = windows)
              rown[rown == '_'] <- make.unique(rown[rown == '_'])
              rownames(x) <- rown
          } 
          if (2L %in% margin) {
-             cols <- rotate(colnames(x), n[margin == 2L], fill = 'XXX', wrap = wrap)
+             cols <- lag(colnames(x), n[margin == 2L], fill = 'XXX', wrap = wrap)
              x[] <-if (wrap) x[cols] else c(list(XXX = rep(NA, nrow(x))),x)[cols]
          }
     
          x
 }
 #' @export
-lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
-          if (length(n) > 1L) .stop('rotate cannot accept multiple rotation values for a vector argument.')
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = list()) {
+          if (length(n) > 1L) .stop('lag cannot accept multiple rotation values for a vector argument.')
           if (length(x) == 0L || n == 0) return(x)
   
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
@@ -228,12 +228,12 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
             }
           }
             
-          if (!is.null(windows)) {
-              if (!is.list(windows)) windows <- list(windows)
-              windows <- windows[!sapply(windows, is.null)]
-              if (!all(lengths(windows) == length(x))) .stop('Windows must be same length as input vector.')
+          
+          windows <- .windows(x, windows)
+          
+          if (length(windows)) {
               
-              boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE, windows = NULL)))
+              boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
               output[boundaries] <- fill
           }
 
@@ -241,7 +241,7 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = NULL) {
 }
 
 #' @export
-lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = NULL) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = list()) {
     if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
     
     
@@ -251,7 +251,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = 
 
                     rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = windows)))
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = windows())))
           }
          if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
          if (dim(x)[margin] == 0L) return(x)
@@ -930,31 +930,32 @@ lcm <- function(...) {
 # sigma (integrate) and delta (derive) should be perfect inverses, 
 # so long as their skip arguments are the same
 
+.windows <- function(x, windows)  if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows
 # Interval "calculus"
 #' @name intervalCalculus
 #' @export
 sigma <- function(x, skip, boundaries) UseMethod('sigma')
 #' @name intervalCalculus
 #' @export
-sigma.default <- function(x, skip = list(is.na), boundaries = NULL) {
+sigma.default <- function(x, skip = list(is.na), windows = list()) {
   
   skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
+ 
+  windows <- .windows(x, windows)
   
-  x[!skip] <- if (is.null(boundaries) || all(sapply(boundaries, is.null))) {
-    cumsum(x[!skip])
+  x[!skip] <- if (length(windows)) {
+    tapply_inplace(x[!skip], lapply(windows, \(b) b[!skip]), cumsum)
   } else {
-    boundaries <- boundaries[!sapply(boundaries, is.null)]
-    tapply_inplace(x[!skip], lapply(boundaries, \(b) b[!skip]), cumsum)
+    cumsum(x[!skip])
   }
   
   x
 }
 #' @name intervalCalculus
 #' @export
-sigma.matrix <- function(x, skip = list(is.na), 
-                             boundaries = NULL) {
+sigma.matrix <- function(x, ..., skip = list(is.na)) {
   
-  do.call('cbind', apply(x, 2, sigma.default, skip = skip, boundaries = boundaries, simplify = FALSE))
+  do.call('cbind', apply(x, 2, sigma.default, skip = skip, ..., simplify = FALSE))
 }
 
 #' @name intervalCalculus
@@ -962,13 +963,14 @@ sigma.matrix <- function(x, skip = list(is.na),
 delta <- function(x, skip, boundaries) UseMethod('delta') 
 #' @name intervalCalculus
 #' @export
-delta.default <- function(x, skip = list(is.na), boundaries = NULL) {
+delta.default <- function(x, skip = list(is.na), windows = list()) {
     skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
     
     x[!skip] <- c(as(NA, class(x)), diff(x[!skip]))
     
+    windows <- .windows(x, windows)
     
-    if (!is.null(boundaries) && !all(sapply(boundaries, is.null))) {
+    if (length(windows)) {
       boundaries <- boundaries[!sapply(boundaries, is.null)]
       boundaries <- do.call('changes', boundaries)
       x[boundaries] <- as(NA, class(x))
@@ -980,8 +982,8 @@ delta.default <- function(x, skip = list(is.na), boundaries = NULL) {
 
 #' @name intervalCalculus
 #' @export
-delta.matrix <- function(x, skip = list(is.na), boundaries = NULL) {
-  do.call('cbind', apply(x, 2, delta.default, skip = skip, boundaries = boundaries, simplify = FALSE))
+delta.matrix <- function(x, ..., skip = list(is.na)) {
+  do.call('cbind', apply(x, 2, delta.default, skip = skip, ..., simplify = FALSE))
 }
 
 

@@ -1893,7 +1893,37 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 ### Inversion methods ####
 
 
+## Melodic Intervals ####
 
+mint <- function(x, lag = 1, deparser = interval, initial = kern, ..., parseArgs = list(), Exclusive = NULL, Key, File = NULL, Spine = NULL, Path = NULL) {
+  
+  lagged <- lag(x, lag, windows = list(File, Spine, Path))
+  
+
+  
+  minterval <- do(
+    \(X, L, exclusive, key, ...) {
+      Xtint <- do.call('tonalInterval', c(list(X, Exclusive = exclusive, Key = key), parseArgs))
+      Ltint <- do.call('tonalInterval', c(list(L, Exclusive = exclusive, Key = key), parseArgs))
+      tint <- Xtint - Ltint
+      
+      output <- deparser(tint, ...)
+      
+      singletons <- !is.na(Xtint) & is.na(Ltint)
+      
+      if (!is.null(initial) && any(singletons)) {
+        
+        if (is.function(initial)) output[singletons] <- paste0('[', initial(Xtint[singletons], ...), ']')
+        if (is.atomic(initial)) output[singletons] <- initial
+      }
+      output
+    }, 
+    args = list(x, lagged, Exclusive, Key, ...), anyMatch = TRUE) # Use do so memoize is invoked
+  
+  
+  minterval
+  
+}
 
 
 
