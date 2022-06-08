@@ -439,9 +439,9 @@ makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), step.labe
                        flat = flat, ..., regexname = 'scaleDegree')
 }
 
-makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer = FALSE, ..., collapse = TRUE) {
+makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer = FALSE, flat = '-', ..., collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts[parts != "step"], octave.integer = octave.integer, ..., collapse = FALSE)
+    REs <- makeRE.tonalChroma(parts[parts != "step"], octave.integer = octave.integer, ..., flat = flat, collapse = FALSE)
     
     if ("step" %in% parts) {
         REs$step <- "([sd][eoi]|[fl][eai]|[mt][eiy]|r[aei])"

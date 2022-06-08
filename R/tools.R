@@ -1613,7 +1613,7 @@ matched <- function(x, table) table[pmatch(x, table)]
 }
 
 
-pasteordered <- function(order, ..., sep = '') {
+pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     # pastes named elements of ... using order supplied in order
     strs <- list(...) # named vector of strings,
     strs <- strs[lengths(strs) > 0L]
@@ -1622,7 +1622,11 @@ pasteordered <- function(order, ..., sep = '') {
     ordered <- strs[pmatch( order, labels, nomatch = 0)]
     
     # do.call('.paste', c(ordered, list(sep = sep)))
-    do.call('.paste', c(ordered, sep = sep))
+    if (collapse) {
+      do.call('.paste', c(ordered, sep = sep))
+    } else {
+      as.data.frame(ordered)
+    }
     
 }
 

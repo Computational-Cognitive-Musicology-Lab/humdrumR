@@ -424,9 +424,9 @@ tint2octave <- function(x,
                         octave.integer = TRUE,
                         up = '^', down = 'v', same = "",
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
-                        relative = FALSE, octave.round = floor, ...) {
+                        octave.closest = FALSE, octave.round = floor, ...) {
 
-  if (relative) x <- delta(x)
+  if (octave.closest) x <- delta(x)
   #
   octn <- octave.offset + tintPartition_complex(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
@@ -683,13 +683,13 @@ tint2specifier <- function(x, Key = NULL, ...,
   specifiers
 }
 
-
+Nupdown <- function(n, up = '^', down = 'v') ifelse(n >= 0, strrep(up, abs(n)), strrep(down, abs(n)))
 
 tint2tonalChroma <- function(x, 
                              parts = c("species", "step", "octave"), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
                              keyed = FALSE, Key = NULL,
-                             qualities = FALSE, ...) {
+                             qualities = FALSE, collapse = TRUE, ...) {
   
   
   if (keyed && !is.null(Key)) {
@@ -725,7 +725,7 @@ tint2tonalChroma <- function(x,
   #   c('-', '', '+')[sign + 2L]
   # }
   
-  pasteordered(parts, step = step, species = species, octave = if (complex) octave, sep = sep)
+  pasteordered(parts, step = step, species = species, octave = if (complex) octave, sep = sep, collapse = collapse)
     
   
 }
@@ -777,8 +777,8 @@ tint2lilypond <- partialApply(tint2tonalChroma,
                               step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                               up = "'", down = ",",
                               qualities = FALSE,
-                              relative = TRUE, octave.integer = FALSE,
-                              octave.round = if (relative) round else floor,
+                              octave.closest = TRUE, octave.integer = FALSE,
+                              octave.round = if (octave.closest) round else floor,
                               sharp = 'is', flat = 'es',
                               parts = c("step", 'species', "octave"))
 
@@ -816,7 +816,7 @@ tint2interval <- function(x, directed = TRUE, ...) {
                        step.labels = 1L:7L,
                        parts = c("species", "step", "octave"),
                        complex = TRUE, keyed = FALSE, qualities = TRUE, 
-                       octave.integer = TRUE, relative = FALSE, explicitNaturals = TRUE,
+                       octave.integer = TRUE, octave.closest = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
   direction <- if (directed) {
@@ -836,7 +836,7 @@ tint2interval <- function(x, directed = TRUE, ...) {
 
 tint2degree <- partialApply(tint2tonalChroma, parts = c("octave", "species", "step"), 
                             complex = FALSE, keyed = FALSE, step.labels = 1L:7L, flat = 'b',
-                            octave.integer = FALSE, relative = TRUE, octave.round = round)
+                            octave.integer = FALSE, octave.closest = TRUE, octave.round = round)
 
 
 tint2bhatk <- function(x, ...) {
@@ -854,35 +854,41 @@ tint2bhatk <- function(x, ...) {
 
 
 
-tint2solfa <- function(x, Key = NULL,  parts = c("octave", 'accidentals', "step"), 
-                       factor = FALSE, ...) {
-  
-  steps <- tint2step(x, c('d', 'r', 'm', 'f', 's', 'l', 't'))
-  
-  ## tails
-  solfatails <- rbind(d = c("e", "o", "i"),
-                      r = c("a", "e", "i"),
-                      m = c("e", "i", "y"),
-                      f = c("e", "a", "i"),
-                      s = c("e", "o", "i"),
-                      l = c("e", "a", "i"),
-                      t = c("e", "i", "y"))
-  tailcol <- sign(tint2specifier(x, qualities = FALSE, accidental.integer = TRUE))
-  tails <- solfatails[cbind(match(steps, rownames(solfatails)),  tailcol + 2L)]
+tint2solfa <- function(x, Key = NULL,  parts = c("octave", "step", 'species'), 
+                       generic = FALSE, flat = '-', sharp = '#', factor = FALSE, ...) {
   
   
-  accidentals <- if ('accidentals' %in% parts) stringr::str_sub(tint2specifier(x, ...) ,
-                                                  start = 2L) # drop first accidental # will mess up with double sharps/flats
-  contours <- if ("octave" %in% parts)  tint2octave(x, ...) 
+  t2tC <- partialApply(tint2tonalChroma, octave.integer = FALSE, octave.closest = FALSE,
+                       step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'), 
+                       qualities = FALSE, accidental.integer = TRUE)
   
-  str <- pasteordered(parts, contour = contours, accidental = accidentals, steps = .paste(steps, tails))
+  solfa_parts <- t2tC(x, generic = generic, ..., collapse = FALSE) #
   
-  if (factor) {
-    solfatails[] <- sweep(solfatails, 1, rownames(solfatails), \(x, y) paste0(y, x))
-    factor(str, levels = c(t(solfatails)))
+  # change species to syllable "tails"
+  solfa_parts$tail <- if (!generic) {
+    solfatails <- rbind(d = c("e", "o", "i"),
+                        r = c("a", "e", "i"),
+                        m = c("e", "i", "y"),
+                        f = c("e", "a", "i"),
+                        s = c("e", "o", "i"),
+                        l = c("e", "a", "i"),
+                        t = c("e", "i", "y"))
+    accidental.integer <- solfa_parts$species
+    
+    solfa_parts$species <- Nupdown(accidental.integer - sign(accidental.integer), up = sharp, down = flat)
+    
+    solfatails[cbind(match(solfa_parts$step, rownames(solfatails)),  sign(accidental.integer) + 2L)]
+    
   } else {
-    str
+    c(d = 'o', r = 'e', m = 'i', f = 'a', s = 'o', l = 'a', t = 'i')[solfa_parts$step]
   }
+  
+  if ('step' %in% parts) parts <- append(parts, 'tail', after = which(parts == 'step'))
+  
+  solfa_parts <- solfa_parts[ , intersect(parts, colnames(solfa_parts))]
+  
+  do.call('.paste', solfa_parts)
+
 }  
 
 
@@ -904,7 +910,7 @@ octave2tint <- function(str, simpletint, roottint,
                         octave.integer = TRUE,
                         up = '^', down = 'v', same = "",
                         octave.offset = 0L, octave.round = floor,
-                        relative = FALSE, ...) {
+                        octave.closest = FALSE, ...) {
   
   n <- if (octave.integer) {
     as.integer(str)
@@ -914,7 +920,7 @@ octave2tint <- function(str, simpletint, roottint,
   
   #
   steps <- tint2step(simpletint, 0:6) + tint2step(roottint, 0:6)
-  n <- if (relative) {
+  n <- if (octave.closest) {
     steps <- delta(steps)
     
     stepOct <- octave.round(steps / 7) 
@@ -1260,25 +1266,25 @@ degree2tint <- partialApply(tonalChroma2tint, parts = c("octave", "species", "st
                            qualities = FALSE, 
                            keyed = FALSE, Key = NULL,
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
-                           octave.integer = FALSE, relative = TRUE, octave.round = round,
+                           octave.integer = FALSE, octave.closest = TRUE, octave.round = round,
                            flat = 'b')
   
 
 
-solfa2tint <- function(str, ...) {
-  syl <- stringr::str_extract(str, '[fdsrlmt][aeioy]')
+solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
+  syl <- stringr::str_extract(str, '[fdsrlmt][aeio]')
   
   base <- stringr::str_sub(syl, 1L, 1L)
   alt  <- stringr::str_sub(syl, 2L, 2L)
   
-  alt.mat <- rbind(d = c(NA,  'b', '#', '', '##'),
-                   r = c('b', '',  '#', NA, '##'),
-                   m = c(NA,  'b',  '', NA, '#'),
-                   f = c('',  'b', '#', NA, '##'),
-                   s = c(NA,  'b', '#', '', '##'),
-                   l = c('',  'b', '#', NA, '##'),
-                   t = c(NA,  'b', '',  NA, '#'))
-  colnames(alt.mat) <- c('a', 'e', 'i', 'o', 'y')
+  alt.mat <- rbind(d = c(NA,   flat, sharp, ''),
+                   r = c(flat, '',   sharp, NA),
+                   m = c(NA,   flat, '',    NA),
+                   f = c('',   flat, sharp, NA),
+                   s = c(NA,   flat, sharp, ''),
+                   l = c('',   flat, sharp, NA),
+                   t = c(NA,   flat, '',    NA))
+  colnames(alt.mat) <- c('a', 'e', 'i', 'o')
   
   sylalt <- alt.mat[cbind(base, alt)]
   
@@ -1288,10 +1294,9 @@ solfa2tint <- function(str, ...) {
                        parts = c("octave", "step", "species"),
                        qualities = FALSE,
                        keyed = FALSE,
-                       octave.integer = FALSE, relative = TRUE, octave.round = round,
-                       flat = 'b')
+                       octave.integer = FALSE, octave.closest = FALSE, octave.round = floor)
   
-  tC2t(str_, step.labels = rownames(alt.mat), ...)
+  tC2t(str_, step.labels = rownames(alt.mat), ..., flat = flat)
   
 }
 
@@ -1450,8 +1455,8 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('absolute' %in% argnames) {
-    if ('relative' %in% argnames && !xor(args$relative, args$absolute)) .stop("In your call to {callname}, you've specified contradictory 'relative' and 'absolute' arguments...it has to be one or the other!")
-    args$relative <- !args$absolute
+    if ('octave.closest' %in% argnames && !xor(args$octave.closest, args$octave.absolute)) .stop("In your call to {callname}, you've specified contradictory 'octave.closest' and 'octave.absolute' arguments...it has to be one or the other!")
+    args$octave.closest <- !args$octave.absolute
   }
   
  
