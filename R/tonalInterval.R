@@ -1470,7 +1470,7 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 #' @param generic (logical) If `generic = TRUE` the "specific" pitch information is discarded.
 #'        For tonal representations, this means no accidentals/qualities or equivalent information is printed.
 #'        For atonal representations, the generic pitch is returned.
-#' @param specific (logical) An alternate (opposite) shortcut for specifying the `generic` argument: `generic == !specific`.
+#'        As an alternative, you can specify `specific` as an alternative (opposite) to the `generic` argument: `generic == !specific`.
 #' 
 #' @name pitchFunctions
 #' @seealso tonalInterval
@@ -1496,7 +1496,8 @@ pitchArgCheck <- function(args,  callname) {
     args$octave.closest <- !args$octave.absolute
   }
   
- 
+  checkTFs( args[intersect(argnames, c('generic', 'specific', 'complex', 'simple', 'octave.absolute', 'octave.closest'))], callname = callname)
+    
   
   args 
   
@@ -1520,16 +1521,24 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
-    # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
+    # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
                                                                 parse = parseArgs, transpose = transposeArgs)
+    formalArgs <- list(!!!fargcall)
+    namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
+    
+    # There are four kinds of arguments: 
+    # ... arguments (now in args...), 
+    # FORMAL arguments, if specified (now in namedArgs)
+    # parseArgs
+    # transposeArgs
     
     # Exclusive
     parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive 
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
-    deparseArgs <- pitchArgCheck(c(args..., list(!!!fargcall)), !!callname)
+    deparseArgs <- pitchArgCheck(c(args..., namedArgs), !!callname)
     
     # Key
     Key     <- diatonicSet(args...$Key %||% dset(0L, 0L))
@@ -1583,45 +1592,41 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' Kern (`**kern`) is the most common humdrum interpretation for representing "notes" in the style of
 #' traditional Western scores.
 #' In [humdrumR], the `kern` function only relates to the *pitch* part of the `**kern` interpretation:
-#' `**kern` rhythms are manipulated using the [recip] function.
+#' `**kern` *rhythms* are created using the [recip] function.
 #' 
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 kern <- makePitchTransformer(tint2kern, 'kern') 
 
 #' Lilypond (pitch) representation
 #' 
-#' This is the representation used to represent pitch in the [Lilypond](https://lilypond.org/doc/v2.22/Documentation/notation/pitches) 
+#' This is the representation used to represent (Western tonal) pitches in the [Lilypond](https://lilypond.org/doc/v2.22/Documentation/notation/pitches) 
 #' notation format.
+#' In [humdrumR], the `lilypond` function only relates to the *pitch* part of Lilypond notation:
+#' Lilypond-like *rhythms* can be creating using the [recip] function.
 #' 
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 
 #' Tonal [interval](https://en.wikipedia.org/wiki/Interval_(music)) representation
 #' 
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 interval <- makePitchTransformer(tint2interval, 'interval')
 
 #' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 degree <- makePitchTransformer(tint2degree, 'degree')
 
 #' [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 solfa <- makePitchTransformer(tint2solfa, 'solfa')
 
 #' [Swara](https://en.wikipedia.org/wiki/Svara) representation
 #' @inheritParams pitchFunctions
-#' @inheritDotParams tonalInterval
 #' @export 
 bhatk <- makePitchTransformer(tint2bhatk, 'bhatk')
 

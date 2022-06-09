@@ -124,3 +124,21 @@ test_that("Functions are invertible", {
     expect_invertible(solfa, interval, inputs$interval)
     
 })
+
+
+test_that('Tonal args work correctly', {
+    test <- c('Eb5', 'G4')
+    
+    
+    
+    expect_equal(kern(test, generic = TRUE), kern(test, specific = FALSE))
+    expect_equal(kern(test, generic = FALSE), kern(test, specific = TRUE))
+    expect_equal(kern(test, generic = FALSE, specific = TRUE), kern(test, specific = TRUE))
+    expect_error(kern(test, generic = TRUE, specific = TRUE))
+    expect_error(kern(test, generic = FALSE, specific = FALSE))
+    
+    
+    
+    
+    
+})

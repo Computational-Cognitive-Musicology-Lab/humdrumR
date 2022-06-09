@@ -1503,8 +1503,12 @@ checkArg <- function(arg,  argname, callname = NULL,
     
     if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
     
-    if (length(arg) <  min.length) .stop(callname, "length(args)} is too few '{argname}' arguments.")
-    if (length(arg) >  max.length) .stop(callname, "length(args)} is too many '{argname}' arguments.")
+    if (length(arg) <  min.length) .stop(callname, 
+                                         "The length of the '{argname}' argument must be at least {min.length}.",
+                                         "In your call, length({argname}) == {length(arg)}.")
+    if (length(arg) > max.length) .stop(callname, 
+                                         "The length of the '{argname}' argument must be at most {max.length}.",
+                                         "In your call, length({argname}) == {length(arg)}.")
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
@@ -1563,8 +1567,8 @@ checkLogical <- function(x, argname, callname = NULL, ...) {
 
 checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) !is.na(arg), 
                                                    validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
-checkTFs <- function(..., callname = NULL) {
-    args <- list(...)
+checkTFs <- function(args = list(), ..., callname = NULL) {
+    args <- c(args, list(...))
     mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
 }
 
