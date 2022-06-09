@@ -85,22 +85,42 @@ test_that("Pitch functions return same output, regardless of input.", {
 test_that("Functions are invertible", {
     expect_invertible <-function(func1, func2, x)  expect_equal(func2(func1(x)), x)
     
+    inputs <- list(tint = tint(c(6, 5, 5, 2, 0, -1, -1, -7, -6, 15, -9, -11), c(-4, -3, -2, -1, 0, 1, 2, 3, 4, -9, 6, 7)), 
+                   kern = c('A-', 'e-', 'bb-', 'f', 'c', 'g', 'ddd', 'AAA', 'e', 'b--', 'f#', 'c#'),
+                   pitch = c("Ab3", "Eb4", "Bb5", "F4", "C4", "G4", "D6", "A1", "E4", "Bbb4", "F#4", "C#4"),
+                   interval = c("-M3", "+m3", "+m14", "+P4", "P1", "+P5", "+M16", "-m17", "+M3", "+d7", "+A4", "+A1"),
+                   solfa = c("vle", "me", "^te", "fa", "do", "so", "^^re", "vvvla", "mi", "te-", "fi", "di"))
     
     #
-    tint_test <- tint( , -4:7)
-    kern_test <- c('a-', 'e-', 'b-', 'f', 'c', 'g', 'd', 'a', 'e', 'b', 'f#', 'c#')
-    pitch_test <- c("Ab4", "Eb4", "Bb4", "F4", "C4", "G4", "D4", "A4", "E4", "B4", "F#4", "C#4")
     
-    expect_invertible(tint2pitch,  pitch2tint,  tint_test)
-    expect_invertible(tint2kern, kern2tint, tint_test)
-    expect_invertible(tint2interval,  interval2tint,  tint_test)
+    expect_invertible(tint2pitch,  pitch2tint,  inputs$tint)
+    expect_invertible(tint2kern, kern2tint, inputs$tint)
+    expect_invertible(tint2interval,  interval2tint,  inputs$tint)
 
-    expect_invertible(kern2tint, tint2kern, kern_test)
-    expect_invertible(pitch2tint, tint2pitch, pitch_test)
+    expect_invertible(kern2tint, tint2kern, inputs$kern)
+    expect_invertible(pitch2tint, tint2pitch, inputs$pitch)
+    expect_invertible(interval2tint, tint2interval, inputs$interval)
+    expect_invertible(solfa2tint, tint2solfa, inputs$solfa)
     
     # exported functions
-    expect_invertible(kern, pitch, pitch_test)
-    expect_invertible(pitch, kern, kern_test)
+    expect_invertible(kern, kern, inputs$kern)
+    expect_invertible(kern, pitch, inputs$pitch)
+    expect_invertible(kern, solfa, inputs$solfa)
+    expect_invertible(kern, interval, inputs$interval)
     
+    expect_invertible(pitch, kern, inputs$kern)
+    expect_invertible(pitch, pitch, inputs$pitch)
+    expect_invertible(pitch, solfa, inputs$solfa)
+    expect_invertible(pitch, interval, inputs$interval)
+    
+    expect_invertible(interval, kern, inputs$kern)
+    expect_invertible(interval, pitch, inputs$pitch)
+    expect_invertible(interval, solfa, inputs$solfa)
+    expect_invertible(interval, interval, inputs$interval)
+    
+    expect_invertible(solfa, kern, inputs$kern)
+    expect_invertible(solfa, pitch, inputs$pitch)
+    expect_invertible(solfa, solfa, inputs$solfa)
+    expect_invertible(solfa, interval, inputs$interval)
     
 })
