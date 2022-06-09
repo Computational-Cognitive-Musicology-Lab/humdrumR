@@ -17,14 +17,40 @@ pitch(
 )
 }
 \arguments{
-\item{generic}{(logical) If \code{generic = TRUE} the "specific" pitch information is discarded.
-For tonal representations, this means no accidentals/qualities or equivalent information is printed.
-For atonal representations, the generic pitch is returned.}
+\item{x}{(atomic vector) The \code{x} argument can be anything, and}
 
-\item{specific}{(logical) An alternate (opposite) shortcut for specifying the \code{generic} argument: \code{generic == !specific}.}
+\item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
+There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{generic}{(logical, length 1) If \code{generic = TRUE} the "specific" pitch information is discarded.
+For tonal representations, this means no accidentals/qualities or equivalent information is printed.
+For atonal representations, the generic pitch is returned.
+As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
+
+\item{simple}{(logical, length 1) If \code{simple = TRUE} the "complex" pitch information is discarded.
+This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
+For absolute pitch representations, this is the octave above middle C.
+For relative pitch representations, this is the octave above a unison.
+(The special \code{octave.round} argument can be used to modify this behavior).}
+
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
+\code{parse(a = x, b = y, etc.)}.}
+
+\item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
+As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
+\code{transpose(a = x, b = y, etc.)}.}
+
+\item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+but there is additional, non-pitch information in the strings "beside" the pitch information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
+If \code{inPlace = FALSE}, only the pitch output information will be returned.}
 }
 \description{
 These functions can be used to "translate" or otherwise modify data representing pitch information.
+
+\href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific pitch} is the most standard
+approach to representing pitch in traditional Western music.
 }
 \details{
 These pitch functions all work in similar ways, with similar arguments and functionality;
@@ -63,7 +89,29 @@ The functions are:
 }
 }
 }
+
+\code{pitch} is one of several \code{humdrumR} \link[=pitchFunctions]{pitch functions}.
 }
 \seealso{
 tonalInterval
+
+To better understand how this function works, read \link{pitchParsing} and \link{pitchDeparsing}.
+
+Other {absolute pitch functions}: 
+\code{\link{helmholtz}()},
+\code{\link{kern}()},
+\code{\link{lilypond}()}
+
+Other {pitch functions}: 
+\code{\link{bhatk}()},
+\code{\link{degree}()},
+\code{\link{helmholtz}()},
+\code{\link{interval}()},
+\code{\link{kern}()},
+\code{\link{lilypond}()},
+\code{\link{midi}()},
+\code{\link{semit}()},
+\code{\link{solfa}()}
 }
+\concept{{absolute pitch functions}}
+\concept{{pitch functions}}

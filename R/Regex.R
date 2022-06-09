@@ -303,8 +303,9 @@ captureRE <- function(strs, n = '') {
 #' @name regexConstruction
 #' @export
 captureUniq <- function(strs, zero = TRUE) {
-# takes a RE capture group and makes it so it will only match one or more of the SAME character
+# takes a RE capture group and makes it so it will only match one or more of the SAME string
     
+    strs[nchar(strs) > 1L] <- paste0('(', strs[nchar(strs) > 1L], ')')
     strs <- paste0(strs, '+')
     
     strs <- paste(strs, collapse = '|')
@@ -415,13 +416,10 @@ makeRE.kern <- function(parts = c("step", "species"),
     
 }
 
-makeRE.sciPitch <- function(parts = c("step", "species", "octave"), qualities = FALSE, 
-                            collapse = TRUE, octave.offset = 4L, octave.integer = TRUE,
-                            flat = 'b', ...) {
-   makeRE.tonalChroma(parts, collapse  = collapse, 
-                      octave.offset = octave.offset, octave.integer = octave.integer, 
-                      qualities = qualities, flat = flat, ..., regexname = 'pitch')
-}
+
+makeRE.lilypond <- partialApply(makeRE.tonalChroma, octave.integer = FALSE, up = "'", down = ",")
+
+makeRE.sciPitch <- partialApply(makeRE.tonalChroma, octave.offset = 4L, octave.integer = TRUE, flat = 'b')
 
 makeRE.interval <- function(parts = c("direction", "species", "step"), step.labels = 1:99, collapse = TRUE, qualities = TRUE, flat = 'b', ...) {
     REs <- makeRE.tonalChroma(parts[parts != 'direction'], collapse  = FALSE, qualities = qualities, step.labels = step.labels,
@@ -433,11 +431,9 @@ makeRE.interval <- function(parts = c("direction", "species", "step"), step.labe
     if (collapse) setNames(cREs(REs), 'solfa') else REs
 }
 
-makeRE.scaleDegree <- function(parts = c("octave", "species", "step"), step.labels = 1:7, octave.integer = FALSE,
-                               flat = 'b', qualities = FALSE, collapse = TRUE, ...) {
-    makeRE.tonalChroma(parts, collapse  = collapse, qualities = qualities, step.labels = step.labels, octave.integer = octave.integer, 
-                       flat = flat, ..., regexname = 'scaleDegree')
-}
+
+makeRE.scaleDegree <- partialApply(makeRE.tonalChroma, parts = c("octave", "species", "step"), step.labels = 1:7, octave.integer = FALSE,
+                                   flat = 'b', qualities = FALSE, regexname = 'scaleDegree')
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer = FALSE, flat = '-', ..., collapse = TRUE) {
     

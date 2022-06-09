@@ -137,8 +137,17 @@ test_that('Tonal args work correctly', {
     expect_error(kern(test, generic = TRUE, specific = TRUE))
     expect_error(kern(test, generic = FALSE, specific = FALSE))
     
+})
+
+
+test_that('Pitch arguments return correct values!', {
+    # These are used in documentation!:
+    expect_equal(pitch('so'), 'G4')
+    expect_equal(pitch('4.ee-['), 'Eb5')
+    expect_equal(pitch('4.ee-[', inPlace = TRUE), '4.Eb5[')
     
-    
-    
-    
+    expect_equal(kern('Eflatflat', parse(flat = 'flat')), 'E--')
+    expect_equal(kern('aa_', parse(flat = "_")), "aa-")
+    expect_equal(kern('4.aa_JJ', parse(flat= "_"), inPlace = TRUE), '4.aa-JJ')
+    expect_equal(kern('G flat', parse(flat = 'flat', sep = ' ')), 'G-')
 })

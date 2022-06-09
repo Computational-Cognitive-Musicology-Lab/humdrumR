@@ -2,7 +2,7 @@
 % Please edit documentation in R/tonalInterval.R
 \name{lilypond}
 \alias{lilypond}
-\title{Lilypond (pitch) representation}
+\title{Lilypond pitch representation}
 \usage{
 lilypond(
   x,
@@ -16,17 +16,62 @@ lilypond(
 )
 }
 \arguments{
-\item{...}{
-  Arguments passed on to \code{\link[=tonalInterval]{tonalInterval}}
-  \describe{
-    \item{\code{}}{}
-  }}
+\item{x}{(atomic vector) The \code{x} argument can be anything, and}
 
-\item{generic}{(logical) If \code{generic = TRUE} the "specific" pitch information is discarded.
+\item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
+There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{generic}{(logical, length 1) If \code{generic = TRUE} the "specific" pitch information is discarded.
 For tonal representations, this means no accidentals/qualities or equivalent information is printed.
-For atonal representations, the generic pitch is returned.}
+For atonal representations, the generic pitch is returned.
+As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
+
+\item{simple}{(logical, length 1) If \code{simple = TRUE} the "complex" pitch information is discarded.
+This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
+For absolute pitch representations, this is the octave above middle C.
+For relative pitch representations, this is the octave above a unison.
+(The special \code{octave.round} argument can be used to modify this behavior).}
+
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
+\code{parse(a = x, b = y, etc.)}.}
+
+\item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
+As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
+\code{transpose(a = x, b = y, etc.)}.}
+
+\item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+but there is additional, non-pitch information in the strings "beside" the pitch information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
+If \code{inPlace = FALSE}, only the pitch output information will be returned.}
 }
 \description{
-This is the representation used to represent pitch in the \href{https://lilypond.org/doc/v2.22/Documentation/notation/pitches}{Lilypond}
+This is the representation used to represent (Western tonal) pitches in the \href{https://lilypond.org/doc/v2.22/Documentation/notation/pitches}{Lilypond}
 notation format.
+In \link{humdrumR}, the \code{lilypond} function only relates to the \emph{pitch} part of Lilypond notation:
+Lilypond-like \emph{rhythms} can be creating using the \link{recip} function.
 }
+\details{
+\code{lilypond} is one of several \code{humdrumR} \link[=pitchFunctions]{pitch functions}.
+}
+\seealso{
+To better understand how this function works, read \link{pitchParsing} and \link{pitchDeparsing}.
+
+Other {absolute pitch functions}: 
+\code{\link{helmholtz}()},
+\code{\link{kern}()},
+\code{\link{pitchFunctions}}
+
+Other {pitch functions}: 
+\code{\link{bhatk}()},
+\code{\link{degree}()},
+\code{\link{helmholtz}()},
+\code{\link{interval}()},
+\code{\link{kern}()},
+\code{\link{midi}()},
+\code{\link{pitchFunctions}},
+\code{\link{semit}()},
+\code{\link{solfa}()}
+}
+\concept{{absolute pitch functions}}
+\concept{{pitch functions}}
