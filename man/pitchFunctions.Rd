@@ -7,15 +7,13 @@
 \usage{
 pitch(
   x,
-  generic = FALSE,
   ...,
-  Key = NULL,
-  Exclusive = NULL,
+  generic = FALSE,
+  simple = FALSE,
+  octave.contour = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  inPlace = FALSE
 )
 }
 \arguments{

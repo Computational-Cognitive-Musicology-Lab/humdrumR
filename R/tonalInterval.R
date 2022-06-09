@@ -1491,7 +1491,7 @@ pitchArgCheck <- function(args,  callname) {
     args$complex <- !args$simple
   }
   
-  if ('absolute' %in% argnames) {
+  if ('octave.absolute' %in% argnames) {
     if ('octave.closest' %in% argnames && !xor(args$octave.closest, args$octave.absolute)) .stop("In your call to {callname}, you've specified contradictory 'octave.closest' and 'octave.absolute' arguments...it has to be one or the other!")
     args$octave.closest <- !args$octave.absolute
   }
@@ -1511,11 +1511,11 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  args <- alist(x = , generic = FALSE, ... = ,
-                Key = NULL, Exclusive = NULL, 
+  args <- alist(x = , 
+                ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
+                generic = FALSE, simple = FALSE, octave.contour = FALSE, 
                 parseArgs = list(), transposeArgs = list(), 
-                inPlace = FALSE, memoize = TRUE,
-                deparse = TRUE)
+                inPlace = FALSE)
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
@@ -1523,16 +1523,16 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
     
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
-                                                             parse = parseArgs, transpose = transposeArgs)
+                                                                parse = parseArgs, transpose = transposeArgs)
     
-
-    args...$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
+    # Exclusive
+    parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive 
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
     deparseArgs <- pitchArgCheck(c(args..., list(!!!fargcall)), !!callname)
     
-    # Keys
-    Key     <- diatonicSet(Key %||% dset(0L, 0L))
+    # Key
+    Key     <- diatonicSet(args...$Key %||% dset(0L, 0L))
     fromKey <- diatonicSet(transposeArgs$from %||% Key)
     toKey   <- diatonicSet(transposeArgs$to   %||% Key)
     
@@ -1542,7 +1542,10 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     transposeArgs$from <- CKey(fromKey)
     transposeArgs$to   <- CKey(toKey)
     
-    memoize <- !parseArgs$melodic %||% TRUE
+    # memoize % deparse
+    memoize <- args...$memoize %||% TRUE
+    deparse <- args...$deparse %||% TRUE
+    
     # Parse
     parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {

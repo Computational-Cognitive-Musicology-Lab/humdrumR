@@ -771,7 +771,7 @@ activateQuo <- function(funcQuosure, active) {
 #     funcQuosure
 # }
 
-#### Insert exclusive args where necessary
+#### Insert exclusive/keyed args where necessary
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
   funcQuosure <- exclusiveArgsQuo(funcQuosure, fields)

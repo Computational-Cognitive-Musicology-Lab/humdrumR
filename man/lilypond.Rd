@@ -6,27 +6,25 @@
 \usage{
 lilypond(
   x,
-  generic = FALSE,
   ...,
-  Key = NULL,
-  Exclusive = NULL,
+  generic = FALSE,
+  simple = FALSE,
+  octave.contour = FALSE,
   parseArgs = list(),
   transposeArgs = list(),
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  inPlace = FALSE
 )
 }
 \arguments{
-\item{generic}{(logical) If \code{generic = TRUE} the "specific" pitch information is discarded.
-For tonal representations, this means no accidentals/qualities or equivalent information is printed.
-For atonal representations, the generic pitch is returned.}
-
 \item{...}{
   Arguments passed on to \code{\link[=tonalInterval]{tonalInterval}}
   \describe{
     \item{\code{}}{}
   }}
+
+\item{generic}{(logical) If \code{generic = TRUE} the "specific" pitch information is discarded.
+For tonal representations, this means no accidentals/qualities or equivalent information is printed.
+For atonal representations, the generic pitch is returned.}
 }
 \description{
 This is the representation used to represent pitch in the \href{https://lilypond.org/doc/v2.22/Documentation/notation/pitches}{Lilypond}
