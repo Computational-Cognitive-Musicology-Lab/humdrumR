@@ -52,6 +52,8 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
+exclusiveFunctions <- c()
+keyedFunctions <- c()
 
 setOldClass('quosure')
 

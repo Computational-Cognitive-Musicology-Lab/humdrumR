@@ -771,45 +771,39 @@ activateQuo <- function(funcQuosure, active) {
 #     funcQuosure
 # }
 
-#### Insert arguments which are fields automatically!
+#### Insert exclusive args where necessary
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
-    
-    predicate <- \(Type, Head, Environment) {
-      args <- formals(Head, if (missing(Environment)) parent.frame() else Environment)
-       Type == 'call' &&
-        !Head %in% c('(', '{') &&
-        !is.null(args) && # uses arguments
-        any(.names(args) %in% fields)
-    }
-      
-    do <- \(exprA) {
-      
-         fargNames <- .names(formals(exprA$Head, if (is.null(exprA$Environment)) parent.frame() else exprA$Environment))
-         hits <- fields %in% fargNames
+  funcQuosure <- exclusiveArgsQuo(funcQuosure, fields)
+  funcQuosure <- keyedArgsQuo(funcQuosure, fields)
+  funcQuosure
+}
 
-         if (!any(hits)) return(exprA)
 
-         namedArgs <- .names(exprA$Args)
-
-         fargNames <- fargNames[!fargNames %in% namedArgs]
-         usedArgs <- c(namedArgs, 
-                       head(head(fargNames,
-                                 min(which(fargNames == '...'),
-                                     length(fargNames))),
-                            sum(namedArgs == ""))) 
+exclusiveArgsQuo <- function(funcQuosure, fields) {
+  if (!'Exclusive' %in% fields) return(funcQuosure)
   
-         hits <- hits & !(fields %in% usedArgs)
-         hits <- fields[hits]
+  predicate <- \(Head) Head %in% exclusiveFunctions 
+  do <- \(exprA) {
+    if (!'Exclusive' %in% names(exprA$Args)) exprA$Args$Exclusive <- quote(Exclusive)
+    exprA
+  }
+  
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  
+}
 
-         exprA$Args <- c(exprA$Args, setNames(rlang::syms(hits), hits))
-         exprA
-
-
-    }
-    
-    modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
-    
+keyedArgsQuo <- function(funcQuosure, fields) {
+  if (!'Key' %in% fields) return(funcQuosure)
+  
+  predicate <- \(Head) Head %in% keyedFunctions
+  
+  do <- \(exprA) {
+    if (!'Key' %in% names(exprA$Args)) exprA$Args$Key <- quote(Key)
+    exprA
+  }
+  
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
 
 #### Lag/Led vectors

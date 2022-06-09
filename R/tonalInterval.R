@@ -1505,6 +1505,8 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various pitch transform functions
+  exclusiveFunctions <<- c(exclusiveFunctions, callname)
+  keyedFunctions <<- c(keyedFunctions, callname)
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
