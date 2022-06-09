@@ -880,11 +880,12 @@ lcm <- function(...) {
 # so long as their skip arguments are the same
 
 .windows <- function(x, windows)  if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows
-# Interval "calculus"
+#' Interval "calculus"
+#'
 #' @name intervalCalculus
 #' @export
 sigma <- function(x, skip, boundaries) UseMethod('sigma')
-#' @name intervalCalculus
+#' @rdname intervalCalculus
 #' @export
 sigma.default <- function(x, skip = list(is.na), windows = list()) {
   
@@ -900,17 +901,17 @@ sigma.default <- function(x, skip = list(is.na), windows = list()) {
   
   x
 }
-#' @name intervalCalculus
+#' @rdname intervalCalculus
 #' @export
 sigma.matrix <- function(x, ..., skip = list(is.na)) {
   
   do.call('cbind', apply(x, 2, sigma.default, skip = skip, ..., simplify = FALSE))
 }
 
-#' @name intervalCalculus
+#' @rdname intervalCalculus
 #' @export
 delta <- function(x, skip, boundaries) UseMethod('delta') 
-#' @name intervalCalculus
+#' @rdname intervalCalculus
 #' @export
 delta.default <- function(x, skip = list(is.na), windows = list(), firstNA = FALSE) {
     skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
@@ -930,7 +931,7 @@ delta.default <- function(x, skip = list(is.na), windows = list(), firstNA = FAL
     
 }
 
-#' @name intervalCalculus
+#' @rdname intervalCalculus
 #' @export
 delta.matrix <- function(x, ..., skip = list(is.na)) {
   do.call('cbind', apply(x, 2, delta.default, skip = skip, ..., simplify = FALSE))
@@ -938,18 +939,6 @@ delta.matrix <- function(x, ..., skip = list(is.na)) {
 
 
 
-#' @name intervalCalculus
-#' @export 
-calculus <- function(x, n, skip = list(na)) {
-    n <- as.integer(n[1])
-    if (n == 0L) return(x)
-    
-    if (n > 0L) {
-        Recall(delta(x, skip), n - 1L)
-    } else {
-        Recall(sigma(x, skip), n + 1L)
-    }
-}
 
 #' @export
 expand <- function(x) {

@@ -112,13 +112,14 @@
 #' 
 #' 
 #' @family {core pitch representation}
+#' @seealso [pitchParsing]
 #' @name tonalInterval
 #' @export 
 setClass('tonalInterval', 
          contains = 'struct',
          slots = c(Fifth  = 'integer', 
                    Octave = 'integer', 
-                   Cent   = 'numeric')) -> tonalInterval
+                   Cent   = 'numeric')) 
 
 setValidity('tonalInterval', 
             \(object) {
@@ -185,8 +186,10 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 #' "Sharps" and "flats" represent `+7` or `-7` on the line-of-fifths respectively.
 #' 
 #' 
-#' @family {core pitch representation}
-#' @seealso [tint()] [tonalInterval]
+#' @family {core pitch representations}
+#' @seealso `LO5th`s are a core component of the [tonalInterval] representation, and are thus 
+#'          an argument to the `tonalInterval` constructor: [tint(octave, LO5th)][tint()].
+#'          Also, see the [tonalInterval][pitchParsing] function, which is used by many `LO5th` methods. 
 #' @return Returns an integer vector or array, matching the input.
 #' @export
 setGeneric("LO5th", function(x, generic = FALSE, ...) standardGeneric("LO5th"))
@@ -1327,9 +1330,11 @@ bhatk2tint <- function(str, ...) {
 
 ### Parse 2tint generic and methods ####
 
-#' @section Parsing:
+#' Parsing tonal (pitch) information
 #' 
-#' `humdrumR` includes a easy-to-use but powerful system for parsing pitch information into the `tonalInterval` representation.
+#' 
+#' 
+#' `humdrumR` includes a easy-to-use but powerful system for parsing pitch information into the [tonalInterval] backend representation.
 #' Basic methods are defined for numeric values representing atonal pitch information:
 #' 
 #' + [integer][base::integer] values are interpreted as semitones. Watch out! In R, you need to append an `L` to a number to make it an explicit integer:
@@ -1362,19 +1367,19 @@ bhatk2tint <- function(str, ...) {
 #' 
 #' The six tonal representations listed above function through a common parsing interface.
 #'
-#' @rdname tonalInterval
+#' @name pitchParsing
 #' @export
 tonalInterval <- function(...) UseMethod('tonalInterval')
 
-#' @rdname tonalInterval
+#' @rdname pitchParsing
 #' @export
 tonalInterval.tonalInterval <- function(x, ...) x
 
-#' @rdname tonalInterval
-#' @export 
+#' @rdname pitchParsing
+#' @export
 tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
 
-#' @rdname tonalInterval
+#' @rdname pitchParsing
 #' @export
 tonalInterval.NULL <- function(x, ...) NULL
 
@@ -1433,8 +1438,40 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 
 ## Pitch transformer documentation ####
 
-#' Manipulate pitch data
-#'  
+#' Translate between pitch representations.
+#' 
+#' These functions can be used to "translate" or otherwise modify data representing pitch information.
+#' 
+#' 
+#' These pitch functions all work in similar ways, with similar arguments and functionality;
+#' To read more details about each function, click on the links in the list below, 
+#' or type `?func` in the R command line: for example, `?kern`.
+#' The functions are:
+#' 
+#' + **Tonal pitch representations**
+#'   + *Absolute pitch representations*
+#'     + [kern]
+#'     + [pitch]
+#'     + [lilypond]
+#'     + [helmholtz]
+#'   + *Relative pitch representations*
+#'     + [interval]
+#'     + [solfa] (solfege)
+#'     + [degree] (scale degrees)
+#'     + [bhatk] (hindustani swara)
+#' + **Atonal pitch representations**
+#'   + *Musical (non-tonal) pitch representations*
+#'     + [semit]
+#'     + [midi]
+#'   + *Physical pitch/interval representations*
+#'     + [frequency]
+#'     + [ratio]
+#' 
+#' @param generic (logical) If `generic = TRUE` the "specific" pitch information is discarded.
+#'        For tonal representations, this means no accidentals/qualities or equivalent information is printed.
+#'        For atonal representations, the generic pitch is returned.
+#' @param specific (logical) An alternate (opposite) shortcut for specifying the `generic` argument: `generic == !specific`.
+#' 
 #' @name pitchFunctions
 #' @seealso tonalInterval
 NULL
@@ -1471,30 +1508,26 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
-  fargs <- fargs(eval(deparser))
-  fargs <- fargs[!names(fargs) %in% c('x', '...')]
   
-  args <- c(alist(x = , ... = ), 
-            fargs,
-            alist(Key = NULL, Exclusive = NULL, 
-                  parseArgs = list(), transposeArgs = list(), 
-                  inPlace = FALSE, memoize = TRUE,
-                  deparse = TRUE))
+  args <- alist(x = , generic = FALSE, ... = ,
+                Key = NULL, Exclusive = NULL, 
+                parseArgs = list(), transposeArgs = list(), 
+                inPlace = FALSE, memoize = TRUE,
+                deparse = TRUE)
   
-  args <- args[!duplicated(names(args))]
-  fargcall <- setNames(rlang::syms(names(fargs)), names(fargs))
+  fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
     
-    c('args', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
+    c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
                                                              parse = parseArgs, transpose = transposeArgs)
     
 
-    args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
+    args...$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
     
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
-    deparseArgs <- pitchArgCheck(c(args, list(!!!fargcall)),      !!callname)
+    deparseArgs <- pitchArgCheck(c(args..., list(!!!fargcall)), !!callname)
     
     # Keys
     Key     <- diatonicSet(Key %||% dset(0L, 0L))
@@ -1529,31 +1562,61 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
 
 ### Pitch Transformers ####
 
-#' @rdname pitchFunctions
+
 #' @export 
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
-#' @rdname pitchFunctions
 #' @export 
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
+
+#' [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) representation
 #' @rdname pitchFunctions
 #' @export 
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
-#' @rdname pitchFunctions
+
+#' Kern (pitch) representation
+#' 
+#' Kern (`**kern`) is the most common humdrum interpretation for representing "notes" in the style of
+#' traditional Western scores.
+#' In [humdrumR], the `kern` function only relates to the *pitch* part of the `**kern` interpretation:
+#' `**kern` rhythms are manipulated using the [recip] function.
+#' 
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 kern <- makePitchTransformer(tint2kern, 'kern') 
-#' @rdname pitchFunctions
+
+#' Lilypond (pitch) representation
+#' 
+#' This is the representation used to represent pitch in the [Lilypond](https://lilypond.org/doc/v2.22/Documentation/notation/pitches) 
+#' notation format.
+#' 
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
-#' @rdname pitchFunctions
+
+#' Tonal [interval](https://en.wikipedia.org/wiki/Interval_(music)) representation
+#' 
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 interval <- makePitchTransformer(tint2interval, 'interval')
-#' @rdname pitchFunctions
+
+#' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 degree <- makePitchTransformer(tint2degree, 'degree')
-#' @rdname pitchFunctions
+
+#' [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 solfa <- makePitchTransformer(tint2solfa, 'solfa')
-#' @rdname pitchFunctions
+
+#' [Swara](https://en.wikipedia.org/wiki/Svara) representation
+#' @inheritParams pitchFunctions
+#' @inheritDotParams tonalInterval
 #' @export 
 bhatk <- makePitchTransformer(tint2bhatk, 'bhatk')
 

@@ -2,184 +2,69 @@
 % Please edit documentation in R/tonalInterval.R
 \name{pitchFunctions}
 \alias{pitchFunctions}
-\alias{semit}
-\alias{midi}
 \alias{pitch}
-\alias{kern}
-\alias{lilypond}
-\alias{interval}
-\alias{degree}
-\alias{solfa}
-\alias{bhatk}
-\title{Manipulate pitch data}
+\title{Translate between pitch representations.}
 \usage{
-semit(
-  x,
-  ...,
-  melodic = FALSE,
-  Key = NULL,
-  specific = TRUE,
-  complex = TRUE,
-  File = NULL,
-  Spine = NULL,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = !melodic
-)
-
-midi(
-  x,
-  ...,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
 pitch(
   x,
-  ...,
-  parts = c("step", "species", "octave"),
-  sep = "",
-  step = TRUE,
-  specific = TRUE,
-  complex = TRUE,
-  keyed = TRUE,
-  Key = NULL,
-  qualities = FALSE,
-  step.labels = c("C", "D", "E", "F", "G", "A", "B"),
-  octave.offset = 4L,
-  integer = TRUE,
-  flat = "b",
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
-kern(
-  x,
-  ...,
-  complex = TRUE,
-  Key = NULL,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
-lilypond(
-  x,
-  ...,
-  parts = c("step", "species", "octave"),
-  sep = "",
-  step = TRUE,
-  specific = TRUE,
-  complex = TRUE,
-  keyed = FALSE,
-  Key = NULL,
-  qualities = FALSE,
-  step.labels = c("c", "d", "e", "f", "g", "a", "b"),
-  up = "'",
-  down = ",",
-  relative = TRUE,
-  octave.integer = FALSE,
-  octave.round = if (relative) round else floor,
-  sharp = "is",
-  flat = "es",
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
-interval(
-  x,
-  ...,
-  directed = TRUE,
-  melodic = FALSE,
-  File = NULL,
-  Spine = NULL,
-  Path = NULL,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = !melodic
-)
-
-degree(
-  x,
-  ...,
-  parts = c("octave", "species", "step"),
-  sep = "",
-  step = TRUE,
-  specific = TRUE,
-  complex = FALSE,
-  keyed = FALSE,
-  Key = NULL,
-  qualities = FALSE,
-  step.labels = 1L:7L,
-  flat = "b",
-  octave.integer = FALSE,
-  relative = TRUE,
-  octave.round = round,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
-solfa(
-  x,
-  ...,
-  Key = NULL,
-  parts = c("octave", "accidentals", "step"),
-  factor = FALSE,
-  Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
-)
-
-bhatk(
-  x,
+  generic = FALSE,
   ...,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  deparse = TRUE,
-  memoize = TRUE
+  memoize = TRUE,
+  deparse = TRUE
 )
 }
+\arguments{
+\item{generic}{(logical) If \code{generic = TRUE} the "specific" pitch information is discarded.
+For tonal representations, this means no accidentals/qualities or equivalent information is printed.
+For atonal representations, the generic pitch is returned.}
+
+\item{specific}{(logical) An alternate (opposite) shortcut for specifying the \code{generic} argument: \code{generic == !specific}.}
+}
 \description{
-Manipulate pitch data
+These functions can be used to "translate" or otherwise modify data representing pitch information.
+}
+\details{
+These pitch functions all work in similar ways, with similar arguments and functionality;
+To read more details about each function, click on the links in the list below,
+or type \code{?func} in the R command line: for example, \code{?kern}.
+The functions are:
+\itemize{
+\item \strong{Tonal pitch representations}
+\itemize{
+\item \emph{Absolute pitch representations}
+\itemize{
+\item \link{kern}
+\item \link{pitch}
+\item \link{lilypond}
+\item \link{helmholtz}
+}
+\item \emph{Relative pitch representations}
+\itemize{
+\item \link{interval}
+\item \link{solfa} (solfege)
+\item \link{degree} (scale degrees)
+\item \link{bhatk} (hindustani swara)
+}
+}
+\item \strong{Atonal pitch representations}
+\itemize{
+\item \emph{Musical (non-tonal) pitch representations}
+\itemize{
+\item \link{semit}
+\item \link{midi}
+}
+\item \emph{Physical pitch/interval representations}
+\itemize{
+\item \link{frequency}
+\item \link{ratio}
+}
+}
+}
 }
 \seealso{
 tonalInterval

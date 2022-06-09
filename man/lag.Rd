@@ -5,7 +5,7 @@
 \alias{lead}
 \title{Shift data within a vector/matrix/data.frame}
 \usage{
-lag(x, n = 1, fill = NA, wrap = FALSE, windows = NULL, ...)
+lag(x, n = 1, ..., fill = NA, wrap = FALSE)
 
 lead(x, n, ...)
 }
