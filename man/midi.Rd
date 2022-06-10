@@ -15,16 +15,61 @@ midi(
   inPlace = FALSE
 )
 }
+\arguments{
+\item{x}{(atomic vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
+There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{generic}{(logical, length 1) If \code{generic = TRUE} the "specific" pitch information is discarded.
+For tonal representations, this means no accidentals/qualities or equivalent information is printed.
+For atonal representations, the generic pitch is returned.
+As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
+
+\item{simple}{(logical, length 1) If \code{simple = TRUE} the "complex" pitch information is discarded.
+This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
+For absolute pitch representations, this is the octave above middle C.
+For relative pitch representations, this is the octave above a unison.
+(The special \code{octave.round} argument can be used to modify this behavior).}
+
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
+As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
+\code{parse(a = x, b = y, etc.)}.}
+
+\item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
+As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
+\code{transpose(a = x, b = y, etc.)}.}
+
+\item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
+If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
+}
 \description{
 This function translates pitch information into \href{https://en.wikipedia.org/wiki/MIDI}{MIDI pitch values}.
 The \code{midi} function is identical to the \code{\link[=semit]{semit()}} function, except offset by 60: \code{midi('c') = 60} while
 \code{semit('c') = 0}.
 }
-\details{
-\code{semit} is one of several \code{humdrumR} \link[=pitchFunctions]{pitch functions}.
+\section{In-place parsing}{
+
+
+In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
+for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
+The \code{humdrumR} parser (\code{tonalInterval}) will automatically "pull out" pitch information from within strings, if it can find any
+using the appropriate known regular expressions.
+For example, \code{pitch('4.ee-[')} returns Eb5.
+However, all the pitch functions (like \code{\link[=pitch]{pitch()}} and \code{\link[=kern]{kern()}}) have an option to keep the "extra" information
+and return the result "in place"---i.e., embedded right where it was found in the input string.
+This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
+So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
+(This obviously only works if the input is a string, not a numeric!)
+Note that \code{inPlace = TRUE} will force functions like \code{semit}, which normally return numeric values, to return character strings
+\emph{if} their input is a character string.
 }
+
 \seealso{
-To better understand how this function works, read \link{pitchParsing} and \link{pitchDeparsing}.
+To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
+or how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {atonal pitch functions}: 
 \code{\link{semit}()}
@@ -36,7 +81,7 @@ Other {pitch functions}:
 \code{\link{interval}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
-\code{\link{pitchFunctions}},
+\code{\link{pitch}()},
 \code{\link{semit}()},
 \code{\link{solfa}()}
 }

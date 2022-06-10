@@ -417,7 +417,13 @@ makeRE.kern <- function(parts = c("step", "species"),
 }
 
 
-makeRE.lilypond <- partialApply(makeRE.tonalChroma, octave.integer = FALSE, up = "'", down = ",")
+makeRE.lilypond <- partialApply(makeRE.tonalChroma, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                                sharp = 'is', flat = 'es',
+                                octave.integer = FALSE, up = "'", down = ",")
+
+makeRE.helmholtz <- partialApply(makeRE.tonalChroma, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                                 steps.sign = TRUE,
+                                 flat = 'b', octave.integer = FALSE, up = "'", down = ",")
 
 makeRE.sciPitch <- partialApply(makeRE.tonalChroma, octave.offset = 4L, octave.integer = TRUE, flat = 'b')
 

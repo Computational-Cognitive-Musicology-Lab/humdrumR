@@ -2,22 +2,9 @@
 % Please edit documentation in R/tonalInterval.R
 \name{pitchFunctions}
 \alias{pitchFunctions}
-\alias{pitch}
 \title{Translate between pitch representations.}
-\usage{
-pitch(
-  x,
-  ...,
-  generic = FALSE,
-  simple = FALSE,
-  octave.contour = FALSE,
-  parseArgs = list(),
-  transposeArgs = list(),
-  inPlace = FALSE
-)
-}
 \arguments{
-\item{x}{(atomic vector) The \code{x} argument can be anything, and}
+\item{x}{(atomic vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
@@ -33,7 +20,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -42,15 +29,17 @@ As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a
 \code{transpose(a = x, b = y, etc.)}.}
 
 \item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-but there is additional, non-pitch information in the strings "beside" the pitch information.
+\emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
-If \code{inPlace = FALSE}, only the pitch output information will be returned.}
+If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
+}
+\value{
+\code{NULL} inputs (\code{x} argument) return a \code{NULL} output.
+Otherwise, returns a vector of the same length as \code{x}.
+\code{NA} values in the input \code{x} are propagated to the output.
 }
 \description{
 These functions can be used to "translate" or otherwise modify data representing pitch information.
-
-\href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific pitch} is the most standard
-approach to representing pitch in traditional Western music.
 }
 \details{
 These pitch functions all work in similar ways, with similar arguments and functionality;
@@ -89,29 +78,24 @@ The functions are:
 }
 }
 }
-
-\code{pitch} is one of several \code{humdrumR} \link[=pitchFunctions]{pitch functions}.
 }
+\section{In-place parsing}{
+
+
+In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
+for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
+The \code{humdrumR} parser (\code{tonalInterval}) will automatically "pull out" pitch information from within strings, if it can find any
+using the appropriate known regular expressions.
+For example, \code{pitch('4.ee-[')} returns Eb5.
+However, all the pitch functions (like \code{\link[=pitch]{pitch()}} and \code{\link[=kern]{kern()}}) have an option to keep the "extra" information
+and return the result "in place"---i.e., embedded right where it was found in the input string.
+This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
+So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
+(This obviously only works if the input is a string, not a numeric!)
+Note that \code{inPlace = TRUE} will force functions like \code{semit}, which normally return numeric values, to return character strings
+\emph{if} their input is a character string.
+}
+
 \seealso{
 tonalInterval
-
-To better understand how this function works, read \link{pitchParsing} and \link{pitchDeparsing}.
-
-Other {absolute pitch functions}: 
-\code{\link{helmholtz}()},
-\code{\link{kern}()},
-\code{\link{lilypond}()}
-
-Other {pitch functions}: 
-\code{\link{bhatk}()},
-\code{\link{degree}()},
-\code{\link{helmholtz}()},
-\code{\link{interval}()},
-\code{\link{kern}()},
-\code{\link{lilypond}()},
-\code{\link{midi}()},
-\code{\link{semit}()},
-\code{\link{solfa}()}
 }
-\concept{{absolute pitch functions}}
-\concept{{pitch functions}}

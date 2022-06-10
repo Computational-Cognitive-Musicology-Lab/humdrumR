@@ -89,7 +89,9 @@ test_that("Functions are invertible", {
                    kern = c('A-', 'e-', 'bb-', 'f', 'c', 'g', 'ddd', 'AAA', 'e', 'b--', 'f#', 'c#'),
                    pitch = c("Ab3", "Eb4", "Bb5", "F4", "C4", "G4", "D6", "A1", "E4", "Bbb4", "F#4", "C#4"),
                    interval = c("-M3", "+m3", "+m14", "+P4", "P1", "+P5", "+M16", "-m17", "+M3", "+d7", "+A4", "+A1"),
-                   solfa = c("vle", "me", "^te", "fa", "do", "so", "^^re", "vvvla", "mi", "te-", "fi", "di"))
+                   solfa = c("vle", "me", "^te", "fa", "do", "so", "^^re", "vvvla", "mi", "te-", "fi", "di"),
+                   helmholtz = c("ab", "eb'", "bb''", "f'", "c'", "g'", "d'''", "A,", "e'", "bbb'", "f#'", "c#'"),
+                   lilypond = c("aes", "ees'", "bes''", "f'", "c'", "g'", "d'''", "a,,", "e'", "beses'", "fis'", "cis'"))
     
     #
     
@@ -107,22 +109,43 @@ test_that("Functions are invertible", {
     expect_invertible(kern, pitch, inputs$pitch)
     expect_invertible(kern, solfa, inputs$solfa)
     expect_invertible(kern, interval, inputs$interval)
+    expect_invertible(kern, helmholtz, inputs$helmholtz)
+    expect_invertible(kern, lilypond, inputs$lilypond)
     
     expect_invertible(pitch, kern, inputs$kern)
     expect_invertible(pitch, pitch, inputs$pitch)
     expect_invertible(pitch, solfa, inputs$solfa)
     expect_invertible(pitch, interval, inputs$interval)
+    expect_invertible(pitch, helmholtz, inputs$helmholtz)
+    expect_invertible(pitch, lilypond, inputs$lilypond)
     
     expect_invertible(interval, kern, inputs$kern)
     expect_invertible(interval, pitch, inputs$pitch)
     expect_invertible(interval, solfa, inputs$solfa)
     expect_invertible(interval, interval, inputs$interval)
+    expect_invertible(interval, helmholtz, inputs$helmholtz)
+    expect_invertible(interval, lilypond, inputs$lilypond)
     
     expect_invertible(solfa, kern, inputs$kern)
     expect_invertible(solfa, pitch, inputs$pitch)
     expect_invertible(solfa, solfa, inputs$solfa)
     expect_invertible(solfa, interval, inputs$interval)
+    expect_invertible(solfa, helmholtz, inputs$helmholtz)
+    expect_invertible(solfa, lilypond, inputs$lilypond)
     
+    expect_invertible(helmholtz, kern, inputs$kern)
+    expect_invertible(helmholtz, pitch, inputs$pitch)
+    expect_invertible(helmholtz, solfa, inputs$solfa)
+    expect_invertible(helmholtz, interval, inputs$interval)
+    expect_invertible(helmholtz, helmholtz, inputs$helmholtz)
+    expect_invertible(helmholtz, lilypond, inputs$lilypond)
+    
+    expect_invertible(lilypond, kern, inputs$kern)
+    expect_invertible(lilypond, pitch, inputs$pitch)
+    expect_invertible(lilypond, solfa, inputs$solfa)
+    expect_invertible(lilypond, interval, inputs$interval)
+    expect_invertible(lilypond, helmholtz, inputs$helmholtz)
+    expect_invertible(lilypond, lilypond, inputs$lilypond)
 })
 
 

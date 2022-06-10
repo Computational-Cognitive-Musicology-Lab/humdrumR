@@ -4,7 +4,7 @@
 
 
 
-## Definition, validity, initialization ####
+## tonalIntervalS4 documentation ----
 
 
 #' Representation of tonal pitch information
@@ -114,12 +114,17 @@
 #' @family {core pitch representation}
 #' @seealso [tonalInterval]
 #' @name tonalIntervalS4
+NULL
+
+## Definition, validity, initialization ####
 #' @export 
 setClass('tonalInterval', 
          contains = 'struct',
          slots = c(Fifth  = 'integer', 
                    Octave = 'integer', 
                    Cent   = 'numeric')) 
+
+
 
 setValidity('tonalInterval', 
             \(object) {
@@ -418,8 +423,12 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 # Deparsing Pitch Representations (tint2x) ###############################
 ###################################################################### ###
 
+## Deparsing documentation ----
+
 #' Deparsing pitch information
 #' 
+#' 
+
 #' @seealso [tonalInterval], [tonalIntervalS4]
 #' @name pitchDeparsing
 NULL
@@ -785,8 +794,9 @@ tint2lilypond <- partialApply(tint2tonalChroma,
                               step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                               up = "'", down = ",",
                               qualities = FALSE,
-                              octave.relative = TRUE, octave.integer = FALSE,
+                              octave.relative = FALSE, octave.integer = FALSE,
                               octave.round = if (octave.relative) round else floor,
+                              octave.offset = 1L, 
                               sharp = 'is', flat = 'es',
                               parts = c("step", 'species', "octave"))
 
@@ -908,6 +918,8 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", "step", 'species'),
 ###################################################################### ### 
 
 
+## Parsing (tonalInterval) documentation ----
+
 #' Parsing pitch information
 #' 
 #' 
@@ -978,11 +990,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", "step", 'species'),
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
 #' The `humdrumR` parser (`tonalInterval`) will automatically "pull out" pitch information from within strings, if it can find any 
 #' using the appropriate known regular expressions.
-#' For example, `pitch('4.ee-[')` returns `r pitch('4.ee-[')`.
-#' For the [pitch function][pitchFunctions] which *return* character strings (like [pitch()] and [kern()]), there is an option to keep the "extra" information
-#' and return the result "in place"---i.e., embedded right where it was found in the string.
-#' This is controlled with the `inPlace` argument, which is `FALSE` by default.
-#' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
+#' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
 #' # Advanced Parsing Options
 #' 
@@ -1370,10 +1378,20 @@ tonalChroma2tint <- function(str,
 
 pitch2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octave"), 
                            octave.offset = 4L, octave.integer = TRUE,
-                           qualities = FALSE,
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                            flat = 'b',
                            keyed = TRUE)
+
+lilypond2tint <- partialApply(tonalChroma2tint, 
+                              step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
+                              flat = 'es', sharp = 'is', 
+                              octave.integer = FALSE, octave.offset = 1L, up = "'", down = ",")
+
+
+helmholtz2tint <- partialApply(tonalChroma2tint,
+                               step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                               steps.sign = TRUE,
+                               up = "'", down = ",", flat = 'b', octave.integer = FALSE, octave.offset = 1L)
 
 kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
@@ -1506,7 +1524,8 @@ tonalInterval.integer  <- semit2tint
 #' @export
 tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   makeRE.kern,        kern2tint),
                                                  list('pitch',                  makeRE.sciPitch,    pitch2tint),
-                                                 # list('lilypond' ,              makeRE.lilypond,    lilypond2tint),
+                                                 list('lilypond' ,              makeRE.lilypond,    lilypond2tint),
+                                                 list('helmholtz' ,             makeRE.helmholtz,   helmholtz2tint),
                                                  list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
                                                  list('deg',                    makeRE.scaleDegree, degree2tint),
                                                  list('solfa',                  makeRE.solfa,       solfa2tint),
@@ -1536,11 +1555,13 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 # Translating Pitch Representations (x2y) ################################
 ###################################################################### ### 
 
-## Pitch transformer documentation ####
+## Pitch function documentation ####
+
+
 
 #' Translate between pitch representations.
 #' 
-#' These functions can be used to "translate" or otherwise modify data representing pitch information.
+#' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
 #' 
 #' 
 #' These pitch functions all work in similar ways, with similar arguments and functionality;
@@ -1567,7 +1588,7 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 #'     + [frequency]
 #'     + [ratio]
 #'     
-#' @param x (atomic vector) The `x` argument can be anything, and 
+#' @param x (atomic vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
 #' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
 #'        There are also two hidden (advanced) argumens you can specify: `memoize` and `deparse` (see the details below).
 #' @param generic (logical, length 1) If `generic = TRUE` the "specific" pitch information is discarded.
@@ -1587,12 +1608,34 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 #'        As a convenient syntactic sugar, instead of writing `transposeArgs = list(a = x, b = y, etc.)`, you can write
 #'        `transpose(a = x, b = y, etc.)`.
 #' @param inPlace (logical, length 1) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        but there is additional, non-pitch information in the strings "beside" the pitch information.
+#'        *and* there is extral, non-pitch information in the strings "beside" the pitch information.
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
-#'        If `inPlace = FALSE`, only the pitch output information will be returned.
-#'
-
+#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
+#'  
 #' 
+#' 
+#'
+#' @section In-place parsing:
+#' 
+#' In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
+#' for example, `**kern` data might include tokens like `"4.ee-[`.
+#' The `humdrumR` parser (`tonalInterval`) will automatically "pull out" pitch information from within strings, if it can find any 
+#' using the appropriate known regular expressions.
+#' For example, `pitch('4.ee-[')` returns `r pitch('4.ee-[')`.
+#' However, all the pitch functions (like [pitch()] and [kern()]) have an option to keep the "extra" information
+#' and return the result "in place"---i.e., embedded right where it was found in the input string.
+#' This is controlled with the `inPlace` argument, which is `FALSE` by default.
+#' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
+#' (This obviously only works if the input is a string, not a numeric!)
+#' Note that `inPlace = TRUE` will force functions like `semit`, which normally return numeric values, to return character strings
+#' *if* their input is a character string.
+#' 
+#' @returns 
+#' 
+#' `NULL` inputs (`x` argument) return a `NULL` output.
+#' Otherwise, returns a vector of the same length as `x`.
+#' `NA` values in the input `x` are propagated to the output.
+#'
 #' @name pitchFunctions
 #' @seealso tonalInterval
 NULL
@@ -1644,6 +1687,8 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
   rlang::new_function(args, rlang::expr( {
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     
+    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname)
+    
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
                                                                 parse = parseArgs, transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)
@@ -1676,6 +1721,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
     memoize <- args...$memoize %||% TRUE
     deparse <- args...$deparse %||% TRUE
     
+    
     # Parse
     parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
@@ -1703,11 +1749,13 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character') 
 #' This function translates pitch information into [semitones](https://en.wikipedia.org/wiki/Semitone) (integers).
 #' Middle-C or unison values are `0`.
 #' 
-#' `semit` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
 
@@ -1717,11 +1765,13 @@ semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
 #' The `midi` function is identical to the [semit()] function, except offset by 60: `midi('c') = 60` while 
 #' `semit('c') = 0`.
 #' 
-#' `semit` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 
@@ -1730,12 +1780,13 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' [Scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) is the most standard
 #' approach to representing pitch in traditional Western music. 
 #' 
-#' `pitch` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
-#' @rdname pitchFunctions
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
 
@@ -1746,12 +1797,48 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' In [humdrumR], the `kern` function only relates to the *pitch* part of the `**kern` interpretation:
 #' `**kern` *rhythms* are created using the [recip] function.
 #' 
-#' `kern` is one of several `humdrumR` [pitch functions][pitchFunctions].
+#' @details 
+#' 
+#' The pitch part of `**kern` tokens breakdown tonal pitch information as so:
+#' 
+#' + **Steps**
+#'   + 1: `"C"` or `"c"`
+#'   + 2: `"D"` or `"d"`
+#'   + 3: `"E"` or `"e"`
+#'   + 4: `"F"` or `"f"`
+#'   + 5: `"G"` or `"g"`
+#'   + 6: `"A"` or `"a"`
+#'   + 7: `"B"` or `"b"`
+#' + **Accidentals**
+#'   + Flat: `"-"`
+#'   + Sharp: `"#"`
+#' + **Octave**
+#'   + Octave is indicated through the case of the step characters, as well as *repetition* of the step character.
+#'     Uppercase letters are used for octaves below middle-C; lowercase letters for the middle-C octave and higher.
+#'     The middle-C octave, and the octave below it get one character each, with higher and lower octaves repeating that character.
+#'     For example, using `C#` as the step value, and relative to the middle-C octave:
+#'     + -3: `"CCC#"`
+#'     + -2: `"CC#"`
+#'     + -1: `"C#"`
+#'     +  0: `"c#"`
+#'     + +1: `"cc#"`
+#'     + +2: `"ccc#"`
+#'     + +3: `"cccc#"`
+#'
+#' Tokens are ordered `Step/Octave + Accidentals`, with no separator.
+#' 
+#' Like all `humdrumR` pitch functions, the ways that `kern` [parses][tonalInterval] and [deparses][pitchDeparsing] tokens
+#' can be modified to accomodate variations of the standard `**kern` pitch representation.
+#' 
+#' ---
+#' 
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 kern <- makePitchTransformer(tint2kern, 'kern') 
 
@@ -1762,12 +1849,13 @@ kern <- makePitchTransformer(tint2kern, 'kern')
 #' In [humdrumR], the `lilypond` function only relates to the *pitch* part of Lilypond notation:
 #' Lilypond-like *rhythms* can be creating using the [recip] function.
 #' 
-#' `lilypond` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 
@@ -1776,62 +1864,67 @@ lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' 
 #' [Helmholtz notation](https://en.wikipedia.org/wiki/Helmholtz_pitch_notation)
 #' 
-#' `helmholtz` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 
 #' Tonal (pitch) interval representation
 #' 
-#' This returns the standard represtnations of [intervals](https://en.wikipedia.org/wiki/Interval_(music))
+#' This returns the standard representations of [intervals](https://en.wikipedia.org/wiki/Interval_(music))
 #' in Western music.
 #' 
-#' `interval` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
-#' @inheritParams pitchFunctions
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions],
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 interval <- makePitchTransformer(tint2interval, 'interval')
 
 #' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation
 #' 
-#' `degree` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 degree <- makePitchTransformer(tint2degree, 'degree')
 
 #' [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
 #' 
-#' `solfa` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' 
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 solfa <- makePitchTransformer(tint2solfa, 'solfa')
 
 #' [Swara](https://en.wikipedia.org/wiki/Svara) representation
 #' 
-#' `bhatk` is one of several `humdrumR` [pitch functions][pitchFunctions].
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read [tonalInterval] and [pitchDeparsing].
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][tonalInterval] and [deparsed][pitchDeparsing].
 #' 
 #' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
 #' @export 
 bhatk <- makePitchTransformer(tint2bhatk, 'bhatk')
 

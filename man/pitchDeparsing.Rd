@@ -7,5 +7,5 @@
 Deparsing pitch information
 }
 \seealso{
-\link{tonalInterval}
+\link{tonalInterval}, \link{tonalIntervalS4}
 }

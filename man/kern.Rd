@@ -16,7 +16,7 @@ kern(
 )
 }
 \arguments{
-\item{x}{(atomic vector) The \code{x} argument can be anything, and}
+\item{x}{(atomic vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
@@ -32,7 +32,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -41,9 +41,9 @@ As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a
 \code{transpose(a = x, b = y, etc.)}.}
 
 \item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-but there is additional, non-pitch information in the strings "beside" the pitch information.
+\emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
-If \code{inPlace = FALSE}, only the pitch output information will be returned.}
+If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
 Kern (\verb{**kern}) is the most common humdrum interpretation for representing "notes" in the style of
@@ -52,15 +52,71 @@ In \link{humdrumR}, the \code{kern} function only relates to the \emph{pitch} pa
 \verb{**kern} \emph{rhythms} are created using the \link{recip} function.
 }
 \details{
-\code{kern} is one of several \code{humdrumR} \link[=pitchFunctions]{pitch functions}.
+The pitch part of \verb{**kern} tokens breakdown tonal pitch information as so:
+\itemize{
+\item \strong{Steps}
+\itemize{
+\item 1: \code{"C"} or \code{"c"}
+\item 2: \code{"D"} or \code{"d"}
+\item 3: \code{"E"} or \code{"e"}
+\item 4: \code{"F"} or \code{"f"}
+\item 5: \code{"G"} or \code{"g"}
+\item 6: \code{"A"} or \code{"a"}
+\item 7: \code{"B"} or \code{"b"}
 }
+\item \strong{Accidentals}
+\itemize{
+\item Flat: \code{"-"}
+\item Sharp: \code{"#"}
+}
+\item \strong{Octave}
+\itemize{
+\item Octave is indicated through the case of the step characters, as well as \emph{repetition} of the step character.
+Uppercase letters are used for octaves below middle-C; lowercase letters for the middle-C octave and higher.
+The middle-C octave, and the octave below it get one character each, with higher and lower octaves repeating that character.
+For example, using \code{C#} as the step value, and relative to the middle-C octave:
+\itemize{
+\item -3: \code{"CCC#"}
+\item -2: \code{"CC#"}
+\item -1: \code{"C#"}
+\item 0: \code{"c#"}
+\item +1: \code{"cc#"}
+\item +2: \code{"ccc#"}
+\item +3: \code{"cccc#"}
+}
+}
+}
+
+Tokens are ordered \code{Step/Octave + Accidentals}, with no separator.
+
+Like all \code{humdrumR} pitch functions, the ways that \code{kern} \link[=tonalInterval]{parses} and \link[=pitchDeparsing]{deparses} tokens
+can be modified to accomodate variations of the standard \verb{**kern} pitch representation.
+}
+\section{In-place parsing}{
+
+
+In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
+for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
+The \code{humdrumR} parser (\code{tonalInterval}) will automatically "pull out" pitch information from within strings, if it can find any
+using the appropriate known regular expressions.
+For example, \code{pitch('4.ee-[')} returns Eb5.
+However, all the pitch functions (like \code{\link[=pitch]{pitch()}} and \code{\link[=kern]{kern()}}) have an option to keep the "extra" information
+and return the result "in place"---i.e., embedded right where it was found in the input string.
+This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
+So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
+(This obviously only works if the input is a string, not a numeric!)
+Note that \code{inPlace = TRUE} will force functions like \code{semit}, which normally return numeric values, to return character strings
+\emph{if} their input is a character string.
+}
+
 \seealso{
-To better understand how this function works, read \link{pitchParsing} and \link{pitchDeparsing}.
+To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
+or how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
 \code{\link{helmholtz}()},
 \code{\link{lilypond}()},
-\code{\link{pitchFunctions}}
+\code{\link{pitch}()}
 
 Other {pitch functions}: 
 \code{\link{bhatk}()},
@@ -69,7 +125,7 @@ Other {pitch functions}:
 \code{\link{interval}()},
 \code{\link{lilypond}()},
 \code{\link{midi}()},
-\code{\link{pitchFunctions}},
+\code{\link{pitch}()},
 \code{\link{semit}()},
 \code{\link{solfa}()}
 }
