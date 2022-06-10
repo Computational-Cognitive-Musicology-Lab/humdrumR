@@ -939,7 +939,37 @@ delta.matrix <- function(x, ..., skip = list(is.na)) {
 
 
 
-
+#' Expand numbers outwards from zero
+#' 
+#' Expand it a complement to the base `R` [rounding functions][base::Round], particularly `trunc`.
+#' Each of the four base `R` functions---`round`, `ceiling`, `floor`, and `trunc`---follow
+#' a different logic in how they round real numbers to ingegers:
+#' 
+#' + `round`: round to *nearest* integer in either direction.
+#' + `floor`: round downward *towards negative infinity*.
+#'   + Negative numbers are rounded to "more negative" numbers.
+#' + `ceiling`: round upward *towards infinity*.
+#'   + Negative numbers are rounded to "less negative" numbers.
+#' + `trunc`: round "inward" *towards* zero.
+#'   + Negative numbers are rounded *up* to "less negative" numbers, but positive
+#'     numbers are still rounded downwards to "less positive" numbers.
+#'     
+#' Just as `ceiling` compliments `floor`, the `humdrumR` function `expand` acts 
+#' as a compliment to `trunc`: `expand` rounds "outward" *away from zero*.
+#' Negative numbers are rounded to "more negative" numbers and positive numbers
+#' are rounded to "more positive" numbers.
+#' 
+#' A table explains better than words:
+#' 
+#' | Call                                   | Returns           |
+#' |:---------------------------------------|:------------------|
+#' | `  round(c(2.9, 3.1, -2.9, -3.1))`     | `c(3, 3, -3, -3)` |
+#' | `  floor(c(2.9, 3.1, -2.9, -3.1))`     | `c(2, 3, -3, -4)` |
+#' | `ceiling(c(2.9, 3.1, -2.9, -3.1))`     | `c(3, 4, -2, -3)` |
+#' | `  trunc(c(2.9, 3.1, -2.9, -3.1))`     | `c(2, 3, -2, -3)` |
+#' | ` expand(c(2.9, 3.1, -2.9, -3.1))`     | `c(3, 4, -3, -4)` |
+#' 
+#' 
 #' @export
 expand <- function(x) {
     .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
@@ -1496,7 +1526,7 @@ checkArg <- function(arg,  argname, callname = NULL,
                      valid, validoptions = NULL, min.length = 1L, max.length = Inf, warnSuperfluous = TRUE, classes = NULL) {
     # arg a argument to check
     # 
-    if (length(sys.calls()) > 6L) return(arg) 
+    if (length(sys.calls()) > 10L) return(arg) 
     
     argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
@@ -1558,6 +1588,13 @@ checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = In
              valid = \(arg) arg >= minval & arg <= maxval,
              ...)
 }
+checkLooseInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
+  checkArg(x, argname = argname, callname = callname,
+           classes = c('numeric', 'integer'), 
+           valid = \(arg) arg >= minval & arg <= maxval & x == round(x),
+           ...)
+}
+
 checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
     checkArg(x, argname = argname, callname = callname,
              classes = c('integer'), 

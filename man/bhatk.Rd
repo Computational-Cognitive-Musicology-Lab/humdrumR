@@ -2,7 +2,7 @@
 % Please edit documentation in R/tonalInterval.R
 \name{bhatk}
 \alias{bhatk}
-\title{\href{https://en.wikipedia.org/wiki/Svara}{Swara} representation}
+\title{Swara representation}
 \usage{
 bhatk(
   x,
@@ -32,7 +32,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -46,7 +46,8 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-\href{https://en.wikipedia.org/wiki/Svara}{Swara} representation
+\href{https://en.wikipedia.org/wiki/Svara}{Swara} are syllabes used to represent scale degrees
+in hindustani music---like solfege.
 }
 \section{In-place parsing}{
 
@@ -67,7 +68,7 @@ Note that \code{inPlace = TRUE} will force functions like \code{semit}, which no
 
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
-or how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
+or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {relative pitch functions}: 
 \code{\link{degree}()},

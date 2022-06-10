@@ -20,7 +20,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -39,7 +39,7 @@ Otherwise, returns a vector of the same length as \code{x}.
 \code{NA} values in the input \code{x} are propagated to the output.
 }
 \description{
-These functions can be used to "translate" or otherwise modify data representing pitch information.
+These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
 }
 \details{
 These pitch functions all work in similar ways, with similar arguments and functionality;
@@ -97,5 +97,5 @@ Note that \code{inPlace = TRUE} will force functions like \code{semit}, which no
 }
 
 \seealso{
-tonalInterval
+To better understand how these functions work, read about how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
 }

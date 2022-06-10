@@ -32,7 +32,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -70,7 +70,7 @@ Note that \code{inPlace = TRUE} will force functions like \code{semit}, which no
 
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
-or how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
+or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
 \code{\link{helmholtz}()},

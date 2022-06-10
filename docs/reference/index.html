@@ -68,13 +68,13 @@
 
       <dl><dt>
           
-          <code><a href="intervalCalculus.html">integrate()</a></code> <code><a href="intervalCalculus.html">sigma()</a></code> <code><a href="intervalCalculus.html">derive()</a></code> <code><a href="intervalCalculus.html">delta()</a></code> <code><a href="intervalCalculus.html">calculus()</a></code> 
+          <code><a href="intervalCalculus.html">sigma()</a></code> <code><a href="intervalCalculus.html">delta()</a></code> 
         </dt>
         <dd>Interval "calculus"</dd>
       </dl></div><div class="section level2">
       
-      <h3 id="pitch">Pitch<a class="anchor" aria-label="anchor" href="#pitch"></a></h3>
-      <p class="section-desc"></p><p>Pitch and tonality classes and functions.</p>
+      <h3 id="pitch-overviews">Pitch overviews<a class="anchor" aria-label="anchor" href="#pitch-overviews"></a></h3>
+      <p class="section-desc"></p><p>These pages overview general concepts in humdrumR pitch:</p>
 
       
     </div><div id="" class="section level2">
@@ -89,14 +89,85 @@
         <dd>humdrumR and pitch</dd>
       </dl><dl><dt>
           
-          <code><a href="pitchFunctions.html">semit()</a></code> <code><a href="pitchFunctions.html">midi()</a></code> <code><a href="pitchFunctions.html">pitch()</a></code> <code><a href="pitchFunctions.html">kern()</a></code> <code><a href="pitchFunctions.html">lilypond()</a></code> <code><a href="pitchFunctions.html">interval()</a></code> <code><a href="pitchFunctions.html">degree()</a></code> <code><a href="pitchFunctions.html">solfa()</a></code> <code><a href="pitchFunctions.html">bhatk()</a></code> 
+          <code><a href="pitchParsing.html">pitchParsing</a></code> 
         </dt>
-        <dd>Manipulate pitch data</dd>
+        <dd>Parsing pitch information</dd>
       </dl><dl><dt>
           
-          <code><a href="tonalInterval.html">tonalInterval</a></code> 
+          <code><a href="pitchDeparsing.html">pitchDeparsing</a></code> 
+        </dt>
+        <dd>Deparsing pitch information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tonalIntervalS4.html">tint()</a></code> <code><a href="tonalIntervalS4.html">is.tonalInterval()</a></code> 
         </dt>
         <dd>Representation of tonal pitch information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="pitchFunctions.html">pitchFunctions</a></code> 
+        </dt>
+        <dd>Translate between pitch representations.</dd>
+      </dl></div><div class="section level2">
+      
+      <h3 id="pitch-functions">Pitch functions<a class="anchor" aria-label="anchor" href="#pitch-functions"></a></h3>
+      <p class="section-desc"></p><p>These functions translate between pitch representations:</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="pitch.html">pitch()</a></code> 
+        </dt>
+        <dd>Scientific pitch representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="degree.html">degree()</a></code> 
+        </dt>
+        <dd>Tonal <a href="https://en.wikipedia.org/wiki/Degree_(music)" class="external-link">scale degree</a> representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="interval.html">interval()</a></code> 
+        </dt>
+        <dd>Tonal (pitch) interval representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="kern.html">kern()</a></code> 
+        </dt>
+        <dd>Kern pitch representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="solfa.html">solfa()</a></code> 
+        </dt>
+        <dd><a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Solfege</a> representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="lilypond.html">lilypond()</a></code> 
+        </dt>
+        <dd>Lilypond pitch representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="helmholtz.html">helmholtz()</a></code> 
+        </dt>
+        <dd>Helmholtz pitch representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="bhatk.html">bhatk()</a></code> 
+        </dt>
+        <dd><a href="https://en.wikipedia.org/wiki/Svara" class="external-link">Swara</a> representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="semit.html">semit()</a></code> 
+        </dt>
+        <dd>Semitone pitch representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="midi.html">midi()</a></code> 
+        </dt>
+        <dd>MIDI pitch representation</dd>
       </dl><dl><dt>
           
           <code><a href="tonalTransformations.html">invert()</a></code> 
@@ -174,6 +245,21 @@
         </dt>
         <dd>-------------------------------------------&gt;             NEEDS DOCUMENTATION             &lt;-------------------------------------------
 Plotting rhythmic symbols in R base graphics</dd>
+      </dl><dl><dt>
+          
+          <code><a href="SOI.html">SOI()</a></code> 
+        </dt>
+        <dd>Onset/Offset interval since beginning.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="measure.html">measure()</a></code> 
+        </dt>
+        <dd>Measure</dd>
+      </dl><dl><dt>
+          
+          <code><a href="metric.html">metric()</a></code> 
+        </dt>
+        <dd>Calculate metric positions from duration data.</dd>
       </dl></div><div class="section level2">
       
       <h3 id="lyrics">Lyrics<a class="anchor" aria-label="anchor" href="#lyrics"></a></h3>
@@ -334,7 +420,7 @@ Standard humdrumR formulae.</dd>
 
       <dl><dt>
           
-          <code><a href="RegexFind.html">`%grepl%`</a></code> <code><a href="RegexFind.html">`%grepi%`</a></code> <code><a href="RegexFind.html">`%grepn%`</a></code> <code><a href="RegexFind.html">`%grepm%`</a></code> <code><a href="RegexFind.html">`%grep%`</a></code> <code><a href="RegexFind.html">`%lgrepl%`</a></code> <code><a href="RegexFind.html">`%lgrepi%`</a></code> <code><a href="RegexFind.html">`%lgrepn%`</a></code> 
+          <code><a href="RegexFind.html">`%grepl%`</a></code> <code><a href="RegexFind.html">`%grepi%`</a></code> <code><a href="RegexFind.html">`%grepn%`</a></code> <code><a href="RegexFind.html">`%grepm%`</a></code> <code><a href="RegexFind.html">`%grep%`</a></code> <code><a href="RegexFind.html">`%!grep%`</a></code> <code><a href="RegexFind.html">`%lgrepl%`</a></code> <code><a href="RegexFind.html">`%lgrepi%`</a></code> <code><a href="RegexFind.html">`%lgrepn%`</a></code> 
         </dt>
         <dd>Match strings against regular expression</dd>
       </dl><dl><dt>

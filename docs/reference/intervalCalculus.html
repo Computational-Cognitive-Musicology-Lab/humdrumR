@@ -63,15 +63,21 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">integrate</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">sigma</span><span class="op">(</span><span class="va">x</span>, <span class="va">skip</span>, <span class="va">boundaries</span><span class="op">)</span>
 
-<span class="fu">sigma</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># S3 method for default</span>
+<span class="fu">sigma</span><span class="op">(</span><span class="va">x</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span>, windows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">derive</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># S3 method for matrix</span>
+<span class="fu">sigma</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">delta</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">delta</span><span class="op">(</span><span class="va">x</span>, <span class="va">skip</span>, <span class="va">boundaries</span><span class="op">)</span>
 
-<span class="fu">calculus</span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">na</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="co"># S3 method for default</span>
+<span class="fu">delta</span><span class="op">(</span><span class="va">x</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span>, windows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, firstNA <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+
+<span class="co"># S3 method for matrix</span>
+<span class="fu">delta</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span></code></pre></div>
     </div>
 
 

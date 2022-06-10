@@ -32,7 +32,7 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=tonalInterval]{pitch parser}.
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
@@ -89,7 +89,7 @@ For example, using \code{C#} as the step value, and relative to the middle-C oct
 
 Tokens are ordered \code{Step/Octave + Accidentals}, with no separator.
 
-Like all \code{humdrumR} pitch functions, the ways that \code{kern} \link[=tonalInterval]{parses} and \link[=pitchDeparsing]{deparses} tokens
+Like all \code{humdrumR} pitch functions, the ways that \code{kern} \link[=pitchParsing]{parses} and \link[=pitchDeparsing]{deparses} tokens
 can be modified to accomodate variations of the standard \verb{**kern} pitch representation.
 }
 \section{In-place parsing}{
@@ -111,7 +111,7 @@ Note that \code{inPlace = TRUE} will force functions like \code{semit}, which no
 
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
-or how pitches are \link[=tonalInterval]{parsed} and \link[=pitchDeparsing]{deparsed}.
+or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
 \code{\link{helmholtz}()},

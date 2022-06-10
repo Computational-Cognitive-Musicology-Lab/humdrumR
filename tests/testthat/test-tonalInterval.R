@@ -165,12 +165,38 @@ test_that('Tonal args work correctly', {
 
 test_that('Pitch arguments return correct values!', {
     # These are used in documentation!:
-    expect_equal(pitch('so'), 'G4')
-    expect_equal(pitch('4.ee-['), 'Eb5')
-    expect_equal(pitch('4.ee-[', inPlace = TRUE), '4.Eb5[')
+    expect_equal(pitch('so'), 
+                 'G4')
+    expect_equal(pitch('4.ee-['), 
+                 'Eb5')
+    expect_equal(pitch('4.ee-[', inPlace = TRUE), 
+                 '4.Eb5[')
     
-    expect_equal(kern('Eflatflat', parse(flat = 'flat')), 'E--')
-    expect_equal(kern('aa_', parse(flat = "_")), "aa-")
-    expect_equal(kern('4.aa_JJ', parse(flat= "_"), inPlace = TRUE), '4.aa-JJ')
-    expect_equal(kern('G flat', parse(flat = 'flat', sep = ' ')), 'G-')
+    expect_equal(kern('Eflatflat', parse(flat = 'flat')), 
+                 'E--')
+    expect_equal(kern('aa_', parse(flat = "_")), 
+                 "aa-")
+    expect_equal(kern('4.aa_JJ', parse(flat= "_"), inPlace = TRUE), 
+                 '4.aa-JJ')
+    expect_equal(kern('G flat', parse(flat = 'flat', sep = ' ')), 
+                 'G-')
+    
+    expect_equal(kern('Fx', parse(doublesharp = 'x')), 
+                 "F##")
+    expect_equal(kern(c('C'), parse(implicitSpecies = TRUE), Key = 'A:'), 
+                 'C#')
+    expect_equal(kern(c('C'), parse(implicitSpecies = TRUE), Key = 'a:'), 
+                 'C')
+    expect_equal(kern(c('C'), parse(implicitSpecies = TRUE), Key = 'a-:'), 
+                 'C-')
+    expect_equal(kern(c('C','C','C'), parse(implicitSpecies = TRUE), Key = c('A:', 'a:', 'a-:')), 
+                 c('C#', 'C', 'C-'))
+    
+    expect_equal(kern(c("D#", "E", "D", "E", "Dn", "C", "D"), parse(memory = TRUE)),
+                 c("D#", "E", "D#", "E", "D", "C", "D"))
+    expect_equal(kern('C5', parse(octave.integer = TRUE, octave.shift = 4)),
+                 'cc')
+    
+    expect_equal(pitch(c("c,", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",")),
+                 c('C2', 'C3', 'C4'))
 })

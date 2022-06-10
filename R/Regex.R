@@ -363,10 +363,10 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
 
 ####. REs for tonalIntervals ####
 
-makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), steps.sign = FALSE, ...)  {
+makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...)  {
     if (is.null(step.labels)) return('[1-9][0-9]*')
     
-    if (steps.sign) step.labels <- c(tolower(step.labels), toupper(step.labels))
+    if (step.signed) step.labels <- c(tolower(step.labels), toupper(step.labels))
     
     
         # captureUniq(step.labels, zero = FALSE)
@@ -376,9 +376,9 @@ makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ste
 
 }
 
-makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', ...) {
+makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', doublesharp = NULL, doubleflat = NULL, ...) {
     
-    paste0(natural,'?', captureUniq(c(sharp, flat)))
+    paste0(natural,'?', captureUniq(c(sharp, flat, doublesharp, doubleflat)))
 }
 
 makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {
@@ -403,14 +403,14 @@ makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities
 
 makeRE.kern <- function(parts = c("step", "species"), 
                         step.labels = unlist(lapply(1:50, strrep, x = c('C', 'D', 'E', 'F', 'G', 'A', 'B'))),
-                        steps.sign = TRUE,
+                        step.signed = TRUE,
                         qualities = FALSE, 
                         octave.integer = FALSE,
                         
                         ...) {
     
     makeRE.tonalChroma(parts, step.labels = step.labels, 
-                       steps.sign = steps.sign, 
+                       step.signed = step.signed, 
                        qualities = qualities,
                        octave.integer = octave.integer, ..., regexname = 'kern')
     
@@ -422,7 +422,7 @@ makeRE.lilypond <- partialApply(makeRE.tonalChroma, step.labels = c('c', 'd', 'e
                                 octave.integer = FALSE, up = "'", down = ",")
 
 makeRE.helmholtz <- partialApply(makeRE.tonalChroma, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                                 steps.sign = TRUE,
+                                 step.signed = TRUE,
                                  flat = 'b', octave.integer = FALSE, up = "'", down = ",")
 
 makeRE.sciPitch <- partialApply(makeRE.tonalChroma, octave.offset = 4L, octave.integer = TRUE, flat = 'b')
@@ -480,7 +480,7 @@ makeRE.alterations <- function(..., qualities = FALSE) {
 
     
     makeRE <- partialApply(makeRE.tonalChroma,
-                       parts = c("species", "step"), steps.sign = FALSE, flat = 'b',
+                       parts = c("species", "step"), step.signed = FALSE, flat = 'b',
                        step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
                        regexname = 'alterations')
     
@@ -495,11 +495,11 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
     if (collapse && "mode" %in% parts) {
         REs <- makeRE.tonalChroma(parts = parts[parts %in% c("step", "species")],
                                   step.labels = toupper(step.labels), qualities = FALSE,
-                                  steps.sign = FALSE, collapse = FALSE, 
+                                  step.signed = FALSE, collapse = FALSE, 
                                   ...)
         res <- makeRE.tonalChroma(parts = parts[parts %in% c("step", "species")],
                                   step.labels = tolower(step.labels), qualities = FALSE,
-                                  steps.sign = FALSE, collapse = FALSE,
+                                  step.signed = FALSE, collapse = FALSE,
                                   ...)
         
         REs['colon'] <- res['colon'] <- ':?'
@@ -515,7 +515,7 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
     } else {
         REs <- makeRE.tonalChroma(parts = parts[parts %in% c("step", "species")],
                                   step.labels = step.labels, qualities = FALSE,
-                                  steps.sign = TRUE, collapse = FALSE,
+                                  step.signed = TRUE, collapse = FALSE,
                                   ...)
         REs['colon'] <-  ':?'
         REs['star']  <- '\\*?'

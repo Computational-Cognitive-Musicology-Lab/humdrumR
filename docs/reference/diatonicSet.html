@@ -125,7 +125,7 @@ from which it inherits a lot of useful "vector-like" behaviors/functionality.</p
 <p>The constructor function <code>dset</code> can be used to create <code>diatonicSets</code> directly.
 The three arguments corespond to the three slots: <code>root</code>, <code>mode</code>, and <code>alteration</code>.
 All inputs will be coerced to match in length.
-The <code>root</code> argument will attempt to coerce character strings to <a href="tonalInterval.html">tonalIntervals</a>, and use their <code>LO5th</code> value as the root.</p>
+The <code>root</code> argument will attempt to coerce character strings to <a href="pitchParsing.html">tonalIntervals</a>, and use their <code>LO5th</code> value as the root.</p>
 <p>By default, the <a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a> method, and thus (via <a href="struct.html">struct</a>) the <a href="https://rdrr.io/r/methods/show.html" class="external-link">show</a> method,
 for diatonicSets call key().
 Thus, if you return a <code>diatonicSet</code> on the command line (or call <a href="https://rdrr.io/r/base/print.html" class="external-link">print</a> one one),
