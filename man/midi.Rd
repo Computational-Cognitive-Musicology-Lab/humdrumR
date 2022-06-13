@@ -9,9 +9,9 @@ midi(
   ...,
   generic = FALSE,
   simple = FALSE,
-  octave.contour = FALSE,
-  parseArgs = list(),
+  octave.relative = FALSE,
   transposeArgs = list(),
+  parseArgs = list(),
   inPlace = FALSE
 )
 }
@@ -32,13 +32,13 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
-As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
-\code{parse(a = x, b = y, etc.)}.}
-
 \item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
 As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
 \code{transpose(a = x, b = y, etc.)}.}
+
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
+\code{parse(a = x, b = y, etc.)}.}
 
 \item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
@@ -75,15 +75,21 @@ Other {atonal pitch functions}:
 \code{\link{semit}()}
 
 Other {pitch functions}: 
+\code{\link{accidental}()},
 \code{\link{bhatk}()},
 \code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{interval}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
+\code{\link{octave}()},
 \code{\link{pitch}()},
+\code{\link{quality}()},
 \code{\link{semit}()},
-\code{\link{solfa}()}
+\code{\link{solfa}()},
+\code{\link{solfg}()},
+\code{\link{step}()},
+\code{\link{tonh}()}
 }
 \concept{{atonal pitch functions}}
 \concept{{pitch functions}}

@@ -7,11 +7,11 @@
 expand(x)
 }
 \description{
-Expand it a complement to the base \code{R} \link[base:Round]{rounding functions}, particularly \code{trunc}.
-Each of the four base \code{R} functions---\code{round}, \code{ceiling}, \code{floor}, and \code{trunc}---follow
-a different logic in how they round real numbers to ingegers:
+Expand is a complement to the base \code{R} \link[base:Round]{rounding functions}, particularly \code{trunc}.
 }
 \details{
+Each of the four base \code{R} functions---\code{round}, \code{ceiling}, \code{floor}, and \code{trunc}---follow
+a different logic in how they round real numbers to ingegers:
 \itemize{
 \item \code{round}: round to \emph{nearest} integer in either direction.
 \item \code{floor}: round downward \emph{towards negative infinity}.

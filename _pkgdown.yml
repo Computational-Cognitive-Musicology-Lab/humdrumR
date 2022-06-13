@@ -122,5 +122,7 @@ reference:
 - subtitle: "Numeric values"
   contents:
   - rational
+  - expand
+- subtitle: "Miscallaneus"
+  contents:
   - humdrumRroot
-

@@ -357,7 +357,13 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
         
     }
     
-    paste(REs, collapse = if (is.null(sep)) {if (parse.exhaust) '' else '.*'} else {sep}) 
+    if (!parse.exhaust && length(REs) > 1L) {
+      Reduce(\(head, last) paste0(head, sep,  '(.*(', last, '))'), REs, right = TRUE )
+    } else {
+      paste(REs, collapse = if (is.null(sep)) "" else sep)
+    }
+    
+  
     
 }
 
@@ -378,7 +384,9 @@ makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ste
 
 makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', doublesharp = NULL, doubleflat = NULL, ...) {
     
-    paste0(natural,'?', captureUniq(c(sharp, flat, doublesharp, doubleflat)))
+ if (nchar(natural) > 1L)  natural <-  paste0('(', natural, ')') 
+  
+  paste0(natural, '?', captureUniq(c(sharp, flat, doublesharp, doubleflat)))
 }
 
 makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {
@@ -389,14 +397,17 @@ makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) 
     if (octave.integer) '-?[0-9]+' else captureUniq(c(up, down))
 }
 
-makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities = FALSE, collapse = TRUE, sep = NULL, ..., regexname = 'tonalChroma'){
+makeRE.tonalChroma <- function(parts = c("step", "species", "octave"), qualities = FALSE, collapse = TRUE, 
+                               parse.exhaust = TRUE,
+                               sep = NULL, ..., regexname = 'tonalChroma'){
     REs <-  list(sign    = if ('sign' %in% parts)       '[-+]?',
                  step    = if ("step" %in% parts)       makeRE.steps(...),
                  species = if ("species" %in% parts) {if (qualities) makeRE.qualities(...) else makeRE.accidentals(...)},
                  octave  = if ("octave" %in% parts)    makeRE.contours(...)
                  )[parts]
     
-    if (collapse) setNames(cREs(REs, sep = sep), regexname) else REs
+    
+    if (collapse) setNames(cREs(REs, sep = sep, parse.exhaust = parse.exhaust), regexname) else REs
     
     
 }
@@ -418,12 +429,24 @@ makeRE.kern <- function(parts = c("step", "species"),
 
 
 makeRE.lilypond <- partialApply(makeRE.tonalChroma, step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                                sharp = 'is', flat = 'es',
+                                sharp = 'is', flat = 'es', regexname = 'lilypond', 
                                 octave.integer = FALSE, up = "'", down = ",")
 
 makeRE.helmholtz <- partialApply(makeRE.tonalChroma, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                                 step.signed = TRUE,
+                                 step.signed = TRUE, regexname = 'helmholtz', 
                                  flat = 'b', octave.integer = FALSE, up = "'", down = ",")
+
+makeRE.tonh <- function(parts = c('step', 'species', 'octave'), flat = 'es',
+                        step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+  
+  REs <- makeRE.tonalChroma(parts = parts, flat = flat, step.labels = step.labels, octave.integer = TRUE, collapse = FALSE)
+  
+  REs$step <- paste0('(', REs$step, '|[HS])')
+  REs$species <- paste0('(', REs$species, '|s)')
+  
+  setNames(cREs(REs), 'tonh')
+  
+}
 
 makeRE.sciPitch <- partialApply(makeRE.tonalChroma, octave.offset = 4L, octave.integer = TRUE, flat = 'b')
 
@@ -452,6 +475,11 @@ makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer 
     
     if (collapse) setNames(cREs(REs), 'solfa') else REs
 }
+
+makeRE.solfg <- partialApply(makeRE.tonalChroma, parts = c('step', 'species', 'octave'),
+                             step.labels = c('do', 're', 'mi', 'fa', 'so', 'la', 'ti'),
+                             flat = '~b', doubleflat = '~bb', natural = '~n', sharp = '~d', doublesharp = '~dd',
+                             octave.integer = TRUE, regexname = 'solfg')
 
 makeRE.bhatk <- function(parts = c("step", "octave"), up = "'", down = ',', 
                          step.labels = c('S', 'r', 'R', 'G', 'g', 'M', 'm', 'P', 'D', 'd', 'N', 'n'),

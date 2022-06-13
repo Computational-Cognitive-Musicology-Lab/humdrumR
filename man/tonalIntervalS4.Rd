@@ -12,7 +12,7 @@ tint(
   cent = numeric(length(octave)),
   partition = FALSE,
   Key = NULL,
-  roundContour = floor
+  octave.round = floor
 )
 
 is.tonalInterval(x)

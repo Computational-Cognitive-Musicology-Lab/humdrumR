@@ -2,16 +2,16 @@
 % Please edit documentation in R/tonalInterval.R
 \name{solfa}
 \alias{solfa}
-\title{\href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation}
+\title{Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation}
 \usage{
 solfa(
   x,
   ...,
   generic = FALSE,
   simple = FALSE,
-  octave.contour = FALSE,
-  parseArgs = list(),
+  octave.relative = FALSE,
   transposeArgs = list(),
+  parseArgs = list(),
   inPlace = FALSE
 )
 }
@@ -32,13 +32,13 @@ For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
 (The special \code{octave.round} argument can be used to modify this behavior).}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
-As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
-\code{parse(a = x, b = y, etc.)}.}
-
 \item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
 As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
 \code{transpose(a = x, b = y, etc.)}.}
+
+\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
+As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
+\code{parse(a = x, b = y, etc.)}.}
 
 \item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
@@ -46,7 +46,7 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-\href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation
+Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation
 }
 \section{In-place parsing}{
 
@@ -75,6 +75,7 @@ Other {relative pitch functions}:
 \code{\link{interval}()}
 
 Other {pitch functions}: 
+\code{\link{accidental}()},
 \code{\link{bhatk}()},
 \code{\link{degree}()},
 \code{\link{helmholtz}()},
@@ -82,8 +83,13 @@ Other {pitch functions}:
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{midi}()},
+\code{\link{octave}()},
 \code{\link{pitch}()},
-\code{\link{semit}()}
+\code{\link{quality}()},
+\code{\link{semit}()},
+\code{\link{solfg}()},
+\code{\link{step}()},
+\code{\link{tonh}()}
 }
 \concept{{pitch functions}}
 \concept{{relative pitch functions}}

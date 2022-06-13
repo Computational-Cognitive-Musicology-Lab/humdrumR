@@ -63,19 +63,21 @@ For example, the value \code{2.0} will be interpreted as an octave (two to one r
 
 (See the "Atonal parsing" section below to learn how atonal data (semitones or frequency/ratios) is interpreted as \emph{tonal} data---i.e., how enharmonic spelling is decided.)
 }
-\section{Tonal Parsing (Character strings)}{
+\section{Tonal Parsing (character strings)}{
 The most useful tool for humdrum data is parsing tonal pitch representations encoded as \code{character} strings.
 (This includes character tokens with pitch information embedded alongside other information; Details below.)
 The pitch parser (\code{tonalInterval}) uses either regular-expressions or exclusive interpretations to decide how to parse an input string.
-There are eight regular-expression patterns for pitch that \code{tonalInterval} knows how to parse automatically:\tabular{lrr}{
+There are ten regular-expression patterns for pitch that \code{tonalInterval} knows how to parse automatically:\tabular{lrr}{
    Representation \tab Exclusive \tab Example \cr
    \href{https://www.humdrum.org/rep/kern/index.html}{Kern} \tab **kern \tab \verb{ee-} \cr
    \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} \tab **pitch \tab \code{Eb5} \cr
    \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Helmholtz pitch} \tab none \tab \verb{eb'} \cr
    \href{https://lilypond.org/doc/v2.22/Documentation/notation/pitches}{Lilypond pitch} \tab none \tab \verb{ees'} \cr
+   \href{https://www.humdrum.org/rep/Tonh/index.html}{German pitch} notation \tab **tonh \tab \code{S5} \cr
    \href{https://en.wikipedia.org/wiki/Interval_(music)}{Interval} \tab **hint/**mint/**int \tab \code{+m3} \cr
    \href{https://en.wikipedia.org/wiki/Degree_(music)}{Scale degree} \tab **deg \tab \code{b3} \cr
-   \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} \tab **solfa \tab \code{me} \cr
+   Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} \tab **solfa \tab \verb{^me} \cr
+   Fixed-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} \tab **solfg \tab \code{mi~b5} \cr
    \href{https://en.wikipedia.org/wiki/Svara}{Swara} \tab **bhatk \tab \code{g} \cr
 }
 
@@ -149,10 +151,21 @@ The following "advanced" parsing arguments are available (read all the details a
 }
 \item \strong{String parsing}
 \itemize{
+\item \code{parts}
 \item \code{parse.exhaust}
 \item \code{sep}.
 }
 }
+
+These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}, or in a call to \code{tonalInterval} itself.
+To use them with \code{tonalInterval} just specify them directly as arguments;
+to use them with other \link[=pitchFunctions]{pitch functions}, you must put them in the \code{parseArgs} argument, or use the "syntactic sugar" form (\code{parse(...)}).
+
+Each Exclusive/Regex-dispatch combo (above) is associated with default parsing arguments.
+For example, if you set \code{Exclusive = 'kern'} or just use data that \emph{look} like \verb{**kern}, the \code{flat} argument is set to \code{"-"},
+However, if you had, for example, input data that looked like \verb{**kern} \strong{except} it used a different flat symbol, like \code{"_"}, you could modify the parser:
+\code{kern("EE_", parse(flat = "_"))}
+This overrides the default value for \verb{**kern}---notice, that it \emph{also} updates the \verb{**kern} regular expression accordingly, so it works exactly the same as the standard \code{\link[=kern]{kern()}} function.
 \subsection{Steps}{
 
 Any representation of "tonal" pitch information will include a representation of \emph{diatonic steps}.
@@ -300,6 +313,8 @@ Though all the examples here use accidentals, these arguments all have the same 
 
 The final piece of information encoded in most (but not) all pitch representations is an indication of the "complex pitch"---
 incorporating octave information.
+In \code{humdrumR} octaves are \emph{always} defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
+This mainly comes up with regards to Cb and B#: Cb4 is a semitone below middle-C; B#3 is enharmonically the same as middle-C.
 \subsection{Integer Octaves}{
 
 The simplest way octave information can be encoded is as an integer value, as in \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch}.
@@ -309,14 +324,14 @@ However, if a different octave is used as the central octave, you can specify th
 
 To illustrate, the default \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} parser used the arguments:
 \itemize{
-\item \verb{kern('C5', parse(octave.integer = TRUE, octave.shift = 4)}
+\item \verb{kern('C5', parse(octave.integer = TRUE, octave.offset = 4)}
 \itemize{
 \item Returns \code{"cc"} (the octave above middle C).
 }
 }
 }
 
-\subsection{Non-integer Octaves}{
+\subsection{Non-integer Octave Markers}{
 
 If \code{octave.integer = FALSE}, the \code{humdrumR} parser instead looks for three possible symbols to indicate octave information.
 These symbols are controlled using the \code{up}, \code{down}, and \code{same} (character, length 1) arguments.
@@ -336,41 +351,128 @@ So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
 
 \subsection{Octave "Rounding"}{
 
-In some situations, pitch data might approach the "boundaries" between octaves a little differently.
+In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
 In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
 between B (degree 7) and C (degree 1).
 However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).
 In this case, the "octave boundary" is \emph{centered} around the unison (or middle-C), rather than starting \emph{at} middle-C/unison.
 If our data was represented this way, we could use the \code{octave.round} argument; \code{octave.round} must be a rounding \emph{function},
 either \link[base:Round]{round, floor, ceiling, trunc}, or \link{expand}.
+These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
+The default behavior for most pitch representations is \code{octave.round = floor}: each scale step is rounded downwards to the nearest C.
+So B is associated with the C 7 steps below it.
+If, on the other hand, \code{octave.round = round}, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C \emph{above} them.
+Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavior we mentioned earlier!
+
+When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a complex interval is represented.
+For example, we might think of a ascending major 12th as being an ascending octave \emph{plus} a ascending perfect 5th: ** +P8 + P5**.
+\strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
+The following table illustrates how different \code{octave.round} arguments "partition" complex intervals into simple parts and octaves:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
+   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
+   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
+   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
+   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+}
+
+
+Notice that, if \code{octave.floor} is being used, all simple intervals are represented as ascending.
+
+When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
+The following table illustrates:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
+   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
+   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
+   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
+   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
+}
+
+}
+
+\subsection{Absolute or Relative (contour) Octave}{
+
+In some notation encoding schemes, the "octave" of each note is interpreted \emph{relative} the previous note, rather than any absolute reference.
+The most prominent system is Lilypond's \href{https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry}{relative octave entry} style.
+This style is often used in combination with scale degree representations---as in the \href{http://rockcorpus.midside.com/melodic_transcriptions.html}{RS200} corpus.
+For example, a data set might say \verb{Do Re Mi vSo La Ti Do}, with the \code{"v"} indicating a jump down to \code{So}.
+To activate relative-octave parsing, set \code{octave.relative = TRUE}---alternatively, you can use \code{octave.absolute = FALSE}, which is equivalent.
+
+In a relative-octave data, we assume that octave indications indicate a shift relative to the previous note.
+This would usually be used in combination with octave markers like \code{"^"} (up) or \code{"v"} (down).
+Different combinations of \code{octave.round} allow us to parse different behaviors:
 \itemize{
-\item \strong{Octave}
-\itemize{
-\item \code{octave.integer}
-\item \code{up}, \code{down}, \code{same}
-\item \code{octave.offset}
-\item \code{octave.round}
-\item \code{octave.relative}, \code{octave.absolute}
-}
-\item \strong{String parsing}
-\itemize{
-\item \code{parse.exhaust}
-\item \code{sep}. If different pieces of information in the input string are separated by a delimeter, this can indicated here.
-For example, if the input string looks like \code{"E flat"}, you could specify \code{sep = " "} and \code{flat = "flat"}.
+\item If \code{octave.round = round}, a \code{same} marker (or no marker) indicates that the note is the pitch \emph{closest} to the previous pitch.
+Octave markers indicate alterations to this assumption.
+As always, this is based on scale steps, not semitones!
+Any fourth is "closer" than any fifth, regardless of their quality: So \emph{C F#} is ascending and \emph{C Gb} is descending!
+A ascending diminished 5th would be written \code{C ^Gb}---with \verb{up = ^}.
+\item If \code{octave.round = floor}, a \code{same} marker (or no marker) indicates that the note is in the octave above the previous pitch.
+Octave markers indicate alterations to this assumption.
+With this setting, going from \emph{C} down to \emph{B} always requires a \code{down} mark.
 }
 }
 
-These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}, or in \code{tonalInterval} itself.
-To use them with \code{tonalInterval} just specify them directly as arguments;
-to use them with other \link[=pitchFunctions]{pitch functions}, you must put them in the \code{parseArgs} argument, or use the "syntactic sugar" form (\code{parse(...)}).
+}
 
-Each Exclusive/Regex-dispatch combo (above) is associated with default parsing arguments.
-For example, if you set \code{Exclusive = 'kern'} or just use data that \emph{look} like \verb{**kern}, the \code{flat} argument is set to \code{"-"},
-However, if you had, for example, input data that looked like \verb{**kern} \strong{except} it used a different flat symbol, like \code{"_"}, you could modify the parser:
-\code{kern("EE_", parse(flat = "_"))}
-This overrides the default value for \verb{**kern}---notice, that it \emph{also} updates the \verb{**kern} regular expression accordingly, so it works exactly the same as the standard \code{\link[=kern]{kern()}} function.
+\subsection{String Parsing}{
+
+In addition to the three types of \emph{musical} parsing considerations reviewed above (steps, species, and octaves), there are also some general
+string-parsing issues that we can consider/control.
+\subsection{Parts and Order}{
+
+So far (aobve) we've discussed various ways that pitch information (step, species, and octave) can be encoded, and how
+the \code{humdrumR} parser can be modified to handle different options.
+However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
+The \code{parts} argument can be specifyied to indicate this.
+The \code{parts} argument must be a \code{character} vector of length 1--3.
+The characters in the must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
+The presense of any of these strings in the \code{parts} vector indicate that that information should be parsed.
+The \emph{order} of the strings indicates what order the pieces of pitch information are encoded in input strings.
+
+To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
+quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
+We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species", "octave")))} and sure enough we'd get the correct parse!
+
+One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components:
+The most common case would be a comma or space.
+For example, we could use a parse command like this: \code{kern("E flat 5", parse(flat = "flat", sep = " "))}.
 }
 
 }
 }
 
+\section{Atonal Parsing (numeric)}{
+The \code{humdrumR} pitch parser (\code{tonalInterval()}) will interpret numeric inputs as atonal pitch information.
+Specifically, real numbers (R \link[base:double]{doubles or "numeric"}) are interpreted as frequencies, while \link[base:integer]{integers}
+are interpreted as \href{https://en.wikipedia.org/wiki/Semitone}{semitones}.
+Remember, to explicitly make integers in R, you need to type \code{L} after numbers---like \code{3L}---or call the function
+\code{as.integer}---like \code{as.integer(3)}.
+}
+
+\examples{
+
+tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII'))
+
+kern('E x 5', parse(doublesharp = 'x', sep = ' '))
+
+}

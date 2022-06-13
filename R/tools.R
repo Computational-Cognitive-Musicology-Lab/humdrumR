@@ -941,7 +941,9 @@ delta.matrix <- function(x, ..., skip = list(is.na)) {
 
 #' Expand numbers outwards from zero
 #' 
-#' Expand it a complement to the base `R` [rounding functions][base::Round], particularly `trunc`.
+#' Expand is a complement to the base `R` [rounding functions][base::Round], particularly `trunc`.
+#' 
+#' @details 
 #' Each of the four base `R` functions---`round`, `ceiling`, `floor`, and `trunc`---follow
 #' a different logic in how they round real numbers to ingegers:
 #' 
@@ -1555,7 +1557,7 @@ checkArg <- function(arg,  argname, callname = NULL,
             } else {
                 case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
                 illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
-                legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+                legalNames <-  paste0(glue::glue_collapse(quotemark(validoptions), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
                 
                 message <- list(callname, illNames, case, 'Valid options are ', legalNames)
                 
@@ -1618,6 +1620,21 @@ checkTFs <- function(args = list(), ..., callname = NULL) {
 
 checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
     if (!is.humdrumR((x))) .stop("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object.")      
+}
+
+checkFunction <- function(x, argname, callname) {
+  label <- rlang::as_label(rlang::enexpr(x))
+  
+  message <- "In the call {callname}({argname} = {label}), the argument {argname}"
+  
+  if (!is.function(x)) .stop(message, " must be a function!")
+  
+  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical, 
+                 y = x))) {
+    .stop(message, 
+          " must be one of the five 'rounding' functions: round, floor, celing, trunc, or expand.")
+  }
+  
 }
 
 checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
