@@ -200,7 +200,7 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(pitch(c("c,", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",")),
                  c('C2', 'C3', 'C4'))
     
-    expect_equal(interval(c("2M", "5P"), parse(parts = c("step", "species", "octave"))), c('+M2', "+P5"))
+    expect_equal(interval(c("2M", "5P"), parse(parts = c("step", "species"))), c('+M2', "+P5"))
     
     expect_equal(kern("E flat 5", parse(flat = "flat", sep = " ")), 'ee-')
     

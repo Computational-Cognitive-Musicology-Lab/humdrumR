@@ -862,6 +862,7 @@ tint2interval <- function(x, directed = TRUE, ...) {
                        step.labels = 1L:7L,
                        parts = c("species", "step", "octave"),
                        complex = TRUE, keyed = FALSE, qualities = TRUE, 
+                       step.complex = TRUE,
                        octave.integer = TRUE, octave.relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
@@ -1331,7 +1332,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., `M2` and `P5`---except the 
 #' quality appears *after* the step---e.g., `2M` and `5P`.
-#' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species", "octave")))` and sure enough we'd get the correct parse!
+#' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species")))` and sure enough we'd get the correct parse!
 #' 
 #' ----
 #' 
