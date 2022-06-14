@@ -386,7 +386,10 @@ makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ste
 }
 
 makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', doublesharp = NULL, doubleflat = NULL, ...) {
-    
+  
+ if (flat %in% c('+', '?')) flat <- paste0('\\', flat)  
+ if (sharp %in% c('+', '?')) sharp <- paste0('\\', sharp)  
+  
  if (nchar(natural) > 1L)  natural <-  paste0('(', natural, ')') 
   
   paste0(natural, '?', captureUniq(c(sharp, flat, doublesharp, doubleflat)))

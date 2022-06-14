@@ -1769,7 +1769,7 @@ degree2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octa
                            keyed = FALSE, sep = c("", "/"),
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                            octave.integer = TRUE, octave.offset = 4L,
-                           flat = '-', sharp = "\\+")
+                           flat = '-', sharp = "+")
   
 deg2tint <- partialApply(tonalChroma2tint, parts = c("octave", "step", "species"), 
                          qualities = FALSE, 
@@ -1777,7 +1777,7 @@ deg2tint <- partialApply(tonalChroma2tint, parts = c("octave", "step", "species"
                          step.labels = c('1', '2', '3', '4', '5', '6', '7'),
                          octave.integer = FALSE, octave.relative = TRUE, octave.round = expand,
                          up = '^', down = 'v',
-                         flat = '-', sharp = "\\+")
+                         flat = '-', sharp = "+")
 
 solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
   syl <- stringr::str_extract(str, '[fdsrlmt][aeio]')
@@ -1884,7 +1884,8 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('lilypond' ,              makeRE.lilypond,    lilypond2tint),
                                                  list('helmholtz' ,             makeRE.helmholtz,   helmholtz2tint),
                                                  list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
-                                                 list('deg',                    makeRE.degree,      degree2tint),
+                                                 list('degree',                 makeRE.degree,      degree2tint),
+                                                 list('deg',                    makeRE.deg,         deg2tint),
                                                  list('solfa',                  makeRE.solfa,       solfa2tint),
                                                  list('solfg',                  makeRE.solfg,       solfg2tint),
                                                  list('bhatk',                  makeRE.bhatk,       bhatk2tint),
