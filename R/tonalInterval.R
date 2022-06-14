@@ -155,7 +155,7 @@ setMethod("initialize",
 tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, octave.round = floor) {
 
     if (missing(octave) || is.null(octave)) {
-      octave <- -floor(tint2semit(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12)
+      octave <- -floor(round(tint2semits(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12, 10))
     }
     
   
@@ -247,7 +247,7 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 is.simple <- function(tint) UseMethod('is.simple')
 
 #' @export
-is.simple.tonalInterval <- function(tint) abs(tint2semit(tint)) < 12
+is.simple.tonalInterval <- function(tint) abs(tint2semits(tint)) < 12
 
 
 
@@ -259,7 +259,7 @@ order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
               
               x <- do.call('c', list(x, ...))
-              order(tint2semit(x), 
+              order(tint2semits(x), 
                     na.last = na.last,
                     decreasing = decreasing,
                     method = method
@@ -268,17 +268,17 @@ order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
           
 setMethod('>', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-             tint2semit(e1) > tint2semit(e2)
+             tint2semits(e1) > tint2semits(e2)
           })
 
 setMethod('>=', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
-              tint2semit(e1) >= tint2semit(e2)
+              tint2semits(e1) >= tint2semits(e2)
           })
 
 setMethod('Summary', signature = c('tonalInterval'),
           function(x) {
-              semit2tint(callGeneric(tint2semit(x)))
+              semits2tint(callGeneric(tint2semits(x)))
           })
 
 setMethod('abs', signature = c('tonalInterval'),
@@ -290,7 +290,7 @@ setMethod('abs', signature = c('tonalInterval'),
 
 setMethod('sign', signature = c('tonalInterval'),
           function(x) {
-              sign(tint2semit(x))
+              sign(tint2semits(x))
           })
 
 
@@ -460,7 +460,7 @@ tint2octave <- function(x,
 }
 
 tint2sign <- function(x, octave.offset = 0L, ...) {
- sign(tint2semit(x) + octave.offset * 12L)
+ sign(tint2semits(x) + octave.offset * 12L)
 }
 
 
@@ -476,7 +476,7 @@ octave.kernstyle <- function(str, octn, step.case = TRUE) {
 
 LO5thNscaleOct2tint <- function(LO5th, scaleOct) {
   tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
-  octshift <- tint2semit(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
+  octshift <- tint2semits(tintWith0Octave %% tint(-11L, 7L)) %/% 12L
   
   tint(scaleOct - octshift, LO5th)
 }
@@ -485,7 +485,7 @@ LO5thNsciOct2tint <- function(LO5th, sciOct) LO5thNscaleOct2tint(LO5th, sciOct -
 
 LO5thNcentralOct2tint <- function(LO5th, centralOct) {
   tintWith0Octave <- tint(integer(length(LO5th)), LO5th)
-  octshift <- round(tint2semit(tintWith0Octave %% tint(-11L, 7L)) / 12L)
+  octshift <- round(tint2semits(tintWith0Octave %% tint(-11L, 7L)) / 12L)
   
   tint(centralOct - octshift, LO5th)
 }
@@ -498,25 +498,31 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semit <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
+tint2semits <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
 
   
   if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
   
   if (!specific) x <- tintPartition_specific(x, Key = Key, ...)$Generic
         
-  semit <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
+  semits <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
-  if (!complex) semit <- semit %% 12L
+  if (!complex) semits <- semits %% 12L
 
-  semit
+  semits
   
 }
+
 
 tint2midi <- function(x, ...) {
-  tint2semit(x, ...) + 60L
+  tint2semits(x, ...) + 60L
 }
 
+tint2cents <- function(x, ...) {
+  double <- tint2double(x, ...)
+  
+  log(double, 2^(1/12)) * 100
+}
 
 #### Frequency ####
 
@@ -544,7 +550,7 @@ tint2rational <-  function(x, tonalHarmonic = 3L) {
 
 tint2fraction <- function(x, tonalHarmonic = 3) as.fraction(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
 
-tint2double <-  function(x, tonalHarmonic = 2^(19/12)) {
+tint2double <-  function(x, tonalHarmonic = 2^(19/12), ...) {
   LO5th <- x@Fifth
   oct   <- x@Octave
   cent  <- x@Cent
@@ -972,8 +978,8 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #'
 #' The underlying parser used by all `humdrumR` [pitch functions][pitchFunctions] can be called explicitly using the function `tonalInterval`.
 #' The `tonalInterval` parser will attempt to parse any input information into a [tonalInterval][tonalIntervalS4] object---a back-end pitch representation that you probably don't need to care about!
-#' When you use one of the main [pitch functions][pitchFunctions], like [kern()] or [semit()], the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immediately [deparsed][pitchDeparsing]
-#' to the representation you asked for (e.g., `**kern` or `**semit`).
+#' When you use one of the main [pitch functions][pitchFunctions], like [kern()] or [semits()], the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immediately [deparsed][pitchDeparsing]
+#' to the representation you asked for (e.g., `**kern` or `**semits`).
 #' 
 #' The pitch parser (`tonalInterval`) is a generic function, meaning it can accept `numeric` or `character`-string input:
 #' 
@@ -1426,7 +1432,7 @@ atonal2tint <- function(tint, accidental.melodic, Key = NULL, ...) {
   tint
 }
 
-semit2tint <- function(n, accidental.melodic = FALSE, ...) {
+semits2tint <- function(n, accidental.melodic = FALSE, ...) {
           wholen <- as.integer(c(n))
           
           pitchclass <- wholen %% 12L
@@ -1444,7 +1450,7 @@ semit2tint <- function(n, accidental.melodic = FALSE, ...) {
 
 
 midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
-  semit2tint(n - 60L, accidental.melodic, Key)
+  semits2tint(n - 60L, accidental.melodic, Key)
 }
 
 
@@ -1864,7 +1870,7 @@ tonalInterval.rational <- rational2tint
 tonalInterval.fraction <- fraction2tint
 #' @rdname pitchParsing
 #' @export
-tonalInterval.integer  <- semit2tint
+tonalInterval.integer  <- semits2tint
 
 
 
@@ -1891,7 +1897,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 #### setAs tonal interval ####
 
-setAs('integer', 'tonalInterval', function(from) semit2tint(from))
+setAs('integer', 'tonalInterval', function(from) semits2tint(from))
 setAs('numeric', 'tonalInterval', function(from) double2tint(from))
 setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %<-matchdim% from)
@@ -1899,7 +1905,7 @@ setAs('logical', 'tonalInterval', function(from) tint(rep(NA, length(from))) %<-
 
 setMethod('as.rational', 'tonalInterval', tint2rational)
 setMethod('as.double', 'tonalInterval', tint2double)
-setMethod('as.integer', 'tonalInterval', tint2semit)
+setMethod('as.integer', 'tonalInterval', tint2semits)
 
 
 
@@ -1935,7 +1941,7 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 #'     + [bhatk] (hindustani swara)
 #' + **Atonal pitch representations**
 #'   + *Musical (non-tonal) pitch representations*
-#'     + [semit]
+#'     + [semits]
 #'     + [midi]
 #'   + *Physical pitch/interval representations*
 #'     + [frequency]
@@ -1980,7 +1986,7 @@ setMethod('as.integer', 'tonalInterval', tint2semit)
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
 #' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
 #' (This obviously only works if the input is a string, not a numeric!)
-#' Note that `inPlace = TRUE` will force functions like `semit`, which normally return numeric values, to return character strings
+#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return numeric values, to return character strings
 #' *if* their input is a character string.
 #' 
 #' @returns 
@@ -2123,10 +2129,17 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
 ### Pitch Transformers ####
 
 
-#' Semitone pitch representation
+#' 12-tone equal-temperament pitch representations
 #' 
-#' This function translates pitch information into [semitones](https://en.wikipedia.org/wiki/Semitone) (integers).
-#' Middle-C or unison values are `0`.
+#' These function translates pitch information into basic atonal, 12-tone-equal-temperament pitch values:
+#' [semitones](https://en.wikipedia.org/wiki/Semitone) (integers), [MIDI pitch values](https://en.wikipedia.org/wiki/MIDI),
+#'  and [cents](https://en.wikipedia.org/wiki/Cent_(music)).
+#' `midi` and `semits` are identical, except `semits` returns values centered at Middle-C (**0 = middle-C**), while
+#' `midi` is offset such that **middle-C = 60**.
+#' 
+#' By default, the output of `cent` is simply the same as `semits(x) * 100`.
+#' However, the `tonalHarmonic` value can be modified for `cent`, to produce cent-value for alternate tunings.
+#' Thus, where as `midi` and `semits` return [integers][base::integer], `cents` always returns real-number ([double][base::double]) values.
 #' 
 #' 
 #' @family {atonal pitch functions}
@@ -2136,23 +2149,28 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchFunctions In-place parsing
 #' @export 
-semit <- makePitchTransformer(tint2semit, 'semit', 'integer')
+semits <- makePitchTransformer(tint2semits, 'semits', 'integer')
 
-#' MIDI pitch representation
-#' 
-#' This function translates pitch information into [MIDI pitch values](https://en.wikipedia.org/wiki/MIDI).
-#' The `midi` function is identical to the [semit()] function, except offset by 60: `midi('c') = 60` while 
-#' `semit('c') = 0`.
-#' 
-#' 
+
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchFunctions In-place parsing
+#' @rdname semits
 #' @export 
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
+
+#' @family {atonal pitch functions}
+#' @family {pitch functions}
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
+#' @rdname semits
+#' @export 
+cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric')
 
 
 #' Scientific pitch representation
@@ -2451,7 +2469,7 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
 
 
 tintPartition_complex <- function(tint, octave.round = floor, ...) {
-  octshift <- as.integer(octave.round(tint2semit(tint %% dset(0, 0)) / 12))
+  octshift <- as.integer(octave.round(tint2semits(tint %% dset(0, 0)) / 12))
   
   octavepart <- tint(octshift, 0L)
   simplepart <- tint - octavepart

@@ -64,7 +64,7 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semit}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
 \emph{if} their input is a character string.
 }
 
@@ -73,6 +73,7 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
+\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
@@ -87,11 +88,10 @@ Other {pitch functions}:
 \code{\link{interval}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
-\code{\link{midi}()},
 \code{\link{octave}()},
 \code{\link{pitch}()},
 \code{\link{quality}()},
-\code{\link{semit}()},
+\code{\link{semits}()},
 \code{\link{solfa}()},
 \code{\link{solfg}()},
 \code{\link{step}()}

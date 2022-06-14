@@ -68,7 +68,7 @@ The functions are:
 \itemize{
 \item \emph{Musical (non-tonal) pitch representations}
 \itemize{
-\item \link{semit}
+\item \link{semits}
 \item \link{midi}
 }
 \item \emph{Physical pitch/interval representations}
@@ -92,7 +92,7 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semit}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
 \emph{if} their input is a character string.
 }
 

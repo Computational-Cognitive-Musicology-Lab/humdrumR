@@ -49,8 +49,8 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 \details{
 The underlying parser used by all \code{humdrumR} \link[=pitchFunctions]{pitch functions} can be called explicitly using the function \code{tonalInterval}.
 The \code{tonalInterval} parser will attempt to parse any input information into a \link[=tonalIntervalS4]{tonalInterval} object---a back-end pitch representation that you probably don't need to care about!
-When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semit]{semit()}}, the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
-to the representation you asked for (e.g., \verb{**kern} or \verb{**semit}).
+When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semits]{semits()}}, the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
+to the representation you asked for (e.g., \verb{**kern} or \verb{**semits}).
 
 The pitch parser (\code{tonalInterval}) is a generic function, meaning it can accept \code{numeric} or \code{character}-string input:
 \itemize{
@@ -369,20 +369,20 @@ For example, we might think of a ascending major 12th as being an ascending octa
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
 The following table illustrates how different \code{octave.round} arguments "partition" complex intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   -P51: \tab -P12 + P40 \tab -P12 + P40 \tab -P11  - P50 \tab -P11  - P50 \tab -P12 + P40 \cr
-   -P41: \tab -P11  - P40 \tab -P12 + P50 \tab -P11  - P40 \tab -P11  - P40 \tab -P12 + P50 \cr
-   -P11: \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \cr
-   -P50: \tab -P11  + P40 \tab -P11  + P40 \tab +P10 - P50 \tab +P10 - P50 \tab -P11  + P40 \cr
-   -P40: \tab +P10 - P40 \tab -P11  + P50 \tab +P10 - P40 \tab +P10 - P40 \tab -P11  + P50 \cr
-   P10: \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \cr
-   +P40: \tab +P10 + P40 \tab +P10 + P40 \tab +P11  - P50 \tab +P10 + P40 \tab +P11  - P50 \cr
-   +P50: \tab +P11  - P40 \tab +P10 + P50 \tab +P11  - P40 \tab +P10 + P50 \tab +P11  - P40 \cr
-   +P11: \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \cr
-   +P41: \tab +P11  + P40 \tab +P11  + P40 \tab +P12 - P50 \tab +P11  + P40 \tab +P12 - P50 \cr
-   +P51: \tab +P12 - P40 \tab +P11  + P50 \tab +P12 - P40 \tab +P11  + P50 \tab +P12 - P40 \cr
-   +P12: \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \cr
-   +P42: \tab +P12 + P40 \tab +P12 + P40 \tab +P13 - P50 \tab +P12 + P40 \tab +P13 - P50 \cr
-   +P52: \tab +P13 - P40 \tab +P12 + P50 \tab +P13 - P40 \tab +P12 + P50 \tab +P13 - P40 \cr
+   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
+   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
+   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
+   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
+   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
 }
 
 
@@ -451,7 +451,7 @@ The \emph{order} of the strings indicates what order the pieces of pitch informa
 
 To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
 quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
-We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species", "octave")))} and sure enough we'd get the correct parse!
+We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species")))} and sure enough we'd get the correct parse!
 
 One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components:
 The most common case would be a comma or space.

@@ -12,7 +12,7 @@
 # correct <- data.frame(kern = tint2kern(scale),
 #                       interval = tint2interval(scale),
 #                       solfa = tint2solfa(scale),
-#                       semit = tint2semit(scale),
+#                       semits = tint2semits(scale),
 #                       lilypond = tint2lilypond(scale),
 #                       helmholtz = tint2helmholtz(scale),
 #                       degree = tint2degree(scale)
@@ -40,7 +40,7 @@ test_that("Pitch function Input -> Output maintains structure", {
     
     
     
-    funcs <- c('semit', 'midi', 'pitch', 'kern', 'lilypond', 'interval',
+    funcs <- c('semits', 'midi', 'pitch', 'kern', 'lilypond', 'interval',
                'degree', 'solfa', 'bhatk')
     inputs <- list(c('c', A='d', 'e', 'f', 'g'),
                    c('c', 'd', 'e', 'f', 'g'),
@@ -77,7 +77,7 @@ test_that("Pitch functions return same output, regardless of input.", {
     expect_allequal(kern, inputs)
     expect_allequal(pitch, inputs)
     expect_allequal(interval, inputs)
-    expect_allequal(semit, inputs)
+    expect_allequal(semits, inputs)
     expect_allequal(solfa, inputs)
     
 })

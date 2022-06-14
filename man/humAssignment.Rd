@@ -46,16 +46,16 @@ or its convenient pipe operator \link[=humPipe]{\%hum>\%}
 When \code{withinHumdrum} creates new fields, it calls them $Pipe1 \ldots Pipe2 \ldots PipeN$.
 Since the output of \code{withinHumdrum} is always the same as the input except with these new "Pipe" fields,
 Byou can use \code{humdrumR <- humdrumR} assignment to immediately assign these pipe fields more meaningful names in the original object.
-This makes the most sense with an example:\preformatted{humdata$Semits <- humdata \%hum>\% ~semit(Token) 
+This makes the most sense with an example:\preformatted{humdata$Semits <- humdata \%hum>\% ~semits(Token) 
 }
 
 In humdrumR, we actually favor the left-to-right "piping" style.
-Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:\preformatted{humdata \%hum>\% ~semit(Token) -> humdata$Semits
+Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:\preformatted{humdata \%hum>\% ~semits(Token) -> humdata$Semits
 }
 
 Calls to \code{withinHumdrum} (or \verb{\%hum>\%}) keep producing new pipe fields.
 If there are more than one pipe fields, you can assign multiple fields at once using the \verb{[]<-} syntax:\preformatted{
-humdata \%hum>\% ~semit(Token) \%hum>\% ~pitch(Token) -> humdata[c('semit', 'pitch')]
+humdata \%hum>\% ~semits(Token) \%hum>\% ~pitch(Token) -> humdata[c('semits', 'pitch')]
 
 }
 

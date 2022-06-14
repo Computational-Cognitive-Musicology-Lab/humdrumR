@@ -1775,14 +1775,14 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' This makes the most sense with an example:
 #' 
 #' ```
-#' humdata$Semits <- humdata %hum>% ~semit(Token) 
+#' humdata$Semits <- humdata %hum>% ~semits(Token) 
 #' ````
 #' 
 #' In humdrumR, we actually favor the left-to-right "piping" style.
 #' Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:
 #' 
 #' ```
-#' humdata %hum>% ~semit(Token) -> humdata$Semits
+#' humdata %hum>% ~semits(Token) -> humdata$Semits
 #' ````
 #' 
 #' Calls to `withinHumdrum` (or `%hum>%`) keep producing new pipe fields.
@@ -1790,7 +1790,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' 
 #' ```
 #' 
-#' humdata %hum>% ~semit(Token) %hum>% ~pitch(Token) -> humdata[c('semit', 'pitch')]
+#' humdata %hum>% ~semits(Token) %hum>% ~pitch(Token) -> humdata[c('semits', 'pitch')]
 #' 
 #' ```
 #' 
