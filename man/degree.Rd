@@ -2,9 +2,21 @@
 % Please edit documentation in R/tonalInterval.R
 \name{degree}
 \alias{degree}
-\title{Tonal \href{https://en.wikipedia.org/wiki/Degree_(music)}{scale degree} representation}
+\alias{deg}
+\title{Tonal \href{https://en.wikipedia.org/wiki/Degree_(music)}{scale degree} representation (absolute)}
 \usage{
 degree(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  transposeArgs = list(),
+  parseArgs = list(),
+  inPlace = FALSE
+)
+
+deg(
   x,
   ...,
   generic = FALSE,
@@ -46,7 +58,14 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-Tonal \href{https://en.wikipedia.org/wiki/Degree_(music)}{scale degree} representation
+The humdrum \href{https://www.humdrum.org/rep/degree/index.html}{\verb{**degree}} and
+\href{https://www.humdrum.org/rep/deg/index.html}{\verb{**deg}} interpretations represent Western
+"scale degrees" in two slightly different formats.
+In the \verb{**degree} representation, the octave of each pitch is represented "absolutely,"
+in the same standard octave scheme as \link[=pitch]{scientific pitch}.
+In the \verb{**deg} representation, the octave of each pitch is indicated \emph{relative to the previous pitch}---
+a \code{"^"} indicates the pitch higher than the previous pitch while a \code{"v"} indicates a pitch lower than
+the previous pitch.
 }
 \section{In-place parsing}{
 

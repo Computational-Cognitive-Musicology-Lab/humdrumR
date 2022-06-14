@@ -36,10 +36,12 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     lead <- NULL
     rest <- str
     
+    sep <- setNames(if (is.null(sep)) character(length(res)) else lag(rep(sep, length.out = length(res)), fill = ''), names(res))
+    
     if (reverse) res <- rev(res)
     
     for (re in names(res)) {
-        if (!is.null(sep)) rest <- stringr::str_remove(rest, pattern = paste0('^', sep))
+         rest <- stringr::str_remove(rest, pattern = paste0('^', sep[re]))
         
         locs <- stringr::str_locate(rest, res[[re]])
         
@@ -360,7 +362,8 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
     if (!parse.exhaust && length(REs) > 1L) {
       Reduce(\(head, last) paste0(head, sep,  '(.*(', last, '))'), REs, right = TRUE )
     } else {
-      paste(REs, collapse = if (is.null(sep)) "" else sep)
+      do.call('.paste', c(as.list(unname(REs)), list(sep = if (is.null(sep)) "" else sep)))
+      # paste(REs, collapse = if (is.null(sep)) "" else sep)
     }
     
   
@@ -461,8 +464,12 @@ makeRE.interval <- function(parts = c("direction", "species", "step"), step.labe
 }
 
 
-makeRE.scaleDegree <- partialApply(makeRE.tonalChroma, parts = c("octave", "species", "step"), step.labels = 1:7, octave.integer = FALSE,
-                                   flat = 'b', qualities = FALSE, regexname = 'scaleDegree')
+makeRE.degree <- partialApply(makeRE.tonalChroma, parts = c("step", "species", "octave"), step.labels = 1:7, octave.integer = TRUE,
+                              flat = '-', sharp = '\\+', qualities = FALSE, regexname = 'degree', sep = c("", "/"))
+
+makeRE.deg <- partialApply(makeRE.tonalChroma, parts = c( "octave", "step", "species"), step.labels = 1:7, 
+                           octave.integer = FALSE, 
+                           flat = '-', sharp = '\\+', qualities = FALSE, regexname = 'deg')
 
 makeRE.solfa <- function(parts = c("octave", "step", "species"), octave.integer = FALSE, flat = '-', ..., collapse = TRUE) {
     

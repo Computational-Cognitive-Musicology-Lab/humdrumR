@@ -369,20 +369,20 @@ For example, we might think of a ascending major 12th as being an ascending octa
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
 The following table illustrates how different \code{octave.round} arguments "partition" complex intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
-   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
-   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
-   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
-   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
-   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
-   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
-   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
-   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
-   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
-   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
-   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
-   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
-   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+   -P51: \tab -P12 + P40 \tab -P12 + P40 \tab -P11  - P50 \tab -P11  - P50 \tab -P12 + P40 \cr
+   -P41: \tab -P11  - P40 \tab -P12 + P50 \tab -P11  - P40 \tab -P11  - P40 \tab -P12 + P50 \cr
+   -P11: \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \tab -P11  + P10 \cr
+   -P50: \tab -P11  + P40 \tab -P11  + P40 \tab +P10 - P50 \tab +P10 - P50 \tab -P11  + P40 \cr
+   -P40: \tab +P10 - P40 \tab -P11  + P50 \tab +P10 - P40 \tab +P10 - P40 \tab -P11  + P50 \cr
+   P10: \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \tab +P10 + P10 \cr
+   +P40: \tab +P10 + P40 \tab +P10 + P40 \tab +P11  - P50 \tab +P10 + P40 \tab +P11  - P50 \cr
+   +P50: \tab +P11  - P40 \tab +P10 + P50 \tab +P11  - P40 \tab +P10 + P50 \tab +P11  - P40 \cr
+   +P11: \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \tab +P11  + P10 \cr
+   +P41: \tab +P11  + P40 \tab +P11  + P40 \tab +P12 - P50 \tab +P11  + P40 \tab +P12 - P50 \cr
+   +P51: \tab +P12 - P40 \tab +P11  + P50 \tab +P12 - P40 \tab +P11  + P50 \tab +P12 - P40 \cr
+   +P12: \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \tab +P12 + P10 \cr
+   +P42: \tab +P12 + P40 \tab +P12 + P40 \tab +P13 - P50 \tab +P12 + P40 \tab +P13 - P50 \cr
+   +P52: \tab +P13 - P40 \tab +P12 + P50 \tab +P13 - P40 \tab +P12 + P50 \tab +P13 - P40 \cr
 }
 
 

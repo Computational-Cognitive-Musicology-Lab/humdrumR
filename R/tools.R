@@ -1663,6 +1663,16 @@ matched <- function(x, table) table[pmatch(x, table)]
     
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
+    
+    if (length(sep) > 1L) {
+      args[1:(length(args) - 1L)] <- Map(\(arg, s) paste0(arg, s), 
+                                         args[1:(length(args) - 1L)], 
+                                          rep(sep, length.out = length(args) - 1L))
+      sep <- ''
+    }
+    
+    
+    
     ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
@@ -1677,7 +1687,7 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     
     # do.call('.paste', c(ordered, list(sep = sep)))
     if (collapse) {
-      do.call('.paste', c(ordered, sep = sep))
+      do.call('.paste', c(ordered, sep = list(sep)))
     } else {
       as.data.frame(ordered)
     }

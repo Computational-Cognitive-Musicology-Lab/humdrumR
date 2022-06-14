@@ -705,6 +705,7 @@ Nupdown <- function(n, up = '^', down = 'v') ifelse(n >= 0, strrep(up, abs(n)), 
 tint2tonalChroma <- function(x, 
                              parts = c("species", "step", "octave"), sep = "", 
                              step = TRUE, specific = TRUE, complex = TRUE,
+                             step.complex = FALSE,
                              keyed = FALSE, Key = NULL,
                              qualities = FALSE, collapse = TRUE, ...) {
   
@@ -726,7 +727,7 @@ tint2tonalChroma <- function(x,
   # complex part
   octave  <- if (complex) {
     octave <- tint2octave(x, ...)
-    if (is.integer(octave) && is.integer(step)) {
+    if (is.integer(octave) && is.integer(step) && step.complex) {
       step <- step + octave * 7L
       ""
     } else {
@@ -879,9 +880,15 @@ tint2interval <- function(x, directed = TRUE, ...) {
 
 
 
-tint2degree <- partialApply(tint2tonalChroma, parts = c("octave", "species", "step"), 
-                            complex = FALSE, keyed = FALSE, step.labels = 1L:7L, flat = 'b',
-                            octave.integer = FALSE, octave.relative = TRUE, octave.round = round)
+tint2degree <- partialApply(tint2tonalChroma, parts = c("step", "species", "octave"), 
+                            complex = TRUE, keyed = FALSE, step.labels = 1L:7L, 
+                            flat = '-', sharp = '+', sep = c("", "/"),
+                            octave.integer = TRUE, octave.offset = 4L)
+
+tint2deg <- partialApply(tint2tonalChroma, parts = c("octave", "step", "species"), 
+                            complex = TRUE, keyed = FALSE, step.labels = 1L:7L, 
+                            flat = '-', sharp = '+', 
+                            octave.integer = FALSE, octave.relative = TRUE, octave.round = expand)
 
 
 tint2bhatk <- function(x, ...) {
@@ -1750,14 +1757,20 @@ interval2tint <- function(str, ...) {
 
 
 
-degree2tint <- partialApply(tonalChroma2tint, parts = c("octave", "species", "step"), 
+degree2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octave"), 
                            qualities = FALSE, 
-                           keyed = FALSE, Key = NULL,
+                           keyed = FALSE, sep = c("", "/"),
                            step.labels = c('1', '2', '3', '4', '5', '6', '7'),
-                           octave.integer = FALSE, octave.relative = TRUE, octave.round = round,
-                           flat = 'b')
+                           octave.integer = TRUE, octave.offset = 4L,
+                           flat = '-', sharp = "\\+")
   
-
+deg2tint <- partialApply(tonalChroma2tint, parts = c("octave", "step", "species"), 
+                         qualities = FALSE, 
+                         keyed = FALSE,
+                         step.labels = c('1', '2', '3', '4', '5', '6', '7'),
+                         octave.integer = FALSE, octave.relative = TRUE, octave.round = expand,
+                         up = '^', down = 'v',
+                         flat = '-', sharp = "\\+")
 
 solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
   syl <- stringr::str_extract(str, '[fdsrlmt][aeio]')
@@ -1864,7 +1877,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('lilypond' ,              makeRE.lilypond,    lilypond2tint),
                                                  list('helmholtz' ,             makeRE.helmholtz,   helmholtz2tint),
                                                  list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
-                                                 list('deg',                    makeRE.scaleDegree, degree2tint),
+                                                 list('deg',                    makeRE.degree,      degree2tint),
                                                  list('solfa',                  makeRE.solfa,       solfa2tint),
                                                  list('solfg',                  makeRE.solfg,       solfg2tint),
                                                  list('bhatk',                  makeRE.bhatk,       bhatk2tint),
@@ -2272,8 +2285,16 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' @export 
 interval <- makePitchTransformer(tint2interval, 'interval')
 
-#' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation
+#' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation (absolute)
 #' 
+#' The humdrum [`**degree`](https://www.humdrum.org/rep/degree/index.html) and 
+#' [`**deg`](https://www.humdrum.org/rep/deg/index.html) interpretations represent Western
+#' "scale degrees" in two slightly different formats.
+#' In the `**degree` representation, the octave of each pitch is represented "absolutely,"
+#' in the same standard octave scheme as [scientific pitch][pitch()].
+#' In the `**deg` representation, the octave of each pitch is indicated *relative to the previous pitch*---
+#' a `"^"` indicates the pitch higher than the previous pitch while a `"v"` indicates a pitch lower than
+#' the previous pitch.
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
@@ -2283,6 +2304,14 @@ interval <- makePitchTransformer(tint2interval, 'interval')
 #' @inheritSection pitchFunctions In-place parsing
 #' @export 
 degree <- makePitchTransformer(tint2degree, 'degree')
+
+
+#' @family {absolute pitch functions}
+#' @family {pitch functions}
+#' @rdname degree
+#' @export 
+deg <- makePitchTransformer(tint2deg, 'deg')
+
 
 #' Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
 #' 
