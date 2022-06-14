@@ -21,19 +21,13 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(
-  x,
-  tonalHarmonic = 3,
-  centMargin = 10,
-  accidental.melodic = FALSE,
-  ...
-)
+\method{tonalInterval}{numeric}(x, tonalHarmonic = 3, centMargin = 10, ...)
 
 \method{tonalInterval}{rational}(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...)
 
 \method{tonalInterval}{fraction}(x, tonalHarmonic = 3)
 
-\method{tonalInterval}{integer}(n, accidental.melodic = FALSE, ...)
+\method{tonalInterval}{integer}(n, accidental.melodic = FALSE, keyed = TRUE, ...)
 
 \method{tonalInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
@@ -109,7 +103,7 @@ Various \link[=pitchFunctions]{pitch parsing functions} have an option to keep t
 }
 }
 
-\section{Advanced Parsing Options}{
+\section{Advanced Tonal Parsing Options}{
 The eight tonal representations listed above function through a common parsing interface.
 By using "advanced" parsing arguments, you can tweak how parsing is done, so as to accommodate even more input representations!
 Note that these arguments are identical to parallel \link[=pitchDeparsing]{deparsing arguments}.
@@ -440,7 +434,7 @@ In addition to the three types of \emph{musical} parsing considerations reviewed
 string-parsing issues that we can consider/control.
 \subsection{Parts and Order}{
 
-So far (aobve) we've discussed various ways that pitch information (step, species, and octave) can be encoded, and how
+So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 the \code{humdrumR} parser can be modified to handle different options.
 However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
 The \code{parts} argument can be specifyied to indicate this.
@@ -467,6 +461,42 @@ Specifically, real numbers (R \link[base:double]{doubles or "numeric"}) are inte
 are interpreted as \href{https://en.wikipedia.org/wiki/Semitone}{semitones}.
 Remember, to explicitly make integers in R, you need to type \code{L} after numbers---like \code{3L}---or call the function
 \code{as.integer}---like \code{as.integer(3)}.
+
+When converting from an atonal representation to a tonal one, we must decide how to interpret the tonality
+of the input---specifically, which \href{https://en.wikipedia.org/wiki/Enharmonic}{enharmonic spelling} of notes to use.
+The  \code{humdrumR} numeric parser interprets atonal pitches in "enharmonic window" of 12 steps on the line-of-fifths.
+The position of this window is set with the \code{enharmonic.center} (integer, length 1) argument.
+By default, \code{enharmonic.center = 0}, which creates a window from a \code{-5} (\emph{b2}) to \code{+6}) (\emph{#4}).
+If you prefer \emph{#1} instead of \emph{b2}, set \code{enharmonic.center = 1}.
+For all flats, set \code{enharmonic.center = -1}.
+For all sharps, set \code{enharmonic.center = 4}.\tabular{rllllllllllll}{
+   \code{enharmonic.center} \tab 0 \tab 1 \tab 2 \tab 3 \tab 4 \tab 5 \tab 6 \tab 7 \tab 8 \tab 9 \tab 10 \tab 11 \cr
+   \code{-2} \tab 1 \tab b2 \tab 2 \tab b3 \tab 3 \tab 4 \tab b5 \tab 5 \tab b6 \tab 6 \tab b7 \tab b1 \cr
+   \code{-1} \tab 1 \tab b2 \tab 2 \tab b3 \tab 3 \tab 4 \tab b5 \tab 5 \tab b6 \tab 6 \tab b7 \tab 7 \cr
+   \code{0} \tab 1 \tab b2 \tab 2 \tab b3 \tab 3 \tab 4 \tab #4 \tab 5 \tab b6 \tab 6 \tab b7 \tab 7 \cr
+   \code{1} \tab 1 \tab #1 \tab 2 \tab b3 \tab 3 \tab 4 \tab #4 \tab 5 \tab b6 \tab 6 \tab b7 \tab 7 \cr
+   \code{2} \tab 1 \tab #1 \tab 2 \tab b3 \tab 3 \tab 4 \tab #4 \tab 5 \tab #5 \tab 6 \tab b7 \tab 7 \cr
+   \code{3} \tab 1 \tab #1 \tab 2 \tab #2 \tab 3 \tab 4 \tab #4 \tab 5 \tab #5 \tab 6 \tab b7 \tab 7 \cr
+   \code{4} \tab 1 \tab #1 \tab 2 \tab #2 \tab 3 \tab 4 \tab #4 \tab 5 \tab #5 \tab 6 \tab #6 \tab 7 \cr
+}
+
+
+The \code{enharmonic.center} argument will work the same when translating to any pitch representation, like \code{\link[=kern]{kern()}}.
+However, we present the table above in terms of scale degrees because the atonal -> enharmonic calculation
+is centered on a key.
+So, if \code{Key} argument is specified, the "enharmonic window" is centered around that key.
+So if you are translating to \code{kern} and the \code{Key = F#:}, the output will range from \code{Gn} to \code{B#}.
+If you don't want this, set \code{Key = NULL}.
+\subsection{Melodic Interpretation of Chromatic}{
+
+It is very common for chromatic notes in melodic passages to be labeled based on their melodic contour:
+i.e., ascending chromatic notes labeled sharp and descending chromatic notes labeled flat.
+This behavior can be engaged by setting the \code{accidental.melodic} (logical, length 1) argument.
+When \code{accidental.melodic = TRUE}, the input is first centered in the enharmonic window (above), but then
+any places where a chromatic alteration proceeds upwards to a non-chromatic note will be altered (if necessary) to a
+sharp, and vice verse for a descending notes and flats.
+For example, while \code{kern(0:2)} returns \code{c("c", "d-", "d")}, \code{kern(0:2, parse(accidental.melodic = TRUE))} returns \code{c("c", "c#", "d")}.
+}
 }
 
 \examples{

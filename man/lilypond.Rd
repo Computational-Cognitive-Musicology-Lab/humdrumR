@@ -88,6 +88,7 @@ Other {pitch functions}:
 \code{\link{interval}()},
 \code{\link{kern}()},
 \code{\link{octave}()},
+\code{\link{pc}()},
 \code{\link{pitch}()},
 \code{\link{quality}()},
 \code{\link{semits}()},

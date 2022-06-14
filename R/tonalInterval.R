@@ -571,6 +571,15 @@ tint2frequency <- function(x, frequency.reference = 440L,
   frequency.reference * ratio %<-matchdim% x
 }
 
+tint2pc <- function(x, ten = 'A', eleven = 'B', ...) {
+  str <- as.character(tint2semits(x, complex = FALSE))
+  
+  if (!is.null(ten)) str <- gsub('10', ten, str)
+  if (!is.null(eleven)) str <- gsub('11', eleven, str)
+  
+  str
+  
+}
 
 
 ### Tonal ####
@@ -1038,7 +1047,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' using the appropriate known regular expressions.
 #' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
-#' # Advanced Parsing Options
+#' # Advanced Tonal Parsing Options
 #' 
 #' The eight tonal representations listed above function through a common parsing interface.
 #' By using "advanced" parsing arguments, you can tweak how parsing is done, so as to accommodate even more input representations!
@@ -1327,7 +1336,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ### Parts and Order
 #' 
-#' So far (aobve) we've discussed various ways that pitch information (step, species, and octave) can be encoded, and how
+#' So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 #' the `humdrumR` parser can be modified to handle different options.
 #' However, there are two general parsing issues/options to consider: what information is encoded, and in *what order*?
 #' The `parts` argument can be specifyied to indicate this.
@@ -1354,6 +1363,43 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Remember, to explicitly make integers in R, you need to type `L` after numbers---like `3L`---or call the function
 #' `as.integer`---like `as.integer(3)`.
 #' 
+#' 
+#' 
+#' When converting from an atonal representation to a tonal one, we must decide how to interpret the tonality 
+#' of the input---specifically, which [enharmonic spelling](https://en.wikipedia.org/wiki/Enharmonic) of notes to use.
+#' The  `humdrumR` numeric parser interprets atonal pitches in "enharmonic window" of 12 steps on the line-of-fifths.
+#' The position of this window is set with the `enharmonic.center` (integer, length 1) argument.
+#' By default, `enharmonic.center = 0`, which creates a window from a `-5` (*b2*) to `+6`) (*#4*).
+#' If you prefer *#1* instead of *b2*, set `enharmonic.center = 1`.
+#' For all flats, set `enharmonic.center = -1`.
+#' For all sharps, set `enharmonic.center = 4`.
+#' 
+#' | `enharmonic.center`      | 0   |   1 |   2 |   3 |   4 |   5 |   6 |   7 |   8 |   9 |  10 |  11 |
+#' |-------------------------:|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+#' | `-2`                     | 1   | b2  | 2   | b3  | 3   | 4   | b5  | 5   | b6  | 6   | b7  | b1  |
+#' | `-1`                     | 1   | b2  | 2   | b3  | 3   | 4   | b5  | 5   | b6  | 6   | b7  | 7   |
+#' | `0`                      | 1   | b2  | 2   | b3  | 3   | 4   | #4  | 5   | b6  | 6   | b7  | 7   |
+#' | `1`                      | 1   | #1  | 2   | b3  | 3   | 4   | #4  | 5   | b6  | 6   | b7  | 7   |
+#' | `2`                      | 1   | #1  | 2   | b3  | 3   | 4   | #4  | 5   | #5  | 6   | b7  | 7   |
+#' | `3`                      | 1   | #1  | 2   | #2  | 3   | 4   | #4  | 5   | #5  | 6   | b7  | 7   |
+#' | `4`                      | 1   | #1  | 2   | #2  | 3   | 4   | #4  | 5   | #5  | 6   | #6  | 7   |
+#' 
+#' The `enharmonic.center` argument will work the same when translating to any pitch representation, like [kern()].
+#' However, we present the table above in terms of scale degrees because the atonal -> enharmonic calculation
+#' is centered on a key.
+#' So, if `Key` argument is specified, the "enharmonic window" is centered around that key.
+#' So if you are translating to `kern` and the `Key = F#:`, the output will range from `Gn` to `B#`.
+#' If you don't want this, set `Key = NULL`.
+#' 
+#' ### Melodic Interpretation of Chromatic
+#' 
+#' It is very common for chromatic notes in melodic passages to be labeled based on their melodic contour:
+#' i.e., ascending chromatic notes labeled sharp and descending chromatic notes labeled flat.
+#' This behavior can be engaged by setting the `accidental.melodic` (logical, length 1) argument.
+#' When `accidental.melodic = TRUE`, the input is first centered in the enharmonic window (above), but then
+#' any places where a chromatic alteration proceeds upwards to a non-chromatic note will be altered (if necessary) to a
+#' sharp, and vice verse for a descending notes and flats.
+#' For example, while `kern(0:2)` returns `c("c", "d-", "d")`, `kern(0:2, parse(accidental.melodic = TRUE))` returns `c("c", "c#", "d")`.
 #' 
 #'     
 #'      
@@ -1409,16 +1455,22 @@ octave2tint <- function(str, simpletint, roottint,
 
 #### Semitones ####
 
-atonal2tint <- function(tint, accidental.melodic, Key = NULL, ...) {
-  if (!is.null(Key)) {
-    Key <- diatonicSet(Key)
-    tint <- tintPartition_harmonic(tint, 12L, Key)$Enharmonic
-    tint <- tint - Key
-  }
-  LO5ths <- tint@Fifth
+atonal2tint <- function(tint, accidental.melodic = FALSE, keyed = TRUE, Key = NULL, 
+                        enharmonic.center = 0L, ...) {
+  
+  Key <- diatonicSet(Key %||% dset(0L, 0L))
+  
+
+  if (keyed) tint <- tint - Key   
+  
+  tint <- tintPartition_harmonic(tint, 
+                                 enharmonic.minimum = enharmonic.center - 5L,
+                                 enharmonic.maximum = enharmonic.center + 6L)$Enharmonic
+  
+  lof <- LO5th(tint)
   
   if (accidental.melodic) {
-    chromatic <- LO5ths > 5 | LO5ths < -1
+    chromatic <- lof > 5 | lof < -1
     ints <- c(diff(tint), tint(0, 0)) # tint(0,0) is just padding
     
     isA1 <- ints == tint(-11, 7)
@@ -1432,7 +1484,7 @@ atonal2tint <- function(tint, accidental.melodic, Key = NULL, ...) {
   tint
 }
 
-semits2tint <- function(n, accidental.melodic = FALSE, ...) {
+semits2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
           wholen <- as.integer(c(n))
           
           pitchclass <- wholen %% 12L
@@ -1442,15 +1494,15 @@ semits2tint <- function(n, accidental.melodic = FALSE, ...) {
           tints <- tint(octaves, LO5ths)
           
           ##
-          tints <- atonal2tint(tints, accidental.melodic, ...)
+          tints <- atonal2tint(tints, accidental.melodic = accidental.melodic, keyed = keyed, ...)
           
           tints
 }
 
 
 
-midi2tint <- function(n, accidental.melodic = FALSE, Key = NULL) {
-  semits2tint(n - 60L, accidental.melodic, Key)
+midi2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
+  semits2tint(n - 60L, accidental.melodic = accidental.melodic, keyed = keyed, ...)
 }
 
 
@@ -1496,8 +1548,8 @@ rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...)
   tint(octs, fifs)
 }
 
-double2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melodic = FALSE, ...) {
-  if (x <= 0) .stop('Double (numeric) values can only be interpreted as tonalIntervals if they are positive.')
+double2tint <- function(x, tonalHarmonic = 3, centMargin = 10,  ...) {
+  if (any(x <= 0)) .stop('Double (numeric) values can only be interpreted as tonalIntervals if they are positive.')
   
   octrange <- attr(centMargin, 'octrange')
   if (is.null(octrange)) octrange <- 5L
@@ -1532,7 +1584,7 @@ double2tint <- function(x, tonalHarmonic = 3, centMargin = 10, accidental.melodi
   if (any(!accept)) output[!accept] <- Recall(x[!accept], tonalHarmonic, 
                                               data.table::setattr(centMargin, 'octrange', octrange + 5L))
   
-  output <- atonal2tint(output, accidental.melodic, ...)
+  output <- atonal2tint(output, ...)
   
   output 
 }
@@ -1763,6 +1815,16 @@ interval2tint <- function(str, ...) {
 }
 
 
+pc2tint <- function(str, ten = 'A', eleven = 'B', ...) {
+  str <- gsub(ten, '10', str)
+  str <- gsub(eleven, '11', str)
+  
+  str <- as.integer(str)
+  
+  semits2tint(str, ...)
+  
+}
+
 
 degree2tint <- partialApply(tonalChroma2tint, parts = c("step", "species", "octave"), 
                            qualities = FALSE, 
@@ -1890,6 +1952,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('solfg',                  makeRE.solfg,       solfg2tint),
                                                  list('bhatk',                  makeRE.bhatk,       bhatk2tint),
                                                  list('Tonh',                   makeRE.tonh,        tonh2tint),
+                                                 list('pc',                     makeRE.pc,          pc2tint),
                                                  funcName = 'tonalInterval.character',
                                                  outputClass = 'tonalInterval')
 
@@ -2035,7 +2098,8 @@ pitchArgCheck <- function(args,  callname) {
     
   }
   
-  checkTFs( args[intersect(argnames, c('generic', 'specific', 'complex', 'simple', 'octave.absolute', 'octave.relative'))], callname = callname)
+  checkTFs( args[intersect(argnames, c('generic', 'specific', 'complex', 'simple', 'accidental.melodic',
+                                       'octave.absolute', 'octave.relative'))], callname = callname)
     
   singlechar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
                   'diminish', 'augment', 'major', 'minor', 'perfect',
@@ -2172,6 +2236,24 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' @rdname semits
 #' @export 
 cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric')
+
+#' Representation of Atonal Pitch classes
+#' 
+#' As encoded in the humdrum 
+#' [`**pc`](https://www.humdrum.org/rep/pc/index.html) interpretation.
+#' 
+#' @param ten (character, length 1) A shorthand-symbol for "10." Defaults to `"A"`.
+#'        If `NULL`, "10" is used with no shorthand.
+#' @param eleven (character, length 1) A shorthand-symbol for "11." Defaults to `"B"`.
+#'        If `NULL`, "11" is used with no shorthand.
+#' @family {atonal pitch functions}
+#' @family {pitch functions}
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
+#' @export 
+pc <- makePitchTransformer(tint2pc, 'pc', 'character')
 
 
 #' Scientific pitch representation
@@ -2482,26 +2564,29 @@ tintPartition_complex <- function(tint, octave.round = floor, ...) {
 
 #### enharmonic + comma = harmonic ####
 
-tintPartition_harmonic <- function(tint, enharmonicWrap = 12L, Key = dset(0L, 0L), ...) {
+
+
+tintPartition_harmonic <- function(tint, enharmonic.minimum = -5L, enharmonic.maximum = enharmonic.minimum + 11L, ...) {
   
-  modeoffset <- tint( , getSignature(Key)) + tint(, 2) # because 2 fifths is the "center" of the diatonic set
-  entint <- (tint - modeoffset) %<-matchdim% NULL
+  # modeoffset <- tint( , getSignature(Key)) + tint(, 2) # because 2 fifths is the "center" of the diatonic set
+  # entint <- (tint - modeoffset) %<-dim% NULL
   
-  enharmonicbound <- enharmonicWrap %/% 2
-  sharpshift <-  tint( , enharmonicbound) # this makes it so an odd number (like 13) is biased towards sharp side
-  flatshift  <- -tint( , enharmonicWrap - enharmonicbound)
+  # mode <- if (is.null(Key)) 0L else getMode(Key)
+  lof <- LO5th(tint) #+ mode
+  harmonic <- tint
   
-  fs <- entint@Fifth
-  sharp <-  fs > enharmonicbound
-  flat  <- fs <= -(enharmonicWrap - enharmonicbound)
+  # flatside
+  tooflat <- lof < enharmonic.minimum
+  harmonic[tooflat] <- tint[tooflat] + (tint(-19L, 12L) * (1L + (lof[tooflat] - enharmonic.minimum) %/% -12L))
   
-  entint[sharp] <- ((entint[sharp] + sharpshift) %%  pythagorean.comma) - sharpshift 
-  entint[ flat] <- ((entint[ flat] + flatshift)  %% -pythagorean.comma) - flatshift
+  # sharpside
+  toosharp <- lof > enharmonic.maximum
+  harmonic[toosharp] <- tint[toosharp] - (tint(-19L, 12L) * (1L + (lof[toosharp] - enharmonic.maximum) %/%  12L))
+
   
-  enharmonicpart <- (entint + modeoffset) %<-matchdim% tint
-  commapart <- tint - enharmonicpart
   
-  .data.frame(Enharmonic = enharmonicpart,  Comma = commapart)
+
+  .data.frame(Enharmonic = harmonic,  Comma = tint - harmonic)
 }
 
 

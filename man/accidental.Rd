@@ -33,6 +33,7 @@ Other {pitch functions}:
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{octave}()},
+\code{\link{pc}()},
 \code{\link{pitch}()},
 \code{\link{quality}()},
 \code{\link{semits}()},

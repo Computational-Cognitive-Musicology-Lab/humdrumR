@@ -80,7 +80,7 @@
       <img src="" class="logo" alt=""><h1>Getting started with humdrumR</h1>
                         <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-06-13</h4>
+            <h4 data-toc-skip class="date">2022-06-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd"><code>vignettes/GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
@@ -96,7 +96,7 @@
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>Attaching package<span class="sc">:</span> <span class="st">'humdrumR'</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>The following objects are masked from <span class="st">'package:stats'</span><span class="sc">:</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    lag, sigma</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    lag, sigma, step</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>The following object is masked from <span class="st">'package:methods'</span><span class="sc">:</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    signature</span>
@@ -1166,9 +1166,9 @@ NULL</code></pre>
 <span id="cb21-290"><a href="#cb21-290" aria-hidden="true" tabindex="-1"></a>             Token <span class="sc">::</span> character</span>
 <span id="cb21-291"><a href="#cb21-291" aria-hidden="true" tabindex="-1"></a>            <span class="sc">*</span>Pipe1 <span class="sc">::</span> character</span></code></pre></div>
 <p>Each expression is evaluated, and the result is put back in the same place in the humdrum data! You’ll also notice that in the printout, there is a new Data field, called <code>Pipe1</code>—this is the default name <code>humdrumR</code> assigns to new fields that you create.</p>
-<p>If you want, you can pick your own names by using <code>$&lt;-</code> (i.e., assigning to a new name you create using <code>$</code>). For instance, lets use <code>humdrumR</code>’s <code>semit</code> function (see the <a href="Pitch.html">humdrum pitch</a> vignette) to calculate the semitone value for each pitch in the chorales:</p>
+<p>If you want, you can pick your own names by using <code>$&lt;-</code> (i.e., assigning to a new name you create using <code>$</code>). For instance, lets use <code>humdrumR</code>’s <code>semits</code> function (see the <a href="Pitch.html">humdrum pitch</a> vignette) to calculate the semitone value for each pitch in the chorales:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>chorales <span class="sc">%hum&gt;%</span> <span class="er">~</span> <span class="fu">semit</span>(Token)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>chorales <span class="sc">%hum&gt;%</span> <span class="er">~</span> <span class="fu">semits</span>(Token)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="do">############################# vvv chor001.krn vvv #############################</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>     <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -1267,7 +1267,7 @@ NULL</code></pre>
 <p>It worked! Lets do it again, but save the result in a new field, which we will call <code>Semits</code>—of course, you could give it any name you want, or just let it be called <code>Pipe1</code> if you want!</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="va">chorales</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span> <span class="fu"><a href="../reference/semit.html">semit</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span><span class="op">$</span><span class="va">Semits</span></code></pre></div>
+<span class="va">chorales</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span><span class="op">$</span><span class="va">Semits</span></code></pre></div>
 <p>There is now a new Data field in our humdrum table, called <code>Semits</code>. Meanwhile, the original <code>Token</code> field is still there, safely unchanged! Just like before, we can use the <code>$</code> operator to look at our fields:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>chorales<span class="sc">$</span>Token</span>

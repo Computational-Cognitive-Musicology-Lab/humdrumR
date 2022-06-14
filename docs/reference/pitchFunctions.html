@@ -116,8 +116,8 @@ The functions are:</p><ul><li><p><strong>Tonal pitch representations</strong></p
 <li><p><a href="bhatk.html">bhatk</a> (hindustani swara)</p></li>
 </ul></li>
 </ul></li>
-<li><p><strong>Atonal pitch representations</strong></p><ul><li><p><em>Musical (non-tonal) pitch representations</em></p><ul><li><p><a href="semit.html">semit</a></p></li>
-<li><p><a href="midi.html">midi</a></p></li>
+<li><p><strong>Atonal pitch representations</strong></p><ul><li><p><em>Musical (non-tonal) pitch representations</em></p><ul><li><p><a href="semits.html">semits</a></p></li>
+<li><p><a href="semits.html">midi</a></p></li>
 </ul></li>
 <li><p><em>Physical pitch/interval representations</em></p><ul><li><p><a href="https://rdrr.io/r/stats/time.html" class="external-link">frequency</a></p></li>
 <li><p>ratio</p></li>
@@ -139,7 +139,7 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the <code>inPlace</code> argument, which is <code>FALSE</code> by default.
 So, <code>pitch('4.ee-[', inPlace = TRUE)</code> will return 4.Eb5[---keeping the <code>"4."</code> and the <code>"["</code>.
 (This obviously only works if the input is a string, not a numeric!)
-Note that <code>inPlace = TRUE</code> will force functions like <code>semit</code>, which normally return numeric values, to return character strings
+Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return numeric values, to return character strings
 <em>if</em> their input is a character string.</p>
     </div>
     <div class="section level2">

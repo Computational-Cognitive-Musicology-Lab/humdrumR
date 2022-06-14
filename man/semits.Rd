@@ -138,21 +138,8 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
-Other {pitch functions}: 
-\code{\link{accidental}()},
-\code{\link{bhatk}()},
-\code{\link{degree}()},
-\code{\link{helmholtz}()},
-\code{\link{interval}()},
-\code{\link{kern}()},
-\code{\link{lilypond}()},
-\code{\link{octave}()},
-\code{\link{pitch}()},
-\code{\link{quality}()},
-\code{\link{solfa}()},
-\code{\link{solfg}()},
-\code{\link{step}()},
-\code{\link{tonh}()}
+Other {atonal pitch functions}: 
+\code{\link{pc}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},
@@ -163,12 +150,16 @@ Other {pitch functions}:
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{octave}()},
+\code{\link{pc}()},
 \code{\link{pitch}()},
 \code{\link{quality}()},
 \code{\link{solfa}()},
 \code{\link{solfg}()},
 \code{\link{step}()},
 \code{\link{tonh}()}
+
+Other {atonal pitch functions}: 
+\code{\link{pc}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},
@@ -179,6 +170,27 @@ Other {pitch functions}:
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{octave}()},
+\code{\link{pc}()},
+\code{\link{pitch}()},
+\code{\link{quality}()},
+\code{\link{solfa}()},
+\code{\link{solfg}()},
+\code{\link{step}()},
+\code{\link{tonh}()}
+
+Other {atonal pitch functions}: 
+\code{\link{pc}()}
+
+Other {pitch functions}: 
+\code{\link{accidental}()},
+\code{\link{bhatk}()},
+\code{\link{degree}()},
+\code{\link{helmholtz}()},
+\code{\link{interval}()},
+\code{\link{kern}()},
+\code{\link{lilypond}()},
+\code{\link{octave}()},
+\code{\link{pc}()},
 \code{\link{pitch}()},
 \code{\link{quality}()},
 \code{\link{solfa}()},

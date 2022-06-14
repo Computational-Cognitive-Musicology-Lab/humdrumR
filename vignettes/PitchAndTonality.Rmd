@@ -713,12 +713,12 @@ An `enharmonicWrap` of 21 allows all single-flat and single-sharp notes, but no 
 
 + tonalInterval
 	+ tonalInterval -> tonalInterval
-	+ integer -> (semit) -> tonalInterval
-	+ numeric  -> (semit) -> tonalInterval
+	+ integer -> (semits) -> tonalInterval
+	+ numeric  -> (semits) -> tonalInterval
 	+ character -> (regex) -> tonalInterval
 + double
         + tonalInterval -> numeric (ratio)
-+ semit 
++ semits 
 	+ tonalInterval -> integer
 	+ character -> integer
 	+ numeric -> integer

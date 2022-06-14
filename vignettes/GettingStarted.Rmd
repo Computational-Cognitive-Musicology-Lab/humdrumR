@@ -426,11 +426,11 @@ Each expression is evaluated, and the result is put back in the same place in th
 You'll also notice that in the printout, there is a new Data field, called `Pipe1`---this is the default name `humdrumR` assigns to new fields that you create.
 
 If you want, you can pick your own names by using `$<-` (i.e., assigning to a new name you create using `$`).
-For instance, lets use `humdrumR`'s `semit` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
+For instance, lets use `humdrumR`'s `semits` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
 
 ```{r}
 
-chorales %hum>% ~ semit(Token)
+chorales %hum>% ~ semits(Token)
 
 ```
 
@@ -439,7 +439,7 @@ Lets do it again, but save the result in a new field, which we will call `Semits
 
 ```{r}
 
-chorales %hum>% ~ semit(Token) -> chorales$Semits
+chorales %hum>% ~ semits(Token) -> chorales$Semits
 
 ```
 

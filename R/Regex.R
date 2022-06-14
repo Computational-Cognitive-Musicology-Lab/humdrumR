@@ -510,6 +510,10 @@ makeRE.double <- function(...) c(double = "[+-]?[0-9]+(\\.[0-9]+)?" )
 makeRE.fraction <- function(sep = '/', ...) paste0("[1-9][0-9]*", sep, "[1-9][0-9]*")
 
 
+makeRE.pc <- function(ten = 'A', eleven = 'B', ...) {
+  captureRE(c(0:11, ten, eleven))
+}
+
 ####. REs for diatonic sets ####
 
 makeRE.alterations <- function(..., qualities = FALSE) {

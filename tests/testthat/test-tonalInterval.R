@@ -207,4 +207,7 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(`humdrumRattr<-`(tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII')), list(dispatch = NULL)), tint(-15L, 9L))
     
     expect_equal(kern('E x 5', parse(doublesharp = 'x', sep = ' ')), 'ee##')
+    
+    expect_equal(kern(0:2), c('c', 'd-', 'd'))
+    expect_equal(kern(0:2, parseArgs=list(accidental.melodic = TRUE)), c('c', 'c#', 'd'))
 })

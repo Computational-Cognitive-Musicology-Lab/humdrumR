@@ -33,11 +33,19 @@ reference:
   - interval
   - kern
   - solfa
+  - solfg
   - lilypond
   - helmholtz
+  - tonh
+  - octave
+  - step
+  - accidental
+  - quality
   - bhatk
-  - semit
+  - semits
   - midi
+  - pc
+  - cents
   - tonalTransformations
   - LO5th
   - diatonicSet

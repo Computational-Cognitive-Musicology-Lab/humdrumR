@@ -87,6 +87,7 @@ Other {pitch functions}:
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{octave}()},
+\code{\link{pc}()},
 \code{\link{quality}()},
 \code{\link{semits}()},
 \code{\link{solfa}()},
