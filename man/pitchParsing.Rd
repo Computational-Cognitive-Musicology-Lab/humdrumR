@@ -7,9 +7,6 @@
 \alias{tonalInterval.logical}
 \alias{tonalInterval.NULL}
 \alias{tonalInterval.numeric}
-\alias{tonalInterval.rational}
-\alias{tonalInterval.fraction}
-\alias{tonalInterval.integer}
 \alias{tonalInterval.character}
 \title{Parsing pitch information}
 \usage{
@@ -21,13 +18,7 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(x, tonalHarmonic = 3, centMargin = 10, ...)
-
-\method{tonalInterval}{rational}(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...)
-
-\method{tonalInterval}{fraction}(x, tonalHarmonic = 3)
-
-\method{tonalInterval}{integer}(n, accidental.melodic = FALSE, keyed = TRUE, ...)
+\method{tonalInterval}{numeric}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 
 \method{tonalInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }

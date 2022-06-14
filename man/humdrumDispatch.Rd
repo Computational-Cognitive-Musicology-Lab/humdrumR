@@ -2,6 +2,7 @@
 % Please edit documentation in R/Compose.R
 \name{humdrumDispatch}
 \alias{humdrumDispatch}
+\alias{exclusiveDispatch}
 \alias{makeDispatchDF}
 \alias{makeHumdrumDispatcher}
 \alias{print.humdrumDispatch}
@@ -11,9 +12,19 @@ humdrumDispatch(
   str,
   dispatchDF,
   Exclusive = NULL,
+  funcName = NULL,
   multiDispatch = FALSE,
   ...,
   outputClass = "character"
+)
+
+exclusiveDispatch(
+  str,
+  dispatchDF,
+  Exclusive = NULL,
+  funcName = NULL,
+  ...,
+  outputClass = "numeric"
 )
 
 makeDispatchDF(...)

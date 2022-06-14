@@ -1923,18 +1923,19 @@ tonalInterval.NULL <- function(x, ...) NULL
 
 #' @rdname pitchParsing
 #' @export
-tonalInterval.numeric  <- double2tint
-#' @rdname pitchParsing
-#' @export
-tonalInterval.rational <- rational2tint
-#' @rdname pitchParsing
-#' @export
-tonalInterval.fraction <- fraction2tint
-#' @rdname pitchParsing
-#' @export
-tonalInterval.integer  <- semits2tint
+tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
+                                                list('freq', NA, frequency2tint),
+                                                list('cents', NA, cents2tint),
+                                                funcName = 'tonalInterval.numeric',
+                                                outputClass ='tonalInterval')
 
-
+# #' @rdname pitchParsing
+# #' @export
+# tonalInterval.rational <- rational2tint
+# #' @rdname pitchParsing
+# #' @export
+# tonalInterval.fraction <- fraction2tint
+# 
 
 
 #### Characters ####

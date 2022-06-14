@@ -363,12 +363,12 @@ partialApply <- function(func, ...) {
 #' 
 #' @name humdrumDispatch
 #' @export
-humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, 
+humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, funcName = NULL, 
                              multiDispatch = FALSE, ..., outputClass = 'character') {
   
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
-  if (!is.character(str)) .stop(if (hasArg('funcName')) "The function '{list(...)$funcName}'" else "humdrumDispatch", "requires a character-vector 'str' argument.")
+  if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
@@ -432,6 +432,37 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL,
   result
 }
 
+#' @rdname humdrumDispatch
+#' @export
+exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NULL, ..., outputClass = 'numeric') {
+  
+  if (is.null(str)) return(NULL)
+  if (length(str) == 0L && is.atomic(str)) return(vectorNA(0L, outputClass))
+  if (!is.atomic(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
+  
+  if (is.null(Exclusive)) Exclusive <- rep(dispatchDF$Exclusives[[1]], length(str))
+  if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
+  
+  Ematch <- match(Exclusive, dispatchDF$Exclusives, nomatch = 0L)
+  
+  strs <- tapply(str, Exclusive, list)
+
+  dispatch <- tapply(Ematch, Exclusive, unique)
+  
+  result <- Map(\(method, x) {
+    args <- c(list(x), list(...))
+    do...(method, args)
+    
+   }, c(list(force), dispatchDF$method)[dispatch + 1L], strs)
+  
+  result <- do.call('c', result)
+  
+  attr(result, 'dispatch') <-  list(Original = str, 
+                                    Segments = Exclusive,
+                                    Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
+  result
+  
+}
 
 humdrumRattr <- function(x) {
   known <- c('dispatch', 'dispatched')
@@ -492,6 +523,9 @@ makeDispatchDF <- function(...) {
   dispatchDF$methodPrint <- sapply(quoted, \(row) as.character(row[[4]])[1])
   
   dispatchDF$Args <- lapply(dispatchDF$method, fargs)
+  
+  if (all(is.na(dispatchDF$regex)) && any(duplicated(dispatchDF$Exclusive))) .stop("Can't make a DispatchDF with no regexes and duplicated Exclusive interpretations!")
+  
   dispatchDF
 }
 
@@ -501,6 +535,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
 
   dispatchDF <- makeDispatchDF(...)
                        
+  dispatcher <- if (all(is.na(dispatchDF$regex))) quote(exclusiveDispatch) else quote(humdrumDispatch)
   
   # Assemble the new function's arguments
   genericArgs <- local({
@@ -527,7 +562,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
                  ...)
     # dispatchArgs <- list(!!!dispatchArgs)
     # for (name in .names(dispatchArgs)) if (hasArg(name)) dispatchArgs[[name]] <- get(name0)
-    do(humdrumDispatch, c(args, dispatchArgs), ...)
+    do(!!dispatcher, c(args, dispatchArgs), ...)
     
   })
   
