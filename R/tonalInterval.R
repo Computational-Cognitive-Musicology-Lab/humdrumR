@@ -23,7 +23,7 @@
 #' The three arguments corespond to the three slots: `octave`, `LO5th` (Fifth), and `cent`.
 #' All inputs will be coerced to match in length.
 #' What's more, the `octave` argument can be left blank, in which case the appropriate octave will automatically be computed
-#' to place the interval in the octave above middle-C.
+#' to place the interval in the octave above .
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method, for `tonalInterval`s call [kern()][pitchRepresentations].
 #' Thus, if you return a `tonalInterval` on the command line (or call [print][base::print] one one) you'll see the [kern pitch][pitchRepresentations] representation printed.
@@ -423,15 +423,6 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 # Deparsing Pitch Representations (tint2x) ###############################
 ###################################################################### ###
 
-## Deparsing documentation ----
-
-#' Deparsing pitch information
-#' 
-#' 
-
-#' @seealso [tonalInterval], [tonalIntervalS4]
-#' @name pitchDeparsing
-NULL
 
 ## Pitch deparsers ####
 
@@ -446,7 +437,7 @@ tint2octave <- function(x,
 
   if (octave.relative) x <- delta(x)
   #
-  octn <- octave.offset + tintPartition_complex(x, octave.round = octave.round)$Octave@Octave
+  octn <- octave.offset + tintPartition_compound(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
   
   if (octave.integer) return(as.integer(octn))
@@ -498,7 +489,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semits <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
+tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
 
   
   if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
@@ -507,7 +498,7 @@ tint2semits <- function(x, Key = NULL, specific = TRUE, complex = TRUE, ...) {
         
   semits <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
-  if (!complex) semits <- semits %% 12L
+  if (!compound) semits <- semits %% 12L
 
   semits
   
@@ -569,7 +560,7 @@ tint2freq <- function(x, frequency.reference = 440L,
 }
 
 tint2pc <- function(x, ten = 'A', eleven = 'B', ...) {
-  str <- as.character(tint2semits(x, complex = FALSE))
+  str <- as.character(tint2semits(x, compound = FALSE))
   
   if (!is.null(ten)) str <- gsub('10', ten, str)
   if (!is.null(eleven)) str <- gsub('11', eleven, str)
@@ -716,8 +707,8 @@ Nupdown <- function(n, up = '^', down = 'v') ifelse(n >= 0, strrep(up, abs(n)), 
 
 tint2tonalChroma <- function(x, 
                              parts = c("species", "step", "octave"), sep = "", 
-                             step = TRUE, specific = TRUE, complex = TRUE,
-                             step.complex = FALSE,
+                             step = TRUE, specific = TRUE, compound = TRUE,
+                             step.compound = FALSE,
                              keyed = FALSE, Key = NULL,
                              qualities = FALSE, collapse = TRUE, ...) {
   
@@ -736,10 +727,10 @@ tint2tonalChroma <- function(x,
   species  <- if (specific)    tint2specifier(x, qualities = qualities, Key = Key, ...)   
   
   
-  # complex part
-  octave  <- if (complex) {
+  # compound part
+  octave  <- if (compound) {
     octave <- tint2octave(x, ...)
-    if (is.integer(octave) && is.integer(step) && step.complex) {
+    if (is.integer(octave) && is.integer(step) && step.compound) {
       step <- step + octave * 7L
       ""
     } else {
@@ -755,7 +746,7 @@ tint2tonalChroma <- function(x,
   #   c('-', '', '+')[sign + 2L]
   # }
   
-  pasteordered(parts, step = step, species = species, octave = if (complex) octave, sep = sep, collapse = collapse)
+  pasteordered(parts, step = step, species = species, octave = if (compound) octave, sep = sep, collapse = collapse)
     
   
 }
@@ -775,11 +766,11 @@ tint2pitch <- partialApply(tint2tonalChroma,
 
 
 
-tint2kern <- function(x, complex = TRUE, Key = NULL, ...) {
+tint2kern <- function(x, compound = TRUE, Key = NULL, ...) {
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
-                       parts = c("step", "species"), qualities = FALSE, complex = FALSE,
+                       parts = c("step", "species"), qualities = FALSE, compound = FALSE,
                        keyed = TRUE)
   
   kern <- t2tC(x, Key = Key, ...)
@@ -793,7 +784,7 @@ tint2kern <- function(x, complex = TRUE, Key = NULL, ...) {
   # }
   
   
-  if (complex) {
+  if (compound) {
     kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = TRUE)
   }
   
@@ -873,8 +864,8 @@ tint2interval <- function(x, directed = TRUE, ...) {
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
                        parts = c("species", "step", "octave"),
-                       complex = TRUE, keyed = FALSE, qualities = TRUE, 
-                       step.complex = TRUE,
+                       compound = TRUE, keyed = FALSE, qualities = TRUE, 
+                       step.compound = TRUE,
                        octave.integer = TRUE, octave.relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
   
@@ -894,12 +885,12 @@ tint2interval <- function(x, directed = TRUE, ...) {
 
 
 tint2degree <- partialApply(tint2tonalChroma, parts = c("step", "species", "octave"), 
-                            complex = TRUE, keyed = FALSE, step.labels = 1L:7L, 
+                            compound = TRUE, keyed = FALSE, step.labels = 1L:7L, 
                             flat = '-', sharp = '+', sep = c("", "/"),
                             octave.integer = TRUE, octave.offset = 4L)
 
 tint2deg <- partialApply(tint2tonalChroma, parts = c("octave", "step", "species"), 
-                            complex = TRUE, keyed = FALSE, step.labels = 1L:7L, 
+                            compound = TRUE, keyed = FALSE, step.labels = 1L:7L, 
                             flat = '-', sharp = '+', 
                             octave.integer = FALSE, octave.relative = TRUE, octave.round = expand)
 
@@ -976,46 +967,68 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' 
 #' [humdrumR] includes a easy-to-use but powerful system for *parsing* pitch information:
-#' various basic pitch representations (including numeric and character-string representations) can be "parsed"---read
+#' various basic pitch representations (including `numeric` and `character`-string representations) can be "parsed"---read
 #' and interpreted by `humdrumR`.
-#' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [pitch function][pitchFunctions], like [kern()].
+#' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [pitch function][pitchFunctions], like [kern()]
+#' [semit()], or [solfa()].
 #' 
 #' @details 
 #'
-#' The underlying parser used by all `humdrumR` [pitch functions][pitchFunctions] can be called explicitly using the function `tonalInterval`.
-#' The `tonalInterval` parser will attempt to parse any input information into a [tonalInterval][tonalIntervalS4] object---a back-end pitch representation that you probably don't need to care about!
-#' When you use one of the main [pitch functions][pitchFunctions], like [kern()] or [semits()], the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immediately [deparsed][pitchDeparsing]
+#' The underlying parser used by all `humdrumR` [pitch functions][pitchFunctions] can be called explicitly using the function `tonalInterval()`.
+#' The `tonalInterval` parser will attempt to parse any input information into a [tonalInterval][tonalIntervalS4] object---a back-end pitch representation 
+#' that you probably don't need to care about!
+#' When you use one of the main [pitch functions][pitchFunctions], like [kern()] or [semits()], 
+#' the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immediately [deparsed][pitchDeparsing]
 #' to the representation you asked for (e.g., `**kern` or `**semits`).
+#' Thus, the underlying pipeline for `humdrumR` [pitch functions][pitchFunctions] looks something like:
 #' 
-#' The pitch parser (`tonalInterval`) is a generic function, meaning it can accept `numeric` or `character`-string input:
+#' + **Input** representation (e.g., `**pitch` or `**semits`) `|>` 
+#'   + *Parsing* (done by `tonalInterval()`) `|>`
+#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'   + *Deparsing* `|>`
+#' +  **Output** representation (e.g. `**kern` or `**solfa`)
 #' 
-#' + [integer][base::integer] values are interpreted as semitones. Watch out! In R, you need to append an `L` to a number to make it an explicit integer:
-#'   For example, `tonalInterval(3L)`.
-#' + [numeric][base::numeric]/[double()] and [rational()] values are interpreted as frequency ratios, assuming a [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
-#'   For example, the value `2.0` will be interpreted as an octave (two to one ratio.)
-#' + [character][base::character] values are interpreted using a complex "regex/exclusive interpretation dispatch system"---details below!
-#'   
-#' (See the "Atonal parsing" section below to learn how atonal data (semitones or frequency/ratios) is interpreted as *tonal* data---i.e., how enharmonic spelling is decided.)
+#' *This* documentation talks about the parsing step.
+#' For an overview of the "deparsing" process, look [here][pitchDeparsing].
+#' To learn about the "deparsing" of specific representations, [start here][pitchFunctions] or go straight to the docs for specific functions---
+#' for example, call `?kern` to learn about [kern()].
 #' 
-#' # Tonal Parsing (character strings)
 #' 
-#' The most useful tool for humdrum data is parsing tonal pitch representations encoded as `character` strings.
+#' # Dispatch
+#' 
+#' The pitch parser (`tonalInterval`) is a generic function, meaning it can accepts a variety of inputs 
+#' and automatically "dispatches" the appropriate method for parsing the input.
+#' R's standard `S3` system is used to dispatch for either `numeric` or `character`-string input:
+#' Generally, `numeric` (or `integer`) inputs are interpreted as various *atonal* pitch representations while
+#' `character` strings are interpreted as various *tonal* pitch representations.
+#' Given either a `character` string or a number, `humdrumR` then uses either regular-expression matching or humdrum
+#' exclusive interpretation matching to dispatch specific parsing methods.
+#' 
+#' # Tonal Parsing (`character`-string inputs)
+#' 
+#' Since humdrum data is inherently string-based, the most powerful part of the `humdrumR` pitch-parser
+#' is its system for parsing pitch (mostly tonal) information from character strings.
 #' (This includes character tokens with pitch information embedded alongside other information; Details below.)
-#' The pitch parser (`tonalInterval`) uses either regular-expressions or exclusive interpretations to decide how to parse an input string.
-#' There are ten regular-expression patterns for pitch that `tonalInterval` knows how to parse automatically:
+#' The pitch parser (`tonalInterval`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
+#' parse an input string.
+#' There are twelve regular-expression patterns for pitch that `tonalInterval` knows how to parse automatically:
 #' 
-#' | Representation                                                                     | Exclusive                 | Example    |
-#' | ---------------------------------------------------------------------------------- | ------------------------: | ---------: |
-#' | [Kern](https://www.humdrum.org/rep/kern/index.html)                                | **kern                    | `ee-`      |
-#' | [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch)                 | **pitch                   | `Eb5`      |
-#' | [Helmholtz pitch](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                      | none                      | `eb'`      |
-#' | [Lilypond pitch](https://lilypond.org/doc/v2.22/Documentation/notation/pitches)    | none                      | `ees'`     |
-#' | [German pitch](https://www.humdrum.org/rep/Tonh/index.html) notation               | **tonh                    | `S5`       |
-#' | [Interval](https://en.wikipedia.org/wiki/Interval_(music))                         | **hint/**mint/**int       | `+m3`      |
-#' | [Scale degree](https://en.wikipedia.org/wiki/Degree_(music))                       | **deg                     | `b3`       |
-#' | Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                  | **solfa                   | `^me`      |
-#' | Fixed-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                     | **solfg                   | `mi~b5`    |
-#' | [Swara](https://en.wikipedia.org/wiki/Svara)                                       | **bhatk                   | `g`        |
+#' | Representation                                                                     | Exclusive                 | Example          |
+#' | ---------------------------------------------------------------------------------- | ------------------------: | ---------------: |
+#' | [Kern](https://www.humdrum.org/rep/kern/index.html)                                | **kern                    | `ee-`            |
+#' | [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch)                 | **pitch                   | `Eb5`            |
+#' | [Helmholtz pitch](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                      | none                      | `eb'`            |
+#' | [Lilypond pitch](https://lilypond.org/doc/v2.22/Documentation/notation/pitches)    | none                      | `ees'`           |
+#' | [German pitch](https://www.humdrum.org/rep/Tonh/index.html) notation               | **Tonh                    | `S5`             |
+#' | [Interval](https://en.wikipedia.org/wiki/Interval_(music))                         | **hint/**mint/**int       | `+m3`            |
+#' | [Scale degree](https://en.wikipedia.org/wiki/Degree_(music))                       | **deg or **degree         | `^^3-` or `3-/5` |
+#' | [Pitch Class](https://en.wikipedia.org/wiki/Pitch_class#Integer_notation)          | **pc                      | `3`              |
+#' | Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                  | **solfa                   | `^me`            |
+#' | Fixed-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                     | **solfg                   | `mi~b5`          |
+#' | [Swara](https://en.wikipedia.org/wiki/Svara)                                       | **bhatk                   | `g`              |
+#' 
+#' 
+#' ## Exclusive Dispatch
 #' 
 #' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
 #' that `Exclusive` argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the 
@@ -1024,7 +1037,9 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Similarly, `solfa(x, Exclusive = 'kern')` will force the parser to interpret `x` as `**kern` data.
 #' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum] (or using a [humdrumR pipe][humPipe], like `%hum>%`),
 #' `humdrumR` will automatically pass the `Exclusive` field from the humdrum data to the function---this means, that in most cases, 
-#' you don't need to explicitely do anything with the `Exclusive` argument!
+#' you don't need to explicitly do anything with the `Exclusive` argument!
+#' 
+#' ## Regex Dispatch
 #' 
 #' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
 #' or `NULL`, `humdrumR` will instead use regular-expression patterns to select a known interpretation.
@@ -1036,7 +1051,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Remember, if `Exclusive` is specified, it overrides the regex-based dispatch, which means that `pitch('so', Exclusive = 'kern')` will return `NA`, because
 #' `'so'` can't be interpreted as a `**kern` value.
 #' 
-#' ## "In place" parsing
+#' ### "In place" parsing
 #' 
 #' In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
@@ -1044,10 +1059,18 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' using the appropriate known regular expressions.
 #' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
-#' # Advanced Tonal Parsing Options
+#' ## Advanced Tonal Parsing Options
 #' 
-#' The eight tonal representations listed above function through a common parsing interface.
-#' By using "advanced" parsing arguments, you can tweak how parsing is done, so as to accommodate even more input representations!
+#' The eleven tonal representations listed above are parsed through a common intesrface.
+#' By using "advanced" parsing arguments, you can tweak how this parsing is done, so as to accommodate even more input representations!
+#' This means we are controlling the behavior of `tonalInterval()`, in the second step of our pipeline:
+#' 
+#' + **Input** representation `|>` 
+#'   + *Parsing* (done by `tonalInterval(PARSE ARGS GO IN HERE!)`) `|>`
+#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'   + *Deparsing* `|>`
+#' +  **Output** representation 
+#' 
 #' Note that these arguments are identical to parallel [deparsing arguments][pitchDeparsing].
 #' The following "advanced" parsing arguments are available (read all the details about them further down):
 #' 
@@ -1079,10 +1102,17 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #'   + `sep`.
 #'   
 #' These "advanced" arguments can be used directly in *any* [pitch function][pitchFunctions], or in a call to `tonalInterval` itself.
-#' To use them with `tonalInterval` just specify them directly as arguments;
-#' to use them with other [pitch functions][pitchFunctions], you must put them in the `parseArgs` argument, or use the "syntactic sugar" form (`parse(...)`).
+#' To use them with `tonalInterval` just specify them directly as arguments: for example, `tonalInterval(x, qualities = TRUE)`.
+#' To use them with other [pitch functions][pitchFunctions], you can either...
 #' 
-#' Each Exclusive/Regex-dispatch combo (above) is associated with default parsing arguments.
+#' + Put them in the `parseArgs` argument:
+#'   + `kern(x, parseArgs = list(qualities = TRUE))`
+#' + Or use the "syntactic sugar" short-hand form:
+#'   + `kern(x, parse(qualities = TRUE))`
+#'   
+#' 
+#' 
+#' Each of the known Exclusive/Regex-dispatch combo (see the table above) is associated with default parsing arguments.
 #' For example, if you set `Exclusive = 'kern'` or just use data that *look* like `**kern`, the `flat` argument is set to `"-"`,
 #' However, if you had, for example, input data that looked like `**kern` **except** it used a different flat symbol, like `"_"`, you could modify the parser:
 #' `kern("EE_", parse(flat = "_"))`
@@ -1103,7 +1133,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ----
 #' 
-#' There is also a `step.signed` (logical, length 1) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
+#' There is also a `step.signed` (`logical`, `length == 1`) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
 #' uppercase versions of `step.labels` are interpreted as positive (upwards) steps.
 #' This option is used, for example, by the default [kern()] and [helmholtz()] parsers.
 #' 
@@ -1111,15 +1141,15 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' In tonal pitch representations, "*specific*" versions of tonal pitches---the tonal "species"---are indicated by "specifiers": 
 #' either *accidentals* or *qualities*.
-#' The `qualities` (logical, length 1) argument indicates whether accidentals are used (`qualities = FALSE`) or qualities (`qualities = TRUE`).
+#' The `qualities` (`logical`, `length == 1`) argument indicates whether accidentals are used (`qualities = FALSE`) or qualities (`qualities = TRUE`).
 #' Some specifiers can be repeated any number of times, like "triple sharps" or "doubly augmented";
-#' The `specifier.maximum` (integer, length 1) argument sets a maximum limit on the number of specifiers to read.
+#' The `specifier.maximum` (`integer`, `length == 1`) argument sets a maximum limit on the number of specifiers to read.
 #' For example, you could force all triple sharps (`"###"`) or double sharps (`"##"`) to parse as just `"#"`, by specifying `specifier.maximum = 1L`.
 #' 
 #' ### Accidentals 
 #'   
 #' If `qualities = FALSE` the parser will look for accidentals in the input, recognizing three types: naturals, flats, and sharps.
-#' The `natural`, `flat`, and/or `sharp` (character, length 1) arguments can be used to indicate how accidentals are represented in the input.
+#' The `natural`, `flat`, and/or `sharp` (`character`, `length == 1`) arguments can be used to indicate how accidentals are represented in the input.
 #' For example, if the input strings look like `c("Eflat", "C")`, you could set the argument `flat = "flat"`.
 #' 
 #' Examples of accidental argument combinations that are currently used by `humdrumR` [pitch functions][pitchFunctions] include:
@@ -1130,14 +1160,14 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ----
 #' 
-#' The `doubleflat`, and `doublesharp` (character, length 1) arguments are `NULL` by default, but can be set if a special symbol is used 
+#' The `doubleflat`, and `doublesharp` (`character`, `length == 1`) arguments are `NULL` by default, but can be set if a special symbol is used 
 #' to represent two sharps or flats. For example, you might have an input which represents double sharps as `"x"`.
 #' You could call `kern("Fx", parse(doublesharp = "x"))` and the output will be `"F##"`.
 #' 
 #' ### Qualities
 #' 
 #' If `qualities = TRUE` the parser will look for qualities in the input, recognizing five types: perfect, minor, major, augmented, and diminished.
-#' The `perfect`, `major`, `minor`, `diminish`, and/or `augment` (character, length 1) arguments can be used to indicate how qualities
+#' The `perfect`, `major`, `minor`, `diminish`, and/or `augment` (`character`, `length == 1`) arguments can be used to indicate how qualities
 #'  are represented in the input.
 #' (Note: we are talking about interval/degree qualities here, not chord qualities!)
 #' For example, if the input strings look like `c("maj3", "p4")`, you could set the arguments `major = "maj"` and `perfect = "p"`.
@@ -1153,7 +1183,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' #### From the Key
 #' 
-#' The most important argument here is `implicitSpecies` (logical, length 1):
+#' The most important argument here is `implicitSpecies` (`logical`, `length == 1`):
 #' if `implicitSpecies = TRUE`, the species of input without an explicit species indicated is interpreted using the `Key`.
 #' For example, 
 #' 
@@ -1175,7 +1205,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' + `kern("C#", Key = 'a:', parse(implicitSpecies = TRUE))` is parsed as `"C#"`.
 #'   + The `"#"` overrides the `Key`.
 #'   
-#' However! You can also change this behavior by setting the `absoluteSpecies` (logical, length 1) argument to `FALSE`.
+#' However! You can also change this behavior by setting the `absoluteSpecies` (`logical`, `length == 1`) argument to `FALSE`.
 #' If you do so, the specifiers in the input are interpreted "on top of" the key accidental:
 #' 
 #' + `kern("C#", Key = 'A:', parse(implicitSpecies = TRUE, absoluteSpecies = FALSE))` is parsed as `"C##"`. 
@@ -1208,17 +1238,17 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Octave
 #' 
-#' The final piece of information encoded in most (but not) all pitch representations is an indication of the "complex pitch"---
+#' The final piece of information encoded in most (but not) all pitch representations is an indication of the "compound pitch"---
 #' incorporating octave information.
 #' In `humdrumR` octaves are *always* defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
-#' This mainly comes up with regards to Cb and B#: Cb4 is a semitone below middle-C; B#3 is enharmonically the same as middle-C.
+#' This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-**C**.
 #' 
 #' ### Integer Octaves 
 #' 
 #' The simplest way octave information can be encoded is as an integer value, as in [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch).
-#' If you need to parse integer-encoded octaves, set the `octave.integer` (logical, length 1) argument to `TRUE`.
-#' By default, `humdrumR` considers the "central" octave (`octave == 0`) to be the octave of middle-C, or equivalently, a unison.
-#' However, if a different octave is used as the central octave, you can specify the `octave.offset` (integer, length 1) argument.
+#' If you need to parse integer-encoded octaves, set the `octave.integer` (`logical`, `length == 1`) argument to `TRUE`.
+#' By default, `humdrumR` considers the "central" octave (`octave == 0`) to be the octave of , or equivalently, a unison.
+#' However, if a different octave is used as the central octave, you can specify the `octave.offset` (`integer`, `length == 1`) argument.
 #' 
 #' To illustrate, the default [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch) parser used the arguments:
 #' 
@@ -1228,7 +1258,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' ### Non-integer Octave Markers
 #' 
 #' If `octave.integer = FALSE`, the `humdrumR` parser instead looks for three possible symbols to indicate octave information.
-#' These symbols are controlled using the `up`, `down`, and `same` (character, length 1) arguments.
+#' These symbols are controlled using the `up`, `down`, and `same` (`character`, `length == 1`) arguments.
 #' A `same` symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the `up` or `down` symbols indicate
 #' increasing positive (`up`) or negative (`down`) octaves.
 #' For example, in `lilypond` notation, `,` represents lower octaves, and `'` (single apostrophe) represents upper octaves.
@@ -1237,7 +1267,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' + `pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))`
 #'   + Returns `c("C2", "C3", "C4")`.
 #'   
-#' (Note that lilypond makes the octave *below* middle-C the central octave, using `octave.offset = 1`.)
+#' (Note that lilypond makes the octave *below*  the central octave, using `octave.offset = 1`.)
 #' 
 #' 
 #' ### Octave "Rounding"
@@ -1246,26 +1276,26 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' In most absolute pitch representations (e.g., [kern()], [pitch()]), the "boundary" between one octave and the next is 
 #' between B (degree 7) and C (degree 1).
 #' However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range `-P4` (`G`) to `+P4` (`f`).
-#' In this case, the "octave boundary" is *centered* around the unison (or middle-C), rather than starting *at* middle-C/unison.
+#' In this case, the "octave boundary" is *centered* around the unison (or ), rather than starting *at* middle-**C**/unison.
 #' If our data was represented this way, we could use the `octave.round` argument; `octave.round` must be a rounding *function*, 
-#' either [round, floor, ceiling, trunc][base::Round], or [expand].
+#' either [round, floor, ceiling, trunc][base::round], or [expand].
 #' These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
 #' The default behavior for most pitch representations is `octave.round = floor`: each scale step is rounded downwards to the nearest C.
 #' So B is associated with the C 7 steps below it.
 #' If, on the other hand, `octave.round = round`, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C *above* them.
 #' Indeed, `octave.round = round` gets us the `-P4` <-> `+P4` behavior we mentioned earlier!
 #'
-#' When working parsing [intervals][interval()], the `octave.round` option allows you to control how the "simple part" (less than an octave) of a complex interval is represented.
+#' When working parsing [intervals][interval()], the `octave.round` option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
 #' For example, we might think of a ascending major 12th as being an ascending octave *plus* a ascending perfect 5th: ** +P8 + P5**.
 #' **Or** we could encode that same interval as *two* ascending octaves *minus* a perfect fourth: **+ P15 - P4**.
-#' The following table illustrates how different `octave.round` arguments "partition" complex intervals into simple parts and octaves:
+#' The following table illustrates how different `octave.round` arguments "partition" compound intervals into simple parts and octaves:
 #'
 #' ```{r, echo = FALSE, comment=NA, result = 'asis'}
 #' 
 #' 
 #' tint <- tonalInterval(c('FF', 'GG','C', 'F','G', 'c', 'f','g','cc','ff','gg','ccc', 'fff', 'ggg'))
 #' 
-#' tintparts <- lapply(c(round, floor, ceiling, trunc, expand), \(f) tintPartition_complex(tint, octave.round = f))
+#' tintparts <- lapply(c(round, floor, ceiling, trunc, expand), \(f) tintPartition_compound(tint, octave.round = f))
 #' 
 #' intervals <- sapply(tintparts, \(tp) paste0(interval(tp$Octave), ' + ', interval(tp$Simple)))
 #' intervals <- gsub('\\+ \\+', '+ ', intervals)
@@ -1352,20 +1382,26 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' The most common case would be a comma or space.
 #' For example, we could use a parse command like this: `kern("E flat 5", parse(flat = "flat", sep = " "))`.
 #'     
-#' # Atonal Parsing (numeric) 
+#' # Atonal Parsing (`numeric` inputs) 
 #' 
 #' The `humdrumR` pitch parser (`tonalInterval()`) will interpret numeric inputs as atonal pitch information.
-#' Specifically, real numbers (R [doubles or "numeric"][base::double]) are interpreted as frequencies, while [integers][base::integer]
-#' are interpreted as [semitones](https://en.wikipedia.org/wiki/Semitone).
-#' Remember, to explicitly make integers in R, you need to type `L` after numbers---like `3L`---or call the function
-#' `as.integer`---like `as.integer(3)`.
+#' By default, numbers are interpreted as semitones.
+#' However, parses for [midi()], [cents()],  and [frequencies][freq()] are also defined.
+#' Dispatch to these different parsers is controlled by the `Exclusive` argument.
 #' 
+#' | Representation                                                                     | Exclusive                 | Example          |
+#' | ---------------------------------------------------------------------------------- | ------------------------: | ---------------: |
+#' | Semitones                                                                          | **semits (or `NULL`)      | `3` -> `e-`      |
+#' | MIDI                                                                               | **midi                    | `63` -> `e-`     |
+#' | Cents                                                                              | **cents                   | `300` -> `e-`    |
+#' | Frequency (Hz)
 #' 
+#' ## Enharmonic Interpretation 
 #' 
 #' When converting from an atonal representation to a tonal one, we must decide how to interpret the tonality 
 #' of the input---specifically, which [enharmonic spelling](https://en.wikipedia.org/wiki/Enharmonic) of notes to use.
-#' The  `humdrumR` numeric parser interprets atonal pitches in "enharmonic window" of 12 steps on the line-of-fifths.
-#' The position of this window is set with the `enharmonic.center` (integer, length 1) argument.
+#' The  `humdrumR` numeric parser interprets atonal pitches in a "enharmonic window" of 12 steps on the line-of-fifths.
+#' The position of this window is set with the `enharmonic.center` (`integer`, `length == 1`) argument.
 #' By default, `enharmonic.center = 0`, which creates a window from a `-5` (*b2*) to `+6`) (*#4*).
 #' If you prefer *#1* instead of *b2*, set `enharmonic.center = 1`.
 #' For all flats, set `enharmonic.center = -1`.
@@ -1382,23 +1418,22 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' | `4`                      | 1   | #1  | 2   | #2  | 3   | 4   | #4  | 5   | #5  | 6   | #6  | 7   |
 #' 
 #' The `enharmonic.center` argument will work the same when translating to any pitch representation, like [kern()].
-#' However, we present the table above in terms of scale degrees because the atonal -> enharmonic calculation
+#' However, we present the table above in terms of scale degrees because the *atonal -> enharmonic* calculation
 #' is centered on a key.
 #' So, if `Key` argument is specified, the "enharmonic window" is centered around that key.
 #' So if you are translating to `kern` and the `Key = F#:`, the output will range from `Gn` to `B#`.
 #' If you don't want this, set `Key = NULL`.
 #' 
-#' ### Melodic Interpretation of Chromatic
+#' ### Melodic Interpretation of Chromatic Notes
 #' 
 #' It is very common for chromatic notes in melodic passages to be labeled based on their melodic contour:
 #' i.e., ascending chromatic notes labeled sharp and descending chromatic notes labeled flat.
-#' This behavior can be engaged by setting the `accidental.melodic` (logical, length 1) argument.
+#' This behavior can be engaged by setting the `accidental.melodic` (`logical`, `length == 1`) argument.
 #' When `accidental.melodic = TRUE`, the input is first centered in the enharmonic window (above), but then
 #' any places where a chromatic alteration proceeds upwards to a non-chromatic note will be altered (if necessary) to a
 #' sharp, and vice verse for a descending notes and flats.
 #' For example, while `kern(0:2)` returns `c("c", "d-", "d")`, `kern(0:2, parse(accidental.melodic = TRUE))` returns `c("c", "c#", "d")`.
 #' 
-#'     
 #'      
 #' @examples 
 #' 
@@ -1481,7 +1516,7 @@ atonal2tint <- function(tint, accidental.melodic = FALSE, keyed = TRUE, Key = NU
   tint
 }
 
-semits2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
+semits2tint <- function(n, ...) {
           wholen <- as.integer(c(n))
           
           pitchclass <- wholen %% 12L
@@ -1491,15 +1526,25 @@ semits2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
           tints <- tint(octaves, LO5ths)
           
           ##
-          tints <- atonal2tint(tints, accidental.melodic = accidental.melodic, keyed = keyed, ...)
+          tints <- atonal2tint(tints, ...)
           
           tints
 }
 
+cents2tint <- function(n, ...) {
+  roundedN <- round(n / 100)
+  tint <- semits2tint(roundedN, ...)
+  
+  tint@Cent <- n - (roundedN * 100)
+  
+  tint
+  
+  
+}
 
 
-midi2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
-  semits2tint(n - 60L, accidental.melodic = accidental.melodic, keyed = keyed, ...)
+midi2tint <- function(n, ...) {
+  semits2tint(n - 60L, ...)
 }
 
 
@@ -1550,7 +1595,7 @@ freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference
   
   tint <- ratio2tint(ratio, ...)
   
-  ## add offset (defaults to A above middle-C)
+  ## add offset (defaults to A above )
   frequency.reference.note <- tonalInterval(frequency.reference.note)
   
   tint + frequency.reference.note
@@ -1690,7 +1735,7 @@ tonalChroma2tint <- function(str,
  
  simpletint <- (step %||% tint( , 0L)) + (species %||%  tint( , 0L)) 
  
- # complex part
+ # compound part
  tint <- if ("octave" %in% parts) octave2tint(octave, simpletint = simpletint, root = getRootTint(Key %||% dset(0L, 0L)), ...) + simpletint else simpletint
  
  if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
@@ -1887,6 +1932,7 @@ tonalInterval.NULL <- function(x, ...) NULL
 tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
                                                 list('freq',  NA, freq2tint),
                                                 list('cents', NA, cents2tint),
+                                                list('midi',  NA, midi2tint),
                                                 funcName = 'tonalInterval.numeric',
                                                 outputClass ='tonalInterval')
 
@@ -1947,52 +1993,94 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' Translate between pitch representations.
 #' 
 #' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-#' 
-#' 
-#' These pitch functions all work in similar ways, with similar arguments and functionality;
-#' To read more details about each function, click on the links in the list below, 
-#' or type `?func` in the R command line: for example, `?kern`.
 #' The functions are:
-#' 
 #' + **Tonal pitch representations**
 #'   + *Absolute pitch representations*
-#'     + [kern]
-#'     + [pitch]
-#'     + [lilypond]
-#'     + [helmholtz]
+#'     + [kern()]
+#'     + [pitch()]
+#'     + [lilypond()]
+#'     + [helmholtz()]
+#'     + [tonh()] (German-style notation)
 #'   + *Relative pitch representations*
-#'     + [interval]
-#'     + [solfa] (solfege)
-#'     + [degree] (scale degrees)
-#'     + [bhatk] (hindustani swara)
+#'     + [interval()]
+#'     + [solfa()] (relative-do solfege)
+#'     + [solfg()] (fixed-do solfege)
+#'     + [degree()] (absolute scale degrees)
+#'     + [deg()] (melodic scale degrees)
+#'     + [bhatk()] (hindustani swara)
+#'   + *Partial pitch representations*
+#'     + [step()]
+#'     + [accidental()]
+#'     + [quality()]
+#'     + [octave()]
 #' + **Atonal pitch representations**
 #'   + *Musical (non-tonal) pitch representations*
-#'     + [semits]
-#'     + [midi]
+#'     + [semits()]
+#'     + [midi()]
+#'     + [cents()]
+#'     + [pc()]
 #'   + *Physical pitch/interval representations*
-#'     + [frequency]
-#'     + [ratio]
+#'     + [freq()]
 #'     
-#' @param x (atomic vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' @details
+#' 
+#' These pitch functions all work in similar ways, with similar arguments and functionality.
+#' Each function takes an input pitch representation (which can be anything) and outputs
+#' *its* own pitch representation. 
+#' For example, [kern()] takes any input representation and outputs `**kern`.
+#' Underneath the hood, the full processing of each function looks like this:
+#' 
+#' + **Input** representation (e.g., `**pitch` or `**semits`) `|>` 
+#'   + *Parsing* (done by [tonalInterval()]) `|>`
+#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'     + **Transformation** (e.g., [transpose()\) `\>`
+#'   + *Deparsing* `|>`
+#' +  **Output** representation (e.g. `**kern` or `**solfa`) 
+#' 
+#' 
+#' 
+#' *This* documentation focuses on the deparsing and output steps.
+#' To read the details of the parsing step, read [this][pitchParsing].
+#' To read more details about each specific function, click on the links in the list above, 
+#' or type `?func` in the R command line: for example, `?kern`.
+#'     
+#' # Basic Arguments
+#' 
+#' 
+#' Each pitch function has a few standard arguments (details above), which control details of the output.
+#' The most important are the `generic` and `simple` arguments, which allow you to control what type of pitch information
+#' if returned.
+#' 
+#' ## Generic vs Specific
+#' 
+#' If `generic = TRUE`, [specific pitch information](https://en.wikipedia.org/wiki/Generic_and_specific_intervals)
+#'  (accidentals or qualities) is omitted from the output.
+#' As an alternative, you can instead specify `specific = FALSE` to get the same result.
+
+#' In the case of atonal outputs, the "generic" version of that pitch is output:
+#' for example, `semits('c#', generic = TRUE)` will return `0`, because the "generic" version of *C#* is *C*, which corresponds to `0`.
+#' Howeber, note that the generic version of a pitch follows the key, so `semits('c#', generic = TRUE, Key = 'A:')` will return `1`!
+#' 
+#' ## Simple vs Compound
+#' 
+#' argument is paired
+#' [Simple vs compound](https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound) or 
+#' simple vs compound 
+#'     
+    
+#'     
+#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
 #' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
 #'        There are also two hidden (advanced) argumens you can specify: `memoize` and `deparse` (see the details below).
-#' @param generic (logical, length 1) If `generic = TRUE` the "specific" pitch information is discarded.
+#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information is discarded.
 #'        For tonal representations, this means no accidentals/qualities or equivalent information is printed.
 #'        For atonal representations, the generic pitch is returned.
-#'        As an alternative, you can specify `specific` as an alternative (opposite) to the `generic` argument: `generic == !specific`.
-#' @param simple (logical, length 1) If `simple = TRUE` the "complex" pitch information is discarded.
+#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information is discarded.
 #'        This means that *octave* information is discarded, and the resulting output is confined within the default octave.
 #'        For absolute pitch representations, this is the octave above middle C.
-#'        For relative pitch representations, this is the octave above a unison.
-#'        (The special `octave.round` argument can be used to modify this behavior).
-
-#' @param parseArgs (list) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
-#'        As a convenient syntactic sugar, instead of writing `parseArgs = list(a = x, b = y, etc.)`, you can write
-#'        `parse(a = x, b = y, etc.)`.
-#' @param transposeArgs (list) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
-#'        As a convenient syntactic sugar, instead of writing `transposeArgs = list(a = x, b = y, etc.)`, you can write
-#'        `transpose(a = x, b = y, etc.)`.
-#' @param inPlace (logical, length 1) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
+#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
 #'        *and* there is extral, non-pitch information in the strings "beside" the pitch information.
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
 #'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
@@ -2015,6 +2103,8 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' Note that `inPlace = TRUE` will force functions like `semits`, which normally return numeric values, to return character strings
 #' *if* their input is a character string.
 #' 
+#' @section Advanced Deparsing
+#' 
 #' @returns 
 #' 
 #' `NULL` inputs (`x` argument) return a `NULL` output.
@@ -2036,8 +2126,8 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('simple' %in% argnames) {
-    if ('complex' %in% argnames && !xor(args$simple, args$complex)) .stop("In your call to {callname}, you've specified contradictory 'simple' and 'complex' arguments...it has to be one or the other!")
-    args$complex <- !args$simple
+    if ('compound' %in% argnames && !xor(args$simple, args$compound)) .stop("In your call to {callname}, you've specified contradictory 'simple' and 'compound' arguments...it has to be one or the other!")
+    args$compound <- !args$simple
   }
   
   if ('octave.absolute' %in% argnames) {
@@ -2060,7 +2150,7 @@ pitchArgCheck <- function(args,  callname) {
     
   }
   
-  checkTFs( args[intersect(argnames, c('generic', 'specific', 'complex', 'simple', 'accidental.melodic',
+  checkTFs( args[intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic',
                                        'octave.absolute', 'octave.relative'))], callname = callname)
     
   singlechar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
@@ -2078,7 +2168,7 @@ pitchArgCheck <- function(args,  callname) {
 }
 
 
-makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL) {
+makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   exclusiveFunctions <<- c(exclusiveFunctions, callname)
   keyedFunctions <<- c(keyedFunctions, callname)
@@ -2086,12 +2176,13 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  args <- alist(x = , 
+  args <- c(alist(x = , 
                 ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
                 generic = FALSE, simple = FALSE, octave.relative = FALSE, 
                 transposeArgs = list(),
                 parseArgs = list(), 
-                inPlace = FALSE)
+                inPlace = FALSE),
+            extraArgs)
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -2156,17 +2247,34 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
 ### Pitch Transformers ####
 
 
-#' 12-tone equal-temperament pitch representations
+#' Translate pitches to frequency (Hz)
+#' 
+#' @param frequency.reference (`numeric`, `length == 1`) What is the reference frequency---default is `440` (Hz).
+#' @param frequency.reference.note (Any parsable pitch representation, `length == 1`) What note is the `reference.frequency` tuned to?
+#'       Default is `"a"`---the **A** above middle-**C**.
+#' @param tonalHarmonic (`numeric`, `length == 1`) What frequency is the "tonal harmonic" (perfect 10th) tuned to?
+#'       By default, the value is `2^(19/12)`, the 12-tone equal-temperament10th.
+#'       For [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning), set `tonalHarmonic = 3`.
+#' 
+#' @family {atonal pitch functions}
+#' @family {frequency-based pitch functions}
+#' @family {pitch functions}
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
+#' @export 
+freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(tonalHarmonic = 2^(19/12),
+                                                                              frequency.reference = 440,
+                                                                              frequence.reference.note = 'a')) 
+#' 12-tone equal-temperament semitone representations
 #' 
 #' These function translates pitch information into basic atonal, 12-tone-equal-temperament pitch values:
 #' [semitones](https://en.wikipedia.org/wiki/Semitone) (integers), [MIDI pitch values](https://en.wikipedia.org/wiki/MIDI),
 #'  and [cents](https://en.wikipedia.org/wiki/Cent_(music)).
-#' `midi` and `semits` are identical, except `semits` returns values centered at Middle-C (**0 = middle-C**), while
-#' `midi` is offset such that **middle-C = 60**.
+#' `midi` and `semits` are identical, except `semits` returns values centered at Middle-C (**0 = **), while
+#' `midi` is offset such that ** = 60**.
 #' 
-#' By default, the output of `cent` is simply the same as `semits(x) * 100`.
-#' However, the `tonalHarmonic` value can be modified for `cent`, to produce cent-value for alternate tunings.
-#' Thus, where as `midi` and `semits` return [integers][base::integer], `cents` always returns real-number ([double][base::double]) values.
 #' 
 #' 
 #' @family {atonal pitch functions}
@@ -2181,35 +2289,34 @@ semits <- makePitchTransformer(tint2semits, 'semits', 'integer')
 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
-#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
-#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' 
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchFunctions In-place parsing
 #' @rdname semits
 #' @export 
 midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 
+#' 12-tone equal-temperament cent representation
+#' 
+#' By default, the output of `cents` is simply the same as `semits(x) * 100`.
+#' However, the `tonalHarmonic` value can be modified for `cents` to produce cent-values for alternate tunings.
+#' For example, `cents('g', tonalHarmonic = 3)` returns `r cents('g', tonalHarmonic = 3)`, because the 
+#' "pure" third harmonic (`3`) is `1.955` sharper than equal-temperment.
+#' Thus, where as `midi` and `semits` return [integers][base::integer], `cents` always returns real-number ([double][base::double]) values.
+#' 
+#' [TonalIntervals][tonalIntervalS4] parsed from [frequency][freq()] might also have arbitrary cent deviations.
+#' For example, `cents(440 * 10/9, Exclusive = 'freq')` returns `1082.404`---this would correspond to the 
+#' "[minor tone](https://en.wikipedia.org/wiki/Major_second#Major_and_minor_tones)" above A=440.
+#' 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' @inheritParams freq
 #' @inheritSection pitchFunctions In-place parsing
-#' @rdname semits
 #' @export 
-cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric')
-
-#' @family {atonal pitch functions}
-#' @family {frequency-based pitch functions}
-#' @family {pitch functions}
-#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
-#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
-#' @inheritParams pitchFunctions
-#' @inheritSection pitchFunctions In-place parsing
-#' @rdname semits
-#' @export 
-freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric')
-
+cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist(tonalHarmonic = 2^(19/12)))
 
 
 
@@ -2218,9 +2325,9 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric')
 #' As encoded in the humdrum 
 #' [`**pc`](https://www.humdrum.org/rep/pc/index.html) interpretation.
 #' 
-#' @param ten (character, length 1) A shorthand-symbol for "10." Defaults to `"A"`.
+#' @param ten (`character`, `length == 1`) A shorthand-symbol for "10." Defaults to `"A"`.
 #'        If `NULL`, "10" is used with no shorthand.
-#' @param eleven (character, length 1) A shorthand-symbol for "11." Defaults to `"B"`.
+#' @param eleven (`character`, `length == 1`) A shorthand-symbol for "11." Defaults to `"B"`.
 #'        If `NULL`, "11" is used with no shorthand.
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
@@ -2271,9 +2378,9 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #'   + Sharp: `"#"`
 #' + **Octave**
 #'   + Octave is indicated through the case of the step characters, as well as *repetition* of the step character.
-#'     Uppercase letters are used for octaves below middle-C; lowercase letters for the middle-C octave and higher.
-#'     The middle-C octave, and the octave below it get one character each, with higher and lower octaves repeating that character.
-#'     For example, using `C#` as the step value, and relative to the middle-C octave:
+#'     Uppercase letters are used for octaves below ; lowercase letters for the middle-**C** octave and higher.
+#'     The  octave, and the octave below it get one character each, with higher and lower octaves repeating that character.
+#'     For example, using `C#` as the step value, and relative to the  octave:
 #'     + -3: `"CCC#"`
 #'     + -2: `"CC#"`
 #'     + -1: `"C#"`
@@ -2492,18 +2599,18 @@ octave <- makePitchTransformer(tint2octave, 'octave', 'integer',
 ## Partitioning tonalIntervals ####
 
 
-tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'),
+tintPartition <- function(tint, partitions = c('compound', 'harmonic', 'specific'),
                           octave.round = floor, Key = NULL, enharmonicWrap = 12L, ...) {
   
-  partitions <- matched(partitions, c('complex', 'harmonic', 'specific'))
+  partitions <- matched(partitions, c('compound', 'harmonic', 'specific'))
   
   Key <- diatonicSet(Key %||% dset(0, 0))
   match_size(tint = tint, Key = Key, toEnv = TRUE)
   
-  octave <- if ('complex' %in% partitions) {
-    complex <- tintPartition_complex(tint, octave.round)
-    tint <- complex$Simple
-    complex['Octave']
+  octave <- if ('compound' %in% partitions) {
+    compound <- tintPartition_compound(tint, octave.round)
+    tint <- compound$Simple
+    compound['Octave']
   }
   
   comma <- if ('harmonic' %in% partitions) {
@@ -2524,10 +2631,10 @@ tintPartition <- function(tint, partitions = c('complex', 'harmonic', 'specific'
   
 }
 
-#### simple + octave = complex ####
+#### simple + octave = compound ####
 
 
-tintPartition_complex <- function(tint, octave.round = floor, ...) {
+tintPartition_compound <- function(tint, octave.round = floor, ...) {
   octshift <- as.integer(octave.round(tint2semits(tint %% dset(0, 0)) / 12))
   
   octavepart <- tint(octshift, 0L)

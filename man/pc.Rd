@@ -21,12 +21,12 @@ pc(
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(logical, length 1) If \code{generic = TRUE} the "specific" pitch information is discarded.
+\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information is discarded.
 For tonal representations, this means no accidentals/qualities or equivalent information is printed.
 For atonal representations, the generic pitch is returned.
 As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
 
-\item{simple}{(logical, length 1) If \code{simple = TRUE} the "complex" pitch information is discarded.
+\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "complex" pitch information is discarded.
 This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
 For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
@@ -40,15 +40,15 @@ As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a
 As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
 \code{parse(a = x, b = y, etc.)}.}
 
-\item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 
-\item{ten}{(character, length 1) A shorthand-symbol for "10." Defaults to \code{"A"}.
+\item{ten}{(\code{character}, \code{length == 1}) A shorthand-symbol for "10." Defaults to \code{"A"}.
 If \code{NULL}, "10" is used with no shorthand.}
 
-\item{eleven}{(character, length 1) A shorthand-symbol for "11." Defaults to \code{"B"}.
+\item{eleven}{(\code{character}, \code{length == 1}) A shorthand-symbol for "11." Defaults to \code{"B"}.
 If \code{NULL}, "11" is used with no shorthand.}
 }
 \description{
@@ -77,12 +77,16 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {atonal pitch functions}: 
+\code{\link{cents}()},
+\code{\link{freq}()},
 \code{\link{semits}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},
 \code{\link{bhatk}()},
+\code{\link{cents}()},
 \code{\link{degree}()},
+\code{\link{freq}()},
 \code{\link{helmholtz}()},
 \code{\link{interval}()},
 \code{\link{kern}()},

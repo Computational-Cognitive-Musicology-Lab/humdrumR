@@ -32,7 +32,7 @@ The constructor function \code{tint} can be used to create \code{tonalIntervals}
 The three arguments corespond to the three slots: \code{octave}, \code{LO5th} (Fifth), and \code{cent}.
 All inputs will be coerced to match in length.
 What's more, the \code{octave} argument can be left blank, in which case the appropriate octave will automatically be computed
-to place the interval in the octave above middle-C.
+to place the interval in the octave above .
 
 By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method, for \code{tonalInterval}s call \link[=pitchRepresentations]{kern()}.
 Thus, if you return a \code{tonalInterval} on the command line (or call \link[base:print]{print} one one) you'll see the \link[=pitchRepresentations]{kern pitch} representation printed.

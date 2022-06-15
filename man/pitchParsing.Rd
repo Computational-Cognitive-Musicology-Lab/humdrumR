@@ -27,45 +27,68 @@ A \link[=tonalIntervalS4]{tonalInterval} object.
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} pitch information:
-various basic pitch representations (including numeric and character-string representations) can be "parsed"---read
+various basic pitch representations (including \code{numeric} and \code{character}-string representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
-For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=pitchFunctions]{pitch function}, like \code{\link[=kern]{kern()}}.
+For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=pitchFunctions]{pitch function}, like \code{\link[=kern]{kern()}}
+\code{\link[=semit]{semit()}}, or \code{\link[=solfa]{solfa()}}.
 }
 \details{
-The underlying parser used by all \code{humdrumR} \link[=pitchFunctions]{pitch functions} can be called explicitly using the function \code{tonalInterval}.
-The \code{tonalInterval} parser will attempt to parse any input information into a \link[=tonalIntervalS4]{tonalInterval} object---a back-end pitch representation that you probably don't need to care about!
-When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semits]{semits()}}, the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
+The underlying parser used by all \code{humdrumR} \link[=pitchFunctions]{pitch functions} can be called explicitly using the function \code{tonalInterval()}.
+The \code{tonalInterval} parser will attempt to parse any input information into a \link[=tonalIntervalS4]{tonalInterval} object---a back-end pitch representation
+that you probably don't need to care about!
+When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semits]{semits()}},
+the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
 to the representation you asked for (e.g., \verb{**kern} or \verb{**semits}).
-
-The pitch parser (\code{tonalInterval}) is a generic function, meaning it can accept \code{numeric} or \code{character}-string input:
+Thus, the underlying pipeline for \code{humdrumR} \link[=pitchFunctions]{pitch functions} looks something like:
 \itemize{
-\item \link[base:integer]{integer} values are interpreted as semitones. Watch out! In R, you need to append an \code{L} to a number to make it an explicit integer:
-For example, \code{tonalInterval(3L)}.
-\item \link[base:numeric]{numeric}/\code{\link[=double]{double()}} and \code{\link[=rational]{rational()}} values are interpreted as frequency ratios, assuming a \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}.
-For example, the value \code{2.0} will be interpreted as an octave (two to one ratio.)
-\item \link[base:character]{character} values are interpreted using a complex "regex/exclusive interpretation dispatch system"---details below!
+\item \strong{Input} representation (e.g., \verb{**pitch} or \verb{**semits}) \verb{|>}
+\itemize{
+\item \emph{Parsing} (done by \code{tonalInterval()}) \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+}
+\item \emph{Deparsing} \verb{|>}
+}
+\item \strong{Output} representation (e.g. \verb{**kern} or \verb{**solfa})
 }
 
-(See the "Atonal parsing" section below to learn how atonal data (semitones or frequency/ratios) is interpreted as \emph{tonal} data---i.e., how enharmonic spelling is decided.)
+\emph{This} documentation talks about the parsing step.
+For an overview of the "deparsing" process, look \link[=pitchDeparsing]{here}.
+To learn about the "deparsing" of specific representations, \link[=pitchFunctions]{start here} or go straight to the docs for specific functions---
+for example, call \code{?kern} to learn about \code{\link[=kern]{kern()}}.
 }
-\section{Tonal Parsing (character strings)}{
-The most useful tool for humdrum data is parsing tonal pitch representations encoded as \code{character} strings.
+\section{Dispatch}{
+The pitch parser (\code{tonalInterval}) is a generic function, meaning it can accepts a variety of inputs
+and automatically "dispatches" the appropriate method for parsing the input.
+R's standard \code{S3} system is used to dispatch for either \code{numeric} or \code{character}-string input:
+Generally, \code{numeric} (or \code{integer}) inputs are interpreted as various \emph{atonal} pitch representations while
+\code{character} strings are interpreted as various \emph{tonal} pitch representations.
+Given either a \code{character} string or a number, \code{humdrumR} then uses either regular-expression matching or humdrum
+exclusive interpretation matching to dispatch specific parsing methods.
+}
+
+\section{Tonal Parsing (\code{character}-string inputs)}{
+Since humdrum data is inherently string-based, the most powerful part of the \code{humdrumR} pitch-parser
+is its system for parsing pitch (mostly tonal) information from character strings.
 (This includes character tokens with pitch information embedded alongside other information; Details below.)
-The pitch parser (\code{tonalInterval}) uses either regular-expressions or exclusive interpretations to decide how to parse an input string.
-There are ten regular-expression patterns for pitch that \code{tonalInterval} knows how to parse automatically:\tabular{lrr}{
+The pitch parser (\code{tonalInterval}) uses a combination of regular-expressions and exclusive interpretations to decide how to
+parse an input string.
+There are twelve regular-expression patterns for pitch that \code{tonalInterval} knows how to parse automatically:\tabular{lrr}{
    Representation \tab Exclusive \tab Example \cr
    \href{https://www.humdrum.org/rep/kern/index.html}{Kern} \tab **kern \tab \verb{ee-} \cr
    \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} \tab **pitch \tab \code{Eb5} \cr
    \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Helmholtz pitch} \tab none \tab \verb{eb'} \cr
    \href{https://lilypond.org/doc/v2.22/Documentation/notation/pitches}{Lilypond pitch} \tab none \tab \verb{ees'} \cr
-   \href{https://www.humdrum.org/rep/Tonh/index.html}{German pitch} notation \tab **tonh \tab \code{S5} \cr
+   \href{https://www.humdrum.org/rep/Tonh/index.html}{German pitch} notation \tab **Tonh \tab \code{S5} \cr
    \href{https://en.wikipedia.org/wiki/Interval_(music)}{Interval} \tab **hint/**mint/**int \tab \code{+m3} \cr
-   \href{https://en.wikipedia.org/wiki/Degree_(music)}{Scale degree} \tab **deg \tab \code{b3} \cr
+   \href{https://en.wikipedia.org/wiki/Degree_(music)}{Scale degree} \tab **deg or **degree \tab \verb{^^3-} or \verb{3-/5} \cr
+   \href{https://en.wikipedia.org/wiki/Pitch_class#Integer_notation}{Pitch Class} \tab **pc \tab \code{3} \cr
    Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} \tab **solfa \tab \verb{^me} \cr
    Fixed-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} \tab **solfg \tab \code{mi~b5} \cr
    \href{https://en.wikipedia.org/wiki/Svara}{Swara} \tab **bhatk \tab \code{g} \cr
 }
 
+\subsection{Exclusive Dispatch}{
 
 If you call \code{tonalInterval} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, with a non-\code{NULL} \code{Exclusive} argument,
 that \code{Exclusive} argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the
@@ -74,7 +97,10 @@ For example, \code{kern(x, Exclusive = 'solfa')} will force the parser to interp
 Similarly, \code{solfa(x, Exclusive = 'kern')} will force the parser to interpret \code{x} as \verb{**kern} data.
 If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
 \code{humdrumR} will automatically pass the \code{Exclusive} field from the humdrum data to the function---this means, that in most cases,
-you don't need to explicitely do anything with the \code{Exclusive} argument!
+you don't need to explicitly do anything with the \code{Exclusive} argument!
+}
+
+\subsection{Regex Dispatch}{
 
 If you call \code{tonalInterval} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, but the \code{Exclusive} argument is missing
 or \code{NULL}, \code{humdrumR} will instead use regular-expression patterns to select a known interpretation.
@@ -92,11 +118,26 @@ The \code{humdrumR} parser (\code{tonalInterval}) will automatically "pull out" 
 using the appropriate known regular expressions.
 Various \link[=pitchFunctions]{pitch parsing functions} have an option to keep the original "extra" data, using their \code{inPlace} argument.
 }
+
 }
 
-\section{Advanced Tonal Parsing Options}{
-The eight tonal representations listed above function through a common parsing interface.
-By using "advanced" parsing arguments, you can tweak how parsing is done, so as to accommodate even more input representations!
+\subsection{Advanced Tonal Parsing Options}{
+
+The eleven tonal representations listed above are parsed through a common intesrface.
+By using "advanced" parsing arguments, you can tweak how this parsing is done, so as to accommodate even more input representations!
+This means we are controlling the behavior of \code{tonalInterval()}, in the second step of our pipeline:
+\itemize{
+\item \strong{Input} representation \verb{|>}
+\itemize{
+\item \emph{Parsing} (done by \verb{tonalInterval(PARSE ARGS GO IN HERE!)}) \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+}
+\item \emph{Deparsing} \verb{|>}
+}
+\item \strong{Output} representation
+}
+
 Note that these arguments are identical to parallel \link[=pitchDeparsing]{deparsing arguments}.
 The following "advanced" parsing arguments are available (read all the details about them further down):
 \itemize{
@@ -143,14 +184,26 @@ The following "advanced" parsing arguments are available (read all the details a
 }
 
 These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}, or in a call to \code{tonalInterval} itself.
-To use them with \code{tonalInterval} just specify them directly as arguments;
-to use them with other \link[=pitchFunctions]{pitch functions}, you must put them in the \code{parseArgs} argument, or use the "syntactic sugar" form (\code{parse(...)}).
+To use them with \code{tonalInterval} just specify them directly as arguments: for example, \code{tonalInterval(x, qualities = TRUE)}.
+To use them with other \link[=pitchFunctions]{pitch functions}, you can either...
+\itemize{
+\item Put them in the \code{parseArgs} argument:
+\itemize{
+\item \code{kern(x, parseArgs = list(qualities = TRUE))}
+}
+\item Or use the "syntactic sugar" short-hand form:
+\itemize{
+\item \code{kern(x, parse(qualities = TRUE))}
+}
+}
 
-Each Exclusive/Regex-dispatch combo (above) is associated with default parsing arguments.
+Each of the known Exclusive/Regex-dispatch combo (see the table above) is associated with default parsing arguments.
 For example, if you set \code{Exclusive = 'kern'} or just use data that \emph{look} like \verb{**kern}, the \code{flat} argument is set to \code{"-"},
 However, if you had, for example, input data that looked like \verb{**kern} \strong{except} it used a different flat symbol, like \code{"_"}, you could modify the parser:
 \code{kern("EE_", parse(flat = "_"))}
 This overrides the default value for \verb{**kern}---notice, that it \emph{also} updates the \verb{**kern} regular expression accordingly, so it works exactly the same as the standard \code{\link[=kern]{kern()}} function.
+}
+
 \subsection{Steps}{
 
 Any representation of "tonal" pitch information will include a representation of \emph{diatonic steps}.
@@ -165,7 +218,7 @@ Examples of \code{step.labels} arguments that are currently used by \code{humdru
 
 If \code{step.labels} is \code{NULL}, steps are assumed to be represented by integers, including negative integers representing downward steps.
 
-There is also a \code{step.signed} (logical, length 1) argument: if \code{step.signed = TRUE}, lowercase versions of \code{step.labels} are interpreted as negative (downward) steps and
+There is also a \code{step.signed} (\code{logical}, \code{length == 1}) argument: if \code{step.signed = TRUE}, lowercase versions of \code{step.labels} are interpreted as negative (downward) steps and
 uppercase versions of \code{step.labels} are interpreted as positive (upwards) steps.
 This option is used, for example, by the default \code{\link[=kern]{kern()}} and \code{\link[=helmholtz]{helmholtz()}} parsers.
 }
@@ -174,14 +227,14 @@ This option is used, for example, by the default \code{\link[=kern]{kern()}} and
 
 In tonal pitch representations, "\emph{specific}" versions of tonal pitches---the tonal "species"---are indicated by "specifiers":
 either \emph{accidentals} or \emph{qualities}.
-The \code{qualities} (logical, length 1) argument indicates whether accidentals are used (\code{qualities = FALSE}) or qualities (\code{qualities = TRUE}).
+The \code{qualities} (\code{logical}, \code{length == 1}) argument indicates whether accidentals are used (\code{qualities = FALSE}) or qualities (\code{qualities = TRUE}).
 Some specifiers can be repeated any number of times, like "triple sharps" or "doubly augmented";
-The \code{specifier.maximum} (integer, length 1) argument sets a maximum limit on the number of specifiers to read.
+The \code{specifier.maximum} (\code{integer}, \code{length == 1}) argument sets a maximum limit on the number of specifiers to read.
 For example, you could force all triple sharps (\code{"###"}) or double sharps (\code{"##"}) to parse as just \code{"#"}, by specifying \code{specifier.maximum = 1L}.
 \subsection{Accidentals}{
 
 If \code{qualities = FALSE} the parser will look for accidentals in the input, recognizing three types: naturals, flats, and sharps.
-The \code{natural}, \code{flat}, and/or \code{sharp} (character, length 1) arguments can be used to indicate how accidentals are represented in the input.
+The \code{natural}, \code{flat}, and/or \code{sharp} (\code{character}, \code{length == 1}) arguments can be used to indicate how accidentals are represented in the input.
 For example, if the input strings look like \code{c("Eflat", "C")}, you could set the argument \code{flat = "flat"}.
 
 Examples of accidental argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
@@ -190,7 +243,7 @@ Examples of accidental argument combinations that are currently used by \code{hu
 \item \code{parse(flat = "-", sharp = "#")}
 }
 
-The \code{doubleflat}, and \code{doublesharp} (character, length 1) arguments are \code{NULL} by default, but can be set if a special symbol is used
+The \code{doubleflat}, and \code{doublesharp} (\code{character}, \code{length == 1}) arguments are \code{NULL} by default, but can be set if a special symbol is used
 to represent two sharps or flats. For example, you might have an input which represents double sharps as \code{"x"}.
 You could call \code{kern("Fx", parse(doublesharp = "x"))} and the output will be \code{"F##"}.
 }
@@ -198,7 +251,7 @@ You could call \code{kern("Fx", parse(doublesharp = "x"))} and the output will b
 \subsection{Qualities}{
 
 If \code{qualities = TRUE} the parser will look for qualities in the input, recognizing five types: perfect, minor, major, augmented, and diminished.
-The \code{perfect}, \code{major}, \code{minor}, \code{diminish}, and/or \code{augment} (character, length 1) arguments can be used to indicate how qualities
+The \code{perfect}, \code{major}, \code{minor}, \code{diminish}, and/or \code{augment} (\code{character}, \code{length == 1}) arguments can be used to indicate how qualities
 are represented in the input.
 (Note: we are talking about interval/degree qualities here, not chord qualities!)
 For example, if the input strings look like \code{c("maj3", "p4")}, you could set the arguments \code{major = "maj"} and \code{perfect = "p"}.
@@ -215,7 +268,7 @@ In some musical data, specifiers (e.g., accidentals or qualities) are not explic
 you must infer the species of each pitch from the context---like the key signature!.
 \subsection{From the Key}{
 
-The most important argument here is \code{implicitSpecies} (logical, length 1):
+The most important argument here is \code{implicitSpecies} (\code{logical}, \code{length == 1}):
 if \code{implicitSpecies = TRUE}, the species of input without an explicit species indicated is interpreted using the \code{Key}.
 For example,
 \itemize{
@@ -251,7 +304,7 @@ Thus, if we are in A major:
 }
 }
 
-However! You can also change this behavior by setting the \code{absoluteSpecies} (logical, length 1) argument to \code{FALSE}.
+However! You can also change this behavior by setting the \code{absoluteSpecies} (\code{logical}, \code{length == 1}) argument to \code{FALSE}.
 If you do so, the specifiers in the input are interpreted "on top of" the key accidental:
 \itemize{
 \item \code{kern("C#", Key = 'A:', parse(implicitSpecies = TRUE, absoluteSpecies = FALSE))} is parsed as \code{"C##"}.
@@ -299,13 +352,13 @@ Though all the examples here use accidentals, these arguments all have the same 
 The final piece of information encoded in most (but not) all pitch representations is an indication of the "complex pitch"---
 incorporating octave information.
 In \code{humdrumR} octaves are \emph{always} defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
-This mainly comes up with regards to Cb and B#: Cb4 is a semitone below middle-C; B#3 is enharmonically the same as middle-C.
+This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-\strong{C}.
 \subsection{Integer Octaves}{
 
 The simplest way octave information can be encoded is as an integer value, as in \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch}.
-If you need to parse integer-encoded octaves, set the \code{octave.integer} (logical, length 1) argument to \code{TRUE}.
-By default, \code{humdrumR} considers the "central" octave (\code{octave == 0}) to be the octave of middle-C, or equivalently, a unison.
-However, if a different octave is used as the central octave, you can specify the \code{octave.offset} (integer, length 1) argument.
+If you need to parse integer-encoded octaves, set the \code{octave.integer} (\code{logical}, \code{length == 1}) argument to \code{TRUE}.
+By default, \code{humdrumR} considers the "central" octave (\code{octave == 0}) to be the octave of , or equivalently, a unison.
+However, if a different octave is used as the central octave, you can specify the \code{octave.offset} (\code{integer}, \code{length == 1}) argument.
 
 To illustrate, the default \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} parser used the arguments:
 \itemize{
@@ -319,7 +372,7 @@ To illustrate, the default \href{https://en.wikipedia.org/wiki/Scientific_pitch}
 \subsection{Non-integer Octave Markers}{
 
 If \code{octave.integer = FALSE}, the \code{humdrumR} parser instead looks for three possible symbols to indicate octave information.
-These symbols are controlled using the \code{up}, \code{down}, and \code{same} (character, length 1) arguments.
+These symbols are controlled using the \code{up}, \code{down}, and \code{same} (\code{character}, \code{length == 1}) arguments.
 A \code{same} symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the \code{up} or \code{down} symbols indicate
 increasing positive (\code{up}) or negative (\code{down}) octaves.
 For example, in \code{lilypond} notation, \verb{,} represents lower octaves, and \verb{'} (single apostrophe) represents upper octaves.
@@ -331,7 +384,7 @@ So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
 }
 }
 
-(Note that lilypond makes the octave \emph{below} middle-C the central octave, using \code{octave.offset = 1}.)
+(Note that lilypond makes the octave \emph{below}  the central octave, using \code{octave.offset = 1}.)
 }
 
 \subsection{Octave "Rounding"}{
@@ -340,7 +393,7 @@ In some situations, pitch data might interpret the "boundaries" between octaves 
 In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
 between B (degree 7) and C (degree 1).
 However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).
-In this case, the "octave boundary" is \emph{centered} around the unison (or middle-C), rather than starting \emph{at} middle-C/unison.
+In this case, the "octave boundary" is \emph{centered} around the unison (or ), rather than starting \emph{at} middle-\strong{C}/unison.
 If our data was represented this way, we could use the \code{octave.round} argument; \code{octave.round} must be a rounding \emph{function},
 either \link[base:Round]{round, floor, ceiling, trunc}, or \link{expand}.
 These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
@@ -446,17 +499,24 @@ For example, we could use a parse command like this: \code{kern("E flat 5", pars
 }
 }
 
-\section{Atonal Parsing (numeric)}{
+\section{Atonal Parsing (\code{numeric} inputs)}{
 The \code{humdrumR} pitch parser (\code{tonalInterval()}) will interpret numeric inputs as atonal pitch information.
-Specifically, real numbers (R \link[base:double]{doubles or "numeric"}) are interpreted as frequencies, while \link[base:integer]{integers}
-are interpreted as \href{https://en.wikipedia.org/wiki/Semitone}{semitones}.
-Remember, to explicitly make integers in R, you need to type \code{L} after numbers---like \code{3L}---or call the function
-\code{as.integer}---like \code{as.integer(3)}.
+By default, numbers are interpreted as semitones.
+However, parses for \code{\link[=midi]{midi()}}, \code{\link[=cents]{cents()}},  and \link[=freq]{frequencies} are also defined.
+Dispatch to these different parsers is controlled by the \code{Exclusive} argument.\tabular{lrr}{
+   Representation \tab Exclusive \tab Example \cr
+   Semitones \tab **semits (or \code{NULL}) \tab \code{3} -> \verb{e-} \cr
+   MIDI \tab **midi \tab \code{63} -> \verb{e-} \cr
+   Cents \tab **cents \tab \code{300} -> \verb{e-} \cr
+   Frequency (Hz) \tab  \tab  \cr
+}
+
+\subsection{Enharmonic Interpretation}{
 
 When converting from an atonal representation to a tonal one, we must decide how to interpret the tonality
 of the input---specifically, which \href{https://en.wikipedia.org/wiki/Enharmonic}{enharmonic spelling} of notes to use.
-The  \code{humdrumR} numeric parser interprets atonal pitches in "enharmonic window" of 12 steps on the line-of-fifths.
-The position of this window is set with the \code{enharmonic.center} (integer, length 1) argument.
+The  \code{humdrumR} numeric parser interprets atonal pitches in a "enharmonic window" of 12 steps on the line-of-fifths.
+The position of this window is set with the \code{enharmonic.center} (\code{integer}, \code{length == 1}) argument.
 By default, \code{enharmonic.center = 0}, which creates a window from a \code{-5} (\emph{b2}) to \code{+6}) (\emph{#4}).
 If you prefer \emph{#1} instead of \emph{b2}, set \code{enharmonic.center = 1}.
 For all flats, set \code{enharmonic.center = -1}.
@@ -473,20 +533,22 @@ For all sharps, set \code{enharmonic.center = 4}.\tabular{rllllllllllll}{
 
 
 The \code{enharmonic.center} argument will work the same when translating to any pitch representation, like \code{\link[=kern]{kern()}}.
-However, we present the table above in terms of scale degrees because the atonal -> enharmonic calculation
+However, we present the table above in terms of scale degrees because the \emph{atonal -> enharmonic} calculation
 is centered on a key.
 So, if \code{Key} argument is specified, the "enharmonic window" is centered around that key.
 So if you are translating to \code{kern} and the \code{Key = F#:}, the output will range from \code{Gn} to \code{B#}.
 If you don't want this, set \code{Key = NULL}.
-\subsection{Melodic Interpretation of Chromatic}{
+\subsection{Melodic Interpretation of Chromatic Notes}{
 
 It is very common for chromatic notes in melodic passages to be labeled based on their melodic contour:
 i.e., ascending chromatic notes labeled sharp and descending chromatic notes labeled flat.
-This behavior can be engaged by setting the \code{accidental.melodic} (logical, length 1) argument.
+This behavior can be engaged by setting the \code{accidental.melodic} (\code{logical}, \code{length == 1}) argument.
 When \code{accidental.melodic = TRUE}, the input is first centered in the enharmonic window (above), but then
 any places where a chromatic alteration proceeds upwards to a non-chromatic note will be altered (if necessary) to a
 sharp, and vice verse for a descending notes and flats.
 For example, while \code{kern(0:2)} returns \code{c("c", "d-", "d")}, \code{kern(0:2, parse(accidental.melodic = TRUE))} returns \code{c("c", "c#", "d")}.
+}
+
 }
 }
 

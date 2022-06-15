@@ -67,6 +67,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/bhatk.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/cents.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/chordTransformer.html</loc>
   </url>
   <url>
@@ -104,6 +107,9 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/filterHumdrum.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/freq.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/getFields.html</loc>
@@ -251,6 +257,9 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/parseAt.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/pc.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/pipeFields.html</loc>

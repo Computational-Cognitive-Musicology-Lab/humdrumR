@@ -70,12 +70,12 @@
 <dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
 There are also two hidden (advanced) argumens you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
-<dd><p>(logical, length 1) If <code>generic = TRUE</code> the "specific" pitch information is discarded.
+<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information is discarded.
 For tonal representations, this means no accidentals/qualities or equivalent information is printed.
 For atonal representations, the generic pitch is returned.
 As an alternative, you can specify <code>specific</code> as an alternative (opposite) to the <code>generic</code> argument: <code>generic == !specific</code>.</p></dd>
 <dt>simple</dt>
-<dd><p>(logical, length 1) If <code>simple = TRUE</code> the "complex" pitch information is discarded.
+<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "complex" pitch information is discarded.
 This means that <em>octave</em> information is discarded, and the resulting output is confined within the default octave.
 For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
@@ -89,7 +89,7 @@ As a convenient syntactic sugar, instead of writing <code>parseArgs = list(a = x
 As a convenient syntactic sugar, instead of writing <code>transposeArgs = list(a = x, b = y, etc.)</code>, you can write
 <code>transpose(a = x, b = y, etc.)</code>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(logical, length 1) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
+<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extral, non-pitch information in the strings "beside" the pitch information.
 If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-pitch information.
 If <code>inPlace = FALSE</code>, only the pitch output information will be returned (details below).</p></dd>
@@ -105,22 +105,31 @@ Otherwise, returns a vector of the same length as <code>x</code>.
     <p>These pitch functions all work in similar ways, with similar arguments and functionality;
 To read more details about each function, click on the links in the list below,
 or type <code>?func</code> in the R command line: for example, <code><a href="kern.html">?kern</a></code>.
-The functions are:</p><ul><li><p><strong>Tonal pitch representations</strong></p><ul><li><p><em>Absolute pitch representations</em></p><ul><li><p><a href="kern.html">kern</a></p></li>
-<li><p><a href="pitch.html">pitch</a></p></li>
-<li><p><a href="lilypond.html">lilypond</a></p></li>
-<li><p><a href="helmholtz.html">helmholtz</a></p></li>
+The functions are:</p><ul><li><p><strong>Tonal pitch representations</strong></p><ul><li><p><em>Absolute pitch representations</em></p><ul><li><p><code><a href="kern.html">kern()</a></code></p></li>
+<li><p><code><a href="pitch.html">pitch()</a></code></p></li>
+<li><p><code><a href="lilypond.html">lilypond()</a></code></p></li>
+<li><p><code><a href="helmholtz.html">helmholtz()</a></code></p></li>
+<li><p><code><a href="tonh.html">tonh()</a></code> (German-style notation)</p></li>
 </ul></li>
-<li><p><em>Relative pitch representations</em></p><ul><li><p><a href="interval.html">interval</a></p></li>
-<li><p><a href="solfa.html">solfa</a> (solfege)</p></li>
-<li><p><a href="degree.html">degree</a> (scale degrees)</p></li>
-<li><p><a href="bhatk.html">bhatk</a> (hindustani swara)</p></li>
+<li><p><em>Relative pitch representations</em></p><ul><li><p><code><a href="interval.html">interval()</a></code></p></li>
+<li><p><code><a href="solfa.html">solfa()</a></code> (relative-do solfege)</p></li>
+<li><p><code><a href="solfg.html">solfg()</a></code> (fixed-do solfege)</p></li>
+<li><p><code><a href="degree.html">degree()</a></code> (absolute scale degrees)</p></li>
+<li><p><code><a href="degree.html">deg()</a></code> (melodic scale degrees)</p></li>
+<li><p><code><a href="bhatk.html">bhatk()</a></code> (hindustani swara)</p></li>
+</ul></li>
+<li><p><em>Partial pitch representations</em></p><ul><li><p><code><a href="step.html">step()</a></code></p></li>
+<li><p><code><a href="accidental.html">accidental()</a></code></p></li>
+<li><p><code><a href="quality.html">quality()</a></code></p></li>
+<li><p><code><a href="octave.html">octave()</a></code></p></li>
 </ul></li>
 </ul></li>
-<li><p><strong>Atonal pitch representations</strong></p><ul><li><p><em>Musical (non-tonal) pitch representations</em></p><ul><li><p><a href="semits.html">semits</a></p></li>
-<li><p><a href="semits.html">midi</a></p></li>
+<li><p><strong>Atonal pitch representations</strong></p><ul><li><p><em>Musical (non-tonal) pitch representations</em></p><ul><li><p><code><a href="semits.html">semits()</a></code></p></li>
+<li><p><code><a href="semits.html">midi()</a></code></p></li>
+<li><p><code><a href="cents.html">cents()</a></code></p></li>
+<li><p><code><a href="pc.html">pc()</a></code></p></li>
 </ul></li>
-<li><p><em>Physical pitch/interval representations</em></p><ul><li><p><a href="https://rdrr.io/r/stats/time.html" class="external-link">frequency</a></p></li>
-<li><p>ratio</p></li>
+<li><p><em>Physical pitch/interval representations</em></p><ul><li><p><code><a href="freq.html">freq()</a></code></p></li>
 </ul></li>
 </ul></li>
 </ul></div>

@@ -210,4 +210,13 @@ test_that('Pitch arguments return correct values!', {
     
     expect_equal(kern(0:2), c('c', 'd-', 'd'))
     expect_equal(kern(0:2, parseArgs=list(accidental.melodic = TRUE)), c('c', 'c#', 'd'))
+    
+    expect_equal(cents('g', tonalHarmonic = 3), 701.955)
+    expect_equal(cents(440 * 10/9, Exclusive = 'freq'), 1082.404 )
+    
+    expect_equal(semits('c#', generic = TRUE), 0)
+    expect_equal(semits('c#', generic = TRUE, Key ='A:'), 1)
+    
+    expect_equal(kern(c('CX5','C4','Cb5'), parse(doublesharp = 'X')),
+                 kern(c('CX5','C4','Cb5'), parseArgs = list(doublesharp = 'X')))
 })

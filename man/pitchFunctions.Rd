@@ -9,12 +9,12 @@
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(logical, length 1) If \code{generic = TRUE} the "specific" pitch information is discarded.
+\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information is discarded.
 For tonal representations, this means no accidentals/qualities or equivalent information is printed.
 For atonal representations, the generic pitch is returned.
 As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
 
-\item{simple}{(logical, length 1) If \code{simple = TRUE} the "complex" pitch information is discarded.
+\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "complex" pitch information is discarded.
 This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
 For absolute pitch representations, this is the octave above middle C.
 For relative pitch representations, this is the octave above a unison.
@@ -28,7 +28,7 @@ As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x
 As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
 \code{transpose(a = x, b = y, etc.)}.}
 
-\item{inPlace}{(logical, length 1) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
@@ -40,43 +40,66 @@ Otherwise, returns a vector of the same length as \code{x}.
 }
 \description{
 These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-}
-\details{
-These pitch functions all work in similar ways, with similar arguments and functionality;
-To read more details about each function, click on the links in the list below,
-or type \code{?func} in the R command line: for example, \code{?kern}.
 The functions are:
 \itemize{
 \item \strong{Tonal pitch representations}
 \itemize{
 \item \emph{Absolute pitch representations}
 \itemize{
-\item \link{kern}
-\item \link{pitch}
-\item \link{lilypond}
-\item \link{helmholtz}
+\item \code{\link[=kern]{kern()}}
+\item \code{\link[=pitch]{pitch()}}
+\item \code{\link[=lilypond]{lilypond()}}
+\item \code{\link[=helmholtz]{helmholtz()}}
+\item \code{\link[=tonh]{tonh()}} (German-style notation)
 }
 \item \emph{Relative pitch representations}
 \itemize{
-\item \link{interval}
-\item \link{solfa} (solfege)
-\item \link{degree} (scale degrees)
-\item \link{bhatk} (hindustani swara)
+\item \code{\link[=interval]{interval()}}
+\item \code{\link[=solfa]{solfa()}} (relative-do solfege)
+\item \code{\link[=solfg]{solfg()}} (fixed-do solfege)
+\item \code{\link[=degree]{degree()}} (absolute scale degrees)
+\item \code{\link[=deg]{deg()}} (melodic scale degrees)
+\item \code{\link[=bhatk]{bhatk()}} (hindustani swara)
+}
+\item \emph{Partial pitch representations}
+\itemize{
+\item \code{\link[=step]{step()}}
+\item \code{\link[=accidental]{accidental()}}
+\item \code{\link[=quality]{quality()}}
+\item \code{\link[=octave]{octave()}}
 }
 }
 \item \strong{Atonal pitch representations}
 \itemize{
 \item \emph{Musical (non-tonal) pitch representations}
 \itemize{
-\item \link{semits}
-\item \link{midi}
+\item \code{\link[=semits]{semits()}}
+\item \code{\link[=midi]{midi()}}
+\item \code{\link[=cents]{cents()}}
+\item \code{\link[=pc]{pc()}}
 }
 \item \emph{Physical pitch/interval representations}
 \itemize{
-\item \link{frequency}
-\item \link{ratio}
+\item \code{\link[=freq]{freq()}}
 }
 }
+}
+}
+\details{
+These pitch functions all work in similar ways, with similar arguments and functionality.
+To read more details about each function, click on the links in the list below,
+or type \code{?func} in the R command line: for example, \code{?kern}.
+\itemize{
+\item \strong{Input} representation (e.g., \verb{**pitch} or \verb{**semits}) \verb{|>}
+\itemize{
+\item \emph{Parsing} (done by \code{tonalInterval()}) \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Transformation} (e.g., [transpose()\) \verb{\\>}
+}
+\item \emph{Deparsing} \verb{|>}
+}
+\item \strong{Output} representation (e.g. \verb{**kern} or \verb{**solfa})
 }
 }
 \section{In-place parsing}{
@@ -94,6 +117,10 @@ So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \cod
 (This obviously only works if the input is a string, not a numeric!)
 Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
 \emph{if} their input is a character string.
+}
+
+\section{Advanced Deparsing}{
+NA
 }
 
 \seealso{
