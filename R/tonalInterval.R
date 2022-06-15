@@ -548,27 +548,24 @@ tint2rational <-  function(x, tonalHarmonic = 3L) {
   
 }
 
-tint2fraction <- function(x, tonalHarmonic = 3) as.fraction(tint2rational(x, tonalHarmonic = tonalHarmonic)) 
+tint2fraction <- function(tint, tonalHarmonic = 3) as.fraction(tint2rational(tint, tonalHarmonic = tonalHarmonic)) 
 
 tint2double <-  function(x, tonalHarmonic = 2^(19/12), ...) {
   LO5th <- x@Fifth
   oct   <- x@Octave
   cent  <- x@Cent
   
-  .ifelse(is.na(LO5th), 
-          NA_real_, 
-          (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)) %<-matchdim% x
+    (2 ^ oct) * (tonalHarmonic ^ LO5th) * 2^(cent / 1200)
 }
 
-tint2frequency <- function(x, frequency.reference = 440L, 
-                           frequencyTint = tint(-4L, 3L), 
-                           tonalHarmonic = 2^(19/12)) {
-  x <- x - frequencyTint
+tint2freq <- function(x, frequency.reference = 440L, 
+                      frequency.reference.note = tint(-4L, 3L), 
+                      ...) {
+  x <- x - tonalInterval(frequency.reference.note)
   
-  ratio <- tint2double(x, tonalHarmonic = tonalHarmonic)
-  attributes(ratio) <- NULL
+  ratio <- tint2double(x, ...)
   
-  frequency.reference * ratio %<-matchdim% x
+  frequency.reference * ratio
 }
 
 tint2pc <- function(x, ten = 'A', eleven = 'B', ...) {
@@ -1508,94 +1505,58 @@ midi2tint <- function(n, accidental.melodic = FALSE, keyed = TRUE, ...) {
 
 #### Frequency ####
 
-fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational(x), tonalHarmonic) %<-matchdim% x
+fraction2tint <- function(x, tonalHarmonic = 3) rational2tint(as.rational(x), tonalHarmonic) 
 
-rational2tint <- function(x, tonalHarmonic = 3, accidental.melodic = FALSE, ...) {
-  if (x@Numerator == 0 || (x@Numerator < 0 & x@Denominator > 0)) .stop('Rational values can only be interpreted as tonalIntervals if they are positive.')
-  
-  fracs <- cbind(x@Numerator, x@Denominator)
-  
-  # octaves
-  octaves    <- log(fracs, base = 2)
-  tonalRatios   <- log(fracs, base = tonalHarmonic)
-  octaves [ , 2] <- -octaves[ , 2]
-  tonalRatios[ , 2] <- -tonalRatios[ , 2] 
-  is.octave  <- is.whole(octaves) & octaves != 0
-  is.tonalRatio <- is.whole(tonalRatios) & tonalRatios != 0
-  
-  octs <- fifs <- numeric(nrow(fracs))
-  # easy "pure" matches
-  pure <- rowSums(is.whole(tonalRatios) | is.whole(octaves)) == 2
-  pure12 <- rowSums(is.tonalRatio) > 0
-  fifs[pure12] <- tonalRatios[pure12,][is.tonalRatio[pure12, ]]
-  
-  # 
-  pure8 <- rowSums(is.octave) > 0
-  octs[pure8] <- octaves[pure8,][is.octave[pure8, ]]
-  
-  # approximations
-  # round to nearest LO5th value
-  if (any(!pure)) {
-    impure <- !is.tonalRatio & !is.octave & tonalRatios != 0
-    tonalRatios <- tonalRatios + log(2^(octaves), base = tonalHarmonic)
-    
-    fifs[rowSums(impure) > 0] <- round(tonalRatios[impure])
-  }
-  tint <- tint(octs, fifs)
-  
-  tint <- atonal2tint(tint, accidental.melodic, ...)
-  
-  tint(octs, fifs)
+
+rational2tint <- function(x, tonalHarmonic = 3, ...) {
+  ratio2tint(as.double(x), ...)
 }
 
-double2tint <- function(x, tonalHarmonic = 3, centMargin = 10,  ...) {
-  if (any(x <= 0)) .stop('Double (numeric) values can only be interpreted as tonalIntervals if they are positive.')
+ratio2tint <- function(x, tonalHarmonic = 2^(19/12), centMargin = 25,  ...) {
+  if (x <= 0) .stop('Numbers can only be interpreted as frequency ratios if they are non-zero and positive.')
   
-  octrange <- attr(centMargin, 'octrange')
-  if (is.null(octrange)) octrange <- 5L
-  if (octrange > 150) stop(call. = FALSE,
-                           "double2tint can't find a note corresponding exactly to this frequency/ratio. ",
-                           "Try raising the centMargin.")
   
-  #
-  octs <- -octrange:octrange
+  possibleLO5ths <- -12:12
   
-  allocts <- do.call('cbind', lapply(2^octs, '*', x))
-  logged <- log(allocts, tonalHarmonic)
+  octaves <- log(outer(x, tonalHarmonic^possibleLO5ths, `/`), 2L)
   
-  whole <- round(logged)
-  remain <- logged - whole
+  bestLO5th <- possibleLO5ths[apply(abs(octaves - round(octaves)), 1L,
+                                    \(row) {
+                                      hits <- which(row == min(row))
+                                      hits[which.min(abs(possibleLO5ths[hits]))]
+                                      })]
   
-  whichhit  <- applyrows(remain, \(row) {
-    hitind <- which(abs(row) == min(abs(row)))
-    hitind[which.min(abs(octs[hitind]))]
-  })
+  x_removedLO5th <- x / 3^bestLO5th
+  bestOctave <- round(log(x_removedLO5th, 2))
+
   
-  LO5th  <- whole[cbind(seq_along(x), whichhit)]
-  remain <- remain[cbind(seq_along(x), whichhit)]
-  octave <- round(log(x / tonalHarmonic ^ LO5th, 2))
+  approx <- 2^bestOctave * tonalHarmonic^bestLO5th
   
-  # cents
-  cents <- log(tonalHarmonic^remain,2) * 1200
+  error <- approx / x
+  cents <- round(log(error, 2^(1/12)) * 100, 5)
   
-  accept <- abs(cents) < centMargin
+  bestOctave[abs(cents) > centMargin] <- NA_integer_
   
-  output <- tint(octave, LO5th, cent = cents)
-  if (any(!accept)) output[!accept] <- Recall(x[!accept], tonalHarmonic, 
-                                              data.table::setattr(centMargin, 'octrange', octrange + 5L))
+  atonal2tint(tint(bestOctave, bestLO5th, cent = -cents), ...)
   
-  output <- atonal2tint(output, ...)
   
-  output 
 }
 
 
 
-frequency2tint <- function(float, frequency.reference = 440L, 
-                           frequencyTint = tint(-4, 3), tonalHarmonic = 3,
-                           centMargin = 10) {
+freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference.note = tint(-4, 3), ...) {
   
-  ( double2tint(float / frequency.reference, tonalHarmonic, centMargin = centMargin) + frequencyTint) %<-matchdim% float
+  ratio <- frequency / frequency.reference
+  
+  tint <- ratio2tint(ratio, ...)
+  
+  ## add offset (defaults to A above middle-C)
+  frequency.reference.note <- tonalInterval(frequency.reference.note)
+  
+  tint + frequency.reference.note
+  
+  
+  
 }
 
 ### Tonal ####
@@ -1924,7 +1885,7 @@ tonalInterval.NULL <- function(x, ...) NULL
 #' @rdname pitchParsing
 #' @export
 tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
-                                                list('freq', NA, frequency2tint),
+                                                list('freq',  NA, freq2tint),
                                                 list('cents', NA, cents2tint),
                                                 funcName = 'tonalInterval.numeric',
                                                 outputClass ='tonalInterval')
@@ -2237,6 +2198,20 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' @rdname semits
 #' @export 
 cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric')
+
+#' @family {atonal pitch functions}
+#' @family {frequency-based pitch functions}
+#' @family {pitch functions}
+#' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
+#' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @inheritParams pitchFunctions
+#' @inheritSection pitchFunctions In-place parsing
+#' @rdname semits
+#' @export 
+freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric')
+
+
+
 
 #' Representation of Atonal Pitch classes
 #' 
