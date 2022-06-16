@@ -219,4 +219,11 @@ test_that('Pitch arguments return correct values!', {
     
     expect_equal(kern(c('CX5','C4','Cb5'), parse(doublesharp = 'X')),
                  kern(c('CX5','C4','Cb5'), parseArgs = list(doublesharp = 'X')))
+    
+    expect_equal(tonalInterval('c#', Key = "A:"), tint(-8, 4))
+    
+    expect_equal( kern('Eb5', flat = "_"), 'ee_')
+    expect_equal(kern('Eb5', flat = 'flat'), 'eeflat')
+    
+    expect_equal(pitch("f##", doublesharp = "x"), 'Fx4')
 })

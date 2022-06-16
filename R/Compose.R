@@ -537,6 +537,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
                        
   dispatcher <- if (all(is.na(dispatchDF$regex))) quote(exclusiveDispatch) else quote(humdrumDispatch)
   
+  
   # Assemble the new function's arguments
   genericArgs <- local({
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
