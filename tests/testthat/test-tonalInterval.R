@@ -226,4 +226,13 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(kern('Eb5', flat = 'flat'), 'eeflat')
     
     expect_equal(pitch("f##", doublesharp = "x"), 'Fx4')
+    
+    expect_equal( kern('C####5', specifier.maximum=2), 'cc##')
+    expect_equal(interval(c("g-", "f#"), augment = 'aug', diminish = 'dim'),
+                 c("+dim5", "+aug4"))
+    
+    expect_equal(kern(c('e-','e','f','f#','f'), explicitNaturals = FALSE),
+                 c("e-", "e",  "f",  "f#", "f" ))
+    expect_equal(kern(c('e-','e','f','f#','f'), explicitNaturals = TRUE),
+                 c("e-", "en",  "fn",  "f#", "fn" ))
 })

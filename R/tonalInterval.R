@@ -1152,9 +1152,9 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' Examples of accidental argument combinations that are currently used by preset `humdrumR` pitch parsers include:
 #' 
-#' + `parse(flat = "b", sharp = "#")` --- (`**pitch`)
-#' + `parse(flat = "-", sharp = "#")` --- (`**kern`)
-#' + `parse(flat = "-", sharp = "+")` --- (`**degree`)
+#' + `parse(flat = "b", sharp = "#")` -> `**pitch`
+#' + `parse(flat = "-", sharp = "#")` -> `**kern`
+#' + `parse(flat = "-", sharp = "+")` -> `**degree`
 #' 
 #' 
 #' ----
@@ -2224,7 +2224,7 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' 
 #' 
 #' Each of the `humdrumR` pitch functions is associated with default deparsing arguments.
-#' For example, if you use [kern()], `flat` is set to `"-"`.
+#' For example, if you use [kern()], `flat` is set (by default) to `"-"`.
 #' However, if you wanted to print `**kern`-like pitch data, **except** with a different flat symbol, like `"_"`, you could modify the deparser:
 #' `kern('Eb5', flat = "_")`.
 #' This overrides the default value for `**kern`, so the output would be `"ee_"` instead of `"ee-"`.
@@ -2259,14 +2259,17 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' 
 #' ### Accidentals 
 #'   
-#' If `qualities = FALSE` the parser will look for accidentals in the input, recognizing three types: naturals, flats, and sharps.
-#' The `natural`, `flat`, and/or `sharp` (`character`, `length == 1`) arguments can be used to indicate how accidentals are printed in the output.
+#' If `qualities = FALSE` the deparser will print accidentals of three types: naturals, flats, and sharps.
+#' The `natural`, `flat`, and/or `sharp` (`character`, `length == 1`) arguments can be used to indicate 
+#' how accidentals are printed in the output.
 #' For example, if set the `kern('Eb5', flat = 'flat')` you get the output `"eeflat"`.
 #' 
 #' Examples of accidental argument combinations that are currently used by `humdrumR` [pitch functions][pitchFunctions] include:
 #' 
-#' + `parse(flat = "b", sharp = "#")`
-#' + `parse(flat = "-", sharp = "#")`
+#' + `(flat = "b", sharp = "#")` ->  [pitch()]
+#' + `(flat = "-", sharp = "#")` ->  [kern()]
+#' + `(flat = "es", sharp = "is")` -> [lilypond()]
+#' + `(flat = "-", sharp = "+")` -> [degree()]
 #' 
 #' 
 #' ----
@@ -2275,18 +2278,26 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' to represent two sharps or flats. For example, you could modify [pitch()] to use a special double sharp symbol:
 #' `pitch("f##", doublesharp = "x")` and the output will be `"Fx4"`.
 #' 
+#' The printing of naturals is controlled by the `natural` argument.
+#' However, by default, the `humdrumR` deparsers don't both printing naturals.
+#' You can force *all* naturals to print my setting the `explicitNaturals` (`logical`, `length == 1`)
+#' argument to `TRUE`.
+#' The exact behavior of `explicitNaturals` depends on the `implicitSpecies`, `absoluteSpecies`,
+#' and `Key` argument (details below).
+#' 
 #' ### Qualities
 #' 
-#' If `qualities = TRUE` the parser will look for qualities in the input, recognizing five types: perfect, minor, major, augmented, and diminished.
-#' The `perfect`, `major`, `minor`, `diminish`, and/or `augment` (`character`, `length == 1`) arguments can be used to indicate how qualities
-#'  are represented in the input.
+#' If `qualities = TRUE` the deparser will print qualities, of five types: perfect, minor, major, augmented, and diminished.
+#' The `perfect`, `major`, `minor`, `diminish`, and/or `augment` (`character`, `length == 1`) arguments 
+#' can be used to indicate how qualities are printed in the output.
 #' (Note: we are talking about interval/degree qualities here, not chord qualities!)
-#' For example, if the input strings look like `c("maj3", "p4")`, you could set the arguments `major = "maj"` and `perfect = "p"`.
+#' For example, you can write `interval(c("g-", "f#"), augment = 'aug', diminish = 'dim')`
+#' and the output `c("+dim5", "+aug4")`.
 #' Examples of quality argument combinations that are currently used by `humdrumR` [pitch functions][pitchFunctions] include:
 #' 
 #' + `parse(major = "M", minor = "m", perfect = "P", diminish = "d", augment = "A")`
 #' + `parse(diminish = "o", augment = "+")`
-
+#
 #' ### Implicit vs Explicit Species
 #' 
 #' In some musical data, specifiers (e.g., accidentals or qualities) are not explicitly indicated; instead, 
