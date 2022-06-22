@@ -13,9 +13,9 @@ integrate(intervals, skip = list(is.na))
 
 sigma(intervals, skip = list(is.na))
 
-derive(intervals, skip = list(is.na))
+derive(intervals, skip = list(is.na), boundaries = NULL)
 
-delta(intervals, skip = list(is.na))
+delta(intervals, skip = list(is.na), boundaries = NULL)
 
 calculus(x, n, skip = list(na))
 }

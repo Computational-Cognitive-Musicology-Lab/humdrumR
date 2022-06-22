@@ -15,14 +15,19 @@
 \usage{
 semit(
   x,
+  melodic = FALSE,
+  specific = TRUE,
+  complex = TRUE,
+  File = NULL,
+  Spine = NULL,
   ...,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = !melodic
 )
 
 midi(
@@ -33,8 +38,8 @@ midi(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 pitch(
@@ -45,20 +50,22 @@ pitch(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 kern(
   x,
+  complex = TRUE,
+  directed = FALSE,
   ...,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 lilypond(
@@ -69,20 +76,24 @@ lilypond(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 interval(
   x,
+  directed = TRUE,
+  melodic = FALSE,
+  File = NULL,
+  Spine = NULL,
   ...,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = !melodic
 )
 
 degree(
@@ -93,20 +104,22 @@ degree(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 solfa(
   x,
+  parts = c("octave", "accidentals", "step"),
+  factor = FALSE,
   ...,
   Key = NULL,
   Exclusive = NULL,
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 
 bhatk(
@@ -117,8 +130,8 @@ bhatk(
   parseArgs = list(),
   transposeArgs = list(),
   inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  deparse = TRUE,
+  memoize = TRUE
 )
 }
 \description{

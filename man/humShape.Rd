@@ -6,7 +6,7 @@
 \alias{foldStops}
 \alias{foldPaths}
 \alias{foldRecords}
-\alias{spinePipe}
+\alias{reshape2Pipe}
 \title{HumdrumR data "Shape"}
 \usage{
 foldHumdrum(humdrumR, byfields, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
@@ -17,7 +17,7 @@ foldPaths(humdrumR, foldAtomic = TRUE, sep = " ")
 
 foldRecords(humdrumR, foldAtomic = TRUE, sep = " ", padPaths = FALSE)
 
-spinePipe(humdrumR, targetSpines, destinationSpines)
+reshape2Pipe(humdrumR, type = "Spine", target, destination)
 }
 \arguments{
 \item{humdrumR}{A \link{humdrumRclass} data object.
