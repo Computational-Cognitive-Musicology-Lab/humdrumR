@@ -456,7 +456,7 @@ splitHumtab <- function(humtab, drop = FALSE) {
 spliceHumtab <- function(humtab) {
           # This combines the components of a humtab list into a single data.table
           # it also sorts them by default values
-          humtab <- rbindlist(humtab, fill = TRUE)
+          humtab <- rbindlist(humtab[sapply(humtab, nrow) > 0L], fill = TRUE)
           
           orderHumtab(humtab)
 }
@@ -1155,7 +1155,7 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 }
 
 
-#########################################spinePipe ----
+### reshape to fields ----
 
 #' Collapse spines into new fields
 #'
@@ -1178,8 +1178,8 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP')
     curpipeN <- curPipeN(humtab)
     
-    fields <- fields(humdrumR, fieldTypes = 'Data')
-    target <- humtab[Spine %in% targetSpines, c(fields$Name, 'File', 'Spine', 'Record', 'Stop'), with = FALSE]
+    dataFields <- fields(humdrumR, fieldTypes = 'Data')
+    target <- humtab[Spine %in% targetSpines, c(dataFields$Name, 'File', 'Spine', 'Record', 'Stop'), with = FALSE]
     
     humtab <- humtab[!Spine %in% targetSpines]
     
@@ -1191,13 +1191,71 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     oldspines <- split(target, by = 'Spine', keep.by = FALSE)
     oldspines <- lapply(oldspines, 
                         \(spine) {
-                            datafields <- colnames(spine) %in% fields$Name
+                            datafields <- colnames(spine) %in% dataFields$Name
                             colnames(spine)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
                             spine
                         })
     
     oldspines <- Reduce(\(x, y) y[x, on = c('File', 'NewSpine', 'Record', 'Stop')], oldspines)
     colnames(oldspines)[colnames(oldspines) == 'NewSpine'] <- 'Spine'
+    # humtab <- oldspines[humtab, on = c('File', 'Spine', 'Record', 'Stop')]
+    humtab <- merge(humtab, oldspines, on = c('File', 'Spine', 'Record', 'Stop'), all = TRUE)
+    
+    newfields <- grepl('xxxPipe', colnames(humtab))
+    pipes <- paste0('Pipe', curpipeN + seq_len(sum(newfields)))
+    colnames(humtab)[newfields] <- pipes 
+    
+    putHumtab(humdrumR, drop = FALSE) <- humtab
+    
+    addFields(humdrumR) <- pipes
+    humdrumR <- setActiveFields(humdrumR, pipes)
+    
+    renumberSpines(humdrumR)
+    
+    
+    
+    
+}
+
+
+#' @rdname humShape
+#' @export
+stopPipe <- function(humdrumR, targetStops, destinationStops) {
+    
+    checkhumdrumR(humdrumR, 'stopPipe')
+    
+    if (any(destinationStops %in% targetStops)) stop(call. = FALSE, 
+                                                       "In your call to stopPipe, the target and destination stops can't overlap.")
+    if (length(targetStops) < length(destinationStops)) stop(call. = FALSE,
+                                                               "In your call to stopPipe, the number of destination stops can't be greater than the number of target stops.")
+    
+    match_size(targetStops = targetStops, 
+               destinationStops = destinationStops,
+               toEnv = TRUE)
+    
+    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP')
+    curpipeN <- curPipeN(humtab)
+    
+    fields <- fields(humdrumR, fieldTypes = 'Data')
+    target <- humtab[Stop %in% targetStops, c(fields$Name, 'File', 'Spine', 'Record', 'Stop'), with = FALSE]
+    
+    humtab <- humtab[!Stop %in% targetStops]
+    
+    
+    
+    target[ , NewStop := destinationStops[match(Stop, targetStops)]]
+    target <- target[ , sapply(target, \(x) !all(is.na(x))), with=FALSE]
+    
+    oldspines <- split(target, by = 'Stop', keep.by = FALSE)
+    oldspines <- lapply(oldspines, 
+                        \(spine) {
+                            datafields <- colnames(spine) %in% fields$Name
+                            colnames(spine)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
+                            spine
+                        })
+    
+    oldspines <- Reduce(\(x, y) y[x, on = c('File', 'Spine', 'Record', 'NewStop')], oldspines)
+    colnames(oldspines)[colnames(oldspines) == 'NewStop'] <- 'Stop'
     humtab <- oldspines[humtab, on = c('File', 'Spine', 'Record', 'Stop')]
     
     newfields <- grepl('xxxPipe', colnames(humtab))
@@ -1215,9 +1273,6 @@ spinePipe <- function(humdrumR, targetSpines, destinationSpines) {
     
     
 }
-
-
-
 
 #################################-
 ############Humtable manipulation and access ####
@@ -1811,11 +1866,6 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 #' you must provide the same number of fieldnames using the `->[c('name1', 'name2', ...)]` syntax.
 #' You can use the `ntokens` command to determine the right length of vectors you need!
 #' 
-#' 
-#' 
-#' 
-#' 
-#' 
 #' @name humAssignment
 NULL
 
@@ -1880,7 +1930,6 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     }
               
                     humtab <- getHumtab(value)
-                    
                     pipes <- pipeFields(humtab)
                     removeFields(value) <- pipes
                     
