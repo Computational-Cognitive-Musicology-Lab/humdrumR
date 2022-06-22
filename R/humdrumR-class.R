@@ -456,12 +456,13 @@ splitHumtab <- function(humtab, drop = FALSE) {
 spliceHumtab <- function(humtab) {
           # This combines the components of a humtab list into a single data.table
           # it also sorts them by default values
-          humtab <- rbindlist(humtab[sapply(humtab, nrow) > 0L], fill = TRUE)
+          humtab <- rbindlist(humtab, fill = TRUE)
           
           orderHumtab(humtab)
 }
 
 orderHumtab <- function(humtab) {
+    if (nrow(humtab) == 0L) return(humtab)
     orderingcols <- c('File', 'Column', 'Record', 'Stop')
     
     # can't sort by lists
@@ -828,12 +829,9 @@ ntokens <- function(humdrumR, dataTypes = 'D') {
 #' @export
 npieces <- function(humdrumR) {
           checkhumdrumR(humdrumR, 'npieces')
-          humtab <- getD(humdrumR)
+          humtab <- getHumtab(humdrumR, 'D')
           
-          length(unique(humtab$File))
-    humtab <- getD(humdrumR)
-    
-    length(unique(humtab$File))
+          if (nrow(humtab) == 0L) 0L else length(unique(humtab$File))
 }
 
 #' Does humdrumR corpus contain subcorpora?
@@ -1161,7 +1159,7 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #'
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @export
-foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
+foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL, groupNames = NULL) {
     
     checkhumdrumR(humdrumR, 'foldHumdrum')
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
@@ -1192,24 +1190,29 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     curpipeN <- curPipeN(humtab)
     
     # 
-    from <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
-    fromTable <- humtab[from == TRUE, fields(humdrumR, c('D', 'S', 'F', 'R'))$Name, with = FALSE]
-    humtab <- humtab[from == FALSE]
+    fromHits <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
+    fromTable <- humtab[fromHits == TRUE, fields(humdrumR, c('D', 'S', 'F', 'R'))$Name, with = FALSE]
+    humtab <- humtab[fromHits == FALSE]
     
-    fromTable[ , New := moves$To[matches(list(File, get(what)), 
-                                         moves[ , c('File', 'From'), with = FALSE])]]
-    if (what == 'Spine') fromTable[ , Column := Column + (New - Spine)]
+    #
+    whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE])]
+    
+    fromTable[ , Groups := if (is.null(groupNames)) get(what) else groupNames[whichMatch]]
+    
+    if (what == 'Spine') fromTable[ , Column := Column + (moves$To[whichMatch] - Spine)]
+    fromTable[[what]] <-  moves$To[whichMatch]
+    
    
     
     # data fields in old rows need to be renamed, because they will now be columns
     dataColumns <- colnames(fromTable) %in% fields(humdrumR, fieldTypes = 'Data')$Name
-    fromTables <- split(fromTable, by = what, keep.by = FALSE)
+   
+    fromTables <- split(fromTable, by = if (is.null(groupNames)) what else 'Groups', keep.by = FALSE)
     fromTables <- lapply(fromTables,
                          \(ftab) {
                              # each spine/stop/what needs a new temp name
                              colnames(ftab)[which(dataColumns)] <- replicate(sum(dataColumns), 
                                                                      tempvar('xxxPipe', asSymbol = FALSE))
-                             colnames(ftab)[colnames(ftab) == 'New'] <- what
                              ftab
 
                          })
@@ -1231,14 +1234,14 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     
     # This is necessary if the from spines have extra paths or stops
     
-    newfields <- grepl('xxxPipe', colnames(humtab))
-    pipes <- paste0('Pipe', curpipeN + seq_len(sum(newfields)))
-    colnames(humtab)[newfields] <- pipes 
+    newFields <- grepl('xxxPipe', colnames(humtab))
+    newFieldNames <- names(fromTables) %||% paste0('Pipe', curpipeN + seq_len(sum(newFields)))
+    colnames(humtab)[newFields] <- newFieldNames 
     
     putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
-    addFields(humdrumR) <- pipes
-    humdrumR <- setActiveFields(humdrumR, pipes)
+    addFields(humdrumR) <- newFieldNames
+    humdrumR <- setActiveFields(humdrumR, newFieldNames)
     
     renumberSpines(humdrumR)
     
@@ -1250,8 +1253,29 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
 foldExclusive <- function(humdrumR, from, to) {
     checkhumdrumR(humdrumR, 'foldExclusive')
     
+    checkCharacter(from, 'from', 'foldExclusive', allowEmpty = FALSE)
+    checkCharacter(to, 'to', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
+    
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
     
+    moves <- humtab[,{
+        fromSpine <- unique(Spine[Exclusive %in% from])
+        toSpine <- unique(Spine[Exclusive %in% to])
+        fromExclusive <- c(tapply(Exclusive, Spine, unique, simplify = TRUE))[fromSpine]
+        match_size(From = fromSpine, To = toSpine, 
+                   Exclusive = fromExclusive)
+        
+        }, by = File]
+
+    moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
+    moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
+    
+    humdrumR <- foldHumdrum(humdrumR, 
+                            from = moves$From, 
+                            to = moves$To, 
+                            File = moves$File, what = 'Spine',
+                            groupNames = moves$Group)
+    humdrumR
     
     
 }
@@ -1275,18 +1299,6 @@ foldStops <- function(humdrumR) {
    
 }
 
-exclusive2fields <- function(humdrumR, target, destination) {
-    checkhumdrumR(humdrumR, 'exclusive2fields')
-    
-    combs <- withHumdrum(humdrumR, ~unique(data.frame(Exclusive, Spine, File)))
-
-    
-    targetCombs <- combs[Exclusive == target]
-    destinationCombs <- combs[Exclusive == destination]
-    
-    unique(cbind(targetCombs$Spine, destinationCombs$Spine))
-    
-}
 
 #################################-
 ############Humtable manipulation and access ####
@@ -1613,7 +1625,6 @@ checkFieldTypes <- function(types, argname, callname) {
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
             name <- as.character(name)
-            
             matches <- fieldMatch(x, name, callfun = '$', argname = 'name')
             
             setActiveFields(x, matches)
@@ -1658,7 +1669,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
   checkhumdrumR(humdrumR, 'fields')
     
-  D <- getD(humdrumR)
+  D <- getHumtab(humdrumR, 'Dd')
  
   valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
   valid <- valid[pmatch(fieldTypes, valid)]
@@ -2021,7 +2032,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
   }
   
   Nfiles <- length(humdrumR)          
-  if (firstAndLast) humdrumR <- humdrumR[unique(c(1, Nfiles))] 
+  if (length(Nfiles) > 2 && firstAndLast) humdrumR <- humdrumR[unique(range(getFields(humdrumR, 'File')$File))] 
   
   # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 

@@ -399,7 +399,10 @@ matches <- function(x, table, ...) {
   
 }
 
+
 `%ins%` <- function(x, table) !is.na(matches(x, table))
+
+`%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
 
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
