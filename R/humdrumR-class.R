@@ -226,7 +226,7 @@
 #' Of course, thanks to the structure fields, we can easily
 #' regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 #' However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-#' HumdrumR has several options for ["folding"][humShape] tokens within humdrum tables,
+#' HumdrumR has several options for ["collapseing"][humShape] tokens within humdrum tables,
 #' or otherwise [reshaping humdrum data][humCoercion] into data formats/structures you might prefer.
 #' 
 #' 
@@ -657,7 +657,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
           
           mats <- as.matrices(humdrumR, dataTypes = dataTypes, padder = padder,
                               fieldnames = fieldname[1], alignColumns = alignColumns,
-                              path.fold = !padPaths)
+                              path.collapse = !padPaths)
           
          
           lines <- unlist(lapply(mats, 
@@ -678,7 +678,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
 #' @name humCoercion
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL, 
-                   alignColumns = TRUE, padder = NA,  path.fold = TRUE) { 
+                   alignColumns = TRUE, padder = NA,  path.collapse = TRUE) { 
                     
                     checkhumdrumR(x, 'as.matrix.humdrumR')
     
@@ -688,10 +688,10 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     if (is.empty(x)) return(matrix(character(0L), ncol = 0, nrow = 0))
                     
-                    if (anyStops(x)) x <- foldStops(x, foldAtomic = TRUE, sep = ' ')
+                    if (anyStops(x)) x <- collapseStops(x, foldAtomic = TRUE, sep = ' ')
                     
                     paths  <- anyPaths(x)
-                    if (paths && path.fold) x <- foldPaths(x, foldAtomic = TRUE, sep = '\t')
+                    if (paths && path.collapse) x <- foldPaths(x, foldAtomic = TRUE, sep = '\t')
                     
                     ragged <- is.ragged(x)
                     #if (ragged && !alignColumns) stop("In call as.matrix(humdrumR, pad = FALSE): This humdrumR object has different numbers
@@ -700,7 +700,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     if (ragged && alignColumns) x <- alignColumns(x, "_C")
                     
                     dataTypes <- c(dataTypes, 'P')
-                    x <- foldRecords(x, foldAtomic = FALSE, padPaths = TRUE)
+                    x <- collapseRecords(x, foldAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
                     records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, we're getting errors.
@@ -735,10 +735,10 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
 #' @export
 setMethod('as.data.frame', 
           signature = c(x = 'humdrumR'),
-          function(x, dataTypes = 'D', fieldname = NULL, padder = NA, fold.path = TRUE) {
+          function(x, dataTypes = 'D', fieldname = NULL, padder = NA, collapse.path = TRUE) {
                     if (!is.null(fieldname) && length(fieldname) != 1L) stop("Can only coerce one field in a humdrumR object to a data.frame.")
                     
-                    as.data.frame(as.matrix(x, dataTypes, fieldname, padder, fold.path), stringsAsFactors = FALSE)
+                    as.data.frame(as.matrix(x, dataTypes, fieldname, padder, collapse.path), stringsAsFactors = FALSE)
           })
 
 
@@ -746,12 +746,12 @@ setMethod('as.data.frame',
 
 #' @name humCoercion
 #' @export
-as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE, alignColumns = FALSE) {
+as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.collapse = TRUE, alignColumns = FALSE) {
           checkhumdrumR(humdrumR, 'as.matrices')
 
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
           mat <- as.matrix(humdrumR, dataTypes = dataTypes,
-                           padder = padder, fieldnames = fieldnames, path.fold = path.fold, alignColumns = alignColumns)
+                           padder = padder, fieldnames = fieldnames, path.collapse = path.fold, alignColumns = alignColumns)
           
           file <- as.integer(gsub('\\..*', '', rownames(mat)))
           lapply(tapply(seq_along(file), file, list),
@@ -764,10 +764,10 @@ as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = N
 }
 #' @name humCoercion
 #' @export 
-as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.fold = TRUE) {
+as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = NA, path.collapse = TRUE) {
           checkhumdrumR(humdrumR, 'as.data.frames')
           lapply(as.matrices(humdrumR, dataTypes = 'D', fieldnames = NULL, 
-                             padder = NA, path.fold = TRUE), as.data.frame)
+                             padder = NA, path.collapse = TRUE), as.data.frame)
 }
 
 
@@ -1016,7 +1016,7 @@ mergeHumdrum <- function(...) {
 
 
 
-#########################################foldHumdrum ----
+#########################################collapseHumdrum ----
 
 #' HumdrumR data "Shape"
 #'
@@ -1024,29 +1024,29 @@ mergeHumdrum <- function(...) {
 #' of data stored in [humdrum tables][humTable]
 #' (held within [humdrumRclass] objects of course).
 #' 
-#' The `foldXXX` family allows you collapse all 
+#' The `collapseXXX` family allows you collapse all 
 #' [user fields][humTable]
 #' across groups in another field.
 #'
 #' @param humdrumR A [humdrumRclass] data object.
 #' (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
-#' @param foldAtomic `logical`. If `foldAtomic == TRUE`, each stop is collapsed to a single string
-#' `foldAtomic == FALSE`, each stop is collapsed to a list of tokens. 
-#' @param sep `character`. If `foldAtomic == TRUE`, collapsed tokens are separated by this string.
+#' @param collapseAtomic `logical`. If `foldAtomic == TRUE`, each stop is collapsed to a single string
+#' `collapseAtomic == FALSE`, each stop is collapsed to a list of tokens. 
+#' @param sep `character`. If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.
 #' @param pad `logical`. Should [path/column padding tokens][humColumns] be included?
 #' 
 #' @name humShape
 #' @export
-foldHumdrum <- function(humdrumR, byfields, 
-                        foldAtomic = TRUE, sep = ' ', padPaths = FALSE) {
-    # This function is the primary function for "folding"
+collapseHumdrum <- function(humdrumR, byfields, 
+                        collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
+    # This function is the primary function for "collapseing"
     # tokens across groups in another field.
     # Most of the arguments are described in the user documentation
     # (because users use them).
-    # byfields determines what fields to fold across.
+    # byfields determines what fields to collapse across.
     # byfields should be a character vector.
     # suitable for the "by" argument in a data.table[].
-    checkhumdrumR(humdrumR, 'foldHumdrum')
+    checkhumdrumR(humdrumR, 'collapseHumdrum')
     # humdrumR <- indexGLIM(humdrumR)
     
     humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
@@ -1056,30 +1056,30 @@ foldHumdrum <- function(humdrumR, byfields,
     fieldtypes <- sapply(humtab[ , fieldnames, with = FALSE], class)
     
     # What fields to apply across
-    byfields <- fieldMatch(humdrumR, byfields, callfun = 'foldHumdrum', argname = 'byfields')
+    byfields <- fieldMatch(humdrumR, byfields, callfun = 'collapseHumdrum', argname = 'byfields')
     byfields <- do.call('call', c(".", lapply(byfields, as.symbol)), quote = TRUE)
     
     #### Construct the expressions which will do the work
     #This is a list of expressions, one to collapse each field.
-    foldexprs <- Map(\(name, type) {
+    collapseExprs <- Map(\(name, type) {
         name <- as.symbol(name) 
         
         if (type == 'list') return(call('catlists', name))
         
-        if (foldAtomic) call('paste', name, collapse = sep) else call('list',  name)},
+        if (collapseAtomic) call('paste', name, collapse = sep) else call('list',  name)},
         fieldnames, fieldtypes)
     #This puts the pasteexprs into a single expression
-    foldexpr <- do.call('call', quote = TRUE,
-                        c('list', foldexprs))
+    collapseExpr <- do.call('call', quote = TRUE,
+                        c('list', collapseExprs))
     
     ## Expressions will be first saved into tmpfieldnames, 
     # because data.table doesn't allow in place changes if the type changes
-    tmpfieldnames <- paste0(fieldnames, '_xxxfoldedxxx')
+    tmpfieldnames <- paste0(fieldnames, '_xxxcollapseedxxx')
     
     ## Build the final expression that is evaluated
     datatableExpr <- quote(humtab[ , X := Y]) # X and Y are just tmp dummies
     datatableExpr <- substituteName(datatableExpr, subs = list(X = call('c', tmpfieldnames), 
-                                                               Y = foldexpr))
+                                                               Y = collapseExpr))
     datatableExpr[['by']] <- byfields
     
     ### EVALUATE IT!
@@ -1103,7 +1103,7 @@ foldHumdrum <- function(humdrumR, byfields,
     
     ## Rename temp colnames
     newhumtab[ , eval(fieldnames) := NULL] # inplace
-    colnames(newhumtab) <- gsub('_xxxfoldedxxx$', '', colnames(newhumtab))
+    colnames(newhumtab) <- gsub('_xxxcollapseedxxx$', '', colnames(newhumtab))
     
     if (anyPaths(humdrumR) && !padPaths) newhumtab <- rbindlist(list(newhumtab, getHumtab(humdrumR, 'P')), use.names = TRUE)
     putHumtab(humdrumR, drop = FALSE) <- newhumtab
@@ -1113,26 +1113,26 @@ foldHumdrum <- function(humdrumR, byfields,
 
 #' @name humShape
 #' @export 
-foldStops <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
-    checkhumdrumR(humdrumR, 'foldStops')
+collapseStops <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
+    checkhumdrumR(humdrumR, 'collapseStops')
     
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
     
-    foldHumdrum(humdrumR, byfields = c('Filename', 'Spine', 'Record', 'Path'), 
-                foldAtomic = foldAtomic, sep = sep)
+    collapseHumdrum(humdrumR, byfields = c('Filename', 'Spine', 'Record', 'Path'), 
+                collapseAtomic = foldAtomic, sep = sep)
 }
 
 #' @name humShape
 #' @export
-foldPaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
-    checkhumdrumR(humdrumR, 'foldPaths')
+collapsePaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
+    checkhumdrumR(humdrumR, 'collapsePaths')
     # First some necessary preprocessing
     
     if (!anyPaths(humdrumR)) return(humdrumR)
     
-    output <- foldHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
-                          foldAtomic = foldAtomic, sep = sep, padPaths = FALSE)
+    output <- collapseHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
+                          collapseAtomic = foldAtomic, sep = sep, padPaths = FALSE)
     
     output@Humtable$P <- output@Humtable$P[0]
     
@@ -1142,14 +1142,14 @@ foldPaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
 
 #' @name humShape
 #' @export
-foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE) {
-    checkhumdrumR(humdrumR, 'foldRecords')
+collapseRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE) {
+    checkhumdrumR(humdrumR, 'collapseRecords')
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
     
     
-    foldHumdrum(humdrumR, byfields = c('Filename', 'Record'), 
-                foldAtomic = foldAtomic, sep = sep, padPaths = padPaths)
+    collapseHumdrum(humdrumR, byfields = c('Filename', 'Record'), 
+                collapseAtomic = foldAtomic, sep = sep, padPaths = padPaths)
     
     
 }
@@ -1162,20 +1162,20 @@ foldRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @rdname humShape
 #' @export
-reshape2Pipe <- function(humdrumR, type = 'Spine', target, destination) {
+foldHumdrum <- function(humdrumR, from, to, type = 'Spine', File = NULL) {
     
     checkhumdrumR(humdrumR, 'reshape2Pipe')
     
-    if (any(destination %in% target)) .stop("In your call to reshape2Pipe, the target and destination {type}s can't overlap.")
-    if (length(target) < length(destination)) .stop("In your call to reshape2Pipe, the number of destination {type}s can't be greater than the number of target {type}s.")
+    if (any(to %in% from)) .stop("In your call to reshape2Pipe, the target and destination {type}s can't overlap.")
+    if (length(from) < length(to)) .stop("In your call to reshape2Pipe, the number of destination {type}s can't be greater than the number of target {type}s.")
     
-    match_size(target = target,  destination = destination, toEnv = TRUE)
+    match_size(target = from,  destination = to, toEnv = TRUE)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP')
     curpipeN <- curPipeN(humtab)
     
     dataFields <- fields(humdrumR, fieldTypes = 'Data')
-    hits <- humtab[ , get(type) %in% target]
+    hits <- humtab[ , get(type) %in% from]
     
     structuralFields <- c('File', 'Spine', 'Path', 'Stop', 'Record')
     targetTable <- humtab[hits == TRUE, c(dataFields$Name, structuralFields), with = FALSE]
@@ -1184,15 +1184,15 @@ reshape2Pipe <- function(humdrumR, type = 'Spine', target, destination) {
     
     
     
-    targetTable[ , New := destination[match(get(type), target)]]
+    targetTable[ , New := to[match(get(type), from)]]
     targetTable <- targetTable[ , sapply(targetTable, \(x) !all(is.na(x))), with = FALSE]
     
     old <- split(targetTable, by = type, keep.by = FALSE)
     old <- lapply(old, 
-                        \(fold) {
-                            datafields <- colnames(fold) %in% dataFields$Name
-                            colnames(fold)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
-                            fold
+                        \(collapse) {
+                            datafields <- colnames(collapse) %in% dataFields$Name
+                            colnames(collapse)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
+                            collapse
                         })
     
     
@@ -1213,6 +1213,38 @@ reshape2Pipe <- function(humdrumR, type = 'Spine', target, destination) {
     
     
     
+    
+}
+
+stops2fields <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'stops2fields')
+           
+   stops <- unique(getHumtab(humdrumR)$Stop)
+   
+   if (all(stops == 1L)) return(humdrumR)
+   
+   dataFields <- fields(humdrumR, fieldTypes = 'Data')
+   minstop <- min(stops)
+   
+   stops <- setdiff(stops, minstop)
+   humdrumR <- reshape2Pipe(humdrumR, 'Stop', stops, minstop)
+   
+   humdrumR[c(outer(dataFields$Name, stops, paste, sep = 'Stop'))] <- humdrumR
+   
+   humdrumR
+   
+}
+
+exclusive2fields <- function(humdrumR, target, destination) {
+    checkhumdrumR(humdrumR, 'exclusive2fields')
+    
+    combs <- withHumdrum(humdrumR, ~unique(data.frame(Exclusive, Spine, File)))
+
+    
+    targetCombs <- combs[Exclusive == target]
+    destinationCombs <- combs[Exclusive == destination]
+    
+    unique(cbind(targetCombs$Spine, destinationCombs$Spine))
     
 }
 
@@ -1997,7 +2029,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                           max.records.file = 40L, max.token.length = 12L, collapseNull = 10L,
                           screenWidth = options('width')$width - 10L) {
-  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.fold = FALSE, alignColumns = TRUE)
+  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
   
   
   #
