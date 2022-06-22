@@ -688,10 +688,10 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     if (is.empty(x)) return(matrix(character(0L), ncol = 0, nrow = 0))
                     
-                    if (anyStops(x)) x <- collapseStops(x, foldAtomic = TRUE, sep = ' ')
+                    if (anyStops(x)) x <- collapseStops(x, collapseAtomic = TRUE, sep = ' ')
                     
                     paths  <- anyPaths(x)
-                    if (paths && path.collapse) x <- foldPaths(x, foldAtomic = TRUE, sep = '\t')
+                    if (paths && path.collapse) x <- collapsePaths(x, collapseAtomic = TRUE, sep = '\t')
                     
                     ragged <- is.ragged(x)
                     #if (ragged && !alignColumns) stop("In call as.matrix(humdrumR, pad = FALSE): This humdrumR object has different numbers
@@ -700,7 +700,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     if (ragged && alignColumns) x <- alignColumns(x, "_C")
                     
                     dataTypes <- c(dataTypes, 'P')
-                    x <- collapseRecords(x, foldAtomic = FALSE, padPaths = TRUE)
+                    x <- collapseRecords(x, collapseAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
                     records  <- lapply(records, as.list) # stri_list2matrix needs lists! If column is not a list-column, we're getting errors.
@@ -751,7 +751,7 @@ as.matrices <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder = N
 
           dataTypes <- checkTypes(dataTypes, 'as.matrices')
           mat <- as.matrix(humdrumR, dataTypes = dataTypes,
-                           padder = padder, fieldnames = fieldnames, path.collapse = path.fold, alignColumns = alignColumns)
+                           padder = padder, fieldnames = fieldnames, path.collapse = path.collapse, alignColumns = alignColumns)
           
           file <- as.integer(gsub('\\..*', '', rownames(mat)))
           lapply(tapply(seq_along(file), file, list),
@@ -890,7 +890,7 @@ is.empty <- function(humdrumR){
 #' @export
 anyPaths <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'anyPaths')
-    humtab <- getD(humdrumR)
+    humtab <- getHumtab(humdrumR, 'Dd')
     
     any(humtab$Path > 0L, na.rm = TRUE)
     
@@ -901,7 +901,7 @@ anyPaths <- function(humdrumR) {
 anyStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'anyStops')
     
-    humtab <- getD(humdrumR)
+    humtab <- getHumtab(humdrumR, 'Dd')
     any(humtab$Stop > 1L, na.rm = TRUE)
     
 }
@@ -1030,7 +1030,7 @@ mergeHumdrum <- function(...) {
 #'
 #' @param humdrumR A [humdrumRclass] data object.
 #' (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
-#' @param collapseAtomic `logical`. If `foldAtomic == TRUE`, each stop is collapsed to a single string
+#' @param collapseAtomic `logical`. If `collapseAtomic == TRUE`, each stop is collapsed to a single string
 #' `collapseAtomic == FALSE`, each stop is collapsed to a list of tokens. 
 #' @param sep `character`. If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.
 #' @param pad `logical`. Should [path/column padding tokens][humColumns] be included?
@@ -1038,8 +1038,8 @@ mergeHumdrum <- function(...) {
 #' @name humShape
 #' @export
 collapseHumdrum <- function(humdrumR, byfields, 
-                        collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
-    # This function is the primary function for "collapseing"
+                            collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
+    # This function is the primary function for "collapsing"
     # tokens across groups in another field.
     # Most of the arguments are described in the user documentation
     # (because users use them).
@@ -1049,7 +1049,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     checkhumdrumR(humdrumR, 'collapseHumdrum')
     # humdrumR <- indexGLIM(humdrumR)
     
-    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
+    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDP" else "GLIMD")
     
     # What fields do apply to?
     fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1113,26 +1113,26 @@ collapseHumdrum <- function(humdrumR, byfields,
 
 #' @name humShape
 #' @export 
-collapseStops <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
+collapseStops <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseStops')
     
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
     
     collapseHumdrum(humdrumR, byfields = c('Filename', 'Spine', 'Record', 'Path'), 
-                collapseAtomic = foldAtomic, sep = sep)
+                    collapseAtomic = collapseAtomic, sep = sep)
 }
 
 #' @name humShape
 #' @export
-collapsePaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
+collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapsePaths')
     # First some necessary preprocessing
     
     if (!anyPaths(humdrumR)) return(humdrumR)
     
     output <- collapseHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
-                          collapseAtomic = foldAtomic, sep = sep, padPaths = FALSE)
+                              collapseAtomic = collapseAtomic, sep = sep, padPaths = FALSE)
     
     output@Humtable$P <- output@Humtable$P[0]
     
@@ -1142,14 +1142,14 @@ collapsePaths <- function(humdrumR, foldAtomic = TRUE, sep = ' ') {
 
 #' @name humShape
 #' @export
-collapseRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = FALSE) {
+collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
     checkhumdrumR(humdrumR, 'collapseRecords')
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
     
     
     collapseHumdrum(humdrumR, byfields = c('Filename', 'Record'), 
-                collapseAtomic = foldAtomic, sep = sep, padPaths = padPaths)
+                    collapseAtomic = collapseAtomic, sep = sep, padPaths = padPaths)
     
     
 }
@@ -2017,7 +2017,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
   # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
   
-  print_humtab_(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
+  .print_humtab(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                 max.records.file, max.token.length, collapseNull)
 
   invisible(NULL)
@@ -2049,6 +2049,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
     # printable[(humtab$Null | humtab$Filter)] <- nulltypes[humtab$Type[(humtab$Null | humtab$Filter)]]
     
     humtab[ , Print := active]
+    humtab$Type[humtab$Type == 'd'] <- 'D'
     
     putHumtab(humdrumR, drop = FALSE) <- humtab
     addFields(humdrumR) <- 'Print'
@@ -2057,7 +2058,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
 
 
 
-print_humtab_ <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
+.print_humtab <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                           max.records.file = 40L, max.token.length = 12L, collapseNull = 10L,
                           screenWidth = options('width')$width - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
