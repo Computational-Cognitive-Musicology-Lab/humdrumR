@@ -1261,12 +1261,23 @@ foldExclusive <- function(humdrumR, from, to) {
     moves <- humtab[,{
         fromSpine <- unique(Spine[Exclusive %in% from])
         toSpine <- unique(Spine[Exclusive %in% to])
-        fromExclusive <- c(tapply(Exclusive, Spine, unique, simplify = TRUE))[fromSpine]
-        match_size(From = fromSpine, To = toSpine, 
-                   Exclusive = fromExclusive)
+        if (!(length(fromSpine) < 1L || 
+            length(toSpine) < 1L ||
+            (length(fromSpine) == 1L && length(toSpine) == 1 && fromSpine == toSpine))) {
+            
+            if (all(fromSpine == toSpine)) {
+                fromSpine <- fromSpine[-1]
+                toSpine <- toSpine[1]
+            }
+            fromExclusive <- c(tapply(Exclusive, Spine, unique, simplify = TRUE))[fromSpine]
+            match_size(From = fromSpine, To = toSpine, 
+                       Exclusive = fromExclusive)
+        }
+        
+      
         
         }, by = File]
-
+    
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
     
@@ -1280,18 +1291,37 @@ foldExclusive <- function(humdrumR, from, to) {
     
 }
 
+foldPaths <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'foldPaths')
+    
+    paths <- unique(getHumtab(humdrumR)$Path)
+    
+    if (all(paths == 1L)) return(humdrumR)
+    
+    dataFields <- fields(humdrumR, fieldTypes = 'Data')
+    minPath <- min(paths)
+    
+    paths <- setdiff(paths, minPath)
+    humdrumR <- foldHumdrum(humdrumR, paths, minPath, what = 'Path')
+    
+    humdrumR[c(outer(dataFields$Name, paths, paste, sep = 'Path'))] <- humdrumR
+    
+    humdrumR
+    
+}
+
 foldStops <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'stops2fields')
+    checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
    
    if (all(stops == 1L)) return(humdrumR)
    
    dataFields <- fields(humdrumR, fieldTypes = 'Data')
-   minstop <- min(stops)
+   minStop <- min(stops)
    
-   stops <- setdiff(stops, minstop)
-   humdrumR <- foldHumdrum(humdrumR, stops, minstop, what = 'Stop')
+   stops <- setdiff(stops, minStop)
+   humdrumR <- foldHumdrum(humdrumR, stops, minStop, what = 'Stop')
    
    humdrumR[c(outer(dataFields$Name, stops, paste, sep = 'Stop'))] <- humdrumR
    
