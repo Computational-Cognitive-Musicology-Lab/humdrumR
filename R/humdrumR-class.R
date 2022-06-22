@@ -1049,7 +1049,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     checkhumdrumR(humdrumR, 'collapseHumdrum')
     # humdrumR <- indexGLIM(humdrumR)
     
-    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDP" else "GLIMD")
+    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
     
     # What fields do apply to?
     fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1247,7 +1247,16 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     
 }
 
-stops2fields <- function(humdrumR) {
+foldExclusive <- function(humdrumR, from, to) {
+    checkhumdrumR(humdrumR, 'foldExclusive')
+    
+    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
+    
+    
+    
+}
+
+foldStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'stops2fields')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -1258,7 +1267,7 @@ stops2fields <- function(humdrumR) {
    minstop <- min(stops)
    
    stops <- setdiff(stops, minstop)
-   humdrumR <- reshape2Pipe(humdrumR, 'Stop', stops, minstop)
+   humdrumR <- foldHumdrum(humdrumR, stops, minstop, what = 'Stop')
    
    humdrumR[c(outer(dataFields$Name, stops, paste, sep = 'Stop'))] <- humdrumR
    
