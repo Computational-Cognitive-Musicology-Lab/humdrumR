@@ -124,17 +124,31 @@ fargs <- function(func) formals(args(func))
 }
 
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
-    # stack <- rlang::caller_call()
-    # stack <- stack[!duplicated(stack)]
-    # calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
-    # calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
+  # stack <- c()
+  # n <- 1
+  # while(!is.null(rlang::caller_call(n))) {
+  #   stack[n] <- rlang::expr_deparse(rlang::caller_call(n))
+  #   n <- n + 1
+  # }
+  
+  stack <- sapply(head(sys.calls(), -1), rlang::expr_deparse)
+  
+  if (grepl('^check', stack[1])) stack <- stack[-1]
+  
+  stack <- rev(stack)
+   # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
+  
+  cut <- 15
+  stack[-1] <- paste0(' -> ', stack[-1])
+  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
     # 
-    # cat('HumdrumR error in call stack:\n')
-    # cat(calls, sep = '\n')
+    cat('humdrumR error in:\n')
+    cat('\t', stack, sep = '')
     
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
-     stop(call. = FALSE, message)
+    cat('\n')
+    stop(call. = FALSE, message)
 }
 
 # Names ----
@@ -374,6 +388,18 @@ catlists <- function(lists) {
 }
 
 # indices
+
+matches <- function(x, table, ...) {
+  # x and table are both lists/data.frames
+  
+  x <- do.call('paste', c(x, list(sep = ' ')))
+  table <- do.call('paste', c(table, list(sep = ' ')))
+  
+  match(x, table, ...)
+  
+}
+
+`%ins%` <- function(x, table) !is.na(matches(x, table))
 
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))

@@ -1160,51 +1160,65 @@ collapseRecords <- function(humdrumR, foldAtomic = TRUE, sep = ' ', padPaths = F
 #' Collapse spines into new fields
 #'
 #' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @rdname humShape
 #' @export
-foldHumdrum <- function(humdrumR, from, to, type = 'Spine', File = NULL) {
+foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     
-    checkhumdrumR(humdrumR, 'reshape2Pipe')
+    checkhumdrumR(humdrumR, 'foldHumdrum')
+    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
     
-    if (any(to %in% from)) .stop("In your call to reshape2Pipe, the target and destination {type}s can't overlap.")
-    if (length(from) < length(to)) .stop("In your call to reshape2Pipe, the number of destination {type}s can't be greater than the number of target {type}s.")
+    # "moves" are the transitions between integers for each file 
+    moves <- as.data.table(if (is.null(File)) {
+        match_size(from = from, to = to, toEnv = TRUE) # we want these matched first
+        expand.grid(File = unique(humtab$File), From = from, To = to)
+    } else {
+        match_size(File = File, From = from, To = to)
+    })
+
     
-    match_size(target = from,  destination = to, toEnv = TRUE)
+    moves[ , {
+        if (any(To %in% From)).stop("In your call to foldHumdrum, the 'from' and 'to' {what}s can't overlap within any 'File'.")
+        if (length(From) < length(To)) .stop("In your call to foldHumdrum, the number of 'to' {what}s must be less than or equal to the number 'from' {what}s",
+                                             "within a each 'File'.")
+    }, by = File]
+   
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP')
+    structuralFields <- c('File', 'Spine', 'Path', 'Stop', 'Record',
+                          'Null', 'Filepath', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Piece')
+    dataFields <- fields(humdrumR, fieldTypes = 'Data')
+   
     curpipeN <- curPipeN(humtab)
     
-    dataFields <- fields(humdrumR, fieldTypes = 'Data')
-    hits <- humtab[ , get(type) %in% from]
+    # 
+    from <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
+    fromTable <- humtab[from == TRUE, fields(humdrumR, c('D', 'S', 'F', 'R'))$Name, with = FALSE]
+    humtab <- humtab[from == FALSE]
     
-    structuralFields <- c('File', 'Spine', 'Path', 'Stop', 'Record')
-    targetTable <- humtab[hits == TRUE, c(dataFields$Name, structuralFields), with = FALSE]
+    fromTable[ , New := moves$To[matches(list(File, get(what)), 
+                                         moves[ , c('File', 'From'), with = FALSE])]]
+    if (what == 'Spine') fromTable[ , Column := Column + (New - Spine)]
+    # fromTable <- fromTable[ , sapply(fromTable, \(x) !all(is.na(x))), with = FALSE]
     
-    humtab <- humtab[hits == FALSE]
+    # data fields in old rows need to be renamed, because they will now be columns
+    dataColumns <- colnames(fromTable) %in% dataFields$Name
+    colnames(fromTable)[dataColumns] <- replicate(sum(dataColumns), tempvar('xxxPipe', asSymbol = FALSE))
+    fromTables <- split(fromTable, by = what, keep.by = FALSE)
+
+ 
     
+    mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
+    fromTable <- Reduce(\(x, y) merge(y, x, by = mergeFields, all = TRUE), 
+                        fromTables)
+    colnames(fromTable)[colnames(fromTable) == 'New'] <- what 
     
-    
-    targetTable[ , New := to[match(get(type), from)]]
-    targetTable <- targetTable[ , sapply(targetTable, \(x) !all(is.na(x))), with = FALSE]
-    
-    old <- split(targetTable, by = type, keep.by = FALSE)
-    old <- lapply(old, 
-                        \(collapse) {
-                            datafields <- colnames(collapse) %in% dataFields$Name
-                            colnames(collapse)[datafields] <- replicate(sum(datafields), tempvar('xxxPipe', FALSE))
-                            collapse
-                        })
-    
-    
-    old <- Reduce(\(x, y) merge(y, x, by = setdiff(c(structuralFields, "New"), type), all = TRUE), old)
-    colnames(old)[colnames(old) == 'New'] <- type 
-    humtab <- merge(humtab, old, by = structuralFields, all = TRUE)
+    humtab <- fromTable[humtab, on = mergeFields]
+    humtab <- rbind(humtab, fromTable[!humtab, on = mergeFields], fill = TRUE) 
+    # This is necessary if the from spines have extra paths or stops
     
     newfields <- grepl('xxxPipe', colnames(humtab))
     pipes <- paste0('Pipe', curpipeN + seq_len(sum(newfields)))
     colnames(humtab)[newfields] <- pipes 
     
-    putHumtab(humdrumR, drop = FALSE) <- humtab
+    putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
     addFields(humdrumR) <- pipes
     humdrumR <- setActiveFields(humdrumR, pipes)
