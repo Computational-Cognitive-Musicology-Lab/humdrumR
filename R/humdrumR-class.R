@@ -1169,7 +1169,10 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     # "moves" are the transitions between integers for each file 
     moves <- as.data.table(if (is.null(File)) {
         match_size(from = from, to = to, toEnv = TRUE) # we want these matched first
-        expand.grid(File = unique(humtab$File), From = from, To = to)
+        File <- rep(unique(humtab$File), each = length(from))
+        list(File = File, From = from, To = to)
+ 
+        
     } else {
         match_size(File = File, From = from, To = to)
     })
@@ -1196,22 +1199,36 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL) {
     fromTable[ , New := moves$To[matches(list(File, get(what)), 
                                          moves[ , c('File', 'From'), with = FALSE])]]
     if (what == 'Spine') fromTable[ , Column := Column + (New - Spine)]
-    # fromTable <- fromTable[ , sapply(fromTable, \(x) !all(is.na(x))), with = FALSE]
+   
     
     # data fields in old rows need to be renamed, because they will now be columns
-    dataColumns <- colnames(fromTable) %in% dataFields$Name
-    colnames(fromTable)[dataColumns] <- replicate(sum(dataColumns), tempvar('xxxPipe', asSymbol = FALSE))
+    dataColumns <- colnames(fromTable) %in% fields(humdrumR, fieldTypes = 'Data')$Name
     fromTables <- split(fromTable, by = what, keep.by = FALSE)
+    fromTables <- lapply(fromTables,
+                         \(ftab) {
+                             # each spine/stop/what needs a new temp name
+                             colnames(ftab)[which(dataColumns)] <- replicate(sum(dataColumns), 
+                                                                     tempvar('xxxPipe', asSymbol = FALSE))
+                             colnames(ftab)[colnames(ftab) == 'New'] <- what
+                             ftab
 
+                         })
  
     
     mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
-    fromTable <- Reduce(\(x, y) merge(y, x, by = mergeFields, all = TRUE), 
-                        fromTables)
-    colnames(fromTable)[colnames(fromTable) == 'New'] <- what 
+    humtab <- Reduce(\(htab, ftab) {
+        htab <- rbind(ftab[htab, on = mergeFields], 
+                      ftab[!htab, on = mergeFields],
+                      # htab[!ftab, on = mergeFields],
+                      fill = TRUE) 
+        htab
+        
+    }, fromTables, init = humtab)
+    # fromTable <- Reduce(\(x, y) merge(y, x, by = setdiff(mergeFields, what), all = TRUE), 
+                        # fromTables)
     
-    humtab <- fromTable[humtab, on = mergeFields]
-    humtab <- rbind(humtab, fromTable[!humtab, on = mergeFields], fill = TRUE) 
+    
+    
     # This is necessary if the from spines have extra paths or stops
     
     newfields <- grepl('xxxPipe', colnames(humtab))

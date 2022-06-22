@@ -131,11 +131,11 @@ fargs <- function(func) formals(args(func))
   #   n <- n + 1
   # }
   
-  stack <- sapply(head(sys.calls(), -1), rlang::expr_deparse)
+  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
+  stack <- sapply(stack, paste, collapse = '\n')
   
-  if (grepl('^check', stack[1])) stack <- stack[-1]
+  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
   
-  stack <- rev(stack)
    # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
   
   cut <- 15
