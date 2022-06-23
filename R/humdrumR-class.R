@@ -1155,33 +1155,31 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 
 ### reshape to fields ----
 
-#' Collapse spines into new fields
+#' "Fold" data into new fields
 #'
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
+#' Many humdrum datasets encode data spread across multiple spines, spine-paths, or stops.
+#' By default, `humdrumR` parses each separate spine, spine-path, and stop as their own individual
+#' data points, taking up one row in the [humdrum table][humTable].
+#' If we want to treat data in multiple spines/paths/stops as different aspects of the same data
+#' it is easiest to reshape the data so that the information is in different humdrumR [fields][fields()]
+#' rather than seperate spines/paths/stops.
+#' We "fold" the data over "on top" of other spines using `foldHumdrum`.
+#' 
+#' To use `foldHumdrum` on a [humdrumR object][humdrumR-class], you must specify
+#' numeric `fold` and `onto` arguments, and a `what` argument is typically
+#' `"Spine"` (default), `"Path"`, or `"Stop"`---other folds are possible as well, 
+#' such as "folding" records on top of each other.
+#' 
+#' 
 #' @export
-foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL, groupNames = NULL) {
-    
+foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
+                        fromField =  activeFields(humdrumR)[1], newFieldNames = NULL) {
     checkhumdrumR(humdrumR, 'foldHumdrum')
+    fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
+    
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
-    
-    # "moves" are the transitions between integers for each file 
-    moves <- as.data.table(if (is.null(File)) {
-        match_size(from = from, to = to, toEnv = TRUE) # we want these matched first
-        File <- rep(unique(humtab$File), each = length(from))
-        list(File = File, From = from, To = to)
  
-        
-    } else {
-        match_size(File = File, From = from, To = to)
-    })
-
-    
-    moves[ , {
-        if (any(To %in% From)).stop("In your call to foldHumdrum, the 'from' and 'to' {what}s can't overlap within any 'File'.")
-        if (length(From) < length(To)) .stop("In your call to foldHumdrum, the number of 'to' {what}s must be less than or equal to the number 'from' {what}s",
-                                             "within a each 'File'.")
-    }, by = File]
-   
+    moves <- foldMoves(humtab, fold, onto, what, File, newFieldNames)
     
     structuralFields <- c('File', 'Spine', 'Path', 'Stop', 'Record',
                           'Null', 'Filepath', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Piece')
@@ -1197,32 +1195,32 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL, groupNa
     #
     whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE])]
     
-    fromTable[ , Groups := if (is.null(groupNames)) get(what) else groupNames[whichMatch]]
     
-    if (what == 'Spine') fromTable[ , Column := Column + (moves$To[whichMatch] - Spine)]
+    switch(what,
+           Spine  = fromTable[ , Column := Column + (moves$To[whichMatch] - Spine)],
+           Record = fromTable[ , NData := NData + (moves$To[whichMatch] - Record)],
+           NData  = fromTable[ , Record := Record + (moves$To[whichMatch] - NData)])
+
     fromTable[[what]] <-  moves$To[whichMatch]
-    
+    fromTable$FieldNames <- moves$FieldNames[whichMatch]
    
     
     # data fields in old rows need to be renamed, because they will now be columns
     dataColumns <- colnames(fromTable) %in% fields(humdrumR, fieldTypes = 'Data')$Name
    
-    fromTables <- split(fromTable, by = if (is.null(groupNames)) what else 'Groups', keep.by = FALSE)
-    fromTables <- lapply(fromTables,
-                         \(ftab) {
-                             # each spine/stop/what needs a new temp name
-                             colnames(ftab)[which(dataColumns)] <- replicate(sum(dataColumns), 
-                                                                     tempvar('xxxPipe', asSymbol = FALSE))
+    fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
+    fromTables <- Map(\(ftab, fname) {
+                             colnames(ftab)[colnames(ftab) == fromField] <- fname
                              ftab
 
-                         })
+                         }, fromTables, names(fromTables))
  
     
     mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
     humtab <- Reduce(\(htab, ftab) {
         htab <- rbind(ftab[htab, on = mergeFields], 
-                      ftab[!htab, on = mergeFields],
-                      # htab[!ftab, on = mergeFields],
+                      ftab[!htab, on = mergeFields], 
+                      # This is necessary if the from spines have extra paths or stops
                       fill = TRUE) 
         htab
         
@@ -1232,16 +1230,15 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL, groupNa
     
     
     
-    # This is necessary if the from spines have extra paths or stops
     
-    newFields <- grepl('xxxPipe', colnames(humtab))
-    newFieldNames <- names(fromTables) %||% paste0('Pipe', curpipeN + seq_len(sum(newFields)))
-    colnames(humtab)[newFields] <- newFieldNames 
+    # newFields <- grepl('xxxPipe', colnames(humtab))
+    # newFieldNames <- if (is.null(fieldNames)) paste0('Pipe', curpipeN + seq_len(sum(newFields))) else names(fromTables) 
+    # colnames(humtab)[newFields] <- newFieldNames 
     
     putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
-    addFields(humdrumR) <- newFieldNames
-    humdrumR <- setActiveFields(humdrumR, newFieldNames)
+    addFields(humdrumR) <- names(fromTables)
+    humdrumR <- setActiveFields(humdrumR, names(fromTables))
     
     renumberSpines(humdrumR)
     
@@ -1249,6 +1246,49 @@ foldHumdrum <- function(humdrumR, from, to, what = 'Spine', File = NULL, groupNa
     
     
 }
+
+foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NULL) {
+    
+    if (!is.null(File)) {
+        if (length(unique(lengths(list(fold, onto, File)))) > 1){
+            .stop("In your call to foldHumdrum, ",
+                  "if the 'File' argument is not NULL,",
+                  "the 'File', 'fold', and 'onto' argumets must all be the same length.")
+        }
+    } else {
+        File <- rep(unique(humtab$File), each = max(length(fold), length(onto)))
+        
+        match_size(File = File, fold = fold, onto = onto, toEnv = TRUE)
+    }    
+    
+    moves <- unique(data.table(File = File, From = fold, To = onto))
+    
+    # Check for errors
+    moves[ , {
+        if (any(To %in% From)).stop("In your call to foldHumdrum, the 'fold' and 'onto' {what}s can't overlap within any 'File'.")
+        if (length(From) < length(To)) .stop("In your call to foldHumdrum, the number of 'onto' {what}s must be less than or equal to the number 'fold' {what}s",
+                                             "within a each 'File'.")
+    }, by = File]
+    
+    
+    # name fields
+    moves[ , NewField := seq_along(From), by = .(File, To)]
+    
+    pipes <- paste0('Pipe', 
+                    seq_len(max(0L, 
+                                length(unique(moves$NewField)) - length(newFieldNames))) + curPipeN(humtab))
+    newFieldNames <- c(newFieldNames, pipes)
+    
+    moves[ , FieldNames := newFieldNames[NewField]]
+    
+    
+    
+    moves
+}
+#    
+
+  
+
 
 foldExclusive <- function(humdrumR, from, to) {
     checkhumdrumR(humdrumR, 'foldExclusive')
@@ -1282,10 +1322,10 @@ foldExclusive <- function(humdrumR, from, to) {
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
     
     humdrumR <- foldHumdrum(humdrumR, 
-                            from = moves$From, 
-                            to = moves$To, 
+                            fold = moves$From, 
+                            onto = moves$To, 
                             File = moves$File, what = 'Spine',
-                            groupNames = moves$Group)
+                            fieldNames = moves$Group)
     humdrumR
     
     

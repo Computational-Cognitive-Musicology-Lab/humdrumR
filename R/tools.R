@@ -646,6 +646,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
   
           x <- list(...)
+          x <- x[!sapply(x, is.null)]
           
           ldims <- ldims(x)
           target <- order(ldims[ , 'size'], ldims[ , 'nrow'], decreasing = TRUE)[1]
