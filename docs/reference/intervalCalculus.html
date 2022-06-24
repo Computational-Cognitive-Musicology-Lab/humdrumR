@@ -30,7 +30,6 @@
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
-    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
@@ -67,9 +66,9 @@
 
 <span class="fu">sigma</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">derive</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">derive</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span>, boundaries <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">delta</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">delta</span><span class="op">(</span><span class="va">intervals</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">is.na</span><span class="op">)</span>, boundaries <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
 <span class="fu">calculus</span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, skip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">na</span><span class="op">)</span><span class="op">)</span></code></pre></div>
     </div>

@@ -300,7 +300,7 @@ of a \code{data.table}, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily
 regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-HumdrumR has several options for \link[=humShape]{"folding"} tokens within humdrum tables,
+HumdrumR has several options for \link[=humShape]{"collapseing"} tokens within humdrum tables,
 or otherwise \link[=humCoercion]{reshaping humdrum data} into data formats/structures you might prefer.
 }
 

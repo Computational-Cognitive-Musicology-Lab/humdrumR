@@ -30,7 +30,6 @@
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
-    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
@@ -65,14 +64,19 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">semit</span><span class="op">(</span>
   <span class="va">x</span>,
+  melodic <span class="op">=</span> <span class="cn">FALSE</span>,
+  specific <span class="op">=</span> <span class="cn">TRUE</span>,
+  complex <span class="op">=</span> <span class="cn">TRUE</span>,
+  File <span class="op">=</span> <span class="cn">NULL</span>,
+  Spine <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>,
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="op">!</span><span class="va">melodic</span>
 <span class="op">)</span>
 
 <span class="fu">midi</span><span class="op">(</span>
@@ -83,8 +87,8 @@
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">pitch</span><span class="op">(</span>
@@ -95,20 +99,22 @@
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">kern</span><span class="op">(</span>
   <span class="va">x</span>,
+  complex <span class="op">=</span> <span class="cn">TRUE</span>,
+  directed <span class="op">=</span> <span class="cn">FALSE</span>,
   <span class="va">...</span>,
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">lilypond</span><span class="op">(</span>
@@ -119,20 +125,24 @@
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">interval</span><span class="op">(</span>
   <span class="va">x</span>,
+  directed <span class="op">=</span> <span class="cn">TRUE</span>,
+  melodic <span class="op">=</span> <span class="cn">FALSE</span>,
+  File <span class="op">=</span> <span class="cn">NULL</span>,
+  Spine <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>,
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="op">!</span><span class="va">melodic</span>
 <span class="op">)</span>
 
 <span class="fu">degree</span><span class="op">(</span>
@@ -143,20 +153,22 @@
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">solfa</span><span class="op">(</span>
   <span class="va">x</span>,
+  parts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"octave"</span>, <span class="st">"accidentals"</span>, <span class="st">"step"</span><span class="op">)</span>,
+  factor <span class="op">=</span> <span class="cn">FALSE</span>,
   <span class="va">...</span>,
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu">bhatk</span><span class="op">(</span>
@@ -167,8 +179,8 @@
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  memoize <span class="op">=</span> <span class="cn">TRUE</span>,
-  deparse <span class="op">=</span> <span class="cn">TRUE</span>
+  deparse <span class="op">=</span> <span class="cn">TRUE</span>,
+  memoize <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 

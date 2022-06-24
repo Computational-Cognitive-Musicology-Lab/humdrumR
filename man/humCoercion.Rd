@@ -25,7 +25,7 @@ as.lines(
   fieldnames = NULL,
   alignColumns = TRUE,
   padder = NA,
-  path.fold = TRUE
+  path.collapse = TRUE
 )
 
 \S4method{as.data.frame}{humdrumR}(
@@ -33,7 +33,7 @@ as.lines(
   dataTypes = "D",
   fieldname = NULL,
   padder = NA,
-  fold.path = TRUE
+  collapse.path = TRUE
 )
 
 as.matrices(
@@ -41,7 +41,7 @@ as.matrices(
   dataTypes = "D",
   fieldnames = NULL,
   padder = NA,
-  path.fold = TRUE,
+  path.collapse = TRUE,
   alignColumns = FALSE
 )
 
@@ -50,7 +50,7 @@ as.data.frames(
   dataTypes = "D",
   fieldnames = NULL,
   padder = NA,
-  path.fold = TRUE
+  path.collapse = TRUE
 )
 }
 \arguments{

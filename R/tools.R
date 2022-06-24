@@ -1529,12 +1529,13 @@ checkArg <- function(arg,  argname, callname = NULL,
     if (length(sys.calls()) > 6L) return(arg) 
     
     argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
+    if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
     if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
     
-    if (length(arg) <  min.length) .stop(callname, "length(args)} is too few '{argname}' arguments.")
-    if (length(arg) >  max.length) .stop(callname, "length(args)} is too many '{argname}' arguments.")
+    if (length(arg) <  min.length) .stop(callname, "{length(arg)} is too few '{argname}' arguments.")
+    if (length(arg) >  max.length) .stop(callname, "{length(arg)} is too many '{argname}' arguments.")
     
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
@@ -1542,6 +1543,7 @@ checkArg <- function(arg,  argname, callname = NULL,
         .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
     }
     
+    if (missing(valid) && !is.null(validoptions)) valid <- \(x) x %in% validoptions
     if (!missing(valid) && !is.null(valid)) {
         ill <- !valid(arg)
         
@@ -1549,9 +1551,9 @@ checkArg <- function(arg,  argname, callname = NULL,
             if (is.null(validoptions)) {
                 .stop(callname, "{arg} is not a valid value for the {argname} argument.")
             } else {
-                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
+                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
                 illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
-                legalNames <-  paste0(glue::glue_collapse(quotemark(valid), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+                legalNames <-  paste0(glue::glue_collapse(quotemark(validoptions), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
                 
                 message <- list(callname, illNames, case, 'Valid options are ', legalNames)
                 

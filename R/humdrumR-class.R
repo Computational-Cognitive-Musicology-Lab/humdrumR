@@ -1033,7 +1033,7 @@ mergeHumdrum <- function(...) {
 #' @param sep `character`. If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.
 #' @param pad `logical`. Should [path/column padding tokens][humColumns] be included?
 #' 
-#' @name humShape
+#' @family {Humdrum data "reshaping" functions.}
 #' @export
 collapseHumdrum <- function(humdrumR, byfields, 
                             collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
@@ -1109,7 +1109,7 @@ collapseHumdrum <- function(humdrumR, byfields,
 }
 
 
-#' @name humShape
+#' @rdname collapseHumdrum
 #' @export 
 collapseStops <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseStops')
@@ -1121,7 +1121,7 @@ collapseStops <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
                     collapseAtomic = collapseAtomic, sep = sep)
 }
 
-#' @name humShape
+#' @rdname collapseHumdrum
 #' @export
 collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapsePaths')
@@ -1138,7 +1138,7 @@ collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     
 }
 
-#' @name humShape
+#' @rdname collapseHumdrum
 #' @export
 collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
     checkhumdrumR(humdrumR, 'collapseRecords')
@@ -1162,20 +1162,108 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' data points, taking up one row in the [humdrum table][humTable].
 #' If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 #' it is easiest to reshape the data so that the information is in different humdrumR [fields][fields()]
-#' rather than seperate spines/paths/stops.
-#' We "fold" the data over "on top" of other spines using `foldHumdrum`.
+#' rather than separate spines/paths/stops.
+#' We "fold" the data from structural field over "on top" of other data using `foldHumdrum`.
+#' The convenient `foldStops()` and `foldPaths()` functions automatically fold *all* stops/paths in a dataset onto the first stop/path,
+#' creating new fields named, e.g., `Path1`, `Path2`, etc.
 #' 
-#' To use `foldHumdrum` on a [humdrumR object][humdrumR-class], you must specify
-#' numeric `fold` and `onto` arguments, and a `what` argument is typically
-#' `"Spine"` (default), `"Path"`, or `"Stop"`---other folds are possible as well, 
-#' such as "folding" records on top of each other.
+#' @details
+#' 
+#' The `numeric` `fold` and `onto` arguments, specify where to fold from/to.
+#' `fold` indicates the Spine/Path/Stop to fold *from*, "**on to**" the Spine/Path/Stop
+#' indicated by `onto`.
+#' For example, if you specify `foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')`
+#' spine 2 will be folded "on top of spine 1.
 #' 
 #' 
+#' The `fold` and `onto` arguments can be vectors of any length, which are interpreted in parallel:
+#' for example, the combination `fold = 1:2` and `onto = 3:4` would map the first spine
+#' to the third spine (`1 -> 3`) and the second spine to the 4th spine (`2 -> 4`).
+#' The `onto` targets can be duplicated, which will cause the `fold` spines to be folded onto
+#' multiple new fields: for example, the combination `fold = 1:2` and `onto = c(3, 3)` will
+#' map first spine *and* the second spine on to *two* new fields of the third spine.
+#' The lengths of `fold` and `onto` are automatically matched, so this
+#' previous cane also be achieved more concisely as `fold = 1:2` and `onto = 3`.
+#' 
+#' The `fold` and `onto` targets may not overlap.
+#' In the current version, the `onto` argument can not be longer than the `fold` argument.
+#' 
+#' To specify what structural field you want to fold across, 
+#' use the `what` argument (`character`, `length == 1`).
+#' The default `what` value is `"Spine"`; other common fold options are `"Path"`,
+#' and `"Stop"`, though you might want to use the convenient `foldPaths()` and `foldStops()`
+#' functions directly (details below).
+#' (You may also fold across `"Record"` or `"NData"`), but these are advanced/tricky!)
+#' 
+#' The `fromField` (`character`, `length == 1`) controls which field in the `fold` 
+#' spine/path/stop is folded into a new field.
+#' The `fromField` argument defaults to the (first) [active field][humActive],
+#' and must match (or partially match) a field in the `humdrumR` argument data set.
+#' 
+#' The resulting new fields will automatically be named as appropriate pipes.
+#' The `newFieldNames` argument (`character`) can be used to control the output names:
+#' one for each new field created by the fold.
+#' If you specify too many `newFieldNames`, the later names are ignored.
+#' If you specify too few `newFieldNames`, the later names will be given pipe names, 
+#' consistent with the default behavior.
+#' 
+#' 
+#' @section File-Specific Folding:
+#' 
+#' By default, the same "fold" is carried out in each file of the input corpus 
+#' (`humdrumR` argument).
+#' If you need to specify different folds in different files, you have to specify the `File`
+#' argument (`numeric`, whole number).
+#' For *every* file in the corpus you want to apply folds to, you must specify all the `fold`
+#' and `onto` arguments in parallel vectors with the `File` argument (even if this is reduendant 
+#' for some files).
+#' For example, if we specify the combinations,
+#' 
+#' |  `fold`  |  `onto`  | `File` |
+#' |:--------:|:--------:|:------:|
+#' | `1`      | `2`      | `1`    |
+#' | `3`      | `4`      | `1`    |
+#' | `1`      | `2`      | `2`    |
+#' | `4`      | `3`      | `2`    |
+#' 
+#' then
+#' 
+#' + In `File` one: 
+#'   + the first spine is mapped to the second spine
+#'   + the third spine is mapped to the fourth spine
+#' + In `File` two: 
+#'   + the first spine is mapped to the second spine
+#'   + the fourth spine is mapped to the third spine
+#' 
+#' If any files in the corpus are not included, they will not be affected at all!
+#' 
+#' @param `humdrumR` A [humdrumR data object][humdrumR-class].
+#' @param `fold` (`numeric`, whole number) The target structure (spine, path, etc.) *from which*
+#'   to "fold" data to another structural position and field(s).
+#' @param `onto` (`numeric`, whole number) The target structure (spine, path, etc.) *to which*
+#'   the "fold" data is moved.
+#' @param `what` (`character`, `length == 1`) The structural field which is folded across.
+#'   Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"NData"`.
+#' @param `File` (`NULL` or `numeric`, `length == length(onto)`, whole number) Used to specify
+#'   specific folds for different files in the corpus (see "File-Specific Folding" section, below).
+#' @param `fromField` (`character`, `length == 1`) A string (partially) matching the 
+#'    name of a data field in the `humdrumR`-object input. This field is the field which is 
+#'   "folded" to a new field.
+#' @param `newFieldNames` (`character`) Names to use for new fields created by the folding.
+#' 
+#' @seealso [foldExclusive()] is a particularly useful application of folding. [collapseHumdrum()] also serves a similar function.
+#' @family {Humdrum data "reshaping" functions.}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
                         fromField =  activeFields(humdrumR)[1], newFieldNames = NULL) {
     checkhumdrumR(humdrumR, 'foldHumdrum')
+    
+    checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
+    checkArg(what, 'what', 'foldHumdrum', max.length = 1L,
+             validoptions = c('Spine', 'Path', 'Stop', 'Record', 'NData'))
+    
+    
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
  
@@ -1248,6 +1336,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
 }
 
 foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NULL) {
+    checkNumeric(fold, 'fold', 'foldHumdrum')
+    
     
     if (!is.null(File)) {
         if (length(unique(lengths(list(fold, onto, File)))) > 1){
@@ -1297,8 +1387,36 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 }
 #    
 
-  
-#' @rdname foldHumdrum
+#' "Fold" exclusive interpretations into new fields
+#' 
+#' 
+#' `foldExclusive()` is a special version of [foldHumdrum()], which 
+#' "folds" spines based on their exclusive interpretations.
+#' For instance, we can "fold" all the `**silbe` spines in a corpus
+#' onto their respective `**kern` spines.
+#' 
+#' 
+#' 
+#' @details 
+#' 
+#' The `fold` and `onto` arguments (`character`, `length == 1`)
+#' must match exclusive interpretations in the `humdrumR` object input.
+#' Within each file, mismatches in the number of matching `onto` and `fold` spines
+#' are handled "in parallel," just like [foldHumdrum()].
+#' Multi-matching spines are matched from left-to-right.
+#'
+#' If no matching exclusive interpetation pairs are found, 
+#' the unchanged `humdrumR` object is returned with a warning.
+#' 
+#' @param `fold` (`character`) The target exclusive interpretation(s) *from which*
+#'    to "fold" spines to new fields.
+#'    Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
+#' @param `onto` (`character`, whole number) The target exclusive interpretation(s) *to which*
+#'    the "fold" data is moved.
+#'    Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
+#' 
+#' @family {Humdrum data "reshaping" functions.}
+#' @seealso `foldExclusive` makes use of the more general [foldHumdrum()].
 #' @export
 foldExclusive <- function(humdrumR, fold, onto) {
     checkhumdrumR(humdrumR, 'foldExclusive')
@@ -1327,6 +1445,11 @@ foldExclusive <- function(humdrumR, fold, onto) {
       
         
         }, by = File]
+    
+    if (nrow(moves) == 0L) {
+        warn('foldExclusive found no matching exclusive interpretation combinations.')
+        return(humdrumR)
+    }
     
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
