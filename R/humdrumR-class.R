@@ -1273,11 +1273,21 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
     
     # name fields
     moves[ , NewField := seq_along(From), by = .(File, To)]
+    NnewFields <- length(unique(moves$NewField))
+
     
-    pipes <- paste0('Pipe', 
-                    seq_len(max(0L, 
-                                length(unique(moves$NewField)) - length(newFieldNames))) + curPipeN(humtab))
-    newFieldNames <- c(newFieldNames, pipes)
+    newFieldNames <- if (is.null(newFieldNames)) {
+        paste0('Pipe', seq_len(NnewFields) +  curPipeN(humtab))
+    } else {
+        if (length(newFieldNames) < NnewFields) {
+            newFieldNames <- c(head(newFieldNames, -1L),
+                               paste0(tail(newFieldNames, 1L), 
+                                      seq_len(NnewFields - length(newFieldNames) + 1)))
+        } 
+        newFieldNames[1:length(unique(moves$NewField))]
+        
+        
+    }
     
     moves[ , FieldNames := newFieldNames[NewField]]
     
@@ -1288,19 +1298,19 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #    
 
   
-
-
-foldExclusive <- function(humdrumR, from, to) {
+#' @rdname foldHumdrum
+#' @export
+foldExclusive <- function(humdrumR, fold, onto) {
     checkhumdrumR(humdrumR, 'foldExclusive')
     
-    checkCharacter(from, 'from', 'foldExclusive', allowEmpty = FALSE)
-    checkCharacter(to, 'to', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
+    checkCharacter(fold, 'from', 'foldExclusive', allowEmpty = FALSE)
+    checkCharacter(onto, 'to', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
     
     moves <- humtab[,{
-        fromSpine <- unique(Spine[Exclusive %in% from])
-        toSpine <- unique(Spine[Exclusive %in% to])
+        fromSpine <- unique(Spine[Exclusive %in% fold])
+        toSpine <- unique(Spine[Exclusive %in% onto])
         if (!(length(fromSpine) < 1L || 
             length(toSpine) < 1L ||
             (length(fromSpine) == 1L && length(toSpine) == 1 && fromSpine == toSpine))) {
@@ -1325,12 +1335,14 @@ foldExclusive <- function(humdrumR, from, to) {
                             fold = moves$From, 
                             onto = moves$To, 
                             File = moves$File, what = 'Spine',
-                            fieldNames = moves$Group)
+                            newFieldNames = unique(moves$Group))
     humdrumR
     
     
 }
 
+#' @rdname foldHumdrum
+#' @export
 foldPaths <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'foldPaths')
     
@@ -1342,14 +1354,15 @@ foldPaths <- function(humdrumR) {
     minPath <- min(paths)
     
     paths <- setdiff(paths, minPath)
-    humdrumR <- foldHumdrum(humdrumR, paths, minPath, what = 'Path')
     
-    humdrumR[c(outer(dataFields$Name, paths, paste, sep = 'Path'))] <- humdrumR
+    foldHumdrum(humdrumR, paths, minPath, what = 'Path', newFieldNames = 'Path')
     
-    humdrumR
+
     
 }
 
+#' @rdname foldHumdrum
+#' @export
 foldStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'foldStops')
            
@@ -1361,11 +1374,9 @@ foldStops <- function(humdrumR) {
    minStop <- min(stops)
    
    stops <- setdiff(stops, minStop)
-   humdrumR <- foldHumdrum(humdrumR, stops, minStop, what = 'Stop')
    
-   humdrumR[c(outer(dataFields$Name, stops, paste, sep = 'Stop'))] <- humdrumR
+   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stop')
    
-   humdrumR
    
 }
 
