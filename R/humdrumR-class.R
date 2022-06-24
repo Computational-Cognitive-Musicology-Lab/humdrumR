@@ -1482,6 +1482,7 @@ foldStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
+   stops <- stops[!is.na(stops)]
    
    if (all(stops == 1L)) return(humdrumR)
    
@@ -1490,7 +1491,7 @@ foldStops <- function(humdrumR) {
    
    stops <- setdiff(stops, minStop)
    
-   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stop')
+   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stops')
    
    
 }
