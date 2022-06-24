@@ -1174,19 +1174,23 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' indicated by `onto`.
 #' For example, if you specify `foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')`
 #' spine 2 will be folded "on top of spine 1.
+#' The `fold` and `onto` targets may not overlap.
 #' 
 #' 
 #' The `fold` and `onto` arguments can be vectors of any length, which are interpreted in parallel:
 #' for example, the combination `fold = 1:2` and `onto = 3:4` would map the first spine
 #' to the third spine (`1 -> 3`) and the second spine to the 4th spine (`2 -> 4`).
-#' The `onto` targets can be duplicated, which will cause the `fold` spines to be folded onto
+#' If the `onto` targets are duplicated, the `fold` spines will be folded onto
 #' multiple new fields: for example, the combination `fold = 1:2` and `onto = c(3, 3)` will
 #' map first spine *and* the second spine on to *two* new fields of the third spine.
-#' The lengths of `fold` and `onto` are automatically matched, so this
-#' previous cane also be achieved more concisely as `fold = 1:2` and `onto = 3`.
+#' If the `fold` target is duplicated, the same `fold` spines can be copied onto multiple
+#' `onto` spines: for example, the combination `fold = 1` and `onto = 2:3` will map the contents 
+#' of the first spine onto the second *and* third spine, duplicating the spine one data.
 #' 
-#' The `fold` and `onto` targets may not overlap.
-#' In the current version, the `onto` argument can not be longer than the `fold` argument.
+#' The lengths of `fold` and `onto` are automatically matched, so
+#' arguments like `fold = 1:2` and `onto = 3` are equivalent to `(fold = 1:2, onto = c(3, 3))`.
+#' This makes it east to do things like "copy all four spines onto spine 1": 
+#' just write `(fold = 2:4, onto = 1)`.
 #' 
 #' To specify what structural field you want to fold across, 
 #' use the `what` argument (`character`, `length == 1`).
@@ -1269,11 +1273,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
  
     moves <- foldMoves(humtab, fold, onto, what, File, newFieldNames)
     
-    structuralFields <- c('File', 'Spine', 'Path', 'Stop', 'Record',
-                          'Null', 'Filepath', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Piece')
-    dataFields <- fields(humdrumR, fieldTypes = 'Data')
-   
-    curpipeN <- curPipeN(humtab)
     
     # 
     fromHits <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
@@ -1281,20 +1280,24 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     humtab <- humtab[fromHits == FALSE]
     
     #
-    whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE])]
+    whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE], multi = TRUE)]
     
-    
-    switch(what,
-           Spine  = fromTable[ , Column := Column + (moves$To[whichMatch] - Spine)],
-           Record = fromTable[ , NData := NData + (moves$To[whichMatch] - Record)],
-           NData  = fromTable[ , Record := Record + (moves$To[whichMatch] - NData)])
-
-    fromTable[[what]] <-  moves$To[whichMatch]
-    fromTable$FieldNames <- moves$FieldNames[whichMatch]
+    fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
+           \(j) {
+               i <- whichMatch[, j]
+               switch(what,
+                      Spine  = fromTable$Column <- fromTable[ , Column + (moves$To[i] - Spine)],
+                      Record = fromTable$NData  <- fromTable[ , NData  + (moves$To[i] - Record)],
+                      NData  = fromTable$Record <- fromTable[ , Record + (moves$To[i] - NData)])
+               
+               fromTable[[what]] <-  moves$To[i]
+               fromTable$FieldNames <- moves$FieldNames[i]
+               fromTable
+           }))
+   
    
     
     # data fields in old rows need to be renamed, because they will now be columns
-    dataColumns <- colnames(fromTable) %in% fields(humdrumR, fieldTypes = 'Data')$Name
    
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
     fromTables <- Map(\(ftab, fname) {
@@ -1313,15 +1316,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
         htab
         
     }, fromTables, init = humtab)
-    # fromTable <- Reduce(\(x, y) merge(y, x, by = setdiff(mergeFields, what), all = TRUE), 
-                        # fromTables)
-    
-    
-    
-    
-    # newFields <- grepl('xxxPipe', colnames(humtab))
-    # newFieldNames <- if (is.null(fieldNames)) paste0('Pipe', curpipeN + seq_len(sum(newFields))) else names(fromTables) 
-    # colnames(humtab)[newFields] <- newFieldNames 
+ 
     
     putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
@@ -1352,13 +1347,10 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
     }    
     
     moves <- unique(data.table(File = File, From = fold, To = onto))
+    moves[] <- lapply(moves, as.integer)
     
     # Check for errors
-    moves[ , {
-        if (any(To %in% From)).stop("In your call to foldHumdrum, the 'fold' and 'onto' {what}s can't overlap within any 'File'.")
-        if (length(From) < length(To)) .stop("In your call to foldHumdrum, the number of 'onto' {what}s must be less than or equal to the number 'fold' {what}s",
-                                             "within a each 'File'.")
-    }, by = File]
+    moves[ ,  if (any(To %in% From)) .stop("In your call to foldHumdrum, the 'fold' and 'onto' {what}s can't overlap within any 'File'.") , by = File]
     
     
     # name fields

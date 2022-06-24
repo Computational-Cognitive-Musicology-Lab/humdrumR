@@ -389,16 +389,25 @@ catlists <- function(lists) {
 
 # indices
 
-matches <- function(x, table, ...) {
+matches <- function(x, table, ..., multi = FALSE) {
   # x and table are both lists/data.frames
   
   x <- do.call('paste', c(x, list(sep = ' ')))
   table <- do.call('paste', c(table, list(sep = ' ')))
   
-  match(x, table, ...)
+  if (multi) multimatch(x, table, ...) else match(x, table, ...)
   
 }
 
+multimatch <- function(x, table, ...) {
+  ns <- tapply_inplace(table, table, seq_along)
+  
+  tables <- lapply(unique(ns), \(n) { 
+    table[ns < n] <- NA
+    table
+    })
+  do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
+}
 
 `%ins%` <- function(x, table) !is.na(matches(x, table))
 
@@ -454,7 +463,9 @@ remove.duplicates <- function(listofvalues) {
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     
-    output <- do.call('c', tapply(X, INDEX, FUN, ...))
+    output <- tapply(X, INDEX, FUN, ...)
+    if (is.list(output)) output <- do.call('c', output)
+    
     indices <- tapply(seq_along(X), INDEX, force) |> unlist()
     
     output[order(indices)]

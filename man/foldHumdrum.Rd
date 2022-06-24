@@ -58,18 +58,22 @@ The \code{numeric} \code{fold} and \code{onto} arguments, specify where to fold 
 indicated by \code{onto}.
 For example, if you specify \code{foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')}
 spine 2 will be folded "on top of spine 1.
+The \code{fold} and \code{onto} targets may not overlap.
 
 The \code{fold} and \code{onto} arguments can be vectors of any length, which are interpreted in parallel:
 for example, the combination \code{fold = 1:2} and \code{onto = 3:4} would map the first spine
 to the third spine (\code{1 -> 3}) and the second spine to the 4th spine (\code{2 -> 4}).
-The \code{onto} targets can be duplicated, which will cause the \code{fold} spines to be folded onto
+If the \code{onto} targets are duplicated, the \code{fold} spines will be folded onto
 multiple new fields: for example, the combination \code{fold = 1:2} and \code{onto = c(3, 3)} will
 map first spine \emph{and} the second spine on to \emph{two} new fields of the third spine.
-The lengths of \code{fold} and \code{onto} are automatically matched, so this
-previous cane also be achieved more concisely as \code{fold = 1:2} and \code{onto = 3}.
+If the \code{fold} target is duplicated, the same \code{fold} spines can be copied onto multiple
+\code{onto} spines: for example, the combination \code{fold = 1} and \code{onto = 2:3} will map the contents
+of the first spine onto the second \emph{and} third spine, duplicating the spine one data.
 
-The \code{fold} and \code{onto} targets may not overlap.
-In the current version, the \code{onto} argument can not be longer than the \code{fold} argument.
+The lengths of \code{fold} and \code{onto} are automatically matched, so
+arguments like \code{fold = 1:2} and \code{onto = 3} are equivalent to \verb{(fold = 1:2, onto = c(3, 3))}.
+This makes it east to do things like "copy all four spines onto spine 1":
+just write \verb{(fold = 2:4, onto = 1)}.
 
 To specify what structural field you want to fold across,
 use the \code{what} argument (\code{character}, \code{length == 1}).
