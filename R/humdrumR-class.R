@@ -2219,7 +2219,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
+print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
                          max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
     
   checkhumdrumR(humdrumR, 'print_humtab')
@@ -2233,7 +2233,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
   }
   
   Nfiles <- length(humdrumR)          
-  if (length(Nfiles) > 2 && firstAndLast) humdrumR <- humdrumR[unique(range(getFields(humdrumR, 'File')$File))] 
+  if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[unique(range(getFields(humdrumR, 'File')$File))] 
   
   # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
