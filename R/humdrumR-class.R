@@ -1495,6 +1495,17 @@ foldStops <- function(humdrumR) {
    
 }
 
+#' "Fold" grace notes into neighbos
+#' 
+#' 
+#' @family {Humdrum data "reshaping" functions.}
+#' @seealso `foldGraceNotes` makes use of the more general [foldHumdrum()].
+#' @export
+foldGraceNotes <- function(humdrumR) {
+    warn("foldGraceNotes has not been implemented yet!")
+    humdrumR
+}
+
 
 #################################-
 ############Humtable manipulation and access ####
@@ -2179,9 +2190,6 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 #########################Print methods ----
 #########################################################-
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @name humPrint
-#' @export
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
                     len  <- length(object)
@@ -2209,11 +2217,6 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-#' Show a [humdrumRclass] object in the terminal.
-#' 
-#' 
-#' @rdname humPrint
-#' @export
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = FALSE,
                          max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
     

@@ -101,8 +101,6 @@ reference:
   - humColumns
   - humMerge
   - humInterpretations
-  - humPrint
-  - humShape
   - foldHumdrum
   - foldExclusive
   - foldStops
