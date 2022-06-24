@@ -16,30 +16,30 @@ foldHumdrum(
   newFieldNames = NULL
 )
 
-foldPaths(humdrumR)
+foldPaths(humdrumR, fromField = activeFields(humdrumR)[1])
 
-foldStops(humdrumR)
+foldStops(humdrumR, fromField = activeFields(humdrumR)[1])
 }
 \arguments{
-\item{`humdrumR`}{A \link[=humdrumR-class]{humdrumR data object}.}
+\item{humdrumR}{A \link[=humdrumR-class]{humdrumR data object}.}
 
-\item{`fold`}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{from which}
+\item{fold}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{from which}
 to "fold" data to another structural position and field(s).}
 
-\item{`onto`}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{to which}
+\item{onto}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{to which}
 the "fold" data is moved.}
 
-\item{`what`}{(\code{character}, \code{length == 1}) The structural field which is folded across.
+\item{what}{(\code{character}, \code{length == 1}) The structural field which is folded across.
 Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"NData"}.}
 
-\item{`File`}{(\code{NULL} or \code{numeric}, \code{length == length(onto)}, whole number) Used to specify
+\item{File}{(\code{NULL} or \code{numeric}, \code{length == length(onto)}, whole number) Used to specify
 specific folds for different files in the corpus (see "File-Specific Folding" section, below).}
 
-\item{`fromField`}{(\code{character}, \code{length == 1}) A string (partially) matching the
+\item{fromField}{(\code{character}, \code{length == 1}) A string (partially) matching the
 name of a data field in the \code{humdrumR}-object input. This field is the field which is
 "folded" to a new field.}
 
-\item{`newFieldNames`}{(\code{character}) Names to use for new fields created by the folding.}
+\item{newFieldNames}{(\code{character}) Names to use for new fields created by the folding.}
 }
 \description{
 Many humdrum datasets encode data spread across multiple spines, spine-paths, or stops.
@@ -135,6 +135,7 @@ If any files in the corpus are not included, they will not be affected at all!
 
 Other {Humdrum data "reshaping" functions.}: 
 \code{\link{collapseHumdrum}()},
-\code{\link{foldExclusive}()}
+\code{\link{foldExclusive}()},
+\code{\link{foldGraceNotes}()}
 }
 \concept{{Humdrum data "reshaping" functions.}}

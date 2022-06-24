@@ -45,6 +45,7 @@ across groups in another field.
 \seealso{
 Other {Humdrum data "reshaping" functions.}: 
 \code{\link{foldExclusive}()},
+\code{\link{foldGraceNotes}()},
 \code{\link{foldHumdrum}()}
 }
 \concept{{Humdrum data "reshaping" functions.}}

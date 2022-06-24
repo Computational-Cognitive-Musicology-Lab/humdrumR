@@ -4,16 +4,22 @@
 \alias{foldExclusive}
 \title{"Fold" exclusive interpretations into new fields}
 \usage{
-foldExclusive(humdrumR, fold, onto)
+foldExclusive(humdrumR, fold, onto, fromField = activeFields(humdrumR)[1])
 }
 \arguments{
-\item{`fold`}{(\code{character}) The target exclusive interpretation(s) \emph{from which}
+\item{humdrumR}{A \link[=humdrumR-class]{humdrumR data object}.}
+
+\item{fold}{(\code{character}) The target exclusive interpretation(s) \emph{from which}
 to "fold" spines to new fields.
 Must be specified \emph{without} the \verb{**} prefix: \code{"kern"} not \code{"**kern"}.}
 
-\item{`onto`}{(\code{character}, whole number) The target exclusive interpretation(s) \emph{to which}
+\item{onto}{(\code{character}, whole number) The target exclusive interpretation(s) \emph{to which}
 the "fold" data is moved.
 Must be specified \emph{without} the \verb{**} prefix: \code{"kern"} not \code{"**kern"}.}
+
+\item{fromField}{(\code{character}, \code{length == 1}) A string (partially) matching the
+name of a data field in the \code{humdrumR}-object input. This field is the field which is
+"folded" to a new field.}
 }
 \description{
 \code{foldExclusive()} is a special version of \code{\link[=foldHumdrum]{foldHumdrum()}}, which
@@ -36,6 +42,7 @@ the unchanged \code{humdrumR} object is returned with a warning.
 
 Other {Humdrum data "reshaping" functions.}: 
 \code{\link{collapseHumdrum}()},
+\code{\link{foldGraceNotes}()},
 \code{\link{foldHumdrum}()}
 }
 \concept{{Humdrum data "reshaping" functions.}}

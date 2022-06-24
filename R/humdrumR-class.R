@@ -920,7 +920,9 @@ is.ragged <- function(humdrumR) {
 renumberSpines <- function(humdrumR) {
     humtab <- getHumtab(humdrumR, 'GLIMDdP')
     
-    humtab[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
+    NewSpine <- humtab[ , match(Spine, sort(unique(Spine))), by = Piece]$V1
+    humtab[ , Column := Column + (NewSpine - Spine)]
+    humtab$Spine <- NewSpine
     
     putHumtab(humdrumR, drop = FALSE) <- humtab
     humdrumR
@@ -1482,7 +1484,6 @@ foldStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
-   stops <- stops[!is.na(stops)]
    
    if (all(stops == 1L)) return(humdrumR)
    
@@ -1491,7 +1492,7 @@ foldStops <- function(humdrumR) {
    
    stops <- setdiff(stops, minStop)
    
-   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stops')
+   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stop')
    
    
 }
