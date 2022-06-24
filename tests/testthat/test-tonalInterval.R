@@ -9,7 +9,7 @@ ex <- list(
 )
 
 test_that("Input -> Output maintains struture", {
-    expect_throughput <-function(func, x) {
+    expect_throughput <- function(func, x) {
         y <- func(x)
         
         expect_equal(length(x), length(y))
