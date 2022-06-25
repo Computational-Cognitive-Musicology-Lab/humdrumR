@@ -1261,7 +1261,8 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' @family {Humdrum data "reshaping" functions.}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
-                        fromField =  activeFields(humdrumR)[1], newFieldNames = NULL) {
+                        fromField = 'Token', newFieldNames = NULL) {
+    # argument checks
     checkhumdrumR(humdrumR, 'foldHumdrum')
     
     checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
@@ -1269,24 +1270,31 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     checkArg(what, 'what', 'foldHumdrum', max.length = 1L,
              validoptions = c('Spine', 'Path', 'Stop', 'Record', 'NData'))
     
-    
+    # start work
+    humdrumR <- setActiveFields(humdrumR, fromField)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
- 
     moves <- foldMoves(humtab, fold, onto, what, File, newFieldNames)
-    
-    
+
     # 
     fromHits <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
-    fromTable <- humtab[fromHits == TRUE, fields(humdrumR, c('D', 'S', 'F', 'R'))$Name, with = FALSE]
-    humtab <- humtab[fromHits == FALSE]
-    
+    fromTable <- humtab[fromHits == TRUE, c(fromField, fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
+    # humtab <- humtab[fromHits == FALSE]
+    humtab[[fromField]][fromHits & humtab$Type == 'D'] <- NA
     #
     whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE], multi = TRUE)]
+    # if (ncol(whichMatch) > 1L) {
+     # for (j in 2:ncol(whichMatch)) {
+         # whichMatch[is.na(whichMatch[ , j]), j] <- whichMatch[is.na(whichMatch[ , j]), j - 1]
+     # }   
+    # }
     
+    #
     fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
            \(j) {
                i <- whichMatch[, j]
+               fromTable <- fromTable[!is.na(i),]
+               i <- i[!is.na(i)]
                switch(what,
                       Spine  = fromTable$Column <- fromTable[ , Column + (moves$To[i] - Spine)],
                       Record = fromTable$NData  <- fromTable[ , NData  + (moves$To[i] - Record)],
@@ -1302,13 +1310,13 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     # data fields in old rows need to be renamed, because they will now be columns
    
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
+    dataFields <- fields(humdrumR, 'D')$Name
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == fromField] <- fname
                              ftab
 
                          }, fromTables, names(fromTables))
  
-    
     mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
     humtab <- Reduce(\(htab, ftab) {
         htab <- rbind(ftab[htab, on = mergeFields], 
@@ -1323,9 +1331,12 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
     addFields(humdrumR) <- names(fromTables)
-    humdrumR <- setActiveFields(humdrumR, names(fromTables))
     
-    renumberSpines(humdrumR)
+    humdrumR <- update_d(updateNull(humdrumR, activeOnly = FALSE))
+    humdrumR <- removeNull(humdrumR, 'GLIMDd', c('File', what), 'LIMd')
+    
+    setActiveFields(humdrumR, names(fromTables))
+    
     
     
     
@@ -1412,7 +1423,7 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' @family {Humdrum data "reshaping" functions.}
 #' @seealso `foldExclusive` makes use of the more general [foldHumdrum()].
 #' @export
-foldExclusive <- function(humdrumR, fold, onto) {
+foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldExclusive')
     
     checkCharacter(fold, 'from', 'foldExclusive', allowEmpty = FALSE)
@@ -1452,6 +1463,7 @@ foldExclusive <- function(humdrumR, fold, onto) {
                             fold = moves$From, 
                             onto = moves$To, 
                             File = moves$File, what = 'Spine',
+                            fromField = fromField,
                             newFieldNames = unique(moves$Group))
     humdrumR
     
@@ -1460,7 +1472,7 @@ foldExclusive <- function(humdrumR, fold, onto) {
 
 #' @rdname foldHumdrum
 #' @export
-foldPaths <- function(humdrumR) {
+foldPaths <- function(humdrumR, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldPaths')
     
     paths <- unique(getHumtab(humdrumR)$Path)
@@ -1472,7 +1484,7 @@ foldPaths <- function(humdrumR) {
     
     paths <- setdiff(paths, minPath)
     
-    foldHumdrum(humdrumR, paths, minPath, what = 'Path', newFieldNames = 'Path')
+    foldHumdrum(humdrumR, paths, minPath, what = 'Path', fromField = fromField, newFieldNames = 'Path')
     
 
     
@@ -1480,7 +1492,7 @@ foldPaths <- function(humdrumR) {
 
 #' @rdname foldHumdrum
 #' @export
-foldStops <- function(humdrumR) {
+foldStops <- function(humdrumR, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -1492,7 +1504,7 @@ foldStops <- function(humdrumR) {
    
    stops <- setdiff(stops, minStop)
    
-   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', newFieldNames = 'Stop')
+   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', fromField = fromField, newFieldNames = 'Stop')
    
    
 }
@@ -1589,12 +1601,20 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
   humdrumR
 }
 
-updateNull <- function(humdrumR) {
+updateNull <- function(humdrumR, activeOnly = TRUE) {
     humtab <- getHumtab(humdrumR, 'GLIMDd')
     
-    active <- evalActive(humdrumR, 'GLIMDd', forceVector = TRUE)
+    null <- if (activeOnly) {
+        active <- evalActive(humdrumR, 'GLIMDd', forceVector = TRUE)
+        humtab[ , is.na(active) | active %in% c('.', '!', '*', '=', '_P')]
+    } else {
+        dataFields <- humtab[ , fields(humdrumR, 'D')$Name, with = FALSE]
+        dataFields <- lapply(dataFields, \(x) is.na(x) | x %in% c('.', '!', '*', '=', '_P'))
+        Reduce('&', dataFields)
+        
+    }
     
-    humtab[ , Null := is.na(active) | active %in% c('.', '!', '*', '=', '_P')]
+    humtab[, Null := null]
     
     putHumtab(humdrumR) <- humtab
     
