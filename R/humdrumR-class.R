@@ -1296,6 +1296,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
                fromTable <- fromTable[!is.na(i),]
                i <- i[!is.na(i)]
                switch(what,
+                      Path   = fromTable$Column <- fromTable[ , Column + (moves$To[i] - Path)],
                       Spine  = fromTable$Column <- fromTable[ , Column + (moves$To[i] - Spine)],
                       Record = fromTable$NData  <- fromTable[ , NData  + (moves$To[i] - Record)],
                       NData  = fromTable$Record <- fromTable[ , Record + (moves$To[i] - NData)])
@@ -1476,6 +1477,7 @@ foldPaths <- function(humdrumR, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldPaths')
     
     paths <- unique(getHumtab(humdrumR)$Path)
+    paths <- paths[!is.na(paths)]
     
     if (all(paths == 1L)) return(humdrumR)
     
@@ -1484,7 +1486,8 @@ foldPaths <- function(humdrumR, fromField = 'Token') {
     
     paths <- setdiff(paths, minPath)
     
-    foldHumdrum(humdrumR, paths, minPath, what = 'Path', fromField = fromField, newFieldNames = 'Path')
+    foldHumdrum(humdrumR, paths, minPath, what = 'Path', 
+                fromField = fromField, newFieldNames = paste0(fromField, '_Path'))
     
 
     
@@ -1496,6 +1499,7 @@ foldStops <- function(humdrumR, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
+   stops <- stops[!is.na(stops)] 
    
    if (all(stops == 1L)) return(humdrumR)
    
@@ -1504,7 +1508,8 @@ foldStops <- function(humdrumR, fromField = 'Token') {
    
    stops <- setdiff(stops, minStop)
    
-   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', fromField = fromField, newFieldNames = 'Stop')
+   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', 
+               fromField = fromField, newFieldNames = paste0(fromField, '_Stop'))
    
    
 }

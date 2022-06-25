@@ -38,3 +38,29 @@ test_that("Exclusive folding works properly", {
   }
   
 })
+
+test_that('Path folding works properly', {
+  
+  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
+
+  foldedPath <- getHumtab(foldPaths(path))
+  
+  
+  expect_equal(dim(foldedPath), c(23, 22))
+  if (expect_true(all(c('Token', 'Token_Path') %in% colnames(foldedPath)))) {
+    expect_equal(foldedPath[ , table(Token, Token_Path)]['c', 'a'], 1L)
+  }
+})
+
+test_that('Stop folding works properly', {
+  
+  stop <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_stops.hum')
+  
+  foldedStop <- getHumtab(foldStops(stop))
+  
+  
+  expect_equal(dim(foldedStop), c(12, 23))
+  if (expect_true(all(c('Token', 'Token_Stop1', 'Token_Stop2') %in% colnames(foldedStop)))) {
+    expect_equal(foldedStop[ , table(Token, Token_Stop1, Token_Stop2)]['b', 'd', 'g#'], 1L)
+  }
+})
