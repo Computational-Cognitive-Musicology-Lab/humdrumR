@@ -2276,9 +2276,12 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
     # field called "Print"
     dataTypes <- checkTypes(dataTypes, "printableActiveField")
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd') 
+    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP') 
     
-    active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDd', forceVector = TRUE, nullAs = "."))
+    active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDdP', 
+                                      forceVector = TRUE, nullAs = "."))
+    humtab$Null[humtab$Type == 'P'] <- FALSE
+    humtab$Filter[humtab$Type == 'P'] <- FALSE
     
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
     active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]
@@ -2296,6 +2299,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
     
     humtab[ , Print := active]
     humtab$Type[humtab$Type == 'd'] <- 'D'
+    humtab$Type[humtab$Type == 'P'] <- 'D'
     
     putHumtab(humdrumR, drop = FALSE) <- humtab
     addFields(humdrumR) <- 'Print'
