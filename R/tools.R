@@ -496,7 +496,7 @@ segments <- function(x, reverse = FALSE) {
 #' @export
 #' @name fillThru
 fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE) {
-    
+    if (length(x) == 0L) return(x)
     if (is.function(nonnull)) nonnull <- nonnull(x)
     
     seg <- segments(nonnull, reverse = reverse)

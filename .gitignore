@@ -5,3 +5,4 @@ docs
 *docx
 .Rproj.user
 .Rhistory
+!.gitignore

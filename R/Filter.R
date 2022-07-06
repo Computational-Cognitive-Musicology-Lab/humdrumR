@@ -274,7 +274,7 @@ removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', c('File', 'Spine'), 'GLIMd')
+  removeNull(humdrumR, 'GLIMDd', c('File', 'Spine'), 'LIMd')
 }
 #' @export
 #' @rdname filterHumdrum
