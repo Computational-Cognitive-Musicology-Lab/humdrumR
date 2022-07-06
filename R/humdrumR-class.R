@@ -1266,7 +1266,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     checkhumdrumR(humdrumR, 'foldHumdrum')
     
     checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
-    fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
+    fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')[]
     checkArg(what, 'what', 'foldHumdrum', max.length = 1L,
              validoptions = c('Spine', 'Path', 'Stop', 'Record', 'NData'))
     

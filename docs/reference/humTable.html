@@ -45,6 +45,7 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
@@ -296,7 +297,7 @@ a new <a href="humdrumR.html">active</a> field is set.
 All updates/changes to the <code>Null</code> field are also propogated to the <code>Type</code> field---i.e., setting <code>Type == d</code> wherever
 a data record is <code>Null</code>.
 This is important/useful because <a href="withinHumdrum.html">withinHumdrum</a> routines are, by default, only applied to <code>"D"</code> data, ignoring <code>"d"</code>.</p>
-<p>Whenever you <a href="humPrint.html">print</a> or <a href="writeHumdrum.html">export</a> a <a href="humdrumRclass.html">humdrumRclass</a> object, null data in the active field
+<p>Whenever you print or <a href="writeHumdrum.html">export</a> a <a href="humdrumRclass.html">humdrumRclass</a> object, null data in the active field
 (i.e., <code>Null == TRUE</code>) print as <code>"."</code>.
 Thus, if you are working with numeric data, with <code>NA</code> values, these <code>NA</code> values will print as <code>"."</code>.</p>
     </div>

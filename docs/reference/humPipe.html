@@ -39,6 +39,7 @@ from the R package magrittr."><!-- mathjax --><script src="https://cdnjs.cloudfl
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
@@ -139,18 +140,18 @@ always behave the way we might like!</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="va">humdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'path*.krn'</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern 'path*.krn' matches 0 text files in 1 directory.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Zero files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No files to validate.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern 'path*.krn' matches 0 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Zero files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> No files to validate.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">humdata</span> <span class="op">%hum&gt;%</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> humdrumR error in:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	tryCatch(withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -176,7 +177,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -199,7 +200,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
@@ -220,8 +221,8 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -247,7 +248,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -270,15 +271,15 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> list(envir = .GlobalEnv, quote = TRUE)), envir = .GlobalEnv, quote = TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; &lt;function(what, args, quote = FALSE, envir = parent.frame()) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   if (!is.list(args)) stop("second argument must be a list")</span>
@@ -368,8 +369,8 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	tryCatch(withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -395,7 +396,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -418,7 +419,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
@@ -439,8 +440,8 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -466,7 +467,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -489,15 +490,15 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> list(envir = .GlobalEnv, quote = TRUE)), envir = .GlobalEnv, quote = TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; &lt;function(what, args, quote = FALSE, envir = parent.frame()) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   if (!is.list(args)) stop("second argument must be a list")</span>
@@ -590,8 +591,8 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	tryCatch(withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -617,7 +618,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -640,7 +641,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
@@ -661,8 +662,8 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; withCallingHandlers({</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stdout())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   flush(stderr())</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   NULL</span>
@@ -688,7 +689,7 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, interrupt = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   {</span>
@@ -711,15 +712,15 @@ always behave the way we might like!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (inherits(e, "rlib_error_2_0")) e2$parent &lt;- e$parent</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     e2 &lt;- err$add_trace_back(e2, embed = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     saveRDS(list("error", e2), file = paste0(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb", ".error"))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a", ".error"))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }, callr_message = function(e) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   try(signalCondition(e))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> })</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; saveRDS(do.call(do.call, c(readRDS(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"), list(envir = .GlobalEnv,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/RtmpqwGfV0/callr-res-15ea702ee27dbb")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/RtmpqwGfV0/callr-fun-15ea706db253da"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   "/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"), list(envir = .GlobalEnv,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   quote = TRUE)), envir = .GlobalEnv, quote = TRUE), file = "/home/nat/.tmp/Rtmp269hj3/callr-res-1ddbcf4fb31a")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; do.call(do.call, c(readRDS("/home/nat/.tmp/Rtmp269hj3/callr-fun-1ddbc363cbbbb"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> list(envir = .GlobalEnv, quote = TRUE)), envir = .GlobalEnv, quote = TRUE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	 -&gt; &lt;function(what, args, quote = FALSE, envir = parent.frame()) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   if (!is.list(args)) stop("second argument must be a list")</span>
