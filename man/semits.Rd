@@ -11,6 +11,7 @@ semits(
   generic = FALSE,
   simple = FALSE,
   octave.relative = FALSE,
+  Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
   inPlace = FALSE
@@ -22,35 +23,28 @@ midi(
   generic = FALSE,
   simple = FALSE,
   octave.relative = FALSE,
+  Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
   inPlace = FALSE
 )
 }
 \arguments{
-\item{x}{(atomic vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information is discarded.
-For tonal representations, this means no accidentals/qualities or equivalent information is printed.
-For atonal representations, the generic pitch is returned.
-As an alternative, you can specify \code{specific} as an alternative (opposite) to the \code{generic} argument: \code{generic == !specific}.}
+\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "complex" pitch information is discarded.
-This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
-For absolute pitch representations, this is the octave above middle C.
-For relative pitch representations, this is the octave above a unison.
-(The special \code{octave.round} argument can be used to modify this behavior).}
+\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
 
-\item{transposeArgs}{(list) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.
-As a convenient syntactic sugar, instead of writing \code{transposeArgs = list(a = x, b = y, etc.)}, you can write
-\code{transpose(a = x, b = y, etc.)}.}
+\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
+the parser, deparser, and transposer.}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
-As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
-\code{parse(a = x, b = y, etc.)}.}
+\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
@@ -64,8 +58,98 @@ and \href{https://en.wikipedia.org/wiki/Cent_(music)}{cents}.
 \code{midi} and \code{semits} are identical, except \code{semits} returns values centered at Middle-C (**0 = \strong{), while
 \code{midi} is offset such that ** = 60}.
 }
-\section{In-place parsing}{
+\section{Basic pitch arguments}{
 
+
+Each pitch function has a few standard arguments (details above), which control details of the output.
+The most important are the \code{generic} and \code{simple} arguments, which allow you to control what type of pitch information
+is returned.
+\subsection{Generic vs Specific}{
+
+If \code{generic = TRUE}, \href{https://en.wikipedia.org/wiki/Generic_and_specific_intervals}{specific pitch information}
+(accidentals or qualities) is omitted from the output.
+As an alternative way of controlling the same functionality, you can use the \code{specific} argument ,where \code{specific == !generic}.
+In the case of atonal outputs, the "generic" version of that pitch is output:
+for example, \code{semits('c#', generic = TRUE)} will return \code{0}, because the "generic" version of \emph{C#} is \emph{C}, which corresponds to \code{0}.
+However, note that the generic version of a pitch follows the key, so \code{semits('c#', generic = TRUE, Key = 'A:')} will return \code{1}!
+}
+
+\subsection{Simple vs Compound}{
+
+If \code{specific = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
+(octave and contour) is omitted from the output.
+As an alternative way of controlling the same functionality, you can use the \code{compound} argument ,where \code{compound == !simple}.
+
+There is actually more than one way you might want to divide compound intervals up into simple and octave parts.
+For example, you might like to call an output \code{-M2} (descending major 2nd) \emph{OR} \code{+m7} (ascending minor 7th in the octave below).
+This functionality can be controlled with the \code{octave.round} argument: see the "advanced deparsing" section below.
+}
+
+\subsection{Key}{
+
+The \code{Key} argument must be a \link{diatonicSet}, or something that can be parsed into one.
+The \code{Key} argument is passed to the \link[=pitchParsing]{parser}, deparser, \emph{and} transpose---\emph{unless}
+an alternate \code{Key} is passed to \code{transposeArgs} or \code{parseArgs}.
+Various deparsing options use the \code{Key} argument; for example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
+
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means, that in most cases,
+you don't need to explicitly do anything with the \code{Key} argument!
+(If you want this \emph{not} to happen, you need to explicitly specify your own \code{Key} argument, or \code{Key = NULL}.)
+}
+
+\subsection{Parse arguments}{
+
+The \code{parseArgs} argument must be a \code{\link[=list]{list()}} of (named) arguments which are passed to the input \link[=pitchParsing]{parser}.
+For example, if our input representation uses \code{"X"} to represent double sharps, we could specify \code{kern('CX5', parseArgs = list(doublesharp = 'X'))}
+and get the correct result (\code{"cc##"}).
+As a convenient shorthand, or "syntactic sugar," you can specify \code{parseArgs} in an alternate way:
+Simply input \code{parse(args...)} as unnamed argument to any pitch function.
+For example, we can get the exact same result as before by typing \code{kern('CX5', parse(doublesharp = 'X'))}.
+}
+
+\subsection{Transpose arguments}{
+
+The \code{transposeArgs} argument must be a \code{\link[=list]{list()}} of (named) arguments which are passed to an internal call
+to \code{\link[=transpose]{transpose()}}, allowing us to easily transpose pitch information.
+For example, we could type \code{kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))} can get the output \code{c('d', 'e', 'f#')}.
+The possible transpose args are:
+\itemize{
+\item \code{by} (\link[=tonalIntervalS4]{tonalInterval}, \code{length == 1 | length == (x)})
+\item \code{from} (\link{diatonicSet}, \code{length == 1 | length == (x)})
+\item \code{to}  (\link{diatonicSet}, \code{length == 1 | length == (x)})
+\item \code{real} (\code{logical}, \code{length == 1}) Should transposition be real or tonal?
+\item \code{relative} (\code{logical}, \code{length == 1}) Should key-wise transposition be based on relative or parallel keys?
+}
+
+As a convenient shorthand, or "syntactic sugar," you can specify \code{transposeArgs} in an alternate way:
+Simply input \code{transpose(args...)} as unnamed argument to any pitch function.
+For example, we can get the exact same result as before by typing \code{kern(c('C', 'D', 'E'), transpose(by = 'M9'))}.
+\subsection{Transposing by interval}{
+
+As when calling \code{\link[=transpose]{transpose()}} directly, the \code{by} argument can be anything coercable to a \link[=tonalIntervalS4]{tonalInterval}, and
+the output will be transposed by that amount.
+If \code{real = FALSE}, tonal transposition (within the \code{Key}) will be performed.
+For more details on transposition behavior, check out the \code{\link[=transpose]{transpose()}} docs.
+}
+
+\subsection{Transposing by key}{
+
+Another way of transposing is by specifying an input ("from") key and an output ("to") key.
+By default, the \code{Key} argument is passed to \code{transpose} as both \code{from} and \code{to}, so nothing actually happens.
+Thus, if you specify either a \code{from} key or \code{to} key, transposition will happen to/from that key to \code{Key}.
+Of course, if you specify \code{from} \emph{and} \code{to} the transposition will happen between the keys you specify.
+
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function.
+If you specify a \code{to} key, the \code{Key} field will be passed as the transpose \code{from} key, and as a result,
+all the pitches in the input will be transposed from whatever keys they are in to your target (\code{to}) key!
+
+The \code{real} and \code{relative} arguments give you special control of how key-wise transposition works, so
+check out the \code{\link[=transpose]{transpose()}} docs for more details!
+}
+
+\subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
 for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
@@ -78,9 +162,477 @@ This is controlled with the \code{inPlace} argument, which is \code{FALSE} by de
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
 Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
-\emph{if} their input is a character string.
+\emph{if} their input is a character string.Advanced Deparsing Options
+
+Though each of the pitch functions (listed at top) outputs a different pitch representation,
+they share a lot of common "deparsing" functionality.
+This is why basic arguments like \code{generic} and \code{simple} will work with any pitch function.
+By using more "advanced" deparsing arguments, you can tweak how this deparsing is done, so as to generate even more output representations!
+This means we are controlling the bin the second step of our pipeline:
+\itemize{
+\item \strong{Input} representation \verb{|>}
+\itemize{
+\item \emph{Parsing} \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Transformation}  \verb{|>}
+}
+\item \emph{Deparsing} (DEPARSING ARGS GO HERE) \verb{|>}
+}
+\item \strong{Output} representation
+}
+
+Note that these arguments are similar or identical to parallel \link[=pitchParsing]{parsing arguments}.
+The following "advanced" deparsing arguments are available (read all the details about them further down):
+\itemize{
+\item \strong{Steps}
+\itemize{
+\item \code{step.labels}
+\item \code{step.signed}
+}
+\item \strong{Species} (accidentals or qualities)
+\itemize{
+\item \code{qualities}
+\item \code{specifier.maximum}
+\item \emph{Accidentals}
+\itemize{
+\item \code{natural}, \code{flat}, \code{sharp}, \code{doubleflat}, \code{doublesharp}
+}
+\item \emph{Qualities}
+\itemize{
+\item \code{perfect}, \code{major}, \code{minor}, \code{augment}, \code{diminish}
+}
+\item \emph{Implicit vs Explicit Species}
+\itemize{
+\item \code{implicitSpecies}
+\item \code{absoluteSpecies}
+\item \code{explicitNaturals}
+\item \code{cautionary}
+\item \code{memory}, \code{memoryWindows}
+}
+}
+\item \strong{Octave}
+\itemize{
+\item \code{octave.integer}
+\item \code{up}, \code{down}, \code{same}
+\item \code{octave.offset}
+\item \code{octave.round}
+\item \code{octave.relative}, \code{octave.absolute}
+}
+\item \strong{String parsing}
+\itemize{
+\item \code{parts}
+\item \code{sep}.
+}
+}
+
+These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}: for example, \code{kern(x, qualities = TRUE)}.
+
+Each of the \code{humdrumR} pitch functions is associated with default deparsing arguments.
+For example, if you use \code{\link[=kern]{kern()}}, \code{flat} is set (by default) to \code{"-"}.
+However, if you wanted to print \verb{**kern}-like pitch data, \strong{except} with a different flat symbol, like \code{"_"}, you could modify the deparser:
+\code{kern('Eb5', flat = "_")}.
+This overrides the default value for \verb{**kern}, so the output would be \code{"ee_"} instead of \code{"ee-"}.
+}
+
+}
+
+\subsection{Steps}{
+
+All representations of "tonal" pitch information include a representation of \emph{diatonic steps}.
+You can control how the deparser writes diatonic steps using the \code{step.labels} argument.
+The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
+Examples of \code{step.labels} arguments that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \code{step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G')}
+\item \code{step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')}
+\item \code{step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't')}
+}
+
+If \code{step.labels} is \code{NULL}, steps are assumed printed as integers, including negative integers representing downward steps.
+
+There is also a \code{step.signed} (\code{logical}, \code{length == 1}) argument: if \code{step.signed = TRUE}, lowercase versions of \code{step.labels} are interpreted as negative (downward) steps and
+uppercase versions of \code{step.labels} are interpreted as positive (upwards) steps.
+This option is used, for example, by the default \code{\link[=kern]{kern()}} and \code{\link[=helmholtz]{helmholtz()}} parsers.
+}
+
+\subsection{Species}{
+
+In tonal pitch representations, "\emph{specific}" versions of tonal pitches---the tonal "species"---are indicated by "specifiers":
+either \emph{accidentals} or \emph{qualities}.
+The \code{qualities} (\code{logical}, \code{length == 1}) argument indicates whether accidentals are used (\code{qualities = FALSE}) or qualities (\code{qualities = TRUE}).
+Some specifiers can be repeated any number of times, like "triple sharps" or "doubly augmented";
+The \code{specifier.maximum} (\code{integer}, \code{length == 1}) argument sets a maximum limit on the number of specifiers to write.
+For example, you could force all triple sharps (\code{"###"}) or double sharps (\code{"##"}) to deparse as just \code{"#"}, by specifying \code{specifier.maximum = 1L}.
+\subsection{Accidentals}{
+
+If \code{qualities = FALSE} the deparser will print accidentals of three types: naturals, flats, and sharps.
+The \code{natural}, \code{flat}, and/or \code{sharp} (\code{character}, \code{length == 1}) arguments can be used to indicate
+how accidentals are printed in the output.
+For example, if set the \code{kern('Eb5', flat = 'flat')} you get the output \code{"eeflat"}.
+
+Examples of accidental argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \verb{(flat = "b", sharp = "#")} ->  \code{\link[=pitch]{pitch()}}
+\item \verb{(flat = "-", sharp = "#")} ->  \code{\link[=kern]{kern()}}
+\item \verb{(flat = "es", sharp = "is")} -> \code{\link[=lilypond]{lilypond()}}
+\item \verb{(flat = "-", sharp = "+")} -> \code{\link[=degree]{degree()}}
+}
+
+The \code{doubleflat}, and \code{doublesharp} (\code{character}, \code{length == 1}) arguments are \code{NULL} by default, but can be set if a special symbol is wanted
+to represent two sharps or flats. For example, you could modify \code{\link[=pitch]{pitch()}} to use a special double sharp symbol:
+\code{pitch("f##", doublesharp = "x")} and the output will be \code{"Fx4"}.
+
+The printing of naturals is controlled by the \code{natural} argument.
+However, by default, the \code{humdrumR} deparsers don't both printing naturals.
+You can force \emph{all} naturals to print my setting the \code{explicitNaturals} (\code{logical}, \code{length == 1})
+argument to \code{TRUE}.
+The exact behavior of \code{explicitNaturals} depends on the \code{implicitSpecies}, \code{absoluteSpecies},
+and \code{Key} argument (details below).
+}
+
+\subsection{Qualities}{
+
+If \code{qualities = TRUE} the deparser will print qualities, of five types: perfect, minor, major, augmented, and diminished.
+The \code{perfect}, \code{major}, \code{minor}, \code{diminish}, and/or \code{augment} (\code{character}, \code{length == 1}) arguments
+can be used to indicate how qualities are printed in the output.
+(Note: we are talking about interval/degree qualities here, not chord qualities!)
+For example, you can write \code{interval(c("g-", "f#"), augment = 'aug', diminish = 'dim')}
+and the output \code{c("+dim5", "+aug4")}.
+Examples of quality argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \code{parse(major = "M", minor = "m", perfect = "P", diminish = "d", augment = "A")}
+\item \code{parse(diminish = "o", augment = "+")}
+}
+}
+
+\subsection{Implicit vs Explicit Species}{
+
+In some musical data, specifiers (e.g., accidentals or qualities) are not explicitly indicated; instead,
+you must infer the species of each pitch from the context---like the key signature!.
+\subsection{From the Key}{
+
+The most important argument here is \code{implicitSpecies} (\code{logical}, \code{length == 1}):
+if \code{implicitSpecies = TRUE}, the species of input without an explicit species indicated is interpreted using the \code{Key}.
+For example,
+\itemize{
+\item \code{kern('C', Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}
+\itemize{
+\item C is sharp in A major.
+}
+\item \code{kern('C', Key = 'a:', parse(implicitSpecies = TRUE))} is parsed as \code{"C"}
+\itemize{
+\item C is natural in A minor.
+}
+\item \code{kern('C', Key = 'a-:', parse(implicitSpecies = TRUE))} is parsed as \code{"C-"}
+\itemize{
+\item C is flat in A-flat minor.
+}
+}
+
+By default, if you input \emph{already has} specifiers, they are interpreted absolutely---overriding the "implicit" \code{Key}---,
+even if \code{implicitSpecies = TRUE}.
+Thus, if we are in A major:
+\itemize{
+\item \code{kern("C#", Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}.
+\itemize{
+\item The \code{"#"} is unnecessary.
+}
+\item \code{kern("Cn", Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C"}.
+\itemize{
+\item The \code{"n"} overrides the \code{Key}.
+}
+\item \code{kern("C#", Key = 'a:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}.
+\itemize{
+\item The \code{"#"} overrides the \code{Key}.
+}
+}
+
+However! You can also change this behavior by setting the \code{absoluteSpecies} (\code{logical}, \code{length == 1}) argument to \code{FALSE}.
+If you do so, the specifiers in the input are interpreted "on top of" the key accidental:
+\itemize{
+\item \code{kern("C#", Key = 'A:', parse(implicitSpecies = TRUE, absoluteSpecies = FALSE))} is parsed as \code{"C##"}.
+\itemize{
+\item The \code{"#"} from the input is added to the \code{"#"} from the \code{Key}, resulting in double sharp!
+}
+}
+
+This is an unusual behavior, for absolute pitch representations like \verb{**kern}.
+However, for use with scale or chord degrees, \code{absoluteSpecies = FALSE} might be appropriate.
+For example, if we are reading a \href{https://en.wikipedia.org/wiki/Figured_bass}{figured bass} in the key of E minor,
+a \code{"b7"} figure above an E in the bass should be interpreted as a \emph{double flat} (diminished) 7th (Db over E)!
+If this is how your data is encoded, use \code{absoluteSpecies = FALSE}.
+}
+
+\subsection{Memory}{
+
+In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
+or until a different accidental replaces it.
+Fortunately, the \code{humdrumR} parser (\code{tonalInterval()}) also knows how to parse data encoded with "memory" this way.
+If \code{memory = TRUE}, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
+For example,
+\itemize{
+\item \code{kern(c("D#", "E", "D", "E", "Dn", "C", "D"), parse(memory = TRUE))}
+\itemize{
+\item is parsed as \code{c("D#", "E", "D#", "E", "D", "C", "D")}
+}
+}
+
+If we want the "memory" to only last when specific time windows (like bars), we can also specify a
+\code{memoryWindows} argument. \code{memoryWindows} must be an atomic vector which is the same length as the input (\code{x} argument).
+Each unique value within the \code{memoryWindows} vector is treated as a "window" within which \code{memory} operates.
+The most common use case would be to pass the \code{Bar} field from a \code{humdrumR} dataset to \code{memoryWindows}!
+
+The \code{memory} and \code{memoryWindows} argument work whatever values of \code{implicitSpecies} or \code{absoluteSpecies} are specified!
+Though all the examples here use accidentals, these arguments all have the same effect if parsing qualities (\code{qualities = TRUE}).
+}
+
+}
+
+}
+
+\subsection{Octave}{
+
+The final piece of information encoded in most (but not) all pitch representations is an indication of the "compound pitch"---
+incorporating octave information.
+In \code{humdrumR} octaves are \emph{always} defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
+This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-\strong{C}.
+\subsection{Integer Octaves}{
+
+The simplest way octave information can be encoded is as an integer value, as in \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch}.
+If you need to parse integer-encoded octaves, set the \code{octave.integer} (\code{logical}, \code{length == 1}) argument to \code{TRUE}.
+By default, \code{humdrumR} considers the "central" octave (\code{octave == 0}) to be the octave of , or equivalently, a unison.
+However, if a different octave is used as the central octave, you can specify the \code{octave.offset} (\code{integer}, \code{length == 1}) argument.
+
+To illustrate, the default \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} parser used the arguments:
+\itemize{
+\item \verb{kern('C5', parse(octave.integer = TRUE, octave.offset = 4)}
+\itemize{
+\item Returns \code{"cc"} (the octave above middle C).
+}
+}
+}
+
+\subsection{Non-integer Octave Markers}{
+
+If \code{octave.integer = FALSE}, the \code{humdrumR} parser instead looks for three possible symbols to indicate octave information.
+These symbols are controlled using the \code{up}, \code{down}, and \code{same} (\code{character}, \code{length == 1}) arguments.
+A \code{same} symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the \code{up} or \code{down} symbols indicate
+increasing positive (\code{up}) or negative (\code{down}) octaves.
+For example, in \code{lilypond} notation, \verb{,} represents lower octaves, and \verb{'} (single apostrophe) represents upper octaves.
+So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
+\itemize{
+\item \code{pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))}
+\itemize{
+\item Returns \code{c("C2", "C3", "C4")}.
+}
+}
+
+(Note that lilypond makes the octave \emph{below}  the central octave, using \code{octave.offset = 1}.)
+}
+
+\subsection{Octave "Rounding"}{
+
+In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
+between B (degree 7) and C (degree 1).
+However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).
+In this case, the "octave boundary" is \emph{centered} around the unison (or ), rather than starting \emph{at} middle-\strong{C}/unison.
+If our data was represented this way, we could use the \code{octave.round} argument; \code{octave.round} must be a rounding \emph{function},
+either \link[base:Round]{round, floor, ceiling, trunc}, or \link{expand}.
+These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
+The default behavior for most pitch representations is \code{octave.round = floor}: each scale step is rounded downwards to the nearest C.
+So B is associated with the C 7 steps below it.
+If, on the other hand, \code{octave.round = round}, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C \emph{above} them.
+Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavior we mentioned earlier!
+
+When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
+For example, we might think of a ascending major 12th as being an ascending octave \emph{plus} a ascending perfect 5th: ** +P8 + P5**.
+\strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
+The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
+   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
+   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
+   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
+   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+}
 
 
+Notice that, if \code{octave.floor} is being used, all simple intervals are represented as ascending.
+
+When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
+The following table illustrates:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
+   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
+   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
+   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
+   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
+}
+
+}
+
+\subsection{Absolute or Relative (contour) Octave}{
+
+In some notation encoding schemes, the "octave" of each note is interpreted \emph{relative} the previous note, rather than any absolute reference.
+The most prominent system is Lilypond's \href{https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry}{relative octave entry} style.
+This style is often used in combination with scale degree representations---as in the \href{http://rockcorpus.midside.com/melodic_transcriptions.html}{RS200} corpus.
+For example, a data set might say \verb{Do Re Mi vSo La Ti Do}, with the \code{"v"} indicating a jump down to \code{So}.
+To activate relative-octave parsing, set \code{octave.relative = TRUE}---alternatively, you can use \code{octave.absolute = FALSE}, which is equivalent.
+
+In a relative-octave data, we assume that octave indications indicate a shift relative to the previous note.
+This would usually be used in combination with octave markers like \code{"^"} (up) or \code{"v"} (down).
+Different combinations of \code{octave.round} allow us to parse different behaviors:
+\itemize{
+\item If \code{octave.round = round}, a \code{same} marker (or no marker) indicates that the note is the pitch \emph{closest} to the previous pitch.
+Octave markers indicate alterations to this assumption.
+As always, this is based on scale steps, not semitones!
+Any fourth is "closer" than any fifth, regardless of their quality: So \emph{C F#} is ascending and \emph{C Gb} is descending!
+A ascending diminished 5th would be written \code{C ^Gb}---with \verb{up = ^}.
+\item If \code{octave.round = floor}, a \code{same} marker (or no marker) indicates that the note is in the octave above the previous pitch.
+Octave markers indicate alterations to this assumption.
+With this setting, going from \emph{C} down to \emph{B} always requires a \code{down} mark.
+}
+}
+
+}
+
+\subsection{String Parsing}{
+
+In addition to the three types of \emph{musical} parsing considerations reviewed above (steps, species, and octaves), there are also some general
+string-parsing issues that we can consider/control.
+\subsection{Parts and Order}{
+
+So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
+the \code{humdrumR} parser can be modified to handle different options.
+However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
+The \code{parts} argument can be specifyied to indicate this.
+The \code{parts} argument must be a \code{character} vector of length 1--3.
+The characters in the must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
+The presense of any of these strings in the \code{parts} vector indicate that that information should be parsed.
+The \emph{order} of the strings indicates what order the pieces of pitch information are encoded in input strings.
+
+To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
+quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
+We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species")))} and sure enough we'd get the correct parse!
+
+One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components:
+The most common case would be a comma or space.
+For example, we could use a parse command like this: \code{kern("E flat 5", parse(flat = "flat", sep = " "))}.
+}
+
+}
+
+
+
+Each pitch function has a few standard arguments (details above), which control details of the output.
+The most important are the \code{generic} and \code{simple} arguments, which allow you to control what type of pitch information
+is returned.
+\subsection{Generic vs Specific}{
+
+If \code{generic = TRUE}, \href{https://en.wikipedia.org/wiki/Generic_and_specific_intervals}{specific pitch information}
+(accidentals or qualities) is omitted from the output.
+As an alternative way of controlling the same functionality, you can use the \code{specific} argument ,where \code{specific == !generic}.
+In the case of atonal outputs, the "generic" version of that pitch is output:
+for example, \code{semits('c#', generic = TRUE)} will return \code{0}, because the "generic" version of \emph{C#} is \emph{C}, which corresponds to \code{0}.
+However, note that the generic version of a pitch follows the key, so \code{semits('c#', generic = TRUE, Key = 'A:')} will return \code{1}!
+}
+
+\subsection{Simple vs Compound}{
+
+If \code{specific = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
+(octave and contour) is omitted from the output.
+As an alternative way of controlling the same functionality, you can use the \code{compound} argument ,where \code{compound == !simple}.
+
+There is actually more than one way you might want to divide compound intervals up into simple and octave parts.
+For example, you might like to call an output \code{-M2} (descending major 2nd) \emph{OR} \code{+m7} (ascending minor 7th in the octave below).
+This functionality can be controlled with the \code{octave.round} argument: see the "advanced deparsing" section below.
+}
+
+\subsection{Key}{
+
+The \code{Key} argument must be a \link{diatonicSet}, or something that can be parsed into one.
+The \code{Key} argument is passed to the \link[=pitchParsing]{parser}, deparser, \emph{and} transpose---\emph{unless}
+an alternate \code{Key} is passed to \code{transposeArgs} or \code{parseArgs}.
+Various deparsing options use the \code{Key} argument; for example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
+
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means, that in most cases,
+you don't need to explicitly do anything with the \code{Key} argument!
+(If you want this \emph{not} to happen, you need to explicitly specify your own \code{Key} argument, or \code{Key = NULL}.)
+}
+
+\subsection{Parse arguments}{
+
+The \code{parseArgs} argument must be a \code{\link[=list]{list()}} of (named) arguments which are passed to the input \link[=pitchParsing]{parser}.
+For example, if our input representation uses \code{"X"} to represent double sharps, we could specify \code{kern('CX5', parseArgs = list(doublesharp = 'X'))}
+and get the correct result (\code{"cc##"}).
+As a convenient shorthand, or "syntactic sugar," you can specify \code{parseArgs} in an alternate way:
+Simply input \code{parse(args...)} as unnamed argument to any pitch function.
+For example, we can get the exact same result as before by typing \code{kern('CX5', parse(doublesharp = 'X'))}.
+}
+
+\subsection{Transpose arguments}{
+
+The \code{transposeArgs} argument must be a \code{\link[=list]{list()}} of (named) arguments which are passed to an internal call
+to \code{\link[=transpose]{transpose()}}, allowing us to easily transpose pitch information.
+For example, we could type \code{kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))} can get the output \code{c('d', 'e', 'f#')}.
+The possible transpose args are:
+\itemize{
+\item \code{by} (\link[=tonalIntervalS4]{tonalInterval}, \code{length == 1 | length == (x)})
+\item \code{from} (\link{diatonicSet}, \code{length == 1 | length == (x)})
+\item \code{to}  (\link{diatonicSet}, \code{length == 1 | length == (x)})
+\item \code{real} (\code{logical}, \code{length == 1}) Should transposition be real or tonal?
+\item \code{relative} (\code{logical}, \code{length == 1}) Should key-wise transposition be based on relative or parallel keys?
+}
+
+As a convenient shorthand, or "syntactic sugar," you can specify \code{transposeArgs} in an alternate way:
+Simply input \code{transpose(args...)} as unnamed argument to any pitch function.
+For example, we can get the exact same result as before by typing \code{kern(c('C', 'D', 'E'), transpose(by = 'M9'))}.
+\subsection{Transposing by interval}{
+
+As when calling \code{\link[=transpose]{transpose()}} directly, the \code{by} argument can be anything coercable to a \link[=tonalIntervalS4]{tonalInterval}, and
+the output will be transposed by that amount.
+If \code{real = FALSE}, tonal transposition (within the \code{Key}) will be performed.
+For more details on transposition behavior, check out the \code{\link[=transpose]{transpose()}} docs.
+}
+
+\subsection{Transposing by key}{
+
+Another way of transposing is by specifying an input ("from") key and an output ("to") key.
+By default, the \code{Key} argument is passed to \code{transpose} as both \code{from} and \code{to}, so nothing actually happens.
+Thus, if you specify either a \code{from} key or \code{to} key, transposition will happen to/from that key to \code{Key}.
+Of course, if you specify \code{from} \emph{and} \code{to} the transposition will happen between the keys you specify.
+
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function.
+If you specify a \code{to} key, the \code{Key} field will be passed as the transpose \code{from} key, and as a result,
+all the pitches in the input will be transposed from whatever keys they are in to your target (\code{to}) key!
+
+The \code{real} and \code{relative} arguments give you special control of how key-wise transposition works, so
+check out the \code{\link[=transpose]{transpose()}} docs for more details!
+}
+
+\subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
 for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
@@ -93,7 +645,385 @@ This is controlled with the \code{inPlace} argument, which is \code{FALSE} by de
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
 Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
-\emph{if} their input is a character string.
+\emph{if} their input is a character string.Advanced Deparsing Options
+
+Though each of the pitch functions (listed at top) outputs a different pitch representation,
+they share a lot of common "deparsing" functionality.
+This is why basic arguments like \code{generic} and \code{simple} will work with any pitch function.
+By using more "advanced" deparsing arguments, you can tweak how this deparsing is done, so as to generate even more output representations!
+This means we are controlling the bin the second step of our pipeline:
+\itemize{
+\item \strong{Input} representation \verb{|>}
+\itemize{
+\item \emph{Parsing} \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Transformation}  \verb{|>}
+}
+\item \emph{Deparsing} (DEPARSING ARGS GO HERE) \verb{|>}
+}
+\item \strong{Output} representation
+}
+
+Note that these arguments are similar or identical to parallel \link[=pitchParsing]{parsing arguments}.
+The following "advanced" deparsing arguments are available (read all the details about them further down):
+\itemize{
+\item \strong{Steps}
+\itemize{
+\item \code{step.labels}
+\item \code{step.signed}
+}
+\item \strong{Species} (accidentals or qualities)
+\itemize{
+\item \code{qualities}
+\item \code{specifier.maximum}
+\item \emph{Accidentals}
+\itemize{
+\item \code{natural}, \code{flat}, \code{sharp}, \code{doubleflat}, \code{doublesharp}
+}
+\item \emph{Qualities}
+\itemize{
+\item \code{perfect}, \code{major}, \code{minor}, \code{augment}, \code{diminish}
+}
+\item \emph{Implicit vs Explicit Species}
+\itemize{
+\item \code{implicitSpecies}
+\item \code{absoluteSpecies}
+\item \code{explicitNaturals}
+\item \code{cautionary}
+\item \code{memory}, \code{memoryWindows}
+}
+}
+\item \strong{Octave}
+\itemize{
+\item \code{octave.integer}
+\item \code{up}, \code{down}, \code{same}
+\item \code{octave.offset}
+\item \code{octave.round}
+\item \code{octave.relative}, \code{octave.absolute}
+}
+\item \strong{String parsing}
+\itemize{
+\item \code{parts}
+\item \code{sep}.
+}
+}
+
+These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}: for example, \code{kern(x, qualities = TRUE)}.
+
+Each of the \code{humdrumR} pitch functions is associated with default deparsing arguments.
+For example, if you use \code{\link[=kern]{kern()}}, \code{flat} is set (by default) to \code{"-"}.
+However, if you wanted to print \verb{**kern}-like pitch data, \strong{except} with a different flat symbol, like \code{"_"}, you could modify the deparser:
+\code{kern('Eb5', flat = "_")}.
+This overrides the default value for \verb{**kern}, so the output would be \code{"ee_"} instead of \code{"ee-"}.
+}
+
+}
+
+\subsection{Steps}{
+
+All representations of "tonal" pitch information include a representation of \emph{diatonic steps}.
+You can control how the deparser writes diatonic steps using the \code{step.labels} argument.
+The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
+Examples of \code{step.labels} arguments that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \code{step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G')}
+\item \code{step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')}
+\item \code{step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't')}
+}
+
+If \code{step.labels} is \code{NULL}, steps are assumed printed as integers, including negative integers representing downward steps.
+
+There is also a \code{step.signed} (\code{logical}, \code{length == 1}) argument: if \code{step.signed = TRUE}, lowercase versions of \code{step.labels} are interpreted as negative (downward) steps and
+uppercase versions of \code{step.labels} are interpreted as positive (upwards) steps.
+This option is used, for example, by the default \code{\link[=kern]{kern()}} and \code{\link[=helmholtz]{helmholtz()}} parsers.
+}
+
+\subsection{Species}{
+
+In tonal pitch representations, "\emph{specific}" versions of tonal pitches---the tonal "species"---are indicated by "specifiers":
+either \emph{accidentals} or \emph{qualities}.
+The \code{qualities} (\code{logical}, \code{length == 1}) argument indicates whether accidentals are used (\code{qualities = FALSE}) or qualities (\code{qualities = TRUE}).
+Some specifiers can be repeated any number of times, like "triple sharps" or "doubly augmented";
+The \code{specifier.maximum} (\code{integer}, \code{length == 1}) argument sets a maximum limit on the number of specifiers to write.
+For example, you could force all triple sharps (\code{"###"}) or double sharps (\code{"##"}) to deparse as just \code{"#"}, by specifying \code{specifier.maximum = 1L}.
+\subsection{Accidentals}{
+
+If \code{qualities = FALSE} the deparser will print accidentals of three types: naturals, flats, and sharps.
+The \code{natural}, \code{flat}, and/or \code{sharp} (\code{character}, \code{length == 1}) arguments can be used to indicate
+how accidentals are printed in the output.
+For example, if set the \code{kern('Eb5', flat = 'flat')} you get the output \code{"eeflat"}.
+
+Examples of accidental argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \verb{(flat = "b", sharp = "#")} ->  \code{\link[=pitch]{pitch()}}
+\item \verb{(flat = "-", sharp = "#")} ->  \code{\link[=kern]{kern()}}
+\item \verb{(flat = "es", sharp = "is")} -> \code{\link[=lilypond]{lilypond()}}
+\item \verb{(flat = "-", sharp = "+")} -> \code{\link[=degree]{degree()}}
+}
+
+The \code{doubleflat}, and \code{doublesharp} (\code{character}, \code{length == 1}) arguments are \code{NULL} by default, but can be set if a special symbol is wanted
+to represent two sharps or flats. For example, you could modify \code{\link[=pitch]{pitch()}} to use a special double sharp symbol:
+\code{pitch("f##", doublesharp = "x")} and the output will be \code{"Fx4"}.
+
+The printing of naturals is controlled by the \code{natural} argument.
+However, by default, the \code{humdrumR} deparsers don't both printing naturals.
+You can force \emph{all} naturals to print my setting the \code{explicitNaturals} (\code{logical}, \code{length == 1})
+argument to \code{TRUE}.
+The exact behavior of \code{explicitNaturals} depends on the \code{implicitSpecies}, \code{absoluteSpecies},
+and \code{Key} argument (details below).
+}
+
+\subsection{Qualities}{
+
+If \code{qualities = TRUE} the deparser will print qualities, of five types: perfect, minor, major, augmented, and diminished.
+The \code{perfect}, \code{major}, \code{minor}, \code{diminish}, and/or \code{augment} (\code{character}, \code{length == 1}) arguments
+can be used to indicate how qualities are printed in the output.
+(Note: we are talking about interval/degree qualities here, not chord qualities!)
+For example, you can write \code{interval(c("g-", "f#"), augment = 'aug', diminish = 'dim')}
+and the output \code{c("+dim5", "+aug4")}.
+Examples of quality argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+\itemize{
+\item \code{parse(major = "M", minor = "m", perfect = "P", diminish = "d", augment = "A")}
+\item \code{parse(diminish = "o", augment = "+")}
+}
+}
+
+\subsection{Implicit vs Explicit Species}{
+
+In some musical data, specifiers (e.g., accidentals or qualities) are not explicitly indicated; instead,
+you must infer the species of each pitch from the context---like the key signature!.
+\subsection{From the Key}{
+
+The most important argument here is \code{implicitSpecies} (\code{logical}, \code{length == 1}):
+if \code{implicitSpecies = TRUE}, the species of input without an explicit species indicated is interpreted using the \code{Key}.
+For example,
+\itemize{
+\item \code{kern('C', Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}
+\itemize{
+\item C is sharp in A major.
+}
+\item \code{kern('C', Key = 'a:', parse(implicitSpecies = TRUE))} is parsed as \code{"C"}
+\itemize{
+\item C is natural in A minor.
+}
+\item \code{kern('C', Key = 'a-:', parse(implicitSpecies = TRUE))} is parsed as \code{"C-"}
+\itemize{
+\item C is flat in A-flat minor.
+}
+}
+
+By default, if you input \emph{already has} specifiers, they are interpreted absolutely---overriding the "implicit" \code{Key}---,
+even if \code{implicitSpecies = TRUE}.
+Thus, if we are in A major:
+\itemize{
+\item \code{kern("C#", Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}.
+\itemize{
+\item The \code{"#"} is unnecessary.
+}
+\item \code{kern("Cn", Key = 'A:', parse(implicitSpecies = TRUE))} is parsed as \code{"C"}.
+\itemize{
+\item The \code{"n"} overrides the \code{Key}.
+}
+\item \code{kern("C#", Key = 'a:', parse(implicitSpecies = TRUE))} is parsed as \code{"C#"}.
+\itemize{
+\item The \code{"#"} overrides the \code{Key}.
+}
+}
+
+However! You can also change this behavior by setting the \code{absoluteSpecies} (\code{logical}, \code{length == 1}) argument to \code{FALSE}.
+If you do so, the specifiers in the input are interpreted "on top of" the key accidental:
+\itemize{
+\item \code{kern("C#", Key = 'A:', parse(implicitSpecies = TRUE, absoluteSpecies = FALSE))} is parsed as \code{"C##"}.
+\itemize{
+\item The \code{"#"} from the input is added to the \code{"#"} from the \code{Key}, resulting in double sharp!
+}
+}
+
+This is an unusual behavior, for absolute pitch representations like \verb{**kern}.
+However, for use with scale or chord degrees, \code{absoluteSpecies = FALSE} might be appropriate.
+For example, if we are reading a \href{https://en.wikipedia.org/wiki/Figured_bass}{figured bass} in the key of E minor,
+a \code{"b7"} figure above an E in the bass should be interpreted as a \emph{double flat} (diminished) 7th (Db over E)!
+If this is how your data is encoded, use \code{absoluteSpecies = FALSE}.
+}
+
+\subsection{Memory}{
+
+In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
+or until a different accidental replaces it.
+Fortunately, the \code{humdrumR} parser (\code{tonalInterval()}) also knows how to parse data encoded with "memory" this way.
+If \code{memory = TRUE}, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
+For example,
+\itemize{
+\item \code{kern(c("D#", "E", "D", "E", "Dn", "C", "D"), parse(memory = TRUE))}
+\itemize{
+\item is parsed as \code{c("D#", "E", "D#", "E", "D", "C", "D")}
+}
+}
+
+If we want the "memory" to only last when specific time windows (like bars), we can also specify a
+\code{memoryWindows} argument. \code{memoryWindows} must be an atomic vector which is the same length as the input (\code{x} argument).
+Each unique value within the \code{memoryWindows} vector is treated as a "window" within which \code{memory} operates.
+The most common use case would be to pass the \code{Bar} field from a \code{humdrumR} dataset to \code{memoryWindows}!
+
+The \code{memory} and \code{memoryWindows} argument work whatever values of \code{implicitSpecies} or \code{absoluteSpecies} are specified!
+Though all the examples here use accidentals, these arguments all have the same effect if parsing qualities (\code{qualities = TRUE}).
+}
+
+}
+
+}
+
+\subsection{Octave}{
+
+The final piece of information encoded in most (but not) all pitch representations is an indication of the "compound pitch"---
+incorporating octave information.
+In \code{humdrumR} octaves are \emph{always} defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
+This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-\strong{C}.
+\subsection{Integer Octaves}{
+
+The simplest way octave information can be encoded is as an integer value, as in \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch}.
+If you need to parse integer-encoded octaves, set the \code{octave.integer} (\code{logical}, \code{length == 1}) argument to \code{TRUE}.
+By default, \code{humdrumR} considers the "central" octave (\code{octave == 0}) to be the octave of , or equivalently, a unison.
+However, if a different octave is used as the central octave, you can specify the \code{octave.offset} (\code{integer}, \code{length == 1}) argument.
+
+To illustrate, the default \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} parser used the arguments:
+\itemize{
+\item \verb{kern('C5', parse(octave.integer = TRUE, octave.offset = 4)}
+\itemize{
+\item Returns \code{"cc"} (the octave above middle C).
+}
+}
+}
+
+\subsection{Non-integer Octave Markers}{
+
+If \code{octave.integer = FALSE}, the \code{humdrumR} parser instead looks for three possible symbols to indicate octave information.
+These symbols are controlled using the \code{up}, \code{down}, and \code{same} (\code{character}, \code{length == 1}) arguments.
+A \code{same} symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the \code{up} or \code{down} symbols indicate
+increasing positive (\code{up}) or negative (\code{down}) octaves.
+For example, in \code{lilypond} notation, \verb{,} represents lower octaves, and \verb{'} (single apostrophe) represents upper octaves.
+So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
+\itemize{
+\item \code{pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))}
+\itemize{
+\item Returns \code{c("C2", "C3", "C4")}.
+}
+}
+
+(Note that lilypond makes the octave \emph{below}  the central octave, using \code{octave.offset = 1}.)
+}
+
+\subsection{Octave "Rounding"}{
+
+In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
+between B (degree 7) and C (degree 1).
+However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).
+In this case, the "octave boundary" is \emph{centered} around the unison (or ), rather than starting \emph{at} middle-\strong{C}/unison.
+If our data was represented this way, we could use the \code{octave.round} argument; \code{octave.round} must be a rounding \emph{function},
+either \link[base:Round]{round, floor, ceiling, trunc}, or \link{expand}.
+These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
+The default behavior for most pitch representations is \code{octave.round = floor}: each scale step is rounded downwards to the nearest C.
+So B is associated with the C 7 steps below it.
+If, on the other hand, \code{octave.round = round}, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C \emph{above} them.
+Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavior we mentioned earlier!
+
+When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
+For example, we might think of a ascending major 12th as being an ascending octave \emph{plus} a ascending perfect 5th: ** +P8 + P5**.
+\strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
+The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
+   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
+   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
+   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
+   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+}
+
+
+Notice that, if \code{octave.floor} is being used, all simple intervals are represented as ascending.
+
+When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
+The following table illustrates:\tabular{llllll}{
+    \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
+   FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
+   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
+   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
+   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
+   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
+}
+
+}
+
+\subsection{Absolute or Relative (contour) Octave}{
+
+In some notation encoding schemes, the "octave" of each note is interpreted \emph{relative} the previous note, rather than any absolute reference.
+The most prominent system is Lilypond's \href{https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry}{relative octave entry} style.
+This style is often used in combination with scale degree representations---as in the \href{http://rockcorpus.midside.com/melodic_transcriptions.html}{RS200} corpus.
+For example, a data set might say \verb{Do Re Mi vSo La Ti Do}, with the \code{"v"} indicating a jump down to \code{So}.
+To activate relative-octave parsing, set \code{octave.relative = TRUE}---alternatively, you can use \code{octave.absolute = FALSE}, which is equivalent.
+
+In a relative-octave data, we assume that octave indications indicate a shift relative to the previous note.
+This would usually be used in combination with octave markers like \code{"^"} (up) or \code{"v"} (down).
+Different combinations of \code{octave.round} allow us to parse different behaviors:
+\itemize{
+\item If \code{octave.round = round}, a \code{same} marker (or no marker) indicates that the note is the pitch \emph{closest} to the previous pitch.
+Octave markers indicate alterations to this assumption.
+As always, this is based on scale steps, not semitones!
+Any fourth is "closer" than any fifth, regardless of their quality: So \emph{C F#} is ascending and \emph{C Gb} is descending!
+A ascending diminished 5th would be written \code{C ^Gb}---with \verb{up = ^}.
+\item If \code{octave.round = floor}, a \code{same} marker (or no marker) indicates that the note is in the octave above the previous pitch.
+Octave markers indicate alterations to this assumption.
+With this setting, going from \emph{C} down to \emph{B} always requires a \code{down} mark.
+}
+}
+
+}
+
+\subsection{String Parsing}{
+
+In addition to the three types of \emph{musical} parsing considerations reviewed above (steps, species, and octaves), there are also some general
+string-parsing issues that we can consider/control.
+\subsection{Parts and Order}{
+
+So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
+the \code{humdrumR} parser can be modified to handle different options.
+However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
+The \code{parts} argument can be specifyied to indicate this.
+The \code{parts} argument must be a \code{character} vector of length 1--3.
+The characters in the must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
+The presense of any of these strings in the \code{parts} vector indicate that that information should be parsed.
+The \emph{order} of the strings indicates what order the pieces of pitch information are encoded in input strings.
+
+To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
+quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
+We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species")))} and sure enough we'd get the correct parse!
+
+One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components:
+The most common case would be a comma or space.
+For example, we could use a parse command like this: \code{kern("E flat 5", parse(flat = "flat", sep = " "))}.
+}
+
+}
 }
 
 \seealso{

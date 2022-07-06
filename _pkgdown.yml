@@ -108,8 +108,14 @@ reference:
   - humColumns
   - humMerge
   - humInterpretations
-  - humPrint
-  - humShape
+  - foldHumdrum
+  - foldExclusive
+  - foldStops
+  - foldPaths
+  - collapseHumdrum
+  - collapseStops
+  - collapsePaths
+  - collapseRecords
   - humSize
   - humTable
   - struct

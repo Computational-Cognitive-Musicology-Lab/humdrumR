@@ -4,23 +4,20 @@
 \alias{step}
 \title{Extract scale step}
 \usage{
-step(x, ..., simple = FALSE, parseArgs = list(), inPlace = FALSE)
+step(x, ..., simple = FALSE, Key = NULL, parseArgs = list(), inPlace = FALSE)
 }
 \arguments{
-\item{x}{(atomic vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "complex" pitch information is discarded.
-This means that \emph{octave} information is discarded, and the resulting output is confined within the default octave.
-For absolute pitch representations, this is the octave above middle C.
-For relative pitch representations, this is the octave above a unison.
-(The special \code{octave.round} argument can be used to modify this behavior).}
+\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
 
-\item{parseArgs}{(list) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.
-As a convenient syntactic sugar, instead of writing \code{parseArgs = list(a = x, b = y, etc.)}, you can write
-\code{parse(a = x, b = y, etc.)}.}
+\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
+the parser, deparser, and transposer.}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.

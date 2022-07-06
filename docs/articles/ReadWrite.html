@@ -49,6 +49,7 @@
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
@@ -80,7 +81,7 @@
       <img src="" class="logo" alt=""><h1>Reading and writing data with humdrumR</h1>
                         <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-06-15</h4>
+            <h4 data-toc-skip class="date">2022-07-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd"><code>vignettes/ReadWrite.Rmd</code></a></small>
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
@@ -174,11 +175,6 @@
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/BachChorales/chor.*.krn'</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BachChorales/chor.*.krn' matches 10 text files in 1 directory.</span>
-<span class="co">#&gt; Ten files read from disk. </span>
-<span class="co">#&gt; Validating ten files...all valid.</span>
-<span class="co">#&gt; Parsing ten files...Assembling corpus...Done!</span>
 <span class="co">#&gt; ############################# vvv chor001.krn vvv #############################</span>
 <span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
 <span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
@@ -276,100 +272,95 @@
 <p>uses the REpath-pattern <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in the ‘HumdrumData/BachChorales’ directory whose name matches the regular expression “chor.<em>.krn.” As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)—using your operating system’s appopriate delimeter (”" for windows, ”/” for everybody else)—</em>and* a pattern for matching file paths. <em>Each</em> directory is also treated as a regular expression, possibly matching multiple directories. Let’s break this down: <code>humdrumR</code> splits your REpath-pattern input string into three parts: <code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and treats <em>each</em> of the three as regular expressions. The the first two expressions are used to match directories, while the last expression is used to match files. So, while <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code> matches all the files with the”.krn” extension in the “BeethovenVariations” directories and <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches all the files in the “MozartVariations” directories, the command <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code> will match all kern files in both directories!</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*Variations/.*.krn'</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/.*Variations/.*.krn' matches 20 text files in 2 directories.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ################## vvv B075_00_01_a.krn vvv ##################</span>
+<span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
 <span class="co">#&gt;     1:  !!!COM: Beethoven</span>
 <span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
 <span class="co">#&gt;     3:  !!!Variation: Theme a</span>
-<span class="co">#&gt;     4:    **function  **harm     **kern                 **kern</span>
-<span class="co">#&gt;     5:             *       *    *clefG2                *clefG2</span>
-<span class="co">#&gt;     6:             *       *     *k[b-]                 *k[b-]</span>
-<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4                  *M2/4</span>
-<span class="co">#&gt;     8:           *F:     *F:        *F:                    *F:</span>
-<span class="co">#&gt;     9:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    10:            =1      =1         =1                     =1</span>
-<span class="co">#&gt;    11:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    12:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    13:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    14:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    15:            =2      =2         =2                     =2</span>
-<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    17:            4T      4I        4f)               4ff) 4aa</span>
-<span class="co">#&gt;    18:            =3      =3         =3                     =3</span>
-<span class="co">#&gt;    19:            2T      2V         4c             8ee'L 8gg'</span>
-<span class="co">#&gt;    20:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    21:             .       .         4c             8cc'L 8ee'</span>
-<span class="co">#&gt;    22:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    23:            =4      =4         =4                     =4</span>
-<span class="co">#&gt;    24:            4T      4V         8c                8ee 8gg</span>
-<span class="co">#&gt;    25:             .       .         8r                     8r</span>
-<span class="co">#&gt;    26:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    27:            =5      =5         =5                     =5</span>
-<span class="co">#&gt;    28:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    29:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    30:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    31:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    32:            =6      =6         =6                     =6</span>
-<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    34:            4T      4I     4f) 4a               4ff) 4aa</span>
-<span class="co">#&gt;    35:            =7      =7         =7                     =7</span>
-<span class="co">#&gt;    36:            4P    4iib       8B-L               8ddL 8gg</span>
-<span class="co">#&gt;    37:             .       .       8B-J               8ddJ 8gg</span>
-<span class="co">#&gt;    38:            4D     4V7        8cL              (8b-L 8ee</span>
-<span class="co">#&gt;    39:             .       .        8cJ             16b-L 16dd</span>
-<span class="co">#&gt;    40:             .       .          .                16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ################## ^^^ B075_00_01_a.krn ^^^ ##################</span>
+<span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
+<span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
+<span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
+<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4              *M2/4</span>
+<span class="co">#&gt;     8:           *F:     *F:        *F:                *F:</span>
+<span class="co">#&gt;     9:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    10:            =1      =1         =1                 =1</span>
+<span class="co">#&gt;    11:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    12:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    13:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    14:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    15:            =2      =2         =2                 =2</span>
+<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    17:            4T      4I        4f)           4ff) 4aa</span>
+<span class="co">#&gt;    18:            =3      =3         =3                 =3</span>
+<span class="co">#&gt;    19:            2T      2V         4c         8ee'L 8gg'</span>
+<span class="co">#&gt;    20:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    21:             .       .         4c         8cc'L 8ee'</span>
+<span class="co">#&gt;    22:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    23:            =4      =4         =4                 =4</span>
+<span class="co">#&gt;    24:            4T      4V         8c            8ee 8gg</span>
+<span class="co">#&gt;    25:             .       .         8r                 8r</span>
+<span class="co">#&gt;    26:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    27:            =5      =5         =5                 =5</span>
+<span class="co">#&gt;    28:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    29:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    30:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    31:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    32:            =6      =6         =6                 =6</span>
+<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    34:            4T      4I     4f) 4a           4ff) 4aa</span>
+<span class="co">#&gt;    35:            =7      =7         =7                 =7</span>
+<span class="co">#&gt;    36:            4P    4iib       8B-L           8ddL 8gg</span>
+<span class="co">#&gt;    37:             .       .       8B-J           8ddJ 8gg</span>
+<span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
+<span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
+<span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ################# vvv M354_01_04d_a.krn vvv ##################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;    15:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    16:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    17:             .       .         8f         .          16a</span>
-<span class="co">#&gt;    18:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    19:           =41     =41        =41       =41          =41</span>
-<span class="co">#&gt;    20:            2D    2V7d         8r       2A-     (16ee-LL</span>
-<span class="co">#&gt;    21:             .       .          .         .         16dd</span>
-<span class="co">#&gt;    22:             .       .     4B- 4f         .        16cc#</span>
-<span class="co">#&gt;    23:             .       .          .         .      16ddJJ)</span>
-<span class="co">#&gt;    24:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    25:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    26:             .       .     8B- 8f         .          16a</span>
-<span class="co">#&gt;    27:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    28:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    29:           =42     =42        =42       =42             </span>
-<span class="co">#&gt;    30:             *       *    *clefF4         *             </span>
-<span class="co">#&gt;    31:            4T     4Ib         8r  (16ee-LL             </span>
-<span class="co">#&gt;    32:             .       .          .      16ff             </span>
-<span class="co">#&gt;    33:             .       .     8G 8e-     16gg)             </span>
-<span class="co">#&gt;    34:             .       .          .    16b'JJ             </span>
-<span class="co">#&gt;    35:            4P     4IV         8r   (16ccLL             </span>
-<span class="co">#&gt;    36:             .       .          .      16dd             </span>
-<span class="co">#&gt;    37:             .       .    8A- 8e-    16ee-)             </span>
-<span class="co">#&gt;    38:             .       .          .   16a-'JJ             </span>
-<span class="co">#&gt;    39:           =43     =43        =43       =43             </span>
-<span class="co">#&gt;    40:             *       *         *^         *             </span>
-<span class="co">#&gt;    41:            4D     4Cc         8r      2BB-       (16gLL</span>
-<span class="co">#&gt;    42:             .       .          .         .         16a-</span>
-<span class="co">#&gt;    43:             .       .        (8G         .        16b-)</span>
-<span class="co">#&gt;    44:             .       .          .         .       16e'JJ</span>
-<span class="co">#&gt;    45:            4D     4V7       8A-L         .       (16fLL</span>
-<span class="co">#&gt;    46:             .       .          .         .          16g</span>
-<span class="co">#&gt;    47:             .       .       8FJ)         .        16a-)</span>
-<span class="co">#&gt;    48:             .       .          .         .       16d'JJ</span>
-<span class="co">#&gt;    49:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    50:           =44     =44        =44       =44             </span>
-<span class="co">#&gt;    51:            2T      2I       8E-L       4e-             </span>
-<span class="co">#&gt;    52:             .       .      8BB-J         .             </span>
-<span class="co">#&gt;    53:             .       .       4EE-        4r             </span>
-<span class="co">#&gt;    54:            *-      *-         *-        *-             </span>
-<span class="co">#&gt; ################# ^^^ M354_01_04d_a.krn ^^^ ##################</span>
+<span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    16:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    17:             .       .         8f     .          16a</span>
+<span class="co">#&gt;    18:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    19:           =41     =41        =41   =41          =41</span>
+<span class="co">#&gt;    20:            2D    2V7d         8r   2A-     (16ee-LL</span>
+<span class="co">#&gt;    21:             .       .          .     .         16dd</span>
+<span class="co">#&gt;    22:             .       .     4B- 4f     .        16cc#</span>
+<span class="co">#&gt;    23:             .       .          .     .      16ddJJ)</span>
+<span class="co">#&gt;    24:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    25:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    26:             .       .     8B- 8f     .          16a</span>
+<span class="co">#&gt;    27:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    28:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    29:           =42     =42        =42                =42</span>
+<span class="co">#&gt;    30:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    31:            4T     4Ib         8r           (16ee-LL</span>
+<span class="co">#&gt;    32:             .       .          .               16ff</span>
+<span class="co">#&gt;    33:             .       .     8G 8e-              16gg)</span>
+<span class="co">#&gt;    34:             .       .          .             16b'JJ</span>
+<span class="co">#&gt;    35:            4P     4IV         8r            (16ccLL</span>
+<span class="co">#&gt;    36:             .       .          .               16dd</span>
+<span class="co">#&gt;    37:             .       .    8A- 8e-             16ee-)</span>
+<span class="co">#&gt;    38:             .       .          .            16a-'JJ</span>
+<span class="co">#&gt;    39:           =43     =43        =43                =43</span>
+<span class="co">#&gt;    40:             *       *         *^                  *</span>
+<span class="co">#&gt;    41:            4D     4Cc         8r  2BB-       (16gLL</span>
+<span class="co">#&gt;    42:             .       .          .     .         16a-</span>
+<span class="co">#&gt;    43:             .       .        (8G     .        16b-)</span>
+<span class="co">#&gt;    44:             .       .          .     .       16e'JJ</span>
+<span class="co">#&gt;    45:            4D     4V7       8A-L     .       (16fLL</span>
+<span class="co">#&gt;    46:             .       .          .     .          16g</span>
+<span class="co">#&gt;    47:             .       .       8FJ)     .        16a-)</span>
+<span class="co">#&gt;    48:             .       .          .     .       16d'JJ</span>
+<span class="co">#&gt;    49:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    50:           =44     =44        =44                =44</span>
+<span class="co">#&gt;    51:            2T      2I       8E-L                4e-</span>
+<span class="co">#&gt;    52:             .       .      8BB-J                  .</span>
+<span class="co">#&gt;    53:             .       .       4EE-                 4r</span>
+<span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
+<span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of twenty files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -381,11 +372,6 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*/.*'</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/.*/.*' matches 50 text files in 5 directories.</span>
-<span class="co">#&gt; Fifty files read from disk. </span>
-<span class="co">#&gt; Validating fifty files...all valid.</span>
-<span class="co">#&gt; Parsing fifty files...Assembling corpus...Done!</span>
 <span class="co">#&gt; ############################ vvv chor001.krn vvv ############################</span>
 <span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
 <span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
@@ -500,101 +486,95 @@
 <p>Sometimes, expressing all the files you want in a single regular expression is not possible. Luckily, <code>readHumdrum</code> can accept as many separate patterns you want, just group them into a vector. Instead of writing <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code>, you could be explicit and write</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'HumdrumData/BeethovenVariations/.*.krn'</span>, <span class="st">'HumdrumData/MozartVariations/.*.krn'</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BeethovenVariations/.*.krn' matches 12 text files in 1 directory.</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ################## vvv B075_00_01_a.krn vvv ##################</span>
+<span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
 <span class="co">#&gt;     1:  !!!COM: Beethoven</span>
 <span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
 <span class="co">#&gt;     3:  !!!Variation: Theme a</span>
-<span class="co">#&gt;     4:    **function  **harm     **kern                 **kern</span>
-<span class="co">#&gt;     5:             *       *    *clefG2                *clefG2</span>
-<span class="co">#&gt;     6:             *       *     *k[b-]                 *k[b-]</span>
-<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4                  *M2/4</span>
-<span class="co">#&gt;     8:           *F:     *F:        *F:                    *F:</span>
-<span class="co">#&gt;     9:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    10:            =1      =1         =1                     =1</span>
-<span class="co">#&gt;    11:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    12:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    13:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    14:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    15:            =2      =2         =2                     =2</span>
-<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    17:            4T      4I        4f)               4ff) 4aa</span>
-<span class="co">#&gt;    18:            =3      =3         =3                     =3</span>
-<span class="co">#&gt;    19:            2T      2V         4c             8ee'L 8gg'</span>
-<span class="co">#&gt;    20:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    21:             .       .         4c             8cc'L 8ee'</span>
-<span class="co">#&gt;    22:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    23:            =4      =4         =4                     =4</span>
-<span class="co">#&gt;    24:            4T      4V         8c                8ee 8gg</span>
-<span class="co">#&gt;    25:             .       .         8r                     8r</span>
-<span class="co">#&gt;    26:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    27:            =5      =5         =5                     =5</span>
-<span class="co">#&gt;    28:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    29:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    30:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    31:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    32:            =6      =6         =6                     =6</span>
-<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    34:            4T      4I     4f) 4a               4ff) 4aa</span>
-<span class="co">#&gt;    35:            =7      =7         =7                     =7</span>
-<span class="co">#&gt;    36:            4P    4iib       8B-L               8ddL 8gg</span>
-<span class="co">#&gt;    37:             .       .       8B-J               8ddJ 8gg</span>
-<span class="co">#&gt;    38:            4D     4V7        8cL              (8b-L 8ee</span>
-<span class="co">#&gt;    39:             .       .        8cJ             16b-L 16dd</span>
-<span class="co">#&gt;    40:             .       .          .                16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ################## ^^^ B075_00_01_a.krn ^^^ ##################</span>
+<span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
+<span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
+<span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
+<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4              *M2/4</span>
+<span class="co">#&gt;     8:           *F:     *F:        *F:                *F:</span>
+<span class="co">#&gt;     9:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    10:            =1      =1         =1                 =1</span>
+<span class="co">#&gt;    11:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    12:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    13:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    14:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    15:            =2      =2         =2                 =2</span>
+<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    17:            4T      4I        4f)           4ff) 4aa</span>
+<span class="co">#&gt;    18:            =3      =3         =3                 =3</span>
+<span class="co">#&gt;    19:            2T      2V         4c         8ee'L 8gg'</span>
+<span class="co">#&gt;    20:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    21:             .       .         4c         8cc'L 8ee'</span>
+<span class="co">#&gt;    22:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    23:            =4      =4         =4                 =4</span>
+<span class="co">#&gt;    24:            4T      4V         8c            8ee 8gg</span>
+<span class="co">#&gt;    25:             .       .         8r                 8r</span>
+<span class="co">#&gt;    26:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    27:            =5      =5         =5                 =5</span>
+<span class="co">#&gt;    28:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    29:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    30:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    31:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    32:            =6      =6         =6                 =6</span>
+<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    34:            4T      4I     4f) 4a           4ff) 4aa</span>
+<span class="co">#&gt;    35:            =7      =7         =7                 =7</span>
+<span class="co">#&gt;    36:            4P    4iib       8B-L           8ddL 8gg</span>
+<span class="co">#&gt;    37:             .       .       8B-J           8ddJ 8gg</span>
+<span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
+<span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
+<span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ################# vvv M354_01_04d_a.krn vvv ##################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;    15:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    16:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    17:             .       .         8f         .          16a</span>
-<span class="co">#&gt;    18:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    19:           =41     =41        =41       =41          =41</span>
-<span class="co">#&gt;    20:            2D    2V7d         8r       2A-     (16ee-LL</span>
-<span class="co">#&gt;    21:             .       .          .         .         16dd</span>
-<span class="co">#&gt;    22:             .       .     4B- 4f         .        16cc#</span>
-<span class="co">#&gt;    23:             .       .          .         .      16ddJJ)</span>
-<span class="co">#&gt;    24:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    25:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    26:             .       .     8B- 8f         .          16a</span>
-<span class="co">#&gt;    27:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    28:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    29:           =42     =42        =42       =42             </span>
-<span class="co">#&gt;    30:             *       *    *clefF4         *             </span>
-<span class="co">#&gt;    31:            4T     4Ib         8r  (16ee-LL             </span>
-<span class="co">#&gt;    32:             .       .          .      16ff             </span>
-<span class="co">#&gt;    33:             .       .     8G 8e-     16gg)             </span>
-<span class="co">#&gt;    34:             .       .          .    16b'JJ             </span>
-<span class="co">#&gt;    35:            4P     4IV         8r   (16ccLL             </span>
-<span class="co">#&gt;    36:             .       .          .      16dd             </span>
-<span class="co">#&gt;    37:             .       .    8A- 8e-    16ee-)             </span>
-<span class="co">#&gt;    38:             .       .          .   16a-'JJ             </span>
-<span class="co">#&gt;    39:           =43     =43        =43       =43             </span>
-<span class="co">#&gt;    40:             *       *         *^         *             </span>
-<span class="co">#&gt;    41:            4D     4Cc         8r      2BB-       (16gLL</span>
-<span class="co">#&gt;    42:             .       .          .         .         16a-</span>
-<span class="co">#&gt;    43:             .       .        (8G         .        16b-)</span>
-<span class="co">#&gt;    44:             .       .          .         .       16e'JJ</span>
-<span class="co">#&gt;    45:            4D     4V7       8A-L         .       (16fLL</span>
-<span class="co">#&gt;    46:             .       .          .         .          16g</span>
-<span class="co">#&gt;    47:             .       .       8FJ)         .        16a-)</span>
-<span class="co">#&gt;    48:             .       .          .         .       16d'JJ</span>
-<span class="co">#&gt;    49:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    50:           =44     =44        =44       =44             </span>
-<span class="co">#&gt;    51:            2T      2I       8E-L       4e-             </span>
-<span class="co">#&gt;    52:             .       .      8BB-J         .             </span>
-<span class="co">#&gt;    53:             .       .       4EE-        4r             </span>
-<span class="co">#&gt;    54:            *-      *-         *-        *-             </span>
-<span class="co">#&gt; ################# ^^^ M354_01_04d_a.krn ^^^ ##################</span>
+<span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    16:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    17:             .       .         8f     .          16a</span>
+<span class="co">#&gt;    18:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    19:           =41     =41        =41   =41          =41</span>
+<span class="co">#&gt;    20:            2D    2V7d         8r   2A-     (16ee-LL</span>
+<span class="co">#&gt;    21:             .       .          .     .         16dd</span>
+<span class="co">#&gt;    22:             .       .     4B- 4f     .        16cc#</span>
+<span class="co">#&gt;    23:             .       .          .     .      16ddJJ)</span>
+<span class="co">#&gt;    24:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    25:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    26:             .       .     8B- 8f     .          16a</span>
+<span class="co">#&gt;    27:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    28:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    29:           =42     =42        =42                =42</span>
+<span class="co">#&gt;    30:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    31:            4T     4Ib         8r           (16ee-LL</span>
+<span class="co">#&gt;    32:             .       .          .               16ff</span>
+<span class="co">#&gt;    33:             .       .     8G 8e-              16gg)</span>
+<span class="co">#&gt;    34:             .       .          .             16b'JJ</span>
+<span class="co">#&gt;    35:            4P     4IV         8r            (16ccLL</span>
+<span class="co">#&gt;    36:             .       .          .               16dd</span>
+<span class="co">#&gt;    37:             .       .    8A- 8e-             16ee-)</span>
+<span class="co">#&gt;    38:             .       .          .            16a-'JJ</span>
+<span class="co">#&gt;    39:           =43     =43        =43                =43</span>
+<span class="co">#&gt;    40:             *       *         *^                  *</span>
+<span class="co">#&gt;    41:            4D     4Cc         8r  2BB-       (16gLL</span>
+<span class="co">#&gt;    42:             .       .          .     .         16a-</span>
+<span class="co">#&gt;    43:             .       .        (8G     .        16b-)</span>
+<span class="co">#&gt;    44:             .       .          .     .       16e'JJ</span>
+<span class="co">#&gt;    45:            4D     4V7       8A-L     .       (16fLL</span>
+<span class="co">#&gt;    46:             .       .          .     .          16g</span>
+<span class="co">#&gt;    47:             .       .       8FJ)     .        16a-)</span>
+<span class="co">#&gt;    48:             .       .          .     .       16d'JJ</span>
+<span class="co">#&gt;    49:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    50:           =44     =44        =44                =44</span>
+<span class="co">#&gt;    51:            2T      2I       8E-L                4e-</span>
+<span class="co">#&gt;    52:             .       .      8BB-J                  .</span>
+<span class="co">#&gt;    53:             .       .       4EE-                 4r</span>
+<span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
+<span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of twenty files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -604,101 +584,95 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BeethovenVariations/.*.krn' matches 12 text files in 1 directory.</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ################## vvv B075_00_01_a.krn vvv ##################</span>
+<span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
 <span class="co">#&gt;     1:  !!!COM: Beethoven</span>
 <span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
 <span class="co">#&gt;     3:  !!!Variation: Theme a</span>
-<span class="co">#&gt;     4:    **function  **harm     **kern                 **kern</span>
-<span class="co">#&gt;     5:             *       *    *clefG2                *clefG2</span>
-<span class="co">#&gt;     6:             *       *     *k[b-]                 *k[b-]</span>
-<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4                  *M2/4</span>
-<span class="co">#&gt;     8:           *F:     *F:        *F:                    *F:</span>
-<span class="co">#&gt;     9:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    10:            =1      =1         =1                     =1</span>
-<span class="co">#&gt;    11:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    12:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    13:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    14:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    15:            =2      =2         =2                     =2</span>
-<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    17:            4T      4I        4f)               4ff) 4aa</span>
-<span class="co">#&gt;    18:            =3      =3         =3                     =3</span>
-<span class="co">#&gt;    19:            2T      2V         4c             8ee'L 8gg'</span>
-<span class="co">#&gt;    20:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    21:             .       .         4c             8cc'L 8ee'</span>
-<span class="co">#&gt;    22:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    23:            =4      =4         =4                     =4</span>
-<span class="co">#&gt;    24:            4T      4V         8c                8ee 8gg</span>
-<span class="co">#&gt;    25:             .       .         8r                     8r</span>
-<span class="co">#&gt;    26:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    27:            =5      =5         =5                     =5</span>
-<span class="co">#&gt;    28:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    29:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    30:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    31:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    32:            =6      =6         =6                     =6</span>
-<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    34:            4T      4I     4f) 4a               4ff) 4aa</span>
-<span class="co">#&gt;    35:            =7      =7         =7                     =7</span>
-<span class="co">#&gt;    36:            4P    4iib       8B-L               8ddL 8gg</span>
-<span class="co">#&gt;    37:             .       .       8B-J               8ddJ 8gg</span>
-<span class="co">#&gt;    38:            4D     4V7        8cL              (8b-L 8ee</span>
-<span class="co">#&gt;    39:             .       .        8cJ             16b-L 16dd</span>
-<span class="co">#&gt;    40:             .       .          .                16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ################## ^^^ B075_00_01_a.krn ^^^ ##################</span>
+<span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
+<span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
+<span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
+<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4              *M2/4</span>
+<span class="co">#&gt;     8:           *F:     *F:        *F:                *F:</span>
+<span class="co">#&gt;     9:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    10:            =1      =1         =1                 =1</span>
+<span class="co">#&gt;    11:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    12:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    13:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    14:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    15:            =2      =2         =2                 =2</span>
+<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    17:            4T      4I        4f)           4ff) 4aa</span>
+<span class="co">#&gt;    18:            =3      =3         =3                 =3</span>
+<span class="co">#&gt;    19:            2T      2V         4c         8ee'L 8gg'</span>
+<span class="co">#&gt;    20:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    21:             .       .         4c         8cc'L 8ee'</span>
+<span class="co">#&gt;    22:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    23:            =4      =4         =4                 =4</span>
+<span class="co">#&gt;    24:            4T      4V         8c            8ee 8gg</span>
+<span class="co">#&gt;    25:             .       .         8r                 8r</span>
+<span class="co">#&gt;    26:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    27:            =5      =5         =5                 =5</span>
+<span class="co">#&gt;    28:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    29:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    30:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    31:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    32:            =6      =6         =6                 =6</span>
+<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    34:            4T      4I     4f) 4a           4ff) 4aa</span>
+<span class="co">#&gt;    35:            =7      =7         =7                 =7</span>
+<span class="co">#&gt;    36:            4P    4iib       8B-L           8ddL 8gg</span>
+<span class="co">#&gt;    37:             .       .       8B-J           8ddJ 8gg</span>
+<span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
+<span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
+<span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ################# vvv M354_01_04d_a.krn vvv ##################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;    15:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    16:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    17:             .       .         8f         .          16a</span>
-<span class="co">#&gt;    18:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    19:           =41     =41        =41       =41          =41</span>
-<span class="co">#&gt;    20:            2D    2V7d         8r       2A-     (16ee-LL</span>
-<span class="co">#&gt;    21:             .       .          .         .         16dd</span>
-<span class="co">#&gt;    22:             .       .     4B- 4f         .        16cc#</span>
-<span class="co">#&gt;    23:             .       .          .         .      16ddJJ)</span>
-<span class="co">#&gt;    24:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    25:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    26:             .       .     8B- 8f         .          16a</span>
-<span class="co">#&gt;    27:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    28:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    29:           =42     =42        =42       =42             </span>
-<span class="co">#&gt;    30:             *       *    *clefF4         *             </span>
-<span class="co">#&gt;    31:            4T     4Ib         8r  (16ee-LL             </span>
-<span class="co">#&gt;    32:             .       .          .      16ff             </span>
-<span class="co">#&gt;    33:             .       .     8G 8e-     16gg)             </span>
-<span class="co">#&gt;    34:             .       .          .    16b'JJ             </span>
-<span class="co">#&gt;    35:            4P     4IV         8r   (16ccLL             </span>
-<span class="co">#&gt;    36:             .       .          .      16dd             </span>
-<span class="co">#&gt;    37:             .       .    8A- 8e-    16ee-)             </span>
-<span class="co">#&gt;    38:             .       .          .   16a-'JJ             </span>
-<span class="co">#&gt;    39:           =43     =43        =43       =43             </span>
-<span class="co">#&gt;    40:             *       *         *^         *             </span>
-<span class="co">#&gt;    41:            4D     4Cc         8r      2BB-       (16gLL</span>
-<span class="co">#&gt;    42:             .       .          .         .         16a-</span>
-<span class="co">#&gt;    43:             .       .        (8G         .        16b-)</span>
-<span class="co">#&gt;    44:             .       .          .         .       16e'JJ</span>
-<span class="co">#&gt;    45:            4D     4V7       8A-L         .       (16fLL</span>
-<span class="co">#&gt;    46:             .       .          .         .          16g</span>
-<span class="co">#&gt;    47:             .       .       8FJ)         .        16a-)</span>
-<span class="co">#&gt;    48:             .       .          .         .       16d'JJ</span>
-<span class="co">#&gt;    49:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    50:           =44     =44        =44       =44             </span>
-<span class="co">#&gt;    51:            2T      2I       8E-L       4e-             </span>
-<span class="co">#&gt;    52:             .       .      8BB-J         .             </span>
-<span class="co">#&gt;    53:             .       .       4EE-        4r             </span>
-<span class="co">#&gt;    54:            *-      *-         *-        *-             </span>
-<span class="co">#&gt; ################# ^^^ M354_01_04d_a.krn ^^^ ##################</span>
+<span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    16:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    17:             .       .         8f     .          16a</span>
+<span class="co">#&gt;    18:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    19:           =41     =41        =41   =41          =41</span>
+<span class="co">#&gt;    20:            2D    2V7d         8r   2A-     (16ee-LL</span>
+<span class="co">#&gt;    21:             .       .          .     .         16dd</span>
+<span class="co">#&gt;    22:             .       .     4B- 4f     .        16cc#</span>
+<span class="co">#&gt;    23:             .       .          .     .      16ddJJ)</span>
+<span class="co">#&gt;    24:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    25:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    26:             .       .     8B- 8f     .          16a</span>
+<span class="co">#&gt;    27:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    28:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    29:           =42     =42        =42                =42</span>
+<span class="co">#&gt;    30:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    31:            4T     4Ib         8r           (16ee-LL</span>
+<span class="co">#&gt;    32:             .       .          .               16ff</span>
+<span class="co">#&gt;    33:             .       .     8G 8e-              16gg)</span>
+<span class="co">#&gt;    34:             .       .          .             16b'JJ</span>
+<span class="co">#&gt;    35:            4P     4IV         8r            (16ccLL</span>
+<span class="co">#&gt;    36:             .       .          .               16dd</span>
+<span class="co">#&gt;    37:             .       .    8A- 8e-             16ee-)</span>
+<span class="co">#&gt;    38:             .       .          .            16a-'JJ</span>
+<span class="co">#&gt;    39:           =43     =43        =43                =43</span>
+<span class="co">#&gt;    40:             *       *         *^                  *</span>
+<span class="co">#&gt;    41:            4D     4Cc         8r  2BB-       (16gLL</span>
+<span class="co">#&gt;    42:             .       .          .     .         16a-</span>
+<span class="co">#&gt;    43:             .       .        (8G     .        16b-)</span>
+<span class="co">#&gt;    44:             .       .          .     .       16e'JJ</span>
+<span class="co">#&gt;    45:            4D     4V7       8A-L     .       (16fLL</span>
+<span class="co">#&gt;    46:             .       .          .     .          16g</span>
+<span class="co">#&gt;    47:             .       .       8FJ)     .        16a-)</span>
+<span class="co">#&gt;    48:             .       .          .     .       16d'JJ</span>
+<span class="co">#&gt;    49:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    50:           =44     =44        =44                =44</span>
+<span class="co">#&gt;    51:            2T      2I       8E-L                4e-</span>
+<span class="co">#&gt;    52:             .       .      8BB-J                  .</span>
+<span class="co">#&gt;    53:             .       .       4EE-                 4r</span>
+<span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
+<span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of twenty files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -719,13 +693,7 @@
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Rap  <span class="op">=</span> <span class="st">'Rap/.*'</span>,
-              Rock <span class="op">=</span> <span class="st">'RollingStone/.*'</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">rapAndRock</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern Rap = 'HumdrumData/Rap/.*' matches 7 text files in 1 directory.</span>
-<span class="co">#&gt;  REpath-pattern Rock = 'HumdrumData/RollingStone/.*' matches 13 text files in 1 directory.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span></code></pre></div>
+              Rock <span class="op">=</span> <span class="st">'RollingStone/.*'</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">rapAndRock</span></code></pre></div>
 <p>and these two separate patterns will be matched and read <em>and</em> the names <code>"Rap"</code> and <code>"Rock"</code> will be associated with them in the resulting <code>Label</code> field. This feature is very useful if you are working with multiple heterogenous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.</p>
 </div>
 </div>
@@ -736,11 +704,6 @@
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, <span class="st">'BachChorales'</span>, <span class="st">'chor.*.krn'</span>,
             contains <span class="op">=</span> <span class="st">'\\*[a-g][-b#]*:'</span><span class="op">)</span> 
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BachChorales/chor.*.krn' matches 3 text files (containing '\*[a-g][-b#]*:') in 1 directory.</span>
-<span class="co">#&gt; Three files read from disk. </span>
-<span class="co">#&gt; Validating three files...all valid.</span>
-<span class="co">#&gt; Parsing three files...Assembling corpus...Done!</span>
 <span class="co">#&gt; ############################# vvv chor003.krn vvv #############################</span>
 <span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
 <span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
@@ -875,101 +838,95 @@
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BeethovenVariations/.*.krn' matches 12 text files in 1 directory.</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ################## vvv B075_00_01_a.krn vvv ##################</span>
+<span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
 <span class="co">#&gt;     1:  !!!COM: Beethoven</span>
 <span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
 <span class="co">#&gt;     3:  !!!Variation: Theme a</span>
-<span class="co">#&gt;     4:    **function  **harm     **kern                 **kern</span>
-<span class="co">#&gt;     5:             *       *    *clefG2                *clefG2</span>
-<span class="co">#&gt;     6:             *       *     *k[b-]                 *k[b-]</span>
-<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4                  *M2/4</span>
-<span class="co">#&gt;     8:           *F:     *F:        *F:                    *F:</span>
-<span class="co">#&gt;     9:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    10:            =1      =1         =1                     =1</span>
-<span class="co">#&gt;    11:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    12:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    13:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    14:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    15:            =2      =2         =2                     =2</span>
-<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    17:            4T      4I        4f)               4ff) 4aa</span>
-<span class="co">#&gt;    18:            =3      =3         =3                     =3</span>
-<span class="co">#&gt;    19:            2T      2V         4c             8ee'L 8gg'</span>
-<span class="co">#&gt;    20:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    21:             .       .         4c             8cc'L 8ee'</span>
-<span class="co">#&gt;    22:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    23:            =4      =4         =4                     =4</span>
-<span class="co">#&gt;    24:            4T      4V         8c                8ee 8gg</span>
-<span class="co">#&gt;    25:             .       .         8r                     8r</span>
-<span class="co">#&gt;    26:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    27:            =5      =5         =5                     =5</span>
-<span class="co">#&gt;    28:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    29:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    30:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    31:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    32:            =6      =6         =6                     =6</span>
-<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    34:            4T      4I     4f) 4a               4ff) 4aa</span>
-<span class="co">#&gt;    35:            =7      =7         =7                     =7</span>
-<span class="co">#&gt;    36:            4P    4iib       8B-L               8ddL 8gg</span>
-<span class="co">#&gt;    37:             .       .       8B-J               8ddJ 8gg</span>
-<span class="co">#&gt;    38:            4D     4V7        8cL              (8b-L 8ee</span>
-<span class="co">#&gt;    39:             .       .        8cJ             16b-L 16dd</span>
-<span class="co">#&gt;    40:             .       .          .                16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ################## ^^^ B075_00_01_a.krn ^^^ ##################</span>
+<span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
+<span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
+<span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
+<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4              *M2/4</span>
+<span class="co">#&gt;     8:           *F:     *F:        *F:                *F:</span>
+<span class="co">#&gt;     9:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    10:            =1      =1         =1                 =1</span>
+<span class="co">#&gt;    11:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    12:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    13:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    14:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    15:            =2      =2         =2                 =2</span>
+<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    17:            4T      4I        4f)           4ff) 4aa</span>
+<span class="co">#&gt;    18:            =3      =3         =3                 =3</span>
+<span class="co">#&gt;    19:            2T      2V         4c         8ee'L 8gg'</span>
+<span class="co">#&gt;    20:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    21:             .       .         4c         8cc'L 8ee'</span>
+<span class="co">#&gt;    22:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    23:            =4      =4         =4                 =4</span>
+<span class="co">#&gt;    24:            4T      4V         8c            8ee 8gg</span>
+<span class="co">#&gt;    25:             .       .         8r                 8r</span>
+<span class="co">#&gt;    26:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    27:            =5      =5         =5                 =5</span>
+<span class="co">#&gt;    28:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    29:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    30:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    31:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    32:            =6      =6         =6                 =6</span>
+<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    34:            4T      4I     4f) 4a           4ff) 4aa</span>
+<span class="co">#&gt;    35:            =7      =7         =7                 =7</span>
+<span class="co">#&gt;    36:            4P    4iib       8B-L           8ddL 8gg</span>
+<span class="co">#&gt;    37:             .       .       8B-J           8ddJ 8gg</span>
+<span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
+<span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
+<span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ################# vvv M354_01_04d_a.krn vvv ##################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;    15:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    16:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    17:             .       .         8f         .          16a</span>
-<span class="co">#&gt;    18:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    19:           =41     =41        =41       =41          =41</span>
-<span class="co">#&gt;    20:            2D    2V7d         8r       2A-     (16ee-LL</span>
-<span class="co">#&gt;    21:             .       .          .         .         16dd</span>
-<span class="co">#&gt;    22:             .       .     4B- 4f         .        16cc#</span>
-<span class="co">#&gt;    23:             .       .          .         .      16ddJJ)</span>
-<span class="co">#&gt;    24:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    25:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    26:             .       .     8B- 8f         .          16a</span>
-<span class="co">#&gt;    27:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    28:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    29:           =42     =42        =42       =42             </span>
-<span class="co">#&gt;    30:             *       *    *clefF4         *             </span>
-<span class="co">#&gt;    31:            4T     4Ib         8r  (16ee-LL             </span>
-<span class="co">#&gt;    32:             .       .          .      16ff             </span>
-<span class="co">#&gt;    33:             .       .     8G 8e-     16gg)             </span>
-<span class="co">#&gt;    34:             .       .          .    16b'JJ             </span>
-<span class="co">#&gt;    35:            4P     4IV         8r   (16ccLL             </span>
-<span class="co">#&gt;    36:             .       .          .      16dd             </span>
-<span class="co">#&gt;    37:             .       .    8A- 8e-    16ee-)             </span>
-<span class="co">#&gt;    38:             .       .          .   16a-'JJ             </span>
-<span class="co">#&gt;    39:           =43     =43        =43       =43             </span>
-<span class="co">#&gt;    40:             *       *         *^         *             </span>
-<span class="co">#&gt;    41:            4D     4Cc         8r      2BB-       (16gLL</span>
-<span class="co">#&gt;    42:             .       .          .         .         16a-</span>
-<span class="co">#&gt;    43:             .       .        (8G         .        16b-)</span>
-<span class="co">#&gt;    44:             .       .          .         .       16e'JJ</span>
-<span class="co">#&gt;    45:            4D     4V7       8A-L         .       (16fLL</span>
-<span class="co">#&gt;    46:             .       .          .         .          16g</span>
-<span class="co">#&gt;    47:             .       .       8FJ)         .        16a-)</span>
-<span class="co">#&gt;    48:             .       .          .         .       16d'JJ</span>
-<span class="co">#&gt;    49:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    50:           =44     =44        =44       =44             </span>
-<span class="co">#&gt;    51:            2T      2I       8E-L       4e-             </span>
-<span class="co">#&gt;    52:             .       .      8BB-J         .             </span>
-<span class="co">#&gt;    53:             .       .       4EE-        4r             </span>
-<span class="co">#&gt;    54:            *-      *-         *-        *-             </span>
-<span class="co">#&gt; ################# ^^^ M354_01_04d_a.krn ^^^ ##################</span>
+<span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    16:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    17:             .       .         8f     .          16a</span>
+<span class="co">#&gt;    18:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    19:           =41     =41        =41   =41          =41</span>
+<span class="co">#&gt;    20:            2D    2V7d         8r   2A-     (16ee-LL</span>
+<span class="co">#&gt;    21:             .       .          .     .         16dd</span>
+<span class="co">#&gt;    22:             .       .     4B- 4f     .        16cc#</span>
+<span class="co">#&gt;    23:             .       .          .     .      16ddJJ)</span>
+<span class="co">#&gt;    24:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    25:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    26:             .       .     8B- 8f     .          16a</span>
+<span class="co">#&gt;    27:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    28:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    29:           =42     =42        =42                =42</span>
+<span class="co">#&gt;    30:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    31:            4T     4Ib         8r           (16ee-LL</span>
+<span class="co">#&gt;    32:             .       .          .               16ff</span>
+<span class="co">#&gt;    33:             .       .     8G 8e-              16gg)</span>
+<span class="co">#&gt;    34:             .       .          .             16b'JJ</span>
+<span class="co">#&gt;    35:            4P     4IV         8r            (16ccLL</span>
+<span class="co">#&gt;    36:             .       .          .               16dd</span>
+<span class="co">#&gt;    37:             .       .    8A- 8e-             16ee-)</span>
+<span class="co">#&gt;    38:             .       .          .            16a-'JJ</span>
+<span class="co">#&gt;    39:           =43     =43        =43                =43</span>
+<span class="co">#&gt;    40:             *       *         *^                  *</span>
+<span class="co">#&gt;    41:            4D     4Cc         8r  2BB-       (16gLL</span>
+<span class="co">#&gt;    42:             .       .          .     .         16a-</span>
+<span class="co">#&gt;    43:             .       .        (8G     .        16b-)</span>
+<span class="co">#&gt;    44:             .       .          .     .       16e'JJ</span>
+<span class="co">#&gt;    45:            4D     4V7       8A-L     .       (16fLL</span>
+<span class="co">#&gt;    46:             .       .          .     .          16g</span>
+<span class="co">#&gt;    47:             .       .       8FJ)     .        16a-)</span>
+<span class="co">#&gt;    48:             .       .          .     .       16d'JJ</span>
+<span class="co">#&gt;    49:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    50:           =44     =44        =44                =44</span>
+<span class="co">#&gt;    51:            2T      2I       8E-L                4e-</span>
+<span class="co">#&gt;    52:             .       .      8BB-J                  .</span>
+<span class="co">#&gt;    53:             .       .       4EE-                 4r</span>
+<span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
+<span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of twenty files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -980,101 +937,95 @@
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Composer <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; Finding and reading files...</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/BeethovenVariations/.*.krn' matches 12 text files in 1 directory.</span>
-<span class="co">#&gt;  REpath-pattern 'HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
-<span class="co">#&gt; Twenty files read from disk. </span>
-<span class="co">#&gt; Validating twenty files...all valid.</span>
-<span class="co">#&gt; Parsing twenty files...Assembling corpus...Done!</span>
-<span class="co">#&gt; ################## vvv B075_00_01_a.krn vvv ##################</span>
+<span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
 <span class="co">#&gt;     1:  !!!COM: Beethoven</span>
 <span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
 <span class="co">#&gt;     3:  !!!Variation: Theme a</span>
-<span class="co">#&gt;     4:    **function  **harm     **kern                 **kern</span>
-<span class="co">#&gt;     5:             *       *    *clefG2                *clefG2</span>
-<span class="co">#&gt;     6:             *       *     *k[b-]                 *k[b-]</span>
-<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4                  *M2/4</span>
-<span class="co">#&gt;     8:           *F:     *F:        *F:                    *F:</span>
-<span class="co">#&gt;     9:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    10:            =1      =1         =1                     =1</span>
-<span class="co">#&gt;    11:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    12:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    13:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    14:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    15:            =2      =2         =2                     =2</span>
-<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    17:            4T      4I        4f)               4ff) 4aa</span>
-<span class="co">#&gt;    18:            =3      =3         =3                     =3</span>
-<span class="co">#&gt;    19:            2T      2V         4c             8ee'L 8gg'</span>
-<span class="co">#&gt;    20:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    21:             .       .         4c             8cc'L 8ee'</span>
-<span class="co">#&gt;    22:             .       .          .             8dd'J 8ff'</span>
-<span class="co">#&gt;    23:            =4      =4         =4                     =4</span>
-<span class="co">#&gt;    24:            4T      4V         8c                8ee 8gg</span>
-<span class="co">#&gt;    25:             .       .         8r                     8r</span>
-<span class="co">#&gt;    26:            4T      4I         4r               4aa 4ccc</span>
-<span class="co">#&gt;    27:            =5      =5         =5                     =5</span>
-<span class="co">#&gt;    28:            2T      2I         2f             8ff'L 8aa'</span>
-<span class="co">#&gt;    29:             .       .          .             8cc'J 8ff'</span>
-<span class="co">#&gt;    30:             .       .          .             8ff'L 8aa'</span>
-<span class="co">#&gt;    31:             .       .          .            8aa'J 8ccc'</span>
-<span class="co">#&gt;    32:            =6      =6         =6                     =6</span>
-<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g              (4gg 4bb-</span>
-<span class="co">#&gt;    34:            4T      4I     4f) 4a               4ff) 4aa</span>
-<span class="co">#&gt;    35:            =7      =7         =7                     =7</span>
-<span class="co">#&gt;    36:            4P    4iib       8B-L               8ddL 8gg</span>
-<span class="co">#&gt;    37:             .       .       8B-J               8ddJ 8gg</span>
-<span class="co">#&gt;    38:            4D     4V7        8cL              (8b-L 8ee</span>
-<span class="co">#&gt;    39:             .       .        8cJ             16b-L 16dd</span>
-<span class="co">#&gt;    40:             .       .          .                16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ################## ^^^ B075_00_01_a.krn ^^^ ##################</span>
+<span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
+<span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
+<span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
+<span class="co">#&gt;     7:         *M2/4   *M2/4      *M2/4              *M2/4</span>
+<span class="co">#&gt;     8:           *F:     *F:        *F:                *F:</span>
+<span class="co">#&gt;     9:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    10:            =1      =1         =1                 =1</span>
+<span class="co">#&gt;    11:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    12:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    13:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    14:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    15:            =2      =2         =2                 =2</span>
+<span class="co">#&gt;    16:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    17:            4T      4I        4f)           4ff) 4aa</span>
+<span class="co">#&gt;    18:            =3      =3         =3                 =3</span>
+<span class="co">#&gt;    19:            2T      2V         4c         8ee'L 8gg'</span>
+<span class="co">#&gt;    20:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    21:             .       .         4c         8cc'L 8ee'</span>
+<span class="co">#&gt;    22:             .       .          .         8dd'J 8ff'</span>
+<span class="co">#&gt;    23:            =4      =4         =4                 =4</span>
+<span class="co">#&gt;    24:            4T      4V         8c            8ee 8gg</span>
+<span class="co">#&gt;    25:             .       .         8r                 8r</span>
+<span class="co">#&gt;    26:            4T      4I         4r           4aa 4ccc</span>
+<span class="co">#&gt;    27:            =5      =5         =5                 =5</span>
+<span class="co">#&gt;    28:            2T      2I         2f         8ff'L 8aa'</span>
+<span class="co">#&gt;    29:             .       .          .         8cc'J 8ff'</span>
+<span class="co">#&gt;    30:             .       .          .         8ff'L 8aa'</span>
+<span class="co">#&gt;    31:             .       .          .        8aa'J 8ccc'</span>
+<span class="co">#&gt;    32:            =6      =6         =6                 =6</span>
+<span class="co">#&gt;    33:            4T     4V7  (4c 4e 4g          (4gg 4bb-</span>
+<span class="co">#&gt;    34:            4T      4I     4f) 4a           4ff) 4aa</span>
+<span class="co">#&gt;    35:            =7      =7         =7                 =7</span>
+<span class="co">#&gt;    36:            4P    4iib       8B-L           8ddL 8gg</span>
+<span class="co">#&gt;    37:             .       .       8B-J           8ddJ 8gg</span>
+<span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
+<span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
+<span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ################# vvv M354_01_04d_a.krn vvv ##################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;    15:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    16:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    17:             .       .         8f         .          16a</span>
-<span class="co">#&gt;    18:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    19:           =41     =41        =41       =41          =41</span>
-<span class="co">#&gt;    20:            2D    2V7d         8r       2A-     (16ee-LL</span>
-<span class="co">#&gt;    21:             .       .          .         .         16dd</span>
-<span class="co">#&gt;    22:             .       .     4B- 4f         .        16cc#</span>
-<span class="co">#&gt;    23:             .       .          .         .      16ddJJ)</span>
-<span class="co">#&gt;    24:             .       .          .         .      (16ccLL</span>
-<span class="co">#&gt;    25:             .       .          .         .         16b-</span>
-<span class="co">#&gt;    26:             .       .     8B- 8f         .          16a</span>
-<span class="co">#&gt;    27:             .       .          .         .      16b-JJ)</span>
-<span class="co">#&gt;    28:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    29:           =42     =42        =42       =42             </span>
-<span class="co">#&gt;    30:             *       *    *clefF4         *             </span>
-<span class="co">#&gt;    31:            4T     4Ib         8r  (16ee-LL             </span>
-<span class="co">#&gt;    32:             .       .          .      16ff             </span>
-<span class="co">#&gt;    33:             .       .     8G 8e-     16gg)             </span>
-<span class="co">#&gt;    34:             .       .          .    16b'JJ             </span>
-<span class="co">#&gt;    35:            4P     4IV         8r   (16ccLL             </span>
-<span class="co">#&gt;    36:             .       .          .      16dd             </span>
-<span class="co">#&gt;    37:             .       .    8A- 8e-    16ee-)             </span>
-<span class="co">#&gt;    38:             .       .          .   16a-'JJ             </span>
-<span class="co">#&gt;    39:           =43     =43        =43       =43             </span>
-<span class="co">#&gt;    40:             *       *         *^         *             </span>
-<span class="co">#&gt;    41:            4D     4Cc         8r      2BB-       (16gLL</span>
-<span class="co">#&gt;    42:             .       .          .         .         16a-</span>
-<span class="co">#&gt;    43:             .       .        (8G         .        16b-)</span>
-<span class="co">#&gt;    44:             .       .          .         .       16e'JJ</span>
-<span class="co">#&gt;    45:            4D     4V7       8A-L         .       (16fLL</span>
-<span class="co">#&gt;    46:             .       .          .         .          16g</span>
-<span class="co">#&gt;    47:             .       .       8FJ)         .        16a-)</span>
-<span class="co">#&gt;    48:             .       .          .         .       16d'JJ</span>
-<span class="co">#&gt;    49:             *       *         *v        *v            *</span>
-<span class="co">#&gt;    50:           =44     =44        =44       =44             </span>
-<span class="co">#&gt;    51:            2T      2I       8E-L       4e-             </span>
-<span class="co">#&gt;    52:             .       .      8BB-J         .             </span>
-<span class="co">#&gt;    53:             .       .       4EE-        4r             </span>
-<span class="co">#&gt;    54:            *-      *-         *-        *-             </span>
-<span class="co">#&gt; ################# ^^^ M354_01_04d_a.krn ^^^ ##################</span>
+<span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    16:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    17:             .       .         8f     .          16a</span>
+<span class="co">#&gt;    18:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    19:           =41     =41        =41   =41          =41</span>
+<span class="co">#&gt;    20:            2D    2V7d         8r   2A-     (16ee-LL</span>
+<span class="co">#&gt;    21:             .       .          .     .         16dd</span>
+<span class="co">#&gt;    22:             .       .     4B- 4f     .        16cc#</span>
+<span class="co">#&gt;    23:             .       .          .     .      16ddJJ)</span>
+<span class="co">#&gt;    24:             .       .          .     .      (16ccLL</span>
+<span class="co">#&gt;    25:             .       .          .     .         16b-</span>
+<span class="co">#&gt;    26:             .       .     8B- 8f     .          16a</span>
+<span class="co">#&gt;    27:             .       .          .     .      16b-JJ)</span>
+<span class="co">#&gt;    28:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    29:           =42     =42        =42                =42</span>
+<span class="co">#&gt;    30:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    31:            4T     4Ib         8r           (16ee-LL</span>
+<span class="co">#&gt;    32:             .       .          .               16ff</span>
+<span class="co">#&gt;    33:             .       .     8G 8e-              16gg)</span>
+<span class="co">#&gt;    34:             .       .          .             16b'JJ</span>
+<span class="co">#&gt;    35:            4P     4IV         8r            (16ccLL</span>
+<span class="co">#&gt;    36:             .       .          .               16dd</span>
+<span class="co">#&gt;    37:             .       .    8A- 8e-             16ee-)</span>
+<span class="co">#&gt;    38:             .       .          .            16a-'JJ</span>
+<span class="co">#&gt;    39:           =43     =43        =43                =43</span>
+<span class="co">#&gt;    40:             *       *         *^                  *</span>
+<span class="co">#&gt;    41:            4D     4Cc         8r  2BB-       (16gLL</span>
+<span class="co">#&gt;    42:             .       .          .     .         16a-</span>
+<span class="co">#&gt;    43:             .       .        (8G     .        16b-)</span>
+<span class="co">#&gt;    44:             .       .          .     .       16e'JJ</span>
+<span class="co">#&gt;    45:            4D     4V7       8A-L     .       (16fLL</span>
+<span class="co">#&gt;    46:             .       .          .     .          16g</span>
+<span class="co">#&gt;    47:             .       .       8FJ)     .        16a-)</span>
+<span class="co">#&gt;    48:             .       .          .     .       16d'JJ</span>
+<span class="co">#&gt;    49:             *       *         *v    *v            *</span>
+<span class="co">#&gt;    50:           =44     =44        =44                =44</span>
+<span class="co">#&gt;    51:            2T      2I       8E-L                4e-</span>
+<span class="co">#&gt;    52:             .       .      8BB-J                  .</span>
+<span class="co">#&gt;    53:             .       .       4EE-                 4r</span>
+<span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
+<span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of twenty files.</span>
 <span class="co">#&gt;   Data fields: </span>

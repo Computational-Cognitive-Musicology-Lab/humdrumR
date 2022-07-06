@@ -32,7 +32,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     ## It takes a character of filestrings (not lines) with names representing the filepath
 
     if (nrow(fileFrame) == 0L) {
-        cat("No files to validate.\n")
+        message("No files to validate.")
         fileFrame[ , Valid := logical(0)]
         return(fileFrame)
     }
@@ -41,7 +41,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     files     <- fileFrame$FileLines
     filepaths <- fileFrame$Filepath
     
-    cat(glue::glue("Validating {num2print(length(files))} files..."))
+    message(glue::glue("Validating {num2print(length(files))} files..."), appendLF = FALSE)
     
     # If files are empty everything gets thrown off...this is a hacky fix
     # Just pad empty files with a single empty record
@@ -64,7 +64,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     reports <- data.table::rbindlist(lapply(funcs, do.call, 
                                             args = list(records, local, filevec)))
     if (nrow(reports) == 0L) {
-        cat("all valid.\n")
+        message("all valid.")
         fileFrame[ , Valid := TRUE]
         return(fileFrame)
     }
@@ -73,7 +73,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     hits      <- !filepaths %in% badFiles
     goodFiles <- filepaths[hits]
     
-    cat(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."))
+    message(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."), appendLF = FALSE)
     
     if (!is.null(errorReport.path)) {
         file.sep <- .Platform$file.sep
@@ -107,10 +107,10 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         recordReports[ , Message := padder(recordReports$Message, sizes = max(nchar(recordReports$Message)))]
         recordReports[ , writeLines(paste0(Message, ' | ', Record), unique(Filepath)), by = Filepath]
         
-        cat(glue::glue("report written in directory '{errorReport.path}'...")) 
+        message(glue::glue("report written in directory '{errorReport.path}'..."), appendLF = FALSE) 
     }
     
-    cat(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
+    message(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
     
     #
     fileFrame[ , Valid := hits]

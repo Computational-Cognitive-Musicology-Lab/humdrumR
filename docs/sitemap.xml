@@ -31,6 +31,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/articles/ReadWrite.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/articles/Reshaping.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/articles/RhythmAndMeter.html</loc>
   </url>
   <url>
@@ -76,6 +79,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/collapse2n.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/collapseHumdrum.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/collapseHumtab.html</loc>
   </url>
   <url>
@@ -107,6 +113,15 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/filterHumdrum.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/foldExclusive.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/foldGraceNotes.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/foldHumdrum.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/freq.html</loc>

@@ -124,17 +124,31 @@ fargs <- function(func) formals(args(func))
 }
 
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
-    # stack <- rlang::caller_call()
-    # stack <- stack[!duplicated(stack)]
-    # calls <- rev(sapply(stack, \(x) gsub('[ \t]+', ' ', paste(deparse(x[[3]]), collapse = ' ')))[-1])
-    # calls <- paste0('\t', strrep(' ', 1:length(calls) * 2), calls)
+  # stack <- c()
+  # n <- 1
+  # while(!is.null(rlang::caller_call(n))) {
+  #   stack[n] <- rlang::expr_deparse(rlang::caller_call(n))
+  #   n <- n + 1
+  # }
+  
+  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
+  stack <- sapply(stack, paste, collapse = '\n')
+  
+  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
+  
+   # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
+  
+  cut <- 15
+  stack[-1] <- paste0(' -> ', stack[-1])
+  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
     # 
-    # cat('HumdrumR error in call stack:\n')
-    # cat(calls, sep = '\n')
+    cat('humdrumR error in:\n')
+    cat('\t', stack, sep = '')
     
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
-     stop(call. = FALSE, message)
+    cat('\n')
+    stop(call. = FALSE, message)
 }
 
 # Names ----
@@ -376,6 +390,30 @@ catlists <- function(lists) {
 
 # indices
 
+matches <- function(x, table, ..., multi = FALSE) {
+  # x and table are both lists/data.frames
+  
+  x <- do.call('paste', c(x, list(sep = ' ')))
+  table <- do.call('paste', c(table, list(sep = ' ')))
+  
+  if (multi) multimatch(x, table, ...) else match(x, table, ...)
+  
+}
+
+multimatch <- function(x, table, ...) {
+  ns <- tapply_inplace(table, table, seq_along)
+  
+  tables <- lapply(unique(ns), \(n) { 
+    table[ns < n] <- NA
+    table
+    })
+  do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
+}
+
+`%ins%` <- function(x, table) !is.na(matches(x, table))
+
+`%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
+
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
           
@@ -426,7 +464,9 @@ remove.duplicates <- function(listofvalues) {
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     
-    output <- do.call('c', tapply(X, INDEX, FUN, ...))
+    output <- tapply(X, INDEX, FUN, ...)
+    if (is.list(output)) output <- do.call('c', output)
+    
     indices <- tapply(seq_along(X), INDEX, force) |> unlist()
     
     output[order(indices)]
@@ -618,6 +658,7 @@ forcedim <- function(ref, ..., toEnv = FALSE, byrow = FALSE) {
 match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
   
           x <- list(...)
+          x <- x[!sapply(x, is.null)]
           
           ldims <- ldims(x)
           target <- order(ldims[ , 'size'], ldims[ , 'nrow'], decreasing = TRUE)[1]
@@ -1522,6 +1563,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     if (length(sys.calls()) > 10L) return(arg) 
     
     argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
+    if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
     if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
@@ -1533,12 +1575,12 @@ checkArg <- function(arg,  argname, callname = NULL,
                                          "The length of the '{argname}' argument must be at most {max.length}.",
                                          "In your call, length({argname}) == {length(arg)}.")
     
-    
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
         classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
         .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
     }
     
+    if (missing(valid) && !is.null(validoptions)) valid <- \(x) x %in% validoptions
     if (!missing(valid) && !is.null(valid)) {
         ill <- !valid(arg)
         
@@ -1546,7 +1588,7 @@ checkArg <- function(arg,  argname, callname = NULL,
             if (is.null(validoptions)) {
                 .stop(callname, "{arg} is not a valid value for the {argname} argument.")
             } else {
-                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid {argname} value. "))
+                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
                 illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
                 legalNames <-  paste0(glue::glue_collapse(quotemark(validoptions), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
                 

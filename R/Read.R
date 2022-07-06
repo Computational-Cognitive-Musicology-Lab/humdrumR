@@ -214,7 +214,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     # As a part of this process, the recursive argument is (eventually) passed to the base::list.files function.
     #
     
-    cat("Finding and reading files...\n")
+    message("Finding and reading files...")
     
     ### Filenames
     fileFrame <- findFiles(..., recursive = recursive)
@@ -259,13 +259,13 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
                         }) 
              } else ""
              
-             cat(glue::glue("\tREpath-pattern {Label}'{Pattern}'",
+             message(glue::glue("\tREpath-pattern {Label}'{Pattern}'",
                             " matches {lengths(Filepath)} text files",
                             contains,
                             " in {lengths(Directories)} {plural(lengths(Directories), 'directories', 'directory')}",
                             if (verbose) ":\n" else ".",
                             "{filepaths}",
-                            .trim = FALSE ), sep = '\n')
+                            .trim = FALSE ))
          })
     
     # Unwrap nested lists
@@ -287,7 +287,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame[ , File := match(Filepath, unique(Filepath))]
     
     # return
-    cat(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)), capitalize = TRUE)} files read from disk."), '\n')
+    message(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)), capitalize = TRUE)} files read from disk."))
     
     fileFrame
 }
@@ -343,7 +343,7 @@ duplicateWarnings <- function(matchTable, allowDuplicates, verbose) {
     
     warning(warning, call. = FALSE, immediate. = FALSE, noBreaks. = FALSE)
     
-    cat(strrep('-', options('width')$width),
+    message(strrep('-', options('width')$width),
         '\nhumdrumR WARNING\n\t',
         warning,
         sep = '')
@@ -352,20 +352,20 @@ duplicateWarnings <- function(matchTable, allowDuplicates, verbose) {
         uniqcombos <- unique.matrix(duptable)
         for (i in 1:nrow(uniqcombos)) {
             curdup <- rownames(duptable)[apply(duptable, 1, \(row) all(row == uniqcombos[i,]))]
-            cat('\n',
+            message('\n',
                 glue::glue("The following files match patterns ", 
-                                    glue::glue_collapse(colnames(duptable)[uniqcombos[i, ] > 0L],
-                                                        sep = ', ', last = ' AND '),
-                                    ':\n\t',
-                                    glue::glue_collapse(curdup, sep = '\n\t'),
+                                    paste0('\t', glue::glue_collapse(colnames(duptable)[uniqcombos[i, ] > 0L],
+                                                        sep = ', ', last = ' AND ')),
+                                    '\t:\n\t',
+                                    paste0('\t', glue::glue_collapse(curdup)),
                                     '\n'))
             
-        cat('\n')
+        # cat('\n')
         }
     }
     
     
-    cat('\n\t', sep = '',
+    message('\n\t', appendLF = FALSE,
         if (allowDuplicates) {
                      "If this is a problem, be more specific in your searches or specify allowDuplicates = FALSE 
                        to force humdrumR to only match each file once.\n"
@@ -601,9 +601,9 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     if (nrow(fileFrame) == 0L) return(NULL)
     
     #
-    cat(glue::glue("Parsing {num2print(nrow(fileFrame))} files..."))
+    message(glue::glue("Parsing {num2print(nrow(fileFrame))} files..."), appendLF = FALSE)
     
-    if (verbose) cat ('\n')
+    # if (verbose) cat ('\n')
     
     
     ## Divide out any pieces within files
@@ -613,7 +613,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     humtabs <- Map(
         function(file, piece) { 
             humtab <- parseRecords(file, piece, reference)
-            if (verbose) cat(filename, '\n') 
+            if (verbose) message(filename, '\n') 
             humtab
         }, 
         fileFrame$FileLines, fileFrame$Piece) 
@@ -621,7 +621,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     ##########-
     ### Assembling local record information with corpus metadata (filenames, reference records, etc.)
     ##########-
-    cat("Assembling corpus...")
+    message("Assembling corpus...", appendLF = FALSE)
     
     ###### consolidate files into one data.table
     humtab  <- data.table::rbindlist(humtabs, fill = TRUE) # fill = TRUE because some pieces have different reference records
@@ -645,7 +645,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     if (!is.null(tandemTab)) humtab <- cbind(humtab, tandemTab)
         
     #
-    cat('Done!\n')
+    message('Done!\n')
     
     makeHumdrumR(humtab, unique(fileFrame$Pattern), 
                  tandemcol = colnames(humtab) %in% colnames(tandemTab))
@@ -990,7 +990,7 @@ parseTandem <- function(tandems, known) {
     uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
     
     # Reduce REs to only those that appear in data
-    REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
+    REs <- REs[apply(do.call('cbind', lapply(REs, stringr::str_detect, string = uniqueTandem)), 2, any)]
     
     tandemMat <- lapply(REs,
                         \(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance

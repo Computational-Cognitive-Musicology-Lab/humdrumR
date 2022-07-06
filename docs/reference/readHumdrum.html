@@ -32,6 +32,7 @@
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
   </div>
@@ -236,24 +237,26 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="op">)</span> <span class="co"># loads all valid humdrum files in the current directory.</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 116 text files in 1 directory.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 116 files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Validating 116 files...24,452 errors in 117 files...zero valid files.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 120 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 120 files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating 120 files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 28,860 errors in 121 files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> zero valid files.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="st">".*krn$"</span><span class="op">)</span> <span class="co"># loads all files ending with "krn" in the currect directory</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*krn$' matches 0 text files in 1 directory.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Zero files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No files to validate.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*krn$' matches 0 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Zero files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> No files to validate.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="st">"^Composers$/^Be|^Mo/.*/^Joined$/.*krn$"</span><span class="op">)</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '^Composers$/^Be|^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Zero files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No files to validate.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '^Composers$/^Be|^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Zero files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> No files to validate.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span class="co"># Goes inside the directory "Composers".</span></span>
 <span class="r-in"><span class="co"># Inside "Composers" looks for directories that start with "Be" or "Mo".</span></span>
@@ -262,19 +265,18 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
 <span class="r-in"><span class="co"># If there are any directories called "Joined", loads all files (if any) that end with "krn".</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="st">"^Composers$"</span>, <span class="st">"^Be|^Mo"</span>, <span class="st">".*"</span>, <span class="st">"^Joined$"</span>, <span class="st">".*krn$"</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern '^Composers$/^Be|^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Zero files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No files to validate.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '^Composers$/^Be|^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Zero files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> No files to validate.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span class="co"># exactly the same as the previous!</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">readHumdrum</span><span class="op">(</span><span class="st">"^Composers$"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Beethoven <span class="op">=</span> <span class="st">"^Be"</span>, Mozart <span class="op">=</span> <span class="st">"^Mo"</span><span class="op">)</span>, <span class="st">".*"</span>, <span class="st">"^Joined$"</span>, <span class="st">".*krn$"</span><span class="op">)</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern Beethoven = '^Composers$/^Be/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	REpath-pattern Mozart = '^Composers$/^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Zero files read from disk. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No files to validate.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern Beethoven = '^Composers$/^Be/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.	REpath-pattern Mozart = '^Composers$/^Mo/.*/^Joined$/.*krn$' matches 0 text files in 0 directories.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Zero files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> No files to validate.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span class="co"># exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped</span></span>
 <span class="r-in"><span class="co"># in the Label field as "Beethoven" and "Mozart" respectively.</span></span>

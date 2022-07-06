@@ -22,8 +22,16 @@ tonalInterval(...)
 
 \method{tonalInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
-\value{
-A \link[=tonalIntervalS4]{tonalInterval} object.
+\arguments{
+\item{str}{(\code{character} or \code{numeric}) The input vector.}
+
+\item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
+
+\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} is used
+to interpret pitch representations.
+For example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
+The output \code{tonalInterval} is output \emph{within the key}: thus, \code{tonalInterval('C#', Key = "A:")}
+returns the tint representing a \strong{Major 3rd}, because \emph{C#} is the major third of A major.}
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} pitch information:
@@ -98,6 +106,7 @@ Similarly, \code{solfa(x, Exclusive = 'kern')} will force the parser to interpre
 If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
 \code{humdrumR} will automatically pass the \code{Exclusive} field from the humdrum data to the function---this means, that in most cases,
 you don't need to explicitly do anything with the \code{Exclusive} argument!
+(If you want this \emph{not} to happen, you need to explicitly specify your own \code{Exclusive} argument, or \code{Exclusive = NULL}.)
 }
 
 \subsection{Regex Dispatch}{
@@ -138,7 +147,7 @@ This means we are controlling the behavior of \code{tonalInterval()}, in the sec
 \item \strong{Output} representation
 }
 
-Note that these arguments are identical to parallel \link[=pitchDeparsing]{deparsing arguments}.
+Note that these arguments are similar or identical to parallel "advanced" deparsing arguments used by various \link[=pitchFunctions]{pitch functions}.
 The following "advanced" parsing arguments are available (read all the details about them further down):
 \itemize{
 \item \strong{Steps}
@@ -162,8 +171,6 @@ The following "advanced" parsing arguments are available (read all the details a
 \itemize{
 \item \code{implicitSpecies}
 \item \code{absoluteSpecies}
-\item \code{explicitNaturals}
-\item \code{cautionary}
 \item \code{memory}, \code{memoryWindows}
 }
 }
@@ -178,8 +185,7 @@ The following "advanced" parsing arguments are available (read all the details a
 \item \strong{String parsing}
 \itemize{
 \item \code{parts}
-\item \code{parse.exhaust}
-\item \code{sep}.
+\item \code{sep}
 }
 }
 
@@ -209,11 +215,11 @@ This overrides the default value for \verb{**kern}---notice, that it \emph{also}
 Any representation of "tonal" pitch information will include a representation of \emph{diatonic steps}.
 You can control how the parser reads diatonic steps from a pitch representation using the \code{step.labels} argument.
 The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
-Examples of \code{step.labels} arguments that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+Examples of \code{step.labels} arguments that are currently used by preset \code{humdrumR} pitch parsers include:
 \itemize{
-\item \code{parse(step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G'))}
-\item \code{parse(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))}
-\item \code{parse(step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'))}
+\item \code{parse(step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G'))} --- (\verb{**Tonh})
+\item \code{parse(step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'))} --- (\verb{**solfa})
+\item \code{parse(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'))} --- (roman numerals)
 }
 
 If \code{step.labels} is \code{NULL}, steps are assumed to be represented by integers, including negative integers representing downward steps.
@@ -237,10 +243,11 @@ If \code{qualities = FALSE} the parser will look for accidentals in the input, r
 The \code{natural}, \code{flat}, and/or \code{sharp} (\code{character}, \code{length == 1}) arguments can be used to indicate how accidentals are represented in the input.
 For example, if the input strings look like \code{c("Eflat", "C")}, you could set the argument \code{flat = "flat"}.
 
-Examples of accidental argument combinations that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
+Examples of accidental argument combinations that are currently used by preset \code{humdrumR} pitch parsers include:
 \itemize{
-\item \code{parse(flat = "b", sharp = "#")}
-\item \code{parse(flat = "-", sharp = "#")}
+\item \code{parse(flat = "b", sharp = "#")} -> \verb{**pitch}
+\item \code{parse(flat = "-", sharp = "#")} -> \verb{**kern}
+\item \code{parse(flat = "-", sharp = "+")} -> \verb{**degree}
 }
 
 The \code{doubleflat}, and \code{doublesharp} (\code{character}, \code{length == 1}) arguments are \code{NULL} by default, but can be set if a special symbol is used
@@ -349,7 +356,7 @@ Though all the examples here use accidentals, these arguments all have the same 
 
 \subsection{Octave}{
 
-The final piece of information encoded in most (but not) all pitch representations is an indication of the "complex pitch"---
+The final piece of information encoded in most (but not) all pitch representations is an indication of the "compound pitch"---
 incorporating octave information.
 In \code{humdrumR} octaves are \emph{always} defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
 This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-\strong{C}.
@@ -402,10 +409,10 @@ So B is associated with the C 7 steps below it.
 If, on the other hand, \code{octave.round = round}, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C \emph{above} them.
 Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavior we mentioned earlier!
 
-When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a complex interval is represented.
+When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
 For example, we might think of a ascending major 12th as being an ascending octave \emph{plus} a ascending perfect 5th: ** +P8 + P5**.
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
-The following table illustrates how different \code{octave.round} arguments "partition" complex intervals into simple parts and octaves:\tabular{llllll}{
+The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
    -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
@@ -557,5 +564,12 @@ For example, while \code{kern(0:2)} returns \code{c("c", "d-", "d")}, \code{kern
 tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII'))
 
 kern('E x 5', parse(doublesharp = 'x', sep = ' '))
+
+#' @returns 
+
+`tonalInterval()` returns a [tonalInterval][tonalIntervalS4] object of the same
+length and dimensions as `x`.
+`NULL` inputs (`x` argument) return a `NULL` output.
+`NA` values in the input `x` are propagated to the output.
 
 }
