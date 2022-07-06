@@ -990,7 +990,7 @@ parseTandem <- function(tandems, known) {
     uniqueTandem <- uniqueTandem[!is.na(uniqueTandem) & uniqueTandem != '']
     
     # Reduce REs to only those that appear in data
-    REs <- REs[apply(sapply(REs, stringr::str_detect, string = uniqueTandem, simplify = TRUE), 2, any)]
+    REs <- REs[apply(do.call('cbind', lapply(REs, stringr::str_detect, string = uniqueTandem)), 2, any)]
     
     tandemMat <- lapply(REs,
                         \(re) stringr::str_match(tandems, re)[ ,1]) #finds first instance

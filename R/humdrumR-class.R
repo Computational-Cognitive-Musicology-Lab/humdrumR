@@ -1310,6 +1310,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     
     # data fields in old rows need to be renamed, because they will now be columns
    
+    fromTable[ , Null := NULL]
+    fromTable[ , Filter := NULL]
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
     dataFields <- fields(humdrumR, 'D')$Name
     fromTables <- Map(\(ftab, fname) {
@@ -1318,7 +1320,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
 
                          }, fromTables, names(fromTables))
  
-    mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
+    mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null', 'Filter'))
     humtab <- Reduce(\(htab, ftab) {
         htab <- rbind(ftab[htab, on = mergeFields], 
                       ftab[!htab, on = mergeFields], 
@@ -2271,7 +2273,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
 }
 
 
-printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, sep = ', '){
+printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNonD = FALSE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
     dataTypes <- checkTypes(dataTypes, "printableActiveField")
@@ -2282,10 +2284,22 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useToken = FALSE, se
                                       forceVector = TRUE, nullAs = "."))
     humtab$Null[humtab$Type == 'P'] <- FALSE
     humtab$Filter[humtab$Type == 'P'] <- FALSE
-    
+
+    ## fill in null data
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
-    active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]
-    active[humtab[, !Type %in% c('D', 'd')]] <- humtab[!Type %in% c('D', 'd'), Token]
+    active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    
+
+    ## fill from token field
+    tokenFill <- if (useTokenNonD) {
+        humtab[, !Type %in% c('D', 'd')]
+    } else {
+        # always get ** exclusive
+        humtab[ , (is.na(active) | active == '*') & grepl('\\*\\*', Token)]
+    }
+    
+    active[tokenFill] <- humtab[tokenFill == TRUE, Token]
+    
+
     
     # 
     # targets <- humtab$Type %in% dataTypes
