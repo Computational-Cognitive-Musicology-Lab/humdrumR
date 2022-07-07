@@ -209,7 +209,7 @@ filterHumdrum <- function(humdrumR, ...) {
     
     oldActive <- getActive(humdrumR)
     
-    humdrumR <- withinHumdrum(humdrumR, ...)
+    humdrumR <- within.humdrumR(humdrumR, ...)
 
     humtab <- getHumtab(humdrumR, 'GLIMDd')
     

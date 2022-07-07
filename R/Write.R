@@ -142,7 +142,7 @@ processFixer.function <- function(fix, origfilenames, humdrumR) {
     
 }
 processFixer.formula <- function(fix, origfilenames, humdrumR) {
-    as.character(withHumdrum(humdrumR, fix, recordtypes ~ 'GLIMDd'))
+    as.character(with.humdrumR(humdrumR, fix, recordtypes = 'GLIMDd'))
 }
 processFixer.default <- function(fix, origfilenames, humdrumR) as.character(fix)
 

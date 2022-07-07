@@ -566,9 +566,6 @@ For example, a data.frame where each column is a different collection of rhythmi
 Functions should be named to reflect what they do.
 Since functions should do only *one* job, this should be easy---if a function's functionality can't be expressed in single, simple name, the function should probably be factored.
 
-In some cases, there is a need for a parent function to offload *most* of it's functionality to a subfunction.
-The subfunction "does" the same thing as the parent, and should be given the same name as the parent function, appended with a `.`.
-For example, `.withHumdrum` does the bulk of the work for `withHumdrum`.
 
 
 

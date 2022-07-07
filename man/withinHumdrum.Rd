@@ -2,35 +2,33 @@
 % Please edit documentation in R/Apply.R
 \name{withinHumdrum}
 \alias{withinHumdrum}
-\alias{withHumdrum}
-\alias{inHumdrum}
 \alias{with.humdrumR}
+\alias{within.humdrumR}
+\alias{In}
 \title{with(in)Humdrum}
 \usage{
-withinHumdrum(humdrumR, ...)
+\method{with}{humdrumR}(data, ..., drop = TRUE, variables = list())
 
-withHumdrum(humdrumR, ..., drop = TRUE)
+\method{within}{humdrumR}(data, ..., variables = list())
 
-inHumdrum(humdrumR, ...)
-
-\method{with}{humdrumR}(data, expr, ...)
+In(data, ..., variables = list())
 }
 \arguments{
-\item{humdrumR}{A \verb{[humdrumR][humdrumRclass]} data object.}
-
 \item{...}{Additional formulas/functions, or lists of formulas/functions.
 These are all simply appended to the \code{formulae} argument.}
 
 \item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
-If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
+If \code{drop = TRUE}, the output of \code{with.humdrumR} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
 a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
 intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
 the output is consistent.}
+
+\item{humdrumR}{A \verb{[humdrumR][humdrumRclass]} data object.}
 }
 \value{
-From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
-From \code{withHumdrum}, whatever value is returned by expression.
+From \code{within.humdrumR} and \code{inHumdrum}, a new humdrumR data object.
+From \code{with.humdrumR}, whatever value is returned by expression.
 }
 \description{
 Apply arbitrary expressions to fields within \verb{[humdrumR][humdrumRclass]} data.
@@ -52,14 +50,14 @@ They also includes a number of special evaluation options:
 \item Evaluate an expression which produces a plot, with particular plotting parameters set using \verb{[graphics][par]}.
 }
 
-The difference between \code{withHumdrum} and \code{withinHumdrum} is
+The difference between \code{with.humdrumR} and \code{within.humdrumR} is
 analogous to the difference between \verb{[base][with]} and \verb{[base][within]}.
-\code{withHumdrum} evaluates your expression(s) and then simply returns the result of
-the evaluation. \code{withinHumdrum} evaluates your expression(s) and then
+\code{with.humdrumR} evaluates your expression(s) and then simply returns the result of
+the evaluation. \code{within.humdrumR} evaluates your expression(s) and then
 (attempts) to insert the results back into the humdrumR object, generating new
 fields called \code{PipeX} (see details).
 
-\code{inHumdrum} is simply a short hand for \code{withinHumdrum}.
+\code{inHumdrum} is simply a short hand for \code{within.humdrumR}.
 }
 
 \section{\code{Formulae}}{
@@ -101,13 +99,13 @@ You can also include a \code{.} anywhere in the expression, which will be
 interpreted as the humdrumR object's current \verb{[dest=humdrumR][Active]}
 expression.\preformatted{humdata <- readHumdrum('directorywithdata/*.krn') # read some data
 
-withinHumdrum(humdata, ~getPitch(Token)) # The most basic pattern
-withinHumdrum(humdata, ~getPitch(.)) # Same as previous (unless `Active` field has been changed))
+within(humdata, ~getPitch(Token)) # The most basic pattern
+within(humdata, ~getPitch(.)) # Same as previous (unless `Active` field has been changed))
 
-withinHumdrum(humdata, ~solfa(getPitch(Token), key = Key)) 
+within(humdata, ~solfa(getPitch(Token), key = Key)) 
 # Assumes that the Key field was parsed during the call to `[readHumdrum][readHumdrum]`
 
-withinHumdrum(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
+within(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
 
 }
 
@@ -126,14 +124,14 @@ argument of \verb{[base][tapply]}, or the \code{INDICES} argument of \verb{[base
 Each \code{by} expression must evaluate, within the \code{humdrumR} data object, to a vector (or a list of vectors
 of equal length) of categories to group the data by.
 Most commonly, the \code{by} expression(s) are simply field(s) in the data:
-for instance,\preformatted{withinHumdrum(humdata,
+for instance,\preformatted{within(humdata,
          do ~ table(Token),
          by ~ File)
 }
 
 will apply the function \verb{[base][table]} to the \code{Token} field
 \emph{separately} for each file in the \code{humdrumR} data.
-However, we can also use more complex expressions like\preformatted{withinHumdrum(humdata,
+However, we can also use more complex expressions like\preformatted{within(humdata,
          do ~ table(Token), 
          by ~ Spine > 3 | Record \\\%\\\% 2 == 0)
 }
@@ -144,7 +142,7 @@ three or less \emph{or} the record number is even, and another group where the o
 If the \code{by} expression evaluates to a list of grouping vectors,
 the \code{do} expressions are evaulated across every combination of categories in all the vectors.
 Thus,
-withinHumdrum(humdata,
+within(humdata,
 do ~ table(Token),
 by ~ list(File, Spine))
 will apply \code{table} to \code{Token} across each spine \emph{in} each file.
@@ -153,7 +151,7 @@ As some \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic 
 the (leftmost) keyword part are combined in a list (i.e., \code{by ~ File ~ Spine}
 becomes \verb{by ~ list(File, Spine)\}}.
 Thus the previous example can also be written:
-withinHumdrum(humdata,
+within(humdata,
 do ~ table(Token),
 by ~ File ~ Spine)
 
@@ -167,14 +165,14 @@ kept unchanged.
 
 If multiple partitioning formulae (i.e, \code{by} and \code{where}) expressions
 are evaluated recursively, in order from left to right. Thus if you specify
-withinHumdrum(humdata,
+within(humdata,
 do ~ sd(semits),
 by ~ File,
 where ~ semits > mean(semits))
 a the standard deviation of the \code{semits} field will be calculated only in each file,
 but only where the \code{semits} field is greater than the mean \code{semits} value
 \emph{within that file}. Contrast this with this call:
-withinHumdrum(humdata,
+within(humdata,
 do ~ sd(semits)
 where ~ semits > mean(semits),
 by ~ File)
@@ -186,22 +184,22 @@ but this time wherever the \code{semits} field is greater than the mean value \e
 
 The \code{doplot} keyword behaves exactly like the \code{do} keyword, except that the result of the
 evaluation is ignored. This is useful for plotting \emph{as well as} other side-effects (like writing to a file).
-If \code{doplot} is used with \code{withHumdrum}, the function simply returns \code{NULL} (after executing the \code{doplot}
+If \code{doplot} is used with \code{with.humdrumR}, the function simply returns \code{NULL} (after executing the \code{doplot}
 expression
-If \code{doplot} is used with \code{withinHumdrum} (or \code{inHumdrum}), the function simply returns the unaltered
+If \code{doplot} is used with \code{within.humdrumR} (or \code{inHumdrum}), the function simply returns the unaltered
 \code{humdrumR} argument.
 
-\code{withinHumdrum} also allows you to specify plotting options in line, without having to make a separate call
+\code{within.humdrumR} also allows you to specify plotting options in line, without having to make a separate call
 to \verb{[graphics][par]}. Any \verb{[graphics][par]} argument can be specified as a \code{Keyword ~ Expression} pair
 in the \code{formulae} argument. For instance, if you call a \code{doplot} expression with a \code{by} expression
 that creates four groups, R will create four plots---but you will only see the last one! Normally, you would need to
-call \code{par(mfcol = c(2,2))} \emph{before} calling your plotting function. However, with \code{withinHumdrum} you can
+call \code{par(mfcol = c(2,2))} \emph{before} calling your plotting function. However, with \code{within.humdrumR} you can
 soecific \code{mfcol = c(2,2)} right in a \code{formulae} formula:
-withinHumdrum(humdata,
+within(humdata,
 doplot ~ fooplot(.),
 by ~ list(Two, byTwo),
 mfcol ~ c(2, 2))
-The best part is \code{withinHumdrum} will reset \code{par} to it's previous state after \code{withinHumdrum} is done.
+The best part is \code{within.humdrumR} will reset \code{par} to it's previous state after \code{withinHumdrum} is done.
 }
 
 \section{Tandem interpretations}{
@@ -215,16 +213,16 @@ up as a \code{Clef} field. However, users might read humdrum data with their
 own custom tandem interpretations that are not built into \code{humdrumR}.
 \code{humdrumR} includes the function \verb{[getTandem][getTandem]} to help us
 extract arbitrary tandem intrpretation data.
-Luckily, \code{withinHumdrum} knows some
+Luckily, \code{within.humdrumR} knows some
 \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
 which makes it easy to do this anywhere in our expressions, simply by putting a
 named object beginning with the symbol \code{*}. Of course, R doesn't normally
 allow names to begin with symbols like \code{*}, but you can force it by
-placing grave symbols around the name \verb{*name}. If you do this in a \code{withinHumdrum}
-expression, \code{withinHumdrum} will treat this name as a
+placing grave symbols around the name \verb{*name}. If you do this in a \code{within.humdrumR}
+expression, \code{within.humdrumR} will treat this name as a
 regular expression and substitute a call \code{getTandem(Tandem, 'regular expression')} in the expression.
 This means you can could do something like
-withinHumdrum(humdata,
+within(humdata,
 do ~ myFunction(Token, \verb{*mytandempattern}))
 and \code{myFunction} will be called with the first argument being the
 \code{Token} field, and the second argument being tandem interpretations
@@ -238,18 +236,18 @@ which match \code{'mytandempattern'} (extracted from the \code{Tandem} field).
 Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
 rather than applying the same expression to each piece, we want to feed
 the separate pieces as separate arguments to the same function.
-In \code{withinHumdrum} you can use some
+In \code{within.humdrumR} you can use some
 \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
 to do just this, using the \code{@} symbol in the format \code{myFunction(TargetExpr@GroupingExpr)}.
 If we make this call
 
-withinHumdrum(humdata,
+within(humdata,
 do ~ myFunction(Token@Spine))
 
 and there are four spines
-this is how \code{withinHumdrum} will intepret the expression:
+this is how \code{within.humdrumR} will intepret the expression:
 
-withinHumdrum(humData,
+within(humData,
 do ~ myFunction(Token\link{Spine == 1}, # first argument when Spine == 1
 Token\link{Spine == 2}, # second argument when Spine == 2
 Token\link{Spine == 3}, # etc.
@@ -259,11 +257,11 @@ Token\link{Spine == 4}))
 \section{Argument interpolation}{
 
 
-Any named arguments to \code{withinHumdrum} are \verb{[humdrumR:interpolateArguments][interpolated]} into the
+Any named arguments to \code{within.humdrumR} are \verb{[humdrumR:interpolateArguments][interpolated]} into the
 \code{do} expressions. This is useful if you've already created a list of formulas that you like, but would like
 to make small changes to a function call within the \code{do} expressions, without starting from scratch.
 Examples:\preformatted{mycommand <- c(do ~ mean(., na.rm = TRUE), by ~ Spine ~ File)
-withinHumdrum(humdata,
+within(humdata,
               mycommand,
               na.rm = FALSE)
 # mycommand is executed with na.rm changed to FALSE              
@@ -273,7 +271,7 @@ withinHumdrum(humdata,
 \section{Piping}{
 
 
-For calls to \code{withinHumdrum}, the result of each \code{do} expression
+For calls to \code{within.humdrumR}, the result of each \code{do} expression
 is insterted back into the \verb{[humtable][humdrum table]}. The results
 are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
 of the expression are shorter than the rows in the \link[=humdrum table]{humtable},
@@ -283,7 +281,7 @@ or an \code{object}, the humdrum table is shrunk to fit them.
 \examples{
 humdata <- readHumdrum('directorywithdata/*.krn')
 
-withinHumdrum(humdata, ~nchar(.)) # counts characters in each data token.
-withinHumdrum(humdata, ~table(.), by ~ Spine) # Tabulates data tokens in each Spine.
+within(humdata, ~nchar(.)) # counts characters in each data token.
+within(humdata, ~table(.), by ~ Spine) # Tabulates data tokens in each Spine.
 
 }

@@ -1649,7 +1649,7 @@ update_d <- function(humdrumR) {
 #' For one, it is the data which is printed by [show][methods::show()] calls,
 #' i.e., whenever you return a `humdrumR` object in the terminal.
 #' In any expression within a call to 
-#' [with(in)Humdrum][withinHumdrum()]
+#' [with(in)Humdrum][withinHumdrum]
 #' `.` is automatically replaced with the `Active` expression.
 #' 
 #' The active expression can be changed with the commands 
