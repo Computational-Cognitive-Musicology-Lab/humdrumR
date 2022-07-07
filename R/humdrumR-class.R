@@ -1850,7 +1850,7 @@ checkFieldTypes <- function(types, argname, callname) {
           checkArg(types,
                    valid = \(arg) arg %in%  c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
                    validoptions = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
-                   argname, callname, warnSuperfluous = TRUE,
+                   argname, callname, 
                    min.length = 0L, max.length = 5L,
                    classes = 'character')
 }

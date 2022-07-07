@@ -142,12 +142,11 @@ fargs <- function(func) formals(args(func))
   stack[-1] <- paste0(' -> ', stack[-1])
   stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
     # 
-    cat('humdrumR error in:\n')
-    cat('\t', stack, sep = '')
+    message('humdrumR error in:')
+    message('\t', stack, sep = '')
     
     message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
    
-    cat('\n')
     stop(call. = FALSE, message)
 }
 
@@ -1557,7 +1556,7 @@ specialArgs <- function(quos, ...) {
 
 checkArg <- function(arg,  argname, callname = NULL, 
                      atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, warnSuperfluous = TRUE, classes = NULL) {
+                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, classes = NULL) {
     # arg a argument to check
     # 
     if (length(sys.calls()) > 10L) return(arg) 
@@ -1594,7 +1593,7 @@ checkArg <- function(arg,  argname, callname = NULL,
                 
                 message <- list(callname, illNames, case, 'Valid options are ', legalNames)
                 
-                do.call(if (warnSuperfluous && any(!ill)) 'warning' else '.stop', message)
+                .stop(message)
             }
             
         }
@@ -1675,7 +1674,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     checkArg(dataTypes,
              valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
               validoptions = c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
-              argname, callname, warnSuperfluous = TRUE, 
+              argname, callname,
               min.length = 1L, max.length = 7L,
               classes = "character")
 }

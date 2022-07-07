@@ -2543,7 +2543,7 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('parts' %in% argnames) {
-    checkArg(args$parts, argname = 'parts', callname = callname, classes = 'character', warnSuperfluous = FALSE,
+    checkArg(args$parts, argname = 'parts', callname = callname, classes = 'character', 
                    valid = \(arg) !is.na(pmatch(args$parts, c('step', 'species', 'octave'))),
                    validoptions = c('step', 'species', 'octave'))
     

@@ -4,7 +4,7 @@
 \alias{withinHumdrum}
 \alias{withHumdrum}
 \alias{inHumdrum}
-\alias{humApply}
+\alias{with.humdrumR}
 \title{with(in)Humdrum}
 \usage{
 withinHumdrum(humdrumR, ...)
@@ -13,24 +13,13 @@ withHumdrum(humdrumR, ..., drop = TRUE)
 
 inHumdrum(humdrumR, ...)
 
-humApply(humdrumR, FUN, ..., within = TRUE, doplot = FALSE)
+\method{with}{humdrumR}(data, expr, ...)
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumRclass} data object.}
+\item{humdrumR}{A \verb{[humdrumR][humdrumRclass]} data object.}
 
-\item{...}{Any arguments which can be fed to
-\verb{[humdrumR:with-in-Humdrum][with(in)Humdrum]} as formulae (except for
-\code{do} expressions, which are replaced by the \code{FUN} argument!).
-However, rather that writinging formula in the format \code{Keyword ~ Expression},
-\code{humApply} arguments should be written as normal \code{R} arguments:
-\code{Keyword = Expression}.
-Unnamed arguments are ignored.
-#' @param within A logical. If \code{TRUE} (the default),
-\verb{[humdrumR:with-in-Humdrum][withinHumdrum]} is used to apply the
-function---meaning that the output is reconstituted into a new field in the
-\code{humdrumR} object. If \code{within == FALSE},
-\verb{[humdrumR:with-in-Humdrum][withHumdrum]} is used instead,
-which results in the function's output being returned inprocessed.}
+\item{...}{Additional formulas/functions, or lists of formulas/functions.
+These are all simply appended to the \code{formulae} argument.}
 
 \item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
 If \code{drop = TRUE}, the output of \code{withHumdrum} is simplified as much as possible (trying to return
@@ -38,21 +27,16 @@ the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the resu
 a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
 intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
 the output is consistent.}
-
-\item{FUN}{A function to apply to the \link[=Active]{humdrumR:humdrumR}\verb{field(s) in the}humdrumR` object.}
-
-\item{doplot}{Boolean. If \code{TRUE} the \code{FUN} argument is treated
-as a \code{doplot} expression by \verb{[humdrumR:with-in-Humdrum][with(in)Humdrum]},
-so the result is ignored (for plotting or side-effects purposes).}
 }
 \value{
 From \code{withinHumdrum} and \code{inHumdrum}, a new humdrumR data object.
 From \code{withHumdrum}, whatever value is returned by expression.
 }
 \description{
-Apply arbitrary expressions to fields within \verb{[S4class][humdrumRclass]} data.
+Apply arbitrary expressions to fields within \verb{[humdrumR][humdrumRclass]} data.
 }
 \section{Overview}{
+
 
 These functions are the primary means of working with
 humdrumR data. (They are analogous to the base functions
