@@ -203,9 +203,6 @@
 filterHumdrum <- function(humdrumR, ...) { 
     checkhumdrumR(humdrumR, 'filterHumdrum')
     
-    formulae <- list(...)
-    formulae <- anyfuncs2forms(formulae, parent.env(environment()))
-    if (any(!sapply(formulae, rlang::is_formula))) stop('In filterHumdrum(...) unnamed arguments must be formulas or functions.')
     
     oldActive <- getActive(humdrumR)
     

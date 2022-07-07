@@ -72,7 +72,8 @@ For example, we can use `kern` to extract the pitch information from `Token`, an
 
 ```{r}
 
-withinHumdrum(example, ~kern(Token)) -> example$Pitch
+within(example, 
+       kern(Token) -> Pitch) -> example
 
 example
 ```
@@ -103,8 +104,10 @@ For example,
 ```{r, echo = -1}
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
-withinHumdrum(example, ~pitch(Token)) -> example$Pitch
-withinHumdrum(example, ~recip(Token)) -> example$Rhythm
+within(example, 
+       Pitch <- pitch(Token),
+       Rhythm <- recip(Token)) -> example
+
 
 example
 ```
@@ -114,7 +117,7 @@ example
 
 -   (Of course, you could choose different names for your new fields, instead of `Pitch` of `Rhythm`.)
 
-We can then use either of these new fields, or both, in any call to `withinHumdrum`, or make them the active fields to see them print:
+We can then use either of these new fields, or both, in any call to `within.humdrumR`, or make them the active fields to see them print:
 
 ```{r}
 example$Pitch
@@ -193,7 +196,7 @@ We could now cross tabulate the two spines of data:
 
 ```{r}
 
-withHumdrum(kernonly, ~table(Token, Spine2))
+with(kernonly, table(Token, Spine2))
 
 ```
 
@@ -246,6 +249,13 @@ example_paths
 foldPaths(example_paths)
 
 ```
+
+Note that `foldPaths` does something a little bit different: wherever the "folding" path is null (non-existent)
+it copies the data from the base path.
+This means that we get two complete copies of the melody, identical where there is no spine path, but different where there are different paths.
+So we get one melody (in the `Token` field) going `4c 4d 4e 4d 2c 2B` and another melody 
+(in the new `Token_Path` field) going `4c 4d 4e 4f 2g 2g`.
+This option can be used with other folding functions as well, by setting the argument `fillFromField == TRUE`.
 
 ### Folding Grace Notes
 
