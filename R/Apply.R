@@ -642,8 +642,7 @@ parseKeywords2 <- function(quoTab, withFunc) {
   quoTab$Keyword <- keywords
   
   # classify keywords
-  knownKeywords <- list(do              = c('do', 'dofx', 'dofill'),
-                        ordo            = c('ordo', 'ordofill'),
+  knownKeywords <- list(do              = c('do', 'dofx', 'dofill', 'ordo', 'ordofill'),
                         partitions      = c('by', 'where'),
                         ngram           = 'ngram',
                         recordtypes     = 'recordtypes',
