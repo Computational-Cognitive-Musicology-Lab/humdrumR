@@ -1205,6 +1205,12 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' spine/path/stop is folded into a new field.
 #' The `fromField` argument defaults to the (first) [active field][humActive],
 #' and must match (or partially match) a field in the `humdrumR` argument data set.
+#' In some cases, the `fold` data is smaller than the `onto` data---for instance,
+#' spine paths often only exist for part of a spine, so there is less data in the path 
+#' than in the full spine.
+#' In these cases, it can be helpful to set `fillFromField == TRUE`,
+#' which causes the missing parts of `fold` to be filled with data from the `from`
+#' field. `foldPaths` does this by default.
 #' 
 #' The resulting new fields will automatically be named as appropriate pipes.
 #' The `newFieldNames` argument (`character`) can be used to control the output names:
@@ -1255,13 +1261,17 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' @param fromField (`character`, `length == 1`) A string (partially) matching the 
 #'    name of a data field in the `humdrumR`-object input. This field is the field which is 
 #'   "folded" to a new field.
+#' @param fillFromField (`logical`, `length == 1`) If the folding field is 
+#' smaller than the `to` field, should the content of the `fromField` be copied
+#' into the `NA` sections?
 #' @param newFieldNames (`character`) Names to use for new fields created by the folding.
 #' 
 #' @seealso [foldExclusive()] is a particularly useful application of folding. [collapseHumdrum()] also serves a similar function.
 #' @family {Humdrum data "reshaping" functions.}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
-                        fromField = 'Token', newFieldNames = NULL) {
+                        fromField = 'Token', fillFromField = FALSE,
+                        newFieldNames = NULL) {
     # argument checks
     checkhumdrumR(humdrumR, 'foldHumdrum')
     
@@ -1320,12 +1330,20 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
 
                          }, fromTables, names(fromTables))
  
+    newfields <- names(fromTables)
     mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null', 'Filter'))
     humtab <- Reduce(\(htab, ftab) {
         htab <- rbind(ftab[htab, on = mergeFields], 
                       ftab[!htab, on = mergeFields], 
                       # This is necessary if the from spines have extra paths or stops
                       fill = TRUE) 
+        if (fillFromField) {
+            for (field in newfields) {
+                na <- is.na(htab[[field]])
+                # hits <- na & htab$Spine %in% unique(htab$Spine[!na])
+                htab[[field]][na] <- htab[[fromField]][na]
+            }
+        }
         htab
         
     }, fromTables, init = humtab)
@@ -1338,10 +1356,11 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     humdrumR <- update_d(updateNull(humdrumR, activeOnly = FALSE))
     humdrumR <- removeNull(humdrumR, 'GLIMDd', c('File', what), 'LIMd')
     
-    setActiveFields(humdrumR, names(fromTables))
+    humdrumR <- setActiveFields(humdrumR, newfields)
     
     
-    
+    humdrumR
+
     
     
 }
@@ -1475,7 +1494,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
 
 #' @rdname foldHumdrum
 #' @export
-foldPaths <- function(humdrumR, fromField = 'Token') {
+foldPaths <- function(humdrumR, fromField = 'Token', fillFromField = TRUE) {
     checkhumdrumR(humdrumR, 'foldPaths')
     
     paths <- unique(getHumtab(humdrumR)$Path)
@@ -1489,7 +1508,8 @@ foldPaths <- function(humdrumR, fromField = 'Token') {
     paths <- setdiff(paths, minPath)
     
     foldHumdrum(humdrumR, paths, minPath, what = 'Path', 
-                fromField = fromField, newFieldNames = paste0(fromField, '_Path'))
+                fromField = fromField, fillFromField = fillFromField,
+                newFieldNames = paste0(fromField, '_Path'))
     
 
     
@@ -1497,7 +1517,7 @@ foldPaths <- function(humdrumR, fromField = 'Token') {
 
 #' @rdname foldHumdrum
 #' @export
-foldStops <- function(humdrumR, fromField = 'Token') {
+foldStops <- function(humdrumR, fromField = 'Token', fillFromField = FALSE) {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -1511,7 +1531,8 @@ foldStops <- function(humdrumR, fromField = 'Token') {
    stops <- setdiff(stops, minStop)
    
    foldHumdrum(humdrumR, stops, minStop, what = 'Stop', 
-               fromField = fromField, newFieldNames = paste0(fromField, '_Stop'))
+               fromField = fromField, fillFromField = fillFromField,
+               newFieldNames = paste0(fromField, '_Stop'))
    
    
 }
@@ -2037,18 +2058,24 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
   object
 }
 
-fillFields <- function(humdrumR, from = 'Token', to) {
+fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
     humtab <- getHumtab(humdrumR, 'GLIMDd')
     
+    where <- if (!is.null(where)) eval(where, envir = humtab) else TRUE
+        
     for (field in to) {
         if (class(humtab[[from]]) == class(humtab[[field]])) {
-            humtab[[field]][is.na(humtab[[field]])] <- humtab[[from]][is.na(humtab[[field]])]
+            
+            hits <- is.na(humtab[[field]]) & where
+            
+            
+            humtab[[field]][hits] <- humtab[[from]][hits]
         }
     }
     
     putHumtab(humdrumR) <- humtab
     
-    humdrumR
+    updateNull(humdrumR)
     
 }
 
@@ -2306,7 +2333,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     ## fill from token field
     tokenFill <- if (useTokenNull) {
         # humtab[, !Type %in% c('D', 'd')]
-        humtab[ , Null]
+        humtab[ , !Type %in% c('D', 'd') & Null]
     } else {
         # always get ** exclusive
         humtab[ , (is.na(active) | active == '*') & grepl('\\*\\*', Token)]
