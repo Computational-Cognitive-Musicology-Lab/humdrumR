@@ -345,7 +345,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
   # number new pipes
   unnamedresult <- which(colnames(newhumtab) == 'Pipe')
   assign <- tail(quoTab[KeywordType == 'do' & Keyword != 'dofx' & !is.na(AssignTo), AssignTo], 1)
-  if (length(assign)) colnames(newhumtab)[unnamedresult[1]] <- assign
+  if (length(assign)) colnames(newhumtab)[unnamedresult[1]] <- assign[[1]]
   unnamedresult <- unnamedresult[-1]
   
   if (length(unnamedresult)) colnames(newhumtab)[unnamedresult] <- paste0('Pipe', curPipeN(humtab) + seq_along(unnamedresult))
@@ -434,7 +434,12 @@ parseArgs <- function(..., variables = list(), withFunc) {
   argnames <- .names(quos)
   
   quos <- lapply(quos, \(quo) {
-    quoA <- analyzeExpr(quo)
+    quoA <- analyzeExpr(quo, stripBrackets = TRUE)
+    if (quoA$Head == '{' && length(quoA$Args) == 1L) {
+      quo <- quoA$Args[[1]]
+      quoA <- analyzeExpr(quo, stripBrackets = TRUE)
+    }
+    
     keyword <- 'do'
     assign <- NA
     
@@ -449,6 +454,7 @@ parseArgs <- function(..., variables = list(), withFunc) {
       if (class(evaled) == 'formula') {
         if (!is.null(rlang::f_lhs(evaled))) keyword <- as.character(rlang::f_lhs(evaled))
         quo <- rlang::new_quosure(rlang::f_rhs(evaled), rlang::f_env(evaled))
+        quoA <- analyzeExpr(quo, stripBrackets = TRUE)
       }
     } 
     
@@ -704,28 +710,42 @@ concatDoQuos <- function(quoTab) {
     doQuos <- quoTab$Quo
     
     sideEffects <- grepl('fx', quoTab$Keyword)
+    assignOut <- unlist(quoTab$Assign)
     
     if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
 
-    temp <- quote(.)
+    varname <- quote(.)
     for (i in 1:length(doQuos)) {
-        if (i > 1L) doQuos[[i]] <- substituteName(doQuos[[i]], list(. = temp))
+        if (i > 1L) doQuos[[i]] <- substituteName(doQuos[[i]], list(. = varname))
         
         expr <- rlang::quo_get_expr(doQuos[[i]])
         
-        if (i < length(doQuos) && 
+        if ((i < length(doQuos) || any(!is.na(assignOut))) && 
                            (length(expr) > 1 && expr[[1]] != '<-') &&
                            !sideEffects[i]) {
             
-            temp <- as.symbol(tempfile('xxx', tmpdir = ''))
-            doQuos[[i]] <- rlang::new_quosure(expr(!!temp <- !!doQuos[[i]]), 
+          varname <- if (is.na(assignOut[i])) {
+            rlang::sym(tempfile('xxx', tmpdir = ''))
+          } else {
+            rlang::sym(assignOut[i])
+          }
+     
+            doQuos[[i]] <- rlang::new_quosure(expr(!!varname <- !!doQuos[[i]]), 
                                               env = rlang::quo_get_env(doQuos[[i]]))
             
         } 
     }
+    doQuo <- quo({!!!doQuos})
     
-    
-    quo({!!!doQuos})
+    if (any(!is.na(assignOut))) {
+      assignOut <- c(assignOut[!is.na(assignOut)],  if (is.na(tail(assignOut, 1L))) as.character(varname))
+      assignOut <- setNames(rlang::syms(assignOut), assignOut)
+      doQuo <- rlang::quo({
+        !!doQuo
+        list(!!!assignOut)
+        })
+    }
+    doQuo
 }
 
 ####################### Functions used inside prepareQuo

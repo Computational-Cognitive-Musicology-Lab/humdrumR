@@ -1217,7 +1217,7 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
 }
 
 
-analyzeExpr <- function(expr) {
+analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA <- list()
     
     exprA$Form <- if (!rlang::is_formula(expr)) {
@@ -1246,6 +1246,15 @@ analyzeExpr <- function(expr) {
     exprA$Args <- if (exprA$Type == 'call') as.list(expr[-1]) else list()
 
     
+    if (stripBrackets && 
+        exprA$Head %in% c("(", "{") && 
+        length(exprA$Args) == 1L) {
+      recurse <- switch(exprA$Form,
+             quosure = rlang::new_quosure(exprA$Args[[1]], exprA$Environment),
+             formula = rlang::new_formula(exprA$LHS, exprA$Args[[1]], exprA$Environment),
+             exprA$Args[[1]])
+      return(Recall(recurse, stripBrackets = TRUE))
+    } 
     
     exprA
     
