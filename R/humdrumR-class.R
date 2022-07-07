@@ -2299,6 +2299,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNonD = FALSE
     
     active[tokenFill] <- humtab[tokenFill == TRUE, Token]
     
+    active <- gsub('\\.(, )+\\.', '.', active)
 
     
     # 

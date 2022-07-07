@@ -1287,7 +1287,9 @@ parseResult_table <- function(result) {
    data.table(list(result))
 }
 
-parseResult_list  <- function(result) data.table(result) 
+parseResult_list  <- function(result) {
+  if (length(unique(lengths(result))) == 1L) as.data.table(result) else data.table(result)
+}
 parseResult_other <- function(result) data.table(list(result))
 
 
