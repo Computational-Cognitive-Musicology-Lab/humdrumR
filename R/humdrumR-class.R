@@ -1741,10 +1741,10 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
   if (forceVector) {
       if (is.factor(values)) values <- as.character(values)
       if (is.list(values)) {     
-          vectors <- sapply(class, is.atomic)
+          vectors <- sapply(values, is.atomic)
           
-          values <- if (all(lengths(values) == nrow(humtab)) && all(vectors)) {
-              do.call('paste', c(values, sep = sep))
+          values <- if (all(vectors) && all(lengths(values) == nrow(humtab))) {
+              do.call('.paste', c(values, sep = sep))
           } else {
               sapply(values, \(x) if (is.object(x)) object2str(x) else paste(x, collapse = sep))
           }
@@ -2037,6 +2037,20 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
   object
 }
 
+fillFields <- function(humdrumR, from = 'Token', to) {
+    humtab <- getHumtab(humdrumR, 'GLIMDd')
+    
+    for (field in to) {
+        if (class(humtab[[from]]) == class(humtab[[field]])) {
+            humtab[[field]][is.na(humtab[[field]])] <- humtab[[from]][is.na(humtab[[field]])]
+        }
+    }
+    
+    putHumtab(humdrumR) <- humtab
+    
+    humdrumR
+    
+}
 
 ############## Assigning to humdrumR #######
 #' Assigning new fields
@@ -2273,7 +2287,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
 }
 
 
-printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNonD = FALSE, sep = ', '){
+printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
     dataTypes <- checkTypes(dataTypes, "printableActiveField")
@@ -2290,8 +2304,9 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNonD = FALSE
     active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    
 
     ## fill from token field
-    tokenFill <- if (useTokenNonD) {
-        humtab[, !Type %in% c('D', 'd')]
+    tokenFill <- if (useTokenNull) {
+        # humtab[, !Type %in% c('D', 'd')]
+        humtab[ , Null]
     } else {
         # always get ** exclusive
         humtab[ , (is.na(active) | active == '*') & grepl('\\*\\*', Token)]

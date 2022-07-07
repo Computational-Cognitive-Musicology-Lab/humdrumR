@@ -376,9 +376,11 @@ within.humdrumR <- function(data, ..., variables = list()) {
     addFields(humdrumR) <- newfields
     
     humdrumR <- setActiveFields(humdrumR, newfields) 
+    # humdrumR <- fillFields(humdrumR, from = 'Token', newfields)
   }
   
   humdrumR
+  
 }
 
 withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
