@@ -308,6 +308,7 @@ with.humdrumR <- function(data, ...,
   checkhumdrumR(data, 'with.humdrumR')
   list2env(withHumdrum(data, ..., variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
+  visible <- attr(result, 'visible') 
   result[ , `_rowKey_` := NULL]
   
   ####-
@@ -317,7 +318,9 @@ with.humdrumR <- function(data, ...,
     if (is.list(result) && length(result) == 1L) result <- result[[1]]
   } 
   
-  result
+  attr(result, 'visible') <- NULL
+  
+  if (visible) result else invisible(result)
   
 }
 
@@ -390,8 +393,8 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   # interpret ... arguments
   quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
   
-  
-  oldpar <- par(no.readonly = TRUE) ; on.exit(par(oldpar, new = FALSE))
+  # "pre" stuff
+  oldpar <- par(no.readonly = TRUE) 
   quoTab <- evalPrePost(quoTab, 'pre')
  
   
@@ -412,11 +415,14 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   
   
   result <- evalDoQuo(do, humtab, 
-                     quoTab[KeywordType == 'partitions'], 
-                      ordo)
+                        quoTab[KeywordType == 'partitions'], 
+                        ordo)
+  
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
   
+  # "post" stuff
   evalPrePost(quoTab, 'post')
+  par(oldpar)
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -691,7 +697,14 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   }
   
 
-  doQuo
+  rlang::quo({
+    result <- withVisible(!!doQuo)
+    
+    output <- result$value
+    attr(output, 'visible') <- result$visible
+    output
+    
+  })
 }
 
 
@@ -1184,11 +1197,19 @@ evalPrePost <- function(quoTab, which = 'pre') {
 evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (nrow(partQuos) == 0L) {
         result <- rlang::eval_tidy(doQuo, data = humtab)
-        parseResult(result, humtab$`_rowKey_`)
+        
+        do_attr(parseResult, result, humtab$`_rowKey_`)
+        # parseResult(result, humtab$`_rowKey_`)
         
     } else {
         result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
-        if (is.data.frame(result)) result else data.table::rbindlist(result)
+        
+        visible <- any(sapply(result, attr, which = 'visible'))
+        
+        if (!is.data.frame(result)) result <- data.table::rbindlist(result)
+        
+        attr(result, 'visible') <- visible
+        result
     }
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {

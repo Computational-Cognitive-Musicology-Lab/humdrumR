@@ -464,8 +464,16 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
   
 }
 
+do_attr <- function(func, x, ...) {
+  humattr <- humdrumRattr(x)
+  
+  result <- func(x, ...)
+  humdrumRattr(result) <- humattr
+  result
+}
+
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched')
+  known <- c('dispatch', 'dispatched', 'visible')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]
