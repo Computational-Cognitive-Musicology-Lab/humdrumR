@@ -1474,8 +1474,8 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
         }, by = File]
     
     if (nrow(moves) == 0L) {
-        warn('foldExclusive found no matching exclusive interpretation combinations.')
-        return(humdrumR)
+        .stop("foldExclusive found no matching files with both '{fold}' and '{onto}'",
+              'exclusive interpretations.')
     }
     
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]

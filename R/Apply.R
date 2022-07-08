@@ -391,7 +391,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
   
   
-  oldpar <- par(no.readonly = TRUE) ; on.exit(par(oldpar))
+  oldpar <- par(no.readonly = TRUE) ; on.exit(par(oldpar, new = FALSE))
   quoTab <- evalPrePost(quoTab, 'pre')
  
   
@@ -486,6 +486,10 @@ parseArgs <- function(..., variables = list(), withFunc) {
         quoA$Head <- 'par'
         quo <- unanalyzeExpr(quoA)
         keyword <- 'pre'
+      }
+      
+      if (pmatch(quoA$Head, c('windows'), nomatch = 0)) {
+        keyword <- 'windows'
       }
     }
     
@@ -682,7 +686,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   if (any(quoTab$Keyword == 'windows')) {
     doQuo <- windowfyQuo(doQuo,  
                          quoTab[Keyword == 'windows']$Quo[[1]],
-                         esedInExpr, 
+                         usedInExpr, 
                          depth = 1L + any(lists))
   }
   
@@ -1050,8 +1054,8 @@ windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
   if (!'boundaries' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['boundaries']] <- quote(list(File,Spine))
   if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
   
-  applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild')])
-  windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild')]
+  applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])
+  windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild', 'passOutside')]
   
   
   rlang::quo(

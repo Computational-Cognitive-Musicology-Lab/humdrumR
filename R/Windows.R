@@ -231,9 +231,8 @@ removeCrossing <- function(x, boundaries) {
   bad <- outer(boundaries, x$Open, '>') & outer(boundaries, x$Close, '<=')
   remove <- colSums(bad) > 0L
   
-  x <- lapply(x, '[', !remove)
+  x[remove == FALSE]
   
-  x
   
 }
 
@@ -329,7 +328,7 @@ align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateC
 
 #' @rdname humWindows
 #' @export
-windowApply <- function(x, func = c, windows, ..., reference = x, rebuild = TRUE, leftEdge = TRUE) {
+windowApply <- function(x, func = c, windows, ..., passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
   if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
   
   if (missing(windows)) windows <- windows(reference, ...)
@@ -345,9 +344,15 @@ windowApply <- function(x, func = c, windows, ..., reference = x, rebuild = TRUE
     if (all(lengths(result_windowed) == 1L)) {
       result <- unlist(result_windowed)
       x[if (leftEdge) windows$Open else windows$Close ] <- result
-      notstarts <- seq_along(x)
-      notstarts <- notstarts[!notstarts %in% unique(if (leftEdge) windows$Open else windows$Close)]
-      x[notstarts] <- NA
+      if (passOutside) {
+        x[setdiff(unlist(indices), windows$Open)] <- NA
+        
+      } else {
+        notstarts <- seq_along(x)
+        notstarts <- notstarts[!notstarts %in% unique(if (leftEdge) windows$Open else windows$Close)]
+        x[notstarts] <- NA
+      }
+      
     } else {
       Map(\(i, v) x[i] <<- v[1:min(length(i), length(v))], indices, result_windowed)
     }
