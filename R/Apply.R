@@ -1239,6 +1239,14 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     partition <- as.factor(partition)
     
+    nparts <- max(as.integer(partition))
+    if (nparts > 1L && all(par()$mfcol == c(1, 1))) {
+      oldpar <- par(no.readonly = TRUE,
+                    mfcol = find2Dlayout(nparts))
+      on.exit(par(oldpar))
+    }
+    
+    
     result <- humtab[ , 
                       list(list(evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo))), 
                       by = partition, .SDcols = targetFields]

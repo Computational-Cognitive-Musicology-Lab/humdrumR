@@ -858,6 +858,19 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+find2Dlayout <- function(n) {
+  
+  options <- c(1, 2, 4, 6, 8, 9, 12, 15, 16)
+  div     <- c(1, 2, 2, 2, 2, 3, 3 , 3,  4)
+  
+  
+  div <- div[which(options >= n)[1]]
+  n <- options[which(options >= n)[1]]
+  
+  c(div, n / div)
+  
+}
+
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
 is.whole <- function(x) x %% 1 == 0
