@@ -46,7 +46,7 @@
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum]---which can also be called using the 
 #' [humdrumR:humPipe][\%hum>\%] piping 
-#' operator---generates one or N new data fields named {Pipe1, Pipe2, ..., PipeN}. 
+#' operator---generates one or N new data fields named {Result1, Result2, ..., ResultN}. 
 #' These fields can be renamed using the `$<-` operator.
 #' 
 #' 
@@ -1212,11 +1212,11 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 #' which causes the missing parts of `fold` to be filled with data from the `from`
 #' field. `foldPaths` does this by default.
 #' 
-#' The resulting new fields will automatically be named as appropriate pipes.
+#' The resulting new fields will automatically be named as appropriate results.
 #' The `newFieldNames` argument (`character`) can be used to control the output names:
 #' one for each new field created by the fold.
 #' If you specify too many `newFieldNames`, the later names are ignored.
-#' If you specify too few `newFieldNames`, the later names will be given pipe names, 
+#' If you specify too few `newFieldNames`, the later names will be given result names, 
 #' consistent with the default behavior.
 #' 
 #' 
@@ -1394,7 +1394,7 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 
     
     newFieldNames <- if (is.null(newFieldNames)) {
-        paste0('Pipe', seq_len(NnewFields) +  curPipeN(humtab))
+        paste0('Result', seq_len(NnewFields) +  curResultN(humtab))
     } else {
         if (length(newFieldNames) < NnewFields) {
             newFieldNames <- c(head(newFieldNames, -1L),
@@ -1876,7 +1876,7 @@ checkFieldTypes <- function(types, argname, callname) {
                    classes = 'character')
 }
 
-#' The `$` operator controls which humdrumR data are printed and default target for pipe.
+#' The `$` operator controls which humdrumR data are printed and default target for result.
 #' @rdname humdrumRclass
 #' @export
 setMethod('$', signature = c(x = 'humdrumR'),
@@ -2120,15 +2120,15 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' The name(s) given in the indexing expression on the left side of the assignment (i.e., `humdata[c('name1', 'name2')]` or
 #' `humdata$name`) are used as new field names.
 #' How fields are extracted from the right side of the assignment is a little trickier:
-#' Any fields in the right-side `humdrumR` object which are named $PipeN$ (where $N$ is an integer) are copied
+#' Any fields in the right-side `humdrumR` object which are named $ResultN$ (where $N$ is an integer) are copied
 #' in descending order into the named fields on the left side.
-#' If there are no $PipeN$ fields on the right side, any fields used in the current Active formula (on the right side)
+#' If there are no $ResultN$ fields on the right side, any fields used in the current Active formula (on the right side)
 #' are copied instead.
 #' This system might seem odd at first, but it is very useful in combination with the [withinHumdrum] function,
 #' or its convenient pipe operator [%hum>%][humdrumR::humPipe]
-#' When `withinHumdrum` creates new fields, it calls them $Pipe1 \ldots Pipe2 \ldots PipeN$.
-#' Since the output of `withinHumdrum` is always the same as the input except with these new "Pipe" fields,
-#' Byou can use `humdrumR <- humdrumR` assignment to immediately assign these pipe fields more meaningful names in the original object.
+#' When `withinHumdrum` creates new fields, it calls them $Result1 \ldots Result2 \ldots ResultN$.
+#' Since the output of `withinHumdrum` is always the same as the input except with these new "Result" fields,
+#' Byou can use `humdrumR <- humdrumR` assignment to immediately assign these result fields more meaningful names in the original object.
 #' This makes the most sense with an example:
 #' 
 #' ```
@@ -2142,8 +2142,8 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' humdata %hum>% ~semits(Token) -> humdata$Semits
 #' ````
 #' 
-#' Calls to `withinHumdrum` (or `%hum>%`) keep producing new pipe fields.
-#' If there are more than one pipe fields, you can assign multiple fields at once using the `[]<-` syntax:
+#' Calls to `withinHumdrum` (or `%hum>%`) keep producing new result fields.
+#' If there are more than one result fields, you can assign multiple fields at once using the `[]<-` syntax:
 #' 
 #' ```
 #' 
@@ -2151,11 +2151,11 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' 
 #' ```
 #' 
-#' #' **IMPORTANT NOTE!**: Any "PipeN" fields in the humdrumR object you assign from
+#' #' **IMPORTANT NOTE!**: Any "ResultN" fields in the humdrumR object you assign from
 #' that you don't assign field names are simply dropped.
-#' This is nice, because often you might proceed through a serious of piped steps, but you only
+#' This is nice, because often you might proceed through a serious of resultd steps, but you only
 #' want the last one (or two).
-#' If you want to keep all your pipe fields either don't re-assign them at all (i.e., keep the "PipeN" names)
+#' If you want to keep all your result fields either don't re-assign them at all (i.e., keep the "ResultN" names)
 #' or assign them all names using the `->[c("name1", "name2", "name3", ...)]` syntax.
 #' 
 #' 
@@ -2220,10 +2220,10 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
 #' @export
 setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value = 'humdrumR'),
           function(x, i, j, value) {
-                    # This function copies one or more PipeN fields from one humdrumR object
+                    # This function copies one or more ResultN fields from one humdrumR object
                     # into named fields in a different (or the same) humdrumR object of the same size.
                     # If these named fields don't exist, they are created.
-                    # If there are no PipeN fields, the active field(s) are copied.
+                    # If there are no ResultN fields, the active field(s) are copied.
                     if (any(i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name)) {
                         builtin <- i[i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
                         .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
@@ -2232,23 +2232,23 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     }
               
                     humtab <- getHumtab(value)
-                    pipes <- pipeFields(humtab)
-                    removeFields(value) <- pipes
+                    results <- resultFields(humtab)
+                    removeFields(value) <- results
                     
-                    if (length(pipes) == 0L) pipes <- activeFields(value)
+                    if (length(results) == 0L) results <- activeFields(value)
    
-                    pipes <- tail(pipes, n = length(i))
+                    results <- tail(results, n = length(i))
                     
                     if (any(i %in% colnames(humtab))) humtab[ , eval(i[i %in% colnames(humtab)]) := NULL]
                     
-                    colnames(humtab)[colnames(humtab) %in% pipes] <- i
+                    colnames(humtab)[colnames(humtab) %in% results] <- i
                     
-                    if (any(grepl('Pipe', colnames(humtab)))) humtab[ , eval(grep('Pipe', colnames(humtab), value = TRUE)) := NULL]
+                    if (any(grepl('Result', colnames(humtab)))) humtab[ , eval(grep('Result', colnames(humtab), value = TRUE)) := NULL]
                     
                     putHumtab(value, drop = TRUE) <- humtab
                     addFields(value) <- i
                     
-                    value@Active <- substituteName(value@Active, setNames(rlang::syms(i), pipes))
+                    value@Active <- substituteName(value@Active, setNames(rlang::syms(i), results))
                     
                     update_d(updateNull(value))
           })

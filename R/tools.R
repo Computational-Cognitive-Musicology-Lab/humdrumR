@@ -994,7 +994,7 @@ delta.matrix <- function(x, ..., skip = list(is.na)) {
 
 #' Expand numbers outwards from zero
 #' 
-#' Expand is a complement to the base `R` [rounding functions][base::Round], particularly `trunc`.
+#' Expand is a complement to the base `R` [rounding functions][base::round()], particularly `trunc`.
 #' 
 #' @details 
 #' Each of the four base `R` functions---`round`, `ceiling`, `floor`, and `trunc`---follow

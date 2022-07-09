@@ -14,8 +14,8 @@ vignette: >
 knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
 
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = ""
+  collapse = TRUE, message = FALSE,
+  comment = ">\t"
 )
 ```
 
@@ -390,23 +390,10 @@ First, we create special "*do-expressions*" that refer to the humtable's fields.
 To create these expression, we use the R `~` operator.
 For instance, I can write things like:
 
-+ `~ Spine + File`
-+ `~ nchar(Token)`
-+ `~ paste0(Token, Record)`
++ `Spine + File`
++ `nchar(Token)`
++ `paste0(Token, Record)`
 
-Notice that all three of these expressions contain the names of `humdrumR` fields.
-If you execute these lines in an R session, nothing much will happen:
-you'll see that they are saved---'quoted'---and returned as R `formula` objects.
-
-```{r}
-
-~ Spine + File
-
-~ nchar(Token)
-
-~ paste0(Token, Record)
-
-```
 
 However, we can tell `humdrumR` to evaluate these expressions using the fields of our humdrum tables.
 These simplest way is using the `%hum>%` pipe operator, which takes a `humdrumR` object (on its left side), and a `formula` on its right side:
@@ -414,11 +401,11 @@ These simplest way is using the `%hum>%` pipe operator, which takes a `humdrumR`
 
 ```{r}
 
-chorales %hum>% ~ Spine + File
+within(chorales, Spine + File)
 
-chorales %hum>% ~ nchar(Token)
+within(chorales,  nchar(Token))
 
-chorales %hum>% ~ paste0(Token, Record)
+within(chorales,  paste0(Token, Record))
 
 ```
 
@@ -430,7 +417,7 @@ For instance, lets use `humdrumR`'s `semits` function (see the [humdrum pitch](P
 
 ```{r}
 
-chorales %hum>% ~ semits(Token)
+within(chorales, semits(Token))
 
 ```
 
@@ -439,7 +426,7 @@ Lets do it again, but save the result in a new field, which we will call `Semits
 
 ```{r}
 
-chorales %hum>% ~ semits(Token) -> chorales$Semits
+within(chorales, semits(Token) -> Semits) -> chorales
 
 ```
 
@@ -459,7 +446,7 @@ Whats more, we can use the `Semits` field *just* like any other field:
 
 ```{r}
 
-chorales %hum>% ~ paste0(Token, ' = ', Semits)
+within(chorales, paste0(Token, ' = ', Semits))
 
 
 ```

@@ -210,10 +210,10 @@ filterHumdrum <- function(humdrumR, ...) {
 
     humtab <- getHumtab(humdrumR, 'GLIMDd')
     
-    filterPipe <- tail(pipeFields(humtab), 1L)
-    removeFields(humdrumR) <- filterPipe
+    filterResult <- tail(resultFields(humtab), 1L)
+    removeFields(humdrumR) <- filterResult
     
-    colnames(humtab)[colnames(humtab) == filterPipe] <- '__TmpFilter__'
+    colnames(humtab)[colnames(humtab) == filterResult] <- '__TmpFilter__'
     
     if (humtab[ , class(`__TmpFilter__`)] != 'logical') stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
     

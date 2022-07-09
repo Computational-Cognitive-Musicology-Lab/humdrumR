@@ -47,7 +47,7 @@
 #' `with.humdrumR` evaluates your expression(s) and then simply returns the result of
 #' the evaluation. `within.humdrumR` evaluates your expression(s) and then
 #' (attempts) to insert the results back into the humdrumR object, generating new
-#' fields called `PipeX` (see details).
+#' fields called `ResultX` (see details).
 #' 
 #' `inHumdrum` is simply a short hand for `within.humdrumR`.
 #' 
@@ -264,7 +264,7 @@
 #' 
 #' For calls to `within.humdrumR`, the result of each `do` expression
 #' is insterted back into the `[humtable][humdrum table]`. The results
-#' are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
+#' are put into new field(s) labeled Result1, ResultX, ..., ResultN. If the results
 #' of the expression are shorter than the rows in the [humtable][humdrum table],
 #' or an `object`, the humdrum table is shrunk to fit them.
 #'     
@@ -345,13 +345,15 @@ within.humdrumR <- function(data, ..., variables = list()) {
   newhumtab <- result[humtab, on ='_rowKey_'] 
   newhumtab[ , `_rowKey_` := NULL]
   
-  # number new pipes
-  unnamedresult <- which(colnames(newhumtab) == 'Pipe')
+  # number new results
+  unnamedresult <- which(colnames(newhumtab) == 'Result')
   assign <- tail(quoTab[KeywordType == 'do' & Keyword != 'dofx' & !is.na(AssignTo), AssignTo], 1)
-  if (length(assign)) colnames(newhumtab)[unnamedresult[1]] <- assign[[1]]
-  unnamedresult <- unnamedresult[-1]
+  if (length(assign)) {
+    colnames(newhumtab)[unnamedresult[1]] <- assign[[1]]
+    unnamedresult <- unnamedresult[-1]
+  }
   
-  if (length(unnamedresult)) colnames(newhumtab)[unnamedresult] <- paste0('Pipe', curPipeN(humtab) + seq_along(unnamedresult))
+  if (length(unnamedresult)) colnames(newhumtab)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_along(unnamedresult))
   
   
   #### Put new humtable back into humdrumR object
@@ -422,7 +424,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   
   # "post" stuff
   evalPrePost(quoTab, 'post')
-  par(oldpar)
+  par(oldpar[names(oldpar) != 'new'])
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -1276,7 +1278,7 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 ## Reassembling humtable ----
 #######################################################-
 
-#This is the hard part, putting pipeout output back into data.table
+#This is the hard part, putting resultout output back into data.table
 
 # options:
 # Output are either length 1, same length as original, short (<21), or some length in between, or some other object.
@@ -1311,8 +1313,8 @@ parseResult <- function(result, rowKey) {
     
     result <- parseFunc(result)
     
-    colnames(result)[colnames(result) == ""] <- "Pipe"
-    colnames(result) <- gsub('^V{1}[0-9]+', "Pipe", colnames(result))
+    colnames(result)[colnames(result) == ""] <- "Result"
+    colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
     
     #
     lenRes <- nrow(result)
@@ -1333,7 +1335,7 @@ parseResult_vector <- function(result) {
         # in a data.table
         as.data.table(as.list(result))
     } else {
-        data.table(Pipe = result)
+        data.table(Result = result)
     }
 }
 
@@ -1352,24 +1354,24 @@ parseResult_other <- function(result) data.table(list(result))
 
 
 
-pipeFields <- function(humtab) {
-  # Another function used by pipeIn<- (withing curePipeN)
-  # Takes a humtab and identifies the pipe fields (columns), if any,
+resultFields <- function(humtab) {
+  # Another function used by resultIn<- (withing cureResultN)
+  # Takes a humtab and identifies the result fields (columns), if any,
   # are in it.
   colnms <- colnames(humtab)
   
-  pipefields  <- colnms[grepl('Pipe', colnms)]
+  resultfields  <- colnms[grepl('Result', colnms)]
   
-  if (length(pipefields) != 0L) pipefields <- pipefields[order(as.numeric(stringr::str_extract(pipefields, '[0-9]+')))]
+  if (length(resultfields) != 0L) resultfields <- resultfields[order(as.numeric(stringr::str_extract(resultfields, '[0-9]+')))]
   
-  pipefields
+  resultfields
 }
 
-curPipeN <- function(humtab) {
-          # A function used by pipeIn<-
-          # identifies how many pipe fields (if any)
+curResultN <- function(humtab) {
+          # A function used by resultIn<-
+          # identifies how many result fields (if any)
           # are already in a humtable.
-          length(pipeFields(humtab))   
+          length(resultFields(humtab))   
           
 }
 
