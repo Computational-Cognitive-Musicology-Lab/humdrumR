@@ -317,7 +317,6 @@ with.humdrumR <- function(data, ...,
     result <- result[[1L]]
     if (is.list(result) && length(result) == 1L) result <- result[[1]]
   } 
-  
   attr(result, 'visible') <- NULL
   
   if (visible) result else invisible(result)
@@ -1264,9 +1263,8 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     if (!is.null(ordoQuo)) {
         orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
-        result <- rbind(result, orresult)
+        result <- list(result, orresult)
     }
-    
    # result[humtab[, '_rowKey_'], on ='_rowKey_'] 
    result
 }
