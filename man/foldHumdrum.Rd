@@ -13,12 +13,13 @@ foldHumdrum(
   what = "Spine",
   File = NULL,
   fromField = "Token",
+  fillFromField = FALSE,
   newFieldNames = NULL
 )
 
-foldPaths(humdrumR, fromField = "Token")
+foldPaths(humdrumR, fromField = "Token", fillFromField = TRUE)
 
-foldStops(humdrumR, fromField = "Token")
+foldStops(humdrumR, fromField = "Token", fillFromField = FALSE)
 }
 \arguments{
 \item{humdrumR}{A \link[=humdrumR-class]{humdrumR data object}.}
@@ -38,6 +39,10 @@ specific folds for different files in the corpus (see "File-Specific Folding" se
 \item{fromField}{(\code{character}, \code{length == 1}) A string (partially) matching the
 name of a data field in the \code{humdrumR}-object input. This field is the field which is
 "folded" to a new field.}
+
+\item{fillFromField}{(\code{logical}, \code{length == 1}) If the folding field is
+smaller than the \code{to} field, should the content of the \code{fromField} be copied
+into the \code{NA} sections?}
 
 \item{newFieldNames}{(\code{character}) Names to use for new fields created by the folding.}
 }
@@ -86,12 +91,18 @@ The \code{fromField} (\code{character}, \code{length == 1}) controls which field
 spine/path/stop is folded into a new field.
 The \code{fromField} argument defaults to the (first) \link[=humActive]{active field},
 and must match (or partially match) a field in the \code{humdrumR} argument data set.
+In some cases, the \code{fold} data is smaller than the \code{onto} data---for instance,
+spine paths often only exist for part of a spine, so there is less data in the path
+than in the full spine.
+In these cases, it can be helpful to set \code{fillFromField == TRUE},
+which causes the missing parts of \code{fold} to be filled with data from the \code{from}
+field. \code{foldPaths} does this by default.
 
-The resulting new fields will automatically be named as appropriate pipes.
+The resulting new fields will automatically be named as appropriate results.
 The \code{newFieldNames} argument (\code{character}) can be used to control the output names:
 one for each new field created by the fold.
 If you specify too many \code{newFieldNames}, the later names are ignored.
-If you specify too few \code{newFieldNames}, the later names will be given pipe names,
+If you specify too few \code{newFieldNames}, the later names will be given result names,
 consistent with the default behavior.
 }
 \section{File-Specific Folding}{

@@ -37,15 +37,15 @@ to another works like this:
 The name(s) given in the indexing expression on the left side of the assignment (i.e., \code{humdata[c('name1', 'name2')]} or
 \code{humdata$name}) are used as new field names.
 How fields are extracted from the right side of the assignment is a little trickier:
-Any fields in the right-side \code{humdrumR} object which are named $PipeN$ (where $N$ is an integer) are copied
+Any fields in the right-side \code{humdrumR} object which are named $ResultN$ (where $N$ is an integer) are copied
 in descending order into the named fields on the left side.
-If there are no $PipeN$ fields on the right side, any fields used in the current Active formula (on the right side)
+If there are no $ResultN$ fields on the right side, any fields used in the current Active formula (on the right side)
 are copied instead.
 This system might seem odd at first, but it is very useful in combination with the \link{withinHumdrum} function,
 or its convenient pipe operator \link[=humPipe]{\%hum>\%}
-When \code{withinHumdrum} creates new fields, it calls them $Pipe1 \ldots Pipe2 \ldots PipeN$.
-Since the output of \code{withinHumdrum} is always the same as the input except with these new "Pipe" fields,
-Byou can use \code{humdrumR <- humdrumR} assignment to immediately assign these pipe fields more meaningful names in the original object.
+When \code{withinHumdrum} creates new fields, it calls them $Result1 \ldots Result2 \ldots ResultN$.
+Since the output of \code{withinHumdrum} is always the same as the input except with these new "Result" fields,
+Byou can use \code{humdrumR <- humdrumR} assignment to immediately assign these result fields more meaningful names in the original object.
 This makes the most sense with an example:\preformatted{humdata$Semits <- humdata \%hum>\% ~semits(Token) 
 }
 
@@ -53,17 +53,17 @@ In humdrumR, we actually favor the left-to-right "piping" style.
 Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:\preformatted{humdata \%hum>\% ~semits(Token) -> humdata$Semits
 }
 
-Calls to \code{withinHumdrum} (or \verb{\%hum>\%}) keep producing new pipe fields.
-If there are more than one pipe fields, you can assign multiple fields at once using the \verb{[]<-} syntax:\preformatted{
+Calls to \code{withinHumdrum} (or \verb{\%hum>\%}) keep producing new result fields.
+If there are more than one result fields, you can assign multiple fields at once using the \verb{[]<-} syntax:\preformatted{
 humdata \%hum>\% ~semits(Token) \%hum>\% ~pitch(Token) -> humdata[c('semits', 'pitch')]
 
 }
 
-#' \strong{IMPORTANT NOTE!}: Any "PipeN" fields in the humdrumR object you assign from
+#' \strong{IMPORTANT NOTE!}: Any "ResultN" fields in the humdrumR object you assign from
 that you don't assign field names are simply dropped.
-This is nice, because often you might proceed through a serious of piped steps, but you only
+This is nice, because often you might proceed through a serious of resultd steps, but you only
 want the last one (or two).
-If you want to keep all your pipe fields either don't re-assign them at all (i.e., keep the "PipeN" names)
+If you want to keep all your result fields either don't re-assign them at all (i.e., keep the "ResultN" names)
 or assign them all names using the \verb{->[c("name1", "name2", "name3", ...)]} syntax.
 }
 

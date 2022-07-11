@@ -31,6 +31,7 @@ windowApply(
   func = c,
   windows,
   ...,
+  passOutside = FALSE,
   reference = x,
   rebuild = TRUE,
   leftEdge = TRUE

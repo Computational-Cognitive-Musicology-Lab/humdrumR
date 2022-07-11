@@ -55,7 +55,7 @@ analogous to the difference between \verb{[base][with]} and \verb{[base][within]
 \code{with.humdrumR} evaluates your expression(s) and then simply returns the result of
 the evaluation. \code{within.humdrumR} evaluates your expression(s) and then
 (attempts) to insert the results back into the humdrumR object, generating new
-fields called \code{PipeX} (see details).
+fields called \code{ResultX} (see details).
 
 \code{inHumdrum} is simply a short hand for \code{within.humdrumR}.
 }
@@ -273,7 +273,7 @@ within(humdata,
 
 For calls to \code{within.humdrumR}, the result of each \code{do} expression
 is insterted back into the \verb{[humtable][humdrum table]}. The results
-are put into new field(s) labeled Pipe1, PipeX, ..., PipeN. If the results
+are put into new field(s) labeled Result1, ResultX, ..., ResultN. If the results
 of the expression are shorter than the rows in the \link[=humdrum table]{humtable},
 or an \code{object}, the humdrum table is shrunk to fit them.
 }

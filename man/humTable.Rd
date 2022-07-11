@@ -74,7 +74,7 @@ contains character strings representing the original strings read from the humdr
 Users can create as many additional data fields as they like. Every call to
 \link{withinHumdrum}---which can also be called using the
 \link[=\\\%hum>\\\%]{humdrumR:humPipe} piping
-operator---generates one or N new data fields named {Pipe1, Pipe2, ..., PipeN}.
+operator---generates one or N new data fields named {Result1, Result2, ..., ResultN}.
 These fields can be renamed using the \verb{$<-} operator.
 }
 
