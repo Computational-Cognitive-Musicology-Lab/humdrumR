@@ -37,14 +37,14 @@ chorales
 So we've got ten files of `**kern` data.
 How do we access or manipulate this data?
 
-# With and within you
+## With and within you
 
 The key functions for working with `humdrumR` data objects are `with` and `within`.
 These functions allow you to get "inside" your data.
 Basically, once you call `with`/`within`, all the data fields within the data become available to you, to do with as you will.
 
 
-## With 
+# With 
 
 Let's start with `with`.
 You should call `with` with a `humdrumR` data object as the first argument.
@@ -206,7 +206,7 @@ The expression `Spine < 3` returns `FALSE` for spines 1 and 2 (bass and tenor) a
 These two categories (`FALSE` and `TRUE`) are then used to group the data.
 
 
-## Within
+# Within
 
 In many cases, we want to apply functions to our humdrum data, but keep the humdrum/`humdrumR` structure in place.
 This is what `within` is for.

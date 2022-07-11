@@ -1206,11 +1206,12 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     } else {
         result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
         
-        visible <- any(sapply(result, attr, which = 'visible'))
+        if (!is.data.frame(result)) {
+          visible <- any(sapply(result, attr, which = 'visible'))
+          result <- data.table::rbindlist(result)
+          attr(result, 'visible') <- visible
+        }
         
-        if (!is.data.frame(result)) result <- data.table::rbindlist(result)
-        
-        attr(result, 'visible') <- visible
         result
     }
 }
