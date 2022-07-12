@@ -45,10 +45,9 @@ reference:
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
   - humdrumPitch
-  - pitchParsing
-  - pitchDeparsing
-  - tonalIntervalS4
   - pitchFunctions
+  - pitchParsing
+  - tonalIntervalS4
 - subtitle: "Pitch functions"
   desc: "These functions translate between pitch representations:"
   contents:
