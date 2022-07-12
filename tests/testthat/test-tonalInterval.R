@@ -91,8 +91,9 @@ test_that("Functions are invertible", {
                    lilypond = c("aes", "ees'", "bes''", "f'", "c'", "g'", "d'''", "a,,", "e'", "beses'", "fis'", "cis'"))
     
     #
+    devtools::load_all()
     
-    expect_invertible(tint2pitch,  pitch2tint,  inputs$tint)
+    # expect_invertible(tint2pitch,  pitch2tint,  inputs$tint)
     expect_invertible(tint2kern, kern2tint, inputs$tint)
     expect_invertible(tint2interval,  interval2tint,  inputs$tint)
 
