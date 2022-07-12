@@ -329,7 +329,6 @@ within.humdrumR <- function(data, ..., variables = list()) {
   checkhumdrumR(data, 'within.humdrumR')
   list2env(withHumdrum(data, ..., variables = variables, withFunc = 'within.humdrumR'), envir = environment())
   
-  
   if (all(quoTab[KeywordType == 'do', Keyword == 'dofx'])) return(data)
   
   local({
@@ -415,9 +414,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
   
-  result <- evalDoQuo(do, humtab, 
-                        quoTab[KeywordType == 'partitions'], 
-                        ordo)
+  result <- evalDoQuo(do, humtab,  quoTab[KeywordType == 'partitions'],  ordo)
   
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
   
@@ -511,7 +508,7 @@ parseArgs <- function(..., variables = list(), withFunc) {
   quoTab <- as.data.table(do.call('rbind', quos))
   quoTab$Keyword[argnames != ""] <- argnames[argnames != ""]
   
-  quoTab$AssignTo[quoTab$Keyword != 'do'] <- NA
+  quoTab$AssignTo[!quoTab$Keyword %in% c('do', 'dofill')] <- NA
   
   quoTab <- parseKeywords(quoTab, withFunc)
   
@@ -1207,6 +1204,11 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
         
         if (!is.data.frame(result)) {
           visible <- any(sapply(result, attr, which = 'visible'))
+          
+          if (partQuos$Keyword[1] == 'where' && !is.null(ordoQuo)) {
+            colnames(result[[2]]) <- colnames(result[[1]])
+          }
+          
           result <- data.table::rbindlist(result)
           attr(result, 'visible') <- visible
         }
@@ -1242,7 +1244,11 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     partition <- as.factor(partition)
     
     nparts <- max(as.integer(partition))
-    if (nparts > 1L && all(par()$mfcol == c(1, 1))) {
+    
+    if (nparts > 1000L) message("You're 'by' argument is making ", num2print(nparts), " groups.", 
+                                " This could take a while!")
+    
+    if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
       oldpar <- par(no.readonly = TRUE,
                     mfcol = find2Dlayout(nparts))
       on.exit(par(oldpar))

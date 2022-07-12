@@ -861,6 +861,8 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 find2Dlayout <- function(n) {
   
   options <- c(1, 2, 4, 6, 8, 9, 12, 15, 16)
+  
+  if (n > max(options)) n <- max(options)
   div     <- c(1, 2, 2, 2, 2, 3, 3 , 3,  4)
   
   
