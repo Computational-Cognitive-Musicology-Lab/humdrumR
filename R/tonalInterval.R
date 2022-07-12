@@ -911,17 +911,17 @@ tint2bhatk <- function(x, ...) {
 
 
 tint2solfa <- function(x, Key = NULL,  parts = c("octave", "step", 'species'), 
-                       generic = FALSE, flat = '-', sharp = '#', factor = FALSE, ...) {
+                       specific = TRUE, flat = '-', sharp = '#', factor = FALSE, ...) {
   
   
   t2tC <- partialApply(tint2tonalChroma, octave.integer = FALSE, octave.relative = FALSE,
                        step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'), 
                        qualities = FALSE, accidental.integer = TRUE)
   
-  solfa_parts <- t2tC(x, generic = generic, ..., collapse = FALSE) #
+  solfa_parts <- t2tC(x, specific = specific, ..., collapse = FALSE) #
   
   # change species to syllable "tails"
-  solfa_parts$tail <- if (!generic) {
+  solfa_parts$tail <- if (specific) {
     solfatails <- rbind(d = c("e", "o", "i"),
                         r = c("a", "e", "i"),
                         m = c("e", "i", "y"),
@@ -1997,39 +1997,38 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 
 ## Pitch function documentation ####
 
+pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'helmholtz', 'tonh' = 'German-style notation'),
+                                    Relative = c('interval', 
+                                                 'solfa' = 'relative-do solfege', 
+                                                 'solfg' = 'French-style fixed-do solfege', 
+                                                 'degree' = 'absolute scale degrees', 'deg' = 'melodic scale degrees', 
+                                                 'bhatk' = 'hindustani swara'),
+                                    Partial  = c('step', 'accidental', 'quality', 'octave')),
+                       Atonal = list(Musical = c('semits', 'midi', 'cents', 'pc' = 'pitch classes'),
+                                     Physical = c('freq')))
 
 
 #' Translate between pitch representations.
 #' 
 #' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
 #' The functions are:
-#' + **Tonal pitch representations**
-#'   + *Absolute pitch representations*
-#'     + [kern()]
-#'     + [pitch()]
-#'     + [lilypond()]
-#'     + [helmholtz()]
-#'     + [tonh()] (German-style notation)
-#'   + *Relative pitch representations*
-#'     + [interval()]
-#'     + [solfa()] (relative-do solfege)
-#'     + [solfg()] (fixed-do solfege)
-#'     + [degree()] (absolute scale degrees)
-#'     + [deg()] (melodic scale degrees)
-#'     + [bhatk()] (hindustani swara)
-#'   + *Partial pitch representations*
-#'     + [step()]
-#'     + [accidental()]
-#'     + [quality()]
-#'     + [octave()]
-#' + **Atonal pitch representations**
-#'   + *Musical (non-tonal) pitch representations*
-#'     + [semits()]
-#'     + [midi()]
-#'     + [cents()]
-#'     + [pc()]
-#'   + *Physical pitch/interval representations*
-#'     + [freq()]
+#' 
+#' ```{r echo = FALSE, results = 'asis'}
+#' 
+#' pfs <- rapply(pitchFunctions, 
+#'                 \(func) paste0('    + [', 
+#'                                 ifelse(.names(func) == '', func, paste0(.names(func))), 
+#'                                 '()]', ifelse(.names(func) == '', '', paste0(' (', func, ')'))), how = 'list')
+#' 
+#' pfs <- lapply(pfs, \(top) Map(\(name, pf) paste(c(paste0('  + *', name, ' pitch representations*'), pf), collapse = '\n'), names(top), top))
+#' 
+#' pfs <- Map(\(name, l) paste(c(paste0('+ **', name, ' pitch representations**'), unlist(l)), collapse ='\n'), names(pfs), pfs)
+#' cat(unlist(pfs), sep = '\n')
+#' 
+#' 
+#' ````
+#' 
+
 #'     
 #' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
 #' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
@@ -2080,7 +2079,7 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' 
 #' If `generic = TRUE`, [specific pitch information](https://en.wikipedia.org/wiki/Generic_and_specific_intervals)
 #'  (accidentals or qualities) is omitted from the output.
-#' As an alternative way of controlling the same functionality, you can use the `specific` argument ,where `specific == !generic`.
+#' As an alternative way of controlling the same functionality, you can use the `specific` argument, where `specific == !generic`.
 
 #' In the case of atonal outputs, the "generic" version of that pitch is output:
 #' for example, `semits('c#', generic = TRUE)` will return `0`, because the "generic" version of *C#* is *C*, which corresponds to `0`.
@@ -2088,7 +2087,7 @@ setMethod('as.integer', 'tonalInterval', tint2semits)
 #' 
 #' ## Simple vs Compound
 #' 
-#' If `specific = TRUE`, [compound pitch information](https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound)
+#' If `simple = TRUE`, [compound pitch information](https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound)
 #' (octave and contour) is omitted from the output.
 #' As an alternative way of controlling the same functionality, you can use the `compound` argument ,where `compound == !simple`.
 #'
@@ -2593,7 +2592,6 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
                                                                 parse = parseArgs, transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)
     namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
-    
     # There are four kinds of arguments: 
     # ... arguments (now in args...), 
     # FORMAL arguments, if specified (now in namedArgs)
@@ -2642,6 +2640,8 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
 
 
 ### Pitch Transformers ####
+
+
 
 
 #' Translate pitches to frequency (Hz)

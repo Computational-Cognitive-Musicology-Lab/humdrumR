@@ -33,7 +33,50 @@ Otherwise, returns a vector/matrix of the same length/dimension as \code{x}.
 \description{
 These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
 The functions are:
+}
+\details{
 \itemize{
+\item Tonal pitch representations
+\itemize{
+\item Absolute pitch representations
+\itemize{
+\item \code{\link[=kern]{kern()}}
+\item \code{\link[=pitch]{pitch()}}
+\item \code{\link[=lilypond]{lilypond()}}
+\item \code{\link[=helmholtz]{helmholtz()}}
+\item \code{\link[=tonh]{tonh()}} (German-style notation)
+}
+\item Relative pitch representations
+\itemize{
+\item \code{\link[=interval]{interval()}}
+\item \code{\link[=solfa]{solfa()}} (relative-do solfege)
+\item \code{\link[=solfg]{solfg()}} (French-style fixed-do solfege)
+\item \code{\link[=degree]{degree()}} (absolute scale degrees)
+\item \code{\link[=deg]{deg()}} (melodic scale degrees)
+\item \code{\link[=bhatk]{bhatk()}} (hindustani swara)
+}
+\item Partial pitch representations
+\itemize{
+\item \code{\link[=step]{step()}}
+\item \code{\link[=accidental]{accidental()}}
+\item \code{\link[=quality]{quality()}}
+\item \code{\link[=octave]{octave()}}
+}
+}
+\item Atonal pitch representations
+\itemize{
+\item Musical pitch representations
+\itemize{
+\item \code{\link[=semits]{semits()}}
+\item \code{\link[=midi]{midi()}}
+\item \code{\link[=cents]{cents()}}
+\item \code{\link[=pc]{pc()}} (pitch classes)
+}
+\item Physical pitch representations
+\itemize{
+\item \code{\link[=freq]{freq()}}
+}
+}
 \item \strong{Tonal pitch representations}
 \itemize{
 \item \emph{Absolute pitch representations}
@@ -76,8 +119,7 @@ The functions are:
 }
 }
 }
-}
-\details{
+
 These pitch functions all work in similar ways, with similar arguments and functionality.
 Each function takes an input pitch representation (which can be anything) and outputs
 \emph{its} own pitch representation.

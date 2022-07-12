@@ -9,839 +9,125 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
-
+```{r, include = FALSE, message=FALSE, echo = FALSE }
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  dpi = 300,
-  comment = ""
-)
-
-par(family = 'Times', mar = c(0,0,0,0))
+  collapse = TRUE, message = FALSE,
+  comment = ">\t")
 library(humdrumR)
+par(mar=c(1,1,1,1))
+
+pitchFunctions <- humdrumR:::pitchFunctions
 ```
 
 
 As a computational musicology toolkit, `humdrumR`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
 For the most part, `humdrumR`'s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
 
-Pitch, and the tonal organization of pitch, is represented in `humdrumR` using three `S4` classes and associated methods: 
 
-+ `struct`
-    + `tonalInterval` (pitches)
-    + `diatonicSet` (keys)
-         + `tertianSet` (chords)
-
-`tertianSet` inherits from `diatonicSet`---thus any `tertianSet` is also a `diatonicSet`.
-(All three classes inherit from `struct`, giving them generic atomic-vector-like behavior.)
+# Pitches and Intervals
 
 
-If know Western music theory, how to Western read music, or even the basics of giving names to pitches and chords, you should be able to get started with `humdrumR` pitch tools very quickly.
-This vignette takes the time to really explain how and why the `humdrumR` tonal system is set up.
-Fortunately, many sections are marked with "tl;dr" summaries, so you can skip to (sub)sections that are relevant to you.
+`humdrumR` defines a suite of pitch functions, like `kern`, `solfa`, `interval`, and `semits`.
+These functions all work in essentially the same way: they take in an input argument and output pitch information in their own particular format.
+For example,
 
-+ Section xxx talks in detail about the music theoretic logic of the `humdrumR` system.
-+ Section xxx talks about how `humdrumR` encodes tonal logic.
-+ Section xxx talks about the functions and tools that `humdrumR` actually offers for you to work with tonal pitch data!
+```{r}
 
-If you really want to just get started coding ASAP, start with section XXX, and feel free to peruse the earlier sections at your leisure to get that deeper understanding.
+input <- c('4.c', '8d', '4e', '2.g')
 
-
-
-# Tonal Intervals
-
-> **tl;dr**: `humdrumR` encodes tonal pitch information as intervals on the fundamental line-of-fifths (tonal),
-> combined with an octave value to indicate pitch height,.
-
-The `tonalInterval` class is the core pitch representation in `humdrumR`.
-As the name suggests, pitch is encoded *tonally*.
-That means that the *focus* of the representation is the **line-of-fifths** (LoF).
-Pitch names (letters and accidentals), intervals, diatonic keys and tertian harmonies all make the most logical sense defined on the line-of-fifths.
-When we want to define specific pitches in frequency space, we have to add *specific* "pitch-height" information, which is encoded as a separate *octaves* field.
-
-
-
-
-## Psychoacoustics and the Western Tuning System
-
-> **tl;dr**: Tonal intervals are represented as combinations of octaves (second harmonic, 2:1 ratio) and perfect 12ths (third harmonic, ~3:1 ratio).
-> The perfect 12ths represent the circle-of-fifths and all diatonic collections while the octaves help specific specific pitch height.
-
-At first glance, pitch appears to by a straightforward, one-dimensional phenomenon:
-every "pitched event" has a frequency (perceptually) associated with it.
-We refer to the frequency associated with an event as it's "pitch"---here, we'll use the term frequency and pitch interchangeably.
-
-Human can percieve frequencies ranging from approximately $20$--$20,000_{Hz}$.
-("Hz" is an abbreviation for *Hertz*; e.g. cycles-per-second.)
-
-```{r, echo = FALSE}
-
-
-plot.new()
-plot.window(xlim = c(20, 20e3), ylim = c(0,1))
-axis(1, c(20, 1000, seq(2000, 20e3, 2e3)), pos = .5)
-mtext("Frequency (Hertz)", 3)
-
-```
-
-However, our perception of pitch is predominantly *relative*, not absolute.
-In other words, (most of us) can't identify specific frequenncies in isolation; instead, we percieve the "distance" between pitches, what we call an *interval*.
-More specfically, we percieved distance/intervals between frequencies *rationally*: the distance we percieve is the *ratio* between the pitches.
-For example, the "distance" between the frequencies $200_{Hz}$ and $300_{Hz}$ is the *same* as the distance between $2,400_{Hz}$ and $3,600_{Hz}$.
-Why? Because they are the same ratios: $\frac{200}{300} = \frac{2,400}{3,600}$!
-This means that it makes more sense to think of the enormous $20$--$20,000_{Hz}$ frequency range we percieve on a logarithmic scale, which makes the equal distance look equal on paper:
-
-```{r, echo = FALSE}
-plot.new()
-plot.window(xlim = log(c(20, 20e3), 2), ylim = c(0,1))
-fs <- 20 * (2^(0:10))
-
-axis(1, log(fs, 2), fs, pos = .5)
-
-mtext("Frequency (Hertz)", 3)
-```
-
-
-### Octave Equivalence
-
-We perceive the distance (interval) between pitches based on the ratio between their frequencies.
-But not all ratios are created equal!
-The simplest, integer ratios are **privileged** in our perception---they simply sound better, more *consonant*, to us!
-Integer ratios between frequencies are called [harmonics](https://en.wikipedia.org/wiki/Harmonic).
-The simplest, purest harmonic relationship is the 2-to-1 ratio, which we call an [octave](https://en.wikipedia.org/wiki/Octave).
-Pitches separated by an octave are *so* consonant that we actually perceive them as being "the same pitch" (in some respects).
-We call this sameness *octave equivalence*.
-If two pitches are octave equivalent---i.e., the ratio between their frequencies is a power of two---we say that they are the same *pitch chroma*.
-In the following figure, the three rows of frequencies each represent groups of pitches that are equivalent chroma:
-
-
-```{r, echo = FALSE}
-
-plot.new()
-plot.window(xlim = log(c(20, 20e3), 2), ylim = c(0,1))
-
-fs <- 20 * (2^(0:8)); axis(1, log(fs, 2), fs, pos = .8)
-fs <- 50 * (2^(0:8)) ;  axis(1, log(fs, 2), fs, pos = .5)
-fs <- 90 * (2^(0:8)); axis(1, log(fs, 2), fs, pos = .2)
-
-mtext("Frequency (Hertz)", 3)
-
-
-```
-
-Due to the perceptual reality of octave equivalence, most (essentially all) musical scales use the octave as a bounding point---the same patterns of pitch chroma (e.g., scales) are repeated in each octave we can perceive.
-Thus, even though we can perceive close to ten octaves worth of frequencies, the organization of pitch in music is mostly based on pitches that can be squeezed into a single octave.
-
-
-```{r, echo = FALSE}
-
-plot.new()
-plot.window(xlim = log(c(100, 800), 2), ylim = c(0,1))
-
-
-scale <- 100 * c(1, 9/8, 5/4, 4/3, 3/2, 3/2 * 9/8, 3/2 * 5/4)
-
-
-fs <- 1 * scale; axis(1, log(fs, 2), fs, pos = .8)
-fs <- 2 * scale; axis(1, log(fs, 2), fs, pos = .5)
-fs <- 4 * scale; axis(1, log(fs, 2), fs, pos = .2)
-
-
-mtext("Frequency (Hertz)", 3)
-
-f <- log(125, 2)
-with(spline(x = c(f, f + .5, f+1), y = c(.8,1,.5), n =100), points(y~x, type = 'l', lty='dashed'))
-with(spline(x = c(f+1, f + 1.5, f+2), y = c(.5,.7,.2), n =100), points(y~x, type = 'l', lty= 'dashed'))
-
-f <- log(150, 2)
-with(spline(x = c(f, f + .5, f+1), y = c(.6,.2,.3), n =100), points(y~x, type = 'l', lty='dashed'))
-with(spline(x = c(f+1, f + 1.5, f+2), y = c(.3,0,0.05), n =100), points(y~x, type = 'l', lty= 'dashed'))
-
+kern(input)
+interval(input)
+semits(input)
+solfa(input)
 
 ```
 
 
-### Tonal Harmonics
+Notice that the functions all recognize the pitch part of these input tokens, ignoring the non-pitch (rhythm) information.
+If you want to keep the non-pitch part of your tokens, use the `inPlace` argument:
 
-The 2-to-1 harmonic octave, however, is not the whole story.
-The next couple of integer (harmonic) ratios are also special, perceptually:
-Both the third and the fifth harmonics---corresponding to the major scale degrees $\hat{5}$ (perfect fifth) and $\hat{3}$ (major third) respectively---have influenced the development of Western tonality.
-That is to say, most musical scales are tuned in such a way as to create ratios between scale degrees that are as close to the 3-to-1 or 5-to-1 as possible.
-"Just intonation" is the preeminent Western example.
+```{r}
 
-The third harmonic ($\approx\hat{5}$) is the **primary** factor in the Western tonal system---in `humdruMR` we call it the *tonal harmonic*.
-The Western diatonic scale is constructed, fundamentally, from arranging 3rd-harmonic intervals within the octave.
-The logical result of this approach is an octave divided into five (pentatonic), seven (diatonic), or twelve (chromatic) *unequal* steps.
+input <- c('4.c', '8d', '4e', '2.g')
 
-
-```{r, echo = FALSE}
-
-plot.new()
-plot.window(xlim = log(c(20, 3000), 2), ylim = c(0,1))
-
-mtext("Frequency (Hertz)", 3)
-
-fs2 <- 20 * (2^(0:7)); axis(1, log(fs2, 2), fs2, pos = 0.2)
-text(mean(log(fs2, 2)), 0, 'Octaves', cex = .6)
-
-fs3 <- 20 * (3^(0:4)) ; axis(1, log(fs3, 2), fs3, pos = .9)
-text(mean(log(fs3, 2)), .95, 'Third (Tonal) Harmonics', cex = .6)
-segments(log(fs3, 2), rep(.7, length(fs3)), log(20,2) + log(fs3/20, 2) %% 1, rep(.3, length(fs3)), lty='dashed')
-
-for (i in 0:6) text(i + sort(log(20, 2) + log(fs3/20, 2) %% 1), rep(.2, length(fs3)), cex = .5, c('C', 'D', 'E', 'G', 'A'), pos = 3)
-
-text(log(1000, 2), .5, 'Pentatonic Scale!')
-```
-
-The seven-note diatonic has been the fundamental unit of Western tonality for several thousand years.
-The chromatic (12-note) superset has gradually grown in prominence over the last five centuries, yet in most tonal contexts, the chromatic set is still distinctly a superset of the diatonic, seen as a diatonic set plus five "alterations."
-
-```{r, echo = FALSE}
-
-plot.new()
-plot.window(xlim = log(c(5, 5000), 2), ylim = c(0,1))
-
-
-mtext("Frequency (Hertz)", 3)
-
-fs2 <- 20 * (2^(-2:8)); axis(1, log(fs2, 2), fs2, pos = 0.2)
-text(mean(log(fs2, 2)), 0, 'Octaves', cex = .6)
-
-fs3 <- 20 * (3^(-1:5)) ; axis(1, log(fs3, 2), round(fs3,2), pos = .9)
-text(mean(log(fs3, 2)), .95, 'Third (Tonal) Harmonics', cex = .6)
-segments(log(fs3, 2), rep(.7, length(fs3)), log(20,2) + log(fs3/20, 2) %% 1, rep(.3, length(fs3)), lty='dashed')
-
-for (i in -2:8) text(i + sort(log(20, 2) + log(fs3/20, 2) %% 1), rep(.2, length(fs3)), cex = .5, c('C', 'D', 'E', 'F', 'G', 'A', 'B'), pos = 3)
-
-text(log(3000, 2), .5, 'Diatonic Scale!')
-```
-
-
-Thus, the 3rd-harmonic is the fundamental *generator* of the Western diatonic scale, diatonic keys, and tonality in general.
-Throughout `humdrumR` we often refer to the *line-of-fifths* (or *circle-of-fifths*), where the "fifths" are those stacked up 3rd harmonics.
-
-
-### Pythagorean Tuning
-
-> **tl;dr**: This sections talks about how the abstract line-of-fifths of "tonal harmonics" is tuned to actual pitches.
-> For the most part, it doesn't really matter that much within Western music; we assume equal temperament most of the time.
-> Most tonal analyses don't really depend on the specific flavor of Western tuning/temperament you use.
-
-A scale *actually* tuned to "pure" 3rd-harmonics results in the [pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning).
-However, for centuries, Western musicians have systematically mistuned, or *tempered*, some of the 3rd-harmonic ratios in order to produce pure 5th harmonics (meantone temperament) or to minimize dissonance with the 2nd harmonic (equal temperament).
-For example, if twelve fifths are flattened by $\sqrt[{12}]{\frac{3^{19}}{2^{12}}}$ (about 2 cents), the result is a chromatic scale which equally divides the octave---creating *semitones*.
-This *equal temperament* tuning system has been dominant in the West for less than 250 years.
-
-Despite the ubiquity of equal temperament in the modern era, Pythagorean tuning---and variants which incorporate the pure 5th harmonic---remains the *conceptual* basis for Western tonality.
-Notably, in Pythagorean tuning, pitches that are separated by twelve fifths *are not* the same.
-This is why traditional notation and theory distinguishes between, for example, G# and Ab, and between minor-3rd and augmented-2nd.
-In contrast, in equal temperament, these values are "*enharmonic*"---i.e., equivalent.
-Equally-tempered G# and Ab are played as the same frequency *but* within the tonal organization of Western music they still reflect perceptually distinct categories: for example, G# in the key of E major and Ab in the key of F minor are quite distinct!
-
-### Line-of-Fifths
-
-The fifth-based tonal system results in a general structure known as the *line of fifths* (LoF).
-Each "step" on the LoF corresponds to a fifth (i.e., a 3rd-harmonic ratio).
-The LoF ranges from $-\infty$--$\infty$, with zero corresponding to the "unison" interval, root, or the note C.
-A complete chromatic set consists of 12 contiguous steps on the LoF---if we apply a modulo 12 transformation, a chromatic the twelfth step is the same as the first "enharmonically." 
-This modulus operation turns the line-of-fifths into the *circle-of-fifths* (CoF).
-
-Seven contiguous values on the line-of-fifths form a diatonic scale, or tonal *key*.
-Shifting this contiguous block up/down on the line gets us the different keys of Western music.
-If we perform a modulo 7 operation on the LoF, we get a pure diatonic set---"chromatic" notes are mapped to their diatonic counterpoints.
-
-
-
-
-
-## Encoding Tonal Pitches
-
-To mimic the fundamental logic of Western tonality, `tonalIntervals` are represented by a combination of 2nd- and 3rd- harmonic powers.
-These are encoded as integers in the `Octave` and `Fifth` fields respectively.
-The `Fifth` slot represents "tonal chroma"---the line-of-fifths space in which diatonic and chromatic structures are defined.
-The `Octave` slot specifies specific shifts in absolute frequency.
-The `Fifth` and `Octave` fields are combined to represent specific notes.
-This combination is modeled on the way their harmonic ratios would combine in Pythagorean tuning.
-The `Octave` value represents a power of 2 ($2^n$), while the `Fifth` value represents a power of 3 ($3^n$), and the values are multiplied together (which is how human rational/logarithmic perception of pitch works).
-Thus,
-
-$2^{Octave} * 3^{Fifth} = \text{tonal interval}$
-
-For example, the `tonalInterval` `(Octave = -2, Fifth = 2)` represents
-
-$2^{-2} * 3^{2} = \frac{1}{4} * 9 = \frac{9}{4}$
-
-which corresponds to a (Pythagorean) major-9th.
-
-The `tonalInterval` representation *is not* in any sense "locked" into Pythagorean tuning.
-Any "tempered fifth" can be used as the generating "tonal harmonic" ratio:
-
-$2^{Octave} * \text{tonalHarmonic}^{Fifth} = \text{tonal interval}$
-
-For instance, if the $\text{tonalHarmonic} = 2^{\frac{19}{12}}$, the result is equal temperament.
-All `humdrumR` functions that relate to precise frequency values---such as `frequency`---have a `tonalHarmonic` argument.
-This discussion illustrates that what "actual" harmonic we use to generate frequencies is largely irrelevant.
-The combination of the `Octave` and `Fifth` integer slots represents Western "pitch space" abstractly.
-In many research use cases, we ignore the `Octave` field altogether, only considering the abstract "tonal chroma" (i.e., the line-of-fifths) described by the `Fifth` slot.
-(Indeed, the `diatonicSet` and `tertianSet` classes are *only* concerned with the abstract "tonal space.")
-
-The following figure illustrate how the dimensions of a `tonalInterval` vector map to pitches as labeled in "scientific pitch notation."
-
-```{r, fig.cap = "Scientific Pitch representation in tonalIntervals", result = 'hide', echo = FALSE}
-arc <- function(x, y, sigma = 3, ...) {
-    if (length(x) <= 1) return(NULL)
-    
-    for (i in 2:length(x)) {
-        xs <- seq(x[i - 1], x[i], length.out = 1000)
-        
-        scaled <- xs - mean(xs)
-        scaled <- (scaled / max(scaled)) * sigma
-        
-        ys <- plogis(scaled)
-        ys <- ys - min(ys)
-        ys <- ys / max(ys)
-        ys <- (ys * (y[i] - y[i - 1])) + y[i - 1]
-        
-        points(xs, ys, type = 'l', ...)
-        
-    }
-    
-
-}
-
-par(mar = c(6,6,6,6))
-plot.new()
-plot.window(xlim = c(-8,8), ylim = c(8,-8))
-
-segments(0, -15, 0, 15, lwd = 20, col = 'grey90')
-segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
-
-coor <- expand.grid(X = -8:8, Y = -8:8)
-
-text(x = coor$X, y = coor$Y, labels = pitch(tint(coor$Y, coor$X)), cex=.5)
-
-
-axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
-mtext('Octave', 2, line = 3, las = 1, xpd = NA)
-mtext(quote(2^y), 2, line = 2, las = 1)
-
-axis(1, seq(-14,14, 2), las = 1, tick = FALSE, cex.axis = .8, line = -1)
-mtext('Fifth', 1, line = 2, las = 1, xpd = NA)
-mtext(quote(3^x),  1, line = 1, las = 1)
-
-
-cols <- col2rgb(rainbow(5))
-
-cols <- apply(cols, 2, function(cur) rgb(cur[1], cur[2], cur[3], alpha = 5, maxColorValue = 255))
-
-
-scale <- c(P1, M2, M3, P4, P5, M6, M7)
-
-for (j in -7:7) {
-	jscale <- tint(,-8:8) + j * P8
-	jscale <- jscale[order(jscale@Fifth, jscale@Octave)]
-
-	arc(jscale@Fifth , jscale@Octave + .5, lwd=.3)
-
-#	for (i in 1:length(scale)) {
-#		x <- jscale[i]@Fifth
-#		y <- jscale[i]@Octave
-#		polygon(x + c(-.5 , -.5, .5, .5), 
-#			y + c(-.5, .5, .5, -.5), 
-#		 		col = cols[j],
-#				border= NA)
-#	}
-}
-
-```
-As you can see, the `Fifth` (x) dimension is simply the line-of-fifths.
-However, the way that the `Octave` dimension relates to specific pitches is not very intuitive.
-This is by design.
-The `tonalInterval` $2^{Octave} * 3^{Fifth}$ scheme is not meant to be engaged directly by users.
-Rather it is a back-end, with very nice properties:
-
-
-#### Algebra and Arithmetic
-
-Tonal intervals as defined constitute an algebraic *module over integers* (module over $\mathbb{Z}$), with appropriate arithmetic operations fully defined in `humdrumR`.
-As a module, they necessarily are abelian groups, with the requisite operations:
-
-1. `tonalIntervals` can be added (`+`) or subtracted (`-`), resulting in new `tonalIntervals`. 
-   For example, $\text{P5} + \text{M2} = \text{M6}$.
-2. All `tonalIntervals` have a "negative," inverted counterpart. Summing a `tonalInterval` with it's negative/inversion results in the identity element.
-   For example, $-\text{M3} + \text{M3} = \text{P1}$.
-3) They have an identify element---"the reference point", middle C, or unison.
-   (`Octave`$= 0$ and `Fifth` $=0$.)
-
-As modules, `tonalIntervals` can also be multiplied by "scalar" integer values.
-For instance, $\text{P5} * 2 = \text{M9}$.
-Finally, `tonalIntervals` have euclidean division (`%/%`) and modulo/remainder (`%%`) operations defined.
-(Rational division (`/` in R) is *not* defined.)
-Euclidean division of `tonalInterval`s is based on tonal (fifths) space, not frequency space.
-This is useful for articulating tonal structures (modulo 7 for example), but can unintuitive when applied to specific pitches.
-
-
-
-
-# Tonal Interval Representations
-
-Western music theory/practice has a rich set of interrelated ways of describing pitch:
-
-+ Letter names (+ accidentals)
-     - "C#", "G", "Eb"
-+ Melodic intervals
-     - "+M3", "+P5", "-M2"
-+ Harmonic intervals
-     - "M3", "P11", "P8"
-+ Scale degrees
-     - "P1", "P5", "d5"
-+ Solfege
-     - "do", "mi", "so"
-
-In `humdrumR`, all of these *concrete* representations are simply different perspectives on the same abstract information---they are all "tonal intervals" which can be represented as `tonalInterval` objects.
-They differ only in 1) fixed-reference, dynamic-reference, or serial-reference interpretations; 2) whether `Octave` information is included; 3) what "tonal modulo" is used.
-
-At first, musicians may be taken aback by this system: we are accustomed to thinking of values like F# as "absolute" pitch representations, while "so" is a "relative" pitch representations, and melodic intervals as, well, melodic intervals.
-However, recognizing that they are all essentially equivalent is powerful.
-Thus, "middle C" is equivalent to "unison", "do", "P1", and "Tonic."
-
-Representation            "C#"  "G"  "Ab"
-------------------------- ----- ---- -----
-Scientific pitch          C#4   G4   Ab3
-Melodic/HarmonicInterval  +A1   +P5  -M3 
-Scale Degree              A1    P5   m6
-Solfege                   di    so   le
-
-That letter names are not really "absolute" is quite evident in many musical practices.
-Transposing instruments are notated relative to middle C, but their middle C is defined relative to "concert pitch."
-Similarly, guitars are often "drop-tuned" or capoed, with chords still identified using names relative to the open strings.
-
-The following figure is equivalent to figure XXX, but shows interval values instead.
-
-```{r, fig.cap = "Interval Representation of tonalIntervals", result = 'hide', echo = FALSE}
-
-par(mar = c(6,6,6,6))
-plot.new()
-plot.window(xlim = c(-8,8), ylim = c(8,-8))
-
-segments(0, -15, 0, 15, lwd = 20, col = 'grey90')
-segments(-15,0, 15, 0,   lwd = 20, col = 'grey90')
-
-coor <- expand.grid(X = -8:8, Y = -8:8)
-
-text(x = coor$X, y = coor$Y, labels = interval(tint(coor$Y, coor$X), contour = c(octave = FALSE, threshold = P1)), cex=.5)
-
-
-axis(2, seq(-14,14, 2), tick = FALSE, cex.axis = .8, las = 1)
-mtext('Octave', 2, line = 3, las = 1, xpd = NA)
-mtext(quote(2^y), 2, line = 2, las = 1)
-
-axis(1, seq(-14,14, 2), las = 1, tick = FALSE, cex.axis = .8, line = -1)
-mtext('Fifth', 1, line = 2, las = 1, xpd = NA)
-mtext(quote(3^x),  1, line = 1, las = 1)
-
-
-scale <- c(P1, M2, M3, P4, P5, M6, M7)
-
-for (i in 1:length(scale)) {
-	x <- scale[i]@Fifth
-	y <- scale[i]@Octave
-	polygon(x + c(-.5 , -.5, .5, .5), 
-		y + c(-.5, .5, .5, -.5), 
-		 	col = rgb(0, 0, 255, 100, max = 255), border= NA)
-}
+kern(input, inPlace = TRUE)
+interval(input, inPlace = TRUE)
+semits(input, inPlace = TRUE)
+solfa(input, inPlace = TRUE)
 
 ```
 
 
 
-## tonalInterval Partitions
 
 
-Many of the practical distinctions between different "concrete" representation of pitch (previous section) boil down to different ways we *partition* (or discard) `tonalInterval` information.
 
-To begin, we can distinguish between the tonal and height dimensions of pitch.
-Tonal pitch information (like "Major third" or "c#") can be abstract, not corresponding to specific frequencies.
-Thus, an abstract c# is neither "above" nor "below" g#.
-However, tonal intervals *are* ordered into scales---wrapped within an octave.
-We can "round" differently to the unison.
-
-Scaled tonal intervals are still best regarded as abstract.
-Only with the combination of octave information do we get complex intervals.
-
-
-$$
-\begin{aligned}
-TonalInterval = Octave \times LoF
-Octave = \mathbb{Z}
-LoF = \mathbb{Z}
-\end{aligned}
-$$
-
-Every tonal interval combines a simple interval with an octave offset.
-A simple interval with octave is a complex interval.
-
-$$
-\begin{aligned}
-Complex = Simple \times Octave 
-Specific = Alteration + Quality + Generic
-Generic = Step
-Alteration = Comma + Accidental
-\end{aligned}
-$$
-
-A scale step is one of seven numbers on the line-of-fifths, 0 through 6, corresponding to seven scale steps: 0 = Unison, 2 = Second, 4 = Third, 6 = Fourth, 1 = Fifth, 3 = Sixth, 5 = Seventh.
-A 
-
-$$
-$$
-
-$$
-\begin{aligned}
-Step = \{0, 1, 2, 3, 4, 5 ,6\}
-Quality(Key) \subset Step \times \{7q\ |\ q \in \Mathbb{z}\}
-\end{aligned}
-$$
-
-
-
-$$
-\begin{aligned}
-Octave + (Key + (Quality + Step) + Alteration + Comma) = Pitch
-Pitch - Octave = Specific
-(Step + Quality) + Alteration = Specific
-\end{aligned}
-$$
-
-$$
-Amajor_{Key} + \hat{3}_{Step} + Major_{Quality} + Flat_{Alteration} = C natural
-$$
-
+----
 
+The complete list of basic pitch functions is: 
 
-### Simple and Complex
+```{r results = 'asis', echo = FALSE}
 
-HumdrumR `tonalIntervals` can represent any *complex* interval: i.e., intervals in any octave.
-For instance, we can distinguish between "M2" and "M9".
-In many cases, we want to partition our intervals into a *simple* part and an *octave* part:
-The simple part is the interval "within" one octave; the general part is simply a number of octaves.[^1]
-When an interval includes it's octave part, it is called a *complex* interval: 
+pfs <- rapply(humdrumR:::pitchFunctions, 
+                \(func) paste0('    + `', 
+                                ifelse(humdrumR:::.names(func) == '', func, paste0(humdrumR:::.names(func))), 
+                                '`', ifelse(humdrumR:::.names(func) == '', '', paste0(' (', func, ')'))), how = 'list')
 
-$\text{interval}_{simple} + \text{interval}_{octave} = \text{interval}_{complex}$ <!--\_-->
+pfs <- lapply(pfs, \(top) Map(\(name, pf) paste(c(paste0('  + *', name, ' pitch representations*'), pf), collapse = '\n'), names(top), top))
 
-[^1]: This partition corresponds to euclidean division by the octave in frequency space.
-      However, since this operation becomes meaningless when "dividing" by other intervals, we do not include a generalized version of this sort of euclidean division.)
+pfs <- Map(\(name, l) paste(c(paste0('+ **', name, ' pitch representations**'), unlist(l)), collapse ='\n'), names(pfs), pfs)
+cat(unlist(pfs), sep = '\n')
 
-There is actually four different ways to make the simple/octave partition, depending on how we "round" our intervals to an octave.
-These four methods correspond to four different ways of rounding numbers in general.
-In terms of `base::` R functions:
-
-+ `floor`: round towards $-\infty$---the simple part is always positive.
-   This is the most common (default) approach to simple intervals, and is used in many pitch representations (notably, scale degrees).
-
-   Simple  Octave  Complex
-   ------- ------- --------
-   +M6      0      +M6
-   +m3     -1      -M6
-   +M6     +1      +M13
-   +m3     -2      -M13
-  
-+ `ceiling`: round towards $\infty$---the simple part is always negative.
-   This is an unusual use case.
-
-   Simple  Octave  Complex
-   ------- ------- --------
-   -m3     +1      +M6
-   -M6      0      -M6
-   -m3     +2      +M13
-   -M6     -1      -M13
-
-+ `trunc`: "truncate" (round) towards zero---the two parts have the same sign as the complex interval.
-  This method preserves the direction of the interval.
-
-   Simple  Octave  Complex
-   ------- ------- --------
-   +M6      0      +M6
-   -M6      0      -M6
-   +M6     +1      +M13
-   -M6     -1      -M13
-   
-+ `expand`: "expand" (round) away from zero---the octave part will always have the
-  sign of the complex interval, whiel the simple part will have the *opposite* sign as the complex interval.
 
-   Simple  Octave  Complex
-   ------- ------- --------
-   +M6      0      +M6
-   -M6      0      -M6
-   +M6     +1      +M13
-   -M6     -1      -M13
+```
 
-+ `round`: round to the *nearest* octave, regardless of direction.
-  This method results in simple intervals which are always less than a 5th in size.
-  If combined with `abs`, the result is an interval class (intervals are equivalent to their inversions).
 
-   Simple  Octave  Complex
-   ------- ------- --------
-   -m3     +1      +M6
-   +m3     -1      -M6
-   -m3     +2      +M13
-   +m3     -2      -M13
-     
-#### Contour
+The global documentation for *all* the pitch functions can be seen by calling `?pitchFunctions`.
+You can also call documentation for any individual function, like `?kern`.
 
-To completely represent a tonal interval, both the octave and specific parts are required.
-Many common analytical representations use only the "pure line-of-fifths," simple part---solfege, scale degree, roman numerals, chord degrees, etc..
-If the octave part is discarded, the (specific) original pitches cannot be reconstructed.
+# Pitch arguments
 
-Another useful representation is a combination of a fixed-reference simple part with the serial-reference (`delta`) octave part.
-In this representation, the octave part represents the contour of the melody.
-We call this a *derived contour*.
-Throughout `humdrumR`, we adopt the representation from the Rolling Stone dataset and use the `"^"` and `"v"` to represent upward or downward derived contours.
-Thus, `"vla"` means, go down to the nearest `"la"`.
+## Generic and Simple pitch
 
+All pitch functions accept logical (`TRUE`/`FALSE`) `generic` and `simple` arguments.
 
-As [mentioned above](#algebraandarithmetic), `tonalIntervals` are invertible---they can be positive or negative.
-This corresponds to the "direction" of motion in frequency space, relative to the reference.
-If the reference is serial, then it corresponds to melodic *contour*.
-Throughout `humdrumR`, we adopt the standard (obvious) `**mint` representation's use of `"+"` and `"-"` to represent true (`sigma`) contour.
+### Simple vs Compound
 
+By default, most pitch functions complete full pitch information, including octave information ("[compound intervals](https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound)").
+However, if you specify `simple = TRUE`, the octave information is discarded, leaving only the simple part of the pitch
+information. 
+(You can alternately specify `compound = FALSE`).
 
+```{r}
 
+input <- c('c', 'dd#', 'G', 'GG', 'GGG-')
 
-### Generic and Specific
+rbind(kern(input, simple = FALSE), kern(input, simple = TRUE))
+rbind(interval(input, simple = FALSE), interval(input, simple = TRUE))
+rbind(semits(input, compound = TRUE), semits(input, compound = FALSE))
+rbind(solfa(input, compound = TRUE), solfa(input, compound = FALSE))
 
-HumdrumR `tonalIntervals` can represent any *specific* tonal, interval:
-For instance, we can distinguish between "M2" and "m2".
-In many cases, we want to partition our intervals tonally, into *generic* parts and *alteration* parts:
-The generic part is the interval within a (diatonic) key---also called a generic step;
-The alteration part represents the specific quality of the interval relative to the key (i.e., perfect/major/minor), including shifts outside of a key (augment/diminish, sharp/flat, etc.).
+```
 
+## Generic vs Specific
 
+By default, most pitch functions complete full pitch information, including [specific tonal information](https://en.wikipedia.org/wiki/Generic_and_specific_intervals).
+"Specific" pitch information is usually specified by [accidentals](https://en.wikipedia.org/wiki/Accidental_(music))
+or quality labels.
+If we specify `generic = TRUE` (or `specific = FALSE`), accidentals or qualities are not printed.
+In the case of pitch representations without excplicit accidentals/qualities (like solfege), the generic version of the
+pitch is printed.
 
-A generic/alteration partition must be made given a *key*, including a root and a mode.
-This means that a generic/alteration partition can be lossy if the key used is lost---in other words, you need to know the key used in the partition to reconstruct the specific interval.
-The default key is C major ($-1$ through $5$ on the circle-of-fifths).
+```{r}
 
-$\text{key} + \text{interval}_{generic} + \text{interval}_{alteration} = \text{interval}_{specific}$ <!--\_ -->
+input <- c('c', 'd#', 'e', 'f#', 'g')
 
-Key  Generic Step  Quality  Specific
----- ------------- -------- ---------
-Cmaj G                      G           
-Cmaj G             #        G#          
-Cmaj A             b        Ab
-Cmaj A                      A           
-Cmaj B             b        Bb          
-Cmaj B                      B           
-Cmin G                      G           
-Cmin G             #        G#          
-Cmin Ab                     Ab          
-Cmin Ab            #        A           
-Cmin Bb                     Bb          
-Cmin Bb            #        B           
-Amaj B             b        G           
-Amaj B                      G#		
-Amaj C             b        Ab
-Amaj C                      A
-Amaj D             b        Bb
-Amaj D                      B
+rbind(kern(input, generic = FALSE), kern(input, generic = TRUE))
+rbind(interval(input, generic = FALSE), interval(input, generic = TRUE))
+rbind(semits(input, specific = TRUE), semits(input, specific = FALSE))
+rbind(solfa(input, specific = TRUE), solfa(input, specific = FALSE))
 
-#### Cautionary Qualities
 
-In some cases we want to know how to tonally partition a `tonalInterval` relative to a key, which is relative to another key!
-One example of this is "cautionary" accidentals in music notation---"cautionary" accidentals involve pitches which are *generic* in a particular key (like A major), but not generic in C major.
-Another example would be chord quality annotations given a key (for instance, a major IV chord in a minor key has a raised 6th scale degree, or scale degrees in a secondary key.
-
-Condsider a piece written in C major, but with a subsection that modulates to E major.
-During the E major section, we observe a D natural---what generic interval is this?
-Obviously, for many analytical purposes, we'd want to think of it in Emajor, which would correspond to $\text{Emaj} + \text{B}_{generic} + \text{b}_{alteration}$---i.e., flatted seventh degree of E major.
-However, what accidental should this note be notated with? 
-Not a flat of course, even though it *is* a "flattened" seventh.
-The (C major) key signature would require no accidental for the D natural, but we'd like one to clarify the note's relationship to the current key.
-If we first partition our note in E major, then partition again the resulting generic interval in C major, we get:
-
-$\text{Emaj} + (\text{Cmaj} + \text{D}_{generic} + \text{#}_{alteration}) + \text{b}_{alteration}$
-
-A sharp *and* a flat---in these cases, we use the symbol natural.
-
-
-
-
-
-### Enharmonic and Comma
-
-
-
-HumdrumR `tonalIntervals` can represent *any* tonal pitch on the circle-of-fifths, even `G#######`!
-In the context of equal-temperament tuning, we consider tones separated by 12 steps on the circle-of-fifths to be "the same"---they are *enharmonic*.
-Thus, in equal temperament, the interval of a diminished second---also known as the *pythagorean comma*---is identical to a unison.
-We can thus partition notes as combinations of a *harmonic* part and a *comma* part.
-
-$\text{interval}_{enharmonic} + \text{interval}_{comma} = \text{interval}_{tonal}$ <!--\_ -->
-
-If we strictly wrap around every 12 steps in the line-of-fifths (i.e., modulo 12), we remove all enharmonic equivalencies, creating the circle-of-fifths.
-However, *where* we wrap matters: in musical practice, we typically aim to center our circle fifths around C, so we get a roughly equal number of flats and sharps. 
-However, since there are five accidentals, strict enharmonics will have to be either 2-flats/3 sharps, or 3-flats/3-sharps.
-Since, the natural diatonic scale spans the range -1:5 on the line-of-fifths, the real center is 2 (D).
-(And when we change key signatures, we want to shift accordingly, allowing higher sharps in sharp key, for instance.)
-Thus, the default behavior in `humdrumR` is to center a set of tints relative to the center of the given key, and enharmonically shift any notes >= 6 OR < -6.
-
-In some cases, we don't actually want to have strict enharmonicism.
-For instance, we might want to allow Dbi---or even Gb and Cbi---alongside C#, F#, and B, but still not want Bbb and Gbbb or A##.
-In `humdrumR`, we can specify I wider "`enharmonicWrap`" value as an argument to `enharmonicpart`.
-The `enharmonicWrap` argument specifies the width of the band of "legal" LoF values we want to allow.
-The default is 12, which results in a perfect enharmonic circle of fifths (Eb:G#), with no enharmonic equivalences.
-If we increase it to 13, we allow Ab and G# to both exist; If we increase it to 14, we allow Eb and D# to both exist; etc.
-An `enharmonicWrap` of 21 allows all single-flat and single-sharp notes, but no double flat/sharps.
-
-
-
-
-
-
-
-
-
-
-
-
-# Methods
-
-
-`humdrumR` exports numerous functions for converting to/from `tonalInterval`s and various string representations, as well as integer/numeric representations:
-
-
-+ tonalInterval
-	+ tonalInterval -> tonalInterval
-	+ integer -> (semits) -> tonalInterval
-	+ numeric  -> (semits) -> tonalInterval
-	+ character -> (regex) -> tonalInterval
-+ double
-        + tonalInterval -> numeric (ratio)
-+ semits 
-	+ tonalInterval -> integer
-	+ character -> integer
-	+ numeric -> integer
-+ midi 
-	+ tonalInterval -> integer
-	+ character -> (regex) -> integer
-	+ numeric -> integer
-+ tonalChroma 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-        + integer -> (fifth -> tonalInterval) -> character
-+ pitch 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-+ kernPitch 
-	+ tonalInterval -> tonalInterval
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (semits) -> character
-	+ numeric -> (ratio) -> character
-+ contour 
-	+ tonalInterval -> character
-+ interval 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (semits -> tonalInterval) -> character
-	+ numeric -> (ratio -> tonalInterval) -> character
-+ scaleDegree 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (semits -> tonalInterval) -> character
-	+ numeric -> (ratio -> tonalInterval) -> character
-+ solfa 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (fifth -> tonalInterval) -> character
-+ ratio 
-	+ tonalInterval -> numeric
-	+ character -> (regex -> tonalInterval) -> numeric
-	+ integer -> (fifth -> tonalInterval) -> numeric
-	+ numeric -> numeric
-+ fraction 
-	+ tonalInterval -> character
-	+ character -> (regex -> tonalInterval) -> character
-	+ integer -> (fifth -> tonalInterval) -> character
-	+ numeric -> character
-+ frequency 
-	+ tonalInterval -> numeric
-	+ character -> (regex -> tonalInterval) -> numeric
-	+ integer -> (fifth -> tonalInterval) -> numeric
-	+ numeric -> numeric
-
-
-
-
-
-
-#### Arguments
-
-Various tonal interval functions share a number of common arguments.
-
-method      `sigma`  `delta`  `contour`  `Key`  `generic`  `accidental`  `cautionary`  `simple`  `octave`  `direction`  
------------ -------- -------- ---------- ------ ---------- ------------- ------------- --------- --------- ------------
-`semit`  
-
-## diatonicSet
-
-The `diatonicSet` S4 class represents diatonic keys.
-Like `tonalIntervals`, we conceptualize keys as an interval---their distance from the reference point, Cmajor.
-This means we can represent the key of "G major" and the key of "V" (the major dominant key) in the same way.
-
-
-A `diatonicSet` contains three `integer` slots: `Root`, `Mode`, `Alterations`.
-In addition, a `Of` slot can hold another `diatonicSet`, allowing the recursive representation, a la "V/V/V."
-
-### Root and Key
-
-The `Root` integer slot is simply a line-of-fifths tonal chroma value representing the root of the key relative to 0 (C).
-The `Key` value represents the *key signature*: the number of sharps (positive integers) or flats (negative integers) in the key.
-Alternatively, and equivalently, you can think of `Key` like this:
-C major represents a contiguous block of seven fifths (-1--5), and the `Key` argument shifts this block up or down.
-So if `Key = 2`, our block on the line-of-fifths is 1--7 (a key signature with two sharps).
-The relationship between `Root` and `Key` determines the mode of the diatonic set.
-If `Root == Key`, the mode is major. 
-Other modes can be created as:
-
-Key =        Mode
------------- -----------
-Root + 1     Lydian
-Root         Ionian (major)
-Root - 1     Mixolydian
-Root - 2     Dorian
-Root - 3     Aeolian (minor)
-Root - 4     Phrygian
-Root - 5     Locrian
-
-For some specific examples:
-
-Root    Key    Tonality
-------- ------ ----------
-1       1      G major
--3      -3     Eb major
--3      -2     Eb lydian
-2       0      D dorian
-3       0      A minor
-
-
-### Alteration
-
-The `Alteration` slot of a `diatonicSet` allows the representation of "altered" diatonic scales.
-One way of thinking about the `Key` slot, is that it takes one edge of a 7-fifth contiguous block and moves it to the opposite side.
-The `Alteration` slot takes the *second from most extreme* element and moves it down 7 fifths.
-
-
-
-
-
-
-
-
-## TertianSet
-
-
-Roman numerals.
-
+```
 
 
