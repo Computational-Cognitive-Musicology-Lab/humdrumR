@@ -65,7 +65,7 @@ is returned.
 
 If \code{generic = TRUE}, \href{https://en.wikipedia.org/wiki/Generic_and_specific_intervals}{specific pitch information}
 (accidentals or qualities) is omitted from the output.
-As an alternative way of controlling the same functionality, you can use the \code{specific} argument ,where \code{specific == !generic}.
+As an alternative way of controlling the same functionality, you can use the \code{specific} argument, where \code{specific == !generic}.
 In the case of atonal outputs, the "generic" version of that pitch is output:
 for example, \code{semits('c#', generic = TRUE)} will return \code{0}, because the "generic" version of \emph{C#} is \emph{C}, which corresponds to \code{0}.
 However, note that the generic version of a pitch follows the key, so \code{semits('c#', generic = TRUE, Key = 'A:')} will return \code{1}!
@@ -73,7 +73,7 @@ However, note that the generic version of a pitch follows the key, so \code{semi
 
 \subsection{Simple vs Compound}{
 
-If \code{specific = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
+If \code{simple = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
 (octave and contour) is omitted from the output.
 As an alternative way of controlling the same functionality, you can use the \code{compound} argument ,where \code{compound == !simple}.
 

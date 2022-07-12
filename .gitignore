@@ -1,4 +1,3 @@
-docs
 .*
 *tmp
 *.tmp.*
@@ -6,5 +5,3 @@ docs
 .Rproj.user
 .Rhistory
 !.gitignore
-docs/*
-doc/*

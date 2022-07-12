@@ -36,47 +36,6 @@ The functions are:
 }
 \details{
 \itemize{
-\item Tonal pitch representations
-\itemize{
-\item Absolute pitch representations
-\itemize{
-\item \code{\link[=kern]{kern()}}
-\item \code{\link[=pitch]{pitch()}}
-\item \code{\link[=lilypond]{lilypond()}}
-\item \code{\link[=helmholtz]{helmholtz()}}
-\item \code{\link[=tonh]{tonh()}} (German-style notation)
-}
-\item Relative pitch representations
-\itemize{
-\item \code{\link[=interval]{interval()}}
-\item \code{\link[=solfa]{solfa()}} (relative-do solfege)
-\item \code{\link[=solfg]{solfg()}} (French-style fixed-do solfege)
-\item \code{\link[=degree]{degree()}} (absolute scale degrees)
-\item \code{\link[=deg]{deg()}} (melodic scale degrees)
-\item \code{\link[=bhatk]{bhatk()}} (hindustani swara)
-}
-\item Partial pitch representations
-\itemize{
-\item \code{\link[=step]{step()}}
-\item \code{\link[=accidental]{accidental()}}
-\item \code{\link[=quality]{quality()}}
-\item \code{\link[=octave]{octave()}}
-}
-}
-\item Atonal pitch representations
-\itemize{
-\item Musical pitch representations
-\itemize{
-\item \code{\link[=semits]{semits()}}
-\item \code{\link[=midi]{midi()}}
-\item \code{\link[=cents]{cents()}}
-\item \code{\link[=pc]{pc()}} (pitch classes)
-}
-\item Physical pitch representations
-\itemize{
-\item \code{\link[=freq]{freq()}}
-}
-}
 \item \strong{Tonal pitch representations}
 \itemize{
 \item \emph{Absolute pitch representations}
@@ -91,7 +50,7 @@ The functions are:
 \itemize{
 \item \code{\link[=interval]{interval()}}
 \item \code{\link[=solfa]{solfa()}} (relative-do solfege)
-\item \code{\link[=solfg]{solfg()}} (fixed-do solfege)
+\item \code{\link[=solfg]{solfg()}} (French-style fixed-do solfege)
 \item \code{\link[=degree]{degree()}} (absolute scale degrees)
 \item \code{\link[=deg]{deg()}} (melodic scale degrees)
 \item \code{\link[=bhatk]{bhatk()}} (hindustani swara)
@@ -106,14 +65,14 @@ The functions are:
 }
 \item \strong{Atonal pitch representations}
 \itemize{
-\item \emph{Musical (non-tonal) pitch representations}
+\item \emph{Musical pitch representations}
 \itemize{
 \item \code{\link[=semits]{semits()}}
 \item \code{\link[=midi]{midi()}}
 \item \code{\link[=cents]{cents()}}
-\item \code{\link[=pc]{pc()}}
+\item \code{\link[=pc]{pc()}} (pitch classes)
 }
-\item \emph{Physical pitch/interval representations}
+\item \emph{Physical pitch representations}
 \itemize{
 \item \code{\link[=freq]{freq()}}
 }
@@ -153,7 +112,7 @@ is returned.
 
 If \code{generic = TRUE}, \href{https://en.wikipedia.org/wiki/Generic_and_specific_intervals}{specific pitch information}
 (accidentals or qualities) is omitted from the output.
-As an alternative way of controlling the same functionality, you can use the \code{specific} argument ,where \code{specific == !generic}.
+As an alternative way of controlling the same functionality, you can use the \code{specific} argument, where \code{specific == !generic}.
 In the case of atonal outputs, the "generic" version of that pitch is output:
 for example, \code{semits('c#', generic = TRUE)} will return \code{0}, because the "generic" version of \emph{C#} is \emph{C}, which corresponds to \code{0}.
 However, note that the generic version of a pitch follows the key, so \code{semits('c#', generic = TRUE, Key = 'A:')} will return \code{1}!
@@ -161,7 +120,7 @@ However, note that the generic version of a pitch follows the key, so \code{semi
 
 \subsection{Simple vs Compound}{
 
-If \code{specific = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
+If \code{simple = TRUE}, \href{https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound}{compound pitch information}
 (octave and contour) is omitted from the output.
 As an alternative way of controlling the same functionality, you can use the \code{compound} argument ,where \code{compound == !simple}.
 
