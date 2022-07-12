@@ -87,8 +87,8 @@ test_that('Examples from Reshaping vignette work', {
   reshaped <- getHumtab(foldHumdrum(reshaping, 2, 1), 'D')
   
   expect_equal(dim(reshaped), c(6, 26))
-  if (expect_true(all(c('Token', 'Pipe1') %in% colnames(reshaped)))) {
-    expect_equal(reshaped[ , table(Token, Pipe1)]['4e', 'an'], 1L)
+  if (expect_true(all(c('Token', 'Result1') %in% colnames(reshaped)))) {
+    expect_equal(reshaped[ , table(Token, Result1)]['4e', 'an'], 1L)
   }
 })
 
