@@ -375,7 +375,7 @@ humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, funcName = NULL
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
-  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')
+  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')(Exclusive)
   if (is.null(Exclusive)) Exclusive <- rep('any', length(str))
   if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   ### find places where str matches dispatch regex AND Exclusive matches dispatch exclusives
@@ -444,7 +444,7 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
   if (length(str) == 0L && is.atomic(str)) return(vectorNA(0L, outputClass))
   if (!is.atomic(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
   
-  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')
+  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')(Exclusive)
   if (is.null(Exclusive)) Exclusive <- rep(dispatchDF$Exclusives[[1]], length(str))
   if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   
@@ -467,6 +467,15 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
                                     Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
   result
   
+}
+
+
+makeExcluder <- function(from, to) {
+  \(Exclusive) {
+    if (is.null(Exclusive)) return(NULL)
+    Exclusive[!is.na(Exclusive) & Exclusive %in% from] <- to
+    Exclusive
+  }
 }
 
 do_attr <- function(func, x, ...) {

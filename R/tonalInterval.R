@@ -859,15 +859,17 @@ tint2romanRoot <- partialApply(tint2tonalChroma,
 
 
 
-tint2interval <- function(x, directed = TRUE, ...) {
+tint2interval <- function(x, directed = TRUE, keyed = TRUE, Key = NULL, ...) {
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = 1L:7L,
                        parts = c("species", "step", "octave"),
-                       compound = TRUE, keyed = FALSE, qualities = TRUE, 
+                       compound = TRUE, qualities = TRUE, 
                        step.compound = TRUE,
                        octave.integer = TRUE, octave.relative = FALSE, explicitNaturals = TRUE,
                        octave.round = floor)
+  
+  if (keyed && !is.null(Key)) x <- x + Key
   
   direction <- if (directed) {
     c('-', '', '+')[sign(x) + 2L]
@@ -876,7 +878,8 @@ tint2interval <- function(x, directed = TRUE, ...) {
   }
   x <- abs(x)
   
-  interval <- t2tC(x, ...)
+  
+  interval <- t2tC(x, keyed = FALSE,  ...)
   
   paste0(direction, interval)
 }
@@ -2631,8 +2634,10 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse) {
+      dispatch <- attr(parsedTint, 'dispatch')
       if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
-      humdrumRattr(output) <- list(Exclusive = !!callname)
+      
+      humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
     
     
