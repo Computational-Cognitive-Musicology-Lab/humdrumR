@@ -421,6 +421,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   # "post" stuff
   evalPrePost(quoTab, 'post')
   par(oldpar[names(oldpar) != 'new'])
+  par(new = FALSE)
   
   list(humdrumR = humdrumR, 
        humtab = humtab,

@@ -176,6 +176,8 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
+  Exclusive <- attr(firstArg, 'Exclusive')
+  
   dimension <- dimParse(args)
   
   memoize <- memoizeParse(dimension$Args, dispatchArgs = doArgs, memoize = memoize, ...)
@@ -183,6 +185,8 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   naskip <- predicateParse(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
   
+  
+  attr(naskip$Args[[1]], 'Exclusive') <- Exclusive
   
   result <- if (length(naskip$Args[[1]])) {
     if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
@@ -365,13 +369,13 @@ partialApply <- function(func, ...) {
 #' @export
 humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, funcName = NULL, 
                              multiDispatch = FALSE, ..., outputClass = 'character') {
-  
   if (is.null(str)) return(NULL)
   if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
   if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
+  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')
   if (is.null(Exclusive)) Exclusive <- rep('any', length(str))
   if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   ### find places where str matches dispatch regex AND Exclusive matches dispatch exclusives
@@ -440,6 +444,7 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
   if (length(str) == 0L && is.atomic(str)) return(vectorNA(0L, outputClass))
   if (!is.atomic(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
   
+  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')
   if (is.null(Exclusive)) Exclusive <- rep(dispatchDF$Exclusives[[1]], length(str))
   if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   
@@ -473,7 +478,7 @@ do_attr <- function(func, x, ...) {
 }
 
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched', 'visible')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]

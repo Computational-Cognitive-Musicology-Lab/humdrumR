@@ -2630,7 +2630,11 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
-    if (deparse && inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
+    if (deparse) {
+      if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
+      humdrumRattr(output) <- list(Exclusive = !!callname)
+    }
+    
     
     output
     
