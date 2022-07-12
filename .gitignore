@@ -6,3 +6,5 @@ docs
 .Rproj.user
 .Rhistory
 !.gitignore
+docs/*
+doc/*
