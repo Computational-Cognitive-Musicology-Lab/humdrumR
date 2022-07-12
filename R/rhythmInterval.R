@@ -207,8 +207,9 @@ duration2rint <- function(x, ...) as.rational(x)
 
 ####. generics ####
 
-
-#' @rdname rhythmInterval
+#' parse rhythmic information
+#' 
+#' @name rhythmInterval
 #' @export 
 rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
 

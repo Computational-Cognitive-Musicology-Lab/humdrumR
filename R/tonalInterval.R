@@ -1752,7 +1752,6 @@ tonalChroma2tint <- function(str,
  
  if ("sign" %in% parts) tint[sign == '-'] <- tint[sign == '-'] * -1L
  
- 
  if (keyed && !is.null(Key)) {
   Key <- rep(Key, length.out = length(tint))
   tint[!is.na(Key)] <- tint[!is.na(Key)] - diatonicSet(Key[!is.na(Key)])
@@ -1761,8 +1760,6 @@ tonalChroma2tint <- function(str,
  
  tint
 
- 
- 
 }
 
 
@@ -2610,7 +2607,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     deparseArgs <- pitchArgCheck(c(args..., namedArgs), !!callname)
     
     # Key
-    Key     <- diatonicSet(args...$Key %||% dset(0L, 0L))
+    Key     <- diatonicSet(Key %||% dset(0L, 0L))
     fromKey <- diatonicSet(transposeArgs$from %||% Key)
     toKey   <- diatonicSet(transposeArgs$to   %||% Key)
     
@@ -3374,7 +3371,7 @@ mintClass <- function(x, directed = TRUE, skips = TRUE) {
 # Predefined tonalIntervals ##############################################
 ###################################################################### ### 
 #' 
-#' @section Predefined intervals:
+#' # Predefined intervals:
 #' 
 #' @rdname tonalIntervalS4
 #' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 dd9 A9 P10 d11 d12 d13 AA13 M14 P15

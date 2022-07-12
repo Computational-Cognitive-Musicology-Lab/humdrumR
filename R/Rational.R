@@ -382,13 +382,13 @@ setAs('character', 'rational', function(from) as.rational(from))
 #' @export
 setGeneric('as.rational', \(x, ...) standardGeneric('as.rational'))
 
-#' @rdname
+#' @rdname rational
 #' @export
 setMethod('as.rational', 'rational', force)
 
 
 
-#' @rdname
+#' @rdname rational
 #' @export
 setMethod('as.rational', 'matrix', \(x) rational(dropdim(x), 1L) %<-matchdim% x)
 

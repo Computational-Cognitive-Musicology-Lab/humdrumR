@@ -36,9 +36,6 @@ test_that("Pitch function Input -> Output maintains structure", {
         
     }
     
-   
-    
-    
     
     funcs <- c('semits', 'midi', 'pitch', 'kern', 'lilypond', 'interval',
                'degree', 'solfa', 'bhatk')
@@ -204,7 +201,10 @@ test_that('Pitch arguments return correct values!', {
     
     expect_equal(kern("E flat 5", parse(flat = "flat", sep = " ")), 'ee-')
     
-    expect_equal(`humdrumRattr<-`(tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII')), list(dispatch = NULL)), tint(-15L, 9L))
+    #
+    step <- tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII'))
+    attr(step, 'dispatch') <- NULL
+    expect_equal(step, tint(-15L, 9L))
     
     expect_equal(kern('E x 5', parse(doublesharp = 'x', sep = ' ')), 'ee##')
     
@@ -212,7 +212,7 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(kern(0:2, parseArgs=list(accidental.melodic = TRUE)), c('c', 'c#', 'd'))
     
     expect_equal(cents('g', tonalHarmonic = 3), 701.955)
-    expect_equal(cents(440 * 10/9, Exclusive = 'freq'), 1082.404 )
+    expect_equal(round(cents(440 * 10/9, Exclusive = 'freq'), 1), 1082.4 )
     
     expect_equal(semits('c#', generic = TRUE), 0)
     expect_equal(semits('c#', generic = TRUE, Key ='A:'), 1)
@@ -220,7 +220,7 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(kern(c('CX5','C4','Cb5'), parse(doublesharp = 'X')),
                  kern(c('CX5','C4','Cb5'), parseArgs = list(doublesharp = 'X')))
     
-    expect_equal(tonalInterval('c#', Key = "A:"), tint(-8, 4))
+    expect_true(tonalInterval('c#', Key = "A:") == tint(-7, 4))
     
     expect_equal( kern('Eb5', flat = "_"), 'ee_')
     expect_equal(kern('Eb5', flat = 'flat'), 'eeflat')

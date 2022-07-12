@@ -286,19 +286,19 @@ recycledim <- function(..., funccall) {
     }
     
     if (all(d1 == 1L) || all(d2 == 1L)) {
-        args <- setNames(match_size(args[[1]], args[[2]], margin = 1:2), names(args))
+        args <- setNames(match_size(args[[1]], args[[2]]), names(args))
         list2env(args, envir = parent.frame(1))
         return(NULL)
     }   
     
     drat <- d1 / d2
     if (drat[1] == 1 && (d1[2] == 1 || d2[2] == 1)) {
-        args <- setNames(match_size(args[[1]], args[[2]], margin = 2), names(args))
+        args <- setNames(match_size(args[[1]], args[[2]]), names(args))
         list2env(args, envir = parent.frame(1))
         return(NULL)
     }
     if (drat[2] == 1&& (d1[1] == 1 || d2[1] == 1)) {
-        args <- setNames(match_size(args[[1]], args[[2]], margin = 1), names(args))
+        args <- setNames(match_size(args[[1]], args[[2]]), names(args))
         list2env(args, envir = parent.frame(1))
         return(NULL)
     }
@@ -1145,7 +1145,7 @@ setMethod('==', signature = c('struct', 'struct'),
           function(e1, e2) {
               checkSame(e1, e2, '==')
             
-              match_size(e1 = e1, e2 = e2, margin = 1:2, toEnv = TRUE)
+              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
               
               slots1 <- getSlots(e1)
               slots2 <- getSlots(e2)

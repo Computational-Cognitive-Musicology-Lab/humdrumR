@@ -1,3 +1,5 @@
+#' Meter class
+#' 
 #' @name humMetric
 #' @export
 setClass('meter', slots = c(Levels = 'list', Tactus = 'integer'))

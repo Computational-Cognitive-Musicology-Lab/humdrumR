@@ -24,6 +24,8 @@
 \alias{sum,rational-method}
 \alias{cumsum,rational-method}
 \alias{as.rational}
+\alias{as.rational,rational-method}
+\alias{as.rational,matrix-method}
 \alias{as.rational,integer-method}
 \alias{as.rational,numeric-method}
 \alias{as.rational,logical-method}
@@ -81,6 +83,10 @@ order.rational(
 \S4method{cumsum}{rational}(x)
 
 as.rational(x, ...)
+
+\S4method{as.rational}{rational}(x)
+
+\S4method{as.rational}{matrix}(x)
 
 \S4method{as.rational}{integer}(x)
 
