@@ -471,11 +471,16 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
 
 
 makeExcluder <- function(from, to) {
-  \(Exclusive) {
+  (\(Exclusive) {
     if (is.null(Exclusive)) return(NULL)
     Exclusive[!is.na(Exclusive) & Exclusive %in% from] <- to
     Exclusive
-  }
+  }) %class% "Excluder"
+}
+
+print.Excluder <- function(x) {
+  env <- environment(x)
+  cat(paste0('**', env$from), ' -> ', paste0('**', env$to, sep = ''), '\n')
 }
 
 do_attr <- function(func, x, ...) {

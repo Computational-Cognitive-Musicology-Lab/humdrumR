@@ -370,20 +370,18 @@ within.humdrumR <- function(data, ..., variables = list()) {
     humdrumR@Humtable$d <- humdrumR@Humtable$d[FALSE]
   }
   
-  putHumtab(humdrumR, drop = TRUE) <- newhumtab
   
-  # Now that the Humtable is taken care of,
+  putHumtab(humdrumR, drop = FALSE) <- newhumtab
+  
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
-    ## Add fields to humtab
     addFields(humdrumR) <- newfields
-    
     humdrumR <- setActiveFields(humdrumR, newfields) 
-    # humdrumR <- fillFields(humdrumR, from = 'Token', newfields)
   }
   
-  humdrumR
-  
+  update_humdrumR(humdrumR, field = newfields)
+
+
 }
 
 withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
@@ -1205,12 +1203,13 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
         
         if (!is.data.frame(result)) {
           visible <- any(sapply(result, attr, which = 'visible'))
-          
-          if (partQuos$Keyword[1] == 'where' && !is.null(ordoQuo)) {
+          humattr <- humdrumRattr(result[[1]])
+          if (partQuos$Keyword[1] == 'where' && !is.null(ordoQuo) && length(unique(lengths(result))) == 1L) {
             colnames(result[[2]]) <- colnames(result[[1]])
           }
           
           result <- data.table::rbindlist(result)
+          humdrumRattr(result[[1]]) <- humattr
           attr(result, 'visible') <- visible
         }
         

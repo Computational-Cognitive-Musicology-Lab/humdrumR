@@ -449,7 +449,7 @@ splitHumtab <- function(humtab, drop = FALSE) {
         split(humtab, 
               # by = 'Type', sorted = FALSE,
               f = factor(humtab$Type, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')),
-              drop = drop) 
+              drop = drop) # this seems wrong but it actually makes sense
     }
 }
 
@@ -916,17 +916,18 @@ is.ragged <- function(humdrumR) {
     
 }
 
-
-renumberSpines <- function(humdrumR) {
+renumberSpines <- function(hum) UseMethod('renumberSpines')
+renumberSpines.humdrumR <- function(hum) {
     humtab <- getHumtab(humdrumR, 'GLIMDdP')
-    
-    NewSpine <- humtab[ , match(Spine, sort(unique(Spine))), by = Piece]$V1
-    humtab[ , Column := Column + (NewSpine - Spine)]
-    humtab$Spine <- NewSpine
-    
-    putHumtab(humdrumR, drop = FALSE) <- humtab
+    putHumtab(humdrumR, drop = FALSE) <- renumberSpines.data.table(humtab)
     humdrumR
     
+}
+renumberSpines.data.table <- function(hum) {
+    NewSpine <- hum[ , match(Spine, sort(unique(Spine))), by = Piece]$V1
+    hum[ , Column := Column + (NewSpine - Spine)]
+    hum$Spine <- NewSpine
+    hum
 }
 
 #### Reshaping ----
@@ -1349,12 +1350,12 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     }, fromTables, init = humtab)
  
     
+    humtab <- update_humdrumR(humtab, fields = newfields)
+    humtab <- removeNull(humtab, by = c('File', what), nullTypes = 'LIMd')
+    
     putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
     
-    addFields(humdrumR) <- names(fromTables)
-    
-    humdrumR <- update_d(updateNull(humdrumR, activeOnly = FALSE))
-    humdrumR <- removeNull(humdrumR, 'GLIMDd', c('File', what), 'LIMd')
+    addFields(humdrumR) <- newfields
     
     humdrumR <- setActiveFields(humdrumR, newfields)
     
@@ -1599,9 +1600,9 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
               value <- if (is.character(drop)) {
                   dataTypes <- checkTypes(drop, 'putHumtab')
                   value <- splitHumtab(value, drop = FALSE)
-                  value[dataTypes]
+                  value[!names(values) %in% dataTypes]
               } else {
-                  splitHumtab(value, drop = drop)
+                  splitHumtab(value, drop = !drop)
               }
           }
           humdrumR@Humtable[names(value)] <- value
@@ -1629,34 +1630,78 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
   humdrumR
 }
 
-updateNull <- function(humdrumR, activeOnly = TRUE) {
-    humtab <- getHumtab(humdrumR, 'GLIMDd')
+##
+
+update_humdrumR <- function(hum, d, Exclusive, Null, ...) UseMethod('update_humdrumR')
+update_humdrumR.humdrumR <- function(hum, d = TRUE, Exclusive = TRUE, Null = TRUE, ...) {
+    humtab <- getHumtab(hum, 'GLIMDd')
+    humtab <- update_humdrumR.data.table(humtab, d, Exclusive, Null, ...)
+    putHumtab(hum, drop = FALSE) <- humtab
+    hum
+}
+update_humdrumR.data.table <- function(hum, d = TRUE, Exclusive = TRUE, Null = TRUE, ...) {
     
-    null <- if (activeOnly) {
-        active <- evalActive(humdrumR, 'GLIMDd', forceVector = TRUE)
-        humtab[ , is.na(active) | active %in% c('.', '!', '*', '=', '_P')]
-    } else {
-        dataFields <- humtab[ , fields(humdrumR, 'D')$Name, with = FALSE]
-        dataFields <- lapply(dataFields, \(x) is.na(x) | x %in% c('.', '!', '*', '=', '_P'))
-        Reduce('&', dataFields)
-        
-    }
+    if (Exclusive) hum <- update_Exclusive(hum, ...)
+    if (Null) hum <- update_Null(hum, ...)
+    if (d) hum <- update_d(hum)
+    hum
     
-    humtab[, Null := null]
-    
-    putHumtab(humdrumR) <- humtab
-    
-    humdrumR
 }
 
-update_d <- function(humdrumR) {
-    humtab <- getHumtab(humdrumR, 'Dd')
+#
+update_d <- function(hum) UseMethod('update_d')
+update_d.humdrumR <- function(hum) {
+    humtab <- getHumtab(hum, 'Dd')
     
-    humtab[ , Type := ifelse(Null | Filter, 'd', 'D')]
+    putHumtab(hum, drop = 'Dd') <- update_d.data.table(humtab)
     
-    putHumtab(humdrumR, drop = 'Dd') <- humtab
+    hum
+}
+update_d.data.table <- function(hum) {
     
-    humdrumR
+    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse( (Null | Filter), 'd', 'D')]
+    hum
+}
+
+#
+update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
+update_Exclusive.humdrumR <- function(hum, ...) {
+    humtab <- getHumtab(hum, 'ID')
+    
+    field <- activeFields(hum)[1]
+    putHumtab(hum, drop = 'ID') <- update_Exclusive.data.table(humtab, field)
+    
+    hum
+}
+update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
+    excluder <- attr(hum[[field]], 'Exclusive')
+    
+    if (!is.null(excluder)) {
+        if (!is.character(hum[[field]])) field <- 'Token'
+        
+        exclusives <- hum[, Type == 'I' & grepl('^\\*\\*', Token)]
+        
+        hum[[field]][exclusives] <- paste0('**', excluder(gsub('\\*\\*', '', hum[['Token']][exclusives])))
+        hum$Null[exclusives] <- FALSE
+    }
+    hum
+}
+
+#
+update_Null <- function(hum, field, ...) UseMethod('update_Null')
+update_Null.humdrumR <- function(hum, field, ...) {
+    if (missing(field)) field <- fields(hum, 'D')$Name
+    humtab <- getHumtab(hum, 'GLIMDd')
+    putHumtab(hum, drop = 'LIMDd') <- update_Null.data.table(humtab, field)
+    hum
+}
+update_Null.data.table <- function(hum, field = 'Token', ...) {
+    dataFields <- hum[ , field, with = FALSE]
+    dataFields <- lapply(dataFields, \(x) is.na(x) | x %in% c('.', '!', '*', '=', '_P'))
+    null <- Reduce('&', dataFields)
+    
+    hum[, Null := null]
+    hum
 }
 
 
@@ -1739,12 +1784,12 @@ NULL
 #' @param nullAsDot A single `atomic` value. Any null tokens are coerced to this value (default is `.`).
 #' @rdname humActive
 #' @export
-evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA)  {
+evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA, humtab)  {
   checkhumdrumR(humdrumR, 'evalActive')
     
   dataTypes <- checkTypes(dataTypes, 'evalActive')
   
-  humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+  humtab <- if (missing(humtab)) getHumtab(humdrumR, dataTypes = dataTypes) else humtab[Type %in% dataTypes]
   # locnames <- humtab[ , paste(File, Spine, Path, Stop, Record, sep = '.')]
   
   values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
@@ -1759,7 +1804,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', 
                                  })
   }
   
-  if (forceVector) {
+  if (!is.atomic(values) && forceVector) {
       if (is.factor(values)) values <- as.character(values)
       if (is.list(values)) {     
           vectors <- sapply(values, is.atomic)
@@ -1833,13 +1878,13 @@ Add a reference to some field, for instance Token.", call. = FALSE)
     
     humdrumR@Active <- actquo
     
-    act <- evalActive(humdrumR)
+    act <- evalActive(humdrumR, humtab = humtab)
     nrows <- nrow(humtab)
     if ((is.atomic(act) && length(act) == nrows)
         || (!is.null(dim(act)) && dim(act)[1] == nrows)
         || (is.list(act) && length(act) == nrows)
         || (is.list(act) && all(lengths(act) == nrows))) {
-        return(update_d(updateNull(humdrumR)))
+        return(humdrumR)
     } else {
         stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
     }
@@ -1919,6 +1964,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 
 #' Use `fields` to list the current fields in 
 #' a [humdrumRclass] object.
+#'
 #' @rdname humdrumRclass
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
@@ -2075,7 +2121,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
     
     putHumtab(humdrumR) <- humtab
     
-    updateNull(humdrumR)
+    update_Null(humdrumR)
     
 }
 
@@ -2211,7 +2257,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     addFields(x) <- i
                     x <- setActiveFields(x, i)
                     
-                    update_d(updateNull(x))
+                    update_d(update_Null(x))
 
           })
 
@@ -2250,7 +2296,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     
                     value@Active <- substituteName(value@Active, setNames(rlang::syms(i), results))
                     
-                    update_d(updateNull(value))
+                    update_d(update_Null(value))
           })
 
 
@@ -2322,7 +2368,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP') 
     
     active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDdP', 
-                                      forceVector = TRUE, nullAs = "."))
+                                      forceVector = TRUE, nullAs = ".", humtab = humtab))
     humtab$Null[humtab$Type == 'P'] <- FALSE
     humtab$Filter[humtab$Type == 'P'] <- FALSE
 
@@ -2358,7 +2404,8 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     humtab$Type[humtab$Type == 'd'] <- 'D'
     humtab$Type[humtab$Type == 'P'] <- 'D'
     
-    putHumtab(humdrumR, drop = FALSE) <- humtab
+    putHumtab(humdrumR, drop = TRUE) <- humtab
+    
     addFields(humdrumR) <- 'Print'
     setActive(humdrumR, ~Print)
 }

@@ -70,7 +70,7 @@ test_that('Examples from Working With Data vignette work', {
          Pitch <- pitch(Token, simple = TRUE),
          where = Spine == 1) -> chorales2
   
-  expect_equal(with(chorales2, table(Pitch,Spine)) |> ncol(), 1)
+  expect_equal(with(chorales2, table(Pitch, Spine)) |> ncol(), 1)
 
   
   within(chorales,

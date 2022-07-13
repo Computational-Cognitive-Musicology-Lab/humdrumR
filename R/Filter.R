@@ -221,8 +221,8 @@ filterHumdrum <- function(humdrumR, ...) {
     humtab[ , Filter := Filter | !`__TmpFilter__`]
     humtab[ , `__TmpFilter__` := NULL]
     
+    humtab <- update_d(humtab)
     putHumtab(humdrumR) <- humtab
-    humdrumR <- update_d(humdrumR)
     
     humdrumR <- setActive(humdrumR, oldActive)
 
@@ -239,22 +239,27 @@ filterHumdrum <- function(humdrumR, ...) {
 # humdrumR filtering and application can result in lots of filtered tokens.
 # These functions remove parts that are entirely filtered
 
-removeNull <- function(humdrumR, recordTypes = 'GLIMDd', by = 'File', nullTypes = 'd', ...) {
-  checkhumdrumR(humdrumR, 'removeNull')
+removeNull <- function(hum, by, nulltypes, ...) {
+  UseMethod("removeNull")
+}
+removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', recordTypes = 'GLIMDd', ...) {
   recordTypes <- checkTypes(recordTypes, 'removeNull', 'recordTypes')
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
+  humtab <- getHumtab(hum, recordTypes)
+  putHumtab(hum, drop = TRUE) <- removeNull.data.table(humtab)
   
-  humtab <- getHumtab(humdrumR, recordTypes)
+  hum
+ 
+}
+removeNull.data.table <- function(hum, by = 'File', nullTypes = 'd', ...) {
+  nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
-  targets <- humtab[ , by, with = FALSE]
-  targets <- unique(targets[!humtab$Type %in% nullTypes])
+  targets <- hum[ , by, with = FALSE]
+  targets <- unique(targets[!hum$Type %in% nullTypes])
   
-  humtab <- humtab[targets, on = by]
-  
-  putHumtab(humdrumR, drop = FALSE) <- humtab
-  
-  renumberSpines(humdrumR)
+  hum <- hum[targets, on = by]
+  renumberSpines(hum)
 }
 
 
@@ -264,21 +269,21 @@ removeNull <- function(humdrumR, recordTypes = 'GLIMDd', by = 'File', nullTypes 
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', 'File')
+  removeNull(humdrumR, 'GLIMDd', 'File','GLIMDd')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', c('File', 'Spine'), 'LIMd')
+  removeNull(humdrumR, 'LIMDd', c('File', 'Spine'), 'GLIMDd')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyRecords')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', c('File', 'Record'))
+  removeNull(humdrumR, 'GLIMDd', c('File', 'Record'), 'GLIMDd')
 }
 
 #########################Indexing ----
@@ -328,7 +333,7 @@ setMethod('[',
                 targets <- humtab[ , sort(unique(File))[i]]
                 humtab <- humtab[File %in% targets]
                 
-                putHumtab(x, drop = FALSE) <- humtab
+                putHumtab(x, drop = TRUE) <- humtab
               } else {
                 form <- do ~ File %in% sort(unique(File))[i]
                 x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
@@ -391,7 +396,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             if (removeEmpty) {
               humtab <- getHumtab(x, 'GLIMDdP')
               
-              humtab <- humtab[Record %in% i | Token == '*-']
+              humtab <- humtab[Record %in% i | Token == '*-' | grepl('\\*\\*', Token)]
               
               putHumtab(x, drop = FALSE) <- humtab
             } else {
