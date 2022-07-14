@@ -1338,6 +1338,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
                       ftab[!htab, on = mergeFields], 
                       # This is necessary if the from spines have extra paths or stops
                       fill = TRUE) 
+        htab$Filter[is.na(htab$Filter)] <- FALSE
+        htab$Null[is.na(htab$Null)] <- FALSE
         if (fillFromField) {
             for (field in newfields) {
                 na <- is.na(htab[[field]])
@@ -1350,10 +1352,10 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     }, fromTables, init = humtab)
  
     
-    humtab <- update_humdrumR(humtab, fields = newfields)
+    humtab <- update_humdrumR(humtab, field = newfields)
     humtab <- removeNull(humtab, by = c('File', what), nullTypes = 'LIMd')
     
-    putHumtab(humdrumR, drop = 'LIMDdP') <- orderHumtab(humtab)
+    putHumtab(humdrumR, drop = FALSE) <- orderHumtab(humtab)
     
     addFields(humdrumR) <- newfields
     
@@ -1679,7 +1681,7 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, drop = TRUE) <- update_Null.data.table(humtab, field)
+    putHumtab(hum, drop = FALSE) <- update_Null.data.table(humtab, field = field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
