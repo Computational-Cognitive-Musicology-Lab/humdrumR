@@ -2412,7 +2412,8 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
                           screenWidth = options('width')$width - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
   
-  
+  # removes "hanging stops"
+  if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
   #
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
