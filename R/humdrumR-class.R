@@ -1600,7 +1600,7 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
               value <- if (is.character(drop)) {
                   dataTypes <- checkTypes(drop, 'putHumtab')
                   value <- splitHumtab(value, drop = FALSE)
-                  value[!names(values) %in% dataTypes]
+                  value[!names(value) %in% dataTypes]
               } else {
                   splitHumtab(value, drop = !drop)
               }
@@ -1632,36 +1632,22 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 
 ##
 
-update_humdrumR <- function(hum, d, Exclusive, Null, ...) UseMethod('update_humdrumR')
-update_humdrumR.humdrumR <- function(hum, d = TRUE, Exclusive = TRUE, Null = TRUE, ...) {
+update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
+update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
-    humtab <- update_humdrumR.data.table(humtab, d, Exclusive, Null, ...)
+    
+    humtab <- update_humdrumR.data.table(humtab, Exclusive, Null, ...)
     putHumtab(hum, drop = FALSE) <- humtab
     hum
 }
-update_humdrumR.data.table <- function(hum, d = TRUE, Exclusive = TRUE, Null = TRUE, ...) {
+update_humdrumR.data.table <- function(hum,Exclusive = TRUE, Null = TRUE, ...) {
     
     if (Exclusive) hum <- update_Exclusive(hum, ...)
     if (Null) hum <- update_Null(hum, ...)
-    if (d) hum <- update_d(hum)
     hum
     
 }
 
-#
-update_d <- function(hum) UseMethod('update_d')
-update_d.humdrumR <- function(hum) {
-    humtab <- getHumtab(hum, 'Dd')
-    
-    putHumtab(hum, drop = 'Dd') <- update_d.data.table(humtab)
-    
-    hum
-}
-update_d.data.table <- function(hum) {
-    
-    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse( (Null | Filter), 'd', 'D')]
-    hum
-}
 
 #
 update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
@@ -1689,10 +1675,11 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
 
 #
 update_Null <- function(hum, field, ...) UseMethod('update_Null')
-update_Null.humdrumR <- function(hum, field, ...) {
-    if (missing(field)) field <- fields(hum, 'D')$Name
+update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FALSE, ...) {
+    
+    if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, drop = 'LIMDd') <- update_Null.data.table(humtab, field)
+    putHumtab(hum, drop = TRUE) <- update_Null.data.table(humtab, field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
@@ -1701,6 +1688,8 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
     null <- Reduce('&', dataFields)
     
     hum[, Null := null]
+    
+    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse( (Null | Filter), 'd', 'D')]
     hum
 }
 
@@ -2254,10 +2243,12 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     D[ , i] <- value
                     
                     putD(x) <- D
+                    humtab <- update_humdrumR(humtab, field = i)
+                    
                     addFields(x) <- i
                     x <- setActiveFields(x, i)
                     
-                    update_d(update_Null(x))
+                    x
 
           })
 
@@ -2291,12 +2282,14 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     
                     if (any(grepl('Result', colnames(humtab)))) humtab[ , eval(grep('Result', colnames(humtab), value = TRUE)) := NULL]
                     
-                    putHumtab(value, drop = TRUE) <- humtab
+                    putHumtab(value, drop = FALSE) <- humtab
+                    humtab <- update_humdrumR(humtab, field = i)
+                    
                     addFields(value) <- i
                     
                     value@Active <- substituteName(value@Active, setNames(rlang::syms(i), results))
-                    
-                    update_d(update_Null(value))
+                   
+                    value
           })
 
 

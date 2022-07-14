@@ -205,6 +205,7 @@ filterHumdrum <- function(humdrumR, ...) {
     
     
     oldActive <- getActive(humdrumR)
+    oldActiveFields <- activeFields(humdrumR)
     
     humdrumR <- within.humdrumR(humdrumR, ...)
 
@@ -221,7 +222,7 @@ filterHumdrum <- function(humdrumR, ...) {
     humtab[ , Filter := Filter | !`__TmpFilter__`]
     humtab[ , `__TmpFilter__` := NULL]
     
-    humtab <- update_d(humtab)
+    humtab <- update_Null(humtab, oldActiveFields)
     putHumtab(humdrumR) <- humtab
     
     humdrumR <- setActive(humdrumR, oldActive)
@@ -269,21 +270,21 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'd', ...) {
 removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', 'File','GLIMDd')
+  removeNull(humdrumR,'File', 'GLIMDd', 'GLIMDd')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR, 'LIMDd', c('File', 'Spine'), 'GLIMDd')
+  removeNull(humdrumR,  c('File', 'Spine'), 'LIMDd', 'GLIMDd')
 }
 #' @export
 #' @rdname filterHumdrum
 removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   checkhumdrumR(humdrumR, 'removeEmptyRecords')
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
-  removeNull(humdrumR, 'GLIMDd', c('File', 'Record'), 'GLIMDd')
+  removeNull(humdrumR, c('File', 'Record'), 'GLIMDd', 'GLIMDd')
 }
 
 #########################Indexing ----
@@ -332,6 +333,7 @@ setMethod('[',
                 
                 targets <- humtab[ , sort(unique(File))[i]]
                 humtab <- humtab[File %in% targets]
+               
                 
                 putHumtab(x, drop = TRUE) <- humtab
               } else {
