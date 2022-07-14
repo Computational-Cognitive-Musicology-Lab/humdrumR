@@ -1048,13 +1048,18 @@ collapseHumdrum <- function(humdrumR, byfields,
     # byfields should be a character vector.
     # suitable for the "by" argument in a data.table[].
     checkhumdrumR(humdrumR, 'collapseHumdrum')
-    # humdrumR <- indexGLIM(humdrumR)
     
     humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
     
     # What fields do apply to?
     fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
     fieldtypes <- sapply(humtab[ , fieldnames, with = FALSE], class)
+    
+    if (collapseAtomic) humtab[ , fieldnames] <- lapply(humtab[, fieldnames, with = FALSE],
+                                                     \(field) {
+                                                         field[is.na(field)] <- '.'
+                                                         field
+                                                     })
     
     # What fields to apply across
     byfields <- fieldMatch(humdrumR, byfields, callfun = 'collapseHumdrum', argname = 'byfields')
@@ -1063,51 +1068,41 @@ collapseHumdrum <- function(humdrumR, byfields,
     #### Construct the expressions which will do the work
     #This is a list of expressions, one to collapse each field.
     collapseExprs <- Map(\(name, type) {
-        name <- as.symbol(name) 
+        if (collapseAtomic) {
+            rlang::expr(paste(!!name, collapse = !!sep))
+        } else {
+            call <- if (type == 'list') quote(catlists) else quote(list)
+            rlang::expr((!!call)(!!name))
+        }
         
-        if (type == 'list') return(call('catlists', name))
-        
-        if (collapseAtomic) call('paste', name, collapse = sep) else call('list',  name)},
-        fieldnames, fieldtypes)
-    #This puts the pasteexprs into a single expression
-    collapseExpr <- do.call('call', quote = TRUE,
-                        c('list', collapseExprs))
+        },
+        rlang::syms(fieldnames), fieldtypes)
     
     ## Expressions will be first saved into tmpfieldnames, 
     # because data.table doesn't allow in place changes if the type changes
-    tmpfieldnames <- paste0(fieldnames, '_xxxcollapseedxxx')
+    collapsedhumtab <- eval(rlang::expr(humtab[ , c(.SD[1], 
+                                                    setNames(list(!!!collapseExprs), 
+                                                             !!fieldnames)), 
+                                                by = !!byfields,
+                                                .SDcols = setdiff(colnames(humtab), fieldnames)]))
     
-    ## Build the final expression that is evaluated
-    datatableExpr <- quote(humtab[ , X := Y]) # X and Y are just tmp dummies
-    datatableExpr <- substituteName(datatableExpr, subs = list(X = call('c', tmpfieldnames), 
-                                                               Y = collapseExpr))
-    datatableExpr[['by']] <- byfields
-    
-    ### EVALUATE IT!
-    eval(datatableExpr) # in place!
-    
-    
-    ### Get rid of rows we don't need anymore
-    reduceExpr <- quote(humtab[ , .SD[1]])
-    reduceExpr[['by']] <- byfields
-    newhumtab <- eval(reduceExpr)
     
     ## Make sure that null tokens which have been grouped with non-null tokens (d with D, or P with anything)
-    ## are now marked as non-null type
-    typeExpr <- quote(humtab[ , {
+    ## are now marked as non-null typ
+    
+    collapsedhumtab$Type <- collapsedhumtab[ , {
         if (Type[1] == 'P' && any(Type != 'P')) Type[1] <- Type[Type != 'P'][1]
-        output <- if (any(Type == 'D') && any(Type == 'd')) 'D' else Type[1]
-        output
-    }])
-    typeExpr[['by']] <- byfields
-    newhumtab$Type <- eval(typeExpr)$V1
+        
+        if (any(Type == 'D') && any(Type == 'd')) 'D' else Type[1]}, 
+        by = byfields]$V1
     
     ## Rename temp colnames
-    newhumtab[ , eval(fieldnames) := NULL] # inplace
-    colnames(newhumtab) <- gsub('_xxxcollapseedxxx$', '', colnames(newhumtab))
+    # newhumtab[ , eval(fieldnames) := NULL] # inplace
+    # colnames(newhumtab) <- gsub('_xxxcollapseedxxx$', '', colnames(newhumtab))
     
-    if (anyPaths(humdrumR) && !padPaths) newhumtab <- rbindlist(list(newhumtab, getHumtab(humdrumR, 'P')), use.names = TRUE)
-    putHumtab(humdrumR, drop = FALSE) <- newhumtab
+    if (anyPaths(humdrumR) && !padPaths) collapsedhumtab <- rbindlist(list(collapsedhumtab,
+                                                                           getHumtab(humdrumR, 'P')), use.names = TRUE)
+    putHumtab(humdrumR, drop = TRUE) <- collapsedhumtab
     humdrumR
 }
 
@@ -1294,11 +1289,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     humtab[[fromField]][fromHits & humtab$Type == 'D'] <- NA
     #
     whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE], multi = TRUE)]
-    # if (ncol(whichMatch) > 1L) {
-     # for (j in 2:ncol(whichMatch)) {
-         # whichMatch[is.na(whichMatch[ , j]), j] <- whichMatch[is.na(whichMatch[ , j]), j - 1]
-     # }   
-    # }
     
     #
     fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
@@ -1335,9 +1325,12 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null', 'Filter'))
     humtab <- Reduce(\(htab, ftab) {
         htab <- rbind(ftab[htab, on = mergeFields], 
+                      # This is necessary if the from spines have extra paths or stops,
                       ftab[!htab, on = mergeFields], 
-                      # This is necessary if the from spines have extra paths or stops
+                      # or vice versa
+                      # htab[!ftab, on = mergeFields],
                       fill = TRUE) 
+        
         htab$Filter[is.na(htab$Filter)] <- FALSE
         htab$Null[is.na(htab$Null)] <- FALSE
         if (fillFromField) {
@@ -1352,8 +1345,9 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     }, fromTables, init = humtab)
  
     
-    humtab <- update_humdrumR(humtab, field = newfields)
+    humtab <- update_humdrumR(humtab, field = c(newfields, fields(humdrumR, 'D')$Name))
     humtab <- removeNull(humtab, by = c('File', what), nullTypes = 'LIMd')
+    humtab <- update_Null(humtab, field = newfields)
     
     putHumtab(humdrumR, drop = FALSE) <- orderHumtab(humtab)
     
@@ -1454,6 +1448,9 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     checkCharacter(fold, 'from', 'foldExclusive', allowEmpty = FALSE)
     checkCharacter(onto, 'to', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
     
+    fold <- gsub('^\\*\\*', '', fold)
+    onto <- gsub('^\\*\\*', '', onto)
+    
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
     
     moves <- humtab[,{
@@ -1484,12 +1481,14 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
     
+    newFieldNames <- stringr::str_to_sentence(unique(moves$Group))
+    
     humdrumR <- foldHumdrum(humdrumR, 
                             fold = moves$From, 
                             onto = moves$To, 
                             File = moves$File, what = 'Spine',
                             fromField = fromField,
-                            newFieldNames = unique(moves$Group))
+                            newFieldNames = newFieldNames)
     humdrumR
     
     
@@ -1584,9 +1583,7 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
           dataTypes <- checkTypes(dataTypes, 'getHumtab')
           
           humtab <- humdrumR@Humtable[dataTypes]
-          # if (!allsame(sapply(humtab, ncol))) {
-          # humtab <- indexGLIM(humdrumR)@Humtable[dataTypes]
-          # }
+
           spliceHumtab(humtab)
 }
 
@@ -1662,6 +1659,7 @@ update_Exclusive.humdrumR <- function(hum, ...) {
     hum
 }
 update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
+    field <- field[1]
     excluder <- attr(hum[[field]], 'Exclusive')
     
     if (!is.null(excluder)) {
@@ -1681,7 +1679,7 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, drop = FALSE) <- update_Null.data.table(humtab, field = field)
+    putHumtab(hum, drop = TRUE) <- update_Null.data.table(humtab, field = field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
@@ -1864,9 +1862,12 @@ putActive <- function(humdrumR, actquo) {
     # setActive and setActiveFields.
     humtab <- getD(humdrumR)
     usedInExpr <- fieldsInExpr(humtab, actquo)
-    if (length(usedInExpr) == 0) stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
-Add a reference to some field, for instance Token.", call. = FALSE)
     
+    
+    if (length(usedInExpr) == 0L) .stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
+Add a reference to some field, for instance Token.")
+    
+    humdrumR <- update_Null(humdrumR, field = usedInExpr)
     humdrumR@Active <- actquo
     
     act <- evalActive(humdrumR, humtab = humtab)
@@ -1884,20 +1885,6 @@ Add a reference to some field, for instance Token.", call. = FALSE)
 }
 
 
-# activeTypes <- function(humdrumR) {
-#     # this function takes a humdrumR object
-#     # and changes the Type field of the humdrumTable
-#     # to match the content of the Active expression.
-#     
-#     active <- evalActive(humdrumR, 'GLIMDdP', forceVector = TRUE, nullAs = NA)
-#     humtab <- getHumtab(humdrumR, 'GLIMDdP') 
-#     
-#     humtab$Type <- parseTokenType(active)
-#     putHumtab(humdrumR, drop = FALSE) <- humtab
-#     
-#     humdrumR
-#     
-# }
 
 
 ####Fields ----
@@ -1918,7 +1905,14 @@ checkFieldTypes <- function(types, argname, callname) {
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
             name <- as.character(name)
-            matches <- fieldMatch(x, name, callfun = '$', argname = 'name')
+            matches <-  if (name == 'All') {
+                fields(x, 'D')$Name
+            } else {
+                fieldMatch(x, name, callfun = '$', argname = 'name')
+            }
+            
+            
+            
             
             setActiveFields(x, matches)
           })
@@ -2344,7 +2338,6 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   Nfiles <- length(humdrumR)          
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[unique(range(getFields(humdrumR, 'File')$File))] 
   
-  # humdrumR <- indexGLIM(humdrumR)
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
   
   .print_humtab(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
@@ -2385,16 +2378,6 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     active <- gsub('\\.(, )+\\.', '.', active)
 
     
-    # 
-    # targets <- humtab$Type %in% dataTypes
-    # printable <- ifelse(!targets, 
-                        # if (useToken) as.character(humtab$Token) else nulltypes[humtab$Type],
-                        # NA_character_)
-    
-    # printable[targets] <- as.character(evalActive(humdrumR, dataTypes = dataTypes, 
-                                                  # forceVector = TRUE, nullAs = NA))
-    # printable[(humtab$Null | humtab$Filter)] <- nulltypes[humtab$Type[(humtab$Null | humtab$Filter)]]
-    
     humtab[ , Print := active]
     humtab$Type[humtab$Type == 'd'] <- 'D'
     humtab$Type[humtab$Type == 'P'] <- 'D'
@@ -2412,7 +2395,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
                           screenWidth = options('width')$width - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
   
-  # removes "hanging stops"
+  # removes "hanging stops" like "a . ." -> "a"
   if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
   #
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
