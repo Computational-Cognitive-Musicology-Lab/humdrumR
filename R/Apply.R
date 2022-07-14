@@ -299,6 +299,7 @@
 NULL
 
 
+
 #' @rdname withinHumdrum
 #' @export
 with.humdrumR <- function(data, ..., 
@@ -308,7 +309,7 @@ with.humdrumR <- function(data, ...,
   checkhumdrumR(data, 'with.humdrumR')
   list2env(withHumdrum(data, ..., variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
-  visible <- attr(result, 'visible') 
+  visible <- attr(result, 'visible') %||% FALSE
   result[ , `_rowKey_` := NULL]
   
   ####-
@@ -418,8 +419,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   
   # "post" stuff
   evalPrePost(quoTab, 'post')
-  par(oldpar[names(oldpar) != 'new'])
-  par(new = FALSE)
+  par(oldpar[!names(oldpar) %in% c('pin', 'new')])
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -698,7 +698,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
     result <- withVisible(!!doQuo)
     
     output <- result$value
-    attr(output, 'visible') <- result$visible
+    if (!is.null(output)) attr(output, 'visible') <- result$visible
     output
     
   })
