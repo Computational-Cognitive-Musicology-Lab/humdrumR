@@ -5,7 +5,7 @@
 \alias{spines}
 \alias{[.humSpines}
 \alias{print.humSpines}
-\title{Summarize spines in humdrum dataset}
+\title{Summarize spines in humdrum dataset.}
 \usage{
 spines(humdrumR)
 
@@ -14,7 +14,8 @@ spines(humdrumR)
 \method{print}{humSpines}(spineTable, showEach = TRUE)
 }
 \description{
-This function provides summary of the spines and spine paths in the pieces of a humdrumR corpus.
+\code{spines} is one of \link{humdrumR}'s \link[=humSummary]{summary functions},
+used to summarize the spines and spine paths in the pieces of a humdrumR corpus.
 }
 \seealso{
 Other humdrum data summary functions: 

@@ -564,9 +564,10 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 
 #### Spines ----
 
-#' Summarize spines in humdrum dataset
+#' Summarize spines in humdrum dataset.
 #'
-#' This function provides summary of the spines and spine paths in the pieces of a humdrumR corpus.
+#' `spines` is one of [humdrumR]'s [summary functions][humSummary],
+#' used to summarize the spines and spine paths in the pieces of a humdrumR corpus.
 #'
 #' @name humSpines
 #' @family humdrum data summary functions
@@ -706,7 +707,56 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 
 #' Summarize humdrum corpus interpretations.
 #' 
-#' This function provides a summary of the interpretations in the pieces of a humdrumR corpus.
+#' `interpretations` is one of [humdrumR]'s [summary functions][humSummary],
+#' used to summarize the interpretations in the pieces of a humdrumR corpus,
+#' including *exclusive* (`**`) and *tandem* (`*`) interpretations.
+#' It returns a `humInterpretations` argument which prints as a informative table in the terminal.
+#' 
+#' Each row in the output table represents a single piece in the corus.
+#' The first column (`(n)`) indicates a unique "exclusive pattern" associated with
+#' each piece---the exclusive patterns are tallied at the bottom.
+#' The remaining columns indicate how many of each interpretation (indicated by column name)
+#' appear in each piece.
+#' 
+#' For tandem interpretations, counts are returned in the format `Total.Unique.Spines`:
+#' 
+#' + `Total`: The total instances of this interpretation, across all spines.
+#' + `Unique`: The number of unique versions of this interpretation.
+#' + `Spines`: The number of spines that this interpretation appears in.
+#'     
+#'     
+#'  For example, consider the following file:
+#'  
+#'  ```
+#'  **kern   **kern   **silbe
+#'     *C:      *C:         *
+#'       c        e        La
+#'       d        f        la
+#'       e        g        la
+#'     *e:      *e:         *
+#'      f#       d#        la
+#'       g        e         _
+#'       a        b         _
+#'     *G:      *G:         *
+#'      f#        a       doo
+#'       g        b       wop
+#'      *-       *-        *-
+#'  ```
+#'  
+#'  In this file, there is several tandem key interpretations,
+#'  which `humdrumR` will call `Key`.
+#'  The tabulation by `interpretations` will return a `Key` column with the value
+#'  `6.3.2` for this file:
+#'  
+#'  + `6` because there are six key interpretations in total.
+#'  + `3` because there are three unique keys: `*C:`, `*e:` and `*G:`.
+#'  + `2` because the key interpretations only occur in two spines.
+#'  
+#'     
+#'     
+#' @param humdrumR A [humdrumR][humdrumR-class] data object.
+#' 
+#' 
 #' @name humInterpretations
 #' @family humdrum data summary functions
 #' @export
@@ -818,6 +868,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
     cat(padder(colNames, lenCol), stars, '\n', sep = '')
     cat(padder(c('',
                  'Hits:',
+                 '',
                  sapply(as.list(interpmat)[exclusive & screen], \(col) sum(col > 0)),
                  colSums(interps$Tandem$NUnique[ , seq_len(max(0L, max(which(screen)) - max(which(exclusive)))), drop = FALSE]  > 0)),
                lenCol), stars,  '\n', sep = '')
@@ -836,9 +887,9 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   
   
   ## tallying patterns
-  cat(padder(c('Tallies:'), 10), '\n', sep = '')
-  tab <- cbind(c(paste0('(', seq_along(tallies), ')')), 
-               paste0(names(tallies), ':'), 
+  cat(padder(c('Tallies:'), 12), '\n', sep = '')
+  tab <- cbind(names(tallies), 
+               paste0('(', seq_along(tallies), '):'), 
                tallies)
   lenCol <- c(12, apply(nchar(tab), 2, max) + 2L)
   for (i in 1:nrow(tab)) {
