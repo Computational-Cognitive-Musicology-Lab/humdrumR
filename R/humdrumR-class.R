@@ -1270,6 +1270,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
                         newFieldNames = NULL) {
     # argument checks
     checkhumdrumR(humdrumR, 'foldHumdrum')
+    checkLooseInteger(fold)
+    checkLooseInteger(onto)
     
     checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')[]
@@ -1370,7 +1372,7 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
         if (length(unique(lengths(list(fold, onto, File)))) > 1){
             .stop("In your call to foldHumdrum, ",
                   "if the 'File' argument is not NULL,",
-                  "the 'File', 'fold', and 'onto' argumets must all be the same length.")
+                  "the 'File', 'fold', and 'onto' arguments must all be the same length.")
         }
     } else {
         File <- rep(unique(humtab$File), each = max(length(fold), length(onto)))
@@ -1435,9 +1437,8 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' @param fold (`character`) The target exclusive interpretation(s) *from which*
 #'    to "fold" spines to new fields.
 #'    Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
-#' @param onto (`character`, whole number) The target exclusive interpretation(s) *to which*
+#' @param onto (`character`, whole number) The target exclusive interpretation (must be only one) *to which*
 #'    the "fold" data is moved.
-#'    Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
 #' 
 #' @family {Humdrum data "reshaping" functions.}
 #' @seealso `foldExclusive` makes use of the more general [foldHumdrum()].
@@ -1445,33 +1446,34 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldExclusive')
     
-    checkCharacter(fold, 'from', 'foldExclusive', allowEmpty = FALSE)
-    checkCharacter(onto, 'to', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
+    checkCharacter(fold, 'fold', 'foldExclusive', allowEmpty = FALSE)
+    checkCharacter(onto, 'onto', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
     
-    fold <- gsub('^\\*\\*', '', fold)
-    onto <- gsub('^\\*\\*', '', onto)
+    fold <- unique(gsub('^\\*\\*', '', fold))
+    onto <- unique(gsub('^\\*\\*', '', onto))
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
     
     moves <- humtab[,{
-        fromSpine <- unique(Spine[Exclusive %in% fold])
-        toSpine <- unique(Spine[Exclusive %in% onto])
-        if (!(length(fromSpine) < 1L || 
-            length(toSpine) < 1L ||
-            (length(fromSpine) == 1L && length(toSpine) == 1 && fromSpine == toSpine))) {
-            
-            if (all(fromSpine == toSpine)) {
-                fromSpine <- fromSpine[-1]
-                toSpine <- toSpine[1]
-            }
-            fromExclusive <- c(tapply(Exclusive, Spine, unique, simplify = TRUE))[fromSpine]
-            match_size(From = fromSpine, To = toSpine, 
-                       Exclusive = fromExclusive)
+        toSpine <- unique(Spine[Exclusive == onto])
+        if (length(toSpine)) {
+            do.call('rbind', lapply(fold, 
+                   \(fromExclusive) {
+                       fromSpine <- unique(Spine[Exclusive == fromExclusive])
+                       if (length(fromSpine) &&
+                           !(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
+                        
+                           if (all(fromSpine == toSpine)) {
+                               fromSpine <- fromSpine[-1]
+                               toSpine <- toSpine[1]
+                           }   
+                           
+                           as.data.frame(match_size(From = fromSpine, To = toSpine,  Exclusive = fromExclusive))
+                       }  
+                       
+                   }))
         }
-        
-      
-        
-        }, by = File]
+    }, by = File]
     
     if (nrow(moves) == 0L) {
         .stop("foldExclusive found no matching files with both '{fold}' and '{onto}'",
