@@ -11,9 +11,8 @@ foldExclusive(humdrumR, fold, onto, fromField = "Token")
 to "fold" spines to new fields.
 Must be specified \emph{without} the \verb{**} prefix: \code{"kern"} not \code{"**kern"}.}
 
-\item{onto}{(\code{character}, whole number) The target exclusive interpretation(s) \emph{to which}
-the "fold" data is moved.
-Must be specified \emph{without} the \verb{**} prefix: \code{"kern"} not \code{"**kern"}.}
+\item{onto}{(\code{character}, whole number) The target exclusive interpretation (must be only one) \emph{to which}
+the "fold" data is moved.}
 }
 \description{
 \code{foldExclusive()} is a special version of \code{\link[=foldHumdrum]{foldHumdrum()}}, which

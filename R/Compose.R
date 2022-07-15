@@ -471,16 +471,32 @@ exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NUL
 
 
 makeExcluder <- function(from, to) {
-  (\(Exclusive) {
-    if (is.null(Exclusive)) return(NULL)
-    Exclusive[!is.na(Exclusive) & Exclusive %in% from] <- to
-    Exclusive
-  }) %class% "Excluder"
+  from <- from[!from %in% to]
+  
+  if (length(from) == 0L) return(NULL)
+  
+  
+  func <- rlang::new_function(alist(Exclusive = ), 
+                      env = pkg_env('humdrumR'), 
+                      rlang::expr({
+                        if (is.null(Exclusive)) return(NULL)
+                        Exclusive[!is.na(Exclusive) & Exclusive %in% !!from] <- !!to
+                      }))
+  
+  attr(func, 'from') <- from
+  attr(func, 'to') <- to
+  func %class% "Excluder"
 }
 
+#' @export
 print.Excluder <- function(x) {
-  env <- environment(x)
-  cat(paste0('**', env$from), ' -> ', paste0('**', env$to, sep = ''), '\n')
+  # from <- attr(x, 'from')
+  to <- attr(x, 'to')
+  cat('**', to, '\n', sep = '')
+  
+  # from <- harvard(paste0('**', from), 'or')
+  # if (length(from) > 1L) from <- paste0('(', from, ')')
+  # cat(from, ' -> ', '**', to, '\n', sep = '')
 }
 
 do_attr <- function(func, x, ...) {

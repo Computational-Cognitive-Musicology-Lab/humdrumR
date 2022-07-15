@@ -66,6 +66,7 @@ test_that("Pitch functions return same output, regardless of input.", {
     
     expect_allequal <- function(f, inputs) {
         vals <- lapply(inputs, f)
+        vals <- lapply(vals, \(v) {attr(v, 'Exclusive') <- NULL ; v})
         
         Reduce('expect_equal', vals)
     }
@@ -80,7 +81,8 @@ test_that("Pitch functions return same output, regardless of input.", {
 })
  
 test_that("Functions are invertible", {
-    expect_invertible <-function(func1, func2, x)  expect_equal(func2(func1(x)), x)
+    expect_invertible <-function(func1, func2, x) expect_equal(func2(func1(x)), x)
+ 
     
     inputs <- list(tint = tint(c(6, 5, 5, 2, 0, -1, -1, -7, -6, 15, -9, -11), c(-4, -3, -2, -1, 0, 1, 2, 3, 4, -9, 6, 7)), 
                    kern = c('A-', 'e-', 'bb-', 'f', 'c', 'g', 'ddd', 'AAA', 'e', 'b--', 'f#', 'c#'),
@@ -213,7 +215,7 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(kern(0:2, parseArgs=list(accidental.melodic = TRUE)), c('c', 'c#', 'd'))
     
     expect_equal(cents('g', tonalHarmonic = 3), 701.955)
-    expect_equal(round(cents(440 * 10/9, Exclusive = 'freq'), 1), 1082.4 )
+    expect_true(round(cents(440 * 10/9, Exclusive = 'freq'), 3) ==  1082.404)
     
     expect_equal(semits('c#', generic = TRUE), 0)
     expect_equal(semits('c#', generic = TRUE, Key ='A:'), 1)

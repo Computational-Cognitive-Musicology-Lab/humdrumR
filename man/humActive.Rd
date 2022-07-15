@@ -13,7 +13,8 @@ evalActive(
   dataTypes = "D",
   forceVector = FALSE,
   sep = ", ",
-  nullAs = NA
+  nullAs = NA,
+  humtab
 )
 
 getActive(humdrumR)

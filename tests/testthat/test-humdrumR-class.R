@@ -80,9 +80,9 @@ test_that('Path folding works properly', {
   foldedPath <- getHumtab(foldPaths(path))
   
   
-  expect_equal(dim(foldedPath), c(25, 23))
-  if (expect_true(all(c('Token', 'Token_Path') %in% colnames(foldedPath)))) {
-    expect_equal(foldedPath[Stop == 1L, table(Token, Token_Path)]['c', 'a'], 2L)
+  expect_equal(dim(foldedPath), c(28, 23))
+  if (expect_true(all(c('Token', 'Token_Path1') %in% colnames(foldedPath)))) {
+    expect_equal(foldedPath[Stop == 1L, table(Token, Token_Path1)]['c', 'a'], 2L)
   }
   
   
@@ -108,10 +108,10 @@ test_that('Stop and path folding work together', {
   foldedPS <- getHumtab(foldStops(foldPaths(path))$Token, 'D')
   foldedSP <- getHumtab(foldPaths(foldStops(path))$Token, 'D')
   
-  expect_equal(foldedPS[, table(Token, Token_Path)], 
-               foldedSP[, table(Token, Token_Path)])
-  expect_equal(foldedPS[, table(Token, Token_Stop)], 
-               foldedSP[, table(Token, Token_Stop)])
+  expect_equal(foldedPS[, table(Token, Token_Path1)], 
+               foldedSP[, table(Token, Token_Path1)])
+  expect_equal(foldedPS[, table(Token, Token_Stop2)], 
+               foldedSP[, table(Token, Token_Stop2)])
   
 })
 
@@ -128,7 +128,7 @@ test_that('Examples from Reshaping vignette work', {
   }
 })
 
-})
+
 
 test_that("Exclusive (spine) folding works properly", {
   
@@ -166,58 +166,7 @@ test_that("Exclusive (spine) folding works properly", {
   }
 })
 
-test_that('Path folding works properly', {
-  
-  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
 
-  foldedPath <- getHumtab(foldPaths(path))
-  
-  
-  expect_equal(dim(foldedPath), c(25, 23))
-  if (expect_true(all(c('Token', 'Token_Path') %in% colnames(foldedPath)))) {
-    expect_equal(foldedPath[Stop == 1L, table(Token, Token_Path)]['c', 'a'], 2L)
-  }
-  
-  
-  
-})
 
-test_that('Stop folding works properly', {
-  
-  stop <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_stops.hum')
-  
-  foldedStop <- getHumtab(foldStops(stop))
-  
-  
-  expect_equal(dim(foldedStop), c(18, 25))
-  if (expect_true(all(c('Token', 'Token_Stop2', 'Token_Stop3') %in% colnames(foldedStop)))) {
-    expect_equal(foldedStop[ , table(Token, Token_Stop2, Token_Stop3)]['b', 'd', 'g#'], 2L)
-  }
-})
 
-test_that('Stop and path folding work together', {
-  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
-  
-  foldedPS <- getHumtab(foldStops(foldPaths(path))$Token, 'D')
-  foldedSP <- getHumtab(foldPaths(foldStops(path))$Token, 'D')
-  
-  expect_equal(foldedPS[, table(Token, Token_Path)], 
-               foldedSP[, table(Token, Token_Path)])
-  expect_equal(foldedPS[, table(Token, Token_Stop)], 
-               foldedSP[, table(Token, Token_Stop)])
-  
-})
-
-# Reshaping vignette
-
-test_that('Examples from Reshaping vignette work', {
-  reshaping <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
-  
-  reshaped <- getHumtab(foldHumdrum(reshaping, 2, 1), 'D')
-  
-  expect_equal(dim(reshaped), c(6, 26))
-  if (expect_true(all(c('Token', 'Result1') %in% colnames(reshaped)))) {
-    expect_equal(reshaped[ , table(Token, Result1)]['4e', 'an'], 1L)
-  }
-})
 
