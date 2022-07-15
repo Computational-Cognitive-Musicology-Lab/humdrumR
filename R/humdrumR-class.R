@@ -1468,10 +1468,19 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
                                toSpine <- toSpine[1]
                            }   
                            
-                           as.data.frame(match_size(From = fromSpine, To = toSpine,  Exclusive = fromExclusive))
+                           as.data.table(match_size(From = fromSpine, To = toSpine,  Exclusive = fromExclusive))
                        }  
                        
-                   }))
+                   })) -> moves
+            # if one exclusive is collapsing onto itself (like kern -> kern),
+            # other spines collapsing onto the collapsed one will result in overlaps
+            # there's no way to see this before now
+            overlaps <- moves[ , To %in% From]
+            if (any(overlaps)) {
+                moves$To[overlaps] <- moves[overlaps == FALSE][moves[overlaps == TRUE], on ='Exclusive']$To
+                moves <- moves[!duplicated(moves)]
+            }
+            moves
         }
     }, by = File]
     
