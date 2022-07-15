@@ -656,6 +656,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
     cols <- if (anypaths) 1:7 else 1:3
     colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
     
+    
     lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
                    nchar(colNames), sapply(spineTable[ , cols, with = FALSE], \(x) max(nchar(x)))) + 2L
     
@@ -681,6 +682,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
     cat(padder(c('Tallies:'), sum(lenCol[1:2])), '\n', sep = '')
     
     tab <- spineTable[ , table(Spines, Columns)]
+    tab <- tab[order(tab[ , 1], decreasing = TRUE), , drop = FALSE]
     for (i in 1:nrow(tab)) {
       row <- c('', sum(tab[i, ]), paste0('with ', (rownames(tab)[i])))
       row <- padder(row, lenCol[1:3])
@@ -737,9 +739,11 @@ interpretations <- function(humdrumR) {
   exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = File]$V1)
   rownames(exclusiveN) <- unique(humtab$Filename)
   
+  exclusivePats <- exclusive[, harvard(Token), by = File]$V1
   output <- list(Filename = unique(humtab$Filename),
                  File = unique(humtab$File),
                  Exclusive = exclusiveN, 
+                 ExclusivePat = exclusivePats,
                  Tandem    = list(Number    = tandemN, 
                                   NUnique   = tandemUN,
                                   InNSpines = tandemIn)) %class% 'humInterpretations'
@@ -759,7 +763,12 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   tandems <- interps$Tandem[[1]]
   tandems[] <- do.call('paste', c(sep = '.', interps$Tandem))
   
-  interpmat <- data.table(File = paste0(num2str(interps$File), ':'), Filename = interps$Filename, interps$Exclusive, tandems)
+  tallies <- sort(table(interps$ExclusivePat), decreasing = TRUE)
+  
+  interpmat <- data.table(File = paste0(num2str(interps$File), ':'), Filename = interps$Filename, 
+                          "(n)" = paste0('(', match(interps$ExclusivePat, names(tallies)), ')'), 
+                          interps$Exclusive,
+                          tandems)
   nfiles <- nrow(interpmat)
   
   corpusMessage <- paste0('\n###### Interpretation content in humdrumR corpus "',
@@ -774,8 +783,6 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
                  nchar(colnames(interpmat)), 
                  na.rm = TRUE) + 2
   
-  
-  
   # shrink to screenWidth size
   screen <- cumsum(lenCol) <= screenWidth
   interpmat <- interpmat[ , screen, with = FALSE]
@@ -784,7 +791,8 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   colNames_str <- padder(colNames, lenCol)
   stars <- if (any(!screen)) "    ***" else ""
   
-  key <- if (ncol(tandems) > 0L && max(which(screen)) > max(which(exclusive))) paste0(stringr::str_pad('(Total.Unique.Spines)', width = sum(lenCol), side = 'left'), '\n') else ""
+  key <- if (ncol(tandems) > 0L && max(which(screen)) > max(which(exclusive))) paste0(stringr::str_pad('(Total.Unique.Spines)', 
+                                                                                                       width = sum(lenCol), side = 'left'), '\n') else ""
   
   
   ## PRINTING BEGINS:
@@ -815,8 +823,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
                lenCol), stars,  '\n', sep = '')
   }
   
-  if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
-  
+  #
   if (stars != "") {
     cat('\n') 
     message <- paste0('(***',
@@ -828,7 +835,19 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   }
   
   
+  ## tallying patterns
+  cat(padder(c('Tallies:'), 10), '\n', sep = '')
+  tab <- cbind(c(paste0('(', seq_along(tallies), ')')), 
+               paste0(names(tallies), ':'), 
+               tallies)
+  lenCol <- c(12, apply(nchar(tab), 2, max) + 2L)
+  for (i in 1:nrow(tab)) {
+    row <- padder(c('', tab[i, ]), lenCol[1:4])
+    cat(row, '\n', sep = '')
+  }
   
+  
+  if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
 }
 
 #### Sections ----
