@@ -255,7 +255,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   if (stars != '') {
     cat('\n') 
-    extraCols <- paste0('(***', #glue::glue_collapse(extraCols, sep = ', ', last = ', and ', width = screenWidth - 50L),
+    extraCols <- paste0('(***', 
                         num2word(sum(!screen)),
                         plural(sum(!screen), ' columns', ' column'), ' not displayed due to screensize',
                         '***)')
@@ -686,7 +686,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
       row <- padder(row, lenCol[1:3])
       if (anypaths) {
         notzero <- which(tab[i, ] > 0)
-        row <- c(row, ' (', glue::glue_collapse(paste0(tab[i, notzero], '*',  colnames(tab)[notzero]), sep = ' paths, ', last = ', and '), ')')
+        row <- c(row, ' (', harvard(paste0(tab[i, notzero], '*',  colnames(tab)[notzero], ' paths'), 'and'), ')')
       }
       cat(row, '\n', sep = '')
     }

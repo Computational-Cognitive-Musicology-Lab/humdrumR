@@ -247,7 +247,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
              # prepare string to print if contains
              contains <- if(!is.null(contains)) {
                  glue::glue(" (containing ", 
-                            glue::glue_collapse(paste0("'", contains, "'"), sep = ', ', last = ' and '),
+                            harvard(contains, 'and', quote = TRUE), 
                             ")")
                  } else ""
              

@@ -900,8 +900,8 @@ setMethod('c', 'struct',
                                            
                                            if (class(y) == 'try-error') {
                                              .stop(ifelse = length(class(y)) > 1L,
-                                                   "You can't concatinate a {class(x)} struct object with objects of class<|es> ",
-                                                   glue::glue_collapse(class(y), sep = ', ', last = ', or '), '.', sep = '')
+                                                   "You can't concatinate a {class(x)} struct object with objects of class<|es>",
+                                                   harvard(class(y), 'or', quote = FALSE), '.')
                                            }
                                            
                                            y

@@ -526,8 +526,7 @@ parseKeywords <- function(quoTab, withFunc) {
   keywords <- quoTab[ , partialMatchKeywords(Keyword)]
   
   if (any(is.na(keywords))) {
-    badwords <- glue::glue_collapse(paste0("'", quoTab$Keyword[is.na(keywords)], "'"),
-                                    sep = ",", last = " and ")
+    badwords <- harvard(quoTab$Keyword[is.na(keywords)], "and", quote = TRUE)
     .stop('In your call to {withFunc},',
           "{badwords} <are|is> not <|a> legal keyword<s|>.",
           "See ?withHumdrum for help.",

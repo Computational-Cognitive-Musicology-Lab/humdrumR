@@ -97,59 +97,6 @@ fargs <- function(func) formals(args(func))
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
-    strs <- unlist(list(...))
-    ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
-    ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
-                                       \(pairs) {
-                                           pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
-                                           pairs <- strsplit(pairs, split = '\\|')
-                                           
-                                           pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
-                                           pick %|% ""
-                                           
-                                       })
-    
-    strs <- Map(function(s, r) {
-        while (length(r) > 0) {
-            s <- stringr::str_replace(s,  '<[^>]*\\|[^>]*>', r[1])
-            r <- r[-1]
-        }
-        s
-    }, 
-                strs, ifelses)
-    
-    strs <- paste(unlist(strs), collapse = sep)
-    glue::glue(strs, .envir = envir)
-}
-
-.stop <- function(..., ifelse = TRUE, sep = ' ') {
-  # stack <- c()
-  # n <- 1
-  # while(!is.null(rlang::caller_call(n))) {
-  #   stack[n] <- rlang::expr_deparse(rlang::caller_call(n))
-  #   n <- n + 1
-  # }
-  
-  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
-  stack <- sapply(stack, paste, collapse = '\n')
-  
-  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
-  
-   # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
-  
-  cut <- 15
-  stack[-1] <- paste0(' -> ', stack[-1])
-  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
-    # 
-    message('humdrumR error in:')
-    message('\t', stack, sep = '')
-    
-    message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame())
-   
-    stop(call. = FALSE, message)
-}
-
 # Names ----
 
 .names <- function(x) { #:: a -> character
@@ -1585,7 +1532,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     # 
     if (length(sys.calls()) > 10L) return(arg) 
     
-    argNames <- if (length(arg) > 1L) paste0('c(', glue::glue_collapse(quotemark(arg), sep = ', '), ')') else quotemark(arg)
+    argNames <- if (length(arg) > 1L) paste0('c(', harvard(arg, quote = TRUE), ')') else quotemark(arg)
     if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
@@ -1599,7 +1546,7 @@ checkArg <- function(arg,  argname, callname = NULL,
                                          "In your call, length({argname}) == {length(arg)}.")
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
-        classNames <- glue::glue_collapse(classes, sep = ', ', last =  ', or ')
+        classNames <- harvard(classes, 'or', quote = TRUE)
         .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
     }
     
@@ -1612,8 +1559,8 @@ checkArg <- function(arg,  argname, callname = NULL,
                 .stop(callname, "{arg} is not a valid value for the {argname} argument.")
             } else {
                 case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
-                illNames <- glue::glue_collapse(quotemark(arg[ill]), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and ')
-                legalNames <-  paste0(glue::glue_collapse(quotemark(validoptions), sep = ', ', last = if (sum(ill) > 2) ', and ' else ' and '), '.')
+                illNames <- harvard(arg[ill], 'and', quote = TRUE)
+                legalNames <-  paste0(harvard(validoptions, quote = TRUE), '.')
                 
                 message <- list(callname, illNames, case, 'Valid options are ', legalNames)
                 
@@ -1703,6 +1650,42 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
               classes = "character")
 }
 
+
+# Error messages ----
+
+.stop <- function(func, ..., ifelse = TRUE, sep = ' ') {
+  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
+  stack <- sapply(stack, paste, collapse = '\n')
+  
+  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
+  # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
+  
+  cut <- 15
+  stack[-1] <- paste0(' -> ', stack[-1])
+  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
+  # 
+  message('humdrumR error in:')
+  message('\t', stack, sep = '')
+  
+  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1))
+  
+  stop(call. = FALSE, message)
+}
+
+
+.warn <- function(...,  ifelse = TRUE, sep = ' ', immediate. = FALSE) {
+  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
+  stack <- sapply(stack, paste, collapse = '\n')
+  
+  call <- sys.calls()[[1]]
+  
+  warning('In your call ', rlang::expr_deparse(call), ': ',
+          .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
+          call. = FALSE,
+          immediate. = immediate.)
+}
+
+
 # Strings ----
 
 
@@ -1733,6 +1716,56 @@ matched <- function(x, table) table[pmatch(x, table)]
 }
 
 
+
+.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
+  strs <- unlist(list(...))
+  ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
+  ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
+                                           \(pairs) {
+                                             pairs <- stringr::str_sub(pairs, 2L, -2L) # rid of <>
+                                             pairs <- strsplit(pairs, split = '\\|')
+                                             
+                                             pick <- sapply(pairs, '[', i = if (ifelse) 1 else 2)
+                                             pick %|% ""
+                                             
+                                           })
+  
+  strs <- Map(function(s, r) {
+    while (length(r) > 0) {
+      s <- stringr::str_replace(s,  '<[^>]*\\|[^>]*>', r[1])
+      r <- r[-1]
+    }
+    s
+  }, 
+  strs, ifelses)
+  
+  strs <- paste(unlist(strs), collapse = sep)
+  glue::glue(strs, .envir = envir)
+}
+
+harvard <- function(x, conjunction = '', quote = FALSE) {
+  if (quote) x <- quotemark(x)
+  if (conjunction != '') conjunction <- paste0(if (length(x) > 2L) ',', ' ', conjunction, ' ')
+  glue::glue_collapse(x, sep = ', ', last = conjunction)
+}
+
+
+plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
+
+quotemark <- function(x) if (is.character(x)) paste0("'", x, "'") else x
+
+nthfix <- function(n) {
+  affix <- rep('th', length(n))
+  mod10 <- abs(n) %% 10
+  mod100 <- abs(n) %% 100
+  affix[mod10 == 1 & mod100 != 11] <- "st"
+  affix[mod10 == 2 & mod100 != 12] <- "nd"
+  affix[mod10 == 3 & mod100 != 13] <- 'rd'
+  
+  paste0(n, affix)
+  
+}
+
 pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     # pastes named elements of ... using order supplied in order
     strs <- list(...) # named vector of strings,
@@ -1750,22 +1783,6 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     
 }
 
-
-plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
-
-quotemark <- function(x) if (is.character(x)) paste0('"', x, '"') else x
-
-nthfix <- function(n) {
-    affix <- rep('th', length(n))
-    mod10 <- abs(n) %% 10
-    mod100 <- abs(n) %% 100
-    affix[mod10 == 1 & mod100 != 11] <- "st"
-    affix[mod10 == 2 & mod100 != 12] <- "nd"
-    affix[mod10 == 3 & mod100 != 13] <- 'rd'
-    
-    paste0(n, affix)
-     
-}
 
 
 object2str <- function(object) {

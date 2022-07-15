@@ -87,7 +87,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
         dontexist <- Filter(Negate(dir.exists), unique(filenameTable$Directory))
         if (length(dontexist) > 0L) {
             cat('\nCreating ', 
-                glue::glue_collapse(dontexist, sep = ', ', last = ', and '), 
+                harvard(dontexist, 'and'), 
                 if (length(dontexist) == 1L) ' directory.' else ' directories.',
                 sep = '')
             

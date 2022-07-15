@@ -220,7 +220,7 @@ validate_recordTypes <- function(records, local, ...) {
           types <- sapply(firsttoks, 
                           \(toks) {
                                     typ <- c("interpretation", "comment", "barline", "data")[match(unique(toks), c("*","!","="), nomatch = 4)]
-                                    glue::glue_collapse(typ, sep = ', ', last = ' and ')
+                                    harvard(typ, 'and')
                                     })
           
           toks <- sapply(firsttoks, \(x) paste0("(", glue::glue_collapse(x, sep = ' '), ')'))

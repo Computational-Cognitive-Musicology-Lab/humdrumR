@@ -1101,7 +1101,8 @@ collapseHumdrum <- function(humdrumR, byfields,
     # colnames(newhumtab) <- gsub('_xxxcollapseedxxx$', '', colnames(newhumtab))
     
     if (anyPaths(humdrumR) && !padPaths) collapsedhumtab <- rbindlist(list(collapsedhumtab,
-                                                                           getHumtab(humdrumR, 'P')), use.names = TRUE)
+                                                                           getHumtab(humdrumR, 'P')), use.names = TRUE,
+                                                                      fill = TRUE) 
     putHumtab(humdrumR, drop = TRUE) <- collapsedhumtab
     humdrumR
 }
@@ -1287,7 +1288,13 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     # 
     fromHits <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
     fromTable <- humtab[fromHits == TRUE, c(fromField, fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
-    # humtab <- humtab[fromHits == FALSE]
+    
+    if (all(is.na(fromTable[[fromField]]))) {
+        .warn("Your fromField doesn't have any non-null data where {what} == {harvard(fold, 'or')}.",
+              "Your humdrumR data is being returned unchanged.")
+        return(humdrumR)
+    }
+    
     humtab[[fromField]][fromHits & humtab$Type == 'D'] <- NA
     #
     whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE], multi = TRUE)]
@@ -1485,8 +1492,10 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     }, by = File]
     
     if (nrow(moves) == 0L) {
-        .stop("foldExclusive found no matching files with both '{fold}' and '{onto}'",
-              'exclusive interpretations.')
+        .warn("foldExclusive found no matching files with both '{fold}' and '{onto}'",
+              'exclusive interpretations.',
+              "Your humdrumR data is returned unchaged.")
+        return(humdrumR)
     }
     
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
@@ -1966,20 +1975,20 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
           nomatch <- is.na(target)
           
           if (all(nomatch)) {
-              stop(call. = FALSE,
-                   glue::glue('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
-                              glue::glue_collapse(fieldnames, sep = ', ', last = ', and '),
-                              plural(length(fieldnames), ' are not names of fields', ' is not the name of a field'),
-                              ' in your humdrumR object.'))
+              .stop("In the '{argname}' argument of your call to humdrumR::{callfun},", 
+                    ifelse = length(fieldnames),
+                    harvard(fieldnames, 'and', quote = TRUE),
+                    '<is not the name of a field|are not names of fields>',
+                    'in your humdrumR object.')
           }
           
           if (any(nomatch)) {
-              warning(call. = FALSE, immediate. = TRUE,
-                      glue::glue('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
-                                 glue::glue_collapse(fieldnames[is.na(target)], 
-                                                sep = ', ', last = ', and '),
-                                 'are not names of fields in your humdrumR object.')
-                      )
+              .warn('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
+                    ifelse = length(argname),
+                    harvard(fieldnames[is.na(target)],  'and'),
+                    '<is not the name of a field|are not names of fields>',
+                    'in your humdrumR object.')
+                      
               target <- target[!nomatch]
               
           }
@@ -2015,7 +2024,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
     classes[lists] <- paste0('list (of ',
                              sapply(D[ , lists, with = FALSE],
                                                 \(col) {
-                                                  glue::glue_collapse(paste0(unique(sapply(col, class)), "s"), sep = ', ', last = ', and ')
+                                                  harvard(paste0(unique(sapply(col, class)), "s"), 'and')
                                                 }),
                              ")")
   }
@@ -2302,8 +2311,9 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     if (any(i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name)) {
                         builtin <- i[i %in% fields(x, c('Structure', 'Interpretation', 'Formal', 'Reference'))$Name]
                         .stop("You can't overwrite built-in fields of a humdrumR object. In this case,",
-                              glue::glue_collapse(builtin, sep = ', ', last = 'and'), 
-                              plural(length(builtin), 'are built-in fields.', 'is a built-in fields'))
+                              harvard(builtin, 'and'), 
+                              ifelse = length(builtin), 
+                              '<is a built-in field|are built-in fields>.')
                     }
               
                     humtab <- getHumtab(value)
