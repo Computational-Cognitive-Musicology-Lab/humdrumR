@@ -419,7 +419,9 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   
   # "post" stuff
   evalPrePost(quoTab, 'post')
-  par(oldpar[!names(oldpar) %in% c('pin', 'new')])
+  curmfg <- par('mfg')
+  par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt','pty', 'new')])
+  par(mfg = curmfg, new = FALSE)
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -1250,7 +1252,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
       oldpar <- par(no.readonly = TRUE,
                     mfcol = find2Dlayout(nparts))
-      on.exit(par(oldpar))
+      on.exit(par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt','pty', 'new')]))
     }
     
     
