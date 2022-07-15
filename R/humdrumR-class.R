@@ -1274,7 +1274,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     checkLooseInteger(onto)
     
     checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
-    fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')[]
+    fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
     checkArg(what, 'what', 'foldHumdrum', max.length = 1L,
              validoptions = c('Spine', 'Path', 'Stop', 'Record', 'NData'))
     
@@ -1522,7 +1522,7 @@ foldPaths <- function(humdrumR, fromField = 'Token', fillFromField = TRUE) {
     
     foldHumdrum(humdrumR, paths, minPath, what = 'Path', 
                 fromField = fromField, fillFromField = fillFromField,
-                newFieldNames = paste0(fromField, '_Path'))
+                newFieldNames = paste0(fromField, '_Path', paths))
     
 
     
@@ -1545,9 +1545,40 @@ foldStops <- function(humdrumR, fromField = 'Token', fillFromField = FALSE) {
    
    foldHumdrum(humdrumR, stops, minStop, what = 'Stop', 
                fromField = fromField, fillFromField = fillFromField,
-               newFieldNames = paste0(fromField, '_Stop'))
+               newFieldNames = paste0(fromField, '_Stop', stops))
    
    
+}
+
+#' "Unfold" data into multiple stops
+#' 
+#' If some record/spine/path locations have different numbers of
+#' stops in different fields, this function spreads the data from the 
+#' smaller fields into multiple stops.
+#' 
+#' @seealso The opposite (kinda) of [foldStops()]
+#' @export
+unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
+    checkhumdrumR(humdrumR, 'unfoldStops', 'humdrumR')
+    if (!anyStops(humdrumR)) return(humdrumR)
+    checkCharacter(fromFields, 'fromFields', 'unfoldStops')
+    fromFields <- fieldMatch(humdrumR, fromFields, 'unfoldStops', 'fromFields')
+    
+    #
+    humtab <- getHumtab(humdrumR)
+    
+    
+    multistopRecords <- as.data.table(humtab[, which(apply(table(Record,Stop,File), c(1,3), sum) > 1, arr.ind = TRUE)])
+    multiHumtab <- humtab[multistopRecords, on = c('Record', 'File')]
+    fromFields <- fromFields[multiHumtab[, sapply(fromFields, \(field) any(is.na(get(field))))]]
+    for (field in fromFields) {
+        
+        multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(File, Record)]   
+    }
+    humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'File')]))
+    humtab <- update_Null(humtab, field = fromFields)
+    putHumtab(humdrumR, drop = TRUE) <- humtab
+    humdrumR
 }
 
 #' "Fold" grace notes into neighbos
@@ -2407,7 +2438,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
   
   # removes "hanging stops" like "a . ." -> "a"
-  if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
+  # if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
   #
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
