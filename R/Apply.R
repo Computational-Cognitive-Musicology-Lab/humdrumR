@@ -333,11 +333,19 @@ within.humdrumR <- function(data, ..., variables = list()) {
   if (all(quoTab[KeywordType == 'do', Keyword == 'dofx'])) return(data)
   
   local({
-    #### if any new fields have same name as old, remove old
-    # ADD A CHECK TO PREVENT OVERWRITING STRUCTURAL FIELDS?
-    overwrittenfields <- colnames(result)[colnames(result) %in% colnames(humtab)]
-    overwrittenfields <- overwrittenfields[overwrittenfields != '_rowKey_']
-    if (length(overwrittenfields)) humtab[ , eval(overwrittenfields) := NULL]
+    overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
+    
+    bad <- overWrote %in% fields(humdrumR, 'S')$Name
+    if (any(bad)) {
+      .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
+            ifelse = sum(bad) > 1L, 
+            "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
+            "For a complete list of structural fields, use the command fields(mdata, 'S').")
+    }
+    
+    if (length(overWrote)) {
+      lapply(humdrumR@Humtable,  \(ht) ht[ , eval(overWrote) := NULL])
+    }
   })
   
   ## put result into new humtab
@@ -347,7 +355,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
   # number new results
   unnamedresult <- which(colnames(newhumtab) == 'Result')
   assign <- tail(quoTab[KeywordType == 'do' & Keyword != 'dofx' & !is.na(AssignTo), AssignTo], 1)
-  if (length(assign)) {
+  if (length(assign) & length(unnamedresult)) {
     colnames(newhumtab)[unnamedresult[1]] <- assign[[1]]
     unnamedresult <- unnamedresult[-1]
   }

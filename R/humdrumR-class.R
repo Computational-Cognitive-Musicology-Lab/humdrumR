@@ -456,7 +456,7 @@ splitHumtab <- function(humtab, drop = FALSE) {
 spliceHumtab <- function(humtab) {
           # This combines the components of a humtab list into a single data.table
           # it also sorts them by default values
-          humtab <- rbindlist(humtab, fill = TRUE)
+          humtab <- if (length(humtab) == 1L) humtab[[1]] else rbindlist(humtab, fill = TRUE)
           
           orderHumtab(humtab)
 }

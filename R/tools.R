@@ -1653,7 +1653,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 
 # Error messages ----
 
-.stop <- function(func, ..., ifelse = TRUE, sep = ' ') {
+.stop <- function(..., ifelse = TRUE, sep = ' ') {
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
   
