@@ -433,35 +433,6 @@ NULL
 #####Humtable methods
 
 
-splitHumtab <- function(humtab, drop = FALSE, levels = c('G', 'L', 'I', 'M', 'D', 'd', 'P')) { 
-          # Splits a humtable by type
-          # drop determines whether absent dataTypes
-          # are returned as empty data.tables (drop = FALSE)
-          # or simply ommited (drop = TRUE).
-          # If the humtab is empty, an empty table for each type is produced, regardless of drop
-    
-    if (length(unique(humtab$Type)) == 1L && drop) {
-        return(setNames(list(humtab), unique(humtab$Type)))
-    }
-    if (nrow(humtab) == 0L ) {
-        output <- replicate(7, humtab, simplify = FALSE)
-        names(output) <- levels
-        output
-    } else {
-        split(humtab, 
-              # by = 'Type', sorted = FALSE,
-              f = factor(humtab$Type, levels = levels),
-              drop = drop) # this seems wrong but it actually makes sense
-    }
-}
-
-spliceHumtab <- function(humtab) {
-          # This combines the components of a humtab list into a single data.table
-          # it also sorts them by default values
-          humtab <- if (length(humtab) == 1L) humtab[[1]] else rbindlist(humtab, fill = TRUE)
-          
-          orderHumtab(humtab)
-}
 
 orderHumtab <- function(humtab) {
     if (nrow(humtab) == 0L) return(humtab)
@@ -1459,13 +1430,15 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     onto <- unique(gsub('^\\*\\*', '', onto))
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
-    
     moves <- humtab[,{
         toSpine <- unique(Spine[Exclusive == onto])
         if (length(toSpine)) {
             do.call('rbind', lapply(fold, 
                    \(fromExclusive) {
                        fromSpine <- unique(Spine[Exclusive == fromExclusive])
+                       if (length(fromSpine) == 0L) return(data.table(From = integer(0), 
+                                                                      To = integer(0), 
+                                                                      Exclusive = character(0)))
                        if (length(fromSpine) &&
                            !(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
                         
