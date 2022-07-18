@@ -380,7 +380,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
     humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes] <- lapply(humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes],
                                                                              \(ht) {ht[ , overWrote] <- NULL; ht})
   }
-  putHumtab(humdrumR, drop = FALSE) <- newhumtab
+  putHumtab(humdrumR, overwriteEmpty = FALSE) <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {

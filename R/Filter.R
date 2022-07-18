@@ -248,7 +248,7 @@ removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', recordTypes =
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
   humtab <- getHumtab(hum, recordTypes)
-  putHumtab(hum, drop = TRUE) <- removeNull.data.table(humtab)
+  putHumtab(hum, overwriteEmpty = TRUE) <- removeNull.data.table(humtab)
   
   hum
  
@@ -335,7 +335,7 @@ setMethod('[',
                 humtab <- humtab[File %in% targets]
                
                 
-                putHumtab(x, drop = TRUE) <- humtab
+                putHumtab(x, overwriteEmpty = TRUE) <- humtab
               } else {
                 form <- do ~ File %in% sort(unique(File))[i]
                 x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
@@ -400,7 +400,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
               
               humtab <- humtab[Record %in% i | Token == '*-' | grepl('\\*\\*', Token)]
               
-              putHumtab(x, drop = FALSE) <- humtab
+              putHumtab(x, overwriteEmpty = FALSE) <- humtab
             } else {
               form <- do ~ Record %in% sort(unique(Record))[i]
               x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
@@ -424,7 +424,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
                 humtab <- getHumtab(x, 'GLIMDdP')
                 humtab <- humtab[is.na(Spine) | Spine %in% j]
                 
-                putHumtab(x, drop = FALSE) <- humtab
+                putHumtab(x, overwriteEmpty = FALSE) <- humtab
               } else {
                 
                 form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
@@ -447,7 +447,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 #           Dd[ , .indhits := grepl(pattern = ind, evalActive(humdrumR, dataTypes = c('D', 'd')))]
 #           
 #           Dd <- Dd[ , func(.SD), by = File]
-#           putHumtab(humdrumR, drop = TRUE) < Dd[ , '.indhits' :=  NULL]
+#           putHumtab(humdrumR, overwriteEmpty = TRUE) < Dd[ , '.indhits' :=  NULL]
 #           humdrumR
 # }
 
@@ -627,7 +627,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'),
 #   GLIMDdP <- GLIMDdP[ , indexGLIM_piece(.SD), by = File, .SDcols = colnames(D)[colnames(D) != 'File']]
 #   
 #   # resplit and put back in to humdrumR object
-#   putHumtab(humdrumR, drop = FALSE) <- GLIMDdP
+#   putHumtab(humdrumR, overwriteEmpty = FALSE) <- GLIMDdP
 #   humdrumR
 # }
 # 
