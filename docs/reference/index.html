@@ -113,7 +113,7 @@
           
           <code><a href="humSpines.html">spines()</a></code> <code><a href="humSpines.html">`[`(<i>&lt;humSpines&gt;</i>)</a></code> <code><a href="humSpines.html">print(<i>&lt;humSpines&gt;</i>)</a></code> 
         </dt>
-        <dd>Summarize spines in humdrum dataset</dd>
+        <dd>Summarize spines in humdrum dataset.</dd>
       </dl></div><div class="section level2">
       <h2 id="working-with-data">Working with Data<a class="anchor" aria-label="anchor" href="#working-with-data"></a></h2>
       
@@ -136,11 +136,6 @@
           <code><a href="withinHumdrum.html">with(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">within(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">In()</a></code> 
         </dt>
         <dd>with(in)Humdrum</dd>
-      </dl><dl><dt>
-          
-          <code><a href="humPipe.html">`%hum&gt;%`</a></code> <code><a href="humPipe.html">`%hum&lt;%`</a></code> <code><a href="humPipe.html">`%humT%`</a></code> <code><a href="humPipe.html">`%s&gt;%`</a></code> <code><a href="humPipe.html">`%hums&gt;%`</a></code> <code><a href="humPipe.html">`%hums&lt;%`</a></code> <code><a href="humPipe.html">`%humsT%`</a></code> <code><a href="humPipe.html">`%hums[]%`</a></code> 
-        </dt>
-        <dd>Piping humdrumR data</dd>
       </dl><dl><dt>
           
           <code><a href="filterHumdrum.html">filterHumdrum()</a></code> <code><a href="filterHumdrum.html">removeEmptyFiles()</a></code> <code><a href="filterHumdrum.html">removeEmptySpines()</a></code> <code><a href="filterHumdrum.html">removeEmptyRecords()</a></code> <code><a href="filterHumdrum.html">`[`</a></code> <code><a href="filterHumdrum.html">`[`</a></code> <code><a href="filterHumdrum.html">`[`</a></code> <code><a href="filterHumdrum.html">`[`</a></code> <code><a href="filterHumdrum.html">`[[`</a></code> <code><a href="filterHumdrum.html">`[[`</a></code> <code><a href="filterHumdrum.html">`[[`</a></code> <code><a href="filterHumdrum.html">`[[`</a></code> 
@@ -363,11 +358,6 @@ Standard humdrumR formulae.</dd>
 
       <dl><dt>
           
-          <code><a href="humMeter.html">humMeter</a></code> 
-        </dt>
-        <dd>Tools for analyzing rhythm and meter.</dd>
-      </dl><dl><dt>
-          
           <code><a href="time.html">bpm2ms()</a></code> <code><a href="time.html">ms2bpm()</a></code> 
         </dt>
         <dd>Time transformations</dd>
@@ -376,6 +366,11 @@ Standard humdrumR formulae.</dd>
           <code><a href="rhythmDecompose.html">rhythmDecompose()</a></code> 
         </dt>
         <dd>Decompose durations in terms of other durations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rhythmInterval.html">rhythmInterval</a></code> 
+        </dt>
+        <dd>parse rhythmic information</dd>
       </dl><dl><dt>
           
           <code><a href="rhythmFunctions.html">recip()</a></code> <code><a href="rhythmFunctions.html">duration()</a></code> 
@@ -389,14 +384,19 @@ Standard humdrumR formulae.</dd>
 Plotting rhythmic symbols in R base graphics</dd>
       </dl><dl><dt>
           
+          <code><a href="humMeter.html">humMeter</a></code> 
+        </dt>
+        <dd>Tools for analyzing rhythm and meter.</dd>
+      </dl><dl><dt>
+          
           <code><a href="SOI.html">SOI()</a></code> 
         </dt>
         <dd>Onset/Offset interval since beginning.</dd>
       </dl><dl><dt>
           
-          <code><a href="measure.html">measure()</a></code> 
+          <code><a href="meter.html">measure()</a></code> 
         </dt>
-        <dd>Measure</dd>
+        <dd>Meter class</dd>
       </dl><dl><dt>
           
           <code><a href="metric.html">metric()</a></code> 
@@ -490,6 +490,16 @@ Get named</dd>
           <code><a href="foldExclusive.html">foldExclusive()</a></code> 
         </dt>
         <dd>"Fold" exclusive interpretations into new fields</dd>
+      </dl><dl><dt>
+          
+          <code><a href="foldGraceNotes.html">foldGraceNotes()</a></code> 
+        </dt>
+        <dd>"Fold" grace notes into neighbos</dd>
+      </dl><dl><dt>
+          
+          <code><a href="unfoldStops.html">unfoldStops()</a></code> 
+        </dt>
+        <dd>"Unfold" data into multiple stops</dd>
       </dl><dl><dt>
           
           <code><a href="collapseHumdrum.html">collapseHumdrum()</a></code> <code><a href="collapseHumdrum.html">collapseStops()</a></code> <code><a href="collapseHumdrum.html">collapsePaths()</a></code> <code><a href="collapseHumdrum.html">collapseRecords()</a></code> 

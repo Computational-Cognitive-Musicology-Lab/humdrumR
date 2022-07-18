@@ -150,7 +150,7 @@ This functionality can be controlled with the <code>octave.round</code> argument
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose---<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
-<p>If you use any <a href="pitchFunctions.html">pitch function</a> within a special call to <a href="withinHumdrum.html">withinHumdrum</a> (or using a <a href="humPipe.html">humdrumR pipe</a>, like <code>%hum&gt;%</code>),
+<p>If you use any <a href="pitchFunctions.html">pitch function</a> within a special call to <a href="withinHumdrum.html">withinHumdrum</a>,
 <code>humdrumR</code> will automatically pass the <code>Key</code> field from the humdrum data to the function---this means, that in most cases,
 you don't need to explicitly do anything with the <code>Key</code> argument!
 (If you want this <em>not</em> to happen, you need to explicitly specify your own <code>Key</code> argument, or <code>Key = NULL</code>.)</p>
@@ -200,7 +200,7 @@ For more details on transposition behavior, check out the <code><a href="transpo
 By default, the <code>Key</code> argument is passed to <code>transpose</code> as both <code>from</code> and <code>to</code>, so nothing actually happens.
 Thus, if you specify either a <code>from</code> key or <code>to</code> key, transposition will happen to/from that key to <code>Key</code>.
 Of course, if you specify <code>from</code> <em>and</em> <code>to</code> the transposition will happen between the keys you specify.</p>
-<p>If you use any <a href="pitchFunctions.html">pitch function</a> within a special call to <a href="withinHumdrum.html">withinHumdrum</a> (or using a <a href="humPipe.html">humdrumR pipe</a>, like <code>%hum&gt;%</code>),
+<p>If you use any <a href="pitchFunctions.html">pitch function</a> within a special call to <a href="withinHumdrum.html">withinHumdrum</a>,
 <code>humdrumR</code> will automatically pass the <code>Key</code> field from the humdrum data to the function.
 If you specify a <code>to</code> key, the <code>Key</code> field will be passed as the transpose <code>from</code> key, and as a result,
 all the pitches in the input will be transposed from whatever keys they are in to your target (<code>to</code>) key!</p>

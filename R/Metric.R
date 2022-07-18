@@ -1,6 +1,6 @@
 #' Meter class
 #' 
-#' @name humMetric
+#' @name meter
 #' @export
 setClass('meter', slots = c(Levels = 'list', Tactus = 'integer'))
 
@@ -205,6 +205,8 @@ metricPlot <- function(metric) {
 #' 
 #' Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
 #' how many beats have passed, and the offset between each attack and the nearest beat.
+#' @export
+#' @rdname meter
 measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   # if correct meter is known (and aligned with dur)
   totalTatum <- sum(beat)

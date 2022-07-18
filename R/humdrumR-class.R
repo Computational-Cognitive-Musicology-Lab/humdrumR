@@ -44,9 +44,7 @@
 #' field called **Token**, which
 #' contains character strings representing the original strings read from the humdrum files. 
 #' Users can create as many additional data fields as they like. Every call to
-#' [withinHumdrum]---which can also be called using the 
-#' [humdrumR:humPipe][\%hum>\%] piping 
-#' operator---generates one or N new data fields named {Result1, Result2, ..., ResultN}. 
+#' [withinHumdrum] generates one or N new data fields named {Result1, Result2, ..., ResultN}. 
 #' These fields can be renamed using the `$<-` operator.
 #' 
 #' 
@@ -505,8 +503,7 @@ orderHumtab <- function(humtab) {
 #' The most powerful features of [humdrumR] are the tools it gives you to
 #' 
 #' 1. Filter humdrum data, using [filterHumdrum] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
-#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::withinHumdrum] routines,
-#' and their associated [piping operators][humPipe].
+#' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::withinHumdrum] routines.
 #' 
 #' 
 #' 
@@ -964,7 +961,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     ### Creating new "P" humdrum table
     copyfields <- fields(humdrumR, c('Structure', 'Reference'))$Name
     humtabPadded <- humtab[ , {
-        missingColumns <- cols[-unique(Column)]
+        missingColumns <- setdiff(cols,Column)
         newtab <- merge(.SD, all = TRUE,
                         expand.grid(Column = missingColumns, Record = unique(Record)))
         copyfields <- copyfields[sapply(.SD[ , copyfields, with = FALSE], 
@@ -1063,7 +1060,6 @@ collapseHumdrum <- function(humdrumR, byfields,
     
     # What fields to apply across
     byfields <- fieldMatch(humdrumR, byfields, callfun = 'collapseHumdrum', argname = 'byfields')
-    byfields <- do.call('call', c(".", lapply(byfields, as.symbol)), quote = TRUE)
     
     #### Construct the expressions which will do the work
     #This is a list of expressions, one to collapse each field.
@@ -1083,8 +1079,8 @@ collapseHumdrum <- function(humdrumR, byfields,
     collapsedhumtab <- eval(rlang::expr(humtab[ , c(.SD[1], 
                                                     setNames(list(!!!collapseExprs), 
                                                              !!fieldnames)), 
-                                                by = !!byfields,
-                                                .SDcols = setdiff(colnames(humtab), fieldnames)]))
+                                                by = list(!!!(rlang::syms(byfields))),
+                                                .SDcols = setdiff(colnames(humtab), c(byfields, fieldnames))]))
     
     
     ## Make sure that null tokens which have been grouped with non-null tokens (d with D, or P with anything)
@@ -1784,8 +1780,9 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' 
 #' kerndata <- readHumdrum(...)
 #' 
-#' kerndata$Token %hum>% pitch -> kerndata$Pitch
-#' kerndata$Token %hum>% recip -> kerndata$Rhythm
+#' within(kerndata$Token,
+#'        Pitch  <- pitch(.),
+#'        Rhythm <- recip(.)) -> kerndata
 #' 
 #' ```
 #' 
@@ -1797,9 +1794,8 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' 
 #' ```
 #' 
-#' kerndata$Pitch %hum<% ~length(Token)
-#' kerndata$Rhythm %hum<% ~length(Token)
-#' 
+#' with(kerndata$Pitch, length(.))
+#' with(kerndata$Rhythm, length(.))
 #' ```
 #' 
 #' Once again, we'll get different numbers here! (Assuming there are rests in the data.)
@@ -2206,32 +2202,21 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' in descending order into the named fields on the left side.
 #' If there are no $ResultN$ fields on the right side, any fields used in the current Active formula (on the right side)
 #' are copied instead.
-#' This system might seem odd at first, but it is very useful in combination with the [withinHumdrum] function,
-#' or its convenient pipe operator [%hum>%][humdrumR::humPipe]
+#' This system might seem odd at first, but it is very useful in combination with the [withinHumdrum] function.
 #' When `withinHumdrum` creates new fields, it calls them $Result1 \ldots Result2 \ldots ResultN$.
 #' Since the output of `withinHumdrum` is always the same as the input except with these new "Result" fields,
 #' Byou can use `humdrumR <- humdrumR` assignment to immediately assign these result fields more meaningful names in the original object.
 #' This makes the most sense with an example:
 #' 
 #' ```
-#' humdata$Semits <- humdata %hum>% ~semits(Token) 
+#' humdata <- within(humdata, Semits <- semits(Token))
 #' ````
 #' 
-#' In humdrumR, we actually favor the left-to-right "piping" style.
-#' Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:
 #' 
-#' ```
-#' humdata %hum>% ~semits(Token) -> humdata$Semits
-#' ````
-#' 
-#' Calls to `withinHumdrum` (or `%hum>%`) keep producing new result fields.
+#' Calls to [within.humdrumR()]  keep producing new result fields.
 #' If there are more than one result fields, you can assign multiple fields at once using the `[]<-` syntax:
 #' 
-#' ```
 #' 
-#' humdata %hum>% ~semits(Token) %hum>% ~pitch(Token) -> humdata[c('semits', 'pitch')]
-#' 
-#' ```
 #' 
 #' #' **IMPORTANT NOTE!**: Any "ResultN" fields in the humdrumR object you assign from
 #' that you don't assign field names are simply dropped.

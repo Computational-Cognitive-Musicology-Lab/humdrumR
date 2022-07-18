@@ -82,7 +82,7 @@
       <img src="" class="logo" alt=""><h1>Reading and writing data with humdrumR</h1>
                         <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-07-12</h4>
+            <h4 data-toc-skip class="date">2022-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd"><code>vignettes/ReadWrite.Rmd</code></a></small>
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
@@ -274,9 +274,6 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*Variations/.*.krn'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
-<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
-<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
-<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -314,13 +311,16 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
+<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
+<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -488,9 +488,6 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'HumdrumData/BeethovenVariations/.*.krn'</span>, <span class="st">'HumdrumData/MozartVariations/.*.krn'</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
-<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
-<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
-<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -528,13 +525,16 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
+<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
+<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -586,9 +586,6 @@
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
-<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
-<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
-<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -626,13 +623,16 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
+<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
+<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -840,9 +840,6 @@
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
-<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
-<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
-<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -880,13 +877,16 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
+<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
+<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -939,9 +939,6 @@
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Composer <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
-<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
-<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
-<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -979,13 +976,16 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
+<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
+<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
+<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>

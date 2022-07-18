@@ -31,7 +31,6 @@ reference:
 - subtitle: "Manipulating Humdrum Data"
   contents:
   - withinHumdrum
-  - humPipe
   - filterHumdrum
   - humWindows
   - interpolateArguments
@@ -81,12 +80,14 @@ reference:
 - subtitle: "Rhythm"
   desc: "Rhythm and meter classes and functions."
   contents:
-  - humMeter
   - time
   - rhythmDecompose
+  - rhythmInterval
   - rhythmFunctions
   - plotRhythm
+  - humMeter
   - SOI
+  - meter
   - measure
   - metric
 - subtitle: "Lyrics"
@@ -111,6 +112,8 @@ reference:
   - foldExclusive
   - foldStops
   - foldPaths
+  - foldGraceNotes
+  - unfoldStops
   - collapseHumdrum
   - collapseStops
   - collapsePaths

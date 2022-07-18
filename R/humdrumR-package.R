@@ -19,8 +19,6 @@
 #' + To filter and "index" `humdrumR` data, we have the [filterHumdrum] function, which can also be called in a variety of 
 #'   short hands using R's standard [indexing operators][base::Extract]: `[]` and `[[]]`.
 #' + To manipulate and modify `humdrumR` data, we have the [with(in)Humdrum][humdrumR::with-in-Humdrum] and [humApply] functions.
-#' + A set of ["pipe" operators][humdrumR::humPipe] (`%hum>%`, `%hum<%`, etc.), so that `humdrumR` data can be manipulated and filtered in concise, 
-#'   [bash-style pipes](https://en.wikipedia.org/wiki/Vertical_bar#Pipe).
 #' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
 #'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 

@@ -211,6 +211,9 @@
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/measure.html</loc>
   </url>
   <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/meter.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/metric.html</loc>
   </url>
   <url>
@@ -290,6 +293,9 @@
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/transpose.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/unfoldStops.html</loc>
   </url>
   <url>
     <loc>https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference/withinHumdrum.html</loc>

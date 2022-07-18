@@ -72,8 +72,7 @@ A number of helpful functions are also defined to \link[=humShape]{reshape} humd
 The most powerful features of \link{humdrumR} are the tools it gives you to
 \enumerate{
 \item Filter humdrum data, using \link{filterHumdrum} and the standard R \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item Apply functions and arbitrary commands to humdrum data using the \link[=withinHumdrum]{with(in)Humdrum} routines,
-and their associated \link[=humPipe]{piping operators}.
+\item Apply functions and arbitrary commands to humdrum data using the \link[=withinHumdrum]{with(in)Humdrum} routines.
 }
 }
 \section{Slots}{

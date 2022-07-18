@@ -153,7 +153,7 @@ foldHumdrum(example, fold = 2, onto = 1)
 
 ```
 
-Notice that the second spine has disappeared, and now there is a new field called `Pipe1`, in the first (`onto`) spine, but containing the data from the old Spine 2.
+Notice that the second spine has disappeared, and now there is a new field called `Result1`, in the first (`onto`) spine, but containing the data from the old Spine 2.
 We could do both `**silbe` spines like this:
 
 ```{r}

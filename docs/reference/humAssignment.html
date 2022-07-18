@@ -101,19 +101,14 @@ Any fields in the right-side <code>humdrumR</code> object which are named $Resul
 in descending order into the named fields on the left side.
 If there are no $ResultN$ fields on the right side, any fields used in the current Active formula (on the right side)
 are copied instead.
-This system might seem odd at first, but it is very useful in combination with the <a href="withinHumdrum.html">withinHumdrum</a> function,
-or its convenient pipe operator <a href="humPipe.html">%hum&gt;%</a>
+This system might seem odd at first, but it is very useful in combination with the <a href="withinHumdrum.html">withinHumdrum</a> function.
 When <code>withinHumdrum</code> creates new fields, it calls them $Result1 ... Result2 ... ResultN$.
 Since the output of <code>withinHumdrum</code> is always the same as the input except with these new "Result" fields,
 Byou can use <code>humdrumR &lt;- humdrumR</code> assignment to immediately assign these result fields more meaningful names in the original object.
-This makes the most sense with an example:</p><div class="sourceCode"><pre><code><span class="va">humdata</span><span class="op">$</span><span class="va">Semits</span> <span class="op">&lt;-</span> <span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></code></pre></div>
+This makes the most sense with an example:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="va">Semits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
-<p>In humdrumR, we actually favor the left-to-right "piping" style.
-Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">humdata</span><span class="op">$</span><span class="va">Semits</span></code></pre></div>
-
-<p>Calls to <code>withinHumdrum</code> (or <code>%hum&gt;%</code>) keep producing new result fields.
-If there are more than one result fields, you can assign multiple fields at once using the <code>[]&lt;-</code> syntax:</p><div class="sourceCode"><pre><code><span class="va">humdata</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="op">~</span><span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">humdata</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'semits'</span>, <span class="st">'pitch'</span><span class="op">)</span><span class="op">]</span></code></pre></div>
-
+<p>Calls to <code><a href="withinHumdrum.html">within.humdrumR()</a></code>  keep producing new result fields.
+If there are more than one result fields, you can assign multiple fields at once using the <code>[]&lt;-</code> syntax:</p>
 <p>#' <strong>IMPORTANT NOTE!</strong>: Any "ResultN" fields in the humdrumR object you assign from
 that you don't assign field names are simply dropped.
 This is nice, because often you might proceed through a serious of resultd steps, but you only

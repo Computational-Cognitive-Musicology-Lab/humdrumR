@@ -270,6 +270,7 @@
 #'     
 #' @param humdrumR A `[humdrumR][humdrumRclass]` data object.
 #' @param ...  `...` arguments to `within.humdrumR` are divided into either named or unnamed arguments.
+#'
 #' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
 #' to a single list of functions/formulas.
 #' All functions are coerced to a formula as `~foo(.)`. The far left-hand side of each formula
@@ -332,24 +333,20 @@ within.humdrumR <- function(data, ..., variables = list()) {
   
   if (all(quoTab[KeywordType == 'do', Keyword == 'dofx'])) return(data)
   
-  local({
-    overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
-    
-    bad <- overWrote %in% fields(humdrumR, 'S')$Name
-    if (any(bad)) {
-      .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
-            ifelse = sum(bad) > 1L, 
-            "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
-            "For a complete list of structural fields, use the command fields(mdata, 'S').")
-    }
-    
-    if (length(overWrote)) {
-      lapply(humdrumR@Humtable,  \(ht) ht[ , eval(overWrote) := NULL])
-    }
-  })
+  # any fields getting overwritten
+  overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
+  
+  bad <- overWrote %in% fields(humdrumR, 'S')$Name
+  if (any(bad)) {
+    .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
+          ifelse = sum(bad) > 1L, 
+          "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
+          "For a complete list of structural fields, use the command fields(mdata, 'S').")
+  }
+  
   
   ## put result into new humtab
-  newhumtab <- result[humtab, on ='_rowKey_'] 
+  newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   newhumtab[ , `_rowKey_` := NULL]
   
   # number new results
@@ -379,7 +376,10 @@ within.humdrumR <- function(data, ..., variables = list()) {
     humdrumR@Humtable$d <- humdrumR@Humtable$d[FALSE]
   }
   
-  
+  if (length(overWrote)) {
+    humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes] <- lapply(humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes],
+                                                                             \(ht) {ht[ , overWrote] <- NULL; ht})
+  }
   putHumtab(humdrumR, drop = FALSE) <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.
@@ -388,7 +388,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
     humdrumR <- setActiveFields(humdrumR, newfields) 
   }
   
-  update_humdrumR(humdrumR, field = newfields)
+  update_humdrumR(humdrumR, field = c(newfields, overWrote))
 
 
 }

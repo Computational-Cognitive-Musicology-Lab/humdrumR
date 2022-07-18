@@ -1038,7 +1038,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' table above.
 #' For example, `kern(x, Exclusive = 'solfa')` will force the parser to interpret `x` as `**solfa` data.
 #' Similarly, `solfa(x, Exclusive = 'kern')` will force the parser to interpret `x` as `**kern` data.
-#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum] (or using a [humdrumR pipe][humPipe], like `%hum>%`),
+#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum],
 #' `humdrumR` will automatically pass the `Exclusive` field from the humdrum data to the function---this means, that in most cases, 
 #' you don't need to explicitly do anything with the `Exclusive` argument!
 #' (If you want this *not* to happen, you need to explicitly specify your own `Exclusive` argument, or `Exclusive = NULL`.)
@@ -2105,7 +2105,7 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' an alternate `Key` is passed to `transposeArgs` or `parseArgs`.
 #' Various deparsing options use the `Key` argument; for example, use of `implicitSpecies` (see advanced parsing section) is dependent on the `Key`.
 #' 
-#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum] (or using a [humdrumR pipe][humPipe], like `%hum>%`),
+#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum],
 #' `humdrumR` will automatically pass the `Key` field from the humdrum data to the function---this means, that in most cases, 
 #' you don't need to explicitly do anything with the `Key` argument!
 #' (If you want this *not* to happen, you need to explicitly specify your own `Key` argument, or `Key = NULL`.)
@@ -2151,7 +2151,7 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' Thus, if you specify either a `from` key or `to` key, transposition will happen to/from that key to `Key`.
 #' Of course, if you specify `from` *and* `to` the transposition will happen between the keys you specify.
 #' 
-#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum] (or using a [humdrumR pipe][humPipe], like `%hum>%`),
+#' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum],
 #' `humdrumR` will automatically pass the `Key` field from the humdrum data to the function.
 #' If you specify a `to` key, the `Key` field will be passed as the transpose `from` key, and as a result,
 #' all the pitches in the input will be transposed from whatever keys they are in to your target (`to`) key!

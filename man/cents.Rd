@@ -89,7 +89,7 @@ The \code{Key} argument is passed to the \link[=pitchParsing]{parser}, deparser,
 an alternate \code{Key} is passed to \code{transposeArgs} or \code{parseArgs}.
 Various deparsing options use the \code{Key} argument; for example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 
-If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum},
 \code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means, that in most cases,
 you don't need to explicitly do anything with the \code{Key} argument!
 (If you want this \emph{not} to happen, you need to explicitly specify your own \code{Key} argument, or \code{Key = NULL}.)
@@ -137,7 +137,7 @@ By default, the \code{Key} argument is passed to \code{transpose} as both \code{
 Thus, if you specify either a \code{from} key or \code{to} key, transposition will happen to/from that key to \code{Key}.
 Of course, if you specify \code{from} \emph{and} \code{to} the transposition will happen between the keys you specify.
 
-If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum},
 \code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function.
 If you specify a \code{to} key, the \code{Key} field will be passed as the transpose \code{from} key, and as a result,
 all the pitches in the input will be transposed from whatever keys they are in to your target (\code{to}) key!

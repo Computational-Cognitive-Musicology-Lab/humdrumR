@@ -26,8 +26,6 @@ the \link[=humTable]{humdrum table}.
 \item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
 short hands using R's standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
 \item To manipulate and modify \code{humdrumR} data, we have the \link[=with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
-\item A set of \link[=humPipe]{"pipe" operators} (\verb{\%hum>\%}, \verb{\%hum<\%}, etc.), so that \code{humdrumR} data can be manipulated and filtered in concise,
-\href{https://en.wikipedia.org/wiki/Vertical_bar#Pipe}{bash-style pipes}.
 \item To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our \link[=humdrumDispatch]{regular-expression dispatch system}.
 \item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,

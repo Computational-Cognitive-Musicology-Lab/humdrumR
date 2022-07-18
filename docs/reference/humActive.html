@@ -85,7 +85,8 @@ In any expression within a call to
   dataTypes <span class="op">=</span> <span class="st">"D"</span>,
   forceVector <span class="op">=</span> <span class="cn">FALSE</span>,
   sep <span class="op">=</span> <span class="st">", "</span>,
-  nullAs <span class="op">=</span> <span class="cn">NA</span>
+  nullAs <span class="op">=</span> <span class="cn">NA</span>,
+  <span class="va">humtab</span>
 <span class="op">)</span>
 
 <span class="fu">getActive</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
@@ -137,15 +138,16 @@ As you work, there will often be data tokens which are null in one field, but no
 For example, if you load <code>**kern</code> data, a token like <code>"4r"</code> (quarter-note rest) token will be <code>NA</code> if you call <code>pitch</code>, but
 not <code>NA</code> if you call <code>recip</code> (rhythm).</p><div class="sourceCode"><pre><code><span class="va">kerndata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
 
-<span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="va">pitch</span> <span class="op">-&gt;</span> <span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>
-<span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span> <span class="op"><a href="../reference/humPipe.html">%hum&gt;%</a></span> <span class="va">recip</span> <span class="op">-&gt;</span> <span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
+       <span class="va">Pitch</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>,
+       <span class="va">Rhythm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kerndata</span></code></pre></div>
 
 <p>Now, if you change the active field between <code>Pitch</code> and <code>Rhythm</code> you'll see that there
 are different numbers of (non-null) data tokens: <code>ntokens(kerndata$Pitch)</code> vs <code>ntokens(kerndata$Rhythm)</code> will return different numbers!
 (The different would be the number of rest tokens.)
 Similarly, if you apply functions/expressions to this data (using <a href="withinHumdrum.html">withinHumdrum</a> for example), the result will depend on
-what the active field is:</p><div class="sourceCode"><pre><code><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span> <span class="op"><a href="../reference/humPipe.html">%hum&lt;%</a></span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>
-<span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span> <span class="op"><a href="../reference/humPipe.html">%hum&lt;%</a></span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></code></pre></div>
+what the active field is:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>Once again, we'll get different numbers here! (Assuming there are rests in the data.)
 This is the case even though the do-expression isn't actually using the <code>Pitch</code> or <code>Rhythm</code> fields!

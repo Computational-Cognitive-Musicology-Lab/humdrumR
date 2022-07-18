@@ -41,23 +41,15 @@ Any fields in the right-side \code{humdrumR} object which are named $ResultN$ (w
 in descending order into the named fields on the left side.
 If there are no $ResultN$ fields on the right side, any fields used in the current Active formula (on the right side)
 are copied instead.
-This system might seem odd at first, but it is very useful in combination with the \link{withinHumdrum} function,
-or its convenient pipe operator \link[=humPipe]{\%hum>\%}
+This system might seem odd at first, but it is very useful in combination with the \link{withinHumdrum} function.
 When \code{withinHumdrum} creates new fields, it calls them $Result1 \ldots Result2 \ldots ResultN$.
 Since the output of \code{withinHumdrum} is always the same as the input except with these new "Result" fields,
 Byou can use \code{humdrumR <- humdrumR} assignment to immediately assign these result fields more meaningful names in the original object.
-This makes the most sense with an example:\preformatted{humdata$Semits <- humdata \%hum>\% ~semits(Token) 
+This makes the most sense with an example:\preformatted{humdata <- within(humdata, Semits <- semits(Token))
 }
 
-In humdrumR, we actually favor the left-to-right "piping" style.
-Luckily, R allows you to assign left-to-right, so the proper humdrumR style is actually:\preformatted{humdata \%hum>\% ~semits(Token) -> humdata$Semits
-}
-
-Calls to \code{withinHumdrum} (or \verb{\%hum>\%}) keep producing new result fields.
-If there are more than one result fields, you can assign multiple fields at once using the \verb{[]<-} syntax:\preformatted{
-humdata \%hum>\% ~semits(Token) \%hum>\% ~pitch(Token) -> humdata[c('semits', 'pitch')]
-
-}
+Calls to \code{\link[=within.humdrumR]{within.humdrumR()}}  keep producing new result fields.
+If there are more than one result fields, you can assign multiple fields at once using the \verb{[]<-} syntax:
 
 #' \strong{IMPORTANT NOTE!}: Any "ResultN" fields in the humdrumR object you assign from
 that you don't assign field names are simply dropped.

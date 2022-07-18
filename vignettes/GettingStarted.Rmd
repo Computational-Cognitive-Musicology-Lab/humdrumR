@@ -396,7 +396,7 @@ For instance, I can write things like:
 
 
 However, we can tell `humdrumR` to evaluate these expressions using the fields of our humdrum tables.
-These simplest way is using the `%hum>%` pipe operator, which takes a `humdrumR` object (on its left side), and a `formula` on its right side:
+These simplest way is using the `wtihin` function, which takes a `humdrumR` object (on its left side), and an expression on its right side.
 
 
 ```{r}
@@ -410,7 +410,7 @@ within(chorales,  paste0(Token, Record))
 ```
 
 Each expression is evaluated, and the result is put back in the same place in the humdrum data!
-You'll also notice that in the printout, there is a new Data field, called `Pipe1`---this is the default name `humdrumR` assigns to new fields that you create.
+You'll also notice that in the printout, there is a new Data field, called `Result1`---this is the default name `humdrumR` assigns to new fields that you create.
 
 If you want, you can pick your own names by using `$<-` (i.e., assigning to a new name you create using `$`).
 For instance, lets use `humdrumR`'s `semits` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
@@ -422,7 +422,7 @@ within(chorales, semits(Token))
 ```
 
 It worked!
-Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it be called `Pipe1` if you want!
+Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it be called `Result1` if you want!
 
 ```{r}
 

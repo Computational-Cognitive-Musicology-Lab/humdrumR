@@ -103,7 +103,7 @@ that \code{Exclusive} argument will be used to choose the input interpretation y
 table above.
 For example, \code{kern(x, Exclusive = 'solfa')} will force the parser to interpret \code{x} as \verb{**solfa} data.
 Similarly, \code{solfa(x, Exclusive = 'kern')} will force the parser to interpret \code{x} as \verb{**kern} data.
-If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum} (or using a \link[=humPipe]{humdrumR pipe}, like \verb{\%hum>\%}),
+If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum},
 \code{humdrumR} will automatically pass the \code{Exclusive} field from the humdrum data to the function---this means, that in most cases,
 you don't need to explicitly do anything with the \code{Exclusive} argument!
 (If you want this \emph{not} to happen, you need to explicitly specify your own \code{Exclusive} argument, or \code{Exclusive = NULL}.)

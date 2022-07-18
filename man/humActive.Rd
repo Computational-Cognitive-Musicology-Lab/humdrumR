@@ -70,8 +70,9 @@ For example, if you load \verb{**kern} data, a token like \code{"4r"} (quarter-n
 not \code{NA} if you call \code{recip} (rhythm).\preformatted{
 kerndata <- readHumdrum(...)
 
-kerndata$Token \%hum>\% pitch -> kerndata$Pitch
-kerndata$Token \%hum>\% recip -> kerndata$Rhythm
+within(kerndata$Token,
+       Pitch  <- pitch(.),
+       Rhythm <- recip(.)) -> kerndata
 
 }
 
@@ -80,9 +81,8 @@ are different numbers of (non-null) data tokens: \code{ntokens(kerndata$Pitch)} 
 (The different would be the number of rest tokens.)
 Similarly, if you apply functions/expressions to this data (using \link{withinHumdrum} for example), the result will depend on
 what the active field is:\preformatted{
-kerndata$Pitch \%hum<\% ~length(Token)
-kerndata$Rhythm \%hum<\% ~length(Token)
-
+with(kerndata$Pitch, length(.))
+with(kerndata$Rhythm, length(.))
 }
 
 Once again, we'll get different numbers here! (Assuming there are rests in the data.)
