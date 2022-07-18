@@ -368,18 +368,15 @@ within.humdrumR <- function(data, ..., variables = list()) {
   newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
   
   # What do do if d is in recordtypes
-  if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
-    humtab[ , `_rowKey_` := NULL]
-    newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
-  }
+  # if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
+  #   humtab[ , `_rowKey_` := NULL]
+  #   newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
+  # }
   if (any(grepl('d', recordtypes))) {
-    humdrumR@Humtable$d <- humdrumR@Humtable$d[FALSE]
+    humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
   }
   
-  if (length(overWrote)) {
-    humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes] <- lapply(humdrumR@Humtable[!names(humdrumR@Humtable) %in% recordtypes],
-                                                                             \(ht) {ht[ , overWrote] <- NULL; ht})
-  }
+
   putHumtab(humdrumR, overwriteEmpty = FALSE) <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.

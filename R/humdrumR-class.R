@@ -465,10 +465,9 @@ spliceHumtab <- function(humtab) {
 
 orderHumtab <- function(humtab) {
     if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- c('File', 'Column', 'Record', 'Stop')
+    orderingcols <- c('File', 'Column', 'Path', 'Record', 'Stop')
     
     # can't sort by lists
-    orderingcols <- orderingcols[sapply(humtab[ , orderingcols, with = FALSE], class) == 'integer']
     
     setorderv(humtab, cols = orderingcols)
     
@@ -538,7 +537,7 @@ orderHumtab <- function(humtab) {
 #' @aliases humdrumRS4
 #' @export
 setClass('humdrumR', 
-         slots = c(Humtable = 'list',
+         slots = c(Humtable = 'data.table',
                    Files = 'list',
                    Fields = 'list',
                    Active = 'quosure',
@@ -563,7 +562,7 @@ setMethod('initialize', 'humdrumR',
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
             
-            .Object@Humtable  <- splitHumtab(humtab)        
+            .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldcategories
             .Object@Active    <- rlang::quo(Token)
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
@@ -645,7 +644,7 @@ setMethod('as.vector',
           function(x, mode = 'any') {
                     if (is.empty(x)) return(vector(mode, 0L))
                     
-                    as.vector(evalActive(x, dataTypes = 'D', nullAs = '.', forceVector = TRUE), mode)
+                    as.vector(evalActive(x@Active, getHumtab(x, 'D'), nullAs = '.', forceVector = TRUE))
                     })
 
 #' @name humCoercion
@@ -779,7 +778,7 @@ as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder 
 # this function tests if the active column is a vector or not
 isActiveAtomic <- function(humdrumR) {
           checkhumdrumR(humdrumR, 'isActiveAtomic')
-          act <- evalActive(humdrumR)
+          act <- evalActive(x@Active, getHumtab(x))
           !is.object(act) && !is.list(act) 
 }
 
@@ -908,7 +907,7 @@ anyStops <- function(humdrumR) {
 is.ragged <- function(humdrumR) {
     # Do the pieces in the corpus vary in number of spines?
     
-    humtab <- getD(humdrumR)
+    humtab <- getHumtab(humdrumR, 'D')
     
     ncols   <- humtab[!is.na(Column) , length(unique(Column)), by = Filename]$V1
     nspines <- humtab[!is.na(Spine)  , length(unique(Spine)) , by = Filename]$V1
@@ -1131,7 +1130,7 @@ collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     output <- collapseHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
                               collapseAtomic = collapseAtomic, sep = sep, padPaths = FALSE)
     
-    output@Humtable$P <- output@Humtable$P[0]
+    output@Humtable <- output@Humtable[Type != 'P']
     
     output
     
@@ -1629,16 +1628,21 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' @rdname humTable
 #' @export
-getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
+getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')) {
+          humtab <- humdrumR@Humtable
+          
+           
           checkhumdrumR(humdrumR, 'getHumtab')
           dataTypes <- checkTypes(dataTypes, 'getHumtab')
           
-          humtab <- humdrumR@Humtable[dataTypes]
+          if (length(setdiff(c('G', 'L', 'I', 'M', 'D', 'd', 'P'), dataTypes))) {
+              humtab <- humtab[Type %in% dataTypes]
+          }
+          
+          humtab
 
-          spliceHumtab(humtab)
 }
 
-getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
 
 `putHumtab<-` <- function(humdrumR, value, overwriteEmpty = FALSE) {
           # adds humtab into humdrumR
@@ -1646,44 +1650,33 @@ getD <- function(humdrumR) getHumtab(humdrumR, dataTypes = 'D')
           # absent from value are left unchanged (drop = FALSE)
           # or replaced with empty data tables (drop = TRUE)
           # If drop indicates a record type (i.e., GLIM) those types are dropped only
-          if (!data.table::is.data.table(value)) .stop("putHumtab() <- requires a data.table value.")
+          if (!data.table::is.data.table(value)) .stop("putHumtab()<- requires a data.table value.")
     
+          
+          overwriteTypes <- unique(value$Type)
       
-          if (is.character(overwriteEmpty)) {
-              overwriteTypes <- checkTypes(overwriteEmpty, 'putHumtab')
-              levels <- unique(c(unique(value$Type), overwriteTypes))
-              splitvalue <- splitHumtab(value, drop = FALSE, levels = levels)
-              
+          overwriteEmpty <- if (is.character(overwriteEmpty)) {
+              checkTypes(overwriteEmpty, 'putHumtab')
           } else {
-              splitvalue <- splitHumtab(value, drop = !overwriteEmpty)
+              if (overwriteEmpty) {
+                  c('G', 'L', 'I', 'M', 'D', 'd', 'P')
+              }
           }
+          overwriteTypes <- union(overwriteTypes, overwriteEmpty)
     
+          humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], 
+                          value, fill = TRUE)
+          humtab <- orderHumtab(humtab)
+          humdrumR@Humtable <- humtab
           
-          
-          humdrumR@Humtable[names(splitvalue)] <- splitvalue
           humdrumR
 }
 
 
 
-# `addNulld<-` <- function(humdrumR, value) {
-#     old <- getHumtab(humdrumR, 'd')
-#     value <- value[ , colnames(old), with = FALSE]
-#     humdrumR@Humtable$d <- rbind(old, value)
-#     humdrumR
-#     
-# }
 
 
-`putD<-` <- function(humdrumR, value) { 
-  # This is a shortcut to replacing non-dull data records
-  # in a humdrumR object. I also forces these
-  # replacement values to be non-null D
-  value$Type <- 'D'
-  value$Null <- FALSE
-  humdrumR@Humtable[['D']] <- value
-  humdrumR
-}
+
 
 ##
 
@@ -1829,15 +1822,8 @@ NULL
 #' @param nullAsDot A single `atomic` value. Any null tokens are coerced to this value (default is `.`).
 #' @rdname humActive
 #' @export
-evalActive <- function(humdrumR, dataTypes = 'D', forceVector = FALSE, sep = ', ', nullAs = NA, humtab)  {
-  checkhumdrumR(humdrumR, 'evalActive')
-    
-  dataTypes <- checkTypes(dataTypes, 'evalActive')
-  
-  humtab <- if (missing(humtab)) getHumtab(humdrumR, dataTypes = dataTypes) else humtab[Type %in% dataTypes]
-  # locnames <- humtab[ , paste(File, Spine, Path, Stop, Record, sep = '.')]
-  
-  values <- rlang::eval_tidy(getActive(humdrumR), data = humtab)
+evalActive <- function(active, humtab, forceVector = FALSE, sep = ', ', nullAs = NA)  {
+  values <- rlang::eval_tidy(active, data = humtab)
   
   if (is.atomic(values)) {
     values[is.na(values)] <- nullAs
@@ -1916,7 +1902,7 @@ setActiveFields <- function(humdrumR, fieldnames) {
 putActive <- function(humdrumR, actquo) {
     # This does the dirty work for 
     # setActive and setActiveFields.
-    humtab <- getD(humdrumR)
+    humtab <- getHumtab(humdrumR, 'D')
     usedInExpr <- fieldsInExpr(humtab, actquo)
     
     
@@ -1926,7 +1912,7 @@ Add a reference to some field, for instance Token.")
     humdrumR <- update_Null(humdrumR, field = usedInExpr)
     humdrumR@Active <- actquo
     
-    act <- evalActive(humdrumR, humtab = humtab)
+    act <- evalActive(actquo, humtab)
     nrows <- nrow(humtab)
     if ((is.atomic(act) && length(act) == nrows)
         || (!is.null(dim(act)) && dim(act)[1] == nrows)
@@ -2076,7 +2062,7 @@ fieldsInExpr <- function(humtab, expr) {
 activeFields <- function(humdrumR) {
           # Identifies which fields are used in
           # the current `Active` expression.
-          fieldsInExpr(getD(humdrumR), getActive(humdrumR))
+          fieldsInExpr(getHumtab(humdrumR, 'D'), getActive(humdrumR))
 }
 
 
@@ -2261,7 +2247,7 @@ setMethod('$<-',  signature = c(x = 'humdrumR', value = 'humdrumR'), function(x,
 #' @export
 setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value = 'vector'),
           function(x, i, j, value) {
-                    D <- getD(x)
+                    D <- getHumtab(x, 'D')
                     
                     if (!is.list(value)) value <- list(value)
                     
@@ -2401,8 +2387,8 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP') 
     
-    active <- as.character(evalActive(humdrumR, dataTypes = 'GLIMDdP', 
-                                      forceVector = TRUE, nullAs = ".", humtab = humtab))
+    active <- as.character(evalActive(humdrumR@Active, humtab,  
+                                      forceVector = TRUE, nullAs = "."))
     humtab$Null[humtab$Type == 'P'] <- FALSE
     humtab$Filter[humtab$Type == 'P'] <- FALSE
 
