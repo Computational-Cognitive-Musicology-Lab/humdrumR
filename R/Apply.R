@@ -396,6 +396,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   humtab <- getHumtab(humdrumR)
+  humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
   # interpret ... arguments
   quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
@@ -417,9 +418,6 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
 
   
   #### evaluate "do" expression! 
-  humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-  
-  
   result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
