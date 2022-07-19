@@ -383,7 +383,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
     addFields(humdrumR) <- newfields
-    humdrumR <- setActiveFields(humdrumR, newfields, updateNull = FALSE) 
+    humdrumR@Active <- rlang::quo(list(!!!(rlang::syms(newfields))))
   }
   humdrumR
   # update_humdrumR(humdrumR, field = c(newfields, overWrote))
