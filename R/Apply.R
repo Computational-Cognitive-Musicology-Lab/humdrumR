@@ -336,7 +336,8 @@ within.humdrumR <- function(data, ..., variables = list()) {
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
-  bad <- overWrote %in% fields(humdrumR, 'S')$Name
+  bad <- overWrote %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece', 'Column', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+  #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
           ifelse = sum(bad) > 1L, 

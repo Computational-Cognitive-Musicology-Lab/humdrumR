@@ -1972,7 +1972,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
   checkhumdrumR(humdrumR, 'fields')
     
-  D <- getHumtab(humdrumR, 'Dd')
+  D <- getHumtab(humdrumR)
  
   valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
   valid <- valid[pmatch(fieldTypes, valid)]
