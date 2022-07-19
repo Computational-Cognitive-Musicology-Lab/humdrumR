@@ -146,46 +146,22 @@ regexFindMethod <- function(str, regexes) {
 }
 
 
-REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
-    if (!is.character(x)) stop(call. = FALSE,
-                               "Sorry, REapply can only apply to an x argument that is a character vector.")
-    result <- .REapply(x, getRE(regex), .func, inPlace = inPlace, ...)
-    
-    if (inherits(result, 'partition')) {
-        result <- lapply(result,
-                         \(res) { res %<-matchdim% x})
-    }
-    as.re(result, regex) 
-}
+REapply <- function(str, regex, .func, inPlace = TRUE, ..., outputClass = 'character') {
+    if (!is.character(str)) .stop(call. = FALSE,
+                                "Sorry, REapply can only apply to an x argument that is a character vector.")
+  
+    regex <- getRE(regex)
 
-#' 
-.REapply <- function(x, regex, .func, inPlace = TRUE, ...) {
-    # accepts a regex (whereas REapply can take a unparsed regex name
-    # like "Recip").
-    matches <- stringi::stri_extract_first(str = x, regex = regex)
-    result <- local({
-        hits <- !is.na(matches)
-        hits_result <- do.call(.func, c(list(matches[hits]), list(...)))
-        
-        if (inherits(hits_result, 'partition')) {
-            result <- hits_result
-            result <- lapply(hits_result,
-                             \(hresult) {
-                                 result <- vectorNA(length(x), class(hresult))
-                                 result[hits] <- hresult
-                                 result 
-                             })
-        } else {
-            result <- vectorNA(length(x), class(hits_result))
-            result[hits] <- hits_result
-        }
-        result
-    })
+    matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     
-    associatedExclusive <- getREexclusive(regex)
-    if (!is.null(associatedExclusive)) stickyAttrs(result) <- list(Exclusive = associatedExclusive)
+    #
+    hits <- !is.na(matches)
+    result <- vectorNA(length(str), outputClass)
+    if (any(hits)) result[hits] <- do...(.func, c(list(matches[hits]), list(...))) 
     
-    if (inPlace) inPlace(result, x, regex) else result
+    if (inPlace && outputClass == 'character') result <- stringi::stri_replace_first_fixed(str, matches, result)
+    
+    result
 
 }
 

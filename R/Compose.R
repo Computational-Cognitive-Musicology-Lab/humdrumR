@@ -367,104 +367,100 @@ partialApply <- function(func, ...) {
 #' 
 #' @name humdrumDispatch
 #' @export
-humdrumDispatch <-  function(str, dispatchDF,  Exclusive = NULL, funcName = NULL, 
+humdrumDispatch <-  function(x, dispatchDF,  Exclusive = NULL, funcName = NULL, 
+                             regexApply = TRUE,
                              multiDispatch = FALSE, ..., outputClass = 'character') {
-  if (is.null(str)) return(NULL)
-  if (length(str) == 0L && is.character(str)) return(vectorNA(0L, outputClass))
-  if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
+  if (is.null(x)) return(NULL)
+  if (length(x) == 0L || (is.null(Exclusive) && !is.character(x))) return(vectorNA(0L, outputClass))
+  
+  if (!is.null(Exclusive)) {
+    exclusiveDispatch(x, dispatchDF, regexApply = regexApply,
+                      Exclusive = Exclusive, outputClass = outputClass,
+                      ...)
+  } else {
+    regexDispatch(x, dispatchDF, multiDispatch = multiDispatch,
+                  funcName = funcName, outputClass = outputClass, ...)
+  }
+  
+}
+
+
+
+regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 'character', ..., funcName = 'regexDispatch') {
+  if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'x' argument.")
   
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
-  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')(Exclusive)
-  if (is.null(Exclusive)) Exclusive <- rep('any', length(str))
-  if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
-  ### find places where str matches dispatch regex AND Exclusive matches dispatch exclusives
-  matches <-  Map(\(regex, exclusives) {
-    output <- character(length(str))
-    target <- 'any' %in% exclusives | Exclusive == "any" | Exclusive %in% exclusives 
-    
-    output[target] <- stringi::stri_extract_first_regex(str[target], regex)
-    output
-  },
-  dispatchDF$regex, dispatchDF$Exclusives)
+  matches <- do.call('cbind', lapply(dispatchDF$regex, \(re) stringi::stri_extract_first_regex(str, pattern = re)))
   
-  Lmatches <- as.data.frame(lapply(matches, \(m) nchar(m) %|% 0L))
+  Lmatches <- nchar(matches) %|% 0L
   
-  if (multiDispatch) {
-    dispatch <- apply(Lmatches, 1L,\(row) {
+  if (!multiDispatch) Lmatches <- rbind(colMeans(Lmatches))
+  
+  matches <- cbind(matches, NA_character_)
+  j <- ncol(matches)
+  dispatch <- apply(Lmatches, 1, \(row) {
       dispatch <- which.max(row)
-      if (length(dispatch) == 0L || row[dispatch] == 0L) 0L else dispatch 
+      if (length(dispatch) == 0L || row[dispatch] == 0L) j else dispatch 
     })
-    segments <- segments(dispatch)
-    dispatch <- attr(segments, 'values')
-    
-  } else {
-    segments <- segments(Exclusive)
-    Mmatches <- as.data.frame(do.call('rbind', by(Lmatches, segments, colMeans, na.rm = TRUE)))
-    
-    #### Pick which dispatch is best
-    dispatch <- apply(Mmatches, 1, \(row) {
-      dispatch <- which.max(row)
-      if (length(dispatch) == 0L || row[dispatch] == 0L) 0L else dispatch 
-    })
-  }
   
   ### Extract matching vectors
-  matches <- Map(\(match, disp) if (disp > 0L) match[ , disp] else vectorNA(nrow(match), outputClass), 
-                 split(as.data.frame(matches), segments), 
-                 dispatch)
-  
+  matches <- if (length(matches) > 1L) matches[cbind(1:nrow(matches), dispatch)] else matches[ , dispatch]
+                 
   ### call methods
-  result <- Map(\(method, strs) {
-    na <- is.na(strs)
-    output <- vectorNA(length(strs), outputClass)
-    args <- c(list(strs), list(...))
+  result <- if (length(dispatch) == 1L) {
+    do...(dispatchDF$method[[dispatch]], c(list(matches), list(...)))
+  } else {
+    i <- tapply(seq_along(matches), dispatch, list)
     
-    if (any(na)) args <- lapply(args, \(arg) if (length(arg) == length(na)) arg[!na] else arg)
-    
-    output[!na] <- do...(method, args)
-    output
-  },
-  c(list(force), dispatchDF$method)[dispatch + 1L], matches)
+    do.call('c', Map(\(method, strs) {
+      do...(method, c(list(strs), list(...)))
+    }, c(dispatchDF$method, list(force))[sort(unique(dispatch))], tapply(matches, dispatch, list)))[order(unlist(i))]
+  }
   
-  result <- do.call('c', result)
   
   attr(result, 'dispatch') <-  list(Original = str, 
-                                    Regexes = unlist(dispatchDF$regex[dispatch]),
-                                    Segments = segments,
-                                    Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
+                                    Regexes = unlist(dispatchDF$regex[unique(dispatch)]),
+                                    Segments = dispatch,
+                                    Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[unique(dispatch)])
   result
 }
 
 #' @rdname humdrumDispatch
 #' @export
-exclusiveDispatch <- function(str, dispatchDF,  Exclusive = NULL, funcName = NULL, ..., outputClass = 'numeric') {
+exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
   
-  if (is.null(str)) return(NULL)
-  if (length(str) == 0L && is.atomic(str)) return(vectorNA(0L, outputClass))
-  if (!is.atomic(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'str' argument.")
+  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
+  if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   
-  if (!is.null(attr(str, 'Exclusive'))) Exclusive <- attr(str, 'Exclusive')(Exclusive)
-  if (is.null(Exclusive)) Exclusive <- rep(dispatchDF$Exclusives[[1]], length(str))
-  if (length(Exclusive) < length(str)) Exclusive <- rep(Exclusive, length.out = length(str))
   
-  Ematch <- match(Exclusive, dispatchDF$Exclusives, nomatch = 0L)
+  regexApply <- regexApply && is.character(x)
   
-  strs <- tapply(str, Exclusive, list)
-
-  dispatch <- tapply(Ematch, Exclusive, unique)
+  dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc))]
+  dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
-  result <- Map(\(method, x) {
-    args <- c(list(x), list(...))
-    do...(method, args)
-    
-   }, c(list(force), dispatchDF$method)[dispatch + 1L], strs)
+  result <- vectorNA(length(x), outputClass)
+  exclusives <- c()
   
-  result <- do.call('c', result)
+  if (nrow(dispatchDF)) {
+    for (i in 1:nrow(dispatchDF)) {
+      hits <- Exclusive %in% dispatchDF$Exclusives[[i]]
+      
+      result[hits] <- if (regexApply) {
+        REapply(x[hits], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, ..., outputClass = outputClass) 
+        } else {
+        args <- c(list(x[hits]), list(...))
+        do...(dispatchDF$method[[i]], args)
+      }
+      
+      exclusives <- c(exclusives, unique(Exclusive[hits])) # some can have multiple exclusives associated!
+    }
+  }
   
-  attr(result, 'dispatch') <-  list(Original = str, 
-                                    Segments = Exclusive,
-                                    Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[dispatch])
+  attr(result, 'dispatch') <-  list(Original = x, 
+                                    Regexes = unlist(dispatchDF$regex),
+                                    Segments = Exclusive, 
+                                    Exclusives = exclusives)
   result
   
 }
@@ -584,23 +580,22 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   # Assemble the new function's arguments
   genericArgs <- local({
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
-    args <- c(alist(str = , Exclusive = NULL), 
+    args <- c(alist(x = , Exclusive = NULL), 
               args, 
               unlist(dispatchDF$Args, recursive = FALSE)[sharedArgNames], 
               alist(... = , multiDispatch = FALSE))
     args <- args[!duplicated(names(args))]
-    args <- args[names(args) != 'x']
     args
 
   })
-  dispatchArgs <- genericArgs[!names(genericArgs) %in% c('str', 'Exclusive', '...', 'multiDispatch')]
+  dispatchArgs <- genericArgs[!names(genericArgs) %in% c('x', 'str', 'Exclusive', '...', 'multiDispatch')]
   dispatchArgs[names(dispatchArgs) %in% names(args)] <- lapply(names(dispatchArgs[names(dispatchArgs) %in% names(args)]),
                                                                rlang::sym)
   
   ##################################################### #
   
   body <- rlang::expr({
-    args <- list(str = str, dispatchDF = dispatchDF, Exclusive = Exclusive,
+    args <- list(x = x, dispatchDF = dispatchDF, Exclusive = Exclusive,
                  multiDispatch = multiDispatch,
                  outputClass = !!outputClass, funcName = !!funcName,
                  ...)
