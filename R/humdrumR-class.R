@@ -1861,7 +1861,7 @@ setActive <- function(humdrumR, form) {
 #' to simply return those fields (as a list, if there are more than one).
 #' @rdname humActive
 #' @export
-setActiveFields <- function(humdrumR, fieldnames) {
+setActiveFields <- function(humdrumR, fieldnames, updateNull = TRUE) {
   checkhumdrumR(humdrumR, 'setActiveFields')
   fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'setActiveFields', argname = 'fieldnames')
   actquo <- if (length(fieldnames) > 1L) {
@@ -1869,10 +1869,10 @@ setActiveFields <- function(humdrumR, fieldnames) {
             } else {
             rlang::new_quosure(as.symbol(fieldnames), env = rlang::get_env(humdrumR@Active))
             }
-  putActive(humdrumR, actquo)
+  putActive(humdrumR, actquo, updateNull = updateNull)
 }
 
-putActive <- function(humdrumR, actquo) {
+putActive <- function(humdrumR, actquo, updateNull = TRUE) {
     # This does the dirty work for 
     # setActive and setActiveFields.
     humtab <- getHumtab(humdrumR, 'D')
@@ -1882,7 +1882,7 @@ putActive <- function(humdrumR, actquo) {
     if (length(usedInExpr) == 0L) .stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
 Add a reference to some field, for instance Token.")
     
-    humdrumR <- update_Null(humdrumR, field = usedInExpr)
+    if (updateNull) humdrumR <- update_Null(humdrumR, field = usedInExpr)
     humdrumR@Active <- actquo
     
     act <- evalActive(actquo, humtab)
