@@ -376,16 +376,17 @@ within.humdrumR <- function(data, ..., variables = list()) {
     humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
   }
   
-
-  putHumtab(humdrumR, overwriteEmpty = FALSE) <- newhumtab
+  newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newfields, overWrote))
+  humdrumR@Humtable <- newhumtab
+  # putHumtab(humdrumR, overwriteEmpty = FALSE) <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
     addFields(humdrumR) <- newfields
     humdrumR <- setActiveFields(humdrumR, newfields, updateNull = FALSE) 
   }
-  
-  update_humdrumR(humdrumR, field = c(newfields, overWrote))
+  humdrumR
+  # update_humdrumR(humdrumR, field = c(newfields, overWrote))
 
 
 }
@@ -393,6 +394,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
 withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
+  humtab <- getHumtab(humdrumR)
   
   # interpret ... arguments
   quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
@@ -406,7 +408,6 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   recordtypes <- if (any(quoTab$Keyword == 'recordtypes')) quoTab[Keyword == 'recordtypes']$Quo[[1]] else 'D'
   quoTab <- quoTab[Keyword != 'recordtypes']
                       
-  humtab <- getHumtab(humdrumR, recordtypes)
   
   ### Preparing the "do" expression
   do   <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = FALSE)
@@ -418,7 +419,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
   
-  result <- evalDoQuo(do, humtab,  quoTab[KeywordType == 'partitions'],  ordo)
+  result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
   
