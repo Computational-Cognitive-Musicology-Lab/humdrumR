@@ -189,7 +189,7 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = list()) {
           }
             
           
-          windows <- .windows(x, windows)
+          windows <- checkWindows(x, windows)
           
           if (length(windows)) {
               
@@ -418,28 +418,25 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
-changes <- function(..., value = FALSE, first = TRUE) {
+changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = FALSE) {
     xs <- list(...)
+    xs <- do.call('match_size', xs)
     
-    changes <- lapply(xs, 
-           \(x) {
-             change <- c(first, head(x, -1L) != tail(x, -1L))
+    changes <- lapply(xs, \(x) c(if (!beforeChange) pad, 
+                                 head(x, -1L) != tail(x, -1L),
+                                 if (beforeChange) pad))
+    changes <- Reduce(if (any) '|' else '&', changes)
+    
              
-             if (value) {
-               output <- vectorNA(length(x), class(x))
-               output[change] <- x[change]
-               output
-             } else {
-               attr(change, 'values') <- x[change]
-               change
-             }
-           })
-    
-    Reduce(if (value) union else '|', changes)
- 
-    
-    
-    
+    values <- do.call('cbind', lapply(xs, '[', !is.na(changes) & changes))
+    rownames(values) <- which(changes)
+             
+    if (value) {
+      values
+    } else {
+      attr(changes, 'values') <- values
+      changes
+    }
 }
 
 
@@ -881,19 +878,21 @@ lcm <- function(...) {
 # sigma (integrate) and delta (derive) should be perfect inverses, 
 # so long as their skip arguments are the same
 
-.windows <- function(x, windows)  if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows
-#' Interval "calculus"
-#'
-#' @name intervalCalculus
+checkWindows <- function(x, windows) {
+  if (!is.list(windows)) windows <- list(windows)
+  if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows 
+}
+
+#' @family interval calculus functions
 #' @export
 sigma <- function(x, skip, boundaries) UseMethod('sigma')
-#' @rdname intervalCalculus
+#' @rdname sigma
 #' @export
 sigma.default <- function(x, skip = list(is.na), windows = list()) {
   
   skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
  
-  windows <- .windows(x, windows)
+  windows <- checkWindows(x, windows)
   
   x[!skip] <- if (length(windows)) {
     tapply_inplace(x[!skip], lapply(windows, \(b) b[!skip]), cumsum)
@@ -903,40 +902,200 @@ sigma.default <- function(x, skip = list(is.na), windows = list()) {
   
   x
 }
-#' @rdname intervalCalculus
+#' @rdname sigma
 #' @export
-sigma.matrix <- function(x, ..., skip = list(is.na)) {
+sigma.matrix <- function(x, margin = 2L, ...) {
+  if (margin > length(dim(x))) .stop("You can't use a `margin` argument of higher dimension than your input.",
+                                     "In this case, you're asking for margin == {margin}, but your input only has",
+                                     "{num2word(length(dim(x)))} dimensions.")
   
-  do.call('cbind', apply(x, 2, sigma.default, skip = skip, ..., simplify = FALSE))
+  results <- apply(x, margin, sigma.default, ..., simplify = FALSE)
+  switch(margin,
+         do.call('rbind', results),
+         do.call('cbind', results),
+         results)
 }
 
-#' @rdname intervalCalculus
+#' Lagged differences
+#'
+#' Calculate sequential differences of values in numeric vectors.
+#' 
+#' 
+#' `delta` is very similar base `R` [diff()].
+#' However, `delta` should be favored in [humdrumR] use because:
+#' 
+#' 1. Its output is *always* the same length as its  input.
+#'    This is achieved by padding the beginning or end of the output with---by default---`NA` values.
+#' 2. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#' 3. They (can) automatically skip `NA` (or other) values.
+#' 
+#' If applied to a matrix, `delta` is applied separately to each column, unless `margin` is set to `1` (rows)
+#' or, if you have a higher-dimensional array, a higher value.
+#' 
+#' # Initial/padding values
+#' 
+#' Each lagged pair of numbers in the vector is summed/subtracted.
+#' This leaves `abs(lag)` numbers at the end with nothing to pair with them.
+#' For example, `lag == 1`, the indices which are getting subtracted look like this:
+#' 
+#' + \eqn{x_1 - x_?}
+#' + \eqn{x_2 - x_1}
+#' + \eqn{x_3 - x_2}
+#' + \eqn{x_4 - x_3}
+#' + \eqn{x_5 - x_4}
+#' 
+#' If `lag == 3`: 
+#' 
+#' + \eqn{x_1 - x_?}
+#' + \eqn{x_2 - x_?}
+#' + \eqn{x_3 - x_?}
+#' + \eqn{x_4 - x_1}
+#' + \eqn{x_5 - x_2}
+#' 
+#' The `init` argument (for "initial") is a value, or values, to pair with the first `lag` values.
+#' By default, `init` is `NA`, and since `n + NA` or `n - NA` are themselves, `NA`, the output vector is
+#' padded with `NA` values. For `lag == 3` again:
+#' 
+#' + \eqn{x_1 - NA}
+#' + \eqn{x_2 - NA}
+#' + \eqn{x_3 - NA}
+#' + \eqn{x_4 - x_1}
+#' + \eqn{x_5 - x_2}
+#' 
+#' However, if the `init` argument can between 1 and `abs(lag)` numeric values.
+#' The result, for `lag==3` is:
+#' 
+#' + \eqn{x_1 - init_1}
+#' + \eqn{x_2 - init_2}
+#' + \eqn{x_3 - init_3}
+#' + \eqn{x_4 - x_1}
+#' + \eqn{x_5 - x_2} 
+#' 
+#' If `right == TRUE`, the `init` values are placed at the end, like:
+#' 
+#' + \eqn{x_4 - x_1}
+#' + \eqn{x_5 - x_2} 
+#' + \eqn{init[1] - x_3}
+#' + \eqn{init[2] - x_4}
+#' + \eqn{init[3] - x_5}
+#' 
+#' The `init` argument functions similarly to the `init` argument of [Reduce()].
+#' 
+#' # Negative lag
+#' 
+#' If `lag` is negative, the differences are simply reversed, resulting in the same numbers as the 
+#' equivalent positive lag, but `* -1`.
+#' 
+#' + \eqn{x_1 - NA}
+#' + \eqn{x_2 - x_1}
+#' + \eqn{x_3 - x_2}
+#' + \eqn{x_4 - x_3}
+#' + \eqn{x_5 - x_5}
+#' 
+#' to
+#' 
+#' + \eqn{NA - x_1}
+#' + \eqn{x_1 - x_2}
+#' + \eqn{x_2 - x_3}
+#' + \eqn{x_3 - x_4}
+#' + \eqn{x_4 - x_5}
+#' 
+#' # Boundaries
+#' 
+#' In many cases we want to calculate sequential differences in a vector, but not across certain boundaries.
+#' For example, we don't want to calculate the difference between the first note in one file and the last 
+#' note of the previous file!
+#' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
+#' into groups.
+#' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
+#' (`boundaries` are evaluated using the [changes()] function, so you can also pass the argument `any = FALSE`
+#' if you want their only to boundaries where *all* boundary vectors change.)
+#' 
+#' Differences which cross between groups are compared to the `init` value(s).
+#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, delta, ...)`,
+#' except generally faster when the number of groups is large.
+#' 
+#' `humdrumR` [with(in)][withinHumdrum] calls will automatically feed the `File`, `Spine`, and `Path` 
+#' fields as three `boundaries` vectors, anywhere you use `delta`.
+#' This is the most common, "melodic" use case.
+#' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
+#' you could manually set `boundaries = list(File, Record)`.
+#' 
+#'    
+#' @param x Any numeric vector. `NULL` values are returned `NULL`.
+#' @param lag (nonzero integer) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
+#' @param skip (`function`) This must be a function which can be applied to `x` and returns a logical vector
+#' of the same length. And `TRUE` values are skipped over in the differences/sums.
+#' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
+#' The skipped values are returned as is in the output vector.
+#' @param init (atomic value of same class as `x`, with `length(init) <= lag`)
+#' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
+#' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
+#' @param boundaries (vector of same length as `x`, or a list of such vectors) Differences are not calculated
+#' across groups indicated by the `boundaries` vector(s).
+#' 
+#' 
+#' @family interval calculus functions
 #' @export
-delta <- function(x, skip, boundaries) UseMethod('delta') 
-#' @rdname intervalCalculus
+delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 
+#' @rdname delta
 #' @export
-delta.default <- function(x, skip = list(is.na), windows = list(), firstNA = FALSE) {
-    skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
+delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, boundaries = list(), ...) {
+    if (is.null(x)) return(NULL)
+    checkNumeric(x, 'x', 'delta')
+    checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
+    if (!is.null(skip))  checkFunction(skip, 'skip', 'delta')
+    checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
+    checkTF(right, 'right', 'delta')
     
-    x[!skip] <- c(if (firstNA) as(NA, class(x)) else x[1], 
-                  diff(x[!skip]))
+    init <- rep(init, length.out = abs(lag))
+    if (lag < 0) {
+      x <- rev(x)
+      right <- !right
+    }
+    skip <- if (is.null(skip)) logical(length(x)) else skip(x)
+    #
+    if (right)  {
+      skip_pad <- c(skip, logical(abs(lag)))
+      x_pad    <- c(x,    init) 
+    } else {
+      skip_pad <- c(logical(abs(lag)), skip)
+      x_pad    <- c(init,  x)
+    }
+      
+    output <- x
+    output[!skip] <-  diff(x_pad[!skip_pad], lag = abs(lag))
     
-    windows <- .windows(x, windows)
+    if (lag < 0) output <- rev(output)
     
-    if (length(windows)) {
-      boundaries <- boundaries[!sapply(boundaries, is.null)]
-      boundaries <- do.call('changes', boundaries)
-      x[boundaries] <- as(NA, class(x))
+    boundaries <- checkWindows(x, boundaries)
+    if (length(boundaries)) {
+      bounds <- which(do.call('changes', c(boundaries, list(beforeChange = right, ...))))
+      if (abs(lag) > 1L) {
+        arith <- if (right) (\(l) bounds - l) else (\(l) bounds + l )
+        bounds <- sort(Reduce(`union`, lapply((2:abs(lag)) - 1L, arith), init = bounds))
+      }
+      output[bounds] <- x[bounds] - rep(init, length.out = length(bounds))
     }
     
-    x
+    
+    output
     
 }
-
-#' @rdname intervalCalculus
+ 
+#' @rdname delta
 #' @export
-delta.matrix <- function(x, ..., skip = list(is.na)) {
-  do.call('cbind', apply(x, 2, delta.default, skip = skip, ..., simplify = FALSE))
+delta.matrix <- function(x, margin = 2L, ...) {
+  if (margin > length(dim(x))) .stop("You can't use a `margin` argument of higher dimension than your input.",
+                                     "In this case, you're asking for margin == {margin}, but your input only has",
+                                     "{num2word(length(dim(x)))} dimensions.")
+  results <- apply(x, margin, delta.default, ..., simplify = FALSE)
+  switch(margin,
+         do.call('rbind', results),
+         do.call('cbind', results),
+         results)
 }
 
 
@@ -1632,12 +1791,15 @@ checkFunction <- function(x, argname, callname) {
   
   if (!is.function(x)) .stop(message, " must be a function!")
   
-  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical, 
-                 y = x))) {
+}
+
+checkRoundingFunction <- function(x, argname, callname) {
+  label <- rlang::as_label(rlang::enexpr(x))
+  
+  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = x))) {
     .stop(message, 
           " must be one of the five 'rounding' functions: round, floor, celing, trunc, or expand.")
   }
-  
 }
 
 checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
