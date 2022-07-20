@@ -21,16 +21,17 @@ delta(x, lag, skip, init, right, ...)
 \method{delta}{matrix}(x, margin = 2L, ...)
 }
 \arguments{
-\item{x}{Any numeric vector. \code{NULL} values are returned \code{NULL}.}
+\item{x}{(Any numeric vector.) \code{NULL} values are returned \code{NULL}.}
 
-\item{lag}{(nonzero integer) Which lag to use. Results will look like: \code{x[i] - x[i - lag]}.}
+\item{lag}{(Non-zero integer.) Which lag to use. Results will look like: \code{x[i] - x[i - lag]}.}
 
-\item{skip}{(\code{function}) This must be a function which can be applied to \code{x} and returns a logical vector
-of the same length. And \code{TRUE} values are skipped over in the differences/sums.
+\item{skip}{(\code{function}.) This must be a function which can be applied to \code{x} and returns a logical vector
+of the same length. And \code{TRUE} values are skipped over in the calculations.
 By default, the \code{skip} function is \code{is.na}, so \code{NA} values in the input (\code{x} argument) are skipped.
 The skipped values are returned as is in the output vector.}
 
-\item{init}{(atomic value of same class as \code{x}, with \code{length(init) <= lag})}
+\item{init}{(Atomic value of same class as \code{x}, with \code{length(init) <= lag}.) \code{NA} values at the beginning
+(or end of \code{right == TRUE}) are filled with these values \emph{before} summing.}
 
 \item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
 By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
@@ -42,7 +43,7 @@ across groups indicated by the \code{boundaries} vector(s).}
 Calculate sequential differences of values in numeric vectors.
 }
 \details{
-\code{delta} is very similar base \code{R} \code{\link[=diff]{diff()}}.
+\code{delta} is very similar base-\code{R} \code{\link[=diff]{diff()}}.
 However, \code{delta} should be favored in \link{humdrumR} use because:
 \enumerate{
 \item Its output is \emph{always} the same length as its  input.
@@ -132,7 +133,9 @@ to
 }
 
 \section{Boundaries}{
-In many cases we want to calculate sequential differences in a vector, but not across certain boundaries.
+
+
+In many cases we want to perform lagged calculations in a vector, but not across certain boundaries.
 For example, we don't want to calculate the difference between the first note in one file and the last
 note of the previous file!
 The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
@@ -141,8 +144,9 @@ If more than \code{boundaries} vectors are given, a change in \emph{any} vector 
 (\code{boundaries} are evaluated using the \code{\link[=changes]{changes()}} function, so you can also pass the argument \code{any = FALSE}
 if you want their only to boundaries where \emph{all} boundary vectors change.)
 
-Differences which cross between groups are compared to the \code{init} value(s).
-Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, delta, ...)},
+Value pairs which cross between groups are compared to the \code{init} value(s), as if they were at the beginning
+(or end, if \code{right == TRUE}).
+Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, delta/sigma, ...)},
 except generally faster when the number of groups is large.
 
 \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will automatically feed the \code{File}, \code{Spine}, and \code{Path}
@@ -152,4 +156,50 @@ However, if you wanted, for instance, to calculate differences across spines (li
 you could manually set \code{boundaries = list(File, Record)}.
 }
 
-\concept{interval calculus functions}
+\section{Invertability}{
+
+
+The \code{sigma} and \code{delta} functions are inverses of each other, meaning that with the right arguments set,
+\code{sigma(delta(x)) == x} and \code{delta(sigma(x)) == x}.
+In other words, the two functions "reverse" each other.
+The key is that the \code{init} argument needs to be set to \code{0}, and all other
+arguments (\code{lag}, \code{skip}, \code{boundaries}, etc.) need to match.
+So \emph{actually},  \code{sigma(delta(x, init = 0, ...)) == x} and \verb{delta(sigma(x), init = 0)) == x}.
+
+When we take the differences between values (\code{delta(x)}), the resulting differences can't tell us
+fully how to reconstruct the original unless we know where to "start" (a constant offset).
+For example,
+\itemize{
+\item \code{delta(c(5, 7, 5, 6)) == c(NA, 2, -2, 1)}
+}
+
+We know our input goes up 2, back down 2, then up 1, but the starting value (the first \code{5})
+is lost.
+If we call sigma on this, we'll get:
+\itemize{
+\item \code{sigma(c(NA, 2, -2, 1)) == c(0, 2,0, 1)}
+}
+
+We get the right contour, but we're offset by that constant \code{5}.
+
+If we call \code{delta(x, init = 0)} the necessary constant (the first value) is kept at the beginning of the vector
+\itemize{
+\item \code{delta(c(5, 7, 5, 6), init = 0) == c(5, 2, -2, 1)}
+}
+
+so \code{sigma} gets what we want, full invertability:
+\itemize{
+\item \code{sigma(delta(c(5, 7, 5, 6), init = 0)) == c(5, 7, 5, 6)}
+}
+
+Alternatively, we could specify the necessary constant as the \code{init} argument of \code{sigma}:
+\itemize{
+\item \code{sigma(delta(c(5, 7, 5, 6)), init = 5) == c(5, 7, 5, 6)}
+}
+
+so the \code{init} arguments of the two functions are complementary.
+}
+
+\seealso{
+This function's inverse is \code{\link[=sigma]{sigma()}}.
+}

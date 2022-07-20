@@ -883,24 +883,179 @@ checkWindows <- function(x, windows) {
   if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows 
 }
 
-#' @family interval calculus functions
+
+#' Cumulative sum of numeric vector
+#' 
+#' Calculate sequential cummulative sum of values in numeric vectors.
+#' 
+#' 
+#' `sigma` is very similar base-`R` [cumsum()].
+#' However, `sigma` should be favored in [humdrumR] use because:
+#' 
+#' 1. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#' 2. They (can) automatically skip `NA` (or other) values.
+#' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
+#' section below.
+#' 
+#' If applied to a matrix, `sigma` is applied separately to each column, unless `margin` is set to `1` (rows)
+#' or, if you have a higher-dimensional array, a higher value.
+#'
+#'
+#' @section Invertability:
+#' 
+#' The `sigma` and `delta` functions are inverses of each other, meaning that with the right arguments set,
+#' `sigma(delta(x)) == x` and `delta(sigma(x)) == x`.
+#' In other words, the two functions "reverse" each other.
+#' The key is that the `init` argument needs to be set to `0`, and all other 
+#' arguments (`lag`, `skip`, `boundaries`, etc.) need to match.
+#' So *actually*,  `sigma(delta(x, init = 0, ...)) == x` and `delta(sigma(x), init = 0)) == x`.
+#'
+#' When we take the differences between values (`delta(x)`), the resulting differences can't tell us 
+#' fully how to reconstruct the original unless we know where to "start" (a constant offset).
+#' For example, 
+#'
+#' + `delta(c(5, 7, 5, 6)) == c(NA, 2, -2, 1)`
+#'
+#' We know our input goes up 2, back down 2, then up 1, but the starting value (the first `5`)
+#' is lost.
+#' If we call sigma on this, we'll get:
+#' 
+#' + `sigma(c(NA, 2, -2, 1)) == c(0, 2,0, 1)`
+#' 
+#' We get the right contour, but we're offset by that constant `5`.
+#'  
+#' If we call `delta(x, init = 0)` the necessary constant (the first value) is kept at the beginning of the vector
+#' 
+#' + `delta(c(5, 7, 5, 6), init = 0) == c(5, 2, -2, 1)`
+#' 
+#' so `sigma` gets what we want, full invertability:
+#' 
+#' + `sigma(delta(c(5, 7, 5, 6), init = 0)) == c(5, 7, 5, 6)`
+#'  
+#' Alternatively, we could specify the necessary constant as the `init` argument of `sigma`:
+#' 
+#' + `sigma(delta(c(5, 7, 5, 6)), init = 5) == c(5, 7, 5, 6)`
+#' 
+#' so the `init` arguments of the two functions are complementary.
+#'
+#' @section Greater lags:
+#' 
+#' The behavior of `sigma` when `abs(lag) > 1` is easiest to understand as the inverse of the 
+#' behavior of [delta(abs(lag) > 1)][delta], which is more intuitive. (`sigma` is the inverse of [delta()], see the
+#' *Invertability* section above).
+#' 
+#' Generally, if `abs(lag) > 1`, `x` is grouped by its indices modulo `lag`, and the cumulative sum is calculated separately
+#' for each set of modulo indices.
+#' For example, consider `lag == 2` for the following input:
+#' 
+#' | `x`     | index  | index modulo 2   |
+#' |---------|--------|------------------|
+#' | 1       | 1      | 1                |
+#' | 3       | 2      | 0                |
+#' | 2       | 3      | 1                |
+#' | 2       | 4      | 0                |
+#' | 5       | 2      | 1                |
+#' 
+#' The cumulative sum of the `1` and `0` modulo-index groups are:
+#' 
+#' + Index `1`: `cumsum(c(1,2,5)) == c(1, 3, 8)`.
+#' + Index `0`: `cumsum(c(3,2)) == c(3, 5)`
+#' 
+#' Interleaved back into order, the result is `c(1,3,3,5,8)`.
+#' This may not be very clear, but sure enough `delta(c(1, 3, 3, 5, 8), lag = 2, init = 0)` returns the original
+#' `c(1,3,2,2,5)` vector!
+#' Again, understanding [delta(..., lag = n)][delta()] is easier than `sigma(..., lag = n)` (see the *Invtertability* section
+#' below.)
+#' 
+#' @section Negative lag:
+#' 
+#' If `lag` is negative, the output is the same as the equivalent positive lag, except
+#' the sign is reversed (`output * -1`).
+#' This behavior is easiest to understand as the inverse of the 
+#' behavior of [delta(lag < 0)][delta], which is more intuitive. (`sigma` is the inverse of [delta()], see the
+#' *Invertability* section above).
+
+#'
+#' 
+#' @section Boundaries:
+#' 
+#' In many cases we want to perform lagged calculations in a vector, but not across certain boundaries.
+#' For example, we don't want to calculate the difference between the first note in one file and the last 
+#' note of the previous file!
+#' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
+#' into groups.
+#' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
+#' (`boundaries` are evaluated using the [changes()] function, so you can also pass the argument `any = FALSE`
+#' if you want their only to boundaries where *all* boundary vectors change.)
+#' 
+#' Value pairs which cross between groups are compared to the `init` value(s), as if they were at the beginning
+#' (or end, if `right == TRUE`).
+#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, delta/sigma, ...)`,
+#' except generally faster when the number of groups is large.
+#' 
+#' `humdrumR` [with(in)][withinHumdrum] calls will automatically feed the `File`, `Spine`, and `Path` 
+#' fields as three `boundaries` vectors, anywhere you use `delta`.
+#' This is the most common, "melodic" use case.
+#' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
+#' you could manually set `boundaries = list(File, Record)`.
+#' 
+#'    
+#' @param x (Any numeric vector.) `NULL` values are returned `NULL`.
+#' @param lag (Non-zero integer.) Which lag to use. (See *Great lags* section, below.) 
+#' @param skip (`function`.) This must be a function which can be applied to `x` and returns a logical vector
+#' of the same length. And `TRUE` values are skipped over in the calculations.
+#' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
+#' The skipped values are returned as is in the output vector.
+#' @param init (Atomic value of same class as `x`, with `length(init) <= lag`.) `NA` values at the beginning
+#' (or end of `right == TRUE`) are filled with these values *before* summing.
+#' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
+#' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
+#' @param boundaries (vector of same length as `x`, or a list of such vectors) Differences are not calculated
+#' across groups indicated by the `boundaries` vector(s).
+#' 
+#' 
+#' 
+#' @seealso This function's inverse is [delta()]. 
 #' @export
-sigma <- function(x, skip, boundaries) UseMethod('sigma')
+sigma <- function(x, lag, skip = is.na, init, right, boundaries = list(), ...) UseMethod('sigma')
 #' @rdname sigma
 #' @export
-sigma.default <- function(x, skip = list(is.na), windows = list()) {
+sigma.default <- function(x, lag = 1, skip = is.na, init = 0, right = FALSE, boundaries = list(), ...) {
+  if (is.null(x)) return(NULL)
+  checkNumeric(x, 'x', 'sigma')
+  checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
+  if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
+  checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
+  checkTF(right, 'right', 'sigma')
+  boundaries <- checkWindows(x, boundaries)
   
-  skip <- if (length(skip)) Reduce('any', lapply(skip,  \(f) f(x))) else FALSE
- 
-  windows <- checkWindows(x, windows)
-  
-  x[!skip] <- if (length(windows)) {
-    tapply_inplace(x[!skip], lapply(windows, \(b) b[!skip]), cumsum)
-  } else {
-    cumsum(x[!skip])
+  if (lag < 0) {
+    x <- -x
+    lag <- -lag
   }
   
-  x
+  init <- rep(init, length.out = lag)
+  if (all(is.na(x[1:lag]))) x[1:lag] <- init
+  
+  skip <- if (is.null(skip)) logical(length(x)) else skip(x)
+  
+  result <- x
+  x <- x[!skip]
+  
+  result[!skip] <- if (abs(lag) > 1L) {
+    groups <- seq_along(x) %% lag
+    groups[groups == 0] <- lag
+    unname(tapply_inplace(x, groups, cumsum))
+  } else {
+    cumsum(x)
+  }
+  
+  
+  result
+  
+  
 }
 #' @rdname sigma
 #' @export
@@ -916,12 +1071,14 @@ sigma.matrix <- function(x, margin = 2L, ...) {
          results)
 }
 
+
+
 #' Lagged differences
 #'
 #' Calculate sequential differences of values in numeric vectors.
 #' 
 #' 
-#' `delta` is very similar base `R` [diff()].
+#' `delta` is very similar base-`R` [diff()].
 #' However, `delta` should be favored in [humdrumR] use because:
 #' 
 #' 1. Its output is *always* the same length as its  input.
@@ -1002,42 +1159,13 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' + \eqn{x_3 - x_4}
 #' + \eqn{x_4 - x_5}
 #' 
-#' # Boundaries
+#' @param lag (Non-zero integer.) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
 #' 
-#' In many cases we want to calculate sequential differences in a vector, but not across certain boundaries.
-#' For example, we don't want to calculate the difference between the first note in one file and the last 
-#' note of the previous file!
-#' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
-#' into groups.
-#' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
-#' (`boundaries` are evaluated using the [changes()] function, so you can also pass the argument `any = FALSE`
-#' if you want their only to boundaries where *all* boundary vectors change.)
+#' @inheritParams sigma
+#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Invertability
 #' 
-#' Differences which cross between groups are compared to the `init` value(s).
-#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, delta, ...)`,
-#' except generally faster when the number of groups is large.
-#' 
-#' `humdrumR` [with(in)][withinHumdrum] calls will automatically feed the `File`, `Spine`, and `Path` 
-#' fields as three `boundaries` vectors, anywhere you use `delta`.
-#' This is the most common, "melodic" use case.
-#' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-#' you could manually set `boundaries = list(File, Record)`.
-#' 
-#'    
-#' @param x Any numeric vector. `NULL` values are returned `NULL`.
-#' @param lag (nonzero integer) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
-#' @param skip (`function`) This must be a function which can be applied to `x` and returns a logical vector
-#' of the same length. And `TRUE` values are skipped over in the differences/sums.
-#' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
-#' The skipped values are returned as is in the output vector.
-#' @param init (atomic value of same class as `x`, with `length(init) <= lag`)
-#' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
-#' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
-#' @param boundaries (vector of same length as `x`, or a list of such vectors) Differences are not calculated
-#' across groups indicated by the `boundaries` vector(s).
-#' 
-#' 
-#' @family interval calculus functions
+#' @seealso This function's inverse is [sigma()]. 
 #' @export
 delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 
 #' @rdname delta
@@ -1749,7 +1877,7 @@ checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE
 checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
     checkArg(x, argname = argname, callname = callname,
              classes = c('numeric', 'integer'), 
-             valid = \(arg) arg >= minval & arg <= maxval,
+             valid = \(arg) is.na(arg) | arg >= minval & arg <= maxval,
              ...)
 }
 checkLooseInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
