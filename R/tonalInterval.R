@@ -2538,7 +2538,7 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('octave.round' %in% argnames) {
-    checkFunction(args$octave.round, 'octave.round', callname)
+    checkRoundingFunction(args$octave.round, 'octave.round', callname)
   }
   
   if ('parts' %in% argnames) {

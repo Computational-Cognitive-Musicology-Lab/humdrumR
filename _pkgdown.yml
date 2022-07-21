@@ -39,7 +39,8 @@ reference:
   desc: >
     These pages describe the classes and functions that directly represent or engage musical/music-theoretic concepts.
   contents:
-  - intervalCalculus
+  - delta
+  - sigma
 - subtitle: "Pitch overviews"
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
