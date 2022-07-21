@@ -1,5 +1,5 @@
 
-############## Filtering humdrumR #######
+# Filtering humdrumR----
 
 
 #' Filter humdrum data
@@ -235,7 +235,7 @@ filterHumdrum <- function(humdrumR, ...) {
 
 
 
-############## Null indexing ----
+## Null indexing ----
 
 # humdrumR filtering and application can result in lots of filtered tokens.
 # These functions remove parts that are entirely filtered
@@ -287,7 +287,7 @@ removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   removeNull(humdrumR, c('File', 'Record'), 'GLIMDd', 'GLIMDd')
 }
 
-#########################Indexing ----
+# Indexing ----
 
 numericIndexCheck <- function(i) {
     if (any(i < 0) && any(i > 0)) stop("You can't mix negative and positive numbers when trying to index humdrumR objects.")
@@ -307,7 +307,7 @@ numericIndexCheck <- function(i) {
 }
 
 
-####[]
+## Single brackets [] ----
 
 
 
@@ -318,7 +318,7 @@ setMethod('[',
           signature = c(x = 'humdrumR', i = 'missing'),
           definition = force)
 
-##[numeric]
+### numeric ----
 
 #' @rdname filterHumdrum
 #' @usage humdata[x:y]
@@ -348,7 +348,7 @@ setMethod('[',
 
 
 
-##[character]
+### character ----
 
 #' @rdname filterHumdrum
 #' @usage humdata['regex']
@@ -363,7 +363,7 @@ setMethod('[',
             x
           })
 
-##[formula]
+### formula ----
 
 
 
@@ -383,10 +383,10 @@ setMethod('[',
               x
           })
 
-####[[]]
+## Double brackets [[]] ----
     
 
-##[[numeric]]
+### numeric ----
 
 #' @rdname filterHumdrum
 #' @usage humdata[[x:y]]
@@ -432,7 +432,6 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
                 x <- filterHumdrum(x, form, recordtypes ~ "D")
               }
               
-              if (removeEmpty) x <- removeEmptySpines(x)
               x
               
               
@@ -440,7 +439,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 
 
 
-#### [[character]]
+### character ----
 
 # grepingind <- function(humdrumR, ind, func) {
 #           Dd <- getHumtab(humdrumR, dataTypes = c('D', 'd'))
@@ -486,15 +485,23 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
           function(x, j, removeEmpty = TRUE) {
             #gets any spine which contains match
             
-            form <- if (all(grepl('^\\*\\*', j))) {
+            if (removeEmpty && all(grepl('^\\*\\*', j))) {
+              humtab <- getHumtab(x)
               j <- gsub('^\\*\\**', '', j)
-              do ~ Spine %in% unique(Spine[Exclusive %grepl% j])
+              hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = File]$V1
+              humtab <- humtab[hits == TRUE]
+              putHumtab(x, overwriteEmpty = TRUE) <- humtab
+              
             } else {
-              do ~ Spine %in% unique(Spine[. %grepl% j])
+              form <- if (all(grepl('^\\*\\*', j))) {
+                j <- gsub('^\\*\\**', '', j)
+                do ~ Spine %in% unique(Spine[Exclusive %in% j])
+              } else {
+                do ~ Spine %in% unique(Spine[. %grepl% j])
+              }
+              x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
             }
-            
-            x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
-            
+           
             if (removeEmpty) x <- removeEmptySpines(x)
             
             x
@@ -532,10 +539,10 @@ setMethod('[[',
           })
 
 
-##[[logical]]
 
 
-##[[formula]]
+
+### formula ----
 
 
 
