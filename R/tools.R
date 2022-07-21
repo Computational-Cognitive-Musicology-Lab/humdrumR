@@ -211,7 +211,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries
 
                     rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = boundaries())))
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, boundaries = boundaries())))
           }
          if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
          if (dim(x)[margin] == 0L) return(x)
