@@ -13,7 +13,7 @@ rhythmInterval(x, ...)
 
 \method{rhythmInterval}{`NULL`}(x, ...)
 
-\method{rhythmInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
+\method{rhythmInterval}{character}(x, Exclusive = NULL, ..., multiDispatch = FALSE)
 }
 \description{
 parse rhythmic information

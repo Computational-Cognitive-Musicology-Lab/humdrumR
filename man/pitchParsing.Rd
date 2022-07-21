@@ -18,14 +18,14 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
+\method{tonalInterval}{numeric}(x, Exclusive = NULL, ..., multiDispatch = FALSE)
 
-\method{tonalInterval}{character}(str, Exclusive = NULL, ..., multiDispatch = FALSE)
+\method{tonalInterval}{character}(x, Exclusive = NULL, str, ..., multiDispatch = FALSE)
 }
 \arguments{
-\item{str}{(\code{character} or \code{numeric}) The input vector.}
-
 \item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
+
+\item{str}{(\code{character} or \code{numeric}) The input vector.}
 
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} is used
 to interpret pitch representations.

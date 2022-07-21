@@ -5,7 +5,7 @@
 \alias{lead}
 \title{Shift data within a vector/matrix/data.frame}
 \usage{
-lag(x, n = 1, ..., fill = NA, wrap = FALSE)
+lag(x, n = 1, fill, wrap, boundaries, ...)
 
 lead(x, n, ...)
 }
@@ -19,7 +19,7 @@ lead(x, n, ...)
 \item{wrap}{If \code{wrap = TRUE}, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 within the data structure.}
 
-\item{windows}{A vector or list of vectors, all of th same length as \code{x}. Lags crossing the boundaries indicated in \code{windows}
+\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Lags crossing the boundaries indicated in \code{windows}
 are filled.}
 
 \item{margin}{Arrays and data.frames can be lagged lead in multiple dimensions using the \code{margin} argument.}

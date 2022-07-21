@@ -40,7 +40,7 @@ order.diatonicSet(
 
 \method{diatonicSet}{integer}(x)
 
-\method{diatonicSet}{character}(str, Exclusive = NULL, Key = NULL, ..., multiDispatch = FALSE)
+\method{diatonicSet}{character}(x, Exclusive = NULL, str, Key = NULL, ..., multiDispatch = FALSE)
 
 \S4method{as.character}{tertianSet}(x)
 

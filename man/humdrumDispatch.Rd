@@ -9,22 +9,24 @@
 \title{Regular expression method dispatch and function application}
 \usage{
 humdrumDispatch(
-  str,
+  x,
   dispatchDF,
   Exclusive = NULL,
   funcName = NULL,
+  regexApply = TRUE,
   multiDispatch = FALSE,
   ...,
   outputClass = "character"
 )
 
 exclusiveDispatch(
-  str,
+  x,
   dispatchDF,
-  Exclusive = NULL,
-  funcName = NULL,
-  ...,
-  outputClass = "numeric"
+  Exclusive,
+  regexApply = TRUE,
+  outputClass = "character",
+  inPlace = FALSE,
+  ...
 )
 
 makeDispatchDF(...)
@@ -39,8 +41,6 @@ makeHumdrumDispatcher(
 \method{print}{humdrumDispatch}(x)
 }
 \arguments{
-\item{str}{The input \code{character} string, on which dispatch is called.}
-
 \item{dispatchDF}{A data.frame which describes what function should be called for
 which regex input. (See details).}
 
@@ -57,6 +57,8 @@ within the same input vector.}
 Generally, to make sense, all dispatched functions should return the same type, which you should explicitly
 indicate with the \code{outputClass} argument.
 Dispatch functions should also be \link[base:Vectorize]{vectorized}.}
+
+\item{str}{The input \code{character} string, on which dispatch is called.}
 }
 \description{
 The \link{humdrumR} \strong{regular-expression method dispatch system}

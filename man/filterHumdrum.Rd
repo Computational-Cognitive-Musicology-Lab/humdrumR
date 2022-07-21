@@ -5,6 +5,7 @@
 \alias{removeEmptyFiles}
 \alias{removeEmptySpines}
 \alias{removeEmptyRecords}
+\alias{removeEmptyStops}
 \alias{[,humdrumR,missing,ANY-method}
 \alias{[,humdrumR,numeric,ANY-method}
 \alias{[,humdrumR,character,ANY-method}
@@ -22,6 +23,8 @@ removeEmptyFiles(humdrumR, fillfromTypes = "D")
 removeEmptySpines(humdrumR, fillfromTypes = "D")
 
 removeEmptyRecords(humdrumR, fillfromTypes = "D")
+
+removeEmptyStops(humdrumR, fillfromTypes = "D")
 
 humdata[] # returns unchanged
 

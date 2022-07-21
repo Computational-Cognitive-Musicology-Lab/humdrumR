@@ -248,7 +248,7 @@ removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', recordTypes =
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
   humtab <- getHumtab(hum, recordTypes)
-  putHumtab(hum, overwriteEmpty = TRUE) <- removeNull.data.table(humtab)
+  putHumtab(hum, overwriteEmpty = TRUE) <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
   
   hum
  
@@ -286,6 +286,15 @@ removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
   fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
   removeNull(humdrumR, c('File', 'Record'), 'GLIMDd', 'GLIMDd')
 }
+
+#' @export
+#' @rdname filterHumdrum
+removeEmptyStops <- function(humdrumR, fillfromTypes = 'D') {
+  checkhumdrumR(humdrumR, 'removeEmptyStops')
+  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyStops', 'fillfromTypes')
+  removeNull(humdrumR, c('File', 'Stop'), 'd', 'Dd')
+}
+
 
 # Indexing ----
 
@@ -500,9 +509,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
                 do ~ Spine %in% unique(Spine[. %grepl% j])
               }
               x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
+              
+              if (removeEmpty) x <- removeEmptySpines(x)
             }
            
-            if (removeEmpty) x <- removeEmptySpines(x)
+            
             
             x
 
