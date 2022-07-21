@@ -3330,9 +3330,9 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' @export
 mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                  classify = FALSE,
-                 parseArgs = list(), Exclusive = NULL, Key = NULL, File = NULL, Spine = NULL, Path = NULL) {
+                 parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
-  lagged <- lag(x, lag, windows = list(File, Spine, Path))
+  lagged <- lag(x, lag, windows = boundaries)
   
   c('args', 'parseArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs)
   

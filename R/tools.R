@@ -140,13 +140,13 @@ applycols <- function(x, f, ...){
 #' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
 #' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 #' within the data structure.
-#' @param windows A vector or list of vectors, all of th same length as `x`. Lags crossing the boundaries indicated in `windows`
+#' @param boundaries A vector or list of vectors, all of the same length as `x`. Lags crossing the boundaries indicated in `windows`
 #' are filled.
 #' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
 #' 
 #' @seealso [data.table::shift()]
 #' @export
-lag <- function(x, n = 1, ..., fill = NA, wrap = FALSE) UseMethod('lag')
+lag <- function(x, n = 1, fill, wrap, boundaries, ...) UseMethod('lag')
 
 #' @rdname lag
 #' @export
@@ -154,12 +154,12 @@ lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = list()) {
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
          if (length(n) < length(margin)) n <- rep(n, length(margin))
         
          if (1L %in% margin) {
-             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, windows = windows)
-             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', windows = windows)
+             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, boundaries = boundaries)
+             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', boundaries = boundaries)
              rown[rown == '_'] <- make.unique(rown[rown == '_'])
              rownames(x) <- rown
          } 
@@ -171,7 +171,7 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, window
          x
 }
 #' @export
-lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = list()) {
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) {
           if (length(n) > 1L) .stop('lag cannot accept multiple rotation values for a vector argument.')
           if (length(x) == 0L || n == 0) return(x)
   
@@ -189,11 +189,11 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = list()) {
           }
             
           
-          windows <- checkWindows(x, windows)
+          boundaries <- checkWindows(x, boundaries)
           
-          if (length(windows)) {
+          if (length(boundaries)) {
               
-              boundaries <- Reduce('|', lapply(windows, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
+              boundaries <- Reduce('|', lapply(boundaries, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
               output[boundaries] <- fill
           }
 
@@ -201,7 +201,7 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, windows = list()) {
 }
 
 #' @export
-lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = list()) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
     if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
     
     
@@ -211,7 +211,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, windows = 
 
                     rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = windows())))
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, windows = boundaries())))
           }
          if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
          if (dim(x)[margin] == 0L) return(x)
