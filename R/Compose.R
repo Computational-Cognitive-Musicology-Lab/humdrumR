@@ -431,22 +431,24 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
   
   if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
+  if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   
-  
-  regexApply <- regexApply && is.character(x)
-  
   dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc))]
+  
+  
+
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
   result <- vectorNA(length(x), outputClass)
   exclusives <- c()
   
+  regexApply <- regexApply && is.character(x)
   if (nrow(dispatchDF)) {
     for (i in 1:nrow(dispatchDF)) {
       hits <- Exclusive %in% dispatchDF$Exclusives[[i]]
       
-      result[hits] <- if (regexApply) {
+      result[hits] <- if (regexApply && !is.na(dispatchDF)) {
         REapply(x[hits], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, ..., outputClass = outputClass) 
         } else {
         args <- c(list(x[hits]), list(...))
@@ -574,7 +576,13 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
 
   dispatchDF <- makeDispatchDF(...)
                        
-  dispatcher <- if (all(is.na(dispatchDF$regex))) quote(exclusiveDispatch) else quote(humdrumDispatch)
+  if (all(is.na(dispatchDF$regex))) {
+    regexApply <- FALSE
+    dispatcher <-  quote(exclusiveDispatch) 
+  } else {
+    regexApply <- TRUE
+    dispatcher <-  quote(humdrumDispatch)
+  }
   
   
   # Assemble the new function's arguments
@@ -596,7 +604,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   
   body <- rlang::expr({
     args <- list(x = x, dispatchDF = dispatchDF, Exclusive = Exclusive,
-                 multiDispatch = multiDispatch,
+                 multiDispatch = multiDispatch, regexApply = !!regexApply,
                  outputClass = !!outputClass, funcName = !!funcName,
                  ...)
     # dispatchArgs <- list(!!!dispatchArgs)
