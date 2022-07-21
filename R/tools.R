@@ -1031,7 +1031,13 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
   if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
+  
   boundaries <- checkWindows(x, boundaries)
+  
+  if (length(boundaries)) {
+    segments <- segments(do.call('changes', c(boundaries, list(...))))
+    return(unname(tapply_inplace(x, segments, sigma.default, lag = lag, skip = skip, init = init)))
+  } 
   
   if (lag < 0) {
     x <- -x
@@ -1054,8 +1060,11 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(
     cumsum(x)
   }
   
+
   
   result
+  
+  
   
   
 }
