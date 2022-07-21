@@ -1,4 +1,5 @@
 .*
+tests/testthat/Rplots.pdf
 *tmp
 *.tmp.*
 *docx

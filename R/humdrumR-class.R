@@ -508,6 +508,7 @@ orderHumtab <- function(humtab) {
 #' @aliases humdrumRS4
 #' @export
 setClass('humdrumR', 
+         contains = 'function',
          slots = c(Humtable = 'data.table',
                    Files = 'list',
                    Fields = 'list',
@@ -532,6 +533,9 @@ setMethod('initialize', 'humdrumR',
                                                   'Bar', 'DoubleBar', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
+            .Object@.Data <- function(..., within = TRUE) {
+                if (within) within(.Object, ...) else (with(.Object, ...))
+            }
             
             .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldcategories

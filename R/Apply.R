@@ -808,6 +808,7 @@ activateQuo <- function(funcQuosure, active) {
 fieldsArgsQuo <- function(funcQuosure, fields) {
   funcQuosure <- exclusiveArgsQuo(funcQuosure, fields)
   funcQuosure <- keyedArgsQuo(funcQuosure, fields)
+  funcQuosure <- boundedArgsQuo(funcQuosure)
   funcQuosure
 }
 
@@ -839,6 +840,20 @@ keyedArgsQuo <- function(funcQuosure, fields) {
   modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
 
+
+boundedArgsQuo <- function(funcQuosure) {
+  # functions that require a Key argument
+  
+  predicate <- \(Head) Head %in% boundedFunctions
+  
+  do <- \(exprA) {
+    if (!'boundaries' %in% names(exprA$Args)) exprA$Args$boundaries <- quote(list(File, Spine, Path))
+    exprA
+  }
+  
+  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+}
+
 #### Lag/Led vectors
 
 laggedQuo <- function(funcQuosure) {
@@ -848,7 +863,7 @@ laggedQuo <- function(funcQuosure) {
   do <- \(exprA) {
     
     args <- exprA$Args
-    if (!'windows' %in% .names(args)) args$windows <- expr(list(File, Spine))
+    if (!'boundaries' %in% .names(args)) args$boundaries <- expr(list(File, Spine, Path))
     
     names(args)[names(args) == 'N'] <- 'n'
     n <- rlang::eval_tidy(args$n)
