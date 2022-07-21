@@ -448,7 +448,7 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
     for (i in 1:nrow(dispatchDF)) {
       hits <- Exclusive %in% dispatchDF$Exclusives[[i]]
       
-      result[hits] <- if (regexApply && !is.na(dispatchDF)) {
+      result[hits] <- if (regexApply && !is.na(dispatchDF$regex[[i]])) {
         REapply(x[hits], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, ..., outputClass = outputClass) 
         } else {
         args <- c(list(x[hits]), list(...))
