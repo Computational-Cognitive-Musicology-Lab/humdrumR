@@ -1550,10 +1550,9 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
     fromFields <- fieldMatch(humdrumR, fromFields, 'unfoldStops', 'fromFields')
     
     #
-    humtab <- getHumtab(humdrumR)
+    humtab <- getHumtab(humdrumR, 'D')
     
-    
-    multistopRecords <- as.data.table(humtab[, which(apply(table(Record,Stop,File), c(1,3), sum) > 1, arr.ind = TRUE)])
+    multistopRecords <- humtab[ , list(Record = unique(Record)[rowSums(table(Record,Stop)) > 1]), by = File]
     multiHumtab <- humtab[multistopRecords, on = c('Record', 'File')]
     fromFields <- fromFields[multiHumtab[, sapply(fromFields, \(field) any(is.na(get(field))))]]
     for (field in fromFields) {
@@ -1562,7 +1561,7 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
     }
     humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'File')]))
     humtab <- update_Null(humtab, field = fromFields)
-    putHumtab(humdrumR, overwriteEmpty = TRUE) <- humtab
+    putHumtab(humdrumR, overwriteEmpty = FALSE) <- humtab
     humdrumR
 }
 
@@ -2367,7 +2366,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
     active <- as.character(evalActive(humdrumR@Active, humtab,  
                                       forceVector = TRUE, nullAs = "."))
     humtab$Null[humtab$Type == 'P'] <- FALSE
-    humtab$Filter[humtab$Type == 'P'] <- FALSE
+    humtab$Filter[humtab$Type == 'P' | is.na(humtab$Filter)] <- FALSE
 
     ## fill in null data
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")

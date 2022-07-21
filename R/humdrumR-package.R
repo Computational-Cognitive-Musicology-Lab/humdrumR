@@ -50,7 +50,7 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-exclusiveFunctions <- c()
+exclusiveFunctions <- c('mint')
 keyedFunctions <- c()
 boundedFunctions <- c('mint', 'delta', 'sigma', 'lag')
 

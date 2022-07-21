@@ -3360,6 +3360,7 @@ mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket =
   
 }
 
+
 mintClass <- function(x, directed = TRUE, skips = TRUE) {
   int <- interval(x, generic = TRUE)
   int <- as.integer(int)
