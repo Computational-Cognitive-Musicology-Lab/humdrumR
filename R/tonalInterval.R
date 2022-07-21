@@ -3332,7 +3332,7 @@ mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket =
                  classify = FALSE,
                  parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
-  lagged <- lag(x, lag, windows = boundaries)
+  lagged <- lag(x, lag, boundaries = boundaries)
   
   c('args', 'parseArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs)
   
