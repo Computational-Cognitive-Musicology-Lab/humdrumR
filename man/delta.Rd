@@ -198,6 +198,9 @@ Alternatively, we could specify the necessary constant as the \code{init} argume
 }
 
 so the \code{init} arguments of the two functions are complementary.
+
+Currently, the \code{right} argument of \code{delta} has no complement in \code{sigma}, so invertability
+only holds true if \code{right = FALSE} (the default).
 }
 
 \seealso{

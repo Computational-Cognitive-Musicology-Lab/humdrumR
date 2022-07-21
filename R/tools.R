@@ -940,6 +940,9 @@ checkWindows <- function(x, windows) {
 #' 
 #' so the `init` arguments of the two functions are complementary.
 #'
+#' Currently, the `right` argument of `delta` has no complement in `sigma`, so invertability
+#' only holds true if `right = FALSE` (the default).
+#'
 #' @section Greater lags:
 #' 
 #' The behavior of `sigma` when `abs(lag) > 1` is easiest to understand as the inverse of the 
@@ -1019,16 +1022,15 @@ checkWindows <- function(x, windows) {
 #' 
 #' @seealso This function's inverse is [delta()]. 
 #' @export
-sigma <- function(x, lag, skip = is.na, init, right, boundaries = list(), ...) UseMethod('sigma')
+sigma <- function(x, lag, skip = is.na, init, boundaries = list(), ...) UseMethod('sigma')
 #' @rdname sigma
 #' @export
-sigma.default <- function(x, lag = 1, skip = is.na, init = 0, right = FALSE, boundaries = list(), ...) {
+sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(), ...) {
   if (is.null(x)) return(NULL)
   checkNumeric(x, 'x', 'sigma')
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
   if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
-  checkTF(right, 'right', 'sigma')
   boundaries <- checkWindows(x, boundaries)
   
   if (lag < 0) {

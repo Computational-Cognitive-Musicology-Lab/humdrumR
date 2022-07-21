@@ -6,17 +6,9 @@
 \alias{sigma.matrix}
 \title{Cumulative sum of numeric vector}
 \usage{
-sigma(x, lag, skip = is.na, init, right, boundaries = list(), ...)
+sigma(x, lag, skip = is.na, init, boundaries = list(), ...)
 
-\method{sigma}{default}(
-  x,
-  lag = 1,
-  skip = is.na,
-  init = 0,
-  right = FALSE,
-  boundaries = list(),
-  ...
-)
+\method{sigma}{default}(x, lag = 1, skip = is.na, init = 0, boundaries = list(), ...)
 
 \method{sigma}{matrix}(x, margin = 2L, ...)
 }
@@ -33,11 +25,11 @@ The skipped values are returned as is in the output vector.}
 \item{init}{(Atomic value of same class as \code{x}, with \code{length(init) <= lag}.) \code{NA} values at the beginning
 (or end of \code{right == TRUE}) are filled with these values \emph{before} summing.}
 
-\item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
-By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
-
 \item{boundaries}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
 across groups indicated by the \code{boundaries} vector(s).}
+
+\item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
+By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
 }
 \description{
 Calculate sequential cummulative sum of values in numeric vectors.
@@ -99,6 +91,9 @@ Alternatively, we could specify the necessary constant as the \code{init} argume
 }
 
 so the \code{init} arguments of the two functions are complementary.
+
+Currently, the \code{right} argument of \code{delta} has no complement in \code{sigma}, so invertability
+only holds true if \code{right = FALSE} (the default).
 }
 
 \section{Greater lags}{

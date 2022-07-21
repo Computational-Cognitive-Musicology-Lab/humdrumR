@@ -1,7 +1,7 @@
 
 test_that('Delta and sigma work right', {
   
-  
+  # delta tests
   
   for (x in list(rep(NA_real_, 10),
                  sample(c(NA,1:10), 100,rep=T),
@@ -28,9 +28,6 @@ test_that('Delta and sigma work right', {
   }
   
 
-  
- 
-  
   ### from docs
   
   
