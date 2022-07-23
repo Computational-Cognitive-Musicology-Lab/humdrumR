@@ -175,7 +175,7 @@ of spine paths.
 }
 \item \code{Filter} :: \code{logical}
 \itemize{
-\item Has this record/token been \link[=filterHumdrum]{filtered out}?
+\item Has this record/token been \link[=subset.humdrumR]{filtered out}?
 }
 }
 }

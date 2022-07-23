@@ -23,7 +23,7 @@ The package \code{humdrumR} has XXX main components:
 the \link[=humTable]{humdrum table}.
 \item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
 \code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
-\item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
+\item To filter and "index" \code{humdrumR} data, we have the \code{\link[=subset.humdrumR]{subset.humdrumR()}} function, which can also be called in a variety of
 short hands using R's standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
 \item To manipulate and modify \code{humdrumR} data, we have the \link[=with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
 \item To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,

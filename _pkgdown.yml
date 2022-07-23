@@ -31,7 +31,8 @@ reference:
 - subtitle: "Manipulating Humdrum Data"
   contents:
   - withinHumdrum
-  - filterHumdrum
+  - subset.humdrumR
+  - indexHumdrum
   - humWindows
   - interpolateArguments
   - humFormulae

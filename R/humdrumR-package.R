@@ -16,7 +16,7 @@
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
-#' + To filter and "index" `humdrumR` data, we have the [filterHumdrum] function, which can also be called in a variety of 
+#' + To filter and "index" `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called in a variety of 
 #'   short hands using R's standard [indexing operators][base::Extract]: `[]` and `[[]]`.
 #' + To manipulate and modify `humdrumR` data, we have the [with(in)Humdrum][humdrumR::with-in-Humdrum] and [humApply] functions.
 #' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 

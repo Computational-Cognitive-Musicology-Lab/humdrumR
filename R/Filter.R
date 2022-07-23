@@ -4,24 +4,24 @@
 
 #' Filter humdrum data
 #' 
-#' `filterHumdrum` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass]
+#' `subset.humdrumR` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass]
 #' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
-#' uses calls to `filterHumdrum`!
+#' uses calls to `subset.humdrumR`!
 #' 
-#' `filterHumdrum` is used in a similar manner as [withinHumdrum],
+#' `subset.humdrumR` is used in a similar manner as [withinHumdrum],
 #' taking any number of "do expressions" (or functions) as arguments.
 #' (In fact, do expressions/function arguments are passed directly to an internal call to `withinHumdrum`.)
-#' The only difference is that the expressions/functions fed to `filterHumdrum` 
+#' The only difference is that the expressions/functions fed to `subset.humdrumR` 
 #' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
 #' which return a logical (`TRUE`/`FALSE`) vector.
 #' The returned vector must also be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
 #' (You can use a `dofill~` expression if you want to "expand" shorter outputs for filtering pusposes.)
-#' `filterHumdrum` updates the humdrum table's `Filter` field using an logical OR (`|`) between the existing `Filter` field and the negation of your predicate: `Filter | !Predicate`.
+#' `subset.humdrumR` updates the humdrum table's `Filter` field using an logical OR (`|`) between the existing `Filter` field and the negation of your predicate: `Filter | !Predicate`.
 #' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`: when you print a filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`), and
 #' any calls to [withinHumdrum][with(in)Humdrum] will ignore the filtered data.
 #' 
-#' By default, `filterHumdrum` completely removes any files in the corpus where *all* the data records are filtered out.
+#' By default, `subset.humdrumR` completely removes any files in the corpus where *all* the data records are filtered out.
 #' However, you can stop this by specifying the `removeEmptyFiles` argumet as `FALSE`.
 #' If you *want* to remove empty files, spines, or records, you should call `removeEmptyFiles`, `removeEmptySpines`, or `removeEmptyRecords`.
 #' 
@@ -165,7 +165,7 @@
 #' `formulae` is the most powerful, flexible indexing option.
 #' Either `[`single`]` or `[[`double`]]` brackets will accept
 #' a (single) formula. The formula are fed directly as arguments to 
-#' `filterHumdrum`---as such, they music evaluate to a logical vector of the same 
+#' `subset.humdrumR`---as such, they music evaluate to a logical vector of the same 
 #' length as the input.
 #' 
 #' In the case of `[`single-bracket`]` indexing, only one `formula`
@@ -197,42 +197,8 @@
 #' are retained, regardless of piece/spine/record.
 #' Pieces, spines, or records with no `TRUE` values
 #' are simply dropped.
-#' Using the `k` argument is exactly the same a "plain" call to `filterHumdrum`.
+#' Using the `k` argument is exactly the same a "plain" call to `subset.humdrumR`.
 #' 
-#' @export
-filterHumdrum <- function(humdrumR, ...) { 
-    checkhumdrumR(humdrumR, 'filterHumdrum')
-    
-    
-    oldActive <- getActive(humdrumR)
-    oldActiveFields <- activeFields(humdrumR)
-    
-    humdrumR <- within.humdrumR(humdrumR, ...)
-
-    humtab <- getHumtab(humdrumR, 'GLIMDd')
-    
-    filterResult <- tail(resultFields(humtab), 1L)
-    removeFields(humdrumR) <- filterResult
-    
-    colnames(humtab)[colnames(humtab) == filterResult] <- '__TmpFilter__'
-    
-    if (humtab[ , class(`__TmpFilter__`)] != 'logical') stop('In call to filterHumdrum, the do-expression must evaluate to a logical vector.')
-    
-    humtab[ , `__TmpFilter__` := `__TmpFilter__` | is.na(`__TmpFilter__`)]
-    humtab[ , Filter := Filter | !`__TmpFilter__`]
-    humtab[ , `__TmpFilter__` := NULL]
-    
-    humtab <- update_Null(humtab, oldActiveFields)
-    putHumtab(humdrumR) <- humtab
-    
-    humdrumR <- setActive(humdrumR, oldActive)
-
-    
-    humdrumR
-    
-}
-
-
 #' @export
 subset.humdrumR <- function(x, ...) {
   
@@ -272,8 +238,8 @@ removeNull <- function(hum, by, nulltypes, ...) {
 removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
-  humtab <- getHumtab(hum, 'GLIMDd')
-  putHumtab(hum, overwriteEmpty = "GLIMDdP") <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
+  humtab <- getHumtab(hum)
+  putHumtab(hum) <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
   
   hum
  
@@ -294,26 +260,26 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
 
 
 #' @export
-#' @rdname filterHumdrum
+#' @rdname subset.humdrumR
 removeEmptyFiles <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
   renumberFiles(removeNull(humdrumR,'File', 'GLIMd'))
 }
 #' @export
-#' @rdname filterHumdrum
+#' @rdname subset.humdrumR
 removeEmptySpines <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   removeNull(humdrumR,  c('File', 'Spine'), 'GLIMd')
 }
 #' @export
-#' @rdname filterHumdrum
+#' @rdname subset.humdrumR
 removeEmptyRecords <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyRecords')
   removeNull(humdrumR, c('File', 'Record'), 'd')
 }
 
 #' @export
-#' @rdname filterHumdrum
+#' @rdname subset.humdrumR
 removeEmptyStops <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyStops')
   removeNull(humdrumR, c('File', 'Stop'), 'd')
@@ -342,9 +308,17 @@ numericIndexCheck <- function(i) {
 
 ## Single brackets [] ----
 
+#' Indexing humdrumR objects
+#'
+#' Instead of using [subset.humdrumR()] to filter [humdrumR data objects][humdrumRS4],
+#' R's built-in indexing operators, `[]` (single brakcets) and `[[]]` (double brackets) can
+#' be used as short cuts for common calls to [subset.humdrumR()].
+#' @name indexHumdrum
+NULL
 
 
-#' @rdname filterHumdrum
+
+#' @rdname indexHumdrum
 #' @usage humdata[] # returns unchanged
 #' @export
 setMethod('[',
@@ -353,7 +327,7 @@ setMethod('[',
 
 ### numeric ----
 
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata[x:y]
 #' @export
 setMethod('[',
@@ -362,13 +336,13 @@ setMethod('[',
               i <- numericIndexCheck(i)
               
               if (removeEmpty) {
-                humtab <- getHumtab(x, 'GLIMDdP')
+                humtab <- getHumtab(x)
                 
                 targets <- humtab[ , sort(unique(File))[i]]
                 humtab <- humtab[File %in% targets]
                
                 
-                putHumtab(x, overwriteEmpty = "GLIMDdP") <- humtab
+                putHumtab(x) <- humtab
               } else {
                 x <- subset(x, File %in% sort(unique(File))[!!i])
               }
@@ -382,7 +356,7 @@ setMethod('[',
 
 ### character ----
 
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata['regex']
 #' @export
 setMethod('[',
@@ -395,32 +369,15 @@ setMethod('[',
             x
           })
 
-### formula ----
 
 
-
-#' @rdname filterHumdrum
-#' @usage humdata[~expression]
-#' @export
-setMethod('[',
-          signature = c(x = 'humdrumR', i = 'formula'),
-          function(x, i, removeEmpty = TRUE) {
-              i <- wrapInCall('any', i)
-              rlang::f_lhs(i) <- quote(dofill)
-              
-              x <- filterHumdrum(x, i, by ~ File, recordtypes ~ "D")
-              
-              if (removeEmpty) x <- removeEmptyFiles(x)
-              
-              x
-          })
 
 ## Double brackets [[]] ----
     
 
 ### numeric ----
 
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata[[x:y]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'), 
@@ -428,24 +385,22 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             i <- numericIndexCheck(i)    
             
             if (removeEmpty) {
-              humtab <- getHumtab(x, 'GLIMDdP')
+              humtab <- getHumtab(x)
               
-              humtab <- humtab[Record %in% i | Token == '*-' | grepl('\\*\\*', Token)]
+              humtab <- humtab[Record %in% i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
               
-              putHumtab(x, overwriteEmpty = c()) <- humtab
+              putHumtab(x) <- humtab
             } else {
-              form <- do ~ Record %in% sort(unique(Record))[i]
-              x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+              x <- subset(x, Record %in% !!i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), 
+                          recordtypes = "GLIMDdP")
             }
-          
-            
             
             x
 
           })
 
 
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata[[ , x:y]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'), 
@@ -453,15 +408,14 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
               j <- numericIndexCheck(j)    
               
               if (removeEmpty) {
-                humtab <- getHumtab(x, 'GLIMDdP')
+                humtab <- getHumtab(x)
                 humtab <- humtab[is.na(Spine) | Spine %in% j]
                 
-                putHumtab(x, overwriteEmpty = c()) <- humtab
+                putHumtab(x) <- renumberSpines.data.table(humtab)
               } else {
                 
-                form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
                 
-                x <- filterHumdrum(x, form, recordtypes ~ "D")
+                x <- subset(x, Spine %iN% sort(unique(Spine))[j] | is.na(Spine), recordtypes = "D")
               }
               
               x
@@ -473,44 +427,24 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 
 ### character ----
 
-# grepingind <- function(humdrumR, ind, func) {
-#           Dd <- getHumtab(humdrumR, dataTypes = c('D', 'd'))
-#           Dd[ , .indhits := grepl(pattern = ind, evalActive(humdrumR, dataTypes = c('D', 'd')))]
-#           
-#           Dd <- Dd[ , func(.SD), by = File]
-#           putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") < Dd[ , '.indhits' :=  NULL]
-#           humdrumR
-# }
 
 
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata[['regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    form <- do ~ Record %in% unique(Record[. %grepl% i])
-    x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
+    x <- subset(x, Record %in% unique(Record[. %grepl% !!i]), by = File, recordtypes = "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
     x
 })
 
-# setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
-#           function(x, i) {
-#             # gets any record which contains match
-#             grepingind(x, i,  \(sd) { 
-#               recn <- unique(sd$Record[sd$.indhits])
-#               sd[Record %in% recn]
-#             })
-#           })
 
-
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @name humdrumR-class
-#' @rdname humdrumRclass
+#' @rdname indexHumdrum
 #' @usage humdata[[ , 'regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
@@ -522,16 +456,19 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
               j <- gsub('^\\*\\**', '', j)
               hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = File]$V1
               humtab <- humtab[hits == TRUE]
-              putHumtab(x, overwriteEmpty = "GLIMDdP") <- humtab
+              putHumtab(x) <- renumberSpines.data.table(humtab)
               
             } else {
-              form <- if (all(grepl('^\\*\\*', j))) {
+              form <- do ~ Spine %in% unique(Spine[. %grepl% j]) | is.na(Spine)
+              
+              if (all(grepl('^\\*\\*', j))) {
+                
                 j <- gsub('^\\*\\**', '', j)
-                do ~ Spine %in% unique(Spine[Exclusive %in% j])
-              } else {
-                do ~ Spine %in% unique(Spine[. %grepl% j])
-              }
-              x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
+                form <- substituteName(form, list(. = quote(Exclusive)))
+                
+              } 
+              
+              x <- subset(x, form, by ~ File, recordtypes ~ "D")
               
               if (removeEmpty) x <- removeEmptySpines(x)
             }
@@ -546,76 +483,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
 
 
 
-#' @rdname humdrumRclass
-#' @usage humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
-#' @export
-setMethod('[[',
-          signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
-          function(x, i, j, k, ..., removeEmpty = FALSE) {
-              if (missing(k)) return(x)
-              
-              if (!(rlang::is_formula(k) || is.character(k)))  {
-                  stop('When indexing humdrumR objects using [[]], third argument (k) must be a formula or character string.')
-              }
-              
-              if (is.character(k)) {
-                  x <- filterHumdrum(x, do ~ . %grepl% k, recordtypes ~ "D")
-              }
-              if (rlang::is_formula(k)) {
-                  # x <- do.call('filterHumdrum', c(x, k,  recordtypes ~ "D", list(...)))
-                  x <- filterHumdrum(x, k, recordtypes ~ 'D', ...)
-              }
-            
-              if (removeEmpty) x <- removeEmptyFiles(x)
-            
-              x
-              
-          })
 
 
 
 
-
-### formula ----
-
-
-
-#' @rdname humdrumRclass
-#' @usage humdata[[~expression]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'formula', j = 'missing'), 
-          function(x, i, removeEmpty = FALSE) {
-            
-                    i <- rlang::as_quosure(i)
-                    form <- rlang::new_formula(quote(dofill), rlang::expr(Record %in% unique(Record[!!i])))
-                    
-                    x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
-                    
-                    if (removeEmpty) x <- removeEmptyRecords(x)
-                    
-                    x
-          })
-
-#' @rdname humdrumRclass
-#' @usage humdata[[ , ~expression]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'formula'), 
-          function(x, j, removeEmpty = TRUE) {
-            j <- rlang::as_quosure(j)
-            
-            form <- rlang::new_formula(quote(dofill), rlang::expr(Spine %in% unique(Spine[!!j])))
-            
-            x <- filterHumdrum(x, form, by ~ File, recordtypes ~ "D")
-            
-            if (removeEmpty) x <- removeEmptySpines(x)
-            
-            x
-          })
-
-
-
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @rdname filterHumdrum
+#' @rdname indexHumdrum
 #' @usage humdata[[x:y, l:m]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
