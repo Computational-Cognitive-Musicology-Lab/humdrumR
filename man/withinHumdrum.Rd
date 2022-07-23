@@ -4,14 +4,11 @@
 \alias{withinHumdrum}
 \alias{with.humdrumR}
 \alias{within.humdrumR}
-\alias{In}
 \title{with(in)Humdrum}
 \usage{
 \method{with}{humdrumR}(data, ..., drop = TRUE, variables = list())
 
 \method{within}{humdrumR}(data, ..., variables = list())
-
-In(data, ..., variables = list())
 }
 \arguments{
 \item{...}{Additional formulas/functions, or lists of formulas/functions.

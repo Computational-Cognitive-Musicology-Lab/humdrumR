@@ -233,7 +233,33 @@ filterHumdrum <- function(humdrumR, ...) {
 }
 
 
-
+#' @export
+subset.humdrumR <- function(x, ...) {
+  
+  
+  oldActive <- getActive(x)
+  oldActiveFields <- activeFields(x)
+  
+  x$.TmpFilter. <- within.humdrumR(x, ...)
+  
+  humtab <- getHumtab(x)
+  
+  if (humtab[ , class(.TmpFilter.)] != 'logical') .stop('In call to subset.humdrumR, the do-expression must evaluate to a logical vector.')
+ 
+  humtab[ , .TmpFilter. := .TmpFilter. | is.na(.TmpFilter.)] 
+  # NA values come in from record types we didn't use, which should NOT be filtered
+  humtab[ , Filter := Filter | !.TmpFilter.]
+  humtab[ , .TmpFilter. := NULL]
+  
+  humtab <- update_Null.data.table(humtab, oldActiveFields)
+  putHumtab(x) <- humtab
+  
+  removeFields(x) <- '.TmpFilter.'
+  x <- setActive(x, oldActive)
+  
+  x
+  
+}
 
 ## Null indexing ----
 
@@ -243,56 +269,54 @@ filterHumdrum <- function(humdrumR, ...) {
 removeNull <- function(hum, by, nulltypes, ...) {
   UseMethod("removeNull")
 }
-removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', recordTypes = 'GLIMDd', ...) {
-  recordTypes <- checkTypes(recordTypes, 'removeNull', 'recordTypes')
+removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
-  humtab <- getHumtab(hum, recordTypes)
-  putHumtab(hum, overwriteEmpty = TRUE) <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
+  humtab <- getHumtab(hum, 'GLIMDd')
+  putHumtab(hum, overwriteEmpty = "GLIMDdP") <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
   
   hum
  
 }
-removeNull.data.table <- function(hum, by = 'File', nullTypes = 'd', ...) {
+removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
   targets <- hum[ , by, with = FALSE]
   targets <- unique(targets[!hum$Type %in% nullTypes])
   
   hum <- hum[targets, on = by]
-  renumberSpines(hum)
+  
+  if ('File' %in% by) hum <- renumberFiles.data.table(hum)
+  if ('Spine' %in% by) hum <- renumberSpines(hum)
+  hum
 }
 
 
 
 #' @export
 #' @rdname filterHumdrum
-removeEmptyFiles <- function(humdrumR, fillfromTypes = 'D') {
+removeEmptyFiles <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
-  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyFiles', 'fillfromTypes')
-  removeNull(humdrumR,'File', 'GLIMDd', 'GLIMDd')
+  renumberFiles(removeNull(humdrumR,'File', 'GLIMd'))
 }
 #' @export
 #' @rdname filterHumdrum
-removeEmptySpines <- function(humdrumR, fillfromTypes = 'D') {
+removeEmptySpines <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
-  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptySpines', 'fillfromTypes')
-  removeNull(humdrumR,  c('File', 'Spine'), 'LIMDd', 'GLIMDd')
+  removeNull(humdrumR,  c('File', 'Spine'), 'GLIMd')
 }
 #' @export
 #' @rdname filterHumdrum
-removeEmptyRecords <- function(humdrumR, fillfromTypes = 'D') {
+removeEmptyRecords <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyRecords')
-  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyRecords', 'fillfromTypes')
-  removeNull(humdrumR, c('File', 'Record'), 'GLIMDd', 'GLIMDd')
+  removeNull(humdrumR, c('File', 'Record'), 'd')
 }
 
 #' @export
 #' @rdname filterHumdrum
-removeEmptyStops <- function(humdrumR, fillfromTypes = 'D') {
+removeEmptyStops <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyStops')
-  fillfromTypes <- checkTypes(fillfromTypes, 'removeEmptyStops', 'fillfromTypes')
-  removeNull(humdrumR, c('File', 'Stop'), 'd', 'Dd')
+  removeNull(humdrumR, c('File', 'Stop'), 'd')
 }
 
 
@@ -344,10 +368,9 @@ setMethod('[',
                 humtab <- humtab[File %in% targets]
                
                 
-                putHumtab(x, overwriteEmpty = TRUE) <- humtab
+                putHumtab(x, overwriteEmpty = "GLIMDdP") <- humtab
               } else {
-                form <- do ~ File %in% sort(unique(File))[i]
-                x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
+                x <- subset(x, File %in% sort(unique(File))[!!i])
               }
              
               
@@ -365,7 +388,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- filterHumdrum(x, dofill ~ any(. %grepl% i),  by ~ File, recordtypes ~ "D")
+            x <- subset(x, dofill ~ any(. %grepl% !!i),  by = File)
             
             if (removeEmpty) x <- removeEmptyFiles(x)
             
@@ -409,7 +432,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
               
               humtab <- humtab[Record %in% i | Token == '*-' | grepl('\\*\\*', Token)]
               
-              putHumtab(x, overwriteEmpty = FALSE) <- humtab
+              putHumtab(x, overwriteEmpty = c()) <- humtab
             } else {
               form <- do ~ Record %in% sort(unique(Record))[i]
               x <- filterHumdrum(x, form, recordtypes ~ "GLIMDdP")
@@ -433,7 +456,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
                 humtab <- getHumtab(x, 'GLIMDdP')
                 humtab <- humtab[is.na(Spine) | Spine %in% j]
                 
-                putHumtab(x, overwriteEmpty = FALSE) <- humtab
+                putHumtab(x, overwriteEmpty = c()) <- humtab
               } else {
                 
                 form <- do ~ Spine %in% sort(unique(Spine))[j] | is.na(Spine)
@@ -455,7 +478,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 #           Dd[ , .indhits := grepl(pattern = ind, evalActive(humdrumR, dataTypes = c('D', 'd')))]
 #           
 #           Dd <- Dd[ , func(.SD), by = File]
-#           putHumtab(humdrumR, overwriteEmpty = TRUE) < Dd[ , '.indhits' :=  NULL]
+#           putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") < Dd[ , '.indhits' :=  NULL]
 #           humdrumR
 # }
 
@@ -499,7 +522,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
               j <- gsub('^\\*\\**', '', j)
               hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = File]$V1
               humtab <- humtab[hits == TRUE]
-              putHumtab(x, overwriteEmpty = TRUE) <- humtab
+              putHumtab(x, overwriteEmpty = "GLIMDdP") <- humtab
               
             } else {
               form <- if (all(grepl('^\\*\\*', j))) {

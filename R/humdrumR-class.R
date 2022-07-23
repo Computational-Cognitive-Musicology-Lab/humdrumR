@@ -891,11 +891,22 @@ is.ragged <- function(humdrumR) {
     
 }
 
+renumberFiles <- function(hum) UseMethod('renumberFiles')
+renumberFiles.humdrumR <- function(hum) {
+    humtab <- getHumtab(hum)
+    putHumtab(hum) <- renumberSpines.data.table(humtab)
+    hum
+}
+renumberFiles.data.table <- function(hum) {
+    hum[ , File := match(File, sort(unique(File)))]
+    hum
+}
+
 renumberSpines <- function(hum) UseMethod('renumberSpines')
 renumberSpines.humdrumR <- function(hum) {
-    humtab <- getHumtab(humdrumR, 'GLIMDdP')
-    putHumtab(humdrumR, overwriteEmpty = FALSE) <- renumberSpines.data.table(humtab)
-    humdrumR
+    humtab <- getHumtab(hum, 'GLIMDdP')
+    putHumtab(hum, overwriteEmpty = c()) <- renumberSpines.data.table(humtab)
+    hum
     
 }
 renumberSpines.data.table <- function(hum) {
@@ -960,7 +971,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     
     orderHumtab(humtabPadded)
     
-    putHumtab(humdrumR, overwriteEmpty = TRUE) <- humtabPadded
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- humtabPadded
     humdrumR
     
 }
@@ -1077,7 +1088,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     if (anyPaths(humdrumR) && !padPaths) collapsedhumtab <- rbindlist(list(collapsedhumtab,
                                                                            getHumtab(humdrumR, 'P')), use.names = TRUE,
                                                                       fill = TRUE) 
-    putHumtab(humdrumR, overwriteEmpty = TRUE) <- collapsedhumtab
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- collapsedhumtab
     humdrumR
 }
 
@@ -1332,7 +1343,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     humtab <- removeNull(humtab, by = c('File', what), nullTypes = 'LIMd')
     humtab <- update_Null(humtab, field = newfields)
     
-    putHumtab(humdrumR, overwriteEmpty = FALSE) <- orderHumtab(humtab)
+    putHumtab(humdrumR, overwriteEmpty = c()) <- orderHumtab(humtab)
     
     addFields(humdrumR) <- newfields
     
@@ -1561,7 +1572,7 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
     }
     humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'File')]))
     humtab <- update_Null(humtab, field = fromFields)
-    putHumtab(humdrumR, overwriteEmpty = FALSE) <- humtab
+    putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
     humdrumR
 }
 
@@ -1620,7 +1631,7 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')
 }
 
 
-`putHumtab<-` <- function(humdrumR, value, overwriteEmpty = FALSE) {
+`putHumtab<-` <- function(humdrumR, value, overwriteEmpty = c()) {
           # adds humtab into humdrumR
           # Drop determines whether record dataTypes that are 
           # absent from value are left unchanged (drop = FALSE)
@@ -1628,16 +1639,17 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')
           # If drop indicates a record type (i.e., GLIM) those types are dropped only
           if (!data.table::is.data.table(value)) .stop("putHumtab()<- requires a data.table value.")
     
+    
+          if (length(overwriteEmpty)) {
+              if (overwriteEmpty == 'GLIMDdP') {
+                  humdrumR@Humtable <- value
+                 return(humdrumR)
+                }
+                  overwriteEmpty <- checkTypes(overwriteEmpty, 'putHumtab<-')
+              
+          }
           
           overwriteTypes <- unique(value$Type)
-      
-          overwriteEmpty <- if (is.character(overwriteEmpty)) {
-              checkTypes(overwriteEmpty, 'putHumtab')
-          } else {
-              if (overwriteEmpty) {
-                  c('G', 'L', 'I', 'M', 'D', 'd', 'P')
-              }
-          }
           overwriteTypes <- union(overwriteTypes, overwriteEmpty)
     
           humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], 
@@ -1661,7 +1673,7 @@ update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) 
     humtab <- getHumtab(hum, 'GLIMDd')
     
     humtab <- update_humdrumR.data.table(humtab, Exclusive, Null, ...)
-    putHumtab(hum, overwriteEmpty = FALSE) <- humtab
+    putHumtab(hum, overwriteEmpty = c()) <- humtab
     hum
 }
 update_humdrumR.data.table <- function(hum,Exclusive = TRUE, Null = TRUE, ...) {
@@ -1704,7 +1716,7 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, overwriteEmpty = TRUE) <- update_Null.data.table(humtab, field = field)
+    putHumtab(hum, overwriteEmpty = "GLIMDdP") <- update_Null.data.table(humtab, field = field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
@@ -2084,7 +2096,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
                    .SD, colnames(humtab) %in% active)]
          
  
- putHumtab(humdrumR, overwriteEmpty = FALSE) <- humtab
+ putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
  humdrumR
 }
 
@@ -2276,18 +2288,18 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     results <- resultFields(humtab)
                     removeFields(value) <- results
                     
+                    
                     if (length(results) == 0L) results <- activeFields(value)
    
                     results <- tail(results, n = length(i))
-                    
                     if (any(i %in% colnames(humtab))) humtab[ , eval(i[i %in% colnames(humtab)]) := NULL]
                     
                     colnames(humtab)[colnames(humtab) %in% results] <- i
                     
                     if (any(grepl('Result', colnames(humtab)))) humtab[ , eval(grep('Result', colnames(humtab), value = TRUE)) := NULL]
                     
-                    putHumtab(value, overwriteEmpty = FALSE) <- humtab
                     humtab <- update_humdrumR(humtab, field = i)
+                    putHumtab(value, overwriteEmpty = "GLIMDdP") <- humtab
                     
                     addFields(value) <- i
                     

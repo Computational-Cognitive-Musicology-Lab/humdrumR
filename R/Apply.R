@@ -329,7 +329,9 @@ with.humdrumR <- function(data, ...,
 #' @export
 within.humdrumR <- function(data, ..., variables = list()) {
   checkhumdrumR(data, 'within.humdrumR')
-  list2env(withHumdrum(data, ..., variables = variables, withFunc = 'within.humdrumR'), envir = environment())
+  list2env(withHumdrum(data, ..., variables = variables, 
+                       withFunc = 'within.humdrumR'), 
+           envir = environment())
   
   if (all(quoTab[KeywordType == 'do', Keyword == 'dofx'])) return(data)
   
@@ -379,7 +381,6 @@ within.humdrumR <- function(data, ..., variables = list()) {
   
   newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newfields, overWrote))
   humdrumR@Humtable <- newhumtab
-  # putHumtab(humdrumR, overwriteEmpty = FALSE) <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
@@ -435,14 +436,12 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
        result = result)
 }
 
-#' @rdname withinHumdrum
-#' @export
-In <- within.humdrumR
-    
+
 ## Parsing Args ----
 
 parseArgs <- function(..., variables = list(), withFunc) {
   quos <- rlang::enquos(...)
+  if (length(quos) == 0L) .stop("You called {withFunc}, but gave it no commands to execute.")
   argnames <- .names(quos)
   
   quos <- lapply(quos, \(quo) {
