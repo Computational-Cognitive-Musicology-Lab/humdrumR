@@ -146,18 +146,26 @@ regexFindMethod <- function(str, regexes) {
 }
 
 
-REapply <- function(str, regex, .func, inPlace = TRUE, ..., outputClass = 'character') {
+REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outputClass = 'character') {
     if (!is.character(str)) .stop(call. = FALSE,
                                 "Sorry, REapply can only apply to an x argument that is a character vector.")
   
+    
     regex <- getRE(regex)
-
     matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     
     #
     hits <- !is.na(matches)
+    
+    args <- local({
+      args <- c(list(matches), args, list(...))
+      firstArgLength <- length(str)
+      args[lengths(args) == firstArgLength] <- lapply(args[lengths(args) == firstArgLength], '[', i = hits)
+      args
+    })
+    
     result <- vectorNA(length(str), outputClass)
-    if (any(hits)) result[hits] <- do...(.func, c(list(matches[hits]), list(...))) 
+    if (any(hits)) result[hits] <- do(.func, args)
     
     if (inPlace && outputClass == 'character') result <- stringi::stri_replace_first_fixed(str, matches, result)
     

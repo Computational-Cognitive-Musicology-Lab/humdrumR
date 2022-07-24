@@ -409,7 +409,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
                  
   ### call methods
   result <- if (length(dispatch) == 1L) {
-    do...(dispatchDF$method[[dispatch]], c(list(matches), list(...)))
+    do(dispatchDF$method[[dispatch]], c(list(matches), list(...)))
   } else {
     i <- tapply(seq_along(matches), dispatch, list)
     
@@ -447,12 +447,13 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   if (nrow(dispatchDF)) {
     for (i in 1:nrow(dispatchDF)) {
       hits <- Exclusive %in% dispatchDF$Exclusives[[i]]
+      args <- c(list(x), list(...))
+      args[lengths(args) == length(args[[1]])] <- lapply(args[lengths(args) == length(args[[1]])], '[', i = hits)
       
       result[hits] <- if (regexApply && !is.na(dispatchDF$regex[[i]])) {
-        REapply(x[hits], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, ..., outputClass = outputClass) 
+        REapply(args[[1]], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, args = args[-1], outputClass = outputClass) 
         } else {
-        args <- c(list(x[hits]), list(...))
-        do...(dispatchDF$method[[i]], args)
+         do...(dispatchDF$method[[i]], args)
       }
       
       exclusives <- c(exclusives, unique(Exclusive[hits])) # some can have multiple exclusives associated!

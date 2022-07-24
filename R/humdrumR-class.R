@@ -111,7 +111,7 @@
 #'         + Is the [active][humdrumR] data field null? 
 #'         + See the detailed discussion below, in the section of this documentation called "Null Data."
 #'     + `Filter` :: `logical`
-#'         + Has this record/token been [filtered out][subset.humdrumR]? 
+#'         + Has this record/token been [filtered out][filterHumdrum]? 
 #'         
 #' 
 #' 
@@ -476,7 +476,7 @@ orderHumtab <- function(humtab) {
 #' 
 #' The most powerful features of [humdrumR] are the tools it gives you to
 #' 
-#' 1. Filter humdrum data, using [subset.humdrumR] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
+#' 1. Filter humdrum data, using [filterHumdrum] and the standard R [indexing operators][base::Extract]: `[]` and `[[]]`.
 #' 2. Apply functions and arbitrary commands to humdrum data using the [with(in)Humdrum][humdrumR::withinHumdrum] routines.
 #' 
 #' 
@@ -904,8 +904,8 @@ renumberFiles.data.table <- function(hum) {
 
 renumberSpines <- function(hum) UseMethod('renumberSpines')
 renumberSpines.humdrumR <- function(hum) {
-    humtab <- getHumtab(hum)
-    putHumtab(hum) <- renumberSpines.data.table(humtab)
+    humtab <- getHumtab(hum, 'GLIMDdP')
+    putHumtab(hum, overwriteEmpty = c()) <- renumberSpines.data.table(humtab)
     hum
     
 }
@@ -971,7 +971,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     
     orderHumtab(humtabPadded)
     
-    putHumtab(humdrumR, overwriteEmpty = "LIMDdP") <- humtabPadded
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- humtabPadded
     humdrumR
     
 }
@@ -1035,7 +1035,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     # suitable for the "by" argument in a data.table[].
     checkhumdrumR(humdrumR, 'collapseHumdrum')
     
-    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "LIMDdP" else "LIMDd")
+    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
     
     # What fields do apply to?
     fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1088,7 +1088,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     if (anyPaths(humdrumR) && !padPaths) collapsedhumtab <- rbindlist(list(collapsedhumtab,
                                                                            getHumtab(humdrumR, 'P')), use.names = TRUE,
                                                                       fill = TRUE) 
-    putHumtab(humdrumR, overwriteEmpty = if (padPaths) "LIMDdP" else "LIMDd") <- collapsedhumtab
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- collapsedhumtab
     humdrumR
 }
 
@@ -1715,8 +1715,8 @@ update_Null <- function(hum, field, ...) UseMethod('update_Null')
 update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FALSE, ...) {
     
     if (allFields) field <- fields(hum, 'D')$Name
-    humtab <- getHumtab(hum)
-    putHumtab(hum) <- update_Null.data.table(humtab, field = field)
+    humtab <- getHumtab(hum, 'GLIMDd')
+    putHumtab(hum, overwriteEmpty = "GLIMDdP") <- update_Null.data.table(humtab, field = field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
@@ -2299,7 +2299,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     if (any(grepl('Result', colnames(humtab)))) humtab[ , eval(grep('Result', colnames(humtab), value = TRUE)) := NULL]
                     
                     humtab <- update_humdrumR(humtab, field = i)
-                    putHumtab(value) <- humtab
+                    putHumtab(value, overwriteEmpty = "GLIMDdP") <- humtab
                     
                     addFields(value) <- i
                     
