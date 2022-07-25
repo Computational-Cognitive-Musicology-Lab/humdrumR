@@ -113,21 +113,23 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 # Arrays/Vectors ----
 
-applyrows <- function(x, f, ...){
-    result <- apply(x, 1, f, ...)
-    result <- if (is.null(dim(result))) cbind(result) else t(result)
+
+.apply <- function(x, margin = 1, f, ...){
+    result <- apply(x, margin, f, ..., simplify = FALSE)
+    result[lengths(result) == 0L] <- list(NA)
     
-    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
+    result <- do.call(if (margin == 1) 'rbind' else 'cbind', result)
+    
+    if (all(dim(result) == dim(x))) {
+      dimnames(result) <- dimnames(x)
+    } else {
+      if (margin == 1)  rownames(result) <- rownames(x) else colnames(result) <- colnames(x)
+      
+    }
     result
 }
-applycols <- function(x, f, ...){
-    result <- apply(x, 2, f, ...)
-    result <- if (is.null(dim(result))) rbind(result) else result
-    
-    
-    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
-    result
-}
+applyrows <- function(x, f, ...) .apply(x, 1, f, ...)
+applycols <- function(x, f, ...) .apply(x, 2, f, ...)
 
 
 #' Shift data within a vector/matrix/data.frame
@@ -2065,6 +2067,16 @@ nthfix <- function(n) {
   
   paste0(n, affix)
   
+}
+
+
+pmatches <- function(x, table, passNoMatch = FALSE) {
+  n <- pmatch(x, table, nomatch = 0, duplicates.ok = TRUE)
+  
+  
+  x[n > 0] <- table[n[n > 0]]
+  if (!passNoMatch) x[n == 0] <- NA
+  x
 }
 
 pasteordered <- function(order, ..., sep = '', collapse = TRUE) {

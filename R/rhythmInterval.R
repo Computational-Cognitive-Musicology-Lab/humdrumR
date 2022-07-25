@@ -407,3 +407,40 @@ IOI <- function(ois) {
 tatum <- function(dur) {
   do.call('gcd', as.list(unique(dur)))
 }
+
+
+findLag <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', range = 5) {
+  candidates <- sapply(1:range, \(l) delta(x, lag = l))
+  
+  if (all(candidates < minlag, na.rm = TRUE) && range < length(x) / 2) return(Recall(x, minlag = minlag, maxlag = maxlag, prefer = prefer, range = range * 2L))
+  
+  hits <- candidates > minlag & candidates < maxlag
+
+  candidates[!hits] <- NA
+  candidates <- candidates - lag
+  
+  prefer <- pmatches(prefer, c('closest', 'short', 'long'))
+  
+  offseti <- if (prefer == 'closest') {
+    applyrows(abs(candidates), which.min)
+  } else {
+     ncandidates <- -candidates
+     
+     candidates[candidates < 0] <- NA
+     ncandidates[ncandidates <= 0] <- NA
+     
+     long  <- applyrows(candidates,  which.min)
+     short <- applyrows(ncandidates,  which.min)
+    
+  }
+  
+  candidates[candidates < 0] <- NA
+  offset <- apply(candidates, 1, which.min)
+
+  offset[lengths(offset) == 0] <- list(NA)
+  lagi <- seq_along(x) - unlist(offset)
+  
+  cbind(x, x[lagi], x - x[lagi])
+  
+  
+}
