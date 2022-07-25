@@ -1,9 +1,8 @@
 # This file defines the functions with.humdrumR and within.humdrumR, which are used to apply
 # expressions to fields in a humdrumR data object in a manner analogous to the base
-# with and within functions (as applied to data.frames). There is also the function apply2Humdrum
-# which acts more like R lapply, but is really just using within.humdrumR.
+# with and within functions (as applied to data.frames).
 #
-# apply2Humdrum, with.humdrumR, within.humdrumR, and inHumdrum (an alias of withinHumdrum) 
+# with.humdrumR, and within.humdrumR 
 # are each exported for users to use.
 # getTandem is also exported.
 # All other functions are just used by with/within.humdrumR.
@@ -1401,77 +1400,3 @@ curResultN <- function(humtab) {
 }
 
 
-
-
-###########################################-
-# happly ----
-###########################################-
-
-# 
-
-#' Apply functions to humdrum data
-#'  
-#' `apply2Humdrum` is just a wrapper for 
-#' `[humdrumR:with-in-Humdrum][with(in)Humdrum]`,
-#' included to parallel the `R` family of `[base:lapply][_apply]` functions.
-#' `apply2Humdrum` uses [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html)
-#' to capture arguments fed to it without the user needing to make explicit 
-#' `[base:tilde][formula]` using `~`. This is only guaranteed to work 
-#' in the `[base:environment][global environment]`, so be careful. If you run into
-#' problems, switch over to `[humdrumR:with-in-Humdrum][with(in)Humdrum]` and use
-#' explicit `[base:tilde][X~formulas]`.
-#' 
-#' @param humdrumR A [humdrumRclass] data object.
-#' @param FUN A function to apply to the [humdrumR:humdrumR][Active]` field(s)
-#' in the `humdrumR` object.
-#' @param ... Any arguments which can be fed to 
-#' `[humdrumR:with-in-Humdrum][with(in)Humdrum]` as formulae (except for
-#' `do` expressions, which are replaced by the `FUN` argument!). 
-#' However, rather that writinging formula in the format `Keyword ~ Expression`,
-#' `apply2Humdrum` arguments should be written as normal `R` arguments: 
-#' `Keyword = Expression`.
-#' Unnamed arguments are ignored.
-#' #' @param within A logical. If `TRUE` (the default), 
-#' `[humdrumR:with-in-Humdrum][withinHumdrum]` is used to apply the 
-#' function---meaning that the output is reconstituted into a new field in the 
-#' `humdrumR` object. If `within == FALSE`,
-#' `[humdrumR:with-in-Humdrum][withHumdrum]` is used instead,
-#' which results in the function's output being returned inprocessed.
-#' @param doplot Boolean. If `TRUE` the `FUN` argument is treated
-#' as a `doplot` expression by `[humdrumR:with-in-Humdrum][with(in)Humdrum]`,
-#' so the result is ignored (for plotting or side-effects purposes).
-#' 
-#' @export
-apply2Humdrum <- function(humdrumR, FUN, ..., within = TRUE, doplot = FALSE) {
-          checkhumdrumR(humdrumR, 'apply2Humdrum')
-          exprs <- rlang::quos(...)
-          keywords <- names(exprs)
-          
-          if (is.null(keywords)) exprs <- list()
-          exprs    <- exprs[keywords != '']
-          keywords <- keywords[keywords != '']
-          
-          formulae <- Map(\(qu, kw) rlang::new_formula(rhs = rlang::quo_get_expr(qu),
-                                                              lhs = as.symbol(kw), 
-                                                              env = rlang::quo_get_env(qu)), exprs, keywords) 
-          formulae <- unname(formulae)
-          # do expression
-          do <- rlang::new_formula(rhs = quote(FUN(.)),
-                                   lhs = if (doplot) quote(doplot) else quote(do),
-                                   env = environment())
-          
-          do.call(if (within) 'within.humdrumR' else 'with.humdrumR',
-                  c(humdrumR, do, formulae))
-          
-          
-          
-          
-}
-
-#' @rdname apply2Humdrum
-#' @export 
-happly <- apply2Humdrum
-
-########################################-
-# with methods ----
-########################################-

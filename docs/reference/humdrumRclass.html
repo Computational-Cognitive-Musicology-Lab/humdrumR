@@ -73,7 +73,7 @@ In coding examples, we name humdrumR objects "humdata."'><!-- mathjax --><script
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>HumdrumR class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R"><code>R/humdrumR-class.R</code></a>, <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Filter.R"><code>R/Filter.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R"><code>R/humdrumR-class.R</code></a></small>
       <div class="d-none name"><code>humdrumRclass.Rd</code></div>
     </div>
 
@@ -112,15 +112,7 @@ $(x, name) &lt;- value
 [(x, i, j) &lt;- value
 
 # S4 method for humdrumR,character,ANY,humdrumR
-[(x, i, j) &lt;- value
-
-humdata[[ , 'regex']]
-
-humdata[[ , , ~expression]] or humdata [[ , , 'regex']] or humdata[[z = ~expression]] or humdata[[z = 'regex']]
-
-humdata[[~expression]]
-
-humdata[[ , ~expression]]</code></pre></div>
+[(x, i, j) &lt;- value</code></pre></div>
     </div>
 
     <div class="section level2">
@@ -136,7 +128,7 @@ obtained with calls to <a href="humSize.html">nrecords, npieces, length, ncol, e
 More detailed summary information can be obtained with the humdrumR <a href="humSummary.html">corpus summary functions</a>.
 HumdrumR data can also be coerced to more basic R data types using <a href="humCoercion.html">as.matrix, as.data.frame, etc.</a>.
 A number of helpful functions are also defined to reshape humdrumR data.</p>
-<p>The most powerful features of <a href="humdrumR.html">humdrumR</a> are the tools it gives you to</p><ol><li><p>Filter humdrum data, using <a href="filterHumdrum.html">filterHumdrum</a> and the standard R <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a>: <code>[]</code> and <code>[[]]</code>.</p></li>
+<p>The most powerful features of <a href="humdrumR.html">humdrumR</a> are the tools it gives you to</p><ol><li><p>Filter humdrum data, using filterHumdrum and the standard R <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a>: <code>[]</code> and <code>[[]]</code>.</p></li>
 <li><p>Apply functions and arbitrary commands to humdrum data using the <a href="withinHumdrum.html">with(in)Humdrum</a> routines.</p></li>
 </ol></div>
     <div class="section level2">

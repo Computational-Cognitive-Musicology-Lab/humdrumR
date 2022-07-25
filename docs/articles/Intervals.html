@@ -82,7 +82,7 @@
       <img src="" class="logo" alt=""><h1>Rhythm and Pitch Intervals</h1>
                         <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-07-18</h4>
+            <h4 data-toc-skip class="date">2022-07-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/Intervals.Rmd"><code>vignettes/Intervals.Rmd</code></a></small>
       <div class="d-none name"><code>Intervals.Rmd</code></div>
@@ -157,11 +157,11 @@
 <span class="co">## </span>
 <span class="co">##     signature</span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">referenceMajor</span>, <span class="fu"><a href="../reference/intervalCalculus.html">sigma</a></span><span class="op">(</span><span class="fu"><a href="../reference/intervalCalculus.html">delta</a></span><span class="op">(</span><span class="va">referenceMajor</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">referenceMajor</span>, <span class="fu"><a href="../reference/sigma.html">sigma</a></span><span class="op">(</span><span class="fu"><a href="../reference/delta.html">delta</a></span><span class="op">(</span><span class="va">referenceMajor</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## [1] TRUE</span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">referenceMajor</span>, <span class="fu"><a href="../reference/intervalCalculus.html">delta</a></span><span class="op">(</span><span class="fu"><a href="../reference/intervalCalculus.html">sigma</a></span><span class="op">(</span><span class="va">referenceMajor</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## [1] TRUE</span></code></pre>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">referenceMajor</span>, <span class="fu"><a href="../reference/delta.html">delta</a></span><span class="op">(</span><span class="fu"><a href="../reference/sigma.html">sigma</a></span><span class="op">(</span><span class="va">referenceMajor</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] FALSE</span></code></pre>
 <div class="figure">
 <img src="Intervals_files/figure-html/unnamed-chunk-5-1.png" alt="Derivative/Integral relationship in Major Scale" width="700"><p class="caption">
 Derivative/Integral relationship in Major Scale

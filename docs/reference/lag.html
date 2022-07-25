@@ -71,7 +71,7 @@ They are similiar to the <a href="https://Rdatatable.gitlab.io/data.table/refere
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lag</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span>, fill <span class="op">=</span> <span class="cn">NA</span>, wrap <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lag</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">1</span>, <span class="va">fill</span>, <span class="va">wrap</span>, <span class="va">boundaries</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="fu">lead</span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
@@ -87,8 +87,8 @@ They are similiar to the <a href="https://Rdatatable.gitlab.io/data.table/refere
 <dt>wrap</dt>
 <dd><p>If <code>wrap = TRUE</code>, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 within the data structure.</p></dd>
-<dt>windows</dt>
-<dd><p>A vector or list of vectors, all of th same length as <code>x</code>. Lags crossing the boundaries indicated in <code>windows</code>
+<dt>boundaries</dt>
+<dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Lags crossing the boundaries indicated in <code>windows</code>
 are filled.</p></dd>
 <dt>margin</dt>
 <dd><p>Arrays and data.frames can be lagged lead in multiple dimensions using the <code>margin</code> argument.</p></dd>

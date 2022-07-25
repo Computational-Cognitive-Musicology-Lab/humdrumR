@@ -89,18 +89,18 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 <span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for numeric</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">str</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">str</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">str</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>str</dt>
-<dd><p>(<code>character</code> or <code>numeric</code>) The input vector.</p></dd>
-<dt>Exclusive</dt>
+    <dl><dt>Exclusive</dt>
 <dd><p>(<code>character</code>,  <code>length == 1 | length == length(x)</code>)</p></dd>
+<dt>str</dt>
+<dd><p>(<code>character</code> or <code>numeric</code>) The input vector.</p></dd>
 <dt>Key</dt>
 <dd><p>(a <a href="diatonicSet.html">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
 to interpret pitch representations.
