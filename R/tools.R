@@ -114,6 +114,7 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 # Arrays/Vectors ----
 
 
+
 .apply <- function(x, margin = 1, f, ...){
     result <- apply(x, margin, f, ..., simplify = FALSE)
     result[lengths(result) == 0L] <- list(NA)
@@ -247,6 +248,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries
 }
 
 ## Matrices ----
+
 
 
 most <- function(mat, whatmost = 'right', which = FALSE) {
@@ -1240,6 +1242,10 @@ delta.matrix <- function(x, margin = 2L, ...) {
 }
 
 
+.cummax <- function(x) {
+  x[!is.na(x)] <- cummax(x[!is.na(x)])
+  x
+}
 
 #' Expand numbers outwards from zero
 #' 
@@ -2070,12 +2076,19 @@ nthfix <- function(n) {
 }
 
 
-pmatches <- function(x, table, passNoMatch = FALSE) {
+pmatches <- function(x, table, error = TRUE, callname = 'pmatches') {
   n <- pmatch(x, table, nomatch = 0, duplicates.ok = TRUE)
   
   
   x[n > 0] <- table[n[n > 0]]
-  if (!passNoMatch) x[n == 0] <- NA
+  if (error && any(n == 0L)) {
+    bad <- harvard(x[n == 0L], 'and', quote = TRUE)
+    table <- harvard(table, 'or', quote = TRUE)
+    .stop('In a call to {callname}, The <value|values> {bad} <does|do> not unambiguously match anything in the set {table}.',
+          ifelse = sum(n == 0L) == 1)
+  } else {
+   x[n == 0] <- NA
+  }
   x
 }
 

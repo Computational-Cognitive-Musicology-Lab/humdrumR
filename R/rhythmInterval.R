@@ -408,6 +408,55 @@ tatum <- function(dur) {
   do.call('gcd', as.list(unique(dur)))
 }
 
+findLag2 <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', range = 5, allow.duplicates = FALSE) {
+  candidates <- sapply(1:range, \(l) delta(x, lag = l))
+  
+  if (all(candidates < minlag, na.rm = TRUE) && range < length(x) / 2) return(Recall(x, minlag = minlag, maxlag = maxlag, prefer = prefer, range = range * 2L))
+  
+  hits <- candidates >= minlag & candidates <= maxlag
+  
+  candidates[!hits] <- NA
+  candidates <- candidates - lag
+ 
+  prefer <- pmatches(prefer, c('closest', 'short', 'long'), callname = 'findLag')
+  
+  na <- is.na(candidates)
+  candidates[na] <- max(candidates, na.rm = TRUE) + 1L
+  c.candi <- c(t(candidates))
+  row <- c(t(row(candidates))) - 1L
+  order <- if (prefer == 'closest') {
+    order(row, abs(c.candi)) - (row  * ncol(candidates))
+  } else {
+    sign <- sign(c.candi)
+    if (prefer == 'short') sign <- -sign
+    order(c(row(candidates)), sign, abs(c.candi)) - ((c(col(candidates)) - 1L)  * ncol(candidates))
+  }
+  
+  order <- matrix(order, ncol = ncol(candidates), byrow = TRUE)
+  order[na] <- NA
+  imat <- row(candidates) - col(candidates)
+  
+  
+  
+  i <- imat[cbind(1:nrow(order), order[ , 1])] 
+  j <- 2
+  
+  while (!allow.duplicates && any(duplicated(i))) {
+    dup <- duplicated(i)
+    if (j > ncol(order)) {
+     i[dup] <- NA
+     break
+    }
+    newi <- imat[cbind(1:nrow(order), order[ , j])]
+    update <- dup & !newi %in% i & newi > shift(.cummax(i), 1L)
+    
+    i[update] <- newi[update]
+    j <- j + 1
+  }
+  
+  i
+   
+}
 
 findLag <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', range = 5) {
   candidates <- sapply(1:range, \(l) delta(x, lag = l))
