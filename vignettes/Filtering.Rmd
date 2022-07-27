@@ -1,0 +1,277 @@
+---
+title: "Filtering Humdrum Data"
+author: "Nathaniel Condit-Schultz"
+date:   "July 2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Filtering Humdrum Data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE, message=FALSE, echo = FALSE }
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  comment = ">\t"
+)
+library(humdrumR)
+```
+
+Most humdrum datasets contain a wealth of information: rhythms, pitches, lyrics, etc.
+However, the particular analysis you want to conduct today might not need all that information.
+The first step after [loading humdrum data](ReadWrite.html "Reading and writing humdrum data")
+is usually to "filter out" the information you don't need.
+(Of course, you are not erasing it from the original files, which are safe on your computer!)
+This is often just one part of larger task of [preparing your data](Reshaping.html "Shaping humdrum data").
+You don't necessarily *need* to do this, but usually it makes things simpler when you simply get anything you don't
+need out of the way.
+
+In this article, we'll use our pre-packaged Bach chorale data to illustrate how filtering works,
+so let's load it up:
+
+```{r message=FALSE}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+```
+
+# Indexing
+
+The simplest, common, way to filter your data is through *indexing*, which is a common approach in
+programming for selecting subsets of data.
+In `R`, we use the square brackets, `[]`, to index various data objects,
+including basic atomic vectors, data.tables, and lists.
+For example, using brackets I can extract subsets of a vector:
+
+```{r}
+
+myname <- c('N', 'A', 'T', ' ', 'C', 'O', 'N', 'D', 'I', 'T')
+
+myname[1:3]
+
+myname[5:10]
+
+myname[c(1, 5)]
+
+```
+
+
+Watch out! `R` actually has **two** different ways of indexing:
+you can use a single pair of matches brackets (`[ ]`) or a double pair (`[[ ]]`).
+If you want a primer on how these two types of indexing are used in normal `R`
+objects, check out the [R primer](Rbasics.html "Basics of R")---you really don't *need*
+to do this before getting into `humdrumR`, but you might want to eventually.
+
+We can use the single-bracket `[]` or double-bracket `[[]]` commands to index our `humdrumR` data objects.
+The single-brackets are used to index whole *pieces* in your data.
+The double-brackets are used to index "within" pieces in your data.
+Either type of bracket can accept either `numeric` or `character` vectors to index by.
+
+## Single-bracket indexing
+
+
+The single-brackets are used to index whole *pieces* in your data.
+So if you have a dataset of 19 files, but you only want to look at some of those files, you'd use
+ the single-brackets `[]`.
+ 
+### Numeric indices (for single-brackets)
+
+If we give a `numeric` value `i` to a single-bracket index command, that number will select the `i`th 
+file in the dataset.
+For example, if we want to look only at the fifth chorale, we can call:
+
+```{r}
+
+chorales[5]
+
+
+```
+
+We can also give the command a vector of `i` numbers:
+
+```{r}
+
+chorales[c(1,3,5)]
+
+```
+
+You might want to use the `R` sequence command, `:`, to select a range of numbers:
+
+```{r}
+
+chorales[6:10]
+
+```
+
+### Character indices (for single-brackets)
+
+If you supply a `humdrumR` object single-bracket index a `character` string,
+`humdrumR` will treat that string as a regular expression and return all the files that
+contain a match to that expression in *any* data token---even if there is only one.
+
+For example, we might be only interested in files that use flat notes.
+Since `**kern` represents flats with "`-`", we can simply write:
+
+```{r}
+
+
+chorales['-']
+
+```
+
+Look at that, five of our ten chorales contain *at least one* flat.
+The other chorales have zero flats.
+Notice that we still get the *whole* files returned to us!
+
+## Double-bracket indexing
+
+The double-brackets are used to index with pieces in your data.
+Specifically, if you only want to work with certain spines or records within your pieces.
+The double-brackets apply the same filters separately to each file in the dataset.
+
+In double-bracket indexing, you can provide two separate arguments, either individually or together:
+
++ `i` is the first argument which will index rows *within* each file.
++ `j` is the second argument, which will index spines *within* each file.
+
+If you want to use the `j` (spine) argument by itself, you should put a comma before it, to indicate that you are
+skipping over `i`.
+It is also good practice to by clear and put a comma after `i`, but this is not actually needed.
+Basically, commands should look like this:
+
++ `chorales[[i, ]]` (records)
++ `chorales[[  , j]]` (spines)
++ `chorales[[i , j]]` (records *and* spines)
+
+
+### Numeric indices (for double-brackets)
+
+`Numeric` values `i` *or* `j` can be given to double-bracket `humdrumR` index commands.
+For `i`, the number is simply matched to record numbers in each file.
+For example, you could extract the first fifty records from each file as so:
+
+```{r}
+
+chorales[[1:50, ]]
+
+```
+
+
+For `j`, the number is matched to the spines in each file (from left to right).
+So if you wanted the second spine in each file, you'd write:
+
+```{r}
+chorales[[ , 2]]
+
+```
+
+If you give indices that are larger than the number of records or spines in a file,
+that file will be dropped.
+For example, if we call
+
+```{r}
+
+chorales[[150:200, ]]
+
+```
+
+We only get three files back, because the other seven files don't have any records above 150!
+(Notice that `humdrumR` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
+
+
+### Character indices (for double-brackets)
+
+`Character` string values `i` *or* `j` can also be given to double-bracket `humdrumR` index commands.
+`humdrumR` will treat string as a regular expression and return all records (`i`) or spines (`j`)
+that any match to that expression in a data token---even if there is only one.
+For example, let's (again) say we are interesting in studying flats.
+Since `**kern` represents flats as "`-`", we can find records that contain a flat by calling:
+
+
+```{r}
+
+chorales[['-', ]]
+
+```
+
+As with our single-bracket search for flats (previous section) we only get five files back,
+because only five of the chorales contain *any* flats at all.
+However, we now see that all records that don't contain a flat are completely stripped away,
+leaving a (handful) of records with at least one flat.
+
+If we do the same thing with `j` (spines)
+
+```{r}
+chorales[[ , '-']]
+
+```
+
+It looks like we get only one spine in each of our five files.
+Those single spines are simply which ever spine in *each* file contained *any* flat.
+But a couple things to notice!
+In the first file, what is now spine `1` was the old spine `2`, which we can tell because that 
+instrument interpretation is `*Itenor`.
+However, if you look at the last of the five files
+
+```{r}
+
+chorales[[ , '-']][5]
+
+```
+
+we see `*Ibass`---so the new spine `1` was actually the original spine `1` in that file.
+And wait, there's more! If we dig in and look at the other files returned to us (which aren't shown by default),
+
+```{r}
+chorales[[ , '-']][3]
+
+```
+
+we see that what is now the third file actually had flats in all four spines, and so all four spines are still there!
+
+---
+
+In some cases you may find the renumbering of spines on a *per file* basis confusing, and you want to keep track of the original spine numbers.
+Fortunately, for you there is an option that might helpful, which you will learn more about below: 
+try specifiying `removeEmpty = FALSE`:
+
+```{r}
+chorales[[ , '-', removeEmpty = FALSE]]
+
+```
+
+
+## Negative numeric indices
+
+A nifty feature of `R` is that if you supply negative numbers to an indexer, `R` will *remove* those
+numbers.
+This works in `humdrumR` too, so if you want all the files *except* the first file, you could write:
+
+```{r}
+chorales[-1]
+
+```
+
+Or if you want all the spines *except* the fourth spine, write
+
+```{r}
+
+chorales[[ , -4]]
+
+```
+
+Or if you want to remove the first 20 records from each file:
+
+
+```{r}
+
+chorales[[-1:-20, ]]
+
+```
+
+(Again, `humdrumR` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
+
+
+# General Filtering

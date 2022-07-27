@@ -2356,7 +2356,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   }
   
   Nfiles <- length(humdrumR)          
-  if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[unique(range(getFields(humdrumR, 'File')$File))] 
+  if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
   humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
   
@@ -2453,9 +2453,9 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
                    \(nr) {
                        if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
                    })
-  ranges[is.na(ranges)] <- ""
+  ranges[is.na(ranges)] <- ":"
   
-  # align :
+  # align : (colon)
   if (any(ranges != '')) {
       line_colon <- stringr::str_locate(lines, ':')[ , 'start']
       range_colon <- stringr::str_locate(ranges, ':')[ , 'start']

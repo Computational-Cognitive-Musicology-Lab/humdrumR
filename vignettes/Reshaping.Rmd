@@ -47,6 +47,9 @@ In addition, the `**harm` spine indicates the harmony accompanying the vocal par
 # Filtering Data
 
 The first step might to remove data we don't need.
+In *this* article, we'll show you the most common, basic, ways you might filter your data.
+For more details about other `humdrumR` filtering functionatily, check out 
+the [data filtering](Filtering.html "Filtering Humdrum Data") article.
 
 ## Indexing
 

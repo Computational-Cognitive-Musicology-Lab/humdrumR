@@ -387,15 +387,16 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
             if (removeEmpty) {
               humtab <- getHumtab(x)
               
-              humtab <- humtab[Record %in% i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
-              
+              humtab <- humtab[Record %in% sort(unique(Record))[i] | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
+              # sort(unique(Record))[i] is needed so that negative indices are used!
               putHumtab(x) <- humtab
+             
             } else {
-              x <- subset(x, Record %in% !!i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), 
+              x <- subset(x, Record %in% sort(unique(Record))[!!i] | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), 
                           recordtypes = "GLIMDdP")
             }
             
-            x
+            removeEmptyFiles(x)
 
           })
 
@@ -409,16 +410,17 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
               
               if (removeEmpty) {
                 humtab <- getHumtab(x)
-                humtab <- humtab[is.na(Spine) | Spine %in% j]
+                humtab <- humtab[is.na(Spine) | Spine %in% sort(unique(Spine))[j]]
+                # sort(unique(Spine))[j] is needed so that negative indices are used!
                 
                 putHumtab(x) <- renumberSpines.data.table(humtab)
               } else {
                 
                 
-                x <- subset(x, Spine %iN% sort(unique(Spine))[j] | is.na(Spine), recordtypes = "D")
+                x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), recordtypes = "D")
               }
               
-              x
+              removeEmptyFiles(x)
               
               
           })
@@ -440,7 +442,7 @@ function(x, i, removeEmpty = FALSE) {
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
-    x
+    removeEmptyFiles(x)
 })
 
 
@@ -475,7 +477,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
            
             
             
-            x
+            removeEmptyFiles(x)
 
           })
 
