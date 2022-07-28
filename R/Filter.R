@@ -205,11 +205,9 @@ subset.humdrumR <- function(x, ...) {
   
   oldActive <- getActive(x)
   oldActiveFields <- activeFields(x)
-  
   x$.TmpFilter. <- within.humdrumR(x, ...)
   
   humtab <- getHumtab(x)
-  
   if (humtab[ , class(.TmpFilter.)] != 'logical') .stop('In call to subset.humdrumR, the do-expression must evaluate to a logical vector.')
  
   humtab[ , .TmpFilter. := .TmpFilter. | is.na(.TmpFilter.)] 
@@ -218,12 +216,26 @@ subset.humdrumR <- function(x, ...) {
   humtab[ , .TmpFilter. := NULL]
   
   humtab <- update_Null.data.table(humtab, oldActiveFields)
-  putHumtab(x) <- humtab
+  putHumtab(x) <- removeNull(humtab, 'File', 'GLIMd')
   
   removeFields(x) <- '.TmpFilter.'
   x <- setActive(x, oldActive)
   
+  
   x
+  
+}
+
+#' @export
+#' @rdname subset.humdrumR
+clearFilter <- function(humdrumR) {
+  humtab <-getHumtab(humdrumR)
+  
+  humtab[ , Filter := FALSE]
+  
+  putHumtab(humdrumR) <- update_Null.data.table(humtab)
+  
+  humdrumR
   
 }
 
@@ -263,13 +275,13 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
 #' @rdname subset.humdrumR
 removeEmptyFiles <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
-  renumberFiles(removeNull(humdrumR,'File', 'GLIMd'))
+  renumberFiles(removeNull(humdrumR, 'File', 'GLIMd'))
 }
 #' @export
 #' @rdname subset.humdrumR
 removeEmptySpines <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
-  removeNull(humdrumR,  c('File', 'Spine'), 'GLIMd')
+  removeNull(humdrumR,  c('File', 'Spine'), 'LIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
@@ -381,19 +393,27 @@ setMethod('[',
 #' @usage humdata[[x:y]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'), 
-          function(x, i, removeEmpty = TRUE) {
-            i <- numericIndexCheck(i)    
+          function(x, i, j, removeEmpty = TRUE) {
             
+            i <- numericIndexCheck(i)    
             if (removeEmpty) {
               humtab <- getHumtab(x)
               
-              humtab <- humtab[Record %in% sort(unique(Record))[i] | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
-              # sort(unique(Record))[i] is needed so that negative indices are used!
+              humtab <- if (all(i > 0L)) {
+                humtab[Record %in% i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
+              } else {
+                humtab[!(Record %in% abs(i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
+              }
+              
               putHumtab(x) <- humtab
              
             } else {
-              x <- subset(x, Record %in% sort(unique(Record))[!!i] | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), 
-                          recordtypes = "GLIMDdP")
+              x <- if (all(i > 0L)) {
+                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDdP')
+              } else {
+                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDdP')
+              }
+          
             }
             
             removeEmptyFiles(x)

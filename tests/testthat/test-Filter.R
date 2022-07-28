@@ -1,5 +1,33 @@
 
 
+# test_that("Remove empty works right", {
+  # chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+  # spines
+  # for (j in 1:4) {
+  #   x <- chorales[[ , j, removeEmpty = FALSE]]
+  #   y <- subset.humdrumR(chorales, Spine == j | is.na(Spine))
+  #   expect_identical(x, y)
+  # }
+  # # 
+  # for (j in 1:4) {
+  #   x <- chorales[[ , j]]
+  #   
+  #   y <- removeEmptySpines(subset(chorales, Spine == j | is.na(Spine)))
+  #   expect_identical(x,y)
+  # }
+  
+  # records
+  # x <- chorales[[1:70, , removeEmpty = FALSE]]
+  # y <- subset(chorales, Record %in% 1:70 | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token),
+  #             recordtypes = 'GLIMDdP')
+  # expect_identical(x,y)
+  
+  ## removeNull needs to be changed so this can work:
+  # x <- chorales[[1:70]]
+  # y <- removeEmptyRecords(y)
+  # expect_identical(x,y)
+  # 
+# })
 
 test_that('Filtering subsets should add up to total', {
   
@@ -46,6 +74,8 @@ test_that('Multiple filters works as it should', {
   
 })
 
+
+
 test_that('Filtering vignette examples work', {
   
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
@@ -78,4 +108,36 @@ test_that('Filtering vignette examples work', {
   expect_equal(with(chorales[[ , '-']][5], max(Spine)), 1)
   expect_true(with(chorales[[ , '-']][1], all(Instrument == 'I"Tenor')))
   expect_true(with(chorales[[ , '-']][5], all(Instrument == 'I"Bass')))
+  
+  # general subsetting
+
+  expect_length(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0) ), length(chorales))
+  expect_equal(with(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0)), length(Token)), 1212)
+  
+  
+  expect_length(subset(chorales, Token %grepl% '-'), 5)
+  expect_equal(with(subset(chorales, Token %grepl% '-'), length(Token)), 
+               with(chorales, sum(grepl('-', Token))))
+  
+  # subsetting by
+  barsub <- subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, Bar)) 
+  expect_equal(with(barsub, nrow(unique(cbind(File,Record)))), 171)
+  expect_equal(with(barsub, nrow(unique(cbind(Bar,Record)))), 144)
+  
+  barsub2 <- subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, floor(Bar  / 2)))
+  
+  expect_equal(with(barsub2, nrow(unique(cbind(Bar,Record)))), 162)
+  expect_equal(with(barsub2, nrow(unique(cbind(File,Record)))), 194)
+  
+})
+
+
+test_that("Unfiltering works", {
+  
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+  
+  orig <- getHumtab(chorales)
+  cleared <- getHumtab(clearFilter(subset(chorales, Spine == 1)))
+  expect_true(all(orig == cleared, na.rm = TRUE))
+  
 })

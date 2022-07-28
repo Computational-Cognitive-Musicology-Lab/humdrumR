@@ -349,6 +349,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
   
   ## put result into new humtab
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
+  humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
   
   # number new results
@@ -977,7 +978,7 @@ splatQuo <- function(funcQuosure, humtab) {
   funcQuosure <- modifyExpression(funcQuosure, predicate, do)
 
   # turn splat(x,y,z) to x,y,z
-  predicate <- \(Args) any(sapply(Args, \(arg) analyzeExpr(arg)$Head == 'splat'))
+  predicate <- \(Args) any(sapply(Args, \(arg) identical(analyzeExpr(arg)$Head, 'splat')))
 
   do <- \(exprA) {
       args <- exprA$Args

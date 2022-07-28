@@ -275,3 +275,122 @@ chorales[[-1:-20, ]]
 
 
 # General Filtering
+
+
+
+The indexing commands (previous section) only get you so far.
+If you want to be more precise about filtering, use the `subset` nethod for `humdrumR` data.
+`Subset.humdrumR` works exactly like [within.humdrumR](WorkingWithData.html "Working with Humdrum Data").
+However, the "do" command you give must evaluate to a logical vector (`TRUE` or `FALSE`) of the same length as its input.
+(You will get an error otherwise.)
+`Subset.humdrumR` will take your logical result and filter out data which matches `FALSE`.
+
+We can reproduce the functionality of the `[]` and `[[]]` indexing operators (previous section) using `subset`:
+
+
+```{r}
+subset(chorales, Spine == 1)
+
+```
+
+But, now we can filter based on *any* arbitrary criteria we want.
+For example, we could extract tokens from odd numbered spines in odd numbered records *and* even numbered spines in even numbered records.
+We'll use `R`s modulo command `%%` to separate even and odd numbers (`odd %% 2 == 1`, `even %% 2 == 0`).
+
+```{r}
+
+subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0) )
+
+```
+
+Would we ever want to do that? Probably not.
+However, returning to our flats, study, lets grab all the flat notes:
+
+```{r}
+
+subset(chorales, Token %grepl% '-')
+
+
+```
+
+
+Woh, we're only seeing a could of B flats in these files!
+But from before, we know that there are a lot more flats in the fourth file (after losing the files with no flats):
+
+```{r}
+
+subset(chorales, Token %grepl% '-')[4]
+
+```
+
+
+## Subseting by Group
+
+
+Since `subset.humdrumR` makes use of [within.humdrumR], we can use `within.humdrumR`'s other special options, including group `by`.
+This can be a useful way to get some context for our searches.
+For example, let's say we want to find flats again, but we want to see the whole *bar* of music that contains a flat.
+We can do this by grouping by the `Bar` field (and the `File` field).
+We'll want to say "within each bar, if there are *any* flats, return `TRUE` for the *whole* bar, else return `FALSE` for the *whole* bar."
+We can use the `any` function to get *any* match, and the `dofill` option to copy the result of `any` to the whole bar.
+
+```{r}
+
+subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, Bar))
+
+
+```
+
+
+Not enough context for you? maybe we should group the bars into even-odd pairs:
+
+```{r}
+
+subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, floor(Bar  / 2)))
+
+```
+
+
+## Removing vs Filtering
+
+You probably noticed that, unlike the indexing commands `[]` and `[[]]`, `subset` doesn't seem to actually *remove* data that you filter out.
+So when we say 
+
+```{r}
+subset(chorales, Spine == 1)
+
+```
+
+we still have four spines, but spines 2--4 are just emptied.
+This is correct.
+What `subset` actually does is mark filtered data in the `Filter` field of the humdrum table.
+`humdrumR` then ignores that data automatically.
+Why do we do this?
+There are several reasons:
+
+1. Sometimes, seeing the full structure remain in place is cleaner/easier to interpret than actually removing them.
+   Basically, all those empty spines remind you what you filtered, so it is easier to see if the filter is doing what you     *think* it is doing.
+   + A clear example of this is when we did `[[ , j]]` indexing for flats (above): when we simply removed the spines with no flats it was hard to tell which spine was which in the result. 
+2. Many filters would break the humdrum syntax if the data was simply removed. If you removed all the tokens that don't        contain flats, the result would be humdrum data with holes in it.
+3. Its possible to undo your filters, using the `clearFilter` command. (Try it.) 
+
+Once you've done some filtering with `subset`, if you *want* to get rid of empty parts of the data, you can do so using the commands `removeEmptyFiles`, `removeEmptySpines`, `removeEmptyRecords`, `removeEmptyStops`, or `removeEmptyPaths`.
+By using this commands, we make sure that 1) you explicitely want to remove them and 2) the humdrum syntax is not broken, because whole records/spines/paths/files are removed.
+
+So for our spines example:
+
+```{r}
+
+subset(chorales, Spine == 1) |> removeEmptySpines()
+
+```
+
+or for records:
+
+```{r}
+
+subset(chorales, Record %% 2 == 0) |> removeEmptyRecords()
+
+
+```
+

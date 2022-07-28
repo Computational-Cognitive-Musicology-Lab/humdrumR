@@ -2343,7 +2343,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
           })
 
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
-                         max.records.file = 40L, max.token.length = 30L, collapseNull = 10L) {
+                         max.records.file = 40L, max.token.length = 30L, collapseNull = 30L) {
     
   checkhumdrumR(humdrumR, 'print_humtab')
     
@@ -2411,7 +2411,7 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
 
 
 .print_humtab <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                          max.records.file = 40L, max.token.length = 12L, collapseNull = 10L,
+                          max.records.file = 40L, max.token.length = 12L, collapseNull = Inf,
                           screenWidth = options('width')$width - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, path.collapse = FALSE, alignColumns = TRUE)
   
@@ -2522,7 +2522,9 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
                                            if (any(!is.na(barnums))) {
                                                barnums <- barnums[!is.na(barnums)]
                                                barnums <- paste(unique(c(barnums[1], tail(barnums, 1))), collapse = '-')
-                                           } 
+                                           } else {
+                                               barnums <- ""
+                                           }
                                            newRN <- paste(rownames(tokmat[i[c(2, length(i))], , drop = FALSE]), collapse = '-')
                                            
                                            paste0(base, barnums)

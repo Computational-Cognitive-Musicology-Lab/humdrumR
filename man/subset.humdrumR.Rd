@@ -2,6 +2,7 @@
 % Please edit documentation in R/Filter.R
 \name{subset.humdrumR}
 \alias{subset.humdrumR}
+\alias{clearFilter}
 \alias{removeEmptyFiles}
 \alias{removeEmptySpines}
 \alias{removeEmptyRecords}
@@ -9,6 +10,8 @@
 \title{Filter humdrum data}
 \usage{
 \method{subset}{humdrumR}(x, ...)
+
+clearFilter(humdrumR)
 
 removeEmptyFiles(humdrumR)
 
