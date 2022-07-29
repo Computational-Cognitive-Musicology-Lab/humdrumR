@@ -28,36 +28,35 @@ From \code{within.humdrumR} and \code{inHumdrum}, a new humdrumR data object.
 From \code{with.humdrumR}, whatever value is returned by expression.
 }
 \description{
-Apply arbitrary expressions to fields within \verb{[humdrumR][humdrumRclass]} data.
+Apply arbitrary expressions to fields within \link[=humdrumRclass]{humdrumR} data.
 }
 \section{Overview}{
 
 
 These functions are the primary means of working with
-humdrumR data. (They are analogous to the base functions
-\verb{[base][with]} and \verb{[base][within]}
-as applied to \verb{[base:data.frame][data.frames]}.)
+humdrumR data. They are analogous to the base functions
+\link[base:with]{with and within}
+as applied to \link[base:data.frame]{data.frames}.
 Specifically they allow you to evaluate arbitrary
-expressions involving fields in a humdrumR data object.
+expressions involving fields in a \link[=humdrumRclass]{humdrumR data object}.
 They also includes a number of special evaluation options:
 \itemize{
-\item Evaluate an expression in only matching parts of the data.
-\item Evaluate an expression separately in subsets of the data.
+\item Evaluate an expression in a subset of the data.
+\item Evaluate the same expression separately in different subsets of the data.
 \item Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-\item Evaluate an expression which produces a plot, with particular plotting parameters set using \verb{[graphics][par]}.
+\item Evaluate an expression which produces a plot, with particular plotting parameters set using \code{\link[graphics:par]{graphics::par()}}.
 }
 
 The difference between \code{with.humdrumR} and \code{within.humdrumR} is
-analogous to the difference between \verb{[base][with]} and \verb{[base][within]}.
+analogous to the difference between \code{\link[base:with]{base::with()}} and \code{\link[base:with]{base::within()}}.
 \code{with.humdrumR} evaluates your expression(s) and then simply returns the result of
 the evaluation. \code{within.humdrumR} evaluates your expression(s) and then
-(attempts) to insert the results back into the humdrumR object, generating new
+inserts the results back into the humdrumR object (if possible), generating new
 fields called \code{ResultX} (see details).
-
-\code{inHumdrum} is simply a short hand for \code{within.humdrumR}.
 }
 
 \section{\code{Formulae}}{
+
 
 Every formula in the \code{formulae} argument
 is treated as a \code{Keyword ~ Expression(s)}

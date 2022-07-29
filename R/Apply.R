@@ -23,34 +23,54 @@
 
 #' with(in)Humdrum
 #' 
-#' Apply arbitrary expressions to fields within `[humdrumR][humdrumRclass]` data.
+#' Apply arbitrary expressions to fields within [humdrumR][humdrumRclass] data.
 #' 
 #' @section Overview:
 #' 
 #' These functions are the primary means of working with
-#' humdrumR data. (They are analogous to the base functions
-#' `[base][with]` and `[base][within]`
-#' as applied to `[base:data.frame][data.frames]`.)
+#' humdrumR data. They are analogous to the base functions
+#' [with and within][base::with()]
+#' methods for [data.frames][base::data.frame].
 #' Specifically they allow you to evaluate arbitrary
-#' expressions involving fields in a humdrumR data object.
+#' expressions involving fields in a [humdrumR data object][humdrumRclass].
 #' They also includes a number of special evaluation options:
 #' 
-#' * Evaluate an expression in only matching parts of the data.
-#' * Evaluate an expression separately in subsets of the data.
+#' * Evaluate an expression in a subset of the data.
+#' * Evaluate the same expression separately in different subsets of the data.
 #' * Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-#' * Evaluate an expression which produces a plot, with particular plotting parameters set using `[graphics][par]`.
+#' * Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
 #' 
 #' 
 #' The difference between `with.humdrumR` and `within.humdrumR` is
-#' analogous to the difference between `[base][with]` and `[base][within]`.
+#' analogous to the difference between [base::with()] and [base::within()].
 #' `with.humdrumR` evaluates your expression(s) and then simply returns the result of
 #' the evaluation. `within.humdrumR` evaluates your expression(s) and then
-#' (attempts) to insert the results back into the humdrumR object, generating new
+#' inserts the results back into the humdrumR object (if possible), generating new
 #' fields called `ResultX` (see details).
+#'
+#' Each call to `with`/`within.humdrumR` must have at least one expression to "*do*," 
+#' which we call "do" expressions.
+#' If multiple do expressions are provided, each expression is evaluated in order, and 
+#' can refer to results of the previous do expression as `.` (variables assigned in previous expressions
+#' can also be used.)
 #' 
-#' `inHumdrum` is simply a short hand for `within.humdrumR`.
 #' 
-#' @section `Formulae`:
+#' @section Special Evaluation Keywords:
+#'
+#' `with.humdrumR` and `within.humdrumR` can be provided with
+#' additional keyword expressions which modify how the main "do" expressions are evaluted.
+#' The complete list of options are:
+#' 
+#' + `dofill`
+#' + `doplot`
+#' + `by` (group by)
+#' + `where` (apply to subset)
+#' + `windows`
+#' + `ngrams`
+#' + `pre` and `post`
+#' + `recordtypes`
+#' 
+#' 
 #' Every formula in the `formulae` argument 
 #' is treated as a `Keyword ~ Expression(s)`
 #' pairing. Multiple expressions can be input using multiple `~` operators:
@@ -303,11 +323,12 @@ NULL
 #' @rdname withinHumdrum
 #' @export
 with.humdrumR <- function(data, ..., 
+                          dataTypes = 'D',
                           drop = TRUE,
                           variables = list()) {
   
   checkhumdrumR(data, 'with.humdrumR')
-  list2env(withHumdrum(data, ..., variables = variables, withFunc = 'with.humdrumR'), envir = environment())
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
   visible <- attr(result, 'visible') %||% FALSE
   result[ , `_rowKey_` := NULL]
@@ -326,9 +347,9 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., variables = list()) {
+within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   checkhumdrumR(data, 'within.humdrumR')
-  list2env(withHumdrum(data, ..., variables = variables, 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -393,7 +414,7 @@ within.humdrumR <- function(data, ..., variables = list()) {
 
 }
 
-withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   humtab <- getHumtab(humdrumR)
@@ -408,8 +429,7 @@ withHumdrum <- function(humdrumR, ..., variables = list(), withFunc) {
  
   
   # Getting the humtab with the right record types.
-  recordtypes <- if (any(quoTab$Keyword == 'recordtypes')) quoTab[Keyword == 'recordtypes']$Quo[[1]] else 'D'
-  quoTab <- quoTab[Keyword != 'recordtypes']
+  recordtypes <- checkTypes(dataTypes, withFunc)
                       
   
   ### Preparing the "do" expression
@@ -545,7 +565,6 @@ parseKeywords <- function(quoTab, withFunc) {
   knownKeywords <- list(do              = c('do', 'dofx', 'dofill', 'ordo', 'ordofill'),
                         partitions      = c('by', 'where'),
                         ngram           = 'ngram',
-                        recordtypes     = 'recordtypes',
                         windows         = 'windows',
                         pre             = 'pre',
                         post            = 'post')
@@ -576,14 +595,6 @@ parseKeywords <- function(quoTab, withFunc) {
     quoTab$Quo[[i]] <- ngram
   }
   
-  if (any(quoTab[ , Keyword == 'recordtypes'])) {
-    i <- which(quoTab$Keyword == 'recordtypes')
-    if (length(i) > 1L) .stop("In a call to {withFunc},",
-                              "you can't have multiple 'recordtypes'-keyword arguments.")
-    
-    recordtypes <- rlang::eval_tidy(quoTab$Quo[[i]])
-    quoTab$Quo[[i]] <- checkTypes(recordtypes, withFunc)
-  }
   
   quoTab
 }
@@ -604,7 +615,6 @@ partialMatchKeywords <- function(keys) {
                          where    = c('where', 'when'),
                          ordo     = c('ordo', 'orelsedo', 'elsedo'),
                          ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
-                         recordtypes = 'recordtypes',
                          ngram    = 'ngrams',
                          windows  = c('windows', 'context', 'window'),
                          pre      = 'pre', 
