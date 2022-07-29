@@ -10,12 +10,13 @@ articles:
   KeysAndChord: KeysAndChord.html
   Overview: Overview.html
   PitchAndTonality: PitchAndTonality.html
+  RPrimer: RPrimer.html
   ReadWrite: ReadWrite.html
   Reshaping: Reshaping.html
   RhythmAndMeter: RhythmAndMeter.html
   Validation: Validation.html
   WorkingWithData: WorkingWithData.html
-last_built: 2022-07-28T20:15Z
+last_built: 2022-07-29T01:04Z
 urls:
   reference: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/reference
   article: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/articles

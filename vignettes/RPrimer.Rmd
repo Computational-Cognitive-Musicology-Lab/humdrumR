@@ -1,0 +1,217 @@
+---
+title: "An R Primer for humdrumR"
+author: "Nathaniel Condit-Schultz"
+date:   "July 2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{An R Primer for humdrumR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE, message=FALSE, echo = FALSE }
+knitr::opts_chunk$set(
+  collapse = TRUE, message = FALSE,
+  comment = ">\t"
+)
+library(humdrumR)
+```
+
+`humdrumR` is a package for the R programming language.
+You don't need to be an R master to use `humdrumR`, but there are some basic concepts from R
+that you will need to learn, and ultimately, if you want to get really advanced, you'll
+need to delevelop some R skills.
+This document is a basic primer for R, which will teach you the basics you need to know in order to 
+make the most out of `humdrumR`.
+
+
+# Basic Data Structures
+
+In R, there two fundamental data structures that are used all the time:
+
++ "atomic" **vectors**
++ data.tables 
+
+
+## Vectors
+
+In R, the basic units---the *atoms*, if you will---of information are called "atomic" vectors.
+There are three basic atomic data types:
+
++ **Numbers**---`numeric` values.
+  + Examples: `3`, `4.2`, `-13`, `254.30`
++ **Strings of characters**: `character` values.
+  + Examples: `"note"`, `"a"`, `"do, a dear, a female dear"`
++ **Logical Trues and Falses**: `logical` values.
+  + Examples: `TRUE`, `FALSE`
+
+You might be wondering, why are we calling these basic atoms "*vectors*"?
+Well, in R, the basic atomic data types are always considered a *collection* of ordered values. 
+These ordered collections are called vectors.
+In the simple examples above, each vector only had a single value, so it just looks like one 
+value---single values like this are often called "scalars".
+However, R doesn't *really* distinguish between scalars (single values) and vectors
+(multiple values)---everything is always a vector.
+(Still, we sometimes refer to length-1 vectors as scalars.)
+
+To make a vector in R, use the `c` command, as so:
+
+```{r}
+
+
+c(1, 2, 3)
+
+c("Bach", "Mozart", "Beethoven", "Brahms")
+
+c(TRUE, FALSE)
+
+c(32.3)
+
+32.3
+
+```
+
+In this example, we've created five vectors.
+
++ A `numeric` vector of length 3.
++ A `character` vector of length four (composers).
++ A `logical` vector of length 2)
++ Two `numeric` vectors of length 1.
+  + That's right, `c(32.3)` and `32.3` are the same thing---a vector of length 1.
+
+
+---
+
+Notice that vectors can't mix-and-match different data types; which makes sense
+be cause a vector *is* a single type of thing.
+But this means that commands like `c(3, "a")` will actually create
+a `character` vector, where the `3` is forced to be a character (`"3"`).
+
+
+
+### Vectorization
+
+Having everything be a vector all the time is very useful, because it allows us to think of and 
+use collections of data as single thing.
+If I give you, say, ten thousand numbers, you don't have to worry about manipulating ten thousand things:
+rather, you just work with *one* thing: a vector, which happens to be of length 10,000.
+In R, we call this **vectorization**---generally, in R and in `humdrumR` we will constantly
+be taking advantage of vectorization to make our lives super easy!
+
+---
+
+For an example of vectorization, watch this:
+
+```{r}
+
+
+c(1, 1, 2, 3, 5, 8, 13, 21) * 2
+
+
+```
+
+We created two `numeric` vectors:
+
+1. The first eight numbers of the Fibonnaci sequence 
+2. the single number `2`
+
+and multiplied them together!
+Notice that the entire Fibonnaci vector is multiplied by two!
+We don't have to worry about multiplying each number of the vector, its done for us.
+
+----
+
+There are the rules for working with vectors?
+There are two ideal circumstances for working with vectors.
+
+1. They are the same length.
+2. One vector is length 1, and the other isn't.
+
+
+In the first case, we work with multiple vectors that are all the same length,
+each value in each vector is "lined" up with values in the other vector.
+If we, for example, add two such vectors together, each "lined up" pair of numbers is added:
+
+
+```{r}
+
+c(1, 2, 3) + c(5, 4, 3)
+
+
+paste(c('a', 'b', 'c'), c(1, 2, 3))
+
+
+```
+
+
+In the second case, one of the vectors is length-1 (a "scalar").
+In this case, the scalar value is paired with each value in the longer vector (as in the
+Fibonnaci example above).
+
+
+```{r}
+
+c(1, 2, 3) + 5
+
+
+paste(c('a', 'b', 'c'), 1)
+
+
+```
+
+----
+
+What happens if we have vectors that are longer than one, but are not the same length.
+Well, `R` will generally attempt to "recycle" the shorter vector---which means repeat it---
+as necessary to match the length of the longer vector.
+If the shorter vector evenly divides the longer vector, you'll generally have not problem:
+
+
+```{r}
+
+
+c(1, 2, 3, 4) * c(2, 3)
+
+```
+
+If the division is not perfect, R will still "recycle" the shorter vector, but you'll get a warning:
+
+```{r}
+
+c(1, 2, 3, 4) * c(2, 3, 4)
+
+```
+
+You see the warning message R have us?
+
+> "longer object length is not a multiple of shorter object length"
+
+That's R telling us that we've got an obvious mismatch in the lengths of our vectors.
+
+---
+
+
+Generally, it is best to work with vectors that are all the same length and/or scalar values (length-1 vectors),
+so you can avoid worrying about how exactly R is "recycling" values.
+This brings us too...
+
+
+## Data tables
+
+
+
+
+## Missing Data
+
+
+
+
+
+
+
+
+
+

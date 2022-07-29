@@ -11,6 +11,41 @@ home:
 template:
   bootstrap: 5
   bootswatch: flatly
+articles:
+- title: Basics
+  navbar: Basics
+  contents:
+  - Overview
+  - GettingStarted
+  - IntroForCoders
+- title: Background
+  desc: Background info on humdrum and R
+  navbar: R/Humdrum background
+  contents:
+  - HumdrumSyntax
+  - RPrimer
+- title: Preparing data
+  desc: Getting your data ready for analysis
+  navbar: Data prep
+  contents: 
+  - ReadWrite
+  - Validation
+  - Reshaping
+  - Filtering
+- title: Analysis
+  desc: Tools for analysis
+  navbar: Analysis
+  contents:
+  - Summary
+  - WorkingWithData
+- title: Musical Processing
+  desc: Funcitonality for analyzing musical information
+  navbar: Musical tools
+  contents:
+  - PitchAndTonality
+  - RhythmAndMeter
+  - Intervals
+  - KeysAndChord
 reference:
 - title: "Reading and Summarizing Data"
   desc: "These tools allow you to import, validate, and abstractly summarize the content of humdrum data."

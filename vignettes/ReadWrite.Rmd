@@ -1,10 +1,10 @@
 ---
-title: "Reading and writing data with humdrumR"
+title: "Reading and writing data"
 author: "Nathaniel Condit-Schultz"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Reading and writing data with humdrumR}
+  %\VignetteIndexEntry{Reading and writing data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
