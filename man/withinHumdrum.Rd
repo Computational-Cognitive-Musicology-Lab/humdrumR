@@ -6,15 +6,19 @@
 \alias{within.humdrumR}
 \title{with(in)Humdrum}
 \usage{
-\method{with}{humdrumR}(data, ..., drop = TRUE, variables = list())
+\method{with}{humdrumR}(data, ..., dataTypes = "D", drop = TRUE, variables = list())
 
-\method{within}{humdrumR}(data, ..., variables = list())
+\method{within}{humdrumR}(data, ..., dataTypes = "D", variables = list())
 }
 \arguments{
-\item{...}{Additional formulas/functions, or lists of formulas/functions.
-These are all simply appended to the \code{formulae} argument.}
+\item{...}{Any number of do expressions or evaluation modifying expressions.}
 
-\item{drop}{This argument is concetually similar to the \code{drop} argument in R matrices and data.frames.
+\item{dataTypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}.
+These characters  correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations,
+\strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
+is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+
+\item{drop}{This argument is conceptually similar to the \code{drop} argument in R matrices.
 If \code{drop = TRUE}, the output of \code{with.humdrumR} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
 a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
@@ -24,8 +28,9 @@ the output is consistent.}
 \item{humdrumR}{A \verb{[humdrumR][humdrumRclass]} data object.}
 }
 \value{
-From \code{within.humdrumR} and \code{inHumdrum}, a new humdrumR data object.
-From \code{with.humdrumR}, whatever value is returned by expression.
+From \code{within.humdrumR}  a new humdrumR data object.
+From \code{with.humdrumR}, whatever value is returned by the expression or, if \code{drop = TRUE},
+a \code{data.table}.
 }
 \description{
 Apply arbitrary expressions to fields within \link[=humdrumRclass]{humdrumR} data.
@@ -36,7 +41,7 @@ Apply arbitrary expressions to fields within \link[=humdrumRclass]{humdrumR} dat
 These functions are the primary means of working with
 humdrumR data. They are analogous to the base functions
 \link[base:with]{with and within}
-as applied to \link[base:data.frame]{data.frames}.
+methods for \link[base:data.frame]{data.frames}.
 Specifically they allow you to evaluate arbitrary
 expressions involving fields in a \link[=humdrumRclass]{humdrumR data object}.
 They also includes a number of special evaluation options:
@@ -55,59 +60,372 @@ inserts the results back into the humdrumR object (if possible), generating new
 fields called \code{ResultX} (see details).
 }
 
-\section{\code{Formulae}}{
-
-
-Every formula in the \code{formulae} argument
-is treated as a \code{Keyword ~ Expression(s)}
-pairing. Multiple expressions can be input using multiple \code{~} operators:
-\code{Keyword ~ Expression1 [~ Expression2 ~ ... ~ ExpressionN]}
-(the leftmost expression is treated as the keyword.)
-If there is no leftmost expression (i.e., \code{~ Expression}), the Keyword
-defaults to "\code{do}." The keyword expression must be a single, simple name/symbol, following
-standard R rules (i.e., "\code{.foobar}" is acceptable but "\code{3 + foobar}" is not).
-
-Legal keywords, and their meanings are:
-\enumerate{
-\item \code{do} An expression to be evaluated within the \code{humdrumR} data object (see "Expression evaluation").
-\item \code{doplot} An expression to be evaluated within the \code{humdrumR} data object while ignoring the result of the expression (see "Expression evaluation" and "Plotting".
-\item \code{by} An expression used to break the data into groups, with the \code{do} expression(s) evaluated
-separately in each group (see "Partitioning").
-\item \code{where} An expression indicating a subset of the data in which to evaluate the \code{do} expression (see "Partitioning").
-\item \code{ngrams} A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.
-\item \code{recordtypes} A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}. These characters
-correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations,
-\strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
-is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).
-\item \code{pre} An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
-or opening a graphing window. The \code{pre} expression is evaluated in the global environment.
-\item \code{post} An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.
-}
-}
-
 \section{Expression evaluation}{
 
 
-The right-hand side of any formula in the \code{formulae} argument with the keyword \code{do} or \code{doplot}
-(or with no keyword specified) is evaluated within the \code{humdrumR} data object.
-The expression can, thus, refer to any field in the humdrumR object (Record, Token, File, etc.).
-You can also include a \code{.} anywhere in the expression, which will be
-interpreted as the humdrumR object's current \verb{[dest=humdrumR][Active]}
-expression.\preformatted{humdata <- readHumdrum('directorywithdata/*.krn') # read some data
+Each call to \code{with}/\code{within.humdrumR} must have at least one expression to "\emph{do},"
+which we call "do" expressions.
+These expressions are evaluated (executed) within the \code{humdrumR} object's humdrum table.
+The expression can, thus, refer to any field in the humdrumR object (\code{Record}, \code{Token}, \code{File}, etc.).
 
-within(humdata, ~getPitch(Token)) # The most basic pattern
-within(humdata, ~getPitch(.)) # Same as previous (unless `Active` field has been changed))
+A number of special syntactic sugars can also be used in the "do" expressions.
+The most basic, is that a \code{.} anywhere in the expression, will be
+interpreted as the humdrumR object's current \link[=humActive]{active expression}.
 
-within(humdata, ~solfa(getPitch(Token), key = Key)) 
+If multiple do expressions are provided, each expression is evaluated in order, and
+can refer to results of the previous do expression as \code{.} (variables assigned in previous expressions
+can also be used.)
+Other syntactic sugars are described in sections below.\preformatted{humdata <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') # read some data
+
+within(humdata, pitch(Token))
+within(humdata, pitch(.)) # Same as previous (unless `Active` field has been changed))
+
+with(humdata, table(solfa(Token, Key = Key)))
 # Assumes that the Key field was parsed during the call to `[readHumdrum][readHumdrum]`
 
-within(humdata, ~getSemits(Token) - mean(getSemits(Token))) 
+within(humdata, semits(Token) - mean(semits(Token))) 
 
 }
 
-If multiple \code{do} expressions are provided, they are each evaluated one at a time,
-with the result of each piped into the next. Other, non-\code{do}, formulae (like \verb{by~} or
-\verb{ngrams~}) are reused for each expression evaluated.
+Unnamed arguments (or formulae without a left-hand side) are interpreted as \code{do} expressions.
+Do expressions can also be explicitely labeled by naming an argument "do" or with \code{do} on the left side
+of a formula:\if{html}{\out{<div class="sourceCode r">}}\preformatted{with(chorales, table(Token))
+}\if{html}{\out{</div>}}\preformatted{##     [2d     [2e     [4a     [4A     [4B     [4c     [4d     [4e     [4E     [4f    [4f#     [4g     [4G    [8cJ    [8CJ    [8gJ    16AL  16B-Jk 
+##       1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1 
+## 16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b 
+##       1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1 
+##    2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A 
+##       1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10 
+##    2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C; 
+##       1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1 
+##     2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-; 
+##       5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1 
+##     2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#; 
+##       9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1 
+##    2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f# 
+##       4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1 
+##     4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX 
+##       5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1 
+##      4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]     4BB    4BB-    4BB;      4c      4C     4c;     4C;     4c]     4c#     4C# 
+##      81      56      16      10       1       9       9       1      25       7       3      49      23       8       2       1      27      19 
+##    4c#;    4C#;     4cc    4cc;    4cc#   4ccnX    4CnX      4d      4D     4d-     4D-     4d;     4D;     4d]     4d#     4D#    4d#;     4dd 
+##       2       1      48       3      28       1       1      53      30       9       4       8       4       1       9       8       3      29 
+##     4DD    4dd-    4dd;    4dd#    4dnX    4DnX      4e      4E     4e-     4E-    4e-;     4e;     4E;     4e]     4E]     4e#     4E#    4e#; 
+##       1       7       2       3       2       1     103      43       7       6       2      14       7       1       1       3       2       1 
+##    4E#X     4ee     4EE    4ee-   4ee-X    4ee;    4EE;    4enX    4EnX      4f      4F     4f;     4F;     4f#     4F#    4f#;    4F#;    4F#X 
+##       1      20       2       3       1       1       2       1       1      50      12       2       2      47      30       4       2       1 
+##   4F#X;     4ff     4FF    4ff;    4FF;    4ff#    4FF#      4g      4G     4g-     4g;     4G;     4g]     4G]     4g#     4G#    4g#;    4G#; 
+##       1       6       3       1       1       1       2      66      33       1       8       3       2       1      34      21       5       3 
+##    4G#X   4G#X;     4gg     4GG    4GG;    4GG#    4gnX    4GnX      4r     4ry    8.cL      8a      8A     8a-     8A-    8a-J    8A-J    8a-L 
+##       1       1       1      15       5       2       1       1       2       2       1       5       5       2       1       2       1       4 
+##    8A-L   8a-XJ     8A#    8a#J    8A#J     8AA    8AA-    8AAJ    8AAL     8aJ     8AJ     8aL     8AL    8aL]    8AL]   8AnXL      8b     8b- 
+##       1       1       2       1       1       3       1       7       4      15      17      10      12       1       2       1       2       1 
+##     8B-    8b-J    8B-J    8b-L     8BB   8BB-J   8BB-L    8BBJ    8BBL     8bJ     8BJ     8bL     8BL      8c      8C     8C#    8c#J    8C#J 
+##       1       1       6       2       3       6       3       6       4      11      15      14      18       1       5       2       3       2 
+##    8c#L    8C#L   8c#XJ     8cc   8cc#J   8cc#L    8ccJ    8ccL     8cJ     8CJ     8cL     8CL    8cL]    8CL]   8cnXJ      8d      8D     8d- 
+##       5       4       1       2       2       2       7       7      15       8      14      14       1       1       1       5       3       1 
+##     8D-    8D-J    8D-L   8d-XJ    8d#J    8D#J    8d#L    8D#L     8dd   8dd#J    8ddJ    8ddL     8dJ     8DJ     8dL     8DL    8dL]    8dnJ 
+##       6       4       2       1       5       1       1       2       1       1       2       4      19      15      24       6       1       1 
+##      8e      8E     8E-    8e-J    8E-J    8e-L    8E-L    8EEJ    8eeL    8EEL     8eJ     8EJ     8eL     8EL    8eL]    8EL]      8f      8F 
+##       6       2       6       1       1       1       4       1       2       1      20       7      35      15       2       1       3       4 
+##     8f#     8F#    8f#J    8F#J    8f#L    8F#L   8f#L]   8F#XJ   8f#XL   8FF#J    8FFL     8fJ     8FJ     8fL     8FL    8fL]   8FnXL      8g 
+##       2       3      26      14      12       7       1       1       1       2       2       4       5       5       6       1       1       3 
+##      8G     8g#     8G#    8g#J    8G#J    8g#L    8G#L   8g#XJ     8GG    8GGJ    8GGL     8gJ     8GJ     8gL     8GL    8gL]    8GL]   8gnXL 
+##       4       4       4       7       7       5       3       1       2       2       2      14       8      14      17       3       1       2 
+##   8GnXL 
+##       1
+}\if{html}{\out{<div class="sourceCode r">}}\preformatted{with(chorales, do = table(Token))
+}\if{html}{\out{</div>}}\preformatted{##     [2d     [2e     [4a     [4A     [4B     [4c     [4d     [4e     [4E     [4f    [4f#     [4g     [4G    [8cJ    [8CJ    [8gJ    16AL  16B-Jk 
+##       1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1 
+## 16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b 
+##       1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1 
+##    2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A 
+##       1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10 
+##    2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C; 
+##       1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1 
+##     2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-; 
+##       5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1 
+##     2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#; 
+##       9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1 
+##    2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f# 
+##       4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1 
+##     4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX 
+##       5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1 
+##      4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]     4BB    4BB-    4BB;      4c      4C     4c;     4C;     4c]     4c#     4C# 
+##      81      56      16      10       1       9       9       1      25       7       3      49      23       8       2       1      27      19 
+##    4c#;    4C#;     4cc    4cc;    4cc#   4ccnX    4CnX      4d      4D     4d-     4D-     4d;     4D;     4d]     4d#     4D#    4d#;     4dd 
+##       2       1      48       3      28       1       1      53      30       9       4       8       4       1       9       8       3      29 
+##     4DD    4dd-    4dd;    4dd#    4dnX    4DnX      4e      4E     4e-     4E-    4e-;     4e;     4E;     4e]     4E]     4e#     4E#    4e#; 
+##       1       7       2       3       2       1     103      43       7       6       2      14       7       1       1       3       2       1 
+##    4E#X     4ee     4EE    4ee-   4ee-X    4ee;    4EE;    4enX    4EnX      4f      4F     4f;     4F;     4f#     4F#    4f#;    4F#;    4F#X 
+##       1      20       2       3       1       1       2       1       1      50      12       2       2      47      30       4       2       1 
+##   4F#X;     4ff     4FF    4ff;    4FF;    4ff#    4FF#      4g      4G     4g-     4g;     4G;     4g]     4G]     4g#     4G#    4g#;    4G#; 
+##       1       6       3       1       1       1       2      66      33       1       8       3       2       1      34      21       5       3 
+##    4G#X   4G#X;     4gg     4GG    4GG;    4GG#    4gnX    4GnX      4r     4ry    8.cL      8a      8A     8a-     8A-    8a-J    8A-J    8a-L 
+##       1       1       1      15       5       2       1       1       2       2       1       5       5       2       1       2       1       4 
+##    8A-L   8a-XJ     8A#    8a#J    8A#J     8AA    8AA-    8AAJ    8AAL     8aJ     8AJ     8aL     8AL    8aL]    8AL]   8AnXL      8b     8b- 
+##       1       1       2       1       1       3       1       7       4      15      17      10      12       1       2       1       2       1 
+##     8B-    8b-J    8B-J    8b-L     8BB   8BB-J   8BB-L    8BBJ    8BBL     8bJ     8BJ     8bL     8BL      8c      8C     8C#    8c#J    8C#J 
+##       1       1       6       2       3       6       3       6       4      11      15      14      18       1       5       2       3       2 
+##    8c#L    8C#L   8c#XJ     8cc   8cc#J   8cc#L    8ccJ    8ccL     8cJ     8CJ     8cL     8CL    8cL]    8CL]   8cnXJ      8d      8D     8d- 
+##       5       4       1       2       2       2       7       7      15       8      14      14       1       1       1       5       3       1 
+##     8D-    8D-J    8D-L   8d-XJ    8d#J    8D#J    8d#L    8D#L     8dd   8dd#J    8ddJ    8ddL     8dJ     8DJ     8dL     8DL    8dL]    8dnJ 
+##       6       4       2       1       5       1       1       2       1       1       2       4      19      15      24       6       1       1 
+##      8e      8E     8E-    8e-J    8E-J    8e-L    8E-L    8EEJ    8eeL    8EEL     8eJ     8EJ     8eL     8EL    8eL]    8EL]      8f      8F 
+##       6       2       6       1       1       1       4       1       2       1      20       7      35      15       2       1       3       4 
+##     8f#     8F#    8f#J    8F#J    8f#L    8F#L   8f#L]   8F#XJ   8f#XL   8FF#J    8FFL     8fJ     8FJ     8fL     8FL    8fL]   8FnXL      8g 
+##       2       3      26      14      12       7       1       1       1       2       2       4       5       5       6       1       1       3 
+##      8G     8g#     8G#    8g#J    8G#J    8g#L    8G#L   8g#XJ     8GG    8GGJ    8GGL     8gJ     8GJ     8gL     8GL    8gL]    8GL]   8gnXL 
+##       4       4       4       7       7       5       3       1       2       2       2      14       8      14      17       3       1       2 
+##   8GnXL 
+##       1
+}\if{html}{\out{<div class="sourceCode r">}}\preformatted{with(chorales, do ~ table(Token))
+}\if{html}{\out{</div>}}\preformatted{##     [2d     [2e     [4a     [4A     [4B     [4c     [4d     [4e     [4E     [4f    [4f#     [4g     [4G    [8cJ    [8CJ    [8gJ    16AL  16B-Jk 
+##       1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1 
+## 16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b 
+##       1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1 
+##    2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A 
+##       1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10 
+##    2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C; 
+##       1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1 
+##     2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-; 
+##       5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1 
+##     2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#; 
+##       9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1 
+##    2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f# 
+##       4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1 
+##     4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX 
+##       5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1 
+##      4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]     4BB    4BB-    4BB;      4c      4C     4c;     4C;     4c]     4c#     4C# 
+##      81      56      16      10       1       9       9       1      25       7       3      49      23       8       2       1      27      19 
+##    4c#;    4C#;     4cc    4cc;    4cc#   4ccnX    4CnX      4d      4D     4d-     4D-     4d;     4D;     4d]     4d#     4D#    4d#;     4dd 
+##       2       1      48       3      28       1       1      53      30       9       4       8       4       1       9       8       3      29 
+##     4DD    4dd-    4dd;    4dd#    4dnX    4DnX      4e      4E     4e-     4E-    4e-;     4e;     4E;     4e]     4E]     4e#     4E#    4e#; 
+##       1       7       2       3       2       1     103      43       7       6       2      14       7       1       1       3       2       1 
+##    4E#X     4ee     4EE    4ee-   4ee-X    4ee;    4EE;    4enX    4EnX      4f      4F     4f;     4F;     4f#     4F#    4f#;    4F#;    4F#X 
+##       1      20       2       3       1       1       2       1       1      50      12       2       2      47      30       4       2       1 
+##   4F#X;     4ff     4FF    4ff;    4FF;    4ff#    4FF#      4g      4G     4g-     4g;     4G;     4g]     4G]     4g#     4G#    4g#;    4G#; 
+##       1       6       3       1       1       1       2      66      33       1       8       3       2       1      34      21       5       3 
+##    4G#X   4G#X;     4gg     4GG    4GG;    4GG#    4gnX    4GnX      4r     4ry    8.cL      8a      8A     8a-     8A-    8a-J    8A-J    8a-L 
+##       1       1       1      15       5       2       1       1       2       2       1       5       5       2       1       2       1       4 
+##    8A-L   8a-XJ     8A#    8a#J    8A#J     8AA    8AA-    8AAJ    8AAL     8aJ     8AJ     8aL     8AL    8aL]    8AL]   8AnXL      8b     8b- 
+##       1       1       2       1       1       3       1       7       4      15      17      10      12       1       2       1       2       1 
+##     8B-    8b-J    8B-J    8b-L     8BB   8BB-J   8BB-L    8BBJ    8BBL     8bJ     8BJ     8bL     8BL      8c      8C     8C#    8c#J    8C#J 
+##       1       1       6       2       3       6       3       6       4      11      15      14      18       1       5       2       3       2 
+##    8c#L    8C#L   8c#XJ     8cc   8cc#J   8cc#L    8ccJ    8ccL     8cJ     8CJ     8cL     8CL    8cL]    8CL]   8cnXJ      8d      8D     8d- 
+##       5       4       1       2       2       2       7       7      15       8      14      14       1       1       1       5       3       1 
+##     8D-    8D-J    8D-L   8d-XJ    8d#J    8D#J    8d#L    8D#L     8dd   8dd#J    8ddJ    8ddL     8dJ     8DJ     8dL     8DL    8dL]    8dnJ 
+##       6       4       2       1       5       1       1       2       1       1       2       4      19      15      24       6       1       1 
+##      8e      8E     8E-    8e-J    8E-J    8e-L    8E-L    8EEJ    8eeL    8EEL     8eJ     8EJ     8eL     8EL    8eL]    8EL]      8f      8F 
+##       6       2       6       1       1       1       4       1       2       1      20       7      35      15       2       1       3       4 
+##     8f#     8F#    8f#J    8F#J    8f#L    8F#L   8f#L]   8F#XJ   8f#XL   8FF#J    8FFL     8fJ     8FJ     8fL     8FL    8fL]   8FnXL      8g 
+##       2       3      26      14      12       7       1       1       1       2       2       4       5       5       6       1       1       3 
+##      8G     8g#     8G#    8g#J    8G#J    8g#L    8G#L   8g#XJ     8GG    8GGJ    8GGL     8gJ     8GJ     8gL     8GL    8gL]    8GL]   8gnXL 
+##       4       4       4       7       7       5       3       1       2       2       2      14       8      14      17       3       1       2 
+##   8GnXL 
+##       1
+}\if{html}{\out{<div class="sourceCode r">}}\preformatted{# These all return the same result
+}\if{html}{\out{</div>}}
+\subsection{Special Do}{
+
+A few special versions of the \code{do} expression can be used.
+\itemize{
+\item \code{doplot}:
+\itemize{
+\item The expression is evaluated, but the original \code{humdrumR} input
+if returned unchanged. This can be used for achieving a side effect (like making a plot)
+without saving the result.
+}
+\item \code{dofill}:
+\itemize{
+\item The result is evaluated, and the result is recycled to the length of the input, making
+sure the result is the same length as the input.
+Basically, do fill is the equivalent of \code{rep(do ~ f(x), length.out = length(x))}.
+}
+}
+
+[8gJ    16AL  16B-Jk
+}
+
+\subsection{1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1}{
+}
+
+\subsection{16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b}{
+}
+
+\subsection{1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1}{
+}
+
+\subsection{2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A}{
+}
+
+\subsection{1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10}{
+}
+
+\subsection{2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C;}{
+}
+
+\subsection{1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1}{
+}
+
+\subsection{2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-;}{
+}
+
+\subsection{5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1}{
+}
+
+\subsection{2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#;}{
+}
+
+\subsection{9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1}{
+}
+
+\subsection{2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f#}{
+}
+
+\subsection{4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1}{
+}
+
+\subsection{4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX}{
+}
+
+\subsection{5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1}{
+}
+
+\subsection{4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]: R:8gJ\%20\%20\%20\%2016AL\%20\%2016B-Jk\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%2016b-XJJ\%20\%2016BBJJ\%20\%20\%2016BJJ\%20\%20\%2016C#L\%20\%2016c#LL\%20\%20\%2016ccL\%20\%2016ccLL\%20\%2016d#JJ\%20\%2016ddJJ\%20\%20\%2016dJJ\%20\%20\%2016EJJ\%20\%20\%20\%2016eL\%20\%20\%2016F#L\%20\%20\%20\%20\%201e;\%20\%20\%20\%202.a;\%20\%20\%20\%202.A;\%20\%20\%202.AA;\%20\%20\%20\%20\%202.b\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202.b;\%20\%20\%20\%202.B;\%20\%20\%202.BB;\%20\%20\%20\%202.c;\%20\%20\%20\%202.C#\%20\%20\%202.c#;\%20\%20\%20\%20\%202.d\%20\%20\%20\%202.d;\%20\%20\%20\%20\%202.e\%20\%20\%20\%202.e;\%20\%20\%20\%202.ee\%20\%20\%20\%202.f;\%20\%20\%202.f#;\%20\%20\%202.FF;\%20\%20\%20\%202.g;\%20\%20\%202.GG;\%20\%20\%20\%20\%20\%202a\%20\%20\%20\%20\%20\%202A\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2017\%20\%20\%20\%20\%20\%2010\%20\%0A##\%20\%20\%20\%202a-;\%20\%20\%20\%202A-;\%20\%20\%20\%20\%202a;\%20\%20\%20\%20\%202A;\%20\%20\%202AA-;\%20\%20\%20\%202AA;\%20\%20\%20\%20\%20\%202b\%20\%20\%20\%20\%20\%202B\%20\%20\%20\%202b-;\%20\%20\%20\%20\%202b;\%20\%20\%20\%20\%202B;\%20\%20\%20\%20\%202BB\%20\%20\%202BB-;\%20\%20\%20\%202BB;\%20\%20\%20\%20\%20\%202c\%20\%20\%20\%20\%20\%202C\%20\%20\%20\%20\%202c;\%20\%20\%20\%20\%202C;\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202c#\%20\%20\%20\%202c#;\%20\%20\%20\%20\%202cc\%20\%20\%20\%202cc#\%20\%20\%202cc#;\%20\%20\%20\%20\%20\%202d\%20\%20\%20\%20\%20\%202D\%20\%20\%20\%202d-;\%20\%20\%20\%20\%202d;\%20\%20\%20\%20\%202D;\%20\%20\%20\%20\%202d#\%20\%20\%20\%20\%202D#\%20\%20\%20\%202d#;\%20\%20\%20\%20\%202dd\%20\%20\%20\%202DnX\%20\%20\%20\%20\%20\%202e\%20\%20\%20\%20\%20\%202E\%20\%20\%20\%202e-;\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2013\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202e;\%20\%20\%20\%20\%202E;\%20\%20\%20\%20\%202E#\%20\%20\%20\%202EE;\%20\%20\%20\%20\%202f;\%20\%20\%20\%20\%202f#\%20\%20\%20\%20\%202F#\%20\%20\%20\%202f#;\%20\%20\%20\%202F#;\%20\%20\%20\%202FF;\%20\%20\%202FF#;\%20\%20\%20\%20\%20\%202g\%20\%20\%20\%20\%20\%202G\%20\%20\%20\%20\%202g;\%20\%20\%20\%20\%202G;\%20\%20\%20\%20\%202g#\%20\%20\%20\%20\%202G#\%20\%20\%20\%202g#;\%20\%0A##\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%207\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202G#;\%20\%20\%202G#X;\%20\%20\%20\%202GG;\%20\%20\%20\%20\%204.a\%20\%20\%20\%204.a-\%20\%20\%20\%20\%204.b\%20\%20\%20\%20\%204.B\%20\%20\%20\%204.b-\%20\%20\%20\%204.BB\%20\%20\%20\%20\%204.c\%20\%20\%204.cc#\%20\%20\%20\%20\%204.d\%20\%20\%20\%204.dd\%20\%20\%20\%20\%204.e\%20\%20\%20\%204.e-\%20\%20\%20\%204.ee\%20\%20\%20\%20\%204.f\%20\%20\%20\%204.f#\%20\%0A##\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%204.g\%20\%20\%20\%20\%20\%204a\%20\%20\%20\%20\%20\%204A\%20\%20\%20\%20\%204a-\%20\%20\%20\%20\%204A-\%20\%20\%20\%204a-;\%20\%20\%20\%204A-;\%20\%20\%20\%204a-X\%20\%20\%20\%20\%204a;\%20\%20\%20\%20\%204A;\%20\%20\%20\%20\%204a#\%20\%20\%20\%20\%204A#\%20\%20\%20\%20\%204AA\%20\%20\%20\%204AA-\%20\%20\%204AA-;\%20\%20\%20\%204AA;\%20\%20\%20\%204AA#\%20\%20\%20\%204anX\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%2090\%20\%20\%20\%20\%20\%2058\%20\%20\%20\%20\%20\%2015\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%2020\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%20\%204b\%20\%20\%20\%20\%20\%204B\%20\%20\%20\%20\%204b-\%20\%20\%20\%20\%204B-\%20\%20\%20\%204B-X\%20\%20\%20\%20\%204b;\%20\%20\%20\%20\%204B;\%20\%20\%20\%20\%204B}{
+
+[8gJ    16AL  16B-Jk
+}
+
+\subsection{1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1}{
+}
+
+\subsection{16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b}{
+}
+
+\subsection{1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1}{
+}
+
+\subsection{2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A}{
+}
+
+\subsection{1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10}{
+}
+
+\subsection{2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C;}{
+}
+
+\subsection{1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1}{
+}
+
+\subsection{2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-;}{
+}
+
+\subsection{5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1}{
+}
+
+\subsection{2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#;}{
+}
+
+\subsection{9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1}{
+}
+
+\subsection{2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f#}{
+}
+
+\subsection{4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1}{
+}
+
+\subsection{4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX}{
+}
+
+\subsection{5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1}{
+}
+
+\subsection{4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]: R:8gJ\%20\%20\%20\%2016AL\%20\%2016B-Jk\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%2016b-XJJ\%20\%2016BBJJ\%20\%20\%2016BJJ\%20\%20\%2016C#L\%20\%2016c#LL\%20\%20\%2016ccL\%20\%2016ccLL\%20\%2016d#JJ\%20\%2016ddJJ\%20\%20\%2016dJJ\%20\%20\%2016EJJ\%20\%20\%20\%2016eL\%20\%20\%2016F#L\%20\%20\%20\%20\%201e;\%20\%20\%20\%202.a;\%20\%20\%20\%202.A;\%20\%20\%202.AA;\%20\%20\%20\%20\%202.b\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202.b;\%20\%20\%20\%202.B;\%20\%20\%202.BB;\%20\%20\%20\%202.c;\%20\%20\%20\%202.C#\%20\%20\%202.c#;\%20\%20\%20\%20\%202.d\%20\%20\%20\%202.d;\%20\%20\%20\%20\%202.e\%20\%20\%20\%202.e;\%20\%20\%20\%202.ee\%20\%20\%20\%202.f;\%20\%20\%202.f#;\%20\%20\%202.FF;\%20\%20\%20\%202.g;\%20\%20\%202.GG;\%20\%20\%20\%20\%20\%202a\%20\%20\%20\%20\%20\%202A\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2017\%20\%20\%20\%20\%20\%2010\%20\%0A##\%20\%20\%20\%202a-;\%20\%20\%20\%202A-;\%20\%20\%20\%20\%202a;\%20\%20\%20\%20\%202A;\%20\%20\%202AA-;\%20\%20\%20\%202AA;\%20\%20\%20\%20\%20\%202b\%20\%20\%20\%20\%20\%202B\%20\%20\%20\%202b-;\%20\%20\%20\%20\%202b;\%20\%20\%20\%20\%202B;\%20\%20\%20\%20\%202BB\%20\%20\%202BB-;\%20\%20\%20\%202BB;\%20\%20\%20\%20\%20\%202c\%20\%20\%20\%20\%20\%202C\%20\%20\%20\%20\%202c;\%20\%20\%20\%20\%202C;\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202c#\%20\%20\%20\%202c#;\%20\%20\%20\%20\%202cc\%20\%20\%20\%202cc#\%20\%20\%202cc#;\%20\%20\%20\%20\%20\%202d\%20\%20\%20\%20\%20\%202D\%20\%20\%20\%202d-;\%20\%20\%20\%20\%202d;\%20\%20\%20\%20\%202D;\%20\%20\%20\%20\%202d#\%20\%20\%20\%20\%202D#\%20\%20\%20\%202d#;\%20\%20\%20\%20\%202dd\%20\%20\%20\%202DnX\%20\%20\%20\%20\%20\%202e\%20\%20\%20\%20\%20\%202E\%20\%20\%20\%202e-;\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2013\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202e;\%20\%20\%20\%20\%202E;\%20\%20\%20\%20\%202E#\%20\%20\%20\%202EE;\%20\%20\%20\%20\%202f;\%20\%20\%20\%20\%202f#\%20\%20\%20\%20\%202F#\%20\%20\%20\%202f#;\%20\%20\%20\%202F#;\%20\%20\%20\%202FF;\%20\%20\%202FF#;\%20\%20\%20\%20\%20\%202g\%20\%20\%20\%20\%20\%202G\%20\%20\%20\%20\%202g;\%20\%20\%20\%20\%202G;\%20\%20\%20\%20\%202g#\%20\%20\%20\%20\%202G#\%20\%20\%20\%202g#;\%20\%0A##\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%207\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202G#;\%20\%20\%202G#X;\%20\%20\%20\%202GG;\%20\%20\%20\%20\%204.a\%20\%20\%20\%204.a-\%20\%20\%20\%20\%204.b\%20\%20\%20\%20\%204.B\%20\%20\%20\%204.b-\%20\%20\%20\%204.BB\%20\%20\%20\%20\%204.c\%20\%20\%204.cc#\%20\%20\%20\%20\%204.d\%20\%20\%20\%204.dd\%20\%20\%20\%20\%204.e\%20\%20\%20\%204.e-\%20\%20\%20\%204.ee\%20\%20\%20\%20\%204.f\%20\%20\%20\%204.f#\%20\%0A##\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%204.g\%20\%20\%20\%20\%20\%204a\%20\%20\%20\%20\%20\%204A\%20\%20\%20\%20\%204a-\%20\%20\%20\%20\%204A-\%20\%20\%20\%204a-;\%20\%20\%20\%204A-;\%20\%20\%20\%204a-X\%20\%20\%20\%20\%204a;\%20\%20\%20\%20\%204A;\%20\%20\%20\%20\%204a#\%20\%20\%20\%20\%204A#\%20\%20\%20\%20\%204AA\%20\%20\%20\%204AA-\%20\%20\%204AA-;\%20\%20\%20\%204AA;\%20\%20\%20\%204AA#\%20\%20\%20\%204anX\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%2090\%20\%20\%20\%20\%20\%2058\%20\%20\%20\%20\%20\%2015\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%2020\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%20\%204b\%20\%20\%20\%20\%20\%204B\%20\%20\%20\%20\%204b-\%20\%20\%20\%20\%204B-\%20\%20\%20\%204B-X\%20\%20\%20\%20\%204b;\%20\%20\%20\%20\%204B;\%20\%20\%20\%20\%204B}{
+
+[8gJ    16AL  16B-Jk
+}
+
+\subsection{1       1       1       2       1       1       1       2       2       1       1       4       2       1       1       1       1       1}{
+}
+
+\subsection{16b-XJJ  16BBJJ   16BJJ   16C#L  16c#LL   16ccL  16ccLL  16d#JJ  16ddJJ   16dJJ   16EJJ    16eL   16F#L     1e;    2.a;    2.A;   2.AA;     2.b}{
+}
+
+\subsection{1       1       1       1       1       1       1       1       1       2       1       2       1       1       1       1       1       1}{
+}
+
+\subsection{2.b;    2.B;   2.BB;    2.c;    2.C#   2.c#;     2.d    2.d;     2.e    2.e;    2.ee    2.f;   2.f#;   2.FF;    2.g;   2.GG;      2a      2A}{
+}
+
+\subsection{1       1       1       1       1       1       1       2       1       1       1       1       1       1       1       1      17      10}{
+}
+
+\subsection{2a-;    2A-;     2a;     2A;   2AA-;    2AA;      2b      2B    2b-;     2b;     2B;     2BB   2BB-;    2BB;      2c      2C     2c;     2C;}{
+}
+
+\subsection{1       2       9       2       1       4      10       2       1       3       8       2       1       1       1       1       6       1}{
+}
+
+\subsection{2c#    2c#;     2cc    2cc#   2cc#;      2d      2D    2d-;     2d;     2D;     2d#     2D#    2d#;     2dd    2DnX      2e      2E    2e-;}{
+}
+
+\subsection{5       3       3       3       1       6       5       1       6       5       1       1       1       8       1      13       4       1}{
+}
+
+\subsection{2e;     2E;     2E#    2EE;     2f;     2f#     2F#    2f#;    2F#;    2FF;   2FF#;      2g      2G     2g;     2G;     2g#     2G#    2g#;}{
+}
+
+\subsection{9       5       1       1       4      10       4       5       1       3       1       7       1       3       1       4       1       1}{
+}
+
+\subsection{2G#;   2G#X;    2GG;     4.a    4.a-     4.b     4.B    4.b-    4.BB     4.c   4.cc#     4.d    4.dd     4.e    4.e-    4.ee     4.f    4.f#}{
+}
+
+\subsection{4       1       2       2       1       2       3       2       2       1       1       1       1       1       1       1       3       1}{
+}
+
+\subsection{4.g      4a      4A     4a-     4A-    4a-;    4A-;    4a-X     4a;     4A;     4a#     4A#     4AA    4AA-   4AA-;    4AA;    4AA#    4anX}{
+}
+
+\subsection{5      90      58      15       4       2       2       1       8       3       4       2      20       2       1       5       1       1}{
+}
+
+\subsection{4b      4B     4b-     4B-    4B-X     4b;     4B;     4B]: R:8gJ\%20\%20\%20\%2016AL\%20\%2016B-Jk\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%2016b-XJJ\%20\%2016BBJJ\%20\%20\%2016BJJ\%20\%20\%2016C#L\%20\%2016c#LL\%20\%20\%2016ccL\%20\%2016ccLL\%20\%2016d#JJ\%20\%2016ddJJ\%20\%20\%2016dJJ\%20\%20\%2016EJJ\%20\%20\%20\%2016eL\%20\%20\%2016F#L\%20\%20\%20\%20\%201e;\%20\%20\%20\%202.a;\%20\%20\%20\%202.A;\%20\%20\%202.AA;\%20\%20\%20\%20\%202.b\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202.b;\%20\%20\%20\%202.B;\%20\%20\%202.BB;\%20\%20\%20\%202.c;\%20\%20\%20\%202.C#\%20\%20\%202.c#;\%20\%20\%20\%20\%202.d\%20\%20\%20\%202.d;\%20\%20\%20\%20\%202.e\%20\%20\%20\%202.e;\%20\%20\%20\%202.ee\%20\%20\%20\%202.f;\%20\%20\%202.f#;\%20\%20\%202.FF;\%20\%20\%20\%202.g;\%20\%20\%202.GG;\%20\%20\%20\%20\%20\%202a\%20\%20\%20\%20\%20\%202A\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2017\%20\%20\%20\%20\%20\%2010\%20\%0A##\%20\%20\%20\%202a-;\%20\%20\%20\%202A-;\%20\%20\%20\%20\%202a;\%20\%20\%20\%20\%202A;\%20\%20\%202AA-;\%20\%20\%20\%202AA;\%20\%20\%20\%20\%20\%202b\%20\%20\%20\%20\%20\%202B\%20\%20\%20\%202b-;\%20\%20\%20\%20\%202b;\%20\%20\%20\%20\%202B;\%20\%20\%20\%20\%202BB\%20\%20\%202BB-;\%20\%20\%20\%202BB;\%20\%20\%20\%20\%20\%202c\%20\%20\%20\%20\%20\%202C\%20\%20\%20\%20\%202c;\%20\%20\%20\%20\%202C;\%20\%0A##\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202c#\%20\%20\%20\%202c#;\%20\%20\%20\%20\%202cc\%20\%20\%20\%202cc#\%20\%20\%202cc#;\%20\%20\%20\%20\%20\%202d\%20\%20\%20\%20\%20\%202D\%20\%20\%20\%202d-;\%20\%20\%20\%20\%202d;\%20\%20\%20\%20\%202D;\%20\%20\%20\%20\%202d#\%20\%20\%20\%20\%202D#\%20\%20\%20\%202d#;\%20\%20\%20\%20\%202dd\%20\%20\%20\%202DnX\%20\%20\%20\%20\%20\%202e\%20\%20\%20\%20\%20\%202E\%20\%20\%20\%202e-;\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%206\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%2013\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%202e;\%20\%20\%20\%20\%202E;\%20\%20\%20\%20\%202E#\%20\%20\%20\%202EE;\%20\%20\%20\%20\%202f;\%20\%20\%20\%20\%202f#\%20\%20\%20\%20\%202F#\%20\%20\%20\%202f#;\%20\%20\%20\%202F#;\%20\%20\%20\%202FF;\%20\%20\%202FF#;\%20\%20\%20\%20\%20\%202g\%20\%20\%20\%20\%20\%202G\%20\%20\%20\%20\%202g;\%20\%20\%20\%20\%202G;\%20\%20\%20\%20\%202g#\%20\%20\%20\%20\%202G#\%20\%20\%20\%202g#;\%20\%0A##\%20\%20\%20\%20\%20\%20\%209\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%2010\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%207\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%202G#;\%20\%20\%202G#X;\%20\%20\%20\%202GG;\%20\%20\%20\%20\%204.a\%20\%20\%20\%204.a-\%20\%20\%20\%20\%204.b\%20\%20\%20\%20\%204.B\%20\%20\%20\%204.b-\%20\%20\%20\%204.BB\%20\%20\%20\%20\%204.c\%20\%20\%204.cc#\%20\%20\%20\%20\%204.d\%20\%20\%20\%204.dd\%20\%20\%20\%20\%204.e\%20\%20\%20\%204.e-\%20\%20\%20\%204.ee\%20\%20\%20\%20\%204.f\%20\%20\%20\%204.f#\%20\%0A##\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%204.g\%20\%20\%20\%20\%20\%204a\%20\%20\%20\%20\%20\%204A\%20\%20\%20\%20\%204a-\%20\%20\%20\%20\%204A-\%20\%20\%20\%204a-;\%20\%20\%20\%204A-;\%20\%20\%20\%204a-X\%20\%20\%20\%20\%204a;\%20\%20\%20\%20\%204A;\%20\%20\%20\%20\%204a#\%20\%20\%20\%20\%204A#\%20\%20\%20\%20\%204AA\%20\%20\%20\%204AA-\%20\%20\%204AA-;\%20\%20\%20\%204AA;\%20\%20\%20\%204AA#\%20\%20\%20\%204anX\%20\%0A##\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%2090\%20\%20\%20\%20\%20\%2058\%20\%20\%20\%20\%20\%2015\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%208\%20\%20\%20\%20\%20\%20\%203\%20\%20\%20\%20\%20\%20\%204\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%2020\%20\%20\%20\%20\%20\%20\%202\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%205\%20\%20\%20\%20\%20\%20\%201\%20\%20\%20\%20\%20\%20\%201\%20\%0A##\%20\%20\%20\%20\%20\%204b\%20\%20\%20\%20\%20\%204B\%20\%20\%20\%20\%204b-\%20\%20\%20\%20\%204B-\%20\%20\%20\%204B-X\%20\%20\%20\%20\%204b;\%20\%20\%20\%20\%204B;\%20\%20\%20\%20\%204B}{
+}
+}
+
+\section{Special Evaluation Keywords}{
+
+
+\code{with.humdrumR} and \code{within.humdrumR} can be provided with
+additional keyword expressions which modify how the main "do" expressions are evaluted.
+The complete list of options are:
+\itemize{
+\item \code{by} (group by)
+\item \code{where} (apply to subset)
+\item \code{windows}
+\item \code{ngrams}
+\item \code{pre} and \code{post}
+}
+
+These special expressions can be specified either as named arguments
+(\code{with(data, do(x), by = group)}) or as formula, with the keyword on the left side
+(\verb{with(data, do(x), by ~ group}).
+Any unnamed argument (or formula without a left-side) is interpreted as a \code{do} expression,
+not a special expression.
+\itemize{
+\item A \code{by} expression is used to break the data into groups, with the \code{do} expression(s) evaluated
+separately in each group (see "Partitioning", below).
+The \code{by} expression must evaluate to something the full length of the humdrum table.
+\item A \code{where} expression must be a full-length logical vector, which indicates a subset of the data
+in which to evaluate the \code{do} expression (see "Partitioning", below).
+\item \code{ngrams} A positive number \emph{n}. The expression is evaluated across overlapping length-\emph{n} windows.
++. \code{pre} An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
+or opening a graphing window. The \code{pre} expression is evaluated in the global environment.
++. \code{post} An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.
+}
 }
 
 \section{Partitioning}{
@@ -277,7 +595,7 @@ or an \code{object}, the humdrum table is shrunk to fit them.
 \examples{
 humdata <- readHumdrum('directorywithdata/*.krn')
 
-within(humdata, ~nchar(.)) # counts characters in each data token.
-within(humdata, ~table(.), by ~ Spine) # Tabulates data tokens in each Spine.
+within(humdata, nchar(.)) # counts characters in each data token.
+within(humdata, table(.), by ~ Spine) # Tabulates data tokens in each Spine.
 
 }

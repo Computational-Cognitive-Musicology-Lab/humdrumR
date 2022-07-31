@@ -154,3 +154,28 @@ test_that('Examples from Working With Data vignette work', {
 })
 
 
+
+test_that("Examples from withinHumdrum docs work", {
+  
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+  
+  chorales <- within(chorales, Semits <- semits(Token))
+  humtab <- getHumtab(chorales)[!is.na(Spine) & !is.na(Semits)]
+  grandMean <- humtab[ , mean(Semits)]
+  
+  #
+  Count1 <- sort(humtab[ , sum(Semits > grandMean), by = Spine]$V1)
+  Count2 <- sort(with(chorales, length(Semits),where = Semits > mean(Semits),  by = Spine))
+  
+  expect_equal(Count1, Count2)
+  
+  #
+  Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine]$V1)
+  Count4 <- sort(with(chorales, length(Semits), by = Spine, where = Semits > mean(Semits)))
+  
+  expect_equal(Count3, Count4)
+  
+  expect_false(any(Count1 == Count3))
+  expect_false(any(Count2 == Count4))
+  
+})
