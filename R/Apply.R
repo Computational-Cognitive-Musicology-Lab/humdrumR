@@ -410,9 +410,13 @@ with.humdrumR <- function(data, ...,
   
   ####-
   ### Do we want extract the results from the data.table? 
-  if (drop && ncol(result) == 1L) {
-    result <- result[[1L]]
-    if (is.list(result) && length(result) == 1L) result <- result[[1]]
+  if (drop) {
+    if (ncol(result) == 1L) {
+      result <- result[[1L]]
+    } else {
+      result <- as.list(result)
+    }
+    # if (is.list(result) && length(result) == 1L) result <- result[[1]]
   } 
   attr(result, 'visible') <- NULL
   
@@ -498,7 +502,6 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
   # 
 
-  print(do)
   #evaluate "do" expression! 
   result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
@@ -508,13 +511,6 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   ## This is done here because if we call `with.humdrumR(drop = FALSE)`
   ## we want the same colnames as the new fields we would get.
   unnamedresult <- colnames(result) == 'Result'
-  assign <- quoTab[KeywordType == 'do' & Keyword != 'dofx', !is.na(AssignTo)][seq_along(unnamedresult)]
-  for (i in which(unnamedresult & assign)) {
-    colnames(newhumtab)[i] <- quoTab$AssignTo[i]
-    unnamedresult[i] <- FALSE
-  }
-  
-  
   if (sum(unnamedresult)) colnames(result)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_len(sum(unnamedresult)))
   
   # "post" stuff
@@ -816,11 +812,17 @@ concatDoQuos <- function(quoTab) {
     doQuos <- quoTab$Quo
     
     sideEffects <- grepl('fx', quoTab$Keyword)
-    assignOut <- vector('list', length(doQuos))
+    whichResult <- last(which(!sideEffects))
     
-    if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
+    if (tail(sideEffects, 1)) {
+      # this might not seem optimal, but actually gets around a lot of problems.
+      doQuos <- c(doQuos, rlang::quo(.))
+      sideEffects <- c(sideEffects, FALSE)
+    }
     
-    namedResult <- FALSE
+    
+    assignOut <- list()
+    resultName <- "Result"
     varname <- quote(.)
     for (i in 1:length(doQuos)) {
         if (i > 1L) doQuos[[i]] <- substituteName(doQuos[[i]], list(. = varname))
@@ -830,50 +832,33 @@ concatDoQuos <- function(quoTab) {
         exprA <- analyzeExpr(doQuos[[i]])
         
         if (exprA$Head == '<-') {
-          if (i == length(doQuos)) {
-            namedResult <- TRUE
-          } 
-          assignOut[[i]] <- varname <- exprA$Args[[1]]
-        } else {
-          if (i  == length(doQuos)) {
-            
+          varname <- exprA$Args[[1]]
+          if (i != whichResult) {
+            assignOut <- c(assignOut, varname)
           } else {
+            resultName <- as.character(varname)
+          }
+        } else {
+          if (i  < length(doQuos)) {
             varname <- rlang::sym(tempfile('xxx', tmpdir = ''))
             doQuos[[i]] <- rlang::new_quosure(expr(!!varname <- !!doQuos[[i]]), 
                                               env = rlang::quo_get_env(doQuos[[i]]))
-            
           }
-          # if (i == length(doQuos)) {
-            # assignOut[[i]] <- va
-            # varname <- 'Result'
-          # }
         }
-        names(assignOut)[i] <- as.character(varname)
     }
     # if (is.null(assignOut[[length(assignOut)]]))  assignOut$Result <- quote(result)
+    names(assignOut) <- sapply(assignOut, as.character)
 
-    
-            
-   if (namedResult) {
-     assignOut <- head(assignOut, -1L)
-     varname <-as.character(varname)
-   }
-    assignOut <- assignOut[!sapply(assignOut, is.null)]
-    
     quo({
       
-      result <- withVisible({!!!doQuos})
-      visible <- result$visible
-      result <- result$value
-      attr(result, 'visible') <- visible
+      result <- visible(withVisible({!!!doQuos}))
       if (!is.list(result)) {
         result <- list(result)
-        names(result) <- if (!!namedResult) !!varname else 'Result'
-        
+        names(result) <- !!resultName
       }
     
       c(list(!!!assignOut), result)
-      })
+      }) 
     
 }
 

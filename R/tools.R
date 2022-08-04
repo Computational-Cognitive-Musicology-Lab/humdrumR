@@ -1400,7 +1400,14 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 # Metaprogramming ----
 
 
-
+visible <- function(withV) {
+  visible <- withV$visible
+  result <- withV$value
+  
+  attr(result, 'visible') <- visible %||% TRUE
+  
+  result
+}
 
 applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
     exprA <- analyzeExpr(expr)
