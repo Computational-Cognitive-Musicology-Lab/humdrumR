@@ -405,20 +405,21 @@ with.humdrumR <- function(data, ...,
   checkhumdrumR(data, 'with.humdrumR')
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
-  visible <- attr(result, 'visible') %||% FALSE
   result[ , `_rowKey_` := NULL]
-  
-  ####-
   ### Do we want extract the results from the data.table? 
   if (drop) {
-    if (ncol(result) == 1L) {
-      result <- result[[1L]]
-    } else {
-      result <- as.list(result)
-    }
-    # if (is.list(result) && length(result) == 1L) result <- result[[1]]
-  } 
-  attr(result, 'visible') <- NULL
+    if (nrow(result) == 0L) return(NULL)
+    result <- result[[length(result)]]  
+    if (is.list(result) && length(result) == 1L) result <- result[[1]]
+    
+    visible <- attr(result, 'visible') %||% TRUE
+    attr(result, 'visible') <- NULL
+  } else {
+    if (nrow(result) == 0L)
+    visible <- TRUE
+    result[] <- lapply(result, \(r) {attr(r, 'visible') <- NULL ; r})
+  }
+  
   
   if (visible) result else invisible(result)
   
@@ -816,15 +817,16 @@ concatDoQuos <- function(quoTab) {
     
     if (tail(sideEffects, 1)) {
       # this might not seem optimal, but actually gets around a lot of problems.
-      doQuos <- c(doQuos, rlang::quo(.))
+      doQuos <- c(doQuos, 
+                  if (any(!sideEffects)) quote(.) else list(quote(NULL)))
       sideEffects <- c(sideEffects, FALSE)
     }
-    
     
     assignOut <- list()
     resultName <- "Result"
     varname <- quote(.)
     for (i in 1:length(doQuos)) {
+        if (is.null(doQuos[[i]])) next
         if (i > 1L) doQuos[[i]] <- substituteName(doQuos[[i]], list(. = varname))
         
         if (sideEffects[i]) next
@@ -852,7 +854,7 @@ concatDoQuos <- function(quoTab) {
     quo({
       
       result <- visible(withVisible({!!!doQuos}))
-      if (!is.list(result)) {
+      if (!is.null(result) && !is.list(result)) {
         result <- list(result)
         names(result) <- !!resultName
       }
@@ -1308,22 +1310,26 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (nrow(partQuos) == 0L) {
         result <- rlang::eval_tidy(doQuo, data = humtab)
         
-        do_attr(parseResult, result, humtab$`_rowKey_`)
+        parseResult(result, humtab$`_rowKey_`)
         # parseResult(result, humtab$`_rowKey_`)
         
     } else {
         result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
         
         if (!is.data.frame(result)) {
-          visible <- any(sapply(result, attr, which = 'visible'))
-          humattr <- humdrumRattr(result[[1]])
+          # visible <- any(sapply(result, attr, which = 'visible'))
+          # humattr <- humdrumRattr(result[[1]])
+          groupNames <- names(result)
+          
           if (partQuos$Keyword[1] == 'where' && !is.null(ordoQuo) && length(unique(lengths(result))) == 1L) {
             colnames(result[[2]]) <- colnames(result[[1]])
           }
           
           result <- data.table::rbindlist(result)
-          humdrumRattr(result[[1]]) <- humattr
-          attr(result, 'visible') <- visible
+          result$Names <- groupNames
+          result
+          # humdrumRattr(result[[1]]) <- humattr
+          # attr(result, 'visible') <- visible
         }
         
         result
@@ -1372,7 +1378,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
                       list(list(evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo))), 
                       by = partition, .SDcols = targetFields]
     
-    result$V1
+    setNames(result$V1, result$partition)
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
@@ -1415,7 +1421,7 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 parseResult <- function(result, rowKey) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
-    if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table())
+    if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table(Result = '', `_rowKey_` = 0L)[0])
     
     parseFunc <- switch(class(result)[1],
                         data.table = force,
@@ -1463,7 +1469,11 @@ parseResult_table <- function(result) {
 }
 
 parseResult_list  <- function(result) {
-  if (length(unique(lengths(result))) == 1L) as.data.table(result) else data.table(result)
+  attrs <- lapply(result, humdrumRattr)
+  result <- lapply(result, \(r) if (is.table(r)) list(r) else r)
+  dt <- as.data.table(result) 
+  dt[] <- Map(\(attr, d) {humdrumRattr(d) <- attr; d}, attrs, dt)
+  dt
 }
 parseResult_other <- function(result) data.table(list(result))
 

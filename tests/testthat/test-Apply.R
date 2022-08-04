@@ -165,7 +165,7 @@ test_that("Examples from withinHumdrum docs work", {
   
   #
   Count1 <- sort(humtab[ , sum(Semits > grandMean), by = Spine]$V1)
-  Count2 <- sort(with(chorales, length(Semits),where = Semits > mean(Semits),  by = Spine))
+  Count2 <- sort(with(chorales, length(Semits), where = Semits > mean(Semits),  by = Spine))
   
   expect_equal(Count1, Count2)
   
@@ -180,16 +180,20 @@ test_that("Examples from withinHumdrum docs work", {
   
 })
 
-test_that("Assignment and multiple do expressions work correctly", {
+test_that("Assignment and multiple do expressions work correctly in with.humdrumR", {
   
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
   
+  # factors
+
+    
   # with, single argument
   ### drop = TRUE
   A <- with(chorales, nchar(Token))
   B <- with(chorales, X <- nchar(Token))
   C <- with(chorales, list(X = nchar(Token)))
   
+  expect_null(dim(A))
   expect_identical(A, B)
   expect_identical(B, C)
   
@@ -208,23 +212,89 @@ test_that("Assignment and multiple do expressions work correctly", {
   A <- with(chorales, nchar(Token)^2)
   B <- with(chorales, nchar(Token), .^2)
   C <- with(chorales, substr(Token, 0,1), nchar(Token)^2)
+  D <- with(chorales, nchar(Token), .^2)
+  E <- with(chorales, NChar <- nchar(Token), NChar^2)
   
+  expect_null(dim(A))
   expect_identical(A, B)
   expect_identical(B, C)
+  expect_identical(C, D)
+  expect_identical(D, E)
   
   ### drop = FALSE
   
-  A <- with(chorales, nchar(Token)^2, drop = FALSE)
-  B <- with(chorales, nchar(Token), .^2, , drop = FALSE)
-  C <- with(chorales, substr(Token, 0,1), nchar(Token)^2, drop = FALSE)
+  A <- with(chorales, drop = FALSE, nchar(Token)^2)
+  B <- with(chorales, drop = FALSE, nchar(Token), .^2)
+  C <- with(chorales, drop = FALSE, substr(Token, 0,1), nchar(Token)^2)
+  D <- with(chorales, drop = FALSE, nchar(Token), .^2)
   
   expect_equal(colnames(A), 'Result1')
   expect_identical(A, B)
   expect_identical(B, C)
+  expect_identical(C, D)
   
-  D <- with(chorales, X <- nchar(Token)^2, drop = FALSE)
-  E <- with(chorales, X <- nchar(Token), .^2, drop = FALSE)
-  G <- with(chorales, X <- nchar(Token), X^2, drop = FALSE)
+  A <- with(chorales, drop = FALSE, NChar <- nchar(Token), NChar^2)
+  B <- with(chorales, drop = FALSE, list(NChar = nchar(Token), nchar(Token)^2))
+  C <- with(chorales, drop = FALSE, nchar(Token), list(NChar = ., .^2))
+  
+  expect_identical(colnames(A), c('NChar', 'Result1'))
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+  A <- with(chorales, drop = FALSE, NChar <- nchar(Token), Squared <- NChar^2)
+  B <- with(chorales, drop = FALSE, list(NChar = nchar(Token), Squared = nchar(Token)^2))
+  C <- with(chorales, drop = FALSE, Nchar <- nchar(Token), list(Squared = .^2))
+  D <- with(chorales, drop = FALSE, nchar(Token), list(NChar = ., Squared = .^2))
+  
+  expect_identical(colnames(A), c('NChar', 'Squared'))
+  expect_identical(A, B)
+  expect_identical(B, C)
+  expect_identical(C, D)
+  
+  
+  ## with fx
+  ### drop = TRUE
+  A <- with(chorales, nchar(Token), dofx = .^2)
+  B <- with(chorales, nchar(Token))
+
+  expect_identical(A, B)
+  
+  A <- with(chorales, nchar(Token), dofx = .^2, .^3)
+  B <- with(chorales, nchar(Token), .^3)
+  C <- with(chorales, nchar(Token)^3)
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+   #### # all fx
+  A <- with(chorales, dofx = nchar(Token))
+  B <- with(chorales, dofx = nchar(Token), dofx = Token == '4ee-')
+  expect_null(A)
+  expect_null(B)
+  
+  ### drop = FALSE
+  A <- with(chorales, drop = FALSE, nchar(Token), dofx = .^2)
+  B <- with(chorales, drop = FALSE, nchar(Token))
+  
+  expect_identical(A, B)
+  
+  A <- with(chorales, drop = FALSE, nchar(Token), dofx = .^2, .^3)
+  B <- with(chorales, drop = FALSE, nchar(Token), .^3)
+  C <- with(chorales, drop = FALSE, nchar(Token)^3)
+  expect_equal(ncol(A), 1)
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+  A <- with(chorales, drop = FALSE, Nchar <- nchar(Token), dofx = .^2, .^3)
+  B <- with(chorales, drop = FALSE, Nchar <- nchar(Token), dofx = .^2, Nchar^3)
+  expect_equal(ncol(A), 2)
+  expect_identical(A, B)
+  
+  #### # all fx
+  A <- with(chorales, drop = FALSE, dofx = nchar(Token))
+  B <- with(chorales, drop = FALSE, dofx = nchar(Token), dofx = Token == '4ee-')
+  expect_identical(A, B)
+  expect_equal(nrow(A), 0L)
+  
   
 })
 

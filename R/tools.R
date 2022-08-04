@@ -1401,6 +1401,7 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 
 visible <- function(withV) {
+  if (is.null(withV$value)) return(NULL)
   visible <- withV$visible
   result <- withV$value
   
