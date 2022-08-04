@@ -1400,6 +1400,8 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 # Metaprogramming ----
 
 
+
+
 applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
     exprA <- analyzeExpr(expr)
     output <- NULL

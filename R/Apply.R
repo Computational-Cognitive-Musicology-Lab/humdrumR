@@ -439,24 +439,14 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
     .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
           ifelse = sum(bad) > 1L, 
           "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
-          "For a complete list of structural fields, use the command fields(mdata, 'S').")
+          "For a complete list of structural fields, use the command fields(mydata, 'S').")
   }
   
-  
+ 
   ## put result into new humtab
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  
-  # number new results
-  unnamedresult <- which(colnames(newhumtab) == 'Result')
-  assign <- tail(quoTab[KeywordType == 'do' & Keyword != 'dofx' & !is.na(AssignTo), AssignTo], 1)
-  if (length(assign) & length(unnamedresult)) {
-    colnames(newhumtab)[unnamedresult[1]] <- assign[[1]]
-    unnamedresult <- unnamedresult[-1]
-  }
-  
-  if (length(unnamedresult)) colnames(newhumtab)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_along(unnamedresult))
   
   
   #### Put new humtable back into humdrumR object
@@ -467,10 +457,6 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
   
   # What do do if d is in recordtypes
-  # if (all(recordtypes == 'd') && all(newhumtab$Type == 'D')) {
-  #   humtab[ , `_rowKey_` := NULL]
-  #   newhumtab <- rbind(newhumtab, getHumtab(humdrumR, 'D'), fill = TRUE)
-  # }
   if (any(grepl('d', recordtypes))) {
     humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
   }
@@ -512,11 +498,24 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
   # 
 
-  
-  #### evaluate "do" expression! 
+  print(do)
+  #evaluate "do" expression! 
   result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
+  
+  #### number the unnamed new results
+  ## This is done here because if we call `with.humdrumR(drop = FALSE)`
+  ## we want the same colnames as the new fields we would get.
+  unnamedresult <- colnames(result) == 'Result'
+  assign <- quoTab[KeywordType == 'do' & Keyword != 'dofx', !is.na(AssignTo)][seq_along(unnamedresult)]
+  for (i in which(unnamedresult & assign)) {
+    colnames(newhumtab)[i] <- quoTab$AssignTo[i]
+    unnamedresult[i] <- FALSE
+  }
+  
+  
+  if (sum(unnamedresult)) colnames(result)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_len(sum(unnamedresult)))
   
   # "post" stuff
   evalPrePost(quoTab, 'post')
@@ -566,9 +565,9 @@ parseArgs <- function(..., variables = list(), withFunc) {
     
     if (quoA$Type == 'call') {
       if (quoA$Head == '<-') { # this block needs to happen first
-        quo <- rlang::new_quosure(quoA$Args[[2]], env = quoA$Environment)
+        # quo <- rlang::new_quosure(quoA$Args[[2]], env = quoA$Environment)
         assign <- deparse(quoA$Args[[1]])
-        quoA <- analyzeExpr(quo)
+        # quoA <- analyzeExpr(quo)
         if (as.character(assign)[1] == '~') {
           assign <- assign[[3]]
         }
@@ -784,14 +783,15 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   }
   
 
-  rlang::quo({
-    result <- withVisible(!!doQuo)
+  # rlang::quo({
+    # result <- withVisible(!!doQuo)
+    # 
+    # output <- result$value
+    # if (!is.null(output)) attr(output, 'visible') <- result$visible
+    # output
     
-    output <- result$value
-    if (!is.null(output)) attr(output, 'visible') <- result$visible
-    output
-    
-  })
+  # })
+  doQuo
 }
 
 
@@ -816,42 +816,65 @@ concatDoQuos <- function(quoTab) {
     doQuos <- quoTab$Quo
     
     sideEffects <- grepl('fx', quoTab$Keyword)
-    assignOut <- unlist(quoTab$Assign)
+    assignOut <- vector('list', length(doQuos))
     
     if (tail(sideEffects, 1)) doQuos <- c(doQuos, rlang::quo(.))
-
+    
+    namedResult <- FALSE
     varname <- quote(.)
     for (i in 1:length(doQuos)) {
         if (i > 1L) doQuos[[i]] <- substituteName(doQuos[[i]], list(. = varname))
         
-        expr <- rlang::quo_get_expr(doQuos[[i]])
+        if (sideEffects[i]) next
         
-        if ((i < length(doQuos) || any(!is.na(assignOut))) && 
-                           (length(expr) > 1 && expr[[1]] != '<-') &&
-                           !sideEffects[i]) {
+        exprA <- analyzeExpr(doQuos[[i]])
+        
+        if (exprA$Head == '<-') {
+          if (i == length(doQuos)) {
+            namedResult <- TRUE
+          } 
+          assignOut[[i]] <- varname <- exprA$Args[[1]]
+        } else {
+          if (i  == length(doQuos)) {
             
-          varname <- if (is.na(assignOut[i])) {
-            rlang::sym(tempfile('xxx', tmpdir = ''))
           } else {
-            rlang::sym(assignOut[i])
-          }
-     
+            varname <- rlang::sym(tempfile('xxx', tmpdir = ''))
             doQuos[[i]] <- rlang::new_quosure(expr(!!varname <- !!doQuos[[i]]), 
                                               env = rlang::quo_get_env(doQuos[[i]]))
             
-        } 
+          }
+          # if (i == length(doQuos)) {
+            # assignOut[[i]] <- va
+            # varname <- 'Result'
+          # }
+        }
+        names(assignOut)[i] <- as.character(varname)
     }
-    doQuo <- quo({!!!doQuos})
+    # if (is.null(assignOut[[length(assignOut)]]))  assignOut$Result <- quote(result)
+
     
-    if (any(!is.na(assignOut))) {
-      assignOut <- c(assignOut[!is.na(assignOut)],  if (is.na(tail(assignOut, 1L))) as.character(varname))
-      assignOut <- setNames(rlang::syms(assignOut), assignOut)
-      doQuo <- rlang::quo({
-        !!doQuo
-        list(!!!assignOut)
-        })
-    }
-    doQuo
+            
+   if (namedResult) {
+     assignOut <- head(assignOut, -1L)
+     varname <-as.character(varname)
+   }
+    assignOut <- assignOut[!sapply(assignOut, is.null)]
+    
+    quo({
+      
+      result <- withVisible({!!!doQuos})
+      visible <- result$visible
+      result <- result$value
+      attr(result, 'visible') <- visible
+      if (!is.list(result)) {
+        result <- list(result)
+        names(result) <- if (!!namedResult) !!varname else 'Result'
+        
+      }
+    
+      c(list(!!!assignOut), result)
+      })
+    
 }
 
 ####################### Functions used inside prepareQuo

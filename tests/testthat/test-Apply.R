@@ -179,3 +179,53 @@ test_that("Examples from withinHumdrum docs work", {
   expect_false(any(Count2 == Count4))
   
 })
+
+test_that("Assignment and multiple do expressions work correctly", {
+  
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+  
+  # with, single argument
+  ### drop = TRUE
+  A <- with(chorales, nchar(Token))
+  B <- with(chorales, X <- nchar(Token))
+  C <- with(chorales, list(X = nchar(Token)))
+  
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+  ### drop = FALSE
+  
+  A <- with(chorales, nchar(Token), drop = FALSE)
+  B <- with(chorales, X <- nchar(Token), drop = FALSE)
+  C <- with(chorales, list(X = nchar(Token)), drop = FALSE)
+  
+  expect_equal(colnames(A), 'Result1')
+  expect_equal(colnames(B), 'X')
+  expect_identical(B, C)
+  
+  # with, two arguments
+  ### drop = TRUE
+  A <- with(chorales, nchar(Token)^2)
+  B <- with(chorales, nchar(Token), .^2)
+  C <- with(chorales, substr(Token, 0,1), nchar(Token)^2)
+  
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+  ### drop = FALSE
+  
+  A <- with(chorales, nchar(Token)^2, drop = FALSE)
+  B <- with(chorales, nchar(Token), .^2, , drop = FALSE)
+  C <- with(chorales, substr(Token, 0,1), nchar(Token)^2, drop = FALSE)
+  
+  expect_equal(colnames(A), 'Result1')
+  expect_identical(A, B)
+  expect_identical(B, C)
+  
+  D <- with(chorales, X <- nchar(Token)^2, drop = FALSE)
+  E <- with(chorales, X <- nchar(Token), .^2, drop = FALSE)
+  G <- with(chorales, X <- nchar(Token), X^2, drop = FALSE)
+  
+})
+
+  
