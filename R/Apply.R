@@ -858,8 +858,8 @@ concatDoQuos <- function(quoTab) {
         result <- list(result)
         names(result) <- !!resultName
       }
-    
-      c(list(!!!assignOut), result)
+      results <- c(list(!!!assignOut), result)
+      results
       }) 
     
 }
@@ -1309,30 +1309,11 @@ evalPrePost <- function(quoTab, which = 'pre') {
 evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (nrow(partQuos) == 0L) {
         result <- rlang::eval_tidy(doQuo, data = humtab)
-        
         parseResult(result, humtab$`_rowKey_`)
-        # parseResult(result, humtab$`_rowKey_`)
         
     } else {
-        result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
+        evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
         
-        if (!is.data.frame(result)) {
-          # visible <- any(sapply(result, attr, which = 'visible'))
-          # humattr <- humdrumRattr(result[[1]])
-          groupNames <- names(result)
-          
-          if (partQuos$Keyword[1] == 'where' && !is.null(ordoQuo) && length(unique(lengths(result))) == 1L) {
-            colnames(result[[2]]) <- colnames(result[[1]])
-          }
-          
-          result <- data.table::rbindlist(result)
-          result$Names <- groupNames
-          result
-          # humdrumRattr(result[[1]]) <- humattr
-          # attr(result, 'visible') <- visible
-        }
-        
-        result
     }
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
@@ -1374,11 +1355,15 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     }
     
     
-    result <- humtab[ , 
-                      list(list(evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo))), 
+    result <- humtab[ , {
+                          evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
+                          evaled$`_partitionKey_` <- partition
+                          list(list(evaled)) 
+                          },
                       by = partition, .SDcols = targetFields]
     
-    setNames(result$V1, result$partition)
+    data.table::rbindlist(result$V1)
+    
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
@@ -1402,40 +1387,24 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 ## Reassembling humtable ----
 #######################################################-
 
-#This is the hard part, putting resultout output back into data.table
-
-# options:
-# Output are either length 1, same length as original, short (<21), or some length in between, or some other object.
-#     If they are same length, put them back where they came, or into new column, no collapsing.
-#     If they are length 1, put them back, but collapse everything else to 1
-#     If they are short (<21) AND named, place them as n appropriately named columns (nrow = 1), collapse everything else
-#     If they are less than 0, do nothing
-#     In any other case, put into list (to make it singleton) and collapse everything else.
-
-#     inputs are 1 or more vectors.
-#     Outputs, may be single vectors, or lists of vectors.
-#     Outpurs are either placed back in original column, or into new dummy columns
-#          if output is list of vectors of matching length, create new columns.
-#     Multiple input columns
 
 parseResult <- function(result, rowKey) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
     if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table(Result = '', `_rowKey_` = 0L)[0])
     
-    parseFunc <- switch(class(result)[1],
-                        data.table = force,
-                        data.frame = as.data.table,
-                        table      = parseResult_table,
-                        integer    = ,
-                        numeric    = ,
-                        factor     = ,
-                        character  = ,
-                        logical    = parseResult_vector,
-                        list       = parseResult_list,
-                        parseResult_other)
+    objects <- sapply(result, \(res) is.object(res) || !is.atomic(res))
+    result[objects] <- lapply(result[objects], 
+                              \(x) {
+                                attr <- humdrumRattr(x)
+                                x <- list(x)
+                                humdrumRattr(x) <- attr
+                                x
+                                })
     
-    result <- parseFunc(result)
+    if (length(unique(lengths(result))) > 1L) result <- list(result)
+    
+    result <- as.data.table(result)
     
     colnames(result)[colnames(result) == ""] <- "Result"
     colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
@@ -1451,33 +1420,6 @@ parseResult <- function(result, rowKey) {
     result
     
 }
-
-parseResult_vector <- function(result) {
-    if (!is.table(result) && allnamed(result) && length(result) < 15) {
-        # If it's a short vector and ALL the ellements are named,
-        # we'd like to make them each their own (named) field
-        # in a data.table
-        as.data.table(as.list(result))
-    } else {
-        data.table(Result = result)
-    }
-}
-
-parseResult_table <- function(result) {
-   names(dimnames(result)) <- NULL
-   data.table(list(result))
-}
-
-parseResult_list  <- function(result) {
-  attrs <- lapply(result, humdrumRattr)
-  result <- lapply(result, \(r) if (is.table(r)) list(r) else r)
-  dt <- as.data.table(result) 
-  dt[] <- Map(\(attr, d) {humdrumRattr(d) <- attr; d}, attrs, dt)
-  dt
-}
-parseResult_other <- function(result) data.table(list(result))
-
-
 
 
 
