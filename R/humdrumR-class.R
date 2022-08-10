@@ -1835,7 +1835,7 @@ activeAtomic <- function(humdrumR, dataTypes = 'D', sep = ', ') {
     maxlen <- max(lengths(values))
     short  <- lengths(values) < maxlen
     if (any(short)) {
-        values[short] <- lapply(values[short], \(val) c(val, rep(nullAs, maxlen - length(val))))
+        values[short] <- lapply(values[short], \(val) c(val, rep(NA, maxlen - length(val))))
     }
     
     null <- humtab[ , Null | Filter]

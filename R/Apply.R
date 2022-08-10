@@ -406,22 +406,16 @@ with.humdrumR <- function(data, ...,
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
   result[ , `_rowKey_` := NULL]
-  
-  partKey <- result$`_partitionKey_`
-  if (!is.null(partKey)) result[ , `_partitionKey_` := NULL]
   ### Do we want extract the results from the data.table? 
   if (drop) {
     if (nrow(result) == 0L) return(NULL)
     result <- result[[length(result)]]
-    if (!is.null(partKey)) names(result) <- partKey
-    
     if (is.list(result) && length(result) == 1L) result <- result[[1]]
     
     visible <- attr(result, 'visible') %||% TRUE
     attr(result, 'visible') <- NULL
   } else {
     visible <- TRUE
-    result[] <- lapply(result, \(r) {attr(r, 'visible') <- NULL ; r})
   }
   
   
@@ -1363,14 +1357,22 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     }
     
     
-    result <- humtab[ , {
+    results <- humtab[ , {
                           evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
                           evaled$`_partitionKey_` <- partition
                           list(list(evaled)) 
                           },
                       by = partition, .SDcols = targetFields]
     
-    data.table::rbindlist(result$V1)
+    result <- data.table::rbindlist(results$V1)
+    
+    
+    if (nrow(result) == nrow(results)) {
+      lists <- colnames(result)[sapply(result, is.list) & !grepl('^_.*_$', colnames(result))]
+      
+      for (col in lists) result[[col]] <- setNames(result[[col]], result$`_partitionKey_`) 
+    }
+    result[, `_partitionKey_` := NULL]
     
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
