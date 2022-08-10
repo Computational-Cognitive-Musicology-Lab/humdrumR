@@ -619,7 +619,10 @@ setMethod('as.vector',
           function(x, mode = 'any') {
                     if (is.empty(x)) return(vector(mode, 0L))
                     
-                    as.vector(evalActive(x@Active, getHumtab(x, 'D'), nullAs = '.', forceVector = TRUE))
+                    vec <- activeAtomic(x, 'D')
+                    if (mode != 'any') vec <- as(vec, mode)
+                    vec
+                    
                     })
 
 #' @name humCoercion
@@ -753,8 +756,8 @@ as.data.frames <- function(humdrumR, dataTypes = 'D', fieldnames = NULL, padder 
 # this function tests if the active column is a vector or not
 isActiveAtomic <- function(humdrumR) {
           checkhumdrumR(humdrumR, 'isActiveAtomic')
-          act <- evalActive(x@Active, getHumtab(x))
-          !is.object(act) && !is.list(act) 
+          act <- rlang::eval_tidy(x@Active, x@Humtable)
+          is.atomic(act) || (!is.object(act) && !is.list(act))
 }
 
 
@@ -1804,57 +1807,59 @@ NULL
 #' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', 'P'` 
 #'        or any combination of these in a single string (e.g., `"LIM"`).
 #'        (see the [humdrum table][humTable] documentation **Fields** section for an explanation.).
-#' @param forceVector `logical`. If `TRUE`, the result is forced to be an atomic vector.
-#' @param sep A length-one `character` string. If `forceVector == TRUE` this value is used as a separator 
-#'        between tokens that are collapsed.
-#' @param nullAsDot A single `atomic` value. Any null tokens are coerced to this value (default is `.`).
 #' @rdname humActive
 #' @export
-evalActive <- function(active, humtab, forceVector = FALSE, sep = ', ', nullAs = NA)  {
-  values <- rlang::eval_tidy(active, data = humtab)
+evalActive <- function(humdrumR, dataTypes = 'D')  {
+  dataTypes <- checkTypes(dataTypes, 'evalActive')
+  rlang::eval_tidy(humdrumR@Active, data = getHumtab(humdrumR, dataTypes))
   
-  if (is.atomic(values)) {
-    values[is.na(values)] <- nullAs
-  } else {
-    values[] <- lapply(values, 
-                       \(col) {
-                                 col[is.na(col)] <- nullAs
-                                 col
-                                 })
-  }
-  
-  if (!is.atomic(values) && forceVector) {
-      if (is.factor(values)) values <- as.character(values)
-      if (is.list(values)) {     
-          vectors <- sapply(values, is.atomic)
-          
-          values <- if (all(vectors) && all(lengths(values) == nrow(humtab))) {
-              do.call('.paste', c(values, sep = sep))
-          } else {
-              sapply(values, \(x) if (is.object(x)) object2str(x) else paste(x, collapse = sep))
-          }
-      }
-      if (is.matrix(values)) {
-          out <- character(nrow(humtab))
-          out[humtab$Type != 'D'] <- apply(values[humtab$Type != 'D', ], 1, \(row) paste(unique(row), collapse = sep))
-          out[humtab$Type == 'D'] <- apply(values[humtab$Type == 'D', ], 1, \(row) paste(       row , collapse = sep))
-          # rownames(out) <- locnames
-          values <- out
-      }   
-      if (is.object(values)) values <- object2str(values)
-      
-  }
-  
-  values
 }
 
-
+#' @rdname humActive
+#' @export
+activeAtomic <- function(humdrumR, dataTypes = 'D', sep = ', ') {
+    dataTypes <- checkTypes(dataTypes, 'activeVector')
+    
+    values <- evalActive(humdrumR, dataTypes)
+    humtab <- getHumtab(humdrumR, dataTypes)
+    
+    values <- if (is.list(values)) list.flatten(values) else list(values)
+    # result is a shallow list!
+    
+    
+    atomic <- sapply(values, is.atomic)
+    values[!atomic] <- lapply(values[!atomic], object2str)
+    
+    
+    
+    maxlen <- max(lengths(values))
+    short  <- lengths(values) < maxlen
+    if (any(short)) {
+        values[short] <- lapply(values[short], \(val) c(val, rep(nullAs, maxlen - length(val))))
+    }
+    
+    null <- humtab[ , Null | Filter]
+    values <- lapply(values,
+                     \(val) {
+                         val[null] <- NA
+                         val
+                     })
+    
+    if (length(values) == 1L) {
+        values[[1]]
+    } else {
+        values <- lapply(values, as.character)
+        do.call('.paste', c(values, list(sep = sep, na.if = all)))
+    }
+    
+    
+}
 
 #' `getActive(humdata)` is simply an accessor for the humdrumR object's Active quosure.
 #' @rdname humActive
 #' @export
 getActive <- function(humdrumR){
-    checkhumdrumR(humdrumR)
+    checkhumdrumR(humdrumR, 'getActive')
     humdrumR@Active 
 } 
 
@@ -1863,9 +1868,9 @@ getActive <- function(humdrumR){
 #' and sets the right side of formula as the object's Active expression.
 #' @rdname humActive
 #' @export
-setActive <- function(humdrumR, form) {
+setActive <- function(humdrumR, expr) {
   checkhumdrumR(humdrumR, 'setActive')
-  putActive(humdrumR, rlang::as_quosure(form))
+  putActive(humdrumR, rlang::enquo(expr))
 }
 
 
@@ -1894,24 +1899,24 @@ putActive <- function(humdrumR, actquo) {
     usedInExpr <- fieldsInExpr(humtab, actquo)
     
     
-    if (length(usedInExpr) == 0L) .stop("The 'active'-field formula for a humdrumR object must refer to some field.\n
-Add a reference to some field, for instance Token.")
+    if (length(usedInExpr) == 0L) .stop("The 'active'-field formula for a humdrumR object must refer to a field in the data.",
+                                        "Add a reference to a field, for instance 'Token'.")
     
     humdrumR <- update_Null(humdrumR, field = usedInExpr)
     humdrumR@Active <- actquo
     
-    act <- evalActive(actquo, humtab)
+    act <- rlang::eval_tidy(actquo, data = humtab)
+    
     nrows <- nrow(humtab)
-    if ((is.atomic(act) && length(act) == nrows)
-        || (!is.null(dim(act)) && dim(act)[1] == nrows)
-        || (is.list(act) && length(act) == nrows)
-        || (is.list(act) && all(lengths(act) == nrows))) {
-        return(humdrumR)
-    } else {
-        stop("The 'active-field formula for a humdrumR object cannot be a different size from the raw fields.", call. = FALSE)
+    if ((is.atomic(act) && length(act) != nrows)
+        && (!is.null(dim(act)) && dim(act)[1] != nrows)
+        && (is.list(act) && length(act) != nrows)
+        && (is.list(act) && all(lengths(act) != nrows))) {
+        .stop("The active-field for a humdrumR object cannot be a different size from the raw fields.")
     }
+   
     
-    
+    humdrumR
 }
 
 
@@ -2358,7 +2363,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   Nfiles <- length(humdrumR)          
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
-  humdrumR <- printableActiveField(humdrumR, dataTypes = 'D') 
+  humdrumR <- printableActiveField(humdrumR)
   
   .print_humtab(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                 max.records.file, max.token.length, collapseNull)
@@ -2368,21 +2373,23 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
 }
 
 
-printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE, sep = ', '){
+printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
-    dataTypes <- checkTypes(dataTypes, "printableActiveField")
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDdP') 
+    humtab <- getHumtab(humdrumR, 'GLIMDdP') 
     
-    active <- as.character(evalActive(humdrumR@Active, humtab,  
-                                      forceVector = TRUE, nullAs = "."))
+    field <- activeAtomic(humdrumR, 'GLIMDdP', sep = ', ')
+    
+    if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
+    if (is.factor(field)) field <- as.character(field)
+    
+    ## fill in null data
     humtab$Null[humtab$Type == 'P'] <- FALSE
     humtab$Filter[humtab$Type == 'P' | is.na(humtab$Filter)] <- FALSE
 
-    ## fill in null data
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
-    active[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    
+    field[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    
 
     ## fill from token field
     tokenFill <- if (useTokenNull) {
@@ -2390,23 +2397,24 @@ printableActiveField <- function(humdrumR, dataTypes = 'D', useTokenNull = TRUE,
         humtab[ , !Type %in% c('D', 'd') & Null]
     } else {
         # always get ** exclusive
-        humtab[ , (is.na(active) | active == '*') & grepl('\\*\\*', Token)]
+        humtab[ , (is.na(field) | field == '*') & grepl('\\*\\*', Token)]
     }
     
-    active[tokenFill] <- humtab[tokenFill == TRUE, Token]
+    field[tokenFill] <- humtab[tokenFill == TRUE, Token]
     
-    active <- gsub('\\.(, )+\\.', '.', active)
+    field <- gsub('\\.(, )+\\.', '.', field)
 
     
-    humtab[ , Print := active]
+    humtab[ , Print := field]
     humtab$Type[humtab$Type == 'd'] <- 'D'
     humtab$Type[humtab$Type == 'P'] <- 'D'
     
     putHumtab(humdrumR, overwriteEmpty = 'dP') <- humtab
     
     addFields(humdrumR) <- 'Print'
-    setActive(humdrumR, ~Print)
+    setActive(humdrumR, Print)
 }
+
 
 
 

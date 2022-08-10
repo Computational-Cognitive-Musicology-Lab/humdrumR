@@ -438,9 +438,13 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
-  bad <- overWrote %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece', 'Column', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Piece', 'Column', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
+    if ('Token' %in% overWrote[bad]) {
+      .stop("In your call to withinHumdrum, you can't overwrite the 'Token' field.",
+            "This field should always keep the original humdrum data you imported.")
+    }
     .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
           ifelse = sum(bad) > 1L, 
           "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
@@ -1393,7 +1397,7 @@ parseResult <- function(result, rowKey) {
     # indices and reconstructs the output object.
     if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table(Result = '', `_rowKey_` = 0L)[0])
     
-    objects <- sapply(result, \(res) is.object(res) || !is.atomic(res))
+    objects <- sapply(result, \(res) !is.atomic(res) || (!is.factor(res) && is.object(res)))
     result[objects] <- lapply(result[objects], 
                               \(x) {
                                 attr <- humdrumRattr(x)

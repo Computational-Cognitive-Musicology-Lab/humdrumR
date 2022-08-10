@@ -303,7 +303,12 @@ allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
 
-
+list.flatten <- function(list) {
+  output <- list()
+  
+  rapply(list, \(x) output <<- c(output, list(x)))
+  output
+}
 
 empty <- function(object, len = length(object), dimen = dim(object), value = NA) {
     if (is.atomic(object)) {

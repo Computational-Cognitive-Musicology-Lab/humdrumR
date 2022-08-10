@@ -219,7 +219,7 @@ subset.humdrumR <- function(x, ...) {
   putHumtab(x) <- removeNull(humtab, 'File', 'GLIMd')
   
   removeFields(x) <- '.TmpFilter.'
-  x <- setActive(x, oldActive)
+  x@Active <- oldActive
   
   
   x

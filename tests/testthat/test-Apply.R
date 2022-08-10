@@ -6,16 +6,16 @@ test_that('Grouping and where are consistent', {
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
 
-  chorales <- within(chorales, Token <- factor(Token))
+  chorales <- within(chorales, TokenF <- factor(Token))
 
-  alltab <- with(chorales, table(Token))
+  alltab <- with(chorales, table(TokenF))
 
   # grouping
-  spines <- with(chorales, table(Token), by = Spine)
+  spines <- with(chorales, table(TokenF), by = Spine)
   expect_true(all(Reduce('+', spines) == alltab))
 
   # where
-  spine1 <- with(chorales, table(Token), where = Spine == 1)
+  spine1 <- with(chorales, table(TokenF), where = Spine == 1)
   expect_true(all(spines[[1]] == spine1))
 
 })
