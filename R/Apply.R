@@ -406,16 +406,20 @@ with.humdrumR <- function(data, ...,
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
   result[ , `_rowKey_` := NULL]
+  
+  partKey <- result$`_partitionKey_`
+  if (!is.null(partKey)) result[ , `_partitionKey_` := NULL]
   ### Do we want extract the results from the data.table? 
   if (drop) {
     if (nrow(result) == 0L) return(NULL)
-    result <- result[[length(result)]]  
+    result <- result[[length(result)]]
+    if (!is.null(partKey)) names(result) <- partKey
+    
     if (is.list(result) && length(result) == 1L) result <- result[[1]]
     
     visible <- attr(result, 'visible') %||% TRUE
     attr(result, 'visible') <- NULL
   } else {
-    if (nrow(result) == 0L)
     visible <- TRUE
     result[] <- lapply(result, \(r) {attr(r, 'visible') <- NULL ; r})
   }
@@ -1395,7 +1399,7 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 parseResult <- function(result, rowKey) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
-    if (length(result) == 0L || all(lengths(result) == 0L)) return(data.table(Result = '', `_rowKey_` = 0L)[0])
+    if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
     
     objects <- sapply(result, \(res) !is.atomic(res) || (!is.factor(res) && is.object(res)))
     result[objects] <- lapply(result[objects], 
