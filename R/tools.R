@@ -332,7 +332,7 @@ catlists <- function(lists) {
     # this is just like do.call('c', lists) except it never returns NULL
     # and always returns a list.
     # if the lists are all empty, it returns an empty list
-    
+    if (any(lengths(lists) > 0)) browser()
     out <- do.call('c', lists)
     if(is.null(out)) out <- list() 
     if (!is.list(out)) out <- list(out)
@@ -811,6 +811,17 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 
 # Math ----
+
+entropy <- function(x, base) UseMethod('entropy')
+entropy.table <- function(x, base = 2) {
+  if (sum(x) != 1) x <- x / sum(x)
+  
+  -sum(x * log(x, base))
+  
+}
+entropy.default <- function(x, base = 2) {
+  entropy.table(table(x), base = base)
+}
 
 find2Dlayout <- function(n) {
   
@@ -2023,7 +2034,10 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
 # Strings ----
 
 
-matched <- function(x, table) table[pmatch(x, table)]
+matched <- function(x, table, nomatch = NA) {
+  y <- table[pmatch(x, table)]
+  ifelse(is.na(y), nomatch, y)
+}
 
 .paste <- function(..., sep = '', collapse = NULL, na.if = any, fill = NA_character_) {
 # paste, but smart about NA values
@@ -2121,18 +2135,22 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
 
 object2str <- function(object) {
     class <- class(object)[1]
-    if (class == 'table') {
-        n <- sum(object)
-        n <- if (n > 1000)  {
-            paste0('~', gsub('e\\+0?', 'e', formatC(n, format='e', digits = 0)))
-        } else {
-            paste0('=', n)
-        }
-        glue::glue("<table: k={length(object)}, n{n}>")
-    } else {
-        paste0('<', class, '>')
+    switch(class,
+           table = {
+             glue::glue("<table: k={length(object)}, n={num2str(sum(object))}>")
+           },
+           list = {
+             if (length(object) < 5) {
+               glue::glue('<list({harvard(unlist(object))})>')
+             } else {
+               glue::glue('list[{num2str(length(object))}]')
+             }
+             
+           },
+           paste0('<', class, '>')
+            )
+
         
-    }
 }
 
 num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')

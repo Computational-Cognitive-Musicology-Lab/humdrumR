@@ -1059,8 +1059,9 @@ collapseHumdrum <- function(humdrumR, byfields,
         if (collapseAtomic) {
             rlang::expr(paste(!!name, collapse = !!sep))
         } else {
-            call <- if (type == 'list') quote(catlists) else quote(list)
-            rlang::expr((!!call)(!!name))
+            # call <- if (type == 'list') quote(catlists) else quote(list)
+            # rlang::expr((!!call)(!!name))
+            rlang::expr(list(!!name))
         }
         
         },
@@ -1723,9 +1724,11 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
-    dataFields <- hum[ , field, with = FALSE]
-    dataFields <- lapply(dataFields, \(x) is.na(x) | x %in% c('.', '!', '*', '=', '_P'))
-    null <- Reduce('&', dataFields)
+    nulls <- lapply(hum[ , field, with = FALSE], 
+                    \(x) {
+                        if (is.list(x)) lengths(x) == 0L else  is.na(x) | x %in% c('.', '!', '*', '=', '_P')
+                    })
+    null <- Reduce('&', nulls)
     
     hum[, Null := null]
     
@@ -1823,20 +1826,22 @@ activeAtomic <- function(humdrumR, dataTypes = 'D', sep = ', ') {
     values <- evalActive(humdrumR, dataTypes)
     humtab <- getHumtab(humdrumR, dataTypes)
     
-    values <- if (is.list(values)) list.flatten(values) else list(values)
-    # result is a shallow list!
+    if (length(values) == nrow(humtab)) values <- list(values)
+    lists <- sapply(values, is.list)
+    values[lists] <- lapply(values[lists],
+                     \(l) {
+                         lens <- lengths(l)
+                         
+                         output <- rep(NA, length = length(lens))
+                         
+                         atomic <- sapply(l, is.atomic) 
+                         
+                         output[!atomic & lens > 0L] <- sapply(l[!atomic & lens > 0L], object2str)
+                         output
+                     })
     
-    
-    atomic <- sapply(values, is.atomic)
-    values[!atomic] <- lapply(values[!atomic], object2str)
-    
-    
-    
-    maxlen <- max(lengths(values))
-    short  <- lengths(values) < maxlen
-    if (any(short)) {
-        values[short] <- lapply(values[short], \(val) c(val, rep(NA, maxlen - length(val))))
-    }
+
+
     
     null <- humtab[ , Null | Filter]
     values <- lapply(values,
@@ -1908,11 +1913,9 @@ putActive <- function(humdrumR, actquo) {
     act <- rlang::eval_tidy(actquo, data = humtab)
     
     nrows <- nrow(humtab)
-    if ((is.atomic(act) && length(act) != nrows)
-        && (!is.null(dim(act)) && dim(act)[1] != nrows)
-        && (is.list(act) && length(act) != nrows)
-        && (is.list(act) && all(lengths(act) != nrows))) {
-        .stop("The active-field for a humdrumR object cannot be a different size from the raw fields.")
+    if (!(length(act) == nrows || all(lengths(act) == nrows))) {
+        .stop("The active-field for a humdrumR object must either be the same length as",
+              "the full humdrum table, or a list where each element is the right length.")
     }
    
     
@@ -1926,12 +1929,14 @@ putActive <- function(humdrumR, actquo) {
 
 
 checkFieldTypes <- function(types, argname, callname) {
-          checkArg(types,
-                   valid = \(arg) arg %in%  c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
-                   validoptions = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
-                   argname, callname, 
-                   min.length = 0L, max.length = 5L,
-                   classes = 'character')
+    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
+    types <- matched(types, valid, nomatch = types)
+    checkArg(types,
+             valid = \(arg) arg %in% valid,
+             validoptions = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
+             argname, callname, 
+             min.length = 0L, max.length = 5L,
+             classes = 'character')
 }
 
 #' The `$` operator controls which humdrumR data are printed and default target for result.
@@ -1992,29 +1997,26 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
   checkhumdrumR(humdrumR, 'fields')
     
-  D <- getHumtab(humdrumR)
  
-  valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
-  valid <- valid[pmatch(fieldTypes, valid)]
-  fieldTypes[!is.na(valid)] <- valid[!is.na(valid)]
   fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', 'fields')
             
   fields <- unlist(humdrumR@Fields[fieldTypes])
   
-  D <- D[1L, fields, with = FALSE]
-  classes <- sapply(D, class)
+  humtab <- getHumtab(humdrumR)[ , fields, with = FALSE]
   
-  if (any(lists <- classes == 'list')) {
+  classes <- sapply(humtab, class)
+  lists <- classes == 'list'
+  if (any(lists)) {
     classes[lists] <- paste0('list (of ',
-                             sapply(D[ , lists, with = FALSE],
-                                                \(col) {
-                                                  harvard(paste0(unique(sapply(col, class)), "s"), 'and')
+                             sapply(humtab[ , lists, with = FALSE],
+                                                \(field) {
+                                                  classes <- unique(sapply(unique(field), class))
+                                                  harvard(paste0(setdiff(classes, 'NULL'), "s"), 'and')
                                                 }),
                              ")")
   }
- 
+  
   output <- data.table(Name = fields, Class = classes, Type = gsub('[0-9]*$', '', names(fields)))
-  output <- output[output$Type %in% fieldTypes]
   
   output
 }
@@ -2404,6 +2406,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     
     field <- gsub('\\.(, )+\\.', '.', field)
 
+    if (any(is.na(field))) .stop('Print field has NA values')
     
     humtab[ , Print := field]
     humtab$Type[humtab$Type == 'd'] <- 'D'

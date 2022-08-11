@@ -464,8 +464,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab[ , `_partitionKey_` := NULL]
-  
+  newhumtab <- newhumtab[ , !grep('_by=..*_$', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -744,7 +743,14 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   dofills <- grepl('fill', doQuoTab$Keyword)
   doQuoTab$Quo[dofills] <- Map(fillQuo, doQuoTab$Quo[dofills], usedInExprs[dofills])
   
-
+  
+  doQuoTab$Quo <- Map(\(quo, used) {
+    lists <- vapply(humtab[1 , used, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
+    if (any(lists)) mapifyQuo(quo, used, depth = 1L) else quo
+  }, doQuoTab$Quo, usedInExprs)
+  
+  
+  
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(doQuoTab)
 
@@ -775,8 +781,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
 
   # if the targets are lists, Map
-  lists <- vapply(humtab[1 , usedInExpr, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
-  if (any(lists)) doQuo <- mapifyQuo(doQuo, usedInExpr, depth = 1L)
+
     
   # if ngram is present
   if (any(quoTab$Keyword == 'ngram')) {
@@ -1158,8 +1163,12 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
   rlang::quo_set_expr(funcQuosure, 
-                      rlang::expr({Map(f = !!rlang::quo_get_expr(funcQuosure), 
-                                      !!!lapply(usedInExpr, rlang::sym))}))
+                      rlang::expr({
+                        result <- Map(f = !!rlang::quo_get_expr(funcQuosure), 
+                                              !!!lapply(usedInExpr, rlang::sym))
+                        if (all(lengths(result) == 1L)) unlist(result) else result
+                        
+                        }))
 
 }
 
@@ -1375,7 +1384,6 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     result <- data.table::rbindlist(results$V1)
     
-    
  
     result
     
@@ -1409,7 +1417,7 @@ parseResult <- function(result, rowKey) {
   if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
   outLength <- sapply(result, height)
-  objects <- outLength == 1L
+  objects <- sapply(result, is.object)
   
   result[objects] <- lapply(result[objects], 
                             \(x) {
@@ -1449,22 +1457,6 @@ parseResult <- function(result, rowKey) {
     
 }
 
-flatten.result <- function(result, keyLength) {
-  keyLength <- c(max(rapply(result, length)), keyLength)
-  
-  flat <- \(val) {
-    if (!is.list(val) || length(val) %in% keyLength) return(list(val))
-    
-    
-    out <- list()
-    for (i in 1:length(val)) {
-      out <- c(out, Recall(val[[i]]))
-    }
-    out
-  }
-  
-  flat(result)
-}
 
 
 
