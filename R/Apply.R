@@ -405,12 +405,22 @@ with.humdrumR <- function(data, ...,
   checkhumdrumR(data, 'with.humdrumR')
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
   
-  result[ , `_rowKey_` := NULL]
+  result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
   if (drop) {
     if (nrow(result) == 0L) return(NULL)
-    result <- result[[length(result)]]
-    if (is.list(result) && length(result) == 1L) result <- result[[1]]
+    
+    bys <- grepl('^_by=..*_$', colnames(result))
+    
+    if (any(bys)) bynames <- do.call('paste', c(result[ , bys, with = FALSE], list(sep = ';')))
+    
+    result <- result[[max(!bys)]]
+    
+    if (is.list(result) && length(result) == 1L) {
+      result <- result[[1]]
+    } else {
+      if (any(bys)) names(result) <- bynames
+    }
     
     visible <- attr(result, 'visible') %||% TRUE
     attr(result, 'visible') <- NULL
@@ -454,6 +464,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
+  newhumtab[ , `_partitionKey_` := NULL]
   
   
   #### Put new humtable back into humdrumR object
@@ -855,11 +866,9 @@ concatDoQuos <- function(quoTab) {
 
     quo({
       
-      result <- visible(withVisible({!!!doQuos}))
-      if (!is.null(result) && !is.list(result)) {
-        result <- list(result)
-        names(result) <- !!resultName
-      }
+      result <- list(visible(withVisible({!!!doQuos})))
+      names(result) <- !!resultName
+      
       results <- c(list(!!!assignOut), result)
       results
       }) 
@@ -1314,8 +1323,8 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
         parseResult(result, humtab$`_rowKey_`)
         
     } else {
-        evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
-        
+        result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
+        result
     }
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
@@ -1355,11 +1364,11 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
                     mfcol = find2Dlayout(nparts))
       on.exit(par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt','pty', 'new')]))
     }
-    
+    partitionName <- paste0('_by=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
     
     results <- humtab[ , {
                           evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
-                          evaled$`_partitionKey_` <- partition
+                          evaled[[partitionName]] <- partition
                           list(list(evaled)) 
                           },
                       by = partition, .SDcols = targetFields]
@@ -1367,12 +1376,8 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     result <- data.table::rbindlist(results$V1)
     
     
-    if (nrow(result) == nrow(results)) {
-      lists <- colnames(result)[sapply(result, is.list) & !grepl('^_.*_$', colnames(result))]
-      
-      for (col in lists) result[[col]] <- setNames(result[[col]], result$`_partitionKey_`) 
-    }
-    result[, `_partitionKey_` := NULL]
+ 
+    result
     
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
@@ -1401,18 +1406,35 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 parseResult <- function(result, rowKey) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
-    if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
+  if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
+  
+  outLength <- sapply(result, height)
+  objects <- outLength == 1L
+  
+  result[objects] <- lapply(result[objects], 
+                            \(x) {
+                              attr <- humdrumRattr(x)
+                              x <- list(x)
+                              humdrumRattr(x) <- attr
+                              x
+                            })
+  
+  outLength <- unique(outLength)
+  if (length(outLength) > 1L) .stop('When using with(in).humdrumR, the result of the do expressions must be a vectors',
+                                    '(including lists) that are all the same lengths< or arrays with the same number of rows|>.',
+                                    ifelse = any(sapply(result, is.array)),
+                                    'In this case, the output list includes values that are {harvard(outLength, "and")} in length.')
+  
+  
+  
+  if (outLength > length(rowKey)) .stop("Sorry, with(in).humdrumR doesn't currently support do-expressions", 
+                                        "which return values that are longer than their input.",
+                                        "In this case, the input data is length {length(rowKey)} but the",
+                                        "do expression is evaluating to <values|a value> of length {outLength}.",
+                                        ifelse = length(result) > 1L)
+  
+  
     
-    objects <- sapply(result, \(res) !is.atomic(res) || (!is.factor(res) && is.object(res)))
-    result[objects] <- lapply(result[objects], 
-                              \(x) {
-                                attr <- humdrumRattr(x)
-                                x <- list(x)
-                                humdrumRattr(x) <- attr
-                                x
-                                })
-    
-    if (length(unique(lengths(result))) > 1L) result <- list(result)
     
     result <- as.data.table(result)
     
@@ -1420,17 +1442,29 @@ parseResult <- function(result, rowKey) {
     colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
     
     #
-    lenRes <- nrow(result)
-    lenKey <- length(rowKey)
+
     
-    if (lenRes > lenKey) stop("Sorry, within.humdrumR doesn't currently support functions/do-expressions
-                              that return values that are longer than their input.", .call = FALSE)
-    
-    result[ , `_rowKey_` := rowKey[1:lenRes]]
+    result[ , `_rowKey_` := rowKey[1:outLength]][]
     result
     
 }
 
+flatten.result <- function(result, keyLength) {
+  keyLength <- c(max(rapply(result, length)), keyLength)
+  
+  flat <- \(val) {
+    if (!is.list(val) || length(val) %in% keyLength) return(list(val))
+    
+    
+    out <- list()
+    for (i in 1:length(val)) {
+      out <- c(out, Recall(val[[i]]))
+    }
+    out
+  }
+  
+  flat(result)
+}
 
 
 

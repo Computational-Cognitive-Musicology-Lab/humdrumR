@@ -522,6 +522,11 @@ ldims <- function(xs) do.call('rbind', lapply(xs, ldim))
 
 size <- function(x) ldim(x)$size
 
+height <- function(x) {
+  if (is.object(x) || !(is.vector(x) || is.atomic(x) || is.list(x))) return(1L)
+  if (hasdim(x)) nrow(x) else length(x)
+}
+
 `%<-matchdim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
@@ -1518,9 +1523,17 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
                          atomic = expr,
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
-    exprA$Args <- if (exprA$Type == 'call') as.list(expr[-1]) else list()
-
+    exprA$Args <- if (exprA$Head == 'function') {
+      exprA$Type <- 'lambda'
+      exprA$Pairlist <- expr[[2]]
+      list(expr[[3]])
+    } else {
+      if (exprA$Type == 'call') as.list(expr[-1]) else list()
+    }
+   
     
+    
+
     if (stripBrackets && 
         exprA$Head %in% c("(", "{") && 
         length(exprA$Args) == 1L) {
@@ -1538,11 +1551,14 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 }
 
 unanalyzeExpr <- function(exprA) {
+  
     expr <- switch(exprA$Type,
                    call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
                    atomic = exprA$Head,
-                   symbol = rlang::sym(exprA$Head))
+                   symbol = rlang::sym(exprA$Head),
+                   lambda = call('function', exprA$Pairlist, exprA$Args[[1]]))
     
+    if (missing(expr)) return(rlang::missing_arg())
     if (exprA$Form != 'expression') {
         expr <- if (exprA$Form == 'formula') {
             rlang::new_formula(exprA$LHS, expr, env = exprA$Environment)
@@ -1550,7 +1566,6 @@ unanalyzeExpr <- function(exprA) {
             rlang::new_quosure(expr, env = exprA$Environment)
         }
     }
-    
     expr
 }
 
@@ -1569,9 +1584,12 @@ modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
         hit <- FALSE
     }
     
+
     if (exprA$Type == 'call' && !(hit && stopOnHit)) {
         for (i in seq_along(exprA$Args)) {
-            if (!is.null(exprA$Args[[i]])) exprA$Args[[i]] <- Recall(exprA$Args[[i]], 
+          # print(exprA$Args[[i]])
+          cur <- exprA$Args[[i]]
+            if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
                                                                      func = func, 
                                                                      predicate = predicate, 
                                                                      stopOnHit = stopOnHit,

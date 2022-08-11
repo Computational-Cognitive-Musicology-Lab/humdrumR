@@ -224,6 +224,9 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' @rdname RegexFind
 #' @export
 `%!grep%` <- Negate(`%grepl%`)
+#' @rdname RegexFind
+#' @export
+`%!grepi%` <- function(x, pattern) which(!x %grepl% pattern)
 #' @export
 #' @rdname RegexFind
 `%lgrepl%` <- function(list, pattern) Reduce(`|`, lapply(list, `%grepl%`, pattern = pattern)) 
