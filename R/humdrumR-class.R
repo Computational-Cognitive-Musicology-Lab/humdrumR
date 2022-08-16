@@ -271,7 +271,7 @@ NULL
 #' It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 #' (This always requires removing global records.)
 #' In order to do this, while maintaining a sensible relationship between spine which have spine paths,
-#' [humRead] automatically *pads* humdrum data into a complete, non-ragged 2d table.
+#' we imagine our humdrum data *padded* into a complete, non-ragged 2d table.
 #' For instance, given this file
 #' 
 #' ```
@@ -285,7 +285,7 @@ NULL
 #' *-      *-
 #' ```
 #' 
-#' [humRead] pads the file as so:
+#' We'd pad it out like:
 #' 
 #' ```
 #' **kern   _P       **kern
@@ -678,7 +678,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     if (ragged && alignColumns) x <- alignColumns(x, "_C")
                     
-                    dataTypes <- c(dataTypes, 'P')
+                    # dataTypes <- c(dataTypes, 'P')
                     x <- collapseRecords(x, collapseAtomic = FALSE, padPaths = TRUE)
                     
                     records <- getFields(x, fieldnames = fieldnames, dataTypes = dataTypes)
@@ -708,7 +708,24 @@ as.matrix.humdrumR <- function(x, dataTypes = 'D', fieldnames = NULL,
                     
                     
                     
-}                   
+}             
+
+as.matrix2 <- function(humdrumR) {
+    humtab <- getHumtab(humdrumR)
+    
+    
+    i <- data.table::frank(humtab, File, Record, ties.method = 'dense')
+    j <- humtab$Column
+    j[is.na(j)] <- 1L
+    
+    
+    output <- matrix(NA_character_, nrow = max(i), ncol = max(j))
+    
+    output[cbind(i, j)] <- humtab$Token
+    
+    output
+    
+}
 
 #' @name humCoercion
 #' @export
@@ -907,7 +924,7 @@ renumberFiles.data.table <- function(hum) {
 
 renumberSpines <- function(hum) UseMethod('renumberSpines')
 renumberSpines.humdrumR <- function(hum) {
-    humtab <- getHumtab(hum, 'GLIMDdP')
+    humtab <- getHumtab(hum, 'GLIMDd')
     putHumtab(hum, overwriteEmpty = c()) <- renumberSpines.data.table(humtab)
     hum
     
@@ -928,7 +945,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     
     checkhumdrumR(humdrumR, 'alignColumns')
     
-    humtab <- getHumtab(humdrumR, c('LIMDdP'))
+    humtab <- getHumtab(humdrumR, c('LIMDd'))
     
     
     ### Figuring out new column for each Spine/Path combination
@@ -966,7 +983,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     
     newrows <- is.na(humtabPadded$Type)
     humtabPadded$Stop[newrows]  <- 1L
-    humtabPadded$Type[newrows]  <- "P"
+    # humtabPadded$Type[newrows]  <- "P"
     humtabPadded$Token[newrows] <- padder
     
     humtabPadded$Spine <- allSpinePathcombs[humtabPadded$Column, 'Spine'] 
@@ -974,7 +991,7 @@ alignColumns <- function(humdrumR, padder = '_C') {
     
     orderHumtab(humtabPadded)
     
-    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- humtabPadded
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDd") <- humtabPadded
     humdrumR
     
 }
@@ -1038,7 +1055,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     # suitable for the "by" argument in a data.table[].
     checkhumdrumR(humdrumR, 'collapseHumdrum')
     
-    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDdP" else "GLIMDd")
+    humtab   <- getHumtab(humdrumR, dataTypes = if (padPaths) "GLIMDd" else "GLIMDd")
     
     # What fields do apply to?
     fieldnames <- unique(c(fields(humdrumR, "Data")$Name, activeFields(humdrumR)))
@@ -1091,7 +1108,7 @@ collapseHumdrum <- function(humdrumR, byfields,
     if (anyPaths(humdrumR) && !padPaths) collapsedhumtab <- rbindlist(list(collapsedhumtab,
                                                                            getHumtab(humdrumR, 'P')), use.names = TRUE,
                                                                       fill = TRUE) 
-    putHumtab(humdrumR, overwriteEmpty = "GLIMDdP") <- collapsedhumtab
+    putHumtab(humdrumR, overwriteEmpty = "GLIMDd") <- collapsedhumtab
     humdrumR
 }
 
@@ -1109,7 +1126,6 @@ collapseHumdrum2 <- function(humdrumR, by,
                         newfield <- rlang::sym(paste0(field, '_collapsed'))
                         field <- rlang::sym(field)
                         
-                        if ('P' %in% dataTypes) 
                         if (collapseAtomic) {
                             rlang::expr({
                                 !!newfield <- paste(!!field, collapse = !!sep)
@@ -1173,7 +1189,7 @@ collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     output <- collapseHumdrum(humdrumR, byfields = c('Filename', 'Record', 'Spine'), 
                               collapseAtomic = collapseAtomic, sep = sep, padPaths = FALSE)
     
-    output@Humtable <- output@Humtable[Type != 'P']
+    # output@Humtable <- output@Humtable[Type != 'P']
     
     output
     
@@ -1188,7 +1204,7 @@ collapsePaths2 <- function(humdrumR, collapseField = 'Token', collapseAtomic = T
     if (!anyPaths(humdrumR)) return(humdrumR)
     
     output <- collapseHumdrum2(humdrumR, collapseField = collapseField, 
-                               dataTypes = 'GLIMDdP',
+                               dataTypes = 'GLIMDd',
                                by = c('Filename', 'Record', 'Spine'), 
                                removeNull = list(removeEmptyPaths),
                                collapseAtomic = collapseAtomic, sep = sep)
@@ -1213,7 +1229,7 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
 }
 #' @rdname collapseHumdrum
 #' @export
-collapseRecords2 <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIMDdP', collapseAtomic = TRUE, sep = ' ') {
+collapseRecords2 <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIMDd', collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseRecords')
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
@@ -1360,7 +1376,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     # start work
     humdrumR <- setActiveFields(humdrumR, fromField)
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
+    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
     moves <- foldMoves(humtab, fold, onto, what, File, newFieldNames)
 
     # 
@@ -1537,7 +1553,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     fold <- unique(gsub('^\\*\\*', '', fold))
     onto <- unique(gsub('^\\*\\*', '', onto))
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDdP')
+    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
     moves <- humtab[,{
         toSpine <- unique(Spine[Exclusive == onto])
         if (length(toSpine)) {
@@ -1708,14 +1724,14 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' @rdname humTable
 #' @export
-getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')) {
+getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
           humtab <- humdrumR@Humtable
           
            
           checkhumdrumR(humdrumR, 'getHumtab')
           dataTypes <- checkTypes(dataTypes, 'getHumtab')
           
-          if (length(setdiff(c('G', 'L', 'I', 'M', 'D', 'd', 'P'), dataTypes))) {
+          if (length(setdiff(c('G', 'L', 'I', 'M', 'D', 'd'), dataTypes))) {
               humtab <- humtab[Type %in% dataTypes]
           }
           
@@ -1724,7 +1740,7 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')
 }
 
 
-`putHumtab<-` <- function(humdrumR, value, overwriteEmpty = 'GLIMDdP') {
+`putHumtab<-` <- function(humdrumR, value, overwriteEmpty = 'GLIMDd') {
           # adds humtab into humdrumR
           # Drop determines whether record dataTypes that are 
           # absent from value are left unchanged (drop = FALSE)
@@ -1734,7 +1750,7 @@ getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd', 'P')
     
     
           if (length(overwriteEmpty)) {
-              if (overwriteEmpty == 'GLIMDdP') {
+              if (overwriteEmpty == 'GLIMDd') {
                   humdrumR@Humtable <- value
                  return(humdrumR)
                 }
@@ -1809,7 +1825,7 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, overwriteEmpty = "GLIMDdP") <- update_Null.data.table(humtab, field = field)
+    putHumtab(hum, overwriteEmpty = "GLIMDd") <- update_Null.data.table(humtab, field = field)
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
@@ -1896,7 +1912,7 @@ NULL
 #' 
 #' 
 #' @param humdrumR A [humdrumRclass] data object.
-#' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', 'P'` 
+#' @param dataTypes Which dataTypes of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd', ` 
 #'        or any combination of these in a single string (e.g., `"LIM"`).
 #'        (see the [humdrum table][humTable] documentation **Fields** section for an explanation.).
 #' @rdname humActive
@@ -2180,7 +2196,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 # and coerceds them to characters, filling in null tokens (! * = .) where there are 
 # NAs.
 # is useToken is true, the Token field is used to fill-in (instead of null tokens).
- humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+ humtab <- getHumtab(humdrumR, 'GLIMDd') 
  
  nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
  
@@ -2399,7 +2415,7 @@ setMethod('[<-', signature = c(x = 'humdrumR', i = 'character', j = 'ANY', value
                     if (any(grepl('Result', colnames(humtab)))) humtab[ , eval(grep('Result', colnames(humtab), value = TRUE)) := NULL]
                     
                     humtab <- update_humdrumR(humtab, field = i)
-                    putHumtab(value, overwriteEmpty = "GLIMDdP") <- humtab
+                    putHumtab(value, overwriteEmpty = "GLIMDd") <- humtab
                     
                     addFields(value) <- i
                     
@@ -2472,18 +2488,18 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
     
-    humtab <- getHumtab(humdrumR, 'GLIMDdP') 
+    humtab <- getHumtab(humdrumR, 'GLIMDd') 
     
-    field <- activeAtomic(humdrumR, 'GLIMDdP', sep = ', ')
+    field <- activeAtomic(humdrumR, 'GLIMDd', sep = ', ')
     
     if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
     if (is.factor(field)) field <- as.character(field)
     
     ## fill in null data
-    # humtab$Null[humtab$Type == 'P'] <- FALSE
-    # humtab$Filter[humtab$Type == 'P' | is.na(humtab$Filter)] <- FALSE
+    # humtab$Null[humtab$Type == ] <- FALSE
+    # humtab$Filter[humtab$Type ==  | is.na(humtab$Filter)] <- FALSE
 
-    nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
+    nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')
     field[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    
 
     ## fill from token field
@@ -2503,9 +2519,9 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     
     humtab[ , Print := field]
     humtab$Type[humtab$Type == 'd'] <- 'D'
-    humtab$Type[humtab$Type == 'P'] <- 'D'
+    # humtab$Type[humtab$Type == 'P'] <- 'D'
     
-    putHumtab(humdrumR, overwriteEmpty = 'dP') <- humtab
+    putHumtab(humdrumR, overwriteEmpty = 'd') <- humtab
     
     addFields(humdrumR) <- 'Print'
     setActive(humdrumR, Print)

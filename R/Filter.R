@@ -416,9 +416,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
              
             } else {
               x <- if (all(i > 0L)) {
-                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDdP')
+                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDd')
               } else {
-                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDdP')
+                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDd')
               }
           
             }

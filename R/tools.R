@@ -1988,8 +1988,8 @@ checkRoundingFunction <- function(x, argname, callname) {
 checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
     dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
     checkArg(dataTypes,
-             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
-              validoptions = c('G', 'L', 'I', 'M', 'D', 'd', 'P'),
+             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd'),
+              validoptions = c('G', 'L', 'I', 'M', 'D', 'd'),
               argname, callname,
               min.length = 1L, max.length = 7L,
               classes = "character")
