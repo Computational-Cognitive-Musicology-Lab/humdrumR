@@ -5,7 +5,7 @@
 \alias{getHumtab}
 \title{Humdrum Tables}
 \usage{
-getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d", "P"))
+getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
 }
 \arguments{
 \item{humdrumR}{A \code{humdrumR} object.}

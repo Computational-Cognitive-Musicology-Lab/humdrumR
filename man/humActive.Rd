@@ -3,32 +3,28 @@
 \name{humActive}
 \alias{humActive}
 \alias{evalActive}
+\alias{activeAtomic}
 \alias{getActive}
 \alias{setActive}
 \alias{setActiveFields}
 \title{The "Active expression" of a humdrumR object.}
 \usage{
-evalActive(active, humtab, forceVector = FALSE, sep = ", ", nullAs = NA)
+evalActive(humdrumR, dataTypes = "D")
+
+activeAtomic(humdrumR, dataTypes = "D", sep = ", ")
 
 getActive(humdrumR)
 
-setActive(humdrumR, form)
+setActive(humdrumR, expr)
 
 setActiveFields(humdrumR, fieldnames)
 }
 \arguments{
-\item{forceVector}{\code{logical}. If \code{TRUE}, the result is forced to be an atomic vector.}
-
-\item{sep}{A length-one \code{character} string. If \code{forceVector == TRUE} this value is used as a separator
-between tokens that are collapsed.}
-
 \item{humdrumR}{A \link{humdrumRclass} data object.}
 
-\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', 'P'}
+\item{dataTypes}{Which dataTypes of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', }
 or any combination of these in a single string (e.g., \code{"LIM"}).
 (see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for an explanation.).}
-
-\item{nullAsDot}{A single \code{atomic} value. Any null tokens are coerced to this value (default is \code{.}).}
 }
 \description{
 This "Active" expression is used as the default value in a lot of humdrumR code.

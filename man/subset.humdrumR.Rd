@@ -5,6 +5,7 @@
 \alias{clearFilter}
 \alias{removeEmptyFiles}
 \alias{removeEmptySpines}
+\alias{removeEmptyPaths}
 \alias{removeEmptyRecords}
 \alias{removeEmptyStops}
 \title{Filter humdrum data}
@@ -16,6 +17,8 @@ clearFilter(humdrumR)
 removeEmptyFiles(humdrumR)
 
 removeEmptySpines(humdrumR)
+
+removeEmptyPaths(humdrumR)
 
 removeEmptyRecords(humdrumR)
 

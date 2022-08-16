@@ -19,31 +19,11 @@ as.lines(
   padder = "."
 )
 
-\method{as.matrix}{humdrumR}(
-  x,
-  dataTypes = "D",
-  fieldnames = NULL,
-  alignColumns = TRUE,
-  padder = NA,
-  path.collapse = TRUE
-)
+\method{as.matrix}{humdrumR}(x, dataTypes = "D", alignColumns = TRUE, padder = NA)
 
-\S4method{as.data.frame}{humdrumR}(
-  x,
-  dataTypes = "D",
-  fieldname = NULL,
-  padder = NA,
-  collapse.path = TRUE
-)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "D", alignColumns = TRUE, padder = NA)
 
-as.matrices(
-  humdrumR,
-  dataTypes = "D",
-  fieldnames = NULL,
-  padder = NA,
-  path.collapse = TRUE,
-  alignColumns = FALSE
-)
+as.matrices(humdrumR, dataTypes = "D", alignColumns = TRUE, padder = NA)
 
 as.data.frames(
   humdrumR,

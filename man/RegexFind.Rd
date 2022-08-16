@@ -8,6 +8,7 @@
 \alias{\%grepm\%}
 \alias{\%grep\%}
 \alias{\%!grep\%}
+\alias{\%!grepi\%}
 \alias{\%lgrepl\%}
 \alias{\%lgrepi\%}
 \alias{\%lgrepn\%}
@@ -24,6 +25,8 @@ x \%grepm\% pattern
 x \%grep\% pattern
 
 ... \%!grep\% NA
+
+x \%!grepi\% pattern
 
 list \%lgrepl\% pattern
 

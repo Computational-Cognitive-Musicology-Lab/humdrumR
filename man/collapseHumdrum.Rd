@@ -9,17 +9,35 @@
 \usage{
 collapseHumdrum(
   humdrumR,
-  byfields,
+  by,
+  collapseField = "Token",
+  dataTypes = "Dd",
+  removeNull = list(),
   collapseAtomic = TRUE,
-  sep = " ",
-  padPaths = FALSE
+  sep = " "
 )
 
-collapseStops(humdrumR, collapseAtomic = TRUE, sep = " ")
+collapseStops(
+  humdrumR,
+  collapseField = "Token",
+  collapseAtomic = TRUE,
+  sep = " "
+)
 
-collapsePaths(humdrumR, collapseAtomic = TRUE, sep = " ")
+collapsePaths(
+  humdrumR,
+  collapseField = "Token",
+  collapseAtomic = TRUE,
+  sep = " "
+)
 
-collapseRecords(humdrumR, collapseAtomic = TRUE, sep = " ", padPaths = FALSE)
+collapseRecords(
+  humdrumR,
+  collapseField = "Token",
+  dataTypes = "GLIMDd",
+  collapseAtomic = TRUE,
+  sep = " "
+)
 }
 \arguments{
 \item{humdrumR}{A \link{humdrumRclass} data object.

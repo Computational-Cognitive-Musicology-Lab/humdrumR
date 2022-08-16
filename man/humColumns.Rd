@@ -2,11 +2,7 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humColumns}
 \alias{humColumns}
-\alias{alignColumns}
 \title{Spines vs Paths vs Columns}
-\usage{
-alignColumns(humdrumR, padder = "_C")
-}
 \description{
 In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
 which are not the same as "columns" in a spreadsheet. A "column" refers to a
@@ -46,7 +42,7 @@ A spine with no splits will have all \code{0L}s in its \code{Path} field.
 It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 (This always requires removing global records.)
 In order to do this, while maintaining a sensible relationship between spine which have spine paths,
-\link{humRead} automatically \emph{pads} humdrum data into a complete, non-ragged 2d table.
+we imagine our humdrum data \emph{padded} into a complete, non-ragged 2d table.
 For instance, given this file\preformatted{**kern  **kern
 A       E
 *^      *
@@ -57,7 +53,7 @@ A       C
 *-      *-
 }
 
-\link{humRead} pads the file as so:\preformatted{**kern   _P       **kern
+We'd pad it out like:\preformatted{**kern   _P       **kern
 A        _P       E
 *^       _P       *
 A        C        E
