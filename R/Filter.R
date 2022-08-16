@@ -283,6 +283,13 @@ removeEmptySpines <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptySpines')
   removeNull(humdrumR,  c('File', 'Spine'), 'LIMd')
 }
+
+#' @export
+#' @rdname subset.humdrumR
+removeEmptyPaths <- function(humdrumR) {
+  checkhumdrumR(humdrumR, 'removeEmptyPaths')
+  removeNull(humdrumR,  c('File', 'Spine', 'Path'), 'LIMd')
+}
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyRecords <- function(humdrumR) {

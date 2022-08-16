@@ -866,7 +866,7 @@ is.empty <- function(humdrumR){
 #' @export
 anyPaths <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'anyPaths')
-    humtab <- getHumtab(humdrumR, 'Dd')
+    humtab <- getHumtab(humdrumR)
     
     any(humtab$Path > 0L, na.rm = TRUE)
     
@@ -877,7 +877,7 @@ anyPaths <- function(humdrumR) {
 anyStops <- function(humdrumR) {
     checkhumdrumR(humdrumR, 'anyStops')
     
-    humtab <- getHumtab(humdrumR, 'Dd')
+    humtab <- getHumtab(humdrumR)
     any(humtab$Stop > 1L, na.rm = TRUE)
     
 }
@@ -1059,8 +1059,7 @@ collapseHumdrum <- function(humdrumR, byfields,
         if (collapseAtomic) {
             rlang::expr(paste(!!name, collapse = !!sep))
         } else {
-            # call <- if (type == 'list') quote(catlists) else quote(list)
-            # rlang::expr((!!call)(!!name))
+
             rlang::expr(list(!!name))
         }
         
@@ -1096,6 +1095,45 @@ collapseHumdrum <- function(humdrumR, byfields,
     humdrumR
 }
 
+collapseHumdrum2 <- function(humdrumR, by,
+                             collapseField = 'Token', 
+                             dataTypes = 'Dd', 
+                             removeNull = list(), 
+                             collapseAtomic = TRUE, sep = ' ') {
+ 
+    checkhumdrumR(humdrumR, 'collapseHumdrum')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'fromField')
+    
+    doQuos <- lapply(collapseField, 
+                    \(field) {
+                        newfield <- rlang::sym(paste0(field, '_collapsed'))
+                        field <- rlang::sym(field)
+                        
+                        if ('P' %in% dataTypes) 
+                        if (collapseAtomic) {
+                            rlang::expr({
+                                !!newfield <- paste(!!field, collapse = !!sep)
+                                })
+                        } else {
+                            rlang::expr({
+                                !!newfield <- list(!!field)
+                                })
+                        } })
+    by <- rlang::syms(by)
+    rlang::eval_tidy(rlang::expr({
+            within(humdrumR, 
+                   !!!doQuos, 
+                   dataTypes = !!dataTypes,
+                   by = list(!!!by))
+            
+        })) -> humdrumR
+    
+
+    humdrumR <- update_Null(humdrumR)
+    if (length(removeNull)) for (f in removeNull) humdrumR <- f(humdrumR)
+    humdrumR
+}
+
 
 #' @rdname collapseHumdrum
 #' @export 
@@ -1105,8 +1143,23 @@ collapseStops <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
     humtab <- getHumtab(humdrumR)
     if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
     
-    collapseHumdrum(humdrumR, byfields = c('Filename', 'Spine', 'Record', 'Path'), 
+    collapseHumdrum(humdrumR, by = c('Filename', 'Spine', 'Record', 'Path'), 
                     collapseAtomic = collapseAtomic, sep = sep)
+}
+
+#' @rdname collapseHumdrum
+#' @export 
+collapseStops2 <- function(humdrumR, collapseField = 'Token', collapseAtomic = TRUE, sep = ' ') {
+    checkhumdrumR(humdrumR, 'collapseStops')
+    
+    humtab <- getHumtab(humdrumR)
+    if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
+    
+    collapseHumdrum2(humdrumR, collapseField = 'Token', 
+                     dataTypes = 'Dd',
+                     by = c('Filename', 'Spine', 'Record', 'Path'), 
+                     removeNull = list(removeEmptyStops),
+                     collapseAtomic = collapseAtomic, sep = sep)
 }
 
 #' @rdname collapseHumdrum
@@ -1128,6 +1181,25 @@ collapsePaths <- function(humdrumR, collapseAtomic = TRUE, sep = ' ') {
 
 #' @rdname collapseHumdrum
 #' @export
+collapsePaths2 <- function(humdrumR, collapseField = 'Token', collapseAtomic = TRUE, sep = ' ') {
+    checkhumdrumR(humdrumR, 'collapsePaths')
+    # First some necessary preprocessing
+    
+    if (!anyPaths(humdrumR)) return(humdrumR)
+    
+    output <- collapseHumdrum2(humdrumR, collapseField = collapseField, 
+                               dataTypes = 'GLIMDdP',
+                               by = c('Filename', 'Record', 'Spine'), 
+                               removeNull = list(removeEmptyPaths),
+                               collapseAtomic = collapseAtomic, sep = sep)
+    
+    
+    output
+    
+}
+
+#' @rdname collapseHumdrum
+#' @export
 collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths = FALSE) {
     checkhumdrumR(humdrumR, 'collapseRecords')
     humtab <- getHumtab(humdrumR)
@@ -1139,6 +1211,23 @@ collapseRecords <- function(humdrumR, collapseAtomic = TRUE, sep = ' ', padPaths
     
     
 }
+#' @rdname collapseHumdrum
+#' @export
+collapseRecords2 <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIMDdP', collapseAtomic = TRUE, sep = ' ') {
+    checkhumdrumR(humdrumR, 'collapseRecords')
+    humtab <- getHumtab(humdrumR)
+    if (!any(humtab$Column > 1L & !is.na(humtab$Column))) return(humdrumR)
+    
+    
+    collapseHumdrum2(humdrumR, collapseField = collapseField, 
+                     by = c('Filename', 'Record'), 
+                     dataTypes = dataTypes,
+                     removeNull = list(removeEmptySpines),
+                     collapseAtomic = collapseAtomic, sep = sep)
+    
+    
+}
+
 
 
 ### reshape to fields ----
@@ -1835,8 +1924,12 @@ activeAtomic <- function(humdrumR, dataTypes = 'D', sep = ', ') {
                          output <- rep(NA, length = length(lens))
                          
                          atomic <- sapply(l, is.atomic) 
+                         l[atomic & lens > 0L] <- lapply(l[atomic & lens > 0L], list)
                          
-                         output[!atomic & lens > 0L] <- sapply(l[!atomic & lens > 0L], object2str)
+                         # output[atomic & lens > 1L] <- paste0('list(', sapply(l[atomic & lens > 1L], paste, collapse = ', ')
+                         # output[atomic & lens == 1L] <- unlist(l[atomic & lens == 1L])
+                         
+                         output[lens > 0L] <- sapply(l[lens > 0L], object2str)
                          output
                      })
     
@@ -2387,8 +2480,8 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     if (is.factor(field)) field <- as.character(field)
     
     ## fill in null data
-    humtab$Null[humtab$Type == 'P'] <- FALSE
-    humtab$Filter[humtab$Type == 'P' | is.na(humtab$Filter)] <- FALSE
+    # humtab$Null[humtab$Type == 'P'] <- FALSE
+    # humtab$Filter[humtab$Type == 'P' | is.na(humtab$Filter)] <- FALSE
 
     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
     field[humtab[, Filter | Null]] <- nulltypes[humtab[Filter | Null, Type]]    

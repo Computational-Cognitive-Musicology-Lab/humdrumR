@@ -2141,7 +2141,7 @@ object2str <- function(object) {
            },
            list = {
              if (length(object) < 5) {
-               glue::glue('<list({harvard(unlist(object))})>')
+               glue::glue('list({harvard(unlist(object))})')
              } else {
                glue::glue('list[{num2str(length(object))}]')
              }
