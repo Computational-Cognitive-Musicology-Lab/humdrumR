@@ -302,134 +302,10 @@ NULL
 #' 0        1        0        Path
 #' 1        2        3        Column
 #' ```
-#' (In this example, the `Spine`, `Path`, and `Column` values are shown below the data.)
-#' The `"_P"` tokens stand for "padded path."
-#' This appraoch assures that every **Spine** is a contiguous block of tokens, of constant width.
-#' In most humdrumR use cases, these padding tokens (and the `Column` field) can be safely ignored.
 #' 
-#' @section Corpus padding:
-#'
-#' [humRead] automatically pads spine paths *within pieces*.
-#' However, as mentioned above, there is also (sometimes) a need to pad across pieces, in order
-#' to create a logical, clean 2d structure.
-#' Consider this example, with humdrum data from two pieces:
 #' 
-#' + *Piece 1*:
-#'    ```
-#'    **kern   **kern  **kern
-#'    E        D       C
-#'    D        .       .
-#'    C        C       E
-#'    *-       *-      *-
-#'    ```
-#' + *Piece 2*:
-#'    ```
-#'    **kern   **kern
-#'    A        A
-#'    .        B
-#'    C        C
-#'    *-       *-
-#'    ```
-#' 
-#' In this example, we have two pieces, one with three spines, the other with two.
-#' There is no way to squish these two pieces into one regular 2d table.
-#' But we *could* pad any missing columns, as so:
-#' 
-#' + *Piece 1*:
-#'    ```
-#'    **kern   **kern  **kern
-#'    E        D       C
-#'    D        .       .
-#'    C        C       E
-#'    *-       *-      *-
-#'    ```
-#' + *Piece 2*:
-#'    ```
-#'    **kern  **kern   _C
-#'    A        A       _C
-#'    .        B       _C
-#'    C        C       _C
-#'    *-       *-      _C
-#'    ```
-#'
-#' The function `alignColumns` is used to achieve just this effect.
-#' In this example, the `"_C"` token stands for "padded column."
-#' 
-#' The presence of spine paths makes padding columns across pieces a bit more complicated.
-#' What `alignColumns` will do, is match up all pieces in a corpus so that
-#' every **Spine**/**Path** field pair allign in the same column.
-#' Here is an example, with its paths already padded: 
-#' 
-#' + *Piece 1*:
-#'    ```
-#'    **kern      _P        **kern
-#'    A           _P        E
-#'    B           _P        D
-#'    *^          _P        *
-#'    A           C         E
-#'    G#          B         E
-#'    *v          *v        *
-#'    A           _P        E
-#'    *-          _P        *-
-#'    #################################################
-#'    1           1         2         Spine
-#'    0           1         0         Path
-#'    1           2         3         Column
-#'    ```
-#' + *Piece 2*:
-#'    ```
-#'    **kern     **kern    _P
-#'    A          E         _P
-#'    *          *^        _P
-#'    G#         D         F
-#'    A          C         E
-#'    *          *v        *v
-#'    E          D         _P
-#'    *-         *-        _P        
-#'    #################################################
-#'    1          2         2        Spine
-#'    0          0         1        Path
-#'    1          2         3        Column
-#'    ```
-#' We have two pieces, each with two spines,
-#' but in the first piece, the first spine splits, while in the second piece, the
-#' second spine splits. Thus, the padded output will have four columns:
-#' 
-#' + *Piece 1*:
-#'    ```
-#'    **kern    _P        **kern   _C
-#'    A         _P        E        _C
-#'    B         _P        D        _C
-#'    *^        _P        *        _C
-#'    A         C         E        _C
-#'    G#        B         E        _C
-#'    *v        *v        *        _C
-#'    A         _P        E        _C
-#'    *-        _P        *-       _C 
-#'    ###########################################################
-#'    1         1         2        2         Spine
-#'    0         1         0        1         Path
-#'    1         2         3        4         Column
-#' + *Piece 2*:
-#'    ```
-#'    **kern    _C        **kern   _P
-#'    A         _C        E        _P
-#'    *         _C        *^       _P
-#'    G#        _C        D        F
-#'    A         _C        C        E
-#'    *         _C        *v       *v
-#'    E         _C        D        _P
-#'    *-        _C        *-       _P 
-#'    #########################################################       
-#'    1         1         2        2         Spine
-#'    0         1         0        1         Path
-#'    1         2         3        4         Column
-#'    ```
-#' Note that `alignColumns` actually adds rows to the [humdrumRclass] object's
-#' internal [humdrum tables][humTable].
-#' @name humColumns
-NULL
-
+#' In this example, the `Spine`, `Path`, and `Column` values are shown below the data.
+#' You can see that `Column` is used to indicate the "padded" position of each data token.
 #####Humtable methods
 
 
@@ -910,9 +786,9 @@ renumberSpines.humdrumR <- function(hum) {
     
 }
 renumberSpines.data.table <- function(hum) {
-    NewSpine <- hum[ , match(Spine, sort(unique(Spine))), by = Piece]$V1
-    hum[ , Column := Column + (NewSpine - Spine)]
-    hum$Spine <- NewSpine
+    hum[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
+    
+    hum[ , Column := frank(.SD, Spine, Path, ties.method = 'dense'), by = File]
     hum
 }
 
@@ -1645,7 +1521,7 @@ update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FA
 update_Null.data.table <- function(hum, field = 'Token', ...) {
     nulls <- lapply(hum[ , field, with = FALSE], 
                     \(x) {
-                        if (is.list(x)) lengths(x) == 0L else  is.na(x) | x %in% c('.', '!', '*', '=', '_P')
+                        if (is.list(x)) lengths(x) == 0L else  is.na(x) | x %in% c('.', '!', '*', '=')
                     })
     null <- Reduce('&', nulls)
     
@@ -2014,7 +1890,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 # is useToken is true, the Token field is used to fill-in (instead of null tokens).
  humtab <- getHumtab(humdrumR, 'GLIMDd') 
  
- nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=', P = "_P")
+ nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')
  
  active <- activeFields(humdrumR)
  humtab <- humtab[ , 
