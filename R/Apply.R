@@ -1417,7 +1417,7 @@ parseResult <- function(result, rowKey) {
   if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
   outLength <- sapply(result, height)
-  objects <- sapply(result, is.object)
+  objects <- sapply(result, \(res) !is.factor(res) && is.object(res))
   
   result[objects] <- lapply(result[objects], 
                             \(x) {

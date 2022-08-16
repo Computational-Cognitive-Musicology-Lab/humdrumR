@@ -523,7 +523,7 @@ ldims <- function(xs) do.call('rbind', lapply(xs, ldim))
 size <- function(x) ldim(x)$size
 
 height <- function(x) {
-  if (is.object(x) || !(is.vector(x) || is.atomic(x) || is.list(x))) return(1L)
+  if ((!is.factor(x) && is.object(x)) || !(is.vector(x) || is.atomic(x) || is.list(x) || is.factor(x))) return(1L)
   if (hasdim(x)) nrow(x) else length(x)
 }
 

@@ -536,15 +536,15 @@ as.matrix.humdrumR <- function(x, dataTypes = 'Dd', alignColumns = TRUE, padder 
     if (alignColumns && length(unique(humtab$File)) > 1L && any(humtab$Path > 0L, na.rm = TRUE)) humtab <- alignColumnsAcrossFiles(humtab)
     
     
-    i <- data.table::frank(humtab, File, Record, ties.method = 'dense')
+    i <- data.table::frank(humtab[ , list(File, Record)], ties.method = 'dense')
     j <- humtab$Column
     j[is.na(j)] <- 1L
     
     
     field <- activeAtomic(x, dataTypes = dataTypes, nullChar = TRUE)
-    field[is.na(field)] <- padder
+    if (is.factor(field)) field <- as.character(field) # R does't allow factors in matrices
     padder <- as(padder, class(field))
-        
+    
     output <- matrix(padder, nrow = max(i), ncol = max(j))
     
     output[cbind(i, j)] <- field
@@ -1647,9 +1647,22 @@ activeAtomic <- function(humdrumR, dataTypes = 'D', sep = ', ', nullChar = FALSE
     null <- humtab[ , Null | Filter]
     values <- lapply(values,
                      \(val) {
-                         val[null] <- if (nullChar) nulltypes[null] else NA
+                         null <- null | (!is.na(nulltypes) & is.na(val))
+                         if (nullChar) {
+                             if (is.factor(val)) {
+                                 levels <- levels(val)
+                                 val <- as.character(val)
+                                 val[null] <- nulltypes[null]
+                                 val <- factor(val, levels = union(levels, unique(nulltypes)))
+                             } else {
+                                 val[null] <- nulltypes[null]   
+                             }
+                         }  else {
+                             val[null] <-  NA
+                         }
+                         
                          val
-                     })
+                         })
     
     if (length(values) == 1L) {
         values[[1]]

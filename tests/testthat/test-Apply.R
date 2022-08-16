@@ -51,7 +51,7 @@ test_that('Examples from Working With Data vignette work', {
                      barplot()))
   
   if (expect_false(barplot1$visible)) {
-    expect_equal(dim(barplot1$value), c(10, 1))
+    expect_equal(length(barplot1$value), c(10))
   }
   
   # where 
