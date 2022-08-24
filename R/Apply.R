@@ -403,31 +403,29 @@ with.humdrumR <- function(data, ...,
                           variables = list()) {
   
   checkhumdrumR(data, 'with.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), envir = environment())
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), 
+           envir = environment())
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
   if (drop) {
     if (nrow(result) == 0L) return(NULL)
     
-    bys <- grepl('^_by=..*_$', colnames(result))
+    parts <- grepl('^_(by|where)=..*_$', colnames(result))
+    if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
-    if (any(bys)) bynames <- do.call('paste', c(result[ , bys, with = FALSE], list(sep = ';')))
-    
-    result <- result[[max(!bys)]]
+    result <- result[[max(which(!parts))]]
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
     } else {
-      if (any(bys)) names(result) <- bynames
+      if (any(parts)) names(result) <- partNames
     }
-    
-    visible <- attr(result, 'visible') %||% TRUE
-    attr(result, 'visible') <- NULL
   } else {
     visible <- TRUE
-  }
+  } 
   
+  attr(result, 'visible') <- NULL
   
   if (visible) result else invisible(result)
   
@@ -518,6 +516,8 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   #evaluate "do" expression! 
   result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
+  visible <- attr(result, 'visible')
+  attr(result, 'visible') <- NULL
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
   
   #### number the unnamed new results
@@ -536,6 +536,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
        humtab = humtab,
        quoTab = quoTab,
        recordtypes = recordtypes,
+       visible = visible,
        result = result)
 }
 
@@ -816,10 +817,23 @@ fillQuo <- function(doQuo, usedInExpr) {
     if (length(usedInExpr) == 0L) usedInExpr <- '.'
     usedInExpr <- rlang::syms(usedInExpr)
     
-    rlang::quo({
+    analE <- analyzeExpr(doQuo)
+    
+    if (analE$Head == '<-') {
+      
+      analE$Args[[2]] <- rlang::quo({
+        targetlen <- max(lengths(list(!!!usedInExpr)))
+        rep(!!analE$Args[[2]], length.out = targetlen)
+      } )
+      unanalyzeExpr(analE)
+    } else {
+      rlang::quo({
         targetlen <- max(lengths(list(!!!usedInExpr)))
         rep(!!doQuo, length.out = targetlen)
-    } )
+      } )
+    }
+    
+    
     
 }
 
@@ -1384,8 +1398,13 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     result <- data.table::rbindlist(results$V1)
     
- 
+    # thread visiblity
+    attr(result, 'visible') <- any(sapply(results$V1, \(res) attr(res, 'visible') %||% TRUE))
+    result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL ; res})
+    
+    
     result
+    
     
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
@@ -1396,12 +1415,14 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     partitionName <- paste0('_where=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
     
-    result[ , eval(partitionName) := TRUE]
+    result[[partitionName]] <- TRUE
     
     if (!is.null(ordoQuo)) {
+        visible <- attr(result, 'visible')
         orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
-        orresult[ , eval(partitionName) := FALSE]
+        orresult[[partitionName]] <- FALSE
         result <- data.table::rbindlist(list(result, orresult))
+        attr(result, 'visible') <- visible
     }
     
    result
@@ -1421,6 +1442,11 @@ parseResult <- function(result, rowKey) {
     # indices and reconstructs the output object.
   if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
+  # thread visiblity
+  visible <- any(sapply(result, \(res) attr(res, 'visible') %||% TRUE))
+  result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL; res})
+  
+  #
   outLength <- sapply(result, height)
   objects <- sapply(result, \(res) !is.factor(res) && is.object(res))
   
@@ -1458,6 +1484,7 @@ parseResult <- function(result, rowKey) {
 
     
     result[ , `_rowKey_` := rowKey[1:outLength]][]
+    attr(result, 'visible') <- visible
     result
     
 }

@@ -103,7 +103,7 @@ test_that('Examples from Working With Data vignette work', {
        semits(Token) |> mean(na.rm = TRUE),
        by = Spine)
   
-  expect_equal(notna, c(-9.6692308, -0.1143317, 5.6065041, 10.5672192))
+  expect_equal(round(notna, 2), setNames(c(-9.67, -0.11, 5.61, 10.57), 1:4))
   
   #
   hist <- withVisible(with(chorales, 
@@ -164,13 +164,13 @@ test_that("Examples from withinHumdrum docs work", {
   grandMean <- humtab[ , mean(Semits)]
   
   #
-  Count1 <- sort(humtab[ , sum(Semits > grandMean), by = Spine]$V1)
+  Count1 <- sort(humtab[ , list(sum(Semits > grandMean), Spine), by = Spine][ , setNames(V1, paste0(Spine, ';', TRUE))])
   Count2 <- sort(with(chorales, length(Semits), where = Semits > mean(Semits),  by = Spine))
   
   expect_equal(Count1, Count2)
   
   #
-  Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine]$V1)
+  Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine][ , setNames(V1, paste0(TRUE, ';', Spine))])
   Count4 <- sort(with(chorales, length(Semits), by = Spine, where = Semits > mean(Semits)))
   
   expect_equal(Count3, Count4)
@@ -191,21 +191,17 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   ### drop = TRUE
   A <- with(chorales, nchar(Token))
   B <- with(chorales, X <- nchar(Token))
-  C <- with(chorales, list(X = nchar(Token)))
   
   expect_null(dim(A))
   expect_identical(A, B)
-  expect_identical(B, C)
   
   ### drop = FALSE
   
   A <- with(chorales, nchar(Token), drop = FALSE)
   B <- with(chorales, X <- nchar(Token), drop = FALSE)
-  C <- with(chorales, list(X = nchar(Token)), drop = FALSE)
   
   expect_equal(colnames(A), 'Result1')
   expect_equal(colnames(B), 'X')
-  expect_identical(B, C)
   
   # with, two arguments
   ### drop = TRUE
@@ -234,22 +230,15 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   expect_identical(C, D)
   
   A <- with(chorales, drop = FALSE, NChar <- nchar(Token), NChar^2)
-  B <- with(chorales, drop = FALSE, list(NChar = nchar(Token), nchar(Token)^2))
-  C <- with(chorales, drop = FALSE, nchar(Token), list(NChar = ., .^2))
-  
+  B <- with(chorales, drop = FALSE, NChar <- nchar(Token), Squared <- NChar^2)
   expect_identical(colnames(A), c('NChar', 'Result1'))
-  expect_identical(A, B)
-  expect_identical(B, C)
+  expect_identical(colnames(B), c('NChar', 'Squared'))
+
+  expect_identical(A$NChar, B$NChar)
+  expect_identical(A$Result1, B$Squared)
   
-  A <- with(chorales, drop = FALSE, NChar <- nchar(Token), Squared <- NChar^2)
-  B <- with(chorales, drop = FALSE, list(NChar = nchar(Token), Squared = nchar(Token)^2))
-  C <- with(chorales, drop = FALSE, Nchar <- nchar(Token), list(Squared = .^2))
-  D <- with(chorales, drop = FALSE, nchar(Token), list(NChar = ., Squared = .^2))
   
-  expect_identical(colnames(A), c('NChar', 'Squared'))
-  expect_identical(A, B)
-  expect_identical(B, C)
-  expect_identical(C, D)
+
   
   
   ## with fx
