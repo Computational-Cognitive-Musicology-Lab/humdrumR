@@ -1394,11 +1394,16 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
                                      your where expression must evaluate to a logical (TRUE/FALSE).")
     result <- evalDoQuo(doQuo, humtab[partition], partQuos[-1], ordoQuo)
     
+    partitionName <- paste0('_where=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
+    
+    result[ , eval(partitionName) := TRUE]
+    
     if (!is.null(ordoQuo)) {
         orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
-        result <- list(result, orresult)
+        orresult[ , eval(partitionName) := FALSE]
+        result <- data.table::rbindlist(list(result, orresult))
     }
-   # result[humtab[, '_rowKey_'], on ='_rowKey_'] 
+    
    result
 }
 
