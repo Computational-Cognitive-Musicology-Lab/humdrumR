@@ -788,7 +788,13 @@ renumberSpines.humdrumR <- function(hum) {
 renumberSpines.data.table <- function(hum) {
     hum[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
     
-    hum[ , Column := frank(.SD, Spine, Path, ties.method = 'dense'), by = File]
+    hum[ , Column := {
+        output <- rep(NA_integer_, nrow(.SD))
+        
+        output[!is.na(Spine)] <- data.table::frank(.SD[!is.na(Spine)], Spine, Path, ties.method = 'dense', na.last = 'keep')
+        output
+        }, 
+        by = File]
     hum
 }
 

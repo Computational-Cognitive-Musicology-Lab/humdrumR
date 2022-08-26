@@ -471,8 +471,8 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab$Null[notnull] <- FALSE
   newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
   
-  # What do do if d is in recordtypes
-  if (any(grepl('d', recordtypes))) {
+  # What do do if d is in dataTypes
+  if (any(grepl('d', dataTypes))) {
     humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
   }
   
@@ -505,7 +505,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
  
   
   # Getting the humtab with the right record types.
-  recordtypes <- checkTypes(dataTypes, withFunc)
+  dataTypes <- checkTypes(dataTypes, withFunc)
                       
   
   ### Preparing the "do" expression
@@ -514,7 +514,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   # 
 
   #evaluate "do" expression! 
-  result <- evalDoQuo(do, humtab[Type %in% recordtypes],  quoTab[KeywordType == 'partitions'],  ordo)
+  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo)
   
   visible <- attr(result, 'visible')
   attr(result, 'visible') <- NULL
@@ -535,7 +535,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   list(humdrumR = humdrumR, 
        humtab = humtab,
        quoTab = quoTab,
-       recordtypes = recordtypes,
+       dataTypes = dataTypes,
        visible = visible,
        result = result)
 }

@@ -275,7 +275,7 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
 #' @rdname subset.humdrumR
 removeEmptyFiles <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'removeEmptyFiles')
-  renumberFiles(removeNull(humdrumR, 'File', 'GLIMd'))
+  removeNull(humdrumR, 'File', 'GLIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
@@ -416,9 +416,9 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
              
             } else {
               x <- if (all(i > 0L)) {
-                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDd')
+                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), dataTypes = 'GLIMDd')
               } else {
-                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), recordtypes = 'GLIMDd')
+                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), dataTypes = 'GLIMDd')
               }
           
             }
@@ -444,7 +444,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
               } else {
                 
                 
-                x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), recordtypes = "D")
+                x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), dataTypes = "D")
               }
               
               removeEmptyFiles(x)
@@ -465,7 +465,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    x <- subset(x, Record %in% unique(Record[. %grepl% !!i]), by = File, recordtypes = "D")
+    x <- subset(x, Record %in% unique(Record[. %grepl% !!i]), by = File, dataTypes = "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
@@ -497,7 +497,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
                 
               } 
               
-              x <- subset(x, form, by ~ File, recordtypes ~ "D")
+              x <- subset(x, form, by ~ File, dataTypes = "D")
               
               if (removeEmpty) x <- removeEmptySpines(x)
             }
