@@ -19,7 +19,6 @@ Collate: humdrumR-package.R
          Apply.R
          Filter.R
          Windows.R
-         Plot.R
          Interpretations.R
          Regex.R
          Validation.R
