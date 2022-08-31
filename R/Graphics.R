@@ -59,14 +59,8 @@ plotNotes <- function(rhythm, pitch, cex = 1, staffy = .5, staffx = c(0, 1)) {
 
 #### Plotting Rhythm Symbols
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' Plotting rhythmic symbols in R base graphics
-#' @name plotRhythm
-#' @export
 plotRhythm <- function(x, y, notes, ...) UseMethod('plotRhythm')
 
-#' @name plotRhythm
-#' @export
 plotRhythm.default <- function(x, y, notes, ...){
     checkArg(x)
     
@@ -77,8 +71,6 @@ plotRhythm.default <- function(x, y, notes, ...){
     plotRhythm.rhythmInterval(x, y, notes, ...)
 } 
 
-#' @name plotRhythm
-#' @export
 plotRhythm.rhythmInterval <- function(x, y, notes, ...) {
     checkArg(x)
     

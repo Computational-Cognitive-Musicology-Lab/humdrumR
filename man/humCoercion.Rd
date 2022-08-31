@@ -19,19 +19,15 @@ as.lines(
   padder = "."
 )
 
-\method{as.matrix}{humdrumR}(x, dataTypes = "D", alignColumns = TRUE, padder = NA)
+\method{as.matrix}{humdrumR}(x, dataTypes = "Dd", alignColumns = TRUE, padder = NA)
 
-\S4method{as.data.frame}{humdrumR}(x, dataTypes = "D", alignColumns = TRUE, padder = NA)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", alignColumns = TRUE, padder = NA)
 
-as.matrices(humdrumR, dataTypes = "D", alignColumns = TRUE, padder = NA)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", alignColumns = TRUE, padder = NA)
 
-as.data.frames(
-  humdrumR,
-  dataTypes = "D",
-  fieldnames = NULL,
-  padder = NA,
-  path.collapse = TRUE
-)
+as.matrices(humdrumR, dataTypes = "Dd", alignColumns = TRUE, padder = NA)
+
+as.data.frames(humdrumR, dataTypes = "Dd", alignColumns = TRUE, padder = NA)
 }
 \arguments{
 \item{mode}{If the \code{mode} argument is not \code{'any'}, it can be a single \code{character}

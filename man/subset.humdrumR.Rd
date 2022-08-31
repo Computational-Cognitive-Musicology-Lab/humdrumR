@@ -25,9 +25,9 @@ removeEmptyRecords(humdrumR)
 removeEmptyStops(humdrumR)
 }
 \description{
-\code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}
-Indexing a humdrumR corpus (using the \verb{[]} or \verb{[[]]} operators)
-uses calls to \code{subset.humdrumR}!
+\code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}.
+The standard R indexing operators (\verb{[]} and \verb{[[]]}) create calls to \code{subset.humdrumR} when use
+on a humdrum corpus.
 }
 \details{
 \code{subset.humdrumR} is used in a similar manner as \link{withinHumdrum},

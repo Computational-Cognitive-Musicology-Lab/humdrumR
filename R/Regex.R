@@ -93,27 +93,6 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     
 }
 
-#' @export
-popRE <- function(str, regex) {
-    var <- rlang::enexpr(str)
-    
-    loc <- stringi::stri_locate_first_regex(str, regex)
-    hits <- !is.na(loc[ , 1])
-    # match if any
-    match <- character(length(str))
-    match[hits] <- stringi::stri_sub(c(str)[hits], loc[hits, 'start'], loc[hits , 'end'])
-    match <- match %<-matchdim% str
-    
-    # rest if any
-    str[hits] <- stringi::stri_sub(str[hits], loc[hits , 'end'] + 1L)
-    str <- str %<-matchdim% match
-    
-    if (length(var) == 1L && !is.atomic(var)) eval(rlang::expr(!!var <- !!str), envir = parent.frame())
-    
-    match
-    
-}
-
 
 
 # Regex dispatch ----

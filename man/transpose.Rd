@@ -118,5 +118,7 @@ Thus, you can type commands like \code{"c#" + M2} to get \code{d#}, or \code{c("
 }
 
 \seealso{
-tonalTransformations
+Other tonal transformations: 
+\code{\link{invert}()}
 }
+\concept{tonal transformations}

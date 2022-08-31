@@ -18,8 +18,53 @@
 #                       degree = tint2degree(scale)
 # )
 
+test_that('tonalIntervalS4 math works', {
+    
+    expect_true((M3 + M3) == A5)
+    expect_true((m3 - m3) == unison)
+    expect_true((-M3 + M3) == unison)
+    expect_true((P4 - P5) == -M2)
+    expect_true((-M3 - m3) == -P5)
+    
+    expect_true((A5 %/% M3) == 2)
+    
+    expect_true((P4 + 'FF') == 'BB-')
+    expect_true((P4 + 'FF]') == 'BB-]')
+    
+})
 
+test_that('Examples from tonalIntervalS4 doc work', {
+    
+    expect_true((M3 + m3) == P5)
 
+    
+    expect_true((M2 * 3) == A4)
+    expect_true((M3 + 2) == 6)
+    expect_true((M3 + '4.ee-') == '4.gg')
+    expect_true((M3 + M3) == A5)
+    
+    expect_true((A4 %/% M2) == 3)
+    expect_true((A4 %%  M2) == unison)
+    expect_true((d5 %/% M2) == -3)
+    expect_true((d5 %%  M2) == P8)
+    
+    expect_false(A1 == m2)
+    expect_true((m3 >= A2) && (m3 <= A2) && m3 != A2)
+    
+    
+    expect_true((M9 - M2) == P8)
+    expect_true((M9 - 2) == 12)
+    expect_true((M3 %/% M2) == 2)
+    expect_true((M3 %/% 2L) == M2)
+    expect_true(("cc#]" + M6) == 'aa#]')
+    
+    
+    cMajor <- sort(tint( , -1:5))
+    eMajor <- cMajor + M3
+    expect_equal(eMajor + 2L, c(6,  8, 10, 11, 13, 15, 17))
+
+    expect_equal(eMajor[4:5] - P8, c(-m3, -m2 ))
+})
 
 test_that("Pitch function Input -> Output maintains structure", {
 

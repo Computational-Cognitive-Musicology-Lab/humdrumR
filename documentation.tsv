@@ -1,0 +1,83 @@
+Source	Rd	Family	Vignette	Nchar	Accurate	Complete	Exported	Nlines
+Apply.R	getTandem.Rd			725			getTandem	605
+Apply.R	interpolateArguments.Rd			1805			interpolateArguments	35
+Apply.R	withinHumdrum.Rd			16179			withinHumdrum, with.humdrumR, within.humdrumR	376
+Compose.R	humdrumDispatch.Rd			3971			humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch	19
+Filter.R	indexHumdrum.Rd			953			indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method	571
+Filter.R	subset.humdrumR.Rd			10608			subset.humdrumR, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops	23
+Formulae.R	humFormulae.Rd			708			humFormulae, ditto	61
+Lyrics.R	silbeFormat.Rd			748			silbeFormat	
+Lyrics.R	wort.Rd			960			wort	606
+Metric.R	humMeter.Rd			516			humMeter	1082
+Metric.R	meter.Rd			450			meter, measure	564
+Metric.R	metric.Rd	rhythm analysis tools		417			metric	208
+Metric.R	rhythmDecompose.Rd	rhythm analysis tools		433			rhythmDecompose	122
+Rational.R	rational.Rd	humdrumR numeric functions		3020			rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction	81
+Read.R	readHumdrum.Rd			9965			readHumdrum, findHumdrum	89
+Regex.R	REparser.Rd			922			REparser, REparse	561
+Regex.R	RegexFind.Rd			1805			RegexFind, \%grepl\%, \%grepi\%, \%grepn\%, \%grepm\%, \%grep\%, \%!grep\%, \%!grepi\%, \%lgrepl\%, \%lgrepi\%, \%lgrepn\%	38
+Regex.R	regexConstruction.Rd			1035			regexConstruction, captureRE, captureUniq, orRE	559
+Summary.R	humCensus.Rd	humdrum data summary functions		3183			humCensus, census, [.humCensus, print.humCensus	13
+Summary.R	humInterpretations.Rd	humdrum data summary functions		2475			humInterpretations, interpretations, print.humInterpretations	71
+Summary.R	humReference.Rd			3235			humReference, reference, reference.character, reference.humdrumR, [.humReference, print.humReference	152
+Summary.R	humSpines.Rd	humdrum data summary functions		675			humSpines, spines, [.humSpines, print.humSpines	565
+Summary.R	humSummary.Rd	humdrum data summary functions		1337			humSummary	173
+Validation.R	humValidation.Rd			1049			humValidation, validateHumdrum	54
+Vector.R	struct.Rd			8323			struct, is.struct	67
+Windows.R	humWindows.Rd			781			humWindows, windows, nested, hop, windowApply, applyNgram	559
+Write.R	writeHumdrum.Rd			494			writeHumdrum	562
+diatonicSet.R	keyTransformer.Rd			289			keyTransformer, key	34
+diatonicSet.R	romanNumerals.Rd			711			romanNumerals	564
+humdrumR-class.R	collapseHumdrum.Rd	"Humdrum data ""reshaping"" functions."		1691			collapseHumdrum, collapseStops, collapsePaths, collapseRecords	36
+humdrumR-class.R	foldExclusive.Rd	"Humdrum data ""reshaping"" functions."		1680			foldExclusive	20
+humdrumR-class.R	foldGraceNotes.Rd	"Humdrum data ""reshaping"" functions."		539			foldGraceNotes	592
+humdrumR-class.R	foldHumdrum.Rd	"Humdrum data ""reshaping"" functions."		7171			foldHumdrum, foldPaths, foldStops	135
+humdrumR-class.R	getFields.Rd			495			getFields	558
+humdrumR-class.R	humActive.Rd			3259			humActive, evalActive, activeAtomic, getActive, setActive, setActiveFields	20
+humdrumR-class.R	humAssignment.Rd			3753			humAssignment	69
+humdrumR-class.R	humCoercion.Rd			4023			humCoercion, as.lines, as.matrix.humdrumR, as.matrices, as.data.frames	12
+humdrumR-class.R	humMerge.Rd			361			humMerge, mergeHumdrum	45
+humdrumR-class.R	humSize.Rd			1805			humSize, nrecords, ntokens, npieces, anySubcorpora, namesSubcorpora, nfiles, is.empty, anyPaths, anyStops	18
+humdrumR-class.R	humTable.Rd			13871			humTable, getHumtab	114
+humdrumR-class.R	humdrumRclass.Rd			4173			humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields, $<-,humdrumR,vector-method, $<-,humdrumR,humdrumR-method, [<-,humdrumR,character,ANY,vector-method, [<-,humdrumR,character,ANY,humdrumR-method	22
+humdrumR-class.R	orderHumtab.Rd			3643			orderHumtab	41
+humdrumR-class.R	unfoldStops.Rd			488			unfoldStops	133
+humdrumR-package.R	humdrumPitch.Rd			1808			humdrumPitch	16
+humdrumR-package.R	humdrumR.Rd			2289			humdrumR	80
+humdrumR-package.R	humdrumRroot.Rd			614			humdrumRroot	562
+rhythmInterval.R	SOI.Rd	rhythm analysis tools		1400			SOI	15
+rhythmInterval.R	rhythmFunctions.Rd			522			rhythmFunctions, recip, duration	575
+rhythmInterval.R	rhythmInterval.Rd			491			rhythmInterval, rhythmInterval.default, rhythmInterval.NULL, rhythmInterval.character	56
+rhythmInterval.R	time.Rd			235			time, bpm2ms, ms2bpm	167
+tertianSet.R	chordTransformer.Rd			519			chordTransformer, figuredBass	54
+tertianSet.R	diatonicSet.Rd			8073			diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character	71
+tertianSet.R	tertianSet.Rd			1820			tertianSet, tset, is.tertianSet	77
+tonalInterval.R	LO5th.Rd	core pitch representations		1354	Yes	Minimal	LO5th	27
+tonalInterval.R	accidental.Rd	partial pitch functions, pitch functions		2011	Yes	Empty	accidental	59
+tonalInterval.R	bhatk.Rd	pitch functions, relative pitch functions		9961	Yes	Empty	bhatk	29
+tonalInterval.R	degree.Rd	absolute pitch functions, pitch functions, relative pitch functions		11305	Yes	Minimal	degree, deg	23
+tonalInterval.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions		10620	Yes	Empty	freq	20
+tonalInterval.R	helmholtz.Rd	absolute pitch functions, pitch functions		9995	Yes	Empty	helmholtz	201
+tonalInterval.R	interval.Rd	pitch functions, relative pitch functions		9978	Yes	Empty	interval	60
+tonalInterval.R	invert.Rd	tonal transformations		346			invert	25
+tonalInterval.R	kern.Rd	absolute pitch functions, pitch functions		11611	Yes	Yes	kern	218
+tonalInterval.R	lilypond.Rd	absolute pitch functions, pitch functions		10267	Yes	Empty	lilypond	15
+tonalInterval.R	octave.Rd	partial pitch functions, pitch functions		2009		Empty	octave	304
+tonalInterval.R	pc.Rd	atonal pitch functions, pitch functions		10219	Yes	Empty	pc	20
+tonalInterval.R	pitch.Rd	absolute pitch functions, pitch functions		10063	Yes	Empty	pitch	109
+tonalInterval.R	pitchDeparsing.Rd			29336	Yes	Mostly	pitchDeparsing	
+tonalInterval.R	pitchFunctions.Rd		Incomplete	4761	Yes	Yes?	pitchFunctions	52
+tonalInterval.R	pitchParsing.Rd			33813	Yes	Yes?	pitchParsing, tonalInterval, tonalInterval.tonalInterval, tonalInterval.logical, tonalInterval.NULL, tonalInterval.numeric, tonalInterval.character	18
+tonalInterval.R	quality.Rd	partial pitch functions, pitch functions		2002	Yes	Empty	quality	97
+tonalInterval.R	semits.Rd	atonal pitch functions, pitch functions		11837	Yes	Yes	semits, midi, cents	35
+tonalInterval.R	solfa.Rd	pitch functions, relative pitch functions		9986	Yes	Empty	solfa	38
+tonalInterval.R	solfg.Rd	absolute pitch functions, pitch functions		10127	Yes	Empty	solfg	17
+tonalInterval.R	step.Rd	partial pitch functions, pitch functions		2138	Yes	Empty	step	12
+tonalInterval.R	tonalIntervalS4.Rd	core pitch representation	Needs one?	7038	Yes	Yes	tonalIntervalS4, tint, is.tonalInterval	53
+tonalInterval.R	tonh.Rd	absolute pitch functions, pitch functions		10205	Yes	Mostly	tonh	17
+tonalInterval.R	transpose.Rd	tonal transformations		8056			transpose	26
+tools.R	delta.Rd			7641			delta, delta.default, delta.matrix	47
+tools.R	expand.Rd			1781			expand	38
+tools.R	fillThru.Rd			1067			fillThru, fillForward, fillBackwards	43
+tools.R	lag.Rd			1258			lag, lead	53
+tools.R	sigma.Rd			7420			sigma, sigma.default, sigma.matrix	32

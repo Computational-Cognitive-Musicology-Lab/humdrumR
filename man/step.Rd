@@ -20,7 +20,7 @@ the parser, deparser, and transposer.}
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extral, non-pitch information in the strings "beside" the pitch information.
+\emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
@@ -31,7 +31,6 @@ Extract scale step
 Other {pitch functions}: 
 \code{\link{accidental}()},
 \code{\link{bhatk}()},
-\code{\link{cents}()},
 \code{\link{degree}()},
 \code{\link{freq}()},
 \code{\link{helmholtz}()},

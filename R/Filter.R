@@ -4,9 +4,9 @@
 
 #' Filter humdrum data
 #' 
-#' `subset.humdrumR` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass]
-#' Indexing a humdrumR corpus (using the `[]` or `[[]]` operators) 
-#' uses calls to `subset.humdrumR`!
+#' `subset.humdrumR` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass].
+#' The standard R indexing operators (`[]` and `[[]]`) create calls to `subset.humdrumR` when use 
+#' on a humdrum corpus.
 #' 
 #' `subset.humdrumR` is used in a similar manner as [withinHumdrum],
 #' taking any number of "do expressions" (or functions) as arguments.

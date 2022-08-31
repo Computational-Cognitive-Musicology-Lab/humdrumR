@@ -7,7 +7,17 @@
 #' Rational numbers
 #' 
 #' R has no built in rational number representation; `humdrumR` defines one.
+#'
+#' Using rational numbers, we can represent numbers like 1/3 without any numeric inaccuracies.
+#' In other words, \eqn{1/3 * 3 = 3}, never \eqn{.999999999}.
+#' On the other hand, if our rational numbers start to have numerators or demoninators that are too large, we can run into 
+#' integer overflow problems.
+#' We assume that the rational numbers we'll be using in the context of music analysis are relatively simple;
+#' We can safely use such numbers without any numeric inaccuracy.
 #' 
+#' `fraction` is a class (and associated constructor) which represents rational numbers as `character` strings.
+#' Unlike `rational`, the `fraction` class is not numeric and thus cannot do arithmetic.
+#' However, `fraction` can be converted to/from `rational`.
 #' 
 #' 
 #' @seealso [as.real()] [as.numeric()] 
@@ -100,14 +110,15 @@ setMethod('is.numeric', signature = c('rational'), \(x) TRUE)
 
 #' @rdname rational
 #' @export
-order.rational <- function(x, ..., na.last = TRUE, decreasing = FALSE,
+setMethod('order', 'Rational', 
+          function(x, ..., na.last = TRUE, decreasing = FALSE,
                                  method = c("auto", "shell", "radix")) {
     order(as.double(x), 
           na.last = na.last,
           decreasing = decreasing,
           method = method
     )
-}
+})
 
 #' @rdname rational
 #' @export
@@ -484,25 +495,25 @@ setMethod('as.rational', 'character',
 # #' @family {humdrumR numeric functions}
 # #' @seealso [rational()]
 # #' @export
-#' real <- function(x) (as.numeric(x) %class% 'real') %<-matchdim% x
-#' 
-#' #' @rdname real
-#' #' @export
-#' as.real <- function(x, ...) UseMethod('as.real')
-#' #' @export
-#' as.real.character <- function(x) {
-#'     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
-#'     as.real.fraction(x)
-#' }
-#' #' @export
-#' as.real.numeric <- real
-#' #' @export
-#' as.real.rational <- function(x) real(as.double(x))
-#' #' @export
-#' as.real.fraction <- function(x) {
-#'     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
-#'     real(sapply(exprs, eval) %<-matchdim% x)
-#' }
+# real <- function(x) (as.numeric(x) %class% 'real') %<-matchdim% x
+# 
+# #' @rdname real
+# #' @export
+# as.real <- function(x, ...) UseMethod('as.real')
+# #' @export
+# as.real.character <- function(x) {
+#     x[grepl('[^0-9.%/\\(\\)-]', x)] <- NA
+#     as.real.fraction(x)
+# }
+# #' @export
+# as.real.numeric <- real
+# #' @export
+# as.real.rational <- function(x) real(as.double(x))
+# #' @export
+# as.real.fraction <- function(x) {
+#     exprs <- parse(text = stringi::stri_replace_all_fixed(x, '%', '/'))
+#     real(sapply(exprs, eval) %<-matchdim% x)
+# }
 
 
 

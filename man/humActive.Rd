@@ -11,7 +11,7 @@
 \usage{
 evalActive(humdrumR, dataTypes = "D")
 
-activeAtomic(humdrumR, dataTypes = "D", sep = ", ")
+activeAtomic(humdrumR, dataTypes = "D", sep = ", ", nullChar = FALSE)
 
 getActive(humdrumR)
 
