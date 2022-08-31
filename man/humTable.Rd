@@ -195,15 +195,15 @@ tandem intepretations is impossible, because A) tandem interpretations can "over
 users can create their own tandem interpretations. The best we can do in all cases is
 identify \emph{all} tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
-character string in the \code{Tandem} field.
-If working with non-standard intrepretations, users can parse the \code{Tandem} field using the
-\link{getTandem} function.
+character string in the \code{Tandem} field (see the \code{\link[=extractTandem]{extractTandem()}} docs for details).
+If working with non-standard interpretations, users can parse the \code{Tandem} field using the
+\code{\link[=extractTandem]{extractTandem()}} function.
 If no tandem interpretations occur in a file, the \code{Tandem} field is full of empty strings (\code{""}).
 
 Fortunately, many tandem interpretations are widely used and standardized, and these
 interpretations are known by \code{humdrumR}. Recognized interpretations (such as \verb{*clefG4} and \verb{*k[b-]})
-are automatically parsed into their own fields by a call to \link{readHumdrum}.
-See the \link{readHumdrum} documentation for more details.
+are automatically parsed into their own fields by a call to \code{\link[=readHumdrum]{readHumdrum()}}.
+See the \code{\link[=readHumdrum]{readHumdrum()}} documentation for more details.
 }
 
 \subsection{Formal fields:}{

@@ -1030,40 +1030,6 @@ laggedQuo <- function(funcQuosure) {
 #}
 
 
-#' Get tandem interpretation information from humdrum data.
-#' 
-#' Every [humdrumRclass] object has a field called
-#' `Tandem` which is a vector of strings which accumulates
-#' tandem interpretations in each Spine. This function (`getTandem`) 
-#' extracts tandem interpretations from this field, based on a matching
-#' regular expression. The obligatory `'*'` *does not* need to 
-#' be included in the `regex`, as it is added automatically. Thus,
-#' if you want to find tandem interpretations that match '*clef..', you
-#' just have to write `regex = 'clef..'`.
-#' 
-#' @export
-getTandem <- function(tandem, regex) {
-  # Tandem data in a humdrumR object is stored as a 
-  # cummulative list of tandem interpretations separated by commas.
-  # This does some toying with tandem and regex to make
-  # it so the user doesn't have to think about these commas,
-  # but they get taken into account...I'm not sure if it 
-  # will always work the way we want.
-  
-  checkArg(tandem, classes = c('list'))
-          
-  tandem <- paste0(',', tandem, ',')
-  
-  regex <- gsub('\\.\\*$', '[^,]*', regex)
-  regex <- gsub('\\.$', '[^,]', regex)
-  regex <- paste0(',\\*', regex, '[^,]*,')
-  
-  matches <- stringr::str_extract(tandem, pattern = regex)
-  unique(stringr::str_sub(matches, 2L, -2L))
-  
-}
-
-
 #### Splatting in expressions
 # "splatting" refers to spreading a list of values expressions 
 # into arguments to of a call.

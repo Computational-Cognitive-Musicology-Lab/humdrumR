@@ -130,15 +130,15 @@
 #' users can create their own tandem interpretations. The best we can do in all cases is 
 #' identify *all* tandem interpretations that have appeared previously in the spine
 #' (counting most recent first). All these previous interpretations are encoded in a single
-#' character string in the `Tandem` field. 
-#' If working with non-standard intrepretations, users can parse the `Tandem` field using the
-#' [getTandem] function. 
+#' character string in the `Tandem` field (see the [extractTandem()] docs for details). 
+#' If working with non-standard interpretations, users can parse the `Tandem` field using the
+#' [extractTandem()] function. 
 #' If no tandem interpretations occur in a file, the `Tandem` field is full of empty strings (`""`).
 #' 
 #' Fortunately, many tandem interpretations are widely used and standardized, and these 
 #' interpretations are known by `humdrumR`. Recognized interpretations (such as `*clefG4` and `*k[b-]`)
-#' are automatically parsed into their own fields by a call to [readHumdrum].
-#' See the [readHumdrum] documentation for more details.
+#' are automatically parsed into their own fields by a call to [readHumdrum()].
+#' See the [readHumdrum()] documentation for more details.
 #' 
 #' 
 #' ### Formal fields:
