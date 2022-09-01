@@ -194,7 +194,7 @@
 #' Each type of humdrum record uses a different null token:
 #' 
 #' + *Intepretation*: `*`
-#'  *Comment*: `!`
+#' + *Comment*: `!`
 #' + *Barline*: `=`
 #' + *Data*: `.`
 #' 
@@ -224,11 +224,12 @@
 #' Of course, thanks to the structure fields, we can easily
 #' regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 #' However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-#' HumdrumR has several options for ["collapseing"][humShape] tokens within humdrum tables,
-#' or otherwise [reshaping humdrum data][humCoercion] into data formats/structures you might prefer.
-#' 
+#' `HumdrumR` has several options for ["collapsing"][collapseHumdrum()] tokens within humdrum tables, 
+#' ["folding"][foldHumdrum()] different parts of the data into new fields,
+#' or otherwise [reshaping humdrum data][humCoercion] into basic R data structures you might prefer.
 #' 
 #'
+#' @family Core humdrum data representation
 #' @name humTable
 NULL
 
@@ -379,8 +380,8 @@ orderHumtab <- function(humtab) {
 #' called to create this `humdrumR` object.
 #' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
-#' 
 #' @name humdrumRclass
+#' @family Core humdrum data representation
 #' @aliases humdrumRS4
 #' @export
 setClass('humdrumR', 
@@ -1892,8 +1893,14 @@ activeFields <- function(humdrumR) {
 
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' Get named 
+#' Individual fields from the humdrum table can be extracted using `getFields`.
+#' @param fieldnames (`character`) A vector of names which are [partially matched][base::pmatch()]
+#'   against field names of the humdrum table.
+#'   Of `NULL` (the default), the `Token` field is returned.
+#' @value A [data.table()][data.table::data.table()], each column corresponding to one field. (The `data.table` is a subset of the 
+#' humdrum table).
+#' 
+#' @rdname humTable
 #' @export
 getFields <- function(humdrumR, fieldnames = NULL, dataTypes = 'D') {
           

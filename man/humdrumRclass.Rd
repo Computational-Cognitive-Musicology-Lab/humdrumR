@@ -95,3 +95,8 @@ which refers to fields in the internal \link[=humTable]{humdrum table}.
 Go to the dedicated \link[=humActive]{active field} documentation to learn more about this important slot!
 }
 
+\seealso{
+Other Core humdrum data representation: 
+\code{\link{humTable}}
+}
+\concept{Core humdrum data representation}

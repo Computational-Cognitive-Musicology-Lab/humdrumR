@@ -32,14 +32,13 @@ humdrumR-class.R	collapseHumdrum.Rd	""	""	1667	""	Empty	collapseHumdrum, collaps
 humdrumR-class.R	foldExclusive.Rd	Folding functions	""	1519	Yes	Ok	foldExclusive	""	20
 humdrumR-class.R	foldGraceNotes.Rd	Folding functions	""	471	""	""	foldGraceNotes	""	592
 humdrumR-class.R	foldHumdrum.Rd	Folding functions	""	7295	Yes	Yes?	foldHumdrum, foldPaths, foldStops	""	135
-humdrumR-class.R	getFields.Rd	""	""	495	""	""	getFields	""	558
 humdrumR-class.R	humActive.Rd	""	""	3259	Yes?	Ok	humActive, evalActive, activeAtomic, getActive, setActive, setActiveFields	""	20
 humdrumR-class.R	humAssignment.Rd	""	""	3753	No	No	humAssignment	""	69
-humdrumR-class.R	humCoercion.Rd	""	""	4023	""	""	humCoercion, as.lines, as.matrix.humdrumR, as.matrices, as.data.frames	""	12
-humdrumR-class.R	humMerge.Rd	""	""	361	""	""	humMerge, mergeHumdrum	""	45
-humdrumR-class.R	humSize.Rd	""	""	1805	""	""	humSize, nrecords, ntokens, npieces, anySubcorpora, namesSubcorpora, nfiles, is.empty, anyPaths, anyStops	""	18
-humdrumR-class.R	humTable.Rd	""	""	14019	""	""	humTable, getHumtab	""	114
-humdrumR-class.R	humdrumRclass.Rd	""	""	4173	""	""	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields, $<-,humdrumR,vector-method, $<-,humdrumR,humdrumR-method, [<-,humdrumR,character,ANY,vector-method, [<-,humdrumR,character,ANY,humdrumR-method	""	22
+humdrumR-class.R	humCoercion.Rd	""	""	4023	Yes?	Ok	humCoercion, as.lines, as.matrix.humdrumR, as.matrices, as.data.frames	""	12
+humdrumR-class.R	humMerge.Rd	""	""	361	X	X	humMerge, mergeHumdrum	""	45
+humdrumR-class.R	humSize.Rd	""	""	1805	Yes	Too short	humSize, nrecords, ntokens, npieces, anySubcorpora, namesSubcorpora, nfiles, is.empty, anyPaths, anyStops	""	18
+humdrumR-class.R	humTable.Rd	Core humdrum data representation	""	14513	Yes?	Yes	humTable, getHumtab, getFields	""	114
+humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation	""	4287	""	""	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields, $<-,humdrumR,vector-method, $<-,humdrumR,humdrumR-method, [<-,humdrumR,character,ANY,vector-method, [<-,humdrumR,character,ANY,humdrumR-method	""	22
 humdrumR-class.R	orderHumtab.Rd	""	""	3643	""	""	orderHumtab	""	41
 humdrumR-class.R	unfoldStops.Rd	""	""	488	""	""	unfoldStops	""	133
 humdrumR-package.R	humdrumPitch.Rd	""	""	1808	""	""	humdrumPitch	""	16
@@ -80,5 +79,5 @@ tools.R	delta.Rd	Lagged vector functions	""	7770	Yes	Yes	delta, delta.default, d
 tools.R	expand.Rd	""	""	1781	Yes	Yes	expand	""	38
 tools.R	fillThru.Rd	Lagged vector functions	""	3802	Yes	Yes	fillThru, fillForward, fillBackwards	""	43
 tools.R	lag.Rd	Lagged vector functions	""	1418	Yes	Yes	lag, lead	""	53
-tools.R	segments.Rd	Window functions	""	279		Empty	segments	""	
+tools.R	segments.Rd	Window functions	""	279	""	Empty	segments	""	
 tools.R	sigma.Rd	Lagged vector functions	""	7544	Yes	Yes	sigma, sigma.default, sigma.matrix	""	32

@@ -3,9 +3,12 @@
 \name{humTable}
 \alias{humTable}
 \alias{getHumtab}
+\alias{getFields}
 \title{Humdrum Tables}
 \usage{
 getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
+
+getFields(humdrumR, fieldnames = NULL, dataTypes = "D")
 }
 \arguments{
 \item{humdrumR}{A \code{humdrumR} object.}
@@ -24,6 +27,10 @@ For \code{dataTypes}, values can be:
 }
 
 Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
+
+\item{fieldnames}{(\code{character}) A vector of names which are \link[base:pmatch]{partially}
+matched against field names of the humdrum table.
+Of \code{NULL} (the default), the \code{Token} field is returned.}
 }
 \description{
 In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.
@@ -268,7 +275,7 @@ In some cases, entire records may be padded with null tokens.
 Each type of humdrum record uses a different null token:
 \itemize{
 \item \emph{Intepretation}: \code{*}
-\emph{Comment}: \code{!}
+\item \emph{Comment}: \code{!}
 \item \emph{Barline}: \code{=}
 \item \emph{Data}: \code{.}
 }
@@ -298,7 +305,13 @@ of a \code{data.table}, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily
 regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-HumdrumR has several options for \link[=humShape]{"collapseing"} tokens within humdrum tables,
-or otherwise \link[=humCoercion]{reshaping humdrum data} into data formats/structures you might prefer.
+\code{HumdrumR} has several options for \link[=collapseHumdrum]{"collapsing"} tokens within humdrum tables,
+\link[=foldHumdrum]{"folding"} different parts of the data into new fields,
+or otherwise \link[=humCoercion]{reshaping humdrum data} into basic R data structures you might prefer.
 }
 
+\seealso{
+Other Core humdrum data representation: 
+\code{\link{humdrumRclass}}
+}
+\concept{Core humdrum data representation}
