@@ -4,22 +4,75 @@
 \alias{fillThru}
 \alias{fillForward}
 \alias{fillBackwards}
-\title{Propogate data points to "fill" null data.}
+\title{Propagate data points to "fill" null data.}
 \usage{
-fillThru(x, nonnull = function(x) !is.na(x) & x != ".", reverse = FALSE)
+fillThru(
+  x,
+  nonnull = function(x) !is.na(x) & x != ".",
+  reverse = FALSE,
+  boundaries = list()
+)
 
 fillForward(...)
 
 fillBackwards(...)
 }
+\arguments{
+\item{x}{The input argument. Should be vector (including list), array, or data.frame}
+
+\item{nonnull}{Either a logical vector where (\code{length(x) == length(nonnull)}), a numeric
+vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.}
+
+\item{reverse}{(\code{logical} & \code{length == 1}) If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
+\emph{earlier} (lower indices) in the vector.}
+
+\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
+by the \code{boundaries} vector(s) is treated separately.}
+}
 \description{
 \code{fillThru} is a function that allow you to "fill" null values in a vector
 with non-null values from earlier/later in the same vector.
-The default, "foward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
+The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 The \code{reverse} argument can be used to cause "backeward" filling, where the \emph{next} (higher index) non-null value is used.
+Alternatively, you can use the functions \code{fillForward} or \code{fillBackward}, which simply call \code{fillThru} with different
+\code{reverse} arguments.
 }
 \details{
 Which values are considered "non-null" can be controlled using the \code{nonnull} argument.
 The \code{nonnull} argument can either be a logical vector which is the same length as the input (\code{x}) argument, a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.
+The values of \code{x} where \code{nonnull == TRUE} are copied forward/backwards to replace any adjacent vales where \code{nonnull == FALSE}.
+By default, \code{nonnull} is the function \verb{\\(x) !is.na(x) & x != '.'}, which means that \code{NA} values and the string \code{"."} are
+"null", and are overwritten by adjacent values.
 }
+\section{Boundaries}{
+
+
+In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
+For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
+between pieces, only within pieces.
+The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+into groups.
+If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
+
+Value pairs which cross between groups are treated as if they were at the beginning.
+Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
+except generally faster when the number of groups is large.
+
+The most common use case in humdrum data, is looking at "melodies" within spines.
+For this, we want \code{boundaries = list(File, Spine, Path )}.
+In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
+three feilds as \code{boundaries} arguments to certain functions: .
+Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+in a "melodic" way, within each spine path of each file.
+However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
+you could manually set \code{boundaries = list(File, Record)}.
+}
+
+\seealso{
+Other {Lagged vector functions}: 
+\code{\link{delta}()},
+\code{\link{lag}()},
+\code{\link{sigma}()}
+}
+\concept{{Lagged vector functions}}

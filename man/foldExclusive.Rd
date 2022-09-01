@@ -31,11 +31,8 @@ If no matching exclusive interpetation pairs are found,
 the unchanged \code{humdrumR} object is returned with a warning.
 }
 \seealso{
-\code{foldExclusive} makes use of the more general \code{\link[=foldHumdrum]{foldHumdrum()}}.
-
-Other {Humdrum data "reshaping" functions.}: 
-\code{\link{collapseHumdrum}()},
+Other {Folding functions}: 
 \code{\link{foldGraceNotes}()},
 \code{\link{foldHumdrum}()}
 }
-\concept{{Humdrum data "reshaping" functions.}}
+\concept{{Folding functions}}

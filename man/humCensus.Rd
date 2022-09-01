@@ -83,6 +83,7 @@ A \code{drop} argument is also available. If \code{TRUE}, a plain
 \seealso{
 Other humdrum data summary functions: 
 \code{\link{humInterpretations}},
+\code{\link{humReference}},
 \code{\link{humSpines}},
 \code{\link{humSummary}}
 }

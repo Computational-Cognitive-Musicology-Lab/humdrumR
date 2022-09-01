@@ -141,27 +141,33 @@ behavior of \link[=delta]{delta(lag < 0)}, which is more intuitive. (\code{sigma
 \section{Boundaries}{
 
 
-In many cases we want to perform lagged calculations in a vector, but not across certain boundaries.
-For example, we don't want to calculate the difference between the first note in one file and the last
-note of the previous file!
+In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
+For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
+between pieces, only within pieces.
 The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
 into groups.
 If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
-(\code{boundaries} are evaluated using the \code{\link[=changes]{changes()}} function, so you can also pass the argument \code{any = FALSE}
-if you want their only to boundaries where \emph{all} boundary vectors change.)
 
-Value pairs which cross between groups are compared to the \code{init} value(s), as if they were at the beginning
-(or end, if \code{right == TRUE}).
-Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, delta/sigma, ...)},
+Value pairs which cross between groups are treated as if they were at the beginning.
+Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
 except generally faster when the number of groups is large.
 
-\code{humdrumR} \link[=withinHumdrum]{with(in)} calls will automatically feed the \code{File}, \code{Spine}, and \code{Path}
-fields as three \code{boundaries} vectors, anywhere you use \code{delta}.
-This is the most common, "melodic" use case.
+The most common use case in humdrum data, is looking at "melodies" within spines.
+For this, we want \code{boundaries = list(File, Spine, Path )}.
+In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
+three feilds as \code{boundaries} arguments to certain functions: .
+Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 you could manually set \code{boundaries = list(File, Record)}.
 }
 
 \seealso{
 This function's inverse is \code{\link[=delta]{delta()}}.
+
+Other {Lagged vector functions}: 
+\code{\link{delta}()},
+\code{\link{fillThru}()},
+\code{\link{lag}()}
 }
+\concept{{Lagged vector functions}}

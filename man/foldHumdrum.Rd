@@ -47,22 +47,22 @@ into the \code{NA} sections?}
 \item{newFieldNames}{(\code{character}) Names to use for new fields created by the folding.}
 }
 \description{
-Many humdrum datasets encode data spread across multiple spines, spine-paths, or stops.
+Many humdrum datasets encode data across multiple spines, spine-paths, or stops.
 By default, \code{humdrumR} parses each separate spine, spine-path, and stop as their own individual
 data points, taking up one row in the \link[=humTable]{humdrum table}.
 If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 it is easiest to reshape the data so that the information is in different humdrumR \link[=fields]{fields}
 rather than separate spines/paths/stops.
-We "fold" the data from structural field over "on top" of other data using \code{foldHumdrum}.
-The convenient \code{foldStops()} and \code{foldPaths()} functions automatically fold \emph{all} stops/paths in a dataset onto the first stop/path,
-creating new fields named, e.g., \code{Path1}, \code{Path2}, etc.
+We "fold" the data from one structural location over "on top" of other data using \code{foldHumdrum}.
 }
-\details{
-The \code{numeric} \code{fold} and \code{onto} arguments, specify where to fold from/to.
-\code{fold} indicates the Spine/Path/Stop to fold \emph{from}, "\strong{on to}" the Spine/Path/Stop
+\section{From where to where}{
+
+
+The \code{numeric} \code{fold} and \code{onto} arguments specify where to fold from/to.
+\code{fold} indicates the Spine/Path/Stop to fold \emph{from}, "\emph{on to}" the Spine/Path/Stop
 indicated by \code{onto}.
 For example, if you specify \code{foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')}
-spine 2 will be folded "on top of spine 1.
+spine 2 will be folded "on top of" spine 1.
 The \code{fold} and \code{onto} targets may not overlap.
 
 The \code{fold} and \code{onto} arguments can be vectors of any length, which are interpreted in parallel:
@@ -73,12 +73,12 @@ multiple new fields: for example, the combination \code{fold = 1:2} and \code{on
 map first spine \emph{and} the second spine on to \emph{two} new fields of the third spine.
 If the \code{fold} target is duplicated, the same \code{fold} spines can be copied onto multiple
 \code{onto} spines: for example, the combination \code{fold = 1} and \code{onto = 2:3} will map the contents
-of the first spine onto the second \emph{and} third spine, duplicating the spine one data.
+of the first spine onto the second \emph{and} third spine, duplicating the spine-1 data.
 
 The lengths of \code{fold} and \code{onto} are automatically matched, so
-arguments like \code{fold = 1:2} and \code{onto = 3} are equivalent to \verb{(fold = 1:2, onto = c(3, 3))}.
-This makes it east to do things like "copy all four spines onto spine 1":
-just write \verb{(fold = 2:4, onto = 1)}.
+arguments like \code{fold = 1:2} and \code{onto = 3} are equivalent to \verb{fold = 1:2, onto = c(3, 3)}.
+This makes it easy to do things like "copy all four spines onto spine 1":
+just write \verb{fold = 2:4, onto = 1}.
 
 To specify what structural field you want to fold across,
 use the \code{what} argument (\code{character}, \code{length == 1}).
@@ -86,6 +86,10 @@ The default \code{what} value is \code{"Spine"}; other common fold options are \
 and \code{"Stop"}, though you might want to use the convenient \code{foldPaths()} and \code{foldStops()}
 functions directly (details below).
 (You may also fold across \code{"Record"} or \code{"NData"}), but these are advanced/tricky!)
+}
+
+\section{Which fields}{
+
 
 The \code{fromField} (\code{character}, \code{length == 1}) controls which field in the \code{fold}
 spine/path/stop is folded into a new field.
@@ -98,13 +102,14 @@ In these cases, it can be helpful to set \code{fillFromField == TRUE},
 which causes the missing parts of \code{fold} to be filled with data from the \code{from}
 field. \code{foldPaths} does this by default.
 
-The resulting new fields will automatically be named as appropriate results.
+The resulting new fields will automatically be named as appropriate \code{Result}s fields.
 The \code{newFieldNames} argument (\code{character}) can be used to control the output names:
 one for each new field created by the fold.
 If you specify too many \code{newFieldNames}, the later names are ignored.
 If you specify too few \code{newFieldNames}, the later names will be given result names,
 consistent with the default behavior.
 }
+
 \section{File-Specific Folding}{
 
 
@@ -141,12 +146,21 @@ then
 If any files in the corpus are not included, they will not be affected at all!
 }
 
-\seealso{
-\code{\link[=foldExclusive]{foldExclusive()}} is a particularly useful application of folding. \code{\link[=collapseHumdrum]{collapseHumdrum()}} also serves a similar function.
+\section{Predefined folds}{
 
-Other {Humdrum data "reshaping" functions.}: 
-\code{\link{collapseHumdrum}()},
+
+The convenient \code{foldStops()} and \code{foldPaths()} functions automatically fold \emph{all} stops/paths in a dataset
+onto the first stop/path, creating new fields named, e.g., \code{Path1}, \code{Path2}, etc.
+Another extremely useful function is \code{\link[=foldExclusive]{foldExclusive()}}, which automatically folds spines
+based on their exclusive interpretation.
+}
+
+\seealso{
+The \link[=collapseHumdrum]{collapse family of functions} serves a somewhat
+similar function, "collapsing" data \emph{within} a field.
+
+Other {Folding functions}: 
 \code{\link{foldExclusive}()},
 \code{\link{foldGraceNotes}()}
 }
-\concept{{Humdrum data "reshaping" functions.}}
+\concept{{Folding functions}}

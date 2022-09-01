@@ -42,6 +42,7 @@ The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} calls all 
 Other humdrum data summary functions: 
 \code{\link{humCensus}},
 \code{\link{humInterpretations}},
+\code{\link{humReference}},
 \code{\link{humSpines}}
 }
 \concept{humdrum data summary functions}

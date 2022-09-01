@@ -324,6 +324,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' A `drop` argument is also available. If `TRUE`, a plain
 #' `[data.table][data.table::data.table()]` is returned.
 #'       
+#' @family humdrum data summary functions
 #' @name humReference
 #' @export
 reference <- function(x) UseMethod('reference')

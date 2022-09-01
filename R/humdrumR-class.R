@@ -847,7 +847,8 @@ mergeHumdrum <- function(...) {
 #' @param sep `character`. If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.
 #' @param pad `logical`. Should [path/column padding tokens][humColumns] be included?
 #' 
-#' @family {Humdrum data "reshaping" functions.}
+#' @seealso The humdrum [folding functions][foldHumdrum()] serve a similar function,
+#' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
                             collapseField = 'Token', 
@@ -946,23 +947,21 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 
 #' "Fold" data into new fields
 #'
-#' Many humdrum datasets encode data spread across multiple spines, spine-paths, or stops.
+#' Many humdrum datasets encode data across multiple spines, spine-paths, or stops.
 #' By default, `humdrumR` parses each separate spine, spine-path, and stop as their own individual
 #' data points, taking up one row in the [humdrum table][humTable].
 #' If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 #' it is easiest to reshape the data so that the information is in different humdrumR [fields][fields()]
 #' rather than separate spines/paths/stops.
-#' We "fold" the data from structural field over "on top" of other data using `foldHumdrum`.
-#' The convenient `foldStops()` and `foldPaths()` functions automatically fold *all* stops/paths in a dataset onto the first stop/path,
-#' creating new fields named, e.g., `Path1`, `Path2`, etc.
+#' We "fold" the data from one structural location over "on top" of other data using `foldHumdrum`.
 #' 
-#' @details
+#' @section From where to where:
 #' 
-#' The `numeric` `fold` and `onto` arguments, specify where to fold from/to.
-#' `fold` indicates the Spine/Path/Stop to fold *from*, "**on to**" the Spine/Path/Stop
+#' The `numeric` `fold` and `onto` arguments specify where to fold from/to.
+#' `fold` indicates the Spine/Path/Stop to fold *from*, "*on to*" the Spine/Path/Stop
 #' indicated by `onto`.
 #' For example, if you specify `foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')`
-#' spine 2 will be folded "on top of spine 1.
+#' spine 2 will be folded "on top of" spine 1.
 #' The `fold` and `onto` targets may not overlap.
 #' 
 #' 
@@ -974,12 +973,13 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 #' map first spine *and* the second spine on to *two* new fields of the third spine.
 #' If the `fold` target is duplicated, the same `fold` spines can be copied onto multiple
 #' `onto` spines: for example, the combination `fold = 1` and `onto = 2:3` will map the contents 
-#' of the first spine onto the second *and* third spine, duplicating the spine one data.
+#' of the first spine onto the second *and* third spine, duplicating the spine-1 data.
 #' 
 #' The lengths of `fold` and `onto` are automatically matched, so
-#' arguments like `fold = 1:2` and `onto = 3` are equivalent to `(fold = 1:2, onto = c(3, 3))`.
-#' This makes it east to do things like "copy all four spines onto spine 1": 
-#' just write `(fold = 2:4, onto = 1)`.
+#' arguments like `fold = 1:2` and `onto = 3` are equivalent to `fold = 1:2, onto = c(3, 3)`.
+#' This makes it easy to do things like "copy all four spines onto spine 1": 
+#' just write `fold = 2:4, onto = 1`.
+#' 
 #' 
 #' To specify what structural field you want to fold across, 
 #' use the `what` argument (`character`, `length == 1`).
@@ -987,6 +987,8 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 #' and `"Stop"`, though you might want to use the convenient `foldPaths()` and `foldStops()`
 #' functions directly (details below).
 #' (You may also fold across `"Record"` or `"NData"`), but these are advanced/tricky!)
+
+#' @section Which fields:
 #' 
 #' The `fromField` (`character`, `length == 1`) controls which field in the `fold` 
 #' spine/path/stop is folded into a new field.
@@ -999,7 +1001,7 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 #' which causes the missing parts of `fold` to be filled with data from the `from`
 #' field. `foldPaths` does this by default.
 #' 
-#' The resulting new fields will automatically be named as appropriate results.
+#' The resulting new fields will automatically be named as appropriate `Result`s fields.
 #' The `newFieldNames` argument (`character`) can be used to control the output names:
 #' one for each new field created by the fold.
 #' If you specify too many `newFieldNames`, the later names are ignored.
@@ -1036,6 +1038,13 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 #' 
 #' If any files in the corpus are not included, they will not be affected at all!
 #' 
+#' @section Predefined folds:
+#' 
+#' The convenient `foldStops()` and `foldPaths()` functions automatically fold *all* stops/paths in a dataset 
+#' onto the first stop/path, creating new fields named, e.g., `Path1`, `Path2`, etc.
+#' Another extremely useful function is [foldExclusive()], which automatically folds spines 
+#' based on their exclusive interpretation.
+#' 
 #' @param humdrumR A [humdrumR data object][humdrumR-class].
 #' @param fold (`numeric`, whole number) The target structure (spine, path, etc.) *from which*
 #'   to "fold" data to another structural position and field(s).
@@ -1053,8 +1062,9 @@ collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIM
 #' into the `NA` sections?
 #' @param newFieldNames (`character`) Names to use for new fields created by the folding.
 #' 
-#' @seealso [foldExclusive()] is a particularly useful application of folding. [collapseHumdrum()] also serves a similar function.
-#' @family {Humdrum data "reshaping" functions.}
+#' @seealso The [collapse family of functions][collapseHumdrum()] serves a somewhat
+#' similar function, "collapsing" data *within* a field.
+#' @family {Folding functions}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
                         fromField = 'Token', fillFromField = FALSE,
@@ -1237,8 +1247,7 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' @param onto (`character`, whole number) The target exclusive interpretation (must be only one) *to which*
 #'    the "fold" data is moved.
 #' 
-#' @family {Humdrum data "reshaping" functions.}
-#' @seealso `foldExclusive` makes use of the more general [foldHumdrum()].
+#' @family {Folding functions}
 #' @export
 foldExclusive <- function(humdrumR, fold, onto, fromField = 'Token') {
     checkhumdrumR(humdrumR, 'foldExclusive')
@@ -1384,7 +1393,7 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
 #' "Fold" grace notes into neighbos
 #' 
 #' 
-#' @family {Humdrum data "reshaping" functions.}
+#' @family {Folding functions}
 #' @seealso `foldGraceNotes` makes use of the more general [foldHumdrum()].
 #' @export
 foldGraceNotes <- function(humdrumR) {

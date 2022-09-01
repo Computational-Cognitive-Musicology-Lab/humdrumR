@@ -21,6 +21,7 @@ used to summarize the spines and spine paths in the pieces of a humdrumR corpus.
 Other humdrum data summary functions: 
 \code{\link{humCensus}},
 \code{\link{humInterpretations}},
+\code{\link{humReference}},
 \code{\link{humSummary}}
 }
 \concept{humdrum data summary functions}

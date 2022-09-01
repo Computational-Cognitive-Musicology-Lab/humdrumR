@@ -52,7 +52,7 @@ humdrumRroot <- system.file(package = 'humdrumR')
 
 exclusiveFunctions <- c('mint')
 keyedFunctions <- c()
-boundedFunctions <- c('mint', 'delta', 'sigma', 'lag')
+boundedFunctions <- c('mint', 'delta', 'sigma', 'lag', 'fillThru')
 
 setOldClass('quosure')
 

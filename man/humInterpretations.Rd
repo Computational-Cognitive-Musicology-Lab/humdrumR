@@ -61,6 +61,7 @@ The tabulation by \code{interpretations} will return a \code{Key} column with th
 \seealso{
 Other humdrum data summary functions: 
 \code{\link{humCensus}},
+\code{\link{humReference}},
 \code{\link{humSpines}},
 \code{\link{humSummary}}
 }

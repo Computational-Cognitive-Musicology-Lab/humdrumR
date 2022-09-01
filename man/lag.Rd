@@ -10,7 +10,7 @@ lag(x, n = 1, fill, wrap, boundaries, ...)
 lead(x, n, ...)
 }
 \arguments{
-\item{x}{The input argument. Should be vector (including lists), array, or data.frame}
+\item{x}{The input argument. Should be vector (including list), array, or data.frame}
 
 \item{n}{The amount to lag/lead the data.}
 
@@ -19,8 +19,8 @@ lead(x, n, ...)
 \item{wrap}{If \code{wrap = TRUE}, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 within the data structure.}
 
-\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Lags crossing the boundaries indicated in \code{windows}
-are filled.}
+\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
+by the \code{boundaries} vector(s) is treated separately.}
 
 \item{margin}{Arrays and data.frames can be lagged lead in multiple dimensions using the \code{margin} argument.}
 }
@@ -31,4 +31,10 @@ They are similiar to the \link[data.table:shift]{data.table::shift} function, bu
 }
 \seealso{
 \code{\link[data.table:shift]{data.table::shift()}}
+
+Other {Lagged vector functions}: 
+\code{\link{delta}()},
+\code{\link{fillThru}()},
+\code{\link{sigma}()}
 }
+\concept{{Lagged vector functions}}

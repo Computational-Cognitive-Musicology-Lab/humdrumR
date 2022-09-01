@@ -61,9 +61,6 @@ The \code{collapseXXX} family allows you collapse all
 across groups in another field.
 }
 \seealso{
-Other {Humdrum data "reshaping" functions.}: 
-\code{\link{foldExclusive}()},
-\code{\link{foldGraceNotes}()},
-\code{\link{foldHumdrum}()}
+The humdrum \link[=foldHumdrum]{folding functions} serve a similar function,
+"folding" data into \emph{new} fields, rather than collapsing it within a field.
 }
-\concept{{Humdrum data "reshaping" functions.}}

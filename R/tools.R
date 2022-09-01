@@ -135,15 +135,16 @@ applycols <- function(x, f, ...){
 #' The `lag` and `lead` functions take input vectors, matrices, or data.frames and shifts their data
 #' by `n` indices. 
 #' They are similiar to the [data.table::shift] function, but with a few additional options:
-#' @param x The input argument. Should be vector (including lists), array, or data.frame
+#' @param x The input argument. Should be vector (including list), array, or data.frame
 #' @param n The amount to lag/lead the data. 
 #' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
 #' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 #' within the data structure.
-#' @param boundaries A vector or list of vectors, all of the same length as `x`. Lags crossing the boundaries indicated in `windows`
-#' are filled.
+#' @param boundaries A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
+#' by the `boundaries` vector(s) is treated separately.
 #' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
 #' 
+#' @family {Lagged vector functions}
 #' @seealso [data.table::shift()]
 #' @export
 lag <- function(x, n = 1, fill, wrap, boundaries, ...) UseMethod('lag')
@@ -423,28 +424,10 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
-changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = FALSE) {
-    xs <- list(...)
-    xs <- do.call('match_size', xs)
-    
-    changes <- lapply(xs, \(x) c(if (!beforeChange) pad, 
-                                 head(x, -1L) != tail(x, -1L),
-                                 if (beforeChange) pad))
-    changes <- Reduce(if (any) '|' else '&', changes)
-    
-             
-    values <- do.call('cbind', lapply(xs, '[', !is.na(changes) & changes))
-    rownames(values) <- which(changes)
-             
-    if (value) {
-      values
-    } else {
-      attr(changes, 'values') <- values
-      changes
-    }
-}
-
-
+#' Identify contiguous sements of a vector
+#' 
+#' @family {Window functions}
+#' @export
 segments <- function(x, reverse = FALSE) {
     change <- if (!is.logical(x)) changes(x) else x
     values <- attr(change, 'values')
@@ -464,34 +447,74 @@ segments <- function(x, reverse = FALSE) {
 }
 
 
+#' @rdname segements
+changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = FALSE) {
+  xs <- list(...)
+  xs <- do.call('match_size', xs)
+  
+  changes <- lapply(xs, \(x) c(if (!beforeChange) pad, 
+                               head(x, -1L) != tail(x, -1L),
+                               if (beforeChange) pad))
+  changes <- Reduce(if (any) '|' else '&', changes)
+  
+  
+  values <- do.call('cbind', lapply(xs, '[', !is.na(changes) & changes))
+  rownames(values) <- which(changes)
+  
+  if (value) {
+    values
+  } else {
+    attr(changes, 'values') <- values
+    changes
+  }
+}
 
 
 
 
-#' Propogate data points to "fill" null data.
+
+#' Propagate data points to "fill" null data.
 #' 
 #' `fillThru` is a function that allow you to "fill" null values in a vector
 #' with non-null values from earlier/later in the same vector.
-#' The default, "foward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
+#' The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 #' The `reverse` argument can be used to cause "backeward" filling, where the *next* (higher index) non-null value is used.
+#' Alternatively, you can use the functions `fillForward` or `fillBackward`, which simply call `fillThru` with different
+#' `reverse` arguments.
 #' 
 #' Which values are considered "non-null" can be controlled using the `nonnull` argument.
 #' The `nonnull` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
+#' The values of `x` where `nonnull == TRUE` are copied forward/backwards to replace any adjacent vales where `nonnull == FALSE`.
+#' By default, `nonnull` is the function `\(x) !is.na(x) & x != '.'`, which means that `NA` values and the string `"."` are 
+#' "null", and are overwritten by adjacent values.
 #' 
+#' @param nonnull Either a logical vector where (`length(x) == length(nonnull)`), a numeric
+#' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
+#' @param reverse (`logical` & `length == 1`) If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
+#' *earlier* (lower indices) in the vector. 
 #' 
-#' 
+#' @inheritParams lag
+#' @inheritSection sigma Boundaries
+#' @family {Lagged vector functions}
 #' @export
 #' @name fillThru
-fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE) {
+fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE, boundaries = list()) {
     if (length(x) == 0L) return(x)
     if (is.function(nonnull)) nonnull <- nonnull(x)
+    
+    boundaries <- checkWindows(x, boundaries)
+    
+    if (length(boundaries)) nonnull <- nonnull | do.call('changes', boundaries)
     
     seg <- segments(nonnull, reverse = reverse)
     
     vals <- x[nonnull]
     if (!head(nonnull, 1) && !reverse) vals <- c(x[1], vals)
     if (!tail(nonnull, 1) && reverse) vals <- c(vals, tail(x, 1))
+    
+    
+  
     
     setNames(rep(vals, rle(seg)$lengths), seg)
 }
@@ -1005,23 +1028,23 @@ checkWindows <- function(x, windows) {
 #' 
 #' @section Boundaries:
 #' 
-#' In many cases we want to perform lagged calculations in a vector, but not across certain boundaries.
-#' For example, we don't want to calculate the difference between the first note in one file and the last 
-#' note of the previous file!
+#' In many cases we want to perform lagged calculations in a vector, but *not across certain boundaries*.
+#' For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
+#' between pieces, only within pieces.
 #' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
 #' into groups.
 #' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
-#' (`boundaries` are evaluated using the [changes()] function, so you can also pass the argument `any = FALSE`
-#' if you want their only to boundaries where *all* boundary vectors change.)
 #' 
-#' Value pairs which cross between groups are compared to the `init` value(s), as if they were at the beginning
-#' (or end, if `right == TRUE`).
-#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, delta/sigma, ...)`,
+#' Value pairs which cross between groups are treated as if they were at the beginning.
+#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, laggedFunction, ...)`,
 #' except generally faster when the number of groups is large.
 #' 
-#' `humdrumR` [with(in)][withinHumdrum] calls will automatically feed the `File`, `Spine`, and `Path` 
-#' fields as three `boundaries` vectors, anywhere you use `delta`.
-#' This is the most common, "melodic" use case.
+#' The most common use case in humdrum data, is looking at "melodies" within spines.
+#' For this, we want `boundaries = list(File, Spine, Path )`.
+#' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
+#' three fields as `boundaries` arguments to certain functions: `r cat(harvard(boundedFunctions, 'or'))`.
+#' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
+#' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 #' you could manually set `boundaries = list(File, Record)`.
 #' 
@@ -1040,7 +1063,7 @@ checkWindows <- function(x, windows) {
 #' across groups indicated by the `boundaries` vector(s).
 #' 
 #' 
-#' 
+#' @family {Lagged vector functions}
 #' @seealso This function's inverse is [delta()]. 
 #' @export
 sigma <- function(x, lag, skip = is.na, init, boundaries = list(), ...) UseMethod('sigma')
@@ -1114,7 +1137,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' However, `delta` should be favored in [humdrumR] use because:
 #' 
 #' 1. Its output is *always* the same length as its  input.
-#'    This is achieved by padding the beginning or end of the output with---by default---`NA` values.
+#'    This is achieved by padding the beginning or end of the output with1 `NA` values (or other options).
 #' 2. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
 #'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
@@ -1197,6 +1220,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' @inheritSection sigma Boundaries
 #' @inheritSection sigma Invertability
 #' 
+#' @family {Lagged vector functions}
 #' @seealso This function's inverse is [sigma()]. 
 #' @export
 delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 

@@ -69,3 +69,11 @@ A \code{drop} argument is also available. If \code{TRUE}, a plain
 \verb{[data.table][data.table::data.table()]} is returned.
 }
 
+\seealso{
+Other humdrum data summary functions: 
+\code{\link{humCensus}},
+\code{\link{humInterpretations}},
+\code{\link{humSpines}},
+\code{\link{humSummary}}
+}
+\concept{humdrum data summary functions}

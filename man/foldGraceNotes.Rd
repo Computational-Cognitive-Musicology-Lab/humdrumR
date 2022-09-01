@@ -12,9 +12,8 @@ foldGraceNotes(humdrumR)
 \seealso{
 \code{foldGraceNotes} makes use of the more general \code{\link[=foldHumdrum]{foldHumdrum()}}.
 
-Other {Humdrum data "reshaping" functions.}: 
-\code{\link{collapseHumdrum}()},
+Other {Folding functions}: 
 \code{\link{foldExclusive}()},
 \code{\link{foldHumdrum}()}
 }
-\concept{{Humdrum data "reshaping" functions.}}
+\concept{{Folding functions}}
