@@ -424,7 +424,9 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
     output[order(indices)]
 }
 
-#' Identify contiguous sements of a vector
+#' Identify contiguous segments of data in a vector
+#' 
+#' `segments` and `changes` are extremely useful functions...
 #' 
 #' @family {Window functions}
 #' @export
@@ -446,8 +448,8 @@ segments <- function(x, reverse = FALSE) {
     
 }
 
-
-#' @rdname segements
+#' @export
+#' @rdname segments
 changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = FALSE) {
   xs <- list(...)
   xs <- do.call('match_size', xs)
@@ -475,12 +477,10 @@ changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = F
 
 #' Propagate data points to "fill" null data.
 #' 
-#' `fillThru` is a function that allow you to "fill" null values in a vector
+#' `ditto` is a function that allow you to "fill" null values in a vector
 #' with non-null values from earlier/later in the same vector.
 #' The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
-#' The `reverse` argument can be used to cause "backeward" filling, where the *next* (higher index) non-null value is used.
-#' Alternatively, you can use the functions `fillForward` or `fillBackward`, which simply call `fillThru` with different
-#' `reverse` arguments.
+#' The `reverse` argument can be used to cause "backward" filling, where the *next* (higher index) non-null value is used.
 #' 
 #' Which values are considered "non-null" can be controlled using the `nonnull` argument.
 #' The `nonnull` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
@@ -489,17 +489,33 @@ changes <- function(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = F
 #' By default, `nonnull` is the function `\(x) !is.na(x) & x != '.'`, which means that `NA` values and the string `"."` are 
 #' "null", and are overwritten by adjacent values.
 #' 
+#' `ditto` methods are defined for data.frames and arrays (including matrices).
+#' The `data.frame` method simply applies `ditto` to each column of the `data.frame` separately.
+#' For arrays, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
+#' 
+#' The `ditto` method for a [humdrumR object][humdrumRclass] applies `ditto` to each spine-path within each file
+#' in the corpus. The `field` argument indicates which field to apply ditto to. The result of the dittoing
+#' is saved to a new field---the `newField` argument can be used to control what to name the new field.
+#' 
 #' @param nonnull Either a logical vector where (`length(x) == length(nonnull)`), a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
 #' @param reverse (`logical` & `length == 1`) If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
 #' *earlier* (lower indices) in the vector. 
+#' @param margin a vector giving the subscripts which the function will be applied over. 
+#'     E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns. 
+#'     Where X has named dimnames, it can be a character vector selecting dimension names.
+#' @param field Which field ([partially matched][base::pmatch()]) in the `humdrumR` dataset should be dittoed?
+#' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
 #' 
 #' @inheritParams lag
 #' @inheritSection sigma Boundaries
 #' @family {Lagged vector functions}
 #' @export
-#' @name fillThru
-fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE, boundaries = list()) {
+ditto <- function(x, ...) UseMethod('ditto')
+
+#' @rdname ditto
+#' @export
+ditto.default <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE, boundaries = list()) {
     if (length(x) == 0L) return(x)
     if (is.function(nonnull)) nonnull <- nonnull(x)
     
@@ -513,18 +529,39 @@ fillThru <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE, bo
     if (!head(nonnull, 1) && !reverse) vals <- c(x[1], vals)
     if (!tail(nonnull, 1) && reverse) vals <- c(vals, tail(x, 1))
     
-    
-  
-    
     setNames(rep(vals, rle(seg)$lengths), seg)
 }
 
+#' @rdname ditto
 #' @export
-#' @name fillThru
-fillForward <- function(...) fillThru(..., reverse = FALSE)
+ditto.data.frame <- function(x, ...) {
+  x[] <- lapply(x, ditto, ...)
+  x
+}
+
+#' @rdname ditto
 #' @export
-#' @name fillThru
-fillBackwards <- function(...) fillThru(..., reverse = TRUE)
+ditto.matrix <- function(x, margin = 2, ...) {
+  result <- apply(x, margin, ditto, ..., simplify = FALSE)
+  
+  do.call(if (margin == 1) 'rbind' else 'cbind', result)
+  
+}
+
+#' @rdname ditto
+#' @export
+ditto.humdrumR <- function(x, field = activeFields(x)[1], ..., newField = paste0(field, '_ditto')) {
+  checkCharacter(newField, max.length = 1L)
+  field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
+  newField <- rlang::sym(newField)
+  rlang::eval_tidy(rlang::expr({
+    
+      within(x, !!newField <- ditto(!!field, ...), by = list(File, Spine, Path), dataTypes = 'Dd')
+    
+  }))
+}
+
+
 
 ## Dimensions ----
 
@@ -1042,7 +1079,7 @@ checkWindows <- function(x, windows) {
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
 #' For this, we want `boundaries = list(File, Spine, Path )`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `boundaries` arguments to certain functions: `r cat(harvard(boundedFunctions, 'or'))`.
+#' three fields as `boundaries` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
 #' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

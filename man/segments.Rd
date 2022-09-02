@@ -2,11 +2,14 @@
 % Please edit documentation in R/tools.R
 \name{segments}
 \alias{segments}
-\title{Identify contiguous sements of a vector}
+\alias{changes}
+\title{Identify contiguous segments of data in a vector}
 \usage{
 segments(x, reverse = FALSE)
+
+changes(..., pad = TRUE, value = FALSE, any = TRUE, beforeChange = FALSE)
 }
 \description{
-Identify contiguous sements of a vector
+\code{segments} and \code{changes} are extremely useful functions...
 }
 \concept{{Window functions}}

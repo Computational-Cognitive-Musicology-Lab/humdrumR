@@ -7,15 +7,15 @@
 #' [humdrumR] includes a number of built in functions for creating quick summaries of [humdrumR][humdrumRclass]
 #' corpora:
 #'
-#' 1. [census][humCensus()]
+#' 1. [census][census()]
 #'     + Tabulates the raw size of the humdrumR corpus.
-#' 2. [reference][humReference()]
+#' 2. [reference][reference()]
 #'     + Tabulates reference records (metadata) for each file.
-#' 3. [spines][humSpines()]
+#' 3. [spines][spines()]
 #'     + Tabulates the number of spines and spine paths in files in the corpus.
-#' 4. [interpretations][humInterpretations()]
+#' 4. [interpretations][interpretations()]
 #'     + Tabulates the types of exclusive and tandem interpretations in the corpus.
-#' 5. [sections][humSections()]
+#' 5. [sections][sections()]
 #'     + Tabulates any formal data (`*>`) in the corpus.
 #'
 #'
@@ -24,7 +24,7 @@
 #' The `summary` method for [humdrumR objects][humdrumRclass] calls all of the above functions and prints a condensed version of each.
 #'
 #' @name humSummary
-#' @family humdrum data summary functions
+#' @family corpus summary functions
 #' @export 
 setMethod('summary', 'humdrumR',
           function(object, ...) {
@@ -54,10 +54,6 @@ setMethod('summary', 'humdrumR',
 #' tabulate the raw size of a [humdrumR][humdrumRclass] corpus.
 #' `census` takes a [humdrumR][humdrumRclass] object
 #' and and returns a `humCensus` table.
-#' The `dataType` argument controls what types of records to tabulate:
-#' legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' The default is `"D"`.
 #' 
 #' A `humCensus` table has five columns of information:
 #' 
@@ -80,28 +76,22 @@ setMethod('summary', 'humdrumR',
 #' across all files are calculated across all files as well, not summed.
 #'  
 #' @param humdrumR A humdrumR object
-#' @param dataTypes A `character` string of length 1. 
+#' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
 #' @param by A `character` string of length 1. Must be a [field][humdrumRclass] in the humdrumR object.
-#'  
+#' @param i Rows of a `humCensus` object can be selected with a single argument `i`: e.g., `censusTable[i]`.
+#'   If `i` is `numeric`, the corresponding rows are selected ordinally (not by `File` number).
+#'   If `i` is a `character` string, this string is matched as a regular expression against file names.
 #'  
 #' @section Indexing:
 #'
-#' Rows of a `humCensus` object can be selected with a single argument `i`: e.g., `censusTable[i]`.
-#' If `i` is `numeric`, the corresponding rows are selected ordinally (not by `File` number).
-#' If `i` is a `character` string, this string is mached as a regular expression against file names.
-#' If `i` is a formula, the right-hand side of the formula is evaluated within the table---if it evaluates to a logical vector,
-#' files are selected accordingly. For instance,
-#' `censusTable[~Tokens > 100]` will select all files
-#' with more than 100 tokens. (The '(unique)' and '(per token)' columns
-#' must be referred to with their names enclosed in `\``---for example,
-#' `censusTable[~\`(unique)\` > 100]` will return all files with
-#' more than 100 unique tokens.
+#' 
 #' 
 #' A `drop` argument is also available. If `TRUE`, a plain 
 #' [data.table::data.table()] is returned.
 #' 
-#' @name humCensus
-#' @family humdrum data summary functions
+#' @family corpus summary functions
 #' @export
 census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty = FALSE) {
   ## This function creates a data.table of class humCensus
@@ -139,7 +129,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
   censusTable %class% 'humCensus'
 }
 
-#' @name humCensus
+#' @rdname census
 #' @usage census(humdata)[i]
 #' @export
 `[.humCensus` <- function(censusTable, i, drop = FALSE) {
@@ -149,7 +139,6 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
   dataTypes  <- attr(censusTable, 'dataTypes')      
   by <- attr(censusTable, 'by')
   
-  if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
   if (is.character(i)) expr <- call('grepl', quote(i), as.symbol(attr(censusTable, 'by')))
   if (is.numeric(i)) expr <- quote(i)
   
@@ -169,7 +158,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
 }
 
 
-#' @name humCensus
+#' @rdname census
 #' @export
 print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
   
@@ -324,13 +313,12 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' A `drop` argument is also available. If `TRUE`, a plain
 #' `[data.table][data.table::data.table()]` is returned.
 #'       
-#' @family humdrum data summary functions
-#' @name humReference
+#' @family corpus summary functions
 #' @export
 reference <- function(x) UseMethod('reference')
 
 
-#' @rdname humReference
+#' @rdname reference
 #' @usage reference('OTL')
 #' @export
 reference.character <- function(str) {
@@ -375,7 +363,7 @@ reference.character <- function(str) {
   return(invisible(hits))
 }
 
-#' @rdname humReference
+#' @rdname reference
 #' @usage reference(humdata)
 #' @export
 reference.humdrumR <- function(humdrumR) {
@@ -400,7 +388,7 @@ reference.humdrumR <- function(humdrumR) {
 }
 
 
-#' @name humReference
+#' @rdname reference
 #' @export
 `[.humReference` <- function(refTable, i, j, drop = FALSE) {
   if (missing(i) && missing(j)) return(if (drop) popclass(refTable) else refTable)
@@ -437,7 +425,7 @@ reference.humdrumR <- function(humdrumR) {
 }
 
 
-#' @name humReference
+#' @rdname reference
 #' @usage NULL
 #' @export
 print.humReference <- function(refTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
@@ -570,8 +558,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' `spines` is one of [humdrumR]'s [summary functions][humSummary],
 #' used to summarize the spines and spine paths in the pieces of a humdrumR corpus.
 #'
-#' @name humSpines
-#' @family humdrum data summary functions
+#' @family corpus summary functions
 #' @export
 spines  <- function(humdrumR) {
 
@@ -598,7 +585,7 @@ spines  <- function(humdrumR) {
 }
 
 
-#' @rdname humSpines
+#' @rdname spines
 #' @export
 `[.humSpines` <- function(spines, i, j) {
   if (missing(i) && missing(j)) return(spines)
@@ -619,7 +606,7 @@ spines  <- function(humdrumR) {
 
 
 
-#' @rdname humSpines
+#' @rdname spines
 #' @export
 print.humSpines <- function(spineTable, showEach = TRUE) {
   nfiles <- nrow(spineTable)
@@ -758,8 +745,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #' @param humdrumR A [humdrumR][humdrumR-class] data object.
 #' 
 #' 
-#' @name humInterpretations
-#' @family humdrum data summary functions
+#' @family corpus summary functions
 #' @export
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
@@ -805,7 +791,7 @@ interpretations <- function(humdrumR) {
   
 }
 
-#' @rdname humInterpretations
+#' @rdname interpretations
 #' @export
 print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = options('width')$width - 10L) {
   if (nrow(interps$Exclusive) < 1 || any(sapply(interps$Tandem, nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}

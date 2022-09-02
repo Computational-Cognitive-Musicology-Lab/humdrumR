@@ -28,8 +28,8 @@ For \code{dataTypes}, values can be:
 
 Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
 
-\item{fieldnames}{(\code{character}) A vector of names which are \link[base:pmatch]{partially}
-matched against field names of the humdrum table.
+\item{fieldnames}{(\code{character}) A vector of names which are \link[base:pmatch]{partially matched}
+against field names of the humdrum table.
 Of \code{NULL} (the default), the \code{Token} field is returned.}
 }
 \description{

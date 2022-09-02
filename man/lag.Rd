@@ -34,7 +34,7 @@ They are similiar to the \link[data.table:shift]{data.table::shift} function, bu
 
 Other {Lagged vector functions}: 
 \code{\link{delta}()},
-\code{\link{fillThru}()},
+\code{\link{ditto}()},
 \code{\link{sigma}()}
 }
 \concept{{Lagged vector functions}}

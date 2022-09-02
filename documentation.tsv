@@ -4,7 +4,6 @@ Apply.R	withinHumdrum.Rd	""	""	16179	""	""	withinHumdrum, with.humdrumR, within.
 Compose.R	humdrumDispatch.Rd	""	""	3971	""	""	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch	""	19
 Filter.R	indexHumdrum.Rd	""	""	953	""	Minimal	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method	""	571
 Filter.R	subset.humdrumR.Rd	""	""	10608	""	""	subset.humdrumR, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops	""	23
-Formulae.R	humFormulae.Rd	""	""	708	""	""	humFormulae, ditto	""	61
 Lyrics.R	silbeFormat.Rd	""	""	748	""	""	silbeFormat	""	
 Lyrics.R	wort.Rd	""	""	960	""	""	wort	""	606
 Metric.R	humMeter.Rd	""	""	516	""	""	humMeter	""	1082
@@ -17,11 +16,11 @@ Read.R	readHumdrum.Rd	""	""	9965	""	""	readHumdrum, findHumdrum	""	89
 Regex.R	REparser.Rd	""	""	922	""	""	REparser, REparse	""	561
 Regex.R	RegexFind.Rd	""	""	1805	""	""	RegexFind, \%grepl\%, \%grepi\%, \%grepn\%, \%grepm\%, \%grep\%, \%!grep\%, \%!grepi\%, \%lgrepl\%, \%lgrepi\%, \%lgrepn\%	""	38
 Regex.R	regexConstruction.Rd	""	""	1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE	""	559
-Summary.R	humCensus.Rd	humdrum data summary functions	""	3210	""	""	humCensus, census, [.humCensus, print.humCensus	""	13
-Summary.R	humInterpretations.Rd	humdrum data summary functions	""	2502	""	""	humInterpretations, interpretations, print.humInterpretations	""	71
-Summary.R	humReference.Rd	humdrum data summary functions	""	3428	""	""	humReference, reference, reference.character, reference.humdrumR, [.humReference, print.humReference	""	152
-Summary.R	humSpines.Rd	humdrum data summary functions	""	702	""	""	humSpines, spines, [.humSpines, print.humSpines	""	565
-Summary.R	humSummary.Rd	humdrum data summary functions	""	1364	""	""	humSummary	""	173
+Summary.R	census.Rd	corpus summary functions	""	2694	No	Missing “by” explanation	census, [.humCensus, print.humCensus	""	
+Summary.R	humSummary.Rd	corpus summary functions	""	1333	Yes	Yes	humSummary	""	173
+Summary.R	interpretations.Rd	corpus summary functions	""	2458	Yes	Yes	interpretations, print.humInterpretations	""	
+Summary.R	reference.Rd	corpus summary functions	""	3390	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference	""	
+Summary.R	spines.Rd	corpus summary functions	""	667	""	Empty	spines, [.humSpines, print.humSpines	""	
 Validation.R	humValidation.Rd	""	""	1049	Yes	Empty	humValidation, validateHumdrum	""	54
 Vector.R	struct.Rd	""	""	8323	""	""	struct, is.struct	""	67
 Windows.R	humWindows.Rd	""	""	781	""	""	humWindows, windows, nested, hop, windowApply, applyNgram	""	559
@@ -75,9 +74,9 @@ tonalInterval.R	step.Rd	partial pitch functions, pitch functions	""	2138	Yes	Emp
 tonalInterval.R	tonalIntervalS4.Rd	core pitch representation	Needs one?	7277	Yes	Yes	tonalIntervalS4, tint, is.tonalInterval	""	53
 tonalInterval.R	tonh.Rd	absolute pitch functions, pitch functions	""	10205	Yes	Mostly	tonh	""	17
 tonalInterval.R	transpose.Rd	tonal transformations	""	8056	""	""	transpose	""	26
-tools.R	delta.Rd	Lagged vector functions	""	7770	Yes	Yes	delta, delta.default, delta.matrix	""	47
+tools.R	delta.Rd	Lagged vector functions	""	7800	Yes	Yes	delta, delta.default, delta.matrix	""	47
+tools.R	ditto.Rd	Lagged vector functions	""	4997	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR	""	
 tools.R	expand.Rd	""	""	1781	Yes	Yes	expand	""	38
-tools.R	fillThru.Rd	Lagged vector functions	""	3802	Yes	Yes	fillThru, fillForward, fillBackwards	""	43
-tools.R	lag.Rd	Lagged vector functions	""	1418	Yes	Yes	lag, lead	""	53
-tools.R	segments.Rd	Window functions	""	279	""	Empty	segments	""	
-tools.R	sigma.Rd	Lagged vector functions	""	7544	Yes	Yes	sigma, sigma.default, sigma.matrix	""	32
+tools.R	lag.Rd	Lagged vector functions	""	1415	Yes	Yes	lag, lead	""	53
+tools.R	segments.Rd	Window functions	""	405	""	Empty	segments, changes	""	
+tools.R	sigma.Rd	Lagged vector functions	""	7574	Yes	Yes	sigma, sigma.default, sigma.matrix	""	32

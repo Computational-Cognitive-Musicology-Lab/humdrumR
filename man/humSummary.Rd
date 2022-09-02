@@ -12,23 +12,23 @@ corpora:
 }
 \details{
 \enumerate{
-\item \link[=humCensus]{census}
+\item \link[=census]{census}
 \itemize{
 \item Tabulates the raw size of the humdrumR corpus.
 }
-\item \link[=humReference]{reference}
+\item \link[=reference]{reference}
 \itemize{
 \item Tabulates reference records (metadata) for each file.
 }
-\item \link[=humSpines]{spines}
+\item \link[=spines]{spines}
 \itemize{
 \item Tabulates the number of spines and spine paths in files in the corpus.
 }
-\item \link[=humInterpretations]{interpretations}
+\item \link[=interpretations]{interpretations}
 \itemize{
 \item Tabulates the types of exclusive and tandem interpretations in the corpus.
 }
-\item \link[=humSections]{sections}
+\item \link[=sections]{sections}
 \itemize{
 \item Tabulates any formal data (\verb{*>}) in the corpus.
 }
@@ -39,10 +39,10 @@ special class of data.table.
 The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} calls all of the above functions and prints a condensed version of each.
 }
 \seealso{
-Other humdrum data summary functions: 
-\code{\link{humCensus}},
-\code{\link{humInterpretations}},
-\code{\link{humReference}},
-\code{\link{humSpines}}
+Other corpus summary functions: 
+\code{\link{census}()},
+\code{\link{interpretations}()},
+\code{\link{reference}()},
+\code{\link{spines}()}
 }
-\concept{humdrum data summary functions}
+\concept{corpus summary functions}
