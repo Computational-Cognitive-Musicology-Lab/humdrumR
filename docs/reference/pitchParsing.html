@@ -48,12 +48,12 @@ semit(), or solfa().'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -125,7 +125,7 @@ returns the tint representing a <strong>Major 3rd</strong>, because <em>C#</em> 
 The <code>tonalInterval</code> parser will attempt to parse any input information into a <a href="tonalIntervalS4.html">tonalInterval</a> object---a back-end pitch representation
 that you probably don't need to care about!
 When you use one of the main <a href="pitchFunctions.html">pitch functions</a>, like <code><a href="kern.html">kern()</a></code> or <code><a href="semits.html">semits()</a></code>,
-the input is parsed into a <a href="tonalIntervalS4.html">tonalInterval</a> object, then immediately deparsed
+the input is parsed into a <a href="tonalIntervalS4.html">tonalInterval</a> object, then immediately <a href="pitchDeparsing.html">deparsed</a>
 to the representation you asked for (e.g., <code>**kern</code> or <code>**semits</code>).
 Thus, the underlying pipeline for <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> looks something like:</p><ul><li><p><strong>Input</strong> representation (e.g., <code>**pitch</code> or <code>**semits</code>) <code>|&gt;</code></p><ul><li><p><em>Parsing</em> (done by <code>tonalInterval()</code>) <code>|&gt;</code></p><ul><li><p><strong>Intermediate</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
 </ul></li>
@@ -133,7 +133,7 @@ Thus, the underlying pipeline for <code>humdrumR</code> <a href="pitchFunctions.
 </ul></li>
 <li><p><strong>Output</strong> representation (e.g. <code>**kern</code> or <code>**solfa</code>)</p></li>
 </ul><p><em>This</em> documentation talks about the parsing step.
-For an overview of the "deparsing" process, look here.
+For an overview of the "deparsing" process, look <a href="pitchDeparsing.html">here</a>.
 To learn about the "deparsing" of specific representations, <a href="pitchFunctions.html">start here</a> or go straight to the docs for specific functions---
 for example, call <code><a href="kern.html">?kern</a></code> to learn about <code><a href="kern.html">kern()</a></code>.</p>
     </div>
@@ -466,7 +466,7 @@ For example, we could use a parse command like this: <code>kern("E flat 5", pars
     <h2 id="atonal-parsing-numeric-inputs-">Atonal Parsing (<code>numeric</code> inputs)<a class="anchor" aria-label="anchor" href="#atonal-parsing-numeric-inputs-"></a></h2>
     <p>The <code>humdrumR</code> pitch parser (<code>tonalInterval()</code>) will interpret numeric inputs as atonal pitch information.
 By default, numbers are interpreted as semitones.
-However, parses for <code><a href="semits.html">midi()</a></code>, <code><a href="cents.html">cents()</a></code>,  and <a href="freq.html">frequencies</a> are also defined.
+However, parses for <code><a href="semits.html">midi()</a></code>, <code><a href="semits.html">cents()</a></code>,  and <a href="freq.html">frequencies</a> are also defined.
 Dispatch to these different parsers is controlled by the <code>Exclusive</code> argument.</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td>Semitones</td><td>**semits (or <code>NULL</code>)</td><td><code>3</code> -&gt; <code>e-</code></td></tr><tr><td>MIDI</td><td>**midi</td><td><code>63</code> -&gt; <code>e-</code></td></tr><tr><td>Cents</td><td>**cents</td><td><code>300</code> -&gt; <code>e-</code></td></tr><tr><td>Frequency (Hz)</td><td></td><td></td></tr></table><div class="section">
 <h3 id="enharmonic-interpretation">Enharmonic Interpretation<a class="anchor" aria-label="anchor" href="#enharmonic-interpretation"></a></h3>
 
@@ -510,11 +510,13 @@ For example, while <code>kern(0:2)</code> returns <code>c("c", "d-", "d")</code>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

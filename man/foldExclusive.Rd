@@ -33,6 +33,7 @@ the unchanged \code{humdrumR} object is returned with a warning.
 \seealso{
 Other {Folding functions}: 
 \code{\link{foldGraceNotes}()},
-\code{\link{foldHumdrum}()}
+\code{\link{foldHumdrum}()},
+\code{\link{unfoldStops}()}
 }
 \concept{{Folding functions}}

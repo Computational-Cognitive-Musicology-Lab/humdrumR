@@ -57,12 +57,12 @@
     <a class="dropdown-item" href="articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -88,49 +88,84 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="humdrumr">humdrumR<a class="anchor" aria-label="anchor" href="#humdrumr"></a>
 </h1></div>
-<p><code>humdrumR</code> is a R library for analyzing musicological data encoded in the <a href="https://www.humdrum.org" class="external-link">humdrum</a> data format.</p>
+<p><code>humdrumR</code> is a R library for analyzing musicological data
+encoded in the <a href="https://www.humdrum.org" class="external-link">humdrum</a> data
+format.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
 <h3 id="installing-r">Installing R<a class="anchor" aria-label="anchor" href="#installing-r"></a>
 </h3>
-<p>To use <code>humdrumR</code>, you’ll first need to install <a href="https://www.r-project.org/" class="external-link">R</a>, version 4.1 or later. We <em>highly</em> recommend that you install the Integrated Development Environment <a href="https://rstudio.com/" class="external-link">Rstudio</a> as well! This link—<a href="https://rstudio-education.github.io/hopr/starting.html" class="external-link">Installing R and RStudio</a>—is a good starting place.</p>
+<p>To use <code>humdrumR</code>, you’ll first need to install <a href="https://www.r-project.org/" class="external-link">R</a>, version 4.1 or later. We
+<em>highly</em> recommend that you install the Integrated Development
+Environment <a href="https://rstudio.com/" class="external-link">Rstudio</a> as well! This
+link—<a href="https://rstudio-education.github.io/hopr/starting.html" class="external-link">Installing
+R and RStudio</a>—is a good starting place.</p>
 </div>
 <div class="section level3">
 <h3 id="installing-humdrumr">Installing humdrumR<a class="anchor" aria-label="anchor" href="#installing-humdrumr"></a>
 </h3>
-<p><code>humdrumR</code> is not yet available on the standard R package repository, <a href="https://cran.r-project.org/" class="external-link">CRAN</a>, so (for now) it can only be installed from this github repository. To install the latest version (master branch) of <code>humdrumR</code>, you’ll first need to install the R package <a href="https://www.rdocumentation.org/packages/devtools/versions/2.2.1" class="external-link">devtools</a>—<code>devtools</code> is used for creating and maintaining R packages. Luckily, <code>devtools</code> is on CRAN, so all you have to do is open an R session on your machine and type:</p>
+<p><code>humdrumR</code> is not yet available on the standard R package
+repository, <a href="https://cran.r-project.org/" class="external-link">CRAN</a>, so (for now)
+it can only be installed from this github repository. To install the
+latest version (master branch) of <code>humdrumR</code>, you’ll first
+need to install the R package <a href="https://www.rdocumentation.org/packages/devtools/versions/2.2.1" class="external-link">devtools</a>—<code>devtools</code>
+is used for creating and maintaining R packages. Luckily,
+<code>devtools</code> is on CRAN, so all you have to do is open an R
+session on your machine and type:</p>
 <pre class="{r}"><code><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'devtools'</span><span class="op">)</span></code></pre>
-<p>Once you have successfuly installed <code>devtools</code>, you are now ready to use it to install <code>humdrumR</code> straight from github. In an R session, type:</p>
+<p>Once you have successfuly installed <code>devtools</code>, you are
+now ready to use it to install <code>humdrumR</code> straight from
+github. In an R session, type:</p>
 <pre class="{r}"><code><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"Computational-Cognitive-Musicology-Lab/humdrumR"</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="humdrumr-source">humdrumR source<a class="anchor" aria-label="anchor" href="#humdrumr-source"></a>
 </h3>
-<p>Another option—useful, if you want to inspect, or contribute to, the <code>humdrumR</code> source code—is to actually download the <code>humdrumR</code> package source from github and install it directly. You’ll first need to install <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" class="external-link">git</a>. Once git is installed on your computer, you can download the <code>humdrumR</code> repository by clicking on the “Clone or download” on the github page.</p>
-<p>Alternatively, you can use git directly: navigate to the directory on machine where you’d like to save the package source and type:</p>
+<p>Another option—useful, if you want to inspect, or contribute to, the
+<code>humdrumR</code> source code—is to actually download the
+<code>humdrumR</code> package source from github and install it
+directly. You’ll first need to install <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git" class="external-link">git</a>.
+Once git is installed on your computer, you can download the
+<code>humdrumR</code> repository by clicking on the “Clone or download”
+on the github page.</p>
+<p>Alternatively, you can use git directly: navigate to the directory on
+machine where you’d like to save the package source and type:</p>
 <pre><code>
 git clone https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
 </code></pre>
-<p>Once you’ve done this, you can install the source on your computer using <code>devtools</code>: Open an R session and use <code>setwd</code> to move your working directory inside the repository you just downloaded (i.e., cloned). Once there, type</p>
+<p>Once you’ve done this, you can install the source on your computer
+using <code>devtools</code>: Open an R session and use
+<code>setwd</code> to move your working directory inside the repository
+you just downloaded (i.e., cloned). Once there, type</p>
 <pre class="{r}"><code><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></code></pre>
 <blockquote>
-<p>If you downloaded Rstudio, you can use the “Open Project” option and select the file <code>humdrumR.Rproj</code> from the repository. Once you’ve done this you can just click “Install and Restart” in the “Build” pane.</p>
+<p>If you downloaded Rstudio, you can use the “Open Project” option and
+select the file <code>humdrumR.Rproj</code> from the repository. Once
+you’ve done this you can just click “Install and Restart” in the “Build”
+pane.</p>
 </blockquote>
 <hr>
-<p>Once you’ve completed the installtion of <code>humdrumR</code> you can used it by simply calling:</p>
+<p>Once you’ve completed the installtion of <code>humdrumR</code> you
+can used it by simply calling:</p>
 <pre class="{r}"><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span></code></pre>
 </div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<p>At this stage, most humdrumR functions are at least partially documented, so you can easily read about them by using the <code>?</code> operator with the name of a function. A good place to start is:</p>
+<p>At this stage, most humdrumR functions are at least partially
+documented, so you can easily read about them by using the
+<code>?</code> operator with the name of a function. A good place to
+start is:</p>
 <pre class="{r}"><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
 
 <span class="op">?</span><span class="va">humdrumR</span></code></pre>
-<p>You should also check out the “vignettes” for <code>humdrumR</code>, which offer a easier introduction to the package. If you installed from github using the <code>build_vignettes = TRUE</code> option, you should be able to simply call:</p>
+<p>You should also check out the “vignettes” for <code>humdrumR</code>,
+which offer a easier introduction to the package. If you installed from
+github using the <code>build_vignettes = TRUE</code> option, you should
+be able to simply call:</p>
 <pre class="{r}"><code><span class="fu"><a href="https://rdrr.io/r/utils/browseVignettes.html" class="external-link">browseVignettes</a></span><span class="op">(</span><span class="st">"humdrumR"</span><span class="op">)</span></code></pre>
 </div>
 </div>
@@ -179,12 +214,14 @@ git clone https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

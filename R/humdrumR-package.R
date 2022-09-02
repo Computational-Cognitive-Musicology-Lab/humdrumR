@@ -18,7 +18,7 @@
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
 #' + To filter and "index" `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called in a variety of 
 #'   short hands using R's standard [indexing operators][base::Extract]: `[]` and `[[]]`.
-#' + To manipulate and modify `humdrumR` data, we have the [with(in)Humdrum][humdrumR::with-in-Humdrum] and [humApply] functions.
+#' + To manipulate and modify `humdrumR` data, we have the [with and within][withinHumdrum] methods for `humdrumR` objects.
 #' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
 #'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 
@@ -42,11 +42,11 @@
 NULL
 
 
-#' ----------------------------------------------->      NEEDS DOCUMENTATION (A SECTION IS INCOMPLETE)       <------------------------------------------------------
 #' `humdrumR`'s root directory on your machine.
 #'
 #' `humdrumRroot` is the path to where the `humdrumR` package is install on your machine.
-#' A few simple humdrum files are stored here.
+#' When you installed `humdrumR` a few basic humdrum files were stored here as well, in subdirectories `examples` and `HumdrumData`.
+#'
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 

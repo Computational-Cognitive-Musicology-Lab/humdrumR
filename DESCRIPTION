@@ -29,8 +29,6 @@ Collate: humdrumR-package.R
          tertianSet.R
          rhythmInterval.R
          Metric.R
-         Graphics.R
-         Formulae.R
 	 Lyrics.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

@@ -14,10 +14,10 @@
 #' and it is all taken care of. (To do this, specify `contains = "struct"` in your call to [setClass][methods::setClass()].)
 #' 
 #' Important `humdrumR` classes which inherit from `struct` include:
-#' + [tonalInterval]
+#' + [tonal intervals][tonalIntervalS4]
 #' + [diatonicSet]
 #' + [tertianSet]
-#' + [rhythmInterval]
+#' + [rational()]
 #' 
 #' Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act *fully* like R atomics, as
 #' many of their features are hard-coded into R itself and can't be replicated.

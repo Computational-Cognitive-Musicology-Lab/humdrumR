@@ -62,12 +62,12 @@ multi-column local records.)'><!-- mathjax --><script src="https://cdnjs.cloudfl
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -107,10 +107,6 @@ Another similar issue is that a corpus of humdrum files may have varying numbers
 multi-column local records.)</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">alignColumns</span><span class="op">(</span><span class="va">humdrumR</span>, padder <span class="op">=</span> <span class="st">"_C"</span><span class="op">)</span></code></pre></div>
-    </div>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -139,7 +135,7 @@ A spine with no splits will have all <code>0L</code>s in its <code>Path</code> f
 <p>It is very useful to sometimes turn humdrum data into a true two dimensional structure, with no ragged edges.
 (This always requires removing global records.)
 In order to do this, while maintaining a sensible relationship between spine which have spine paths,
-humRead automatically <em>pads</em> humdrum data into a complete, non-ragged 2d table.
+we imagine our humdrum data <em>padded</em> into a complete, non-ragged 2d table.
 For instance, given this file</p><div class="sourceCode"><pre><code>**kern  **kern
 A       E
 *^      *
@@ -150,7 +146,7 @@ A       C
 *-      *-
 </code></pre></div>
 
-<p>humRead pads the file as so:</p><div class="sourceCode"><pre><code>**kern   _P       **kern
+<p>We'd pad it out like:</p><div class="sourceCode"><pre><code>**kern   _P       **kern
 A        _P       E
 *^       _P       *
 A        C        E
@@ -165,108 +161,8 @@ A        _P       C
 1        2        3        Column
 </code></pre></div>
 
-<p>(In this example, the <code>Spine</code>, <code>Path</code>, and <code>Column</code> values are shown below the data.)
-The <code>"_P"</code> tokens stand for "padded path."
-This appraoch assures that every <strong>Spine</strong> is a contiguous block of tokens, of constant width.
-In most humdrumR use cases, these padding tokens (and the <code>Column</code> field) can be safely ignored.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="corpus-padding">Corpus padding<a class="anchor" aria-label="anchor" href="#corpus-padding"></a></h2>
-    
-
-
-<p>humRead automatically pads spine paths <em>within pieces</em>.
-However, as mentioned above, there is also (sometimes) a need to pad across pieces, in order
-to create a logical, clean 2d structure.
-Consider this example, with humdrum data from two pieces:</p><ul><li><p><em>Piece 1</em>:</p><div class="sourceCode"><pre><code>**kern   **kern  **kern
-E        D       C
-D        .       .
-C        C       E
-*-       *-      *-
-</code></pre></div></li>
-<li><p><em>Piece 2</em>:</p><div class="sourceCode"><pre><code>**kern   **kern
-A        A
-.        B
-C        C
-*-       *-
-</code></pre></div></li>
-</ul><p>In this example, we have two pieces, one with three spines, the other with two.
-There is no way to squish these two pieces into one regular 2d table.
-But we <em>could</em> pad any missing columns, as so:</p><ul><li><p><em>Piece 1</em>:</p><div class="sourceCode"><pre><code>**kern   **kern  **kern
-E        D       C
-D        .       .
-C        C       E
-*-       *-      *-
-</code></pre></div></li>
-<li><p><em>Piece 2</em>:</p><div class="sourceCode"><pre><code>**kern  **kern   _C
-A        A       _C
-.        B       _C
-C        C       _C
-*-       *-      _C
-</code></pre></div></li>
-</ul><p>The function <code>alignColumns</code> is used to achieve just this effect.
-In this example, the <code>"_C"</code> token stands for "padded column."</p>
-<p>The presence of spine paths makes padding columns across pieces a bit more complicated.
-What <code>alignColumns</code> will do, is match up all pieces in a corpus so that
-every <strong>Spine</strong>/<strong>Path</strong> field pair allign in the same column.
-Here is an example, with its paths already padded:</p><ul><li><p><em>Piece 1</em>:</p><div class="sourceCode"><pre><code>**kern      _P        **kern
-A           _P        E
-B           _P        D
-*^          _P        *
-A           C         E
-G#          B         E
-*v          *v        *
-A           _P        E
-*-          _P        *-
-#################################################
-1           1         2         Spine
-0           1         0         Path
-1           2         3         Column
-</code></pre></div></li>
-<li><p><em>Piece 2</em>:</p><div class="sourceCode"><pre><code>**kern     **kern    _P
-A          E         _P
-*          *^        _P
-G#         D         F
-A          C         E
-*          *v        *v
-E          D         _P
-*-         *-        _P        
-#################################################
-1          2         2        Spine
-0          0         1        Path
-1          2         3        Column
-</code></pre></div></li>
-</ul><p>We have two pieces, each with two spines,
-but in the first piece, the first spine splits, while in the second piece, the
-second spine splits. Thus, the padded output will have four columns:</p><ul><li><p><em>Piece 1</em>:</p><div class="sourceCode"><pre><code>**kern    _P        **kern   _C
-A         _P        E        _C
-B         _P        D        _C
-*^        _P        *        _C
-A         C         E        _C
-G#        B         E        _C
-*v        *v        *        _C
-A         _P        E        _C
-*-        _P        *-       _C 
-###########################################################
-1         1         2        2         Spine
-0         1         0        1         Path
-1         2         3        4         Column
-</code></pre></div></li>
-<li><p><em>Piece 2</em>:</p><div class="sourceCode"><pre><code>**kern    _C        **kern   _P
-A         _C        E        _P
-*         _C        *^       _P
-G#        _C        D        F
-A         _C        C        E
-*         _C        *v       *v
-E         _C        D        _P
-*-        _C        *-       _P 
-#########################################################       
-1         1         2        2         Spine
-0         1         0        1         Path
-1         2         3        4         Column
-</code></pre></div></li>
-</ul><p>Note that <code>alignColumns</code> actually adds rows to the <a href="humdrumRclass.html">humdrumRclass</a> object's
-internal <a href="humTable.html">humdrum tables</a>.</p>
+<p>In this example, the <code>Spine</code>, <code>Path</code>, and <code>Column</code> values are shown below the data.
+You can see that <code>Column</code> is used to indicate the "padded" position of each data token.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -274,11 +170,13 @@ internal <a href="humTable.html">humdrum tables</a>.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

@@ -57,12 +57,12 @@
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -91,9 +91,10 @@
 <div class="row">
   <main id="main"><div class="page-header">
       <img src="" class="logo" alt=""><h1>The Humdrum Syntax</h1>
-                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
+                        <h4 data-toc-skip class="author">Nathaniel
+Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-07-28</h4>
+            <h4 data-toc-skip class="date">2022-09-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/HumdrumSyntax.Rmd"><code>vignettes/HumdrumSyntax.Rmd</code></a></small>
       <div class="d-none name"><code>HumdrumSyntax.Rmd</code></div>
@@ -101,51 +102,105 @@
 
     
     
-<p>The humdrum syntax is a simple, flexible, and powerful way of encoding musicological data. Humdrum files are simply <a href="https://en.wikipedia.org/wiki/Plain_text" title="Plain text on wikipedia" class="external-link">plain text</a> files—files which simply contain a simple characters. (This is <em>unlike</em> <code>.pdf</code> or <code>.docx</code> (MS Word) files, which are much more complex “rich text” files.) You can open plain-text files in simple text editors like <strong>Notepad</strong> (Windows) or <strong>TextEdit</strong> (MacOS).</p>
-<p>To be a humdrum file, your text-file must have very general layout which is called the <em>humdrum syntax</em>. Such a file can be said “to conform to the humdrum syntax,” “to be valid humdrum,” or most simply “to be a humdrum file.”</p>
+<p>The humdrum syntax is a simple, flexible, and powerful way of
+encoding musicological data. Humdrum files are simply <a href="https://en.wikipedia.org/wiki/Plain_text" title="Plain text on wikipedia" class="external-link">plain text</a> files—files which simply
+contain a simple characters. (This is <em>unlike</em> <code>.pdf</code>
+or <code>.docx</code> (MS Word) files, which are much more complex “rich
+text” files.) You can open plain-text files in simple text editors like
+<strong>Notepad</strong> (Windows) or <strong>TextEdit</strong>
+(MacOS).</p>
+<p>To be a humdrum file, your text-file must have very general layout
+which is called the <em>humdrum syntax</em>. Such a file can be said “to
+conform to the humdrum syntax,” “to be valid humdrum,” or most simply
+“to be a humdrum file.”</p>
 <blockquote>
-<p>In computer programming, you will often encounter words like “characters”, “text”, and “strings” used interchangibly. You’ll also hear combinations like “character-strings” and “text-strings.” These all (generally) refer to the same things: collectiosn of letters, numbers, punctuation, and a control/spacing characters like SPACEBAR (<code></code>), TAB (<code>\t</code>), NEWLINE (<code>\n</code>), etc. Technically, humdrum text files are supposed to use the ASCII character set.</p>
+<p>In computer programming, you will often encounter words like
+“characters”, “text”, and “strings” used interchangibly. You’ll also
+hear combinations like “character-strings” and “text-strings.” These all
+(generally) refer to the same things: collectiosn of letters, numbers,
+punctuation, and a control/spacing characters like SPACEBAR
+(<code></code>), TAB (<code>\t</code>), NEWLINE (<code>\n</code>), etc.
+Technically, humdrum text files are supposed to use the ASCII character
+set.</p>
 </blockquote>
 <div class="section level4">
 <h4 id="structure-vs-content">Structure vs Content<a class="anchor" aria-label="anchor" href="#structure-vs-content"></a>
 </h4>
-<p>The humdrum syntax lays out a simple <em>structure</em> for encoding data, but it says <em>nothing</em> about the content. What information is encoded, and how that information is represented is flexible. For all this flexibility, the <em>structure</em> of humdrum data—the humdrum syntax—is always the same, which makes it easy to work with!</p>
-<p>To fill content into our humdrum files, we define “<strong>interpretations</strong>. Interpretations are schemes for how to represent some information as characters. This sounds complicated/scary, but it can be very simple! For instance, if I wanted to encode drum beats in humdrum I could invent a simple scheme for encoding drum beats as:</p>
+<p>The humdrum syntax lays out a simple <em>structure</em> for encoding
+data, but it says <em>nothing</em> about the content. What information
+is encoded, and how that information is represented is flexible. For all
+this flexibility, the <em>structure</em> of humdrum data—the humdrum
+syntax—is always the same, which makes it easy to work with!</p>
+<p>To fill content into our humdrum files, we define
+“<strong>interpretations</strong>. Interpretations are schemes for how
+to represent some information as characters. This sounds
+complicated/scary, but it can be very simple! For instance, if I wanted
+to encode drum beats in humdrum I could invent a simple scheme for
+encoding drum beats as:</p>
 <ul>
 <li>Kick drum = “K”</li>
 <li>Snare drum = “S”</li>
 <li>Hi-Hat = “H”</li>
 </ul>
-<p>I could treat each newline in my text file as a sixteenth-note tick (read about humdrum “timebase” below) and start encoding. The only thing I need to make this conform the humdrum syntax would be to name it: we call overarching interpretations like this “<em>exclusive interpretations</em>”, which are prefixed with <code>**</code>. We could call it <code>**drums</code> and we’d be ready to create humdrum data!</p>
+<p>I could treat each newline in my text file as a sixteenth-note tick
+(read about humdrum “timebase” below) and start encoding. The only thing
+I need to make this conform the humdrum syntax would be to name it: we
+call overarching interpretations like this “<em>exclusive
+interpretations</em>”, which are prefixed with <code>**</code>. We could
+call it <code>**drums</code> and we’d be ready to create humdrum
+data!</p>
 </div>
 <div class="section level2">
 <h2 id="syntax">Syntax<a class="anchor" aria-label="anchor" href="#syntax"></a>
 </h2>
-<p>The humdrum syntax is, at first glange, nothing but a simple, tab-delineated spread sheet. (“tab-delineated” just means that the columns of the spreadsheet are separated by TABs.) This <em>is</em> the basic idea, but there are a few extra features to learn!</p>
+<p>The humdrum syntax is, at first glange, nothing but a simple,
+tab-delineated spread sheet. (“tab-delineated” just means that the
+columns of the spreadsheet are separated by TABs.) This <em>is</em> the
+basic idea, but there are a few extra features to learn!</p>
 <p>Let’s take a look at a basic humdrum file:</p>
 <p><img src="images/Syntax_Example.png" width="800"></p>
-<p>This file can be broken down into different types of information like this:</p>
+<p>This file can be broken down into different types of information like
+this:</p>
 <p><img src="images/Syntax_Abstract.png" width="800"></p>
-<p>This file has two columns of data, separated by tabs. However, we have special terminology that we use: The “columns” in a humdrum file are called <em>spines</em>. Each line, or row, in the file is called a <em>record</em>.</p>
+<p>This file has two columns of data, separated by tabs. However, we
+have special terminology that we use: The “columns” in a humdrum file
+are called <em>spines</em>. Each line, or row, in the file is called a
+<em>record</em>.</p>
 <p><img src="images/Syntax_Concrete_RecSpine.png" width="800"></p>
 <p>There are twenty records and two spines in this file.</p>
-<p>Each character-string, located at each spine/record position, is called a <em>token</em>. Examples of tokens in this file include <code>*M4/4</code>, <code>4A</code>, <code>=1</code>, and <code>!Suspension</code>.</p>
+<p>Each character-string, located at each spine/record position, is
+called a <em>token</em>. Examples of tokens in this file include
+<code>*M4/4</code>, <code>4A</code>, <code>=1</code>, and
+<code>!Suspension</code>.</p>
 <div class="section level5">
 <h5 id="global-vs-local">Global vs Local<a class="anchor" aria-label="anchor" href="#global-vs-local"></a>
 </h5>
-<p>You’ll notice that two records in this file (<code>1</code> and <code>10</code>) don’t seem to have two columns. Indeed, these are called “<em>global</em>” records—they don’t belong to a particular column, but to the whole row/file. This image illustrates that the two spines in this file don’t include records <code>1</code> and <code>10</code>:</p>
+<p>You’ll notice that two records in this file (<code>1</code> and
+<code>10</code>) don’t seem to have two columns. Indeed, these are
+called “<em>global</em>” records—they don’t belong to a particular
+column, but to the whole row/file. This image illustrates that the two
+spines in this file don’t include records <code>1</code> and
+<code>10</code>:</p>
 <p><img src="images/Syntax_Spine.png" width="800"></p>
 <p>Or with the real data again:</p>
 </div>
 <div class="section level3">
 <h3 id="time">Time<a class="anchor" aria-label="anchor" href="#time"></a>
 </h3>
-<p>There is one fundamental assumption regarding how the humdrum syntax encodes information: as we travel downward through a file (from top to bottom) we are encoding information in the order it occurs in time. This is true of data records—interpetation and comment records are all associated with the moment in time of the first data record that occurs below them. Information that appears in the same record (within one spine, or in different spines) is assumed to happen at the same time.</p>
+<p>There is one fundamental assumption regarding how the humdrum syntax
+encodes information: as we travel downward through a file (from top to
+bottom) we are encoding information in the order it occurs in time. This
+is true of data records—interpetation and comment records are all
+associated with the moment in time of the first data record that occurs
+below them. Information that appears in the same record (within one
+spine, or in different spines) is assumed to happen at the same
+time.</p>
 </div>
 <div class="section level3">
 <h3 id="record-types">Record Types<a class="anchor" aria-label="anchor" href="#record-types"></a>
 </h3>
-<p>The humdrum syntax recognizes four broad types of records, with five sub-types:</p>
+<p>The humdrum syntax recognizes four broad types of records, with five
+sub-types:</p>
 <ul>
 <li>Interpretations
 <ul>
@@ -163,28 +218,80 @@
 <li>Barlines (<code>=</code>)</li>
 <li>Data</li>
 </ul>
-<p>We know what type of record we’re dealing with by looking at the first character in each token. All tokens in a single record <em>must</em> be of the same type—you can’t have an interpretation token and a comment token on the same line. As a result, we can refer to the type of a token, <em>or</em> the type of a whole record, because all the tokens within a record are always the same type.</p>
+<p>We know what type of record we’re dealing with by looking at the
+first character in each token. All tokens in a single record
+<em>must</em> be of the same type—you can’t have an interpretation token
+and a comment token on the same line. As a result, we can refer to the
+type of a token, <em>or</em> the type of a whole record, because all the
+tokens within a record are always the same type.</p>
 <div class="section level5">
 <h5 id="interpretations">Interpretations<a class="anchor" aria-label="anchor" href="#interpretations"></a>
 </h5>
-<p>If a token starts with <code>*</code>, it is an interpretation token. Two stars <code>**</code> indicates an <strong>exclusive</strong> interpretation. Every spine must start with an exclusive interpretation, and can only have one. The exclusive interpretation for a spine tells us the type of information is encoded in that spine, for the whole spine. For instance, our <code>**drums</code> interpration that we invented above is an exclusive interpetation.</p>
-<p>In the examples we’re using here, the exclusive interpretation in both spines is <code>**kern</code>, is the most widely used humdrum interpretation, used to encode music notation. Note that a humdrum file can have different exclusive interpretations in each spine—they don’t have to be the same, as they are in this example. To read about various humdrum interpretations that have been defined, check out <a href="http://www.humdrum.org/rep/" target="_blank" class="external-link">humdrum.org</a>.</p>
+<p>If a token starts with <code>*</code>, it is an interpretation token.
+Two stars <code>**</code> indicates an <strong>exclusive</strong>
+interpretation. Every spine must start with an exclusive interpretation,
+and can only have one. The exclusive interpretation for a spine tells us
+the type of information is encoded in that spine, for the whole spine.
+For instance, our <code>**drums</code> interpration that we invented
+above is an exclusive interpetation.</p>
+<p>In the examples we’re using here, the exclusive interpretation in
+both spines is <code>**kern</code>, is the most widely used humdrum
+interpretation, used to encode music notation. Note that a humdrum file
+can have different exclusive interpretations in each spine—they don’t
+have to be the same, as they are in this example. To read about various
+humdrum interpretations that have been defined, check out <a href="http://www.humdrum.org/rep/" target="_blank" class="external-link">humdrum.org</a>.</p>
 <p><img src="images/Syntax_Interpretations.png" width="800"></p>
 <hr>
-<p>If a token starts with only one <code>*</code>, it is called a <strong>tandem</strong> interpretation. Tandem interpretations tell us more specific, localized information about how to interpret data. There can be different, overlapping tandem interpretations within a spine. In our example,</p>
-<p><code>*C:</code>, <code>*Ibass</code>, <code>*M4/4</code>, and <code>*M3/4</code>, are all tandem interpretations. <code>*C:</code> is used in <code>**kern</code> to indicate the key of C major. <code>*Ibass</code> indicates what instrument is associated with that spine (bass voice). <code>*M4/4</code> and <code>*M3/4</code> indicate 4/4 and 3/4 meter respectively. This last case brings up something important about tandem interprations: a tandem interpretation is applied to all subsequent data points, unless it is cancelled or replaced by another tandem intepretation of the same type. Thus, this humdrum file indicates 4/4 time starting at record 5, but switches to 3/4 time at record 13. However, the <code>*M4/4</code> in record 4 doesn’t replace the <code>*C:</code> in record 3, because they are different types of tandem intepretations.</p>
+<p>If a token starts with only one <code>*</code>, it is called a
+<strong>tandem</strong> interpretation. Tandem interpretations tell us
+more specific, localized information about how to interpret data. There
+can be different, overlapping tandem interpretations within a spine. In
+our example,</p>
+<p><code>*C:</code>, <code>*Ibass</code>, <code>*M4/4</code>, and
+<code>*M3/4</code>, are all tandem interpretations. <code>*C:</code> is
+used in <code>**kern</code> to indicate the key of C major.
+<code>*Ibass</code> indicates what instrument is associated with that
+spine (bass voice). <code>*M4/4</code> and <code>*M3/4</code> indicate
+4/4 and 3/4 meter respectively. This last case brings up something
+important about tandem interprations: a tandem interpretation is applied
+to all subsequent data points, unless it is cancelled or replaced by
+another tandem intepretation of the same type. Thus, this humdrum file
+indicates 4/4 time starting at record 5, but switches to 3/4 time at
+record 13. However, the <code>*M4/4</code> in record 4 doesn’t replace
+the <code>*C:</code> in record 3, because they are different types of
+tandem intepretations.</p>
 <hr>
-<p>One more very special token is the <code>*-</code> token. This token indicates where a spine <em>ends</em>. If the <code>*-</code> are missing at the end—one for every spine—it is an invalid humdrum file!</p>
+<p>One more very special token is the <code>*-</code> token. This token
+indicates where a spine <em>ends</em>. If the <code>*-</code> are
+missing at the end—one for every spine—it is an invalid humdrum
+file!</p>
 </div>
 <div class="section level4">
 <h4 id="comments">Comments<a class="anchor" aria-label="anchor" href="#comments"></a>
 </h4>
-<p>If a token begins with <code>!</code>, it is a <strong>comment</strong> token. Comments are used to freely include comments in the data. There are both <em>global</em> comments (<code>!!</code>) which are not associated with a spine—they apply to the whole file at the point they appear—and <em>local</em> comments (<code>!</code>) which are specific to a particular spine. In our example, <code>!! Ritardando</code> is a global comment, while <code>!Suspension</code> is a local comment, which is specific to the second spine.</p>
+<p>If a token begins with <code>!</code>, it is a
+<strong>comment</strong> token. Comments are used to freely include
+comments in the data. There are both <em>global</em> comments
+(<code>!!</code>) which are not associated with a spine—they apply to
+the whole file at the point they appear—and <em>local</em> comments
+(<code>!</code>) which are specific to a particular spine. In our
+example, <code>!! Ritardando</code> is a global comment, while
+<code>!Suspension</code> is a local comment, which is specific to the
+second spine.</p>
 <p><img src="images/Syntax_Comments.png" width="800"></p>
 <div class="section level5">
 <h5 id="reference-records">Reference Records<a class="anchor" aria-label="anchor" href="#reference-records"></a>
 </h5>
-<p>There is one final type of comment: <strong>reference records</strong>. Reference records are global comments that are placed at the beginning or end of file. Reference records encode global metadata about an entire file: things like who composed the piece or what the title of the piece is. Reference records have specific “reference codes,” usually three digits, which come after the <code>!!!</code>, and are followed by a colon, then whatever the content of the record is. For instance, the code <code>!!!OTL:</code> refers to the original title of the piece. Learn about various standard humdrum reference records <a href="http://www.humdrum.org/Humdrum/guide.append1.html" target="_blank" class="external-link">here</a>.</p>
+<p>There is one final type of comment: <strong>reference
+records</strong>. Reference records are global comments that are placed
+at the beginning or end of file. Reference records encode global
+metadata about an entire file: things like who composed the piece or
+what the title of the piece is. Reference records have specific
+“reference codes,” usually three digits, which come after the
+<code>!!!</code>, and are followed by a colon, then whatever the content
+of the record is. For instance, the code <code>!!!OTL:</code> refers to
+the original title of the piece. Learn about various standard humdrum
+reference records <a href="http://www.humdrum.org/Humdrum/guide.append1.html" target="_blank" class="external-link">here</a>.</p>
 </div>
 </div>
 <div class="section level4">
@@ -205,12 +312,14 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

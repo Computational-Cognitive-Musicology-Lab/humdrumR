@@ -57,12 +57,12 @@
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -91,7 +91,8 @@
 <div class="row">
   <main id="main"><div class="page-header">
       <img src="" class="logo" alt=""><h1>An R Primer for humdrumR</h1>
-                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
+                        <h4 data-toc-skip class="author">Nathaniel
+Condit-Schultz</h4>
             
             <h4 data-toc-skip class="date">July 2022</h4>
       
@@ -101,11 +102,18 @@
 
     
     
-<p><code>humdrumR</code> is a package for the R programming language. You don’t need to be an R master to use <code>humdrumR</code>, but there are some basic concepts from R that you will need to learn, and ultimately, if you want to get really advanced, you’ll need to delevelop some R skills. This document is a basic primer for R, which will teach you the basics you need to know in order to make the most out of <code>humdrumR</code>.</p>
+<p><code>humdrumR</code> is a package for the R programming language.
+You don’t need to be an R master to use <code>humdrumR</code>, but there
+are some basic concepts from R that you will need to learn, and
+ultimately, if you want to get really advanced, you’ll need to delevelop
+some R skills. This document is a basic primer for R, which will teach
+you the basics you need to know in order to make the most out of
+<code>humdrumR</code>.</p>
 <div class="section level2">
 <h2 id="basic-data-structures">Basic Data Structures<a class="anchor" aria-label="anchor" href="#basic-data-structures"></a>
 </h2>
-<p>In R, there two fundamental data structures that are used all the time:</p>
+<p>In R, there two fundamental data structures that are used all the
+time:</p>
 <ul>
 <li>“atomic” <strong>vectors</strong>
 </li>
@@ -114,31 +122,45 @@
 <div class="section level3">
 <h3 id="vectors">Vectors<a class="anchor" aria-label="anchor" href="#vectors"></a>
 </h3>
-<p>In R, the basic units—the <em>atoms</em>, if you will—of information are called “atomic” vectors. There are three basic atomic data types:</p>
+<p>In R, the basic units—the <em>atoms</em>, if you will—of information
+are called “atomic” vectors. There are three basic atomic data
+types:</p>
 <ul>
 <li>
 <strong>Numbers</strong>—<code>numeric</code> values.
 <ul>
-<li>Examples: <code>3</code>, <code>4.2</code>, <code>-13</code>, <code>254.30</code>
+<li>Examples: <code>3</code>, <code>4.2</code>, <code>-13</code>,
+<code>254.30</code>
 </li>
 </ul>
 </li>
 <li>
-<strong>Strings of characters</strong>: <code>character</code> values.
+<strong>Strings of characters</strong>: <code>character</code>
+values.
 <ul>
-<li>Examples: <code>"note"</code>, <code>"a"</code>, <code>"do, a dear, a female dear"</code>
+<li>Examples: <code>"note"</code>, <code>"a"</code>,
+<code>"do, a dear, a female dear"</code>
 </li>
 </ul>
 </li>
 <li>
-<strong>Logical Trues and Falses</strong>: <code>logical</code> values.
+<strong>Logical Trues and Falses</strong>: <code>logical</code>
+values.
 <ul>
 <li>Examples: <code>TRUE</code>, <code>FALSE</code>
 </li>
 </ul>
 </li>
 </ul>
-<p>You might be wondering, why are we calling these basic atoms “<em>vectors</em>”? Well, in R, the basic atomic data types are always considered a <em>collection</em> of ordered values. These ordered collections are called vectors. In the simple examples above, each vector only had a single value, so it just looks like one value—single values like this are often called “scalars”. However, R doesn’t <em>really</em> distinguish between scalars (single values) and vectors (multiple values)—everything is always a vector. (Still, we sometimes refer to length-1 vectors as scalars.)</p>
+<p>You might be wondering, why are we calling these basic atoms
+“<em>vectors</em>”? Well, in R, the basic atomic data types are always
+considered a <em>collection</em> of ordered values. These ordered
+collections are called vectors. In the simple examples above, each
+vector only had a single value, so it just looks like one value—single
+values like this are often called “scalars”. However, R doesn’t
+<em>really</em> distinguish between scalars (single values) and vectors
+(multiple values)—everything is always a vector. (Still, we sometimes
+refer to length-1 vectors as scalars.)</p>
 <p>To make a vector in R, use the <code>c</code> command, as so:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -163,16 +185,28 @@
 <li>A <code>logical</code> vector of length 2)</li>
 <li>Two <code>numeric</code> vectors of length 1.
 <ul>
-<li>That’s right, <code>c(32.3)</code> and <code>32.3</code> are the same thing—a vector of length 1.</li>
+<li>That’s right, <code>c(32.3)</code> and <code>32.3</code> are the
+same thing—a vector of length 1.</li>
 </ul>
 </li>
 </ul>
 <hr>
-<p>Notice that vectors can’t mix-and-match different data types; which makes sense be cause a vector <em>is</em> a single type of thing. But this means that commands like <code>c(3, "a")</code> will actually create a <code>character</code> vector, where the <code>3</code> is forced to be a character (<code>"3"</code>).</p>
+<p>Notice that vectors can’t mix-and-match different data types; which
+makes sense be cause a vector <em>is</em> a single type of thing. But
+this means that commands like <code>c(3, "a")</code> will actually
+create a <code>character</code> vector, where the <code>3</code> is
+forced to be a character (<code>"3"</code>).</p>
 <div class="section level4">
 <h4 id="vectorization">Vectorization<a class="anchor" aria-label="anchor" href="#vectorization"></a>
 </h4>
-<p>Having everything be a vector all the time is very useful, because it allows us to think of and use collections of data as single thing. If I give you, say, ten thousand numbers, you don’t have to worry about manipulating ten thousand things: rather, you just work with <em>one</em> thing: a vector, which happens to be of length 10,000. In R, we call this <strong>vectorization</strong>—generally, in R and in <code>humdrumR</code> we will constantly be taking advantage of vectorization to make our lives super easy!</p>
+<p>Having everything be a vector all the time is very useful, because it
+allows us to think of and use collections of data as single thing. If I
+give you, say, ten thousand numbers, you don’t have to worry about
+manipulating ten thousand things: rather, you just work with
+<em>one</em> thing: a vector, which happens to be of length 10,000. In
+R, we call this <strong>vectorization</strong>—generally, in R and in
+<code>humdrumR</code> we will constantly be taking advantage of
+vectorization to make our lives super easy!</p>
 <hr>
 <p>For an example of vectorization, watch this:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
@@ -185,14 +219,20 @@
 <li>the single number <code>2</code>
 </li>
 </ol>
-<p>and multiplied them together! Notice that the entire Fibonnaci vector is multiplied by two! We don’t have to worry about multiplying each number of the vector, its done for us.</p>
+<p>and multiplied them together! Notice that the entire Fibonnaci vector
+is multiplied by two! We don’t have to worry about multiplying each
+number of the vector, its done for us.</p>
 <hr>
-<p>There are the rules for working with vectors? There are two ideal circumstances for working with vectors.</p>
+<p>There are the rules for working with vectors? There are two ideal
+circumstances for working with vectors.</p>
 <ol style="list-style-type: decimal">
 <li>They are the same length.</li>
 <li>One vector is length 1, and the other isn’t.</li>
 </ol>
-<p>In the first case, we work with multiple vectors that are all the same length, each value in each vector is “lined” up with values in the other vector. If we, for example, add two such vectors together, each “lined up” pair of numbers is added:</p>
+<p>In the first case, we work with multiple vectors that are all the
+same length, each value in each vector is “lined” up with values in the
+other vector. If we, for example, add two such vectors together, each
+“lined up” pair of numbers is added:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">6</span> <span class="dv">6</span></span>
@@ -200,7 +240,9 @@
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 2"</span> <span class="st">"c 3"</span></span></code></pre></div>
-<p>In the second case, one of the vectors is length-1 (a “scalar”). In this case, the scalar value is paired with each value in the longer vector (as in the Fibonnaci example above).</p>
+<p>In the second case, one of the vectors is length-1 (a “scalar”). In
+this case, the scalar value is paired with each value in the longer
+vector (as in the Fibonnaci example above).</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="dv">5</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">7</span> <span class="dv">8</span></span>
@@ -209,12 +251,17 @@
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="dv">1</span>)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 1"</span> <span class="st">"c 1"</span></span></code></pre></div>
 <hr>
-<p>What happens if we have vectors that are longer than one, but are not the same length. Well, <code>R</code> will generally attempt to “recycle” the shorter vector—which means repeat it— as necessary to match the length of the longer vector. If the shorter vector evenly divides the longer vector, you’ll generally have not problem:</p>
+<p>What happens if we have vectors that are longer than one, but are not
+the same length. Well, <code>R</code> will generally attempt to
+“recycle” the shorter vector—which means repeat it— as necessary to
+match the length of the longer vector. If the shorter vector evenly
+divides the longer vector, you’ll generally have not problem:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">6</span>  <span class="dv">6</span> <span class="dv">12</span></span></code></pre></div>
-<p>If the division is not perfect, R will still “recycle” the shorter vector, but you’ll get a warning:</p>
+<p>If the division is not perfect, R will still “recycle” the shorter
+vector, but you’ll get a warning:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    Warning <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)<span class="sc">:</span> longer object length is not a multiple of</span>
@@ -224,9 +271,13 @@
 <blockquote>
 <p>“longer object length is not a multiple of shorter object length”</p>
 </blockquote>
-<p>That’s R telling us that we’ve got an obvious mismatch in the lengths of our vectors.</p>
+<p>That’s R telling us that we’ve got an obvious mismatch in the lengths
+of our vectors.</p>
 <hr>
-<p>Generally, it is best to work with vectors that are all the same length and/or scalar values (length-1 vectors), so you can avoid worrying about how exactly R is “recycling” values. This brings us too…</p>
+<p>Generally, it is best to work with vectors that are all the same
+length and/or scalar values (length-1 vectors), so you can avoid
+worrying about how exactly R is “recycling” values. This brings us
+too…</p>
 </div>
 </div>
 <div class="section level3">
@@ -246,12 +297,14 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

@@ -48,12 +48,12 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -101,40 +101,17 @@ basic <code>R</code> data types.</p>
 <span class="op">)</span>
 
 <span class="co"># S3 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  dataTypes <span class="op">=</span> <span class="st">"D"</span>,
-  fieldnames <span class="op">=</span> <span class="cn">NULL</span>,
-  alignColumns <span class="op">=</span> <span class="cn">TRUE</span>,
-  padder <span class="op">=</span> <span class="cn">NA</span>,
-  path.collapse <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, alignColumns <span class="op">=</span> <span class="cn">TRUE</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
 
 <span class="co"># S4 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  dataTypes <span class="op">=</span> <span class="st">"D"</span>,
-  fieldname <span class="op">=</span> <span class="cn">NULL</span>,
-  padder <span class="op">=</span> <span class="cn">NA</span>,
-  collapse.path <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, alignColumns <span class="op">=</span> <span class="cn">TRUE</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
 
-<span class="fu">as.matrices</span><span class="op">(</span>
-  <span class="va">humdrumR</span>,
-  dataTypes <span class="op">=</span> <span class="st">"D"</span>,
-  fieldnames <span class="op">=</span> <span class="cn">NULL</span>,
-  padder <span class="op">=</span> <span class="cn">NA</span>,
-  path.collapse <span class="op">=</span> <span class="cn">TRUE</span>,
-  alignColumns <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
+<span class="co"># S4 method for humdrumR</span>
+<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, alignColumns <span class="op">=</span> <span class="cn">TRUE</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
 
-<span class="fu">as.data.frames</span><span class="op">(</span>
-  <span class="va">humdrumR</span>,
-  dataTypes <span class="op">=</span> <span class="st">"D"</span>,
-  fieldnames <span class="op">=</span> <span class="cn">NULL</span>,
-  padder <span class="op">=</span> <span class="cn">NA</span>,
-  path.collapse <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+<span class="fu">as.matrices</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, alignColumns <span class="op">=</span> <span class="cn">TRUE</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
+
+<span class="fu">as.data.frames</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, alignColumns <span class="op">=</span> <span class="cn">TRUE</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -185,11 +162,13 @@ on each individual file in a <a href="humdrumRclass.html">humdrumRclass</a> corp
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

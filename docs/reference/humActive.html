@@ -50,12 +50,12 @@ with(in)Humdrum
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -91,30 +91,25 @@ In any expression within a call to
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">evalActive</span><span class="op">(</span><span class="va">active</span>, <span class="va">humtab</span>, forceVector <span class="op">=</span> <span class="cn">FALSE</span>, sep <span class="op">=</span> <span class="st">", "</span>, nullAs <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">evalActive</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span><span class="op">)</span>
+
+<span class="fu">activeAtomic</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, sep <span class="op">=</span> <span class="st">", "</span>, nullChar <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="fu">getActive</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
 
-<span class="fu">setActive</span><span class="op">(</span><span class="va">humdrumR</span>, <span class="va">form</span><span class="op">)</span>
+<span class="fu">setActive</span><span class="op">(</span><span class="va">humdrumR</span>, <span class="va">expr</span><span class="op">)</span>
 
 <span class="fu">setActiveFields</span><span class="op">(</span><span class="va">humdrumR</span>, <span class="va">fieldnames</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>forceVector</dt>
-<dd><p><code>logical</code>. If <code>TRUE</code>, the result is forced to be an atomic vector.</p></dd>
-<dt>sep</dt>
-<dd><p>A length-one <code>character</code> string. If <code>forceVector == TRUE</code> this value is used as a separator
-between tokens that are collapsed.</p></dd>
-<dt>humdrumR</dt>
+    <dl><dt>humdrumR</dt>
 <dd><p>A <a href="humdrumRclass.html">humdrumRclass</a> data object.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>Which dataTypes of humdrum records to include. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd', 'P'</code>
+<dd><p>Which dataTypes of humdrum records to include. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd', </code>
 or any combination of these in a single string (e.g., <code>"LIM"</code>).
 (see the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for an explanation.).</p></dd>
-<dt>nullAsDot</dt>
-<dd><p>A single <code>atomic</code> value. Any null tokens are coerced to this value (default is <code>.</code>).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -163,11 +158,13 @@ If <code>Pitch</code> is the active field the rest tokens are null-data and will
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

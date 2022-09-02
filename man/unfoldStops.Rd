@@ -13,4 +13,10 @@ smaller fields into multiple stops.
 }
 \seealso{
 The opposite (kinda) of \code{\link[=foldStops]{foldStops()}}
+
+Other {Folding functions}: 
+\code{\link{foldExclusive}()},
+\code{\link{foldGraceNotes}()},
+\code{\link{foldHumdrum}()}
 }
+\concept{{Folding functions}}

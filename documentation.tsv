@@ -1,18 +1,17 @@
 Source	Rd	Family	Vignette	Nchar	Accurate	Complete	Exported	Tests	Nlines
-Apply.R	interpolateArguments.Rd	""	""	1805	""	""	interpolateArguments	""	35
-Apply.R	withinHumdrum.Rd	""	""	16179	""	""	withinHumdrum, with.humdrumR, within.humdrumR	""	376
-Compose.R	humdrumDispatch.Rd	""	""	3971	""	""	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch	""	19
-Filter.R	indexHumdrum.Rd	""	""	953	""	Minimal	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method	""	571
-Filter.R	subset.humdrumR.Rd	""	""	10608	""	""	subset.humdrumR, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops	""	23
+Apply.R	withinHumdrum.Rd	""	""	16179	No	""	withinHumdrum, with.humdrumR, within.humdrumR	""	376
+Compose.R	humdrumDispatch.Rd	""	""	3971	Yes?	OK?	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch	""	19
+Filter.R	indexHumdrum.Rd	""	""	6325	Yes	Yes	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method	""	571
+Filter.R	subset.humdrumR.Rd	""	""	3393	Yes	Yes	subset.humdrumR, subset, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops	""	23
 Lyrics.R	silbeFormat.Rd	""	""	748	""	""	silbeFormat	""	
 Lyrics.R	wort.Rd	""	""	960	""	""	wort	""	606
 Metric.R	humMeter.Rd	""	""	516	""	""	humMeter	""	1082
 Metric.R	meter.Rd	""	""	450	""	""	meter, measure	""	564
 Metric.R	metric.Rd	rhythm analysis tools	""	417	""	""	metric	""	208
 Metric.R	rhythmDecompose.Rd	rhythm analysis tools	""	433	""	""	rhythmDecompose	""	122
-Rational.R	rational.Rd	humdrumR numeric functions	""	3020	""	""	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction	""	81
+Rational.R	rational.Rd	humdrumR numeric functions	""	3020	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction	""	81
 Read.R	extractTandem.Rd	""	""	2929	Yes	Yes	extractTandem	Needs	
-Read.R	readHumdrum.Rd	""	""	9965	""	""	readHumdrum, findHumdrum	""	89
+Read.R	readHumdrum.Rd	""	""	9985	Yes	Yes	readHumdrum, findHumdrum	""	89
 Regex.R	REparser.Rd	""	""	922	""	""	REparser, REparse	""	561
 Regex.R	RegexFind.Rd	""	""	1805	""	""	RegexFind, \%grepl\%, \%grepi\%, \%grepn\%, \%grepm\%, \%grep\%, \%!grep\%, \%!grepi\%, \%lgrepl\%, \%lgrepi\%, \%lgrepn\%	""	38
 Regex.R	regexConstruction.Rd	""	""	1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE	""	559
@@ -21,28 +20,28 @@ Summary.R	humSummary.Rd	corpus summary functions	""	1333	Yes	Yes	humSummary	""	1
 Summary.R	interpretations.Rd	corpus summary functions	""	2458	Yes	Yes	interpretations, print.humInterpretations	""	
 Summary.R	reference.Rd	corpus summary functions	""	3390	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference	""	
 Summary.R	spines.Rd	corpus summary functions	""	667	""	Empty	spines, [.humSpines, print.humSpines	""	
-Validation.R	humValidation.Rd	""	""	1049	Yes	Empty	humValidation, validateHumdrum	""	54
-Vector.R	struct.Rd	""	""	8323	""	""	struct, is.struct	""	67
-Windows.R	humWindows.Rd	""	""	781	""	""	humWindows, windows, nested, hop, windowApply, applyNgram	""	559
-Write.R	writeHumdrum.Rd	""	""	494	""	""	writeHumdrum	""	562
+Validation.R	validateHumdrum.Rd	""	""	1030	""	Empty	validateHumdrum	""	
+Vector.R	struct.Rd	""	""	8357	Yes?	Yes	struct, is.struct	""	67
+Windows.R	humWindows.Rd	""	""	781	""	Empty	humWindows, windows, nested, hop, windowApply, applyNgram	""	559
+Write.R	writeHumdrum.Rd	""	""	494	""	Empty	writeHumdrum	""	562
 diatonicSet.R	keyTransformer.Rd	""	""	289	""	""	keyTransformer, key	""	34
 diatonicSet.R	romanNumerals.Rd	""	""	711	""	""	romanNumerals	""	564
 humdrumR-class.R	collapseHumdrum.Rd	""	""	1667	""	Empty	collapseHumdrum, collapseStops, collapsePaths, collapseRecords	""	36
-humdrumR-class.R	foldExclusive.Rd	Folding functions	""	1519	Yes	Ok	foldExclusive	""	20
-humdrumR-class.R	foldGraceNotes.Rd	Folding functions	""	471	""	""	foldGraceNotes	""	592
-humdrumR-class.R	foldHumdrum.Rd	Folding functions	""	7295	Yes	Yes?	foldHumdrum, foldPaths, foldStops	""	135
+humdrumR-class.R	foldExclusive.Rd	Folding functions	""	1547	Yes	Ok	foldExclusive	""	20
+humdrumR-class.R	foldGraceNotes.Rd	Folding functions	""	499	""	Empty	foldGraceNotes	""	592
+humdrumR-class.R	foldHumdrum.Rd	Folding functions	""	7323	Yes	Yes?	foldHumdrum, foldPaths, foldStops	""	135
 humdrumR-class.R	humActive.Rd	""	""	3259	Yes?	Ok	humActive, evalActive, activeAtomic, getActive, setActive, setActiveFields	""	20
 humdrumR-class.R	humAssignment.Rd	""	""	3753	No	No	humAssignment	""	69
 humdrumR-class.R	humCoercion.Rd	""	""	4023	Yes?	Ok	humCoercion, as.lines, as.matrix.humdrumR, as.matrices, as.data.frames	""	12
+humdrumR-class.R	humColumns.Rd	""	""	3614	""	""	humColumns	""	
 humdrumR-class.R	humMerge.Rd	""	""	361	X	X	humMerge, mergeHumdrum	""	45
 humdrumR-class.R	humSize.Rd	""	""	1805	Yes	Too short	humSize, nrecords, ntokens, npieces, anySubcorpora, namesSubcorpora, nfiles, is.empty, anyPaths, anyStops	""	18
 humdrumR-class.R	humTable.Rd	Core humdrum data representation	""	14513	Yes?	Yes	humTable, getHumtab, getFields	""	114
-humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation	""	4287	""	""	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields, $<-,humdrumR,vector-method, $<-,humdrumR,humdrumR-method, [<-,humdrumR,character,ANY,vector-method, [<-,humdrumR,character,ANY,humdrumR-method	""	22
-humdrumR-class.R	orderHumtab.Rd	""	""	3643	""	""	orderHumtab	""	41
-humdrumR-class.R	unfoldStops.Rd	""	""	488	""	""	unfoldStops	""	133
-humdrumR-package.R	humdrumPitch.Rd	""	""	1808	""	""	humdrumPitch	""	16
-humdrumR-package.R	humdrumR.Rd	""	""	2289	""	""	humdrumR	""	80
-humdrumR-package.R	humdrumRroot.Rd	""	""	614	""	""	humdrumRroot	""	562
+humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation	""	4287	Yes?	Yes?	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields, $<-,humdrumR,vector-method, $<-,humdrumR,humdrumR-method, [<-,humdrumR,character,ANY,vector-method, [<-,humdrumR,character,ANY,humdrumR-method	""	22
+humdrumR-class.R	unfoldStops.Rd	Folding functions	""	632	Yes	Minimal	unfoldStops	""	133
+humdrumR-package.R	humdrumPitch.Rd	""	""	1808	No	Minimal	humdrumPitch	""	16
+humdrumR-package.R	humdrumR.Rd	""	""	2293	No	OK	humdrumR	""	80
+humdrumR-package.R	humdrumRroot.Rd	""	""	554	Yes	Yes	humdrumRroot	""	562
 rhythmInterval.R	SOI.Rd	rhythm analysis tools	""	1400	""	""	SOI	""	15
 rhythmInterval.R	rhythmFunctions.Rd	""	""	522	""	""	rhythmFunctions, recip, duration	""	575
 rhythmInterval.R	rhythmInterval.Rd	""	""	491	""	""	rhythmInterval, rhythmInterval.default, rhythmInterval.NULL, rhythmInterval.character	""	56
@@ -51,29 +50,29 @@ tertianSet.R	chordTransformer.Rd	""	""	519	""	""	chordTransformer, figuredBass	"
 tertianSet.R	diatonicSet.Rd	""	""	8073	""	""	diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character	""	71
 tertianSet.R	tertianSet.Rd	""	""	1820	""	""	tertianSet, tset, is.tertianSet	""	77
 tonalInterval.R	LO5th.Rd	core pitch representations	""	1354	Yes	Minimal	LO5th	""	27
-tonalInterval.R	accidental.Rd	partial pitch functions, pitch functions	""	2011	Yes	Empty	accidental	""	59
-tonalInterval.R	bhatk.Rd	pitch functions, relative pitch functions	""	9961	Yes	Empty	bhatk	""	29
+tonalInterval.R	accidental.Rd	partial pitch functions, pitch functions	""	2011	""	Empty	accidental	""	59
+tonalInterval.R	bhatk.Rd	pitch functions, relative pitch functions	""	9961	""	Empty	bhatk	""	29
 tonalInterval.R	degree.Rd	absolute pitch functions, pitch functions, relative pitch functions	""	11305	Yes	Minimal	degree, deg	""	23
-tonalInterval.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions	""	10620	Yes	Empty	freq	""	20
-tonalInterval.R	helmholtz.Rd	absolute pitch functions, pitch functions	""	9995	Yes	Empty	helmholtz	""	201
-tonalInterval.R	interval.Rd	pitch functions, relative pitch functions	""	9978	Yes	Empty	interval	""	60
-tonalInterval.R	invert.Rd	tonal transformations	""	346	""	""	invert	""	25
+tonalInterval.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions	""	10620	""	Empty	freq	""	20
+tonalInterval.R	helmholtz.Rd	absolute pitch functions, pitch functions	""	9995	""	Empty	helmholtz	""	201
+tonalInterval.R	interval.Rd	pitch functions, relative pitch functions	""	9978	""	Empty	interval	""	60
+tonalInterval.R	invert.Rd	tonal transformations	""	346	""	Empty	invert	""	25
 tonalInterval.R	kern.Rd	absolute pitch functions, pitch functions	""	11611	Yes	Yes	kern	""	218
-tonalInterval.R	lilypond.Rd	absolute pitch functions, pitch functions	""	10267	Yes	Empty	lilypond	""	15
-tonalInterval.R	octave.Rd	partial pitch functions, pitch functions	""	2009	""	Empty	octave	""	304
-tonalInterval.R	pc.Rd	atonal pitch functions, pitch functions	""	10219	Yes	Empty	pc	""	20
-tonalInterval.R	pitch.Rd	absolute pitch functions, pitch functions	""	10063	Yes	Empty	pitch	""	109
+tonalInterval.R	lilypond.Rd	absolute pitch functions, pitch functions	""	10267	""	Empty	lilypond	""	15
+tonalInterval.R	octave.Rd	partial pitch functions, pitch functions	""	2009	No	Empty	octave	""	304
+tonalInterval.R	pc.Rd	atonal pitch functions, pitch functions	""	10219	""	Empty	pc	""	20
+tonalInterval.R	pitch.Rd	absolute pitch functions, pitch functions	""	10063	""	Empty	pitch	""	109
 tonalInterval.R	pitchDeparsing.Rd	""	""	29336	Yes	Mostly	pitchDeparsing	""	
 tonalInterval.R	pitchFunctions.Rd	""	Incomplete	4761	Yes	Yes?	pitchFunctions	""	52
 tonalInterval.R	pitchParsing.Rd	""	""	33813	Yes	Yes?	pitchParsing, tonalInterval, tonalInterval.tonalInterval, tonalInterval.logical, tonalInterval.NULL, tonalInterval.numeric, tonalInterval.character	""	18
-tonalInterval.R	quality.Rd	partial pitch functions, pitch functions	""	2002	Yes	Empty	quality	""	97
+tonalInterval.R	quality.Rd	partial pitch functions, pitch functions	""	2002	""	Empty	quality	""	97
 tonalInterval.R	semits.Rd	atonal pitch functions, pitch functions	""	11837	Yes	Yes	semits, midi, cents	""	35
-tonalInterval.R	solfa.Rd	pitch functions, relative pitch functions	""	9986	Yes	Empty	solfa	""	38
-tonalInterval.R	solfg.Rd	absolute pitch functions, pitch functions	""	10127	Yes	Empty	solfg	""	17
-tonalInterval.R	step.Rd	partial pitch functions, pitch functions	""	2138	Yes	Empty	step	""	12
+tonalInterval.R	solfa.Rd	pitch functions, relative pitch functions	""	9986	""	Empty	solfa	""	38
+tonalInterval.R	solfg.Rd	absolute pitch functions, pitch functions	""	10127	""	Empty	solfg	""	17
+tonalInterval.R	step.Rd	partial pitch functions, pitch functions	""	2138	""	Empty	step	""	12
 tonalInterval.R	tonalIntervalS4.Rd	core pitch representation	Needs one?	7277	Yes	Yes	tonalIntervalS4, tint, is.tonalInterval	""	53
 tonalInterval.R	tonh.Rd	absolute pitch functions, pitch functions	""	10205	Yes	Mostly	tonh	""	17
-tonalInterval.R	transpose.Rd	tonal transformations	""	8056	""	""	transpose	""	26
+tonalInterval.R	transpose.Rd	tonal transformations	""	8056	Yes?	Yes	transpose	""	26
 tools.R	delta.Rd	Lagged vector functions	""	7800	Yes	Yes	delta, delta.default, delta.matrix	""	47
 tools.R	ditto.Rd	Lagged vector functions	""	4997	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR	""	
 tools.R	expand.Rd	""	""	1781	Yes	Yes	expand	""	38

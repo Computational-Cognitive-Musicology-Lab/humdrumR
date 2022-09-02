@@ -504,9 +504,9 @@ shortFilenames <- function(fileFrame) {
 #' @section Validity:
 #' 
 #' `findHumdrum` and `readHumdrum` automatically ignore non-text files.
-#' Whatsmore, any files which contain humdrum syntax errors (checked by `[validateHumdrum][validateHumdrum]`) are automatically
-#' skipped. If you want to see specifically what errors occured, call `[validateHumdrum][validateHumdrum]` 
-#' directly and its `errorReport.path` argument.
+#' Whatsmore, any files which contain humdrum syntax errors (checked by [validateHumdrum()]) are automatically
+#' skipped. If you want to see specifically what errors occured, call [validateHumdrum()]
+#' directly and use its `errorReport.path` argument.
 #' 
 #' @section Tandem Interpretations:
 #' 

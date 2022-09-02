@@ -109,9 +109,9 @@ If there are no multi-piece files, \code{Piece} and \code{File} will be identica
 
 
 \code{findHumdrum} and \code{readHumdrum} automatically ignore non-text files.
-Whatsmore, any files which contain humdrum syntax errors (checked by \verb{[validateHumdrum][validateHumdrum]}) are automatically
-skipped. If you want to see specifically what errors occured, call \verb{[validateHumdrum][validateHumdrum]}
-directly and its \code{errorReport.path} argument.
+Whatsmore, any files which contain humdrum syntax errors (checked by \code{\link[=validateHumdrum]{validateHumdrum()}}) are automatically
+skipped. If you want to see specifically what errors occured, call \code{\link[=validateHumdrum]{validateHumdrum()}}
+directly and use its \code{errorReport.path} argument.
 }
 
 \section{Tandem Interpretations}{

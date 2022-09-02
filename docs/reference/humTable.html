@@ -54,12 +54,12 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -97,7 +97,9 @@ If you want to directly access the humdrum table within a <a href="humdrumRclass
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getHumtab</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"G"</span>, <span class="st">"L"</span>, <span class="st">"I"</span>, <span class="st">"M"</span>, <span class="st">"D"</span>, <span class="st">"d"</span>, <span class="st">"P"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getHumtab</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"G"</span>, <span class="st">"L"</span>, <span class="st">"I"</span>, <span class="st">"M"</span>, <span class="st">"D"</span>, <span class="st">"d"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="fu">getFields</span><span class="op">(</span><span class="va">humdrumR</span>, fieldnames <span class="op">=</span> <span class="cn">NULL</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -114,6 +116,10 @@ See the humTable documentation and/or the humdrum syntax vignette for clarificat
 <li><p><code>"D"</code>: non-null data</p></li>
 <li><p><code>"d"</code>: null data</p></li>
 </ul><p>Multiple types can be specified as a vector, or smooshed into a single string: e.g., <code>"GLIMD"</code>.</p></dd>
+<dt>fieldnames</dt>
+<dd><p>(<code>character</code>) A vector of names which are <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partially matched</a>
+against field names of the humdrum table.
+Of <code>NULL</code> (the default), the <code>Token</code> field is returned.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -232,14 +238,14 @@ tandem intepretations is impossible, because A) tandem interpretations can "over
 users can create their own tandem interpretations. The best we can do in all cases is
 identify <em>all</em> tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
-character string in the <code>Tandem</code> field.
-If working with non-standard intrepretations, users can parse the <code>Tandem</code> field using the
-<a href="getTandem.html">getTandem</a> function.
+character string in the <code>Tandem</code> field (see the <code><a href="extractTandem.html">extractTandem()</a></code> docs for details).
+If working with non-standard interpretations, users can parse the <code>Tandem</code> field using the
+<code><a href="extractTandem.html">extractTandem()</a></code> function.
 If no tandem interpretations occur in a file, the <code>Tandem</code> field is full of empty strings (<code>""</code>).</p>
 <p>Fortunately, many tandem interpretations are widely used and standardized, and these
 interpretations are known by <code>humdrumR</code>. Recognized interpretations (such as <code>*clefG4</code> and <code>*k[b-]</code>)
-are automatically parsed into their own fields by a call to <a href="readHumdrum.html">readHumdrum</a>.
-See the <a href="readHumdrum.html">readHumdrum</a> documentation for more details.</p>
+are automatically parsed into their own fields by a call to <code><a href="readHumdrum.html">readHumdrum()</a></code>.
+See the <code><a href="readHumdrum.html">readHumdrum()</a></code> documentation for more details.</p>
 </div>
 
 <div class="section">
@@ -295,8 +301,8 @@ Any humdrum data with these records will end up having <code>COM</code> and <cod
     <p>In humdrum syntax, there is no requirement that every spine-path contains data
 in every record. Rather, spines are often padded with <em>null tokens</em>.
 In some cases, entire records may be padded with null tokens.
-Each type of humdrum record uses a different null token:</p><ul><li><p><em>Intepretation</em>: <code>*</code>
-<em>Comment</em>: <code>!</code></p></li>
+Each type of humdrum record uses a different null token:</p><ul><li><p><em>Intepretation</em>: <code>*</code></p></li>
+<li><p><em>Comment</em>: <code>!</code></p></li>
 <li><p><em>Barline</em>: <code>=</code></p></li>
 <li><p><em>Data</em>: <code>.</code></p></li>
 </ul><p>Null tokens in a humdrum table are identified in the logical <code>Null</code> field.
@@ -319,8 +325,14 @@ of a <code>data.table</code>, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily
 regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-HumdrumR has several options for "collapseing" tokens within humdrum tables,
-or otherwise <a href="humCoercion.html">reshaping humdrum data</a> into data formats/structures you might prefer.</p>
+<code>HumdrumR</code> has several options for <a href="collapseHumdrum.html">"collapsing"</a> tokens within humdrum tables,
+<a href="foldHumdrum.html">"folding"</a> different parts of the data into new fields,
+or otherwise <a href="humCoercion.html">reshaping humdrum data</a> into basic R data structures you might prefer.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other Core humdrum data representation: 
+<code><a href="humdrumRclass.html">humdrumRclass</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -328,11 +340,13 @@ or otherwise <a href="humCoercion.html">reshaping humdrum data</a> into data for
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

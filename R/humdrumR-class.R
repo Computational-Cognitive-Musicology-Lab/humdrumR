@@ -307,6 +307,10 @@ NULL
 #' 
 #' In this example, the `Spine`, `Path`, and `Column` values are shown below the data.
 #' You can see that `Column` is used to indicate the "padded" position of each data token.
+#' @name humColumns
+NULL
+
+
 #####Humtable methods
 
 
@@ -561,11 +565,11 @@ alignColumnsAcrossFiles <- function(humtab) {
     G <- humtab[Type == 'G']
     humtab <- humtab[Type != 'G']
     
-    combos <- humtab[ , list(Column = max(Column)), by = c(Spine, Path)]
+    combos <- humtab[ , list(Column = max(Column)), by = list(Spine, Path)]
     
     newColumn <- combos$Column[matches(list(humtab$Spine, humtab$Path),
                                        list(combos$Spine, humtab$Path))]
-    combos[ , Column := newColumn]
+    humtab[ , Column := newColumn]
     
     orderHumtab(rbind(humtab, G))
     
@@ -1367,6 +1371,7 @@ foldStops <- function(humdrumR, fromField = 'Token', fillFromField = FALSE) {
 #' stops in different fields, this function spreads the data from the 
 #' smaller fields into multiple stops.
 #' 
+#' @family {Folding functions}
 #' @seealso The opposite (kinda) of [foldStops()]
 #' @export
 unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {

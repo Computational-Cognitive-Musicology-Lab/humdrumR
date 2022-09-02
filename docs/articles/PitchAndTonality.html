@@ -57,12 +57,12 @@
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -91,9 +91,10 @@
 <div class="row">
   <main id="main"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Pitch and Tonality in humdrumR</h1>
-                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
+                        <h4 data-toc-skip class="author">Nathaniel
+Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-07-28</h4>
+            <h4 data-toc-skip class="date">2022-09-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
@@ -101,11 +102,21 @@
 
     
     
-<p>As a computational musicology toolkit, <code>humdrumR</code>’s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox. For the most part, <code>humdrumR</code>’s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of <em>this</em> vignette—we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.</p>
+<p>As a computational musicology toolkit, <code>humdrumR</code>’s tools
+for analyzing and manipulating pitch data are just about the most
+important tools in the toolbox. For the most part,
+<code>humdrumR</code>’s pitch tools are focused on the Western system of
+tonality, and tools for representing pitches in a tonal context are the
+focus of <em>this</em> vignette—we also have standard tools for looking
+at pitch from a Western, 12-tone atonal setting as well.</p>
 <div class="section level2">
 <h2 id="pitches-and-intervals">Pitches and Intervals<a class="anchor" aria-label="anchor" href="#pitches-and-intervals"></a>
 </h2>
-<p><code>humdrumR</code> defines a suite of pitch functions, like <code>kern</code>, <code>solfa</code>, <code>interval</code>, and <code>semits</code>. These functions all work in essentially the same way: they take in an input argument and output pitch information in their own particular format. For example,</p>
+<p><code>humdrumR</code> defines a suite of pitch functions, like
+<code>kern</code>, <code>solfa</code>, <code>interval</code>, and
+<code>semits</code>. These functions all work in essentially the same
+way: they take in an input argument and output pitch information in
+their own particular format. For example,</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -117,7 +128,10 @@
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">7</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">solfa</span>(input)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"do"</span> <span class="st">"re"</span> <span class="st">"mi"</span> <span class="st">"so"</span></span></code></pre></div>
-<p>Notice that the functions all recognize the pitch part of these input tokens, ignoring the non-pitch (rhythm) information. If you want to keep the non-pitch part of your tokens, use the <code>inPlace</code> argument:</p>
+<p>Notice that the functions all recognize the pitch part of these input
+tokens, ignoring the non-pitch (rhythm) information. If you want to keep
+the non-pitch part of your tokens, use the <code>inPlace</code>
+argument:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -195,7 +209,9 @@
 </ul>
 </li>
 </ul>
-<p>The global documentation for <em>all</em> the pitch functions can be seen by calling <code><a href="../reference/pitchFunctions.html">?pitchFunctions</a></code>. You can also call documentation for any individual function, like <code><a href="../reference/kern.html">?kern</a></code>.</p>
+<p>The global documentation for <em>all</em> the pitch functions can be
+seen by calling <code><a href="../reference/pitchFunctions.html">?pitchFunctions</a></code>. You can also call
+documentation for any individual function, like <code><a href="../reference/kern.html">?kern</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="pitch-arguments">Pitch arguments<a class="anchor" aria-label="anchor" href="#pitch-arguments"></a>
@@ -203,11 +219,18 @@
 <div class="section level3">
 <h3 id="generic-and-simple-pitch">Generic and Simple pitch<a class="anchor" aria-label="anchor" href="#generic-and-simple-pitch"></a>
 </h3>
-<p>All pitch functions accept logical (<code>TRUE</code>/<code>FALSE</code>) <code>generic</code> and <code>simple</code> arguments.</p>
+<p>All pitch functions accept logical
+(<code>TRUE</code>/<code>FALSE</code>) <code>generic</code> and
+<code>simple</code> arguments.</p>
 <div class="section level4">
 <h4 id="simple-vs-compound">Simple vs Compound<a class="anchor" aria-label="anchor" href="#simple-vs-compound"></a>
 </h4>
-<p>By default, most pitch functions complete full pitch information, including octave information (“<a href="https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound" class="external-link">compound intervals</a>”). However, if you specify <code>simple = TRUE</code>, the octave information is discarded, leaving only the simple part of the pitch information. (You can alternately specify <code>compound = FALSE</code>).</p>
+<p>By default, most pitch functions complete full pitch information,
+including octave information (“<a href="https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound" class="external-link">compound
+intervals</a>”). However, if you specify <code>simple = TRUE</code>, the
+octave information is discarded, leaving only the simple part of the
+pitch information. (You can alternately specify
+<code>compound = FALSE</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'dd#'</span>, <span class="st">'G'</span>, <span class="st">'GG'</span>, <span class="st">'GGG-'</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -232,7 +255,15 @@
 <div class="section level3">
 <h3 id="generic-vs-specific">Generic vs Specific<a class="anchor" aria-label="anchor" href="#generic-vs-specific"></a>
 </h3>
-<p>By default, most pitch functions complete full pitch information, including <a href="https://en.wikipedia.org/wiki/Generic_and_specific_intervals" class="external-link">specific tonal information</a>. “Specific” pitch information is usually specified by <a href="https://en.wikipedia.org/wiki/Accidental_(music)" class="external-link">accidentals</a> or quality labels. If we specify <code>generic = TRUE</code> (or <code>specific = FALSE</code>), accidentals or qualities are not printed. In the case of pitch representations without excplicit accidentals/qualities (like solfege), the generic version of the pitch is printed.</p>
+<p>By default, most pitch functions complete full pitch information,
+including <a href="https://en.wikipedia.org/wiki/Generic_and_specific_intervals" class="external-link">specific
+tonal information</a>. “Specific” pitch information is usually specified
+by <a href="https://en.wikipedia.org/wiki/Accidental_(music)" class="external-link">accidentals</a>
+or quality labels. If we specify <code>generic = TRUE</code> (or
+<code>specific = FALSE</code>), accidentals or qualities are not
+printed. In the case of pitch representations without excplicit
+accidentals/qualities (like solfege), the generic version of the pitch
+is printed.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'d#'</span>, <span class="st">'e'</span>, <span class="st">'f#'</span>, <span class="st">'g'</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -262,12 +293,14 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

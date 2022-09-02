@@ -14,8 +14,6 @@
 #' 
 #' @param files A list of character strings, each representing a record in a file.
 #' 
-#' @name humValidation
-#' 
 #' @export
 validateHumdrum <- function(..., contains = NULL, recursive = FALSE, errorReport.path = NULL) {
 

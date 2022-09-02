@@ -14,6 +14,7 @@ foldGraceNotes(humdrumR)
 
 Other {Folding functions}: 
 \code{\link{foldExclusive}()},
-\code{\link{foldHumdrum}()}
+\code{\link{foldHumdrum}()},
+\code{\link{unfoldStops}()}
 }
 \concept{{Folding functions}}

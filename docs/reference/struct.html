@@ -40,12 +40,12 @@
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -89,10 +89,10 @@ make all the new types we <em>do</em> define act as much like atomic vectors as 
 <p>As a "virtual class" <code>struct</code>s themselves don't really exist as independent objects, but the <code>struct</code> class defines (abstractly) all the necessarry methods to treat a collection of
 atomic vectors as a single vector/matrix-like object---simply make your new subclass <a href="https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)" class="external-link">inherit</a> <code>struct</code>
 and it is all taken care of. (To do this, specify <code>contains = "struct"</code> in your call to <a href="https://rdrr.io/r/methods/setClass.html" class="external-link">setClass</a>.)</p>
-<p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="pitchParsing.html">tonalInterval</a></p></li>
+<p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="tonalIntervalS4.html">tonal intervals</a></p></li>
 <li><p><a href="diatonicSet.html">diatonicSet</a></p></li>
 <li><p><a href="tertianSet.html">tertianSet</a></p></li>
-<li><p><a href="rhythmInterval.html">rhythmInterval</a></p></li>
+<li><p><code><a href="rational.html">rational()</a></code></p></li>
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
 The most important limitation of <code>struct</code> that you may encounter is that, though <code>struct</code> classes work (ok) in <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frames</a>,
@@ -231,11 +231,13 @@ If these definitions don't work for your subclass, you'll need to create your ow
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

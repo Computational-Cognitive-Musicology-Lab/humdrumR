@@ -161,6 +161,7 @@ similar function, "collapsing" data \emph{within} a field.
 
 Other {Folding functions}: 
 \code{\link{foldExclusive}()},
-\code{\link{foldGraceNotes}()}
+\code{\link{foldGraceNotes}()},
+\code{\link{unfoldStops}()}
 }
 \concept{{Folding functions}}

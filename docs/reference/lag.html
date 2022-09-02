@@ -44,12 +44,12 @@ They are similiar to the data.table::shift function, but with a few additional o
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
   </div>
 </li>
@@ -90,7 +90,7 @@ They are similiar to the <a href="https://Rdatatable.gitlab.io/data.table/refere
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>The input argument. Should be vector (including lists), array, or data.frame</p></dd>
+<dd><p>The input argument. Should be vector (including list), array, or data.frame</p></dd>
 <dt>n</dt>
 <dd><p>The amount to lag/lead the data.</p></dd>
 <dt>fill</dt>
@@ -99,14 +99,18 @@ They are similiar to the <a href="https://Rdatatable.gitlab.io/data.table/refere
 <dd><p>If <code>wrap = TRUE</code>, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
 within the data structure.</p></dd>
 <dt>boundaries</dt>
-<dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Lags crossing the boundaries indicated in <code>windows</code>
-are filled.</p></dd>
+<dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Each segment of <code>x</code> delineated
+by the <code>boundaries</code> vector(s) is treated separately.</p></dd>
 <dt>margin</dt>
 <dd><p>Arrays and data.frames can be lagged lead in multiple dimensions using the <code>margin</code> argument.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html" class="external-link">data.table::shift()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html" class="external-link">data.table::shift()</a></code></p>
+<p>Other Lagged vector functions: 
+<code><a href="delta.html">delta</a>()</code>,
+<code><a href="ditto.html">ditto</a>()</code>,
+<code><a href="sigma.html">sigma</a>()</code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -114,11 +118,13 @@ are filled.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
+Condit-Schultz</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>
