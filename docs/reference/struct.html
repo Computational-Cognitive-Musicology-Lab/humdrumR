@@ -66,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>struct</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Vector.R"><code>R/Vector.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Struct.R"><code>R/Struct.R</code></a></small>
       <div class="d-none name"><code>struct.Rd</code></div>
     </div>
 
@@ -96,7 +96,7 @@ and it is all taken care of. (To do this, specify <code>contains = "struct"</cod
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
 The most important limitation of <code>struct</code> that you may encounter is that, though <code>struct</code> classes work (ok) in <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frames</a>,
-<a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.tables</a> and <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibbles</a> will either not work or give strange behaviors if you put <code>struct</code>s into them.</p>
+<a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.tables</a> and <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibbles</a> will either not work or give strange behaviors if you put <code>struct</code>s into them.</p>
     </div>
     <div class="section level2">
     <h2 id="slots">Slots<a class="anchor" aria-label="anchor" href="#slots"></a></h2>

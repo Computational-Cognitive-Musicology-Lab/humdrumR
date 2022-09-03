@@ -76,7 +76,7 @@ In addition, exclusive interpretations can be used to guide dispatch."><!-- math
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Regular expression method dispatch and function application</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Compose.R"><code>R/Compose.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Dispatch.R"><code>R/Dispatch.R</code></a></small>
       <div class="d-none name"><code>humdrumDispatch.Rd</code></div>
     </div>
 
@@ -156,7 +156,7 @@ representation, and call the appropriate parser for that.</p><div class="section
 <h3 id="dispatchdf">dispatchDF<a class="anchor" aria-label="anchor" href="#dispatchdf"></a></h3>
 
 
-<p>The <code>dispatchDF</code> must be a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table()</a></code> created using the <code>makeDispatchDF</code> function.
+<p>The <code>dispatchDF</code> must be a <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table()</a></code> created using the <code>makeDispatchDF</code> function.
 <code>makeDispatchDF</code> takes one or more arguments, each a list with three components (ordered, not nameed):</p><ol><li><p>A character vector of exclusive interpretations. (Specify <code>"any"</code> if you don't want exclusive dispatch).</p></li>
 <li><p>A regular expression (character string) or a function which can generate a regular expression, which accepts <code>...</code>
 arguments at the time of dispatch.</p></li>

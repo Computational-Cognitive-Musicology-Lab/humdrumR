@@ -11,23 +11,23 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
-         Compose.R
+         Dispatch.R
          humdrumR-class.R
          Summary.R
          Read.R
          Write.R
-         Apply.R
-         Filter.R
+         Within.R
+         Subset.R
          Windows.R
          Interpretations.R
          Regex.R
          Validation.R
-         Vector.R
+         Struct.R
          Rational.R
-         tonalInterval.R
-         diatonicSet.R
-         tertianSet.R
-         rhythmInterval.R
+         Pitch.R
+         Keys.R
+         Chords.R
+         Rhythm.R
          Metric.R
 	 Lyrics.R
 Roxygen: list(markdown = TRUE)
