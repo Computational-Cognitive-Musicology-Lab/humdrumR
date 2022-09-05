@@ -134,7 +134,8 @@ applycols <- function(x, f, ...){
 #' 
 #' The `lag` and `lead` functions take input vectors, matrices, or data.frames and shifts their data
 #' by `n` indices. 
-#' They are similiar to the [data.table::shift] function, but with a few additional options:
+#' They are similiar to the [data.table::shift] function, but with a few additional options.
+#' 
 #' @param x The input argument. Should be vector (including list), array, or data.frame
 #' @param n The amount to lag/lead the data. 
 #' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
@@ -145,6 +146,7 @@ applycols <- function(x, f, ...){
 #' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
 #' 
 #' @family {Lagged vector functions}
+#' @inheritSection sigma Boundaries
 #' @seealso [data.table::shift()]
 #' @export
 lag <- function(x, n = 1, fill, wrap, boundaries, ...) UseMethod('lag')

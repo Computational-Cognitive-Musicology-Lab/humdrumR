@@ -178,6 +178,12 @@ test_that("Examples from withinHumdrum docs work", {
   expect_false(any(Count1 == Count3))
   expect_false(any(Count2 == Count4))
   
+  
+  #
+  expect_identical(with(chorales, lag(Token, 1)), with(chorales, Token[lag = 1]))
+  expect_identical(with(chorales, table(lag(Token, 1), lag(Token, 2))), 
+                   with(chorales, table(Token[lag = 1:2])))
+  
 })
 
 test_that("Assignment and multiple do expressions work correctly in with.humdrumR", {

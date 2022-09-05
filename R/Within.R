@@ -33,83 +33,175 @@
 #' [with and within][base::with()]
 #' methods for [data.frames][base::data.frame].
 #' Specifically they allow you to evaluate arbitrary
-#' expressions involving the fields of a [humdrumR data object][humdrumRclass].
-#' This means that you can drop "inside" your [humdrumR data object][humdrumRclass] ,
-#' and run whatever commands you want using the fields of the [humdrum data table][humTable], 
-#' then pop out again.
-#' 
-#' The power of `with` and `within` is that they also includes a number of *special evaluation options*:
-#' 
-#' + Evaluate an expression in a subset of the data.
-#' + Evaluate the same expression separately in different subsets of the data.
-#' + Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-#' + Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
-#' 
+#' expressions using the fields of a [humdrumR data object][humdrumRclass].
+#' This means that you can drop "inside" your [humdrumR data object][humdrumRclass] and run whatever commands 
+#' you want using the fields of the [humdrum data table][humTable], 
+#' while keeping the data safely "encapsulated" within the humdrum object---at least, until you *want*
+#' to pull it out.
 #' 
 #' The difference between `with.humdrumR` and `within.humdrumR` is
 #' analogous to the difference between [base::with()] and [base::within()].
 #' `with.humdrumR` evaluates your expression(s) and then simply returns the result of
 #' the evaluation. `within.humdrumR` evaluates your expression(s) and then
-#' inserts the results back into the humdrumR object (if possible), generating new
+#' inserts the results back into the humdrumR object, generating new
 #' fields called `ResultX` (see details).
+#' 
+#' In addition, `with` and `within` offer a number of powerful options that make working with 
+#' humdrum data easier, explained in detail below.
+#' Most notably, a number of *special evaluation arguments* can be used to:
+#' 
+#' + Evaluate an expression in a subset of the data.
+#' + Evaluate the same expression separately in different subsets of the data, then recombined them (split-apply-combine).
+#' + Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
+#' + Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
+#' + "Fill" short results to match the original field size.
+#' + Evaluate expressions only in certain record types (defaulting only data records).
+#' 
+#' Special evaluation arguments specified as named arguments to `with`/`within` calls.
+#' Even though they aren't formal arguments, they are [partially matched][base::pmatch()],
+#' so if write `grou` instead of `groupby`, you won't get an error!
+#' In some cases, you can specify more than one of the same type of special evaluation argument (details below).
 #'
 #'
 #' @section Expression evaluation:
 #'
 #' An "expression" is a legal bit of R code, like `2 + 2` or `x - mean(x)`. 
-#' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate,
-#' or "*do*"  which we call "do" expressions.
-#' These expressions are evaluated (executed) within the `humdrumR` object's humdrum table.
-#' which means the expression can refer to any field in the humdrumR object (`Record`, `Token`, `File`, etc.).
-#' Since all the fields in a data.table are all vectors of the same length, expressions should usually be 
-#' vectorized.
+#' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate.
+#' We will refer to these as "within-expressions."
+#' These expressions are passed to `with`/`within.humdrumR` as unnamed arguments: for example,
+#' `with(humData, myExpressionHere)`.
+#' 
+#' Within expressions are evaluated within the `humdrumR` object's humdrum table,
+#' which means the expression can refer fields in the humdrumR object (`Record`, `Token`, `File`, etc.)
+#' like any other variables.
+#' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
+#' (and generally should be) vectorized.
+#' 
+#' If multiple within-expressions are provided, each expression is evaluated in order (left to right).
+#' Each expression can refer to the results of the last expression (as `.`), or 
+#' to variables defined in previous expressions.
 #' 
 #' A number of special [syntactic sugars](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic) 
-#' can be used in the "do" expressions.
-#' The most basic, is that a `.` anywhere in the expression, will be 
-#' interpreted as the humdrumR object's current [active expression][humActive].
+#' can be used in within expressions.
 #' 
-#' If multiple do expressions are provided, each expression is evaluated in order, and 
-#' can refer to results of the previous do expression as `.` (variables assigned in previous expressions
-#' can also be used.)
-#' Other syntactic sugars are described in sections below.
+#' + The `.` placeholder.
+#' + Side effects
+#' + Recycled ("filled") results
+#' + Lagged vectors
+#' + etc.
+#' 
+#' Each of these is explained below.
+#' 
+#' ### The . placeholder
+#' 
+#' The `.` variable can be used as a special placeholder in within expressions.
+#' In the first within expression, `.` is interpreted as the humdrumR object's 
+#' current [active expression][humActive].
+#' If multiple within expressions are given, `.` refers to result of the *previous* expression.
+#' For example, if `Token` is the [active expression][humActive], then:
+#' 
+#' ```
+#' with(humData, nchar(.), mean(.), .^2)
+#' 
+#' ```
+#' 
+#' would return the same result as:
+#' 
+#' ```
+#' with(humData, mean(nchar(Token))^2)
+#' ```
+#' 
 #'
-#' ```
-#' humdata <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') # read some data
-#' 
-#' within(humdata, pitch(Token))
-#' within(humdata, pitch(.)) # Same as previous (unless `Active` field has been changed))
-#' 
-#' with(humdata, table(solfa(Token, Key = Key)))
-#' # Assumes that the Key field was parsed during the call to `[readHumdrum][readHumdrum]`
-#' 
-#' within(humdata, semits(Token) - mean(semits(Token))) 
-#' 
-#' ```
-#' 
-#' Any unnamed arguments to `with` or `within` are interpreted as do expressions.
-#' Do expressions can also be explicitly labeled by naming an argument "do":
-#' 
-#' ```
-#' with(chorales, table(Token))
-#' with(chorales, do = table(Token))
-#' # These return the same result
-#' 
-#' ```
 #'
-#' ### Special Do
 #' 
-#' A few special versions of the `do` expression can be used.
+#' ### Side effects:
 #' 
-#' + `doplot`:
-#'   + The expression is evaluated, but the original `humdrumR` input
-#'     if returned unchanged. This can be used for achieving a side effect (like making a plot)
-#'     without saving the result.
-#' + `dofill`:
-#'   + The result is evaluated recycled to the length of the input, making
-#'     sure the result is the same length as the input.
-#'     Basically, do fill is the equivalent of `rep(do ~ f(x), length.out = length(x))`.
+#' In some cases, you want to evaluate an expression for its 
+#' "[side effect](https://en.wikipedia.org/wiki/Side_effect_(computer_science))";
+#' This means that the expression *does* something you want (the "side effect") but doesn't actually
+#' evaluate to (return) a result that you want.
+#' The most common "side effect" is creating a plot.
+#' Other examples might be printing text to the console using [base::cat()] or [base::print()], or 
+#' writing to a file.
 #' 
+#' Side effects can be achieved by naming your expression `sidefx` or `fx`---as usual,
+#' these arguments can be [partially matched][base::pmatch()], so `side` also works, and is commonly used.
+#' Side-effect expressions are executed, but their result (if any) is ignored.
+#' This means that if you call something like `newData <- within(humData, side = plot(x))`, the plot is made
+#' but the result (`newData`) is identical to `humData`.
+#' 
+#' Side-effects can also be used in combination with other within expressions.
+#' Their result is ignored, and *not* fed to the next expression as `.`.
+#' For example the command
+#' 
+#' ```
+#' with(humData, nchar(Token), side = hist(.), mean(.))
+#' ```
+#' 
+#' creates a histogram of `nchar(Token)` and also returns the mean of `nchar(Token)`.
+#' (Note that variables explicitly assigned in a `side` call *are* visible in later calls,
+#' which is confusing, so don't do it!)
+#' 
+#' 
+#' ### Filling (cycling) results:
+#' 
+#' The result of your within expression may be shorter than the input vectors ([humtable fields][humTable]).
+#' However, in some calls to `within.humdrumR` in particular, you'd like to return a single number and 
+#' recycle it to "fill" the original data field.
+#' In other words, you'd like the output (result) of your expression to be repeated until it matches the
+#' length of the input field(s).
+#' You could do this manually be using the [base::rep()] function, but `with`/`within.humdrumR` provide a
+#' syntactic sugar for this:
+#' You can name our expression `recycle` or `fill` ([partially matched][base::pmatch()]),
+#' which will cause the result to be recycled.
+#' All this does is take `yourExpression(field, ...)` and wrap it in 
+#' `rep(yourExpression(field, ...), length.out = length(field))`.
+#' 
+#' ### Lagged vectors
+#' 
+#' We very often want to work with "[lagged][lag()]" vectors of data.
+#' For example, we want to look at the relation between a vector and the previous values of that 
+#' vector---e.g., the vector offset or "lagged" by one index.
+#' The `humdrumR` [lag()] function is useful for this, as it gives us several options for lagging vectors,
+#' while keeping them the same length (so vectorization is never hindered).
+#' 
+#' `with` and `within.humdrumR` give us a very convenient short cut to using `lag`.
+#' In a within-expression, and vector can be indexed with a `integer` argument named `lag` (case insensitive).
+#' causing it to be lagged by that integer (using [lag()]).
+#' (A vector indexed with `lag = 0` returns the unchanged vector.)
+#' For example, the following two calls are the same:
+#' 
+#' ```
+#' with(humData, Token[lag = 1])
+#' with(humData, lag(Token, 1))
+#' ```
+#' 
+#' If the `lag` index has *multiple* values and the indexed object appears within a higher function call,
+#' each lag is inserted as a *separate* argument to that call.
+#' Thus, *these* two calls are also the same:
+#' 
+#' ```
+#' with(humData, table(Token[lag = 1:2])
+#' 
+#' with(humData, table(lag(Token, 1), lag(Token, 2))
+#' ```
+#' 
+#' [lag()] is a function with a `boundaries` argument, which `with`/`within.humdrumR`
+#' will automatically feed the fields `list(File, Spine, Path)`.
+#' This is the default "melodic" behavior in most music.
+#' If you'd like to turn this off, you need to override it by adding your own
+#' `boundaries` argument to the lagged index, like `Token[lag = 1, boundaries = list(...)]`.
+#' 
+#' 
+#' Using lagged vectors, since they are vectorized is the fastest (computationally) and easiest way of working with n-grams.
+#' For example, if you want to create character-string 5-grams of your data, you could call:
+#' 
+#' ```
+#' with(humData, paste(Token[lag = 0:5], sep = '-'))
+#' ```
+#' 
+#' Note that, since `with`/`within.humdrumR` passes `boundaries = list(File, Spine, Path)`
+#' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each file.
 #' 
 #' @section Special Evaluation Keywords:
 #'
@@ -688,7 +780,7 @@ parseKeywords <- function(quoTab, withFunc) {
   quoTab$Keyword <- keywords
   
   # classify keywords
-  knownKeywords <- list(do              = c('do', 'dofx', 'dofill', 'ordo', 'ordofill'),
+  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo', 'orfill'),
                         partitions      = c('by', 'where'),
                         ngram           = 'ngram',
                         windows         = 'windows')
@@ -729,18 +821,15 @@ partialMatchKeywords <- function(keys) {
     keys <- gsub('_', '', tolower(keys))
     
     # define standard keys and alternatives
-    standardkeys <- list(do          = c('do', 'd', 'eval', 'apply'),
-                         dofill      = c('dofill', 'fill', 'evalfill', 'filleval', 'applyfill'),
-                         dofx     = c('dofxs', 'dosideeffects', 'dosidefxs', 'fxs', 
-                                      'doplots', 'plots',
-                                      'evalfxs', 'evalsidefxs', 'evalsideeffects',
-                                      'applyfxs', 'applysidefxs', 'applysideffects'),
-                         by       = c('by', 'groupby', 'groups', 'across', 'groupacross'),
-                         where    = c('where', 'when'),
-                         ordo     = c('ordo', 'orelsedo', 'elsedo'),
-                         ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
-                         ngram    = 'ngrams',
-                         windows  = c('windows', 'context', 'window'))
+    standardkeys <- list(do        = c('do', 'eval', 'apply'),
+                         fill      = c('fill', 'recycle'),
+                         fx        = c('fxs', 'sidefxs'),
+                         by        = c('by', 'groupby'),
+                         where     = c('where', 'when'),
+                         or        = c('orelse'),
+                         orfill    = c('orfill', 'orelsefill'),
+                         ngram     = c('ngrams'),
+                         windows   = c('windows', 'context'))
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
@@ -1020,16 +1109,16 @@ boundedArgsQuo <- function(funcQuosure) {
 
 laggedQuo <- function(funcQuosure) {
   
-  predicate <- \(Head, Args) Head == '[' && any(names(Args) %in% c('n', 'N')) 
+  predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) == 'lag') 
   
   do <- \(exprA) {
     
     args <- exprA$Args
     if (!'boundaries' %in% .names(args)) args$boundaries <- expr(list(File, Spine, Path))
     
-    names(args)[names(args) == 'N'] <- 'n'
+    names(args)[tolower(names(args)) == 'lag'] <- 'n'
     n <- rlang::eval_tidy(args$n)
-    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [n = ] lag expression.')
+    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
     args$n <- NULL
     
     lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
@@ -1455,22 +1544,21 @@ parseResult <- function(result, rowKey) {
                               x
                             })
   
-  outLength <- unique(outLength)
-  if (length(outLength) > 1L) .stop('When using with(in).humdrumR, the result of the do expressions must be a vectors',
-                                    '(including lists) that are all the same lengths< or arrays with the same number of rows|>.',
-                                    ifelse = any(sapply(result, is.array)),
-                                    'In this case, the output list includes values that are {harvard(outLength, "and")} in length.')
+  finalLength <- tail(outLength, 1L)
+  result <- result[outLength == finalLength]
+  # if (length(outLength) > 1L) .stop('When using with(in).humdrumR, the result of the within expressions must be a vectors',
+  #                                   '(including lists) that are all the same lengths< or arrays with the same number of rows|>.',
+  #                                   ifelse = any(sapply(result, is.array)),
+  #                                   'In this case, the output list includes values that are {harvard(outLength, "and")} in length.')
   
   
   
-  if (outLength > length(rowKey)) .stop("Sorry, with(in).humdrumR doesn't currently support do-expressions", 
-                                        "which return values that are longer than their input.",
-                                        "In this case, the input data is length {length(rowKey)} but the",
-                                        "do expression is evaluating to <values|a value> of length {outLength}.",
-                                        ifelse = length(result) > 1L)
+  if (finalLength > length(rowKey)) .stop("Sorry, with(in).humdrumR doesn't currently support within-expressions", 
+                                          "which return values that are longer than their input field(s).",
+                                          "In this case, the input data is length {length(rowKey)} but the",
+                                          "last expression is evaluating to <values|a value> of length {finalLength}.",
+                                          ifelse = length(result) > 1L)
   
-  
-    
     
     result <- as.data.table(result)
     
@@ -1478,9 +1566,8 @@ parseResult <- function(result, rowKey) {
     colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
     
     #
-
     
-    result[ , `_rowKey_` := rowKey[1:outLength]][]
+    result[ , `_rowKey_` := rowKey[1:finalLength]][]
     attr(result, 'visible') <- visible
     result
     
