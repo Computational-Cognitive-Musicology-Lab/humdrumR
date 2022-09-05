@@ -23,22 +23,27 @@
 
 #' with(in)Humdrum
 #' 
-#' Apply arbitrary expressions to fields within [humdrumR][humdrumRclass] data.
+#' Apply arbitrary expressions to fields within [humdrumR][humdrumRclass] data,
+#' while employing split/apply/combine, windowing, and other analysis options.
 #' 
 #' @section Overview:
 #' 
 #' These functions are the primary means of working with
-#' humdrumR data. They are analogous to the base functions
+#' humdrumR data. They are analogous to the base-R
 #' [with and within][base::with()]
 #' methods for [data.frames][base::data.frame].
 #' Specifically they allow you to evaluate arbitrary
-#' expressions involving fields in a [humdrumR data object][humdrumRclass].
-#' They also includes a number of special evaluation options:
+#' expressions involving the fields of a [humdrumR data object][humdrumRclass].
+#' This means that you can drop "inside" your [humdrumR data object][humdrumRclass] ,
+#' and run whatever commands you want using the fields of the [humdrum data table][humTable], 
+#' then pop out again.
 #' 
-#' * Evaluate an expression in a subset of the data.
-#' * Evaluate the same expression separately in different subsets of the data.
-#' * Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-#' * Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
+#' The power of `with` and `within` is that they also includes a number of *special evaluation options*:
+#' 
+#' + Evaluate an expression in a subset of the data.
+#' + Evaluate the same expression separately in different subsets of the data.
+#' + Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
+#' + Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
 #' 
 #' 
 #' The difference between `with.humdrumR` and `within.humdrumR` is
@@ -55,7 +60,7 @@
 #' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate,
 #' or "*do*"  which we call "do" expressions.
 #' These expressions are evaluated (executed) within the `humdrumR` object's humdrum table.
-#' which means the expression can, refer to any field in the humdrumR object (`Record`, `Token`, `File`, etc.).
+#' which means the expression can refer to any field in the humdrumR object (`Record`, `Token`, `File`, etc.).
 #' Since all the fields in a data.table are all vectors of the same length, expressions should usually be 
 #' vectorized.
 #' 
@@ -63,7 +68,6 @@
 #' can be used in the "do" expressions.
 #' The most basic, is that a `.` anywhere in the expression, will be 
 #' interpreted as the humdrumR object's current [active expression][humActive].
-#' More syntactic sugars are described below.
 #' 
 #' If multiple do expressions are provided, each expression is evaluated in order, and 
 #' can refer to results of the previous do expression as `.` (variables assigned in previous expressions
@@ -83,15 +87,13 @@
 #' 
 #' ```
 #' 
-#' Unnamed arguments (or formulae without a left-hand side) are interpreted as `do` expressions.
-#' Do expressions can also be explicitly labeled by naming an argument "do" or with `do` on the left side
-#' of a formula:
+#' Any unnamed arguments to `with` or `within` are interpreted as do expressions.
+#' Do expressions can also be explicitly labeled by naming an argument "do":
 #' 
 #' ```
 #' with(chorales, table(Token))
 #' with(chorales, do = table(Token))
-#' with(chorales, do ~ table(Token))
-#' # These all return the same result
+#' # These return the same result
 #' 
 #' ```
 #'
@@ -101,12 +103,12 @@
 #' 
 #' + `doplot`:
 #'   + The expression is evaluated, but the original `humdrumR` input
-#'   if returned unchanged. This can be used for achieving a side effect (like making a plot)
-#'   without saving the result.
+#'     if returned unchanged. This can be used for achieving a side effect (like making a plot)
+#'     without saving the result.
 #' + `dofill`:
-#'   + The result is evaluated, and the result is recycled to the length of the input, making
-#'   sure the result is the same length as the input.
-#'   Basically, do fill is the equivalent of `rep(do ~ f(x), length.out = length(x))`.
+#'   + The result is evaluated recycled to the length of the input, making
+#'     sure the result is the same length as the input.
+#'     Basically, do fill is the equivalent of `rep(do ~ f(x), length.out = length(x))`.
 #' 
 #' 
 #' @section Special Evaluation Keywords:
@@ -121,10 +123,9 @@
 #' + `ngrams`
 #' + `pre` and `post`
 #' 
-#' These special expressions can be specified either as named arguments
-#' (`with(data, do(x), by = group)`) or as formula, with the keyword on the left side 
-#' (`with(data, do(x), by ~ group`).
-#' Any unnamed argument (or formula without a left-side) is interpreted as a `do` expression,
+#' These special expressions must be specified as named arguments,
+#' like `with(data, do(x), by = group)`.
+#' Any unnamed argument is interpreted as a `do` expression,
 #' not a special expression.
 #' 
 #' + A `by` expression is used to break the data into groups, with the `do` expression(s) evaluated 
@@ -132,9 +133,6 @@
 #' + A `where` expression indicates a subset of the data 
 #'   in which to evaluate the `do` expression (see "Partitioning", below).
 #' + `ngrams` A positive number *n*. The expression is evaluated across overlapping length-*n* windows.
-#' +. `pre` An expression to evaluate once before evaluating the do expression(s). Useful, for instance, for taking logs
-#'   or opening a graphing window. The `pre` expression is evaluated in the global environment.
-#' +. `post` An expression evaluate once after evaluating the do expression(s). Always evaluated in the global environment.
 #' 
 #' 
 #' 
@@ -357,7 +355,53 @@
 #' + end the expression with a named list.
 #'   + For example, `within(data, list(Semits = semits(Token)))`
 #' 
-
+#' @section Advanced scripting:
+#' 
+#' `with.humdrumR` and `within.humdrumR` use
+#' [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html)
+#' of their expressions.
+#' This is very useful on the command line or in a script running one command at a time.
+#' But what if you want to do a for-loop where you apply different expressions/options
+#' in each loop. Or if you want to reuse a common command (or special evaluation option)
+#' many times?
+#' 
+#' Fortunately, R has *formula*, which are a way of capturing ("quoting") expressions into a 
+#' concrete object that you can manipulate. Better yet, `with.humdrumR` and `within.humdrumR` will 
+#' interpret formulae passed to them as arguments.
+#' Basically, the right-hand side of any formula passed to them is intepreted as an 
+#' expression to evaluate.
+#' If a formula is passed as a unnamed argument to `with`/`within`, the left-hand side
+#' of the formula (if any) is treated as the arugment name.
+#' If you name a formula argument that has a left-hand side, the left-hand side is ignored.
+#' 
+#' ```
+#' 
+#' with(humdrumR, table(Token), by = Spine)
+#' with(humdrumR, ~table(Token), by ~ Spine)
+#' 
+#' ````
+#' 
+#' Why is this useful? Because `~table(Token)` and `by ~ Spine` can be assigned to variables or 
+#' captured in lists.
+#' For example, we can do things like:
+#' 
+#' ```
+#' 
+#' tabler <- ~table(.)
+#' byspine <- by ~ Spine
+#' 
+#' with(humData, tabler, byspine)
+#' 
+#' ```
+#' 
+#' We can even make lists and loop through them:
+#' 
+#' ```
+#' bys <- list(~ Spine, ~ File, ~ COM)
+#' 
+#' for (b in bys) with(humData, table(.), by = b)
+#' 
+#' ```
 #'     
 #' @param humdrumR A `[humdrumR][humdrumRclass]` data object.
 #' @param ...  `...` arguments to `within.humdrumR` are divided into either named or unnamed arguments.
@@ -501,7 +545,6 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   
   # "pre" stuff
   oldpar <- par(no.readonly = TRUE) 
-  quoTab <- evalPrePost(quoTab, 'pre')
  
   
   # Getting the humtab with the right record types.
@@ -527,9 +570,8 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   if (sum(unnamedresult)) colnames(result)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_len(sum(unnamedresult)))
   
   # "post" stuff
-  evalPrePost(quoTab, 'post')
   curmfg <- par('mfg')
-  par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt','pty', 'new')])
+  par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
   par(mfg = curmfg, new = FALSE)
   
   list(humdrumR = humdrumR, 
@@ -649,9 +691,7 @@ parseKeywords <- function(quoTab, withFunc) {
   knownKeywords <- list(do              = c('do', 'dofx', 'dofill', 'ordo', 'ordofill'),
                         partitions      = c('by', 'where'),
                         ngram           = 'ngram',
-                        windows         = 'windows',
-                        pre             = 'pre',
-                        post            = 'post')
+                        windows         = 'windows')
   quoTab[ , KeywordType := rep(names(knownKeywords), lengths(knownKeywords))[match(Keyword, unlist(knownKeywords))]]
   
   # check for validity
@@ -700,9 +740,7 @@ partialMatchKeywords <- function(keys) {
                          ordo     = c('ordo', 'orelsedo', 'elsedo'),
                          ordofill = c('ordofill', 'orelsedofill', 'orelsefill', 'elsefill'),
                          ngram    = 'ngrams',
-                         windows  = c('windows', 'context', 'window'),
-                         pre      = 'pre', 
-                         post     = 'post')
+                         windows  = c('windows', 'context', 'window'))
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
@@ -1298,12 +1336,6 @@ interpolateArguments <- function(quo, namedArgs) {
 
 
 
-evalPrePost <- function(quoTab, which = 'pre') {
-  
-  if (any(quoTab$Keyword == which)) lapply(quoTab[Keyword == which]$Quo, rlang::eval_tidy, env = .GlobalEnv)
-  
-  quoTab[Keyword != which]
-}
 
 evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (nrow(partQuos) == 0L) {
