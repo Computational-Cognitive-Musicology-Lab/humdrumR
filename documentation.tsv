@@ -1,16 +1,16 @@
 Source	Rd	Family	Vignette	Nchar	Accurate	Complete	Exported	Tests	Nlines
-Chords.R	chordTransformer.Rd			515			chordTransformer, figuredBass		54
-Chords.R	diatonicSet.Rd			8062			diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character		71
-Chords.R	tertianSet.Rd			1816			tertianSet, tset, is.tertianSet		77
+Chords.R	chordTransformer.Rd			515	X	X	chordTransformer, figuredBass		54
+Chords.R	diatonicSet.Rd			8062	X	X	diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character		71
+Chords.R	tertianSet.Rd			1816	X	X	tertianSet, tset, is.tertianSet		77
 Dispatch.R	humdrumDispatch.Rd			3972	Yes?	OK?	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch		19
-Keys.R	keyTransformer.Rd			282			keyTransformer, key		34
-Keys.R	romanNumerals.Rd			704			romanNumerals		564
-Lyrics.R	silbeFormat.Rd			748			silbeFormat		
-Lyrics.R	wort.Rd			960			wort		606
-Metric.R	humMeter.Rd			516			humMeter		1082
-Metric.R	meter.Rd			450			meter, measure		564
-Metric.R	metric.Rd	rhythm analysis tools		417			metric		208
-Metric.R	rhythmDecompose.Rd	rhythm analysis tools		433			rhythmDecompose		122
+Keys.R	keyTransformer.Rd			282	X	X	keyTransformer, key		34
+Keys.R	romanNumerals.Rd			704	X	X	romanNumerals		564
+Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
+Lyrics.R	wort.Rd			960	X	X	wort		606
+Metric.R	humMeter.Rd			516	X	X	humMeter		1082
+Metric.R	meter.Rd			450	X	X	meter, measure		564
+Metric.R	metric.Rd	rhythm analysis tools		417	X	X	metric		208
+Metric.R	rhythmDecompose.Rd	rhythm analysis tools		433	X	X	rhythmDecompose		122
 Pitch.R	LO5th.Rd	core pitch representations		1346	Yes	Minimal	LO5th		27
 Pitch.R	accidental.Rd	partial pitch functions, pitch functions		2003		Empty	accidental		59
 Pitch.R	bhatk.Rd	pitch functions, relative pitch functions		9953		Empty	bhatk		29
@@ -38,13 +38,13 @@ Pitch.R	transpose.Rd	tonal transformations		8048	Yes?	Yes	transpose		26
 Rational.R	rational.Rd	humdrumR numeric functions		3020	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction		81
 Read.R	extractTandem.Rd			2929	Yes	Yes	extractTandem	Needs	
 Read.R	readHumdrum.Rd			9985	Yes	Yes	readHumdrum, findHumdrum		89
-Regex.R	REparser.Rd			922			REparser, REparse		561
-Regex.R	RegexFind.Rd			1805			RegexFind, \%grepl\%, \%grepi\%, \%grepn\%, \%grepm\%, \%grep\%, \%!grep\%, \%!grepi\%, \%lgrepl\%, \%lgrepi\%, \%lgrepn\%		38
+Regex.R	REparser.Rd			922	Yes	Minimal	REparser, REparse		561
+Regex.R	RegexFind.Rd			2458	Yes	Yes	RegexFind, \%~l\%, \%~i\%, \%~n\%, \%~m\%, \%~\%, \%!~\%, \%!~l\%, \%!~i\%		38
 Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE		559
-Rhythm.R	SOI.Rd	rhythm analysis tools		1392			SOI		15
-Rhythm.R	rhythmFunctions.Rd			514			rhythmFunctions, recip, duration		575
-Rhythm.R	rhythmInterval.Rd			483			rhythmInterval, rhythmInterval.default, rhythmInterval.NULL, rhythmInterval.character		56
-Rhythm.R	time.Rd			227			time, bpm2ms, ms2bpm		167
+Rhythm.R	SOI.Rd	rhythm analysis tools		1392	X	X	SOI		15
+Rhythm.R	rhythmFunctions.Rd			514	X	X	rhythmFunctions, recip, duration		575
+Rhythm.R	rhythmInterval.Rd			483	X	X	rhythmInterval, rhythmInterval.default, rhythmInterval.NULL, rhythmInterval.character		56
+Rhythm.R	time.Rd			227	X	X	time, bpm2ms, ms2bpm		167
 Struct.R	struct.Rd			8357	Yes?	Yes	struct, is.struct		67
 Subset.R	indexHumdrum.Rd			6325	Yes	Yes	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method		571
 Subset.R	subset.humdrumR.Rd			3393	Yes	Yes	subset.humdrumR, subset, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops		23

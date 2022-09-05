@@ -168,53 +168,89 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 
 #' Match strings against regular expression
 #' 
-#' These infix functions are simply syntactic sugar for
-#' existing `R` regular expression matching functions.
-#' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
+#' The functions give you a concise way to search for regular expressions in `character` vectors.
+#' They are "infix" functions, meaning you write the function between its two arguments:
+#' `myvector %~% regex`.
+#'  
 #' 
-#' + `%grepl%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
-#' + `%grep%`: The "default"---same as `%grepl%`.
-#' + `%grepi%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
-#' + `%grepn%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
-#'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex()].
-#' + `%grepm%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#' @details 
+#' 
+#' Each version of the function returns a different type of information about regex matches (if any)
+#' in the input vector:
+#' 
+#' + `%~l%`: returns `logical` (`TRUE`/`FALSE`) indicating where in `x` there are matches.
+#' + `%~i%`: returns `integer` indicating the indices of matches in `x`.
+#' + `%~n%`: returns `integer` indicating the number (count) of matches in each string.
+#' + `%~m%`: returns `character` string of the matched string itself. Returns `NA`
+#'   where there is no match.
+#' 
+#' The basic function (`%~%`) is the same as `%~l%`.
+#' There is also a negative versions of the `l` and `i` functions: giving all
+#' strings that *don't* match the given regular expression.
+#' These are `%!~%`, `%!~l%`, and `%!~i%`.
 #'
-#' Each regex infix has an "lapply" version, called `%lgrepx%`.
+#' These functions are simply syntactic sugar for
+#' existing `R` regular expression matching functions:
 #' 
-#' @param x A vector to search in
-#' @param list A list of vectors (all the same length) to search in
-#' @param pattern One or more regular expression
+#' + `%~l%`: [base::grepl()]
+#' + `%~i%`: [base::grep()]
+#' + `%~n%`: [stringi::stri_count_regex()]
+#' + `%~m%`: [stringi::stri_extract_first_regex()]
+#' 
+#' @section Multiple regexes:
+#' 
+#' If more than one regex is supplied,
+#' `%~l%` and `%~i%` return the indices where *any* of the regexes match.
+#' In the case of `%~n%`, each matching regex is counted separately, and they are all summed.
+#' In the case of `%~m%`, all matches (if any) are pasted together, 
+#' including multiple matches of the same string.
+#' 
+#' 
+#' @param x A `character` vector to search in.
+#' @param regex One or more regular expressions. If more than one regex is supplied,
+#'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export
 #' @name RegexFind
-`%grepl%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
+`%~l%` <- function(x, regex) {
+  checkVector(x, 'x', '%~l%')
+  checkCharacter(regex, 'regex', "%~l%", min.length = 1L)
+  Reduce('|', lapply(regex, grepl, x = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepi%` <- function(x, pattern) which(x %grepl% pattern)
+`%~i%` <- function(x, regex) {
+  checkVector(x, 'x', '%~i%')
+  checkCharacter(regex, 'regex', "%~i%", min.length = 1L)
+  Reduce('union', lapply(regex, grep, x = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepn%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
+`%~n%` <- function(x, regex) {
+  checkVector(x, 'x', '%~n%')
+  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepm%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
+`%~m%` <- function(x, regex) {
+  checkVector(x, 'x', '%~n%')
+  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  
+  do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
+}
 #' @rdname RegexFind
 #' @export
-`%grep%` <- `%grepl%`
+`%~%` <- `%~l%`
 #' @rdname RegexFind
 #' @export
-`%!grep%` <- Negate(`%grepl%`)
+`%!~%` <- Negate(`%~l%`)
 #' @rdname RegexFind
 #' @export
-`%!grepi%` <- function(x, pattern) which(!x %grepl% pattern)
-#' @export
+`%!~l%` <- Negate(`%~l%`)
 #' @rdname RegexFind
-`%lgrepl%` <- function(list, pattern) Reduce(`|`, lapply(list, `%grepl%`, pattern = pattern)) 
 #' @export
-#' @rdname RegexFind
-`%lgrepi%` <- function(list, pattern) which(list %lgrepl% pattern)
-#' @export
-#' @rdname RegexFind
-`%lgrepn%` <- function(list, pattern) Reduce('+', lapply(list, `%grepn%`, pattern = pattern))
+`%!~i%` <- function(x, pattern) which(!x %~l% pattern)
 
 
 
