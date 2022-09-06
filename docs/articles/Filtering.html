@@ -1984,7 +1984,7 @@ separate even and odd numbers (<code>odd %% 2 == 1</code>,
 <p>Would we ever want to do that? Probably not. However, returning to
 our flats, study, lets grab all the flat notes:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, Token <span class="sc">%grepl%</span> <span class="st">'-'</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, Token <span class="sc">%~%</span> <span class="st">'-'</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor003.krn vvv ############################</span></span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -2083,7 +2083,7 @@ our flats, study, lets grab all the flat notes:</p>
 before, we know that there are a lot more flats in the fourth file
 (after losing the files with no flats):</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, Token <span class="sc">%grepl%</span> <span class="st">'-'</span>)[<span class="dv">4</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, Token <span class="sc">%~%</span> <span class="st">'-'</span>)[<span class="dv">4</span>]</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor008.krn vvv ############################</span></span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -2273,10 +2273,10 @@ do this by grouping by the <code>Bar</code> field (and the
 are <em>any</em> flats, return <code>TRUE</code> for the <em>whole</em>
 bar, else return <code>FALSE</code> for the <em>whole</em> bar.” We can
 use the <code>any</code> function to get <em>any</em> match, and the
-<code>dofill</code> option to copy the result of <code>any</code> to the
+<code>fill</code> option to copy the result of <code>any</code> to the
 whole bar.</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, <span class="at">dofill =</span> <span class="fu">any</span>(Token <span class="sc">%grepl%</span> <span class="st">'-'</span>), <span class="at">by =</span> <span class="fu">list</span>(File, Bar))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, <span class="at">fill =</span> <span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>), <span class="at">by =</span> <span class="fu">list</span>(File, Bar))</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor003.krn vvv ############################</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -2374,7 +2374,7 @@ whole bar.</p>
 <p>Not enough context for you? maybe we should group the bars into
 even-odd pairs:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, <span class="at">dofill =</span> <span class="fu">any</span>(Token <span class="sc">%grepl%</span> <span class="st">'-'</span>), <span class="at">by =</span> <span class="fu">list</span>(File, <span class="fu">floor</span>(Bar  <span class="sc">/</span> <span class="dv">2</span>)))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, <span class="at">fill =</span> <span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>), <span class="at">by =</span> <span class="fu">list</span>(File, <span class="fu">floor</span>(Bar  <span class="sc">/</span> <span class="dv">2</span>)))</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor003.krn vvv ############################</span></span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>

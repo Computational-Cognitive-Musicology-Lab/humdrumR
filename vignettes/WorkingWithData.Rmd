@@ -198,12 +198,12 @@ Maybe we want to calculate the simple pitch of the first spine, but *leave the o
 within(chorales,
        Pitch <- pitch(Token, simple = TRUE),
        where = Spine == 1,
-       elsedo = Token)
+       orelse = Token)
 
 
 ```
 
-This pattern, with `elsedo` set to `Token` is quite common.
+This pattern, with `orelse` set to `Token` is quite common.
 
 
 
@@ -327,7 +327,7 @@ These two categories (`FALSE` and `TRUE`) are then used to group the data.
 
 In some cases, we'd like to peform a command `within` our data which might output a smaller vector than in the 
 input, including a single value, but we still want to reconstruct the data fully.
-Instead of our normal "do" argument, we can specify a `dofill` command; `dofill` will recycle its output to match
+Instead of our normal "do" argument, we can specify a `fill` command; `fill` will recycle its output to match
 the length of the input.
 This is useful if you want to group by something, and fill each group with the same value.
 
@@ -337,7 +337,7 @@ within(chorales,
        Semits <- semits(Token)) -> chorales
 
 within(chorales, 
-       dofill = BarBassNote <- min(Semits),
+       fill = BarBassNote <- min(Semits),
        by = list(File, Bar)) -> chorales
 
 chorales

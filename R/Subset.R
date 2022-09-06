@@ -20,7 +20,7 @@
 #' which return a logical (`TRUE`/`FALSE`) vector.
 #' The returned vector must also be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
-#' (You can use a `dofill` expression if you want to "expand" shorter outputs for filtering pusposes.)
+#' (You can use a `fill` expression if you want to "expand" shorter outputs for filtering pusposes.)
 #' 
 #' @section Filter field:
 #' 
@@ -45,7 +45,7 @@
 #' By default, `subset.humdrumR` automatically calls `removeEmptyFiles` at the end.
 #' However, you can stop this by specifying  `removeEmptyFiles == FALSE`.
 #' 
-#' @section Renumbering
+#' @section Renumbering:
 #'
 #' If filtered files are removed from a corpus (using `removeEmptyFiles` or `removeEmptySpines`, in combination with `subset`)
 #' the `File` and/or `Spine` fields are renumbered to represented the remaining regions,
@@ -362,7 +362,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- subset(x, dofill ~ any(. %grepl% !!i),  by = File)
+            x <- subset(x, fill ~ any(. %~l% !!i),  by = File)
             
             if (removeEmpty) x <- removeEmptyFiles(x)
             
@@ -446,7 +446,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    x <- subset(x, Record %in% unique(Record[. %grepl% !!i]), by = File, dataTypes = "D")
+    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), by = File, dataTypes = "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
@@ -469,7 +469,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
               putHumtab(x) <- renumberSpines.data.table(humtab)
               
             } else {
-              form <- do ~ Spine %in% unique(Spine[. %grepl% j]) | is.na(Spine)
+              form <- do ~ Spine %in% unique(Spine[. %~l% j]) | is.na(Spine)
               
               if (all(grepl('^\\*\\*', j))) {
                 

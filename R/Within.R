@@ -23,7 +23,7 @@
 
 #' with(in)Humdrum
 #' 
-#' Apply arbitrary expressions to fields within [humdrumR][humdrumRclass] data,
+#' Evaluate arbitrary expressions using the fields within [humdrumR][humdrumRclass] data,
 #' while employing split/apply/combine, windowing, and other analysis options.
 #' 
 #' @section Overview:
@@ -47,20 +47,24 @@
 #' fields called `ResultX` (see details).
 #' 
 #' In addition, `with` and `within` offer a number of powerful options that make working with 
-#' humdrum data easier, explained in detail below.
-#' Most notably, a number of *special evaluation arguments* can be used to:
+#' humdrum data easier:
+#' *evaluation control arguments* can be used to control
+#' how your expressions are evaluated.
+#' You can evaluate expressions...
 #' 
-#' + Evaluate an expression in a subset of the data.
-#' + Evaluate the same expression separately in different subsets of the data, then recombined them (split-apply-combine).
-#' + Evaluate an expression across windows in the data (e.g., ngrams, rolling windows).
-#' + Evaluate an expression which produces a plot, with particular plotting parameters set using [graphics::par()].
-#' + "Fill" short results to match the original field size.
-#' + Evaluate expressions only in certain record types (defaulting only data records).
+#' + In a subset of the data using `where`...
+#'   + either ignoring the rest of the data or evaluating a *different* expression in the other part.
+#' + Separately in different subsets of the data, which are then recombined (split-apply-combine) using `by`.
+#' + Across windows in the data (e.g., ngrams, rolling windows).
+#' + Which produces a plot, with particular [plotting parameters][graphics::par()], and/or without 
+#'   returning anything using `sidefx`.
+#' + "Fill" short results to match the original field size using `fill`.
+#' + Only in certain record types (defaulting only data records) using `dataTypes`.
 #' 
-#' Special evaluation arguments specified as named arguments to `with`/`within` calls.
+#' These arguments are specified as named arguments to `with`/`within` calls.
 #' Even though they aren't formal arguments, they are [partially matched][base::pmatch()],
 #' so if write `grou` instead of `groupby`, you won't get an error!
-#' In some cases, you can specify more than one of the same type of special evaluation argument (details below).
+#' In some cases, you can specify more than one of the same type of control argument (details below).
 #'
 #'
 #' @section Expression evaluation:
@@ -72,10 +76,13 @@
 #' `with(humData, myExpressionHere)`.
 #' 
 #' Within expressions are evaluated within the `humdrumR` object's humdrum table,
-#' which means the expression can refer fields in the humdrumR object (`Record`, `Token`, `File`, etc.)
-#' like any other variables.
+#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `File`, etc.)
+#' just like any other variables.
 #' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 #' (and generally should be) vectorized.
+#' Note that the within-expression value is only evaluated over data-points/records that match the type
+#' indicated in the `dataTypes` argument.
+#' By default, only non-null data tokens (`"D"`) are used.
 #' 
 #' If multiple within-expressions are provided, each expression is evaluated in order (left to right).
 #' Each expression can refer to the results of the last expression (as `.`), or 
@@ -97,7 +104,8 @@
 #' The `.` variable can be used as a special placeholder in within expressions.
 #' In the first within expression, `.` is interpreted as the humdrumR object's 
 #' current [active expression][humActive].
-#' If multiple within expressions are given, `.` refers to result of the *previous* expression.
+#' If multiple within expressions are given, beyond the first expression,  `.` refers to result of 
+#' the *previous* expression.
 #' For example, if `Token` is the [active expression][humActive], then:
 #' 
 #' ```
@@ -111,12 +119,12 @@
 #' with(humData, mean(nchar(Token))^2)
 #' ```
 #' 
-#'
+#' 
 #'
 #' 
 #' ### Side effects:
 #' 
-#' In some cases, you want to evaluate an expression for its 
+#' In some cases, you want to evaluate a within-expression for its 
 #' "[side effect](https://en.wikipedia.org/wiki/Side_effect_(computer_science))";
 #' This means that the expression *does* something you want (the "side effect") but doesn't actually
 #' evaluate to (return) a result that you want.
@@ -152,7 +160,7 @@
 #' length of the input field(s).
 #' You could do this manually be using the [base::rep()] function, but `with`/`within.humdrumR` provide a
 #' syntactic sugar for this:
-#' You can name our expression `recycle` or `fill` ([partially matched][base::pmatch()]),
+#' You can name your expression `recycle` or `fill` ([partially matched][base::pmatch()]),
 #' which will cause the result to be recycled.
 #' All this does is take `yourExpression(field, ...)` and wrap it in 
 #' `rep(yourExpression(field, ...), length.out = length(field))`.
@@ -160,14 +168,13 @@
 #' ### Lagged vectors
 #' 
 #' We very often want to work with "[lagged][lag()]" vectors of data.
-#' For example, we want to look at the relation between a vector and the previous values of that 
-#' vector---e.g., the vector offset or "lagged" by one index.
+#' For example, we want to look at the relationship between a vector and the previous values of the 
+#' same vector---e.g., the vector offset or "lagged" by one index.
 #' The `humdrumR` [lag()] function is useful for this, as it gives us several options for lagging vectors,
-#' while keeping them the same length (so vectorization is never hindered).
-#' 
+#' always keeping them the same length so vectorization is never hindered.
 #' `with` and `within.humdrumR` give us a very convenient short cut to using `lag`.
-#' In a within-expression, and vector can be indexed with a `integer` argument named `lag` (case insensitive).
-#' causing it to be lagged by that integer (using [lag()]).
+#' In a within-expression, any vector can be indexed with an `integer` argument named `lag` (case insensitive),
+#' causing it to be lagged by that integer.
 #' (A vector indexed with `lag = 0` returns the unchanged vector.)
 #' For example, the following two calls are the same:
 #' 
@@ -193,7 +200,7 @@
 #' `boundaries` argument to the lagged index, like `Token[lag = 1, boundaries = list(...)]`.
 #' 
 #' 
-#' Using lagged vectors, since they are vectorized is the fastest (computationally) and easiest way of working with n-grams.
+#' Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
 #' For example, if you want to create character-string 5-grams of your data, you could call:
 #' 
 #' ```
@@ -203,46 +210,127 @@
 #' Note that, since `with`/`within.humdrumR` passes `boundaries = list(File, Spine, Path)`
 #' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each file.
 #' 
-#' @section Special Evaluation Keywords:
+#' 
+#' @section Results:
+#' 
+#' The difference between `with.humdrumR` and `within.humdrumR` is in what they do with the results
+#' of the evaluated within-expression(s).
+#' 
+#' 
+#' ### Within
+#' 
+#' 
+#' For calls to `within.humdrumR`, the result of the final within-expression
+#' is inserted back into the `[humtable][humdrum table]`. 
+#' Most results should be `atomic` vectors, though `list`s can also be placed as fields.
+#' If results are shorter than the input fields of the [humtable][humdrum table] 
+#' they are padded with null values to fill the same length as the input.
+#' Non-vector results (`object`s) and tables are put into lists, and treated like any other list.
+#' In the result, data/record-types that are not indicated by the `dataTypes` argument are also 
+#' returned padded as null values.
+#' 
+#' If you don't explicitly name the result of your within-expression, it is put into a new field labeled 
+#' `ResultX`, where `X` is the lowest number of "ResultX" fields that is not already taken.
+#' You can explicitly name the result field with a top-level assignment in the expression.
+#' For example, `within(data, Semits <- semits(Token))` will put the result of 
+#' `semits(Token)` into a new field called `Semits`.
+#' In fact, if you assign the results of multiple within-expressions, 
+#' each result that is the same length as the last result will be put into a new field.
+#' Thus, you can create multiple new fields in a single call:
+#' for example,
+#' 
+#' ```
+#' within(humData, 
+#'        Semits <- semits(Token),
+#'        Recip <- recip(Token))
+#' ```
+#' 
+#' creates *two* new fields, `Semits` *and* `Recip`.
+#' (As explained above, the second within-expression could also refer to the `Semits` variable
+#' created in the previous expression.)
+#' 
+#' 
+#' ### With
+#' 
+#' For calls to `with.humdrumR`, the result is simply returned as is.
+#' This is what you want when you want to get out of the [humdrumR object][humdrumRclass] and drop back 
+#' into "normal" R, often in the last stages of an analysis.
+#' 
+#' `with.humdrumR` has a `drop` argument, which defaults to `TRUE`.
+#' If `drop = FALSE`, the result is returned in a [data.table()].
+#' The column names of this results table are generated as described in the previous section:
+#' i.e., defaulting to `ResultX` but allowing explicit naming with through one or more
+#' explicit assignments in the within-expressions.
+#' In addition, if `where` or `groupby` arguments are used, columns are included which indicate
+#' the value of the evaluated `where`/`groupby` factor for each row.
+#' 
+#' 
+#' 
+#' @section Partitioning data:
 #'
-#' `with.humdrumR` and `within.humdrumR` can be provided with
-#' additional keyword expressions which modify how the main "do" expressions are evaluated.
-#' The complete list of options are:
+#' `groupby` (e.g., `by`) and `where` expression control arguments all you to evaluate
+#' your within-expressions within specific subsets of the data.
+#' A `where` argument can be used to evaluate your within-expression only within a subset of the data.
+#' A `groupby` argument breaks the data into groups,
+#' evaluating the within-expression(s) *separately* within each group.
+#' The results of the grouped evaluations are then returned in a list (`with`) or recombined
+#' into the original data `within`---this is a form of the "split-apply-combine" routine that is 
+#' key to `R` data analysis.
 #' 
-#' + `by` (group by)
-#' + `where` (apply to subset)
-#' + `windows`
-#' + `ngrams`
-#' + `pre` and `post`
+#' `where` and `groupby` arguments are themselves arbitrary expressions which are evaluated within
+#' the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
+#' Any `with`/`within.humdrumR` call can include zero, one, *or more* `where` and/or `groupby` arguments, 
+#' including combinations of both.
+#' If more than one `where`/`groupy` by argument is included, they are evaluated in order (left to right),
+#' *recursively*: each one evaluated within the partition(s) established by the previous expression.
+#' The normal *within* expression(s) are then, all evaluated within the partition(s) established by the
+#' last  `where`/`groupby` argument.
+#' The "Advanced" partitioning section below explores this in more detail.
 #' 
-#' These special expressions must be specified as named arguments,
-#' like `with(data, do(x), by = group)`.
-#' Any unnamed argument is interpreted as a `do` expression,
-#' not a special expression.
+#' ### Apply where TRUE:
+#'                      
+#' A `where` argument is an arbitrary expression which identifies a subset of the humdrum data.
+#' `where` expressions must evaluate to
+#' a single logical vector, 
+#' The `where` result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
+#' The within expression(s) are only evaluated where the `where` argument(s) return `TRUE`.
 #' 
-#' + A `by` expression is used to break the data into groups, with the `do` expression(s) evaluated 
-#'   separately in each group (see "Group by", below).
-#' + A `where` expression indicates a subset of the data 
-#'   in which to evaluate the `do` expression (see "Partitioning", below).
-#' + `ngrams` A positive number *n*. The expression is evaluated across overlapping length-*n* windows.
+#'   
+#' In a call to `with`, only the result evaluated where `where == TRUE` is returned.
+#' However, in a call to `within`, the result field(s) are (by default) padded with null data
+#' where ever `where == FALSE`.
+#' However, you can also control what is returned where `where == FALSE` by specifying alternate
+#' within-expression(s) to evaluate where `where == FALSE`.
+#' These must be named `orelse` ([partially matched][base::pmatch()]).
+#' (You can also specify `orfill` or `orelsefill`, to get the behavior of `fill`. See above.)
+#' 
+#' A `orelse` expression can only be specified in combination with a `where` argument,
+#' and must be *in addition* to a normal within-expression.
+#' The idea is that you evaluate the "normal" within-expression where `where == TRUE`, *or else*
+#' you specify evaluate the `orelse` expression.
+#' A common use case is to use the within expression to change some of a data field,
+#' but to use the `orelse` to return the data unchanged in the rest of the field.
 #' 
 #' 
 #' 
-#' @section Group by:
+#' ### Group by:
 #' 
-#' A `by` expression is used to break the data into subsets, with the `do` expression(s) evaluated 
-#' separately within each subset. This works the similarly to the `by` argument in 
+#' A `groupby` expression (use `by` for short) partitions your data exhaustively into 
+#' (possibly non-contiguous) groups, and evaluates your within-expression(s) *separately* 
+#' within each group.
+#'  This works the similarly to the `by` argument in 
 #' `[data.table][data.table]`s, the `INDEX` 
 #' argument of `[base][tapply]`, or the `INDICES` argument of `[base][by]`.
-#' Each `by` expression must evaluate, within the `humdrumR` data object, to a vector (or a list of vectors 
-#' of equal length) of categories to group the data by.
+#' Each `groupby` expression must evaluate, within the `humdrumR` data object, to a vector (or a list of vectors 
+#' of equal length) to group the data by.
+#' Each unique combination of values across these vectors becomes one group.
 #' 
-#' Most commonly, the `by` expression(s) are simply field(s) in the data: 
+#' Most commonly, the `groupby` expression(s) are simply field(s) in the data: 
 #' for instance, 
 #' 
 #' ```
 #' with(humdata,
-#'      do = table(Token),
+#'      table(Token),
 #'      by = File)
 #' ```
 #'
@@ -252,51 +340,38 @@
 #' 
 #' ```
 #' with(humdata,
-#'      do = table(Token), 
+#'      table(Token), 
 #'      by = Spine > 3 | Record \%\% 2 == 0)
 #' ```
 #'
 #' which will evaluate the do expression in two groups, one where either the spine number is 
 #' three or less *or* the record number is even, and another group where the opposite is true. 
 #' 
-#' If the `by` expression evaluates to a list of grouping vectors,
-#' the `do` expressions are evaluated across every combination of categories in all the vectors.
+#' If the `groupby` expression evaluates to a list of grouping vectors,
+#' the within expressions are evaluated across every combination of categories across all the vectors.
 #' Thus,
 #' 
 #' ```
 #' with(humdata, 
-#'      do = table(Token),
+#'      table(Token),
 #'      by = list(File, Spine))
 #' ````
 #'
 #' will apply `table` to `Token` across each spine *in* each file.
 #'
-#' As some [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic), if the 
-#' `by` expression is input as a formulae, lists of grouping expressions
-#' can be created by separating each expression by a `~`. 
-#' Thus, `by = list(File ~ Spine)` can be written 
-#' `by = File ~ Spine` or `by ~ File ~ Spine`.
 #'
-#' @section Apply where TRUE:
-#'                      
-#' A `where` expression is used to identify a subset of the data and evaluate
-#' the `do` expression(s) *only* in that subset. 
-#' `where` expressions must evaluate, within the `humdrumR` data object, to
-#' a single logical vector. The `do` expression(s) are only evaluated where this logical
-#' vector is `TRUE`.
-#' kept unchanged.
 #' 
-#' @section Advanced partitioning:
+#' ### Advanced partitioning:
 #' 
-#' If multiple `by` or `where` expressions, or combinations of the two, are specified,
+#' If multiple `groupby` or `where` expressions, or combinations of the two, are specified,
 #' each is evaluated recursively, in order from left to right.
-#' If `where` is specified after `by`, the `where` expression is evaluated within each `by` group
-#' If `by` is specified after `where`, the grouping `by` expression is evaluated only where `where == TRUE`.
+#' If `where` is specified after `groupby`, the `where` expression is evaluated within each `groupby` group
+#' If `groupby` is specified after `where`, the grouping `by` expression is evaluated only where `where == TRUE`.
 #' Thus, if you specify
 #'
 #' ````
 #' within(humdata,
-#'          do = sd(Semits),
+#'          sd(Semits),
 #'          by = File, 
 #'          where = Semits > mean(Semits))
 #' ```
@@ -307,7 +382,7 @@
 #' 
 #' ```
 #' within(humdata,
-#'          do = sd(Semits)
+#'          sd(Semits)
 #'          where = Semits > mean(Semits), 
 #'          by = File) 
 #' ```
@@ -315,60 +390,35 @@
 #' wherein the standard deviation of `semits` is, again, calculated for each file,
 #' but this time wherever the `semits` field is greater than the mean value *across all the data*.
 #' 
-#' @section Plotting:
-#'
-#' The `doplot` keyword behaves exactly like the `do` keyword, except that the result of the
-#' evaluation is ignored. This is useful for plotting as well as *other* side-effects (like writing to a file).
-#' If `doplot` is used with `with.humdrumR`, the function simply returns `NULL` (after executing the `doplot`
-#' expression.
-#' If `doplot` is used with `within.humdrumR`, the function simply returns the unaltered
-#' `humdrumR` argument.
+#' @section Windowing data:
 #' 
-#' `within.humdrumR` also allows you to specify plotting options inline, without having to make a separate call
+#' XXXX
+#' 
+#' @section Plotting parameters:
+#'
+#' As mentioned above, plots in within-expressions should (often) be called using the `sidefx` argument name.
+#' When plotting, `with`/`within.humdrumR` also allows you to specify plotting options inline,
+#'  without having to make a separate call
 #' to [par()]. Any [par()] argument can be specified by providing a named list to the `graphics` keyword.
 #' For example, we can set the plot margins with the `mar` argument:
 #' 
 #' ```
 #' within(data, 
-#'        doplot = plot(sort(table(Token))), 
+#'        side = plot(sort(table(Token))), 
 #'        graphics = list(mar = c(4, 4, 4, 4)))
 #' 
 #' ```
-#' The best part is `within.humdrumR` will reset `par` to it's previous state after its done.
+#' The best part is `with`/`within.humdrumR` will reset `par` to it's previous state after its done.
 #' 
 #' You can also use the syntactic sugar, `graphics(parargs = ...)`:
 #' 
 #' ```
 #' within(data,
-#'        doplot = plot(sort(nchar(Token))),
+#'        side = plot(sort(nchar(Token))),
 #'        graphics(mar = c(4, 4, 4, 4)))
 #' ```
 #' 
 #' 
-#' @section Tandem interpretations:
-#' 
-#' The function `[readHumdrum][readHumdrum]` automatically parses
-#' tandem interpretations (that it recognizes) into
-#' their own fields in the resulting `[humdrumR][humdrumRclass]` data.
-#' For instance, data with a `'*clefF4'` will show
-#' up as a `Clef` field. However, users might read humdrum data with their
-#' own custom tandem interpretations that are not built into `humdrumR`.
-#' `humdrumR` includes the function `[getTandem][getTandem]` to help us
-#' extract arbitrary tandem intrpretation data.
-#' Luckily, `within.humdrumR` knows some
-#'  [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
-#' which makes it easy to do this anywhere in our expressions, simply by putting a 
-#' named object beginning with the symbol `*`. Of course, R doesn't normally 
-#' allow names to begin with symbols like `*`, but you can force it by
-#' placing grave symbols around the name ``*name``. If you do this in a `within.humdrumR`
-#' expression, `within.humdrumR` will treat this name as a 
-#' regular expression and substitute a call `getTandem(Tandem, 'regular expression')` in the expression.
-#' This means you can could do something like 
-#' within(humdata, 
-#'          do ~ myFunction(Token, `*mytandempattern`))
-#' and `myFunction` will be called with the first argument being the 
-#' `Token` field, and the second argument being tandem interpretations
-#' which match `'mytandempattern'` (extracted from the `Tandem` field).
 #' 
 #' @section Splatting:
 #' 
@@ -376,7 +426,7 @@
 #' Sometimes we want to divide our data into pieces (a l\'a `partition` option), but
 #' rather than applying the same expression to each piece, we want to feed
 #' the separate pieces as separate arguments to the same function.
-#' In `with(in).humdrumR` you can use some 
+#' In `with`/`within.humdrumR` you can use some 
 #' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
 #' to do just this.
 #' We can index any field in our call with a `splat` argument, which must be a `Field %in% x`.
@@ -389,63 +439,19 @@
 #' In this call, the `Token` field will be divided into two groups, one where `Spine == 1` and the other where
 #' `Spine == 2`; the first group (`Spine == 1`) will be used as the first argument to `list`, and the second group
 #' (`Spine == 2`) as the second argument.
-#' Thus, `wihtin.humdrumR` translates the previous expression to this:
+#' Thus, `within` translates the previous expression to this:
 #' 
 #' ```
 #' within(humdata,
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
 #' 
-#' @section Argument interpolation:
-#' 
-#' The `variables` argument is a list of named arguments which are `[humdrumR:interpolateArguments][interpolated]` into the
-#' `do` expressions. This is useful if you've already created a list of formulas that you like, but would like
-#' to make small changes to a function call within the `do` expressions, without starting from scratch.
-#' Examples:
-#' 
-#' ```
-#' mycommand <- c(do ~ mean(., na.rm = x), by ~ Spine ~ File)
-#' within(humdata,
-#'               mycommand,
-#'               variables(x = TRUE))
-#' ```
-#' 
+
 #' @section N grams:
 #' 
-#' @section Results:
-#' 
-#' The difference between `with.humdrumR` and `within.humdrumR` is in what they do with the results
-#' of the evaluated do expression(s).
-#' 
-#' ### With
-#' 
-#' For calls to `with.humdrumR`, the result is simply returned as is.
-#' This is what you want when you want to get out of thue humdrumR object and drop back into "normal" R,
-#' often in the last stages of an analysis.
-#' However, you may optionally specify `drop = FALSE`, in which case the result is returned
-#' in a [data.table()].
+#' XXXX
 #' 
 #' 
-#' ### Within
-#' 
-#' 
-#' For calls to `within.humdrumR`, the result of each `do` expression
-#' is inserted back into the `[humtable][humdrum table]`. 
-#' Usually, `do` expressions should evaluate to atomic output which is the same length as the input:
-#' in other words, every data point in the input field(s) correspond to a single data point in the new field.
-#' However, if the results are shorter than input fields [humtable][humdrum table],
-#' they are padded with null tokens to match the full (original) length.
-#' 
-#' #### Naming results 
-#' 
-#' If you don't explicitely name the results, they are put into new field(s) labeled 
-#' `Result1`, `ResultX`, `...`, `ResultN`. 
-#' You can name the new fields in one of two ways: 
-#'
-#' + normal R assignment, using `<-` or `->` anywhere in a do expression.
-#'   + For example, `within(data, Semits <- semits(Token))`.
-#' + end the expression with a named list.
-#'   + For example, `within(data, list(Semits = semits(Token)))`
 #' 
 #' @section Advanced scripting:
 #' 
@@ -453,17 +459,17 @@
 #' [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html)
 #' of their expressions.
 #' This is very useful on the command line or in a script running one command at a time.
-#' But what if you want to do a for-loop where you apply different expressions/options
-#' in each loop. Or if you want to reuse a common command (or special evaluation option)
-#' many times?
+#' However, if you want to more advanced scripting non-standard evaluation can be a problem.
+#' For example, if you to loop through a list of within-expressions
+#' or reuse a common combination coor arguments many times.
 #' 
 #' Fortunately, R has *formula*, which are a way of capturing ("quoting") expressions into a 
-#' concrete object that you can manipulate. Better yet, `with.humdrumR` and `within.humdrumR` will 
+#' concrete object that you can manipulate. Better yet, `with`/`within.humdrumR` will 
 #' interpret formulae passed to them as arguments.
-#' Basically, the right-hand side of any formula passed to them is intepreted as an 
+#' Basically, the right-hand side of any formula is interpreted as an 
 #' expression to evaluate.
 #' If a formula is passed as a unnamed argument to `with`/`within`, the left-hand side
-#' of the formula (if any) is treated as the arugment name.
+#' of the formula (if any) is treated as the argument name.
 #' If you name a formula argument that has a left-hand side, the left-hand side is ignored.
 #' 
 #' ```
@@ -473,9 +479,8 @@
 #' 
 #' ````
 #' 
-#' Why is this useful? Because `~table(Token)` and `by ~ Spine` can be assigned to variables or 
-#' captured in lists.
-#' For example, we can do things like:
+#' This approach would allows us to, same `~table(Token)` or `by ~ Spine` as variables, 
+#' allowing us to do things like:
 #' 
 #' ```
 #' 
@@ -494,21 +499,36 @@
 #' for (b in bys) with(humData, table(.), by = b)
 #' 
 #' ```
-#'     
-#' @param humdrumR A `[humdrumR][humdrumRclass]` data object.
-#' @param ...  `...` arguments to `within.humdrumR` are divided into either named or unnamed arguments.
-#'
-#' Unnamed arguments must be formulas, functions---lists of formulas/functions, no matter how deeply nested, are flattened
-#' to a single list of functions/formulas.
-#' All functions are coerced to a formula as `~foo(.)`. The far left-hand side of each formula
-#' must be a name/symbol. Named arguments are [humdrumR:interpolateArguments][interpolated] into and `do~X` formulas.
-
 #' 
-#' @param ... Any number of do expressions or evaluation modifying expressions.
+#' ### Variables
+#' 
+#' Another useful scripting option is to include free variables in your 
+#' within-expressions, which can then be fed in using the `variables` argument.
+#' `variables` must be a named list.
+#' Variables in the within-expression which match a name of from the `variables`
+#' list have that value interpolated.
+#' This allows us, for example, to run commands like:
+#' 
+#' ```
+#' nums <- c(2, 3, 4, 5)
+#' expression <- ~.^N
+#' 
+#' for (n in nums) with(humData, expression, variables = list(N = n))
+#' 
+#' ```
+#' 
+#' Each time `with` is called, the `N` in `.^N` is replaced by the current value of `n`.
+#'      
+#' @param data A `[humdrumR][humdrumRclass]` data object.
+#' @param ...  Any number of expressions to evaluate. Unnamed expressions are interpreted as the
+#' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `where`, and `windows`.
+#' Other evaluation options can be achieved with `fill` or `side` arguments.
 #' @param dataTypes A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. 
-#' These characters  correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
-#' **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
-#' is only evaluated on data drawn from the specified record types (defaults to `"D"`).
+#'     These characters  correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
+#'     **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
+#'     is only evaluated on data drawn from the specified record types (defaults to `"D"`).
+#' @param variables A named `list` of values, which are interpolated into the within-expression(s)
+#' wherever a variable name matches a named from the list.
 #' @param drop This argument is conceptually similar to the `drop` argument in R matrices.
 #' If `drop = TRUE`, the output of `with.humdrumR` is simplified as much as possible (trying to return
 #' the "raw" vector, list, table, etc. within it). If `drop = FALSE`, the result is *always*
@@ -516,11 +536,6 @@
 #' intuitive, but in more complex code, it can be helpful to set `drop = FALSE` so that 
 #' the output is consistent.
 #' 
-#' @examples 
-#' humdata <- readHumdrum('directorywithdata/*.krn')
-#' 
-#' within(humdata, nchar(.)) # counts characters in each data token.
-#' within(humdata, table(.), by ~ Spine) # Tabulates data tokens in each Spine.
 #' 
 #' @return From `within.humdrumR`  a new humdrumR data object.
 #' From `with.humdrumR`, whatever value is returned by the expression or, if `drop = TRUE`,
@@ -598,7 +613,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab <- newhumtab[ , !grep('_by=..*_$', colnames(newhumtab)), with = FALSE]
+  newhumtab <- newhumtab[ , !grep('_by=..*_$|_where=..*_', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -780,7 +795,7 @@ parseKeywords <- function(quoTab, withFunc) {
   quoTab$Keyword <- keywords
   
   # classify keywords
-  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo', 'orfill'),
+  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo', 'ordofill'),
                         partitions      = c('by', 'where'),
                         ngram           = 'ngram',
                         windows         = 'windows')
@@ -788,16 +803,13 @@ parseKeywords <- function(quoTab, withFunc) {
   
   # check for validity
   if (!any(quoTab[ , KeywordType == 'do'])) {
-    .stop("Your call to {withFunc} doesn't include any expressions with a 'do' keyword,",
-          "so we don't know what you want to do to your data.",
-          "These expressions must by input either as an argument with no name,",
-          "a formula with no left hand side (~Expr)",
-          "a formula or with 'do', 'doplot', 'dofx', or 'dofill', on the left hand side (do~Expr, doplot~Expr, etc.).")
+    .stop("Your call to {withFunc} doesn't include any unnamed expressions to evaluate,",
+          "so we don't know what you want to do to your data.")
   }
   
-  if (any(quoTab[, KeywordType == 'ordo']) && !any(quoTab[, Keyword == 'where'])) {
-    .stop("In your call to {withFunc} you've included an 'ordo' expression improperly.", 
-          "An 'ordo' expression can only be used in combination with BOTH a where expression AND a do expression.",
+  if (any(quoTab[, KeywordType == 'or']) && !any(quoTab[, Keyword == 'where'])) {
+    .stop("In your call to {withFunc} you've included an 'orelse' expression improperly.", 
+          "An 'orelse' expression can only be used in combination with BOTH a where expression AND a normal within expression.",
           "See ?withinHumdrum for help.")
   }
   
@@ -826,8 +838,8 @@ partialMatchKeywords <- function(keys) {
                          fx        = c('fxs', 'sidefxs'),
                          by        = c('by', 'groupby'),
                          where     = c('where', 'when'),
-                         or        = c('orelse'),
-                         orfill    = c('orfill', 'orelsefill'),
+                         ordo        = c('orelse'),
+                         ordofill    = c('orfill', 'orelsefill'),
                          ngram     = c('ngrams'),
                          windows   = c('windows', 'context'))
     

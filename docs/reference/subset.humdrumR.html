@@ -141,6 +141,19 @@ You can only remove the data if <em>all</em> of it is null (within a region) bec
 <p>By default, <code>subset.humdrumR</code> automatically calls <code>removeEmptyFiles</code> at the end.
 However, you can stop this by specifying  <code>removeEmptyFiles == FALSE</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="renumbering">Renumbering<a class="anchor" aria-label="anchor" href="#renumbering"></a></h2>
+    
+
+
+<p>If filtered files are removed from a corpus (using <code>removeEmptyFiles</code> or <code>removeEmptySpines</code>, in combination with <code>subset</code>)
+the <code>File</code> and/or <code>Spine</code> fields are renumbered to represented the remaining regions,
+starting from <code>1</code>.
+For example, if you have a corpus of 10 files and remove the first file (<code>File == 1</code>),
+the remaining files are renumbered from <code>2:10</code> to <code>1:9</code>.
+Spine renumbering works the same, except it is done independently <em>within</em> each file
+(<a href="humColumns.html">columns</a> are also renumbered accordingly).</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

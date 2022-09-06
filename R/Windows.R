@@ -128,7 +128,7 @@ parseAnchor.formula <- function(anchor, x, name){
 grepi_multi <- function(x, pattern) {
   pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
   
-  ns <- x %grepn% pattern
+  ns <- x %~n% pattern
   rep(x %grepi% pattern, ns[ns > 0L])
   
 }

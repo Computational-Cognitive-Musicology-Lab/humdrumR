@@ -308,7 +308,7 @@ However, returning to our flats, study, lets grab all the flat notes:
 
 ```{r}
 
-subset(chorales, Token %grepl% '-')
+subset(chorales, Token %~% '-')
 
 
 ```
@@ -319,7 +319,7 @@ But from before, we know that there are a lot more flats in the fourth file (aft
 
 ```{r}
 
-subset(chorales, Token %grepl% '-')[4]
+subset(chorales, Token %~% '-')[4]
 
 ```
 
@@ -332,11 +332,11 @@ This can be a useful way to get some context for our searches.
 For example, let's say we want to find flats again, but we want to see the whole *bar* of music that contains a flat.
 We can do this by grouping by the `Bar` field (and the `File` field).
 We'll want to say "within each bar, if there are *any* flats, return `TRUE` for the *whole* bar, else return `FALSE` for the *whole* bar."
-We can use the `any` function to get *any* match, and the `dofill` option to copy the result of `any` to the whole bar.
+We can use the `any` function to get *any* match, and the `fill` option to copy the result of `any` to the whole bar.
 
 ```{r}
 
-subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, Bar))
+subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar))
 
 
 ```
@@ -346,7 +346,7 @@ Not enough context for you? maybe we should group the bars into even-odd pairs:
 
 ```{r}
 
-subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, floor(Bar  / 2)))
+subset(chorales, fill = any(Token %~% '-'), by = list(File, floor(Bar  / 2)))
 
 ```
 

@@ -152,7 +152,7 @@ method is essentially a wrapper for <a href="humActive.html">evalActive</a>.</p>
 <strong>Active</strong> expression, but wraps it into a matrix of dimensions <code>c([humdrumR:humSize][nrow(humdata), ncol(humdata)])</code>.
 Note that "<code>[humdrumR:humTable][Columns]</code>" in humdrum data are not necesarily the same as spines.</p>
 <p><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame(humdata)</a> first calls <code>as.matrix</code> then converts the matrix to a <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a>.
-<a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table(humdata)</a> first calls <code>as.matrix</code> then converts the matrix to a <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table()</a></code>.</p>
+<a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table(humdata)</a> first calls <code>as.matrix</code> then converts the matrix to a <code><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table()</a></code>.</p>
 <p><code>as.matrices</code>, <code>as.data.frames</code>, and <code>as.data.tables</code> call <code>as.matrix</code>/<code>as.data.frame</code>/<code>as.data.table</code>
 on each individual file in a <a href="humdrumRclass.html">humdrumRclass</a> corpus, returning a list of matices/data.frames/data.tables.</p>
     </div>

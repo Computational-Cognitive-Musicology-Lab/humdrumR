@@ -27,8 +27,32 @@ by the \code{boundaries} vector(s) is treated separately.}
 \description{
 The \code{lag} and \code{lead} functions take input vectors, matrices, or data.frames and shifts their data
 by \code{n} indices.
-They are similiar to the \link[data.table:shift]{data.table::shift} function, but with a few additional options:
+They are similiar to the \link[data.table:shift]{data.table::shift} function, but with a few additional options.
 }
+\section{Boundaries}{
+
+
+In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
+For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
+between pieces, only within pieces.
+The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+into groups.
+If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
+
+Value pairs which cross between groups are treated as if they were at the beginning.
+Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
+except generally faster when the number of groups is large.
+
+The most common use case in humdrum data, is looking at "melodies" within spines.
+For this, we want \code{boundaries = list(File, Spine, Path )}.
+In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
+three fields as \code{boundaries} arguments to certain functions: mint, delta, sigma, lag, or ditto.
+Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+in a "melodic" way, within each spine path of each file.
+However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
+you could manually set \code{boundaries = list(File, Record)}.
+}
+
 \seealso{
 \code{\link[data.table:shift]{data.table::shift()}}
 
