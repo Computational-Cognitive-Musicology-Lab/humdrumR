@@ -25,6 +25,14 @@ removeEmptyRecords(humdrumR)
 
 removeEmptyStops(humdrumR)
 }
+\arguments{
+\item{x}{A \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{...}{Arbitrary expressions passed to \link[=withinHumdrum]{with(in)}---the "within" expression(s) must evaluate to
+full-length \code{logical} values.}
+
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+}
 \description{
 \code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}.
 The standard indexing operators (\verb{[]} and \verb{[[]]}) actually work by calling \code{subset} under-the-hood;
@@ -34,15 +42,15 @@ methods.
 }
 \details{
 \code{subset.humdrumR} is used in a similar manner to \link{withinHumdrum},
-taking any number of "do expressions" (or functions) as arguments.
-In fact, do expressions/function arguments are passed directly to an internal call to \code{withinHumdrum}, and
+taking any number of "within expressions" as arguments.
+In fact, expression arguments are passed directly to an internal call to \code{withinHumdrum}, and
 other control expressions (like \code{by} or \code{where}) can be used as well.
 The only requirement is that the expressions/functions fed to \code{subset.humdrumR}
 \emph{must} be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions
 which return a logical (\code{TRUE}/\code{FALSE}) vector.
 The returned vector must also be the same length as the input data (the number
 of rows in the \link[=humTable]{humdrum table}).
-(You can use a \code{fill} expression if you want to "expand" shorter outputs for filtering pusposes.)
+(You can use a \code{fill} expression if you want to "expand" shorter outputs for filtering purposes.)
 }
 \section{Filter field}{
 
@@ -66,7 +74,7 @@ is null or filtered (i.e., \code{Null == TRUE | Filter == TRUE}); if so, that da
 You can only remove the data if \emph{all} of it is null (within a region) because otherwise the humdrum syntax is broken.
 
 By default, \code{subset.humdrumR} automatically calls \code{removeEmptyFiles} at the end.
-However, you can stop this by specifying  \code{removeEmptyFiles == FALSE}.
+However, you can stop this by specifying  \code{removeEmptyFiles = FALSE}.
 }
 
 \section{Renumbering}{
@@ -81,3 +89,6 @@ Spine renumbering works the same, except it is done independently \emph{within} 
 (\link[=humColumns]{columns} are also renumbered accordingly).
 }
 
+\seealso{
+{The \link[=indexHumdrum]{indexing operators} \verb{[]} and \verb{[[]]} can be used as shortcuts for common \code{subset} calls.}
+}

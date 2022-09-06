@@ -127,13 +127,13 @@ Notice that we still get the *whole* files returned to us!
 
 ## Double-bracket indexing
 
-The double-brackets are used to index with pieces in your data.
+The double-brackets are used to index within pieces in your data.
 Specifically, if you only want to work with certain spines or records within your pieces.
 The double-brackets apply the same filters separately to each file in the dataset.
 
 In double-bracket indexing, you can provide two separate arguments, either individually or together:
 
-+ `i` is the first argument which will index rows *within* each file.
++ `i` is the first argument which will index records *within* each file.
 + `j` is the second argument, which will index spines *within* each file.
 
 If you want to use the `j` (spine) argument by itself, you should put a comma before it, to indicate that you are
@@ -278,12 +278,12 @@ chorales[[-1:-20, ]]
 
 
 
-The indexing commands (previous section) only get you so far.
-If you want to be more precise about filtering, use the `subset` nethod for `humdrumR` data.
-`Subset.humdrumR` works exactly like [within.humdrumR](WorkingWithData.html "Working with Humdrum Data").
-However, the "do" command you give must evaluate to a logical vector (`TRUE` or `FALSE`) of the same length as its input.
+The indexing commands (previous sections) only get you so far.
+If you want to be more precise about filtering, use the `subset` method for `humdrumR` data.
+`subset.humdrumR` works exactly like [within.humdrumR](WorkingWithData.html "Working with Humdrum Data").
+However, the expression(s) you give must evaluate to a logical vector (`TRUE` or `FALSE`) of the same length as its input.
 (You will get an error otherwise.)
-`Subset.humdrumR` will take your logical result and filter out data which matches `FALSE`.
+`subset.humdrumR` will take your logical result and filter out data which matches `FALSE`.
 
 We can reproduce the functionality of the `[]` and `[[]]` indexing operators (previous section) using `subset`:
 
@@ -314,7 +314,7 @@ subset(chorales, Token %~% '-')
 ```
 
 
-Woh, we're only seeing a could of B flats in these files!
+Woh, we're only seeing a couple of B flats in these files!
 But from before, we know that there are a lot more flats in the fourth file (after losing the files with no flats):
 
 ```{r}
@@ -369,13 +369,13 @@ Why do we do this?
 There are several reasons:
 
 1. Sometimes, seeing the full structure remain in place is cleaner/easier to interpret than actually removing them.
-   Basically, all those empty spines remind you what you filtered, so it is easier to see if the filter is doing what you     *think* it is doing.
+   Basically, all those empty spines remind you what you filtered, so it is easier to see if the filter is doing what you *think* it is doing.
    + A clear example of this is when we did `[[ , j]]` indexing for flats (above): when we simply removed the spines with no flats it was hard to tell which spine was which in the result. 
-2. Many filters would break the humdrum syntax if the data was simply removed. If you removed all the tokens that don't        contain flats, the result would be humdrum data with holes in it.
+2. Many filters would break the humdrum syntax if the data was simply removed. If you removed all the tokens that don't  contain flats, the result would be humdrum data with holes in it.
 3. Its possible to undo your filters, using the `clearFilter` command. (Try it.) 
 
 Once you've done some filtering with `subset`, if you *want* to get rid of empty parts of the data, you can do so using the commands `removeEmptyFiles`, `removeEmptySpines`, `removeEmptyRecords`, `removeEmptyStops`, or `removeEmptyPaths`.
-By using this commands, we make sure that 1) you explicitely want to remove them and 2) the humdrum syntax is not broken, because whole records/spines/paths/files are removed.
+By using this commands, we make sure that 1) you explicitly want to remove them and 2) the humdrum syntax is not broken, because whole records/spines/paths/files are removed.
 
 So for our spines example:
 

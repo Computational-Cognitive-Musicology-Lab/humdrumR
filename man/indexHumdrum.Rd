@@ -28,14 +28,22 @@ humdata[[ , 'regex']]
 
 humdata[[x:y, l:m]]
 }
+\arguments{
+\item{x}{A \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{i}{A \code{integer}/\code{numeric} value or a \code{character} string treated as a regular expression.}
+
+\item{j}{A \code{integer}/\code{numeric} value or a \code{character} string treated as a regular expression.}
+}
 \description{
 R's built-in indexing operators, \verb{[]} (single brakcets) and \verb{[[]]} (double brackets) can
-be used as shortcuts for common calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}}.
+be used as shortcuts for common calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}},
+allowing you to filter out specific files, spines, or records.
 }
 \details{
-In R, the basic \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
+In \code{R}, the basic \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
 are used to select subsets of data.
-For many R data types (for instance, base R \link[base:list]{lists})
+For many data types (for instance, base R \link[base:list]{lists})
 the \strong{\code{[}single brackets\verb{]}} are used for "shallower" extraction while the
 \strong{\code{[[}double brackets\verb{]]}} are used for "deeper" extraction.
 \link[=humdrumRclass]{HumdrumR corpus} indexing follows this same basic pattern:
@@ -65,12 +73,12 @@ Indexing \code{humdrumR} objects with
 \strong{\code{[[}double brackets\verb{]]}} will accept
 one or two numeric arguments, \code{i} and \code{j}, either of which can
 be used in isolation or in combination.
-(If \code{j} is used in isolation, it must be placed after a comma, as in \code{humdata[[ , j ]]}.)
+(If \code{j} is used in isolation, it must be named or placed after a comma, as in \code{humdata[[ , j ]]}.)
 \itemize{
-\item \code{i} is used to index data records (i.e., based on the humtable \code{Record} field) ordinally.
+\item \code{i} is used to index data records (i.e., based on the humtable \code{Record} field).
 Thus, \code{humdata[[1:20]]} indexes the first twenty records \emph{from each file}
 in the corpus, and \code{humdata[[42]]} extracts the 42nd record \emph{from each file}.
-\item \code{j} is used to index spines  (i.e., based on the \code{Spine} field) ordinally.
+\item \code{j} is used to index spines  (i.e., based on the \code{Spine} field).
 Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from each}
 file in the corpus.
 }
@@ -94,7 +102,7 @@ humsubset2[[ , 2]]
 
 will return the third spine from the original data.
 
-As in normal R indexing, negative numbers can be used, causing corresponding elements to be
+As in normal \code{R} indexing, negative numbers can be used, causing corresponding elements to be
 \emph{removed} instead of retained. Thus, \code{humdata[-3:-5]} will remove the third, fourth, and fifth pieces from the data
 while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
 Positive and negative indices cannot be mixed in a single argument.
@@ -143,4 +151,17 @@ matching spines (\code{j}) are indexed first, so that
 tokens matching the regular expression(s) in \code{i}
 must be found in the matching spines.
 }
+}
+\section{removeEmpty}{
+
+
+By default, calls to indexing operators will completely remove
+data which you are filtering out.
+However, if you set the \code{removeEmpty} argument to \code{FALSE},
+the filtered data is set to \code{NULL}, but not actually removed from the data object.
+(See \code{\link[=subset.humdrumR]{subset.humdrumR()}} for more details.)
+}
+
+\seealso{
+{These indexing operators work through special calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}}}
 }

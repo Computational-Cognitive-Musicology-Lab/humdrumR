@@ -12,15 +12,15 @@
 #' 
 #' 
 #' `subset.humdrumR` is used in a similar manner to [withinHumdrum],
-#' taking any number of "do expressions" (or functions) as arguments.
-#' In fact, do expressions/function arguments are passed directly to an internal call to `withinHumdrum`, and 
+#' taking any number of "within expressions" as arguments.
+#' In fact, expression arguments are passed directly to an internal call to `withinHumdrum`, and 
 #' other control expressions (like `by` or `where`) can be used as well.
 #' The only requirement is that the expressions/functions fed to `subset.humdrumR` 
 #' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
 #' which return a logical (`TRUE`/`FALSE`) vector.
 #' The returned vector must also be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
-#' (You can use a `fill` expression if you want to "expand" shorter outputs for filtering pusposes.)
+#' (You can use a `fill` expression if you want to "expand" shorter outputs for filtering purposes.)
 #' 
 #' @section Filter field:
 #' 
@@ -43,7 +43,7 @@
 #' You can only remove the data if *all* of it is null (within a region) because otherwise the humdrum syntax is broken.
 #' 
 #' By default, `subset.humdrumR` automatically calls `removeEmptyFiles` at the end.
-#' However, you can stop this by specifying  `removeEmptyFiles == FALSE`.
+#' However, you can stop this by specifying  `removeEmptyFiles = FALSE`.
 #' 
 #' @section Renumbering:
 #'
@@ -55,6 +55,12 @@
 #' Spine renumbering works the same, except it is done independently *within* each file
 #' ([columns][humColumns] are also renumbered accordingly).
 #' 
+#' @param x A [humdrumR data object][humdrumRclass].
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
+#' @param ... Arbitrary expressions passed to [with(in)][withinHumdrum]---the "within" expression(s) must evaluate to
+#'   full-length `logical` values.
+#' 
+#' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
 #' @aliases subset
 subset.humdrumR <- function(x, ...) {
@@ -167,13 +173,14 @@ removeEmptyStops <- function(humdrumR) {
 #' Indexing humdrumR objects
 #'
 #' R's built-in indexing operators, `[]` (single brakcets) and `[[]]` (double brackets) can
-#' be used as shortcuts for common calls to [subset.humdrumR()].
+#' be used as shortcuts for common calls to [subset.humdrumR()],
+#' allowing you to filter out specific files, spines, or records.
 #' 
 #' @details 
 #'  
-#' In R, the basic [indexing operators][base::Extract], `[]` and `[[]]`,
+#' In `R`, the basic [indexing operators][base::Extract], `[]` and `[[]]`,
 #' are used to select subsets of data.
-#' For many R data types (for instance, base R [lists][base::list])
+#' For many data types (for instance, base R [lists][base::list])
 #' the **`[`single brackets`]`** are used for "shallower" extraction while the 
 #' **`[[`double brackets`]]`** are used for "deeper" extraction.
 #' [HumdrumR corpus][humdrumR::humdrumRclass] indexing follows this same basic pattern:
@@ -205,12 +212,12 @@ removeEmptyStops <- function(humdrumR) {
 #'  **`[[`double brackets`]]`** will accept 
 #' one or two numeric arguments, `i` and `j`, either of which can 
 #' be used in isolation or in combination.
-#' (If `j` is used in isolation, it must be placed after a comma, as in `humdata[[ , j ]]`.)
+#' (If `j` is used in isolation, it must be named or placed after a comma, as in `humdata[[ , j ]]`.)
 #' 
-#' + `i` is used to index data records (i.e., based on the humtable `Record` field) ordinally.
+#' + `i` is used to index data records (i.e., based on the humtable `Record` field).
 #'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each file*
 #'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each file*.
-#' + `j` is used to index spines  (i.e., based on the `Spine` field) ordinally.
+#' + `j` is used to index spines  (i.e., based on the `Spine` field).
 #'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
 #'   file in the corpus.
 #' 
@@ -239,7 +246,7 @@ removeEmptyStops <- function(humdrumR) {
 #
 #' will return the third spine from the original data.
 #' 
-#' As in normal R indexing, negative numbers can be used, causing corresponding elements to be
+#' As in normal `R` indexing, negative numbers can be used, causing corresponding elements to be
 #' *removed* instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
 #' while `humdata[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
 #' Positive and negative indices cannot be mixed in a single argument.
@@ -290,7 +297,19 @@ removeEmptyStops <- function(humdrumR) {
 #' tokens matching the regular expression(s) in `i`
 #' must be found in the matching spines.
 #' 
+#' @section removeEmpty:
 #' 
+#' By default, calls to indexing operators will completely remove
+#' data which you are filtering out.
+#' However, if you set the `removeEmpty` argument to `FALSE`,
+#' the filtered data is set to `NULL`, but not actually removed from the data object.
+#' (See [subset.humdrumR()] for more details.)
+#' 
+#' @param x A [humdrumR data object][humdrumRclass].
+#' @param i A `integer`/`numeric` value or a `character` string treated as a regular expression.
+#' @param j A `integer`/`numeric` value or a `character` string treated as a regular expression.
+#' 
+#' @seealso {These indexing operators work through special calls to [subset.humdrumR()]}
 #' @name indexHumdrum
 NULL
 
