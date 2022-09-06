@@ -42,7 +42,7 @@ The only requirement is that the expressions/functions fed to \code{subset.humdr
 which return a logical (\code{TRUE}/\code{FALSE}) vector.
 The returned vector must also be the same length as the input data (the number
 of rows in the \link[=humTable]{humdrum table}).
-(You can use a \code{dofill} expression if you want to "expand" shorter outputs for filtering pusposes.)
+(You can use a \code{fill} expression if you want to "expand" shorter outputs for filtering pusposes.)
 }
 \section{Filter field}{
 

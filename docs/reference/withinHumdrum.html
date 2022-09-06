@@ -168,7 +168,10 @@ These expressions are passed to <code>with</code>/<code>within.humdrumR</code> a
 which means the expression can refer fields in the humdrumR object by name (<code>Record</code>, <code>Token</code>, <code>File</code>, etc.)
 just like any other variables.
 Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
-(and generally should be) vectorized.</p>
+(and generally should be) vectorized.
+Note that the within-expression value is only evaluated over data-points/records that match the type
+indicated in the <code>dataTypes</code> argument.
+By default, only non-null data tokens (<code>"D"</code>) are used.</p>
 <p>If multiple within-expressions are provided, each expression is evaluated in order (left to right).
 Each expression can refer to the results of the last expression (as <code>.</code>), or
 to variables defined in previous expressions.</p>
@@ -268,6 +271,58 @@ For example, if you want to create character-string 5-grams of your data, you co
 
 <p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>boundaries = list(File, Spine, Path)</code>
 to <code><a href="lag.html">lag()</a></code>, these are true "melodic" n-grams, only created within spine-paths within each file.</p>
+</div>
+
+    </div>
+    <div class="section level2">
+    <h2 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a></h2>
+    
+
+
+<p>The difference between <code>with.humdrumR</code> and <code>within.humdrumR</code> is in what they do with the results
+of the evaluated within-expression(s).</p><div class="section">
+<h3 id="within">Within<a class="anchor" aria-label="anchor" href="#within"></a></h3>
+
+
+<p>For calls to <code>within.humdrumR</code>, the result of the final within-expression
+is inserted back into the <code>[humtable][humdrum table]</code>.
+Most results should be <code>atomic</code> vectors, though <code>list</code>s can also be placed as fields.
+If results are shorter than the input fields of the humtable
+they are padded with null values to fill the same length as the input.
+Non-vector results (<code>object</code>s) and tables are put into lists, and treated like any other list.
+In the result, data/record-types that are not indicated by the <code>dataTypes</code> argument are also
+returned padded as null values.</p>
+<p>If you don't explicitly name the result of your within-expression, it is put into a new field labeled
+<code>ResultX</code>, where <code>X</code> is the lowest number of "ResultX" fields that is not already taken.
+You can explicitly name the result field with a top-level assignment in the expression.
+For example, <code>within(data, Semits &lt;- semits(Token))</code> will put the result of
+<code>semits(Token)</code> into a new field called <code>Semits</code>.
+In fact, if you assign the results of multiple within-expressions,
+each result that is the same length as the last result will be put into a new field.
+Thus, you can create multiple new fields in a single call:
+for example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humData</span>, 
+       <span class="va">Semits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
+       <span class="va">Recip</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+
+<p>creates <em>two</em> new fields, <code>Semits</code> <em>and</em> <code>Recip</code>.
+(As explained above, the second within-expression could also refer to the <code>Semits</code> variable
+created in the previous expression.)</p>
+</div>
+
+<div class="section">
+<h3 id="with">With<a class="anchor" aria-label="anchor" href="#with"></a></h3>
+
+
+<p>For calls to <code>with.humdrumR</code>, the result is simply returned as is.
+This is what you want when you want to get out of the <a href="humdrumRclass.html">humdrumR object</a> and drop back
+into "normal" R, often in the last stages of an analysis.</p>
+<p><code>with.humdrumR</code> has a <code>drop</code> argument, which defaults to <code>TRUE</code>.
+If <code>drop = FALSE</code>, the result is returned in a <code>data.table()</code>.
+The column names of this results table are generated as described in the previous section:
+i.e., defaulting to <code>ResultX</code> but allowing explicit naming with through one or more
+explicit assignments in the within-expressions.
+In addition, if <code>where</code> or <code>groupby</code> arguments are used, columns are included which indicate
+the value of the evaluated <code>where</code>/<code>groupby</code> factor for each row.</p>
 </div>
 
     </div>
@@ -447,56 +502,6 @@ Thus, <code>within</code> translates the previous expression to this:</p><div cl
 
 
 <p>XXXX</p>
-    </div>
-    <div class="section level2">
-    <h2 id="results">Results<a class="anchor" aria-label="anchor" href="#results"></a></h2>
-    
-
-
-<p>The difference between <code>with.humdrumR</code> and <code>within.humdrumR</code> is in what they do with the results
-of the evaluated within-expression(s).</p><div class="section">
-<h3 id="within">Within<a class="anchor" aria-label="anchor" href="#within"></a></h3>
-
-
-<p>For calls to <code>within.humdrumR</code>, the result of the final within-expression
-is inserted back into the <code>[humtable][humdrum table]</code>.
-Most results should be <code>atomic</code> vectors, though <code>list</code>s can also be placed as fields.
-If results are shorter than the input fields of the humtable
-they are padded with null values to fill the same length as the input.
-Non-vector results (<code>object</code>s) and tables are put into lists, and treated like any other list.</p>
-<p>If you don't explicitly name the result of your within-expression, it is put into a new field labeled
-<code>ResultX</code>, where <code>X</code> is the lowest number of "ResultX" fields that is not already taken.
-You can explicitly name the result field with a top-level assignment in the expression.
-For example, <code>within(data, Semits &lt;- semits(Token))</code> will put the result of
-<code>semits(Token)</code> into a new field called <code>Semits</code>.
-In fact, if you assign the results of multiple within-expressions,
-each result that is the same length as the last result will be put into a new field.
-Thus, you can create multiple new fields in a single call:
-for example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humData</span>, 
-       <span class="va">Semits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
-       <span class="va">Recip</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-
-<p>creates <em>two</em> new fields, <code>Semits</code> <em>and</em> <code>Recip</code>.
-(As explained above, the second within-expression could also refer to the <code>Semits</code> variable
-created in the previous expression.)</p>
-</div>
-
-<div class="section">
-<h3 id="with">With<a class="anchor" aria-label="anchor" href="#with"></a></h3>
-
-
-<p>For calls to <code>with.humdrumR</code>, the result is simply returned as is.
-This is what you want when you want to get out of the <a href="humdrumRclass.html">humdrumR object</a> and drop back
-into "normal" R, often in the last stages of an analysis.</p>
-<p><code>with.humdrumR</code> has a <code>drop</code> argument, which defaults to <code>TRUE</code>.
-If <code>drop = FALSE</code>, the result is returned in a <code>data.table()</code>.
-The column names of this results table are generated as described in the previous section:
-i.e., defaulting to <code>ResultX</code> but allowing explicit naming with through one or more
-explicit assignments in the within-expressions.
-In addition, if <code>where</code> or <code>groupby</code> arguments are used, columns are included which indicate
-the value of the evaluated <code>where</code>/<code>groupby</code> factor for each row.</p>
-</div>
-
     </div>
     <div class="section level2">
     <h2 id="advanced-scripting">Advanced scripting<a class="anchor" aria-label="anchor" href="#advanced-scripting"></a></h2>

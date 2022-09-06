@@ -44,39 +44,46 @@ These functions allow you to get "inside" your data.
 Basically, once you call `with`/`within`, all the data fields within the data become available to you, to do with as you will.
 
 
-## With 
+## With
 
 Let's start with `with`.
 You should call `with` with a `humdrumR` data object as the first argument.
-Your second argument can be any arbitrary `R` code you like, and can refer to fields of the humdrum data.
-As a good starting point, lets tabulate all the tokens we have in our dataset.
+Your second argument can be any arbitrary `R` *expression* you like, and can use fields of the humdrum data.
+An "expression" is just a valid bit of `R` code; for example, `2 + 2`, `c(1, 2, 3)`,  `(x - mean(x))^2`, and `nchar(letters) |> mean()` are all examples of expressions.
+So "any arbitrary `R` expression" is just a fancy way of saying any `R` code that *you* want.
+When we execute an `R` command, `R` "*evaluates*" the expression(s) and returns their results.
+
+As a starting point, lets tabulate all the tokens we have in our dataset.
 When you first load humdrum data, the original data tokens are always put into a field called `Token`.
 We will use the *awesome* built-in `R` function, `table`, to tabulate the unique tokens in our `Token` field.
-To access the `Token` field, we use `with`:
+However, we can't access the `Token` field directly; if we just write the expression on the
+`table(Token)` we'll get an error---`R` will not be able to "find", and will say "`Error: object 'Token' not found`." 
+Instead, we use `with` to enter the data, where `R` can "see" `Token` (and all other data fields):
+
 
 ```{r}
 with(chorales, table(Token))
 
 ```
 
-It worked. However, there's a *lot* of unique tokens in this data, so its kind of a mess.
+It worked! 
+However, there's a *lot* of unique tokens in this data, so its kind of a mess.
 Let's take a page from the [pitch vignette](PitchAndTonality.Rmd "Pitch and tonality in humdrumR") and extract just the pitch
 information using the `kern` function:
 
 ```{r}
 with(chorales, 
-     kern(Token) |> 
-       table())
+     kern(Token) |> table())
 ```
 
 Much better!
-But hey, this would be more useful sorted:
+Notice that the *whole* expression `kern(Token) |> table()` is executed within the data.
+Our expressions can get as complicated as we want.
+Let's add a call to `sort`:
 
 ```{r}
 with(chorales, 
-     kern(Token) |> 
-       table() |> 
-       sort())
+     kern(Token) |>  table() |>  sort())
 ```
 
 Ah, now we can clearly see that the top 10 most common notes in the data are `r rev(names(tail(with(chorales, sort(table(kern(Token)))), 10)))`.
@@ -95,6 +102,19 @@ with(chorales,
        tail(n = 10) |> 
        barplot())
 ```
+
+Notice that when writing a big complex expression like 
+
+```
+ kern(Token) |> 
+       table() |> 
+       sort() |> 
+       tail(n = 10) |> 
+       barplot()
+```
+
+it's helpful to spread the expression across multiple lines. 
+After the `|>` (pipe) operator is a great place for this.
 
 
 ## Within
@@ -121,10 +141,10 @@ within(chorales, pitch(Token))
 ```
 
 Now we get our `humdrumR` data back, but the `Token` data has been transformed from `**kern` to `**pitch`.
-Notice, that there are now two "Data fields" listed at the bottom: `Token` (the original data) and `Result1`---
-this is the default name for new fields produced by `within`, and yes, they will get higher numbers if you keep making new fields.
-However, these `ResultN` fields are meant to be temporary, and will get dropped/deleted if you don't save them a more specific name.
-We can do this by assigning *within* the call to `within`.
+Notice, that there are now two "Data fields" listed at the bottom: `Token` (the original data) and `Result1`---this is the default name for new fields produced by `within`, and yes, they will get higher numbers if you keep making new fields.
+
+"Result1" is not very informative, so it's actually a good idea to give our new fields specific names.
+We can do this by assigning our expressions in `within`:
 
 
 ```{r}
@@ -137,10 +157,10 @@ chorales
 
 # With/Within Subsets
 
-The real power of the `with` and `within` functions, comes from additional "special" arguments you can pass.
-Two prominent examples allow you to automatically work with subsets of your data.
-We can indicate a subset, or multiple subsets, of our main command will then be applied separately to each subset.
-The main to "special" keyword arguments are `where` and `by`.
+The real power of the `with` and `within` functions, comes from additional "control" arguments you can pass.
+Two prominent examples allow you to automatically work with subsets of your data: the `where` and `by` arguments.
+We can indicate a subset, or multiple subsets, and our expressions will 
+be evaluated separately within each subset.
 
 ## With Subset
 
@@ -187,9 +207,8 @@ Notice, our new `Pitch` field is `NULL` in all spine except spine 1.
 ### Or else...
 
 In many cases when using `where` we'd like to do something with, or at least keep, the "other" part of the data.
-We can do this by expressing an "else do" expression.
-The idea is that we say "do X where Y true, otherwise do this instead."
-
+We can do this by expressing an "or else" expression.
+The idea is that we say "evaluate X where Y is true, otherwise evaluate this instead."
 This is easiest to understand if we use our `wihtin` example from above.
 Maybe we want to calculate the simple pitch of the first spine, but *leave the other spines unchanged*:
 
@@ -203,11 +222,9 @@ within(chorales,
 
 ```
 
-This pattern, with `orelse` set to `Token` is quite common.
+This pattern, with `orelse = Token` is quite common.
 
 
-
-}
 
 
 
@@ -282,7 +299,7 @@ with(chorales,
 
 Notice that we did something differently here!
 We don't want to make a separate plot of *each* group-by calculation---that would just be a single number for each spine.
-We want to make a plot of all four numbers, so we put the `barplot` call *after* the `with` call.
+We want to make a plot of all four numbers, so we put the `barplot` call *after* (outside) the `with` call.
 Notice we can also control the labels for our barplot using the `names.arg` argument.
 
 Maybe we want to inspect a whole histogram of the pitches in each voice.
@@ -322,14 +339,15 @@ with(chorales,
 The expression `Spine < 3` returns `FALSE` for spines 1 and 2 (bass and tenor) and `TRUE` for spines 3 and 4.
 These two categories (`FALSE` and `TRUE`) are then used to group the data.
 
-## Filling Out
+## Recycling results
 
 
-In some cases, we'd like to peform a command `within` our data which might output a smaller vector than in the 
+In some cases, we'd like to perform a command `within` our data which might output a smaller vector than in the 
 input, including a single value, but we still want to reconstruct the data fully.
-Instead of our normal "do" argument, we can specify a `fill` command; `fill` will recycle its output to match
-the length of the input.
-This is useful if you want to group by something, and fill each group with the same value.
+In `R`, this is usually called "recycling"---i.e., repeating a value until it matches a certain length.
+When using `with` or `within`, we can cause our results to be recycled to the full field length
+by using the `fill` argument for our expression.
+This is useful if you want to group by something, and fill each group with the same value:
 
 ```{r}
 

@@ -100,6 +100,9 @@ which means the expression can refer fields in the humdrumR object by name (\cod
 just like any other variables.
 Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 (and generally should be) vectorized.
+Note that the within-expression value is only evaluated over data-points/records that match the type
+indicated in the \code{dataTypes} argument.
+By default, only non-null data tokens (\code{"D"}) are used.
 
 If multiple within-expressions are provided, each expression is evaluated in order (left to right).
 Each expression can refer to the results of the last expression (as \code{.}), or
@@ -206,6 +209,56 @@ For example, if you want to create character-string 5-grams of your data, you co
 
 Note that, since \code{with}/\code{within.humdrumR} passes \code{boundaries = list(File, Spine, Path)}
 to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each file.
+}
+}
+
+\section{Results}{
+
+
+The difference between \code{with.humdrumR} and \code{within.humdrumR} is in what they do with the results
+of the evaluated within-expression(s).
+\subsection{Within}{
+
+For calls to \code{within.humdrumR}, the result of the final within-expression
+is inserted back into the \verb{[humtable][humdrum table]}.
+Most results should be \code{atomic} vectors, though \code{list}s can also be placed as fields.
+If results are shorter than the input fields of the \link[=humdrum table]{humtable}
+they are padded with null values to fill the same length as the input.
+Non-vector results (\code{object}s) and tables are put into lists, and treated like any other list.
+In the result, data/record-types that are not indicated by the \code{dataTypes} argument are also
+returned padded as null values.
+
+If you don't explicitly name the result of your within-expression, it is put into a new field labeled
+\code{ResultX}, where \code{X} is the lowest number of "ResultX" fields that is not already taken.
+You can explicitly name the result field with a top-level assignment in the expression.
+For example, \code{within(data, Semits <- semits(Token))} will put the result of
+\code{semits(Token)} into a new field called \code{Semits}.
+In fact, if you assign the results of multiple within-expressions,
+each result that is the same length as the last result will be put into a new field.
+Thus, you can create multiple new fields in a single call:
+for example,\preformatted{within(humData, 
+       Semits <- semits(Token),
+       Recip <- recip(Token))
+}
+
+creates \emph{two} new fields, \code{Semits} \emph{and} \code{Recip}.
+(As explained above, the second within-expression could also refer to the \code{Semits} variable
+created in the previous expression.)
+}
+
+\subsection{With}{
+
+For calls to \code{with.humdrumR}, the result is simply returned as is.
+This is what you want when you want to get out of the \link[=humdrumRclass]{humdrumR object} and drop back
+into "normal" R, often in the last stages of an analysis.
+
+\code{with.humdrumR} has a \code{drop} argument, which defaults to \code{TRUE}.
+If \code{drop = FALSE}, the result is returned in a \code{\link[=data.table]{data.table()}}.
+The column names of this results table are generated as described in the previous section:
+i.e., defaulting to \code{ResultX} but allowing explicit naming with through one or more
+explicit assignments in the within-expressions.
+In addition, if \code{where} or \code{groupby} arguments are used, columns are included which indicate
+the value of the evaluated \code{where}/\code{groupby} factor for each row.
 }
 }
 
@@ -383,54 +436,6 @@ Thus, \code{within} translates the previous expression to this:\preformatted{wit
 
 
 XXXX
-}
-
-\section{Results}{
-
-
-The difference between \code{with.humdrumR} and \code{within.humdrumR} is in what they do with the results
-of the evaluated within-expression(s).
-\subsection{Within}{
-
-For calls to \code{within.humdrumR}, the result of the final within-expression
-is inserted back into the \verb{[humtable][humdrum table]}.
-Most results should be \code{atomic} vectors, though \code{list}s can also be placed as fields.
-If results are shorter than the input fields of the \link[=humdrum table]{humtable}
-they are padded with null values to fill the same length as the input.
-Non-vector results (\code{object}s) and tables are put into lists, and treated like any other list.
-
-If you don't explicitly name the result of your within-expression, it is put into a new field labeled
-\code{ResultX}, where \code{X} is the lowest number of "ResultX" fields that is not already taken.
-You can explicitly name the result field with a top-level assignment in the expression.
-For example, \code{within(data, Semits <- semits(Token))} will put the result of
-\code{semits(Token)} into a new field called \code{Semits}.
-In fact, if you assign the results of multiple within-expressions,
-each result that is the same length as the last result will be put into a new field.
-Thus, you can create multiple new fields in a single call:
-for example,\preformatted{within(humData, 
-       Semits <- semits(Token),
-       Recip <- recip(Token))
-}
-
-creates \emph{two} new fields, \code{Semits} \emph{and} \code{Recip}.
-(As explained above, the second within-expression could also refer to the \code{Semits} variable
-created in the previous expression.)
-}
-
-\subsection{With}{
-
-For calls to \code{with.humdrumR}, the result is simply returned as is.
-This is what you want when you want to get out of the \link[=humdrumRclass]{humdrumR object} and drop back
-into "normal" R, often in the last stages of an analysis.
-
-\code{with.humdrumR} has a \code{drop} argument, which defaults to \code{TRUE}.
-If \code{drop = FALSE}, the result is returned in a \code{\link[=data.table]{data.table()}}.
-The column names of this results table are generated as described in the previous section:
-i.e., defaulting to \code{ResultX} but allowing explicit naming with through one or more
-explicit assignments in the within-expressions.
-In addition, if \code{where} or \code{groupby} arguments are used, columns are included which indicate
-the value of the evaluated \code{where}/\code{groupby} factor for each row.
-}
 }
 
 \section{Advanced scripting}{

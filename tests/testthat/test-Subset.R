@@ -115,16 +115,16 @@ test_that('Filtering vignette examples work', {
   expect_equal(with(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0)), length(Token)), 1212)
   
   
-  expect_length(subset(chorales, Token %grepl% '-'), 5)
-  expect_equal(with(subset(chorales, Token %grepl% '-'), length(Token)), 
+  expect_length(subset(chorales, Token %~% '-'), 5)
+  expect_equal(with(subset(chorales, Token %~% '-'), length(Token)), 
                with(chorales, sum(grepl('-', Token))))
   
   # subsetting by
-  barsub <- subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, Bar)) 
+  barsub <- subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar)) 
   expect_equal(with(barsub, nrow(unique(cbind(File,Record)))), 171)
   expect_equal(with(barsub, nrow(unique(cbind(Bar,Record)))), 144)
   
-  barsub2 <- subset(chorales, dofill = any(Token %grepl% '-'), by = list(File, floor(Bar  / 2)))
+  barsub2 <- subset(chorales, fill = any(Token %~% '-'), by = list(File, floor(Bar  / 2)))
   
   expect_equal(with(barsub2, nrow(unique(cbind(Bar,Record)))), 162)
   expect_equal(with(barsub2, nrow(unique(cbind(File,Record)))), 194)
