@@ -105,17 +105,27 @@ methods.</p>
     </div>
 
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>x</dt>
+<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dt>...</dt>
+<dd><p>Arbitrary expressions passed to <a href="withinHumdrum.html">with(in)</a>---the "within" expression(s) must evaluate to
+full-length <code>logical</code> values.</p></dd>
+<dt>humdrumR</dt>
+<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+</dl></div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>subset.humdrumR</code> is used in a similar manner to <a href="withinHumdrum.html">withinHumdrum</a>,
-taking any number of "do expressions" (or functions) as arguments.
-In fact, do expressions/function arguments are passed directly to an internal call to <code>withinHumdrum</code>, and
+taking any number of "within expressions" as arguments.
+In fact, expression arguments are passed directly to an internal call to <code>withinHumdrum</code>, and
 other control expressions (like <code>by</code> or <code>where</code>) can be used as well.
 The only requirement is that the expressions/functions fed to <code>subset.humdrumR</code>
 <em>must</em> be <a href="https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)" class="external-link">predicate</a> expressions
 which return a logical (<code>TRUE</code>/<code>FALSE</code>) vector.
 The returned vector must also be the same length as the input data (the number
 of rows in the <a href="humTable.html">humdrum table</a>).
-(You can use a <code>fill</code> expression if you want to "expand" shorter outputs for filtering pusposes.)</p>
+(You can use a <code>fill</code> expression if you want to "expand" shorter outputs for filtering purposes.)</p>
     </div>
     <div class="section level2">
     <h2 id="filter-field">Filter field<a class="anchor" aria-label="anchor" href="#filter-field"></a></h2>
@@ -139,7 +149,7 @@ These functions go through each piece/spine/path/record and check if <em>all</em
 is null or filtered (i.e., <code>Null == TRUE | Filter == TRUE</code>); if so, that data will be removed.
 You can only remove the data if <em>all</em> of it is null (within a region) because otherwise the humdrum syntax is broken.</p>
 <p>By default, <code>subset.humdrumR</code> automatically calls <code>removeEmptyFiles</code> at the end.
-However, you can stop this by specifying  <code>removeEmptyFiles == FALSE</code>.</p>
+However, you can stop this by specifying  <code>removeEmptyFiles = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="renumbering">Renumbering<a class="anchor" aria-label="anchor" href="#renumbering"></a></h2>
@@ -153,6 +163,10 @@ For example, if you have a corpus of 10 files and remove the first file (<code>F
 the remaining files are renumbered from <code>2:10</code> to <code>1:9</code>.
 Spine renumbering works the same, except it is done independently <em>within</em> each file
 (<a href="humColumns.html">columns</a> are also renumbered accordingly).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>The <a href="indexHumdrum.html">indexing operators</a> <code>[]</code> and <code>[[]]</code> can be used as shortcuts for common <code>subset</code> calls.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

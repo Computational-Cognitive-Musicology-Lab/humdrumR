@@ -86,8 +86,8 @@ Tens of thousands of musical scores (and other musical data) have been encoded i
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><code>humdrumR</code> is intended as a modernized replacement for the original <a href="http://www.humdrum.org/" class="external-link">humdrum toolkit</a>, levaraging
-the power of R to give us enprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.</p>
+    <p><code>humdrumR</code> is intended as a modernized replacement for the original <a href="http://www.humdrum.org/" class="external-link">humdrum toolkit</a>, leveraging
+the power of <code>R</code> to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.</p>
     </div>
     <div class="section level2">
     <h2 id="package-design">Package design<a class="anchor" aria-label="anchor" href="#package-design"></a></h2>
@@ -98,10 +98,10 @@ the power of R to give us enprecedented power to manipulate and analyze humdrum 
 the <a href="humTable.html">humdrum table</a>.</p></li>
 <li><p>To create <code>humdrumR</code> data, a sophisticated humdrum data parser: <a href="readHumdrum.html">readHumdrum</a>.
 <code>humdrumR</code> data can also be written back to humdrum-syntax text files using <a href="writeHumdrum.html">writeHumdrum</a>.</p></li>
-<li><p>To filter and "index" <code>humdrumR</code> data, we have the <code><a href="subset.humdrumR.html">subset.humdrumR()</a></code> function, which can also be called in a variety of
-short hands using R's standard <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a>: <code>[]</code> and <code>[[]]</code>.</p></li>
+<li><p>To filter <code>humdrumR</code> data, we have the <code><a href="subset.humdrumR.html">subset.humdrumR()</a></code> function, which can also be called
+using <code>R</code>'s standard <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a>: <code>[]</code> and <code>[[]]</code>.</p></li>
 <li><p>To manipulate and modify <code>humdrumR</code> data, we have the <a href="withinHumdrum.html">with and within</a> methods for <code>humdrumR</code> objects.</p></li>
-<li><p>To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
+<li><p>To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our <a href="humdrumDispatch.html">regular-expression dispatch system</a>.</p></li>
 <li><p>Several <a href="humdrumPitch.html">modules</a> for representing and manipulating musical pitch information,
 including our core <a href="pitchParsing.html">tonalInterval</a> class to represent tonal pitch.</p></li>

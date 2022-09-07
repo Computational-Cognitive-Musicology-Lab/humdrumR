@@ -497,7 +497,7 @@ one spine, on top of another!</p>
 
 <span class="va">kernonly</span> <span class="op">&lt;-</span> <span class="va">example</span><span class="op">[[</span> , <span class="st">'**kern'</span><span class="op">]</span><span class="op">]</span>
 
-<span class="fu"><a href="../reference/foldHumdrum.html">foldHumdrum</a></span><span class="op">(</span><span class="va">kernonly</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kernonly</span><span class="op">$</span><span class="va">Spine2</span></code></pre></div>
+<span class="va">kernonly</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/foldHumdrum.html">foldHumdrum</a></span><span class="op">(</span><span class="va">kernonly</span>, <span class="fl">2</span>, <span class="fl">1</span>, newFieldNames <span class="op">=</span> <span class="st">'Spine2'</span><span class="op">)</span> </code></pre></div>
 <p>We could now cross tabulate the two spines of data:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(kernonly, <span class="fu">table</span>(Token, Spine2))</span>

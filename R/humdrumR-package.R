@@ -5,8 +5,8 @@
 #' Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online through repositories such as 
 #' [KernScores](http://kern.ccarh.org/).
 #' 
-#' `humdrumR` is intended as a modernized replacement for the original [humdrum toolkit](http://www.humdrum.org/), levaraging
-#' the power of R to give us enprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
+#' `humdrumR` is intended as a modernized replacement for the original [humdrum toolkit](http://www.humdrum.org/), leveraging
+#' the power of `R` to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 #'
 #' @section Package design:
 #' 
@@ -16,10 +16,10 @@
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
-#' + To filter and "index" `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called in a variety of 
-#'   short hands using R's standard [indexing operators][base::Extract]: `[]` and `[[]]`.
+#' + To filter `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called 
+#'   using `R`'s standard [indexing operators][base::Extract]: `[]` and `[[]]`.
 #' + To manipulate and modify `humdrumR` data, we have the [with and within][withinHumdrum] methods for `humdrumR` objects.
-#' + To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
+#' + To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
 #'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 
 #'   including our core [tonalInterval] class to represent tonal pitch.
@@ -61,19 +61,26 @@ setOldClass('quosure')
 
 #' humdrumR and pitch
 #' 
-#' [humdrumR][humdrumR::humdrumR] includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
+#' [humdrumR][humdrumR::humdrumR] includes a number of intertwined data structures, and associated functions, 
+#' for representing and manipulating musical pitch information.
 #' 
 #' @section Tonality:
 #' 
 #' There are four data types extensively used in `humdrumR` to encode/process [tonal](https://en.wikipedia.org/wiki/Tonality) musical information:
 #' 
-#' + [integers][base::integer] --- used to encode "[line-of-fifths]" tonal information
-#' + [tonalInterval] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave) and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
+#' + [integers][base::integer] --- used to encode "[line-of-fifths](https://en.wikipedia.org/wiki/Circle_of_fifths)" tonal information
+#' + [tonalInterval][tonalIntervalS4] --- embeds line-of-fifth tonal integers alongside [octave](https://en.wikipedia.org/wiki/Octave)
+#'    and [cent]("https://en.wikipedia.org/wiki/Cent_(music)") information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
 #' + [diatonicSet] --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
 #' + [tertianSet] --- an extension of `diatonicSet` used to encode  [tertian](https://en.wikipedia.org/wiki/Tertian) diatonic harmonies.
 #' 
+#' Users will rarely need to engage with these data types.
+#' Rather, users will work with humdrum data where pitch information is encoded in strings, and wish to manipulate and analyze such data.
+#' The most widely used `humdrumR` tools are your [pitch conversion/manipulation functions][pitchFunctions], including [kern()],
+#' and functions like [invert()] and [transpose()].
+#' These functions make use of sophisticated, and flexible pitch [parsing][pitchParsing] and [deparsing][pitchDeparsing] functions, 
+#' which are the bridge between the "core" pitch representations listed above and real-world humdrum data.
 #' 
-#' For a detailed explanation of the theory and specifics of `humdrumR`'s treatment of tonality, see the *Tonality in humdrumR* vignette.
 #' 
 #' @section Atonality:
 #' 

@@ -68,10 +68,11 @@ subset.humdrumR <- function(x, ...) {
   
   oldActive <- getActive(x)
   oldActiveFields <- activeFields(x)
-  x$.TmpFilter. <- within.humdrumR(x, ...)
+  x <- within.humdrumR(x, ...)
+  resultFields(x) <- '.TmpFilter.'
   
   humtab <- getHumtab(x)
-  if (humtab[ , class(.TmpFilter.)] != 'logical') .stop('In call to subset.humdrumR, the do-expression must evaluate to a logical vector.')
+  if (humtab[ , class(.TmpFilter.)] != 'logical') .stop('In call to subset.humdrumR, the within-expression must evaluate to a logical vector.')
  
   humtab[ , .TmpFilter. := .TmpFilter. | is.na(.TmpFilter.)] 
   # NA values come in from record types we didn't use, which should NOT be filtered

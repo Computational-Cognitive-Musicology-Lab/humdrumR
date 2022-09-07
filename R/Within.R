@@ -1610,3 +1610,19 @@ curResultN <- function(humtab) {
 }
 
 
+`resultFields<-` <- function(object, value) {
+  humtab <- getHumtab(object)
+  
+  results <- rev(resultFields(humtab))[seq_along(value)]
+  
+  for (i in seq_along(value)) {
+    colnames(humtab)[colnames(humtab) == results[i]] <- value[i]
+    removeFields(object) <- results[i]
+  }
+  
+  putHumtab(object) <- humtab
+  
+  addFields(object) <- value
+  object
+}
+

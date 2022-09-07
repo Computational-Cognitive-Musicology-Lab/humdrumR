@@ -191,7 +191,7 @@ example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
 kernonly <- example[[ , '**kern']]
 
-foldHumdrum(kernonly, 2, 1) -> kernonly$Spine2
+kernonly <- foldHumdrum(kernonly, 2, 1, newFieldNames = 'Spine2') 
 
 ```
 

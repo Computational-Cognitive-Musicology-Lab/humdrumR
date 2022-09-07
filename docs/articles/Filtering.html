@@ -630,7 +630,7 @@ flat. The other chorales have zero flats. Notice that we still get the
 <div class="section level3">
 <h3 id="double-bracket-indexing">Double-bracket indexing<a class="anchor" aria-label="anchor" href="#double-bracket-indexing"></a>
 </h3>
-<p>The double-brackets are used to index with pieces in your data.
+<p>The double-brackets are used to index within pieces in your data.
 Specifically, if you only want to work with certain spines or records
 within your pieces. The double-brackets apply the same filters
 separately to each file in the dataset.</p>
@@ -638,7 +638,7 @@ separately to each file in the dataset.</p>
 either individually or together:</p>
 <ul>
 <li>
-<code>i</code> is the first argument which will index rows
+<code>i</code> is the first argument which will index records
 <em>within</em> each file.</li>
 <li>
 <code>j</code> is the second argument, which will index spines
@@ -1773,14 +1773,15 @@ that would break the humdrum syntax.)</p>
 <div class="section level2">
 <h2 id="general-filtering">General Filtering<a class="anchor" aria-label="anchor" href="#general-filtering"></a>
 </h2>
-<p>The indexing commands (previous section) only get you so far. If you
+<p>The indexing commands (previous sections) only get you so far. If you
 want to be more precise about filtering, use the <code>subset</code>
-nethod for <code>humdrumR</code> data. <code>Subset.humdrumR</code>
-works exactly like <a href="WorkingWithData.html" title="Working with Humdrum Data">within.humdrumR</a>. However, the “do”
-command you give must evaluate to a logical vector (<code>TRUE</code> or
-<code>FALSE</code>) of the same length as its input. (You will get an
-error otherwise.) <code>Subset.humdrumR</code> will take your logical
-result and filter out data which matches <code>FALSE</code>.</p>
+method for <code>humdrumR</code> data. <code>subset.humdrumR</code>
+works exactly like <a href="WorkingWithData.html" title="Working with Humdrum Data">within.humdrumR</a>. However, the
+expression(s) you give must evaluate to a logical vector
+(<code>TRUE</code> or <code>FALSE</code>) of the same length as its
+input. (You will get an error otherwise.) <code>subset.humdrumR</code>
+will take your logical result and filter out data which matches
+<code>FALSE</code>.</p>
 <p>We can reproduce the functionality of the <code>[]</code> and
 <code>[[]]</code> indexing operators (previous section) using
 <code>subset</code>:</p>
@@ -2079,7 +2080,7 @@ our flats, study, lets grab all the flat notes:</p>
 <span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five files.</span>
 <span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
-<p>Woh, we’re only seeing a could of B flats in these files! But from
+<p>Woh, we’re only seeing a couple of B flats in these files! But from
 before, we know that there are a lot more flats in the fourth file
 (after losing the files with no flats):</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
@@ -2598,7 +2599,7 @@ result would be humdrum data with holes in it.</li>
 the commands <code>removeEmptyFiles</code>,
 <code>removeEmptySpines</code>, <code>removeEmptyRecords</code>,
 <code>removeEmptyStops</code>, or <code>removeEmptyPaths</code>. By
-using this commands, we make sure that 1) you explicitely want to remove
+using this commands, we make sure that 1) you explicitly want to remove
 them and 2) the humdrum syntax is not broken, because whole
 records/spines/paths/files are removed.</p>
 <p>So for our spines example:</p>

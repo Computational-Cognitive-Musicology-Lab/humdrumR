@@ -8,10 +8,6 @@
 \alias{is.humdrumR}
 \alias{$,humdrumR-method}
 \alias{fields}
-\alias{$<-,humdrumR,vector-method}
-\alias{$<-,humdrumR,humdrumR-method}
-\alias{[<-,humdrumR,character,ANY,vector-method}
-\alias{[<-,humdrumR,character,ANY,humdrumR-method}
 \title{HumdrumR class}
 \usage{
 is.humdrumR(x)
@@ -22,14 +18,6 @@ fields(
   humdrumR,
   fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference")
 )
-
-\S4method{$}{humdrumR,vector}(x, name) <- value
-
-\S4method{$}{humdrumR,humdrumR}(x, name) <- value
-
-\S4method{[}{humdrumR,character,ANY,vector}(x, i, j) <- value
-
-\S4method{[}{humdrumR,character,ANY,humdrumR}(x, i, j) <- value
 }
 \description{
 This \code{S4} class is the basic unit of the

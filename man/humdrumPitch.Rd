@@ -4,20 +4,27 @@
 \alias{humdrumPitch}
 \title{humdrumR and pitch}
 \description{
-\link[=humdrumR]{humdrumR} includes a number of intertwined data structures, and associated functions, for representing and manipulating musical pitch information.
+\link[=humdrumR]{humdrumR} includes a number of intertwined data structures, and associated functions,
+for representing and manipulating musical pitch information.
 }
 \section{Tonality}{
 
 
 There are four data types extensively used in \code{humdrumR} to encode/process \href{https://en.wikipedia.org/wiki/Tonality}{tonal} musical information:
 \itemize{
-\item \link[base:integer]{integers} --- used to encode "\link{line-of-fifths}" tonal information
-\item \link{tonalInterval} --- embeds line-of-fifth tonal integers alongside \href{https://en.wikipedia.org/wiki/Octave}{octave} and \href{"https://en.wikipedia.org/wiki/Cent_(music)"}{cent} information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
+\item \link[base:integer]{integers} --- used to encode "\href{https://en.wikipedia.org/wiki/Circle_of_fifths}{line-of-fifths}" tonal information
+\item \link[=tonalIntervalS4]{tonalInterval} --- embeds line-of-fifth tonal integers alongside \href{https://en.wikipedia.org/wiki/Octave}{octave}
+and \href{"https://en.wikipedia.org/wiki/Cent_(music)"}{cent} information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)
 \item \link{diatonicSet} --- combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).
 \item \link{tertianSet} --- an extension of \code{diatonicSet} used to encode  \href{https://en.wikipedia.org/wiki/Tertian}{tertian} diatonic harmonies.
 }
 
-For a detailed explanation of the theory and specifics of \code{humdrumR}'s treatment of tonality, see the \emph{Tonality in humdrumR} vignette.
+Users will rarely need to engage with these data types.
+Rather, users will work with humdrum data where pitch information is encoded in strings, and wish to manipulate and analyze such data.
+The most widely used \code{humdrumR} tools are your \link[=pitchFunctions]{pitch conversion/manipulation functions}, including \code{\link[=kern]{kern()}},
+and functions like \code{\link[=invert]{invert()}} and \code{\link[=transpose]{transpose()}}.
+These functions make use of sophisticated, and flexible pitch \link[=pitchParsing]{parsing} and \link[=pitchDeparsing]{deparsing} functions,
+which are the bridge between the "core" pitch representations listed above and real-world humdrum data.
 }
 
 \section{Atonality}{
