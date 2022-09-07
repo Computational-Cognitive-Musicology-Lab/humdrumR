@@ -32,6 +32,10 @@ Multiple types can be specified as a vector, or smooshed into a single string: e
 against field names of the humdrum table.
 Of \code{NULL} (the default), the \code{Token} field is returned.}
 }
+\value{
+A \link[data.table:data.table]{data.table()}, each column corresponding to one field. (The \code{data.table} is a subset of the
+humdrum table).
+}
 \description{
 In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files

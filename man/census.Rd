@@ -6,33 +6,44 @@
 \alias{print.humCensus}
 \title{Tabulate records and tokens in a humdrumR corpus}
 \usage{
-census(humdrumR, dataTypes = "GLIMDd", by = "Filename", removeEmpty = FALSE)
+census(
+  humdrumR,
+  dataTypes = "GLIMDd",
+  by = Filename,
+  removeEmpty = FALSE,
+  drop = FALSE
+)
 
 census(humdata)[i]
 
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{A humdrumR object}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR object}}
 
-\item{dataTypes}{Which types of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+\item{dataTypes}{Which types of humdrum records to include in the census. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 (see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
 
-\item{by}{A \code{character} string of length 1. Must be a \link[=humdrumRclass]{field} in the humdrumR object.}
+\item{by}{An arbitrary expression which indicates how to group the data.}
 
-\item{i}{Rows of a \code{humCensus} object can be selected with a single argument \code{i}: e.g., \code{censusTable[i]}.
-If \code{i} is \code{numeric}, the corresponding rows are selected ordinally (not by \code{File} number).
-If \code{i} is a \code{character} string, this string is matched as a regular expression against file names.}
+\item{removeEmpty}{(\code{logical}, \code{length == 1}) If set \code{TRUE}, any groups that have zero tokens are
+not included in the \code{humCensus} table.}
+
+\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+a \code{humCensus} table.}
+
+\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+as a regular expression against the "by-group" names.}
 }
 \description{
+\code{census} tabulates the raw "size" of a \link[=humdrumRclass]{humdrumR corpus},
+including the total number of records and tokens.
 \code{census} is one of \link{humdrumR}'s
-\link[=humSummary]{summary functions}, used to
-tabulate the raw size of a \link[=humdrumRclass]{humdrumR} corpus.
-\code{census} takes a \link[=humdrumRclass]{humdrumR} object
-and and returns a \code{humCensus} table.
+basic \link[=humSummary]{corpus summary functions}.
 }
 \details{
+\code{census} returns a special \code{data.frame} called a \code{humCensus} table.
 A \code{humCensus} table has five columns of information:
 \enumerate{
 \item Records
@@ -49,7 +60,8 @@ A \code{humCensus} table has five columns of information:
 }
 \item Characters
 \itemize{
-\item The total numder of characters. This includes humdrum control characters like \code{*} and \verb{!!}.
+\item The total number of characters.
+(This includes humdrum control characters like \code{*} and \verb{!!}.)
 }
 \item (per token)
 \itemize{
@@ -57,18 +69,22 @@ A \code{humCensus} table has five columns of information:
 }
 }
 
-A \code{humCensus} table has one row for each file in the corpus.
-Rows are labeled with each file's corresponding
-number (from the \link[=humTable]{humTable's} \strong{File} field) and name (the \strong{Filename} field).
-In addition, when a \code{humCensus} object is printed,
+By default, \code{census} tabulates data within files in the corpus,
+with each file tabulated in a row of the \code{humCensus} table.
+Rows are labeled with each filename.
+When a \code{humCensus} object is printed,
 the totals across all files are printed as well---(unique) and (per token)
-across all files are calculated across all files as well, not summed.
+values are calculated across all files as well, not summed.
+The \code{by} argument can be used to tabulate data across other divisions in the data (see next section).
 }
-\section{Indexing}{
+\section{Tabulate "by" other groups}{
 
 
-A \code{drop} argument is also available. If \code{TRUE}, a plain
-\code{\link[data.table:data.table]{data.table::data.table()}} is returned.
+The \code{by} argument to \code{census} indicates groupings in the data to tabulate within, grouping
+across filenames in the corpus by default.
+\code{by} can be an arbitrary expression which is evaluated inside the \link[=humTable]{humdrum table},
+like the \code{groupby} argument to a \link[=withHumdrum]{with/within} call.
+The by expression must be the full length of the humdrum table.
 }
 
 \seealso{

@@ -642,14 +642,16 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #'   + `octave.relative`, `octave.absolute`
 #' + **String parsing**
 #'   + `parts`
-#'   + `sep`.
+#'   + `sep`
 #'   
 #' Note that the deparsing arguments are similar (sometimes identical) to parallel [parsing arguments][pitchParsing].
-#' These "advanced" arguments can be used directly in *any* [pitch function][pitchFunctions]: for example, `kern(x, qualities = TRUE)`.
+#' These "advanced" arguments can be used directly in *any* [pitch function][pitchFunctions]: 
+#' for example, `kern(x, qualities = TRUE)`.
 #' 
 #' Each of the `humdrumR` pitch functions is associated with default deparsing arguments.
 #' For example, if you use [kern()], `flat` is set (by default) to `"-"`.
-#' However, if you wanted to print `**kern`-like pitch data, **except** with a different flat symbol, like `"_"`, you could modify the deparser:
+#' However, if you wanted to print `**kern`-like pitch data, **except** with a 
+#' different flat symbol, like `"_"`, you could modify the deparser:
 #' `kern('Eb5', flat = "_")`.
 #' This overrides the default value for `**kern`, so the output would be `"ee_"` instead of `"ee-"`.
 #' 

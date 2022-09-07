@@ -1011,9 +1011,9 @@ parseTandem <- function(tandems, known) {
 #' @details 
 #'
 #' Every [humdrumR][humdrumRclass] object has a field called
-#' `Tandem` which is a vector of strings which accumulates
+#' `Tandem`, which is a vector of strings which accumulates
 #' tandem interpretations in each Spine.
-#' At each record, all the previous tandems that ocured in each spine
+#' At each record, all the previous tandems that occured in each spine
 #' are listed (comma separated), with the most recent appearing first.
 #' 
 #' For example, consider this file:
@@ -1050,9 +1050,8 @@ parseTandem <- function(tandems, known) {
 #' that doesn't "know" that `"C:"` and `"G:"` are related.
 #' The earlier tandem (`"C:"`) is just pushed further back onto the stack.
 #' 
-#' ---
 #' 
-#' Don't worry, the [humdrumR data parser][readHumdrum()] does recognize many
+#' Don't worry, the [humdrumR data parser][readHumdrum()] *does* recognize many
 #' common tandem interpretations (like `*C:` and `*G:`) and will automatically parse
 #' them if they are present---in this case, they are put into the `Key` field automatically.
 #' However, the `Tandem` field is retained in case your data contains any novel tandem intepretations
@@ -1062,7 +1061,7 @@ parseTandem <- function(tandems, known) {
 #' 
 #' If your data *does* contain novel/unknown tandem interpretations, you can use the
 #' `extractTandem` function to pull them out of the `Tandem` field.
-#' The first argument to `exctractTandem` must be the `Tandem` field from a 
+#' The first argument to `extractTandem` must be the `Tandem` field from a 
 #' [humdrumR object][humdrumRclass].
 #' The second argument (`regex`) is a regular expression which is matched against
 #' the the tandem interpretations.
@@ -1071,10 +1070,10 @@ parseTandem <- function(tandems, known) {
 #' For example, if we wanted to manually extract the key information from the `Tandem` field 
 #' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
 #' 
-#' @param Tandem Should always be the `Tandem` field from a [humdrumR object][humdrumRclass]!
+#' @param Tandem Should always be the `Tandem` field from a [humdrumR object][humdrumRclass].
 #' @param regex (`character`, `length == 1`). A single regular expression to match against the 
-#' tandem intrepretations. You should not include a `*` at the beginning---the `*` marker
-#' for tandem interpretations are already removed from the `Tandem` field.
+#'   tandem interpretations. You should not include a `*` at the beginning---the `*` marker
+#'   for tandem interpretations are already removed from the `Tandem` field.
 #' 
 #' @export
 extractTandem <- function(Tandem, regex) {

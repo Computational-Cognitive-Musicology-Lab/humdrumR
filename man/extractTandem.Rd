@@ -7,10 +7,10 @@
 extractTandem(Tandem, regex)
 }
 \arguments{
-\item{Tandem}{Should always be the \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}!}
+\item{Tandem}{Should always be the \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}.}
 
 \item{regex}{(\code{character}, \code{length == 1}). A single regular expression to match against the
-tandem intrepretations. You should not include a \code{*} at the beginning---the \code{*} marker
+tandem interpretations. You should not include a \code{*} at the beginning---the \code{*} marker
 for tandem interpretations are already removed from the \code{Tandem} field.}
 }
 \description{
@@ -19,9 +19,9 @@ spine in \link[=humdrumRclass]{humdrumR object}.
 }
 \details{
 Every \link[=humdrumRclass]{humdrumR} object has a field called
-\code{Tandem} which is a vector of strings which accumulates
+\code{Tandem}, which is a vector of strings which accumulates
 tandem interpretations in each Spine.
-At each record, all the previous tandems that ocured in each spine
+At each record, all the previous tandems that occured in each spine
 are listed (comma separated), with the most recent appearing first.
 
 For example, consider this file:\preformatted{**kern **kern
@@ -52,7 +52,7 @@ Notice that the \code{"C:"} isn't erased by the appearance of \code{"G:"}---this
 that doesn't "know" that \code{"C:"} and \code{"G:"} are related.
 The earlier tandem (\code{"C:"}) is just pushed further back onto the stack.
 
-Don't worry, the \link[=readHumdrum]{humdrumR data parser} does recognize many
+Don't worry, the \link[=readHumdrum]{humdrumR data parser} \emph{does} recognize many
 common tandem interpretations (like \verb{*C:} and \verb{*G:}) and will automatically parse
 them if they are present---in this case, they are put into the \code{Key} field automatically.
 However, the \code{Tandem} field is retained in case your data contains any novel tandem intepretations
@@ -63,7 +63,7 @@ that \code{humdrumR} does not recognize.
 
 If your data \emph{does} contain novel/unknown tandem interpretations, you can use the
 \code{extractTandem} function to pull them out of the \code{Tandem} field.
-The first argument to \code{exctractTandem} must be the \code{Tandem} field from a
+The first argument to \code{extractTandem} must be the \code{Tandem} field from a
 \link[=humdrumRclass]{humdrumR object}.
 The second argument (\code{regex}) is a regular expression which is matched against
 the the tandem interpretations.

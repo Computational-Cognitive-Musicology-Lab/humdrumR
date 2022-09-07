@@ -1,9 +1,9 @@
 XXXAuthorship Information
 !!!COM: Composer's name. In some cases, opinions differ regarding the best spelling of a composer's name. If so, all common spellings should be given -- each alternative separated from the previous by a semicolon. E.g.
-x!!COM: Chopin, Fryderyk; Chopin, Frederick
+!!!COM: Chopin, Fryderyk; Chopin, Frederick
 With respect to accents, refer to the discussion concerning the !!RLN: reference record (see below). If a work was composed by more than one composer, then each composer's name should appear on a separate !!COM: record with a number designation prior to the colon. For example,
-x!!COM1: Composer, A. 
-x!!COM2: Composer, B.
+!!!COM1: Composer, A. 
+!!!COM2: Composer, B.
 !!!COA: Attributed composer. This may include attributions known to be false. Several attributions may be combined on a single record by separating each name by a semicolon. Note that if a document contains both !!COA: and !!COM: records, then the attributed composer is explicitly assumed to be false.
 !!!COS: Suspected composer. This reference code indicates the belief of the editor or producer of the document as to the true identity of the composer(s). If more than one composer is suspected, each name should appear on a separate !!COS: record with a number designation prior to the colon.
 !!!COL: Composer's abbreviated, alias, or stage name. e.g. Madonna.
@@ -61,7 +61,7 @@ XXXWork Identification Information
 XXXGroup Information
 !!!GTL: Group Title. A logical collection of works such as the "London Symphonies" by Haydn, or the four concertos by Vivaldi forming "The Seasons".
 !!!GAW: Associated Work. Some works are associated with other works, such as plays, novels, paintings, films, or other musical works. E.g. Mendelssohn's Overture to Shakespeare's Midsummer Night's Dream. This reference allows associated works to be explicitly identified by author and title. E.g.
-x!!GAW: Stéphane Mallarmé, L'Après-midi d'un faune; [The Afternoon of a Faun].
+!!!GAW: Stéphane Mallarmé, L'Après-midi d'un faune; [The Afternoon of a Faun].
 !!!GCO: Collection designation. This is a free-form text record that can be used to identify a collection of pieces, such as works appearing in a compendium or anthology. E.g. Norton Scores, Smithsonian Collection, Burkhart Anthology.
 XXXImprint Information
 !!!PUB: Publication status. This reference record identifies whether the document has ever been "published". One of the following English terms may appear: published or unpublished.
@@ -89,7 +89,7 @@ XXXCopyright Information
 !!!EMD: Document modification description. This record type is used to chronicle all modifications made to the original electronic document. EMD records should indicate the date of modification, the name of the person making the modification, and a brief description of the type of modification made. For each successive modification, a separate !!EMD: record should appear with a number designation prior to the colon.
 !!!EEV: Electronic edition version. This reference identifies the specific editorial version of the work. e.g. Version 1.3g Only a single !!EEV: record can appear in a given electronic document.
 !!!EFL: File number. Some files are part of a series or group of related files. This record indicates that the current document is file x in a group of y files. The two numbers are separated by a slash as in:
-x!!EFL: 1/4
+!!!EFL: 1/4
 !!!EST: Encoding status. This record indicates the current status of the document as it is being produced. Free-format text may indicate that the encoding is in-progress, list tasks remaining, or indicate that the encoding is complete. !!EST: records are normally eliminated prior to distribution of the document.
 !!!VTS: Checksum validation number. This reference encodes the checksum number for the file -- excluding the !!VTS: record itself. When this record is eliminated from the file, any POSIX.2 standard cksum command can be used to determine whether the file originates with the publisher, or whether it has been modified in some way. (See the Humdrum veritas command described in Section 4.) Note that this validation process is easily circumvented by malicious individuals. For true security, the checksum value should be compared with a printed list of checksums provided by the electronic publisher.
 XXXAnalytic Information
@@ -113,20 +113,20 @@ XXXAnalytic Information
 Other non-standard mode names can be used at the discretion of the electronic editor.
 !!!AMT: Metric Classification. Meters for a file may be classified as one of the following eight categories: simple duple, simple triple, simple quadruple, compound duple, compound triple, compound quadruple, irregular, or various.
 !!!AIN: Instrumentation. This reference is used to list all of the instruments (including voice) used in the work. Instruments should be encoded using the abbreviations specified by the *I tandem interpretation described in Appendix II. Instrument codes must appear in alphabetical order separated by spaces. (Note that alphabetical ordering is essential in order to facilitate searches for specific combinations or subsets of instruments using the grep command.) E.g.
-x!!AIN: clars corno fagot flt oboe
+!!!AIN: clars corno fagot flt oboe
 !!!ARE: Geographical region of origin. This reference identifies the geographical location from which the work originates. Location designations are encoded using the local language. The location begins with the continent designation, and becomes successively more refined. If the information is available, refinement can continue to suburban district or even street address.
-x!!ARE: Europa, Mitteleuropa, Deutschland, Wuerttemberg, Sindelfingen 
-x!!ARE: America, North America, United States of America, Ohio, Columbus
+!!!ARE: Europa, Mitteleuropa, Deutschland, Wuerttemberg, Sindelfingen 
+!!!ARE: America, North America, United States of America, Ohio, Columbus
 !!!ARL: Geographical location of origin. Like the ARE record, this reference record identifies the geographical location from which a work originates. Location designations are encoded using latitude and longitude values -- suitable for creating maps. The first numerical value indicates latitude (positive values indicating North, negative values indicating South). The second numerical value indicates longitude (positive values only, indicating distance East from the central meridian). A slash separates the latitude and longitude values. A series of trailing characters is used to indicate the degree of accuracy of the location information: % (continent), @ (country), # (province or state), : (town or village). For large regions such as countries or provinces, the geographical center of the region is used.
-x!!ARL: 51.5/10.5@
+!!!ARL: 51.5/10.5@
 XXXHistorical and Background Information
 !!!HAO: Aural History. This is a free-form text record used to relay any story or stories about the origin, purpose or background of the work. This reference record is especially useful in ethnomusicological materials, where a particular story accompanies a song. The story may be encoded using several successive HAO records.
 !!!HTX: Free-form Translation of Vocal Text. This is a free-form text record used to relay a non-literal translation of a vocal text. This reference record is again especially useful in ethnomusicological materials.
 XXXRepresentation Information
 !!!RLN: ASCII language setting. This reference identifies the "language" code in which the file was encoded. This is applicable only to computer platforms which provide "extended ASCII" text capabilities (e.g. Danish or Spanish characters).
 !!!RDF: User-defined signifiers. All Humdrum representations provide some signifiers (ASCII characters) that remain undefined. Users are free to use these undefined signifiers as they choose. When undefined signifiers appear in a given document, the !!RDF**interp: code should be used to specify what the signifiers denote. Notice that the code RDF is followed by the name of the interpretation to which the signifier definition applies. In the following example, the letters "X" and "x" symbols that are defined within a hypothetical **piano representation. E.g.
-x!!RDF**piano: X=hands cross, left over right 
-x!!RDF**piano: x=hands cross, right over left
+!!!RDF**piano: X=hands cross, left over right 
+!!!RDF**piano: x=hands cross, right over left
 !!!RDT: Date encoded. This reference uses the Humdrum **date format to identify the date(s) when the document was encoded.
 !!!RNB: Representation note. This reference provides a free-format text that conveys some document-specific note related to matters of representation.
 !!!RWG: Representation warning. This reference may be used to encode explicit warnings concerning the encoded material.

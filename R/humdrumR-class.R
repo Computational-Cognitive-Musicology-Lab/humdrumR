@@ -1902,7 +1902,7 @@ activeFields <- function(humdrumR) {
 #' @param fieldnames (`character`) A vector of names which are [partially matched][base::pmatch()]
 #'   against field names of the humdrum table.
 #'   Of `NULL` (the default), the `Token` field is returned.
-#' @value A [data.table()][data.table::data.table()], each column corresponding to one field. (The `data.table` is a subset of the 
+#' @return A [data.table()][data.table::data.table()], each column corresponding to one field. (The `data.table` is a subset of the 
 #' humdrum table).
 #' 
 #' @rdname humTable

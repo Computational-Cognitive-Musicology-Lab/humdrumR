@@ -187,16 +187,18 @@ The following "advanced" deparsing arguments are available (read all the details
 \item \strong{String parsing}
 \itemize{
 \item \code{parts}
-\item \code{sep}.
+\item \code{sep}
 }
 }
 
 Note that the deparsing arguments are similar (sometimes identical) to parallel \link[=pitchParsing]{parsing arguments}.
-These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}: for example, \code{kern(x, qualities = TRUE)}.
+These "advanced" arguments can be used directly in \emph{any} \link[=pitchFunctions]{pitch function}:
+for example, \code{kern(x, qualities = TRUE)}.
 
 Each of the \code{humdrumR} pitch functions is associated with default deparsing arguments.
 For example, if you use \code{\link[=kern]{kern()}}, \code{flat} is set (by default) to \code{"-"}.
-However, if you wanted to print \verb{**kern}-like pitch data, \strong{except} with a different flat symbol, like \code{"_"}, you could modify the deparser:
+However, if you wanted to print \verb{**kern}-like pitch data, \strong{except} with a
+different flat symbol, like \code{"_"}, you could modify the deparser:
 \code{kern('Eb5', flat = "_")}.
 This overrides the default value for \verb{**kern}, so the output would be \code{"ee_"} instead of \code{"ee-"}.
 \subsection{Steps}{

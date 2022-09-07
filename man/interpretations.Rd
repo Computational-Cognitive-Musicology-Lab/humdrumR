@@ -2,26 +2,33 @@
 % Please edit documentation in R/Summary.R
 \name{interpretations}
 \alias{interpretations}
+\alias{[.humInterpretations}
 \alias{print.humInterpretations}
 \title{Summarize humdrum corpus interpretations.}
 \usage{
 interpretations(humdrumR)
 
+\method{[}{humInterpretations}(interps, i)
+
 \method{print}{humInterpretations}(interps, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
 \item{humdrumR}{A \link[=humdrumR-class]{humdrumR} data object.}
+
+\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+as a regular expression against the filenames in the corpus.}
 }
 \description{
-\code{interpretations} is one of \link{humdrumR}'s \link[=humSummary]{summary functions},
-used to summarize the interpretations in the pieces of a humdrumR corpus,
+\code{interpretations} is used to summarize the interpretations in the pieces of a humdrumR corpus,
 including \emph{exclusive} (\verb{**}) and \emph{tandem} (\code{*}) interpretations.
-It returns a \code{humInterpretations} argument which prints as a informative table in the terminal.
+\code{interpretations} is one of \link{humdrumR}'s
+basic \link[=humSummary]{corpus summary functions}.
 }
 \details{
-Each row in the output table represents a single piece in the corus.
-The first column (\code{(n)}) indicates a unique "exclusive pattern" associated with
-each piece---the exclusive patterns are tallied at the bottom.
+\code{interpretations} returns a special \code{data.frame} called a \code{humInterpretations} table.
+Each row in the table represents a single piece in the corpus.
+The first column (\code{{X}}) is a variable indicating a unique "exclusive pattern" associated with
+each file---the exclusive patterns are tallied at the bottom of the printout.
 The remaining columns indicate how many of each interpretation (indicated by column name)
 appear in each piece.
 

@@ -470,7 +470,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 #' 
 #' @examples 
 #' 
-#' segments(letters %~% '[aeiou]`)
+#' segments(letters %~% '[aeiou]')
 #' 
 #' changes(c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4), 
 #'         c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3),

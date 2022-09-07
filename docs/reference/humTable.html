@@ -24,7 +24,7 @@ getHumtab extracts a humdrum table from a humdrumRclass object."><!-- mathjax --
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,6 +121,11 @@ See the humTable documentation and/or the humdrum syntax vignette for clarificat
 against field names of the humdrum table.
 Of <code>NULL</code> (the default), the <code>Token</code> field is returned.</p></dd>
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table()</a>, each column corresponding to one field. (The <code>data.table</code> is a subset of the
+humdrum table).</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>In a humdrum table, each row represents a single "token"

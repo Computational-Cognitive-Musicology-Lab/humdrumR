@@ -20,7 +20,7 @@ or into new formats that you create!'><!-- mathjax --><script src="https://cdnjs
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -253,13 +253,15 @@ Note that <code>inPlace = TRUE</code> will force functions like <code>semits</co
 <li><p><code>octave.relative</code>, <code>octave.absolute</code></p></li>
 </ul></li>
 <li><p><strong>String parsing</strong></p><ul><li><p><code>parts</code></p></li>
-<li><p><code>sep</code>.</p></li>
+<li><p><code>sep</code></p></li>
 </ul></li>
 </ul><p>Note that the deparsing arguments are similar (sometimes identical) to parallel <a href="pitchParsing.html">parsing arguments</a>.
-These "advanced" arguments can be used directly in <em>any</em> <a href="pitchFunctions.html">pitch function</a>: for example, <code>kern(x, qualities = TRUE)</code>.</p>
+These "advanced" arguments can be used directly in <em>any</em> <a href="pitchFunctions.html">pitch function</a>:
+for example, <code>kern(x, qualities = TRUE)</code>.</p>
 <p>Each of the <code>humdrumR</code> pitch functions is associated with default deparsing arguments.
 For example, if you use <code><a href="kern.html">kern()</a></code>, <code>flat</code> is set (by default) to <code>"-"</code>.
-However, if you wanted to print <code>**kern</code>-like pitch data, <strong>except</strong> with a different flat symbol, like <code>"_"</code>, you could modify the deparser:
+However, if you wanted to print <code>**kern</code>-like pitch data, <strong>except</strong> with a
+different flat symbol, like <code>"_"</code>, you could modify the deparser:
 <code>kern('Eb5', flat = "_")</code>.
 This overrides the default value for <code>**kern</code>, so the output would be <code>"ee_"</code> instead of <code>"ee-"</code>.</p><div class="section">
 <h3 id="steps">Steps<a class="anchor" aria-label="anchor" href="#steps"></a></h3>

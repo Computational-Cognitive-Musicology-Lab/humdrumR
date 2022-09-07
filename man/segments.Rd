@@ -67,8 +67,18 @@ would return \code{c(1, 1, 2, 2, 2, 3, 4, 4)}.
 This creates contiguous blocks of values which can be used for a \code{groupby} argument in a call
 to \code{\link[=within.humdrumR]{within.humdrumR()}}, or similar functions like \code{\link[base:tapply]{base::tapply()}}.
 
-Any input vector9s) to \code{segments} which are not \code{logical}, are first fed to
+Any input vector(s) to \code{segments} which are not \code{logical}, are first fed to
 \code{changes} to create a \code{logical} input.
 }
 
+\examples{
+
+segments(letters \%~\% '[aeiou]')
+
+changes(c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4), 
+        c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3),
+        any = TRUE)
+# result is T,F,F,T,T,F,T,F,T,T,F,F
+
+}
 \concept{{Window functions}}

@@ -28,12 +28,137 @@ This document is a basic primer for R, which will teach you the basics you need 
 make the most out of `humdrumR`.
 
 
+# Basic Commands
+
+`R` code is made up of "expressions" like `2 + 2`, `sqrt(2)`, or `(x - mean(x))^2`.
+As you can see, you can do arithmetic in very intuitive ways, like `5 / 2` or `3 * 3` (more details lin a later section).
+However, the most common elements of `R` expressions are "calls" to *functions*.
+A "function" in `R` is a pre-built bit of code that does something.
+Most functions take one or more input *arguments*, and "return" some kind of output.
+For example, the function `sqrt()` takes a number as an input argument, and "returns" the square root of that number.
+
+```{r}
+sqrt(2)
+
+sqrt(9)
+
+```
+
+To "call" a function, we write the function's name, followed by parentheses (`()`).
+Any input arguments to the function must go inside the parentheses, separated by commas if there are more than one.
+Here are some examples of common functions being "called" with zero or more input arguments:
+
+```{r}
+
+abs(-3)
+
+mean(1:5)
+
+c(1, 2, 3)
+
+max(1,5) # two arguments
+
+Sys.time() # no arguments!
+
+```
+
+
+Different functions have different arguments they recognize, with specific names.
+For example, the function `log()` takes two arguments, called `x` and `base`.
+Other functions can take any number of arguments, with any name.
+You can learn about a function, including the arguments it accepts, by typing `?functionName` at the command line; for example, `?sqrt` or `?mean`.
+If you see an argument called `...`, that tells you that the function can take any number of arguments.
+
+We can explicitly "name" the function arguments we want by putting `argname = argument` into our calls:
+For example, you could say `log(10, base = 2)`.
+Named arguments are very useful when we are creating data, like vectors and `data.frame`s (see below).
+
+
+
+### Pipes
+
+Complex expressions might involve a large number of function calls, which can get tiresome to read (or write).
+For example, something like `log(round(sqrt(mean(x^2)), base = 2)` calls *four* functions!
+An expression like that is a bit tricky to read, and it can be really easy to make a mistake where
+you put the wrong number of parentheses.
+As an alternative, `R` gives us the option of calling functions in a "pipe."
+The way this works is we use the "pipe" command `|>`, which takes an input on the left and "pipes" it into a function call on the right.
+For example, we can re-write the previous command as:
+
+```
+x^2 |> mean() |> sqrt() |> round() |> log(base = 2)
+
+```
+
+Much better!
+To make things even cleaner, `R` will understand if you spread your expressions across multiple lines, by putting a new line after each `|>`, or function argument:
+
+```
+x^2 |>
+  mean() |>
+  sqrt() |>
+  round() |>
+  log(base = 2)
+  
+max(sqrt(2),
+    log(2),
+    exp(2),
+    pi / 2)
+
+```
+
+
+
+
+## Variables
+
+When coding in `R`, you'll often want to "save" data or other objects so you can reuse them.
+We do this by "assigning" something (often the result of a function) to a "*variable*".
+This is done using the assignment operators, either `<-` or `->`.
+A variable name can be any combination of upper and lowercase letters.
+Let's calculate the square-root of two and save it to a variable:
+
+```{r}
+tworoot <- sqrt(2)
+
+```
+
+We can then reuse that value as many times as we want:
+
+```{r}
+tworoot^2
+
+tworoot * 2
+
+c(tworoot, tworoot)
+
+```
+
+You can also assign from left to right, using `->`.
+This is useful in combination with pipes:
+
+```{r}
+
+tworoot |> exp() |> round() -> newvalue
+
+
+```
+
+----
+
+Note your variable names can also include `_`, `.`, or numeric digits, as long as they aren't at the beginning of the name.
+For example, `X1` or `my_name` are valid names---but noat `2X`.
+
+
+
+
+
 # Basic Data Structures
 
 In R, there two fundamental data structures that are used all the time:
 
 + "atomic" **vectors**
-+ data.tables 
++ data.frames 
 
 
 ## Vectors
@@ -57,7 +182,7 @@ However, R doesn't *really* distinguish between scalars (single values) and vect
 (multiple values)---everything is always a vector.
 (Still, we sometimes refer to length-1 vectors as scalars.)
 
-To make a vector in R, use the `c` command, as so:
+To make a vector from scratch in `R`, use `c()`, as so:
 
 ```{r}
 
@@ -78,7 +203,7 @@ In this example, we've created five vectors.
 
 + A `numeric` vector of length 3.
 + A `character` vector of length four (composers).
-+ A `logical` vector of length 2)
++ A `logical` vector of length 2.
 + Two `numeric` vectors of length 1.
   + That's right, `c(32.3)` and `32.3` are the same thing---a vector of length 1.
 
@@ -199,19 +324,119 @@ so you can avoid worrying about how exactly R is "recycling" values.
 This brings us too...
 
 
-## Data tables
+## Data frames
+
+Data frames are the heart and soul of `R`.
+A `data.frame` is simply a collection of vectors that are *all the same length*---ideal for vectorized operations!
+The vectors in a `data.frame` are arranged as columns in a two dimension table.
+Let's make a data frame, by feeding some vectors to the [data.frame()] function:
+
+```{r}
+
+X <- c("C", "D", "E", "F", "G", "A", "B", "C")
+Y <- c(0, 2, 4, 5, 7, 9, 11, 12)
+Z <- c("P1", "M2", "M3", "P4", "P5", "M6", "M7", "P8")
+
+df <- data.frame(X, Y, Z)
+
+df
+
+```
 
 
+Notice that each of your columns/vectors can be a different type, with no problem.
+Also notice, that each column has a name; we can inspect these names using the `colnames()` function.
 
+```{r}
+
+colnames(df)
+
+```
+
+Or change them:
+
+```{r}
+
+colnames(df) <- c('Letters', "Semitones", "Intervals")
+df
+
+```
+
+Finally, it's also possible to assign the column name we want when creating the data frame:
+
+```{r}
+data.frame(Letters = X, Semitones = Y, Intervals = Z)
+
+```
+
+----
+
+Remember, the vectors in a `data.frame` must all be the same length.
+If you tried to make a `data.frame` with a vectors that don't match in length, you'll get an error `arguments imply differing number of rows`.
+The one exception is that you can call `data.frame` with some *scalar* single values, which will be automatically recyced to match
+the length of the other vectors.
+
+### With and Within You
+
+We often want to access the columns/vectors held in a data frame.
+We can do this several ways.
+One approach is with the `$` operator, combined with the name of the column we want.
+For example, we can get the `Letters` column from the data frame we made above using `df$Letters`.
+
+Often, we'll want to write code that uses a bunch of different columns from the same data.frame---in fact, this is the *main* thing we do most of the time in `R`!
+To avoid writing `df$` over and over again, we can use the [with()] function.
+`with()` allows us to drop "inside" our `data.frame`, where our `R` commands can "see" the columns variables:
+
+```{r}
+
+with(df,
+     paste(Intervals, Semitones, sep = ' = '))
+
+
+```
 
 ## Missing Data
 
+Sometimes we'll encounter data points which are irrelevant, meaningless, or "not applicable."
 
 
+# Common Functions
 
 
+## Vector functions
+
++ `sort()` --- Put values of a vector into ascending order.
+  + set `decreasing = TRUE` for decreasing order.
++ `rev()` --- Reverse the order of a vector.
++ `x %in% y` --- Which elements of the vector `x` appear in the vector `y`?
 
 
+## String functions
 
++ `paste()` --- Paste together multiple `character` strings.
+
+## Arithmetic
+
++ `x + y` --- Addition; $x + y$.
++ `x - y` --- Subtraction; $x - y$.
++ `-x` --- Negation; $-x$.
++ `x * y` --- Multiplication; $xy$
++ `x^y` --- Exponentiation; $x^y$.
+  + Use parentheses for things like `x^(1/3)`; $x^{\frac{1}{3}}$.
++ `x / y` --- Real division; $\frac{x}{y}$.
++ `x %/% y` --- [Euclidean division](https://en.wikipedia.org/wiki/Euclidean_division); $\lfloor \frac{x}{y} \rfloor$.
+  + E.g., whole-number division with remainder.
++ `x %% y` --- `x` modulo `y`; $x \mod y$.
+  + E.g., remainder after whole-number division.
+
+
+## Other Math functions
+
++ `sqrt()` --- Square-root of numbers; $\sqrt{x}$.
++ `abs()` --- Absolute value of numbers; $|x|$
++ `round()` --- Round number to nearest integer; $\lfloor x \rceil$
+
+
+# Making your own functions
 
 

@@ -8,7 +8,7 @@
 \alias{print.humReference}
 \title{Summarize reference records in a humdrumR corpus}
 \usage{
-reference(x)
+reference(x, ...)
 
 reference('OTL')
 
@@ -16,58 +16,75 @@ reference(humdata)
 
 \method{[}{humReference}(refTable, i, j, drop = FALSE)
 }
+\arguments{
+\item{x}{A \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR object}.}
+
+\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table}
+is returned instead of \code{humReference} table.}
+
+\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+as a regular expression against filenames in the corpus.}
+
+\item{j}{if \code{numeric} selects columns by index. If \code{character}, \link[base:pmatch]{partially matched}
+against column names (reference codes).}
+}
 \description{
-\code{reference} is one of \link{humdrumR}'s
-\link[=humSummary]{summary functions}, used to
+\code{reference} is used to
 tabulate the reference records
 present in a \link[=humdrumRclass]{humdrumR} corpus.
-\code{reference} takes a \link[=humdrumRclass]{humdrumR} object
-and and returns a \code{humReference} table.
-Alternatively, \code{reference} can take a \code{character} string,
-which it will check against known reference codes and print a
-information about matching codes. For instance, \code{reference('OTL')}
-returns a description of the standard humdrum \code{!!!OTL} reference record
-(original title metadata).
+\code{reference} is one of \link{humdrumR}'s
+basic \link[=humSummary]{corpus summary functions}.
 }
 \details{
+\code{reference} can be used to look up information about common reference
+codes: supply a reference code as a \code{character} string to \code{reference}
+and it will check it against known reference codes and print
+information about matching codes (if there is one). For instance, \code{reference('OTL')}
+returns a description of the standard humdrum \code{!!!OTL} reference record
+(original title metadata).
+
+When applied to a \link[=humdrumRclass]{humdrumR corpus}
+\code{reference} returns a special \code{data.frame} called a \code{humReference} table.
 A \code{humReference} table has one column for
-each reference code that appears in a \link[=humdrumRclass]{humdrumR} corpus.
-Since reference records can be long (too much to print on one screen),
-and humdrum files can have multiple of the same type of reference code
-(for instance multiple composers annotated with "!!!COM"),
-by default, a \code{humReference} only prints the number of each type of
+each reference code that appears in the corpus.
+Since reference records can be too long to print on one screen,
+and humdrum files can have multiple of the same type of reference code,
+a \code{humReference} table normally prints only the number of each type of
 reference record to appear in each file.
 However, if only one type of reference code is present in a
 \code{humReference} table, the complete reference records for that code
-will be printed for each file. Likewise, if only one file is present
+\emph{will} be printed for each file. Likewise, if only one file is present
 in the table, all of that file's complete reference records are printed.
-Thus, if you want to see actualy reference records, try indexing the
+Thus, if you want to see actual reference records, try indexing the
 \code{humReference} table down to one column or row (see below).
 
 A \code{humReference} table has one row for each file in the corpus.
-Rows are labeled with each file's corresponding
-number (from the \link{humTable}'s \strong{File} field) and name (the \strong{Filename} field).
+Rows are labeled with each file name.
 In addition, when a \code{humReference} object is printed,
 three different summary totals are printed for each reference code:
-\strong{Any} indicates how many files in the corpus have at least
-one example of each code in them.
-\strong{Sum} indicates the total number of each reference code to appear
-in the corpus, including multiple appearances in one file (like multiple "!!!COM"
+\itemize{
+\item \strong{Any} indicates how many files in the corpus contain at least
+one example of each code.
+\item \strong{Sum} indicates the total number of each reference code to appear
+in the corpus, including multiple appearances in one file (like multiple \code{"!!!COM"}
 records).
-Finally, \strong{Unique} tabulates the number of unique tokens in each reference
-code---if your corpus only hase two unique composers (encoded in "!!!COM"),
+\item \strong{Unique} tabulates the number of unique token in the corpus, for each code.
+If your corpus only has two unique composers (encoded in "!!!COM"),
 the \strong{Unique} total will be \code{2}.
+This assumes that tokens are \emph{exactly} identical, including white space;
+so \code{"!!!COM: J.S. Bach"} and \code{"!!!COM: JS Bach"} will be counted as two
+unique reference records.
 }
-\section{Indexing}{
-
-
-\code{humReference} tables can be indexed much like base \code{R} \verb{[data.frames][base::data.frame()],  with two arguments: }i\verb{(rows) and}j\verb{(columns). If}i\code{or}j\code{are}numeric\verb{, they select rows or columns respectively, ordinally. If }i\verb{is a}character\verb{, it is matched as a regular expression against filenames in the corpus. If }j\verb{is a}character`, it is \link[base:pmatch]{partially matched}
-against column names.
-
-A \code{drop} argument is also available. If \code{TRUE}, a plain
-\verb{[data.table][data.table::data.table()]} is returned.
 }
+\examples{
 
+reference('COM')
+
+reference(humData)[ , 'COM']
+
+reference(humData)[3, ]
+       
+}
 \seealso{
 Other corpus summary functions: 
 \code{\link{census}()},
