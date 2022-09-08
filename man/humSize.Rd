@@ -5,9 +5,9 @@
 \alias{nrecords}
 \alias{ntokens}
 \alias{npieces}
+\alias{nfiles}
 \alias{anySubcorpora}
 \alias{namesSubcorpora}
-\alias{nfiles}
 \alias{is.empty}
 \alias{anyPaths}
 \alias{anyStops}
@@ -19,15 +19,17 @@ ntokens(humdrumR, dataTypes = "D")
 
 npieces(humdrumR)
 
+nfiles(humdrumR)
+
 anySubcorpora(humdrumR)
 
 namesSubcorpora(humdrumR)
 
-nfiles(humdrumR)
-
 \S4method{length}{humdrumR}(x)
 
 \S4method{nrow}{humdrumR}(x)
+
+\S4method{ncol}{humdrumR}(x)
 
 is.empty(humdrumR)
 

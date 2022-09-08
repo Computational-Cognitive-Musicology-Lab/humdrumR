@@ -669,16 +669,18 @@ spines  <- function(humdrumR, drop = FALSE) {
 
 #' @rdname spines
 #' @export
-`[.humSpines` <- function(spines, i, drop = FALSE) {
-  if (missing(i)) return(if (drop) popclass(spines) else spines)
+`[.humSpines` <- function(spineTable, i, drop = FALSE) {
+  if (missing(i)) return(if (drop) popclass(spineTable) else spineTable)
   
   
-  corpusName <- attr(spines, 'corpusName')
-  spines <- popclass(spines)
-  spines <- spines[i]
+  corpusName <- attr(spineTable, 'corpusName')
+  spineTable <- popclass(spineTable)
   
-  attr(spines, 'corpusName') <- corpusName
-  if (drop) spines else spines %class% 'humSpines'
+  if (is.character(i)) i <- grep(i, spineTable$Filename)
+  spineTable <- spineTable[i]
+  
+  attr(spineTable, 'corpusName') <- corpusName
+  if (drop) spineTable else spineTable %class% 'humSpines'
 }
 
 

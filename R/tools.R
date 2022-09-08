@@ -2064,12 +2064,12 @@ checkArg <- function(arg,  argname, callname = NULL,
     
 }
 
-checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE) {
-  checkArg(x, argname = argname, callname = callname,
+checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, min.length = 0L, ...) {
+  checkArg(x, argname = argname, callname = callname, ..., 
            valid = NULL,
            classes = c('numeric', 'integer', 'character', 'logical', structs, 
                        if (null) 'NULL'),
-           min.length = 0L)
+           min.length = min.length)
 }
 
 

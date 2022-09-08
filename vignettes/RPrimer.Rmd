@@ -78,12 +78,18 @@ Named arguments are very useful when we are creating data, like vectors and `dat
 ### Pipes
 
 Complex expressions might involve a large number of function calls, which can get tiresome to read (or write).
-For example, something like `log(round(sqrt(mean(x^2)), base = 2)` calls *four* functions!
+For example, something like
+
+```
+log(round(sqrt(mean(x^2)), base = 2)
+```
+
+calls *four* functions!
 An expression like that is a bit tricky to read, and it can be really easy to make a mistake where
 you put the wrong number of parentheses.
 As an alternative, `R` gives us the option of calling functions in a "pipe."
 The way this works is we use the "pipe" command `|>`, which takes an input on the left and "pipes" it into a function call on the right.
-For example, we can re-write the previous command as:
+For example, we can rewrite the previous command as:
 
 ```
 x^2 |> mean() |> sqrt() |> round() |> log(base = 2)
@@ -147,7 +153,7 @@ tworoot |> exp() |> round() -> newvalue
 ----
 
 Note your variable names can also include `_`, `.`, or numeric digits, as long as they aren't at the beginning of the name.
-For example, `X1` or `my_name` are valid names---but noat `2X`.
+For example, `X1` or `my_name` are valid names---but not `2X`.
 
 
 
@@ -249,7 +255,6 @@ We don't have to worry about multiplying each number of the vector, its done for
 
 ----
 
-There are the rules for working with vectors?
 There are two ideal circumstances for working with vectors.
 
 1. They are the same length.
@@ -289,10 +294,10 @@ paste(c('a', 'b', 'c'), 1)
 
 ----
 
-What happens if we have vectors that are longer than one, but are not the same length.
+What happens if we have vectors that are longer than one, but are not the same length?
 Well, `R` will generally attempt to "recycle" the shorter vector---which means repeat it---
 as necessary to match the length of the longer vector.
-If the shorter vector evenly divides the longer vector, you'll generally have not problem:
+If the shorter vector evenly divides the longer vector, you generally won't have a problem:
 
 
 ```{r}
@@ -372,7 +377,7 @@ data.frame(Letters = X, Semitones = Y, Intervals = Z)
 ----
 
 Remember, the vectors in a `data.frame` must all be the same length.
-If you tried to make a `data.frame` with a vectors that don't match in length, you'll get an error `arguments imply differing number of rows`.
+If you tried to make a `data.frame` with a vectors that don't match in length, you'll get an error "`arguments imply differing number of rows`."
 The one exception is that you can call `data.frame` with some *scalar* single values, which will be automatically recyced to match
 the length of the other vectors.
 
@@ -384,7 +389,7 @@ One approach is with the `$` operator, combined with the name of the column we w
 For example, we can get the `Letters` column from the data frame we made above using `df$Letters`.
 
 Often, we'll want to write code that uses a bunch of different columns from the same data.frame---in fact, this is the *main* thing we do most of the time in `R`!
-To avoid writing `df$` over and over again, we can use the [with()] function.
+To avoid writing `df$` over and over again, we can use the `with()` function.
 `with()` allows us to drop "inside" our `data.frame`, where our `R` commands can "see" the columns variables:
 
 ```{r}
@@ -440,3 +445,46 @@ Sometimes we'll encounter data points which are irrelevant, meaningless, or "not
 # Making your own functions
 
 
+To make your function in `R`, you use the `function` keyword, like so:
+
+```
+function(argument1, argument2, etc.) {
+  Expressions to evaluate here, involving the arguments
+
+}
+```
+
+For example, let's make a function that subtracts the mean from a vector of numbers.
+We'll have one argument, which we'll call `numbers`.
+
+
+```{r}
+
+myfunc <- function(numbers) {
+  mean <- mean(numbers)
+  numbers - mean
+}
+
+
+```
+
+We've created our function, and assigned it the name `myfunc`, just like any other assignment.
+Let's try it out:
+
+```{r}
+
+myfunc(1:9)
+
+```
+
+Notice that the *last* expression in your function definition is the value that gets "returned" by the function.
+
+
+---
+
+If you are feeling lazy, you can also define a function using a few less keystrokes using the command `\()` instead of `function()`.
+For example,
+
+```{r}
+\(x) x + 1
+```

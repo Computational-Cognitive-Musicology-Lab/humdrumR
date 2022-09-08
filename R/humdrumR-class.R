@@ -430,65 +430,72 @@ setMethod('initialize', 'humdrumR',
 
 # humdrumR core methods ####
 
-### As/Is ####
+## As/Is ####
 
 #' @rdname humdrumRclass
 #' @export
 is.humdrumR <- function(x){
     inherits(x, 'humdrumR')  
 } 
-is.humdrumR <- \(x) inherits(x, 'humdrumR')
+
 
 
 #' humdrumR Coercion.
 #' 
-#' Many users may wish to work with humdrum data without
-#' using the `[humdrumR:humdrumR][humdrumR]` API, instead using 
+#' Many users may wish to work with humdrum data,
+#' without having to rely on `humdrumR`'s [with(in).humdrumR][withinHumdrum] functionality.
+#' Rather, you'd like to just get "normal" `R` objects out of your humdrum data.
+#' `humdrumR` defines a number of functions/methods for "coercing" [humdrum data][humdrumRclass] into
 #' basic `R` data types.
-#' For this purpose, [humdrumRclass] data objects can be coerced to 
-#' basic `R` data types.
 #' 
-#' [as.vector(humdata)][base::as.vector()] evaluates the [humdrumRclass] object's
-#' **Active** expression, and (attempts) to force the result to a vector of mode. This
-#' method is essentially a wrapper for [evalActive].
+#' @details
 #' 
-#' [as.matrix(humdata][base::as.matrix()] also evaluates the [humdrumRclass] object's
-#' **Active** expression, but wraps it into a matrix of dimensions `c([humdrumR:humSize][nrow(humdata), ncol(humdata)])`.
-#' Note that "`[humdrumR:humTable][Columns]`" in humdrum data are not necesarily the same as spines. 
+#' Generally, coercion works by evaluating a humdrumR object's the 
+#' [active expression][humActive] and forcing the result to be an atomic vector.
+#' This process is accomplished by the [activeAtomic()] command.
+#' The [as.vector(humdrumR)][base::as.vector()] method is essentially a wrapper for [activeAtomic()], with the additional
+#' option of coercing the resulting vector to a particular type using the `mode` argument.
 #' 
-#' [as.data.frame(humdata)][base::as.data.frame()] first calls `as.matrix` then converts the matrix to a [data.frame][base::data.frame()].
-#' [as.data.table(humdata)][data.table::as.data.table()] first calls `as.matrix` then converts the matrix to a [data.table::data.table()].
+#' The [as.matrix(humdrumR)][base::as.matrix()] method take things a step further by putting the evaluated
+#' active expression into a matrix of dimensions [`c(nrow(humdata), ncol(humdata))`][humSize].
+#' [as.data.frame(humdrumR)][base::as.data.frame()] and [as.data.table(humdrumR)][data.table::as.data.table()] first call `as.matrix` then convert the matrix to a
+#' `data.frame`/`table`.
+#' Note that `as.matrix(humdrumR)` places the *entire* corpus object into one matrix, even if there are multiple pieces.
+#' In contrast, the plural `as.matrices`, `as.data.frames`, and `as.data.tables` call their respective singular versions 
+#' separately on each individual file in a [humdrumR corpus][humdrumRclass] and return them all in a list.
 #' 
-#' `as.matrices`, `as.data.frames`, and `as.data.tables` call `as.matrix`/`as.data.frame`/`as.data.table`
-#' on each individual file in a [humdrumRclass] corpus, returning a list of matices/data.frames/data.tables.
+#' Different pieces in a single [humdrumR object][humdrumRclass]
+#' often differ in the number of [spines and spine paths][humColumns] they contain.
+#' If necessary, `humdrumR` pads the output matrix (with the value of the `padder` argument) to make all files the same number of columns.
+#' By default (`alignSpines = TRUE`), files containing spine paths are padded such that the base path (`Path == 0`) of all
+#' spines line up in the same column.
+#' Note that these padding behaviors introduce data-points that don't exist in the original humdrum data.
+#' All padding can be disabled by specifying `padder = NULL`.
+#' If you call the singular versions of `as.matrix`/`data.frame` on a unequally-columned dataset an error will occur.
+#' In contrast, the plural versions (e.g., `as.matrices`) will function fine with `padder = NULL`, since each element in the 
+#' resulting list *can* differ in the number of columns.
+#' 
+#' 
+#' The `as.lines` function converts a [humdrumR object][humdrumRclass] into a `character` vector of text lines, 
+#' like what you'd see in the original humdrum data.
 #' 
 #' 
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#'    or any combination of these (e.g., `"LIM"`).
+#'    (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
+#' @param alignSpines (`logical`, `length == 1`) Different pieces in a single [humdrumR object][humdrumRclass]
+#'   often differ in the number of [spines and spine paths][humColumns] they contain.
+#'   To squish them into a two dimensional object (`matrix` or `data.frame`) they must necessarily be padded to the same number of columns.
+#'   If `alignSpines = TRUE` (the default), spine paths are padded such that paths in each spine line up in the same column.
 #' 
-#' @param pad.files `logical` (default `TRUE`). If any pieces in the [humdrumRclass] corpus have fewer 
-#' `[humdrumR:humTable][spines/columns]` than the maximum, should they be padded with the `padder` argument (`par.files == TRUE`) or
-#' should an an error occur (`pad.files == FALSE`)? Note that these "padded" points are not represented in the original humdrum data.
-#' 
-#' @param pad.paths `logical` If any spine path splits (`'*^'`) occur in the humdrumR data, should they be padded 
-#' with the `padder` argument (`par.files == TRUE`) or
-#' should an an error occur (`pad.paths == FALSE`)? 
-#' Note that these "padded" points are not represented in the original humdrum data.
-#' 
-#' @param padder An atomic value of length one. If `par.files` or `pad.paths` are true, the `padder`
-#' argument is used to fill in the desired gaps.
+#' @param padder An atomic value of length one. The value of the `padder`
+#'   argument is used to fill in differences in the number of columns between files.
+#'   If `NULL`, not padding is done.
 #' 
 #' 
-#' @param mode If the `mode` argument is not `'any'`, it can be a single `character`
-#' string naming an atomic mode---the output will be coerced to this mode (if possible).
-#' 
-#' @param field(s) If the `field` argument is *not* `NULL`, it can instead be a `character` string matching
-#' the [humdrumRclass] object's fields. If so, these fields are extracted instead of the
-#' [Active expression][humActive].
-#' For calls to `as.vector` and `as.data.frame`, only one field can be extracted.
-#' However, for calls to `as.matrix`, multiple fields can be extraced---these fields will be
-#' returned in a third matrix dimension, each field forming one rectangular slice.
+#' @param mode A single `character`
+#'   string naming an [atomic vector type][base::vector] to coerce the output to (if possible).
+#'   By default, set to `'any'`, which lets the output type simply be whatever comes out of [activeAtomic()].
 #' 
 #' 
 #' 
@@ -498,6 +505,9 @@ is.humdrumR <- \(x) inherits(x, 'humdrumR')
 setMethod('as.vector', 
           signature = c(x = 'humdrumR'),
           function(x, mode = 'any') {
+              checkArg(mode, 'mode', 'as.vector.humdrumR',
+                       validoptions = c('any', 'logical', 'numeric', 'integer', 'character'),
+                       min.length = 1L, max.length = 1L)
                     if (is.empty(x)) return(vector(mode, 0L))
                     
                     vec <- activeAtomic(x, 'D')
@@ -508,15 +518,12 @@ setMethod('as.vector',
 
 #' @name humCoercion
 #' @export
-as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL, 
-                     alignColumns = FALSE, padPaths = FALSE, padder = '.') {
+as.lines <- function(humdrumR, dataTypes = 'GLIMDd') {
     
           checkhumdrumR(humdrumR, 'as.lines')
-            
           dataTypes <- checkTypes(dataTypes, 'as.lines')
           
-          mat <- as.matrix(chor, dataTypes, padder = '')
-         
+          mat <- as.matrix(humdrumR, dataTypes, padder = '')
           lines <- applyrows(mat, paste, collapse = '\t')
           lines <- stringr::str_replace_all(lines, '\t\t+', '\t')
           lines <- stringr::str_remove(lines, '\t+$')
@@ -528,17 +535,26 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', fieldname = NULL,
           
 }
 
-#### As single matrix(like) ----
+### As single matrix(like) ----
 
 #' @name humCoercion
 #' @export
-as.matrix.humdrumR <- function(x, dataTypes = 'Dd', alignColumns = TRUE, padder = NA) { 
+as.matrix.humdrumR <- function(x, dataTypes = 'Dd', alignSpines = TRUE, padder = NA) { 
     
     checkhumdrumR(x, 'as.matrix.humdrumR')
     dataTypes <- checkTypes(dataTypes, 'as.matrix.humdrumR')
+    checkTF(alignSpines, 'alignSpines', 'as.matrix.humdrumR')
+    if (is.null(padder)) {
+        if (is.ragged(x)) .stop("You can't make a humdrumR object with",
+                                       "varying numbers of columns/spines/paths into a matrix without padding the data.",
+                                       "Since you've set the padder argument to NULL, you are seeing this error.")
+        padder <- NA # this is just used to initialize the empty matrix later
+    } else {
+        checkVector(padder, 'padder', 'as.matrix.humdrumR', max.length = 1, min.length = 1)
+    }
     
     humtab <- getHumtab(x, dataTypes)
-    if (alignColumns && length(unique(humtab$File)) > 1L && any(humtab$Path > 0L, na.rm = TRUE)) humtab <- alignColumnsAcrossFiles(humtab)
+    if (alignSpines && length(unique(humtab$File)) > 1L && any(humtab$Path > 0L, na.rm = TRUE)) humtab <- alignSpinesAcrossFiles(humtab)
     
     
     i <- data.table::frank(humtab[ , list(File, Record)], ties.method = 'dense')
@@ -560,7 +576,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'Dd', alignColumns = TRUE, padder 
     
 }             
 
-alignColumnsAcrossFiles <- function(humtab) {
+alignSpinesAcrossFiles <- function(humtab) {
     
     G <- humtab[Type == 'G']
     humtab <- humtab[Type != 'G']
@@ -586,34 +602,41 @@ alignColumnsAcrossFiles <- function(humtab) {
 #' @export
 setMethod('as.data.frame', 
           signature = c(x = 'humdrumR'),
-          function(x, dataTypes = 'Dd', alignColumns = TRUE, padder = NA) {
+          function(x, dataTypes = 'Dd', alignSpines = TRUE, padder = NA) {
               
-              as.data.frame(as.matrix.humdrumR(x, dataTypes = dataTypes, alignColumns = alignColumns, padder = padder), stringsAsFactors = FALSE)
+              as.data.frame(as.matrix.humdrumR(x, dataTypes = dataTypes, alignSpines = alignSpines, padder = padder), stringsAsFactors = FALSE)
           })
 
 #' @name humCoercion
 #' @export
 setMethod('as.data.frame', 
           signature = c(x = 'humdrumR'),
-          function(x, dataTypes = 'Dd', alignColumns = TRUE, padder = NA) {
+          function(x, dataTypes = 'Dd', alignSpines = TRUE, padder = NA) {
               
-              as.data.frame(as.matrix.humdrumR(x, dataTypes = dataTypes, alignColumns = alignColumns, padder = padder), stringsAsFactors = FALSE)
+              as.data.frame(as.matrix.humdrumR(x, dataTypes = dataTypes, alignSpines = alignSpines, padder = padder), stringsAsFactors = FALSE)
           })
 
-##### As (list of) matrix-like ####
+### As (list of) matrix-like ####
+
 #' @name humCoercion
 #' @export
-as.matrices <- function(humdrumR, dataTypes = 'Dd', alignColumns = TRUE, padder = NA) {
+as.matrices <- function(humdrumR, dataTypes = 'Dd', alignSpines = TRUE, padder = NA) {
     checkhumdrumR(humdrumR, 'as.matrices')
     dataTypes <- checkTypes(dataTypes, 'as.matrices')
+    checkTF(alignSpines, 'alignSpines', 'as.matrices.humdrumR')
     
-    mat <- as.matrix.humdrumR(humdrumR, dataTypes = dataTypes, alignColumns = alignColumns, padder = padder)
+    dontpad <- is.null(padder)
+    if (dontpad) padder <- NA
+    
+    checkVector(padder, 'padder', 'as.matrix.humdrumR', max.length = 1, min.length = 1)
+    
+    mat <- as.matrix.humdrumR(humdrumR, dataTypes = dataTypes, alignSpines = alignSpines, padder = padder)
     
     file <- as.integer(gsub('\\..*', '', rownames(mat)))
     lapply(unique(file),
            \(f) {
                submat <- mat[file == f, , drop = FALSE] 
-               if (!alignColumns) {
+               if (dontpad) {
                    submat <- submat[ , colSums(!is.na(submat)) > 0L, drop = FALSE]
                }
                
@@ -623,9 +646,9 @@ as.matrices <- function(humdrumR, dataTypes = 'Dd', alignColumns = TRUE, padder 
 
 #' @name humCoercion
 #' @export 
-as.data.frames <- function(humdrumR, dataTypes = 'Dd', alignColumns = TRUE, padder = NA) {
+as.data.frames <- function(humdrumR, dataTypes = 'Dd', alignSpines = TRUE, padder = NA) {
     checkhumdrumR(humdrumR, 'as.data.frames')
-    lapply(as.matrices(humdrumR,dataTypes = dataTypes, alignColumns = alignColumns, padder = padder), 
+    lapply(as.matrices(humdrumR,dataTypes = dataTypes, alignSpines = alignSpines, padder = padder), 
            as.data.frame, stringsAsFactors = FALSE)
 }
 
@@ -676,6 +699,7 @@ nrecords <- function(humdrumR, dataTypes = 'D') {
 #' @export
 ntokens <- function(humdrumR, dataTypes = 'D') {
           checkhumdrumR(humdrumR, 'ntokens')
+          checkTypes(dataTypes, 'dataTypes', 'ntokens')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
           
           nrow(humtab)
@@ -689,6 +713,11 @@ npieces <- function(humdrumR) {
           
           if (nrow(humtab) == 0L) 0L else length(unique(humtab$File))
 }
+
+
+#' @name humSize
+#' @export
+nfiles <- npieces
 
 #' Does humdrumR corpus contain subcorpora?
 #' 
@@ -715,9 +744,6 @@ namesSubcorpora <- function(humdrumR) {
     unique(humtab$SubCorpus)
 }
 
-#' @name humSize
-#' @export
-nfiles <- npieces
 
 #' @name humSize
 #' @export
@@ -730,6 +756,13 @@ setMethod('length',
 setMethod('nrow', 
           signature = c(x = 'humdrumR'), 
           \(x) nrecords(x, dataTypes = 'LIMDd'))
+
+
+#' @name humSize
+#' @export
+setMethod('ncol', 
+          signature = c(x = 'humdrumR'), 
+          \(x) max(getHumtab(x)$Column, na.rm = TRUE))
 
 #' @name humSize
 #' @export
@@ -817,7 +850,7 @@ mergeHumdrum <- function(...) {
 }
 
 # padRecord <- function(record) {
-#           ## This is used by alignColumns
+#           ## This is used by alignSpines
 #           columnlabels <- record$ColumnLabels[[1]]
 #           if (is.na(record$Spine[1])) { # if it's a global record!
 #                     list(setNames(record$Temp, '0.0'))
@@ -2094,7 +2127,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
 .print_humtab <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                           max.records.file = 40L, max.token.length = 12L, collapseNull = Inf,
                           screenWidth = options('width')$width - 10L) {
-  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, alignColumns = TRUE, padder = '')
+  tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, alignSpines = TRUE, padder = '')
   
   # removes "hanging stops" like "a . ." -> "a"
   # if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
