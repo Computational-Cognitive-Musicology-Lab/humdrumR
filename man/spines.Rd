@@ -8,7 +8,7 @@
 \usage{
 spines(humdrumR, drop = FALSE)
 
-\method{[}{humSpines}(spines, i, drop = FALSE)
+\method{[}{humSpines}(spineTable, i, drop = FALSE)
 
 \method{print}{humSpines}(spineTable, showEach = TRUE)
 }

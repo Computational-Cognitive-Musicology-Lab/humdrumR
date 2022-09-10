@@ -368,7 +368,7 @@ getHumtab(paths2)
 
 Notice that `humdrumR` prints paths in a way that is more readable than reading humdrum syntax directly:
 paths are "shifted" over into columns that align.
-This is what the `Column` field is used for.
+This is an option to the function `as.matrix.humdrumR()`.
 
 
 

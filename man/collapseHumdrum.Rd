@@ -48,7 +48,7 @@ collapseRecords(
 
 \item{sep}{\code{character}. If \code{collapseAtomic == TRUE}, collapsed tokens are separated by this string.}
 
-\item{pad}{\code{logical}. Should \link[=humColumns]{path/column padding tokens} be included?}
+\item{pad}{\code{logical}. Should path/column padding tokens be included?}
 }
 \description{
 These functions are used to change the "shape"

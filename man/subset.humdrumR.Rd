@@ -85,8 +85,7 @@ the \code{File} and/or \code{Spine} fields are renumbered to represented the rem
 starting from \code{1}.
 For example, if you have a corpus of 10 files and remove the first file (\code{File == 1}),
 the remaining files are renumbered from \code{2:10} to \code{1:9}.
-Spine renumbering works the same, except it is done independently \emph{within} each file
-(\link[=humColumns]{columns} are also renumbered accordingly).
+Spine renumbering works the same, except it is done independently \emph{within} each file.
 }
 
 \seealso{

@@ -52,8 +52,7 @@
 #' starting from `1`.
 #' For example, if you have a corpus of 10 files and remove the first file (`File == 1`),
 #' the remaining files are renumbered from `2:10` to `1:9`.
-#' Spine renumbering works the same, except it is done independently *within* each file
-#' ([columns][humColumns] are also renumbered accordingly).
+#' Spine renumbering works the same, except it is done independently *within* each file.
 #' 
 #' @param x A [humdrumR data object][humdrumRclass].
 #' @param humdrumR A [humdrumR data object][humdrumRclass].

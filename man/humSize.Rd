@@ -51,7 +51,7 @@ A few common base \code{R} methods are defined
 as synonyms for the humdrumR-specific sizing functions:
 \link[base:length]{length(humdata)} is equivalent to \code{npieces(humdata)};
 \link[base:nrow]{nrow(humdata)} is shortand for \code{nrecords(., dataTypes = 'LIMDd')} (i.e., local records only).
-\link[base:nrow]{ncol(humdata)} returns the \emph{maximum} value of the \link[=humTable]{Column} field---the maximum number of
+\link[base:nrow]{ncol(humdata)} returns the \emph{maximum} value -----------
 tab-delineated columns in the humdrum files (irrespective of Spines/Paths).
 The results of \code{nrow} and \code{ncol} will match
 up with the dimensions of matrices/data.frames produced by calls to \link[=as.matrix]{as.matrix/as.data.frame}.

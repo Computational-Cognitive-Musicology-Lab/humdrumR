@@ -169,13 +169,46 @@ either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rath
 or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 }
 
+\section{Spines and Paths}{
+Spines vs Paths vs Columns
+
+In the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}, data is placed in "spines,"
+which are not the same as "columns" in a spreadsheet. A "column" refers to a
+tab-delineated group of values.
+"Spines" can be a single column, or they may (at any time) split into multiple columns,
+which can in turn split again, using the \code{"*^"} interpretation token. The reverse can happen as well,
+with two or more columns merging into a single column, using the \code{"v"} token.
+This means that, while humdrum data at first glance looks like a simple two-dimensional table,
+it is actually a flexible tree structure. As spines split and merge, the total number of columns
+can change during a piece, creating a "ragged" edge.
+Another similar issue is that a corpus of humdrum files may have varying numbers of spines/columns, between pieces.
+("Global" comment/reference records are also a special case, as that are always a single value, even if interspersed with
+multi-column local records.)
+\code{readHumdrum} assumes a slightly more strict version of the humdrum syntax:
+that all the spines which appear at the beginning of a file (headed with exclusive interpretations
+like \code{"**kern"}) can never merge into each other. Thus, a humdrum file read into \code{humdrumR}
+must not end with fewer columns than it starts.
+Spine merges (\code{"*v"}) can only happen within spine paths that originally split off the same spine.
+This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
+informally followed in most humdrum datasets.
+
+Our strict spine-path definition makes everything work fairly simply:
+Within a piece, the spines which appear at the beginning of the piece are the "true" spines throughout the piece, numbered
+from left to right, starting from \code{1L}.
+For each local token, the value in the \code{Spine} field is an integer indicating which of these
+"true" spines it belongs to---global tokens have a \code{NA} value in their \code{Spine} field, because they do not belong to any spine.
+Any spine path splits (\code{"*^"}) from the main spines form \strong{spine paths}.
+Every spine's paths are numbered in the \code{Path} field, from right to left, starting from \code{0L}.
+A spine with no splits will have all \code{0L}s in its \code{Path} field.
+}
+
 \section{Result}{
 
 
 \code{findHumdrum} returns a "fileFrame" (\code{data.table}), listing all file names,
 the patterns they match, the directories they were found in, \emph{and} the raw text content of these files.
 
-\code{readHumdrum} returns a fully parsed \code{humdrumR} object.
+\code{readHumdrum} returns a fully parsed \link[=humdrumRclass]{humdrumR object}.
 }
 
 \examples{

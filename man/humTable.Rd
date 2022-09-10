@@ -55,8 +55,8 @@ piece of information associated with each token, which we call a \strong{field}.
 Throughout this documentation, you should keep in mind that a "token" refers
 to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 \itemize{
-\item Token = Row
-\item Field = Column
+\item Token = row
+\item Field = column
 }
 }
 \section{Fields:}{
@@ -70,11 +70,11 @@ There are five types of fields in a humdrum table:
 }
 
 When first created by a call to \link{readHumdrum} every
-humdrum table has at least nineteen fields: one data field (\code{Token}), two interpretation
-fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fifteen structure fields. Additional
+humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation
+fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fourteen structure fields. Additional
 interpretation or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
-by \link[=humAssignment]{assigning to the object}.
+by using \link[=withinHumdrum]{within(humdrumR)}.
 \subsection{Data fields:}{
 
 Data fields are used to describe individual data points
@@ -135,14 +135,6 @@ the humdrum data, the right side of the split becomes a new "path." The original
 is numbered \code{0} with additional paths numbered with integers to the right.
 (If there are no spine path splits, the \code{Path} field is all zeros.)
 \item This field is always \code{NA} when \code{Global == TRUE}.
-\item Read the \link[=humColumns]{humdrum columns documentation} for a more thorough explanation
-of spine paths.
-}
-\item \code{Column} :: \code{integer}
-\itemize{
-\item The tab-delineated column in the humdrum file---irrespective of Spine/Paths---, numbered starting from \code{1}.
-\item This field is always \code{NA} when \code{Global == TRUE}.
-\item See this \link[=humColumns]{explanation of columns in humdrumR}.
 }
 \item \code{Record} :: \code{integer}
 \itemize{
@@ -161,7 +153,7 @@ of spine paths.
 \item \code{Global} :: \code{logical}
 \itemize{
 \item Did the token come from a global record (as opposed to a local record)?
-\item When \code{Global == TRUE}, the \code{Spine}, \code{Column}, and \code{Stop} fields are always \code{NA}.
+\item When \code{Global == TRUE}, the \code{Spine}, \code{Path}, and \code{Stop} fields are always \code{NA}.
 }
 }
 \item \emph{Token info}:
@@ -176,7 +168,6 @@ of spine paths.
 \item \code{"M"} = measure/barline
 \item \code{"L"} = local comment
 \item \code{"G"} = global comment.
-\item \code{"P"} = null "non-tokens" (see the \link[=humColumns]{humdrumR columns} documentation for an explanation.)
 }
 }
 \item \code{Null} :: \code{logical}

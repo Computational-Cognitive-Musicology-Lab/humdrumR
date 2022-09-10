@@ -649,6 +649,7 @@ spines  <- function(humdrumR, drop = FALSE) {
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
   humtab <- getHumtab(humdrumR)
+  humtab$Column <- getColumn(humtab, 'piece')
   
   spines <- humtab[Global == FALSE , 
                    .(File            = unique(File),

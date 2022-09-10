@@ -4,23 +4,30 @@
 \alias{humCoercion}
 \alias{as.lines}
 \alias{as.matrix.humdrumR}
+\alias{as.matrix}
 \alias{as.matrices}
 \alias{as.data.frames}
 \title{humdrumR Coercion.}
 \usage{
 \S4method{as.vector}{humdrumR}(x, mode = "any")
 
-as.lines(humdrumR, dataTypes = "GLIMDd")
+as.lines(
+  humdrumR,
+  dataTypes = "GLIMDd",
+  padPaths = "dont",
+  padder = "",
+  sep = "\\t"
+)
 
-\method{as.matrix}{humdrumR}(x, dataTypes = "Dd", alignSpines = TRUE, padder = NA)
+\method{as.matrix}{humdrumR}(x, dataTypes = "LIMDd", padPaths = "corpus", padder = NA)
 
-\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", alignSpines = TRUE, padder = NA)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", padPaths = "corpus", padder = NA)
 
-\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", alignSpines = TRUE, padder = NA)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", padPaths = "corpus", padder = NA)
 
-as.matrices(humdrumR, dataTypes = "Dd", alignSpines = TRUE, padder = NA)
+as.matrices(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 
-as.data.frames(humdrumR, dataTypes = "Dd", alignSpines = TRUE, padder = NA)
+as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 }
 \arguments{
 \item{mode}{A single \code{character}
@@ -31,14 +38,13 @@ By default, set to \code{'any'}, which lets the output type simply be whatever c
 or any combination of these (e.g., \code{"LIM"}).
 (See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
-\item{alignSpines}{(\code{logical}, \code{length == 1}) Different pieces in a single \link[=humdrumRclass]{humdrumR object}
-often differ in the number of \link[=humColumns]{spines and spine paths} they contain.
-To squish them into a two dimensional object (\code{matrix} or \code{data.frame}) they must necessarily be padded to the same number of columns.
-If \code{alignSpines = TRUE} (the default), spine paths are padded such that paths in each spine line up in the same column.}
+\item{padPaths}{(\code{character}, \code{length == 1}) One of three options: \code{"corpus"}, \code{"piece"}, or \code{"dont"}.
+See details for explanation.}
 
 \item{padder}{An atomic value of length one. The value of the \code{padder}
-argument is used to fill in differences in the number of columns between files.
-If \code{NULL}, not padding is done.}
+argument is used to fill in differences in the number of columns between files, and or spine paths.}
+
+\item{sep}{A single \code{character} string, indicating a separator to place between columns in collapsed lines.}
 }
 \description{
 Many users may wish to work with humdrum data,
@@ -56,23 +62,59 @@ option of coercing the resulting vector to a particular type using the \code{mod
 
 The \link[base:matrix]{as.matrix(humdrumR)} method take things a step further by putting the evaluated
 active expression into a matrix of dimensions \code{\link[=humSize]{c(nrow(humdata), ncol(humdata))}}.
-\link[base:as.data.frame]{as.data.frame(humdrumR)} and \link[data.table:as.data.table]{as.data.table(humdrumR)} first call \code{as.matrix} then convert the matrix to a
-\code{data.frame}/\code{table}.
+\link[base:as.data.frame]{as.data.frame(humdrumR)} first calls \code{as.matrix} then converts the matrix to a
+\code{data.frame}.
 Note that \code{as.matrix(humdrumR)} places the \emph{entire} corpus object into one matrix, even if there are multiple pieces.
-In contrast, the plural \code{as.matrices}, \code{as.data.frames}, and \code{as.data.tables} call their respective singular versions
+In contrast, the plural \code{as.matrices} and \code{as.data.frames} call their respective singular versions
 separately on each individual file in a \link[=humdrumRclass]{humdrumR corpus} and return them all in a list.
-
-Different pieces in a single \link[=humdrumRclass]{humdrumR object}
-often differ in the number of \link[=humColumns]{spines and spine paths} they contain.
-If necessary, \code{humdrumR} pads the output matrix (with the value of the \code{padder} argument) to make all files the same number of columns.
-By default (\code{alignSpines = TRUE}), files containing spine paths are padded such that the base path (\code{Path == 0}) of all
-spines line up in the same column.
-Note that these padding behaviors introduce data-points that don't exist in the original humdrum data.
-All padding can be disabled by specifying \code{padder = NULL}.
-If you call the singular versions of \code{as.matrix}/\code{data.frame} on a unequally-columned dataset an error will occur.
-In contrast, the plural versions (e.g., \code{as.matrices}) will function fine with \code{padder = NULL}, since each element in the
-resulting list \emph{can} differ in the number of columns.
+The \link[base:colnames]{row names}  of the \code{matrix}/\code{data.frame}(s) consist of two integer values,
+separated by a \code{.}, representing: \code{File.Record}.
 
 The \code{as.lines} function converts a \link[=humdrumRclass]{humdrumR object} into a \code{character} vector of text lines,
-like what you'd see in the original humdrum data.
+with columns separated by the \code{sep} argument (defaults to \code{"\\t"}), just as you'd see in a humdrum-syntax file.
+Each line is a single row from a \code{as.matrix.humdrumR}, with padded values at the right side removed.
+The matrix's \link[base:colnames]{row names} are preserved as the lines' names.
 }
+\section{Padding}{
+
+
+Different pieces in a single \link[=humdrumRclass]{humdrumR object}
+often differ in the number of spines and/or spine paths they contain.
+To squish them into a two dimensional object (\code{matrix} or \code{data.frame}) they must necessarily be padded to the same number of columns.
+(Global comments---which actually have \code{NA} spines---are also padded, placing the record in column 1.)
+The \code{pad} argument is a single atomic value which is used to pad the matrix.
+
+Another consideration is the behavior of spine paths.
+In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:\preformatted{**kern  **kern
+A       E
+*^      *
+A       C       E
+G       B       D
+*v      *v      *
+A       C        
+*-      *-
+}
+
+At the beginning and end of the file, the second column holds data for the second spine.
+However, in the middle of the file, the second column holds data from the second spine path of the first spine.
+To make the spine structure clearer, \code{as.matrix(humdrumR)} has the option to pad spine paths.
+For example, using \code{"_"} as our \code{pad} argument:\preformatted{**kern   _        **kern
+A        _        E
+*^       _        *
+A        C        E
+G        B        D
+*v       *v       *
+A        _        C        
+*-       _        *-
+}
+
+This aspect of the matrix padding behavior can be controlled with the \code{padPaths} argument, with three possible values/behaviors:
+\itemize{
+\item \code{"corpus"}: Paths are padded such that spine-paths across all pieces in the corpus all align in the same columns.
+If even one file has a spine path, all the other files are padded so their spines stay aligned.
+This is the default behavior for \code{as.matrix(humdrumR)}.
+\item \code{"piece"}: Paths are padded, but only \emph{within} each piece. The spines/paths between different pieces may not align.
+\item \code{"dont"}: Paths are not padded at all.
+}
+}
+

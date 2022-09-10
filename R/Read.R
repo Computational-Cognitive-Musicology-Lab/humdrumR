@@ -560,6 +560,39 @@ shortFilenames <- function(fileFrame) {
 #' or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 #' 
 #' 
+#' @section Spines and Paths:
+#' 
+#' # Spines vs Paths vs Columns 
+#' 
+#' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
+#' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
+#' tab-delineated group of values.
+#' "Spines" can be a single column, or they may (at any time) split into multiple columns,
+#' which can in turn split again, using the `"*^"` interpretation token. The reverse can happen as well,
+#' with two or more columns merging into a single column, using the `"v"` token.
+#' This means that, while humdrum data at first glance looks like a simple two-dimensional table,
+#' it is actually a flexible tree structure. As spines split and merge, the total number of columns
+#' can change during a piece, creating a "ragged" edge.
+#' Another similar issue is that a corpus of humdrum files may have varying numbers of spines/columns, between pieces.
+#' ("Global" comment/reference records are also a special case, as that are always a single value, even if interspersed with
+#' multi-column local records.)
+# 
+#' `readHumdrum` assumes a slightly more strict version of the humdrum syntax:
+#' that all the spines which appear at the beginning of a file (headed with exclusive interpretations
+#' like `"**kern"`) can never merge into each other. Thus, a humdrum file read into `humdrumR`
+#' must not end with fewer columns than it starts.
+#' Spine merges (`"*v"`) can only happen within spine paths that originally split off the same spine.
+#' This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
+#' informally followed in most humdrum datasets.
+#' 
+#' Our strict spine-path definition makes everything work fairly simply: 
+#' Within a piece, the spines which appear at the beginning of the piece are the "true" spines throughout the piece, numbered
+#' from left to right, starting from `1L`.
+#' For each local token, the value in the `Spine` field is an integer indicating which of these
+#' "true" spines it belongs to---global tokens have a `NA` value in their `Spine` field, because they do not belong to any spine.
+#' Any spine path splits (`"*^"`) from the main spines form **spine paths**.
+#' Every spine's paths are numbered in the `Path` field, from right to left, starting from `0L`.
+#' A spine with no splits will have all `0L`s in its `Path` field.
 #' 
 #' 
 #' @section Result:
@@ -567,7 +600,7 @@ shortFilenames <- function(fileFrame) {
 #' `findHumdrum` returns a "fileFrame" (`data.table`), listing all file names,
 #' the patterns they match, the directories they were found in, *and* the raw text content of these files.
 #' 
-#' `readHumdrum` returns a fully parsed `humdrumR` object.
+#' `readHumdrum` returns a fully parsed [humdrumR object][humdrumRclass].
 #' 
 #' @examples 
 #' 
@@ -803,14 +836,13 @@ parseLocal <- function(records) {
   # Don't need recordns to be characters anymore.
   recordns  <- as.integer(recordns)
   humtab <- data.table::data.table(Token = tokens,
-                                 Column = Columns,
-                                 Spine = SpineNumbers[Columns],
-                                 Path  = SpinePaths[Columns],
-                                 Record = recordns,
-                                 Stop = stopNs,
-                                 Exclusive = exclusives[Columns],
-                                 Tandem = tandems,
-                                 barlines)
+                                   Spine = SpineNumbers[Columns],
+                                   Path  = SpinePaths[Columns],
+                                   Record = recordns,
+                                   Stop = stopNs,
+                                   Exclusive = exclusives[Columns],
+                                   Tandem = tandems,
+                                   barlines)
 
   if (ncol(sections) > 0L) humtab <- cbind(humtab, sections)
   # humtab <- humtab[Token != '_P'] # "_P" tokens were inserted as padding by parseSpinePaths

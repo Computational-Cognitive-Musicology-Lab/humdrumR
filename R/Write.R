@@ -100,7 +100,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     
     # humdrumR <- indexGLIM(humdrumR)
     humdrumR <- fields.as.character(humdrumR)
-    lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', fieldname = fieldname, padPaths = FALSE, alignColumns = FALSE)
+    lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont')
     filestrs <- tapply(lines, 
                        as.numeric(stringi::stri_extract_first_regex(names(lines), # as.numeric makes them sort numerically
                                                                     '^[1-9][0-9]*')), 
