@@ -525,8 +525,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'LIMDd', padPaths = 'corpus', padd
              validoptions = c('corpus', 'piece', 'dont'))
     checkVector(padder, 'padder', 'as.matrix.humdrumR', max.length = 1, min.length = 1)
 
-    
-    
+    x <- collapseStops(x)
     humtab <- getHumtab(x, dataTypes)
     
     
@@ -830,93 +829,111 @@ mergeHumdrum <- function(...) {
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
-                            collapseField = 'Token', 
-                            dataTypes = 'Dd', 
-                            removeNull = list(), 
+                            collapseField = activeFields(humdrumR)[1], 
+                            dataTypes = 'GLIMDd', 
                             collapseAtomic = TRUE, sep = ' ') {
  
     checkhumdrumR(humdrumR, 'collapseHumdrum')
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'fromField')
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapseHumdrum')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
+    by <- fieldMatch(humdrumR, by, 'collapseHumdrum', 'by')
+    checkCharacter(sep, 'sep', 'collapseHumdrum', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
-    doQuos <- lapply(collapseField, 
-                    \(field) {
-                        newfield <- rlang::sym(paste0(field, '_collapsed'))
-                        field <- rlang::sym(field)
-                        
-                        if (collapseAtomic) {
-                            rlang::expr({
-                                !!newfield <- paste(!!field, collapse = !!sep)
-                                })
-                        } else {
-                            rlang::expr({
-                                !!newfield <- list(!!field)
-                                })
-                        } })
-    by <- rlang::syms(by)
-    rlang::eval_tidy(rlang::expr({
-            within(humdrumR, 
-                   !!!doQuos, 
-                   dataTypes = !!dataTypes,
-                   by = list(!!!by))
-            
-        })) -> humdrumR
+    humtab <- getHumtab(humdrumR, dataTypes)
+    
+    humtab <- collapseHumtab(humtab, by = by, collapseField = collapseField, sep = sep, collapseAtomic = collapseAtomic)
+    
+    putHumtab(humdrumR, dataTypes) <- humtab
+    
+    humdrumR
+    
+}
+
+
+collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseAtomic = TRUE, sep = ' ') {
+    if (nrow(target) == 0L) return(humtab)
+    
+    collapser <- switch(paste0(is.list(humtab[[collapseField]]), collapseAtomic),
+                        TRUETRUE   = \(x) paste(unlist(x), collapse = sep),
+                        TRUEFALSE  = \(x) list(do.call('c', x)),
+                        FALSETRUE  = \(x) paste(x, collapse = sep),
+                        FALSEFALSE = \(x) list(list(x)))
+    
+    target <- humtab[unique(target[ , by , with = FALSE]), on = by]
+    collapsed <- rlang::eval_tidy(rlang::expr(target[ , collapser(!!rlang::sym(collapseField)), by = by]))
+    
+    humtab <- humtab[, {
+        result <- .SD[1]
+        result$Type <- if (any(Type %in% c('D', 'd'))) 'D' else Type[1]
+        result$Null <- all(Null, na.rm = TRUE)
+        result
+        }, by = by]
+    collapsed <- collapsed[humtab, on = by, V1]
+    replacements <- if (collapseAtomic) !is.na(collapsed) else !sapply(collapsed, is.null)
+    humtab[[collapseField]][replacements] <- collapsed[replacements]
+    
+    
     
 
-    humdrumR <- update_Null(humdrumR)
-    if (length(removeNull)) for (f in removeNull) humdrumR <- f(humdrumR)
-    humdrumR
+    humtab
+    
 }
 
 
 #' @rdname collapseHumdrum
 #' @export 
-collapseStops <- function(humdrumR, collapseField = 'Token', collapseAtomic = TRUE, sep = ' ') {
+collapseStops <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseStops')
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapseStops')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
+    checkCharacter(sep, 'sep', 'collapseStops', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
-    humtab <- getHumtab(humdrumR)
-    if (!any(humtab$Stop > 1L & !is.na(humtab$Stop))) return(humdrumR)
+    humtab <- getHumtab(humdrumR, 'D')
+    humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Path', 'Record'),
+                             target = humtab[Stop > 1L & !is.na(Stop)],
+                             collapseField = collapseField,
+                             collapseAtomic = collapseAtomic, sep = sep)
     
-    collapseHumdrum(humdrumR, collapseField = 'Token', 
-                    dataTypes = 'Dd',
-                    by = c('Filename', 'Spine', 'Record', 'Path'), 
-                    removeNull = list(removeEmptyStops),
-                    collapseAtomic = collapseAtomic, sep = sep)
+    putHumtab(humdrumR, overwriteEmpty = 'D') <- humtab
+    humdrumR
+
 }
+
 
 
 #' @rdname collapseHumdrum
 #' @export
-collapsePaths <- function(humdrumR, collapseField = 'Token', collapseAtomic = TRUE, sep = ' ') {
+collapsePaths <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapsePaths')
-    # First some necessary preprocessing
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapsePaths')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapsePaths', 'collapseField')
+    checkCharacter(sep, 'sep', 'collapsePaths', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
-    if (!anyPaths(humdrumR)) return(humdrumR)
+    humtab <- getHumtab(humdrumR)
+    humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Record'),
+                             target = humtab[Path > 0L & !is.na(Path)],
+                             collapseField = collapseField,
+                             collapseAtomic = collapseAtomic, sep = sep)
     
-    output <- collapseHumdrum(humdrumR, collapseField = collapseField, 
-                              dataTypes = 'GLIMDd',
-                              by = c('Filename', 'Record', 'Spine'), 
-                              removeNull = list(removeEmptyPaths),
-                              collapseAtomic = collapseAtomic, sep = sep)
-    
-    
-    output
+    putHumtab(humdrumR) <- humtab
+    humdrumR
     
 }
 
 #' @rdname collapseHumdrum
 #' @export
-collapseRecords <- function(humdrumR, collapseField = 'Token', dataTypes = 'GLIMDd', collapseAtomic = TRUE, sep = ' ') {
+collapseRecords <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseRecords')
-    humtab <- getHumtab(humdrumR)
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapseRecords')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseRecords', 'collapseField')
+    checkCharacter(sep, 'sep', 'collapseRecords', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
     
-    collapseHumdrum(humdrumR, collapseField = collapseField, 
-                    by = c('Filename', 'Record'), 
-                    dataTypes = dataTypes,
-                    removeNull = list(removeEmptySpines),
+    collapseHumdrum(humdrumR, dataTypes = 'LIMDd', 
+                    by = c('File', 'Record'),
+                    collapseField = collapseField,
                     collapseAtomic = collapseAtomic, sep = sep)
-    
-    
+
 }
 
 

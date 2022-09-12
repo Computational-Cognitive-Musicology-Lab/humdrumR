@@ -1477,7 +1477,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     nparts <- max(as.integer(partition))
     
-    if (nparts > 10000L) message("You're 'by' argument is making ", num2print(nparts), " groups.", 
+    if (nparts > 10000L) message("Your 'by' argument is making ", num2print(nparts), " groups.", 
                                 " This could take a while!")
     
     if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
