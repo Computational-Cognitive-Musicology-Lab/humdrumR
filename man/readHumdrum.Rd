@@ -82,6 +82,7 @@ This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*k
 look for any kern files in directories containing "Mozart" OR "Beethoven."
 If patterns are named, these names will show up as identifying patterns in the \verb{[humdrumR][humdrumR]} object's
 \code{Label} field. Unnamed patterns are simply labeled with numbers.
+We refer to files matched from regex patterns to be "subcorpora" of the total corpus.
 
 Normal (system appropriate) conventions (i.e., directories separated by \code{"/"},
 \code{'~'} at beginning to indicate home, \code{".."} to indicate directory above working directory, etc.)
@@ -100,7 +101,7 @@ each file by appending the names of the directories they occupy, recursively
 until the names are unique.)
 
 If a single humdrum file has multiple pieces in it---meaning that all spine paths close with \verb{*-}, then
-open again with \verb{**}---then they are parsed separetely.
+open again with \verb{**}---then they are parsed separately.
 They are distinguished in the \code{Piece} field.
 If there are no multi-piece files, \code{Piece} and \code{File} will be identical.
 }

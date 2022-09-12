@@ -2,60 +2,96 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{humSize}
 \alias{humSize}
-\alias{nrecords}
-\alias{ntokens}
-\alias{npieces}
-\alias{nfiles}
-\alias{anySubcorpora}
-\alias{namesSubcorpora}
+\alias{nrecord}
+\alias{ntoken}
+\alias{npiece}
+\alias{nfile}
 \alias{is.empty}
+\alias{anyMultiPieceFiles}
 \alias{anyPaths}
 \alias{anyStops}
-\title{humdrumR size and shape}
+\alias{anySubcorpora}
+\alias{namesSubcorpora}
+\title{\link[=humdrumRclass]{humdrumR data} size and shape}
 \usage{
-nrecords(humdrumR, dataTypes = "D")
-
-ntokens(humdrumR, dataTypes = "D")
-
-npieces(humdrumR)
-
-nfiles(humdrumR)
-
-anySubcorpora(humdrumR)
-
-namesSubcorpora(humdrumR)
-
-\S4method{length}{humdrumR}(x)
+nrecord(humdrumR, dataTypes = "GLIMDd")
 
 \S4method{nrow}{humdrumR}(x)
 
+ntoken(humdrumR, dataTypes = "GLIMDd")
+
+npiece(humdrumR)
+
+nfile(humdrumR)
+
+\S4method{length}{humdrumR}(x)
+
 \S4method{ncol}{humdrumR}(x)
 
+\S4method{dim}{humdrumR}(x)
+
 is.empty(humdrumR)
+
+anyMultiPieceFiles(humdrumR)
 
 anyPaths(humdrumR)
 
 anyStops(humdrumR)
+
+anySubcorpora(humdrumR)
+
+namesSubcorpora(humdrumR)
+}
+\arguments{
+\item{humdrumR}{A \link{humdrumRclass} data object.}
+
+\item{dataTypes}{(\code{character}) Which types of humdrum records to count.
+Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'} or any combination of
+these (e.g., \code{"LIM"}).}
+
+\item{x}{A \link{humdrumRclass} data object.}
 }
 \description{
 These functions can be used to quickly
 get basic information about the size and "shape" of
-a \link{humdrumRclass} corpus.
-For more details, use the \link[=humSummary]{census} function.
+a \link[=humdrumRclass]{humdrumR corpus objects}.
+For more details, use the \code{\link[=census]{census()}} or \code{\link[=spines]{spines()}} functions instead.
 
 \link[=humdrumRclass]{HumdrumR} objects can be divided into "subcorpora."
 \code{anySubcorpora} and \code{namesSubcorpora} functions tell us if there are any subcorpora and, if so, what they are called.
 }
 \details{
-A few common base \code{R} methods are defined
-as synonyms for the humdrumR-specific sizing functions:
-\link[base:length]{length(humdata)} is equivalent to \code{npieces(humdata)};
-\link[base:nrow]{nrow(humdata)} is shortand for \code{nrecords(., dataTypes = 'LIMDd')} (i.e., local records only).
-\link[base:nrow]{ncol(humdata)} returns the \emph{maximum} value -----------
-tab-delineated columns in the humdrum files (irrespective of Spines/Paths).
-The results of \code{nrow} and \code{ncol} will match
-up with the dimensions of matrices/data.frames produced by calls to \link[=as.matrix]{as.matrix/as.data.frame}.
-\link[base:dim]{dim(humdata)} returns \code{c(nrow(humdata), ncol(humdata))}, as usual.
-
-\code{is.empty(humdata)} asks if \code{ntokens(humdata, dataTypes = 'D') == 0L}.
+The following functions are defined.
+\itemize{
+\item \code{nfile} : The number of input files in the corpus.
+\itemize{
+\item \link[base:length]{length}\code{(humdrumR)} is a synonym.
 }
+\item \code{npiece}: The number of pieces in the corpus. (There may be multiple pieces per file.)
+\item \code{nrecord}: The number of records in the corpus.
+\itemize{
+\item \link[base:nrow]{nrow}\code{(humdrumR)} is a synonym.
+}
+\item \code{ntoken}: The number of tokens in the corpus.
+\item \code{ncol(humdrumR)}: Returns the maximum number of "columns" need to represent the data in a 2d matrix.
+Matches the default output from \link[=humCoercion]{as.matrix(humdrumR)}.
+\item \code{dim(humdrumR)}: the same as \code{c(nrow(humdrumR), ncol(humdrumR))}.
+}
+}
+\section{Is/Any}{
+
+
+A few additional functions return quick \code{TRUE}/\code{FALSE} answers regarding a \link[=humdrumRclass]{humdrumR corpus}:
+\itemize{
+\item \code{is.empty}: Returns \code{TRUE} is a corpus contains no \emph{non-null} data tokens (\code{D} tokens).
+\item \code{anyPaths}: Returns \code{TRUE} if there are any spine paths (\code{Path > 0}) in any pieces in the corpus.
+\item \code{anyStops}: Returns \code{TRUE} if there are any multi-stops (\code{Stop > 1}) in any pieces in the corpus.
+\item \code{anySubcorpora}: Returns \code{TRUE} if the corpus was \link[=readHumdrum]{read} with different regex patterns
+matching "subcorpora" labels.
+\itemize{
+\item \code{namesSubcorpora} returns the names of the subcorpora labels (\code{Label} field).
+}
+\item \code{anyMultiPieceFiles}: Returns \code{TRUE} if any files contain more than one piece (\code{Piece != File}).
+}
+}
+

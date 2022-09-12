@@ -479,6 +479,7 @@ shortFilenames <- function(fileFrame) {
 #' look for any kern files in directories containing "Mozart" OR "Beethoven."
 #' If patterns are named, these names will show up as identifying patterns in the `[humdrumR][humdrumR]` object's
 #' `Label` field. Unnamed patterns are simply labeled with numbers.
+#' We refer to files matched from regex patterns to be "subcorpora" of the total corpus.
 #' 
 #' Normal (system appropriate) conventions (i.e., directories separated by `"/"`, 
 #' `'~'` at beginning to indicate home, `".."` to indicate directory above working directory, etc.)
@@ -497,7 +498,7 @@ shortFilenames <- function(fileFrame) {
 #' until the names are unique.)
 #' 
 #' If a single humdrum file has multiple pieces in it---meaning that all spine paths close with `*-`, then
-#' open again with `**`---then they are parsed separetely.
+#' open again with `**`---then they are parsed separately.
 #' They are distinguished in the `Piece` field.
 #' If there are no multi-piece files, `Piece` and `File` will be identical.
 #' 

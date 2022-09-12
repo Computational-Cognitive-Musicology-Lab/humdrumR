@@ -253,7 +253,7 @@ getColumn <- function(humtab, pad = 'corpus') {
 
 orderHumtab <- function(humtab) {
     if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- c('File', 'Spine', 'Path', 'Record', 'Stop')
+    orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop')
     
     # can't sort by lists
     
@@ -376,7 +376,7 @@ is.humdrumR <- function(x){
 
 
 
-#' humdrumR Coercion.
+#' humdrumR coercion
 #' 
 #' Many users may wish to work with humdrum data,
 #' without having to rely on `humdrumR`'s [with(in).humdrumR][withinHumdrum] functionality.
@@ -393,7 +393,8 @@ is.humdrumR <- function(x){
 #' option of coercing the resulting vector to a particular type using the `mode` argument.
 #' 
 #' The [as.matrix(humdrumR)][base::as.matrix()] method take things a step further by putting the evaluated
-#' active expression into a matrix of dimensions [`c(nrow(humdata), ncol(humdata))`][humSize].
+#' active expression into a two-dimensional matrix, with rows representing records and columns indicating 
+#' spine paths (see Padding section below).
 #' [as.data.frame(humdrumR)][base::as.data.frame()] first calls `as.matrix` then converts the matrix to a
 #' `data.frame`.
 #' Note that `as.matrix(humdrumR)` places the *entire* corpus object into one matrix, even if there are multiple pieces.
@@ -405,8 +406,12 @@ is.humdrumR <- function(x){
 #' The `as.lines` function converts a [humdrumR object][humdrumRclass] into a `character` vector of text lines,
 #' with columns separated by the `sep` argument (defaults to `"\t"`), just as you'd see in a humdrum-syntax file.
 #' Each line is a single row from a `as.matrix.humdrumR`, with padded values at the right side removed.
-#' The matrix's [row names][base::rownames()] are preserved as the lines' names.
+#' The matrix's `File.Record` [row names][base::rownames()] are preserved as the lines' [names][base::names()].
 #'  
+#' Note that multiple-stop token (where `Stop > 1L`) cannot by incorporated into the two 
+#' dimensional `matrix`/`data.frame`. Thus, `as.matrix(humdrumR)` calls 
+#' [collapseStops(collapseAtomic = TRUE, sep = " ")]
+#' on the [humdrumR object][humdrumRclass] before creating a matrix.
 #' 
 #' @section Padding:
 #' 
@@ -455,7 +460,7 @@ is.humdrumR <- function(x){
 #' + `"dont"`: Paths are not padded at all. 
 #' 
 #' 
-#' 
+#' @param humdrumR A [humdrumRclass] data object.
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #'    or any combination of these (e.g., `"LIM"`).
 #'    (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
@@ -517,7 +522,7 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont', padder =
 #' @name humCoercion
 #' @aliases as.matrix
 #' @export
-as.matrix.humdrumR <- function(x, dataTypes = 'LIMDd', padPaths = 'corpus', padder = NA) { 
+as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', padder = NA) { 
     
     checkhumdrumR(x, 'as.matrix.humdrumR')
     dataTypes <- checkTypes(dataTypes, 'as.matrix.humdrumR')
@@ -627,41 +632,70 @@ isActiveAtomic <- function(humdrumR) {
 
 # Shape ####
 
-#' humdrumR size and shape
+## Size ----
+
+#' [humdrumR data][humdrumRclass] size and shape
 #' 
 #' These functions can be used to quickly
 #' get basic information about the size and "shape" of
-#' a [humdrumRclass] corpus.
-#' For more details, use the [census][humSummary()] function.
+#' a [humdrumR corpus objects][humdrumRclass].
+#' For more details, use the [census()] or [spines()] functions instead.
 #' 
-#' A few common base `R` methods are defined
-#' as synonyms for the humdrumR-specific sizing functions:
-#' [length(humdata)][base::length()] is equivalent to `npieces(humdata)`;
-#' [nrow(humdata)][base::nrow()] is shortand for `nrecords(., dataTypes = 'LIMDd')` (i.e., local records only).
-#' [ncol(humdata)][base::ncol()] returns the *maximum* value -----------
-#' tab-delineated columns in the humdrum files (irrespective of Spines/Paths).
-#' The results of `nrow` and `ncol` will match
-#' up with the dimensions of matrices/data.frames produced by calls to [as.matrix/as.data.frame][humdrumR::as.matrix()].
-#' [dim(humdata)][base::dim()] returns `c(nrow(humdata), ncol(humdata))`, as usual.
+#' @details 
 #' 
-#' `is.empty(humdata)` asks if `ntokens(humdata, dataTypes = 'D') == 0L`.
+#' The following functions are defined.
 #' 
+#' 
+#' + `nfile` : The number of input files in the corpus. 
+#'   + [length][base::length()]`(humdrumR)` is a synonym.
+#' + `npiece`: The number of pieces in the corpus. (There may be multiple pieces per file.)
+#' + `nrecord`: The number of records in the corpus. 
+#'   + [nrow][base::nrow()]`(humdrumR)` is a synonym.
+#' + `ntoken`: The number of tokens in the corpus.
+#' + `ncol(humdrumR)`: Returns the maximum number of "columns" need to represent the data in a 2d matrix.
+#'    Matches the default output from [as.matrix(humdrumR)][humCoercion].
+#' + `dim(humdrumR)`: the same as `c(nrow(humdrumR), ncol(humdrumR))`.
+#' 
+#' @section Is/Any:
+#' 
+#' A few additional functions return quick `TRUE`/`FALSE` answers regarding a [humdrumR corpus][humdrumRclass]:
+#' 
+#' + `is.empty`: Returns `TRUE` is a corpus contains no *non-null* data tokens (`D` tokens).
+#' + `anyPaths`: Returns `TRUE` if there are any spine paths (`Path > 0`) in any pieces in the corpus.
+#' + `anyStops`: Returns `TRUE` if there are any multi-stops (`Stop > 1`) in any pieces in the corpus.
+#' + `anySubcorpora`: Returns `TRUE` if the corpus was [read][readHumdrum()] with different regex patterns
+#'     matching "subcorpora" labels.
+#'    + `namesSubcorpora` returns the names of the subcorpora labels (`Label` field).
+#' + `anyMultiPieceFiles`: Returns `TRUE` if any files contain more than one piece (`Piece != File`).
+#' 
+#' @param humdrumR A [humdrumRclass] data object.
+#' @param x A [humdrumRclass] data object.
+#' @param dataTypes (`character`) Which types of humdrum records to count.
+#'     Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` or any combination of 
+#'     these (e.g., `"LIM"`).
+#'     
 #' @name humSize
 #' @export
-nrecords <- function(humdrumR, dataTypes = 'D') {
-          checkhumdrumR(humdrumR, 'nrecords')
+nrecord <- function(humdrumR, dataTypes = 'GLIMDd') {
+          checkhumdrumR(humdrumR, 'nrecord')
+          dataTypes <- checkTypes(dataTypes, 'dataTypes', 'nrecord')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
-          n <- humtab[Stop == 1L | is.na(Stop) , .(NR = length(unique(Record))), by = Filename] 
+          nrow(unique(humtab[ , list(File, Record)]))
           
-          sum(n$NR)
 }
 
 #' @name humSize
 #' @export
-ntokens <- function(humdrumR, dataTypes = 'D') {
-          checkhumdrumR(humdrumR, 'ntokens')
-          checkTypes(dataTypes, 'dataTypes', 'ntokens')
+setMethod('nrow',  signature = c(x = 'humdrumR'), \(x) nrecord(x))
+
+
+
+#' @name humSize
+#' @export
+ntoken <- function(humdrumR, dataTypes = 'GLIMDd') {
+          checkhumdrumR(humdrumR, 'ntoken')
+          dataTypes <- checkTypes(dataTypes, 'dataTypes', 'ntoken')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
           
           nrow(humtab)
@@ -669,17 +703,74 @@ ntokens <- function(humdrumR, dataTypes = 'D') {
 
 #' @name humSize
 #' @export
-npieces <- function(humdrumR) {
-          checkhumdrumR(humdrumR, 'npieces')
-          humtab <- getHumtab(humdrumR, 'D')
+npiece <- function(humdrumR) {
+          checkhumdrumR(humdrumR, 'npiece')
           
-          if (nrow(humtab) == 0L) 0L else length(unique(humtab$File))
+          length(unique(getHumtab(humdrumR)$Piece))
 }
+
+#' @name humSize
+#' @export
+nfile <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'npiece')
+    
+    length(unique(getHumtab(humdrumR)$File))
+}
+
+#' @name humSize
+#' @export
+setMethod('length', signature = c(x = 'humdrumR'), \(x) nfile(x))
 
 
 #' @name humSize
 #' @export
-nfiles <- npieces
+setMethod('ncol', 
+          signature = c(x = 'humdrumR'), 
+          \(x) max(getColumn(getHumtab(x)), na.rm = TRUE))
+
+#' @name humSize
+#' @export
+setMethod('dim',  signature = c(x = 'humdrumR'),  \(x) c(nrecord(x), ncol(x)))
+
+
+#' @name humSize
+#' @export
+is.empty <- function(humdrumR){
+    checkhumdrumR(humdrumR, 'is.empty')
+    nrow(getHumtab(humdrumR, 'D')) == 0L
+} 
+
+
+
+## Structure ----
+
+#' @rdname humSize
+#' @export
+anyMultiPieceFiles <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'anyPieces')
+    nfile(humdrumR) != npiece(humdrumR)
+}
+
+#' @rdname humSize
+#' @export
+anyPaths <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'anyPaths')
+    humtab <- getHumtab(humdrumR)
+    
+    any(humtab$Path > 0L, na.rm = TRUE)
+    
+}
+
+#' @rdname humSize
+#' @export
+anyStops <- function(humdrumR) {
+    checkhumdrumR(humdrumR, 'anyStops')
+    
+    humtab <- getHumtab(humdrumR)
+    any(humtab$Stop > 1L, na.rm = TRUE)
+    
+}
+
 
 #' Does humdrumR corpus contain subcorpora?
 #' 
@@ -693,7 +784,7 @@ anySubcorpora <- function(humdrumR){
     
     humtab <- getHumtab(humdrumR)
     
-    length(unique(humtab$SubCorpus)) > 1L
+    humtab[ , length(unique(Label)) > 1L]
 }
 
 #' @name humSize
@@ -703,57 +794,11 @@ namesSubcorpora <- function(humdrumR) {
     
     humtab <- getHumtab(humdrumR)
     
-    unique(humtab$SubCorpus)
+    humtab[ , unique(Label)]
 }
 
 
-#' @name humSize
-#' @export
-setMethod('length',
-          signature = c(x = 'humdrumR'),
-          \(x) npieces(x))
-
-#' @name humSize
-#' @export
-setMethod('nrow', 
-          signature = c(x = 'humdrumR'), 
-          \(x) nrecords(x, dataTypes = 'LIMDd'))
-
-
-#' @name humSize
-#' @export
-setMethod('ncol', 
-          signature = c(x = 'humdrumR'), 
-          \(x) max(getColumn(getHumtab(x)), na.rm = TRUE))
-
-#' @name humSize
-#' @export
-is.empty <- function(humdrumR){
-    checkhumdrumR(humdrumR, 'is.empty')
-    ntokens(humdrumR, 'D') == 0L 
-} 
-
-
-
-#' @name humSize
-#' @export
-anyPaths <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'anyPaths')
-    humtab <- getHumtab(humdrumR)
-    
-    any(humtab$Path > 0L, na.rm = TRUE)
-    
-}
-
-#' @name humSize
-#' @export
-anyStops <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'anyStops')
-    
-    humtab <- getHumtab(humdrumR)
-    any(humtab$Stop > 1L, na.rm = TRUE)
-    
-}
+## Renumbering ----
 
 is.ragged <- function(humdrumR) {
     # Do the pieces in the corpus vary in number of spines?
@@ -776,6 +821,7 @@ renumberFiles.humdrumR <- function(hum) {
 }
 renumberFiles.data.table <- function(hum) {
     hum[ , File := match(File, sort(unique(File)))]
+    hum[ , Piece := match(Piece, sort(unique(Piece)))]
     hum
 }
 
@@ -808,22 +854,28 @@ mergeHumdrum <- function(...) {
 
 ### collapseHumdrum ----
 
-#' HumdrumR data "Shape"
-#'
-#' These functions are used to change the "shape"
-#' of data stored in [humdrum tables][humTable]
-#' (held within [humdrumRclass] objects of course).
+#' "Collapse" humdrumR data into a field
 #' 
-#' The `collapseXXX` family allows you collapse all 
-#' [user fields][humTable]
-#' across groups in another field.
+#' `collapseHumdrum` allows you collapse a data field across
+#' across groups within the data indicated by the `by` argument.
+#' Data is "collapsed" either by [pasting][base::paste()] the data into a string,
+#' or by putting them into [list][base::list()].
+#' `collapseStops`, `collapsePaths`, and `collapseRecords` are built-in
+#' calls to `collapseHumtab`, with some additional optimizations.
 #'
 #' @param humdrumR A [humdrumRclass] data object.
-#' (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
-#' @param collapseAtomic `logical`. If `collapseAtomic == TRUE`, each stop is collapsed to a single string
-#' `collapseAtomic == FALSE`, each stop is collapsed to a list of tokens. 
-#' @param sep `character`. If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.
-#' @param pad `logical`. Should path/column padding tokens be included?
+#' @param by (`character`) A vector of field names to group the data by.
+#'   Data in the `collapseField` will be collapsed within these groups.
+#' @param collapseField (`character`, `length == 1`) The target
+#'   field in the `humdrumR` data to collapse. Defaults to the first [active field][humActive].
+#' @param dataTypes (`character`) Which types of humdrum records to collapse.
+#'     Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` or any combination of 
+#'     these (e.g., `"LIM"`).
+#' @param collapseAtomic (`logical`, `length == 1`) If `TRUE`, data is collapsed 
+#'   into a single `character` string.
+#'   If `FALSE`, data is conctanated in a `list`.
+#' @param sep (`character`, `length == 1`) If `collapseAtomic == TRUE`, collapsed tokens 
+#' are separated by this string.
 #' 
 #' @seealso The humdrum [folding functions][foldHumdrum()] serve a similar function,
 #' "folding" data into *new* fields, rather than collapsing it within a field.
@@ -834,9 +886,10 @@ collapseHumdrum <- function(humdrumR, by,
                             collapseAtomic = TRUE, sep = ' ') {
  
     checkhumdrumR(humdrumR, 'collapseHumdrum')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapseHumdrum')
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
     by <- fieldMatch(humdrumR, by, 'collapseHumdrum', 'by')
+    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
+    dataTypes <- checkTypes(dataTypes, ,'collapseHumdrum', argname = 'dataTypes')
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapseHumdrum')
     checkCharacter(sep, 'sep', 'collapseHumdrum', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
     humtab <- getHumtab(humdrumR, dataTypes)
@@ -855,7 +908,7 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
     
     collapser <- switch(paste0(is.list(humtab[[collapseField]]), collapseAtomic),
                         TRUETRUE   = \(x) paste(unlist(x), collapse = sep),
-                        TRUEFALSE  = \(x) list(list(do.call('c', x))),
+                        TRUEFALSE  = \(x) list(list(unlist(x, recursive = FALSE))), # there could be bugs here if we collapse data that is objects.
                         FALSETRUE  = \(x) paste(x, collapse = sep),
                         FALSEFALSE = \(x) list(list(x)))
     
@@ -887,8 +940,8 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
 #' @export 
 collapseStops <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseStops')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapseStops')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
+    checkTF(collapseAtomic, 'collapseAtomic', 'collapseStops')
     checkCharacter(sep, 'sep', 'collapseStops', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
     humtab <- getHumtab(humdrumR, 'D')
@@ -943,7 +996,7 @@ collapseRecords <- function(humdrumR, collapseField = activeFields(humdrumR)[1],
 
 ### foldHumdrum ----
 
-#' "Fold" data into new fields
+#' "Fold" humdrumR data into new fields
 #'
 #' Many humdrum datasets encode data across multiple spines, spine-paths, or stops.
 #' By default, `humdrumR` parses each separate spine, spine-path, and stop as their own individual

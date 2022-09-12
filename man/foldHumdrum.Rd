@@ -4,7 +4,7 @@
 \alias{foldHumdrum}
 \alias{foldPaths}
 \alias{foldStops}
-\title{"Fold" data into new fields}
+\title{"Fold" humdrumR data into new fields}
 \usage{
 foldHumdrum(
   humdrumR,

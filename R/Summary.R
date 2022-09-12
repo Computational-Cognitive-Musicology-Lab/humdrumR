@@ -652,7 +652,7 @@ spines  <- function(humdrumR, drop = FALSE) {
   humtab$Column <- getColumn(humtab, 'piece')
   
   spines <- humtab[Global == FALSE , 
-                   .(File            = unique(File),
+                   .(File             = unique(File),
                      Spines           = length(unique(Spine)),
                      Columns          = length(unique(Column)),
                      Splits           = sum(grepl('\\*\\^', Token)),

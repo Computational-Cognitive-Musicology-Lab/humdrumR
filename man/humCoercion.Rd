@@ -7,7 +7,7 @@
 \alias{as.matrix}
 \alias{as.matrices}
 \alias{as.data.frames}
-\title{humdrumR Coercion.}
+\title{humdrumR coercion}
 \usage{
 \S4method{as.vector}{humdrumR}(x, mode = "any")
 
@@ -19,7 +19,7 @@ as.lines(
   sep = "\\t"
 )
 
-\method{as.matrix}{humdrumR}(x, dataTypes = "LIMDd", padPaths = "corpus", padder = NA)
+\method{as.matrix}{humdrumR}(x, dataTypes = "GLIMDd", padPaths = "corpus", padder = NA)
 
 \S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", padPaths = "corpus", padder = NA)
 
@@ -33,6 +33,8 @@ as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 \item{mode}{A single \code{character}
 string naming an \link[base:vector]{atomic vector type} to coerce the output to (if possible).
 By default, set to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=activeAtomic]{activeAtomic()}}.}
+
+\item{humdrumR}{A \link{humdrumRclass} data object.}
 
 \item{dataTypes}{Which types of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
@@ -61,7 +63,8 @@ The \link[base:vector]{as.vector(humdrumR)} method is essentially a wrapper for 
 option of coercing the resulting vector to a particular type using the \code{mode} argument.
 
 The \link[base:matrix]{as.matrix(humdrumR)} method take things a step further by putting the evaluated
-active expression into a matrix of dimensions \code{\link[=humSize]{c(nrow(humdata), ncol(humdata))}}.
+active expression into a two-dimensional matrix, with rows representing records and columns indicating
+spine paths (see Padding section below).
 \link[base:as.data.frame]{as.data.frame(humdrumR)} first calls \code{as.matrix} then converts the matrix to a
 \code{data.frame}.
 Note that \code{as.matrix(humdrumR)} places the \emph{entire} corpus object into one matrix, even if there are multiple pieces.
@@ -73,7 +76,12 @@ separated by a \code{.}, representing: \code{File.Record}.
 The \code{as.lines} function converts a \link[=humdrumRclass]{humdrumR object} into a \code{character} vector of text lines,
 with columns separated by the \code{sep} argument (defaults to \code{"\\t"}), just as you'd see in a humdrum-syntax file.
 Each line is a single row from a \code{as.matrix.humdrumR}, with padded values at the right side removed.
-The matrix's \link[base:colnames]{row names} are preserved as the lines' names.
+The matrix's \code{File.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
+
+Note that multiple-stop token (where \code{Stop > 1L}) cannot by incorporated into the two
+dimensional \code{matrix}/\code{data.frame}. Thus, \code{as.matrix(humdrumR)} calls
+\link{collapseStops(collapseAtomic = TRUE, sep = " ")}
+on the \link[=humdrumRclass]{humdrumR object} before creating a matrix.
 }
 \section{Padding}{
 
