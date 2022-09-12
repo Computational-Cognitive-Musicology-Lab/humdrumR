@@ -855,26 +855,29 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
     
     collapser <- switch(paste0(is.list(humtab[[collapseField]]), collapseAtomic),
                         TRUETRUE   = \(x) paste(unlist(x), collapse = sep),
-                        TRUEFALSE  = \(x) list(do.call('c', x)),
+                        TRUEFALSE  = \(x) list(list(do.call('c', x))),
                         FALSETRUE  = \(x) paste(x, collapse = sep),
                         FALSEFALSE = \(x) list(list(x)))
     
     target <- humtab[unique(target[ , by , with = FALSE]), on = by]
     collapsed <- rlang::eval_tidy(rlang::expr(target[ , collapser(!!rlang::sym(collapseField)), by = by]))
-    
-    humtab <- humtab[, {
-        result <- .SD[1]
-        result$Type <- if (any(Type %in% c('D', 'd'))) 'D' else Type[1]
-        result$Null <- all(Null, na.rm = TRUE)
-        result
-        }, by = by]
-    collapsed <- collapsed[humtab, on = by, V1]
-    replacements <- if (collapseAtomic) !is.na(collapsed) else !sapply(collapsed, is.null)
-    humtab[[collapseField]][replacements] <- collapsed[replacements]
-    
-    
-    
+    humtab <- humtab[ , .SD[1], by = by]
 
+    collapsed <- collapsed[humtab, on = by, V1]
+    field <- humtab[[collapseField]]
+    if (collapseAtomic) {
+        replacements <- !is.na(collapsed) 
+        
+        if (is.list(field)) field <- sapply(field, collapser)
+        
+    } else {
+        replacements <- !sapply(collapsed, is.null)
+    }
+    field[replacements] <- collapsed[replacements]
+    humtab[[collapseField]] <- field
+    humtab$Null[replacements] <- FALSE
+    humtab$Type[replacements] <- 'D'
+    
     humtab
     
 }
@@ -929,7 +932,7 @@ collapseRecords <- function(humdrumR, collapseField = activeFields(humdrumR)[1],
     checkCharacter(sep, 'sep', 'collapseRecords', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
     
     
-    collapseHumdrum(humdrumR, dataTypes = 'LIMDd', 
+    collapseHumdrum(humdrumR, dataTypes = 'GLIMDd', 
                     by = c('File', 'Record'),
                     collapseField = collapseField,
                     collapseAtomic = collapseAtomic, sep = sep)
