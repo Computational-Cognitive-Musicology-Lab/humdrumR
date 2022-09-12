@@ -682,7 +682,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     #
     message('Done!\n')
     
-    makeHumdrumR(humtab, unique(fileFrame$Pattern), 
+    makeHumdrumR(humtab, pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
                  tandemcol = colnames(humtab) %in% colnames(tandemTab))
     
     
@@ -886,6 +886,7 @@ separatePieces <- function(fileFrame) {
     
     ## spread out 
     newFrame <- data.table(FileLines = unlist(filelines, recursive = FALSE),
+                           Pattern   = rep(fileFrame$Pattern, lengths(filelines)),
                            Filepath  = rep(fileFrame$Filepath, lengths(filelines)))
     newFrame[ , Piece := 1:nrow(newFrame)]
     # newFrame[ , Piece := unlist(lapply(lengths(filelines), seq_len))]

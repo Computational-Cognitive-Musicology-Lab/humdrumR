@@ -133,8 +133,8 @@ in the original humdrum data. Even multistops---tokens separated by spaces---are
 their own rows. Meanwhile, each column in the humdrum table represents a single
 piece of information associated with each token, which we call a <strong>field</strong>.
 Throughout this documentation, you should keep in mind that a "token" refers
-to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</em>:</p><ul><li><p>Token = Row</p></li>
-<li><p>Field = Column</p></li>
+to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</em>:</p><ul><li><p>Token = row</p></li>
+<li><p>Field = column</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="fields-">Fields:<a class="anchor" aria-label="anchor" href="#fields-"></a></h2>
@@ -144,11 +144,11 @@ to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</e
 <li><p>Formal fields</p></li>
 <li><p>Reference fields</p></li>
 </ol><p>When first created by a call to <a href="readHumdrum.html">readHumdrum</a> every
-humdrum table has at least nineteen fields: one data field (<code>Token</code>), two interpretation
-fields (<code>Tandem</code> and <code>Exclusive</code>), three formal fields, and fifteen structure fields. Additional
+humdrum table has at least eighteen fields: one data field (<code>Token</code>), two interpretation
+fields (<code>Tandem</code> and <code>Exclusive</code>), three formal fields, and fourteen structure fields. Additional
 interpretation or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
-by assigning to the object.</p><div class="section">
+by using <a href="withinHumdrum.html">within(humdrumR)</a>.</p><div class="section">
 <h3 id="data-fields-">Data fields:<a class="anchor" aria-label="anchor" href="#data-fields-"></a></h3>
 
 
@@ -192,12 +192,6 @@ the humdrum data, the right side of the split becomes a new "path." The original
 is numbered <code>0</code> with additional paths numbered with integers to the right.
 (If there are no spine path splits, the <code>Path</code> field is all zeros.)</p></li>
 <li><p>This field is always <code>NA</code> when <code>Global == TRUE</code>.</p></li>
-<li><p>Read the <a href="humColumns.html">humdrum columns documentation</a> for a more thorough explanation
-of spine paths.</p></li>
-</ul></li>
-<li><p><code>Column</code> :: <code>integer</code></p><ul><li><p>The tab-delineated column in the humdrum file---irrespective of Spine/Paths---, numbered starting from <code>1</code>.</p></li>
-<li><p>This field is always <code>NA</code> when <code>Global == TRUE</code>.</p></li>
-<li><p>See this <a href="humColumns.html">explanation of columns in humdrumR</a>.</p></li>
 </ul></li>
 <li><p><code>Record</code> :: <code>integer</code></p><ul><li><p>The record (i.e., line) number in the original file.</p></li>
 </ul></li>
@@ -208,7 +202,7 @@ of spine paths.</p></li>
 <li><p>This field is always <code>NA</code> when <code>Global == TRUE</code>.</p></li>
 </ul></li>
 <li><p><code>Global</code> :: <code>logical</code></p><ul><li><p>Did the token come from a global record (as opposed to a local record)?</p></li>
-<li><p>When <code>Global == TRUE</code>, the <code>Spine</code>, <code>Column</code>, and <code>Stop</code> fields are always <code>NA</code>.</p></li>
+<li><p>When <code>Global == TRUE</code>, the <code>Spine</code>, <code>Path</code>, and <code>Stop</code> fields are always <code>NA</code>.</p></li>
 </ul></li>
 </ul></li>
 <li><p><em>Token info</em>:</p><ul><li><p><code>Type</code> :: <code>character</code></p><ul><li><p>What type of record is it?</p><ul><li><p><code>"D"</code> = non-null data</p></li>
@@ -217,7 +211,6 @@ of spine paths.</p></li>
 <li><p><code>"M"</code> = measure/barline</p></li>
 <li><p><code>"L"</code> = local comment</p></li>
 <li><p><code>"G"</code> = global comment.</p></li>
-<li><p><code>"P"</code> = null "non-tokens" (see the <a href="humColumns.html">humdrumR columns</a> documentation for an explanation.)</p></li>
 </ul></li>
 </ul></li>
 <li><p><code>Null</code> :: <code>logical</code></p><ul><li><p>Is the <a href="humdrumR.html">active</a> data field null?</p></li>

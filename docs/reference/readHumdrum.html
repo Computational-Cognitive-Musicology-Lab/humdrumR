@@ -154,7 +154,8 @@ filenames containing "mozart" OR "beethoven."
 This works for directories too: <code>readHumdrum(c("Mozart", "Beethoven"), ".*krn$")</code> will
 look for any kern files in directories containing "Mozart" OR "Beethoven."
 If patterns are named, these names will show up as identifying patterns in the <code>[humdrumR][humdrumR]</code> object's
-<code>Label</code> field. Unnamed patterns are simply labeled with numbers.</p>
+<code>Label</code> field. Unnamed patterns are simply labeled with numbers.
+We refer to files matched from regex patterns to be "subcorpora" of the total corpus.</p>
 <p>Normal (system appropriate) conventions (i.e., directories separated by <code>"/"</code>,
 <code>'~'</code> at beginning to indicate home, <code>".."</code> to indicate directory above working directory, etc.)
 are followed.
@@ -169,7 +170,7 @@ Thus, <code>readHumdrum()</code> will read any humdrum files in the working dire
 each file by appending the names of the directories they occupy, recursively
 until the names are unique.)</p>
 <p>If a single humdrum file has multiple pieces in it---meaning that all spine paths close with <code>*-</code>, then
-open again with <code>**</code>---then they are parsed separetely.
+open again with <code>**</code>---then they are parsed separately.
 They are distinguished in the <code>Piece</code> field.
 If there are no multi-piece files, <code>Piece</code> and <code>File</code> will be identical.</p>
     </div>
@@ -236,13 +237,44 @@ either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rath
 or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".</p>
     </div>
     <div class="section level2">
+    <h2 id="spines-and-paths">Spines and Paths<a class="anchor" aria-label="anchor" href="#spines-and-paths"></a></h2>
+    <p>Spines vs Paths vs Columns</p>
+<p>In the <a href="http://www.humdrum.org/guide/ch05/" class="external-link">humdrum syntax</a>, data is placed in "spines,"
+which are not the same as "columns" in a spreadsheet. A "column" refers to a
+tab-delineated group of values.
+"Spines" can be a single column, or they may (at any time) split into multiple columns,
+which can in turn split again, using the <code>"*^"</code> interpretation token. The reverse can happen as well,
+with two or more columns merging into a single column, using the <code>"v"</code> token.
+This means that, while humdrum data at first glance looks like a simple two-dimensional table,
+it is actually a flexible tree structure. As spines split and merge, the total number of columns
+can change during a piece, creating a "ragged" edge.
+Another similar issue is that a corpus of humdrum files may have varying numbers of spines/columns, between pieces.
+("Global" comment/reference records are also a special case, as that are always a single value, even if interspersed with
+multi-column local records.)
+<code>readHumdrum</code> assumes a slightly more strict version of the humdrum syntax:
+that all the spines which appear at the beginning of a file (headed with exclusive interpretations
+like <code>"**kern"</code>) can never merge into each other. Thus, a humdrum file read into <code>humdrumR</code>
+must not end with fewer columns than it starts.
+Spine merges (<code>"*v"</code>) can only happen within spine paths that originally split off the same spine.
+This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
+informally followed in most humdrum datasets.</p>
+<p>Our strict spine-path definition makes everything work fairly simply:
+Within a piece, the spines which appear at the beginning of the piece are the "true" spines throughout the piece, numbered
+from left to right, starting from <code>1L</code>.
+For each local token, the value in the <code>Spine</code> field is an integer indicating which of these
+"true" spines it belongs to---global tokens have a <code>NA</code> value in their <code>Spine</code> field, because they do not belong to any spine.
+Any spine path splits (<code>"*^"</code>) from the main spines form <strong>spine paths</strong>.
+Every spine's paths are numbered in the <code>Path</code> field, from right to left, starting from <code>0L</code>.
+A spine with no splits will have all <code>0L</code>s in its <code>Path</code> field.</p>
+    </div>
+    <div class="section level2">
     <h2 id="result">Result<a class="anchor" aria-label="anchor" href="#result"></a></h2>
     
 
 
 <p><code>findHumdrum</code> returns a "fileFrame" (<code>data.table</code>), listing all file names,
 the patterns they match, the directories they were found in, <em>and</em> the raw text content of these files.</p>
-<p><code>readHumdrum</code> returns a fully parsed <code>humdrumR</code> object.</p>
+<p><code>readHumdrum</code> returns a fully parsed <a href="humdrumRclass.html">humdrumR object</a>.</p>
     </div>
 
     <div class="section level2">
@@ -253,7 +285,7 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 100 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One-Hundred files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one-hundred files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 22,314 errors in 101 files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 22,415 errors in 101 files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> zero valid files.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"></span>

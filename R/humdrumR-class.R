@@ -298,27 +298,21 @@ orderHumtab <- function(humtab) {
 #' 
 #' 
 #' 
-#' @section Active field:
-#' 
-#' The `Active` slot of a [humdrumR] object contains an [expression][rlang::quosure]
-#' which refers to fields in the internal [humdrum table][humTable].
-#' Go to the dedicated [active field][humActive] documentation to learn more about this important slot!
-#' 
 #' 
 #' @slot Humtable A list of [humdrum tables][humTable], each having the same fields
 #' but containing data from different types of records (e.g., interpretations, data, barlines, comments).
 #' @slot Files A list of two elements. The first, "Search", contains a single character representing
-#' the `pattern` used in the call to [readHumdrum] which created this humdrumR object.
+#' the `pattern` used in the call to [readHumdrum()] which created this humdrumR object.
 #' The second, "Names", is a vector of strings representing all the files which matched the `pattern`
-#' and were read into the `humdrumR` object.
+#' and were read into the `humdrumR` object, with [names()] corresponding to their "subcorpora" labels (`Label`).
 #' @slot Fields A list containing strings corresponding to the existing fields in the `humdrumR` object.
 #' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference"---see 
 #' the [humdrum table][humTable] documentation.
 #' @slot Active A quosure expression which 
 #' extracts data from field(s) in the [humdrum table][humTable]: the "active expression."
-#' @slot LoadTime A [POSIXct][base::DateTimeClasses] value, indicating the time at which [readHumdrum] was
+#' Go to the dedicated [active field][humActive] documentation to learn more about this important slot!
+#' @slot LoadTime A [POSIXct][base::DateTimeClasses] value, indicating the time at which [readHumdrum()] was
 #' called to create this `humdrumR` object.
-#' @slot Patterns A character vector of the original search patterns used to match files in the system.
 #
 #' @name humdrumRclass
 #' @family Core humdrum data representation
@@ -2097,8 +2091,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
 printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     # evaluates the active expression into something printable, and puts it in a 
     # field called "Print"
-    
-    humtab <- getHumtab(humdrumR, 'GLIMDd') 
+    humtab <- data.table::copy(getHumtab(humdrumR, 'GLIMDd') )
     
     field <- activeAtomic(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
     
