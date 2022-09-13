@@ -505,34 +505,38 @@ shortFilenames <- function(fileFrame) {
 #' @section Validity:
 #' 
 #' `findHumdrum` and `readHumdrum` automatically ignore non-text files.
-#' Whatsmore, any files which contain humdrum syntax errors (checked by [validateHumdrum()]) are automatically
-#' skipped. If you want to see specifically what errors occured, call [validateHumdrum()]
+#' What's more, any files which contain humdrum syntax errors (checked by [validateHumdrum()]) are automatically
+#' skipped. If you want to see specifically what errors occurred, call [validateHumdrum()]
 #' directly and use its `errorReport.path` argument.
 #' 
 #' @section Tandem Interpretations:
 #' 
-#' The `tandems` argument controls which tandem interpretations
+#' All tandem interpretations in a humdrum dataset are summarized in the [humdrum table's][humTable]
+#' `Tandem` field, which is described in detail [here][extractTandem()].
+#' In addition, certain "known" tandem interpretations are parsed into their *own* fields automatically.
+#' For example, `*clefG4` and "`*clefF2` are parsed as `Clef` data, while `*k[b-]` is parsed as a `KeySignature`.
+#' The "known" tandem interpretations that `humdrumR` recognizes are encoded in a built-in
+#' table called `knownInterpretations`. 
+#' Each interpretation has a humdrumR name (`"Clef"`, `"TimeSignature"`, etc.) as well as a regular expression
+#' associated with it.
+#' 
+#' The `tandems` argument to `readHumdrum` controls which tandem interpretations are
 #' parsed into their own fields. This can be helpful to either save processing time and memory
 #' by *not* parsing interpretations you won't need, or to parse interpretations that 
 #' humdrumR doesn't recognize.
-#' The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
-#' table called `knownInterpretations`. 
-#' Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
-#' associated with it.
 #' The default value for the `tandems` argument is `"known"`. If the `tandems` argument
 #' contains `"known"` *all* tandem interpretations in the built-in `knownInterpretations` 
 #' table are parsed.
 #' Users may specify different interpretations to parse in two ways: 
 #' 
 #' 1) character strings 
-#' matching one of the name values from the `Name` column of `knownInterpretations`.
-#' For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
-#' and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
-#' 
-#' 2) if the chracter string(s) in `tandem` do not exactly match one of the names in 
-#' `knownInterpretations$Name`, they are treated as regular expressions and used to match
-#' tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
-#' that humdrumR doesn't already know about.
+#'    matching one of the name values from the `Name` column of `knownInterpretations`.
+#'    For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
+#'    and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
+#' 2) if the character string(s) in `tandem` do not exactly match one of the names in 
+#'    `knownInterpretations$Name`, they are treated as regular expressions and used to match
+#'    tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
+#'    that humdrumR doesn't already know about.
 #' 
 #' If any values in `tandems` are named, these names will be used for resulting fields.
 #' If no matches to an given interpretation are found, no field is created for that interpretation.
@@ -563,7 +567,6 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' @section Spines and Paths:
 #' 
-#' # Spines vs Paths vs Columns 
 #' 
 #' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
 #' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
@@ -1037,9 +1040,9 @@ parseTandem <- function(tandems, known) {
 
 
 
-#' Get tandem interpretation information from humdrum data.
+#' Get tandem interpretation information from humdrum data
 #' 
-#' `ExtractTandem` extracts tandem interpretations from the raw `Tandem`
+#' `extractTandem` extracts tandem interpretations from the raw `Tandem`
 #' spine in [humdrumR object][humdrumRclass].
 #' 
 #' @details 
@@ -1109,6 +1112,9 @@ parseTandem <- function(tandems, known) {
 #'   tandem interpretations. You should not include a `*` at the beginning---the `*` marker
 #'   for tandem interpretations are already removed from the `Tandem` field.
 #' 
+#' @seealso {Read more about tandem interpretations in `humdrumR` in the 
+#' [humdrum table docs][humTable]. [readHumdrum()] also preprocesses
+#'  some "known" tandem interpretations. }
 #' @export
 extractTandem <- function(Tandem, regex) {
   

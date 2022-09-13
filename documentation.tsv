@@ -3,6 +3,7 @@ Chords.R	chordTransformer.Rd			515	X	X	chordTransformer, figuredBass		54
 Chords.R	diatonicSet.Rd			8062	Yes	Yes	diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character		71
 Chords.R	tertianSet.Rd			1816	X	a	tertianSet, tset, is.tertianSet		77
 Dispatch.R	humdrumDispatch.Rd			3972	Yes?	OK?	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch		19
+Interpretations.R	readHumdrum.Rd			13080	Yes	Yes	readHumdrum, findHumdrum, knownInterpretations		89
 Keys.R	keyTransformer.Rd			282	X	X	keyTransformer, key		34
 Keys.R	romanNumerals.Rd			704	X	X	romanNumerals		564
 Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
@@ -36,8 +37,7 @@ Pitch.R	tonalIntervalS4.Rd	core pitch representation	Needs one?	7269	Yes	Yes	ton
 Pitch.R	tonh.Rd	absolute pitch functions, pitch functions		10197	Yes	Mostly	tonh		17
 Pitch.R	transpose.Rd	tonal transformations		8048	Yes?	Yes	transpose		26
 Rational.R	rational.Rd	humdrumR numeric functions		3020	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction		81
-Read.R	extractTandem.Rd			2937	Yes	Yes	extractTandem	Needs	
-Read.R	readHumdrum.Rd			12431	Yes	Yes	readHumdrum, findHumdrum		89
+Read.R	extractTandem.Rd			3146	Yes	Yes	extractTandem	Needs	
 Regex.R	REparser.Rd			922	Yes	Minimal	REparser, REparse		561
 Regex.R	RegexFind.Rd			2458	Yes	Yes	RegexFind, \%~l\%, \%~i\%, \%~n\%, \%~m\%, \%~\%, \%!~\%, \%!~l\%, \%!~i\%		38
 Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE		559
@@ -51,29 +51,30 @@ Subset.R	subset.humdrumR.Rd		Filtering	4317	Yes	Yes	subset.humdrumR, subset, cle
 Summary.R	census.Rd	corpus summary functions		3161	Yes	Yes	census, [.humCensus, print.humCensus		
 Summary.R	humSummary.Rd	corpus summary functions		1573	Yes	Yes	humSummary, summary.humdrumR, summary		173
 Summary.R	interpretations.Rd	corpus summary functions		2744	Yes	Yes	interpretations, [.humInterpretations, print.humInterpretations		
-Summary.R	reference.Rd	corpus summary functions		3630	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference		
+Summary.R	reference.Rd	corpus summary functions		3635	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference		
 Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, print.humSpines		
 Validation.R	validateHumdrum.Rd			1030	Empty	Empty	validateHumdrum		
 Windows.R	humWindows.Rd			781	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
-Within.R	withinHumdrum.Rd		WorkingWithData	23344	Yes	Yes	withinHumdrum, with.humdrumR, within.humdrumR		376
+Within.R	withinHumdrum.Rd		WorkingWithData	23362	Yes	Yes	withinHumdrum, with.humdrumR, within.humdrumR		376
 Write.R	writeHumdrum.Rd			494	Empty	Empty	writeHumdrum		562
 humdrumR-class.R	collapseHumdrum.Rd			2171	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
-humdrumR-class.R	foldExclusive.Rd	Folding functions		1547	Yes	Ok	foldExclusive		20
+humdrumR-class.R	foldExclusive.Rd	Folding functions		1565	Yes	Yes	foldExclusive		20
 humdrumR-class.R	foldGraceNotes.Rd	Folding functions		499	X	X	foldGraceNotes		592
-humdrumR-class.R	foldHumdrum.Rd	Folding functions		7332	Yes	Yes?	foldHumdrum, foldPaths, foldStops		135
-humdrumR-class.R	humActive.Rd			3259	Yes?	Ok	humActive, evalActive, activeAtomic, getActive, setActive, setActiveFields		20
-humdrumR-class.R	humCoercion.Rd			6281	Yes	Yes	humCoercion, as.lines, as.matrix.humdrumR, as.matrix, as.matrices, as.data.frames		12
+humdrumR-class.R	foldHumdrum.Rd	Folding functions		7394	Yes	Yes	foldHumdrum, foldPaths, foldStops		135
+humdrumR-class.R	humActive.Rd			9158	Yes	Ok	humActive, evalActive, getActive, setActive, setActiveFields, $,humdrumR-method		20
+humdrumR-class.R	humCoercion.Rd			6269	Yes	Yes	humCoercion, as.lines, as.matrix.humdrumR, as.matrix, as.matrices, as.data.frames		12
 humdrumR-class.R	humMerge.Rd			361	X	X	humMerge, mergeHumdrum		45
-humdrumR-class.R	humSize.Rd			3056	Yes	Yes	humSize, nrecord, ntoken, npiece, nfile, is.empty, anyMultiPieceFiles, anyPaths, anyStops, anySubcorpora, namesSubcorpora		18
-humdrumR-class.R	humTable.Rd	Core humdrum data representation		14134	Yes?	Yes	humTable, getHumtab, getFields		114
-humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation		3899	Yes?	Yes?	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR, $,humdrumR-method, fields		22
+humdrumR-class.R	humSize.Rd			3070	Yes	Yes	humSize, nrecord, ntoken, npiece, nfile, is.empty, anyMultiPieceFiles, anyPaths, anyStops, anySubcorpora, namesSubcorpora		18
+humdrumR-class.R	humTable.Rd	Core humdrum data representation		14920	Yes	Yes	humTable, getHumtab, getFields, fields		114
+humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation		3608	Yes	Yes	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR		22
 humdrumR-class.R	unfoldStops.Rd	Folding functions		632	Yes	Minimal	unfoldStops		133
 humdrumR-package.R	humdrumPitch.Rd			2408	Yes	Missing chords/keys	humdrumPitch		16
 humdrumR-package.R	humdrumR.Rd			2269	Yes	OK	humdrumR		80
 humdrumR-package.R	humdrumRroot.Rd			554	Yes	Yes	humdrumRroot		562
+humdrumR-package.R	partialMatching.Rd			1563	Yes	Yes	partialMatching		
 tools.R	delta.Rd	Lagged vector functions		7800	Yes	Yes	delta, delta.default, delta.matrix		47
-tools.R	ditto.Rd	Lagged vector functions		4997	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
+tools.R	ditto.Rd	Lagged vector functions		5021	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
 tools.R	expand.Rd			1781	Yes	Yes	expand		38
-tools.R	lag.Rd	Lagged vector functions		2860	Yes	No	lag, lead		53
+tools.R	lag.Rd	Lagged vector functions		3633	Yes	Yes	lag, lead		53
 tools.R	segments.Rd	Window functions		3388	Yes	Yes	segments, changes		
 tools.R	sigma.Rd	Lagged vector functions		7574	Yes	Yes	sigma, sigma.default, sigma.matrix		32

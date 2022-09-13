@@ -24,7 +24,7 @@ ditto(x, ...)
 \method{ditto}{humdrumR}(x, field = activeFields(x)[1], ..., newField = paste0(field, "_ditto"))
 }
 \arguments{
-\item{x}{The input argument. Should be vector (including list), array, or data.frame}
+\item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}
 
 \item{nonnull}{Either a logical vector where (\code{length(x) == length(nonnull)}), a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.}
@@ -39,7 +39,7 @@ by the \code{boundaries} vector(s) is treated separately.}
 E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns.
 Where X has named dimnames, it can be a character vector selecting dimension names.}
 
-\item{field}{Which field (\link[base:pmatch]{partially matched}) in the \code{humdrumR} dataset should be dittoed?}
+\item{field}{Which field (\link[=partialMatching]{partially matched}) in the \code{humdrumR} dataset should be dittoed?}
 
 \item{newField}{(\code{character} of \code{length == 1}) What to name the new (dittoed) field.}
 }

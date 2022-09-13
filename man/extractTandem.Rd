@@ -2,7 +2,7 @@
 % Please edit documentation in R/Read.R
 \name{extractTandem}
 \alias{extractTandem}
-\title{Get tandem interpretation information from humdrum data.}
+\title{Get tandem interpretation information from humdrum data}
 \usage{
 extractTandem(Tandem, regex)
 }
@@ -14,7 +14,7 @@ tandem interpretations. You should not include a \code{*} at the beginning---the
 for tandem interpretations are already removed from the \code{Tandem} field.}
 }
 \description{
-\code{ExtractTandem} extracts tandem interpretations from the raw \code{Tandem}
+\code{extractTandem} extracts tandem interpretations from the raw \code{Tandem}
 spine in \link[=humdrumRclass]{humdrumR object}.
 }
 \details{
@@ -73,3 +73,8 @@ For example, if we wanted to manually extract the key information from the \code
 (which \code{humdrumR} automatically does for you), we could call \code{extractTandem(Tandem, "[A-Ga-g][#-]*:")}.
 }
 
+\seealso{
+{Read more about tandem interpretations in \code{humdrumR} in the
+\link[=humTable]{humdrum table docs}. \code{\link[=readHumdrum]{readHumdrum()}} also preprocesses
+some "known" tandem interpretations. }
+}

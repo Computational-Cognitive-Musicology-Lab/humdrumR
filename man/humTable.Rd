@@ -4,37 +4,38 @@
 \alias{humTable}
 \alias{getHumtab}
 \alias{getFields}
-\title{Humdrum Tables}
+\alias{fields}
+\title{Humdrum tables (and their Fields)}
 \usage{
 getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
 
-getFields(humdrumR, fieldnames = NULL, dataTypes = "D")
+getFields(humdrumR, fields = activeFields(humdrumR), dataTypes = "D")
+
+fields(
+  humdrumR,
+  fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference")
+)
 }
 \arguments{
 \item{humdrumR}{A \code{humdrumR} object.}
 
 \item{dataTypes}{A \code{character} vector. Specifies which types of data tokens/records to extract.
-See the \link{humTable} documentation and/or the humdrum syntax vignette for clarification!
+Legal values are:
++ \code{"G"}: global comments
++ \code{"L"}: local comments
++ \code{"I"}: interpretations
++ \code{"M"}: barlines
++ \code{"D"}: non-null data
++ \code{"d"}: null data\preformatted{Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
+}}
 
-For \code{dataTypes}, values can be:
-\itemize{
-\item \code{"G"}: global comments
-\item \code{"L"}: local comments
-\item \code{"I"}: interpretations
-\item \code{"M"}: barlines
-\item \code{"D"}: non-null data
-\item \code{"d"}: null data
-}
-
-Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
-
-\item{fieldnames}{(\code{character}) A vector of names which are \link[base:pmatch]{partially matched}
+\item{fields}{(\code{character}) A vector of names which are \link[=partialMatching]{partially matched}
 against field names of the humdrum table.
-Of \code{NULL} (the default), the \code{Token} field is returned.}
-}
-\value{
-A \link[data.table:data.table]{data.table()}, each column corresponding to one field. (The \code{data.table} is a subset of the
-humdrum table).
+If \code{NULL} (the default), the \link[=humActive]{active fields} are returned.}
+
+\item{fieldTypes}{A \code{character} type indicating which types of fields to list.
+Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, and \code{"Reference"}.
+Types can be \link[=partialMatching]{partially matched}---for example, \code{"S"} for \code{"Structure"}.}
 }
 \description{
 In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.
@@ -45,7 +46,17 @@ Humdrum tables are stored "inside" every \link{humdrumRclass} object that you wi
 functions allow you to study or manipulate the them.
 If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \link{getHumtab} function.
 
-\code{getHumtab} extracts a \link[=humTable]{humdrum table} from a \link{humdrumRclass} object.
+\code{getHumtab} extracts the hudrum table from a \link[=humdrumRclass]{humdrumR object}.
+
+Individual fields from the humdrum table can be extracted using \code{getFields}.
+Returns a \link[data.table:data.table]{data.table()}, each column corresponding to one field.
+(The \code{data.table} is a column-subset of the humdrum table).
+
+Use \code{fields} to list the current fields in
+a \link{humdrumRclass} object.
+It returns a \code{\link[=data.table]{data.table()}} with three columns: the field's \code{Name}, the \code{Class} of the
+data held in the field,
+and the \code{Type} of field (e.g., \code{"Formal"}).
 }
 \details{
 In a humdrum table, each row represents a single "token"
@@ -69,28 +80,28 @@ There are five types of fields in a humdrum table:
 \item Reference fields
 }
 
-When first created by a call to \link{readHumdrum} every
+When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}} every
 humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation
 fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fourteen structure fields. Additional
 interpretation or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
-by using \link[=withinHumdrum]{within(humdrumR)}.
+by using \link[=withinHumdrum]{within(humdrumR)} (and some other functions).
 \subsection{Data fields:}{
 
-Data fields are used to describe individual data points
+\emph{Data} fields are used to describe individual data points
 in humdrum data (as opposed to groups of points).
 Every humdrum table starts with a data
 field called \strong{Token}, which
 contains character strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
-\link{withinHumdrum} generates one or N new data fields named {Result1, Result2, ..., ResultN}.
-These fields can be renamed using the \verb{$<-} operator.
+\code{\link[=withinHumdrum]{withinHumdrum()}} generates one or \code{N} new data fields named \eqn{Result1, Result2, \ldots, ResultN}.
 }
 
 \subsection{Structure fields:}{
 
-Every humdrum table starts with fifteen Structure fields,
-which describe where each data token was "located" in the original humdrum data: which file, which spine, which record, etc.
+Every humdrum table starts with fourteen \emph{Structure} fields,
+which describe where each data token was "located" in the original humdrum data:
+which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.
 \itemize{
 \item \emph{File info}:
@@ -98,7 +109,8 @@ See the vignette on humdrum syntax to fully understand the terms here.
 \item \code{Filename} :: \code{character}
 \itemize{
 \item The unique name of the humdrum file. This may include an appended path
-if more than one file with the same name were read from different directories (see the \link{readHumdrum} docs).
+if more than one file with the same name were read from different directories
+(see the \code{\link[=readHumdrum]{readHumdrum()}} docs).
 }
 \item \code{Filepath} :: \code{character}
 \itemize{
@@ -106,9 +118,9 @@ if more than one file with the same name were read from different directories (s
 }
 \item \code{Label} :: \code{character}
 \itemize{
-\item A label specified during the call to \link{readHumdrum}, associated with a particular
+\item A label specified during the call to \code{\link[=readHumdrum]{readHumdrum()}}, associated with a particular
 \code{readHumdrum} "REpath-pattern." If no label was specified, patterns are just labeled \code{"_n"}, where "\code{n}" is the
-number of the pattern. (Labels can also be created when \link[=humMerge]{merging two humdrumR objects}.)
+number of the pattern.
 }
 \item \code{File} :: \code{integer}
 \itemize{
@@ -133,7 +145,7 @@ more than one piece were read from the same file.
 \item The "spine path." Any time a \verb{*^} spine path split occurs in
 the humdrum data, the right side of the split becomes a new "path." The original path
 is numbered \code{0} with additional paths numbered with integers to the right.
-(If there are no spine path splits, the \code{Path} field is all zeros.)
+(If there are no spine path splits, the \code{Path} field is all \code{0}s.)
 \item This field is always \code{NA} when \code{Global == TRUE}.
 }
 \item \code{Record} :: \code{integer}
@@ -172,12 +184,12 @@ is numbered \code{0} with additional paths numbered with integers to the right.
 }
 \item \code{Null} :: \code{logical}
 \itemize{
-\item Is the \link[=humdrumR]{active} data field null?
+\item Is the \link[=humActive]{active field} data field null?
 \item See the detailed discussion below, in the section of this documentation called "Null Data."
 }
 \item \code{Filter} :: \code{logical}
 \itemize{
-\item Has this record/token been \link[=filterHumdrum]{filtered out}?
+\item Has this record/token been \link[=subset.humdrumR]{filtered out}?
 }
 }
 }
@@ -185,15 +197,15 @@ is numbered \code{0} with additional paths numbered with integers to the right.
 
 \subsection{Interpretation fields:}{
 
-Interpretation fields describe interpretation metadata in the humdrum file(s).
+\emph{Interpretation} fields describe interpretation metadata in the humdrum file(s).
 Humdrum interpretations are tokens that "carry forward" to data points after them, unless cancelled out by a
 subsequent interpretation. (See the humdrum syntax vignette for a detailed explanation.)
 \emph{All} humdrum data must have an \emph{exclusive} interpretation
 so humdrum tables always have an \code{Exclusive} (:: \code{character}) field indicating the
-exclusive interpretation associated with each token/row of the \link[=humdrumR]{active} field.
+exclusive interpretation associated with each token/row of the \code{Token} field.
 
 Humdrum data may, or may not, include additional \emph{tandem} interpretations. A universal rule for parsing
-tandem intepretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
+tandem interpretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
 users can create their own tandem interpretations. The best we can do in all cases is
 identify \emph{all} tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
@@ -210,7 +222,7 @@ See the \code{\link[=readHumdrum]{readHumdrum()}} documentation for more details
 
 \subsection{Formal fields:}{
 
-Formal fields indicate musical sections, or time windows within
+\emph{Formal} fields indicate musical sections, or time windows within
 a piece, including formal designations ("verse", "chorus", etc.) and measures/bars.
 Humdrum data may or may not include formal metadata fields, indicated by the token \code{"*>"}.
 Classified formal marks are put into fields matching their name.
@@ -237,7 +249,7 @@ Humdrum tables \emph{always} include three formal fields related to barlines:
 \item \code{BarLabel} :: \code{character}
 \itemize{
 \item Any characters that occur in a barline-token \emph{after} an initial \code{"="} or \code{"=="}.
-These include the \code{"-"} in the common "implied barline token \code{"=-"},
+These include the \code{"-"} in the common "implied barline" token \code{"=-"},
 repeat tokens (like \code{"=:||"}), and also any \emph{explicit} bar numbers.
 \item Note that the \code{Bar} field always enumerate \emph{every} bar record, while
 measure-number labels in humdrum data (which appear in the \code{BarLabel} field) may
@@ -249,14 +261,14 @@ If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\
 
 \subsection{Reference fields:}{
 
-Reference fields describe any \emph{Reference Records}
+\emph{Reference} fields describe any \strong{Reference Records}
 in the humdrum data. Every reference record (records beginning \code{"!!!"}) in any
 humdrum file in a corpus read by \link{readHumdrum} is parsed into a field named
 by the reference code: \code{"XXX"} in \code{"!!!XXX"}.
 Reference tokens are all identical throughout
 any humdrum piece. If a reference code appears in one file but not another, the field is
 \code{NA} in the file which does not have the code. If no reference records appear in any
-files read by \link{readHumdrum}, no reference fields are created.
+files read by \code{\link[=readHumdrum]{readHumdrum()}}, no reference fields are created.
 
 Examples of common reference records are \code{"!!!COM:"} (composer) and \code{"!!!OTL:"} (original title).
 Any humdrum data with these records will end up having \code{COM} and \code{OTL} fields in its humdrum table.
@@ -276,8 +288,8 @@ Each type of humdrum record uses a different null token:
 }
 
 Null tokens in a humdrum table are identified in the logical \code{Null} field.
-The \code{Null} field is set when a humdrum table is created (by \link{readHumdrum}) and is updated everytime
-a new \link[=humdrumR]{active} field is set.
+The \code{Null} field is set when a humdrum table is created (by \code{\link[=readHumdrum]{readHumdrum()}}) and is updated everytime
+a new \link[=humActive]{active field} is set.
 \code{Null} is set to \code{TRUE} wherever, either
 \itemize{
 \item the active field is \code{character} data and the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"};
@@ -285,13 +297,13 @@ a new \link[=humdrumR]{active} field is set.
 }
 
 In parallel to the \code{Null} field, null \emph{data} tokens (\code{"."}) are identified as their own record type: \code{"d"}.
-All updates/changes to the \code{Null} field are also propogated to the \code{Type} field---i.e., setting \code{Type == d} wherever
+All updates/changes to the \code{Null} field are also propagated to the \code{Type} field---i.e., setting \code{Type == d} wherever
 a data record is \code{Null}.
-This is important/useful because \link{withinHumdrum} routines are, by default, only applied to \code{"D"} data, ignoring \code{"d"}.
+This is important/useful because \code{\link[=withinHumdrum]{withinHumdrum()}} routines are, by default, only applied to \code{"D"} data, ignoring \code{"d"}.
 
-Whenever you \link[=humPrint]{print} or \link[=writeHumdrum]{export} a \link{humdrumRclass} object, null data in the active field
-(i.e., \code{Null == TRUE}) print as \code{"."}.
-Thus, if you are working with numeric data, with \code{NA} values, these \code{NA} values will print as \code{"."}.
+Whenever you print or \link[=writeHumdrum]{export} a [humdrumR object\link{humdrumRclass}, null data in the active field
+(i.e., \code{Null == TRUE}) prints as \code{"."}.
+Thus, if you are working with numeric data with \code{NA} values, these \code{NA} values will print as \code{"."}.
 }
 
 \section{Reshaping:}{
@@ -300,7 +312,7 @@ of a \code{data.table}, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily
 regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
-\code{HumdrumR} has several options for \link[=collapseHumdrum]{"collapsing"} tokens within humdrum tables,
+\code{humdrumR} has several options for \link[=collapseHumdrum]{"collapsing"} tokens within humdrum tables,
 \link[=foldHumdrum]{"folding"} different parts of the data into new fields,
 or otherwise \link[=humCoercion]{reshaping humdrum data} into basic R data structures you might prefer.
 }

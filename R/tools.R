@@ -132,18 +132,37 @@ applycols <- function(x, f, ...){
 
 #' Shift data within a vector/matrix/data.frame
 #' 
-#' The `lag` and `lead` functions take input vectors, matrices, or data.frames and shifts their data
+#' The `lag` and `lead` functions take input vectors, matrices, or data.frames and 
+#' shifts their data
 #' by `n` indices. 
-#' They are similiar to the [data.table::shift] function, but with a few additional options.
+#' They are similar to the [data.table::shift()] function, but with a few additional options.
 #' 
-#' @param x The input argument. Should be vector (including list), array, or data.frame
-#' @param n The amount to lag/lead the data. 
-#' @param fill If `wrap = FALSE` and/or `windows = NULL`, parts of the output are padded with the `fill` argument. Defaults to `NA`.
-#' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
+#' @details 
+#' 
+#' A lagged vector has the same values as the original vector, except offset by `n` indices.
+#' `lag` moves each value to a high index (if `n > 0`); `lead` does the opposite,
+#' moving each value to a lower index (if `n > 0`).
+#' `n` can be positive or negative---negative lags are equivalent to leads, and vice versa.
+#' Values near the end/beginning are either "wrapped" to the opposite end of the
+#' vector, or replaced/padded with the value of the `fill` argument.
+#'
+#' The vector `r letters[1:7]` can be lagged by `n==1` is `r lag(letters[1:7])`.
+#' If we set `wrap == TRUE`, the `"g"` moved to the beginning of the output: 
+#' is `r lag(letters[1:7], wrap = TRUE)`.
+#' 
+#' 
+#' @param x The input argument. Should be a vector (including lists), `matrix`, or `data.frame`.
+#' @param n The amount to lag/lead the data.  If `n == 0`, `x` is returned unchanged.
+#' @param fill If `wrap = FALSE` parts of the output are padded with the `fill` argument. 
+#' Defaults to `NA`.
+#' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the
+#'  other end of the output, "wrapping" the data
 #' within the data structure.
 #' @param boundaries A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
 #' by the `boundaries` vector(s) is treated separately.
-#' @param margin Arrays and data.frames can be lagged lead in multiple dimensions using the `margin` argument.
+#' @param margin Arrays and data.frames can be lagged lead in multiple dimensions 
+#' using the `margin` argument: `margin == 1` shifts across rows while `margin == 2`
+#' shifts across columns.
 #' 
 #' @family {Lagged vector functions}
 #' @inheritSection sigma Boundaries
@@ -175,7 +194,10 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, bounda
 }
 #' @export
 lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) {
-          if (length(n) > 1L) .stop('lag cannot accept multiple rotation values for a vector argument.')
+          checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
+          checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
+          checkTF(wrap, 'wrap', 'lag')
+  
           if (length(x) == 0L || n == 0) return(x)
   
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
@@ -191,7 +213,6 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) 
             }
           }
             
-          
           boundaries <- checkWindows(x, boundaries)
           
           if (length(boundaries)) {
@@ -587,7 +608,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @param margin a vector giving the subscripts which the function will be applied over. 
 #'     E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns. 
 #'     Where X has named dimnames, it can be a character vector selecting dimension names.
-#' @param field Which field ([partially matched][base::pmatch()]) in the `humdrumR` dataset should be dittoed?
+#' @param field Which field ([partially matched][partialMatching]) in the `humdrumR` dataset should be dittoed?
 #' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
 #' 
 #' @inheritParams lag

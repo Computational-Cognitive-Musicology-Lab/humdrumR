@@ -12,14 +12,22 @@ foldHumdrum(
   onto,
   what = "Spine",
   File = NULL,
-  fromField = "Token",
+  fromField = activeFields(humdrumR)[1],
   fillFromField = FALSE,
   newFieldNames = NULL
 )
 
-foldPaths(humdrumR, fromField = "Token", fillFromField = TRUE)
+foldPaths(
+  humdrumR,
+  fromField = activeFields(humdrumR)[1],
+  fillFromField = TRUE
+)
 
-foldStops(humdrumR, fromField = "Token", fillFromField = FALSE)
+foldStops(
+  humdrumR,
+  fromField = activeFields(humdrumR)[1],
+  fillFromField = FALSE
+)
 }
 \arguments{
 \item{humdrumR}{A \link[=humdrumR-class]{humdrumR data object}.}

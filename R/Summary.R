@@ -359,7 +359,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' @param x A `character` string (to look up a reference code) or a [humdrumR object][humdrumRclass].
 #' @param i If `numeric`, selects rows by index. If `character`, the string is matched
 #'     as a regular expression against filenames in the corpus.
-#' @param j if `numeric` selects columns by index. If `character`, [partially matched][base::pmatch()]
+#' @param j if `numeric` selects columns by index. If `character`, [partially matched][partialMatching]
 #'     against column names (reference codes).
 #' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] 
 #'     is returned instead of `humReference` table.

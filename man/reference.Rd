@@ -25,7 +25,7 @@ is returned instead of \code{humReference} table.}
 \item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against filenames in the corpus.}
 
-\item{j}{if \code{numeric} selects columns by index. If \code{character}, \link[base:pmatch]{partially matched}
+\item{j}{if \code{numeric} selects columns by index. If \code{character}, \link[=partialMatching]{partially matched}
 against column names (reference codes).}
 }
 \description{

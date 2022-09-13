@@ -81,7 +81,7 @@ returning anything using \code{sidefx}.
 }
 
 These arguments are specified as named arguments to \code{with}/\code{within} calls.
-Even though they aren't formal arguments, they are \link[base:pmatch]{partially matched},
+Even though they aren't formal arguments, they are \link[=partialMatching]{partially matched},
 so if write \code{grou} instead of \code{groupby}, you won't get an error!
 In some cases, you can specify more than one of the same type of control argument (details below).
 }
@@ -145,7 +145,7 @@ Other examples might be printing text to the console using \code{\link[base:cat]
 writing to a file.
 
 Side effects can be achieved by naming your expression \code{sidefx} or \code{fx}---as usual,
-these arguments can be \link[base:pmatch]{partially matched}, so \code{side} also works, and is commonly used.
+these arguments can be \link[=partialMatching]{partially matched}, so \code{side} also works, and is commonly used.
 Side-effect expressions are executed, but their result (if any) is ignored.
 This means that if you call something like \code{newData <- within(humData, side = plot(x))}, the plot is made
 but the result (\code{newData}) is identical to \code{humData}.
@@ -169,7 +169,7 @@ In other words, you'd like the output (result) of your expression to be repeated
 length of the input field(s).
 You could do this manually be using the \code{\link[base:rep]{base::rep()}} function, but \code{with}/\code{within.humdrumR} provide a
 syntactic sugar for this:
-You can name your expression \code{recycle} or \code{fill} (\link[base:pmatch]{partially matched}),
+You can name your expression \code{recycle} or \code{fill} (\link[=partialMatching]{partially matched}),
 which will cause the result to be recycled.
 All this does is take \code{yourExpression(field, ...)} and wrap it in
 \code{rep(yourExpression(field, ...), length.out = length(field))}.
@@ -296,7 +296,7 @@ However, in a call to \code{within}, the result field(s) are (by default) padded
 where ever \code{where == FALSE}.
 However, you can also control what is returned where \code{where == FALSE} by specifying alternate
 within-expression(s) to evaluate where \code{where == FALSE}.
-These must be named \code{orelse} ([partially matched][base::pmatch()]).
+These must be named \code{orelse} ([partially matched][partialMatching]).
 (You can also specify \code{orfill} or \code{orelsefill}, to get the behavior of \code{fill}. See above.)
 
 A \code{orelse} expression can only be specified in combination with a \code{where} argument,
@@ -374,7 +374,7 @@ but this time wherever the `semits` field is greater than the mean value *across
 
 [humTable]: R:humTable
 [humTable]: R:humTable
-[base::pmatch()]: R:base::pmatch()
+[partialMatching]: R:partialMatching
 [data.table]: R:data.table
 [tapply]: R:tapply
 [by]: R:by

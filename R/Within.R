@@ -62,7 +62,7 @@
 #' + Only in certain record types (defaulting only data records) using `dataTypes`.
 #' 
 #' These arguments are specified as named arguments to `with`/`within` calls.
-#' Even though they aren't formal arguments, they are [partially matched][base::pmatch()],
+#' Even though they aren't formal arguments, they are [partially matched][partialMatching],
 #' so if write `grou` instead of `groupby`, you won't get an error!
 #' In some cases, you can specify more than one of the same type of control argument (details below).
 #'
@@ -133,7 +133,7 @@
 #' writing to a file.
 #' 
 #' Side effects can be achieved by naming your expression `sidefx` or `fx`---as usual,
-#' these arguments can be [partially matched][base::pmatch()], so `side` also works, and is commonly used.
+#' these arguments can be [partially matched][partialMatching], so `side` also works, and is commonly used.
 #' Side-effect expressions are executed, but their result (if any) is ignored.
 #' This means that if you call something like `newData <- within(humData, side = plot(x))`, the plot is made
 #' but the result (`newData`) is identical to `humData`.
@@ -160,7 +160,7 @@
 #' length of the input field(s).
 #' You could do this manually be using the [base::rep()] function, but `with`/`within.humdrumR` provide a
 #' syntactic sugar for this:
-#' You can name your expression `recycle` or `fill` ([partially matched][base::pmatch()]),
+#' You can name your expression `recycle` or `fill` ([partially matched][partialMatching]),
 #' which will cause the result to be recycled.
 #' All this does is take `yourExpression(field, ...)` and wrap it in 
 #' `rep(yourExpression(field, ...), length.out = length(field))`.
@@ -301,7 +301,7 @@
 #' where ever `where == FALSE`.
 #' However, you can also control what is returned where `where == FALSE` by specifying alternate
 #' within-expression(s) to evaluate where `where == FALSE`.
-#' These must be named `orelse` ([partially matched][base::pmatch()]).
+#' These must be named `orelse` ([partially matched][partialMatching]).
 #' (You can also specify `orfill` or `orelsefill`, to get the behavior of `fill`. See above.)
 #' 
 #' A `orelse` expression can only be specified in combination with a `where` argument,

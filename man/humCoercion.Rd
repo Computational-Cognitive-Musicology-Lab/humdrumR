@@ -32,7 +32,7 @@ as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 \arguments{
 \item{mode}{A single \code{character}
 string naming an \link[base:vector]{atomic vector type} to coerce the output to (if possible).
-By default, set to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=activeAtomic]{activeAtomic()}}.}
+By default, set to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=evalActive]{evalActive()}}.}
 
 \item{humdrumR}{A \link{humdrumRclass} data object.}
 
@@ -58,8 +58,8 @@ basic \code{R} data types.
 \details{
 Generally, coercion works by evaluating a humdrumR object's the
 \link[=humActive]{active expression} and forcing the result to be an atomic vector.
-This process is accomplished by the \code{\link[=activeAtomic]{activeAtomic()}} command.
-The \link[base:vector]{as.vector(humdrumR)} method is essentially a wrapper for \code{\link[=activeAtomic]{activeAtomic()}}, with the additional
+This process is accomplished by the \code{\link[=evalActive]{evalActive()}} command.
+The \link[base:vector]{as.vector(humdrumR)} method is essentially a wrapper for \code{\link[=evalActive]{evalActive()}}, with the additional
 option of coercing the resulting vector to a particular type using the \code{mode} argument.
 
 The \link[base:matrix]{as.matrix(humdrumR)} method take things a step further by putting the evaluated
