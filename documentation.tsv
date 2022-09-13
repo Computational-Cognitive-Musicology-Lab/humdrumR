@@ -56,16 +56,16 @@ Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, 
 Validation.R	validateHumdrum.Rd			1030	Empty	Empty	validateHumdrum		
 Windows.R	humWindows.Rd			781	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
 Within.R	withinHumdrum.Rd		WorkingWithData	23362	Yes	Yes	withinHumdrum, with.humdrumR, within.humdrumR		376
-Write.R	writeHumdrum.Rd			494	Empty	Empty	writeHumdrum		562
-humdrumR-class.R	collapseHumdrum.Rd			2171	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
-humdrumR-class.R	foldExclusive.Rd	Folding functions		1565	Yes	Yes	foldExclusive		20
+Write.R	writeHumdrum.Rd			518	Empty	Empty	writeHumdrum		562
+humdrumR-class.R	collapseHumdrum.Rd			2183	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
+humdrumR-class.R	foldExclusive.Rd	Folding functions		1568	Yes	Yes	foldExclusive		20
 humdrumR-class.R	foldGraceNotes.Rd	Folding functions		499	X	X	foldGraceNotes		592
-humdrumR-class.R	foldHumdrum.Rd	Folding functions		7394	Yes	Yes	foldHumdrum, foldPaths, foldStops		135
-humdrumR-class.R	humActive.Rd			9158	Yes	Ok	humActive, evalActive, getActive, setActive, setActiveFields, $,humdrumR-method		20
+humdrumR-class.R	foldHumdrum.Rd	Folding functions		7403	Yes	Yes	foldHumdrum, foldPaths, foldStops		135
+humdrumR-class.R	humActive.Rd			9335	Yes	Yes	humActive, evalActive, getActive, getActiveFields, setActive, setActiveFields, $,humdrumR-method		20
 humdrumR-class.R	humCoercion.Rd			6269	Yes	Yes	humCoercion, as.lines, as.matrix.humdrumR, as.matrix, as.matrices, as.data.frames		12
 humdrumR-class.R	humMerge.Rd			361	X	X	humMerge, mergeHumdrum		45
 humdrumR-class.R	humSize.Rd			3070	Yes	Yes	humSize, nrecord, ntoken, npiece, nfile, is.empty, anyMultiPieceFiles, anyPaths, anyStops, anySubcorpora, namesSubcorpora		18
-humdrumR-class.R	humTable.Rd	Core humdrum data representation		14920	Yes	Yes	humTable, getHumtab, getFields, fields		114
+humdrumR-class.R	humTable.Rd	Core humdrum data representation		14923	Yes	Yes	humTable, getHumtab, getFields, fields		114
 humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation		3608	Yes	Yes	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR		22
 humdrumR-class.R	unfoldStops.Rd	Folding functions		632	Yes	Minimal	unfoldStops		133
 humdrumR-package.R	humdrumPitch.Rd			2408	Yes	Missing chords/keys	humdrumPitch		16
@@ -73,7 +73,7 @@ humdrumR-package.R	humdrumR.Rd			2269	Yes	OK	humdrumR		80
 humdrumR-package.R	humdrumRroot.Rd			554	Yes	Yes	humdrumRroot		562
 humdrumR-package.R	partialMatching.Rd			1563	Yes	Yes	partialMatching		
 tools.R	delta.Rd	Lagged vector functions		7800	Yes	Yes	delta, delta.default, delta.matrix		47
-tools.R	ditto.Rd	Lagged vector functions		5021	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
+tools.R	ditto.Rd	Lagged vector functions		5029	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
 tools.R	expand.Rd			1781	Yes	Yes	expand		38
 tools.R	lag.Rd	Lagged vector functions		3633	Yes	Yes	lag, lead		53
 tools.R	segments.Rd	Window functions		3388	Yes	Yes	segments, changes		

@@ -9,7 +9,7 @@
 \usage{
 getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
 
-getFields(humdrumR, fields = activeFields(humdrumR), dataTypes = "D")
+getFields(humdrumR, fields = getActiveFields(humdrumR), dataTypes = "D")
 
 fields(
   humdrumR,

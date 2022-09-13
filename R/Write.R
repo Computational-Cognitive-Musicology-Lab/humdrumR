@@ -3,7 +3,7 @@
 #' 
 #' ----------NEEDS DOCUMENTATION------------
 #' @export
-writeHumdrum <- function(humdrumR, fieldname = NULL,
+writeHumdrum <- function(humdrumR, fieldName = getActiveFields(humdrumR)[1],
                          affix = "_humdrumR", prefix = "", rename = NULL, extension = NULL, 
                          directory = NULL, 
                          EMD = paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.date()),
@@ -11,7 +11,7 @@ writeHumdrum <- function(humdrumR, fieldname = NULL,
     # This function will have bugs if the input files are read on different file systems, with different directory separators.
     checkhumdrumR(humdrumR, 'writeHumdrum')
     
-    if (!is.null(fieldname)) humdrumR <- setActiveFields(humdrumR, fieldname)
+    if (!is.null(fieldName)) humdrumR <- setActiveFields(humdrumR, fieldName)
     
     
     cat('Writing humdrum data...\n')

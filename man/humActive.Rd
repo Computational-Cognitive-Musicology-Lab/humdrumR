@@ -4,6 +4,7 @@
 \alias{humActive}
 \alias{evalActive}
 \alias{getActive}
+\alias{getActiveFields}
 \alias{setActive}
 \alias{setActiveFields}
 \alias{$,humdrumR-method}
@@ -18,6 +19,8 @@ evalActive(
 )
 
 getActive(humdrumR)
+
+getActiveFields(humdrumR)
 
 setActive(humdrumR, expr)
 
@@ -73,6 +76,8 @@ by their name(s).
 Functions like \url{collapseHumdrum}], \code{\link[=foldHumdrum]{foldHumdrum()}}, and \code{\link[=fields]{fields()}}, use the active field(s) for default arguments.
 
 The current active field can be seen by calling \code{getActive(humData)}.
+A \code{character} vector of all fields being used by the active expression
+can be extracted with \code{getActiveFields(humData)}.
 }
 \section{Setting the active expression}{
 

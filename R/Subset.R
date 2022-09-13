@@ -66,7 +66,7 @@ subset.humdrumR <- function(x, ...) {
   
   
   oldActive <- getActive(x)
-  oldActiveFields <- activeFields(x)
+  oldActiveFields <- getActiveFields(x)
   x <- within.humdrumR(x, ...)
   resultFields(x) <- '.TmpFilter.'
   

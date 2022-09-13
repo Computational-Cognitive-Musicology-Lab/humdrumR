@@ -871,7 +871,7 @@ mergeHumdrum <- function(...) {
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
-                            collapseField = activeFields(humdrumR)[1], 
+                            collapseField = getActiveFields(humdrumR)[1], 
                             dataTypes = 'GLIMDd', 
                             collapseAtomic = TRUE, sep = ' ') {
  
@@ -928,7 +928,7 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
 
 #' @rdname collapseHumdrum
 #' @export 
-collapseStops <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseStops')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
     checkTF(collapseAtomic, 'collapseAtomic', 'collapseStops')
@@ -949,7 +949,7 @@ collapseStops <- function(humdrumR, collapseField = activeFields(humdrumR)[1], c
 
 #' @rdname collapseHumdrum
 #' @export
-collapsePaths <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapsePaths')
     checkTF(collapseAtomic, 'collapseAtomic', 'collapsePaths')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapsePaths', 'collapseField')
@@ -968,7 +968,7 @@ collapsePaths <- function(humdrumR, collapseField = activeFields(humdrumR)[1], c
 
 #' @rdname collapseHumdrum
 #' @export
-collapseRecords <- function(humdrumR, collapseField = activeFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checkhumdrumR(humdrumR, 'collapseRecords')
     checkTF(collapseAtomic, 'collapseAtomic', 'collapseRecords')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseRecords', 'collapseField')
@@ -1108,7 +1108,7 @@ collapseRecords <- function(humdrumR, collapseField = activeFields(humdrumR)[1],
 #' @family {Folding functions}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
-                        fromField = activeFields(humdrumR)[1], fillFromField = FALSE,
+                        fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE,
                         newFieldNames = NULL) {
     # argument checks
     checkhumdrumR(humdrumR, 'foldHumdrum')
@@ -1288,7 +1288,7 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' 
 #' @family {Folding functions}
 #' @export
-foldExclusive <- function(humdrumR, fold, onto, fromField = activeFields(humdrumR)[1]) {
+foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1]) {
     checkhumdrumR(humdrumR, 'foldExclusive')
     
     checkCharacter(fold, 'fold', 'foldExclusive', allowEmpty = FALSE)
@@ -1356,7 +1356,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = activeFields(humdrum
 
 #' @rdname foldHumdrum
 #' @export
-foldPaths <- function(humdrumR, fromField = activeFields(humdrumR)[1], fillFromField = TRUE) {
+foldPaths <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = TRUE) {
     checkhumdrumR(humdrumR, 'foldPaths')
     
     paths <- unique(getHumtab(humdrumR)$Path)
@@ -1379,7 +1379,7 @@ foldPaths <- function(humdrumR, fromField = activeFields(humdrumR)[1], fillFromF
 
 #' @rdname foldHumdrum
 #' @export
-foldStops <- function(humdrumR, fromField = activeFields(humdrumR)[1], fillFromField = FALSE) {
+foldStops <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE) {
     checkhumdrumR(humdrumR, 'foldStops')
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -1541,7 +1541,7 @@ update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
 update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
-    field <- activeFields(hum)[1]
+    field <- getActiveFields(hum)[1]
     putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, field)
     
     hum
@@ -1563,7 +1563,7 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
 
 #
 update_Null <- function(hum, field, ...) UseMethod('update_Null')
-update_Null.humdrumR <- function(hum, field = activeFields(hum),  allFields = FALSE, ...) {
+update_Null.humdrumR <- function(hum, field = getActiveFields(hum),  allFields = FALSE, ...) {
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
@@ -1619,6 +1619,8 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' Functions like [collapseHumdrum]()], [foldHumdrum()], and [fields()], use the active field(s) for default arguments.
 #' 
 #' The current active field can be seen by calling `getActive(humData)`.
+#' A `character` vector of all fields being used by the active expression
+#' can be extracted with `getActiveFields(humData)`.
 #' 
 #' @section Setting the active expression:
 #' 
@@ -1818,6 +1820,14 @@ getActive <- function(humdrumR){
     humdrumR@Active 
 } 
 
+#' @rdname humActive
+#' @export
+getActiveFields <- function(humdrumR) {
+    # Identifies which fields are used in
+    # the current `Active` expression.
+    fieldsInExpr(getHumtab(humdrumR, 'D'), getActive(humdrumR))
+}
+
 
 #' @rdname humActive
 #' @export
@@ -1948,7 +1958,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 #'   
 #' @rdname humTable
 #' @export
-getFields <- function(humdrumR, fields = activeFields(humdrumR), dataTypes = 'D') {
+getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 'D') {
     
     checkhumdrumR(humdrumR, 'getFields')
     
@@ -2012,7 +2022,7 @@ showFields <-  function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpret
           # list fields used by print_humtab
           fields <- fields(humdrumR, fieldTypes)
 
-          activefield <- fields$Name %in% activeFields(humdrumR)
+          activefield <- fields$Name %in% getActiveFields(humdrumR)
           fields$Name <- paste0(' ', fields$Name)
           fields$Name[activefield] <- gsub('^ ', '*', fields$Name[activefield])
           fields$Name <- stringr::str_pad(fields$Name, width = max(nchar(fields$Name)), side = 'right')
@@ -2039,11 +2049,6 @@ fieldsInExpr <- function(humtab, expr) {
   namesInExpr(colnames(humtab), expr)
 }
 
-activeFields <- function(humdrumR) {
-          # Identifies which fields are used in
-          # the current `Active` expression.
-          fieldsInExpr(getHumtab(humdrumR, 'D'), getActive(humdrumR))
-}
 
 
 
@@ -2058,7 +2063,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
  
  nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')
  
- active <- activeFields(humdrumR)
+ active <- getActiveFields(humdrumR)
  humtab <- humtab[ , 
                    Map(\(field, act) {
                              if (!act) return(field)

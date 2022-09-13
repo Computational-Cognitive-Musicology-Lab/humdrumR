@@ -10,7 +10,7 @@
 collapseHumdrum(
   humdrumR,
   by,
-  collapseField = activeFields(humdrumR)[1],
+  collapseField = getActiveFields(humdrumR)[1],
   dataTypes = "GLIMDd",
   collapseAtomic = TRUE,
   sep = " "
@@ -18,21 +18,21 @@ collapseHumdrum(
 
 collapseStops(
   humdrumR,
-  collapseField = activeFields(humdrumR)[1],
+  collapseField = getActiveFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapsePaths(
   humdrumR,
-  collapseField = activeFields(humdrumR)[1],
+  collapseField = getActiveFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapseRecords(
   humdrumR,
-  collapseField = activeFields(humdrumR)[1],
+  collapseField = getActiveFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )

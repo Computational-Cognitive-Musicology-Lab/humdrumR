@@ -6,7 +6,7 @@
 \usage{
 writeHumdrum(
   humdrumR,
-  fieldname = NULL,
+  fieldName = getActiveFields(humdrumR)[1],
   affix = "_humdrumR",
   prefix = "",
   rename = NULL,

@@ -12,20 +12,20 @@ foldHumdrum(
   onto,
   what = "Spine",
   File = NULL,
-  fromField = activeFields(humdrumR)[1],
+  fromField = getActiveFields(humdrumR)[1],
   fillFromField = FALSE,
   newFieldNames = NULL
 )
 
 foldPaths(
   humdrumR,
-  fromField = activeFields(humdrumR)[1],
+  fromField = getActiveFields(humdrumR)[1],
   fillFromField = TRUE
 )
 
 foldStops(
   humdrumR,
-  fromField = activeFields(humdrumR)[1],
+  fromField = getActiveFields(humdrumR)[1],
   fillFromField = FALSE
 )
 }
