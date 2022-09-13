@@ -29,7 +29,7 @@ setActiveFields(humdrumR, fieldnames)
 \S4method{$}{humdrumR}(x, name)
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumRclass} data object.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{(\code{character}, \code{length == 1}) Which types of humdrum records to include.
 Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', }

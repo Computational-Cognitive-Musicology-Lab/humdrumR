@@ -34,7 +34,7 @@ as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 string naming an \link[base:vector]{atomic vector type} to coerce the output to (if possible).
 By default, set to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=evalActive]{evalActive()}}.}
 
-\item{humdrumR}{A \link{humdrumRclass} data object.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{Which types of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).

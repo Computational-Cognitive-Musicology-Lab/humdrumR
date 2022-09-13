@@ -422,10 +422,10 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' These functions find valid humdrum files on your local machine and read them into `humdrumR`.
 #' 
-#' `findHumdrum` does the work of finding and reading the text files into R.
+#' `findHumdrum` does the work of finding and reading the text files into `R`.
 #' `readHumdrum` utilizes `findHumdrum` to read files, then parses them to
-#' create a [humTable] and build
-#' a [humdrumR][humdrumR::humdrumRclass] data object around the table.
+#' create a [humdrum table][humTable] and build
+#' a [humdrumR data object][humdrumRclass] around the table.
 #' 
 #' 
 #' @param ... character: One or more patterns used to identify files to read.

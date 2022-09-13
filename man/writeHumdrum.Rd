@@ -2,21 +2,75 @@
 % Please edit documentation in R/Write.R
 \name{writeHumdrum}
 \alias{writeHumdrum}
-\title{Write \code{humdrumR} data to humdrum files.}
+\title{Write \link[=humdrumRclass]{humdrumR data} to humdrum files}
 \usage{
 writeHumdrum(
   humdrumR,
-  fieldName = getActiveFields(humdrumR)[1],
-  affix = "_humdrumR",
-  prefix = "",
-  rename = NULL,
+  prefix = "humdrumR_",
+  renamer = force,
+  affix = "",
   extension = NULL,
   directory = NULL,
-  EMD = paste0("Edited in humdrumR ", packageVersion("humdrumR"), " on ", Sys.date()),
   overwrite = FALSE,
-  verbose = TRUE
+  verbose = FALSE,
+  EMD = paste0("Edited in humdrumR ", packageVersion("humdrumR"), " on ", Sys.Date())
 )
 }
-\description{
-----------NEEDS DOCUMENTATION------------
+\arguments{
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{prefix}{(\code{character}, \code{length == 1L}) A \code{character} string prepended to the file name.}
+
+\item{renamer}{A \code{function}. Must accept a \code{character} vector and return a new atomic vector
+of the same length.}
+
+\item{affix}{(\code{character}, \code{length == 1L}) A \code{character} string appended to the file name
+(before the extension).}
+
+\item{directory}{(\code{character}, \code{length == 1L}) A directory to write the files into. If \code{NULL},
+files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
+
+\item{overwrite}{(\code{logical}, \code{length == 1}) If \code{FALSE}, \code{writeHumdrum} will refuse to overwrite
+any files. If \code{TRUE}, \code{writeHumdrum} will overwrite files, but only after an additional prompt from the user.}
+
+\item{verbose}{(\code{logical}, \code{length == 1}) If \code{TRUE}, each \emph{new} output file name is printed on the console
+as the writing happens.}
+
+\item{EMD}{(\code{character}, \code{length == 1}) A string to write to a new \verb{!!!EMD:} record in each file.
+If \code{NULL}, not appended.}
 }
+\description{
+\code{writeHumdrum} writes \code{humdrumR} data into humdrum-syntax text files.
+The current \link[=humActive]{active expression} is evaluated to generate the humdrum output
+data.
+The written output should match the printout if printing the data in the \code{R} terminal.
+}
+\section{File names}{
+
+
+The main option to control with \code{writeHumdrum} is what files to write to.
+\code{writeHumdrum} uses the original names of the files, as \link[=readHumdrum]{read by readHumdrum},
+as the basis for \emph{new} file names.
+By default, \code{writeHumdrum} will refuse to overwrite the original files---overwriting
+will only be allowed if you specify \code{overwrite == TRUE} \emph{and} respond with \code{"y"} to a prompt.
+
+\code{writeHumdrum} generates \emph{new} file names by modifying the original read file names.
+The \code{renamer} argument must be a function which takes the original names as an input \code{character} vector
+(excluding the directory path and the file extension)
+and returns a new \code{character} vector of the same length (the default is \code{R}'s identity function \code{force}).
+After running \code{renamer}, the \code{character}-string \code{affix} and \code{prefix} arguments
+are appended/prepended to the renamed names.
+(The \code{affix} is affixed \emph{before} the extension.)
+Finally, the \code{extension} argument can be used to specify a different file extension.
+
+The \code{directory} argument indicates a file path where to write the files.
+If the \code{directory} doesn't exist, it is created.
+If \code{directory} is \code{NULL}, files are written to their original input directory (or directories).
+
+The \code{EMD} argument specifies a character string to put into a new \code{!!!EMD} reference record
+at the end of each file.
+\code{EMD} records keep track of modifications to humdrum data.
+The default behavior is to print a string indicating the \code{humdrumR} version number and date.
+If \code{EMD} is set to \code{NULL}, it is not appended to the files.
+}
+

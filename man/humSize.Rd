@@ -43,7 +43,7 @@ anySubcorpora(humdrumR)
 namesSubcorpora(humdrumR)
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumRclass} data object.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{(\code{character}) Which types of humdrum records to count.
 Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'} or any combination of

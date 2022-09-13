@@ -17,7 +17,7 @@ fields(
 )
 }
 \arguments{
-\item{humdrumR}{A \code{humdrumR} object.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{A \code{character} vector. Specifies which types of data tokens/records to extract.
 Legal values are:

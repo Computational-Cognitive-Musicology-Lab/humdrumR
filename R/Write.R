@@ -1,52 +1,99 @@
 
-#' Write `humdrumR` data to humdrum files.
+#' Write [humdrumR data][humdrumRclass] to humdrum files
 #' 
-#' ----------NEEDS DOCUMENTATION------------
+#' `writeHumdrum` writes `humdrumR` data into humdrum-syntax text files.
+#' The current [active expression][humActive] is evaluated to generate the humdrum output
+#' data.
+#' The written output should match the printout if printing the data in the `R` terminal.
+#' 
+#' @section File names:
+#' 
+#' The main option to control with `writeHumdrum` is what files to write to.
+#' `writeHumdrum` uses the original names of the files, as [read by readHumdrum][readHumdrum()],
+#' as the basis for *new* file names.
+#' By default, `writeHumdrum` will refuse to overwrite the original files---overwriting
+#' will only be allowed if you specify `overwrite == TRUE` *and* respond with `"y"` to a prompt.
+#' 
+#' `writeHumdrum` generates *new* file names by modifying the original read file names.
+#' The `renamer` argument must be a function which takes the original names as an input `character` vector
+#' (excluding the directory path and the file extension)
+#' and returns a new `character` vector of the same length (the default is `R`'s identity function `force`).
+#' After running `renamer`, the `character`-string `affix` and `prefix` arguments 
+#' are appended/prepended to the renamed names.
+#' (The `affix` is affixed *before* the extension.)
+#' Finally, the `extension` argument can be used to specify a different file extension.
+#' 
+#' The `directory` argument indicates a file path where to write the files.
+#' If the `directory` doesn't exist, it is created.
+#' If `directory` is `NULL`, files are written to their original input directory (or directories).
+#' 
+#' The `EMD` argument specifies a character string to put into a new `!!!EMD` reference record
+#' at the end of each file.
+#' `EMD` records keep track of modifications to humdrum data.
+#' The default behavior is to print a string indicating the `humdrumR` version number and date.
+#' If `EMD` is set to `NULL`, it is not appended to the files.
+#' 
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
+#' @param renamer A `function`. Must accept a `character` vector and return a new atomic vector
+#' of the same length. 
+#' @param prefix (`character`, `length == 1L`) A `character` string prepended to the file name.
+#' @param affix (`character`, `length == 1L`) A `character` string appended to the file name
+#' (before the extension).
+#' @param directory (`character`, `length == 1L`) A directory to write the files into. If `NULL`,
+#' files are written to the same directory (or directories) they were [read from][readHumdrum()].
+#' @param overwrite (`logical`, `length == 1`) If `FALSE`, `writeHumdrum` will refuse to overwrite
+#' any files. If `TRUE`, `writeHumdrum` will overwrite files, but only after an additional prompt from the user.
+#' @param verbose (`logical`, `length == 1`) If `TRUE`, each *new* output file name is printed on the console
+#' as the writing happens.
+#' @param EMD (`character`, `length == 1`) A string to write to a new `!!!EMD:` record in each file.
+#' If `NULL`, not appended.
+#' 
+#' 
+#' 
 #' @export
-writeHumdrum <- function(humdrumR, fieldName = getActiveFields(humdrumR)[1],
-                         affix = "_humdrumR", prefix = "", rename = NULL, extension = NULL, 
+writeHumdrum <- function(humdrumR, 
+                         prefix = "humdrumR_", renamer = force, affix = "", extension = NULL, 
                          directory = NULL, 
-                         EMD = paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.date()),
-                         overwrite = FALSE, verbose = TRUE) {
+                         overwrite = FALSE, verbose = FALSE,
+                         EMD = paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.Date())
+                         ) {
     # This function will have bugs if the input files are read on different file systems, with different directory separators.
     checkhumdrumR(humdrumR, 'writeHumdrum')
-    
-    if (!is.null(fieldName)) humdrumR <- setActiveFields(humdrumR, fieldName)
+    checkFunction(renamer, 'renamer', 'writeHumdrum')
+    checkCharacter(affix,  'affix',  'writeHumdrum', min.length = 1L, max.length = 1L)
+    checkCharacter(prefix, 'prefix', 'writeHumdrum', min.length = 1L, max.length = 1L)
+    directory %||% checkCharacter(prefix, 'directory', 'writeHumdrum', min.length = 1L, max.length = 1L)
+    if (!is.null(extension)) checkCharacter(extension, 'extension', 'writeHumdrum', min.length = 1L, max.length = 1L)
+    checkCharacter(EMD, 'EMD', 'writeHumdrum', min.length = 1L, max.length = 1L)
+    checkTF(overwrite, 'overwrite', 'writeHumdrum')
+    checkTF(verbose, 'verbose', 'writeHumdrum')
     
     
     cat('Writing humdrum data...\n')
     cat('Determining validity of new filenames...')
     #
-    filenameTable <- getFields(humdrumR, c('File', 'Filename', 'Filepath'), dataTypes = 'GLIMDd')
-    filenameTable[ , Directory := dirname(Filepath)]
-    filenameTable[ , Filename      := stringi::stri_replace_all_regex(Filename, '/', ':')] # in case filenames contain dir/file
+    filenameTable <- getFields(humdrumR, c('File', 'Filepath'), dataTypes = 'GLIMDd')[ , .SD[1], by = File]
+    filenameTable[ , Directory := if (is.null(directory)) dirname(Filepath) else directory]
+    filenameTable[ , Filename  := basename(Filepath)]
     
     ## File extensions
     re.ext <- '\\.[A-Za-z0-9]{1,4}$'
-    filenameTable[ , Extension := stringi::stri_extract_last_regex(Filename, re.ext)]
-    filenameTable[ , Filename      := stringi::stri_replace_last_regex(Filename, re.ext, '')]
+    filenameTable[ , Extension := if (is.null(extension)) stringi::stri_extract_last_regex(Filename, re.ext) else extension]
+    filenameTable[ , Filename  := stringi::stri_replace_last_regex(Filename, re.ext, '')]
     
-    if (!is.null(extension)) {
-        filenameTable[ , Extension := extension]
-    }
     
     #
     ### POTENTIAL SPEED UPS HERE< IF PROCESSING IS ONLY APPLIED TO UNIQUE VALUES
     # Right now, one method of processFixer replies on withHumdrum, and thus can't be a reduced version of the table.
-    rename    <- processFixer(rename, filenameTable, humdrumR)
-    prefix    <- processFixer(prefix, filenameTable, humdrumR)
-    affix     <- processFixer(affix,  filenameTable, humdrumR)
-    directory <- processFixer(directory, filenameTable, humdrumR)
+    filenameTable[ , Filename := renamer(Filename)]
     
-    filenameTable[ , Directory := if (is.null(directory)) Directory else directory]
     filenameTable[ , NewFile := paste0(Directory, .Platform$file.sep, 
                                        prefix, 
-                                       if (is.null(rename)) Filename else rename, 
+                                       Filename,
                                        affix, 
-                                       Extension %|% "")]
+                                       Extension)]
     
     
-    filenameTable <- filenameTable[ , .SD[1], by = Filename] # get unique value for each file!
     if (any(duplicated(filenameTable$NewFile))) {
         warning(call. = FALSE, noBreaks. = FALSE, immediate. = FALSE,
                 "In your call to writeHumdrum, your arguments are resulting in non-unique names ",
@@ -88,7 +135,7 @@ writeHumdrum <- function(humdrumR, fieldName = getActiveFields(humdrumR)[1],
         if (length(dontexist) > 0L) {
             cat('\nCreating ', 
                 harvard(dontexist, 'and'), 
-                if (length(dontexist) == 1L) ' directory.' else ' directories.',
+                plural(length(dontexist), ' directories.', ' directory.'),
                 sep = '')
             
             sapply(dontexist, dir.create)
@@ -99,13 +146,16 @@ writeHumdrum <- function(humdrumR, fieldName = getActiveFields(humdrumR)[1],
     cat(sep = '', '\nPreparing text...')
     
     # humdrumR <- indexGLIM(humdrumR)
-    humdrumR <- fields.as.character(humdrumR)
+    humdrumR <- printableActiveField(humdrumR)
     lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont')
-    filestrs <- tapply(lines, 
+    filestrs <- tapply(lines, # collapse across files (using names())
                        as.numeric(stringi::stri_extract_first_regex(names(lines), # as.numeric makes them sort numerically
                                                                     '^[1-9][0-9]*')), 
                        paste, collapse = '\n')
     
+    if (!is.null(EMD)) {
+        filestrs <- paste0(filestrs, '\n!!!EMD: ', EMD)
+    }
     ### Write~
     cat(sep = '', 'Writing ', nrow(filenameTable), ' files...')
     Map(\(str, path) {
@@ -122,27 +172,4 @@ writeHumdrum <- function(humdrumR, fieldName = getActiveFields(humdrumR)[1],
     
     invisible(filenameTable)
 }
-
-
-processFixer <- function(fix, origfilenames, humdrumR) {
-    if (is.null(fix)) return(fix)
-    
-    UseMethod('processFixer')
-}
-
-processFixer.character <- function(fix, origfilenames, humdrumR) return(fix)
-
-processFixer.function <- function(fix, origfilenames, humdrumR) {
-    if (length(formals(args(fix))) < 1L) return(fix())
-    
-    uniqfilenames <- unique(origfilenames)
-    uniqfilenames[ , Fixed := fix(Filename)]
-    
-    uniqfilenames[origfilenames, on = 'File']$Fixed
-    
-}
-processFixer.formula <- function(fix, origfilenames, humdrumR) {
-    as.character(with.humdrumR(humdrumR, fix, dataTypes = 'GLIMDd'))
-}
-processFixer.default <- function(fix, origfilenames, humdrumR) as.character(fix)
 

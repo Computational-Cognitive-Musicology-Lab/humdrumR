@@ -38,7 +38,7 @@ collapseRecords(
 )
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumRclass} data object.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{by}{(\code{character}) A vector of field names to group the data by.
 Data in the \code{collapseField} will be collapsed within these groups.}

@@ -30,7 +30,7 @@ foldStops(
 )
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumR-class]{humdrumR data object}.}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{fold}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{from which}
 to "fold" data to another structural position and field(s).}

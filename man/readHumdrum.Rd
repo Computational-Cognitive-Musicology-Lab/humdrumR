@@ -62,10 +62,10 @@ are parsed into their own fields. The default value is \code{"all"}.}
 These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.
 }
 \details{
-\code{findHumdrum} does the work of finding and reading the text files into R.
+\code{findHumdrum} does the work of finding and reading the text files into \code{R}.
 \code{readHumdrum} utilizes \code{findHumdrum} to read files, then parses them to
-create a \link{humTable} and build
-a \link[=humdrumRclass]{humdrumR} data object around the table.
+create a \link[=humTable]{humdrum table} and build
+a \link[=humdrumRclass]{humdrumR data object} around the table.
 }
 \section{REpath-patterns}{
 

@@ -3,7 +3,7 @@ Chords.R	chordTransformer.Rd			515	X	X	chordTransformer, figuredBass		54
 Chords.R	diatonicSet.Rd			8062	Yes	Yes	diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character		71
 Chords.R	tertianSet.Rd			1816	X	a	tertianSet, tset, is.tertianSet		77
 Dispatch.R	humdrumDispatch.Rd			3972	Yes?	OK?	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch		19
-Interpretations.R	readHumdrum.Rd			13080	Yes	Yes	readHumdrum, findHumdrum, knownInterpretations		89
+Interpretations.R	readHumdrum.Rd			13103	Yes	Yes	readHumdrum, findHumdrum, knownInterpretations		89
 Keys.R	keyTransformer.Rd			282	X	X	keyTransformer, key		34
 Keys.R	romanNumerals.Rd			704	X	X	romanNumerals		564
 Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
@@ -56,16 +56,16 @@ Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, 
 Validation.R	validateHumdrum.Rd			1030	Empty	Empty	validateHumdrum		
 Windows.R	humWindows.Rd			781	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
 Within.R	withinHumdrum.Rd		WorkingWithData	23362	Yes	Yes	withinHumdrum, with.humdrumR, within.humdrumR		376
-Write.R	writeHumdrum.Rd			518	Empty	Empty	writeHumdrum		562
-humdrumR-class.R	collapseHumdrum.Rd			2183	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
+Write.R	writeHumdrum.Rd			3583	Yes	Yes	writeHumdrum		562
+humdrumR-class.R	collapseHumdrum.Rd			2194	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
 humdrumR-class.R	foldExclusive.Rd	Folding functions		1568	Yes	Yes	foldExclusive		20
 humdrumR-class.R	foldGraceNotes.Rd	Folding functions		499	X	X	foldGraceNotes		592
-humdrumR-class.R	foldHumdrum.Rd	Folding functions		7403	Yes	Yes	foldHumdrum, foldPaths, foldStops		135
-humdrumR-class.R	humActive.Rd			9335	Yes	Yes	humActive, evalActive, getActive, getActiveFields, setActive, setActiveFields, $,humdrumR-method		20
-humdrumR-class.R	humCoercion.Rd			6269	Yes	Yes	humCoercion, as.lines, as.matrix.humdrumR, as.matrix, as.matrices, as.data.frames		12
+humdrumR-class.R	foldHumdrum.Rd	Folding functions		7402	Yes	Yes	foldHumdrum, foldPaths, foldStops		135
+humdrumR-class.R	humActive.Rd			9346	Yes	Yes	humActive, evalActive, getActive, getActiveFields, setActive, setActiveFields, $,humdrumR-method		20
+humdrumR-class.R	humCoercion.Rd			6280	Yes	Yes	humCoercion, as.lines, as.matrix.humdrumR, as.matrix, as.matrices, as.data.frames		12
 humdrumR-class.R	humMerge.Rd			361	X	X	humMerge, mergeHumdrum		45
-humdrumR-class.R	humSize.Rd			3070	Yes	Yes	humSize, nrecord, ntoken, npiece, nfile, is.empty, anyMultiPieceFiles, anyPaths, anyStops, anySubcorpora, namesSubcorpora		18
-humdrumR-class.R	humTable.Rd	Core humdrum data representation		14923	Yes	Yes	humTable, getHumtab, getFields, fields		114
+humdrumR-class.R	humSize.Rd			3081	Yes	Yes	humSize, nrecord, ntoken, npiece, nfile, is.empty, anyMultiPieceFiles, anyPaths, anyStops, anySubcorpora, namesSubcorpora		18
+humdrumR-class.R	humTable.Rd	Core humdrum data representation		14944	Yes	Yes	humTable, getHumtab, getFields, fields		114
 humdrumR-class.R	humdrumRclass.Rd	Core humdrum data representation		3608	Yes	Yes	humdrumRclass, makeHumdrumR, humdrumRS4, is.humdrumR		22
 humdrumR-class.R	unfoldStops.Rd	Folding functions		632	Yes	Minimal	unfoldStops		133
 humdrumR-package.R	humdrumPitch.Rd			2408	Yes	Missing chords/keys	humdrumPitch		16

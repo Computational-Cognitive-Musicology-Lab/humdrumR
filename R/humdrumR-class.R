@@ -449,7 +449,7 @@ is.humdrumR <- function(x){
 #' + `"dont"`: Paths are not padded at all. 
 #' 
 #' 
-#' @param humdrumR A [humdrumRclass] data object.
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param dataTypes Which types of humdrum records to include. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #'    or any combination of these (e.g., `"LIM"`).
 #'    (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
@@ -657,7 +657,7 @@ isActiveAtomic <- function(humdrumR) {
 #'    + `namesSubcorpora` returns the names of the subcorpora labels (`Label` field).
 #' + `anyMultiPieceFiles`: Returns `TRUE` if any files contain more than one piece (`Piece != File`).
 #' 
-#' @param humdrumR A [humdrumRclass] data object.
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param x A [humdrumRclass] data object.
 #' @param dataTypes (`character`) Which types of humdrum records to count.
 #'     Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` or any combination of 
@@ -853,7 +853,7 @@ mergeHumdrum <- function(...) {
 #' `collapseStops`, `collapsePaths`, and `collapseRecords` are built-in
 #' calls to `collapseHumtab`, with some additional optimizations.
 #'
-#' @param humdrumR A [humdrumRclass] data object.
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param by (`character`) A vector of field names to group the data by.
 #'   Data in the `collapseField` will be collapsed within these groups.
 #' @param collapseField (`character`, `length == 1`) The target
@@ -1086,7 +1086,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' Another extremely useful function is [foldExclusive()], which automatically folds spines 
 #' based on their exclusive interpretation.
 #' 
-#' @param humdrumR A [humdrumR data object][humdrumR-class].
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param fold (`numeric`, whole number) The target structure (spine, path, etc.) *from which*
 #'   to "fold" data to another structural position and field(s).
 #' @param onto (`numeric`, whole number) The target structure (spine, path, etc.) *to which*
@@ -1452,7 +1452,7 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' `getHumtab` extracts the hudrum table from a [humdrumR object][humdrumRclass].
 #' 
-#' @param humdrumR A `humdrumR` object.
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param dataTypes A `character` vector. Specifies which types of data tokens/records to extract.
 #'     Legal values are:
 #'     + `"G"`: global comments 
@@ -1730,7 +1730,7 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' This is exactly what `setActiveFields` does when fed multiple `fieldNames`, as well as the 
 #' special call `humData$All`.
 #' 
-#' @param humdrumR A [humdrumRclass] data object.
+#' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param dataTypes (`character`, `length == 1`) Which types of humdrum records to include. 
 #'        Legal values are `'G', 'L', 'I', 'M', 'D', 'd', ` 
 #'        or any combination of these in a single string (e.g., `"LIM"`).
