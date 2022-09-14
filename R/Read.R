@@ -1219,3 +1219,41 @@ parseBarlines <- function(spine) {
 
 
 
+
+readTSV <- function(paths) {
+  if (dir.exists('.humdrumR_tmp')) {
+    content <- dir('.humdrumR_tmp', full.names = TRUE)
+    for (file in content) file.remove(file)
+  } else {
+    dir.create('.humdrumR_tmp')
+  }
+  
+  message("Naively converting ", num2str(length(paths)), ' tsv file', 
+          plural(length(paths), 's', ''), ' to basic humdrum files...', 
+          appendLF = FALSE)
+  newfilepaths <- lapply(paths,
+                  \(path) {
+                    tsv <- fread(file = path)
+                    
+                    colnames(tsv) <- paste0('**', colnames(tsv))
+                    
+                    tsv[] <- lapply(tsv, as.character)
+                    tsv[] <- lapply(tsv, \(col) {col[col == '' | is.na(col)] <- '.'; col})
+                    ender <- replicate(ncol(tsv), '*-')
+                    ender <- rlang::eval_tidy(rlang::expr(data.table(!!!ender)))
+                    colnames(ender) <- colnames(tsv)
+                    tsv <- rbind(tsv, ender)
+                    newpath <- paste0('.humdrumR_tmp', .Platform$file.sep, basename(path), '.humdrumR')
+                    fwrite(tsv,  sep = '\t', file = newpath)
+                    newpath
+                  })
+  
+  message('done!')
+  
+  corpus <- readHumdrum('.humdrumR_tmp/.*')
+  
+  for (file in newfilepaths) file.remove(file)
+  file.remove('.humdrumR_tmp')
+  
+  corpus
+}
