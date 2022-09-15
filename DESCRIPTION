@@ -13,13 +13,13 @@ Collate: humdrumR-package.R
          tools.R
          Dispatch.R
          humdrumR-class.R
+         Interpretations.R
          Summary.R
          Read.R
          Write.R
          Within.R
          Subset.R
          Windows.R
-         Interpretations.R
          Regex.R
          Validation.R
          Struct.R

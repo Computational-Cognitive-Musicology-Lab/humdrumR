@@ -3,7 +3,6 @@ Chords.R	chordTransformer.Rd			515	X	X	chordTransformer, figuredBass		54
 Chords.R	diatonicSet.Rd			8062	Yes	Yes	diatonicSet, dset, is.diatonicSet, order.diatonicSet, Compare,diatonicSet,diatonicSet-method, diatonicSet.diatonicSet, diatonicSet.logical, diatonicSet.numeric, diatonicSet.integer, diatonicSet.character		71
 Chords.R	tertianSet.Rd			1816	X	a	tertianSet, tset, is.tertianSet		77
 Dispatch.R	humdrumDispatch.Rd			3972	Yes?	OK?	humdrumDispatch, exclusiveDispatch, makeDispatchDF, makeHumdrumDispatcher, print.humdrumDispatch		19
-Interpretations.R	readHumdrum.Rd			13103	Yes	Yes	readHumdrum, findHumdrum, knownInterpretations		89
 Keys.R	keyTransformer.Rd			282	X	X	keyTransformer, key		34
 Keys.R	romanNumerals.Rd			704	X	X	romanNumerals		564
 Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
@@ -38,6 +37,7 @@ Pitch.R	tonh.Rd	absolute pitch functions, pitch functions		10197	Yes	Mostly	tonh
 Pitch.R	transpose.Rd	tonal transformations		8048	Yes?	Yes	transpose		26
 Rational.R	rational.Rd	humdrumR numeric functions		3020	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,Rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction		81
 Read.R	extractTandem.Rd			3146	Yes	Yes	extractTandem	Needs	
+Read.R	readHumdrum.Rd			17638	Yes	Yes	knownInterpretations, readHumdrum, findHumdrum		89
 Regex.R	REparser.Rd			922	Yes	Minimal	REparser, REparse		561
 Regex.R	RegexFind.Rd			2458	Yes	Yes	RegexFind, \%~l\%, \%~i\%, \%~n\%, \%~m\%, \%~\%, \%!~\%, \%!~l\%, \%!~i\%		38
 Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE		559
@@ -53,7 +53,7 @@ Summary.R	humSummary.Rd	corpus summary functions		1573	Yes	Yes	humSummary, summa
 Summary.R	interpretations.Rd	corpus summary functions		2744	Yes	Yes	interpretations, [.humInterpretations, print.humInterpretations		
 Summary.R	reference.Rd	corpus summary functions		3635	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference		
 Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, print.humSpines		
-Validation.R	validateHumdrum.Rd			1030	Empty	Empty	validateHumdrum		
+Validation.R	validateHumdrum.Rd			3912	Yes	Yes	validateHumdrum		
 Windows.R	humWindows.Rd			781	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
 Within.R	withinHumdrum.Rd		WorkingWithData	23362	Yes	Yes	withinHumdrum, with.humdrumR, within.humdrumR		376
 Write.R	writeHumdrum.Rd			3583	Yes	Yes	writeHumdrum		562

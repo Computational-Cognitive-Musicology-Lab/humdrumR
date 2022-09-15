@@ -1,23 +1,73 @@
 #' Validate humdrum files
 #' 
-#' This function checks files for violations of the 
-#' humdrum syntax.
+#' This function checks files on your local machine for violations of the 
+#' [humdrum syntax](http://www.humdrum.org/guide/ch05/).
+#' Detailed error reports can be generated, pointing to specific problematic records in files.
+#'
 #' 
-#' @param patterns `character` vector. Search pattern(s) for identifying files 
-#' (see `[readHumdrum][readHumdrum]`).
-#' @param recursive `logical`. If `TRUE`, the final part of the search pattern (i.e., the file search) 
-#' is searched for recursively through all sub directories.
-#' @param errorReport.path `character`. A directory path which, if not `NULL`, an error report is written 
-#' in the file `'humdrumR_syntaxErrorReport_date.txt'`. In addition, all files with errors
-#' are written to this directory (with `'errorMarkup'` appended to their names), with 
-#' errors annotated inline.
+#' @details 
+#'
+#' Only violations of the general [humdrum syntax](http://www.humdrum.org/guide/ch05/) are identified.
+#' For example, missing exclusive interpretations, `*-` spine enders, or null data tokens.
+#' The `validateHumdrum` function *does not* check for ill-formed data content---for example, a `**kern`
+#' spine containing the token `"Lsharp"` will not be rejected.
+#' Note that `validateHumdrum` is quite picky about details! 
+#' "Hanging white space," even in global records, will be marked as invalid files!
+#'
+#' `validateHumdrum` is called in the same manner as [readHumdrum()], by providing
+#' one or more regex search patterns to match files on your machine.
+#' (The `...`, `recursive`, and `contains` arguments are all simply passed to [findHumdrum()].)
+#' When called, `validateHumdrum` prints basic messages informing you about the result of
+#' the file matching and validity testing.
+#'
+#' The function also returns ([invisibly][base::invisible()]) the [findHumdrum()] "file info"
+#' `data.table`, with additional `Valid` and `Errors` columns:
+#' The `Valid` column is `logical`, with `TRUE` for all valid humdrum files.
+#' The `Error` column is a list of `data.table`s, describing syntax errors in the files
+#' if any.
+#' The `Error` `data.table`s have one row for each error in a file (if any), and three columns:
 #' 
-#' @param files A list of character strings, each representing a record in a file.
+#' + `Filepath`: The file name.
+#' + `Record`: Which record contains the error.
+#' + `Message`: A description of the error.
 #' 
+#' 
+#' @section Error reports:
+#' 
+#' If desired, the contents of the `validateHumdrum` can be written files.
+#' This is most useful, as we can print the errors tagged right alongside the original raw data.
+#' To write an error report, set the `errorReport.path` argument to a non-`NULL` string,
+#' pointing to a directory path on your machine.
+#' If the directory doesn't exist, `R` will (attempt to) create it.
+#' 
+#' In the `errorReport.path` directory, the complete error report(s) for all
+#' the files (same as in the returned "fileFrame", see above) are written into a single file named
+#' `'humdrumR_syntaxErrorReport_DATE.txt'` (with the `date` coming from [Sys.Date][base::Sys.Date()]`). 
+#' In addition, a sub directory called `AnnotatedFiles` is created.
+#' In this directory, copies of all the files which contain errors are written, with `_errorAnnotations` appended
+#' to their names.
+#' In each file, individual errors are directly indicated in the record where they occur.
+#' The output looks like this:
+#' 
+#' ```
+#'                                              | The original records from the input file
+#'                                              | appear on the right side.
+#' Error message for record three printed here. | Exactly as they did
+#'                                              | in the input file.
+#' ````
+#' 
+#' @param ... `character`: Arguments passed to [findHumdrum()] to identify files on the local machine
+#' to test for humdrum validity.
+#' This is mainly used to pass [regex file-path search patterns][readHumdrum()], but may also be used to pass
+#' the `recursive` and/or `contains` arguments to [findHumdrum()].
+#'
+#' @param errorReport.path (`character`, `length == 1`) A directory path where to write error report files.
+#' If `NULL` (the default), no error report files are written.
+#'
 #' @export
-validateHumdrum <- function(..., contains = NULL, recursive = FALSE, errorReport.path = NULL) {
+validateHumdrum <- function(..., errorReport.path = NULL) {
 
-  fileFrame <- readFiles(..., contains = contains, recursive = recursive, allowDuplicates = FALSE)
+  fileFrame <- readFiles(..., allowDuplicates = FALSE)
   
   fileFrame <- isValidHumdrum(fileFrame, errorReport.path = errorReport.path)
   
@@ -36,14 +86,16 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     }
     
     ##
+    emptyFiles <- fileFrame[ , lengths(FileLines) == 0L]
+    if (any(emptyFiles)) message(glue::glue("{num2print(sum(emptyFiles))} files are simply empty..."))
+    
     files     <- fileFrame$FileLines
     filepaths <- fileFrame$Filepath
     
-    message(glue::glue("Validating {num2print(length(files))} files..."), appendLF = FALSE)
     
+    message(glue::glue("Validating {if (any(emptyFiles)) 'remaining ' else ''}{num2print(sum(!emptyFiles))} files..."), appendLF = FALSE)
     # If files are empty everything gets thrown off...this is a hacky fix
     # Just pad empty files with a single empty record
-    files <- ifelse(lengths(files) == 0L, "", files)
     
     filevec  <- rep(filepaths, lengths(files))
     recordNs <- unlist(lapply(files, seq_along), use.names = TRUE) 
@@ -51,6 +103,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     
     local   <- !grepl('^!!', records)
     
+    ## Prepare validity reports
     reports <- list()
     # 
     funcs <- list(validate_File,
@@ -61,24 +114,29 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
                   validate_spinePaths)
     reports <- data.table::rbindlist(lapply(funcs, do.call, 
                                             args = list(records, local, filevec)))
+    reports <- reports[ , c("RecordN", "Filepath") := .(recordNs[Location], filevec[Location])]
+    if (any(emptyFiles)) {
+      reports <- rbind(reports, 
+                       fileFrame[emptyFiles == TRUE, list(Filepath = Filepath, RecordN = 0, Message = 'Empty', Location = NA)])
+      setorder(reports, Filepath)
+    }
+    # reports <- shortFilenames(reports)
+    
     if (nrow(reports) == 0L) {
         message("all valid.")
         fileFrame[ , Valid := TRUE]
         return(fileFrame)
     }
     
-    badFiles  <- unique(filevec[reports$Location])
-    hits      <- !filepaths %in% badFiles
-    goodFiles <- filepaths[hits]
+    badFiles  <- reports[ , unique(Filepath)]
+    fileFrame[ , Valid := !Filepath %in% badFiles]
+    message(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files{if (any(emptyFiles)) ' (including empty files)' else ''}..."), 
+            appendLF = FALSE)
     
-    message(glue::glue("{num2print(nrow(reports))} errors in {num2print(length(badFiles))} files..."), appendLF = FALSE)
     
     if (!is.null(errorReport.path)) {
         file.sep <- .Platform$file.sep
         if (!dir.exists(errorReport.path)) dir.create(path = errorReport.path)
-        
-        reports <- reports[ , c("RecordN", "Filepath") := .(recordNs[Location], filevec[Location])]
-        reports <- shortFilenames(reports)
         
         # Summary file
         summary <- reports[ , fileErrorSummary(.SD, unique(Filepath)) , by = Filepath, .SDcols = colnames(reports)]$V1
@@ -108,10 +166,19 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
         message(glue::glue("report written in directory '{errorReport.path}'..."), appendLF = FALSE) 
     }
     
-    message(glue::glue("{num2print(length(goodFiles))} valid files.\n", .trim = FALSE))
+    message(glue::glue("{num2print(sum(fileFrame$Valid))} valid files.\n", .trim = FALSE))
     
-    #
-    fileFrame[ , Valid := hits]
+
+    fileFrame <- reports[, list(Errors = list(data.table(Filepath = Filepath, Record = RecordN, Error = Message))), by = Filepath][fileFrame, on = 'Filepath']
+    fileFrame$Errors <- lapply(fileFrame$Errors,
+                               \(errors) {
+                                 if (is.null(errors)) {
+                                   data.table(Filepath = character(0), Record = integer(0), Message = character(0))
+                                 } else {
+                                   errors
+                                 }
+                                 
+                                 })
     
     fileFrame
 }
@@ -256,7 +323,7 @@ validate_spinePaths <- function(records, local, filevec) {
           
           addsordrops <- ifelse(diffs[hits] > 0, 'adds', 'drops')
           columns <- ifelse(abs(diffs[hits]) > 1L, 'columns', 'column')
-          hitsTable(hits, 1L + which(local)[hits],
+          hitsTable(hits, which(local)[hits],
                     glue::glue("{addsordrops} {num2print(abs(diffs[hits]))} {columns}"))
 }
 
