@@ -102,13 +102,18 @@ The <code>reverse</code> argument can be used to cause "backward" filling, where
 <span class="fu">ditto</span><span class="op">(</span><span class="va">x</span>, margin <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for humdrumR</span>
-<span class="fu">ditto</span><span class="op">(</span><span class="va">x</span>, field <span class="op">=</span> <span class="fu">activeFields</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">...</span>, newField <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">field</span>, <span class="st">"_ditto"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">ditto</span><span class="op">(</span>
+  <span class="va">x</span>,
+  field <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  <span class="va">...</span>,
+  newField <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">field</span>, <span class="st">"_ditto"</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>The input argument. Should be vector (including list), array, or data.frame</p></dd>
+<dd><p>The input argument. Should be a vector (including lists), <code>matrix</code>, or <code>data.frame</code>.</p></dd>
 <dt>nonnull</dt>
 <dd><p>Either a logical vector where (<code>length(x) == length(nonnull)</code>), a numeric
 vector of positive indices, or a function which, when applied to <code>x</code> returns an appropriate logical/numeric vector.</p></dd>
@@ -123,7 +128,7 @@ by the <code>boundaries</code> vector(s) is treated separately.</p></dd>
 E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns.
 Where X has named dimnames, it can be a character vector selecting dimension names.</p></dd>
 <dt>field</dt>
-<dd><p>Which field (<a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partially matched</a>) in the <code>humdrumR</code> dataset should be dittoed?</p></dd>
+<dd><p>Which field (<a href="partialMatching.html">partially matched</a>) in the <code>humdrumR</code> dataset should be dittoed?</p></dd>
 <dt>newField</dt>
 <dd><p>(<code>character</code> of <code>length == 1</code>) What to name the new (dittoed) field.</p></dd>
 </dl></div>

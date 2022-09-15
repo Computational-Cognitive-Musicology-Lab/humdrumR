@@ -1454,15 +1454,9 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' @param humdrumR A [humdrumR data object][humdrumRclass].
 #' @param dataTypes A `character` vector. Specifies which types of data tokens/records to extract.
-#'     Legal values are:
-#'     + `"G"`: global comments 
-#'     + `"L"`: local comments 
-#'     + `"I"`: interpretations
-#'     + `"M"`: barlines
-#'     + `"D"`: non-null data
-#'     + `"d"`: null data 
-#' 
-#'     Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
+#'   Legal values are: `"G"` (global comments), `"L"` (local comments), `"I"` (interpretations),
+#'   `"M"` (barlines), `"D"` (non-null data), or `"d"` (null data).
+#'   Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
 #' 
 #' @rdname humTable
 #' @export

@@ -118,9 +118,9 @@ basic <code>R</code> data types.</p>
     <dl><dt>mode</dt>
 <dd><p>A single <code>character</code>
 string naming an <a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic vector type</a> to coerce the output to (if possible).
-By default, set to <code>'any'</code>, which lets the output type simply be whatever comes out of <code><a href="humActive.html">activeAtomic()</a></code>.</p></dd>
+By default, set to <code>'any'</code>, which lets the output type simply be whatever comes out of <code><a href="humActive.html">evalActive()</a></code>.</p></dd>
 <dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumRclass</a> data object.</p></dd>
+<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
 <dd><p>Which types of humdrum records to include. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
 or any combination of these (e.g., <code>"LIM"</code>).
@@ -138,8 +138,8 @@ argument is used to fill in differences in the number of columns between files, 
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Generally, coercion works by evaluating a humdrumR object's the
 <a href="humActive.html">active expression</a> and forcing the result to be an atomic vector.
-This process is accomplished by the <code><a href="humActive.html">activeAtomic()</a></code> command.
-The <a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector(humdrumR)</a> method is essentially a wrapper for <code><a href="humActive.html">activeAtomic()</a></code>, with the additional
+This process is accomplished by the <code><a href="humActive.html">evalActive()</a></code> command.
+The <a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector(humdrumR)</a> method is essentially a wrapper for <code><a href="humActive.html">evalActive()</a></code>, with the additional
 option of coercing the resulting vector to a particular type using the <code>mode</code> argument.</p>
 <p>The <a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix(humdrumR)</a> method take things a step further by putting the evaluated
 active expression into a two-dimensional matrix, with rows representing records and columns indicating

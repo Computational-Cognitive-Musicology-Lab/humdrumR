@@ -88,14 +88,19 @@ the content of humdrum data.</p>
 
       <dl><dt>
           
-          <code><a href="readHumdrum.html">findHumdrum()</a></code> <code><a href="readHumdrum.html">readHumdrum()</a></code> 
+          <code><a href="validateHumdrum.html">validateHumdrum()</a></code> 
+        </dt>
+        <dd>Validate humdrum files</dd>
+      </dl><dl><dt>
+          
+          <code><a href="readHumdrum.html">knownInterpretations</a></code> <code><a href="readHumdrum.html">findHumdrum()</a></code> <code><a href="readHumdrum.html">readHumdrum()</a></code> 
         </dt>
         <dd>Find and read humdrum files into R</dd>
       </dl><dl><dt>
           
           <code><a href="writeHumdrum.html">writeHumdrum()</a></code> 
         </dt>
-        <dd>Write <code>humdrumR</code> data to humdrum files.</dd>
+        <dd>Write humdrumR data to humdrum files</dd>
       </dl></div><div id="" class="section level2">
       
       
@@ -106,6 +111,26 @@ the content of humdrum data.</p>
           <code><a href="humSummary.html">summary(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
         <dd>Summarize humdrumR corpora</dd>
+      </dl><dl><dt>
+          
+          <code><a href="census.html">census()</a></code> <code><a href="census.html">`[`</a></code> <code><a href="census.html">print(<i>&lt;humCensus&gt;</i>)</a></code> 
+        </dt>
+        <dd>Tabulate records and tokens in a humdrumR corpus</dd>
+      </dl><dl><dt>
+          
+          <code><a href="interpretations.html">interpretations()</a></code> <code><a href="interpretations.html">`[`(<i>&lt;humInterpretations&gt;</i>)</a></code> <code><a href="interpretations.html">print(<i>&lt;humInterpretations&gt;</i>)</a></code> 
+        </dt>
+        <dd>Summarize humdrum corpus interpretations.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reference.html">reference()</a></code> <code><a href="reference.html">reference()</a></code> <code><a href="reference.html">reference()</a></code> <code><a href="reference.html">`[`(<i>&lt;humReference&gt;</i>)</a></code> 
+        </dt>
+        <dd>Summarize reference records in a humdrumR corpus</dd>
+      </dl><dl><dt>
+          
+          <code><a href="spines.html">spines()</a></code> <code><a href="spines.html">`[`(<i>&lt;humSpines&gt;</i>)</a></code> <code><a href="spines.html">print(<i>&lt;humSpines&gt;</i>)</a></code> 
+        </dt>
+        <dd>Summarize spines in humdrum dataset.</dd>
       </dl></div><div class="section level2">
       <h2 id="working-with-data">Working with Data<a class="anchor" aria-label="anchor" href="#working-with-data"></a></h2>
       
@@ -151,22 +176,7 @@ ensconced within humdrumR data structures.</p>
 represent or engage musical/music-theoretic concepts.</p>
 
       
-    </div><div id="" class="section level2">
-      
-      
-      
-
-      <dl><dt>
-          
-          <code><a href="delta.html">delta()</a></code> 
-        </dt>
-        <dd>Lagged differences</dd>
-      </dl><dl><dt>
-          
-          <code><a href="sigma.html">sigma()</a></code> 
-        </dt>
-        <dd>Cumulative sum of numeric vector</dd>
-      </dl></div><div class="section level2">
+    </div><div class="section level2">
       
       <h3 id="pitch-overviews">Pitch overviews<a class="anchor" aria-label="anchor" href="#pitch-overviews"></a></h3>
       <p class="section-desc"></p><p>These pages overview general concepts in humdrumR pitch:</p>
@@ -192,6 +202,11 @@ represent or engage musical/music-theoretic concepts.</p>
           <code><a href="pitchParsing.html">pitchParsing</a></code> 
         </dt>
         <dd>Parsing pitch information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="pitchDeparsing.html">pitchDeparsing</a></code> 
+        </dt>
+        <dd>Generating ("deparsing") pitch representations</dd>
       </dl><dl><dt>
           
           <code><a href="tonalIntervalS4.html">tint()</a></code> <code><a href="tonalIntervalS4.html">is.tonalInterval()</a></code> 
@@ -320,6 +335,11 @@ represent or engage musical/music-theoretic concepts.</p>
         <dd>Transpose pitches and keys</dd>
       </dl><dl><dt>
           
+          <code><a href="invert.html">invert()</a></code> 
+        </dt>
+        <dd>Invert or transpose tonal intervals.</dd>
+      </dl><dl><dt>
+          
           <code><a href="chordTransformer.html">figuredBass()</a></code> 
         </dt>
         <dd>Parsing and deparsing chord information.</dd>
@@ -414,19 +434,19 @@ contain the musical data.</p>
 
       <dl><dt>
           
-          <code><a href="humdrumRclass.html">is.humdrumR()</a></code> <code><a href="humdrumRclass.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humdrumRclass.html">fields()</a></code> 
+          <code><a href="humdrumRclass.html">is.humdrumR()</a></code> 
         </dt>
-        <dd>HumdrumR class</dd>
+        <dd><code>humdrumR</code> class</dd>
       </dl><dl><dt>
           
-          <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">getFields()</a></code> 
+          <code><a href="extractTandem.html">extractTandem()</a></code> 
         </dt>
-        <dd>Humdrum Tables</dd>
+        <dd>Get tandem interpretation information from humdrum data</dd>
       </dl><dl><dt>
           
-          <code><a href="humActive.html">evalActive()</a></code> <code><a href="humActive.html">activeAtomic()</a></code> <code><a href="humActive.html">getActive()</a></code> <code><a href="humActive.html">setActive()</a></code> <code><a href="humActive.html">setActiveFields()</a></code> 
+          <code><a href="humActive.html">evalActive()</a></code> <code><a href="humActive.html">getActive()</a></code> <code><a href="humActive.html">getActiveFields()</a></code> <code><a href="humActive.html">setActive()</a></code> <code><a href="humActive.html">setActiveFields()</a></code> <code><a href="humActive.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>The "Active expression" of a humdrumR object.</dd>
+        <dd>The "Active expression" of a humdrumR object</dd>
       </dl><dl><dt>
           
           <code><a href="humCoercion.html">as.vector(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.lines()</a></code> <code><a href="humCoercion.html">as.matrix(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.matrices()</a></code> <code><a href="humCoercion.html">as.data.frames()</a></code> 
@@ -437,6 +457,11 @@ contain the musical data.</p>
           <code><a href="humMerge.html">mergeHumdrum()</a></code> 
         </dt>
         <dd>Merge two (or more) humdrumR datasets</dd>
+      </dl><dl><dt>
+          
+          <code><a href="collapseHumdrum.html">collapseHumdrum()</a></code> <code><a href="collapseHumdrum.html">collapseStops()</a></code> <code><a href="collapseHumdrum.html">collapsePaths()</a></code> <code><a href="collapseHumdrum.html">collapseRecords()</a></code> 
+        </dt>
+        <dd>"Collapse" humdrumR data into a field</dd>
       </dl><dl><dt>
           
           <code><a href="foldHumdrum.html">foldHumdrum()</a></code> <code><a href="foldHumdrum.html">foldPaths()</a></code> <code><a href="foldHumdrum.html">foldStops()</a></code> 
@@ -459,14 +484,14 @@ contain the musical data.</p>
         <dd>"Unfold" data into multiple stops</dd>
       </dl><dl><dt>
           
-          <code><a href="collapseHumdrum.html">collapseHumdrum()</a></code> <code><a href="collapseHumdrum.html">collapseStops()</a></code> <code><a href="collapseHumdrum.html">collapsePaths()</a></code> <code><a href="collapseHumdrum.html">collapseRecords()</a></code> 
-        </dt>
-        <dd>"Collapse" humdrumR data into a field</dd>
-      </dl><dl><dt>
-          
           <code><a href="humSize.html">nrecord()</a></code> <code><a href="humSize.html">nrow(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ntoken()</a></code> <code><a href="humSize.html">npiece()</a></code> <code><a href="humSize.html">nfile()</a></code> <code><a href="humSize.html">length(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ncol(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">dim(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">is.empty()</a></code> <code><a href="humSize.html">anyMultiPieceFiles()</a></code> <code><a href="humSize.html">anyPaths()</a></code> <code><a href="humSize.html">anyStops()</a></code> <code><a href="humSize.html">anySubcorpora()</a></code> <code><a href="humSize.html">namesSubcorpora()</a></code> 
         </dt>
         <dd>humdrumR data size and shape</dd>
+      </dl><dl><dt>
+          
+          <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">getFields()</a></code> <code><a href="humTable.html">fields()</a></code> 
+        </dt>
+        <dd>Humdrum tables (and their Fields)</dd>
       </dl><dl><dt>
           
           <code><a href="struct.html">is.struct()</a></code> 
@@ -512,9 +537,29 @@ contain the musical data.</p>
 
       <dl><dt>
           
+          <code><a href="delta.html">delta()</a></code> 
+        </dt>
+        <dd>Lagged differences</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ditto.html">ditto()</a></code> 
+        </dt>
+        <dd>Propagate data points to "fill" null data.</dd>
+      </dl><dl><dt>
+          
           <code><a href="lag.html">lag()</a></code> <code><a href="lag.html">lead()</a></code> 
         </dt>
         <dd>Shift data within a vector/matrix/data.frame</dd>
+      </dl><dl><dt>
+          
+          <code><a href="segments.html">segments()</a></code> <code><a href="segments.html">changes()</a></code> 
+        </dt>
+        <dd>Identify contiguous segments of data in a vector</dd>
+      </dl><dl><dt>
+          
+          <code><a href="sigma.html">sigma()</a></code> 
+        </dt>
+        <dd>Cumulative sum of numeric vector</dd>
       </dl></div><div class="section level2">
       
       <h3 id="regular-expressions">Regular Expressions<a class="anchor" aria-label="anchor" href="#regular-expressions"></a></h3>
@@ -565,6 +610,11 @@ expressions.</p>
           <code><a href="humdrumRroot.html">humdrumRroot</a></code> 
         </dt>
         <dd><code>humdrumR</code>'s root directory on your machine.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="partialMatching.html">partialMatching</a></code> 
+        </dt>
+        <dd>Partial matching</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

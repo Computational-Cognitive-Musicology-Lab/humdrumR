@@ -150,7 +150,7 @@ returning anything using <code>sidefx</code>.</p></li>
 <li><p>"Fill" short results to match the original field size using <code>fill</code>.</p></li>
 <li><p>Only in certain record types (defaulting only data records) using <code>dataTypes</code>.</p></li>
 </ul><p>These arguments are specified as named arguments to <code>with</code>/<code>within</code> calls.
-Even though they aren't formal arguments, they are <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partially matched</a>,
+Even though they aren't formal arguments, they are <a href="partialMatching.html">partially matched</a>,
 so if write <code>grou</code> instead of <code>groupby</code>, you won't get an error!
 In some cases, you can specify more than one of the same type of control argument (details below).</p>
     </div>
@@ -208,7 +208,7 @@ The most common "side effect" is creating a plot.
 Other examples might be printing text to the console using <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat()</a></code> or <code><a href="https://rdrr.io/r/base/print.html" class="external-link">base::print()</a></code>, or
 writing to a file.</p>
 <p>Side effects can be achieved by naming your expression <code>sidefx</code> or <code>fx</code>---as usual,
-these arguments can be <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partially matched</a>, so <code>side</code> also works, and is commonly used.
+these arguments can be <a href="partialMatching.html">partially matched</a>, so <code>side</code> also works, and is commonly used.
 Side-effect expressions are executed, but their result (if any) is ignored.
 This means that if you call something like <code>newData &lt;- within(humData, side = plot(x))</code>, the plot is made
 but the result (<code>newData</code>) is identical to <code>humData</code>.</p>
@@ -232,7 +232,7 @@ In other words, you'd like the output (result) of your expression to be repeated
 length of the input field(s).
 You could do this manually be using the <code><a href="https://rdrr.io/r/base/rep.html" class="external-link">base::rep()</a></code> function, but <code>with</code>/<code>within.humdrumR</code> provide a
 syntactic sugar for this:
-You can name your expression <code>recycle</code> or <code>fill</code> (<a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partially matched</a>),
+You can name your expression <code>recycle</code> or <code>fill</code> (<a href="partialMatching.html">partially matched</a>),
 which will cause the result to be recycled.
 All this does is take <code>yourExpression(field, ...)</code> and wrap it in
 <code>rep(yourExpression(field, ...), length.out = length(field))</code>.</p>
@@ -361,7 +361,7 @@ However, in a call to <code>within</code>, the result field(s) are (by default) 
 where ever <code>where == FALSE</code>.
 However, you can also control what is returned where <code>where == FALSE</code> by specifying alternate
 within-expression(s) to evaluate where <code>where == FALSE</code>.
-These must be named <code>orelse</code> ([partially matched][base::pmatch()]).
+These must be named <code>orelse</code> ([partially matched][partialMatching]).
 (You can also specify <code>orfill</code> or <code>orelsefill</code>, to get the behavior of <code>fill</code>. See above.)</p>
 <p>A <code>orelse</code> expression can only be specified in combination with a <code>where</code> argument,
 and must be <em>in addition</em> to a normal within-expression.
@@ -438,7 +438,7 @@ but this time wherever the `semits` field is greater than the mean value *across
 
 [humTable]: R:humTable
 [humTable]: R:humTable
-[base::pmatch()]: R:base::pmatch()
+[partialMatching]: R:partialMatching
 [data.table]: R:data.table
 [tapply]: R:tapply
 [by]: R:by

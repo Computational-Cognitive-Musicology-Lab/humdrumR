@@ -94,7 +94,7 @@ calls to <code>collapseHumtab</code>, with some additional optimizations.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">collapseHumdrum</span><span class="op">(</span>
   <span class="va">humdrumR</span>,
   <span class="va">by</span>,
-  collapseField <span class="op">=</span> <span class="fu">activeFields</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  collapseField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>,
   collapseAtomic <span class="op">=</span> <span class="cn">TRUE</span>,
   sep <span class="op">=</span> <span class="st">" "</span>
@@ -102,21 +102,21 @@ calls to <code>collapseHumtab</code>, with some additional optimizations.</p>
 
 <span class="fu">collapseStops</span><span class="op">(</span>
   <span class="va">humdrumR</span>,
-  collapseField <span class="op">=</span> <span class="fu">activeFields</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  collapseField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   collapseAtomic <span class="op">=</span> <span class="cn">TRUE</span>,
   sep <span class="op">=</span> <span class="st">" "</span>
 <span class="op">)</span>
 
 <span class="fu">collapsePaths</span><span class="op">(</span>
   <span class="va">humdrumR</span>,
-  collapseField <span class="op">=</span> <span class="fu">activeFields</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  collapseField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   collapseAtomic <span class="op">=</span> <span class="cn">TRUE</span>,
   sep <span class="op">=</span> <span class="st">" "</span>
 <span class="op">)</span>
 
 <span class="fu">collapseRecords</span><span class="op">(</span>
   <span class="va">humdrumR</span>,
-  collapseField <span class="op">=</span> <span class="fu">activeFields</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  collapseField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   collapseAtomic <span class="op">=</span> <span class="cn">TRUE</span>,
   sep <span class="op">=</span> <span class="st">" "</span>
 <span class="op">)</span></code></pre></div>
@@ -125,7 +125,7 @@ calls to <code>collapseHumtab</code>, with some additional optimizations.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumRclass</a> data object.</p></dd>
+<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>by</dt>
 <dd><p>(<code>character</code>) A vector of field names to group the data by.
 Data in the <code>collapseField</code> will be collapsed within these groups.</p></dd>

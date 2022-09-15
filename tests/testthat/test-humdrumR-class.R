@@ -36,7 +36,7 @@ test_that('Spine folding works properly when stops are present, and vice versa',
   }
   
   #
-  tab1 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 2, 1)))
+  tab1 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 2, 1), fromField = 'Token'))
   tab2 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 1, 2), fromField = 'Result1'))
   if (expect_true(identical(dim(tab1), dim(tab2)))) {
     expect_true(all(tab1$Token == tab2$Result1))
@@ -114,8 +114,8 @@ test_that('Stop folding works properly', {
 test_that('Stop and path folding work together', {
   path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
   
-  foldedPS <- getHumtab(foldStops(foldPaths(path))$Token, 'D')
-  foldedSP <- getHumtab(foldPaths(foldStops(path))$Token, 'D')
+  foldedPS <- getHumtab(foldStops(foldPaths(path), fromField = 'Token')$Token, 'D')
+  foldedSP <- getHumtab(foldPaths(foldStops(path), fromField = 'Token')$Token, 'D')
   
   expect_equal(foldedPS[, table(Token, Token_Path1)], 
                foldedSP[, table(Token, Token_Path1)])

@@ -20,14 +20,9 @@ fields(
 \item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{A \code{character} vector. Specifies which types of data tokens/records to extract.
-Legal values are:
-+ \code{"G"}: global comments
-+ \code{"L"}: local comments
-+ \code{"I"}: interpretations
-+ \code{"M"}: barlines
-+ \code{"D"}: non-null data
-+ \code{"d"}: null data\preformatted{Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
-}}
+Legal values are: \code{"G"} (global comments), \code{"L"} (local comments), \code{"I"} (interpretations),
+\code{"M"} (barlines), \code{"D"} (non-null data), or \code{"d"} (null data).
+Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
 
 \item{fields}{(\code{character}) A vector of names which are \link[=partialMatching]{partially matched}
 against field names of the humdrum table.

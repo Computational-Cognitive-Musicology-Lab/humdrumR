@@ -87,7 +87,7 @@ We "fold" the data from one structural location over "on top" of other data usin
 By default, <code>humdrumR</code> parses each separate spine, spine-path, and stop as their own individual
 data points, taking up one row in the <a href="humTable.html">humdrum table</a>.
 If we want to treat data in multiple spines/paths/stops as different aspects of the same data
-it is easiest to reshape the data so that the information is in different humdrumR <a href="humdrumRclass.html">fields</a>
+it is easiest to reshape the data so that the information is in different humdrumR <a href="humTable.html">fields</a>
 rather than separate spines/paths/stops.
 We "fold" the data from one structural location over "on top" of other data using <code>foldHumdrum</code>.</p>
     </div>
@@ -100,20 +100,28 @@ We "fold" the data from one structural location over "on top" of other data usin
   <span class="va">onto</span>,
   what <span class="op">=</span> <span class="st">"Spine"</span>,
   File <span class="op">=</span> <span class="cn">NULL</span>,
-  fromField <span class="op">=</span> <span class="st">"Token"</span>,
+  fromField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   fillFromField <span class="op">=</span> <span class="cn">FALSE</span>,
   newFieldNames <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span>
 
-<span class="fu">foldPaths</span><span class="op">(</span><span class="va">humdrumR</span>, fromField <span class="op">=</span> <span class="st">"Token"</span>, fillFromField <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">foldPaths</span><span class="op">(</span>
+  <span class="va">humdrumR</span>,
+  fromField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  fillFromField <span class="op">=</span> <span class="cn">TRUE</span>
+<span class="op">)</span>
 
-<span class="fu">foldStops</span><span class="op">(</span><span class="va">humdrumR</span>, fromField <span class="op">=</span> <span class="st">"Token"</span>, fillFromField <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">foldStops</span><span class="op">(</span>
+  <span class="va">humdrumR</span>,
+  fromField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
+  fillFromField <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A humdrumR data object.</p></dd>
+<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>fold</dt>
 <dd><p>(<code>numeric</code>, whole number) The target structure (spine, path, etc.) <em>from which</em>
 to "fold" data to another structural position and field(s).</p></dd>

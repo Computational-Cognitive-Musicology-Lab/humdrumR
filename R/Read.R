@@ -728,7 +728,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     # combine with parsed data
     humtab  <- humtab[fileFrame,  on = "Piece"]
-    
+    humtab[ , Pattern := NULL]
     
     ## Other general information about tokens
     humtab[ , Type := parseTokenType(Token)]
