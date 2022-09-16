@@ -178,7 +178,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
-    tint <- tint %<-matchdim% (if (size(tint) == size(LO5th)) LO5th else octave)
+    tint <- tint %<-matchdim% (if (hasdim(LO5th) && size(tint) == size(LO5th)) LO5th else octave)
     if (partition) tintPartition(tint, Key = Key, octave.round = octave.round) else tint
 }
 
@@ -2459,14 +2459,6 @@ tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
                                                 funcName = 'tonalInterval.numeric',
                                                 outputClass ='tonalInterval')
 
-# #' @rdname pitchParsing
-# #' @export
-# tonalInterval.rational <- rational2tint
-# #' @rdname pitchParsing
-# #' @export
-# tonalInterval.fraction <- fraction2tint
-# 
-
 
 #### Characters ####
 
@@ -2665,10 +2657,10 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
-    # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     
     checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname)
     
+    # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
                                                                 parse = parseArgs, transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)

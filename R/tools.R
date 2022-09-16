@@ -801,7 +801,7 @@ match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
           
 }
 
-recycle <- function(x,length.out = if (hasdim(x)) dim(x) else length(x)) {
+recycle <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
   .fillout(x, length.out, recycle = TRUE)
 }
 

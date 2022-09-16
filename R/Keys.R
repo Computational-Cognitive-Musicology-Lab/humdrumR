@@ -894,6 +894,11 @@ diatonicSet.diatonicSet <- function(x, ...) x
 #' @export 
 diatonicSet.logical <- function(x, ...) vectorNA(length(x), 'diatonicSet')
 
+#' @rdname diatonicSet
+#' @export
+diatonicSet.NULL <- function(x, ...) NULL
+
+
 #### Numbers ####
 
 #' @rdname diatonicSet
@@ -943,6 +948,7 @@ setAs('integer', 'diatonicSet', function(from) integer2dset(from))
 setAs('numeric', 'diatonicSet', function(from) integer2dset(from))
 setAs('character', 'diatonicSet', function(from) diatonicSet.character(from))
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %<-matchdim% from)
+setAs('logical', 'diatonicSet', function(from) dset(rep(NA, length(from))) %<-matchdim% from)
 
 
 ###################################################################### ### 
@@ -963,45 +969,55 @@ NULL
 
 
 
-makeKeyTransformer <- function(deparser, callname, outputclass = 'character') {
+makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various pitch transform functions
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  args <- alist(x = , ... = , Key = NULL, 
-                parseArgs = list(), 
-                memoize = TRUE, deparse = TRUE)
+  args <- alist(x = , 
+                ... = , 
+                Key = NULL, 
+                parseArgs = list())
   
+  fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr({
     
+    checkVector(x, structs = 'diatonicSet', argname = 'x', callname = !!callname)
+    
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-    args <- lapply(rlang::enexprs(...),
-                   \(argExpr) {
-                     if (is.call(argExpr) && as.character(argExpr[[1]]) %in% c('parse', 'transpose')) {
-                       type <- as.character(argExpr[[1]])
-                       argExpr[[1]] <- quote(list)
-                       assign(paste0(type, 'Args'), eval(argExpr), envir = parent.frame(2))
-                       NULL
-                     } else {
-                       rlang::eval_tidy(argExpr)
-                     }
-                   })
+    c('args...', 'parseArgs') %<-% specialArgs(rlang::enquos(...), 
+                                               parse = parseArgs)
+    formalArgs <- list(!!!fargcall)
+    namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
+    # There are four kinds of arguments: 
+    # ... arguments (now in args...), 
+    # FORMAL arguments, if specified (now in namedArgs)
+    # parseArgs
+    # transposeArgs
     
-    args <- args[!sapply(args, is.null)]
+    # Exclusive
+    parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive 
     
-    parseArgs   <- pitchArgCheck(parseArgs, !!callname)
-    deparseArgs <- pitchArgCheck(args,      !!callname)
+    # parseArgs   <- pitchArgCheck(parseArgs, !!callname)
+    # deparseArgs <- pitchArgCheck(c(args..., namedArgs), !!callname)
+    deparseArgs <- c(args..., namedArgs)
     
-    Key  <- diatonicSet(Key %||% dset(0L, 0L))
+    # Key
+    Key     <- diatonicSet(Key %||% dset(0L, 0L))
+    
+    # memoize % deparse
+    memoize <- args...$memoize %||% TRUE
+    deparse <- args...$deparse %||% TRUE
     
     # Parse
-    parsedDset <- do(diatonicSet, c(list(x), parseArgs), memoize = memoize)
+    parsedDset <- do(diatonicSet, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'diatonicSet')
     
     deparseArgs <- c(list(parsedDset), deparseArgs)
     
-    output <- if (deparse && is.diatonicSet(parsedDset)) do(!!deparser, deparseArgs, memoize = FALSE) else parsedDset
-    
+    output <- if (deparse && is.diatonicSet(parsedDset))  do(!!deparser, deparseArgs, 
+                                                             memoize = memoize, 
+                                                             outputClass = !!outputClass) else parsedDset
     
     output
   }))
