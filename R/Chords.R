@@ -307,7 +307,7 @@ reduceFigures <- function(alterations, extensions,
   inverted <- inversion > 0L
   
   present <- !is.na(alterations) 
-  tags <- array("", dim = dim(alterations))
+  tags <- array(NA_character_, dim = dim(alterations))
   
   
   # get rid of alterations that are already taken care of by the quality!
@@ -358,10 +358,17 @@ reduceFigures <- function(alterations, extensions,
   
   
   # order
-  orders <- apply(extensions, 1, order, decreasing = extension.decreasing, na.last = NA, simplify = FALSE)
   
-  alterations[] <- .paste(tags, alterations, if (step) extensions, fill = "", na.if = all)
-  figures <- Map(\(i,j) alterations[i,j], 1:nrow(alterations), orders)
+  alterations[] <- .paste(tags, alterations, if (step) extensions, fill = ".", na.if = all)
+  
+  figures <- if (!is.null(extension.decreasing)) {
+    Map(\(i,j) alterations[i,j], 1:nrow(alterations),
+                   apply(extensions, 1, order, 
+                         decreasing = extension.decreasing, 
+                         na.last = NA, simplify = FALSE))
+  } else {
+    lapply(1L:nrow(alterations), \(i) alterations[i, ])
+  }
   
   sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
   
@@ -396,7 +403,8 @@ tset2tonalHarmony <- function(tset,
     extensions  <- do.call('tset2extensions', c(list(tset, inversion = inversion), figurationArgs))
     alterations <- do.call('tset2alterations', c(list(tset, Key = Key, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
     
-    figuration <- do.call('reduceFigures', c(list(alterations, extensions, quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
+    figuration <- do.call('reduceFigures', c(list(alterations, extensions, ...,
+                                                  quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
     quality[quality == '?'] <- ""
     figuration
     
@@ -478,6 +486,7 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
                        root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
                        implicitSpecies = FALSE,
                        extension.shorthand = TRUE, extension.simple = FALSE,
+                       extension.decreasing = NULL,
                        extension.add = TRUE, extension.sus = TRUE)
   t2tH(tset, figurationArgs = figArgs, ...)
 }
