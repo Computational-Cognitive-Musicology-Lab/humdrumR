@@ -110,7 +110,7 @@ setMethod('is.numeric', signature = c('rational'), \(x) TRUE)
 
 #' @rdname rational
 #' @export
-setMethod('order', 'Rational', 
+setMethod('order', 'rational', 
           function(x, ..., na.last = TRUE, decreasing = FALSE,
                                  method = c("auto", "shell", "radix")) {
     order(as.double(x), 

@@ -4,6 +4,12 @@
 \alias{tertianSet}
 \alias{tset}
 \alias{is.tertianSet}
+\alias{tertianSet.tertianSet}
+\alias{tertianSet.logical}
+\alias{tertianSet.NULL}
+\alias{tertianSet.numeric}
+\alias{tertianSet.integer}
+\alias{tertianSet.character}
 \title{Tertian set}
 \usage{
 tertianSet(...)
@@ -18,6 +24,25 @@ tset(
 )
 
 is.tertianSet(x)
+
+\method{tertianSet}{tertianSet}(x, ...)
+
+\method{tertianSet}{logical}(x, ...)
+
+\method{tertianSet}{`NULL`}(x, ...)
+
+\method{tertianSet}{numeric}(x)
+
+\method{tertianSet}{integer}(x)
+
+\method{tertianSet}{character}(
+  x,
+  Exclusive = NULL,
+  str,
+  Key = dset(0, 0),
+  ...,
+  multiDispatch = FALSE
+)
 }
 \description{
 \code{tertianSet} is one of \link[=humdrumR]{humdrumR's}

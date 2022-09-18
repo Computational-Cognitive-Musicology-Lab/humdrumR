@@ -8,6 +8,7 @@
 \alias{Compare,diatonicSet,diatonicSet-method}
 \alias{diatonicSet.diatonicSet}
 \alias{diatonicSet.logical}
+\alias{diatonicSet.NULL}
 \alias{diatonicSet.numeric}
 \alias{diatonicSet.integer}
 \alias{diatonicSet.character}
@@ -35,6 +36,8 @@ order.diatonicSet(
 \method{diatonicSet}{diatonicSet}(x, ...)
 
 \method{diatonicSet}{logical}(x, ...)
+
+\method{diatonicSet}{`NULL`}(x, ...)
 
 \method{diatonicSet}{numeric}(x)
 

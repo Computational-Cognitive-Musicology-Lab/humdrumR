@@ -524,9 +524,9 @@ makeRE.alterations <- function(..., qualities = FALSE) {
 
     
     makeRE <- partialApply(makeRE.tonalChroma,
-                       parts = c("species", "step"), step.signed = FALSE, flat = 'b',
-                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
-                       regexname = 'alterations')
+                           parts = c("species", "step"), step.signed = FALSE, flat = 'b',
+                           step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
+                           regexname = 'alterations')
     
     paste0('(', makeRE(..., qualities = qualities), ')*')
 }
@@ -607,19 +607,19 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for tertian sets ####
 
-makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
+makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'o', perfect = 'P', collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts = c("step", 'species'),
                               step.labels = '[A-G]', qualities = FALSE,
                               step.sign = FALSE, collapse = FALSE, ...)
     
-    qualityRE <- captureRE(c(major, minor, augment, diminish))
-    REs['quality'] <-  paste0('(', 
+    qualityRE <- captureRE(c(major, minor, augment, diminish, '.'))
+    REs['quality'] <-  paste0('((', 
                               qualityRE, '{3}',  
-                              captureRE(c(perfect, augment, diminish)), 
+                              captureRE(c(perfect, augment, diminish, '.')), 
                               qualityRE, 
                               '?)|(', 
-                              qualityRE, '{1,3})')
+                              qualityRE, '{1,3}))')
    
     REs <- REs[c("step", "species", "quality")]
     

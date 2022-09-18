@@ -160,13 +160,13 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 #' @export
 getRoot <- function(dset){
-  checkArg(dset)
+  checkArg(dset, classes = 'diatonicSet')
   dset@Root %<-matchdim% dset
 } 
 
 #' @export
 getRootTint <- function(dset) {
-    checkArg(dset)
+    checkArg(dset, classes = 'diatonicSet')
     root <- getRoot(dset)
     
     tint( , c(root)) %<-matchdim% dset
@@ -630,7 +630,7 @@ dset2romanNumeral <- function(dset, flat = 'b', Key = NULL, ...) {
 
 ### Key representations ####  
 
-qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE, 
+qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, 
                             major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', ...) {
     
     
@@ -651,24 +651,24 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE,
     
     ####
     if (steporder != 1L) {
-      str <- strsplit(str, split = '')
+      x <- strsplit(x, split = '')
       ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
-      str <- sapply(str, \(s) paste(s[ord], collapse = ''))
+      x <- sapply(x, \(s) paste(s[ord], collapse = ''))
     }
     
     if (allow_partial) {
-      mode <- sapply(paste0('^', str), \(str) modes_int[which(stringr::str_detect(names(modes_int), str))[1]])
+      mode <- sapply(paste0('^', x), \(x) modes_int[which(stringr::str_detect(names(modes_int), x))[1]])
     } else {
-      mode <- modes_int[str]
+      mode <- modes_int[x]
     }
     
-    alterations <- integer(length(str))
+    alterations <- integer(length(x))
     if (any(is.na(mode))) {
       altered <- is.na(mode)
       quality.labels <- c(diminish, minor, perfect, major, augment) # reorder for rank
       modes <- do.call('cbind', modes)
       
-      mode_alterations <- lapply(strsplit(str[altered], split = ''),
+      mode_alterations <- lapply(strsplit(x[altered], split = ''),
                                  \(qualities) {
                                    hits <- qualities == modes[1L:length(qualities), ]
                                    
@@ -707,25 +707,25 @@ qualities2dset <-  function(str, steporder = 2L, allow_partial = FALSE,
 }
 
 
-alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat = 'b', ...) {
+alteration2trit <- function(x, mode = integer(length(x)), sharp = '#', flat = 'b', ...) {
     
     accidentalRE <- captureUniq(c(sharp, flat), zero = TRUE)
     
-    str <- stringr::str_replace(str, '13', '6')
-    str <- stringr::str_replace(str, '11', '4')
-    str <- stringr::str_replace(str, '10', '3')
-    str <- stringr::str_replace(str,  '9', '2')
+    x <- stringr::str_replace(x, '13', '6')
+    x <- stringr::str_replace(x, '11', '4')
+    x <- stringr::str_replace(x, '10', '3')
+    x <- stringr::str_replace(x,  '9', '2')
     
-    hits <- str != ''
+    hits <- x != ''
     # degrees
-    degrees <- stringr::str_extract_all(str[hits],   paste0(accidentalRE, '[1234567]'))
+    degrees <- stringr::str_extract_all(x[hits],   paste0(accidentalRE, '[1234567]'))
     
     acc <- lapply(degrees, stringr::str_extract, accidentalRE)
     acc <- lapply(acc, \(acc) specifier2tint(acc, qualities = FALSE, 
                                                     sharp = sharp, flat = flat, ...)@Fifth) 
     degrees <- lapply(degrees, stringr::str_remove, accidentalRE)
     
-    alterations <- matrix(0, nrow = length(str), ncol = 7)
+    alterations <- matrix(0, nrow = length(x), ncol = 7)
     
     degrees <- data.frame(Accidentals = unlist(acc), 
                           Degrees = unlist(degrees),
@@ -746,13 +746,13 @@ alteration2trit <- function(str, mode = integer(length(str)), sharp = '#', flat 
 
 ##... from key signature
 
-signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
+signature2dset <- function(x, Key = NULL, signature.mode = 0L, ...) {
     if (!is.null(Key)) dset <- dset + Key
   
-    str <- gsub('^\\*', '', str)
-    signotes <- stringr::str_extract_all(str, '[a-g]([#-n])\\1*')
+    x <- gsub('^\\*', '', x)
+    signotes <- stringr::str_extract_all(x, '[a-g]([#-n])\\1*')
     
-    sigs <- integer(length(str))
+    sigs <- integer(length(x))
     
     empty <- lengths(signotes) == 0L
     
@@ -813,7 +813,7 @@ signature2dset <- function(str, Key = NULL, signature.mode = 0L, ...) {
 ##... From key interpretation
 
 
-key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'), 
+key2dset <- function(x, parts = c('step', 'species', 'mode', 'alterations'), 
                      step.labels = c('C', 'D','E','F','G','A','B'),
                      Key = NULL, keyed = TRUE,
                      ...) {
@@ -824,7 +824,7 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
     if (!is.null(Key)) Key <- diatonicSet(Key)
   
     REs <- makeRE.key(..., parts = parts, step.labels = step.labels, collapse = FALSE)
-    REparse(str, REs, parse.strict = FALSE, parse.exhaust = FALSE, toEnv = TRUE)
+    REparse(x, REs, parse.strict = FALSE, parse.exhaust = FALSE, toEnv = TRUE)
     
     # Root
     root <- local( {
@@ -861,8 +861,8 @@ key2dset <- function(str, parts = c('step', 'species', 'mode', 'alterations'),
 
 ##... From roman numeral
 
-romanNumeral2dset <- function(str, Key = NULL, flat = 'b', ...) {
-    dset <- key2dset(str, c('species', 'step', 'mode', 'alterations'), 
+romanNumeral2dset <- function(x, Key = NULL, flat = 'b', ...) {
+    dset <- key2dset(x, c('species', 'step', 'mode', 'alterations'), 
                      step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                      flat = flat, keyed = FALSE,
                      Key = Key, ...)

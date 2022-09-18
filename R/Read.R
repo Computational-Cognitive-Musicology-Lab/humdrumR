@@ -22,6 +22,7 @@ findFiles <- function(..., recursive = FALSE) {
     
     #### Parse ... arguments into a cartesian collection of patterns, ordered left to right
     patterns <- assemblePatterns(list(...))
+    patterns[patterns == ""] <- ".*"
     
     ##### split paths into directories (all but rightmost) and files (rightmost)
     dirpaths  <- dirname(patterns)
@@ -324,7 +325,7 @@ readTextFiles <- function(fpaths) {
     
 splitFiles2Lines <- function(filestrs) {
     lines <- stringi::stri_split_lines(filestrs)
-    lapply(lines, \(line) if (length(line) > 1L) head(line, n = -1L) else line)
+    lapply(lines, head, n = -1L)
 }
 
 
@@ -419,251 +420,191 @@ shortFilenames <- function(fileFrame) {
 
 #' Find and read humdrum files into R
 #' 
-#' `findHumdrum` does the work of finding and reading valid text files into `R`.
+#' These functions find valid humdrum files on your local machine and read them into `humdrumR`.
+#' 
+#' `findHumdrum` does the work of finding and reading the text files into `R`.
 #' `readHumdrum` utilizes `findHumdrum` to read files, then parses them to
-#' create a [humdrumR data object][humdrumRclass].
+#' create a [humdrum table][humTable] and build
+#' a [humdrumR data object][humdrumRclass] around the table.
 #' 
 #' 
-#' @param ... `character`: One or more regex search patterns used to identify files on the local machine. read.
-#'    For details: see the "Regex file-path matching" section below.
-#' @param recursive (`logical`, `length == 1`) If `TRUE`, the final part of 
-#'   the search pattern (i.e., the file search) is searched for
-#'   recursively through all sub directories.
-#' @param allowDuplicates (`logical`, `length == 1`) Indicates what should happen if multiple 
-#'   search patterns match the same files. If `allowDuplicates = TRUE`,
-#'   any such files are read multiple times, grouped into their respective corpora by the `Label` field. 
-#'   If `allowDuplicates = FALSE`, any redundant files are only read into the corpus of the first pattern they 
-#'   match.
-#' @param contains (`character`) If `!is.null(contains)`, the `contains` argument is
-#'   is treated as regular expressions: only files which contain matches to
-#'  *all* of these regular expressions are matched.
-#' @param verbose (`logical`, `length == 1)` If `TRUE`, the names of matching files are 
-#'   printed before parsing begins. This is very
-#'   useful as a check to make sure you aren't reading the wrong files!
-#' @param tandems (`character`) This argument controls which, if any, tandem interpretations 
-#'   are parsed into their own fields. The default value is `"known"`. 
-#' @param reference (`character`) This argument controls which, if any, reference records
-#'   are parsed into their own fields. The default value is `"all"`. 
+#' @param ... character: One or more patterns used to identify files to read.
+#' For details: see the "REpath-patterns" section below.
 #' 
-#' @details 
+#' @param recursive
+#' logical: If `TRUE`, the final part of the search pattern (i.e., the file search) is searched for
+#' recursively through all sub directories.
 #' 
-#' `findHumdrum` searches for matching files (details in next section) on your machine and returns a "file info" `data.table`.
-#' The file-info table has one row for each matched file, and six columns:
-#'
-#' + `Filepath` (`character`): The complete file path.
-#' + `Pattern` (`character`): The search pattern (details below) which matched the file.
-#' + `Label` (`character`): The "subcorpora" label identified with the search pattern. (Used as the `Label` field
-#' in a [humdrum table][humTable].)
-#' + `Files` (`character`): The file contents themselves, in a single string.
-#' + `FileLines` (`list` of `character`): The file contents themselves, divided into lines.
-#' + `File` (`integer`): A integer enumerating the files. (Used as the `File` field in a [humdrum table][humTable].)
-
-#' If two or more files in different directories share the same name, a unique name is created for 
+#' @param allowDuplicates `logical` of length one, indicating what should happen if multiple search patterns match the same files.
+#' If `allowDuplicates = TRUE`,
+#' any such files are read multiple times, grouped into their respective corpora by the `Label` field. 
+#' If `allowDuplicates = FALSE`, any redundant files are only read into the corpus of the first pattern they 
+#' match.
+#' 
+#' @param contains `character`. If `!is.null(contains)`, the `contains` argument is
+#' is treated as regular expressions: only files which contain matches to
+#'  *all* of these regular expressions are read.
+#' Thus, `readHumdrum('.*krn$', contains = "EEE")` will only read kern files which contain matches 
+#' to `"EE"`---which is kern for the E two octaves below middle C (or lower).
+#' 
+#' 
+#' @param verbose
+#' logical: If `TRUE`, the names of matching files are printed before parsing begins. This is very
+#' useful as a check to make sure you aren't reading the wrong files!
+#' 
+#' @param tandems `character`. This argument controls which, if any, tandem interpretations 
+#' are parsed into their own fields. The default value is `"known"`. 
+#' 
+#' @param reference `character`. This argument controls which, if any, reference records
+#' are parsed into their own fields. The default value is `"all"`. 
+#' 
+#' @section REpath-patterns:
+#' 
+#' "REpath-patterns" are specified using `...` arguments. 
+#' In combination, all the `...` arguments are used to search for file paths.
+#' Each part of the search path you specify (`"dirpart/dirpart/filepart"`, etc) are matched as regular expressions
+#' against directories/files on your disc.
+#' Thus, we can say things like `findHumdrum("../^A.*/.*krn$")`, which would
+#' match any kern files in any directory beginning with a capital `"A"` in the 
+#' directory above the current working directory.
+#' For conveniance, you can break the path across multiple arguments instead of using delimited strings: For example, the code
+#' `findHumdrum("..", "^A.*", ".*krn$")` will give an identical result as the previous example 
+#' (`findHumdrum("../^A.*/,*krn$")`).
+#' This is useful when searching for more than one pattern (see next paragraph) in the same directory.
+#' 
+#' If you want to search for *more than one* pattern, you can input them as a character vector:
+#' For instance, `readHumdrum(c("mozart", "beethoven")`---this command will search for
+#' filenames containing "mozart" OR "beethoven."
+#' This works for directories too: `readHumdrum(c("Mozart", "Beethoven"), ".*krn$")` will
+#' look for any kern files in directories containing "Mozart" OR "Beethoven."
+#' If patterns are named, these names will show up as identifying patterns in the `[humdrumR][humdrumR]` object's
+#' `Label` field. Unnamed patterns are simply labeled with numbers.
+#' We refer to files matched from regex patterns to be "subcorpora" of the total corpus.
+#' 
+#' Normal (system appropriate) conventions (i.e., directories separated by `"/"`, 
+#' `'~'` at beginning to indicate home, `".."` to indicate directory above working directory, etc.)
+#' are followed.
+#' If a pattern contains a solo dot followed by a file sep---e.g., `"./"`, `"x/./y"`---this is 
+#' treated as the current directory, not a regular expression.
+#' If a pattern contains two dots---e.g., `"../"`---this is treated as the directory above, not a regular expression.
+#' If you want to create a regular expression to match any directory, use `".*/"`.
+#' 
+#' The regex pattern `""` matches any file (it is changed to `".*"`). If you don't specifiy any `...` argument,
+#' `findHumdrum` (or `readHumdrum`) will default to `".*"` as well.
+#' Thus, `readHumdrum()` will read any humdrum files in the working directory.
+#' 
+#' (If two or more files in different directories share the same name, a unique name is created for 
 #' each file by appending the names of the directories they occupy, recursively
-#' until the names are unique.
+#' until the names are unique.)
 #' 
-#' `readHumdrum` uses `findHumdrum` to identify humdrum files, then parses each file 
-#' and assembles them all into a [humdrum table][humTable] which is in turn wrapped in
-#' a [humdrumR data object][humdrumRclass] (the final output).
-#' The output's `Filepath`, `File`, and `Label` fields are taken directly from `findHumdrum`'s "file info" table.
 #' If a single humdrum file has multiple pieces in it---meaning that all spine paths close with `*-`, then
-#' open again with `**`---then they are parsed separately, and labeled separately in the `Piece` field.
-#' If there are no multi-piece files, the `Piece` and `File` will be identical.
-#'
-#' ### Validity
-#'
-#' `findHumdrum` and `readHumdrum` automatically ignore non-text files and 
-#' files that contain humdrum syntax errors.
-#' When calling either command, messages will print in the terminal informing you about invalid files, if any.
-#' Validity checking is performed by the separate [validateHumdrum()] function.
-#' If you want to see specifically what errors occurred, call [validateHumdrum()]
-#' directly. 
+#' open again with `**`---then they are parsed separately.
+#' They are distinguished in the `Piece` field.
+#' If there are no multi-piece files, `Piece` and `File` will be identical.
 #' 
-#' @section Regex file-path matching:
+#' @section Validity:
 #' 
-#' Files on your local machine can be concisely identified using
-#' [regular-expression][https://en.wikipedia.org/wiki/Regular_expression]
-#' pattern matching.
-#' To find/read humdrum files,
-#' one or more `character` search patterns must be specified as `...` arguments;
-#' A search pattern is a file-path like string, with strings separated by zero or more delimiters 
-#' (`/` or `\`, depending on your operating system).
-#' Each delimited part of the string to the left of a delimiter (if any) is treated as a regular expression
-#' matched against *directories*, recursively.
-#' The right-most part of the string (or the whole string if there are no delimiters), is matched
-#' as a regular expression against *files* in the matched directories.
-#' The left-most directory pattern (if any) can be either relative (to `R`'s [working directory][base::getwd()]) or absolute.
-#' (Unix-like systems can use `~` for home. All systems use `.` for the current working directory
-#' and `..` for its parent.
-#' These special keys are *not* treated like regular expressions.)
-#' 
-#' Let's consider some examples:
-#' 
-#' + With no delimiters (relative):
-#'   + `readHumdrum('.*krn$')` will match all files in the current working directory which match the `.*krn$` regex.
-#'     (This would be all files ending the `krn`.)
-#' + With one directory pattern (relative):
-#'   + `readHumdrum('[A-G]/.*krn$')` will first match any subdirectories of the working directory which match the `[A-G]` regex.
-#'     If there are any such directories, it will then search the files in *all* of these matching directories for matches to `.*krn$`.
-#' + Two directory patterns (absolute):
-#'   + On Unix-like systems `readHumdrum('~/[A-G]/.*krn$')` will perform the same search as above, but in the 
-#'     *home* directory (`~`) instead of the `R` working directory.
-#' + With two directory patterns (relative):
-#'   + `readHumdrum('^Krn$/[A-G]/.*krn$')` will first match the directory `Krn` in the working directory, 
-#'      search all the subdirectories of `Krn` for matches to `[A-G]`. 
-#'      Finally, if there are any matching directories, they will *all* be searched for files matching `.*krn$`.
-#'   + Note that the pattern `"^Krn$"` is needed to match exactly the `Krn` directory, and no other directory.
-#'     If used `"Krn"` instead, *any* directory containing the string `Krn` would be matched; for example, `NoKrn` would be a match.
-#' 
-#'
-#' If you provide multiple `...` arguments, they are pasted together (left-to-right), separated by the system delimiter,
-#' to create a single complete regex search pattern.
-#' Thus, `readHumdrum('^Krn$', '[A-G]', '.*krn$')` is identical to `readHumdrum('^Krn$/[A-G]/.*krn$')`.
-#'
-#' If you don't specify *any* `...` arguments,
-#' `findHumdrum` (or `readHumdrum`) will default to `""`, the empty regex pattern `""` which matches any file.
-#' Thus, `readHumdrum()` will read any humdrum files in the [working directory][base::getwd()].
-#'
-#' ### Multiple patterns
-#' 
-#' If you want to search for *more than one* pattern, you can input them as a `character` vector:
-#' For instance, `readHumdrum(c("Mozart", "Beethoven"))` will search for files
-#' (in the working directory) matching the regexes `Mozart` **OR** `Beethoven`.
-#' This works for directories too: `readHumdrum(c('Mozart/.*krn', 'Beethoven/.*krn'))` will
-#' search for files matching `.*krn` in directories matching `Mozart` or `Beethoven`.
-#' For this sort of call, it can be convenient to break the search across arguments:
-#'  `readHumdrum(c("Mozart", "Beethoven"), ".*krn")` will give the same result.
-#' When the multiple `...` arguments are appended, every possible combination of arguments is
-#' used to create search patterns.
-#' Thus, a call like `readHumdrum(c('[A-G]', '[a-g]), c('Mozart', 'Beethoven'), '.*krn')` will search all the following
-#' patterns:
-#' 
-#' + `[A-G]/Mozart/.*krn`
-#' + `[a-g]/Mozart/.*krn`
-#' + `[A-G]/Beethoven/.*krn`
-#' + `[a-g]/Beethoven/.*krn`
-#'  
-#' When reading humdrum data, we refer to files matched from different regex patterns to be "subcorpora" of the total corpus.
-#' The last search above would create a dataset with four subcorpora, which are tracked in the [humdrumR object's][humdrumRclass]
-#' `Label` field.
-#' By default, subcorpora are simply numbered: `"_1"`, `"_2"`, etc.
-#' However, if pattern arguments are named, these names will show up in the `Label` field instead.
-#' 
-#' 
-#' ### Filter files by content
-#' 
-#' The `contains` argument can be a `character` vector of regular expressions
-#' to search in the *contents* of matched files (as opposed to matching the file name/path).
-#' Is `contains` is not `NULL` (which is the default),
-#' `humdrumR` searches all files matched by the regex search pattern(s) for 
-#' any matches to the `contains` regexes.
-#' Files which match **all** the `contains` regexes are read, others are discarded.
-#' 
-#' For example, the command `readHumdrum(./.*krn$, contains = c('[Ee]-', '[Aa]-'))` will
-#' read all `krn`-extension files in the working directory which contain E-flat *and* a A-flat tokens.
-#' 
-#' 
+#' `findHumdrum` and `readHumdrum` automatically ignore non-text files.
+#' What's more, any files which contain humdrum syntax errors (checked by [validateHumdrum()]) are automatically
+#' skipped. If you want to see specifically what errors occurred, call [validateHumdrum()]
+#' directly and use its `errorReport.path` argument.
 #' 
 #' @section Tandem Interpretations:
 #' 
 #' All tandem interpretations in a humdrum dataset are summarized in the [humdrum table's][humTable]
 #' `Tandem` field, which is described in detail [here][extractTandem()].
 #' In addition, certain "known" tandem interpretations are parsed into their *own* fields automatically.
-#' For example, `*clefG4` and "`*clefF2` are parsed into a `Clef` field, 
-#' while `*k[b-]` is parsed into a `KeySignature` field.
+#' For example, `*clefG4` and "`*clefF2` are parsed as `Clef` data, while `*k[b-]` is parsed as a `KeySignature`.
 #' The "known" tandem interpretations that `humdrumR` recognizes are encoded in a built-in
-#' table called `knownInterpretations`, which contains five `character` columns:
-#' 
-#' + `Name`: A code name `humdrumR` uses (e.g., `Clef` or `TimeSignatue`).
-#' + `Exclusive`: Zero or more (comma-separated) exclusive interpretations associated with the tandem interpretation.
-#' + `RE`: A regular expression which matches instances of the tandem interpretation.
-#' + `Pretty`: A readable shorthand of the tandem interpretation's pattern.
-#' + `Type`: One of three types: `"Tandem"`, `"Exclusive"`, or `"Atomic"`.
-#' 
+#' table called `knownInterpretations`. 
+#' Each interpretation has a humdrumR name (`"Clef"`, `"TimeSignature"`, etc.) as well as a regular expression
+#' associated with it.
 #' 
 #' The `tandems` argument to `readHumdrum` controls which tandem interpretations are
 #' parsed into their own fields. This can be helpful to either save processing time and memory
 #' by *not* parsing interpretations you won't need, or to parse interpretations that 
-#' `humdrumR` doesn't recognize.
+#' humdrumR doesn't recognize.
 #' The default value for the `tandems` argument is `"known"`. If the `tandems` argument
 #' contains `"known"` *all* tandem interpretations in the built-in `knownInterpretations` 
 #' table are parsed.
-#' If you want to limit the number of interpretations that are parsed,
-#' you may explicitly indicate known interpretations to parse by giving their `Name` (matching 
-#' `knownInterprations$Name`) in the `tandems` argument.
-#' For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
-#' and time signature (e.g., `"*M3/4"`) interpretations will be parsed.
-#'
-#' If you want to parse novel interpreations that aren't known to `humdrumR`,
-#' you can alternatively specify an arbitrary regular expressions in the `tandem` argument.
-#' (So long as they don't exactly match a `Name` from `knownInterpretations`.)
-#' These regular expressions are matched against the [Tandem field][extractTandem()]
-#' and used to generate new fields for the [humdrum table][humTable].
-#' If any values in `tandems` are named, these names will be used for the resulting fields.
+#' Users may specify different interpretations to parse in two ways: 
+#' 
+#' 1) character strings 
+#'    matching one of the name values from the `Name` column of `knownInterpretations`.
+#'    For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
+#'    and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
+#' 2) if the character string(s) in `tandem` do not exactly match one of the names in 
+#'    `knownInterpretations$Name`, they are treated as regular expressions and used to match
+#'    tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
+#'    that humdrumR doesn't already know about.
+#' 
+#' If any values in `tandems` are named, these names will be used for resulting fields.
 #' If no matches to an given interpretation are found, no field is created for that interpretation.
 #' If `tandems = NULL`, then no tandem interpretations are parsed.
 #' 
 #' @section Reference Records:
 #' 
 #' By default (`reference = "all"`), humdrumR reads all reference records in the data.
-#' The reference code for each record (e.g, the `"OTL"`, in `"!!!OTL: xxx"`) is used as the name of 
+#' The reference code for each record (e.g, the "OTL", in "!!!OTL: xxx") is used as the name of 
 #' an associated field.
-#' If a reference record has no reference code (i.e., it lacks a colon), the field is called `"Unkeyed."`
-#' If there are more than one reference records with the same reference code,
-#' either explicitly numbered (e.g., `"!!!COM1:"`, `"!!!COM2:"`) or not, 
-#' a single field is created (`COM` in this case) with the multiple values separated by `";"`.
-#'
-#' ### Controlling reference parsing
-#'
-#' The `reference` argument can be used to control which reference codes are parsed by `readHumdrum`,
-#' and/or rename their resulting fields.
-#' Unless `reference == "all"`, only referene codes specifically indicated in `reference` are parsed;
-#' For example, `readHumdrum(_, reference = "OTL")` will *only* parse OTL reference records.
-#' By naming the values of `reference`, the resulting field name can be controled:
-#' If we specify `reference = c(Title = 'OTL')`, the `OTL` reference records will be placed in
-#' a field called `Title`.
-#' If `reference = NULL`, no reference records are parsed.
-#' 
+#' (If a reference record has no reference code (i.e., it lacks a colon), the field is called "Unkeyed.")
 #' In large datasets with many reference records, the reference data can actually make up a large portion 
-#' of the humdrum table, using up a lot of memory. In these cases, simply
-#' not reading reference records (`reference = NULL`) or selectively reading only the reference records 
-#' that we are planning to use in our analyses can be quick and easy way to reduce memory consumption.
+#' of the humdrum table, and eat up a lot of memory. In these cases, we might not want to read
+#' all (or any) reference records---we can instead read only the reference records that we are planning to use 
+#' in our analyses (if any).
+#' If `reference = NULL`, no reference records are parsed.
+#' Otherwise, the character values of `reference` are treated as reference codes and only
+#' matching reference records are parsed.
+#' For instance, `readHumdrum(_, reference = "OTL")` will *only* parse OTL reference records.
+#' If the values of `reference` are named, these names are used to name associated fields.
+#' Thus, by specifing `reference = c(Title = 'OTL')`, you can use "OTL" reference records to populate
+#' a field called "Title".
+#' 
+#' If there are more than one reference records with the same reference code,
+#' either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two 
+#' or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 #' 
 #' 
 #' @section Spines and Paths:
 #' 
-#' At first glance, humdrum data looks like a simple two-dimensional, tab-delineated table structure.
-#' However, the [humdrum syntax](http://www.humdrum.org/guide/ch05/) is bit more complicated than that.
-#' Wheres as two-dimensional table has stable "columns",
-#' humdrum data has "*spines*":
-#' "Spines" *can* be a single column, or they may (at any time) split into multiple "spine *paths*",
+#' 
+#' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
+#' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
+#' tab-delineated group of values.
+#' "Spines" can be a single column, or they may (at any time) split into multiple columns,
 #' which can in turn split again, using the `"*^"` interpretation token. The reverse can happen as well,
-#' with two or more paths merging into a single spine, using the `"v"` token.
-#' Thus the humdrum syntax is actually a flexible tree structure; As spines split and merge, the total number of "columns"
-#' can change during a piece.
-#' A related issue is that a "corpus" (collection) of humdrum files may have varying numbers of spines/columns between pieces.
-#' Finally, *global* comment records are also a special case, as that are always a single value, even though
-#' they are interspersed with multi-spine *local* records.)
-#' 
-#' To make parsing and manipulating humdrum data data simpler, 
-#' `readHumdrum` assumes a slightly restricted version of the humdrum syntax:
-#' namely, that spines which appear at the beginning of a file (headed with exclusive interpretations
-#' like `"**kern"`) can never merge into each other.
-#' Spine merges (`"*v"`) can only happen within spine paths that originally split off the same spine, which means
-#' that a humdrum file read into `humdrumR`
+#' with two or more columns merging into a single column, using the `"v"` token.
+#' This means that, while humdrum data at first glance looks like a simple two-dimensional table,
+#' it is actually a flexible tree structure. As spines split and merge, the total number of columns
+#' can change during a piece, creating a "ragged" edge.
+#' Another similar issue is that a corpus of humdrum files may have varying numbers of spines/columns, between pieces.
+#' ("Global" comment/reference records are also a special case, as that are always a single value, even if interspersed with
+#' multi-column local records.)
+# 
+#' `readHumdrum` assumes a slightly more strict version of the humdrum syntax:
+#' that all the spines which appear at the beginning of a file (headed with exclusive interpretations
+#' like `"**kern"`) can never merge into each other. Thus, a humdrum file read into `humdrumR`
 #' must not end with fewer columns than it starts.
+#' Spine merges (`"*v"`) can only happen within spine paths that originally split off the same spine.
 #' This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
-#' informally followed in most humdrum data sets.
+#' informally followed in most humdrum datasets.
 #' 
-#' Our strict spine-path definition makes parsing humdrum data into a uniform structure possible: 
+#' Our strict spine-path definition makes everything work fairly simply: 
 #' Within a piece, the spines which appear at the beginning of the piece are the "true" spines throughout the piece, numbered
-#' from left to right, starting from `1`.
-#' For each *local* token, the value in the `Spine` field is an integer indicating which of these
+#' from left to right, starting from `1L`.
+#' For each local token, the value in the `Spine` field is an integer indicating which of these
 #' "true" spines it belongs to---global tokens have a `NA` value in their `Spine` field, because they do not belong to any spine.
 #' Any spine path splits (`"*^"`) from the main spines form **spine paths**.
-#' Every spine's paths are numbered in the `Path` field, from right to left, starting from `0`.
-#' A spine with no splits will have all `0`s in its `Path` field.
+#' Every spine's paths are numbered in the `Path` field, from right to left, starting from `0L`.
+#' A spine with no splits will have all `0L`s in its `Path` field.
 #' 
+#' 
+#' @section Result:
+#' 
+#' `findHumdrum` returns a "fileFrame" (`data.table`), listing all file names,
+#' the patterns they match, the directories they were found in, *and* the raw text content of these files.
+#' 
+#' `readHumdrum` returns a fully parsed [humdrumR object][humdrumRclass].
 #' 
 #' @examples 
 #' 
@@ -728,7 +669,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     # combine with parsed data
     humtab  <- humtab[fileFrame,  on = "Piece"]
-    humtab[ , Pattern := NULL]
+    
     
     ## Other general information about tokens
     humtab[ , Type := parseTokenType(Token)]

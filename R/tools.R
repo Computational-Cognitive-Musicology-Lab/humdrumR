@@ -694,11 +694,11 @@ height <- function(x) {
 `%<-matchdim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
-    if (inherits(x, 'partition')) {
-        x[] <- lapply(x, `%<-matchdim%`, value =value)
-        return(x)
-    }
-    
+    # if (inherits(x, 'partition')) {
+    #     x[] <- lapply(x, `%<-matchdim%`, value =value)
+    #     return(x)
+    # }
+    # 
     if (is.null(value)) {dim(x) <- NULL; return(x)}
     
     if (size(x) != size(value)) .stop("%<-matchdim% is trying to match the dimensions of two objects, but the target object is not the right size.")

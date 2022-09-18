@@ -9,13 +9,9 @@ figuredBass(
   x,
   ...,
   Key = NULL,
-  Exclusive = NULL,
-  parseArgs = list(),
   transposeArgs = list(),
-  figurationArgs = list(),
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
+  parseArgs = list(),
+  inPlace = FALSE
 )
 }
 \description{

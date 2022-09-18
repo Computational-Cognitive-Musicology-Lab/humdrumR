@@ -5,7 +5,7 @@
 \alias{key}
 \title{Parsing and deparsing key information}
 \usage{
-key(x, ..., Key = NULL, parseArgs = list(), memoize = TRUE, deparse = TRUE)
+key(x, ..., Key = NULL, parseArgs = list())
 }
 \description{
 XXX

@@ -10,7 +10,7 @@
 \alias{denominator,rational-method}
 \alias{is.rational}
 \alias{is.numeric,rational-method}
-\alias{order,Rational-method}
+\alias{order,rational-method}
 \alias{Compare,rational,rational-method}
 \alias{Compare,rational,ANY-method}
 \alias{Compare,ANY,rational-method}
@@ -50,7 +50,7 @@ is.rational(x)
 
 \S4method{is.numeric}{rational}(x)
 
-\S4method{order}{Rational}(
+\S4method{order}{rational}(
   x,
   ...,
   na.last = TRUE,

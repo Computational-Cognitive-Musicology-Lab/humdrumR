@@ -1268,12 +1268,16 @@ tint2tonalChroma <- function(x,
 
 tint2pitch <- partialApply(tint2tonalChroma,  
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
-                           octave.offset = 4L, integer = TRUE,
+                           octave.offset = 4L, octave.integer = TRUE,
                            flat = 'b', qualities = FALSE,
                            keyed = TRUE,
                            parts = c("step", "species", "octave"))
 
-
+tint2simplepitch <- partialApply(tint2tonalChroma,  
+                                 step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                                 flat = 'b', qualities = FALSE,
+                                 keyed = FALSE,
+                                 parts = c("step", "species"))
 
 
 
@@ -2042,8 +2046,8 @@ atonal2tint <- function(tint, accidental.melodic = FALSE, keyed = TRUE, Key = NU
   tint
 }
 
-semits2tint <- function(n, ...) {
-          wholen <- as.integer(c(n))
+semits2tint <- function(x, ...) {
+          wholen <- as.integer(c(x))
           
           pitchclass <- wholen %% 12L
           
@@ -2057,11 +2061,11 @@ semits2tint <- function(n, ...) {
           tints
 }
 
-cents2tint <- function(n, ...) {
-  roundedN <- round(n / 100)
+cents2tint <- function(x, ...) {
+  roundedN <- round(x / 100)
   tint <- semits2tint(roundedN, ...)
   
-  tint@Cent <- n - (roundedN * 100)
+  tint@Cent <- x - (roundedN * 100)
   
   tint
   
@@ -2069,8 +2073,8 @@ cents2tint <- function(n, ...) {
 }
 
 
-midi2tint <- function(n, ...) {
-  semits2tint(n - 60L, ...)
+midi2tint <- function(x, ...) {
+  semits2tint(x - 60L, ...)
 }
 
 
@@ -2115,9 +2119,9 @@ ratio2tint <- function(x, tonalHarmonic = 2^(19/12), centMargin = 25,  ...) {
 
 
 
-freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference.note = tint(-4, 3), ...) {
+freq2tint <- function(x, frequency.reference = 440L, frequency.reference.note = tint(-4, 3), ...) {
   
-  ratio <- frequency / frequency.reference
+  ratio <- x / frequency.reference
   
   tint <- ratio2tint(ratio, ...)
   
@@ -2134,13 +2138,13 @@ freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference
 
 
 
-step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...) {
+step2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...) {
   
   if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pitches, the number of "step.labels" must be a multiple of 7.')
   
   
   
-  step <- if (is.null(step.labels)) as.integer(str) else match(toupper(str), toupper(step.labels), nomatch = NA_integer_) 
+  step <- if (is.null(step.labels)) as.integer(x) else match(toupper(x), toupper(step.labels), nomatch = NA_integer_) 
   
   
   # generic
@@ -2150,7 +2154,7 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), s
   # specific
   octave <- (step - 1L) %/% 7L
   
-  if (step.signed) octave[str == toupper(str)] <- (octave[str == toupper(str)] + 1L) * -1
+  if (step.signed) octave[x == toupper(x)] <- (octave[x == toupper(x)] + 1L) * -1
   
   tint <- tint + tint(octave, 0L)
   
@@ -2167,7 +2171,7 @@ updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, u
 
 
 
-specifier2tint <- function(str, step = NULL, Key = NULL, 
+specifier2tint <- function(x, step = NULL, Key = NULL, 
                            qualities = TRUE,
                            memory = FALSE, memoryWindows = NULL,
                            implicitSpecies = FALSE, absoluteSpecies = TRUE, 
@@ -2179,19 +2183,17 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   
   # step is lof = -1:5
   step <- if (is.null(step)) 0L else getFifth(step)
-   
+  
   if (qualities && !absoluteSpecies) .stop("When parsing tonal information, you can't use the absoluteSpecies == FALSE if the specifier type is 'quality'.")
     
   # use double sharp/flats?
-  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
-  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
-  
-  
+  if (!false(doublesharp)) x <- gsub(doublesharp, strrep(sharp, 2), x)
+  if (!false(doubleflat )) x <- gsub(doubleflat,  strrep(flat , 2), x)
   
   # incorporate memory?
   if (memory) {
-    memoryWindows <- if (truthy(memoryWindows) && length(memoryWindows) == length(str)) {
-      match_size(str,
+    memoryWindows <- if (truthy(memoryWindows) && length(memoryWindows) == length(x)) {
+      match_size(x,
                  step = step, 
                  memory = memory, 
                  toEnv = TRUE)
@@ -2200,19 +2202,19 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
       step
     }
   
-    str <- tapply_inplace(str, memoryWindows, ditto, nonnull = \(x) x != '')
+    x <- tapply_inplace(x, memoryWindows, ditto, nonnull = \(x) x != '')
    
   } 
   
   # calculate lof
   
-  natural <- stringi::stri_detect_fixed(str, natural)
+  natural <- stringi::stri_detect_fixed(x, natural)
   lof <- (if (qualities) {
-    updownN(str, up = augment, down = diminish) -
-      (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
-      (str == 'm')
+    updownN(x, up = augment, down = diminish) -
+      (substr(x, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
+      (x == 'm')
   } else {
-    updownN(str, up = sharp, down = flat)
+    updownN(x, up = sharp, down = flat)
   } ) 
 
   lof <- pmaxmin(lof, -specifier.maximum, specifier.maximum) * 7L
@@ -2221,7 +2223,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   if (!is.null(Key) && implicitSpecies) {
     keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
     if (absoluteSpecies) {
-      lof[str == ''] <- keyalt[str == '']
+      lof[x == ''] <- keyalt[x == '']
     } else {
       lof <- lof + keyalt
     }
@@ -2237,7 +2239,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 CKey <- function(dset) if (!is.null(dset)) dset - getRootTint(dset) 
 
 
-tonalChroma2tint <- function(str,  
+tonalChroma2tint <- function(x,  
                              parts = c("step", "species", "octave"), 
                              qualities = FALSE, 
                              parse.exhaust = TRUE, 
@@ -2248,11 +2250,12 @@ tonalChroma2tint <- function(str,
   
  parts <- matched(parts, c("sign", "step", "species", "octave"))
  
+ if (!is.null(Key)) Key <- diatonicSet(Key)
  
  ############# parse string
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, qualities = qualities, ...)
- REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, sep = sep, toEnv = TRUE) ## save to environment!
+ REparse(x, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, sep = sep, toEnv = TRUE) ## save to environment!
  
  ## simple part
  step    <- if ("step" %in% parts)    step2tint(step, ...) 
@@ -2268,7 +2271,7 @@ tonalChroma2tint <- function(str,
  
  if (keyed && !is.null(Key)) {
   Key <- rep(Key, length.out = length(tint))
-  tint[!is.na(Key)] <- tint[!is.na(Key)] - diatonicSet(Key[!is.na(Key)])
+  tint[!is.na(Key)] <- tint[!is.na(Key)] - Key[!is.na(Key)]
   
  }
  
@@ -2291,17 +2294,17 @@ lilypond2tint <- partialApply(tonalChroma2tint,
                               octave.integer = FALSE, octave.offset = 1L, up = "'", down = ",")
 
 
-tonh2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+tonh2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                       flat = 'es',   ...) {
   
   seven <- step.labels[7L]
   
-  str <- gsub('([AE])s', '\\1es', str)
-  str <- gsub('S', 'Ees', str)
+  x <- gsub('([AE])s', '\\1es', x)
+  x <- gsub('S', 'Ees', x)
   
-  str <- gsub(paste0('H', flat, flat), paste0(seven, flat, flat), str) # Heses -> Beses
-  str <- gsub(paste0(seven, '(-?[0-9])'), paste0(seven, flat, '\\1'), str)
-  str <- gsub('H', seven, str)
+  x <- gsub(paste0('H', flat, flat), paste0(seven, flat, flat), x) # Heses -> Beses
+  x <- gsub(paste0(seven, '(-?[0-9])'), paste0(seven, flat, '\\1'), x)
+  x <- gsub('H', seven, x)
    
   tC2t <- partialApply(tonalChroma2tint, 
                        parts = c('step', 'species', 'octave'),
@@ -2309,7 +2312,7 @@ tonh2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                        octave.integer = TRUE, octave.offset = 4L,
                        sharp = 'is')
   
-  tC2t(str, flat = flat,  step.labels = step.labels, ...)
+  tC2t(x, flat = flat,  step.labels = step.labels, ...)
   
   
 }
@@ -2319,7 +2322,7 @@ helmholtz2tint <- partialApply(tonalChroma2tint,
                                step.signed = TRUE,
                                up = "'", down = ",", flat = 'b', octave.integer = FALSE, octave.offset = 1L)
 
-kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
+kern2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   step.labels <- unlist(lapply(1:50, strrep, x = step.labels))
@@ -2329,28 +2332,28 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  
                        keyed = TRUE,  
                        qualities = FALSE,
                        step.signed = TRUE)
-  tint <- tC2t(str, step.labels = step.labels, ...)
+  tint <- tC2t(x, step.labels = step.labels, ...)
   
   
 }
 
-interval2tint <- function(str, ...) {
+interval2tint <- function(x, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                               parts = c('sign', 'species', "step"), 
                               qualities = TRUE, step.labels = NULL)
-  tC2t(str, ...)
+  tC2t(x, ...)
   
 }
 
 
-pc2tint <- function(str, ten = 'A', eleven = 'B', ...) {
-  str <- gsub(ten, '10', str)
-  str <- gsub(eleven, '11', str)
+pc2tint <- function(x, ten = 'A', eleven = 'B', ...) {
+  x <- gsub(ten, '10', x)
+  x <- gsub(eleven, '11', x)
   
-  str <- as.integer(str)
+  x <- as.integer(x)
   
-  semits2tint(str, ...)
+  semits2tint(x, ...)
   
 }
 
@@ -2370,8 +2373,8 @@ deg2tint <- partialApply(tonalChroma2tint, parts = c("octave", "step", "species"
                          up = '^', down = 'v',
                          flat = '-', sharp = "+")
 
-solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
-  syl <- stringr::str_extract(str, '[fdsrlmt][aeio]')
+solfa2tint <- function(x, ..., flat = '-', sharp = '#') {
+  syl <- stringr::str_extract(x, '[fdsrlmt][aeio]')
   
   base <- stringr::str_sub(syl, 1L, 1L)
   alt  <- stringr::str_sub(syl, 2L, 2L)
@@ -2387,7 +2390,7 @@ solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
   
   sylalt <- alt.mat[cbind(base, alt)]
   
-  str_ <- stringr::str_replace(str, alt, sylalt)
+  str_ <- stringr::str_replace(x, alt, sylalt)
  
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c("octave", "step", "species"),
@@ -2405,7 +2408,7 @@ solfg2tint <- partialApply(tonalChroma2tint, flat = '~b', doubleflat = '~bb', sh
                            octave.integer = TRUE, octave.offset = 4L)
                            
 
-bhatk2tint <- function(str, ...) {
+bhatk2tint <- function(x, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c('step', 'octave'),
@@ -2413,11 +2416,11 @@ bhatk2tint <- function(str, ...) {
                        octave.integer = FALSE,
                        up = "'", down = ',')
   
-  tint <- tC2t(toupper(str))
+  tint <- tC2t(toupper(x))
   
   
   perfects <- abs(LO5th(tint)) <= 1L
-  altered <- str == tolower(str)
+  altered <- x == tolower(x)
   
   tint[altered] <- tint[altered] + tint( , ifelse(perfects[altered], 7L, -7L))
   
@@ -2645,12 +2648,12 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   callname <- rlang::enexpr(callname)
   
   args <- c(alist(x = , 
-                ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
-                generic = FALSE, simple = FALSE, octave.relative = FALSE, 
-                Key = NULL,
-                transposeArgs = list(),
-                parseArgs = list(), 
-                inPlace = FALSE),
+                  ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
+                  generic = FALSE, simple = FALSE, octave.relative = FALSE, 
+                  Key = NULL,
+                  transposeArgs = list(),
+                  parseArgs = list(), 
+                  inPlace = FALSE),
             extraArgs)
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
   
@@ -2685,8 +2688,8 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     parseArgs$Key   <- fromKey
     deparseArgs$Key <- toKey 
     
-    transposeArgs$from <- CKey(fromKey)
-    transposeArgs$to   <- CKey(toKey)
+    if (!is.null(transposeArgs$from)) transposeArgs$from <- CKey(fromKey)
+    if (!is.null(transposeArgs$to))   transposeArgs$to    <- CKey(toKey)
     
     # memoize % deparse
     memoize <- args...$memoize %||% TRUE

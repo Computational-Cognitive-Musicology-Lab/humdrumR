@@ -589,10 +589,10 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   # Assemble the new function's arguments
   genericArgs <- local({
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
-    args <- c(alist(x = , Exclusive = NULL), 
-              args, 
+    args <- c(alist(x = ), 
               unlist(dispatchDF$Args, recursive = FALSE)[sharedArgNames], 
-              alist(... = , multiDispatch = FALSE))
+              args, 
+              alist(Exclusive = NULL, ... = , multiDispatch = FALSE))
     args <- args[!duplicated(names(args))]
     args
 
@@ -602,7 +602,6 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
                                                                rlang::sym)
   
   ##################################################### #
-  
   body <- rlang::expr({
     args <- list(x = x, dispatchDF = dispatchDF, Exclusive = Exclusive,
                  multiDispatch = multiDispatch, regexApply = !!regexApply,
