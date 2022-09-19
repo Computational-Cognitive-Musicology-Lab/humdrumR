@@ -558,7 +558,7 @@ extension2bit <- function(str) {
 
 
 triad2sciQuality <- function(triad, extensionQualities, 
-                             major = 'M', minor = 'm', perfect = 'P', diminish = 'o', augment = '+',
+                             major = 'M', minor = 'm', perfect = 'P', diminish = 'd', augment = 'A',
                              ...) {
   
   
