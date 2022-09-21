@@ -620,8 +620,10 @@ makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', dimini
                               qualityRE, 
                               '?)|(', 
                               qualityRE, '{1,3}))')
+    
+    REs['inversion'] <- '(/[1-7])?'
    
-    REs <- REs[c("step", "species", "quality")]
+    REs <- REs[c("step", "species", "quality", "inversion")]
     
     if (collapse) setNames(cREs(REs), 'sciChord') else REs
 }

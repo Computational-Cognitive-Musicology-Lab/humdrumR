@@ -392,7 +392,9 @@ tset2tonalHarmony <- function(tset,
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
   
-  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), paste0(bass.sep, bass_func(getBassTint(tset) - tint(1L, 0L), Key = Key, ...)), "")
+  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), 
+                                paste0(bass.sep, bass_func(getBassTint(tset) - tint(1, 0), Key = Key, ...)), 
+                                "")
   root      <- if (root) root_func(getRootTint(tset), Key = Key, ...) 
   
   quality   <- if (quality) {
@@ -482,11 +484,12 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
   
   
   t2tH <- partialApply(tset2tonalHarmony,
-                       parts = c('root', 'quality', 'figuration', 'bass'), 
+                       parts = c('root', 'quality', 'figuration', 'inversion'), 
                        root_func = tint2simplepitch, 
                        root.case = FALSE,
-                       root = TRUE, quality = TRUE, figuration = TRUE, inversion = FALSE, bass = FALSE,
-                       implicitSpecies = FALSE,
+                       root = TRUE, quality = TRUE, figuration = TRUE, 
+                       inversion = FALSE, bass = TRUE,
+                       implicitSpecies = FALSE, inversion.labels = c('', '/3', '/5', '/7', '/2', '/4', '/6'),
                        extension.shorthand = TRUE, extension.simple = FALSE,
                        extension.decreasing = NULL,
                        extension.add = TRUE, extension.sus = TRUE)
@@ -721,7 +724,7 @@ romanNumeral2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o',
 
 
 
-sciQualities2tset <- function(str, ...) {
+sciQualities2tset <- function(str, inversion = 0L, ...) {
   
   chord <- stringr::str_pad(str, width = 7L, side = 'right', pad = '.')
   
@@ -730,7 +733,7 @@ sciQualities2tset <- function(str, ...) {
   
   extension <- sapply(stringr::str_locate_all(str, '[^.]'), \(x) sum(as.integer(2L^(x[,  'start'] - 1L))))
   
-  tset(dset@Root, dset@Signature, dset@Alteration, extension = extension)
+  tset(dset@Root, dset@Signature, dset@Alteration, extension = extension, inversion = inversion)
   
 }
 
@@ -751,8 +754,9 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
       
       triad2sciQuality(triad, extensions, ...)
     })
+    inversion <- ifelse(inversion == '', 0L, match(gsub('^/', '', inversion), c(1, 3, 5, 7, 2, 4, 6)) - 1L)
     
-    (sciQualities2tset(quality,  ...) + tset(root, root)) - getRoot(Key)
+    (sciQualities2tset(quality,  inversion = inversion, ...) + tset(root, root, inversion = inversion)) - getRoot(Key)
     
 }
 
