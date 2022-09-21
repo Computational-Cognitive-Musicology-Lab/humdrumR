@@ -361,14 +361,14 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
         
     }
     
-    if (!parse.exhaust && length(REs) > 1L) {
+    output <- if (!parse.exhaust && length(REs) > 1L) {
       Reduce(\(head, last) paste0(head, sep,  '(.*(', last, '))'), REs, right = TRUE )
     } else {
       do.call('.paste', c(as.list(unname(REs)), list(sep = if (is.null(sep)) "" else sep)))
       # paste(REs, collapse = if (is.null(sep)) "" else sep)
     }
     
-  
+    list(output)
     
 }
 
@@ -609,23 +609,44 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts = c("step", 'species'),
+    REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,
-                              step.sign = FALSE, collapse = FALSE, ...)
+                              step.sign = FALSE, ...)
     
     qualityRE <- captureRE(c(major, minor, augment, diminish, '.'))
-    REs['quality'] <-  paste0('((', 
-                              qualityRE, '{3}',  
-                              captureRE(c(perfect, augment, diminish, '.')), 
-                              qualityRE, 
-                              '?)|(', 
-                              qualityRE, '{1,3}))')
+    REs$quality <-  paste0('((', 
+                           qualityRE, '{3}',  
+                           captureRE(c(perfect, augment, diminish, '.')), 
+                           qualityRE, 
+                           '?)|(', 
+                           qualityRE, '{1,3}))')
     
-    REs['inversion'] <- '(/[1-7])?'
+    REs$inversion <- '(/[1-7])?'
    
-    REs <- REs[c("step", "species", "quality", "inversion")]
+    REs <- REs[c("tonalChroma", "quality", "inversion")]
     
     if (collapse) setNames(cREs(REs), 'sciChord') else REs
+}
+
+makeRE.chordSymbol <-  function(..., major = 'maj', minor = 'min', augment = '+', diminish = 'o', 
+                                bass.sep = '/',
+                                collapse = TRUE) {
+  REs <- makeRE.tonalChroma(parts = c("step", "species"),
+                            step.labels = '[A-G]', qualities = FALSE,
+                            step.sign = FALSE, ...)
+  
+  REs$triadalt <- captureRE(c(major, minor, augment, diminish), '?')
+  
+  REs$figurations <- makeRE.alterations(...)
+  
+  REs$bass <- paste0('(', bass.sep, REs$tonalChroma, ')?')
+  
+  REs <- REs[c("tonalChroma", "quality", "figurations", "bass")]
+  
+  
+  
+  if (collapse) setNames(cREs(REs), 'chordSymbol') else REs
+  
 }
 
 makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
@@ -642,11 +663,11 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
     REs$triadalt <- captureRE(c(diminish, augment), n = '?')
 
     
-    REs['figurations'] <- makeRE.alterations(...)
+    REs$figurations <- makeRE.alterations(...)
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
-    if (collapse) setNames(cREs(REs), 'chord') else REs
+    if (collapse) setNames(cREs(REs), 'romanChord') else REs
 }
 
 

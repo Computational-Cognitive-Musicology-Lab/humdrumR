@@ -619,7 +619,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
                          parts = c('species', 'step'), qualities = FALSE,
                          collapse = TRUE)
   
-  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat), simplify = FALSE)
+  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat)[[1]], simplify = FALSE)
 
   figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat))
   
@@ -748,7 +748,7 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
   
     Key <- diatonicSet(Key)
     
-    root <- tonalChroma2tint(paste0(step, species), parts = c('step', 'species'), qualities = FALSE, ...)@Fifth
+    root <- tonalChroma2tint(tonalChroma, parts = c('step', 'species'), qualities = FALSE, ...)@Fifth
     
     # qualities
     quality <- local({
@@ -766,7 +766,11 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
 }
 
 
-chordSymbol2tset <- function()
+chordSymbol2tset <- function(x, ...) {
+  
+  
+  
+}
 ##... Numbers
 
 integer2tset <- function(x) tset(x, x)
