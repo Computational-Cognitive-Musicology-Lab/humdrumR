@@ -196,26 +196,26 @@ setMethod('LO5th', 'tertianSet',
 
 
 
-tset2alterations <- function(tset, Key = dset(0,0), 
+tset2alterations <- function(x, Key = dset(0,0), 
                              qualities = FALSE, 
                              inversion = TRUE, 
                              absoluteSpecies = TRUE,  implicitSpecies = FALSE, 
                              explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
-  if (!inversion) tset <- rootPosition(tset)
-  bass <- getBass(tset)
+  if (!inversion) x <- rootPosition(x)
+  bass <- getBass(x)
   
   if (absoluteSpecies) {
-    tset <- tset - getRoot(tset)
+    x <- x - getRoot(x)
     Key <- dset(0, -1L)
   }
   if (explicitNaturals) {
-    tset <- tset - getRoot(Key)
+    x <- x - getRoot(Key)
     Key <- Key - getRoot(Key)
   }
   
-  LO5ths <- LO5th(tset)
+  LO5ths <- LO5th(x)
   tints <- tint( , c(LO5ths))
   figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, 
                               parts = 'species',
@@ -228,16 +228,16 @@ tset2alterations <- function(tset, Key = dset(0,0),
 }
 
 
-tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ...) {
+tset2extensions <- function(x, extension.simple = FALSE, inversion = TRUE, ...) {
   extensions <- c(1L, 3L, 5L, 7L, 9L, 11L, 13L)
   if (extension.simple) extensions <- genericStep(extensions)
   
-  if (!inversion) tset <- rootPosition(tset)
+  if (!inversion) x <- rootPosition(x)
   
-  extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(tset))
+  extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(x))
   colnames(extensions) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
   
-  extensions[!getExtensions(tset)] <- NA_integer_
+  extensions[!getExtensions(x)] <- NA_integer_
   
   extensions
 }
@@ -245,12 +245,12 @@ tset2extensions <- function(tset, extension.simple = FALSE, inversion = TRUE, ..
 
 
 
-tset2triadLabel <- function(tset, root, root.case = TRUE, 
+tset2triadLabel <- function(x, root, root.case = TRUE, 
                             major = 'M', minor = 'm', diminish = 'o', augment = '+', ...) {
   
   perfect <- 'P'
   
-  qualities <- tset2alterations(tset, qualities = TRUE, inversion = FALSE,  step = FALSE,
+  qualities <- tset2alterations(x, qualities = TRUE, inversion = FALSE,  step = FALSE,
                                 explicitNaturals = TRUE, implicitSpecies = FALSE,
                                 major = major, minor = minor, diminish = diminish, augment = augment, perfect = perfect)
   
@@ -388,7 +388,6 @@ tset2tonalHarmony <- function(x,
                               Key = NULL, keyed = FALSE,
                               inversion.labels = NULL,
                               sep = '', ...) {
-  
   if (keyed && !is.null(Key)) {
     Key <- rep(Key, length.out = length(x))
     x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(diatonicSet(Key[!is.na(Key)]))
@@ -430,7 +429,7 @@ tset2tonalHarmony <- function(x,
 
 
 
-tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
+tset2figuredBass <- function(x, figurationArgs = list(),  ...) {
   figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE,
                   absoluteSpecies = FALSE, extension.decreasing = TRUE,
                   extension.simple = TRUE)
@@ -445,7 +444,7 @@ tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
                        extension.sus = FALSE, extension.add = FALSE,
                        inversion = TRUE,
                        sep = ' ', bass.sep = '')
-  figures <- t2tH(tset, figurationArgs = figArgs, ...)
+  figures <- t2tH(x, figurationArgs = figArgs, ...)
   
   
   # if (extension.shorthand) {
@@ -462,7 +461,7 @@ tset2figuredBass <- function(tset, figurationArgs = list(),  ...) {
 }
 
 
-tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...) {
+tset2romanNumeral <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
   figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -477,11 +476,11 @@ tset2romanNumeral <- function(tset,  Key = dset(0, 0), figurationArgs = c(), ...
                        extension.sus = TRUE, extension.add = TRUE,
                        inversion = TRUE)
   
-  t2tH(tset, figurationArgs = figArgs, Key = Key, ...)
+  t2tH(x, figurationArgs = figArgs, Key = Key, ...)
   
 }
 
-tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
+tset2sciChord <- function(x,  figurationArgs = c(), ...) {
   figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
   
@@ -498,11 +497,11 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
                        extension.shorthand = TRUE, extension.simple = FALSE,
                        extension.decreasing = NULL,
                        extension.add = TRUE, extension.sus = TRUE)
-  t2tH(tset, figurationArgs = figArgs, ...)
+  t2tH(x, figurationArgs = figArgs, ...)
 }
 
 
-tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
+tset2chordSymbol <- function(x, figurationArgs = c(), major = NULL, ...) {
   figArgs <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
                   flat = 'b', qualities = FALSE, natural = 'maj')
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -516,7 +515,7 @@ tset2chordSymbol <- function(tset, figurationArgs = c(), major = NULL, ...) {
                        extension.shorthand = TRUE, extension.simple = FALSE,
                        extension.add = TRUE, extension.sus = TRUE)
   
-  chords <- t2tH(tset, figurationArgs = figArgs, major = major %||% "MAJOR", ...)
+  chords <- t2tH(x, figurationArgs = figArgs, major = major %||% "MAJOR", ...)
   
   if (is.null(major)) chords <- stringr::str_replace(chords, "MAJOR", '')
   
@@ -747,6 +746,8 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
             makeRE.sciChord(..., collapse = FALSE),
             toEnv = TRUE) -> parsed
   
+    Key <- diatonicSet(Key)
+    
     root <- tonalChroma2tint(paste0(step, species), parts = c('step', 'species'), qualities = FALSE, ...)@Fifth
     
     # qualities
@@ -764,6 +765,8 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
     
 }
 
+
+chordSymbol2tset <- function()
 ##... Numbers
 
 integer2tset <- function(x) tset(x, x)

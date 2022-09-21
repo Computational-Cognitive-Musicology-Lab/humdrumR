@@ -541,16 +541,16 @@ LO5th2mode <- function(LO5th, short = FALSE) {
 
 
 
-dset2signature <- function(dset, Key = NULL, ...) {
-    if (!is.null(Key)) dset <- dset + Key
+dset2signature <- function(x, Key = NULL, ...) {
+    if (!is.null(Key)) x <- x + diatonicSet(Key %||% dset(0, 0))
   
-    LO5ths <- LO5th(dset)
+    LO5ths <- LO5th(x)
     LO5ths[] <- t(apply(LO5ths, 1, \(row) row[order(sign(row), (abs(row) + ifelse(row > 1, 1L, -2L)) %% 7L)])) 
     # this puts accidentals in absolute ascending order, but putting double flats/sharps in the right place
     tints <- tint( , LO5ths) %<-matchdim% NULL
     
     notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
-                              flat = '-', qualities = FALSE, Key = dset(0, 0),
+                              flat = '-', qualities = FALSE, Key = x(0, 0),
                               step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %<-matchdim% LO5ths
     
     notes[LO5ths <= 5L & LO5ths >= -1L] <- ""
@@ -563,16 +563,16 @@ dset2signature <- function(dset, Key = NULL, ...) {
 
 
 
-dset2key <- function(dset, Key = NULL, ...) {
-    if (!is.null(Key)) dset <- dset + getRootTint(Key)
+dset2key <- function(x, Key = NULL, ...) {
+    if (!is.null(Key)) x <- x + getRootTint(Key)
     
-    root <- tint2kern(tint( , getRoot(dset)))
-    mode <- getMode(dset)
+    root <- tint2kern(tint( , getRoot(x)))
+    mode <- getMode(x)
     root[!is.na(mode) & mode %in% c(1L, 0L, 6L, -1L)] <- toupper(root[!is.na(mode) & mode %in% c(1L, 0L, 6L, -1L)])
     
-    modelab <- dset2modelabel(dset) 
+    modelab <- dset2modelabel(x) 
     
-    alterations <- dset2alterations(dset, ...)
+    alterations <- dset2alterations(x, ...)
     
     key <- .paste("*", root, ":", modelab, alterations) 
     
@@ -600,19 +600,19 @@ dset2key <- function(dset, Key = NULL, ...) {
 #' @name romanNumerals
 NULL
 
-dset2romanNumeral <- function(dset, flat = 'b', Key = NULL, ...) {
-    if (!is.null(Key)) dset <- dset + getRootTint(Key)
+dset2romanNumeral <- function(x, flat = 'b', Key = NULL, ...) {
+    if (!is.null(Key)) x <- x + getRootTint(Key %||% x(0, 0))
   
-    tint <- getRootTint(dset)
+    tint <- getRootTint(x)
     
     numeral <- tint2romanRoot(tint, flat = flat, ...)
     
-    mode <- getMode(dset)
+    mode <- getMode(x)
     numeral[mode <= -2L] <- tolower(numeral[mode <= -2L])
     
-    modelab <- dset2modelabel(dset) 
+    modelab <- dset2modelabel(x) 
     
-    alterations <- dset2alterations(dset)
+    alterations <- dset2alterations(x)
     
     out <- .paste(numeral, modelab, alterations)
 

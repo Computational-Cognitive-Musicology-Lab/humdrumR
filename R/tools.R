@@ -824,7 +824,7 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
   
   length.out[seq_along(dim) > length(length.out)] <- dim[seq_along(dim) > length(length.out)]
   length.out[is.na(length.out)] <- dim[is.na(length.out)]
-  a
+  
   if (recycle) .recycle(x, length.out, dim) else .stretch(x, length.out, dim) 
 }
 
