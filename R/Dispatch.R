@@ -589,32 +589,29 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   # Assemble the new function's arguments
   genericArgs <- local({
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
-    args <- c(alist(x = ), 
+    args <- c(alist(x = , ... =), 
               unlist(dispatchDF$Args, recursive = FALSE)[sharedArgNames], 
               args, 
-              alist(Exclusive = NULL, ... = , multiDispatch = FALSE))
+              alist(Exclusive = NULL, multiDispatch = FALSE))
     args <- args[!duplicated(names(args))]
     args
 
   })
-  dispatchArgs <- genericArgs[!names(genericArgs) %in% c('x', 'str', 'Exclusive', '...', 'multiDispatch')]
-  dispatchArgs[names(dispatchArgs) %in% names(args)] <- lapply(names(dispatchArgs[names(dispatchArgs) %in% names(args)]),
-                                                               rlang::sym)
   
+  formalSymbols <- setNames(rlang::syms(names(genericArgs)), names(genericArgs))
+  formalSymbols <- formalSymbols[names(formalSymbols) != '...']
   ##################################################### #
   body <- rlang::expr({
-    args <- list(x = x, dispatchDF = dispatchDF, Exclusive = Exclusive,
-                 multiDispatch = multiDispatch, regexApply = !!regexApply,
-                 outputClass = !!outputClass, funcName = !!funcName,
-                 ...)
-    # dispatchArgs <- list(!!!dispatchArgs)
-    # for (name in .names(dispatchArgs)) if (hasArg(name)) dispatchArgs[[name]] <- get(name0)
-    do(!!dispatcher, c(args, dispatchArgs), ...)
+    args <- list(!!!formalSymbols)
+    do(!!dispatcher, c(args, 
+                       list(..., dispatchDF = dispatchDF,
+                            regexApply = !!regexApply, outputClass = !!outputClass, funcName = !!funcName)),
+       ...)
     
   })
   
   genericFunc <- rlang::new_function(genericArgs, body, 
-                                     rlang::new_environment(list(dispatchDF = dispatchDF, dispatchArgs = dispatchArgs), parent = parent.frame()))
+                                     rlang::new_environment(list(dispatchDF = dispatchDF), parent = parent.frame()))
   
   attr(genericFunc, 'dispatch') <- dispatchDF
   genericFunc %class% 'humdrumDispatch'

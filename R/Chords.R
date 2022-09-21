@@ -379,36 +379,41 @@ reduceFigures <- function(alterations, extensions,
 }
 
 
-tset2tonalHarmony <- function(tset,
+tset2tonalHarmony <- function(x,
                               parts = c('root', 'quality', 'figuration'), 
                               root = TRUE, quality = TRUE, figuration = TRUE, inversion = TRUE, bass = FALSE, 
                               figurationArgs = list(),
                               root_func = tint2romanRoot, bass_func = root_func, bass.sep = '/',
                               root.case = TRUE,
-                              Key = NULL, 
+                              Key = NULL, keyed = FALSE,
                               inversion.labels = NULL,
                               sep = '', ...) {
+  
+  if (keyed && !is.null(Key)) {
+    Key <- rep(Key, length.out = length(x))
+    x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(diatonicSet(Key[!is.na(Key)]))
+  }
   
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
   
-  bass      <- if (bass) ifelse(!root | (getInversion(tset) > 0), 
-                                paste0(bass.sep, bass_func(getBassTint(tset) - tint(1, 0), Key = Key, ...)), 
+  bass      <- if (bass) ifelse(!root | (getInversion(x) > 0), 
+                                paste0(bass.sep, bass_func(getBassTint(x) - tint(1, 0), Key = Key, ...)), 
                                 "")
-  root      <- if (root) root_func(getRootTint(tset), Key = Key, ...) 
+  root      <- if (root) root_func(getRootTint(x), Key = Key, ...) 
   
   quality   <- if (quality) {
-    {quality; root} %<-% tset2triadLabel(tset, root, root.case, ...)
+    {quality; root} %<-% tset2triadLabel(x, root, root.case, ...)
     quality
   }
  
   
   figuration <- if (figuration) {
-    extensions  <- do.call('tset2extensions', c(list(tset, inversion = inversion), figurationArgs))
-    alterations <- do.call('tset2alterations', c(list(tset, Key = Key, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
+    extensions  <- do.call('tset2extensions', c(list(x, inversion = inversion), figurationArgs))
+    alterations <- do.call('tset2alterations', c(list(x, Key = Key, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
     
     figuration <- do.call('reduceFigures', c(list(alterations, extensions, ...,
-                                                  quality, root.case, if (inversion) getInversion(tset) else 0L), figurationArgs))
+                                                  quality, root.case, if (inversion) getInversion(x) else 0L), figurationArgs))
     quality[quality == '?'] <- ""
     figuration
     
@@ -416,7 +421,7 @@ tset2tonalHarmony <- function(tset,
   
   
   
-  inversion.label <- if (!is.null(inversion.labels)) getInversion(tset, inversion.labels = inversion.labels)
+  inversion.label <- if (!is.null(inversion.labels)) getInversion(x, inversion.labels = inversion.labels)
   
   tonalharmony <- pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
   
@@ -483,7 +488,7 @@ tset2sciChord <- function(tset,  figurationArgs = c(), ...) {
   figArgs[names(figurationArgs)] <- figurationArgs
   
   
-  t2tH <- partialApply(tset2tonalHarmony,
+  t2tH <- partialApply(tset2tonalHarmony, keyed = TRUE,
                        parts = c('root', 'quality', 'figuration', 'inversion'), 
                        root_func = tint2simplepitch, 
                        root.case = FALSE,
@@ -676,7 +681,6 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 romanNumeral2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
   
   Key <- CKey(Key)
-  
   REparse(x,
           makeRE.romanChord(..., diminish = diminish, augment = augment, collapse = FALSE),
           parse.exhaust = FALSE, parse.strict = FALSE,

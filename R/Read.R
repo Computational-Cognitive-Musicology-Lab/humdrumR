@@ -677,6 +677,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     humtab[ , Null := Token %in% c('.', '!', '*', '=')]
     humtab[ , Filter := FALSE]
     humtab[ , Global := is.na(Spine)]
+    humtab[ , Pattern := NULL]
     
     #
     tandemTab <- parseTandem(humtab$Tandem, tandems)

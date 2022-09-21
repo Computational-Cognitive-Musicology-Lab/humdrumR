@@ -35,14 +35,7 @@ is.tertianSet(x)
 
 \method{tertianSet}{integer}(x)
 
-\method{tertianSet}{character}(
-  x,
-  Exclusive = NULL,
-  str,
-  Key = dset(0, 0),
-  ...,
-  multiDispatch = FALSE
-)
+\method{tertianSet}{character}(x, Key = dset(0, 0), ..., Exclusive = NULL, multiDispatch = FALSE)
 }
 \description{
 \code{tertianSet} is one of \link[=humdrumR]{humdrumR's}

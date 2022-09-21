@@ -18,9 +18,9 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(x, Exclusive = NULL, ..., multiDispatch = FALSE)
+\method{tonalInterval}{numeric}(x, Exclusive = NULL, multiDispatch = FALSE)
 
-\method{tonalInterval}{character}(x, Exclusive = NULL, str, ..., multiDispatch = FALSE)
+\method{tonalInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 }
 \arguments{
 \item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
