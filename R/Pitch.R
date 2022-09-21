@@ -2136,7 +2136,7 @@ freq2tint <- function(x, frequency.reference = 440L, frequency.reference.note = 
 
 ### Tonal ####
 
-
+lof2tint <- function(x) tint(, x)
 
 step2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...) {
   
@@ -2453,12 +2453,14 @@ tonalInterval.NULL <- function(x, ...) NULL
 
 #### Numbers ####
 
+
 #' @rdname pitchParsing
 #' @export
 tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
                                                 list('freq',  NA, freq2tint),
                                                 list('cents', NA, cents2tint),
                                                 list('midi',  NA, midi2tint),
+                                                list('lof',  NA, lof2tint),
                                                 funcName = 'tonalInterval.numeric',
                                                 outputClass ='tonalInterval')
 
@@ -2481,6 +2483,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('pc',                     makeRE.pc,          pc2tint),
                                                  funcName = 'tonalInterval.character',
                                                  outputClass = 'tonalInterval')
+
 
 
 
@@ -2661,7 +2664,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   
   rlang::new_function(args, rlang::expr( {
     
-    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname)
+    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname, matrix = TRUE)
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 

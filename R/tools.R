@@ -2085,7 +2085,9 @@ checkArg <- function(arg,  argname, callname = NULL,
     
 }
 
-checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, min.length = 0L, ...) {
+checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, matrix = FALSE, min.length = 0L, ...) {
+  if (matrix && is.matrix(x)) x <- c(x)
+  
   checkArg(x, argname = argname, callname = callname, ..., 
            valid = NULL,
            classes = c('numeric', 'integer', 'character', 'logical', structs, 

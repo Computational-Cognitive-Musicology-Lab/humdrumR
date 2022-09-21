@@ -230,7 +230,7 @@ vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n
 
 setMethod('nrow', signature = 'struct', function(x) x@dim[1])
 setMethod('ncol', signature = 'struct', function(x) x@dim[2])
-setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
+setMethod('length', signature = 'struct', function(x) length(getSlots(x)[[1]]))
 setMethod('dim', signature = 'struct', function(x) x@dim )
 setMethod('lengths', signature = 'struct', 
           function(x) {
@@ -334,7 +334,7 @@ setMethod('colnames<-', c(x = 'struct'),
           })
 setMethod('rownames<-', c(x = 'struct'),
           function(x, value) {
-              if (!is.null(value) && length(value) != length(x)) .stop(ifelse = is.null(x@dim),
+              if (!is.null(value) && length(value) != nrow(x)) .stop(ifelse = is.null(x@dim),
                                                                        "Rownames assigned to {class(x)} must be ", 
                                                                        "<the same length as the {class(x)}|be of length nrow({class(x)})>",
                                                                        " In this case, you are tring to assign {length(value)} ",  plural(length(value), 'rownames', 'rowname'), 
@@ -1118,15 +1118,24 @@ setMethod('as.character', 'struct',
 #' @export
 setMethod('show', signature = c(object = 'struct'), 
           function(object) { 
+            cat(class(object), 
+                if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
+                '\n', sep = '')
+            
+            if (length(object) > 0L) {
               
-              cat(class(object), 
-                  if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
-                  '\n', sep = '')
-              if (length(object) > 0L) {
-                  print(ifelse(is.na(object), 'NA', as.character(object)), quote = FALSE)
-              }
+              toprint <- c(object)
+              toprint <-  ifelse(is.na(toprint), 'NA', as.character(toprint))
+              dim(toprint) <- dim(object)
+            
+              print(toprint, quote = FALSE)
+              
+            }
+            
             invisible(object)
-            }  )
+              
+            
+          }  )
 
 ########## order, equality ----
 

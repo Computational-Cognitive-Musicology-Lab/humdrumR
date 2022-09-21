@@ -370,7 +370,9 @@ reduceFigures <- function(alterations, extensions,
     lapply(1L:nrow(alterations), \(i) alterations[i, ])
   }
   
-  sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
+  output <- sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
+  
+  gsub('\\.+$', '', output)
   
   #
   
