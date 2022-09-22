@@ -372,7 +372,7 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
     
 }
 
-####. REs for tonalIntervals ####
+#### REs for tonalIntervals ----
 
 makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...)  {
     if (is.null(step.labels)) return('[1-9][0-9]*')
@@ -607,7 +607,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for tertian sets ####
 
-makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
+makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,
@@ -625,17 +625,17 @@ makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = 'A', dimini
    
     REs <- REs[c("tonalChroma", "quality", "inversion")]
     
-    if (collapse) setNames(cREs(REs), 'sciChord') else REs
+    if (collapse) setNames(cREs(REs), 'tertian') else REs
 }
 
-makeRE.chordSymbol <-  function(..., major = 'maj', minor = 'min', augment = '+', diminish = 'o', 
-                                bass.sep = '/',
+makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', 
+                                bass.sep = '/', flat = 'b', 
                                 collapse = TRUE) {
-  REs <- makeRE.tonalChroma(parts = c("step", "species"),
+  REs <- makeRE.tonalChroma(parts = c("step", "species"), flat = flat,
                             step.labels = '[A-G]', qualities = FALSE,
                             step.sign = FALSE, ...)
   
-  REs$triadalt <- captureRE(c(major, minor, augment, diminish), '?')
+  REs$quality <- captureRE(c(major, minor, augment, diminish), '?')
   
   REs$figurations <- makeRE.alterations(...)
   
@@ -645,11 +645,11 @@ makeRE.chordSymbol <-  function(..., major = 'maj', minor = 'min', augment = '+'
   
   
   
-  if (collapse) setNames(cREs(REs), 'chordSymbol') else REs
+  if (collapse) setNames(cREs(REs), 'chord') else REs
   
 }
 
-makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
     augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
@@ -667,19 +667,19 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
-    if (collapse) setNames(cREs(REs), 'romanChord') else REs
+    if (collapse) setNames(cREs(REs), 'roman') else REs
 }
 
 
 
 makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
     
-    romanChord <- makeRE.romanChord(...)
+    roman <- makeRE.roman(...)
     
     
     key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0(romanChord, '(', split, key, ')', if (!mustPartition) '?')
+    paste0(roman, '(', split, key, ')', if (!mustPartition) '?')
 }
 
 

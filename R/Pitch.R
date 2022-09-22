@@ -96,7 +96,6 @@
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
 #' 
-
 #' 
 #' 
 #' @examples 
@@ -135,6 +134,7 @@
 NULL
 
 ## Definition, validity, initialization ####
+#' @rdname tonalIntervalS4
 #' @export 
 setClass('tonalInterval', 
          contains = 'struct',

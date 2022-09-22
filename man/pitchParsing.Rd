@@ -18,7 +18,7 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(x, Exclusive = NULL, multiDispatch = FALSE)
+\method{tonalInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
 \method{tonalInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 }

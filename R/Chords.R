@@ -124,7 +124,7 @@ rootPosition <- function(tset) {
 
 #' @name diatonicSet
 #' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) tset2sciChord(x))
+setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(x))
 
 ## Logic methods ####
 
@@ -461,7 +461,7 @@ tset2figuredBass <- function(x, figurationArgs = list(),  ...) {
 }
 
 
-tset2romanNumeral <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
+tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
   figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -480,7 +480,7 @@ tset2romanNumeral <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
 }
 
-tset2sciChord <- function(x,  figurationArgs = c(), ...) {
+tset2tertian <- function(x,  figurationArgs = c(), ...) {
   figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
   
@@ -501,7 +501,7 @@ tset2sciChord <- function(x,  figurationArgs = c(), ...) {
 }
 
 
-tset2chordSymbol <- function(x, figurationArgs = c(), major = NULL, ...) {
+tset2chord <- function(x, figurationArgs = c(), major = NULL, ...) {
   figArgs <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
                   flat = 'b', qualities = FALSE, natural = 'maj')
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -677,11 +677,11 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 
 ### Chord representations ####  
 
-romanNumeral2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
+roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
   
   Key <- CKey(Key)
   REparse(x,
-          makeRE.romanChord(..., diminish = diminish, augment = augment, collapse = FALSE),
+          makeRE.roman(..., diminish = diminish, augment = augment, collapse = FALSE),
           parse.exhaust = FALSE, parse.strict = FALSE,
           toEnv = TRUE)  # adds accidental numeral triadalt figurations to the environment
   
@@ -740,10 +740,10 @@ sciQualities2tset <- function(str, inversion = 0L, ...) {
   
 }
 
-sciChord2tset <- function(x, Key = dset(0, 0), ...) {
+tertian2tset <- function(x, Key = dset(0, 0), ...) {
   
     REparse(x,
-            makeRE.sciChord(..., collapse = FALSE),
+            makeRE.tertian(..., collapse = FALSE),
             toEnv = TRUE) -> parsed
   
     Key <- diatonicSet(Key)
@@ -766,7 +766,54 @@ sciChord2tset <- function(x, Key = dset(0, 0), ...) {
 }
 
 
-chordSymbol2tset <- function(x, ...) {
+chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = 'b') {
+  
+  
+  # preprocessing
+  x <- stringr::str_replace(x, 'maj7', 'majn7')
+  x <- stringr::str_replace(x, 'maj([91])', 'majn7\\1')
+  
+  #
+  
+  REparse(x,
+          makeRE.chord(..., flat = flat, collapse = FALSE),
+          toEnv = TRUE) -> parsed
+  
+  quality[quality == ''] <- major
+  quality <- setNames(c('M', 'm', 'A', 'd'), c(major, minor, augment, diminish))[quality]
+  
+  
+  
+  makeRE.figs <- partialApply(makeRE.tonalChroma, step.labels = 13:1, 
+                         parts = c('species', 'step'), qualities = FALSE,
+                         collapse = TRUE)
+  
+  figurations <- stringr::str_extract_all(figurations, makeRE.figs(..., collapse = TRUE, flat = flat)[[1]], simplify = FALSE)
+  
+  figurations <- lapply(figurations, REparse, res = makeRE.figs(..., collapse = FALSE, flat = flat))
+  sciQualities <- do.call('rbind',
+                       lapply(figurations,
+                              \(fig) {
+                                step <- fig[ , 'step']
+                                
+                                if (is.null(step)) return(c('.', '.', '.', '.'))
+                                step <- ifelse(step %in% c('9', '11', '13'), c('2', '4', '6')[match(step, c('9', '11', '13'))], step)
+                                fig <- paste0(fig[ , 'species'], step)
+                                
+                                quals <-  tint2specifier(deg2tint(fig, flat = flat, parts = c('species', 'step'),
+                                                                  Key = dset(0L, -1L), implicitSpecies = TRUE), qualities = TRUE, explicitNaturals = TRUE)
+                                
+                                
+                                extensions <- c('7' = '.', '2' = '.', '4' = '.', '6' = '.')
+                                extensions[step] <- quals
+                                if (extensions['7'] == '.' && any(step == c('2', '4', '6'))) extensions['7'] <- 'm'
+                                extensions
+                                
+                              }))
+  sciQualities <- do.call('paste0', as.data.frame(sciQualities))
+  
+  tertian2tset(paste0(tonalChroma, quality, sciQualities), flat = flat, ...)
+  
   
   
   
@@ -811,8 +858,9 @@ tertianSet.integer <- integer2tset
 
 
 
-char2tset <- makeHumdrumDispatcher(list('any', makeRE.romanChord,  romanNumeral2tset),
-                                   list('any', makeRE.sciChord,    sciChord2tset),
+char2tset <- makeHumdrumDispatcher(list('any', makeRE.roman,      roman2tset),
+                                   list('any', makeRE.tertian,    tertian2tset),
+                                   list('any', makeRE.chord,      chord2tset),
                                    funcName = 'char2tset',
                                    outputClass = 'tertianSet')
 
@@ -840,8 +888,9 @@ mapoftset <- function(str, Key = NULL, ..., split = '/') {
 
 #' @rdname tertianSet
 #' @export
-tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.romanChord,       romanNumeral2tset),
-                                              list('any', makeRE.sciChord,         sciChord2tset),
+tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.roman,            roman2tset),
+                                              list('any', makeRE.tertian,          tertian2tset),
+                                              list('any', makeRE.chord,            chord2tset),
                                               list('any', makeRE.tertianPartition, mapoftset),
                                               funcName = 'tertianSet.character',
                                               outputClass = 'tertianSet')
@@ -967,12 +1016,12 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 
 ##
 #' @rdname chordTransformer
-#' @export figuredBass romanNumeral 
-#' @export sciChord chordSymbol
+#' @export figuredBass roman 
+#' @export tertian chord
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
-romanNumeral <- makeChordTransformer(tset2romanNumeral, 'romanNumeral')
-sciChord <- makeChordTransformer(tset2sciChord, 'sciChord')
-chordSymbol <- makeChordTransformer(tset2chordSymbol, 'chordSymbol')
+roman <- makeChordTransformer(tset2roman, 'roman')
+tertian <- makeChordTransformer(tset2tertian, 'tertian')
+chord <- makeChordTransformer(tset2chord, 'chord')
 
 ###################################################################### ### 
 # Manipulating tertian sets ##############################################
