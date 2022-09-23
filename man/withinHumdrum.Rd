@@ -14,7 +14,7 @@
 \item{data}{A \verb{[humdrumR][humdrumRclass]} data object.}
 
 \item{...}{Any number of expressions to evaluate. Unnamed expressions are interpreted as the
-"main" \emph{within-expressions}. Possible \emph{evaluation control arguments} include \code{by}, \code{where}, and \code{windows}.
+"main" \emph{within-expressions}. Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
 Other evaluation options can be achieved with \code{fill} or \code{side} arguments.}
 
 \item{dataTypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}.
@@ -68,7 +68,7 @@ humdrum data easier:
 how your expressions are evaluated.
 You can evaluate expressions...
 \itemize{
-\item In a subset of the data using \code{where}...
+\item In a subset of the data using \code{subset}...
 \itemize{
 \item either ignoring the rest of the data or evaluating a \emph{different} expression in the other part.
 }
@@ -257,54 +257,67 @@ If \code{drop = FALSE}, the result is returned in a \code{\link[=data.table]{dat
 The column names of this results table are generated as described in the previous section:
 i.e., defaulting to \code{ResultX} but allowing explicit naming with through one or more
 explicit assignments in the within-expressions.
-In addition, if \code{where} or \code{groupby} arguments are used, columns are included which indicate
-the value of the evaluated \code{where}/\code{groupby} factor for each row.
+In addition, if \code{subset} or \code{groupby} arguments are used, columns are included which indicate
+the value of the evaluated \code{subset}/\code{groupby} factor for each row.
 }
 }
 
 \section{Partitioning data}{
 
 
-\code{groupby} (e.g., \code{by}) and \code{where} expression control arguments all you to evaluate
+\code{groupby} (e.g., \code{by}) and \code{subset} expression control arguments all you to evaluate
 your within-expressions within specific subsets of the data.
-A \code{where} argument can be used to evaluate your within-expression only within a subset of the data.
+A \code{subset} argument can be used to evaluate your within-expression only within a subset of the data.
 A \code{groupby} argument breaks the data into groups,
 evaluating the within-expression(s) \emph{separately} within each group.
 The results of the grouped evaluations are then returned in a list (\code{with}) or recombined
 into the original data \code{within}---this is a form of the "split-apply-combine" routine that is
 key to \code{R} data analysis.
 
-\code{where} and \code{groupby} arguments are themselves arbitrary expressions which are evaluated within
+\code{subset} and \code{groupby} arguments are themselves arbitrary expressions which are evaluated within
 the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
-Any \code{with}/\code{within.humdrumR} call can include zero, one, \emph{or more} \code{where} and/or \code{groupby} arguments,
+Any \code{with}/\code{within.humdrumR} call can include zero, one, \emph{or more} \code{subset} and/or \code{groupby} arguments,
 including combinations of both.
-If more than one \code{where}/\code{groupy} by argument is included, they are evaluated in order (left to right),
+If more than one \code{subset}/\code{groupy} by argument is included, they are evaluated in order (left to right),
 \emph{recursively}: each one evaluated within the partition(s) established by the previous expression.
 The normal \emph{within} expression(s) are then, all evaluated within the partition(s) established by the
-last  \code{where}/\code{groupby} argument.
+last  \code{subset}/\code{groupby} argument.
 The "Advanced" partitioning section below explores this in more detail.
-\subsection{Apply where TRUE:}{
+\subsection{Apply in subset:}{
 
-A \code{where} argument is an arbitrary expression which identifies a subset of the humdrum data.
-\code{where} expressions must evaluate to
+A \code{subset} argument is an arbitrary expression which identifies a subset of the humdrum data.
+\code{subset} expressions must evaluate to
 a single logical vector,
-The \code{where} result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
-The within expression(s) are only evaluated where the \code{where} argument(s) return \code{TRUE}.
+The \code{subset} result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
+The within expression(s) are only evaluated where the \code{subset} argument(s) return \code{TRUE}.
 
-In a call to \code{with}, only the result evaluated where \code{where == TRUE} is returned.
-However, in a call to \code{within}, the result field(s) are (by default) padded with null data
-where ever \code{where == FALSE}.
-However, you can also control what is returned where \code{where == FALSE} by specifying alternate
-within-expression(s) to evaluate where \code{where == FALSE}.
-These must be named \code{orelse} ([partially matched][partialMatching]).
-(You can also specify \code{orfill} or \code{orelsefill}, to get the behavior of \code{fill}. See above.)
+In a call to \code{with}, only the result evaluated where \code{subset == TRUE} is returned.
+However, in a call to \code{within}, we must decide what to
+do with rest of the data: the \href{https://en.wikipedia.org/wiki/Complement_(set_theory)}{complement}
+of the subset.
+By default, \code{within} pads the returned values with null data
+where ever \code{subset == FALSE} (in the complement).
+So if you, for example, run the command \code{within(humData, kern(Token), subset = Spine == 1)}
+the new field created by \code{within} will be filled with \code{kern} data where \code{Spine == 1},
+but the remaining spines (if any) will all by null.
 
-A \code{orelse} expression can only be specified in combination with a \code{where} argument,
+If you want to explicitly control what is put into the complement
+part of a new field, you can specifying alternate
+within-expression(s) to evaluate where \code{subset == FALSE}.
+These must be named \code{complement}, or the aliases
+\code{rest} or \code{otherwise} (these are all [partially matched][partialMatching]).
+(You can also specify \code{compfill} or \code{restfill}, to get the behavior of \code{fill}. See above.)
+A \code{complement} expression can only be specified in combination with a \code{subset} argument,
 and must be \emph{in addition} to a normal within-expression.
-The idea is that you evaluate the "normal" within-expression where \code{where == TRUE}, \emph{or else}
-you specify evaluate the \code{orelse} expression.
-A common use case is to use the within expression to change some of a data field,
-but to use the \code{orelse} to return the data unchanged in the rest of the field.
+The idea is that you evaluate the "normal" within-expression where \code{subset == TRUE}, \emph{or else}
+you specify evaluate the \code{complement} expression.
+
+A common use case for a \code{complement} expression is to use the within expression to change the data in one spine
+but return the data unchanged in other spines.
+For example, we could specify \code{within(humData, kern(Token), subset = Spine == 1, complement = Token)}.
+Spine 1 will (as before) have \code{kern} applied to it.
+However, instead of return a new field with null values in the other spine(s),
+this call will return the original (unaltered) values from the \code{Token} field in the other spines.
 }
 
 \subsection{Group by:}{
@@ -347,14 +360,14 @@ will apply \code{table} to \code{Token} across each spine \emph{in} each file.
 
 \subsection{Advanced partitioning:}{
 
-If multiple \code{groupby} or \code{where} expressions, or combinations of the two, are specified,
+If multiple \code{groupby} or \code{subset} expressions, or combinations of the two, are specified,
 each is evaluated recursively, in order from left to right.
-If \code{where} is specified after \code{groupby}, the \code{where} expression is evaluated within each \code{groupby} group
-If \code{groupby} is specified after \code{where}, the grouping \code{by} expression is evaluated only where \code{where == TRUE}.
+If \code{subset} is specified after \code{groupby}, the \code{subset} expression is evaluated within each \code{groupby} group
+If \code{groupby} is specified after \code{subset}, the grouping \code{by} expression is evaluated only where \code{subset == TRUE}.
 Thus, if you specify\preformatted{within(humdata,
          sd(Semits),
          by = File, 
-         where = Semits > mean(Semits))
+         subset = Semits > mean(Semits))
 ```
 
 the standard deviation of the `semits` field will be calculated in each file,
@@ -364,7 +377,7 @@ but only where the `semits` field is greater than the mean `semits` value
 ```
 within(humdata,
          sd(Semits)
-         where = Semits > mean(Semits), 
+         subset = Semits > mean(Semits), 
          by = File) 
 ```
 
@@ -374,6 +387,7 @@ but this time wherever the `semits` field is greater than the mean value *across
 
 [humTable]: R:humTable
 [humTable]: R:humTable
+[complement]: R:complement
 [partialMatching]: R:partialMatching
 [data.table]: R:data.table
 [tapply]: R:tapply

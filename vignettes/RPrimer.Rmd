@@ -31,7 +31,7 @@ make the most out of `humdrumR`.
 # Basic Commands
 
 `R` code is made up of "expressions" like `2 + 2`, `sqrt(2)`, or `(x - mean(x))^2`.
-As you can see, you can do arithmetic in very intuitive ways, like `5 / 2` or `3 * 3` (more details lin a later section).
+As you can see, you can create very intuitive *arithmetic* expressions, like `5 / 2` or `3 * 3`.
 However, the most common elements of `R` expressions are "calls" to *functions*.
 A "function" in `R` is a pre-built bit of code that does something.
 Most functions take one or more input *arguments*, and "return" some kind of output.
@@ -54,9 +54,9 @@ abs(-3)
 
 mean(1:5)
 
-c(1, 2, 3)
+max(1, 5) # two arguments
 
-max(1,5) # two arguments
+c(1, 2, 3) # three arguments
 
 Sys.time() # no arguments!
 

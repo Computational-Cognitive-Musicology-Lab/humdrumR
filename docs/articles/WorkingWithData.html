@@ -799,22 +799,22 @@ expressions in <code>within</code>:</p>
 <p>The real power of the <code>with</code> and <code>within</code>
 functions, comes from additional “control” arguments you can pass. Two
 prominent examples allow you to automatically work with subsets of your
-data: the <code>where</code> and <code>by</code> arguments. We can
+data: the <code>subset</code> and <code>by</code> arguments. We can
 indicate a subset, or multiple subsets, and our expressions will be
 evaluated separately within each subset.</p>
 <div class="section level3">
 <h3 id="with-subset">With Subset<a class="anchor" aria-label="anchor" href="#with-subset"></a>
 </h3>
-<p>The <code>where</code> argument indicates a subset of the data which
-we should evaluate “within.” There <code>where</code> argument must be
+<p>The <code>subset</code> argument indicates a subset of the data which
+we should evaluate “within.” There <code>subset</code> argument must be
 an expression which evaluates to a logical vector (<code>TRUE</code> of
 <code>FALSE</code>). The main command is then evaluated wherever the
-<code>where</code> expression evaluates to <code>TRUE</code>.</p>
+<code>subset</code> expression evaluates to <code>TRUE</code>.</p>
 <p>Let’s try it with our tabling example. Maybe we want to table only
 tokens in the <em>first</em> spine:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(chorales, </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">kern</span>(Token) <span class="sc">|&gt;</span> <span class="fu">table</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>() <span class="sc">|&gt;</span> <span class="fu">tail</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">where =</span> Spine <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">subset =</span> Spine <span class="sc">==</span> <span class="dv">1</span>)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>    GG C<span class="co">#  A  G AA F# BB  C  D  E </span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">29</span> <span class="dv">30</span> <span class="dv">36</span> <span class="dv">36</span> <span class="dv">44</span> <span class="dv">44</span> <span class="dv">48</span> <span class="dv">57</span> <span class="dv">70</span> <span class="dv">85</span></span></code></pre></div>
@@ -827,17 +827,17 @@ piece. If we want even numbers, we can ask where is <code>Bar</code>
 modulu 2 zero?: <code>Bar %% 2 == 0</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(chorales, </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">kern</span>(Token) <span class="sc">|&gt;</span> <span class="fu">table</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>() <span class="sc">|&gt;</span> <span class="fu">tail</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">where =</span> Bar <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">subset =</span> Bar <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>      G   c  f<span class="co">#   A   B   b   d   g   a   e </span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">41</span>  <span class="dv">53</span>  <span class="dv">57</span>  <span class="dv">59</span>  <span class="dv">62</span>  <span class="dv">63</span>  <span class="dv">63</span>  <span class="dv">72</span>  <span class="dv">82</span> <span class="dv">111</span></span></code></pre></div>
-<p>If we use the <code>where</code> argument with <code>within</code>,
+<p>If we use the <code>subset</code> argument with <code>within</code>,
 parts of the data which don’t match the <code>within</code> expression
 are returned as null:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>       Pitch <span class="ot">&lt;-</span> <span class="fu">pitch</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">where =</span> Spine <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">subset =</span> Spine <span class="sc">==</span> <span class="dv">1</span>)</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor001.krn vvv #############################</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>         <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -938,18 +938,19 @@ spine except spine 1.</p>
 <div class="section level4">
 <h4 id="or-else">Or else…<a class="anchor" aria-label="anchor" href="#or-else"></a>
 </h4>
-<p>In many cases when using <code>where</code> we’d like to do something
-with, or at least keep, the “other” part of the data. We can do this by
-expressing an “or else” expression. The idea is that we say “evaluate X
-where Y is true, otherwise evaluate this instead.” This is easiest to
-understand if we use our <code>wihtin</code> example from above. Maybe
-we want to calculate the simple pitch of the first spine, but <em>leave
-the other spines unchanged</em>:</p>
+<p>In many cases when using <code>subset</code> we’d like to do
+something with, or at least keep, the “other” part of the data—the
+complement of the subset. We can do this by expressing a “complement”
+expression. The idea is that we say “evaluate X where Y is true,
+otherwise evaluate this instead.” This is easiest to understand if we
+use our <code>within</code> example from above. Maybe we want to
+calculate the simple pitch of the first spine, but <em>leave the other
+spines unchanged</em>:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales,</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>       Pitch <span class="ot">&lt;-</span> <span class="fu">pitch</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">where =</span> Spine <span class="sc">==</span> <span class="dv">1</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">orelse =</span> Token)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">subset =</span> Spine <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">complement =</span> Token)</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor001.krn vvv #############################</span></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>         <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -1045,7 +1046,7 @@ the other spines unchanged</em>:</p>
 <span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
 <span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> character</span></code></pre></div>
-<p>This pattern, with <code>orelse = Token</code> is quite common.</p>
+<p>This pattern, with <code>comp = Token</code> is quite common.</p>
 </div>
 </div>
 <div class="section level3">

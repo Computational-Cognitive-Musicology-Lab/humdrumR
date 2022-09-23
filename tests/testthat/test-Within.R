@@ -2,7 +2,7 @@
 
 
 # 
-test_that('Grouping and where are consistent', {
+test_that('Grouping and subset are consistent', {
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
 
@@ -14,8 +14,8 @@ test_that('Grouping and where are consistent', {
   spines <- with(chorales, table(TokenF), by = Spine)
   expect_true(all(Reduce('+', spines) == alltab))
 
-  # where
-  spine1 <- with(chorales, table(TokenF), where = Spine == 1)
+  # subset
+  spine1 <- with(chorales, table(TokenF), subset = Spine == 1)
   expect_true(all(spines[[1]] == spine1))
 
 })
@@ -54,13 +54,13 @@ test_that('Examples from Working With Data vignette work', {
     expect_equal(length(barplot1$value), c(10))
   }
   
-  # where 
-  spine1tab <- with(chorales, table(kern(Token)), where = Spine == 1)
+  # subset 
+  spine1tab <- with(chorales, table(kern(Token)), subset = Spine == 1)
   expect_equal(unname(spine1tab['F#']), 44)
   
   evenbartab <- with(chorales, 
        kern(Token) |> table() |> sort() |> tail(n = 10),
-       where = Bar %% 2 == 0)
+       subset = Bar %% 2 == 0)
   
   expect_equal(unname(evenbartab['d']), 63)
   
@@ -68,15 +68,15 @@ test_that('Examples from Working With Data vignette work', {
   
   within(chorales,
          Pitch <- pitch(Token, simple = TRUE),
-         where = Spine == 1) -> chorales2
+         subset = Spine == 1) -> chorales2
   
   expect_equal(with(chorales2, table(Pitch, Spine)) |> ncol(), 1)
 
   
   within(chorales,
          Pitch <- pitch(Token, simple = TRUE),
-         where = Spine == 1,
-         orelse = Token)  -> chorales2
+         subset = Spine == 1,
+         complement = Token)  -> chorales2
   
   spinetab <- with(chorales2, table(Pitch, Spine))
   expect_equal(ncol(spinetab), 4)
@@ -165,13 +165,13 @@ test_that("Examples from withinHumdrum docs work", {
   
   #
   Count1 <- sort(humtab[ , list(sum(Semits > grandMean), Spine), by = Spine][ , setNames(V1, paste0(Spine, ';', TRUE))])
-  Count2 <- sort(with(chorales, length(Semits), where = Semits > mean(Semits),  by = Spine))
+  Count2 <- sort(with(chorales, length(Semits), subset = Semits > mean(Semits),  by = Spine))
   
   expect_equal(Count1, Count2)
   
   #
   Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine][ , setNames(V1, paste0(TRUE, ';', Spine))])
-  Count4 <- sort(with(chorales, length(Semits), by = Spine, where = Semits > mean(Semits)))
+  Count4 <- sort(with(chorales, length(Semits), by = Spine, subset = Semits > mean(Semits)))
   
   expect_equal(Count3, Count4)
   

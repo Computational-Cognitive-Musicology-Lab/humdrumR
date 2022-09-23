@@ -821,8 +821,8 @@ parseKeywords <- function(quoTab, withFunc) {
   }
   
   if (any(quoTab[, KeywordType == 'or']) && !any(quoTab[, Keyword == 'subset'])) {
-    .stop("In your call to {withFunc} you've included an 'orelse' expression improperly.", 
-          "An 'orelse' expression can only be used in combination with BOTH a subset expression AND a normal within expression.",
+    .stop("In your call to {withFunc} you've included an 'complement' expression improperly.", 
+          "An 'complement' expression can only be used in combination with BOTH a subset expression AND a normal within expression.",
           "See ?withinHumdrum for help.")
   }
   

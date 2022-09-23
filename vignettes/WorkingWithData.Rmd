@@ -158,15 +158,15 @@ chorales
 # With/Within Subsets
 
 The real power of the `with` and `within` functions, comes from additional "control" arguments you can pass.
-Two prominent examples allow you to automatically work with subsets of your data: the `where` and `by` arguments.
+Two prominent examples allow you to automatically work with subsets of your data: the `subset` and `by` arguments.
 We can indicate a subset, or multiple subsets, and our expressions will 
 be evaluated separately within each subset.
 
 ## With Subset
 
-The `where` argument indicates a subset of the data which we should evaluate "within."
-There `where` argument must be an expression which evaluates to a logical vector (`TRUE` of `FALSE`).
-The main command is then evaluated wherever the `where` expression evaluates to `TRUE`.
+The `subset` argument indicates a subset of the data which we should evaluate "within."
+There `subset` argument must be an expression which evaluates to a logical vector (`TRUE` of `FALSE`).
+The main command is then evaluated wherever the `subset` expression evaluates to `TRUE`.
 
 Let's try it with our tabling example.
 Maybe we want to table only tokens in the *first* spine:
@@ -174,7 +174,7 @@ Maybe we want to table only tokens in the *first* spine:
 ```{r}
 with(chorales, 
      kern(Token) |> table() |> sort() |> tail(n = 10),
-     where = Spine == 1)
+     subset = Spine == 1)
 ```
 
 We only see the low notes, which is what we'd expect from the bass voice.
@@ -186,10 +186,10 @@ If we want even numbers, we can ask where is `Bar` modulu 2 zero?: `Bar %% 2 == 
 ```{r}
 with(chorales, 
      kern(Token) |> table() |> sort() |> tail(n = 10),
-     where = Bar %% 2 == 0)
+     subset = Bar %% 2 == 0)
 ```
 
-If we use the `where` argument with `within`, parts of the data which don't match the `within` expression
+If we use the `subset` argument with `within`, parts of the data which don't match the `within` expression
 are returned as null:
 
 
@@ -197,7 +197,7 @@ are returned as null:
 
 within(chorales,
        Pitch <- pitch(Token, simple = TRUE),
-       where = Spine == 1)
+       subset = Spine == 1)
 
 
 ```
@@ -206,23 +206,23 @@ Notice, our new `Pitch` field is `NULL` in all spine except spine 1.
 
 ### Or else...
 
-In many cases when using `where` we'd like to do something with, or at least keep, the "other" part of the data.
-We can do this by expressing an "or else" expression.
+In many cases when using `subset` we'd like to do something with, or at least keep, the "other" part of the data---the complement of the subset.
+We can do this by expressing a "complement" expression.
 The idea is that we say "evaluate X where Y is true, otherwise evaluate this instead."
-This is easiest to understand if we use our `wihtin` example from above.
+This is easiest to understand if we use our `within` example from above.
 Maybe we want to calculate the simple pitch of the first spine, but *leave the other spines unchanged*:
 
 ```{r}
 
 within(chorales,
        Pitch <- pitch(Token, simple = TRUE),
-       where = Spine == 1,
-       orelse = Token)
+       subset = Spine == 1,
+       complement = Token)
 
 
 ```
 
-This pattern, with `orelse = Token` is quite common.
+This pattern, with `comp = Token` is quite common.
 
 
 

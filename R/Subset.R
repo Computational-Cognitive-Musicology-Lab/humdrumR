@@ -14,7 +14,7 @@
 #' `subset.humdrumR` is used in a similar manner to [withinHumdrum],
 #' taking any number of "within expressions" as arguments.
 #' In fact, expression arguments are passed directly to an internal call to `withinHumdrum`, and 
-#' other control expressions (like `by` or `where`) can be used as well.
+#' other control expressions (like `by` or `subset`) can be used as well.
 #' The only requirement is that the expressions/functions fed to `subset.humdrumR` 
 #' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
 #' which return a logical (`TRUE`/`FALSE`) vector.
