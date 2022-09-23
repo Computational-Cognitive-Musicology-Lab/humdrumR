@@ -257,6 +257,8 @@ tset2triadLabel <- function(x, root, root.case = TRUE,
   qualities <- qualities[ , c('3rd', '5th'), drop = FALSE]
   thirds <- qualities[ , '3rd', drop = FALSE]
   fifths <- qualities[ , '5th', drop = FALSE]
+  thirds[is.na(thirds)] <- '.'
+  fifths[is.na(fifths)] <- '.'
   
   #
   triadQuality <- rep('?', nrow(qualities))
@@ -264,7 +266,7 @@ tset2triadLabel <- function(x, root, root.case = TRUE,
 
   
   ## prepare labels for known combinations of third and fifth qualities
-  reductions <- matrix('?', ncol = 3, nrow = 4, dimnames = list(c(diminish, minor, major, augment), c(diminish, perfect, augment)))
+  reductions <- matrix('?', ncol = 4, nrow = 5, dimnames = list(c(diminish, minor, major, augment, '.'), c(diminish, perfect, augment, '.')))
   # reductions[] <- paste0('(', outer(rownames(reductions), colnames(reductions), paste0), ')')
   
   reductions <- local({
@@ -272,6 +274,12 @@ tset2triadLabel <- function(x, root, root.case = TRUE,
                        reductions[minor, perfect] <- minor
                        reductions[major, perfect] <- major
                        reductions[major, augment] <- augment
+                       reductions[major, '.'] <- paste0('3', major)
+                       reductions[minor, '.'] <- paste0('3', minor)
+                       reductions['.', perfect] <- paste0('5', major)
+                       reductions['.', augment] <- paste0('5', augment)
+                       reductions['.', diminish] <- paste0('5',diminish) 
+                       reductions['.', '.'] <- paste0('1', major) 
                        reductions
                      }
   )
@@ -326,7 +334,7 @@ reduceFigures <- function(alterations, extensions,
   if (any(!inverted) && extension.sus) {
     
     nines.elevens <- col(extensions) %in% 5:6 & present
-    sus <- sweep(nines.elevens, 1, !present[ , '3rd'] & !inverted, `&`)
+    sus <- sweep(nines.elevens, 1, !present[ , '3rd'] & !inverted, `&`) & alterations == ''
     extensions[sus] <- ((extensions[sus] - 1L) %% 7L) + 1L
     tags[sus] <- 'sus'
   }
@@ -341,6 +349,9 @@ reduceFigures <- function(alterations, extensions,
     tags[adds] <- 'add'
   }
   
+  # missing triad tones
+  tags[is.na(extensions) & col(tags) %in% 2L:3L & is.na(tags)] <- 'no'
+  extensions[which(tags == 'no')] <- ((col(extensions)[which(tags == 'no')] - 1L) * 2L) + 1L
   #
   if (extension.shorthand) {
     # if (!extension.simple && any(inverted)) {
@@ -352,11 +363,11 @@ reduceFigures <- function(alterations, extensions,
     
     hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<') 
     
-    extensions[(hide & alterations == "") | extensions == 1L] <- NA_integer_
+    extensions[(hide & alterations == "" & is.na(tags)) | extensions == 1L] <- NA_integer_
     
   }
   
-  
+ 
   # order
   
   alterations[] <- .paste(tags, alterations, if (step) extensions, fill = ".", na.if = all)
@@ -496,7 +507,7 @@ tset2tertian <- function(x,  figurationArgs = c(), ...) {
                        implicitSpecies = FALSE, inversion.labels = c('', '/3', '/5', '/7', '/2', '/4', '/6'),
                        extension.shorthand = TRUE, extension.simple = FALSE,
                        extension.decreasing = NULL,
-                       extension.add = TRUE, extension.sus = TRUE)
+                       extension.add = FALSE, extension.sus = FALSE)
   t2tH(x, figurationArgs = figArgs, ...)
 }
 
@@ -566,7 +577,7 @@ extension2bit <- function(str) {
 
 
 
-triad2sciQuality <- function(triad, extensionQualities, 
+triad2sciQuality <- function(triad, extensionQualities, incomplete,
                              major = 'M', minor = 'm', perfect = 'P', diminish = 'd', augment = 'A',
                              ...) {
   
@@ -576,7 +587,14 @@ triad2sciQuality <- function(triad, extensionQualities,
                                           c(major, minor, minor, major), 
                                           c(perfect, perfect, diminish, augment))
                            rownames(quals) <- c(major, minor, diminish, augment)
-                           cbind(quals[triad, , drop = FALSE ], '.', '.', '.', '.')
+                           quals <- cbind(quals[triad, , drop = FALSE ], '.', '.', '.', '.')
+                           
+                           quals[incomplete == '1', 2L] <- '.'
+                           quals[incomplete == '1', 3L] <- '.'
+                           quals[incomplete == '3', 3L] <- '.'
+                           quals[incomplete == '5', 2L] <- '.'
+                           quals
+                           
                          })
   extensionQualities[col(extensionQualities) <= 3L & extensionQualities == '.'] <- triadQualities[col(extensionQualities) <= 3L & extensionQualities == '.']
   extensionQualities[ , 2L:3L] <- triadQualities[ , 2L:3L]
@@ -757,7 +775,7 @@ tertian2tset <- function(x, Key = dset(0, 0), ...) {
       triad <- quality[ , 1]
       extensions <- cbind('.', '.', '.', quality[ , -1L, drop = FALSE])
       
-      triad2sciQuality(triad, extensions, ...)
+      triad2sciQuality(triad, extensions, incomplete, ...)
     })
     inversion <- ifelse(inversion == '', 0L, match(gsub('^/', '', inversion), c(1, 3, 5, 7, 2, 4, 6)) - 1L)
     

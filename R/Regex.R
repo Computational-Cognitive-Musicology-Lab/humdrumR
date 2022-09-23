@@ -613,6 +613,8 @@ makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminis
                               step.labels = '[A-G]', qualities = FALSE,
                               step.sign = FALSE, ...)
     
+    REs$incomplete <- '[135]?'
+    
     qualityRE <- captureRE(c(major, minor, augment, diminish, '.'))
     REs$quality <-  paste0('((', 
                            qualityRE, '{3}',  
@@ -623,7 +625,8 @@ makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminis
     
     REs$inversion <- '(/[1-7])?'
    
-    REs <- REs[c("tonalChroma", "quality", "inversion")]
+    
+    REs <- REs[c("tonalChroma", "incomplete", "quality", "inversion")]
     
     if (collapse) setNames(cREs(REs), 'tertian') else REs
 }
