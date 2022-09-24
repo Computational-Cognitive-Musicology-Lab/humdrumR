@@ -351,7 +351,7 @@ data are e, a, g, d, b, B, A, f#, c, E.</p>
 <code>tail</code> function to grab the top (last) 10, and the built-in
 <code>barplot</code> function.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
+<code class="sourceCode R"><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
      <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> |&gt; 
        <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; 
        <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="op">)</span> |&gt; 
@@ -1084,7 +1084,7 @@ so we tabulate each spine of data (voice) separately!</p>
 to make multiple plots, we can just add <code>barplot</code> like
 before.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
+<code class="sourceCode R"><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
      <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="va">Spine</span><span class="op">)</span></code></pre></div>
 <p><img src="WorkingWithData_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
@@ -1115,7 +1115,7 @@ remove):</p>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="sc">-</span><span class="fl">9.6692308</span> <span class="sc">-</span><span class="fl">0.1143317</span>  <span class="fl">5.6065041</span> <span class="fl">10.5672192</span></span></code></pre></div>
 <p>That’s what we expected! Of course, we might prefer a plot.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
+<code class="sourceCode R"><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
      <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span>na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="va">Spine</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span>names.arg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Bass'</span>, <span class="st">'Tenor'</span>, <span class="st">'Alto'</span>, <span class="st">'Soprano'</span><span class="op">)</span>, 
                             main <span class="op">=</span> <span class="st">'Mean Pitch by Voice'</span>,
@@ -1132,7 +1132,7 @@ voice. We can use the base-R <code>hist</code> function; Since we want a
 histogram of each spine, we <em>will</em> want to put <code>hist</code>
 “inside” the call to <code>with</code> again:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
+<code class="sourceCode R"><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
      <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">24</span>, <span class="fl">24</span><span class="op">)</span>, main <span class="op">=</span> <span class="va">Instrument</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="va">Spine</span><span class="op">)</span> </code></pre></div>
 <p><img src="WorkingWithData_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
@@ -1152,7 +1152,7 @@ long as its output is the same length as its input. For example, maybe
 we’d like to reproduce our histograms, but lumping the male (bass/tenor)
 and female (alto/soprano) voices together.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
+<code class="sourceCode R"><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, 
      <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">24</span>, <span class="fl">24</span><span class="op">)</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">Instrument</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">' and '</span><span class="op">)</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="va">Spine</span> <span class="op">&lt;</span> <span class="fl">3</span><span class="op">)</span> </code></pre></div>
 <p><img src="WorkingWithData_files/figure-html/unnamed-chunk-20-1.png" width="700"></p>
@@ -1171,15 +1171,15 @@ single value, but we still want to reconstruct the data fully. In
 <code>R</code>, this is usually called “recycling”—i.e., repeating a
 value until it matches a certain length. When using <code>with</code> or
 <code>within</code>, we can cause our results to be recycled to the full
-field length by using the <code>fill</code> argument for our expression.
-This is useful if you want to group by something, and fill each group
-with the same value:</p>
+field length by using the <code>recycle</code> argument for our
+expression. This is useful if you want to group by something, and fill
+each group with the same value:</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>       Semits <span class="ot">&lt;-</span> <span class="fu">semits</span>(Token)) <span class="ot">-&gt;</span> chorales</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales, </span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> BarBassNote <span class="ot">&lt;-</span> <span class="fu">min</span>(Semits),</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">recycle =</span> BarBassNote <span class="ot">&lt;-</span> <span class="fu">min</span>(Semits),</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">by =</span> <span class="fu">list</span>(File, Bar)) <span class="ot">-&gt;</span> chorales</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>chorales</span>

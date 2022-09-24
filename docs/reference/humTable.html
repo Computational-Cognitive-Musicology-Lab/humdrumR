@@ -137,14 +137,9 @@ and the <code>Type</code> of field (e.g., <code>"Formal"</code>).</p>
 <dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
 <dd><p>A <code>character</code> vector. Specifies which types of data tokens/records to extract.
-Legal values are:
-+ <code>"G"</code>: global comments
-+ <code>"L"</code>: local comments
-+ <code>"I"</code>: interpretations
-+ <code>"M"</code>: barlines
-+ <code>"D"</code>: non-null data
-+ <code>"d"</code>: null data</p><div class="sourceCode"><pre><code>Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
-</code></pre></div></dd>
+Legal values are: <code>"G"</code> (global comments), <code>"L"</code> (local comments), <code>"I"</code> (interpretations),
+<code>"M"</code> (barlines), <code>"D"</code> (non-null data), or <code>"d"</code> (null data).
+Multiple types can be specified as a vector, or smooshed into a single string: e.g., <code>"GLIMD"</code>.</p></dd>
 <dt>fields</dt>
 <dd><p>(<code>character</code>) A vector of names which are <a href="partialMatching.html">partially matched</a>
 against field names of the humdrum table.

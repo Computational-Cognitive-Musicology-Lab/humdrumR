@@ -2,6 +2,8 @@
 % Please edit documentation in R/Within.R
 \name{withinHumdrum}
 \alias{withinHumdrum}
+\alias{within}
+\alias{with}
 \alias{with.humdrumR}
 \alias{within.humdrumR}
 \title{with(in)Humdrum}

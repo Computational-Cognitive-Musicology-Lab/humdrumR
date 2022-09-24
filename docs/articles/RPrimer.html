@@ -114,15 +114,15 @@ you the basics you need to know in order to make the most out of
 </h2>
 <p><code>R</code> code is made up of “expressions” like
 <code>2 + 2</code>, <code>sqrt(2)</code>, or
-<code>(x - mean(x))^2</code>. As you can see, you can do arithmetic in
-very intuitive ways, like <code>5 / 2</code> or <code>3 * 3</code> (more
-details lin a later section). However, the most common elements of
-<code>R</code> expressions are “calls” to <em>functions</em>. A
-“function” in <code>R</code> is a pre-built bit of code that does
-something. Most functions take one or more input <em>arguments</em>, and
-“return” some kind of output. For example, the function
-<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> takes a number as an input argument, and “returns”
-the square root of that number.</p>
+<code>(x - mean(x))^2</code>. As you can see, you can create very
+intuitive <em>arithmetic</em> expressions, like <code>5 / 2</code> or
+<code>3 * 3</code>. However, the most common elements of <code>R</code>
+expressions are “calls” to <em>functions</em>. A “function” in
+<code>R</code> is a pre-built bit of code that does something. Most
+functions take one or more input <em>arguments</em>, and “return” some
+kind of output. For example, the function <code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> takes a
+number as an input argument, and “returns” the square root of that
+number.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">2</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.414214</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -140,14 +140,14 @@ or more input arguments:</p>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="dv">1</span>, <span class="dv">5</span>) <span class="co"># two arguments</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">5</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="dv">1</span>,<span class="dv">5</span>) <span class="co"># two arguments</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">5</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="co"># three arguments</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2022-09-23 19:43:37 EDT"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2022-09-23 20:11:20 EDT"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -472,8 +472,8 @@ above using <code>df$Letters</code>.</p>
 <p>Often, we’ll want to write code that uses a bunch of different
 columns from the same data.frame—in fact, this is the <em>main</em>
 thing we do most of the time in <code>R</code>! To avoid writing
-<code>df$</code> over and over again, we can use the <code><a href="https://rdrr.io/r/base/with.html" class="external-link">with()</a></code>
-function. <code><a href="https://rdrr.io/r/base/with.html" class="external-link">with()</a></code> allows us to drop “inside” our
+<code>df$</code> over and over again, we can use the <code><a href="../reference/withinHumdrum.html">with()</a></code>
+function. <code><a href="../reference/withinHumdrum.html">with()</a></code> allows us to drop “inside” our
 <code>data.frame</code>, where our <code>R</code> commands can “see” the
 columns variables:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>

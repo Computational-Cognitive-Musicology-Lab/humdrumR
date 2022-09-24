@@ -80,10 +80,10 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, drop <span class="op">=</span> <span class="cn">TRUE</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">with</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, drop <span class="op">=</span> <span class="cn">TRUE</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># S3 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">within</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -92,7 +92,7 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
 <dd><p>A <code>[humdrumR][humdrumRclass]</code> data object.</p></dd>
 <dt>...</dt>
 <dd><p>Any number of expressions to evaluate. Unnamed expressions are interpreted as the
-"main" <em>within-expressions</em>. Possible <em>evaluation control arguments</em> include <code>by</code>, <code>where</code>, and <code>windows</code>.
+"main" <em>within-expressions</em>. Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>windows</code>.
 Other evaluation options can be achieved with <code>fill</code> or <code>side</code> arguments.</p></dd>
 <dt>dataTypes</dt>
 <dd><p>A string or vector of characters drawn from <code>c("D", "d", "I", "L", "M","G")</code>.
@@ -141,7 +141,7 @@ fields called <code>ResultX</code> (see details).</p>
 humdrum data easier:
 <em>evaluation control arguments</em> can be used to control
 how your expressions are evaluated.
-You can evaluate expressions...</p><ul><li><p>In a subset of the data using <code>where</code>...</p><ul><li><p>either ignoring the rest of the data or evaluating a <em>different</em> expression in the other part.</p></li>
+You can evaluate expressions...</p><ul><li><p>In a subset of the data using <code>subset</code>...</p><ul><li><p>either ignoring the rest of the data or evaluating a <em>different</em> expression in the other part.</p></li>
 </ul></li>
 <li><p>Separately in different subsets of the data, which are then recombined (split-apply-combine) using <code>by</code>.</p></li>
 <li><p>Across windows in the data (e.g., ngrams, rolling windows).</p></li>
@@ -190,9 +190,9 @@ In the first within expression, <code>.</code> is interpreted as the humdrumR ob
 current <a href="humActive.html">active expression</a>.
 If multiple within expressions are given, beyond the first expression,  <code>.</code> refers to result of
 the <em>previous</em> expression.
-For example, if <code>Token</code> is the <a href="humActive.html">active expression</a>, then:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="va">.</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
+For example, if <code>Token</code> is the <a href="humActive.html">active expression</a>, then:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="va">.</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
 
-<p>would return the same result as:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
+<p>would return the same result as:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
 
 </div>
 
@@ -214,7 +214,7 @@ This means that if you call something like <code>newData &lt;- within(humData, s
 but the result (<code>newData</code>) is identical to <code>humData</code>.</p>
 <p>Side-effects can also be used in combination with other within expressions.
 Their result is ignored, and <em>not</em> fed to the next expression as <code>.</code>.
-For example the command</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example the command</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>creates a histogram of <code>nchar(Token)</code> and also returns the mean of <code>nchar(Token)</code>.
 (Note that variables explicitly assigned in a <code>side</code> call <em>are</em> visible in later calls,
@@ -251,8 +251,8 @@ always keeping them the same length so vectorization is never hindered.
 In a within-expression, any vector can be indexed with an <code>integer</code> argument named <code>lag</code> (case insensitive),
 causing it to be lagged by that integer.
 (A vector indexed with <code>lag = 0</code> returns the unchanged vector.)
-For example, the following two calls are the same:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="../reference/lag.html">lag</a></span><span class="op">(</span><span class="va">Token</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example, the following two calls are the same:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="../reference/lag.html">lag</a></span><span class="op">(</span><span class="va">Token</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>If the <code>lag</code> index has <em>multiple</em> values and the indexed object appears within a higher function call,
 each lag is inserted as a <em>separate</em> argument to that call.
@@ -267,7 +267,7 @@ This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
 <code>boundaries</code> argument to the lagged index, like <code>Token[lag = 1, boundaries = list(...)]</code>.</p>
 <p>Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
-For example, if you want to create character-string 5-grams of your data, you could call:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example, if you want to create character-string 5-grams of your data, you could call:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>boundaries = list(File, Spine, Path)</code>
 to <code><a href="lag.html">lag()</a></code>, these are true "melodic" n-grams, only created within spine-paths within each file.</p>
@@ -300,7 +300,7 @@ For example, <code>within(data, Semits &lt;- semits(Token))</code> will put the 
 In fact, if you assign the results of multiple within-expressions,
 each result that is the same length as the last result will be put into a new field.
 Thus, you can create multiple new fields in a single call:
-for example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humData</span>, 
+for example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humData</span>, 
        <span class="va">Semits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
        <span class="va">Recip</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
@@ -321,8 +321,8 @@ If <code>drop = FALSE</code>, the result is returned in a <code>data.table()</co
 The column names of this results table are generated as described in the previous section:
 i.e., defaulting to <code>ResultX</code> but allowing explicit naming with through one or more
 explicit assignments in the within-expressions.
-In addition, if <code>where</code> or <code>groupby</code> arguments are used, columns are included which indicate
-the value of the evaluated <code>where</code>/<code>groupby</code> factor for each row.</p>
+In addition, if <code>subset</code> or <code>groupby</code> arguments are used, columns are included which indicate
+the value of the evaluated <code>subset</code>/<code>groupby</code> factor for each row.</p>
 </div>
 
     </div>
@@ -331,44 +331,56 @@ the value of the evaluated <code>where</code>/<code>groupby</code> factor for ea
     
 
 
-<p><code>groupby</code> (e.g., <code>by</code>) and <code>where</code> expression control arguments all you to evaluate
+<p><code>groupby</code> (e.g., <code>by</code>) and <code>subset</code> expression control arguments all you to evaluate
 your within-expressions within specific subsets of the data.
-A <code>where</code> argument can be used to evaluate your within-expression only within a subset of the data.
+A <code>subset</code> argument can be used to evaluate your within-expression only within a subset of the data.
 A <code>groupby</code> argument breaks the data into groups,
 evaluating the within-expression(s) <em>separately</em> within each group.
 The results of the grouped evaluations are then returned in a list (<code>with</code>) or recombined
 into the original data <code>within</code>---this is a form of the "split-apply-combine" routine that is
 key to <code>R</code> data analysis.</p>
-<p><code>where</code> and <code>groupby</code> arguments are themselves arbitrary expressions which are evaluated within
+<p><code>subset</code> and <code>groupby</code> arguments are themselves arbitrary expressions which are evaluated within
 the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
-Any <code>with</code>/<code>within.humdrumR</code> call can include zero, one, <em>or more</em> <code>where</code> and/or <code>groupby</code> arguments,
+Any <code>with</code>/<code>within.humdrumR</code> call can include zero, one, <em>or more</em> <code>subset</code> and/or <code>groupby</code> arguments,
 including combinations of both.
-If more than one <code>where</code>/<code>groupy</code> by argument is included, they are evaluated in order (left to right),
+If more than one <code>subset</code>/<code>groupy</code> by argument is included, they are evaluated in order (left to right),
 <em>recursively</em>: each one evaluated within the partition(s) established by the previous expression.
 The normal <em>within</em> expression(s) are then, all evaluated within the partition(s) established by the
-last  <code>where</code>/<code>groupby</code> argument.
+last  <code>subset</code>/<code>groupby</code> argument.
 The "Advanced" partitioning section below explores this in more detail.</p><div class="section">
-<h3 id="apply-where-true-">Apply where TRUE:<a class="anchor" aria-label="anchor" href="#apply-where-true-"></a></h3>
+<h3 id="apply-in-subset-">Apply in subset:<a class="anchor" aria-label="anchor" href="#apply-in-subset-"></a></h3>
 
 
-<p>A <code>where</code> argument is an arbitrary expression which identifies a subset of the humdrum data.
-<code>where</code> expressions must evaluate to
+<p>A <code>subset</code> argument is an arbitrary expression which identifies a subset of the humdrum data.
+<code>subset</code> expressions must evaluate to
 a single logical vector,
-The <code>where</code> result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
-The within expression(s) are only evaluated where the <code>where</code> argument(s) return <code>TRUE</code>.</p>
-<p>In a call to <code>with</code>, only the result evaluated where <code>where == TRUE</code> is returned.
-However, in a call to <code>within</code>, the result field(s) are (by default) padded with null data
-where ever <code>where == FALSE</code>.
-However, you can also control what is returned where <code>where == FALSE</code> by specifying alternate
-within-expression(s) to evaluate where <code>where == FALSE</code>.
-These must be named <code>orelse</code> ([partially matched][partialMatching]).
-(You can also specify <code>orfill</code> or <code>orelsefill</code>, to get the behavior of <code>fill</code>. See above.)</p>
-<p>A <code>orelse</code> expression can only be specified in combination with a <code>where</code> argument,
+The <code>subset</code> result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
+The within expression(s) are only evaluated where the <code>subset</code> argument(s) return <code>TRUE</code>.</p>
+<p>In a call to <code>with</code>, only the result evaluated where <code>subset == TRUE</code> is returned.
+However, in a call to <code>within</code>, we must decide what to
+do with rest of the data: the <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)" class="external-link">complement</a>
+of the subset.
+By default, <code>within</code> pads the returned values with null data
+where ever <code>subset == FALSE</code> (in the complement).
+So if you, for example, run the command <code>within(humData, kern(Token), subset = Spine == 1)</code>
+the new field created by <code>within</code> will be filled with <code>kern</code> data where <code>Spine == 1</code>,
+but the remaining spines (if any) will all by null.</p>
+<p>If you want to explicitly control what is put into the complement
+part of a new field, you can specifying alternate
+within-expression(s) to evaluate where <code>subset == FALSE</code>.
+These must be named <code>complement</code>, or the aliases
+<code>rest</code> or <code>otherwise</code> (these are all [partially matched][partialMatching]).
+(You can also specify <code>compfill</code> or <code>restfill</code>, to get the behavior of <code>fill</code>. See above.)
+A <code>complement</code> expression can only be specified in combination with a <code>subset</code> argument,
 and must be <em>in addition</em> to a normal within-expression.
-The idea is that you evaluate the "normal" within-expression where <code>where == TRUE</code>, <em>or else</em>
-you specify evaluate the <code>orelse</code> expression.
-A common use case is to use the within expression to change some of a data field,
-but to use the <code>orelse</code> to return the data unchanged in the rest of the field.</p>
+The idea is that you evaluate the "normal" within-expression where <code>subset == TRUE</code>, <em>or else</em>
+you specify evaluate the <code>complement</code> expression.</p>
+<p>A common use case for a <code>complement</code> expression is to use the within expression to change the data in one spine
+but return the data unchanged in other spines.
+For example, we could specify <code>within(humData, kern(Token), subset = Spine == 1, complement = Token)</code>.
+Spine 1 will (as before) have <code>kern</code> applied to it.
+However, instead of return a new field with null values in the other spine(s),
+this call will return the original (unaltered) values from the <code>Token</code> field in the other spines.</p>
 </div>
 
 <div class="section">
@@ -385,7 +397,7 @@ Each <code>groupby</code> expression must evaluate, within the <code>humdrumR</c
 of equal length) to group the data by.
 Each unique combination of values across these vectors becomes one group.</p>
 <p>Most commonly, the <code>groupby</code> expression(s) are simply field(s) in the data:
-for instance,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humdata</span>,
+for instance,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdata</span>,
      <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="va">File</span><span class="op">)</span></code></pre></div>
 
@@ -400,7 +412,7 @@ However, we can also use more complex expressions like</p><div class="sourceCode
 three or less <em>or</em> the record number is even, and another group where the opposite is true.</p>
 <p>If the <code>groupby</code> expression evaluates to a list of grouping vectors,
 the within expressions are evaluated across every combination of categories across all the vectors.
-Thus,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humdata</span>, 
+Thus,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdata</span>, 
      <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
      by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">File</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
@@ -411,14 +423,14 @@ Thus,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rd
 <h3 id="advanced-partitioning-">Advanced partitioning:<a class="anchor" aria-label="anchor" href="#advanced-partitioning-"></a></h3>
 
 
-<p>If multiple <code>groupby</code> or <code>where</code> expressions, or combinations of the two, are specified,
+<p>If multiple <code>groupby</code> or <code>subset</code> expressions, or combinations of the two, are specified,
 each is evaluated recursively, in order from left to right.
-If <code>where</code> is specified after <code>groupby</code>, the <code>where</code> expression is evaluated within each <code>groupby</code> group
-If <code>groupby</code> is specified after <code>where</code>, the grouping <code>by</code> expression is evaluated only where <code>where == TRUE</code>.
+If <code>subset</code> is specified after <code>groupby</code>, the <code>subset</code> expression is evaluated within each <code>groupby</code> group
+If <code>groupby</code> is specified after <code>subset</code>, the grouping <code>by</code> expression is evaluated only where <code>subset == TRUE</code>.
 Thus, if you specify</p><div class="sourceCode"><pre><code>within(humdata,
          sd(Semits),
          by = File, 
-         where = Semits &gt; mean(Semits))
+         subset = Semits &gt; mean(Semits))
 ```
 
 the standard deviation of the `semits` field will be calculated in each file,
@@ -428,7 +440,7 @@ but only where the `semits` field is greater than the mean `semits` value
 ```
 within(humdata,
          sd(Semits)
-         where = Semits &gt; mean(Semits), 
+         subset = Semits &gt; mean(Semits), 
          by = File) 
 ```
 
@@ -438,6 +450,7 @@ but this time wherever the `semits` field is greater than the mean value *across
 
 [humTable]: R:humTable
 [humTable]: R:humTable
+[complement]: R:complement
 [partialMatching]: R:partialMatching
 [data.table]: R:data.table
 [tapply]: R:tapply
@@ -464,12 +477,12 @@ but this time wherever the `semits` field is greater than the mean value *across
 When plotting, <code>with</code>/<code>within.humdrumR</code> also allows you to specify plotting options inline,
 without having to make a separate call
 to <code><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par()</a></code>. Any <code><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par()</a></code> argument can be specified by providing a named list to the <code>graphics</code> keyword.
-For example, we can set the plot margins with the <code>mar</code> argument:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">data</span>, 
+For example, we can set the plot margins with the <code>mar</code> argument:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">data</span>, 
        side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, 
        graphics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>The best part is <code>with</code>/<code>within.humdrumR</code> will reset <code>par</code> to it's previous state after its done.</p>
-<p>You can also use the syntactic sugar, <code>graphics(parargs = ...)</code>:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">data</span>,
+<p>You can also use the syntactic sugar, <code>graphics(parargs = ...)</code>:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">data</span>,
        side <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
        <span class="fu"><a href="https://rdrr.io/r/graphics/graphics-package.html" class="external-link">graphics</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
@@ -487,12 +500,12 @@ In <code>with</code>/<code>within.humdrumR</code> you can use some
 <a href="https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic" class="external-link">syntactic sugar</a>
 to do just this.
 We can index any field in our call with a <code>splat</code> argument, which must be a <code>Field %in% x</code>.
-For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>In this call, the <code>Token</code> field will be divided into two groups, one where <code>Spine == 1</code> and the other where
 <code>Spine == 2</code>; the first group (<code>Spine == 1</code>) will be used as the first argument to <code>list</code>, and the second group
 (<code>Spine == 2</code>) as the second argument.
-Thus, <code>within</code> translates the previous expression to this:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">humdata</span>,
+Thus, <code>within</code> translates the previous expression to this:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>,
        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">]</span>, <span class="va">Token</span><span class="op">[</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
     </div>
@@ -522,18 +535,18 @@ Basically, the right-hand side of any formula is interpreted as an
 expression to evaluate.
 If a formula is passed as a unnamed argument to <code>with</code>/<code>within</code>, the left-hand side
 of the formula (if any) is treated as the argument name.
-If you name a formula argument that has a left-hand side, the left-hand side is ignored.</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humdrumR</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">Spine</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humdrumR</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, <span class="va">by</span> <span class="op">~</span> <span class="va">Spine</span><span class="op">)</span></code></pre></div>
+If you name a formula argument that has a left-hand side, the left-hand side is ignored.</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdrumR</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">Spine</span><span class="op">)</span>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdrumR</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, <span class="va">by</span> <span class="op">~</span> <span class="va">Spine</span><span class="op">)</span></code></pre></div>
 
 <p>This approach would allows us to, same <code>~table(Token)</code> or <code>by ~ Spine</code> as variables,
 allowing us to do things like:</p><div class="sourceCode"><pre><code><span class="va">tabler</span> <span class="op">&lt;-</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>
 <span class="va">byspine</span> <span class="op">&lt;-</span> <span class="va">by</span> <span class="op">~</span> <span class="va">Spine</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">tabler</span>, <span class="va">byspine</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">tabler</span>, <span class="va">byspine</span><span class="op">)</span></code></pre></div>
 
 <p>We can even make lists and loop through them:</p><div class="sourceCode"><pre><code><span class="va">bys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Spine</span>, <span class="op">~</span> <span class="va">File</span>, <span class="op">~</span> <span class="va">COM</span><span class="op">)</span>
 
-<span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">bys</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">b</span><span class="op">)</span></code></pre></div>
+<span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">bys</span><span class="op">)</span> <span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">b</span><span class="op">)</span></code></pre></div>
 <div class="section">
 <h3 id="variables">Variables<a class="anchor" aria-label="anchor" href="#variables"></a></h3>
 
@@ -546,7 +559,7 @@ list have that value interpolated.
 This allows us, for example, to run commands like:</p><div class="sourceCode"><pre><code><span class="va">nums</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>
 <span class="va">expression</span> <span class="op">&lt;-</span> <span class="op">~</span><span class="va">.</span><span class="op">^</span><span class="va">N</span>
 
-<span class="kw">for</span> <span class="op">(</span><span class="va">n</span> <span class="kw">in</span> <span class="va">nums</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">expression</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="kw">for</span> <span class="op">(</span><span class="va">n</span> <span class="kw">in</span> <span class="va">nums</span><span class="op">)</span> <span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">expression</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>Each time <code>with</code> is called, the <code>N</code> in <code>.^N</code> is replaced by the current value of <code>n</code>.</p>
 </div>

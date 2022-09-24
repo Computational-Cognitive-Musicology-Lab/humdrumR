@@ -346,7 +346,7 @@ In some cases, we'd like to perform a command `within` our data which might outp
 input, including a single value, but we still want to reconstruct the data fully.
 In `R`, this is usually called "recycling"---i.e., repeating a value until it matches a certain length.
 When using `with` or `within`, we can cause our results to be recycled to the full field length
-by using the `fill` argument for our expression.
+by using the `recycle` argument for our expression.
 This is useful if you want to group by something, and fill each group with the same value:
 
 ```{r}
@@ -355,7 +355,7 @@ within(chorales,
        Semits <- semits(Token)) -> chorales
 
 within(chorales, 
-       fill = BarBassNote <- min(Semits),
+       recycle = BarBassNote <- min(Semits),
        by = list(File, Bar)) -> chorales
 
 chorales

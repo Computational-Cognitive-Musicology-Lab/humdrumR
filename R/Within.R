@@ -151,7 +151,7 @@
 #' which is confusing, so don't do it!)
 #' 
 #' 
-#' ### Filling (cycling) results:
+#' ### Recycling ("filling") results:
 #' 
 #' The result of your within expression may be shorter than the input vectors ([humtable fields][humTable]).
 #' However, in some calls to `within.humdrumR` in particular, you'd like to return a single number and 
@@ -311,11 +311,11 @@
 #' within-expression(s) to evaluate where `subset == FALSE`.
 #' These must be named `complement`, or the aliases
 #' `rest` or `otherwise` (these are all [partially matched][partialMatching]).
-#' (You can also specify `compfill` or `restfill`, to get the behavior of `fill`. See above.)
 #' A `complement` expression can only be specified in combination with a `subset` argument,
 #' and must be *in addition* to a normal within-expression.
 #' The idea is that you evaluate the "normal" within-expression where `subset == TRUE`, *or else*
 #' you specify evaluate the `complement` expression.
+#' The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")
 #' 
 #' A common use case for a `complement` expression is to use the within expression to change the data in one spine
 #' but return the data unchanged in other spines.
@@ -459,7 +459,6 @@
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
 #' 
-
 #' @section N grams:
 #' 
 #' XXXX
@@ -535,7 +534,7 @@
 #' @param data A `[humdrumR][humdrumRclass]` data object.
 #' @param ...  Any number of expressions to evaluate. Unnamed expressions are interpreted as the
 #' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
-#' Other evaluation options can be achieved with `fill` or `side` arguments.
+#' Other evaluation options can be achieved with `recycle` or `side` arguments.
 #' @param dataTypes A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. 
 #'     These characters  correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
 #'     **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
@@ -554,6 +553,7 @@
 #' From `with.humdrumR`, whatever value is returned by the expression or, if `drop = TRUE`,
 #' a `data.table`.
 #' 
+#' @aliases within with
 #' @name withinHumdrum
 NULL
 
@@ -808,7 +808,7 @@ parseKeywords <- function(quoTab, withFunc) {
   quoTab$Keyword <- keywords
   
   # classify keywords
-  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo', 'ordofill'),
+  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo'), #, 'ordofill'),
                         partitions      = c('by', 'subset'),
                         ngram           = 'ngram',
                         windows         = 'windows')
@@ -852,7 +852,7 @@ partialMatchKeywords <- function(keys) {
                          by        = c('by', 'groupby'),
                          subset     = c('subset', 'where'),
                          ordo        = c('complement', 'rest', 'otherwise'),
-                         ordofill    = c('compfill', 'restfill', 'otherfill'),
+                         # ordofill    = c('compfill', 'restfill', 'otherfill'),
                          ngram     = c('ngrams'),
                          windows   = c('windows', 'context'))
     
@@ -893,7 +893,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   
   usedInExprs <- lapply(doQuoTab$Quo, fieldsInExpr, humtab = humtab)
   
-  dofills <- grepl('fill', doQuoTab$Keyword)
+  dofills <- grepl('fill', doQuoTab$Keyword) | ordo
   doQuoTab$Quo[dofills] <- Map(fillQuo, doQuoTab$Quo[dofills], usedInExprs[dofills])
   
   
@@ -1532,6 +1532,7 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
         visible <- attr(result, 'visible')
         orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
         orresult[[partitionName]] <- FALSE
+        
         result <- data.table::rbindlist(list(result, orresult))
         attr(result, 'visible') <- visible
     }

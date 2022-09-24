@@ -188,7 +188,7 @@ Null data is updated whenever the active field is changed or reset, including by
 For example, if you load <code>**kern</code> data, a token like <code>"4r"</code> (quarter-note rest) token will be <code>NA</code> if you call <code>pitch</code>, but
 not <code>NA</code> if you call <code>recip</code> (rhythm).</p><div class="sourceCode"><pre><code><span class="va">kerndata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
+<span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
        <span class="va">Pitch</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>,
        <span class="va">Rhythm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kerndata</span></code></pre></div>
 
@@ -197,8 +197,8 @@ are different numbers of (non-null) data tokens: <code>ntoken(kerndata$Pitch ,'D
 return different numbers!
 (The difference would be the number of rest tokens.)
 Similarly, if you apply functions/expressions to this data (using <code><a href="withinHumdrum.html">withinHumdrum()</a></code> for example), the result will depend on
-what the active field is:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+what the active field is:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>Once again, we'll get different numbers here! (Assuming there are rests in the data.)
 This is the case even though the do-expression isn't actually using the <code>Pitch</code> or <code>Rhythm</code> fields!
