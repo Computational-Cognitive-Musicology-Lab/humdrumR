@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -1342,7 +1341,7 @@ table. What can we do with it?</p>
 <code>readHumdrum</code>, this object encapsulates a humdrum-table
 (<code>data.table</code>) object, which is where the data is really
 stored. We’ve already seen that you can extract that humdrum table
-directly using <code>getHumtab</code>—and if you are aleady an R pro,
+directly using <code>getHumtab</code>—and if you are already an R pro,
 you might just want to extract the table an work with it directly.
 However, what the humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object does is give us some
 convenient ways of working with that table. For example, we’ve already
@@ -1362,7 +1361,7 @@ like:</p>
 </ul>
 <p>However, we can tell humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> to evaluate these
 expressions using the fields of our humdrum tables. These simplest way
-is using the <code><a href="https://rdrr.io/r/base/with.html" class="external-link">within()</a></code> function, which takes a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object and an expression on
+is using the <code><a href="../reference/withinHumdrum.html">within()</a></code> function, which takes a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object and an expression on
 its right side.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales, Spine <span class="sc">+</span> File)</span>
@@ -1767,7 +1766,7 @@ name you want, or just let it be called <code>Result1</code> if you
 want!</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">Semits</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">Semits</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></code></pre></div>
 <p>There is now a new Data field in our humdrum table, called
 <code>Semits</code>. Meanwhile, the original <code>Token</code> field is
 still there, safely unchanged! Just like before, we can use the
@@ -2165,14 +2164,14 @@ instead:</p>
 basic function called <code><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot()</a></code>:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-28-1.png" width="700"></p>
 <p>Remember our <code>Semits</code> field that we made earlier? Maybe
 we’d like to see a histogram of those values—let’s use R’s
 <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code> function:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-29-1.png" width="700"></p>
 </div>
 </div>
@@ -2184,9 +2183,9 @@ learning check out the other articles on the <a href="https://computational-cogn
 webpage</a>. If you want to continue along the path we’ve started here,
 the next articles to check out are probably <a href="Filtering.html" title="Filtering humdrum data">Filtering humdrum data</a> and <a href="WorkingWithData.html" title="Working with humdrum data">Working
 with humdrum data</a>. Since most musicological analysis involves pitch
-or rhythm, you’ll probably want to learn about relavent ideas from the
-[Pitch and tonality](PitchAndTonality.html “Pitch and tonality in
-humdrumR) and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm and meter</a> articles.</p>
+or rhythm, you’ll probably want to learn about relevant ideas from the
+<a href="PitchAndTonality.html" title="Pitch and tonality in humdrumR">Pitch and tonality</a> and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm
+and meter</a> articles.</p>
 <p>If the humdrum data you are working with is complex—e.g., including
 multiple different exclusive interpretations, spine paths, or
 multi-stops—you’ll probably find you need to check out the <a href="Reshaping.html" title="Shaping humdrum data">Shaping humdrum

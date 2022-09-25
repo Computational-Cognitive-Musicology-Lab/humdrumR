@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -89,13 +88,157 @@
 <div class="page-header"><h1 id="humdrum_mathbbr">Humdrum<span class="math inline"><sub>ℝ</sub></span>
 <a class="anchor" aria-label="anchor" href="#humdrum_mathbbr"></a>
 </h1></div>
-<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> is an R library
-for analyzing musicological data encoded in the <a href="https://www.humdrum.org" class="external-link">humdrum</a> data format. The most up to
-date info on using humdrumR<span class="math inline"><sub>ℝ</sub></span>
-be found at our <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/" class="external-link">github
-website</a>.</p>
+<p>Welcome to the main website of humdrum<span class="math inline"><sub>ℝ</sub></span>!</p>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="what-is-humdrum_mathbbr">What is humdrum<span class="math inline"><sub>ℝ</sub></span>?<a class="anchor" aria-label="anchor" href="#what-is-humdrum_mathbbr"></a>
+</h2>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> is is an <a href="https://en.wikipedia.org/wiki/R_package" class="external-link">R package</a>—a “library”
+of preexisting code for the <a href="https://en.wikipedia.org/wiki/R_(programming_language)" class="external-link">R
+programming language</a>. Humdrum<span class="math inline"><sub>ℝ</sub></span> code provides tools for the
+visualization, manipulation, and analysis of data formatted in the
+humdrum syntax.</p>
+<blockquote>
+<p>Note: The name of the package is pronounced
+<em>hum-drum-<strong>ARRRRR</strong></em>, with the last syllable
+emphasized in pirate fashion. The name should always be typeset <span class="math inline"><em>h</em><em>μ</em><em>m</em><sub>ℝ</sub><sup><em>Δ</em><em>r</em><em>μ</em><em>m</em></sup></span>.
+Failure to pronounce or typeset <span class="math inline"><em>h</em><em>μ</em><em>m</em><sub>ℝ</sub><sup><em>Δ</em><em>r</em><em>μ</em><em>m</em></sup></span>
+correctly will void the warranty.</p>
+</blockquote>
+<div class="section level3">
+<h3 id="what-is-humdrum">What is humdrum?<a class="anchor" aria-label="anchor" href="#what-is-humdrum"></a>
+</h3>
+<p>Humdrum is a system for computational musicology developed by David
+Huron. The Humdrum “universe” includes two parts: a data format called
+the <a href="http://www.humdrum.org/guide/ch05/" class="external-link">humdrum syntax</a> and
+musicological software system called the <a href="http://www.humdrum.org/" class="external-link">humdrum toolkit</a>. Humdrum<span class="math inline"><sub>ℝ</sub></span> is meant as a modernized
+replacement for the original humdrum toolkit, leveraging the power of R
+to give us unprecedented power to manipulate and analyze humdrum data
+using concise, expressive syntax.</p>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> is mainly used
+to manipulate and analyze data encoded in the humdrum syntax and/or
+humdrum interpretations like “**kern”. The humdrum syntax is an
+incredibly flexible, and powerful, scheme for encoding musical data.
+Tens of thousands of musical scores (and other musical data) have been
+encoded in the humdrum syntax, many available online through
+repositories such as <a href="http://kern.ccarh.org/" class="external-link">KernScores</a>.
+Our <a href="HumdrumSyntax.html" title="The humdrum syntax">humdrum
+syntax</a> vignette gives a detailed introduction to the data
+format.</p>
+</div>
+<div class="section level3">
+<h3 id="what-is-r">What is R?<a class="anchor" aria-label="anchor" href="#what-is-r"></a>
+</h3>
+<p>R is programming language, designed from the ground up for
+statistical computing and data analysis. R has many features which make
+it ideal for data analysis, particularly if research and analysis is
+your only background in programming. Our <a href="RPrimer.html" title="An R primer for humdrumR users">R primer</a> introduces the core
+concepts of R programming.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="what-can-humdrum_mathbbr-do">What can humdrum<span class="math inline"><sub>ℝ</sub></span>
+do?<a class="anchor" aria-label="anchor" href="#what-can-humdrum_mathbbr-do"></a>
+</h2>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> provides a
+number of tools for working with <a href="http://www.humdrum.org/guide/ch05/" class="external-link">humdrum data</a> and more
+generally, musicological analysis. Humdrum<span class="math inline"><sub>ℝ</sub></span> does seven main things:</p>
+<div class="section level4">
+<h4 id="represent-humdrum-data-in-r">Represent humdrum data in R<a class="anchor" aria-label="anchor" href="#represent-humdrum-data-in-r"></a>
+</h4>
+<p>To represent humdrum data in R, humdrum<span class="math inline"><sub>ℝ</sub></span> defines a special data type—the
+<code>humdrumR</code> class—which we call “humdrumR objects” throughout
+the documentation. The most important part of a <code>humdrumR</code>
+object is the “<em>humdrum table</em>” which it contains. You can read
+about how the humdrum-syntax data is represented in the <a href="GettingStarted.html" title="Getting started with humdrumR">getting
+started with humdrumR</a> vignette.</p>
+<p><img src="reference/figures/DataModelDiagram.png" width="600"></p>
+<p>For more details, read the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumRclass.html" class="external-link">humdrumR
+class</a> and <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humTable.html" class="external-link">humdrum
+table</a>; If humdrum<span class="math inline"><sub>ℝ</sub></span> is
+installed and loaded, you can read these directly in an R session by
+typing <code>?humdrumR-class</code> or <code><a href="reference/humTable.html">?humTable</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="read-and-write-humdrum-data">Read and write humdrum data<a class="anchor" aria-label="anchor" href="#read-and-write-humdrum-data"></a>
+</h4>
+<p>To create <code>humdrumR</code> data objects, humdrum<span class="math inline"><sub>ℝ</sub></span> includes a humdrum data parser,
+which finds humdrum data on your local machine, reads it into R, then
+creates a humdrumR object from the data. The <a href="ReadWrite.html" title="Reading and writing data with humdrumR">Reading and writing
+data</a> vignette is the best place to realm how this works. You can get
+more details from the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/readHumdrum.html" class="external-link">readHumdrum()</a>
+and <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/writeHumdrum.html" class="external-link">writeHumdrum()</a>
+documentation; If humdrum<span class="math inline"><sub>ℝ</sub></span>
+is installed and loaded, you can read these directly in an R session by
+typing <code><a href="reference/readHumdrum.html">?readHumdrum</a></code> or <code><a href="reference/writeHumdrum.html">?writeHumdrum</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="reshape-humdrum-data">“Reshape” humdrum data<a class="anchor" aria-label="anchor" href="#reshape-humdrum-data"></a>
+</h4>
+<p>Once you’ve imported humdrum data in R, the next step is often to
+organize and prepare your data. You’ll often want to pick out specific
+subsets of the data, or rearrange the data representations to be easier
+to work with. Humdrum<span class="math inline"><sub>ℝ</sub></span> gives
+us a number of powerful tools for “shaping the data”: The <a href="Reshaping.html" title="Shaping humdrum data with humdrumR">Shaping
+humdrum data</a> and <a href="Filtering.html" title="Filtering humdrum data with humdrumR">Filtering humdrum data</a>
+vignettes are the best places to learn about these processes. You can
+find more details on sub-setting data in the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/subset.humdrumR.html" class="external-link">subset.humdrumR()</a>
+and <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/indexHumdrum.html" class="external-link">indexHumdrum</a>
+documentation; If humdrum<span class="math inline"><sub>ℝ</sub></span>
+is installed and loaded, you can read these directly in an R session by
+typing <code><a href="reference/subset.humdrumR.html">?subset.humdrumR</a></code> or <code><a href="reference/indexHumdrum.html">?indexHumdrum</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="analyze-humdrum-data">Analyze humdrum data<a class="anchor" aria-label="anchor" href="#analyze-humdrum-data"></a>
+</h4>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> makes it very
+easy to manipulate, modify, and analyze humdrum data. The <a href="WorkingWithData.html" title="Working with humdrum data using humdrumR">Working with humdrum
+data</a> vignette gives an overview of this functionality. You can find
+more details in the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/withinHumdrum.html" class="external-link">withinHumdrum</a>
+documentation; If humdrum<span class="math inline"><sub>ℝ</sub></span>
+is installed and loaded, you can read this directly in an R session by
+typing <code><a href="reference/withinHumdrum.html">?withinHumdrum</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="manipulate-musical-pitch-information">Manipulate (musical) pitch information<a class="anchor" aria-label="anchor" href="#manipulate-musical-pitch-information"></a>
+</h4>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> defines tools
+for manipulating numerous representations of pitch and tonality,
+including <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSet.html" class="external-link">diatonic
+keys</a> and <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSet.html" class="external-link">tertian
+harmonies</a>. The <a href="PitchAndTonality.html" title="Pitch and tonality in humdrumR">Pitch and tonality</a> vignette
+explains how to work with pitch data in humdrum<span class="math inline"><sub>ℝ</sub></span>. You can find more details in
+the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumPitch.html" class="external-link">humdrumPitch</a>
+documentation; If humdrum<span class="math inline"><sub>ℝ</sub></span>
+is installed and loaded, you can read this directly in an R session by
+typing <code><a href="reference/humdrumPitch.html">?humdrumPitch</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="manipulate-musical-rhythm-information">Manipulate (musical) rhythm information<a class="anchor" aria-label="anchor" href="#manipulate-musical-rhythm-information"></a>
+</h4>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> defines tools
+for manipulating numerous representations of rhythm, timing, and meter.
+The <a href="RhythmAndMeter.html" title="Rhythm and Meter in humdrumR">Rhythm and meter</a> vignette
+explains how to work with rhythmic information humdrum<span class="math inline"><sub>ℝ</sub></span>. You can find more details in
+the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumPitch.html" class="external-link">humdrumRhythm</a>
+documentation; If humdrum<span class="math inline"><sub>ℝ</sub></span>
+is installed and loaded, you can read this directly in an R session by
+typing <code>?humdrumRhythm</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="develop-new-humdrum-tools">Develop new humdrum tools<a class="anchor" aria-label="anchor" href="#develop-new-humdrum-tools"></a>
+</h4>
+<p>To facilitate the development of <em>new</em> functions to work with
+humdrum tokens—which are simple character strings packed with
+information—, Humdrum<span class="math inline"><sub>ℝ</sub></span>
+provides several useful development tools, including our <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/struct.html" class="external-link">struct</a>
+data type and a useful API we call our <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumDispatch.html" class="external-link">regular-expression
+dispatch system</a>, which makes it easy to dispatch different methods
+based on matches to regular expressions.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="installing-humdrum_mathbbr">Installing humdrum<span class="math inline"><sub>ℝ</sub></span>
+<a class="anchor" aria-label="anchor" href="#installing-humdrum_mathbbr"></a>
 </h2>
 <div class="section level3">
 <h3 id="installing-r">Installing R<a class="anchor" aria-label="anchor" href="#installing-r"></a>
@@ -107,8 +250,8 @@ Integrated Development Environment <a href="https://rstudio.com/" class="externa
 R and RStudio</a>—is a good starting place.</p>
 </div>
 <div class="section level3">
-<h3 id="installing-humdrum_mathbbr">Installing humdrum<span class="math inline"><sub>ℝ</sub></span>
-<a class="anchor" aria-label="anchor" href="#installing-humdrum_mathbbr"></a>
+<h3 id="installing-humdrum_mathbbr-1">Installing humdrum<span class="math inline"><sub>ℝ</sub></span>
+<a class="anchor" aria-label="anchor" href="#installing-humdrum_mathbbr-1"></a>
 </h3>
 <p>Humdrum<span class="math inline"><sub>ℝ</sub></span> is not yet
 available on the standard R package repository, <a href="https://cran.r-project.org/" class="external-link">CRAN</a>, so (for now) it can only be
@@ -157,14 +300,12 @@ calling:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+<h2 id="learning-humdrum_mathbbr">Learning humdrum<span class="math inline"><sub>ℝ</sub></span>
+<a class="anchor" aria-label="anchor" href="#learning-humdrum_mathbbr"></a>
 </h2>
-<p>At this stage, most humdrum<span class="math inline"><sub>ℝ</sub></span> functions are documented, and
-all the documentation can be found on our <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/" class="external-link">github
-website</a>. The “Articles” list at the top of the page is the best
-place to start, in particular the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Overview.html" class="external-link">Overview
-of humdrumR</a> and <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/GettingStarted.html" class="external-link">Getting
-started with humdrumR</a> articles. Documentation for specific functions
+<p>To learn how to use humdrum<span class="math inline"><sub>ℝ</sub></span> the “Articles” list at the top
+of this page is the best place to start—in particular, the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/GettingStarted.html" class="external-link">Getting
+started with humdrumR</a> article! Documentation for specific functions
 and other general topics can be found in the “<a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/index.html" class="external-link">Reference</a>”
 section.</p>
 <p>Once humdrum<span class="math inline"><sub>ℝ</sub></span> is

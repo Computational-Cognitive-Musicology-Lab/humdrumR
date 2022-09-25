@@ -18,7 +18,6 @@ articles:
 - title: Basics
   navbar: Basics
   contents:
-  - Overview
   - GettingStarted
   - IntroForCoders
 - title: Background
