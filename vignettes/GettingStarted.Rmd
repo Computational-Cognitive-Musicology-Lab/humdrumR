@@ -384,7 +384,7 @@ We've also got some idea of what the humdrum data looks like under the surface: 
 What can we do with it?
 
 When you create a `r hm` corpus object, using `readHumdrum`, this object encapsulates a humdrum-table (`data.table`) object, which is where the data is really stored.
-We've already seen that you can extract that humdrum table directly using `getHumtab`---and if you are aleady an R pro, you might just want to extract the table an work with it directly.
+We've already seen that you can extract that humdrum table directly using `getHumtab`---and if you are already an R pro, you might just want to extract the table an work with it directly.
 However, what the `r hm` object does is give us some convenient ways of working with that table.
 For example, we've already seen that when we print `r hm` objects, they print out as humdrum syntax, which is easier to read than the complex humdrum table!
 But the `r hm` does more!
@@ -510,7 +510,7 @@ If you want to continue along the path we've started here, the next articles to 
 [Filtering humdrum data](Filtering.html "Filtering humdrum data") and 
 [Working with humdrum data](WorkingWithData.html "Working with humdrum data").
 Since most musicological analysis involves pitch or rhythm, you'll probably want to learn about
-relavent ideas from the [Pitch and tonality](PitchAndTonality.html "Pitch and tonality in humdrumR)
+relevant ideas from the [Pitch and tonality](PitchAndTonality.html "Pitch and tonality in humdrumR")
 and [Rhythm and meter](RhythmAndMeter.html "Rhythm and meter in humdrumR") articles.
 
 If the humdrum data you are working with is complex---e.g., including multiple different exclusive interpretations,
