@@ -27,7 +27,7 @@ If you're all ready to start learning how to use `r hm`, checkout [getting start
 
 `r Hm` is is an [R package](https://en.wikipedia.org/wiki/R_package)---a "library" of preexisting code for the
 [R programming language](https://en.wikipedia.org/wiki/R_(programming_language).
-`r Hm` code provides tools for the visualization, manipulation, and analysis of [humdrum data](http://www.humdrum.org/guide/ch05/).
+`r Hm` code provides tools for the visualization, manipulation, and analysis of data formatted in the humdrum syntax.
 
 
 > Note: The name of the package is pronounced _hum-drum-**ARRRRR**_, with the last syllable emphasized in pirate fashion.
@@ -38,8 +38,8 @@ If you're all ready to start learning how to use `r hm`, checkout [getting start
 ## What is humdrum?
 
 Humdrum is a system for computational musicology developed by David Huron.
-The Humdrum "universe" includes two parts: a data format called the *humdrum syntax* and musicological software system
-called the [humdrum toolkit](http://www.humdrum.org/), 
+The Humdrum "universe" includes two parts: a data format called the [humdrum syntax](http://www.humdrum.org/guide/ch05/) and musicological software system
+called the [humdrum toolkit](http://www.humdrum.org/).
 `r hm` is meant as a modernized replacement for the original humdrum toolkit, leveraging
  the power of R to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 
@@ -60,10 +60,10 @@ Our [R primer](RPrimer.html "An R primer for humdrumR users") introduces the cor
 # What can `r hm` do?
 
 `r Hm` provides a number of tools for working with [humdrum data](http://www.humdrum.org/guide/ch05/) and more generally, musicological analysis.
-The package has seven main components:
+`r Hm` does seven main things:
  
  
-### Representing humdrum in R
+## Represent humdrum data in R
 
 To represent humdrum data in R, `r hm` defines a special data type---the `humdrumR` class---which we call "humdrumR objects" throughout the documentation.
 The most important part of a `humdrumR` object is the "*humdrum table*" which it contains.
@@ -78,7 +78,7 @@ If `r hm` is installed and loaded, you can read these directly in an R session b
 
 
 
-### Reading and writing humdrum data
+## Read and write humdrum data
 
 
 To create `humdrumR` data objects, `r hm` includes a humdrum data parser, which finds humdrum data on your local machine, reads it into
@@ -89,7 +89,7 @@ and [writeHumdrum()](https://computational-cognitive-musicology-lab.github.io/hu
 If `r hm` is installed and loaded, you can read these directly in an R session by typing `?readHumdrum` or `?writeHumdrum`.
 
 
-### Shaping humdrum data
+## "Reshape" humdrum data
 
 Once you've imported humdrum data in R, the next step is often to organize and prepare your data.
 You'll often want to pick out specific subsets of the data, or rearrange the data representations to be easier to work with.
@@ -99,14 +99,14 @@ You can find more details on subsetting data in the [subset.humdrumR()](https://
  and [indexHumdrum](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/indexHumdrum.html) documentation;
 If `r hm` is installed and loaded, you can read these directly in an R session by typing `?subset.humdrumR` or `?indexHumdrum`.
 
-### Working with humdrum data
+## Analyze humdrum data
 
 `r Hm` makes it very easy to manipulate, modify, and analyze humdrum data.
 The [Working with humdrum data](WorkingWithData.html "Working with humdrum data using humdrumR") vignette gives an overview of this functionality.
 You can find more details in the [withinHumdrum](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/withinHumdrum.html) documentation;
 If `r hm` is installed and loaded, you can read this directly in an R session by typing `?withinHumdrum`.
 
-### Pitch
+## Manipulate (musical) pitch information
 
 `r Hm` defines tools for manipulating numerous representations of pitch and tonality, including 
 [diatonic keys](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSet.html) and [tertian harmonies](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSet.html).
@@ -116,7 +116,7 @@ documentation;
 If `r hm` is installed and loaded, you can read this directly in an R session by typing `?humdrumPitch`.
 
 
-### Rhythm
+## Manipulate (musical) rhythm information
 
 
 `r Hm` defines tools for manipulating numerous representations of rhythm, timing, and meter.
@@ -127,7 +127,7 @@ If `r hm` is installed and loaded, you can read this directly in an R session by
 
 
 
-### Development
+## Develop new humdrum tools
 
 To facilitate the development of *new* functions to work with humdrum tokens---which are simple character strings packed with information---, 
 `r hm` provides several useful development tools, including our [struct](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/struct.html) data type and a useful API we call our [regular-expression dispatch system](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumDispatch.html),
