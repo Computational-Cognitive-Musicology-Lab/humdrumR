@@ -10,6 +10,8 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
+
+hm <- "humdrum$_{\\mathbb{R}}$"
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -17,12 +19,17 @@ knitr::opts_chunk$set(
 ```
 
 Welcome to "Overview of humdrumR"!
-This document will give you a very brief overview of what the humdrumR package is, and what it can do. 
-If you're all ready to start learning how to use humdrumR, checkout [getting started with humdrumR](GettingStarted.html "Getting started with humdrumR")
+This document will give you a very brief overview of what the `r hm` package is, and what it can do. 
+If you're all ready to start learning how to use `r hm`, checkout [getting started with humdrumR](GettingStarted.html "Getting started with humdrumR")
 
-#What is humdrumR?
+# What is `r hm`?
 
-`humdrumR` is is a R package for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax [http://www.humdrum.org].
+`r hm` is is a R package for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax [http://www.humdrum.org].
+
+The name of the package is pronounced _hum-drum-**ARRRRR**_, with the last syllable emphasized in pirate fashion.
+The name should always be typeset $h\mu m_{\mathbb{R}}^{\Delta r \mu m}$.
+Failure to pronounce or typeset $h\mu m_{\mathbb{R}}^{\Delta r \mu m}$ correctly will void the warranty.
+ 
 
 ## What is humdrum?
 
