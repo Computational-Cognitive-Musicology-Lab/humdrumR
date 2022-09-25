@@ -1,13 +1,16 @@
-
-authors: 
-    Nathaniel Condit-Schultz:
-       href: http://fathermckenzie.net/
-    Claire Arthur:
-       href: https://clairearthur.com/
 url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
 home:
   sidebar:
     structure: [links, license, community, citation, authors, dev, toc]
+  links:
+  - text: R language official website
+    href: https://www.r-project.org
+  - text: Humdrum website
+    href: https://www.humdrum.org/
+  - text: Computational and Cognitive Musicology Lab
+    href: https://ccml.gtcmt.gatech.edu/
+  - text: Georgia Tech Center for Music Technology
+    href: https://gtcmt.gatech.edu/
 template:
   bootstrap: 5
   bootswatch: flatly

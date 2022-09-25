@@ -1,10 +1,10 @@
 ---
-title: "An R Primer for humdrumR"
+title: "An R primer for humdrumR users"
 author: "Nathaniel Condit-Schultz"
 date:   "July 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{An R Primer for humdrumR}
+  %\VignetteIndexEntry{An R primer for humdrumR users}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 

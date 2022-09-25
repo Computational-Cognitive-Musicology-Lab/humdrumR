@@ -1,10 +1,10 @@
 ---
-title: Diatonic and Tertian Sets in humdrumR
+title: Diatonic and tertian sets in humdrumR
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Diatonic and Tertian Sets in humdrumR}
+  %\VignetteIndexEntry{Diatonic and tertian sets in humdrumR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

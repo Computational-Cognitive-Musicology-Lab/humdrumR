@@ -1,10 +1,10 @@
 ---
-title: Pitch and Tonality in humdrumR
+title: Pitch and tonality in humdrumR
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Pitch and Tonality in humdrumR}
+  %\VignetteIndexEntry{Pitch and tonality in humdrumR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

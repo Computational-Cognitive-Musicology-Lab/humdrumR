@@ -1,0 +1,14 @@
+citHeader("To cite humdrumR in publications use:")
+
+citEntry(
+  entry    = "InProceedings",
+  title    = "humdrumR: a New Take on an Old Approach to Computational Musicology",
+  author   = "Nathaniel Condit-Schultz and Claire Arthur",
+  booktitle = "Proceedings of the International Society for Music Information Retrieval",
+  year     = "2019",
+  pages    = "715--722",
+  doi = "10.5281/zenodo.3527910",
+  url = "https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR",
+  textVersion = NULL
+)
+

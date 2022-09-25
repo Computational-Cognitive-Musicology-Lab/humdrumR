@@ -1,10 +1,10 @@
 ---
-title: "The Humdrum Syntax"
+title: "The humdrum syntax"
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{The Humdrum Syntax}
+  %\VignetteIndexEntry{The humdrum syntax}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -1,10 +1,10 @@
 ---
-title: "Working with Humdrum Data"
+title: "Working with humdrum data"
 author: "Nathaniel Condit-Schultz"
 date:   "July 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Working with Humdrum Data}
+  %\VignetteIndexEntry{Working with humdrum data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
