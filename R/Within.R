@@ -52,7 +52,7 @@
 #' how your expressions are evaluated.
 #' You can evaluate expressions...
 #' 
-#' + In a subset of the data using `where`...
+#' + In a subset of the data using `subset`...
 #'   + either ignoring the rest of the data or evaluating a *different* expression in the other part.
 #' + Separately in different subsets of the data, which are then recombined (split-apply-combine) using `by`.
 #' + Across windows in the data (e.g., ngrams, rolling windows).
@@ -151,7 +151,7 @@
 #' which is confusing, so don't do it!)
 #' 
 #' 
-#' ### Filling (cycling) results:
+#' ### Recycling ("filling") results:
 #' 
 #' The result of your within expression may be shorter than the input vectors ([humtable fields][humTable]).
 #' However, in some calls to `within.humdrumR` in particular, you'd like to return a single number and 
@@ -261,55 +261,68 @@
 #' The column names of this results table are generated as described in the previous section:
 #' i.e., defaulting to `ResultX` but allowing explicit naming with through one or more
 #' explicit assignments in the within-expressions.
-#' In addition, if `where` or `groupby` arguments are used, columns are included which indicate
-#' the value of the evaluated `where`/`groupby` factor for each row.
+#' In addition, if `subset` or `groupby` arguments are used, columns are included which indicate
+#' the value of the evaluated `subset`/`groupby` factor for each row.
 #' 
 #' 
 #' 
 #' @section Partitioning data:
 #'
-#' `groupby` (e.g., `by`) and `where` expression control arguments all you to evaluate
+#' `groupby` (e.g., `by`) and `subset` expression control arguments all you to evaluate
 #' your within-expressions within specific subsets of the data.
-#' A `where` argument can be used to evaluate your within-expression only within a subset of the data.
+#' A `subset` argument can be used to evaluate your within-expression only within a subset of the data.
 #' A `groupby` argument breaks the data into groups,
 #' evaluating the within-expression(s) *separately* within each group.
 #' The results of the grouped evaluations are then returned in a list (`with`) or recombined
 #' into the original data `within`---this is a form of the "split-apply-combine" routine that is 
 #' key to `R` data analysis.
 #' 
-#' `where` and `groupby` arguments are themselves arbitrary expressions which are evaluated within
+#' `subset` and `groupby` arguments are themselves arbitrary expressions which are evaluated within
 #' the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
-#' Any `with`/`within.humdrumR` call can include zero, one, *or more* `where` and/or `groupby` arguments, 
+#' Any `with`/`within.humdrumR` call can include zero, one, *or more* `subset` and/or `groupby` arguments, 
 #' including combinations of both.
-#' If more than one `where`/`groupy` by argument is included, they are evaluated in order (left to right),
+#' If more than one `subset`/`groupy` by argument is included, they are evaluated in order (left to right),
 #' *recursively*: each one evaluated within the partition(s) established by the previous expression.
 #' The normal *within* expression(s) are then, all evaluated within the partition(s) established by the
-#' last  `where`/`groupby` argument.
+#' last  `subset`/`groupby` argument.
 #' The "Advanced" partitioning section below explores this in more detail.
 #' 
-#' ### Apply where TRUE:
+#' ### Apply in subset:
 #'                      
-#' A `where` argument is an arbitrary expression which identifies a subset of the humdrum data.
-#' `where` expressions must evaluate to
+#' A `subset` argument is an arbitrary expression which identifies a subset of the humdrum data.
+#' `subset` expressions must evaluate to
 #' a single logical vector, 
-#' The `where` result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
-#' The within expression(s) are only evaluated where the `where` argument(s) return `TRUE`.
+#' The `subset` result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
+#' The within expression(s) are only evaluated where the `subset` argument(s) return `TRUE`.
 #' 
 #'   
-#' In a call to `with`, only the result evaluated where `where == TRUE` is returned.
-#' However, in a call to `within`, the result field(s) are (by default) padded with null data
-#' where ever `where == FALSE`.
-#' However, you can also control what is returned where `where == FALSE` by specifying alternate
-#' within-expression(s) to evaluate where `where == FALSE`.
-#' These must be named `orelse` ([partially matched][partialMatching]).
-#' (You can also specify `orfill` or `orelsefill`, to get the behavior of `fill`. See above.)
-#' 
-#' A `orelse` expression can only be specified in combination with a `where` argument,
+#' In a call to `with`, only the result evaluated where `subset == TRUE` is returned.
+#' However, in a call to `within`, we must decide what to
+#' do with rest of the data: the [complement](https://en.wikipedia.org/wiki/Complement_(set_theory)) 
+#' of the subset.
+#' By default, `within` pads the returned values with null data
+#' where ever `subset == FALSE` (in the complement).
+#' So if you, for example, run the command `within(humData, kern(Token), subset = Spine == 1)`
+#' the new field created by `within` will be filled with `kern` data where `Spine == 1`,
+#'  but the remaining spines (if any) will all by null.
+#'  
+#' If you want to explicitly control what is put into the complement
+#' part of a new field, you can specifying alternate
+#' within-expression(s) to evaluate where `subset == FALSE`.
+#' These must be named `complement`, or the aliases
+#' `rest` or `otherwise` (these are all [partially matched][partialMatching]).
+#' A `complement` expression can only be specified in combination with a `subset` argument,
 #' and must be *in addition* to a normal within-expression.
-#' The idea is that you evaluate the "normal" within-expression where `where == TRUE`, *or else*
-#' you specify evaluate the `orelse` expression.
-#' A common use case is to use the within expression to change some of a data field,
-#' but to use the `orelse` to return the data unchanged in the rest of the field.
+#' The idea is that you evaluate the "normal" within-expression where `subset == TRUE`, *or else*
+#' you specify evaluate the `complement` expression.
+#' The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")
+#' 
+#' A common use case for a `complement` expression is to use the within expression to change the data in one spine
+#' but return the data unchanged in other spines.
+#' For example, we could specify `within(humData, kern(Token), subset = Spine == 1, complement = Token)`.
+#' Spine 1 will (as before) have `kern` applied to it.
+#' However, instead of return a new field with null values in the other spine(s),
+#' this call will return the original (unaltered) values from the `Token` field in the other spines.
 #' 
 #' 
 #' 
@@ -363,17 +376,17 @@
 #' 
 #' ### Advanced partitioning:
 #' 
-#' If multiple `groupby` or `where` expressions, or combinations of the two, are specified,
+#' If multiple `groupby` or `subset` expressions, or combinations of the two, are specified,
 #' each is evaluated recursively, in order from left to right.
-#' If `where` is specified after `groupby`, the `where` expression is evaluated within each `groupby` group
-#' If `groupby` is specified after `where`, the grouping `by` expression is evaluated only where `where == TRUE`.
+#' If `subset` is specified after `groupby`, the `subset` expression is evaluated within each `groupby` group
+#' If `groupby` is specified after `subset`, the grouping `by` expression is evaluated only where `subset == TRUE`.
 #' Thus, if you specify
 #'
 #' ````
 #' within(humdata,
 #'          sd(Semits),
 #'          by = File, 
-#'          where = Semits > mean(Semits))
+#'          subset = Semits > mean(Semits))
 #' ```
 #' 
 #' the standard deviation of the `semits` field will be calculated in each file,
@@ -383,7 +396,7 @@
 #' ```
 #' within(humdata,
 #'          sd(Semits)
-#'          where = Semits > mean(Semits), 
+#'          subset = Semits > mean(Semits), 
 #'          by = File) 
 #' ```
 #' 
@@ -446,7 +459,6 @@
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
 #' 
-
 #' @section N grams:
 #' 
 #' XXXX
@@ -521,8 +533,8 @@
 #'      
 #' @param data A `[humdrumR][humdrumRclass]` data object.
 #' @param ...  Any number of expressions to evaluate. Unnamed expressions are interpreted as the
-#' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `where`, and `windows`.
-#' Other evaluation options can be achieved with `fill` or `side` arguments.
+#' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
+#' Other evaluation options can be achieved with `recycle` or `side` arguments.
 #' @param dataTypes A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. 
 #'     These characters  correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
 #'     **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
@@ -541,6 +553,7 @@
 #' From `with.humdrumR`, whatever value is returned by the expression or, if `drop = TRUE`,
 #' a `data.table`.
 #' 
+#' @aliases within with
 #' @name withinHumdrum
 NULL
 
@@ -562,7 +575,7 @@ with.humdrumR <- function(data, ...,
   if (drop) {
     if (nrow(result) == 0L) return(NULL)
     
-    parts <- grepl('^_(by|where)=..*_$', colnames(result))
+    parts <- grepl('^_(by|subset)=..*_$', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
     result <- result[[max(which(!parts))]]
@@ -613,7 +626,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab <- newhumtab[ , !grep('_by=..*_$|_where=..*_', colnames(newhumtab)), with = FALSE]
+  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -795,8 +808,8 @@ parseKeywords <- function(quoTab, withFunc) {
   quoTab$Keyword <- keywords
   
   # classify keywords
-  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo', 'ordofill'),
-                        partitions      = c('by', 'where'),
+  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo'), #, 'ordofill'),
+                        partitions      = c('by', 'subset'),
                         ngram           = 'ngram',
                         windows         = 'windows')
   quoTab[ , KeywordType := rep(names(knownKeywords), lengths(knownKeywords))[match(Keyword, unlist(knownKeywords))]]
@@ -807,9 +820,9 @@ parseKeywords <- function(quoTab, withFunc) {
           "so we don't know what you want to do to your data.")
   }
   
-  if (any(quoTab[, KeywordType == 'or']) && !any(quoTab[, Keyword == 'where'])) {
-    .stop("In your call to {withFunc} you've included an 'orelse' expression improperly.", 
-          "An 'orelse' expression can only be used in combination with BOTH a where expression AND a normal within expression.",
+  if (any(quoTab[, KeywordType == 'or']) && !any(quoTab[, Keyword == 'subset'])) {
+    .stop("In your call to {withFunc} you've included an 'complement' expression improperly.", 
+          "An 'complement' expression can only be used in combination with BOTH a subset expression AND a normal within expression.",
           "See ?withinHumdrum for help.")
   }
   
@@ -837,9 +850,9 @@ partialMatchKeywords <- function(keys) {
                          fill      = c('fill', 'recycle'),
                          fx        = c('fxs', 'sidefxs'),
                          by        = c('by', 'groupby'),
-                         where     = c('where', 'when'),
-                         ordo        = c('orelse'),
-                         ordofill    = c('orfill', 'orelsefill'),
+                         subset     = c('subset', 'where'),
+                         ordo        = c('complement', 'rest', 'otherwise'),
+                         # ordofill    = c('compfill', 'restfill', 'otherfill'),
                          ngram     = c('ngrams'),
                          windows   = c('windows', 'context'))
     
@@ -880,7 +893,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   
   usedInExprs <- lapply(doQuoTab$Quo, fieldsInExpr, humtab = humtab)
   
-  dofills <- grepl('fill', doQuoTab$Keyword)
+  dofills <- grepl('fill', doQuoTab$Keyword) | ordo
   doQuoTab$Quo[dofills] <- Map(fillQuo, doQuoTab$Quo[dofills], usedInExprs[dofills])
   
   
@@ -1457,11 +1470,11 @@ evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (!is.list(partition)) partition <- list(partition)
     partition <- lapply(partition, rep, length.out = nrow(humtab))
     
-    partition <- Reduce(switch(partType, by = paste, where = `&`), partition)
+    partition <- Reduce(switch(partType, by = paste, subset = `&`), partition)
     
     partEval <- switch(partType,
                        by    = evalDoQuo_by,
-                       where = evalDoQuo_where)
+                       subset = evalDoQuo_where)
     
     partEval(doQuo, humtab, partition, partQuos, ordoQuo)
     
@@ -1507,11 +1520,11 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
-                                     "In your call to with(in)Humdrum with a 'where ~ x' expression, 
-                                     your where expression must evaluate to a logical (TRUE/FALSE).")
+                                     "In your call to with(in)Humdrum with a 'subset ~ x' expression, 
+                                     your subset expression must evaluate to a logical (TRUE/FALSE).")
     result <- evalDoQuo(doQuo, humtab[partition], partQuos[-1], ordoQuo)
     
-    partitionName <- paste0('_where=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
+    partitionName <- paste0('_subset=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
     
     result[[partitionName]] <- TRUE
     
@@ -1519,6 +1532,7 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
         visible <- attr(result, 'visible')
         orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
         orresult[[partitionName]] <- FALSE
+        
         result <- data.table::rbindlist(list(result, orresult))
         attr(result, 'visible') <- visible
     }

@@ -35,26 +35,26 @@ an the objects &quot;Active expression&quot;."><!-- mathjax --><script src="http
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
     <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
+    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>R/Humdrum background</h6>
-    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
-    <a class="dropdown-item" href="../articles/RPrimer.html">An R Primer for humdrumR</a>
+    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The humdrum syntax</a>
+    <a class="dropdown-item" href="../articles/RPrimer.html">An R primer for humdrumR users</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/Filtering.html">Filtering Humdrum Data</a>
+    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
+    <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
-    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
+    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
-    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
+    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -188,7 +188,7 @@ Null data is updated whenever the active field is changed or reset, including by
 For example, if you load <code>**kern</code> data, a token like <code>"4r"</code> (quarter-note rest) token will be <code>NA</code> if you call <code>pitch</code>, but
 not <code>NA</code> if you call <code>recip</code> (rhythm).</p><div class="sourceCode"><pre><code><span class="va">kerndata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
+<span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
        <span class="va">Pitch</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>,
        <span class="va">Rhythm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kerndata</span></code></pre></div>
 
@@ -197,8 +197,8 @@ are different numbers of (non-null) data tokens: <code>ntoken(kerndata$Pitch ,'D
 return different numbers!
 (The difference would be the number of rest tokens.)
 Similarly, if you apply functions/expressions to this data (using <code><a href="withinHumdrum.html">withinHumdrum()</a></code> for example), the result will depend on
-what the active field is:</p><div class="sourceCode"><pre><code><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+what the active field is:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Pitch</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Rhythm</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>Once again, we'll get different numbers here! (Assuming there are rests in the data.)
 This is the case even though the do-expression isn't actually using the <code>Pitch</code> or <code>Rhythm</code> fields!
@@ -241,8 +241,7 @@ special call <code>humData$All</code>.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel
-Condit-Schultz</a>.</p>
+  <p></p><p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
 </div>
 
 <div class="pkgdown-footer-right">

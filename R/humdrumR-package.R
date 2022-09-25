@@ -10,7 +10,7 @@
 #'
 #' @section Package design:
 #' 
-#' The package `humdrumR` has XXX main components:
+#' The package `humdrumR` has seven main components:
 #' 
 #' + To represent humdrum data in R, we have the [humdrumR][humdrumR::humdrumRclass] [S4 class](http://adv-r.had.co.nz/S4.html), and it's core component 
 #'   the [humdrum table][humdrumR::humTable]. 
