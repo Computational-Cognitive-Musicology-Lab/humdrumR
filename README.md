@@ -1,4 +1,4 @@
-# humdrumR
+# Humdrum$_{\mathbb{R}}$
 
 Humdrum$_{\mathbb{R}}$ is an R library for analyzing musicological data encoded in the [humdrum](https://www.humdrum.org) data format.
 The most up to date info on using humdrumR$_{\mathbb{R}}$ be found at our [github website](https://computational-cognitive-musicology-lab.github.io/humdrumR/).
@@ -15,7 +15,7 @@ To use humdrum$_{\mathbb{R}}$, you'll first need to install [R](https://www.r-pr
 We *highly* recommend that you install the Integrated Development Environment [Rstudio](https://rstudio.com/) as well!
 This link---[Installing R and RStudio](https://rstudio-education.github.io/hopr/starting.html)---is a good starting place.
 
-### Installing humdrumR
+### Installing humdrum$_{\mathbb{R}}$
 
 Humdrum$_{\mathbb{R}}$ is not yet available on the standard R package repository, [CRAN](https://cran.r-project.org/), so (for now) it can only be installed from this github repository.
 To install the latest version (master branch) of humdrum$_{\mathbb{R}}$, you'll first need to install the R package [devtools](https://www.rdocumentation.org/packages/devtools/versions/2.2.1)---`devtools` is used for creating and maintaining R packages.
@@ -36,7 +36,7 @@ devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR", buil
 
 ```
 
-### humdrum$_{\mathbb{R}} source
+#### Humdrum$_{\mathbb{R}}$ source
 
 Another option---useful, if you want to inspect, or contribute to, the humdrum$_{\mathbb{R}}$ source code---is to actually download the humdrum$_{\mathbb{R}}$ package source from github and install it directly.
 You'll first need to install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
