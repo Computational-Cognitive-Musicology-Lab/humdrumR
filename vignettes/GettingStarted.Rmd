@@ -502,3 +502,20 @@ with(chorales, hist(Semits))
 
 ```
 
+# What next?
+
+You've gotten started, but there is much more to learn!
+To keep learning check out the other articles on the [humdrumR webpage](https://computational-cognitive-musicology-lab.github.io/humdrumR/).
+If you want to continue along the path we've started here, the next articles to check out are probably 
+[Filtering humdrum data](Filtering.html "Filtering humdrum data") and 
+[Working with humdrum data](WorkingWithData.html "Working with humdrum data").
+Since most musicological analysis involves pitch or rhythm, you'll probably want to learn about
+relavent ideas from the [Pitch and tonality](PitchAndTonality.html "Pitch and tonality in humdrumR)
+and [Rhythm and meter](RhythmAndMeter.html "Rhythm and meter in humdrumR") articles.
+
+If the humdrum data you are working with is complex---e.g., including multiple different exclusive interpretations,
+spine paths, or multi-stops---you'll probably find you need to check out the [Shaping humdrum data](Reshaping.html "Shaping humdrum data") article, which will
+give you tools to deal with with more complex humdrum data sets.
+
+
+

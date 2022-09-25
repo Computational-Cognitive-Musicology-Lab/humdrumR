@@ -1,8 +1,8 @@
 ---
-title: "Validating Humdrum Data"
+title: "Validating humdrum data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Validating Humdrum Data}
+  %\VignetteIndexEntry{Validating humdrum data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

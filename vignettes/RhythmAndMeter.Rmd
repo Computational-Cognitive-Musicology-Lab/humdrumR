@@ -1,10 +1,10 @@
 ---
-title: Rhythm and Meter in humdrumR
+title: Rhythm and meter in humdrumR
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Rhythm and Meter in humdrumR}
+  %\VignetteIndexEntry{Rhythm and meter in humdrumR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
