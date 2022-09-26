@@ -6,29 +6,29 @@ Welcome to the main website of humdrum$_{\mathbb{R}}$!
 
 ## What is humdrum$_{\mathbb{R}}$?
 
-Humdrum$_{\mathbb{R}}$ is is an [R package](https://en.wikipedia.org/wiki/R_package)---a "library" of preexisting code for the
+Humdrum$_{\mathbb{R}}$ is an [R package](https://en.wikipedia.org/wiki/R_package): a "library" of preexisting code for the
 [R programming language](https://en.wikipedia.org/wiki/R_(programming_language)).
 Humdrum$_{\mathbb{R}}$ code provides tools for the visualization, manipulation, and analysis of data formatted in the humdrum syntax.
 
 
 > Note: The name of the package is pronounced _hum-drum-**ARRRRR**_, with the last syllable emphasized in pirate fashion.
-> The name should always be typeset $h\mu m_{\mathbb{R}}^{\Delta r \mu m}$.
-> Failure to pronounce or typeset $h\mu m_{\mathbb{R}}^{\Delta r \mu m}$ correctly will void the warranty.
+> The name should always be typeset $h\mu m^{\Delta r \mu m}_{\mathbb{R}}$.
+> Failure to pronounce or typeset $h\mu m^{\Delta r \mu m}_{\mathbb{R}}$ correctly will void the warranty.
  
 
 ### What is humdrum?
 
 Humdrum is a system for computational musicology developed by David Huron.
-The Humdrum "universe" includes two parts: a data format called the [humdrum syntax](http://www.humdrum.org/guide/ch05/) and musicological software system
+The Humdrum "universe" includes two parts: a data format called the [humdrum syntax](http://www.humdrum.org/guide/ch05/) and a musicological software system
 called the [humdrum toolkit](http://www.humdrum.org/).
 Humdrum$_{\mathbb{R}}$ is meant as a modernized replacement for the original humdrum toolkit, leveraging
  the power of R to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 
-Humdrum$_{\mathbb{R}}$ is mainly used to manipulate and analyze data encoded in the humdrum syntax and/or humdrum interpretations like "**kern".
+Humdrum$_{\mathbb{R}}$ is mainly used to manipulate and analyze data encoded in the humdrum syntax and/or humdrum interpretations like `**kern`.
 The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
 Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online 
 through repositories such as [KernScores](http://kern.ccarh.org/).
-Our [humdrum syntax](HumdrumSyntax.html "The humdrum syntax") vignette gives a detailed introduction to the data format.
+Our [humdrum syntax](articles/HumdrumSyntax.html "The humdrum syntax") vignette gives a detailed introduction to the data format.
 
 
 
@@ -36,7 +36,7 @@ Our [humdrum syntax](HumdrumSyntax.html "The humdrum syntax") vignette gives a d
 
 R is programming language, designed from the ground up for statistical computing and data analysis.
 R has many features which make it ideal for data analysis, particularly if research and analysis is your only background in programming.
-Our [R primer](RPrimer.html "An R primer for humdrumR users") introduces the core concepts of R programming.
+Our [R primer](articles/RPrimer.html "An R primer for humdrumR users") introduces the core concepts of R programming.
 
 ## What can humdrum$_{\mathbb{R}}$ do?
 
@@ -48,13 +48,13 @@ Humdrum$_{\mathbb{R}}$ does seven main things:
 
 To represent humdrum data in R, humdrum$_{\mathbb{R}}$ defines a special data type---the `humdrumR` class---which we call "humdrumR objects" throughout the documentation.
 The most important part of a `humdrumR` object is the "*humdrum table*" which it contains.
-You can read about how the humdrum-syntax data is represented in the [getting started with humdrumR](GettingStarted.html "Getting started with humdrumR")
+You can read about how the humdrum-syntax data is represented in the [getting started with humdrumR](articles/GettingStarted.html "Getting started with humdrumR")
 vignette.
 
 ![](man/figures/DataModelDiagram.png){width=600px}
 
-For more details, read the [humdrumR class](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumRclass.html) 
-and [humdrum table](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humTable.html);
+For more details, read the [humdrumR class](reference/humdrumRclass.html) 
+and [humdrum table](reference/humTable.html);
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read these directly in an R session by typing `?humdrumR-class` or `?humTable`.
 
 
@@ -64,9 +64,9 @@ If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read these directly i
 
 To create `humdrumR` data objects, humdrum$_{\mathbb{R}}$ includes a humdrum data parser, which finds humdrum data on your local machine, reads it into
 R, then creates a humdrumR object from the data.
-The [Reading and writing data](ReadWrite.html "Reading and writing data with humdrumR") vignette is the best place to realm how this works.
-You can get more details from the [readHumdrum()](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/readHumdrum.html)
-and [writeHumdrum()](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/writeHumdrum.html) documentation;
+The [Reading and writing data](articles/ReadWrite.html "Reading and writing data with humdrumR") vignette is the best place to realm how this works.
+You can get more details from the [readHumdrum()](reference/readHumdrum.html)
+and [writeHumdrum()](reference/writeHumdrum.html) documentation;
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read these directly in an R session by typing `?readHumdrum` or `?writeHumdrum`.
 
 
@@ -75,24 +75,24 @@ If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read these directly i
 Once you've imported humdrum data in R, the next step is often to organize and prepare your data.
 You'll often want to pick out specific subsets of the data, or rearrange the data representations to be easier to work with.
 Humdrum$_{\mathbb{R}}$ gives us a number of powerful tools for "shaping the data":
-The [Shaping humdrum data](Reshaping.html "Shaping humdrum data with humdrumR") and [Filtering humdrum data](Filtering.html "Filtering humdrum data with humdrumR") vignettes are the best places to learn about these processes.
-You can find more details on sub-setting data in the [subset.humdrumR()](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/subset.humdrumR.html)
- and [indexHumdrum](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/indexHumdrum.html) documentation;
+The [Shaping humdrum data](articles/Reshaping.html "Shaping humdrum data with humdrumR") and [Filtering humdrum data](articles/Filtering.html "Filtering humdrum data with humdrumR") vignettes are the best places to learn about these processes.
+You can find more details on sub-setting data in the [subset.humdrumR()](reference/subset.humdrumR.html)
+ and [indexHumdrum](reference/indexHumdrum.html) documentation;
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read these directly in an R session by typing `?subset.humdrumR` or `?indexHumdrum`.
 
 #### Analyze humdrum data
 
 Humdrum$_{\mathbb{R}}$ makes it very easy to manipulate, modify, and analyze humdrum data.
-The [Working with humdrum data](WorkingWithData.html "Working with humdrum data using humdrumR") vignette gives an overview of this functionality.
-You can find more details in the [withinHumdrum](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/withinHumdrum.html) documentation;
+The [Working with humdrum data](articles/WorkingWithData.html "Working with humdrum data using humdrumR") vignette gives an overview of this functionality.
+You can find more details in the [withinHumdrum](reference/withinHumdrum.html) documentation;
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read this directly in an R session by typing `?withinHumdrum`.
 
 #### Manipulate (musical) pitch information
 
 Humdrum$_{\mathbb{R}}$ defines tools for manipulating numerous representations of pitch and tonality, including 
-[diatonic keys](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSet.html) and [tertian harmonies](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSet.html).
-The [Pitch and tonality](PitchAndTonality.html "Pitch and tonality in humdrumR") vignette explains how to work with pitch data in humdrum$_{\mathbb{R}}$.
-You can find more details in the [humdrumPitch](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumPitch.html)
+[diatonic keys](reference/diatonicSet.html) and [tertian harmonies](reference/tertianSet.html).
+The [Pitch and tonality](articles/PitchAndTonality.html "Pitch and tonality in humdrumR") vignette explains how to work with pitch data in humdrum$_{\mathbb{R}}$.
+You can find more details in the [humdrumPitch](reference/humdrumPitch.html)
 documentation;
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read this directly in an R session by typing `?humdrumPitch`.
 
@@ -101,8 +101,8 @@ If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read this directly in
 
 
 Humdrum$_{\mathbb{R}}$ defines tools for manipulating numerous representations of rhythm, timing, and meter.
-The [Rhythm and meter](RhythmAndMeter.html "Rhythm and Meter in humdrumR") vignette explains how to work with rhythmic information humdrum$_{\mathbb{R}}$.
-You can find more details in the [humdrumRhythm](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumPitch.html)
+The [Rhythm and meter](articles/RhythmAndMeter.html "Rhythm and Meter in humdrumR") vignette explains how to work with rhythmic information humdrum$_{\mathbb{R}}$.
+You can find more details in the [humdrumRhythm](reference/humdrumPitch.html)
 documentation;
 If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read this directly in an R session by typing `?humdrumRhythm`.
 
@@ -111,7 +111,7 @@ If humdrum$_{\mathbb{R}}$ is installed and loaded, you can read this directly in
 #### Develop new humdrum tools
 
 To facilitate the development of *new* functions to work with humdrum tokens---which are simple character strings packed with information---, 
-Humdrum$_{\mathbb{R}}$ provides several useful development tools, including our [struct](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/struct.html) data type and a useful API we call our [regular-expression dispatch system](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumDispatch.html),
+Humdrum$_{\mathbb{R}}$ provides several useful development tools, including our [struct](reference/struct.html) data type and a useful API we call our [regular-expression dispatch system](reference/humdrumDispatch.html),
 which makes it easy to dispatch different methods based on matches to regular expressions.
 
 
@@ -187,8 +187,8 @@ library(humdrumR)
 
 To learn how to use humdrum$_{\mathbb{R}}$
 the "Articles" list at the top of this page is the best place to start---in particular,
-the [Getting started with humdrumR](https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/GettingStarted.html) article!
-Documentation for specific functions and other general topics can be found in the "[Reference](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/index.html)"
+the [Getting started with humdrumR](articles/GettingStarted.html) article!
+Documentation for specific functions and other general topics can be found in the "[Reference](reference/index.html)"
 section.
 
 Once humdrum$_{\mathbb{R}}$ is installed, you can also access documentation directly in R sessions.
