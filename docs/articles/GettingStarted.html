@@ -51,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -148,10 +147,10 @@ with the ‘BachChorales’ folder.</p>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">6</span>] <span class="st">"chor006.krn"</span> <span class="st">"chor007.krn"</span> <span class="st">"chor008.krn"</span> <span class="st">"chor009.krn"</span> <span class="st">"chor010.krn"</span></span></code></pre></div>
 <p>There are ten files in the folder, named “chor001.krn”,
 “chor002.krn”, etc. These are simple plain humdrum text files, using the
-’**kern’ interpretation to represent ten chorales by J.S. Bach. Take a
-minute to find the files in your computer’s finder/exporer and open them
-up with a simple text editor. One of the core philosophies of
-humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> is that we
+<code>**kern</code> interpretation to represent ten chorales by J.S.
+Bach. Take a minute to find the files in your computer’s finder/explorer
+and open them up with a simple text editor. One of the core philosophies
+of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> is that we
 maintain a direct, transparent relationship with our symbolic data—so
 always take the time to look at your data! You can also do this within
 Rstudio’s “Files” pane—in fact, Rstudio will make things extra easy for
@@ -162,7 +161,7 @@ Working Directory” to quickly find the files.</p>
 </h4>
 <p>Now that we’ve found some humdrum data to look at, let’s read it into
 humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>. We can do
-this useing humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s
+this using humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s
 <code>readHumdrum</code> command. Try this:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -2181,10 +2180,10 @@ we’d like to see a histogram of those values—let’s use R’s
 <p>You’ve gotten started, but there is much more to learn! To keep
 learning check out the other articles on the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/" class="external-link">humdrumR
 webpage</a>. If you want to continue along the path we’ve started here,
-the next articles to check out are probably <a href="Filtering.html" title="Filtering humdrum data">Filtering humdrum data</a> and <a href="WorkingWithData.html" title="Working with humdrum data">Working
-with humdrum data</a>. Since most musicological analysis involves pitch
-or rhythm, you’ll probably want to learn about relevant ideas from the
-<a href="PitchAndTonality.html" title="Pitch and tonality in humdrumR">Pitch and tonality</a> and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm
+the next articles to check out are probably <a href="Summary.html" title="Getting to know your data">Getting to know your data</a>, <a href="Filtering.html" title="Filtering humdrum data">Filtering humdrum
+data</a>, and <a href="WorkingWithData.html" title="Working with humdrum data">Working with humdrum data</a>. Since
+most musicological analysis involves pitch or rhythm, you’ll probably
+want to learn about relevant ideas from the <a href="PitchAndTonality.html" title="Pitch and tonality in humdrumR">Pitch and tonality</a> and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm
 and meter</a> articles.</p>
 <p>If the humdrum data you are working with is complex—e.g., including
 multiple different exclusive interpretations, spine paths, or

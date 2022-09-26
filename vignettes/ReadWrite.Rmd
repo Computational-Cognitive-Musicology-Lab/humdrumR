@@ -212,15 +212,17 @@ This is useful to check if you are reading the files you *intend* to read.
 
 ### Validation
 
-`findHumdrum`, and by extension `readHumdrum`, are smart functions that will ignore non-humdrum files matched by your pattern.
+`findHumdrum()`, and by extension `readHumdrum()`, are smart functions that will ignore non-humdrum files matched by your pattern.
 Non-text files (like `.pdf` or `.jpg`) will be ignored.
 Whats more, text files which fail to conform to the humdrum syntax will not be read either.
 You will see a message that checks which files are "valid humdrum," and tell you how many (if any) text files are not read.
 
-If you are trying to read a file which you *think* should be valid humdrum, but `readHumdrum` won't read it, use `validateHumdrum` with the exact same REpath-pattern arguments, and specify and `errorReport.path` to see a detailed report of the problem.
-`r Hm` won't read files with *any* humdrum-syntax violations---there might be minor problems in the data that you need to fix.
-Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `r hm`'s data validation tools, and how they can be used to identify errors in your humdrum data.
-(`validateHumdrum` does not automatically check if the humdrum *data* is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)
+If you are trying to read a file which you *think* should be valid humdrum but `readHumdrum()` won't read it, use `validateHumdrum()` to see a detailed report of the problem.
+`r Hm` won't read files with *any* humdrum-syntax violations, even relatively minor ones.
+Once you see the problems that `validateHumdrum()` is finding in your data, you'll need to fix them yourself before you can use `r hm` on the data.
+Check out the [validateHumdrum][reference/validateHumdrum.html] documentation to learn more about `r hm`'s data validation tools, and how they can be used to identify errors in your humdrum data.
+
+> Note that `validateHumdrum()` does not automatically check if the humdrum *data* is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.
 
 ## Reading
 

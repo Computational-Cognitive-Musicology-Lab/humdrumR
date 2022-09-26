@@ -51,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -150,8 +149,8 @@ parts.</p>
 </h2>
 <p>The first step might to remove data we don’t need. In <em>this</em>
 article, we’ll show you the most common, basic, ways you might filter
-your data. For more details about other <code>humdrumR</code> filtering
-functionatily, check out the <a href="Filtering.html" title="Filtering Humdrum Data">data filtering</a> article.</p>
+your data. For more details about other humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> filtering functionality,
+check out the <a href="Filtering.html" title="Filtering Humdrum Data">data filtering</a> article.</p>
 <div class="section level3">
 <h3 id="indexing">Indexing<a class="anchor" aria-label="anchor" href="#indexing"></a>
 </h3>
@@ -368,10 +367,10 @@ print:</p>
 <h2 id="pastingaligning">Pasting/Aligning<a class="anchor" aria-label="anchor" href="#pastingaligning"></a>
 </h2>
 <p>The next step might be to align/combine information that is currently
-separated. In many humrum datasets, we have multiple pieces of
-information spread across multiple spines, or in some cases, across
-spine paths or stops. If, given our research question, we need to think
-of multiple pieces of information as describing a <em>single data
+separated. In many humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> datasets, we have multiple
+pieces of information spread across multiple spines, or in some cases,
+across spine paths or stops. If, given our research question, we need to
+think of multiple pieces of information as describing a <em>single data
 point</em>, we’ll reshape the data. For example, in our example file the
 <code>**silbe</code> (lyric) spines associate each syllable with exactly
 one note in the adjacent <code>**kern</code> spines.</p>
@@ -530,11 +529,11 @@ depends on what questions you are trying to ask of your data!</p>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>     <span class="er">^^^</span> Reshaping_example2_stops.hum <span class="sc">^</span><span class="er">^^</span> </span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
-<p>By default, humdrumR treats each token (note) in <em>each</em> stop
-as a separate data observation, with its own row in the humdrum table.
-If we are studying harmony, we might want to align those stops “on top”
-of each other, in different fields. Try the <code>foldStops</code>
-function!</p>
+<p>By default, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+treats each token (note) in <em>each</em> stop as a separate data
+observation, with its own row in the humdrum table. If we are studying
+harmony, we might want to align those stops “on top” of each other, in
+different fields. Try the <code>foldStops</code> function!</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">foldStops</span>(example_stops)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>     vvv Reshaping_example2_stops.hum vvv </span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">1</span><span class="sc">:</span>    <span class="er">**</span>kern  <span class="sc">**</span>harm</span>

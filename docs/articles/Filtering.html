@@ -51,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -120,10 +119,10 @@ illustrate how filtering works, so let’s load it up:</p>
 </h2>
 <p>The simplest, common, way to filter your data is through
 <em>indexing</em>, which is a common approach in programming for
-selecting subsets of data. In <code>R</code>, we use the square
-brackets, <code>[]</code>, to index various data objects, including
-basic atomic vectors, data.tables, and lists. For example, using
-brackets I can extract subsets of a vector:</p>
+selecting subsets of data. In R, we use the square brackets,
+<code>[]</code>, to index various data objects, including basic atomic
+vectors, data.tables, and lists. For example, using brackets I can
+extract subsets of a vector:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>myname <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'N'</span>, <span class="st">'A'</span>, <span class="st">'T'</span>, <span class="st">' '</span>, <span class="st">'C'</span>, <span class="st">'O'</span>, <span class="st">'N'</span>, <span class="st">'D'</span>, <span class="st">'I'</span>, <span class="st">'T'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -135,18 +134,19 @@ brackets I can extract subsets of a vector:</p>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>myname[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>)]</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"N"</span> <span class="st">"C"</span></span></code></pre></div>
-<p>Watch out! <code>R</code> actually has <strong>two</strong> different
-ways of indexing: you can use a single pair of matches brackets
+<p>Watch out! R actually has <strong>two</strong> different ways of
+indexing: you can use a single pair of matches brackets
 (<code>[ ]</code>) or a double pair (<code>[[ ]]</code>). If you want a
-primer on how these two types of indexing are used in normal
-<code>R</code> objects, check out the <a href="Rbasics.html" title="Basics of R">R primer</a>—you really don’t <em>need</em> to do
-this before getting into <code>humdrumR</code>, but you might want to
-eventually.</p>
+primer on how these two types of indexing are used in normal R objects,
+check out the <a href="Rbasics.html" title="Basics of R">R
+primer</a>—you really don’t <em>need</em> to do this before getting into
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>, but you might
+want to eventually.</p>
 <p>We can use the single-bracket <code>[]</code> or double-bracket
-<code>[[]]</code> commands to index our <code>humdrumR</code> data
-objects. The single-brackets are used to index whole <em>pieces</em> in
-your data. The double-brackets are used to index “within” pieces in your
-data. Either type of bracket can accept either <code>numeric</code> or
+<code>[[]]</code> commands to index our humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data objects. The
+single-brackets are used to index whole <em>pieces</em> in your data.
+The double-brackets are used to index “within” pieces in your data.
+Either type of bracket can accept either <code>numeric</code> or
 <code>character</code> vectors to index by.</p>
 <div class="section level3">
 <h3 id="single-bracket-indexing">Single-bracket indexing<a class="anchor" aria-label="anchor" href="#single-bracket-indexing"></a>
@@ -437,8 +437,8 @@ only at the fifth chorale, we can call:</p>
 <span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of three files.</span>
 <span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
-<p>You might want to use the <code>R</code> sequence command,
-<code>:</code>, to select a range of numbers:</p>
+<p>You might want to use the R sequence command, <code>:</code>, to
+select a range of numbers:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>chorales[<span class="dv">6</span><span class="sc">:</span><span class="dv">10</span>]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
@@ -516,11 +516,10 @@ only at the fifth chorale, we can call:</p>
 <div class="section level4">
 <h4 id="character-indices-for-single-brackets">Character indices (for single-brackets)<a class="anchor" aria-label="anchor" href="#character-indices-for-single-brackets"></a>
 </h4>
-<p>If you supply a <code>humdrumR</code> object single-bracket index a
-<code>character</code> string, <code>humdrumR</code> will treat that
-string as a regular expression and return all the files that contain a
-match to that expression in <em>any</em> data token—even if there is
-only one.</p>
+<p>If you supply a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object single-bracket index
+a <code>character</code> string, Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> will treat that string as a
+regular expression and return all the files that contain a match to that
+expression in <em>any</em> data token—even if there is only one.</p>
 <p>For example, we might be only interested in files that use flat
 notes. Since <code>**kern</code> represents flats with “<code>-</code>”,
 we can simply write:</p>
@@ -660,7 +659,7 @@ commands should look like this:</p>
 <h4 id="numeric-indices-for-double-brackets">Numeric indices (for double-brackets)<a class="anchor" aria-label="anchor" href="#numeric-indices-for-double-brackets"></a>
 </h4>
 <p><code>Numeric</code> values <code>i</code> <em>or</em> <code>j</code>
-can be given to double-bracket <code>humdrumR</code> index commands. For
+can be given to double-bracket humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> index commands. For
 <code>i</code>, the number is simply matched to record numbers in each
 file. For example, you could extract the first fifty records from each
 file as so:</p>
@@ -923,22 +922,21 @@ spines in a file, that file will be dropped. For example, if we call</p>
 <span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
 <p>We only get three files back, because the other seven files don’t
-have any records above 150! (Notice that <code>humdrumR</code> won’t
-remove the Exclusive interpretation or spine spine closing
-(<code>*-</code>) records…since that would break the humdrum
-syntax.)</p>
+have any records above 150! (Notice that humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> won’t remove the Exclusive
+interpretation or spine spine closing (<code>*-</code>) records…since
+that would break the humdrum syntax.)</p>
 </div>
 <div class="section level4">
 <h4 id="character-indices-for-double-brackets">Character indices (for double-brackets)<a class="anchor" aria-label="anchor" href="#character-indices-for-double-brackets"></a>
 </h4>
 <p><code>Character</code> string values <code>i</code> <em>or</em>
-<code>j</code> can also be given to double-bracket <code>humdrumR</code>
-index commands. <code>humdrumR</code> will treat string as a regular
-expression and return all records (<code>i</code>) or spines
-(<code>j</code>) that any match to that expression in a data token—even
-if there is only one. For example, let’s (again) say we are interesting
-in studying flats. Since <code>**kern</code> represents flats as
-“<code>-</code>”, we can find records that contain a flat by
+<code>j</code> can also be given to double-bracket humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> index commands.
+Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> will treat
+string as a regular expression and return all records (<code>i</code>)
+or spines (<code>j</code>) that any match to that expression in a data
+token—even if there is only one. For example, let’s (again) say we are
+interesting in studying flats. Since <code>**kern</code> represents
+flats as “<code>-</code>”, we can find records that contain a flat by
 calling:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>chorales[[<span class="st">'-'</span>, ]]</span>
@@ -1344,7 +1342,7 @@ spines, and so all four spines are still there!</p>
 <p>In some cases you may find the renumbering of spines on a <em>per
 file</em> basis confusing, and you want to keep track of the original
 spine numbers. Fortunately, for you there is an option that might
-helpful, which you will learn more about below: try specifiying
+helpful, which you will learn more about below: try specifying
 <code>removeEmpty = FALSE</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>chorales[[ , <span class="st">'-'</span>, removeEmpty <span class="ot">=</span> <span class="cn">FALSE</span>]]</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################ vvv chor003.krn vvv #############################</span></span>
@@ -1446,10 +1444,10 @@ helpful, which you will learn more about below: try specifiying
 <div class="section level3">
 <h3 id="negative-numeric-indices">Negative numeric indices<a class="anchor" aria-label="anchor" href="#negative-numeric-indices"></a>
 </h3>
-<p>A nifty feature of <code>R</code> is that if you supply negative
-numbers to an indexer, <code>R</code> will <em>remove</em> those
-numbers. This works in <code>humdrumR</code> too, so if you want all the
-files <em>except</em> the first file, you could write:</p>
+<p>A nifty feature of R is that if you supply negative numbers to an
+indexer, R will <em>remove</em> those numbers. This works in
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> too, so if you
+want all the files <em>except</em> the first file, you could write:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>chorales[<span class="sc">-</span><span class="dv">1</span>]</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>           (<span class="dv">7</span> more files...)</span>
@@ -1764,9 +1762,10 @@ write</p>
 <span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
-<p>(Again, <code>humdrumR</code> won’t remove the Exclusive
-interpretation or spine spine closing (<code>*-</code>) records…since
-that would break the humdrum syntax.)</p>
+<p>(Again, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+won’t remove the Exclusive interpretation or spine spine closing
+(<code>*-</code>) records…since that would break the humdrum
+syntax.)</p>
 </div>
 </div>
 <div class="section level2">
@@ -1774,8 +1773,8 @@ that would break the humdrum syntax.)</p>
 </h2>
 <p>The indexing commands (previous sections) only get you so far. If you
 want to be more precise about filtering, use the <code>subset</code>
-method for <code>humdrumR</code> data. <code>subset.humdrumR</code>
-works exactly like <a href="WorkingWithData.html" title="Working with Humdrum Data">within.humdrumR</a>. However, the
+method for humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+data. <code>subset.humdrumR</code> works exactly like <a href="WorkingWithData.html" title="Working with Humdrum Data">within.humdrumR</a>. However, the
 expression(s) you give must evaluate to a logical vector
 (<code>TRUE</code> or <code>FALSE</code>) of the same length as its
 input. (You will get an error otherwise.) <code>subset.humdrumR</code>
@@ -1882,8 +1881,8 @@ will take your logical result and filter out data which matches
 <p>But, now we can filter based on <em>any</em> arbitrary criteria we
 want. For example, we could extract tokens from odd numbered spines in
 odd numbered records <em>and</em> even numbered spines in even numbered
-records. We’ll use <code>R</code>s modulo command <code>%%</code> to
-separate even and odd numbers (<code>odd %% 2 == 1</code>,
+records. We’ll use Rs modulo command <code>%%</code> to separate even
+and odd numbers (<code>odd %% 2 == 1</code>,
 <code>even %% 2 == 0</code>).</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, (Record <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">==</span> (Spine <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) )</span>
@@ -2371,7 +2370,7 @@ whole bar.</p>
 <span id="cb22-94"><a href="#cb22-94" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five files.</span>
 <span id="cb22-95"><a href="#cb22-95" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb22-96"><a href="#cb22-96" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
-<p>Not enough context for you? maybe we should group the bars into
+<p>Not enough context for you? Maybe we should group the bars into
 even-odd pairs:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(chorales, <span class="at">fill =</span> <span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>), <span class="at">by =</span> <span class="fu">list</span>(File, <span class="fu">floor</span>(Bar  <span class="sc">/</span> <span class="dv">2</span>)))</span>
@@ -2573,9 +2572,8 @@ to actually <em>remove</em> data that you filter out. So when we say</p>
 <span id="cb24-95"><a href="#cb24-95" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
 <p>we still have four spines, but spines 2–4 are just emptied. This is
 correct. What <code>subset</code> actually does is mark filtered data in
-the <code>Filter</code> field of the humdrum table.
-<code>humdrumR</code> then ignores that data automatically. Why do we do
-this? There are several reasons:</p>
+the <code>Filter</code> field of the humdrum table. Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> then ignores that data
+automatically. Why do we do this? There are several reasons:</p>
 <ol style="list-style-type: decimal">
 <li>Sometimes, seeing the full structure remain in place is
 cleaner/easier to interpret than actually removing them. Basically, all

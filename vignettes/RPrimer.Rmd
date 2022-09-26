@@ -409,12 +409,16 @@ Sometimes we'll encounter data points which are irrelevant, meaningless, or "not
 
 # Common Functions
 
++ `getwd()` --- Get R's current working directory.
++ `setwd()` --- Set R's working directory.
++ `summary()` --- Summarize the contents of an R object.
 
 ## Vector functions
 
 + `sort()` --- Put values of a vector into ascending order.
   + set `decreasing = TRUE` for decreasing order.
 + `rev()` --- Reverse the order of a vector.
++ `unique()` --- Returns only the unique values of a vector.
 + `x %in% y` --- Which elements of the vector `x` appear in the vector `y`?
 
 

@@ -31,7 +31,6 @@ articles:
   navbar: Data prep
   contents: 
   - ReadWrite
-  - Validation
   - Reshaping
   - Filtering
 - title: Analysis

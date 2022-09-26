@@ -51,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -102,9 +101,9 @@ Condit-Schultz</h4>
     
     
 <p>Once we have <a href="ReadWrite.html" title="Reading and writing humdrum data">imported humdrum data</a> into
-<code>R</code>, we’ll be ready to actually work with our data! The
-humdrum data you’ve imported is stored in a <code>humdrumR</code> data
-object, which gives us some special tools for working with it.</p>
+R, we’ll be ready to actually work with our data! The humdrum data
+you’ve imported is stored in a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data object, which gives us
+some special tools for working with it.</p>
 <p>Let’s load some of the prepackaged data, as we learned in the <a href="ReadWrite.html" title="Reading and writing humdrum data">read/write vignette</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>chorales <span class="ot">&lt;-</span> <span class="fu">readHumdrum</span>(humdrumRroot, <span class="st">'HumdrumData/BachChorales/chor.*.krn'</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -208,36 +207,35 @@ or manipulate this data?</p>
 <div class="section level2">
 <h2 id="with-and-within-you">With and within you<a class="anchor" aria-label="anchor" href="#with-and-within-you"></a>
 </h2>
-<p>The key functions for working with <code>humdrumR</code> data objects
-are <code>with</code> and <code>within</code>. These functions allow you
-to get “inside” your data. Basically, once you call
+<p>The key functions for working with humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data objects are
+<code>with</code> and <code>within</code>. These functions allow you to
+get “inside” your data. Basically, once you call
 <code>with</code>/<code>within</code>, all the data fields within the
 data become available to you, to do with as you will.</p>
 <div class="section level3">
 <h3 id="with">With<a class="anchor" aria-label="anchor" href="#with"></a>
 </h3>
 <p>Let’s start with <code>with</code>. You should call <code>with</code>
-with a <code>humdrumR</code> data object as the first argument. Your
-second argument can be any arbitrary <code>R</code> <em>expression</em>
-you like, and can use fields of the humdrum data. An “expression” is
-just a valid bit of <code>R</code> code; for example,
+with a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data
+object as the first argument. Your second argument can be any arbitrary
+R <em>expression</em> you like, and can use fields of the humdrum data.
+An “expression” is just a valid bit of R code; for example,
 <code>2 + 2</code>, <code>c(1, 2, 3)</code>,
 <code>(x - mean(x))^2</code>, and
 <code>nchar(letters) |&gt; mean()</code> are all examples of
-expressions. So “any arbitrary <code>R</code> expression” is just a
-fancy way of saying any <code>R</code> code that <em>you</em> want. When
-we execute an <code>R</code> command, <code>R</code>
-“<em>evaluates</em>” the expression(s) and returns their results.</p>
+expressions. So “any arbitrary R expression” is just a fancy way of
+saying any R code that <em>you</em> want. When we execute an R command,
+R “<em>evaluates</em>” the expression(s) and returns their results.</p>
 <p>As a starting point, lets tabulate all the tokens we have in our
 dataset. When you first load humdrum data, the original data tokens are
 always put into a field called <code>Token</code>. We will use the
-<em>awesome</em> built-in <code>R</code> function, <code>table</code>,
-to tabulate the unique tokens in our <code>Token</code> field. However,
-we can’t access the <code>Token</code> field directly; if we just write
-the expression on the <code>table(Token)</code> we’ll get an
-error—<code>R</code> will not be able to “find”, and will say
+<em>awesome</em> built-in R function, <code>table</code>, to tabulate
+the unique tokens in our <code>Token</code> field. However, we can’t
+access the <code>Token</code> field directly; if we just write the
+expression on the <code>table(Token)</code> we’ll get an error—R will
+not be able to “find”, and will say
 “<code>Error: object 'Token' not found</code>.” Instead, we use
-<code>with</code> to enter the data, where <code>R</code> can “see”
+<code>with</code> to enter the data, where R can “see”
 <code>Token</code> (and all other data fields):</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(chorales, <span class="fu">table</span>(Token))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    Token</span>
@@ -370,11 +368,12 @@ the <code>|&gt;</code> (pipe) operator is a great place for this.</p>
 <h3 id="within">Within<a class="anchor" aria-label="anchor" href="#within"></a>
 </h3>
 <p>In many cases, we want to apply functions to our humdrum data, but
-keep the humdrum/<code>humdrumR</code> structure in place. This is what
-<code>within</code> is for. Where <code>with</code> just returns what
-ever the output of your commands are, <code>within</code> will (attempt
-to) put the results of your commands “back inside” the
-<code>humdrumR</code> data object, as a new field.</p>
+keep the humdrum/humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> structure in place. This is
+what <code>within</code> is for. Where <code>with</code> just returns
+what ever the output of your commands are, <code>within</code> will
+(attempt to) put the results of your commands “back inside” the
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data object,
+as a new field.</p>
 <p>For example, let’s say we want to translate our <code>kern</code>
 data into a different pitch representation, like scientific pitch. We
 can do this with the <code>pitch</code> command. If we use
@@ -682,7 +681,7 @@ can do this with the <code>pitch</code> command. If we use
 <span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> character</span></code></pre></div>
-<p>Now we get our <code>humdrumR</code> data back, but the
+<p>Now we get our humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data back, but the
 <code>Token</code> data has been transformed from <code>**kern</code> to
 <code>**pitch</code>. Notice, that there are now two “Data fields”
 listed at the bottom: <code>Token</code> (the original data) and
@@ -823,7 +822,7 @@ voice.</p>
 datasets which have measures indicated (with <code>=</code> tokens), the
 <code>Bar</code> field is integers counting these bars within each
 piece. If we want even numbers, we can ask where is <code>Bar</code>
-modulu 2 zero?: <code>Bar %% 2 == 0</code>.</p>
+modulo 2 zero?: <code>Bar %% 2 == 0</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(chorales, </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">kern</span>(Token) <span class="sc">|&gt;</span> <span class="fu">table</span>() <span class="sc">|&gt;</span> <span class="fu">sort</span>() <span class="sc">|&gt;</span> <span class="fu">tail</span>(<span class="at">n =</span> <span class="dv">10</span>),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">subset =</span> Bar <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span>
@@ -1102,11 +1101,10 @@ and add a call to the base-R function <code>mean</code>: Watch</p>
 data are rests, like <code>4r</code>. The <code>semits</code> function
 doesn’t know how to read <code>4r</code> so it returns an
 <code>NA</code> value. Don’t worry, this is an easy fix, and a good
-lesson for data analysis in general and <code>R</code> in particular. We
-always need to keep in mind what data is “missing” or Not Applicable
-(<code>NA</code>). Most <code>R</code> math functions have an option to
-ignore missing data by setting <code>na.rm = TRUE</code> (NA
-remove):</p>
+lesson for data analysis in general and R in particular. We always need
+to keep in mind what data is “missing” or Not Applicable
+(<code>NA</code>). Most R math functions have an option to ignore
+missing data by setting <code>na.rm = TRUE</code> (NA remove):</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(chorales, </span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">semits</span>(Token) <span class="sc">|&gt;</span> <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">by =</span> Spine)</span>
@@ -1166,9 +1164,9 @@ are then used to group the data.</p>
 </h3>
 <p>In some cases, we’d like to perform a command <code>within</code> our
 data which might output a smaller vector than in the input, including a
-single value, but we still want to reconstruct the data fully. In
-<code>R</code>, this is usually called “recycling”—i.e., repeating a
-value until it matches a certain length. When using <code>with</code> or
+single value, but we still want to reconstruct the data fully. In R,
+this is usually called “recycling”—i.e., repeating a value until it
+matches a certain length. When using <code>with</code> or
 <code>within</code>, we can cause our results to be recycled to the full
 field length by using the <code>recycle</code> argument for our
 expression. This is useful if you want to group by something, and fill
