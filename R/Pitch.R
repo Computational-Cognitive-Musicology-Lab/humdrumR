@@ -2938,6 +2938,7 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
+#' @family {Lagged pitch interval functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions],
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
@@ -3396,8 +3397,19 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
+#' Calculate melodic intervals
+#' 
+#' `mint` calculates melodic intervals in a vector, or across spine/paths of a [humdrumR data object][humdrumRclass].
+#'
+#' @family {relative pitch functions}
+#' @family {Lagged pitch interval functions}
+#' @name mint
 #' @export
-mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+mint <- function(x, ...) UseMethod('mint')
+
+#' @rdname mint
+#' @export
+mint.default <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                  classify = FALSE,
                  parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
@@ -3431,7 +3443,7 @@ mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket =
 
 
 mintClass <- function(x, directed = TRUE, skips = TRUE) {
-  int <- interval(x, generic = TRUE)
+  int <- interval(x, generic = TRUE, Exclusive = 'int')
   int <- as.integer(int)
   
   sign <- if (directed)  c('-', '', '+')[sign(int - 1L) + 2L] else ""
@@ -3439,12 +3451,76 @@ mintClass <- function(x, directed = TRUE, skips = TRUE) {
    
  
   
-  intClass <- cut(int, breaks = c(0, 1, 2, 3, Inf), labels = c('Unison', 'Step', 'Skip', 'Leap'))
+  intClass <- as.character(cut(int, breaks = c(0, 1, 2, 3, Inf), labels = c('Unison', 'Step', if (skips) 'Skip' else 'Leap', 'Leap')))
   
   
-  paste0(sign, intClass)
+  .paste(sign, intClass)
 }
 
+#' @rdname mint
+#' @export
+mint.data.frame <- function(x, ...) {
+  x[] <- lapply(x, mint, ...)
+  x
+}
+
+#' @rdname mint
+#' @export
+mint.matrix <- function(x, margin = 2, ...) {
+  result <- apply(x, margin, mint, ..., simplify = FALSE)
+  
+  do.call(if (margin == 1) 'rbind' else 'cbind', result)
+  
+}
+
+#' @rdname mint
+#' @export
+mint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
+  checkCharacter(newField, max.length = 1L)
+  
+  field <- rlang::sym(fieldMatch(x, field, 'mint.humdrumR', 'field'))
+  newField <- rlang::sym(newField)
+  
+  rlang::eval_tidy(rlang::expr({
+    
+    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Spine, Path), ...), dataTypes = dataTypes)
+    
+  }))
+}
+
+
+## Harmonic Intervals ####
+
+#' Calculate harmonic intervals
+#' 
+#' `hint` calculates harmonic intervals in a vector, or across records of a [humdrumR data object][humdrumRclass].
+#' 
+#' @family {relative pitch functions}
+#' @family {Lagged pitch interval functions}
+#' @name hint
+#' @export
+hint <- function(x, ...) UseMethod('hint') 
+
+
+
+#' @export
+hint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
+  
+  checkCharacter(newField, max.length = 1L)
+  
+  field <- rlang::sym(fieldMatch(x, field, 'hint.humdrumR', 'field'))
+  newField <- rlang::sym(newField)
+  
+  orderHumtab_humdrumR(x, melodic = FALSE)
+  
+  x <-  rlang::eval_tidy(rlang::expr({
+    
+    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Record), ...), dataTypes = dataTypes)
+    
+  }))
+  
+  orderHumtab_humdrumR(x, melodic = TRUE)
+}
 
 ###################################################################### ### 
 # Predefined tonalIntervals ##############################################

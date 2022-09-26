@@ -249,11 +249,15 @@ getColumn <- function(humtab, pad = 'corpus') {
 
 #####Humtable methods
 
+orderHumtab_humdrumR <- function(humdrumR, melodic = TRUE) {
+    humtab <- getHumtab(humdrumR)
+    orderHumtab(humtab, melodic = melodic)
+    humdrumR
+}
 
-
-orderHumtab <- function(humtab) {
+orderHumtab <- function(humtab, melodic = TRUE) {
     if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop')
+    orderingcols <- if (melodic) c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') else c('File', 'Piece', 'Record', 'Spine', 'Path', 'Stop')
     
     # can't sort by lists
     

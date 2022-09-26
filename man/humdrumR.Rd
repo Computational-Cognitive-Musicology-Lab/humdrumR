@@ -17,7 +17,7 @@ the power of \code{R} to give us unprecedented power to manipulate and analyze h
 \section{Package design}{
 
 
-The package \code{humdrumR} has XXX main components:
+The package \code{humdrumR} has seven main components:
 \itemize{
 \item To represent humdrum data in R, we have the \link[=humdrumRclass]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
 the \link[=humTable]{humdrum table}.
