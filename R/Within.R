@@ -1500,18 +1500,25 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     }
     partitionName <- paste0('_by=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
     
-    results <- humtab[ , {
-                          evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
-                          evaled[[partitionName]] <- partition
-                          list(list(evaled)) 
-                          },
-                      by = partition, .SDcols = targetFields]
+    result <- if (nrow(partQuos) > 1) {
+      results <- humtab[ , {
+        evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
+        evaled[[partitionName]] <- partition
+        list(list(evaled)) 
+      },
+      by = partition, .SDcols = targetFields]
+      
+      data.table::rbindlist(results$V1)
+    } else {
+      result <- eval(rlang::quo_squash(rlang::quo(humtab[ , !!doQuo, by = partition])))
+      result <- parseResult(as.list(result)[-1], humtab[match(result$partition, partition), `_rowKey_`])
+    }
+   
     
-    result <- data.table::rbindlist(results$V1)
     
     # thread visiblity
-    attr(result, 'visible') <- any(sapply(results$V1, \(res) attr(res, 'visible') %||% TRUE))
-    result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL ; res})
+    # attr(result, 'visible') <- any(sapply(results$V1, \(res) attr(res, 'visible') %||% TRUE))
+    # result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL ; res})
     
     
     result
