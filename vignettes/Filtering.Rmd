@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
   comment = ">\t"
 )
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 library(humdrumR)
 ```
 
@@ -41,7 +43,7 @@ chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 The simplest, common, way to filter your data is through *indexing*, which is a common approach in
 programming for selecting subsets of data.
-In `R`, we use the square brackets, `[]`, to index various data objects,
+In R, we use the square brackets, `[]`, to index various data objects,
 including basic atomic vectors, data.tables, and lists.
 For example, using brackets I can extract subsets of a vector:
 
@@ -58,13 +60,13 @@ myname[c(1, 5)]
 ```
 
 
-Watch out! `R` actually has **two** different ways of indexing:
+Watch out! R actually has **two** different ways of indexing:
 you can use a single pair of matches brackets (`[ ]`) or a double pair (`[[ ]]`).
-If you want a primer on how these two types of indexing are used in normal `R`
+If you want a primer on how these two types of indexing are used in normal R
 objects, check out the [R primer](Rbasics.html "Basics of R")---you really don't *need*
-to do this before getting into `humdrumR`, but you might want to eventually.
+to do this before getting into `r hm`, but you might want to eventually.
 
-We can use the single-bracket `[]` or double-bracket `[[]]` commands to index our `humdrumR` data objects.
+We can use the single-bracket `[]` or double-bracket `[[]]` commands to index our `r hm` data objects.
 The single-brackets are used to index whole *pieces* in your data.
 The double-brackets are used to index "within" pieces in your data.
 Either type of bracket can accept either `numeric` or `character` vectors to index by.
@@ -97,7 +99,7 @@ chorales[c(1,3,5)]
 
 ```
 
-You might want to use the `R` sequence command, `:`, to select a range of numbers:
+You might want to use the R sequence command, `:`, to select a range of numbers:
 
 ```{r}
 
@@ -107,8 +109,8 @@ chorales[6:10]
 
 ### Character indices (for single-brackets)
 
-If you supply a `humdrumR` object single-bracket index a `character` string,
-`humdrumR` will treat that string as a regular expression and return all the files that
+If you supply a `r hm` object single-bracket index a `character` string,
+`r Hm` will treat that string as a regular expression and return all the files that
 contain a match to that expression in *any* data token---even if there is only one.
 
 For example, we might be only interested in files that use flat notes.
@@ -148,7 +150,7 @@ Basically, commands should look like this:
 
 ### Numeric indices (for double-brackets)
 
-`Numeric` values `i` *or* `j` can be given to double-bracket `humdrumR` index commands.
+`Numeric` values `i` *or* `j` can be given to double-bracket `r hm` index commands.
 For `i`, the number is simply matched to record numbers in each file.
 For example, you could extract the first fifty records from each file as so:
 
@@ -178,13 +180,13 @@ chorales[[150:200, ]]
 ```
 
 We only get three files back, because the other seven files don't have any records above 150!
-(Notice that `humdrumR` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
+(Notice that `r hm` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
 
 
 ### Character indices (for double-brackets)
 
-`Character` string values `i` *or* `j` can also be given to double-bracket `humdrumR` index commands.
-`humdrumR` will treat string as a regular expression and return all records (`i`) or spines (`j`)
+`Character` string values `i` *or* `j` can also be given to double-bracket `r hm` index commands.
+`r Hm` will treat string as a regular expression and return all records (`i`) or spines (`j`)
 that any match to that expression in a data token---even if there is only one.
 For example, let's (again) say we are interesting in studying flats.
 Since `**kern` represents flats as "`-`", we can find records that contain a flat by calling:
@@ -235,7 +237,7 @@ we see that what is now the third file actually had flats in all four spines, an
 
 In some cases you may find the renumbering of spines on a *per file* basis confusing, and you want to keep track of the original spine numbers.
 Fortunately, for you there is an option that might helpful, which you will learn more about below: 
-try specifiying `removeEmpty = FALSE`:
+try specifying `removeEmpty = FALSE`:
 
 ```{r}
 chorales[[ , '-', removeEmpty = FALSE]]
@@ -245,9 +247,9 @@ chorales[[ , '-', removeEmpty = FALSE]]
 
 ## Negative numeric indices
 
-A nifty feature of `R` is that if you supply negative numbers to an indexer, `R` will *remove* those
+A nifty feature of R is that if you supply negative numbers to an indexer, R will *remove* those
 numbers.
-This works in `humdrumR` too, so if you want all the files *except* the first file, you could write:
+This works in `r hm` too, so if you want all the files *except* the first file, you could write:
 
 ```{r}
 chorales[-1]
@@ -271,7 +273,7 @@ chorales[[-1:-20, ]]
 
 ```
 
-(Again, `humdrumR` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
+(Again, `r hm` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
 
 
 # General Filtering
@@ -279,7 +281,7 @@ chorales[[-1:-20, ]]
 
 
 The indexing commands (previous sections) only get you so far.
-If you want to be more precise about filtering, use the `subset` method for `humdrumR` data.
+If you want to be more precise about filtering, use the `subset` method for `r hm` data.
 `subset.humdrumR` works exactly like [within.humdrumR](WorkingWithData.html "Working with Humdrum Data").
 However, the expression(s) you give must evaluate to a logical vector (`TRUE` or `FALSE`) of the same length as its input.
 (You will get an error otherwise.)
@@ -295,7 +297,7 @@ subset(chorales, Spine == 1)
 
 But, now we can filter based on *any* arbitrary criteria we want.
 For example, we could extract tokens from odd numbered spines in odd numbered records *and* even numbered spines in even numbered records.
-We'll use `R`s modulo command `%%` to separate even and odd numbers (`odd %% 2 == 1`, `even %% 2 == 0`).
+We'll use Rs modulo command `%%` to separate even and odd numbers (`odd %% 2 == 1`, `even %% 2 == 0`).
 
 ```{r}
 
@@ -342,7 +344,7 @@ subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar))
 ```
 
 
-Not enough context for you? maybe we should group the bars into even-odd pairs:
+Not enough context for you? Maybe we should group the bars into even-odd pairs:
 
 ```{r}
 
@@ -364,7 +366,7 @@ subset(chorales, Spine == 1)
 we still have four spines, but spines 2--4 are just emptied.
 This is correct.
 What `subset` actually does is mark filtered data in the `Filter` field of the humdrum table.
-`humdrumR` then ignores that data automatically.
+`r Hm` then ignores that data automatically.
 Why do we do this?
 There are several reasons:
 

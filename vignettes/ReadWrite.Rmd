@@ -15,11 +15,13 @@ knitr::opts_chunk$set(message = FALSE,
   collapse = TRUE,
   comment = "#>"
 )
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 ```
 
 Welcome to "Reading and writing data with humdrumR"!
-This document will give you a detailed overview of humdrumR's data reading and writing functionality.
-This document closely parallels parts of humdrumR's code documentation;
+This document will give you a detailed overview of `r hm`'s data reading and writing functionality.
+This document closely parallels parts of `r hm`'s code documentation;
 within an R session, you can read more concise version the material in this document by calling:
 
 ```{r } 
@@ -33,19 +35,19 @@ library(humdrumR)
 -------
 
 > **Note**:
-> humdrumR is primarily intended to be used for analyzing existing humdrum data, and most users will be reading humdrum data a lot more often than writing it.
-> humdrumR *is* able to write modified humdrum data back to humdrum-syntax text files, but this is a secondary use-case, and has recieved relatively little attention/thought in the current version of the package.
+> `r Hm` is primarily intended to be used for analyzing existing humdrum data, and most users will be reading humdrum data a lot more often than writing it.
+> `r Hm` *is* able to write modified humdrum data back to humdrum-syntax text files, but this is a secondary use-case, and has received relatively little attention/thought in the current version of the package.
 
 # Reading humdrum data
 
 
-The `readHumdrum` function is the gateway to humdrumR: it is the function we use to read humdrum data, encoded in humdrum-syntax text files, into R.
+The `readHumdrum` function is the gateway to `r hm`: it is the function we use to read humdrum data, encoded in humdrum-syntax text files, into R.
 
 ### Practice Data
 
-In the following examples, we will make use the small number of raw humdrum data files which are included with humdrumR.
-To access these files, we need to navigate to the directory where your computer installed humdrumR---fortunately, humdrumR records where this directory is on your computer in a variable called `humdrumRroot`.
-Once we load the humdrumR library, we just need to set our R "working directory" to that location using the command `setwd`.
+In the following examples, we will make use the small number of raw humdrum data files which are included with `r hm`.
+To access these files, we need to navigate to the directory where your computer installed `r hm`---fortunately, `r hm` records where this directory is on your computer in a variable called `humdrumRroot`.
+Once we load the `r hm` library, we just need to set our R "working directory" to that location using the command `setwd`.
 
 ```{r}
 library(humdrumR)
@@ -83,7 +85,7 @@ readHumdrum('HumdrumData/BachChorales/chor.*.krn')
 uses the REpath-pattern `"HumdrumData/BachChorales/chor.*.krn"` to match all files in the 'HumdrumData/BachChorales' directory whose name matches the regular expression "chor.*.krn."
 As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)---using your operating system's appopriate delimeter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
 *Each* directory is also treated as a regular expression, possibly matching multiple directories.
-Let's break this down: `humdrumR` splits your REpath-pattern input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
+Let's break this down: `r hm` splits your REpath-pattern input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
 The the first two expressions are used to match directories, while the last expression is used to match files.
 So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" directories and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" directories, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all kern files in both directories!
 
@@ -106,8 +108,8 @@ readHumdrum('HumdrumData/.*/.*')
 ```
 
 
-> Note: Since humdrumR can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched.
-> If this happens, humdrumR identifies each file with enough of it's directory path to make sure they are all unique.
+> Note: Since `r hm` can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched.
+> If this happens, `r hm` identifies each file with enough of it's directory path to make sure they are all unique.
 
 ----
 
@@ -169,7 +171,7 @@ However, the middle argument (`"...Variations"`) is of length two.
 
 #### Pattern Names
 
-Whenever we specific more than one REpath-pattern, `humdrumR` gives them names which we can access in the `Label` field of the resulting `humdrumR` data object.
+Whenever we specific more than one REpath-pattern, `r hm` gives them names which we can access in the `Label` field of the resulting `r hm` data object.
 You can choose these labels by giving names to the patterns in your multi-pattern vectors:
 Thus, we could write
 
@@ -179,7 +181,7 @@ readHumdrum('HumdrumData',
               Rock = 'RollingStone/.*')) -> rapAndRock
 ```
 and these two separate patterns will be matched and read *and* the names `"Rap"` and `"Rock"` will be associated with them in the resulting `Label` field.
-This feature is very useful if you are working with multiple heterogenous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.
+This feature is very useful if you are working with multiple heterogeneous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.
 
 ### Contains
 
@@ -202,7 +204,7 @@ readHumdrum('HumdrumData', 'BachChorales', 'chor.*.krn',
 
 `readHumdrum` interprets REpath-patterns and finds files using the helper function `findHumdrum`.
 If you are not sure where your humdrum files are, or what pattern you want to use to find them, you might start be using `findHumdrum`.
-`findHumdrum` takes the same input as `readHumdrum`, but doesn't fully parse the input into `humdrumR`.
+`findHumdrum` takes the same input as `readHumdrum`, but doesn't fully parse the input into `r hm`.
 Instead, it returns a `data.table` containing matching filenames (if any) and raw file content.
 
 If you use the `verbose = TRUE` option for either `findHumdrum` or `readHumdrum`, a complete list of all the matches files will be printed.
@@ -212,12 +214,12 @@ This is useful to check if you are reading the files you *intend* to read.
 
 `findHumdrum`, and by extension `readHumdrum`, are smart functions that will ignore non-humdrum files matched by your pattern.
 Non-text files (like `.pdf` or `.jpg`) will be ignored.
-Whatsmore, text files which fail to conform to the humdrum syntax will not be read either.
+Whats more, text files which fail to conform to the humdrum syntax will not be read either.
 You will see a message that checks which files are "valid humdrum," and tell you how many (if any) text files are not read.
 
 If you are trying to read a file which you *think* should be valid humdrum, but `readHumdrum` won't read it, use `validateHumdrum` with the exact same REpath-pattern arguments, and specify and `errorReport.path` to see a detailed report of the problem.
-`humdrumR` won't read files with *any* humdrum-syntax violations---there might be minor problems in the data that you need to fix.
-Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `humdrumR`'s data validation tools, and how they can be used to identify errors in your humdrum data.
+`r Hm` won't read files with *any* humdrum-syntax violations---there might be minor problems in the data that you need to fix.
+Call `?validateHumdrum` or read our [humdrum data validation vignette](Validation.html) to learn more about `r hm`'s data validation tools, and how they can be used to identify errors in your humdrum data.
 (`validateHumdrum` does not automatically check if the humdrum *data* is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)
 
 ## Reading
@@ -227,17 +229,17 @@ By now, you've seen that `readHumdrum` prints out a few messages describing its 
 
 1. First, the files which match your search patterns (if any) are identified, and their text is read into R.
 2. Next, these files are checked to see if they are valid humdrum files. 
-3. The files are parsed---i.e., translated into `humdrumR`'s [data.table backend](HumdrumTable.html). This step takes the longest by far, as it includes parsing all the humdrum files' data tokens, interpretations, reference records, and (worst of all) spine paths. Indeed, reading humdrum data with spine paths will take significantly longer than reading pathless data. To save yourself some time, you can potentially use the `tandems` and `reference` arguments (see "Parsing Metadata" below).
+3. The files are parsed---i.e., translated into `r hm`'s [data.table backend](HumdrumTable.html). This step takes the longest by far, as it includes parsing all the humdrum files' data tokens, interpretations, reference records, and (worst of all) spine paths. Indeed, reading humdrum data with spine paths will take significantly longer than reading pathless data. To save yourself some time, you can potentially use the `tandems` and `reference` arguments (see "Parsing Metadata" below).
 
 
 ## Parsing Metadata
 
-By default, humdrumR parses all metadata in the humdrum files it reads.
+By default, `r hm` parses all metadata in the humdrum files it reads.
 This includes the true global metadata for files, encoded in humdrum *reference records*, as well as the more local *tandem interpretations*.
 
 ### Reference Records
 
-By default, humdrumR parses all reference records in the files it reads, creating a unique field for each reference key. 
+By default, `r hm` parses all reference records in the files it reads, creating a unique field for each reference key. 
 (If there are more than one instance of any given key, they are combined in a string separated by semicolons.)
 If there are a lot of unique reference keys in a dataset, they can end up taking a lot of memory in a humdrum table.
 In these cases, you might find it useful to limit `readHumdrum` to only parsing those reference records which you are actually going to use.
@@ -274,12 +276,12 @@ If you don't want to parse *any* reference records, specify `reference = NULL`.
 
 Tandem interpretations are used in humdrum data to represent "local," real-time metainformation associated with specific spines---review our [humdrum syntax](HumdrumSyntax.html) vignette for more details.
 
-HumdrumR can read any arbitrary tandem interpertations in humdrum data.
-However, if non-standard intrepretations are used, `humdrumR` has no way of knowing how to parse them.
+`r Hm` can read any arbitrary tandem interpretations in humdrum data.
+However, if non-standard interpretations are used, `r hm` has no way of knowing how to parse them.
 
 
-By default, `humdrumR` always reads tandem interpretations into a field called `Tandem`.
-This field tabulates all tandem interperations that have so far appeared in a spine in order, concatenating them into a single comma-delimited, from most recent to most distant.
+By default, `r hm` always reads tandem interpretations into a field called `Tandem`.
+This field tabulates all tandem interpretations that have so far appeared in a spine in order, concatenating them into a single comma-delimited, from most recent to most distant.
 For instance, the `Tandem` field for the spine
 
 ```
@@ -309,12 +311,12 @@ D:,MM100,M4/4,C:
 ```
 
 So, the interpretations pile up into a longer and longer string as a piece progresses.
-Notice that the `"D:"` and `"C:"` intrerpretations get piled up separately, just like any other interpretation, even though they are of the same tandem class, and the `"D:"` should supercede the `"C:"`.
+Notice that the `"D:"` and `"C:"` interpretations get piled up separately, just like any other interpretation, even though they are of the same tandem class, and the `"D:"` should supersede the `"C:"`.
 Why do this?
 Well, *in general* there is no way to know if an arbitrary tandem interpretations are of the same class.
-If you create some humdrum data with new interpretations in it, `humdrumR` doesn't know how to parse them, so will just pile them up like this in the `Tandem` field.
+If you create some humdrum data with new interpretations in it, `r hm` doesn't know how to parse them, so will just pile them up like this in the `Tandem` field.
 
-Fortunately, `humdrumR` *does* know how to parse many standard tandem interpretations.
+Fortunately, `r hm` *does* know how to parse many standard tandem interpretations.
 If you run the command 
 
 ```{r}

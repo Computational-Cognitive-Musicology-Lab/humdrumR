@@ -70,8 +70,8 @@ dir('HumdrumData/BachChorales')
 
 
 There are `r humdrumR:::num2word(length(dir('HumdrumData/BachChorales')))` files in the folder, named "chor001.krn", "chor002.krn", etc.
-These are simple plain humdrum text files, using the '**kern' interpretation to represent ten chorales by J.S. Bach.
-Take a minute to find the files in your computer's finder/exporer and open them up with a simple text editor.
+These are simple plain humdrum text files, using the `**kern` interpretation to represent ten chorales by J.S. Bach.
+Take a minute to find the files in your computer's finder/explorer and open them up with a simple text editor.
 One of the core philosophies of `r hm` is that we maintain a direct, transparent relationship with our symbolic data---so always take the time to look at your data! 
 You can also do this within Rstudio's "Files" pane---in fact, Rstudio will make things extra easy for you because you can (within the Files pane) click "More" > "Go To Working Directory" to quickly find the files.
 
@@ -81,7 +81,7 @@ You can also do this within Rstudio's "Files" pane---in fact, Rstudio will make 
 ### Reading humdrum data
 
 Now that we've found some humdrum data to look at, let's read it into `r hm`.
-We can do this useing `r hm`'s `readHumdrum` command.
+We can do this using `r hm`'s `readHumdrum` command.
 Try this:
 
 ```{r}

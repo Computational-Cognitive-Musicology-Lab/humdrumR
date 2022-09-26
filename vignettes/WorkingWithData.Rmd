@@ -17,13 +17,15 @@ knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
   comment = ">\t"
 )
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 library(humdrumR)
 par(mar=c(1,1,1,1))
 ```
 
-Once we have [imported humdrum data](ReadWrite.html "Reading and writing humdrum data") into `R`,
+Once we have [imported humdrum data](ReadWrite.html "Reading and writing humdrum data") into R,
 we'll be ready to actually work with our data!
-The humdrum data you've imported is stored in a `humdrumR` data object, which gives us some special tools for working with it.
+The humdrum data you've imported is stored in a `r hm` data object, which gives us some special tools for working with it.
 
 Let's load some of the prepackaged data, as we learned in the [read/write vignette](ReadWrite.html "Reading and writing humdrum data").
 
@@ -39,7 +41,7 @@ How do we access or manipulate this data?
 
 # With and within you
 
-The key functions for working with `humdrumR` data objects are `with` and `within`.
+The key functions for working with `r hm` data objects are `with` and `within`.
 These functions allow you to get "inside" your data.
 Basically, once you call `with`/`within`, all the data fields within the data become available to you, to do with as you will.
 
@@ -47,18 +49,18 @@ Basically, once you call `with`/`within`, all the data fields within the data be
 ## With
 
 Let's start with `with`.
-You should call `with` with a `humdrumR` data object as the first argument.
-Your second argument can be any arbitrary `R` *expression* you like, and can use fields of the humdrum data.
-An "expression" is just a valid bit of `R` code; for example, `2 + 2`, `c(1, 2, 3)`,  `(x - mean(x))^2`, and `nchar(letters) |> mean()` are all examples of expressions.
-So "any arbitrary `R` expression" is just a fancy way of saying any `R` code that *you* want.
-When we execute an `R` command, `R` "*evaluates*" the expression(s) and returns their results.
+You should call `with` with a `r hm` data object as the first argument.
+Your second argument can be any arbitrary R *expression* you like, and can use fields of the humdrum data.
+An "expression" is just a valid bit of R code; for example, `2 + 2`, `c(1, 2, 3)`,  `(x - mean(x))^2`, and `nchar(letters) |> mean()` are all examples of expressions.
+So "any arbitrary R expression" is just a fancy way of saying any R code that *you* want.
+When we execute an R command, R "*evaluates*" the expression(s) and returns their results.
 
 As a starting point, lets tabulate all the tokens we have in our dataset.
 When you first load humdrum data, the original data tokens are always put into a field called `Token`.
-We will use the *awesome* built-in `R` function, `table`, to tabulate the unique tokens in our `Token` field.
+We will use the *awesome* built-in R function, `table`, to tabulate the unique tokens in our `Token` field.
 However, we can't access the `Token` field directly; if we just write the expression on the
-`table(Token)` we'll get an error---`R` will not be able to "find", and will say "`Error: object 'Token' not found`." 
-Instead, we use `with` to enter the data, where `R` can "see" `Token` (and all other data fields):
+`table(Token)` we'll get an error---R will not be able to "find", and will say "`Error: object 'Token' not found`." 
+Instead, we use `with` to enter the data, where R can "see" `Token` (and all other data fields):
 
 
 ```{r}
@@ -119,10 +121,10 @@ After the `|>` (pipe) operator is a great place for this.
 
 ## Within
 
-In many cases, we want to apply functions to our humdrum data, but keep the humdrum/`humdrumR` structure in place.
+In many cases, we want to apply functions to our humdrum data, but keep the humdrum/`r hm` structure in place.
 This is what `within` is for.
 Where `with` just returns what ever the output of your commands are, `within` will (attempt to) put the results of your commands
-"back inside" the `humdrumR` data object, as a new field.
+"back inside" the `r hm` data object, as a new field.
 
 For example, let's say we want to translate our `kern` data into a different pitch representation, like scientific pitch.
 We can do this with the `pitch` command.
@@ -140,7 +142,7 @@ within(chorales, pitch(Token))
 
 ```
 
-Now we get our `humdrumR` data back, but the `Token` data has been transformed from `**kern` to `**pitch`.
+Now we get our `r hm` data back, but the `Token` data has been transformed from `**kern` to `**pitch`.
 Notice, that there are now two "Data fields" listed at the bottom: `Token` (the original data) and `Result1`---this is the default name for new fields produced by `within`, and yes, they will get higher numbers if you keep making new fields.
 
 "Result1" is not very informative, so it's actually a good idea to give our new fields specific names.
@@ -181,7 +183,7 @@ We only see the low notes, which is what we'd expect from the bass voice.
 
 What about this, let's only tabulate the even-numbered bars:
 For datasets which have measures indicated (with `=` tokens), the `Bar` field is integers counting these bars within each piece.
-If we want even numbers, we can ask where is `Bar` modulu 2 zero?: `Bar %% 2 == 0`.
+If we want even numbers, we can ask where is `Bar` modulo 2 zero?: `Bar %% 2 == 0`.
 
 ```{r}
 with(chorales, 
@@ -272,9 +274,9 @@ with(chorales,
 Oops, that didn't work!
 It's because some of our `Token` data are rests, like `4r`.
 The `semits` function doesn't know how to read `4r` so it returns an `NA` value.
-Don't worry, this is an easy fix, and a good lesson for data analysis in general and `R` in particular.
+Don't worry, this is an easy fix, and a good lesson for data analysis in general and R in particular.
 We always need to keep in mind what data is "missing" or Not Applicable (`NA`). 
-Most `R` math functions have an option to ignore missing data by setting `na.rm = TRUE` (NA remove):
+Most R math functions have an option to ignore missing data by setting `na.rm = TRUE` (NA remove):
 
 ```{r}
 with(chorales, 
@@ -344,7 +346,7 @@ These two categories (`FALSE` and `TRUE`) are then used to group the data.
 
 In some cases, we'd like to perform a command `within` our data which might output a smaller vector than in the 
 input, including a single value, but we still want to reconstruct the data fully.
-In `R`, this is usually called "recycling"---i.e., repeating a value until it matches a certain length.
+In R, this is usually called "recycling"---i.e., repeating a value until it matches a certain length.
 When using `with` or `within`, we can cause our results to be recycled to the full field length
 by using the `recycle` argument for our expression.
 This is useful if you want to group by something, and fill each group with the same value:
