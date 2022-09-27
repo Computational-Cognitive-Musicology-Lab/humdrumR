@@ -2299,7 +2299,8 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
 
 
 object2str <- function(object) {
-    class <- class(object)[1]
+  object <- object[[1]]
+    class <- if (is.atomic(object) && !is.table(object)) 'list' else class(object)
     switch(class,
            table = {
              glue::glue("<table: k={length(object)}, n={num2str(sum(object))}>")

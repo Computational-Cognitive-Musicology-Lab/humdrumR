@@ -1037,10 +1037,11 @@ concatDoQuos <- function(quoTab) {
 
     quo({
       
-      result <- list(visible(withVisible({!!!doQuos})))
-      names(result) <- !!resultName
+      result <- list(list(visible(withVisible({!!!doQuos}))))
       
-      results <- c(list(!!!assignOut), result)
+      results <- c(lapply(list(!!!assignOut), \(ass) list(list(ass))), use.names = TRUE,
+                   setNames(list(result), !!resultName),
+                   list(`_rowKey_` = list(list(`_rowKey_`))))
       results
       }) 
     
@@ -1453,8 +1454,8 @@ interpolateArguments <- function(quo, namedArgs) {
 
 evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
     if (nrow(partQuos) == 0L) {
-        result <- rlang::eval_tidy(doQuo, data = humtab)
-        parseResult(result, humtab$`_rowKey_`)
+        result <- as.data.table(rlang::eval_tidy(doQuo, data = humtab))
+        parseResult(result)
         
     } else {
         result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
@@ -1490,7 +1491,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     nparts <- max(as.integer(partition))
     
-    if (nparts > 10000L) message("Your 'by' argument is making ", num2print(nparts), " groups.", 
+    if (nparts > 1e5L) message("Your 'by' argument is making ", num2print(nparts), " groups.", 
                                 " This could take a while!")
     
     if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
@@ -1511,15 +1512,10 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
       data.table::rbindlist(results$V1)
     } else {
       result <- eval(rlang::quo_squash(rlang::quo(humtab[ , !!doQuo, by = partition])))
-      result <- parseResult(as.list(result)[-1], humtab[match(result$partition, partition), `_rowKey_`])
+      colnames(result)[colnames(result) == 'partition'] <- partitionName
+      result <- parseResult(result)
     }
    
-    
-    
-    # thread visiblity
-    # attr(result, 'visible') <- any(sapply(results$V1, \(res) attr(res, 'visible') %||% TRUE))
-    # result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL ; res})
-    
     
     result
     
@@ -1556,53 +1552,68 @@ evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 #######################################################-
 
 
-parseResult <- function(result, rowKey) {
+
+parseResult <- function(results) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
-  if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
+  # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
-  # thread visiblity
-  visible <- any(sapply(result, \(res) attr(res, 'visible') %||% TRUE))
-  result[] <- lapply(result, \(res) {attr(res, 'visible') <- NULL; res})
+  resultCols <- !grepl('^_..*_$|partition', colnames(results))
+
+  lastResult <- max(which(resultCols))
+  firstResult <- results[[lastResult]][[1]][[1]]
   
-  #
-  outLength <- sapply(result, height)
-  objects <- sapply(result, \(res) !is.factor(res) && is.object(res))
-  
-  result[objects] <- lapply(result[objects], 
-                            \(x) {
-                              attr <- humdrumRattr(x)
-                              x <- list(x)
-                              humdrumRattr(x) <- attr
-                              x
-                            })
-  
-  finalLength <- tail(outLength, 1L)
-  result <- result[outLength == finalLength]
-  # if (length(outLength) > 1L) .stop('When using with(in).humdrumR, the result of the within expressions must be a vectors',
-  #                                   '(including lists) that are all the same lengths< or arrays with the same number of rows|>.',
-  #                                   ifelse = any(sapply(result, is.array)),
-  #                                   'In this case, the output list includes values that are {harvard(outLength, "and")} in length.')
+  keyLengths <- lengths(unlist(results[['_rowKey_']], recursive = FALSE))
+  resultLengths <- if (!is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
   
   
   
-  if (finalLength > length(rowKey)) .stop("Sorry, with(in).humdrumR doesn't currently support within-expressions", 
-                                          "which return values that are longer than their input field(s).",
-                                          "In this case, the input data is length {length(rowKey)} but the",
-                                          "last expression is evaluating to <values|a value> of length {finalLength}.",
-                                          ifelse = length(result) > 1L)
+  # results <- results[ , !grepl('^_..*_$|partition', colnames(results)), with = FALSE]
   
+  if (any(resultLengths > keyLengths)) {
+    pairs <- subset(unique(data.frame(resultLengths, keyLengths)), resultLengths > keyLengths)
     
-    result <- as.data.table(result)
+   
     
-    colnames(result)[colnames(result) == ""] <- "Result"
-    colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
+    .stop("Sorry, with(in).humdrumR doesn't currently support within-expressions", 
+          "which return values that are longer than their input field(s).",
+          "Your expression has returned results of lengths {harvard(pairs$resultLengths, 'and')} evaluated from",
+          "inputs of length {harvard(pairs$keyLengths, 'and')}<, respectively|>.",
+          ifelse = nrow(pairs) > 1L)
+  }
+  
+  
+  results <- lapply(results, 
+                    \(result) {
+                      if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
+                      first <- result[[1]][[1]]
+                      
+                      object <- !is.factor(first) && is.object(first)
+                      
+                      result <- unlist(result, recursive = FALSE)
+                      
+                      
+                      if (!object) {
+                        result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
+                        result <- unlist(result, recursive = FALSE)
+                      } 
+                      attr(result, 'visible') <- NULL
+                      result
+                    })
+  
+
+  
+  
+ 
     
-    #
+  result <- as.data.table(results)
     
-    result[ , `_rowKey_` := rowKey[1:finalLength]][]
-    attr(result, 'visible') <- visible
-    result
+  colnames(result)[colnames(result) == ""] <- "Result"
+  colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
+    
+  
+  attr(result, 'visible') <- attr(firstResult, 'visible') %||% TRUE
+  result
     
 }
 
