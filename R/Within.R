@@ -773,7 +773,7 @@ parseArgs <- function(..., variables = list(), withFunc) {
     quoenv <- rlang::quo_get_env(quo)
     for (name in names(variables)) assign(name, variables[[name]], envir = quoenv)
     
-    list(Quo = quo, Keyword = keyword, AssignTo = assign)
+    list(Quo = quo, Keyword = keyword, AssignTo = assign, Environment = quoA$Environment)
   })
   
   quoTab <- as.data.table(do.call('rbind', quos))
@@ -783,7 +783,6 @@ parseArgs <- function(..., variables = list(), withFunc) {
   
   quoTab <- parseKeywords(quoTab, withFunc)
   
-
   quoTab
   
 }
@@ -1045,7 +1044,6 @@ concatDoQuos <- function(quoTab) {
       results
     }) 
     
-    # environment(doQuo) <- rlang::get_env(doQuos[[1]])
     doQuo
 }
 
@@ -1477,7 +1475,7 @@ evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     
     partEval <- switch(partType,
                        by    = evalDoQuo_by,
-                       subset = evalDoQuo_where)
+                       subset = evalDoQuo_subset)
     
     partEval(doQuo, humtab, partition, partQuos, ordoQuo)
     
@@ -1493,8 +1491,11 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     nparts <- max(as.integer(partition))
     
-    if (nparts > 1e5L) message("Your 'by' argument is making ", num2print(nparts), " groups.", 
-                                " This could take a while!")
+    if (nparts > 1e5L) message("Your group-by expression {by = ",
+                               rlang::as_label(partQuos$Quo[[1]]),
+                               "} is evaluating to ", 
+                               num2print(nparts), " groups.", 
+                                " If your within-expression is complex, this could take a while!")
     
     if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
       oldpar <- par(no.readonly = TRUE,
@@ -1512,12 +1513,11 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
       by = partition, .SDcols = targetFields]
       data.table::rbindlist(results$V1)
     } else {
-      # I shouldn't need to manually thread the enviromnent...but 
-      # it won't work automatically with eval_tidy for some reason.
-      quoEnv <- rlang::new_environment(list(humtab = humtab, partition = partition), 
-                                       rlang::get_env(doQuo))
-      result <- eval(rlang::quo_squash(rlang::expr( humtab[ , !!doQuo, by = partition])), 
-                     envir = quoEnv)
+      # quoEnv <- rlang::new_environment(list(humtab = humtab, partition = partition),
+                                       # rlang::get_env(doQuo))
+      # result <- eval(rlang::quo_squash(rlang::expr( humtab[ , !!doQuo, by = partition])),
+                     # envir = quoEnv)
+      result <- humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = partition]
       colnames(result)[colnames(result) == 'partition'] <- partitionName
       result
     }
@@ -1527,10 +1527,13 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 
     
 }
-evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
-    if (!is.logical(partition)) stop(call. = FALSE,
-                                     "In your call to with(in)Humdrum with a 'subset = x' expression, 
-                                     your subset expression must evaluate to a logical (TRUE/FALSE).")
+evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
+  if (!is.logical(partition)) stop(call. = FALSE,
+                                   "In your call to with(in)Humdrum with a 'subset = x' expression, 
+                                     your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
+                                   "The expression you've provided {",
+                                   rlang::as_label(partQuos$Quo[[1]]),
+                                   "} evaluates to something of class {class(partition)}")
   
     if (nrow(partQuos) > 1L) {
       
