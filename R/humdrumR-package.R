@@ -50,9 +50,9 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-exclusiveFunctions <- c('mint')
+exclusiveFunctions <- c('mint', 'hint')
 keyedFunctions <- c()
-boundedFunctions <- c('mint', 'delta', 'sigma', 'lag', 'ditto')
+boundedFunctions <- c('mint', 'hint', 'delta', 'sigma', 'lag', 'ditto')
 
 setOldClass('quosure')
 
