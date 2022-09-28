@@ -17,23 +17,25 @@ knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
   comment = ">\t"
 )
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 library(humdrumR)
 ```
 
-`humdrumR` is a package for the R programming language.
-You don't need to be an R master to use `humdrumR`, but there are some basic concepts from R
+`r Hm` is a package for the R programming language.
+You don't need to be an R master to use `r hm`, but there are some basic concepts from R
 that you will need to learn, and ultimately, if you want to get really advanced, you'll
-need to delevelop some R skills.
+need to develop some R skills.
 This document is a basic primer for R, which will teach you the basics you need to know in order to 
-make the most out of `humdrumR`.
+make the most out of `r hm`.
 
 
 # Basic Commands
 
-`R` code is made up of "expressions" like `2 + 2`, `sqrt(2)`, or `(x - mean(x))^2`.
+R code is made up of "expressions" like `2 + 2`, `sqrt(2)`, or `(x - mean(x))^2`.
 As you can see, you can create very intuitive *arithmetic* expressions, like `5 / 2` or `3 * 3`.
-However, the most common elements of `R` expressions are "calls" to *functions*.
-A "function" in `R` is a pre-built bit of code that does something.
+However, the most common elements of R expressions are "calls" to *functions*.
+A "function" in R is a pre-built bit of code that does something.
 Most functions take one or more input *arguments*, and "return" some kind of output.
 For example, the function `sqrt()` takes a number as an input argument, and "returns" the square root of that number.
 
@@ -87,7 +89,7 @@ log(round(sqrt(mean(x^2)), base = 2)
 calls *four* functions!
 An expression like that is a bit tricky to read, and it can be really easy to make a mistake where
 you put the wrong number of parentheses.
-As an alternative, `R` gives us the option of calling functions in a "pipe."
+As an alternative, R gives us the option of calling functions in a "pipe."
 The way this works is we use the "pipe" command `|>`, which takes an input on the left and "pipes" it into a function call on the right.
 For example, we can rewrite the previous command as:
 
@@ -97,7 +99,7 @@ x^2 |> mean() |> sqrt() |> round() |> log(base = 2)
 ```
 
 Much better!
-To make things even cleaner, `R` will understand if you spread your expressions across multiple lines, by putting a new line after each `|>`, or function argument:
+To make things even cleaner, R will understand if you spread your expressions across multiple lines, by putting a new line after each `|>`, or function argument:
 
 ```
 x^2 |>
@@ -118,7 +120,7 @@ max(sqrt(2),
 
 ## Variables
 
-When coding in `R`, you'll often want to "save" data or other objects so you can reuse them.
+When coding in R, you'll often want to "save" data or other objects so you can reuse them.
 We do this by "assigning" something (often the result of a function) to a "*variable*".
 This is done using the assignment operators, either `<-` or `->`.
 A variable name can be any combination of upper and lowercase letters.
@@ -188,7 +190,7 @@ However, R doesn't *really* distinguish between scalars (single values) and vect
 (multiple values)---everything is always a vector.
 (Still, we sometimes refer to length-1 vectors as scalars.)
 
-To make a vector from scratch in `R`, use `c()`, as so:
+To make a vector from scratch in R, use `c()`, as so:
 
 ```{r}
 
@@ -229,7 +231,7 @@ Having everything be a vector all the time is very useful, because it allows us 
 use collections of data as single thing.
 If I give you, say, ten thousand numbers, you don't have to worry about manipulating ten thousand things:
 rather, you just work with *one* thing: a vector, which happens to be of length 10,000.
-In R, we call this **vectorization**---generally, in R and in `humdrumR` we will constantly
+In R, we call this **vectorization**---generally, in R and in `r hm` we will constantly
 be taking advantage of vectorization to make our lives super easy!
 
 ---
@@ -246,11 +248,11 @@ c(1, 1, 2, 3, 5, 8, 13, 21) * 2
 
 We created two `numeric` vectors:
 
-1. The first eight numbers of the Fibonnaci sequence 
+1. The first eight numbers of the Fibonacci sequence 
 2. the single number `2`
 
 and multiplied them together!
-Notice that the entire Fibonnaci vector is multiplied by two!
+Notice that the entire Fibonacci vector is multiplied by two!
 We don't have to worry about multiplying each number of the vector, its done for us.
 
 ----
@@ -279,7 +281,7 @@ paste(c('a', 'b', 'c'), c(1, 2, 3))
 
 In the second case, one of the vectors is length-1 (a "scalar").
 In this case, the scalar value is paired with each value in the longer vector (as in the
-Fibonnaci example above).
+Fibonacci example above).
 
 
 ```{r}
@@ -295,7 +297,7 @@ paste(c('a', 'b', 'c'), 1)
 ----
 
 What happens if we have vectors that are longer than one, but are not the same length?
-Well, `R` will generally attempt to "recycle" the shorter vector---which means repeat it---
+Well, R will generally attempt to "recycle" the shorter vector---which means repeat it---
 as necessary to match the length of the longer vector.
 If the shorter vector evenly divides the longer vector, you generally won't have a problem:
 
@@ -331,7 +333,7 @@ This brings us too...
 
 ## Data frames
 
-Data frames are the heart and soul of `R`.
+Data frames are the heart and soul of R.
 A `data.frame` is simply a collection of vectors that are *all the same length*---ideal for vectorized operations!
 The vectors in a `data.frame` are arranged as columns in a two dimension table.
 Let's make a data frame, by feeding some vectors to the [data.frame()] function:
@@ -378,7 +380,7 @@ data.frame(Letters = X, Semitones = Y, Intervals = Z)
 
 Remember, the vectors in a `data.frame` must all be the same length.
 If you tried to make a `data.frame` with a vectors that don't match in length, you'll get an error "`arguments imply differing number of rows`."
-The one exception is that you can call `data.frame` with some *scalar* single values, which will be automatically recyced to match
+The one exception is that you can call `data.frame` with some *scalar* single values, which will be automatically recycled to match
 the length of the other vectors.
 
 ### With and Within You
@@ -388,9 +390,9 @@ We can do this several ways.
 One approach is with the `$` operator, combined with the name of the column we want.
 For example, we can get the `Letters` column from the data frame we made above using `df$Letters`.
 
-Often, we'll want to write code that uses a bunch of different columns from the same data.frame---in fact, this is the *main* thing we do most of the time in `R`!
+Often, we'll want to write code that uses a bunch of different columns from the same data.frame---in fact, this is the *main* thing we do most of the time in R!
 To avoid writing `df$` over and over again, we can use the `with()` function.
-`with()` allows us to drop "inside" our `data.frame`, where our `R` commands can "see" the columns variables:
+`with()` allows us to drop "inside" our `data.frame`, where our R commands can "see" the columns variables:
 
 ```{r}
 
@@ -407,12 +409,16 @@ Sometimes we'll encounter data points which are irrelevant, meaningless, or "not
 
 # Common Functions
 
++ `getwd()` --- Get R's current working directory.
++ `setwd()` --- Set R's working directory.
++ `summary()` --- Summarize the contents of an R object.
 
 ## Vector functions
 
 + `sort()` --- Put values of a vector into ascending order.
   + set `decreasing = TRUE` for decreasing order.
 + `rev()` --- Reverse the order of a vector.
++ `unique()` --- Returns only the unique values of a vector.
 + `x %in% y` --- Which elements of the vector `x` appear in the vector `y`?
 
 
@@ -445,7 +451,7 @@ Sometimes we'll encounter data points which are irrelevant, meaningless, or "not
 # Making your own functions
 
 
-To make your function in `R`, you use the `function` keyword, like so:
+To make your function in R, you use the `function` keyword, like so:
 
 ```
 function(argument1, argument2, etc.) {

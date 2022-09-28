@@ -27,7 +27,6 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -37,12 +36,11 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -93,7 +91,7 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
 <dt>...</dt>
 <dd><p>Any number of expressions to evaluate. Unnamed expressions are interpreted as the
 "main" <em>within-expressions</em>. Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>windows</code>.
-Other evaluation options can be achieved with <code>fill</code> or <code>side</code> arguments.</p></dd>
+Other evaluation options can be achieved with <code>recycle</code> or <code>side</code> arguments.</p></dd>
 <dt>dataTypes</dt>
 <dd><p>A string or vector of characters drawn from <code>c("D", "d", "I", "L", "M","G")</code>.
 These characters  correspond to types of humdrum records: <strong>D</strong>ata, null <strong>d</strong>ata, <strong>I</strong>nterpretations,
@@ -222,7 +220,7 @@ which is confusing, so don't do it!)</p>
 </div>
 
 <div class="section">
-<h3 id="filling-cycling-results-">Filling (cycling) results:<a class="anchor" aria-label="anchor" href="#filling-cycling-results-"></a></h3>
+<h3 id="recycling-filling-results-">Recycling ("filling") results:<a class="anchor" aria-label="anchor" href="#recycling-filling-results-"></a></h3>
 
 
 <p>The result of your within expression may be shorter than the input vectors (<a href="humTable.html">humtable fields</a>).
@@ -370,11 +368,11 @@ part of a new field, you can specifying alternate
 within-expression(s) to evaluate where <code>subset == FALSE</code>.
 These must be named <code>complement</code>, or the aliases
 <code>rest</code> or <code>otherwise</code> (these are all [partially matched][partialMatching]).
-(You can also specify <code>compfill</code> or <code>restfill</code>, to get the behavior of <code>fill</code>. See above.)
 A <code>complement</code> expression can only be specified in combination with a <code>subset</code> argument,
 and must be <em>in addition</em> to a normal within-expression.
 The idea is that you evaluate the "normal" within-expression where <code>subset == TRUE</code>, <em>or else</em>
-you specify evaluate the <code>complement</code> expression.</p>
+you specify evaluate the <code>complement</code> expression.
+The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")</p>
 <p>A common use case for a <code>complement</code> expression is to use the within expression to change the data in one spine
 but return the data unchanged in other spines.
 For example, we could specify <code>within(humData, kern(Token), subset = Spine == 1, complement = Token)</code>.

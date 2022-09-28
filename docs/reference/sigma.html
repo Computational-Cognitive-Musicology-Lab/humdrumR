@@ -25,7 +25,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -35,12 +34,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -189,7 +187,7 @@ except generally faster when the number of groups is large.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want <code>boundaries = list(File, Spine, Path )</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
-three fields as <code>boundaries</code> arguments to certain functions: mint, delta, sigma, lag, or ditto.
+three fields as <code>boundaries</code> arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

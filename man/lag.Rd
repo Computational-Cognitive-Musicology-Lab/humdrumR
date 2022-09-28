@@ -81,7 +81,7 @@ except generally faster when the number of groups is large.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{boundaries = list(File, Spine, Path )}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{boundaries} arguments to certain functions: mint, delta, sigma, lag, or ditto.
+three fields as \code{boundaries} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

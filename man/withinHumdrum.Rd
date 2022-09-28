@@ -17,7 +17,7 @@
 
 \item{...}{Any number of expressions to evaluate. Unnamed expressions are interpreted as the
 "main" \emph{within-expressions}. Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
-Other evaluation options can be achieved with \code{fill} or \code{side} arguments.}
+Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
 
 \item{dataTypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}.
 These characters  correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations,
@@ -162,7 +162,7 @@ creates a histogram of \code{nchar(Token)} and also returns the mean of \code{nc
 which is confusing, so don't do it!)
 }
 
-\subsection{Filling (cycling) results:}{
+\subsection{Recycling ("filling") results:}{
 
 The result of your within expression may be shorter than the input vectors (\link[=humTable]{humtable fields}).
 However, in some calls to \code{within.humdrumR} in particular, you'd like to return a single number and
@@ -308,11 +308,11 @@ part of a new field, you can specifying alternate
 within-expression(s) to evaluate where \code{subset == FALSE}.
 These must be named \code{complement}, or the aliases
 \code{rest} or \code{otherwise} (these are all [partially matched][partialMatching]).
-(You can also specify \code{compfill} or \code{restfill}, to get the behavior of \code{fill}. See above.)
 A \code{complement} expression can only be specified in combination with a \code{subset} argument,
 and must be \emph{in addition} to a normal within-expression.
 The idea is that you evaluate the "normal" within-expression where \code{subset == TRUE}, \emph{or else}
 you specify evaluate the \code{complement} expression.
+The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")
 
 A common use case for a \code{complement} expression is to use the within expression to change the data in one spine
 but return the data unchanged in other spines.

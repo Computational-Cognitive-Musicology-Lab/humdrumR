@@ -37,7 +37,7 @@
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
-#' @importFrom data.table data.table rbindlist setorderv setcolorder copy as.data.table is.data.table frank
+#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank
 #' @importFrom lubridate period is.period
 NULL
 
@@ -50,9 +50,9 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-exclusiveFunctions <- c('mint')
+exclusiveFunctions <- c('mint', 'hint')
 keyedFunctions <- c()
-boundedFunctions <- c('mint', 'delta', 'sigma', 'lag', 'ditto')
+boundedFunctions <- c('mint', 'hint', 'delta', 'sigma', 'lag', 'ditto')
 
 setOldClass('quosure')
 

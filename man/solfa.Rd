@@ -160,7 +160,9 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 Other {relative pitch functions}: 
 \code{\link{bhatk}()},
 \code{\link{degree}()},
-\code{\link{interval}()}
+\code{\link{hint}()},
+\code{\link{interval}()},
+\code{\link{mint}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},

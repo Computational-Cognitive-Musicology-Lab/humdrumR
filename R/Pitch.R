@@ -946,7 +946,7 @@ tint2octave <- function(x,
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
                         octave.relative = FALSE, octave.round = floor, ...) {
 
-  if (octave.relative) x <- delta(x)
+  if (octave.relative) x <- delta(x, init = x)
   #
   octn <- octave.offset + tintPartition_compound(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
@@ -2936,6 +2936,7 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
+#' @family {Lagged pitch interval functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions],
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
@@ -3394,55 +3395,219 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
+#' Calculate melodic intervals
+#' 
+#' `mint` calculates melodic intervals in a vector, or across spine/paths of a [humdrumR data object][humdrumRclass].
+#' A vector is interpreted as an ordered sequence of notes, forming a "melody,"
+#' and the intervals *between* successive pitches are calculated.
+#'
+#' @details 
+#' 
+#' Input vector `x` is [parsed as pitch information][tonalInterval()].
+#' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. `Key` and `Exclusive` are also passed to the parser.)
+#'
+#' The parsed pitch vector is copied and lagged using [lag()], and pairs which cross `boundaries` are ignored.
+#' The melodic intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
+#' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
+#' However, the only alternative deparser that would be *commonly* used (other than [intervals()]) would be [semits()].
+#' 
+#' The `lag` argument controls how far apart in the melody intervals are calculated.
+#' For instance, a lag of `2` will calculate intervals between *every other* note in the vector.
+#' Positive lags will calculate **approaching** intervals: each token represents the interval between the current note
+#' and the *previous* note.
+#' Negative lags will calculate **departing** intervals: each token reprseents the interval 
+#' between the current note and the *next* note.
+#' 
+#' Note that you by passing `directed = FALSE` through the the deparser, the undirected (absolute value)
+#' of the melodic intervals can be returned.
+#' 
+#' @section Initial value padding:
+#' 
+#' Any output of `mint` is necessarily padded by `abs(lag)` undefined intervals at the beginning
+#' (positive lag) or end (negative lag).
+#' The `initial` argument controls how these initial values are presented.
+#' 
+#' If `initial` is a function, the "initial" pitches are parsed "absolutely" relative to middle-C;
+#' in this case, `initial` should be another [pitch function][pitchFunctions] to deparse these pitches.
+#' The default is the [kern()] function.
+#' If `bracket == TRUE`, these initial values are are surrounded with `[]`, so they are easier to distinguish from the
+#' actual melodic intervals.
+#' 
+#' If `initial` is an atomic value, these value are used as the padder;
+#' An atomic (vector) `initial` must be the same length as `abs(lag)`.
+#' For example, you could set `initial = 'start'` to label these locations as the character string `'start'`.
+#' If `initial` is `NULL`, the initial values are simply padded with `NA`.
+#' 
+#' 
+#' @section Interval classification:
+#' 
+#' If the `classify` argument is set to `TRUE`, intervals are classified as either `"Unison"`,
+#' `"Step"`, `"Skip"`, or `"Leap"`.
+#' Alternatively, skips can be interpreted as leaps by setting `skips = FALSE`.
+#' (Note that classification will only work if `deparser = interval`, which is the default).
+#'
+#' By default, intervals are categorized tonally, meaning that the interval in tonal *steps*
+#' is used as the basis of classification.
+#' For example, an augmented 2nd is a step, and a diminished 3rd is a skip/leap.
+#' This means that augmented and diminished unisons are marked `"Unison"` as well!
+#' However, if `directed = TRUE`, augmented/diminished unisons will be marked with `+` or `-`
+#' to indicate direction, whereas perfect unisons are never marked with `+`/`-`.
+#' 
+#' Alternatively, you may choose to categorize intervals *atonally* by setting `atonal = TRUE`.
+#' If so, intervals are categorized based only on semitone (enharmonic) intervals:
+#' D# and Eb are classified the same.
+#' 
+#' 
+#' 
+#'
+#'
+#' @family {relative pitch functions}
+#' @family {Lagged pitch interval functions}
+#' @seealso {`mint` uses [lag()] to "lag" the input pitches, and also makes use of [pitch parsers][tonalInterval()] and [pitch functions][pitchFunctions].}
+#' @inheritSection sigma Boundaries
+#' @name mint
 #' @export
-mint <- function(x, ..., lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
-                 classify = FALSE,
+mint <- function(x, ...) UseMethod('mint')
+
+#' @rdname mint
+#' @export
+mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+                 classify = FALSE, ..., 
                  parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+  
+  checkVector(x, 'x', 'mint', min.length = 1L)
+  checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
+  checkFunction(deparser, 'deparser', 'mint')
+  if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to mint with an atomic 'initial' argument, ",
+                                                               "length(initial) must equal abs(lag).")                 
+  checkTF(bracket, 'bracket', 'mint')
+  checkTF(classify, 'classify', 'mint')
   
   lagged <- lag(x, lag, boundaries = boundaries)
   
   c('args', 'parseArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs)
   
+  if (classify) deparser <- mintClass
+  
   minterval <- do(
     \(X, L, exclusive, key) {
       Xtint <- do.call('tonalInterval', c(list(X, Exclusive = exclusive, Key = key), parseArgs))
       Ltint <- do.call('tonalInterval', c(list(L, Exclusive = exclusive, Key = key), parseArgs))
-      tint <- Xtint - Ltint
+      tint <- if (lag >= 0) Xtint - Ltint else Ltint - Xtint
       
       output <- do(deparser, c(list(tint), args))
+      
       
       singletons <- !is.na(Xtint) & is.na(Ltint)
       
       if (!is.null(initial) && any(singletons)) {
         
-        if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', do(initial, c(list(Xtint[singletons]), args)), if (bracket) ']')
+        if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', 
+                                                               do(initial, c(list(Xtint[singletons], 
+                                                                                  Exclusive = exclusive, 
+                                                                                  Key = key), 
+                                                                             args)), 
+                                                               if (bracket) ']')
         if (is.atomic(initial)) output[singletons] <- initial
       }
       output
     }, 
     args = list(x, lagged, Exclusive, Key)) # Use do so memoize is invoked
-  
-  if (classify) minterval[!is.na(minterval)] <- mintClass(minterval[!is.na(minterval)], ...)
   minterval
   
 }
 
 
-mintClass <- function(x, directed = TRUE, skips = TRUE) {
-  int <- interval(x, generic = TRUE)
-  int <- as.integer(int)
+mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   
-  sign <- if (directed)  c('-', '', '+')[sign(int - 1L) + 2L] else ""
+  if (atonal) {
+    int <- tint2semits(x)
+    sign <- c('-', '', '+')[sign(int) + 2L]
+    breaks <- c(-Inf, 0, 2, 4, Inf)
+
+  } else {
+    int <- tint2interval(x, step.labels = NULL, specific = FALSE, compound = FALSE)
+    sign <- stringr::str_extract(int, '^[+-]?')
+    int <- as.numeric(int)
+    
+    
+    breaks <- c(0, 1, 2, 3, Inf)
+  }
+  
   int <- abs(int)
    
  
+  intClass <- as.character(cut(int, breaks = breaks, labels = c('Unison', 'Step', if (skips) 'Skip' else 'Leap', 'Leap')))
   
-  intClass <- cut(int, breaks = c(0, 1, 2, 3, Inf), labels = c('Unison', 'Step', 'Skip', 'Leap'))
   
-  
-  paste0(sign, intClass)
+  .paste(if (directed) sign, intClass)
 }
 
+#' @rdname mint
+#' @export
+mint.data.frame <- function(x, ...) {
+  x[] <- lapply(x, mint, ...)
+  x
+}
+
+#' @rdname mint
+#' @export
+mint.matrix <- function(x, margin = 2, ...) {
+  result <- apply(x, margin, mint, ..., simplify = FALSE)
+  
+  do.call(if (margin == 1) 'rbind' else 'cbind', result)
+  
+}
+
+#' @rdname mint
+#' @export
+mint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
+  checkCharacter(newField, max.length = 1L)
+  
+  field <- rlang::sym(fieldMatch(x, field, 'mint.humdrumR', 'field'))
+  newField <- rlang::sym(newField)
+  
+  rlang::eval_tidy(rlang::expr({
+    
+    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Spine, Path), ...), dataTypes = dataTypes)
+    
+  }))
+}
+
+
+## Harmonic Intervals ####
+
+#' Calculate harmonic intervals
+#' 
+#' `hint` calculates harmonic intervals in a vector, or across records of a [humdrumR data object][humdrumRclass].
+#' 
+#' @family {relative pitch functions}
+#' @family {Lagged pitch interval functions}
+#' @name hint
+#' @export
+hint <- function(x, ...) UseMethod('hint') 
+
+
+
+#' @export
+hint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
+  
+  checkCharacter(newField, max.length = 1L)
+  
+  field <- rlang::sym(fieldMatch(x, field, 'hint.humdrumR', 'field'))
+  newField <- rlang::sym(newField)
+  
+  putHumtab(x) <- orderHumtab(copy(getHumtab(x)), melodic = FALSE)
+  
+  x <-  rlang::eval_tidy(rlang::expr({
+    
+    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Record), ...), dataTypes = dataTypes)
+    
+  }))
+  
+  orderHumtab_humdrumR(x, melodic = TRUE)
+  x
+}
 
 ###################################################################### ### 
 # Predefined tonalIntervals ##############################################

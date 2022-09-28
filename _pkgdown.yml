@@ -1,4 +1,4 @@
-url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
+url: https://computational-cognitive-musicology-lab.github.io/humdrumR/index.html
 home:
   sidebar:
     structure: [links, license, community, citation, authors, dev, toc]
@@ -18,7 +18,6 @@ articles:
 - title: Basics
   navbar: Basics
   contents:
-  - Overview
   - GettingStarted
   - IntroForCoders
 - title: Background
@@ -32,7 +31,6 @@ articles:
   navbar: Data prep
   contents: 
   - ReadWrite
-  - Validation
   - Reshaping
   - Filtering
 - title: Analysis
@@ -113,6 +111,8 @@ reference:
   - invert
   - chordTransformer
   - keyTransformer
+  - mint
+  - hint
 - subtitle: "Rhythm"
   desc: "Rhythm and meter classes and functions."
   contents:

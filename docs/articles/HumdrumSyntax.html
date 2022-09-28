@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -52,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -94,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-09-25</h4>
+            <h4 data-toc-skip class="date">2022-09-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/HumdrumSyntax.Rmd"><code>vignettes/HumdrumSyntax.Rmd</code></a></small>
       <div class="d-none name"><code>HumdrumSyntax.Rmd</code></div>
@@ -115,9 +113,9 @@ conform to the humdrum syntax,” “to be valid humdrum,” or most simply
 “to be a humdrum file.”</p>
 <blockquote>
 <p>In computer programming, you will often encounter words like
-“characters”, “text”, and “strings” used interchangibly. You’ll also
+“characters”, “text”, and “strings” used interchangeably. You’ll also
 hear combinations like “character-strings” and “text-strings.” These all
-(generally) refer to the same things: collectiosn of letters, numbers,
+(generally) refer to the same things: collections of letters, numbers,
 punctuation, and a control/spacing characters like SPACEBAR
 (<code></code>), TAB (<code>\t</code>), NEWLINE (<code>\n</code>), etc.
 Technically, humdrum text files are supposed to use the ASCII character
@@ -153,7 +151,7 @@ data!</p>
 <div class="section level2">
 <h2 id="syntax">Syntax<a class="anchor" aria-label="anchor" href="#syntax"></a>
 </h2>
-<p>The humdrum syntax is, at first glange, nothing but a simple,
+<p>The humdrum syntax is, at first glance, nothing but a simple,
 tab-delineated spread sheet. (“tab-delineated” just means that the
 columns of the spreadsheet are separated by TABs.) This <em>is</em> the
 basic idea, but there are a few extra features to learn!</p>
@@ -190,7 +188,7 @@ spines in this file don’t include records <code>1</code> and
 <p>There is one fundamental assumption regarding how the humdrum syntax
 encodes information: as we travel downward through a file (from top to
 bottom) we are encoding information in the order it occurs in time. This
-is true of data records—interpetation and comment records are all
+is true of data records—interpretation and comment records are all
 associated with the moment in time of the first data record that occurs
 below them. Information that appears in the same record (within one
 spine, or in different spines) is assumed to happen at the same
@@ -232,8 +230,8 @@ Two stars <code>**</code> indicates an <strong>exclusive</strong>
 interpretation. Every spine must start with an exclusive interpretation,
 and can only have one. The exclusive interpretation for a spine tells us
 the type of information is encoded in that spine, for the whole spine.
-For instance, our <code>**drums</code> interpration that we invented
-above is an exclusive interpetation.</p>
+For instance, our <code>**drums</code> interpretation that we invented
+above is an exclusive interpretation.</p>
 <p>In the examples we’re using here, the exclusive interpretation in
 both spines is <code>**kern</code>, is the most widely used humdrum
 interpretation, used to encode music notation. Note that a humdrum file
@@ -253,13 +251,13 @@ used in <code>**kern</code> to indicate the key of C major.
 <code>*Ibass</code> indicates what instrument is associated with that
 spine (bass voice). <code>*M4/4</code> and <code>*M3/4</code> indicate
 4/4 and 3/4 meter respectively. This last case brings up something
-important about tandem interprations: a tandem interpretation is applied
-to all subsequent data points, unless it is cancelled or replaced by
-another tandem intepretation of the same type. Thus, this humdrum file
-indicates 4/4 time starting at record 5, but switches to 3/4 time at
-record 13. However, the <code>*M4/4</code> in record 4 doesn’t replace
-the <code>*C:</code> in record 3, because they are different types of
-tandem intepretations.</p>
+important about tandem interpretations: a tandem interpretation is
+applied to all subsequent data points, unless it is cancelled or
+replaced by another tandem interpretation of the same type. Thus, this
+humdrum file indicates 4/4 time starting at record 5, but switches to
+3/4 time at record 13. However, the <code>*M4/4</code> in record 4
+doesn’t replace the <code>*C:</code> in record 3, because they are
+different types of tandem interpretations.</p>
 <hr>
 <p>One more very special token is the <code>*-</code> token. This token
 indicates where a spine <em>ends</em>. If the <code>*-</code> are

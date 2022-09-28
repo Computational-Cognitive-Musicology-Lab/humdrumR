@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -52,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -94,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-09-25</h4>
+            <h4 data-toc-skip class="date">2022-09-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/KeysAndChord.Rmd"><code>vignettes/KeysAndChord.Rmd</code></a></small>
       <div class="d-none name"><code>KeysAndChord.Rmd</code></div>
@@ -102,13 +100,16 @@ Condit-Schultz</h4>
 
     
     
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">hm</span> <span class="op">&lt;-</span> <span class="st">"humdrum$_{\\mathbb{R}}$"</span>
+<span class="va">Hm</span> <span class="op">&lt;-</span> <span class="st">"Humdrum$_{\\mathbb{R}}$"</span></code></pre></div>
 <div class="section level2">
 <h2 id="diatonic-sets">Diatonic Sets<a class="anchor" aria-label="anchor" href="#diatonic-sets"></a>
 </h2>
 <p>As mentioned in the Pitch and Tonality vignette, a normative diatonic
-key consists of a set of seven consetutive pitch chroma on the Line of
+key consists of a set of seven consecutive pitch chroma on the Line of
 Fifths.</p>
-<p>A diatonic set can be orderd either by line-of-fifths position:</p>
+<p>A diatonic set can be ordered either by line-of-fifths position:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left"><strong>LoF</strong></th>
@@ -172,7 +173,7 @@ Fifths.</p>
 </h2>
 <p>The set of seven notes in a diatonic key can be reimagined as a
 <em>chord</em>—a set of notes played at the same time. Specifically, a
-full seven-note diatonic chord is refered to as a 13th chord. However,
+full seven-note diatonic chord is referred to as a 13th chord. However,
 most chords used in tonal music are subsets of the full diatonic set, in
 particular three-note <em>triads</em>.</p>
 <p>When viewing a diatonic set as a chord, we traditionally order the
@@ -216,8 +217,8 @@ resulting in steps 9, 11, and 13, instead of 2, 4, and 6.</p>
 </table>
 <p>There are <span class="math inline">\(2^7=\)</span> 128 possible
 subsets that can be formed from the full diatonic set. Of these, the
-seven possiblities that are built from consecutive tertian steps are
-theoritically priveledged : i.e., <span class="math inline">\(\{\{1\},
+seven possibilities that are built from consecutive tertian steps are
+theoretically privileged : i.e., <span class="math inline">\(\{\{1\},
 \{1,3\}, \{1,3,5\}, \{1,3,5,7\}, \{1,3,5,7,9\}, \{1,3,5,7,9,11\},
 \{1,3,5,7,9,11,13\}\}\)</span>.</p>
 <p>A few other possible sets are fairly commonplace in Western theory as
@@ -227,11 +228,11 @@ well: <span class="math inline">\(\{1,5, 11\}\)</span> (“sus4”), <span class
 </h3>
 <p>There are numerous ways tertian sets of notes are traditionally
 notated or annotated as character strings. Unfortunately, these systems
-are not always rigorously consisistent or logical, with convenient
+are not always rigorously consistent or logical, with convenient
 shorthands for common chords which lead to ambiguity, and/or practices
-rooted in traditional practices with little relavance.
-<code>humdrumR</code> aims to provide a general approach to make
-reading/writing chord annotations in many forms possible.</p>
+rooted in traditional practices with little relevance. Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> aims to provide a general
+approach to make reading/writing chord annotations in many forms
+possible.</p>
 <p>A chord representation is consists of set of at least one of the
 following elements:</p>
 <ul>
@@ -243,7 +244,7 @@ key.</li>
 </ul>
 <p>Traditional chord notation symbols often conflate or merge these
 various elements in various ways, with numerous common shorthands. In
-particular, the common diatonic traids—which are abstractly different
+particular, the common diatonic triads—which are abstractly different
 combinations of qualities of the 3rd and 5th—are represented in various
 shorthands.</p>
 <div class="section level4">
@@ -262,7 +263,7 @@ part of the ostensible chord. For instance, <code>C7/Ab</code>.</li>
 indicated in various ways.
 <ul>
 <li>In the most consist form, a unique symbol is appended to indicate
-one of four unique triad types: major, minor, diminished, or augmetned.
+one of four unique triad types: major, minor, diminished, or augmented.
 However, in some cases, major is assumed to be the default, and can be
 ommitted. In other cases, either a major or minor symbol is ommited, and
 the case of the root symbol is used to indicate major or minor. (In

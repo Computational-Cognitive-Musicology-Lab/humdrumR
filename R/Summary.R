@@ -159,7 +159,7 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = 
   }
 
   censusTable$partition <- as.character(censusTable$partition)
-  setorder(censusTable, partition)
+  data.table::setorder(censusTable, partition)
   
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- paste(dataTypes, collapse = '')

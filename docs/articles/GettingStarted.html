@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
     <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
     <div class="dropdown-divider"></div>
@@ -52,12 +51,11 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
     <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating humdrum data</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Summarizing humdrum data sets</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
@@ -94,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-09-25</h4>
+            <h4 data-toc-skip class="date">2022-09-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd"><code>vignettes/GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
@@ -149,10 +147,10 @@ with the ‘BachChorales’ folder.</p>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">6</span>] <span class="st">"chor006.krn"</span> <span class="st">"chor007.krn"</span> <span class="st">"chor008.krn"</span> <span class="st">"chor009.krn"</span> <span class="st">"chor010.krn"</span></span></code></pre></div>
 <p>There are ten files in the folder, named “chor001.krn”,
 “chor002.krn”, etc. These are simple plain humdrum text files, using the
-’**kern’ interpretation to represent ten chorales by J.S. Bach. Take a
-minute to find the files in your computer’s finder/exporer and open them
-up with a simple text editor. One of the core philosophies of
-humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> is that we
+<code>**kern</code> interpretation to represent ten chorales by J.S.
+Bach. Take a minute to find the files in your computer’s finder/explorer
+and open them up with a simple text editor. One of the core philosophies
+of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> is that we
 maintain a direct, transparent relationship with our symbolic data—so
 always take the time to look at your data! You can also do this within
 Rstudio’s “Files” pane—in fact, Rstudio will make things extra easy for
@@ -163,7 +161,7 @@ Working Directory” to quickly find the files.</p>
 </h4>
 <p>Now that we’ve found some humdrum data to look at, let’s read it into
 humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>. We can do
-this useing humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s
+this using humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s
 <code>readHumdrum</code> command. Try this:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -1342,7 +1340,7 @@ table. What can we do with it?</p>
 <code>readHumdrum</code>, this object encapsulates a humdrum-table
 (<code>data.table</code>) object, which is where the data is really
 stored. We’ve already seen that you can extract that humdrum table
-directly using <code>getHumtab</code>—and if you are aleady an R pro,
+directly using <code>getHumtab</code>—and if you are already an R pro,
 you might just want to extract the table an work with it directly.
 However, what the humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object does is give us some
 convenient ways of working with that table. For example, we’ve already
@@ -1362,7 +1360,7 @@ like:</p>
 </ul>
 <p>However, we can tell humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> to evaluate these
 expressions using the fields of our humdrum tables. These simplest way
-is using the <code><a href="https://rdrr.io/r/base/with.html" class="external-link">within()</a></code> function, which takes a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object and an expression on
+is using the <code><a href="../reference/withinHumdrum.html">within()</a></code> function, which takes a humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> object and an expression on
 its right side.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales, Spine <span class="sc">+</span> File)</span>
@@ -1674,7 +1672,7 @@ calculate the semitone value for each pitch in the chorales:</p>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">269</span></span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 1</span></span>
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>        <span class="er">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">127</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">128</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">129</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
@@ -1767,7 +1765,7 @@ name you want, or just let it be called <code>Result1</code> if you
 want!</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">Semits</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">Semits</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></code></pre></div>
 <p>There is now a new Data field in our humdrum table, called
 <code>Semits</code>. Meanwhile, the original <code>Token</code> field is
 still there, safely unchanged! Just like before, we can use the
@@ -1782,7 +1780,7 @@ still there, safely unchanged! Just like before, we can use the
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">269</span></span>
 <span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 1</span></span>
 <span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>        <span class="er">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
 <span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">127</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
 <span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">128</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
 <span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">129</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
@@ -1879,7 +1877,7 @@ still there, safely unchanged! Just like before, we can use the
 <span id="cb23-105"><a href="#cb23-105" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">269</span></span>
 <span id="cb23-106"><a href="#cb23-106" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 1</span></span>
 <span id="cb23-107"><a href="#cb23-107" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>        <span class="er">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits</span>
+<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
 <span id="cb23-109"><a href="#cb23-109" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">127</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
 <span id="cb23-110"><a href="#cb23-110" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">128</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
 <span id="cb23-111"><a href="#cb23-111" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">129</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
@@ -1978,7 +1976,7 @@ like any other field:</p>
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">269</span></span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 1</span></span>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>        <span class="er">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">126</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">127</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
 <span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">128</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
 <span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">129</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
@@ -2165,14 +2163,14 @@ instead:</p>
 basic function called <code><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot()</a></code>:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-28-1.png" width="700"></p>
 <p>Remember our <code>Semits</code> field that we made earlier? Maybe
 we’d like to see a histogram of those values—let’s use R’s
 <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code> function:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-29-1.png" width="700"></p>
 </div>
 </div>
@@ -2182,11 +2180,11 @@ we’d like to see a histogram of those values—let’s use R’s
 <p>You’ve gotten started, but there is much more to learn! To keep
 learning check out the other articles on the <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/" class="external-link">humdrumR
 webpage</a>. If you want to continue along the path we’ve started here,
-the next articles to check out are probably <a href="Filtering.html" title="Filtering humdrum data">Filtering humdrum data</a> and <a href="WorkingWithData.html" title="Working with humdrum data">Working
-with humdrum data</a>. Since most musicological analysis involves pitch
-or rhythm, you’ll probably want to learn about relavent ideas from the
-[Pitch and tonality](PitchAndTonality.html “Pitch and tonality in
-humdrumR) and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm and meter</a> articles.</p>
+the next articles to check out are probably <a href="Summary.html" title="Getting to know your data">Getting to know your data</a>, <a href="Filtering.html" title="Filtering humdrum data">Filtering humdrum
+data</a>, and <a href="WorkingWithData.html" title="Working with humdrum data">Working with humdrum data</a>. Since
+most musicological analysis involves pitch or rhythm, you’ll probably
+want to learn about relevant ideas from the <a href="PitchAndTonality.html" title="Pitch and tonality in humdrumR">Pitch and tonality</a> and <a href="RhythmAndMeter.html" title="Rhythm and meter in humdrumR">Rhythm
+and meter</a> articles.</p>
 <p>If the humdrum data you are working with is complex—e.g., including
 multiple different exclusive interpretations, spine paths, or
 multi-stops—you’ll probably find you need to check out the <a href="Reshaping.html" title="Shaping humdrum data">Shaping humdrum
