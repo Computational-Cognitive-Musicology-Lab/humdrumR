@@ -3511,7 +3511,7 @@ hint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ...
   field <- rlang::sym(fieldMatch(x, field, 'hint.humdrumR', 'field'))
   newField <- rlang::sym(newField)
   
-  orderHumtab_humdrumR(x, melodic = FALSE)
+  putHumtab(x) <- orderHumtab(copy(getHumtab(x)), melodic = FALSE)
   
   x <-  rlang::eval_tidy(rlang::expr({
     
@@ -3520,6 +3520,7 @@ hint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ...
   }))
   
   orderHumtab_humdrumR(x, melodic = TRUE)
+  x
 }
 
 ###################################################################### ### 
