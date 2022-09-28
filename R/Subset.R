@@ -381,7 +381,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- subset(x, fill ~ any(. %~l% !!i),  by = File)
+            x <- subset(x, fill = any(. %~l% !!i),  by = File)
             
             if (removeEmpty) x <- removeEmptyFiles(x)
             
@@ -497,7 +497,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
                 
               } 
               
-              x <- subset(x, form, by ~ File, dataTypes = "D")
+              x <- subset(x, form, by = File, dataTypes = "D")
               
               if (removeEmpty) x <- removeEmptySpines(x)
             }

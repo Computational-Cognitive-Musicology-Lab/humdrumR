@@ -179,7 +179,9 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 
 Other {relative pitch functions}: 
 \code{\link{bhatk}()},
+\code{\link{hint}()},
 \code{\link{interval}()},
+\code{\link{mint}()},
 \code{\link{solfa}()}
 
 Other {pitch functions}: 

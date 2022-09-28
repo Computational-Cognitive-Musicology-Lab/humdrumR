@@ -8,7 +8,7 @@
 \alias{mint.humdrumR}
 \title{Calculate melodic intervals}
 \usage{
-mint(x, ..., lag, deparaser, initial, bracket)
+mint(x, ...)
 
 \method{mint}{default}(
   x,
@@ -39,3 +39,17 @@ mint(x, ..., lag, deparaser, initial, bracket)
 \description{
 \code{mint} calculates melodic intervals in a vector, or across spine/paths of a \link[=humdrumRclass]{humdrumR data object}.
 }
+\seealso{
+Other {relative pitch functions}: 
+\code{\link{bhatk}()},
+\code{\link{degree}()},
+\code{\link{hint}()},
+\code{\link{interval}()},
+\code{\link{solfa}()}
+
+Other {Lagged pitch interval functions}: 
+\code{\link{hint}()},
+\code{\link{interval}()}
+}
+\concept{{Lagged pitch interval functions}}
+\concept{{relative pitch functions}}

@@ -1034,17 +1034,19 @@ concatDoQuos <- function(quoTab) {
     }
     # if (is.null(assignOut[[length(assignOut)]]))  assignOut$Result <- quote(result)
     names(assignOut) <- sapply(assignOut, as.character)
-
-    quo({
+    
+    doQuo <- rlang::quo({
       
       result <- list(list(visible(withVisible({!!!doQuos}))))
       
-      results <- c(lapply(list(!!!assignOut), \(ass) list(list(ass))), use.names = TRUE,
+      results <- c(lapply(list(!!!assignOut), \(assign) list(list(assign))), use.names = TRUE,
                    setNames(list(result), !!resultName),
                    list(`_rowKey_` = list(list(`_rowKey_`))))
       results
-      }) 
+    }) 
     
+    # environment(doQuo) <- rlang::get_env(doQuos[[1]])
+    doQuo
 }
 
 ####################### Functions used inside prepareQuo
@@ -1453,14 +1455,14 @@ interpolateArguments <- function(quo, namedArgs) {
 
 
 evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
-    if (nrow(partQuos) == 0L) {
-        result <- as.data.table(rlang::eval_tidy(doQuo, data = humtab))
-        parseResult(result)
+    result <- if(nrow(partQuos) == 0L) {
+        as.data.table(rlang::eval_tidy(doQuo, data = humtab))
         
     } else {
-        result <- evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
-        result
+        evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
     }
+   
+    parseResult(result)
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     ### evaluation partition expression and collapse results 
@@ -1485,7 +1487,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     # this function doesn't use reHum because data.table 
     # pretty much already does (some) of whats needed.
     targetFields <- namesInExprs(colnames(humtab), c(doQuo, partQuos[-1]$Quo))
-    targetFields <- c(targetFields, '_rowKey_')
+    targetFields <- unique(c(targetFields, '_rowKey_'))
     
     partition <- as.factor(partition)
     
@@ -1503,41 +1505,48 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     result <- if (nrow(partQuos) > 1) {
       results <- humtab[ , {
-        evaled <- evalDoQuo(doQuo, .SD, partQuos[-1], ordoQuo)
+        evaled <- evalDoQuo_part(doQuo, .SD, partQuos[-1], ordoQuo)
         evaled[[partitionName]] <- partition
         list(list(evaled)) 
       },
       by = partition, .SDcols = targetFields]
-      
       data.table::rbindlist(results$V1)
     } else {
-      result <- eval(rlang::quo_squash(rlang::quo(humtab[ , !!doQuo, by = partition])))
+      # I shouldn't need to manually thread the enviromnent...but 
+      # it won't work automatically with eval_tidy for some reason.
+      quoEnv <- rlang::new_environment(list(humtab = humtab, partition = partition), 
+                                       rlang::get_env(doQuo))
+      result <- eval(rlang::quo_squash(rlang::expr( humtab[ , !!doQuo, by = partition])), 
+                     envir = quoEnv)
       colnames(result)[colnames(result) == 'partition'] <- partitionName
-      result <- parseResult(result)
+      result
     }
-   
     
     result
     
+
     
 }
 evalDoQuo_where <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.logical(partition)) stop(call. = FALSE,
-                                     "In your call to with(in)Humdrum with a 'subset ~ x' expression, 
+                                     "In your call to with(in)Humdrum with a 'subset = x' expression, 
                                      your subset expression must evaluate to a logical (TRUE/FALSE).")
-    result <- evalDoQuo(doQuo, humtab[partition], partQuos[-1], ordoQuo)
+  
+    if (nrow(partQuos) > 1L) {
+      
+      result <- evalDoQuo_part(doQuo, humtab[partition], partQuos[-1], ordoQuo)
+    
+    } else {
+      result <- as.data.table(rlang::eval_tidy(doQuo, data = humtab[partition]))
+    }
     
     partitionName <- paste0('_subset=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
-    
     result[[partitionName]] <- TRUE
     
     if (!is.null(ordoQuo)) {
-        visible <- attr(result, 'visible')
-        orresult <- evalDoQuo(ordoQuo, humtab[!partition], partQuos[-1], NULL)
-        orresult[[partitionName]] <- FALSE
-        
-        result <- data.table::rbindlist(list(result, orresult))
-        attr(result, 'visible') <- visible
+        complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!partition]))
+        complement[[partitionName]] <- FALSE
+        result <- data.table::rbindlist(list(result, complement))
     }
     
    result
@@ -1572,8 +1581,6 @@ parseResult <- function(results) {
   
   if (any(resultLengths > keyLengths)) {
     pairs <- subset(unique(data.frame(resultLengths, keyLengths)), resultLengths > keyLengths)
-    
-   
     
     .stop("Sorry, with(in).humdrumR doesn't currently support within-expressions", 
           "which return values that are longer than their input field(s).",

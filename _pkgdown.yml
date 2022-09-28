@@ -111,6 +111,8 @@ reference:
   - invert
   - chordTransformer
   - keyTransformer
+  - mint
+  - hint
 - subtitle: "Rhythm"
   desc: "Rhythm and meter classes and functions."
   contents:
