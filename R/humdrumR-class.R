@@ -249,15 +249,10 @@ getColumn <- function(humtab, pad = 'corpus') {
 
 #####Humtable methods
 
-orderHumtab_humdrumR <- function(humdrumR, melodic = TRUE) {
-    humtab <- getHumtab(humdrumR)
-    orderHumtab(humtab, melodic = melodic)
-    humdrumR
-}
 
-orderHumtab <- function(humtab, melodic = TRUE) {
+orderHumtab <- function(humtab) {
     if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- if (melodic) c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') else c('File', 'Piece', 'Record', 'Spine', 'Path', 'Stop')
+    orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') 
     
     # can't sort by lists
     
@@ -539,7 +534,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     output <- matrix(padder, nrow = max(i), ncol = max(j))
     
     output[cbind(i, j)] <- field
-    rownames(output) <- humtab[!duplicated(humtab[ , c('File', 'Record'), with = FALSE]), paste0(File, '.', Record)]
+    rownames(output) <- unique(humtab[,c('File', 'Record')])[order(File,Record), paste0(File, '.', Record)]
     
     output
     

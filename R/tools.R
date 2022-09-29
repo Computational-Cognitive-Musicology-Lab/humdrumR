@@ -597,8 +597,9 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' The `data.frame` method simply applies `ditto` to each column of the `data.frame` separately.
 #' For arrays, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
 #' 
-#' The `ditto` method for a [humdrumR object][humdrumRclass] applies `ditto` to each spine-path within each file
-#' in the corpus. The `field` argument indicates which field to apply ditto to. The result of the dittoing
+#' The `ditto` method for a [humdrumR object][humdrumRclass] simply applies `ditto` to the, by default,
+#' the active field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
+#' The `field` argument can be used to indicated a different field to apply to. The result of the dittoing
 #' is saved to a new field---the `newField` argument can be used to control what to name the new field.
 #' 
 #' @param nonnull Either a logical vector where (`length(x) == length(nonnull)`), a numeric
@@ -606,8 +607,8 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @param reverse (`logical` & `length == 1`) If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
 #' *earlier* (lower indices) in the vector. 
 #' @param margin a vector giving the subscripts which the function will be applied over. 
-#'     E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns. 
-#'     Where X has named dimnames, it can be a character vector selecting dimension names.
+#'     E.g., for a matrix `1` indicates rows, `2` indicates columns.
+#'     Where `x` has named dimnames, it can be a character vector selecting dimension names.
 #' @param field Which field ([partially matched][partialMatching]) in the `humdrumR` dataset should be dittoed?
 #' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
 #' 
@@ -646,6 +647,7 @@ ditto.data.frame <- function(x, ...) {
 #' @rdname ditto
 #' @export
 ditto.matrix <- function(x, margin = 2, ...) {
+  checkLooseInteger(margin, 'margin', 'ditto.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
   result <- apply(x, margin, ditto, ..., simplify = FALSE)
   
   do.call(if (margin == 1) 'rbind' else 'cbind', result)
@@ -659,9 +661,9 @@ ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = pas
   field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
   newField <- rlang::sym(newField)
   rlang::eval_tidy(rlang::expr({
-    
-      within(x, !!newField <- ditto(!!field, ...), by = list(File, Spine, Path), dataTypes = 'Dd')
-    
+
+      within(x, !!newField <- ditto(!!field, ...), dataTypes = 'Dd')
+
   }))
 }
 
