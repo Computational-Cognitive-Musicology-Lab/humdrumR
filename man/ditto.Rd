@@ -12,7 +12,8 @@ ditto(x, ...)
 
 \method{ditto}{default}(
   x,
-  nonnull = function(x) !is.na(x) & x != ".",
+  null = function(x) is.na(x) & x == ".",
+  initial = NA,
   reverse = FALSE,
   boundaries = list()
 )
@@ -29,10 +30,13 @@ ditto(x, ...)
 )
 }
 \arguments{
-\item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}
+\item{x}{A vector.}
 
-\item{nonnull}{Either a logical vector where (\code{length(x) == length(nonnull)}), a numeric
+\item{null}{Either a logical vector where (\code{length(x) == length(null)}), a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.}
+
+\item{initial}{A value (\code{length == 1}) of the same class as \code{x}, used to pad the beginning (or end, if \code{reverse == TRUE}) of the output,
+if necessary.}
 
 \item{reverse}{(\code{logical} & \code{length == 1}) If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
 \emph{earlier} (lower indices) in the vector.}
@@ -41,8 +45,8 @@ vector of positive indices, or a function which, when applied to \code{x} return
 by the \code{boundaries} vector(s) is treated separately.}
 
 \item{margin}{a vector giving the subscripts which the function will be applied over.
-E.g., for a matrix 1 indicates rows, 2 indicates columns, c(1, 2) indicates rows and columns.
-Where X has named dimnames, it can be a character vector selecting dimension names.}
+E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
+Where \code{x} has named dimnames, it can be a character vector selecting dimension names.}
 
 \item{field}{Which field (\link[=partialMatching]{partially matched}) in the \code{humdrumR} dataset should be dittoed?}
 
@@ -53,21 +57,24 @@ Where X has named dimnames, it can be a character vector selecting dimension nam
 with non-null values from earlier/later in the same vector.
 The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 The \code{reverse} argument can be used to cause "backward" filling, where the \emph{next} (higher index) non-null value is used.
+If the input begins (or ends if \code{reverse == TRUE}) with a null value, the \code{initial} argument is filled instead; defaults to \code{NA}.
+As a special option, \code{initial == "_next_"} will cause the first (or last) non-null value to be filled backwards into the initial nulls.
 }
 \details{
-Which values are considered "non-null" can be controlled using the \code{nonnull} argument.
-The \code{nonnull} argument can either be a logical vector which is the same length as the input (\code{x}) argument, a numeric
+Which values are considered "null" can be controlled using the \code{null} argument.
+The \code{null} argument can either be a logical vector which is the same length as the input (\code{x}) argument, a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.
-The values of \code{x} where \code{nonnull == TRUE} are copied forward/backwards to replace any adjacent vales where \code{nonnull == FALSE}.
-By default, \code{nonnull} is the function \verb{\\(x) !is.na(x) & x != '.'}, which means that \code{NA} values and the string \code{"."} are
+The values of \code{x} where \code{null == FALSE} are copied forward/backwards to replace any adjacent vales where \code{null == TRUE}.
+By default, \code{null} is the function \verb{\\(x) is.na(x) | x == '.'}, which means that \code{NA} values and the string \code{"."} are
 "null", and are overwritten by adjacent values.
 
-\code{ditto} methods are defined for data.frames and arrays (including matrices).
+\code{ditto} methods are defined for data.frames and matrices.
 The \code{data.frame} method simply applies \code{ditto} to each column of the \code{data.frame} separately.
-For arrays, ditto can be applied across columns (\code{margin == 2}), rows (\code{margin == 1}), or other dimensions.
+For matrices, ditto can be applied across columns (\code{margin == 2}), rows (\code{margin == 1}), or other dimensions.
 
-The \code{ditto} method for a \link[=humdrumRclass]{humdrumR object} applies \code{ditto} to each spine-path within each file
-in the corpus. The \code{field} argument indicates which field to apply ditto to. The result of the dittoing
+The \code{ditto} method for a \link[=humdrumRclass]{humdrumR object} simply applies \code{ditto} to the, by default,
+the active field; thus \code{ditto(humData)} is equivalent to \code{within(humData, newField <- ditto(.), dataTypes = 'Dd')}.
+The \code{field} argument can be used to indicated a different field to apply to. The result of the dittoing
 is saved to a new field---the \code{newField} argument can be used to control what to name the new field.
 }
 \section{Boundaries}{
