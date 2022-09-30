@@ -407,3 +407,32 @@ IOI <- function(ois) {
 tatum <- function(dur) {
   do.call('gcd', as.list(unique(dur)))
 }
+
+
+###################################################################### ###
+# Rhythmic visualizations rhythm intervals ###############################
+###################################################################### ###
+
+
+londonPlot <- function(soi) {
+  
+  radian <- -(soi * 2 * pi) + pi / 2
+  
+  x <- cos(radian)
+  y <- sin(radian)
+  
+  plot.new()
+  plot.window(xlim = c(-1L, 1L), ylim = c(-1L, 1L))
+  
+  lines(cos(seq(0, 2*pi, length.out = 1e3)), 
+        sin(seq(0, 2*pi, length.out = 1e3)),
+        lty = 'dashed', col = 'grey50')
+  
+  # polygon(x = x, y = y, )
+  points(c(x, x[1]), c(y, y[1]), type = 'b', pch = 16)
+  
+  i <- tapply(seq_along(x), INDEX = paste(round(x, 2), round(y, 2)), paste, collapse = ';')
+  xy <- do.call('rbind', lapply(strsplit(names(i), split = ' '), as.numeric))
+  text(xy[ , 1]*1.1, xy[ , 2]*1.1, i, xpd = T)
+  
+}
