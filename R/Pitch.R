@@ -3423,6 +3423,10 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' Note that you by passing `directed = FALSE` through the the deparser, the undirected (absolute value)
 #' of the melodic intervals can be returned.
 #' 
+#' `mint` methods are defined for data.frames and matrices.
+#' The `data.frame` method simply applies `mint` to each column of the `data.frame` separately.
+#' For matrices, mint can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
+#' 
 #' @section Initial value padding:
 #' 
 #' Any output of `mint` is necessarily padded by `abs(lag)` undefined intervals at the beginning
@@ -3474,8 +3478,8 @@ mint <- function(x, ...) UseMethod('mint')
 #' @rdname mint
 #' @export
 mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
-                 classify = FALSE, ..., 
-                 parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+                         classify = FALSE, ..., 
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
   checkVector(x, 'x', 'mint', min.length = 1L)
   checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
@@ -3487,38 +3491,37 @@ mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracke
   
   lagged <- lag(x, lag, boundaries = boundaries)
   
-  c('args', 'parseArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs)
   
   if (classify) deparser <- mintClass
   
-  minterval <- do(
-    \(X, L, exclusive, key) {
-      Xtint <- do.call('tonalInterval', c(list(X, Exclusive = exclusive, Key = key), parseArgs))
-      Ltint <- do.call('tonalInterval', c(list(L, Exclusive = exclusive, Key = key), parseArgs))
-      tint <- if (lag >= 0) Xtint - Ltint else Ltint - Xtint
-      
-      output <- do(deparser, c(list(tint), args))
-      
-      
-      singletons <- !is.na(Xtint) & is.na(Ltint)
-      
-      if (!is.null(initial) && any(singletons)) {
-        
-        if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', 
-                                                               do(initial, c(list(Xtint[singletons], 
-                                                                                  Exclusive = exclusive, 
-                                                                                  Key = key), 
-                                                                             args)), 
-                                                               if (bracket) ']')
-        if (is.atomic(initial)) output[singletons] <- initial
-      }
-      output
-    }, 
-    args = list(x, lagged, Exclusive, Key)) # Use do so memoize is invoked
+  minterval <- do(.mint, args = list(x, lagged, lag = lag, deparser = deparser, initial = initial, bracket = bracket, 
+                                     parseArgs = parseArgs, Exclusive = Exclusive, Key = Key, ...)) # Use do so memoize is invoked
   minterval
   
 }
 
+
+.mint <- function(X, L, lag, deparser, initial, bracket, parseArgs, Exclusive, Key, ...) {
+  Xtint <- do.call('tonalInterval', c(list(X, Exclusive = Exclusive, Key = Key), parseArgs))
+  Ltint <- do.call('tonalInterval', c(list(L, Exclusive = Exclusive, Key = Key), parseArgs))
+  tint <- if (lag >= 0) Xtint - Ltint else Ltint - Xtint
+  
+  output <- do(deparser, list(tint, ...))
+  
+  singletons <- !is.na(Xtint) & is.na(Ltint)
+  
+  if (!is.null(initial) && any(singletons)) {
+    
+    if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', 
+                                                           do(initial, c(list(Xtint[singletons], 
+                                                                              Exclusive = Exclusive, 
+                                                                              Key = Key), 
+                                                                         ...)), 
+                                                           if (bracket) ']')
+    if (is.atomic(initial)) output[singletons] <- initial
+  }
+  output
+}
 
 mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   
@@ -3555,26 +3558,13 @@ mint.data.frame <- function(x, ...) {
 #' @rdname mint
 #' @export
 mint.matrix <- function(x, margin = 2, ...) {
+  checkLooseInteger(margin, 'margin', 'mint.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
   result <- apply(x, margin, mint, ..., simplify = FALSE)
   
   do.call(if (margin == 1) 'rbind' else 'cbind', result)
   
 }
 
-#' @rdname mint
-#' @export
-mint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
-  checkCharacter(newField, max.length = 1L)
-  
-  field <- rlang::sym(fieldMatch(x, field, 'mint.humdrumR', 'field'))
-  newField <- rlang::sym(newField)
-  
-  rlang::eval_tidy(rlang::expr({
-    
-    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Spine, Path), ...), dataTypes = dataTypes)
-    
-  }))
-}
 
 
 ## Harmonic Intervals ####
@@ -3592,23 +3582,39 @@ hint <- function(x, ...) UseMethod('hint')
 
 
 #' @export
-hint.humdrumR <- function(x, field = getActiveFields(x)[1], dataTypes = 'D', ..., newField = paste0(field, '_mint')) {
+hint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+                         classify = FALSE, ..., 
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
-  checkCharacter(newField, max.length = 1L)
+  checkVector(x, 'x', 'hint', min.length = 1L)
+  checkFunction(deparser, 'deparser', 'hint')
+  if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to hint with an atomic 'initial' argument, ",
+                                                               "length(initial) must equal abs(lag).")                 
+  checkTF(bracket, 'bracket', 'hint')
+  checkTF(classify, 'classify', 'hint')
   
-  field <- rlang::sym(fieldMatch(x, field, 'hint.humdrumR', 'field'))
-  newField <- rlang::sym(newField)
+  reorderer <- if (length(boundaries)) {
+    i <- do.call('order', boundaries)
+    x <- x[i]
+    if (is.logical(lag)) lag <- lag[i]
+    boundaries <- lapply(boundaries, '[', i = i)
+    \(z) z[match(seq_along(z), i)]
+  } else {
+    force
+  }
   
-  putHumtab(x) <- orderHumtab(copy(getHumtab(x)), melodic = FALSE)
   
-  x <-  rlang::eval_tidy(rlang::expr({
-    
-    within(x, !!newField <- mint.default(!!field, boundaries = list(Piece, Record), ...), dataTypes = dataTypes)
-    
-  }))
+  lagged <- if (is.numeric(lag)) lag(x, lag, boundaries = boundaries) else {
+    lagged <- ditto.default(x, null = !lag, boundaries = boundaries, initial = '_next_')
+    lagged[lag] <- NA
+    lagged
+  }
   
-  orderHumtab_humdrumR(x, melodic = TRUE)
-  x
+  
+  hinterval <- do(.mint, args = list(x, lagged, lag = 1, deparser = deparser, initial = initial, bracket = bracket, 
+                                     parseArgs = parseArgs, Exclusive = Exclusive, Key = Key, ...)) # Use do so memoize is invoked
+
+  reorderer(hinterval)
 }
 
 ###################################################################### ### 

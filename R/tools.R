@@ -526,7 +526,7 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
   changes[!logical] <- lapply(changes[!logical], changes, reverse = reverse, first = first)
   
   change <- Reduce(if (any) `|` else `&`, changes)
-  if (first) change[1] <- TRUE
+  if (first) change[if (reverse) length(change) else 1L] <- TRUE
   
   values <- if (any(!logical)) do.call('cbind', lapply(xs[!logical], '[', i = change))
   
@@ -585,25 +585,31 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' with non-null values from earlier/later in the same vector.
 #' The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 #' The `reverse` argument can be used to cause "backward" filling, where the *next* (higher index) non-null value is used.
+
+#' If the input begins (or ends if `reverse == TRUE`) with a null value, the `initial` argument is filled instead; defaults to `NA`.
+#' As a special option, `initial == "_next_"` will cause the first (or last) non-null value to be filled backwards into the initial nulls.
 #' 
-#' Which values are considered "non-null" can be controlled using the `nonnull` argument.
-#' The `nonnull` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
+#' Which values are considered "null" can be controlled using the `null` argument.
+#' The `null` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
-#' The values of `x` where `nonnull == TRUE` are copied forward/backwards to replace any adjacent vales where `nonnull == FALSE`.
-#' By default, `nonnull` is the function `\(x) !is.na(x) & x != '.'`, which means that `NA` values and the string `"."` are 
+#' The values of `x` where `null == FALSE` are copied forward/backwards to replace any adjacent vales where `null == TRUE`.
+#' By default, `null` is the function `\(x) is.na(x) | x == '.'`, which means that `NA` values and the string `"."` are 
 #' "null", and are overwritten by adjacent values.
 #' 
-#' `ditto` methods are defined for data.frames and arrays (including matrices).
+#' `ditto` methods are defined for data.frames and matrices.
 #' The `data.frame` method simply applies `ditto` to each column of the `data.frame` separately.
-#' For arrays, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
+#' For matrices, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
 #' 
 #' The `ditto` method for a [humdrumR object][humdrumRclass] simply applies `ditto` to the, by default,
 #' the active field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
 #' The `field` argument can be used to indicated a different field to apply to. The result of the dittoing
 #' is saved to a new field---the `newField` argument can be used to control what to name the new field.
 #' 
-#' @param nonnull Either a logical vector where (`length(x) == length(nonnull)`), a numeric
+#' @param x A vector.
+#' @param null Either a logical vector where (`length(x) == length(null)`), a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
+#' @param initial A value (`length == 1`) of the same class as `x`, used to pad the beginning (or end, if `reverse == TRUE`) of the output,
+#' if necessary.
 #' @param reverse (`logical` & `length == 1`) If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
 #' *earlier* (lower indices) in the vector. 
 #' @param margin a vector giving the subscripts which the function will be applied over. 
@@ -620,19 +626,29 @@ ditto <- function(x, ...) UseMethod('ditto')
 
 #' @rdname ditto
 #' @export
-ditto.default <- function(x, nonnull = \(x) !is.na(x) & x != '.', reverse = FALSE, boundaries = list()) {
+ditto.default <- function(x, null = \(x) is.na(x) & x == '.', initial = NA, reverse = FALSE, boundaries = list()) {
     if (length(x) == 0L) return(x)
-    if (is.function(nonnull)) nonnull <- nonnull(x)
+    hits <- !(if (is.function(null)) null(x) else null)
     
     boundaries <- checkWindows(x, boundaries)
     
-    if (length(boundaries)) nonnull <- nonnull | do.call('changes', boundaries)
+    boundaries <- if (length(boundaries)) {
+      do.call('changes', c(boundaries, list(reverse = reverse)))
+    } else {
+      seq_along(x) == if (reverse) length(x) else 1L
+    }
     
-    seg <- segments(nonnull, reverse = reverse)
     
-    vals <- x[nonnull]
-    if (!head(nonnull, 1) && !reverse) vals <- c(x[1], vals)
-    if (!tail(nonnull, 1) && reverse) vals <- c(vals, tail(x, 1))
+    if (initial == '_next_') { 
+      initial <- x[closest(which(boundaries), which(hits), direction = if (reverse) 'below' else 'above')]
+    }
+    
+    x[boundaries] <- initial
+    
+    
+    seg <- segments(hits | boundaries, reverse = reverse)
+    vals <- x[hits | boundaries]
+    
     
     setNames(rep(vals, rle(seg)$lengths), seg)
 }
@@ -1677,7 +1693,6 @@ tempvar <- function(prefix = '', asSymbol = TRUE) {
 
 analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA <- list()
-    
     exprA$Form <- if (!rlang::is_formula(expr)) {
         'expression'
     } else {
@@ -1701,14 +1716,23 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
                          atomic = expr,
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
-    exprA$Args <- if (exprA$Head == 'function') {
+    # exprA$Args <- switch(exprA$Head[1],
+    #                      'function' = {
+    #                        exprA$Type <- 'lambda'
+    #                        exprA$Pairlist <- expr[[2]]
+    #                        list(expr[[3]])
+    #                      },
+    #                      call = as.list(expr[-1]),
+    #                      list())
+    
+    exprA$Args <- if (exprA$Head[1] == 'function') {
       exprA$Type <- 'lambda'
       exprA$Pairlist <- expr[[2]]
       list(expr[[3]])
     } else {
       if (exprA$Type == 'call') as.list(expr[-1]) else list()
     }
-   
+
     
     
 
