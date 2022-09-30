@@ -3683,7 +3683,7 @@ table.pitchData <- function(..., generic = TRUE, simple = TRUE) {
   output <- do.call('table', vectors)
   names(dimnames(output)) <- paste0('**', exclusives)
   
-  output %class% paste0(paste(exclusives, sep = '/'), '_pitch')
+  output %class% 'humdrumRtable'
 }
 
 makeGamut <- function(x = NULL, 
@@ -3712,3 +3712,10 @@ makeGamut <- function(x = NULL,
   if (!is.null(deparser)) deparser(gamut) else gamut
 }
 
+#' @export
+barplot.humdrumRtable <- function(x) {
+  x <- unclass(x)
+  barplot(x, border = FALSE, space = 0, axes = FALSE)
+  axis(2, pretty(x), tick = FALSE, las =1)
+  
+}
