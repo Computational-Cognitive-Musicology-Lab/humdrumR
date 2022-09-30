@@ -3059,44 +3059,11 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE),
 #' @family {partial pitch functions}
 #' @export 
 octave <- makePitchTransformer(tint2octave, 'octave', 'integer',
-                               removeArgs = c('generic', 'simple', 'transposeArgs'))
+                               removeArgs = c('generic', 'simple'))
 
 
 
 
-
-
-###################################################################### ###
-# pitch class methods ####################################################
-###################################################################### ###
-
-
-#' @rdname pitchFunctions
-#' @export
-print.pitchData <- function(x) {
-  exclusive <- attr(x, 'Exclusive')
-  x <- unclass(x)
-  attributes(x) <- NULL
-  cat('**', exclusive, '\n',sep = '')
-  print(unclass(x), quote = FALSE, na.print = '.')
-}
-
-#' @rdname pitchFunctions
-#' @export
-table.pitchData <- function(x) {
-  exclusive <- attr(x, 'Exclusive')
-  x <- unclass(x)
-  
-  if (exclusive == 'kern') {
-    gamut <- sort(tint( , -5:7))
-    gamut <- c(gamut - tint(1,0 ), gamut, gamut + tint(1, 0))
-    x <- factor(x, levels = kern(gamut))
-  }
-  
-  output <- table(x) %class% paste0(exclusive, '_pitch')
-  names(dimnames(output))[1] <- paste0('**', exclusive)
-  output
-}
 
 ###################################################################### ###
 # Manipulating tonal intervals ###########################################
@@ -3673,3 +3640,75 @@ for (int in allints) {
 rm(allints)
 unison <- P1
 pythagorean.comma <- (-dd2)
+
+
+
+
+###################################################################### ###
+# pitchData S3 class #####################################################
+###################################################################### ###
+
+
+#' @rdname pitchFunctions
+#' @export
+print.pitchData <- function(x) {
+  exclusive <- attr(x, 'Exclusive')
+  x <- unclass(x)
+  attributes(x) <- NULL
+  cat('**', exclusive, '\n',sep = '')
+  print(unclass(x), quote = FALSE, na.print = '.')
+}
+
+#' @rdname pitchFunctions
+#' @export
+table.pitchData <- function(..., generic = TRUE, simple = TRUE) {
+  vectors <- list(...)
+  
+  exclusives <- sapply(vectors, attr, which = 'Exclusive')
+  
+  vectors <- lapply(vectors,
+                    \(x) {
+                      exclusive <- attr(x, 'Exclusive')
+                      x <- unclass(x)
+                      
+                      if (!is.null(exclusive)) {
+                        gamut <- makeGamut(tonalInterval(x),
+                                           generic = generic, simple = simple,
+                                           deparser = match.fun(exclusive))
+                        x <- factor(x, levels = gamut)
+                      }
+                      x
+                    })
+
+  output <- do.call('table', vectors)
+  names(dimnames(output)) <- paste0('**', exclusives)
+  
+  output %class% paste0(paste(exclusives, sep = '/'), '_pitch')
+}
+
+makeGamut <- function(x = NULL, 
+                      generic = FALSE, simple = FALSE,
+                      octaveRange =  c(-2L, 2L), 
+                      enharmonicRange =  c(-4L, 7L),
+                      deparser = NULL) {
+  
+  if (!is.null(x)) {
+    xOctave <- tint2octave(x)
+    octaveRange <- c(min(octaveRange[1], xOctave, na.rm = TRUE),
+                     max(octaveRange[2], xOctave, na.rm = TRUE))
+    enharmonicRange <- c(min(enharmonicRange[1], x@Fifth, na.rm = TRUE),
+                         max(enharmonicRange[2], x@Fifth, na.rm = TRUE))
+    
+  }
+  
+  gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
+  
+  if (!generic) gamut <- do.call('c', 
+                                 lapply(octaveRange[1]:octaveRange[2], 
+                                        \(o) gamut + tint(o, 0L)))
+  
+  gamut <- sort(gamut)
+  
+  if (!is.null(deparser)) deparser(gamut) else gamut
+}
+

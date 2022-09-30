@@ -2,7 +2,14 @@
 % Please edit documentation in R/Pitch.R
 \name{pitchFunctions}
 \alias{pitchFunctions}
+\alias{print.pitchData}
+\alias{table.pitchData}
 \title{Translate between pitch representations.}
+\usage{
+\method{print}{pitchData}(x)
+
+table.pitchData(...)
+}
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
@@ -102,6 +109,12 @@ To read the details of the "deparsing" step, read \link[=pitchDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
 or type \code{?func} in the R command line: for example, \code{?kern}.
 }
+\section{Pitch data class}{
+
+
+All pitch functions return vectors with additional class \code{pitchData}.
+}
+
 \seealso{
 To better understand how these functions work, read about how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 }
