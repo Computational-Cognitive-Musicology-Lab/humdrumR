@@ -1099,7 +1099,7 @@ exclusiveArgsQuo <- function(funcQuosure, fields) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
   
 }
 
@@ -1114,7 +1114,7 @@ keyedArgsQuo <- function(funcQuosure, fields) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
 
 
@@ -1128,7 +1128,7 @@ boundedArgsQuo <- function(funcQuosure) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
 
 #### Lag/Led vectors
@@ -1155,7 +1155,7 @@ laggedQuo <- function(funcQuosure) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
   
 }
 
@@ -1168,7 +1168,7 @@ laggedQuo <- function(funcQuosure) {
  # If input is a quosure (it should be), it keeps the quosure intact,
  # (i.e., keeps it's environment).
           
-# applyExpr(funcQuosure,
+# withExpression(funcQuosure,
 #           \(ex) {
 #             exstr <- deparse(ex)
 #             interp <- grepl('^\\*[^*]', exstr)
@@ -1219,7 +1219,7 @@ splatQuo <- function(funcQuosure, humtab) {
     exprA
   }
   
-  funcQuosure <- modifyExpression(funcQuosure, predicate, do)
+  funcQuosure <- withinExpression(funcQuosure, predicate, do)
 
   # turn splat(x,y,z) to x,y,z
   predicate <- \(Args) any(sapply(Args, \(arg) identical(analyzeExpr(arg)$Head, 'splat')))
@@ -1235,7 +1235,7 @@ splatQuo <- function(funcQuosure, humtab) {
       exprA
   }
 
-  modifyExpression(funcQuosure, predicate, do)
+  withinExpression(funcQuosure, predicate, do)
   
 }
 

@@ -2200,7 +2200,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
       step
     }
   
-    str <- tapply_inplace(str, memoryWindows, ditto, nonnull = \(x) x != '')
+    str <- tapply_inplace(str, memoryWindows, ditto.default, null = \(x) x == '', initial = '')
    
   } 
   
@@ -3423,10 +3423,6 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' Note that you by passing `directed = FALSE` through the the deparser, the undirected (absolute value)
 #' of the melodic intervals can be returned.
 #' 
-#' `mint` methods are defined for data.frames and matrices.
-#' The `data.frame` method simply applies `mint` to each column of the `data.frame` separately.
-#' For matrices, mint can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
-#' 
 #' @section Initial value padding:
 #' 
 #' Any output of `mint` is necessarily padded by `abs(lag)` undefined intervals at the beginning
@@ -3473,11 +3469,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' @inheritSection sigma Boundaries
 #' @name mint
 #' @export
-mint <- function(x, ...) UseMethod('mint')
-
-#' @rdname mint
-#' @export
-mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
@@ -3488,6 +3480,7 @@ mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracke
                                                                "length(initial) must equal abs(lag).")                 
   checkTF(bracket, 'bracket', 'mint')
   checkTF(classify, 'classify', 'mint')
+  boundaries <- checkWindows(x, boundaries)
   
   lagged <- lag(x, lag, boundaries = boundaries)
   
@@ -3508,18 +3501,19 @@ mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracke
   
   output <- do(deparser, list(tint, ...))
   
-  singletons <- !is.na(Xtint) & is.na(Ltint)
+  initLocs <- !is.na(Xtint) & is.na(Ltint)
   
-  if (!is.null(initial) && any(singletons)) {
+  if (!is.null(initial) && any(initLocs)) {
     
-    if (is.function(initial)) output[singletons] <- paste0(if (bracket) '[', 
-                                                           do(initial, c(list(Xtint[singletons], 
-                                                                              Exclusive = Exclusive, 
-                                                                              Key = Key), 
-                                                                         ...)), 
-                                                           if (bracket) ']')
-    if (is.atomic(initial)) output[singletons] <- initial
+    if (is.function(initial)) output[initLocs] <- do(initial, c(list(Xtint[initLocs], 
+                                                                       Exclusive = Exclusive, 
+                                                                       Key = Key), 
+                                                                  ...))
+                                                           
+    if (is.atomic(initial)) output[initLocs] <- initial
+    if (bracket) output[initLocs] <- paste0('[', output[initLocs], ']')
   }
+
   output
 }
 
@@ -3548,22 +3542,7 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   .paste(if (directed) sign, intClass)
 }
 
-#' @rdname mint
-#' @export
-mint.data.frame <- function(x, ...) {
-  x[] <- lapply(x, mint, ...)
-  x
-}
 
-#' @rdname mint
-#' @export
-mint.matrix <- function(x, margin = 2, ...) {
-  checkLooseInteger(margin, 'margin', 'mint.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
-  result <- apply(x, margin, mint, ..., simplify = FALSE)
-  
-  do.call(if (margin == 1) 'rbind' else 'cbind', result)
-  
-}
 
 
 
@@ -3577,12 +3556,7 @@ mint.matrix <- function(x, margin = 2, ...) {
 #' @family {Lagged pitch interval functions}
 #' @name hint
 #' @export
-hint <- function(x, ...) UseMethod('hint') 
-
-
-
-#' @export
-hint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   

@@ -106,14 +106,14 @@ parseAnchor.formula <- function(anchor, x, name){
       return(rlang::new_quosure(anchors, env = env))
     }
     anchor <- rlang::f_rhs(anchor)
-    anchor <- modifyExpression(anchor, 
+    anchor <- withinExpression(anchor, 
                                \(Head) Head == 'hop', 
                                \(exprA) {
                                  exprA$Args <- c(quote(x), exprA$Args)
                                  exprA
                                  })
     
-    anchor <- modifyExpression(anchor, applyTo = 'atomic',
+    anchor <- withinExpression(anchor, applyTo = 'atomic',
                                \(Class) Class == 'character',
                                \(exprA) {
                                  exprA$Args <- list(quote(x), exprA$Head)

@@ -2,14 +2,9 @@
 % Please edit documentation in R/Pitch.R
 \name{mint}
 \alias{mint}
-\alias{mint.default}
-\alias{mint.data.frame}
-\alias{mint.matrix}
 \title{Calculate melodic intervals}
 \usage{
-mint(x, ...)
-
-\method{mint}{default}(
+mint(
   x,
   lag = 1,
   deparser = interval,
@@ -22,10 +17,6 @@ mint(x, ...)
   Key = NULL,
   boundaries = list()
 )
-
-\method{mint}{data.frame}(x, ...)
-
-\method{mint}{matrix}(x, margin = 2, ...)
 }
 \description{
 \code{mint} calculates melodic intervals in a vector, or across spine/paths of a \link[=humdrumRclass]{humdrumR data object}.
@@ -50,10 +41,6 @@ between the current note and the \emph{next} note.
 
 Note that you by passing \code{directed = FALSE} through the the deparser, the undirected (absolute value)
 of the melodic intervals can be returned.
-
-\code{mint} methods are defined for data.frames and matrices.
-The \code{data.frame} method simply applies \code{mint} to each column of the \code{data.frame} separately.
-For matrices, mint can be applied across columns (\code{margin == 2}), rows (\code{margin == 1}), or other dimensions.
 }
 \section{Initial value padding}{
 
