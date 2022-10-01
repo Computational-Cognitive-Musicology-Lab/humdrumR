@@ -1549,7 +1549,13 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.null(ordoQuo)) {
         complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!partition]))
         complement[[partitionName]] <- FALSE
-        result <- data.table::rbindlist(list(result, complement))
+        
+        if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
+        
+        mismatch <-  !colnames(complement) %in% colnames(result)
+        colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
+        
+        result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
     }
     
    result
