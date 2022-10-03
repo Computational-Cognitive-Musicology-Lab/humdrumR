@@ -212,21 +212,46 @@ is.diatonicSet <- function(x){
 
 ### is.methods ####
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
 #' @name diatonicSet
 #' @export
-is.diatonicSet <- \(x) inherits(x, 'diatonicSet')
+is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 
 #### Tonal is.methods ####
 
-#' @export is.major is.minor
-is.major <- \(x) UseMethod('is.major')
-is.minor <- \(x) UseMethod('is.minor')
+#' Test the major/minor modality of a set
+#' 
+#' These functions test the majorness/minorness of a 
+#' tertian or diatonic set, a logical `TRUE`/`FALSE`.
+#' These functions are not testing whether a chord is strictly
+#' a major or minor chord, but rather a "broad" major/minorness:
+#' gnerally, the presence of a minor third degree
+#' makes a set "minor"; thus, a diminished chord is "minor"
+#' and the lydian key is "major."
+#'
+#' @details 
+#' 
+#' This function can be called directly on [tertianSetS4] or [diatonicSetS4].
+#' If called on anything else, the function first calls the [tertianSet()]
+#' parser. If any values fail to parse (returning `NA`), the [diatonicSet()]
+#' parser is called on them.
+#' 
+#' 
+#' @family {Tonal feature functions}
+#' @name is.major
+#' @export 
+is.major <- function(x, ...) UseMethod('is.major')
+#' @rdname is.major
+#' @export
+is.minor <- function(x, ...) UseMethod('is.minor')
 
+
+
+#' @rdname is.major
 #' @export
-is.major.diatonicSet <- \(x) getMode(x) >= 1L
+is.major.diatonicSet <- function(x) getMode(x) >= -1L
+#' @rdname is.major
 #' @export
-is.minor.diatonicSet <- \(x) getMode(x) < -1L
+is.minor.diatonicSet <- function(x) getMode(x) < -1L
 
 
 

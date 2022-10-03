@@ -135,7 +135,28 @@ setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 
+#### Tonal is.methods ####
 
+#' @rdname is.major
+#' @export
+is.major.default <- function(x, ...) {
+   parsed <- tertianSet(x, ...)
+   
+   if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
+  
+   is.major.diatonicSet(parsed)
+  
+}
+#' @rdname is.major
+#' @export
+is.minor.default <- function(x) {
+  parsed <- tertianSet(x, ...)
+  
+  if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
+  
+  is.minor.diatonicSet(parsed)
+  
+}
 
 ## Order/relations methods ####
 
