@@ -6,6 +6,7 @@
 \alias{tonalInterval-class}
 \alias{tint}
 \alias{is.tonalInterval}
+\alias{order.tonalInterval}
 \title{Representation of tonal pitch information}
 \usage{
 tint(
@@ -18,6 +19,14 @@ tint(
 )
 
 is.tonalInterval(x)
+
+order.tonalInterval(
+  x,
+  ...,
+  na.last = TRUE,
+  decreasing = FALSE,
+  method = c("auto", "shell", "radix")
+)
 }
 \description{
 The \code{tonalInterval} is the core tonal pitch representation in \link[=humdrumR]{humdrumR}.

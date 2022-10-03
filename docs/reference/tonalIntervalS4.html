@@ -104,7 +104,15 @@ details on how <code>tonalIntervals</code> are used by <code>humdrumR</code>.</p
   octave.round <span class="op">=</span> <span class="va">floor</span>
 <span class="op">)</span>
 
-<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+
+<span class="fu">order.tonalInterval</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  na.last <span class="op">=</span> <span class="cn">TRUE</span>,
+  decreasing <span class="op">=</span> <span class="cn">FALSE</span>,
+  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"shell"</span>, <span class="st">"radix"</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -200,7 +208,12 @@ Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE<
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>The main way to create <code>tonalInterval</code> S4 objects is with the <code><a href="pitchParsing.html">tonalInterval()</a></code> pitch parser.</p></div>
+    <div class="dont-index"><p>The main way to create <code>tonalInterval</code> S4 objects is with the <code><a href="pitchParsing.html">tonalInterval()</a></code> pitch parser.</p>
+<p>Other core pitch representations: 
+<code><a href="LO5th.html">LO5th</a>()</code></p>
+<p>Other Tonal S4 classes: 
+<code><a href="diatonicSetS4.html">diatonicSetS4</a></code>,
+<code><a href="tertianSetS4.html">tertianSetS4</a></code></p></div>
     </div>
 
     <div class="section level2">

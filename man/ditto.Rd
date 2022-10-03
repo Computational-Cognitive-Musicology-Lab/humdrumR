@@ -12,7 +12,7 @@ ditto(x, ...)
 
 \method{ditto}{default}(
   x,
-  null = function(x) is.na(x) & x == ".",
+  null = function(x) is.na(x) | x == ".",
   initial = NA,
   reverse = FALSE,
   boundaries = list()

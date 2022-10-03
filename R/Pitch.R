@@ -250,7 +250,7 @@ genericStep <- function(x) ((x - 1L) %% 7L) + 1L
 ### is.methods ####
 
 
-#' @name tonalIntervalS4
+#' @rdname tonalIntervalS4
 #' @export
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
@@ -325,6 +325,7 @@ is.generic.default <- function(x, Key = NULL, ...) is.generic.tonalInterval(tona
 ## Order/relations methods ####
 
 #' @export order.tonalInterval
+#' @rdname tonalIntervalS4
 #' @exportMethod > >= < <= Summary abs sign
 order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
@@ -546,7 +547,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 #' Generating ("deparsing") pitch representations
 #' 
-#' [humdrumR] includes a easy-to-use but generating a variety of tonal (or atonal) pitch representations,
+#' [humdrumR] includes a easy-to-use system for 
+#' generating a variety of tonal (or atonal) pitch representations,
 #' which can be flexibly modified by users.
 #' "Under the hood" `humdrumR` represents all tonal pitch information using the [same underlying representation][tonalIntervalS4],
 #' which is typically extracted from input data using the [pitch parser][pitchParsing].
@@ -2032,6 +2034,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' `NULL` inputs (`x` argument) return a `NULL` output.
 #' `NA` values in the input `x` are propagated to the output.
 #' 
+#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the deparsing functionality.
 #' @name pitchParsing
 NULL
 
@@ -2789,7 +2792,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
 
 
 
-### Pitch Transformers ####
+### Pitch functions ####
 
 
 
@@ -2817,7 +2820,6 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(to
 #' Atonal pitch representations
 #' 
 #' These function translates pitch information into basic atonal pitch values:
-
 #' `midi` and `semits` map pitches to standard 12-tone-equal-temperament 
 #' semitone (`integer`) values. For `semits` `0` (zero) is middle-C (or unison).
 #' In contrast, the [MIDI pitch values](https://en.wikipedia.org/wiki/MIDI) output by 
@@ -2858,7 +2860,7 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist
 
 
 
-#' Representation of Atonal Pitch classes
+#' Representation of atonal pitch classes
 #' 
 #' As encoded in the humdrum 
 #' [`**pc`](https://www.humdrum.org/rep/pc/index.html) interpretation.

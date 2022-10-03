@@ -167,7 +167,7 @@ is.minor.default <- function(x, ...) {
 
 ## Order/relations methods ####
 
-#' @name diatonicSet
+#' @rdname diatonicSetS4
 #' @export
 setMethod('==', signature = c('tertianSet', 'tertianSet'),
           function(e1, e2) {
@@ -183,41 +183,49 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
 ## Arithmetic methods ###
 
 
-### Addition ###
 
 
 ###################################################################### ###
 # Deparsing Chord Representations (tset2x) ###############################
 ###################################################################### ###
 
+
+## Deparsing (tertianSet) documentation ----
+
+#' Generating ("deparsing") chord representations
+#' 
+#' [humdrumR] includes a easy-to-use system for 
+#' generating a variety of tertian harmony (chord) representations,
+#' which can be flexibly modified by users.
+#' "Under the hood" `humdrumR` represents all tonal chord information using the [same underlying representation][tertianSetS4],
+#' which is typically extracted from input data using the [chord parser][chordParsing].
+#' This representation can then be "deparsed" into a variety of predefined output formats (like `**harm`), 
+#' or into new formats that you create!
+#' 
+#' Deparsing is the second step in the [chord function][chordFunctions] processing pipeline:
+#' 
+#' + **Input** representation `|>` 
+#'   + *Parsing* `|>`
+#'     + **Intermediate** ([tertianSet][tertianSetS4]) representation `|>`
+#'     + **Transformation**  `|>`
+#'   + *Deparsing* (DEPARSING ARGS GO HERE) `|>`
+#' +  **Output** representation 
+#' 
+#' Various pitch representations can be generated using predefined [chord functions][chordFunctions] like [chord()]
+#' [tertian()], and [roman()].
+#' All of these functions use a common deparsing framework, and are specified using different combinations of arguments
+#' to the deparser.
+#' By modifying these *"deparsing" arguments*, you can exercise 
+#' fine control over how you want pitch information to be represented in your output.
+#' 
+#' @seealso All `humdrumR` [chord functions][chordFunctions] make use of the deparsing functionality.
+#' @name chordDeparsing
+NULL
+
+
 ## Chord deparsers ####
 
 
-### Extracting Pitches ####
-
-#### Line of Fifths ####
-
-#' @export
-setMethod('LO5th', 'tertianSet',
-         function(x) {
-    tset <- x
-    
-    # if (is.null(Key)) Key <- dset(0, 0)
-    # tset <- tset + tset(getRoot(Key), getSignature(Key), cardinality = 0L)
-    LO5ths <- callNextMethod(tset, steporder = 4L, inversion = getInversion(x))
-    thirds <- getExtensions(tset)
-    LO5ths <- LO5ths * thirds
-    LO5ths[!thirds] <- NA_integer_
-    
-    rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)), qualities = FALSE,
-                                        step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
-                                        parts = c('step', 'species'))
-    
-    LO5ths
-
-})
-
-#### Tonal intervals ####   
 
 
 ### Chord representations ####
@@ -523,6 +531,27 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
 }
 
+
+tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
+  
+  figArgs <- list(implicitSpecies = FALSE, qualities = FALSE, 
+                  flat = 'm', natural = 'M', perfect = 'P')
+  figArgs[names(figurationArgs)] <- figurationArgs
+  
+  t2tH <- partialApply(tset2tonalHarmony, 
+                       parts = c('root', 'quality', 'figuration', 'inversion'), 
+                       root_func = tint2romanRoot, 
+                       implicitSpecies = TRUE,
+                       rootCase = TRUE,
+                       inversion.labels = c('', 'b', 'c', 'd', 'e', 'f', 'g'),
+                       extension.shorthand = TRUE, extension.simple = TRUE, extension.decreasing = FALSE,
+                       extension.sus = TRUE, extension.add = TRUE,
+                       inversion = TRUE)
+  
+  t2tH(x, figurationArgs = figArgs, Key = Key, ...)
+  
+}
+
 tset2tertian <- function(x,  figurationArgs = c(), ...) {
   figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
@@ -572,6 +601,21 @@ tset2chord <- function(x, figurationArgs = c(), major = NULL, ...) {
 ###################################################################### ###
 # Parsing Chord Representations (x2tset) #################################
 ###################################################################### ###
+
+
+## Parsing (tertianSet) documentation ----
+
+#' Parsing chord information
+#' 
+#' [humdrumR] includes a easy-to-use but powerful system for *parsing* tertian harmony information:
+#' various basic chord representations (including `numeric` and `character`-string representations) can be "parsed"---read
+#' and interpreted by `humdrumR`.
+#' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [chord function][chordFunctions], like [harm()]
+#' [roman()], or [chord()].
+#' 
+#' @seealso All `humdrumR` [chord functions][chordFunctions] make use of the deparsing functionality.
+#' @name chordParsing
+NULL
 
 ## Chord parsers ####
 
@@ -874,29 +918,30 @@ integer2tset <- function(x) tset(x, x)
 
 ### Parse 2tset generic and methods ####
 
+#' @rdname chordParsing
 #' @export
 tertianSet <- function(...) UseMethod('tertianSet')
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.tertianSet <- function(x, ...) x
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.logical <- function(x, ...) vectorNA(length(x), 'tertianSet')
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.NULL <- function(x, ...) tset(c(), c())
 
 #### Numbers ####
 
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.numeric <- \(x) integer2tset(as.integer(x))
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.integer <- integer2tset
 
@@ -933,7 +978,7 @@ mapoftset <- function(str, Key = NULL, ..., split = '/') {
   tset + dset(root, root, 0L)
 }
 
-#' @rdname tertianSet
+#' @rdname chordParsing
 #' @export
 tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.roman,            roman2tset),
                                               list('any', makeRE.tertian,          tertian2tset),
@@ -943,7 +988,6 @@ tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.roman,         
                                               outputClass = 'tertianSet')
   
 
-#' @name diatonicSet
 #' @export
 setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(x))
 
@@ -971,18 +1015,28 @@ setAs('tertianSet', 'diatonicSet', function(from) tset(from@Root, from@Signature
 # Translating Chord Representations (x2y) ################################
 ###################################################################### ### 
 
-## Chord transform documentation ####
+
+## Chord function documentation ####
 
 
-#' Parsing and deparsing chord information.
+
+#' Parsing and deparsing chord information
 #' 
-#' These functions are used to work with chord information.
+#' These functions can be used to extract and "translate," or otherwise modify, data representing tertian harmony information.
+#' The functions are:
 #' 
-#' xxx
-#' Tertian sets can be read/wrote in various ways.
+#' + [chord()]
+#' + [figuredBass()]
+#' + [harm()]
+#' + [roman()]
+#' + [tertian()]
 #' 
-#' @name chordTransformer
+#' @seealso To better understand how these functions work, read about how diatonic keys are 
+#' [parsed][chordParsing] and [deparsed][chordDeparsing].
+#' 
+#' @name chordFunctions
 NULL
+
 
 ## Chord transform maker ####
 
@@ -1069,16 +1123,84 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 
 
 
-### Chord transformers ####
+### Chord functions ####
 
-##
-#' @rdname chordTransformer
-#' @export figuredBass roman 
-#' @export tertian chord
-figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
-roman <- makeChordTransformer(tset2roman, 'roman')
-tertian <- makeChordTransformer(tset2tertian, 'tertian')
+#' "Pop/Jazz" chord symbols
+#' 
+#' This function outputs a generic "jazz" chord symbol representation of a tonal harmony.
+#' 
+#' @export 
 chord <- makeChordTransformer(tset2chord, 'chord')
+
+#' Figured bass representation of harmony
+#' 
+#' This function outputs a [figured bass](https://en.wikipedia.org/wiki/Figured_bass)
+#' representation of a tertian harmony.
+#' 
+#' @export 
+figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
+
+#' Roman numeral representations of harmony
+#' 
+#' These functions output [roman numeral](https://en.wikipedia.org/wiki/Roman_numeral_analysis)
+#' representations of a tertian harmony.
+#' The `**harm` representation is the most widely used standard for roman numeral notation in humdrum data.
+#' Unlike traditional roman numerals, `**harm` does not indicate inversions with figuration, using lowercase letters
+#' (`a`, `b`, `c`, etc.) instead.
+#' The `roman` function however does output (relatively) traditional figures.
+#' 
+#' @export 
+harm <- makeChordTransformer(tset2harm, 'harm')
+
+
+
+#' Roman numeral representation of harmony
+#' 
+
+#' Unlike the more standard humdrum [harm()] representation, inversions are indicated using traditional figures.
+#' 
+#' @rdname harm
+#' @export 
+roman <- makeChordTransformer(tset2roman, 'roman')
+
+
+#' Tertian quality chord representation
+#' 
+#' This functions a generic form of tertian harmony representation, commonly used in music theory.
+#' In this representation, the root of a chord is indicated as **kern, followed by one or more 
+#' quality indicators, like `"CMM"` (C major seventh).
+#' 
+#' @details 
+#' 
+#' The first quality after the root indicates the quality of the triad.
+#' Subsequent qualities, if present, indicate the quality of the 7th, 9th, 11th, and 13th respectively.
+#' Some examples:
+#' 
+#' + `M`: major triad
+#' + `Mm`: dominant-seventh chord
+#' + `MM`: major-seventh chord
+#' + `Mmm`: dominant-seventh-with-flat-9 chord.
+#' + `oo`: fully-diminished-seventh chord.
+#' 
+#' Missing extensions can be indicated in their position using `.`.
+#' For example, `E-Mm.P` indicates a E-flat dominant-11th chord with no 9th.
+#' Missing members of the triad can be indicated by specifying either `5` or `3` immediately after the root, but before any
+#' quality indicators.
+#' For example, `C5M` indicates a C major chord with no 3rd, while `G3mm` indicates a G-minor-seventh chord with missing 5th.
+#' 
+#' The default quality indicators are `P` (perfect), `M` (major), `m` (minor), `o` (diminished), or `+` (augmented), but these
+#' can be overridden by calls to their respective arguments: for example, `tertian('Cdim', diminish = 'd')`.
+#' 
+#' @section Inversions:
+#' 
+#' Inversions are indicated with slash notation, with the scale degree to the right of the slash.
+#' For example, a first-inversion A major chord would be `AM/3`.
+#' 
+#' 
+#' @export 
+tertian <- makeChordTransformer(tset2tertian, 'tertian')
+
+
 
 ###################################################################### ### 
 # Manipulating tertian sets ##############################################
@@ -1086,5 +1208,33 @@ chord <- makeChordTransformer(tset2chord, 'chord')
 
 
 
+## Extracting pitches #####
 
-##### Tonal transform methods ####
+
+
+### Line of Fifths ####
+
+#' @export
+setMethod('LO5th', 'tertianSet',
+          function(x) {
+            tset <- x
+            
+            # if (is.null(Key)) Key <- dset(0, 0)
+            # tset <- tset + tset(getRoot(Key), getSignature(Key), cardinality = 0L)
+            LO5ths <- callNextMethod(tset, steporder = 4L, inversion = getInversion(x))
+            thirds <- getExtensions(tset)
+            LO5ths <- LO5ths * thirds
+            LO5ths[!thirds] <- NA_integer_
+            
+            rownames(LO5ths) <- tint2tonalChroma(tint( , getRoot(x)), qualities = FALSE,
+                                                 step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
+                                                 parts = c('step', 'species'))
+            
+            LO5ths
+            
+          })
+
+### Tonal intervals ####   
+
+
+## Tonal transform methods ####

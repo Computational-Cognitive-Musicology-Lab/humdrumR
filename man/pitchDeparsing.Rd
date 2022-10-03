@@ -4,7 +4,8 @@
 \alias{pitchDeparsing}
 \title{Generating ("deparsing") pitch representations}
 \description{
-\link{humdrumR} includes a easy-to-use but generating a variety of tonal (or atonal) pitch representations,
+\link{humdrumR} includes a easy-to-use system for
+generating a variety of tonal (or atonal) pitch representations,
 which can be flexibly modified by users.
 "Under the hood" \code{humdrumR} represents all tonal pitch information using the \link[=tonalIntervalS4]{same underlying representation},
 which is typically extracted from input data using the \link[=pitchParsing]{pitch parser}.

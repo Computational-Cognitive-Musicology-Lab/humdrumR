@@ -573,3 +573,6 @@ length and dimensions as `x`.
 `NA` values in the input `x` are propagated to the output.
 
 }
+\seealso{
+All \code{humdrumR} \link[=pitchFunctions]{pitch functions} make use of the deparsing functionality.
+}

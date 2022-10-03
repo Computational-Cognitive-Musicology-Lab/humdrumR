@@ -98,10 +98,10 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 <span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for numeric</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">str</span>, <span class="va">...</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -111,7 +111,7 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 <dt>str</dt>
 <dd><p>(<code>character</code> or <code>numeric</code>) The input vector.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="diatonicSet.html">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
+<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
 to interpret pitch representations.
 For example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.
 The output <code>tonalInterval</code> is output <em>within the key</em>: thus, <code>tonalInterval('C#', Key = "A:")</code>
@@ -497,6 +497,10 @@ For example, while <code>kern(0:2)</code> returns <code>c("c", "d-", "d")</code>
 
 </div>
 
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>All <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> make use of the deparsing functionality.</p></div>
     </div>
 
     <div class="section level2">

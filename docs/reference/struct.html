@@ -88,8 +88,8 @@ make all the new types we <em>do</em> define act as much like atomic vectors as 
 atomic vectors as a single vector/matrix-like object---simply make your new subclass <a href="https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)" class="external-link">inherit</a> <code>struct</code>
 and it is all taken care of. (To do this, specify <code>contains = "struct"</code> in your call to <a href="https://rdrr.io/r/methods/setClass.html" class="external-link">setClass</a>.)</p>
 <p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="tonalIntervalS4.html">tonal intervals</a></p></li>
-<li><p><a href="diatonicSet.html">diatonicSet</a></p></li>
-<li><p><a href="tertianSet.html">tertianSet</a></p></li>
+<li><p><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a></p></li>
+<li><p><a href="chordParsing.html">tertianSet</a></p></li>
 <li><p><code><a href="rational.html">rational()</a></code></p></li>
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
@@ -182,7 +182,7 @@ If these definitions don't work for your subclass, you'll need to create your ow
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmInterval.html">rhythmInterval</a> <a href="diatonicSet.html">diatonicSet</a> <a href="tertianSet.html">tertianSet</a></p></div>
+    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmInterval.html">rhythmInterval</a> <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> <a href="chordParsing.html">tertianSet</a></p></div>
     </div>
 
     <div class="section level2">

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Pitch.R
 \name{pc}
 \alias{pc}
-\title{Representation of Atonal Pitch classes}
+\title{Representation of atonal pitch classes}
 \usage{
 pc(
   x,
