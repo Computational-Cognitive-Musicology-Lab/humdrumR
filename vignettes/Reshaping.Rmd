@@ -154,6 +154,7 @@ In our example, we want to align the notes in the `**kern` spines with the sylla
 We can do this directly using `foldHumdrum`: use the `fold` argument to indicate which spine to fold, and the `onto` argument to indicate which spine to move it onto.
 
 ```{r}
+example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 foldHumdrum(example, fold = 2, onto = 1)
 
 ```
