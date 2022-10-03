@@ -4,7 +4,19 @@
 \alias{hint}
 \title{Calculate harmonic intervals}
 \usage{
-hint(x, ...)
+hint(
+  x,
+  lag = 1,
+  deparser = interval,
+  initial = kern,
+  bracket = TRUE,
+  classify = FALSE,
+  ...,
+  parseArgs = list(),
+  Exclusive = NULL,
+  Key = NULL,
+  boundaries = list()
+)
 }
 \description{
 \code{hint} calculates harmonic intervals in a vector, or across records of a \link[=humdrumRclass]{humdrumR data object}.

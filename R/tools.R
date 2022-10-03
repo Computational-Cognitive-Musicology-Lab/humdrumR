@@ -626,7 +626,18 @@ ditto <- function(x, ...) UseMethod('ditto')
 
 #' @rdname ditto
 #' @export
-ditto.default <- function(x, null = \(x) is.na(x) & x == '.', initial = NA, reverse = FALSE, boundaries = list()) {
+ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, boundaries = list()) {
+    if (!(is.function(null) || (is.logical(null) && length(null) == length(x)))) {
+      .stop("In a call to ditto, the 'null' argument must either be a function or a logical vector",
+            " which is the same length as the 'x' argument.")
+    }
+    if ((class(x) != class(initial)) && (!is.na(initial) && initial != '_next_')) {
+      .stop("In a call to ditto, the 'initial' argument must be the same class as the 'x' argument.")
+    }
+    checkArg(initial, 'initial', 'ditto', max.length = 1L)
+    checkTF(reverse, 'reverse', 'dito')
+    boundaries <- checkWindows(x, boundaries)
+  
     if (length(x) == 0L) return(x)
     hits <- !(if (is.function(null)) null(x) else null)
     
@@ -639,11 +650,11 @@ ditto.default <- function(x, null = \(x) is.na(x) & x == '.', initial = NA, reve
     }
     
     
-    if (initial == '_next_') { 
+    if (!is.na(initial) && initial == '_next_') { 
       initial <- x[closest(which(boundaries), which(hits), direction = if (reverse) 'below' else 'above')]
     }
     
-    x[boundaries] <- initial
+    x[boundaries & !hits] <- initial
     
     
     seg <- segments(hits | boundaries, reverse = reverse)
@@ -1614,7 +1625,7 @@ visible <- function(withV) {
   result
 }
 
-applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
+withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
     exprA <- analyzeExpr(expr)
     output <- NULL
     if (exprA$Type %in% applyTo) {
@@ -1651,7 +1662,7 @@ namesInExpr <- function(names, expr, applyTo = 'symbol') {
     ## (not including things called as functions) in an expression 
     ## (or rhs for formula).
     
-    unlist(applyExpr(expr, applyTo = applyTo,
+    unlist(withExpression(expr, applyTo = applyTo,
               \(Head) Head %in% names,
               \(exprA) {
                   matches <- names[pmatch(exprA$Head, names)]
@@ -1713,24 +1724,28 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
                          call = as.character(expr[[1]]),
-                         atomic = expr,
+                         atomic = 'c',
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
-    # exprA$Args <- switch(exprA$Head[1],
-    #                      'function' = {
-    #                        exprA$Type <- 'lambda'
-    #                        exprA$Pairlist <- expr[[2]]
-    #                        list(expr[[3]])
-    #                      },
-    #                      call = as.list(expr[-1]),
-    #                      list())
+    exprA$Args <- switch(exprA$Head,
+                         'function' = {
+                           exprA$Type <- 'lambda'
+                           exprA$Pairlist <- expr[[2]]
+                           list(expr[[3]])
+                         },
+                         atomic = as.list(expr),
+                         call = as.list(expr[-1]),
+                         list())
     
     exprA$Args <- if (exprA$Head[1] == 'function') {
       exprA$Type <- 'lambda'
       exprA$Pairlist <- expr[[2]]
       list(expr[[3]])
     } else {
-      if (exprA$Type == 'call') as.list(expr[-1]) else list()
+      switch(exprA$Type,
+             call = as.list(expr[-1]),
+             atomic = as.list(expr),
+             list())
     }
 
     
@@ -1755,8 +1770,8 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 unanalyzeExpr <- function(exprA) {
   
     expr <- switch(exprA$Type,
+                   atomic = ,
                    call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
-                   atomic = exprA$Head,
                    symbol = rlang::sym(exprA$Head),
                    lambda = call('function', exprA$Pairlist, exprA$Args[[1]]))
     
@@ -1773,36 +1788,68 @@ unanalyzeExpr <- function(exprA) {
 
 
 
-modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
-    if (is.null(expr)) return(expr)
-    exprA <- analyzeExpr(expr)
-    
-    if (exprA$Type %in% applyTo) {
-        hit <- do...(predicate, exprA, envir = parent.frame())
-        if (hit) {
-            exprA <- func(exprA)
-        } 
-    } else {
-        hit <- FALSE
+withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
+  if (is.null(expr)) return(expr)
+  exprA <- analyzeExpr(expr)
+  
+  if (exprA$Type %in% applyTo) {
+    hit <- do...(predicate, exprA, envir = parent.frame())
+    if (hit) {
+      exprA <- func(exprA)
+    } 
+  } else {
+    hit <- FALSE
+  }
+  
+  
+  if (exprA$Type == 'call' && !(hit && stopOnHit)) {
+    for (i in seq_along(exprA$Args)) {
+      # print(exprA$Args[[i]])
+      cur <- exprA$Args[[i]]
+      if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
+                                                                    func = func, 
+                                                                    predicate = predicate, 
+                                                                    stopOnHit = stopOnHit,
+                                                                    applyTo = applyTo)
     }
     
-
-    if (exprA$Type == 'call' && !(hit && stopOnHit)) {
-        for (i in seq_along(exprA$Args)) {
-          # print(exprA$Args[[i]])
-          cur <- exprA$Args[[i]]
-            if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
-                                                                     func = func, 
-                                                                     predicate = predicate, 
-                                                                     stopOnHit = stopOnHit,
-                                                                     applyTo = applyTo)
-        }
-       
-    }
-    
-    unanalyzeExpr(exprA)
-    
+  }
+  
+  unanalyzeExpr(exprA)
+  
 }
+
+withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic'), stopOnHit = TRUE) {
+  output <- list()
+  if (is.null(expr)) return(output)
+  
+  exprA <- analyzeExpr(expr)
+  
+  
+  if (exprA$Type %in% applyTo) {
+    hit <- do...(predicate, exprA, envir = parent.frame())
+    if (hit) {
+      output <- func(exprA)
+    } 
+  } else {
+    hit <- FALSE
+  }
+  
+  if (exprA$Type == 'call' && !(hit && stopOnHit)) {
+    outputRecurse <- list()
+    for (i in seq_along(exprA$Args)) {
+      outputRecurse[[i]] <- Recall(exprA$Args[[i]], 
+                            func = func, 
+                            predicate = predicate, 
+                            applyTo = applyTo)
+    }
+    if (length(outputRecurse) == 0L || all(lengths(outputRecurse) == 0L)) outputRecurse <- NULL
+    
+    output <- c(output, outputRecurse)
+  }
+  output
+}
+
 
 is.givenCall <- function(expr, call) {
     if (rlang::is_quosure(expr)) expr <- rlang::quo_squash(expr)
