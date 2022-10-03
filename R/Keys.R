@@ -2,8 +2,7 @@
 # diatonicSet S4 class ###############
 ################################## ###
 
-## Definition, validity, initialization ####
-
+## diatoniocSetS4 documentation ----
 
 #' Tonal (diatonic) sets
 #' 
@@ -93,7 +92,7 @@
 #' However, in combination with the `Signature` slot, sets with double-flat/sharps (like doubly-diminished 7ths) can be encoded.
 #' 
 #' 
-#' @section Arithmatic:
+#' @section Arithmetic:
 #' 
 #' Arithmetic between diatonicSets is not defined.
 #' However, a number of useful arithmetic operations between diatonicSets and other data types *are* defined:
@@ -121,11 +120,17 @@
 #' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
 #'   explained fully [here][diatonicRepresentations].
 #'   
-#'
-#' @name diatonicSet
+#' @seealso The main way to create `diatonicSet` S4 objects is with the [diatonicSet()] pitch parser.
+#' @family {Tonal S4 classes}
+#' @name diatonicSetS4
 NULL
 
+## Definition, validity, initialization ####
 
+
+
+
+#' @rdname diatonicSetS4
 #' @export 
 setClass('diatonicSet', 
          contains = 'struct',
@@ -141,11 +146,15 @@ setClass('diatonicSet',
 #' The basic constructor for `diatonicSet`s.
 #' The root argument can accept either an integer (line-of-fifths), a [tonalInterval()], 
 #' or a character string which will be coerced to a `tonalInterval`.
-#' @rdname diatonicSet
+#' @rdname diatonicSetS4
 #' @export
 dset <- function(root = 0L, signature = root, alterations = 0L) {
            if (is.character(root)) root <- tonalInterval.character(root)
            if (is.tonalInterval(root)) root <- root@Fifth
+           
+           
+           if (length(root) == 0L && length(signature) == 0L) alterations <- integer()
+           match_size(root = root, signature = signature, alterations = alterations, toEnv = TRUE)
            
            new('diatonicSet', 
                Root = as.integer(root), 
@@ -158,13 +167,11 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 ## Accessors ####
 
 
-#' @export
 getRoot <- function(dset){
   checkArg(dset, classes = 'diatonicSet')
   dset@Root %<-matchdim% dset
 } 
 
-#' @export
 getRootTint <- function(dset) {
     checkArg(dset, classes = 'diatonicSet')
     root <- getRoot(dset)
@@ -173,13 +180,11 @@ getRootTint <- function(dset) {
     
 }
 
-#' @export getSignature
 getSignature <- function(dset){
     checkArg(dset)
     dset@Signature %<-matchdim% dset
 }  
 
-#' @export
 getMode <- function(dset) {
     checkArg(dset)
     # mode is sign - root (the signature RELATIVE to the root)
@@ -200,19 +205,11 @@ getAlterations <- function(dset) {
 }
 
 
-#' ------------------------------------------->             NEEDS DOCUMENTATION             <-------------------------------------------
-#' @name diatonicSet
-#' @export
-is.diatonicSet <- function(x){
-    checkArg(x)
-    inherits(x, 'diatonicSet')
-} 
-
 ## Logic methods ####
 
 ### is.methods ####
 
-#' @name diatonicSet
+#' @rdname diatonicSetS4
 #' @export
 is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 
@@ -230,11 +227,13 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 #'
 #' @details 
 #' 
-#' This function can be called directly on [tertianSetS4] or [diatonicSetS4].
-#' If called on anything else, the function first calls the [tertianSet()]
+#' Either function can be called directly on [tertian][tertianSetS4] or [diatonic][diatonicSetS4] sets.
+#' If called on anything else, the functions first call the [tertianSet()]
 #' parser. If any values fail to parse (returning `NA`), the [diatonicSet()]
 #' parser is called on them.
 #' 
+#' @param x Either a `diatonicSet` or `tertianSet`, or something that can be parsed as one.
+#' @param ... Parameters passed to the parsers ([tertianSet()] and [diatonicSet()]).
 #' 
 #' @family {Tonal feature functions}
 #' @name is.major
@@ -921,7 +920,7 @@ diatonicSet.logical <- function(x, ...) vectorNA(length(x), 'diatonicSet')
 
 #' @rdname diatonicSet
 #' @export
-diatonicSet.NULL <- function(x, ...) NULL
+diatonicSet.NULL <- function(x, ...) dset(c(), c())
 
 
 #### Numbers ####
@@ -971,7 +970,11 @@ diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.key,       key
 
 setAs('integer', 'diatonicSet', function(from) integer2dset(from))
 setAs('numeric', 'diatonicSet', function(from) integer2dset(from))
-setAs('character', 'diatonicSet', function(from) diatonicSet.character(from))
+setAs('character', 'diatonicSet', function(from) {
+  output <- dset(rep(NA, length(from)))
+  if (any(!is.na(from))) output[!is.na(from)] <- diatonicSet.character(from[!is.na(from)])
+  output
+})
 setAs('matrix', 'diatonicSet', function(from) diatonicSet(c(from)) %<-matchdim% from)
 setAs('logical', 'diatonicSet', function(from) dset(rep(NA, length(from))) %<-matchdim% from)
 

@@ -147,5 +147,13 @@ eMajor[4:5] - P8
 }
 \seealso{
 The main way to create \code{tonalInterval} S4 objects is with the \code{\link[=tonalInterval]{tonalInterval()}} pitch parser.
+
+Other {core pitch representations}: 
+\code{\link{LO5th}()}
+
+Other {Tonal S4 classes}: 
+\code{\link{diatonicSetS4}},
+\code{\link{tertianSetS4}}
 }
-\concept{{core pitch representation}}
+\concept{{Tonal S4 classes}}
+\concept{{core pitch representations}}

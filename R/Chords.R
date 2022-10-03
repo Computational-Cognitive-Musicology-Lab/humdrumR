@@ -2,8 +2,7 @@
 # tertianSet S4 class ################
 ################################## ###
 
-## Definition, validity, initialization ####
-
+## tertianSetS4 documentation ----
 
 #' Tertian set
 #' 
@@ -33,13 +32,19 @@
 #' 
 #' `tertianSet` has many specific methods defined for reading/writing harmonic information.
 #' 
-#' @name tertianSet
-#' @seealso diatonicSet humTonality
+#' @seealso The main way to create `tertianSet` S4 objects is with the [tertianSet()] pitch parser.
+#' @family {Tonal S4 classes}
+#' @name tertianSetS4
+NULL
+
+## Definition, validity, initialization ####
+
+#' @rdname tertianSetS4
 #' @export 
 setClass('tertianSet', 
          contains = 'diatonicSet',
          slots = c(Extensions = 'integer',
-                   Inversion = 'integer')) -> tertianSet
+                   Inversion = 'integer'))
 
 setValidity('tertianSet', 
             function(object) {
@@ -51,11 +56,19 @@ setValidity('tertianSet',
 
 ## Constructors ####
 
-#' @name tertianSet
+#' @rdname tertianSetS4
 #' @export
 tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, extension = NULL, inversion = 0L) {
     if (is.tonalInterval(root)) root <- root@Fifth
     
+    if (length(root) == 0L && length(signature) == 0L) {
+      return(new('tertianSet', 
+                   Root = integer(), 
+                   Signature = integer(), 
+                   Alteration = integer(), 
+                   Extensions = integer(),
+                   Inversion = integer()))
+    }
     match_size(root = root, signature = signature, alterations = alterations,
                cardinality = cardinality, extension = extension, inversion = inversion, 
                toEnv = TRUE)
@@ -78,13 +91,12 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
 
 ## Accessors ####
 
-#' @export
+
 getBass <- function(tset){
     is.tertianSet(tset)
     LO5th(tset)[ , 1L]
 }
 
-#' @export
 getBassTint <- function(tset){
     is.tertianSet(tset)
     tint( , getBass(tset)) 
@@ -120,17 +132,13 @@ rootPosition <- function(tset) {
 }
 
 
-## Formatting methods ####
 
-#' @name diatonicSet
-#' @export
-setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(x))
 
 ## Logic methods ####
 
 ### is.methods #####
 
-#' @name tertianSet
+#' @rdname tertianSetS4
 #' @export
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
@@ -144,17 +152,16 @@ is.major.default <- function(x, ...) {
    
    if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
   
-   is.major.diatonicSet(parsed)
-  
+   is.major.diatonicSet(parsed) 
+   
 }
 #' @rdname is.major
 #' @export
-is.minor.default <- function(x) {
+is.minor.default <- function(x, ...) {
   parsed <- tertianSet(x, ...)
-  
   if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
   
-  is.minor.diatonicSet(parsed)
+  is.minor.diatonicSet(parsed) 
   
 }
 
@@ -880,7 +887,7 @@ tertianSet.logical <- function(x, ...) vectorNA(length(x), 'tertianSet')
 
 #' @rdname tertianSet
 #' @export
-tertianSet.NULL <- function(x, ...) NULL
+tertianSet.NULL <- function(x, ...) tset(c(), c())
 
 #### Numbers ####
 
@@ -936,13 +943,20 @@ tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.roman,         
                                               outputClass = 'tertianSet')
   
 
+#' @name diatonicSet
+#' @export
+setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(x))
 
 #### setAs tertianSet ####
 
 
 setAs('integer', 'tertianSet', function(from) integer2tset(from))
 setAs('numeric', 'tertianSet', function(from) integer2tset(as.integer(from)))
-setAs('character', 'tertianSet', function(from) char2tset(from))
+setAs('character', 'tertianSet', function(from) {
+  output <- tset(rep(NA, length(from)))
+  if (any(!is.na(from))) output[!is.na(from)] <- tertianSet.character(from[!is.na(from)])
+  output
+  })
 setAs('matrix', 'tertianSet', function(from) tertianSet(c(from)) %<-matchdim% from)
 setAs('logical', 'tertianSet', function(from) tset(rep(NA, length(from))) %<-matchdim% from)
 

@@ -128,12 +128,14 @@
 #' 
 #' 
 #' 
-#' @family {core pitch representation}
+#' @family {core pitch representations}
+#' @family {Tonal S4 classes}
 #' @seealso The main way to create `tonalInterval` S4 objects is with the [tonalInterval()] pitch parser.
 #' @name tonalIntervalS4
 NULL
 
 ## Definition, validity, initialization ####
+
 #' @rdname tonalIntervalS4
 #' @export 
 setClass('tonalInterval', 
@@ -242,8 +244,6 @@ genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 genericStep <- function(x) ((x - 1L) %% 7L) + 1L
 
 
-## Formatting methods ####
-
 
 ## Logic methods ####
 
@@ -256,11 +256,71 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 #### Tonal is.methods ####
 
-is.simple <- function(tint) UseMethod('is.simple')
 
-is.simple.tonalInterval <- function(tint) abs(tint2semits(tint)) < 12
+#' Test the properties of tonal information
+#' 
+#' These functions test basic properties of pitch information.
+#' `is.simple` returns `TRUE` if pitch information is constrained 
+#' in one octave.
+#' `is.generic` returns `TRUE` if pitch information is "natural" to
+#' the key (`Key`) argument.
+#' 
+#' @details 
+#' 
+#' These functions can be called directly on [tonalIntervals][tonalIntervalS4];
+#' If called on anything else, the functions first calls the [tonalInterval()]
+#' parser. If any values fail to parse `NA` is returned.
+#'
+#' "Simple" intervals fall in a particular octave relative to middle-C/unison.
+#' The `octave.floor` argument can be used to change how this works:
+#' The default option, `floor`, interprets the (**kern) pitches  `c`, `d`, `e`, `f`, `g`, `a`, and `b` to be "simple."
+#' The most common alternative, `round`, identifies `G`, `A`, `B`, `c`, `d`, `e`, and `f` as "simple."
+#' See the [pitch deparsing docs][pitchDeparsing] for a more detailed explanation.
+#' 
+#' "Generic" intervals belong to a key.
+#' 
+#' @param x A `tonalInterval` or something that can be parsed as one.
+#' @param octave.round A [rouding function][expand()]. Controls how 
+#' simple intervals are interpreted relative to C. 
+#' @param Key A [diatonicSet][diatonicSetS4] (tonal key) or something which can be
+#' [parsed][diatonicSet()] as one.
+#' @param ... Parameters passed to [tonalInterval()].
+#' 
+#' @family {Tonal feature functions}
+#' @export
+is.simple <- function(x, ...) UseMethod('is.simple')
+
+#' @rdname is.simple
+#' @export 
+is.simple.tonalInterval <- function(x, octave.round = floor, ...) {
+  semits <- tint2semits(x, specific = FALSE, ...)
+  
+  octave.round(semits / 12) == 0
+}
 
 
+#' @rdname is.simple
+#' @export
+is.simple.default <- function(x, ...) is.simple.tonalInterval(tonalInterval(x, ...), ...)
+
+#' @rdname is.simple
+#' @export 
+is.generic <- function(x, Key, ...) UseMethod('is.generic')
+
+#' @rdname is.simple
+#' @export 
+is.generic.tonalInterval <- function(x, Key = NULL) {
+  Key <- diatonicSet(Key %||% dset(0L, 0L))
+  match_size(x = x, Key = Key, toEnv = TRUE)
+  
+  keynotes <- LO5th(Key)
+  
+  rowSums(sweep(keynotes, 1, x@Fifth, `-`) == 0L) > 0L
+  
+  
+}
+
+is.generic.default <- function(x, Key = NULL, ...) is.generic.tonalInterval(tonalInterval(x, Key = NULL, ...), Key = Key)
 
 ## Order/relations methods ####
 
@@ -2202,7 +2262,7 @@ specifier2tint <- function(x, step = NULL, Key = NULL,
       step
     }
   
-    x <- tapply_inplace(x, memoryWindows, ditto, nonnull = \(x) x != '')
+    x <- tapply_inplace(x, memoryWindows, ditto, null = \(x) x == '')
    
   } 
   
@@ -2449,7 +2509,7 @@ tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
 
 #' @rdname pitchParsing
 #' @export
-tonalInterval.NULL <- function(x, ...) NULL
+tonalInterval.NULL <- function(x, ...) tint(c(), c())
 
 #### Numbers ####
 
@@ -2492,7 +2552,12 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 setAs('integer', 'tonalInterval', function(from) semits2tint(from))
 setAs('numeric', 'tonalInterval', function(from) semits2tint(as.integer(from)))
-setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
+setAs('character', 'tonalInterval', function(from) {
+  output <- tint(rep(NA, length(from)))
+  if (any(!is.na(from))) output[!is.na(from)] <- tonalInterval.character(from[!is.na(from)])
+  output
+} )
+
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %<-matchdim% from)
 setAs('logical', 'tonalInterval', function(from) tint(rep(NA, length(from))) %<-matchdim% from)
 

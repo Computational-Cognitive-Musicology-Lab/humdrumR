@@ -39,5 +39,8 @@ In fact, any diatonic key is a block of seven consecutive numbers of the line-of
 \code{LO5th}s are a core component of the \link{tonalIntervalS4} representation, and are thus
 an argument to the \code{tonalInterval} constructor: \link[=tint]{tint(octave, LO5th)}.
 Also, see the \link{tonalInterval} function, which is used by many \code{LO5th} methods.
+
+Other {core pitch representations}: 
+\code{\link{tonalIntervalS4}}
 }
 \concept{{core pitch representations}}

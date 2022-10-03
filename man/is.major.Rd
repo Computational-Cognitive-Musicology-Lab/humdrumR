@@ -19,7 +19,12 @@ is.minor(x, ...)
 
 \method{is.major}{default}(x, ...)
 
-\method{is.minor}{default}(x)
+\method{is.minor}{default}(x, ...)
+}
+\arguments{
+\item{x}{Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one.}
+
+\item{...}{Parameters passed to the parsers (\code{\link[=tertianSet]{tertianSet()}} and \code{\link[=diatonicSet]{diatonicSet()}}).}
 }
 \description{
 These functions test the majorness/minorness of a
@@ -31,9 +36,13 @@ makes a set "minor"; thus, a diminished chord is "minor"
 and the lydian key is "major."
 }
 \details{
-This function can be called directly on \link{tertianSetS4} or \link{diatonicSetS4}.
-If called on anything else, the function first calls the \code{\link[=tertianSet]{tertianSet()}}
+Either function can be called directly on \link[=tertianSetS4]{tertian} or \link[=diatonicSetS4]{diatonic} sets.
+If called on anything else, the functions first call the \code{\link[=tertianSet]{tertianSet()}}
 parser. If any values fail to parse (returning \code{NA}), the \code{\link[=diatonicSet]{diatonicSet()}}
 parser is called on them.
+}
+\seealso{
+Other {Tonal feature functions}: 
+\code{\link{is.simple}()}
 }
 \concept{{Tonal feature functions}}

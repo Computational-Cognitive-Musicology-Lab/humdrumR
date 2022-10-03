@@ -418,6 +418,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
     }, c(dispatchDF$method, list(force))[sort(unique(dispatch))], tapply(matches, dispatch, list)))[order(unlist(i))]
   }
   
+
   
   attr(result, 'dispatch') <-  list(Original = str, 
                                     Regexes = unlist(dispatchDF$regex[unique(dispatch)]),
@@ -603,11 +604,14 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   ##################################################### #
   body <- rlang::expr({
     args <- list(!!!formalSymbols)
-    do(!!dispatcher, c(args, 
+    result <- do(!!dispatcher, c(args, 
                        list(..., dispatchDF = dispatchDF,
                             regexApply = !!regexApply, outputClass = !!outputClass, funcName = !!funcName)),
        ...)
     
+    if (!(!!outputClass) %in% class(result)) result <- as(result, !!outputClass)
+    
+    result
   })
   
   genericFunc <- rlang::new_function(genericArgs, body, 
