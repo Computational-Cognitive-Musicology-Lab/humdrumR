@@ -399,10 +399,13 @@ tset2tonalHarmony <- function(x,
                               Key = NULL, keyed = FALSE,
                               inversion.labels = NULL,
                               sep = '', ...) {
+  Key <- diatonicSet(Key)
+  
   if (keyed && !is.null(Key)) {
     Key <- rep(Key, length.out = length(x))
-    x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(diatonicSet(Key[!is.na(Key)]))
+    x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(Key[!is.na(Key)])
   }
+  Key <- CKey(Key)
   
   parts <- matched(parts, c('root', 'quality', 'figuration', 'inversion', 'bass'))
   
@@ -447,11 +450,12 @@ tset2figuredBass <- function(x, figurationArgs = list(),  ...) {
 
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  t2tH <- partialApply(tset2tonalHarmony, parts = c('bass','figuration'),
+  t2tH <- partialApply(tset2tonalHarmony, keyed = TRUE,
+                       parts = c('bass','figuration'),
                        root.case = FALSE,
                        root = FALSE, bass = TRUE, bass_func = tint2kern,
                        figuration = TRUE, quality = FALSE,
-                       extension.shorthand = TRUE, extension.simple=TRUE,
+                       extension.shorthand = TRUE, #extension.simple = TRUE,
                        extension.sus = FALSE, extension.add = FALSE,
                        inversion = TRUE,
                        sep = ' ', bass.sep = '')
@@ -517,7 +521,7 @@ tset2chord <- function(x, figurationArgs = c(), major = NULL, ...) {
                   flat = 'b', qualities = FALSE, natural = 'maj')
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  t2tH <- partialApply(tset2tonalHarmony,
+  t2tH <- partialApply(tset2tonalHarmony, keyed = TRUE,
                        parts = c('root', 'quality', 'figuration', 'bass'), 
                        root_func = tint2simplepitch, 
                        minor = 'min', diminish = 'dim',
@@ -702,7 +706,6 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
           makeRE.roman(..., diminish = diminish, augment = augment, collapse = FALSE),
           parse.exhaust = FALSE, parse.strict = FALSE,
           toEnv = TRUE)  # adds accidental numeral triadalt figurations to the environment
-  
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
                            parts = c('species', 'step'), qualities = FALSE,
                            implicitSpecies = implicitSpecies,
@@ -718,10 +721,10 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
   qualities <- local({
     triad <- rep('M', length(numeral))
     triad[numeral == tolower(numeral)] <- 'm'
-    triad[triadalt == diminish] <- if (hasArg('diminish')) list(...)$diminish else 'o' 
-    triad[triadalt == augment]  <- if (hasArg('arugment')) list(...)$augment else '+'
+    triad[triadalt == diminish] <- diminish
+    triad[triadalt == augment]  <- augment
     
-    triad2sciQuality(triad, qualities, ...)
+    triad2sciQuality(triad, qualities, incomplete = '', diminish = diminish, augment = augment, ...)
   })
 
   qualitytset <-  sciQualities2tset(qualities, ..., diminish = diminish, augment = augment)
@@ -799,8 +802,6 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
   quality[quality == ''] <- major
   quality <- setNames(c('M', 'm', 'A', 'd'), c(major, minor, augment, diminish))[quality]
-  
-  
   
   makeRE.figs <- partialApply(makeRE.tonalChroma, step.labels = 13:1, 
                          parts = c('species', 'step'), qualities = FALSE,
@@ -953,6 +954,9 @@ NULL
 
 makeChordTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
+  
+  keyedFunctions <<- c(keyedFunctions, callname)
+  
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
