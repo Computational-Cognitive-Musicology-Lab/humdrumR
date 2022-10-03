@@ -2262,8 +2262,7 @@ specifier2tint <- function(x, step = NULL, Key = NULL,
       step
     }
   
-    x <- tapply_inplace(x, memoryWindows, ditto, null = \(x) x == '')
-    str <- tapply_inplace(str, memoryWindows, ditto.default, null = \(x) x == '', initial = '')
+    x <- tapply_inplace(x, memoryWindows, ditto.default, null = \(x) x == '', initial = '')
    
   } 
   
