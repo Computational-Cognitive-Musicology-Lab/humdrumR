@@ -6,9 +6,9 @@
 \alias{sigma.matrix}
 \title{Cumulative sum of numeric vector}
 \usage{
-sigma(x, lag, skip = is.na, init, boundaries = list(), ...)
+sigma(x, lag, skip = is.na, init, groupby = list(), ...)
 
-\method{sigma}{default}(x, lag = 1, skip = is.na, init = 0, boundaries = list(), ...)
+\method{sigma}{default}(x, lag = 1, skip = is.na, init = 0, groupby = list(), ...)
 
 \method{sigma}{matrix}(x, margin = 2L, ...)
 }
@@ -25,8 +25,8 @@ The skipped values are returned as is in the output vector.}
 \item{init}{(Atomic value of same class as \code{x}, with \code{length(init) <= lag}.) \code{NA} values at the beginning
 (or end of \code{right == TRUE}) are filled with these values \emph{before} summing.}
 
-\item{boundaries}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
-across groups indicated by the \code{boundaries} vector(s).}
+\item{groupby}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
+across groups indicated by the \code{groupby} vector(s).}
 
 \item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
 By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
@@ -38,9 +38,9 @@ Calculate sequential cummulative sum of values in numeric vectors.
 \code{sigma} is very similar base-\code{R} \code{\link[=cumsum]{cumsum()}}.
 However, \code{sigma} should be favored in \link{humdrumR} use because:
 \enumerate{
-\item It has a \code{boundaries} argument, which is \emph{automatically} used by \code{humdrumR} \link[=withinHumdrum]{with(in)}
+\item It has a \code{groupby} argument, which is \emph{automatically} used by \code{humdrumR} \link[=withinHumdrum]{with(in)}
 commands to constrain the differences within files/spines/paths of \code{humdrum} data.
-The \code{boundaries} approach (details below) is generally faster than applying the commands within \code{groupby} groups.
+The \code{groupby} approach (details below) is generally faster than applying the commands within \code{groupby} groups.
 \item They (can) automatically skip \code{NA} (or other) values.
 \item \code{sigma} also has a \code{init} argument which can be used to ensure full invertability with \code{\link[=delta]{delta()}}. See the "Invertability"
 section below.
@@ -56,7 +56,7 @@ The \code{sigma} and \code{delta} functions are inverses of each other, meaning 
 \code{sigma(delta(x)) == x} and \code{delta(sigma(x)) == x}.
 In other words, the two functions "reverse" each other.
 The key is that the \code{init} argument needs to be set to \code{0}, and all other
-arguments (\code{lag}, \code{skip}, \code{boundaries}, etc.) need to match.
+arguments (\code{lag}, \code{skip}, \code{groupby}, etc.) need to match.
 So \emph{actually},  \code{sigma(delta(x, init = 0, ...)) == x} and \verb{delta(sigma(x), init = 0)) == x}.
 
 When we take the differences between values (\code{delta(x)}), the resulting differences can't tell us
@@ -144,22 +144,22 @@ behavior of \link[=delta]{delta(lag < 0)}, which is more intuitive. (\code{sigma
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
 For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 between pieces, only within pieces.
-The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+The \code{groupby} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
 into groups.
-If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
+If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
 
 Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
+Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{boundaries = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path )}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{boundaries} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{boundaries = list(File, Record)}.
+you could manually set \code{groupby = list(File, Record)}.
 }
 
 \seealso{
@@ -168,6 +168,7 @@ This function's inverse is \code{\link[=delta]{delta()}}.
 Other {Lagged vector functions}: 
 \code{\link{delta}()},
 \code{\link{ditto}()},
-\code{\link{lag}()}
+\code{\link{lag}()},
+\code{\link{xint}()}
 }
 \concept{{Lagged vector functions}}

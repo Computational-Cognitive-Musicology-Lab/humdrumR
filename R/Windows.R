@@ -139,7 +139,7 @@ grepi_multi <- function(x, pattern) {
 #' @export
 #' @name humWindows
 windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
-                    nest = FALSE, depth = NULL, boundaries = NULL,
+                    nest = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf) {
   
   
@@ -157,10 +157,10 @@ windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
   windowFrame <- depth(windowFrame, nest = nest, depth = depth)
   
   
-  if (!is.null(boundaries)) {
-    if (any(lengths(boundaries) != length(x))) .stop("In a call to windows, all vectors in the list boundaries must be", 
+  if (!is.null(groupby)) {
+    if (any(lengths(groupby) != length(x))) .stop("In a call to windows, all vectors in the list groupby must be", 
                                                      "the same length as x.")
-    windowFrame <- removeCrossing(windowFrame, boundaries)
+    windowFrame <- removeCrossing(windowFrame, groupby)
   }
   
   attr(windowFrame, 'vector') <- x
@@ -224,11 +224,11 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
   ind 
 }
 
-removeCrossing <- function(x, boundaries) {
+removeCrossing <- function(x, groupby) {
   
-  boundaries <- sort(unlist(lapply(boundaries, \(b) which(b != lag(b)))))
+  groupby <- sort(unlist(lapply(groupby, \(b) which(b != lag(b)))))
   
-  bad <- outer(boundaries, x$Open, '>') & outer(boundaries, x$Close, '<=')
+  bad <- outer(groupby, x$Open, '>') & outer(groupby, x$Close, '<=')
   remove <- colSums(bad) > 0L
   
   x[remove == FALSE]

@@ -158,8 +158,8 @@ applycols <- function(x, f, ...){
 #' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the
 #'  other end of the output, "wrapping" the data
 #' within the data structure.
-#' @param boundaries A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
-#' by the `boundaries` vector(s) is treated separately.
+#' @param groupby A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
+#' by the `groupby` vector(s) is treated separately.
 #' @param margin Arrays and data.frames can be lagged lead in multiple dimensions 
 #' using the `margin` argument: `margin == 1` shifts across rows while `margin == 2`
 #' shifts across columns.
@@ -168,7 +168,7 @@ applycols <- function(x, f, ...){
 #' @inheritSection sigma Boundaries
 #' @seealso [data.table::shift()]
 #' @export
-lag <- function(x, n = 1, fill, wrap, boundaries, ...) UseMethod('lag')
+lag <- function(x, n = 1, fill, wrap, groupby, ...) UseMethod('lag')
 
 #' @rdname lag
 #' @export
@@ -176,12 +176,12 @@ lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list()) {
          if (length(n) < length(margin)) n <- rep(n, length(margin))
         
          if (1L %in% margin) {
-             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, boundaries = boundaries)
-             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', boundaries = boundaries)
+             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, groupby = groupby)
+             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', groupby = groupby)
              rown[rown == '_'] <- make.unique(rown[rown == '_'])
              rownames(x) <- rown
          } 
@@ -193,7 +193,7 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, bounda
          x
 }
 #' @export
-lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) {
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list()) {
           checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
           checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
           checkTF(wrap, 'wrap', 'lag')
@@ -213,19 +213,19 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) 
             }
           }
             
-          boundaries <- checkWindows(x, boundaries)
+          groupby <- checkWindows(x, groupby)
           
-          if (length(boundaries)) {
+          if (length(groupby)) {
               
-              boundaries <- Reduce('|', lapply(boundaries, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
-              output[boundaries] <- fill
+              groupby <- Reduce('|', lapply(groupby, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
+              output[groupby] <- fill
           }
 
           output
 }
 
 #' @export
-lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list()) {
     if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
     
     
@@ -235,7 +235,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries
 
                     rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, boundaries = boundaries())))
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, groupby = groupby())))
           }
          if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
          if (dim(x)[margin] == 0L) return(x)
@@ -626,7 +626,7 @@ ditto <- function(x, ...) UseMethod('ditto')
 
 #' @rdname ditto
 #' @export
-ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, boundaries = list()) {
+ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, groupby = list()) {
     if (!(is.function(null) || (is.logical(null) && length(null) == length(x)))) {
       .stop("In a call to ditto, the 'null' argument must either be a function or a logical vector",
             " which is the same length as the 'x' argument.")
@@ -636,29 +636,29 @@ ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reve
     }
     checkArg(initial, 'initial', 'ditto', max.length = 1L)
     checkTF(reverse, 'reverse', 'dito')
-    boundaries <- checkWindows(x, boundaries)
+    groupby <- checkWindows(x, groupby)
   
     if (length(x) == 0L) return(x)
     hits <- !(if (is.function(null)) null(x) else null)
     
-    boundaries <- checkWindows(x, boundaries)
+    groupby <- checkWindows(x, groupby)
     
-    boundaries <- if (length(boundaries)) {
-      do.call('changes', c(boundaries, list(reverse = reverse)))
+    groupby <- if (length(groupby)) {
+      do.call('changes', c(groupby, list(reverse = reverse)))
     } else {
       seq_along(x) == if (reverse) length(x) else 1L
     }
     
     
     if (!is.na(initial) && initial == '_next_') { 
-      initial <- x[closest(which(boundaries), which(hits), direction = if (reverse) 'below' else 'above')]
+      initial <- x[closest(which(groupby), which(hits), direction = if (reverse) 'below' else 'above')]
     }
     
-    x[boundaries & !hits] <- initial
+    x[groupby & !hits] <- initial
     
     
-    seg <- segments(hits | boundaries, reverse = reverse)
-    vals <- x[hits | boundaries]
+    seg <- segments(hits | groupby, reverse = reverse)
+    vals <- x[hits | groupby]
     
     
     setNames(rep(vals, rle(seg)$lengths), seg)
@@ -1106,9 +1106,9 @@ checkWindows <- function(x, windows) {
 #' `sigma` is very similar base-`R` [cumsum()].
 #' However, `sigma` should be favored in [humdrumR] use because:
 #' 
-#' 1. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#' 1. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
-#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
 #' 2. They (can) automatically skip `NA` (or other) values.
 #' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
 #' section below.
@@ -1123,7 +1123,7 @@ checkWindows <- function(x, windows) {
 #' `sigma(delta(x)) == x` and `delta(sigma(x)) == x`.
 #' In other words, the two functions "reverse" each other.
 #' The key is that the `init` argument needs to be set to `0`, and all other 
-#' arguments (`lag`, `skip`, `boundaries`, etc.) need to match.
+#' arguments (`lag`, `skip`, `groupby`, etc.) need to match.
 #' So *actually*,  `sigma(delta(x, init = 0, ...)) == x` and `delta(sigma(x), init = 0)) == x`.
 #'
 #' When we take the differences between values (`delta(x)`), the resulting differences can't tell us 
@@ -1201,22 +1201,22 @@ checkWindows <- function(x, windows) {
 #' In many cases we want to perform lagged calculations in a vector, but *not across certain boundaries*.
 #' For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 #' between pieces, only within pieces.
-#' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
+#' The `groupby` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
 #' into groups.
-#' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
+#' If more than `groupby` vectors are given, a change in *any* vector indicates a boundary.
 #' 
 #' Value pairs which cross between groups are treated as if they were at the beginning.
-#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, laggedFunction, ...)`,
+#' Basically, using groupby should be essentially identical to using `tapply(x, groupby, laggedFunction, ...)`,
 #' except generally faster when the number of groups is large.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
-#' For this, we want `boundaries = list(File, Spine, Path )`.
+#' For this, we want `groupby = list(File, Spine, Path )`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `boundaries` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
+#' three fields as `groupby` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
 #' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-#' you could manually set `boundaries = list(File, Record)`.
+#' you could manually set `groupby = list(File, Record)`.
 #' 
 #'    
 #' @param x (Any numeric vector.) `NULL` values are returned `NULL`.
@@ -1229,27 +1229,27 @@ checkWindows <- function(x, windows) {
 #' (or end of `right == TRUE`) are filled with these values *before* summing.
 #' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
 #' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
-#' @param boundaries (vector of same length as `x`, or a list of such vectors) Differences are not calculated
-#' across groups indicated by the `boundaries` vector(s).
+#' @param groupby (vector of same length as `x`, or a list of such vectors) Differences are not calculated
+#' across groups indicated by the `groupby` vector(s).
 #' 
 #' 
 #' @family {Lagged vector functions}
 #' @seealso This function's inverse is [delta()]. 
 #' @export
-sigma <- function(x, lag, skip = is.na, init, boundaries = list(), ...) UseMethod('sigma')
+sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('sigma')
 #' @rdname sigma
 #' @export
-sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(), ...) {
+sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), ...) {
   if (is.null(x)) return(NULL)
   checkNumeric(x, 'x', 'sigma')
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
   if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
   
-  boundaries <- checkWindows(x, boundaries)
+  groupby <- checkWindows(x, groupby)
   
-  if (length(boundaries)) {
-    segments <- segments(do.call('changes', c(boundaries, list(...))))
+  if (length(groupby)) {
+    segments <- segments(do.call('changes', c(groupby, list(...))))
     return(unname(tapply_inplace(x, segments, sigma.default, lag = lag, skip = skip, init = init)))
   } 
   
@@ -1308,9 +1308,9 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' 1. Its output is *always* the same length as its  input.
 #'    This is achieved by padding the beginning or end of the output with1 `NA` values (or other options).
-#' 2. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#' 2. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
-#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
 #' 3. They (can) automatically skip `NA` (or other) values.
 #' 
 #' If applied to a matrix, `delta` is applied separately to each column, unless `margin` is set to `1` (rows)
@@ -1396,7 +1396,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 
 #' @rdname delta
 #' @export
-delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, boundaries = list(), ...) {
+delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, groupby = list(), ...) {
     if (is.null(x)) return(NULL)
     checkNumeric(x, 'x', 'delta')
     checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
@@ -1424,9 +1424,9 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     
     if (lag < 0) output <- rev(output)
     
-    boundaries <- checkWindows(x, boundaries)
-    if (length(boundaries)) {
-      bounds <- which(do.call('changes', c(boundaries, list(reverse = right, ...))))
+    groupby <- checkWindows(x, groupby)
+    if (length(groupby)) {
+      bounds <- which(do.call('changes', c(groupby, list(reverse = right, ...))))
       if (abs(lag) > 1L) {
         arith <- if (right) (\(l) bounds - l) else (\(l) bounds + l )
         bounds <- sort(Reduce(`union`, lapply((2:abs(lag)) - 1L, arith), init = bounds))
@@ -2112,7 +2112,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     # 
     if (length(sys.calls()) > 10L) return(arg) 
     
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argname, quote = TRUE), ')') else quotemark(argname)
+    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argzzzzzzzzname, quote = TRUE), ')') else quotemark(argname)
     if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     

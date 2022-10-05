@@ -882,7 +882,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' ### Octave "Rounding"
 #' 
-#' In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+#' In some situations, pitch data might interpret the "groupby" between octaves a little differently.
 #' In most absolute pitch representations (e.g., [kern()], [pitch()]), the "boundary" between one octave and the next is 
 #' between B (degree 7) and C (degree 1).
 #' However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range `-P4` (`G`) to `+P4` (`f`).
@@ -3473,7 +3473,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' Input vector `x` is [parsed as pitch information][tonalInterval()].
 #' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. `Key` and `Exclusive` are also passed to the parser.)
 #'
-#' The parsed pitch vector is copied and lagged using [lag()], and pairs which cross `boundaries` are ignored.
+#' The parsed pitch vector is copied and lagged using [lag()], and pairs which cross `groupby` are ignored.
 #' The melodic intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
 #' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
 #' However, the only alternative deparser that would be *commonly* used (other than [intervals()]) would be [semits()].
@@ -3551,7 +3551,7 @@ xint <- function(to, from = tint(0L, 0L), deparser = interval, parseArgs = list(
 #' @export 
 mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 
-                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list()) {
   
   checkLooseInteger(lag, 'lag', 'mint', min.length = 2L, max.length = 1L)
   checkFunction(deparser, 'deparser', 'mint')
@@ -3559,9 +3559,9 @@ mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE
                                                                "length(initial) must equal abs(lag).")                 
   checkTF(bracket, 'bracket', 'mint')
   checkTF(classify, 'classify', 'mint')
-  boundaries <- checkWindows(x, boundaries)
+  groupby <- checkWindows(x, groupby)
   
-  lagged <- lag(x, lag, boundaries = boundaries)
+  lagged <- lag(x, lag, groupby = groupby)
   
   
   if (classify) deparser <- mintClass
@@ -3638,7 +3638,7 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 #' @export
 hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 
-                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list()) {
   
   checkVector(x, 'x', 'hint', min.length = 1L)
   checkFunction(deparser, 'deparser', 'hint')
@@ -3647,19 +3647,19 @@ hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE
   checkTF(bracket, 'bracket', 'hint')
   checkTF(classify, 'classify', 'hint')
   
-  reorderer <- if (length(boundaries)) {
-    i <- do.call('order', boundaries)
+  reorderer <- if (length(groupby)) {
+    i <- do.call('order', groupby)
     x <- x[i]
     if (is.logical(lag)) lag <- lag[i]
-    boundaries <- lapply(boundaries, '[', i = i)
+    groupby <- lapply(groupby, '[', i = i)
     \(z) z[match(seq_along(z), i)]
   } else {
     force
   }
   
   
-  lagged <- if (is.numeric(lag)) lag(x, lag, boundaries = boundaries) else {
-    lagged <- ditto.default(x, null = !lag, boundaries = boundaries, initial = '_next_')
+  lagged <- if (is.numeric(lag)) lag(x, lag, groupby = groupby) else {
+    lagged <- ditto.default(x, null = !lag, groupby = groupby, initial = '_next_')
     lagged[lag] <- NA
     lagged
   }

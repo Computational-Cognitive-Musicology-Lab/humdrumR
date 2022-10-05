@@ -193,11 +193,11 @@
 #' with(humData, table(lag(Token, 1), lag(Token, 2))
 #' ```
 #' 
-#' [lag()] is a function with a `boundaries` argument, which `with`/`within.humdrumR`
+#' [lag()] is a function with a `groupby` argument, which `with`/`within.humdrumR`
 #' will automatically feed the fields `list(File, Spine, Path)`.
 #' This is the default "melodic" behavior in most music.
 #' If you'd like to turn this off, you need to override it by adding your own
-#' `boundaries` argument to the lagged index, like `Token[lag = 1, boundaries = list(...)]`.
+#' `groupby` argument to the lagged index, like `Token[lag = 1, groupby = list(...)]`.
 #' 
 #' 
 #' Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
@@ -207,7 +207,7 @@
 #' with(humData, paste(Token[lag = 0:5], sep = '-'))
 #' ```
 #' 
-#' Note that, since `with`/`within.humdrumR` passes `boundaries = list(File, Spine, Path)`
+#' Note that, since `with`/`within.humdrumR` passes `groupby = list(File, Spine, Path)`
 #' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each file.
 #' 
 #' 
@@ -1124,7 +1124,7 @@ boundedArgsQuo <- function(funcQuosure) {
   predicate <- \(Head) Head %in% boundedFunctions
   
   do <- \(exprA) {
-    if (!'boundaries' %in% names(exprA$Args)) exprA$Args$boundaries <- quote(list(File, Spine, Path))
+    if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path))
     exprA
   }
   
@@ -1140,7 +1140,7 @@ laggedQuo <- function(funcQuosure) {
   do <- \(exprA) {
     
     args <- exprA$Args
-    if (!'boundaries' %in% .names(args)) args$boundaries <- expr(list(File, Spine, Path))
+    if (!'groupby' %in% .names(args)) args$groupby <- expr(list(File, Spine, Path))
     
     names(args)[tolower(names(args)) == 'lag'] <- 'n'
     n <- rlang::eval_tidy(args$n)
@@ -1329,7 +1329,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
-  if (!'boundaries' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['boundaries']] <- quote(list(File,Spine))
+  if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(File,Spine))
   if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
   
   applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])

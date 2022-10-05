@@ -15,7 +15,7 @@ ditto(x, ...)
   null = function(x) is.na(x) | x == ".",
   initial = NA,
   reverse = FALSE,
-  boundaries = list()
+  groupby = list()
 )
 
 \method{ditto}{data.frame}(x, ...)
@@ -41,8 +41,8 @@ if necessary.}
 \item{reverse}{(\code{logical} & \code{length == 1}) If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
 \emph{earlier} (lower indices) in the vector.}
 
-\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
-by the \code{boundaries} vector(s) is treated separately.}
+\item{groupby}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
+by the \code{groupby} vector(s) is treated separately.}
 
 \item{margin}{a vector giving the subscripts which the function will be applied over.
 E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
@@ -83,28 +83,29 @@ is saved to a new field---the \code{newField} argument can be used to control wh
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
 For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 between pieces, only within pieces.
-The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+The \code{groupby} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
 into groups.
-If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
+If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
 
 Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
+Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{boundaries = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path )}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{boundaries} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{boundaries = list(File, Record)}.
+you could manually set \code{groupby = list(File, Record)}.
 }
 
 \seealso{
 Other {Lagged vector functions}: 
 \code{\link{delta}()},
 \code{\link{lag}()},
-\code{\link{sigma}()}
+\code{\link{sigma}()},
+\code{\link{xint}()}
 }
 \concept{{Lagged vector functions}}

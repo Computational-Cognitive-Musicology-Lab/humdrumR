@@ -161,9 +161,8 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 Other {relative pitch functions}: 
 \code{\link{bhatk}()},
 \code{\link{degree}()},
-\code{\link{hint}()},
-\code{\link{mint}()},
-\code{\link{solfa}()}
+\code{\link{solfa}()},
+\code{\link{xint}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},
@@ -182,10 +181,6 @@ Other {pitch functions}:
 \code{\link{solfg}()},
 \code{\link{step}()},
 \code{\link{tonh}()}
-
-Other {Lagged pitch interval functions}: 
-\code{\link{hint}()},
-\code{\link{mint}()}
 }
 \concept{{Lagged pitch interval functions}}
 \concept{{pitch functions}}

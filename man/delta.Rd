@@ -14,7 +14,7 @@ delta(x, lag, skip, init, right, ...)
   skip = is.na,
   init = as(NA, class(x)),
   right = FALSE,
-  boundaries = list(),
+  groupby = list(),
   ...
 )
 
@@ -36,8 +36,8 @@ The skipped values are returned as is in the output vector.}
 \item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
 By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
 
-\item{boundaries}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
-across groups indicated by the \code{boundaries} vector(s).}
+\item{groupby}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
+across groups indicated by the \code{groupby} vector(s).}
 }
 \description{
 Calculate sequential differences of values in numeric vectors.
@@ -48,9 +48,9 @@ However, \code{delta} should be favored in \link{humdrumR} use because:
 \enumerate{
 \item Its output is \emph{always} the same length as its  input.
 This is achieved by padding the beginning or end of the output with1 \code{NA} values (or other options).
-\item It has a \code{boundaries} argument, which is \emph{automatically} used by \code{humdrumR} \link[=withinHumdrum]{with(in)}
+\item It has a \code{groupby} argument, which is \emph{automatically} used by \code{humdrumR} \link[=withinHumdrum]{with(in)}
 commands to constrain the differences within files/spines/paths of \code{humdrum} data.
-The \code{boundaries} approach (details below) is generally faster than applying the commands within \code{groupby} groups.
+The \code{groupby} approach (details below) is generally faster than applying the commands within \code{groupby} groups.
 \item They (can) automatically skip \code{NA} (or other) values.
 }
 
@@ -138,22 +138,22 @@ to
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
 For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 between pieces, only within pieces.
-The \code{boundaries} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+The \code{groupby} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
 into groups.
-If more than \code{boundaries} vectors are given, a change in \emph{any} vector indicates a boundary.
+If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
 
 Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using boundaries should be essentially identical to using \code{tapply(x, boundaries, laggedFunction, ...)},
+Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{boundaries = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path )}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{boundaries} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{boundaries = list(File, Record)}.
+you could manually set \code{groupby = list(File, Record)}.
 }
 
 \section{Invertability}{
@@ -163,7 +163,7 @@ The \code{sigma} and \code{delta} functions are inverses of each other, meaning 
 \code{sigma(delta(x)) == x} and \code{delta(sigma(x)) == x}.
 In other words, the two functions "reverse" each other.
 The key is that the \code{init} argument needs to be set to \code{0}, and all other
-arguments (\code{lag}, \code{skip}, \code{boundaries}, etc.) need to match.
+arguments (\code{lag}, \code{skip}, \code{groupby}, etc.) need to match.
 So \emph{actually},  \code{sigma(delta(x, init = 0, ...)) == x} and \verb{delta(sigma(x), init = 0)) == x}.
 
 When we take the differences between values (\code{delta(x)}), the resulting differences can't tell us
@@ -209,6 +209,7 @@ This function's inverse is \code{\link[=sigma]{sigma()}}.
 Other {Lagged vector functions}: 
 \code{\link{ditto}()},
 \code{\link{lag}()},
-\code{\link{sigma}()}
+\code{\link{sigma}()},
+\code{\link{xint}()}
 }
 \concept{{Lagged vector functions}}
