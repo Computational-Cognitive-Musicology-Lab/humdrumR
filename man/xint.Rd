@@ -19,7 +19,7 @@ mint(
   parseArgs = list(),
   Exclusive = NULL,
   Key = NULL,
-  boundaries = list()
+  groupby = list()
 )
 
 hint(
@@ -33,7 +33,7 @@ hint(
   parseArgs = list(),
   Exclusive = NULL,
   Key = NULL,
-  boundaries = list()
+  groupby = list()
 )
 }
 \description{
@@ -47,7 +47,7 @@ and the intervals \emph{between} successive pitches are calculated.
 Input vector \code{x} is \link[=tonalInterval]{parsed as pitch information}.
 (Parsing arguments can be passed via the \code{parseArgs} list, or \code{parse(...)} sugar. \code{Key} and \code{Exclusive} are also passed to the parser.)
 
-The parsed pitch vector is copied and lagged using \code{\link[=lag]{lag()}}, and pairs which cross \code{boundaries} are ignored.
+The parsed pitch vector is copied and lagged using \code{\link[=lag]{lag()}}, and pairs which cross \code{groupby} are ignored.
 The melodic intervals are then "\link[=pitchDeparsing]{deparsed}" into a standard representation; by default, the \code{\link[=intervals]{intervals()}}
 representation is used, but you can set the \code{deparser} argument to any \link[=pitchFunctions]{pitch function}.
 However, the only alternative deparser that would be \emph{commonly} used (other than \code{\link[=intervals]{intervals()}}) would be \code{\link[=semits]{semits()}}.
@@ -101,7 +101,7 @@ If so, intervals are categorized based only on semitone (enharmonic) intervals:
 D# and Eb are classified the same.
 }
 
-\section{Boundaries}{
+\section{Grouping}{
 
 
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
@@ -116,7 +116,7 @@ Basically, using groupby should be essentially identical to using \code{tapply(x
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}

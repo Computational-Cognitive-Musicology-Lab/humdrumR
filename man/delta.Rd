@@ -132,7 +132,7 @@ to
 }
 }
 
-\section{Boundaries}{
+\section{Grouping}{
 
 
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
@@ -147,13 +147,53 @@ Basically, using groupby should be essentially identical to using \code{tapply(x
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 you could manually set \code{groupby = list(File, Record)}.
+}
+
+\section{Order}{
+
+
+When performing lagged calculations, we typically assume that the order of the values in the input vector
+(\code{x}) is the order we want to "lag" across.
+E.g., the first element is "before" the second element, which is "before" the third element, etc.
+[Humdrum tables][humTable] are always ordered \verb{File > Piece > Spine > Path > Record > Stop}.
+Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
+the \emph{next} element is the next element in the spine path.
+For example, consider this data:\preformatted{**kern  **kern
+a       d
+b       e
+c       f
+*-      *-
+}
+
+The default order of these tokens (in the \code{Token} field) would be \verb{a b c d e f}.
+If we wanted to instead lag across our tokens \emph{harmonically} (across records) we'd need to specifiy a different order
+For example, we could say \code{orderby = list(File, Record, Spine)}---the lagged function
+would interpret the \code{Token} field above as \verb{a d b e c f}.
+
+For another example, note \code{Stop} comes last in the order.
+Let's consider what happens then if here are stops in our data:\preformatted{**kern  **kern
+a       d
+b D     e g
+c A     f a
+*-      *-
+```
+
+The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+That may or may not be what you want!
+If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+The resulting order would be `a b c d e f D G g a`.
+
+   
+
+[humTable]: R:humTable
+}
 }
 
 \section{Invertability}{

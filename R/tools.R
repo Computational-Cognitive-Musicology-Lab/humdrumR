@@ -165,7 +165,7 @@ applycols <- function(x, f, ...){
 #' shifts across columns.
 #' 
 #' @family {Lagged vector functions}
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
 #' @seealso [data.table::shift()]
 #' @export
 lag <- function(x, n = 1, fill, wrap, groupby, ...) UseMethod('lag')
@@ -176,7 +176,7 @@ lead <- function(x, n, ...) lag(x, -n, ...)
 
 
 #' @export
-lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list()) {
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
          if (length(n) < length(margin)) n <- rep(n, length(margin))
         
          if (1L %in% margin) {
@@ -193,13 +193,15 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupb
          x
 }
 #' @export
-lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list()) {
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
           checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
           checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
           checkTF(wrap, 'wrap', 'lag')
   
           if (length(x) == 0L || n == 0) return(x)
-  
+          
+          reorder(x = x, orderby = orderby)
+          
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
           
           output <- data.table::shift(x, n, type = 'lag', fill = fill)
@@ -221,7 +223,7 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list()) {
               output[groupby] <- fill
           }
 
-          output
+          reorder(output)
 }
 
 #' @export
@@ -267,6 +269,27 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = 
 
           output
 }
+
+reorder <- function(..., orderby = list(), toEnv = TRUE) {
+  xs <- list(...)
+  xs <- checkWindows(xs[[1]], xs)
+  orderby <- checkWindows(xs[[1]], orderby)
+  
+  if (length(orderby)) {
+    ord <- do.call('order', orderby)
+    
+    xs <- lapply(xs, '[', i = ord)
+    xs$reorder <- \(X) X[match(seq_along(X), ord)]
+  } else {
+    xs$reorder <- force
+  } 
+  
+  if (toEnv) list2env(xs[.names(xs) != ''], envir = parent.frame()) 
+
+  xs
+} 
+  
+   
 
 ## Matrices ----
 
@@ -619,7 +642,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
 #' 
 #' @inheritParams lag
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
 #' @family {Lagged vector functions}
 #' @export
 ditto <- function(x, ...) UseMethod('ditto')
@@ -1108,7 +1131,7 @@ checkWindows <- function(x, windows) {
 #' 
 #' 1. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
-#'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#'    Using the `groupby` argument to a function (details below) is generally faster than using a `groupby` argument to [withinHumdrum()].
 #' 2. They (can) automatically skip `NA` (or other) values.
 #' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
 #' section below.
@@ -1196,7 +1219,7 @@ checkWindows <- function(x, windows) {
 
 #'
 #' 
-#' @section Boundaries:
+#' @section Grouping:
 #' 
 #' In many cases we want to perform lagged calculations in a vector, but *not across certain boundaries*.
 #' For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
@@ -1210,7 +1233,7 @@ checkWindows <- function(x, windows) {
 #' except generally faster when the number of groups is large.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
-#' For this, we want `groupby = list(File, Spine, Path )`.
+#' For this, we want `groupby = list(File, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
 #' three fields as `groupby` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
 #' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
@@ -1218,9 +1241,48 @@ checkWindows <- function(x, windows) {
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 #' you could manually set `groupby = list(File, Record)`.
 #' 
+#' @section Order:
+#' 
+#' When performing lagged calculations, we typically assume that the order of the values in the input vector
+#' (`x`) is the order we want to "lag" across.
+#' E.g., the first element is "before" the second element, which is "before" the third element, etc.
+#' [Humdrum tables][humTable] are always ordered `File > Piece > Spine > Path > Record > Stop`.
+#' Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
+#' the *next* element is the next element in the spine path.
+#' For example, consider this data:
+#' 
+#' ```
+#' **kern  **kern
+#' a       d
+#' b       e
+#' c       f
+#' *-      *-
+#' ```
+#' 
+#' The default order of these tokens (in the `Token` field) would be `a b c d e f`.
+#' If we wanted to instead lag across our tokens *harmonically* (across records) we'd need to specifiy a different order
+#' For example, we could say `orderby = list(File, Record, Spine)`---the lagged function
+#' would interpret the `Token` field above as `a d b e c f`.
+#' 
+#' For another example, note `Stop` comes last in the order.
+#' Let's consider what happens then if here are stops in our data:
+#' 
+#' ````
+#' **kern  **kern
+#' a       d
+#' b D     e g
+#' c A     f a
+#' *-      *-
+#' ```
+#' 
+#' The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+#' That may or may not be what you want!
+#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+#' The resulting order would be `a b c d e f D G g a`.
+#' 
 #'    
 #' @param x (Any numeric vector.) `NULL` values are returned `NULL`.
-#' @param lag (Non-zero integer.) Which lag to use. (See *Great lags* section, below.) 
+#' @param lag (Non-zero integer.) Which lag to use. (See *Greater lags* section, below.) 
 #' @param skip (`function`.) This must be a function which can be applied to `x` and returns a logical vector
 #' of the same length. And `TRUE` values are skipped over in the calculations.
 #' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
@@ -1231,6 +1293,8 @@ checkWindows <- function(x, windows) {
 #' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
 #' @param groupby (vector of same length as `x`, or a list of such vectors) Differences are not calculated
 #' across groups indicated by the `groupby` vector(s).
+#' @param orderby (vector of same length as `x`, or a list of such vectors) Differences in `x` are calculated
+#' based on the order of `orderby` vector(s), as determined by [base::order()].
 #' 
 #' 
 #' @family {Lagged vector functions}
@@ -1239,7 +1303,7 @@ checkWindows <- function(x, windows) {
 sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('sigma')
 #' @rdname sigma
 #' @export
-sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), ...) {
+sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
   checkNumeric(x, 'x', 'sigma')
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
@@ -1247,6 +1311,9 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), 
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
   
   groupby <- checkWindows(x, groupby)
+  orderby <- checkWindows(x, orderby)
+  
+  reorder(x = x, orderby = orderby)
   
   if (length(groupby)) {
     segments <- segments(do.call('changes', c(groupby, list(...))))
@@ -1274,13 +1341,7 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), 
     cumsum(x)
   }
   
-
-  
-  result
-  
-  
-  
-  
+  reorder(result)
 }
 #' @rdname sigma
 #' @export
@@ -1387,7 +1448,8 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' @param lag (Non-zero integer.) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
 #' 
 #' @inheritParams sigma
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
+#' @inheritSection sigma Order
 #' @inheritSection sigma Invertability
 #' 
 #' @family {Lagged vector functions}
@@ -1396,13 +1458,16 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 
 #' @rdname delta
 #' @export
-delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, groupby = list(), ...) {
+delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
+                          groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
     checkNumeric(x, 'x', 'delta')
     checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
     if (!is.null(skip))  checkFunction(skip, 'skip', 'delta')
     checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
     checkTF(right, 'right', 'delta')
+    
+    reorder(x = x, orderby = orderby)
     
     init <- rep(init, length.out = abs(lag))
     if (lag < 0) {
@@ -1434,9 +1499,7 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
       output[bounds] <- x[bounds] - rep(init, length.out = length(bounds))
     }
     
-    
-    output
-    
+    reorder(output)
 }
  
 #' @rdname delta
@@ -2112,7 +2175,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     # 
     if (length(sys.calls()) > 10L) return(arg) 
     
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argzzzzzzzzname, quote = TRUE), ')') else quotemark(argname)
+    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argname, quote = TRUE), ')') else quotemark(argname)
     if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     

@@ -17,7 +17,7 @@ windows(
   end = length(x),
   nest = FALSE,
   depth = NULL,
-  boundaries = NULL,
+  groupby = NULL,
   min_length = 1L,
   max_length = Inf
 )

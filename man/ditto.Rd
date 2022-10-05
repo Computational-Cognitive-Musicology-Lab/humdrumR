@@ -77,7 +77,7 @@ the active field; thus \code{ditto(humData)} is equivalent to \code{within(humDa
 The \code{field} argument can be used to indicated a different field to apply to. The result of the dittoing
 is saved to a new field---the \code{newField} argument can be used to control what to name the new field.
 }
-\section{Boundaries}{
+\section{Grouping}{
 
 
 In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
@@ -92,7 +92,7 @@ Basically, using groupby should be essentially identical to using \code{tapply(x
 except generally faster when the number of groups is large.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path )}.
+For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}

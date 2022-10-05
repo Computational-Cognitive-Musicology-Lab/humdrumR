@@ -398,7 +398,7 @@ So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
 
 \subsection{Octave "Rounding"}{
 
-In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+In some situations, pitch data might interpret the "groupby" between octaves a little differently.
 In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
 between B (degree 7) and C (degree 1).
 However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).

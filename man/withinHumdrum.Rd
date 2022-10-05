@@ -199,17 +199,17 @@ Thus, \emph{these} two calls are also the same:\preformatted{with(humData, table
 with(humData, table(lag(Token, 1), lag(Token, 2))
 }
 
-\code{\link[=lag]{lag()}} is a function with a \code{boundaries} argument, which \code{with}/\code{within.humdrumR}
+\code{\link[=lag]{lag()}} is a function with a \code{groupby} argument, which \code{with}/\code{within.humdrumR}
 will automatically feed the fields \code{list(File, Spine, Path)}.
 This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
-\code{boundaries} argument to the lagged index, like \code{Token[lag = 1, boundaries = list(...)]}.
+\code{groupby} argument to the lagged index, like \code{Token[lag = 1, groupby = list(...)]}.
 
 Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
 For example, if you want to create character-string 5-grams of your data, you could call:\preformatted{with(humData, paste(Token[lag = 0:5], sep = '-'))
 }
 
-Note that, since \code{with}/\code{within.humdrumR} passes \code{boundaries = list(File, Spine, Path)}
+Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(File, Spine, Path)}
 to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each file.
 }
 }
