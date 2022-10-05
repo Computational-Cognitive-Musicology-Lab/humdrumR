@@ -2787,7 +2787,7 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     
     output
     
-  }))
+  })) %class% 'pitchFunction'
 }
 
 
@@ -3529,17 +3529,31 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #'
 #'
 #' @family {relative pitch functions}
-#' @family {Lagged pitch interval functions}
+#' @family {Lagged vector functions}
+#'
 #' @seealso {`mint` uses [lag()] to "lag" the input pitches, and also makes use of [pitch parsers][tonalInterval()] and [pitch functions][pitchFunctions].}
 #' @inheritSection sigma Boundaries
-#' @name mint
+#;
+#' @name xint
 #' @export
+xint <- function(to, from = tint(0L, 0L), deparser = interval, parseArgs = list(), ...) {
+  checkArg(deparser, 'deparser', callname = 'xint', classes = c('pitchFunction'))
+  from <- rep(from, length.out = length(to))
+  
+  to <- do.call('tonalInterval', c(list(to), parseArgs))
+  from <- do.call('tonalInterval', c(list(from), parseArgs))
+  
+  deparser(to - from, ...)
+}
+
+
+#' @rdname xint
+#' @export 
 mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
   
-  checkVector(x, 'x', 'mint', min.length = 1L)
-  checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
+  checkLooseInteger(lag, 'lag', 'mint', min.length = 2L, max.length = 1L)
   checkFunction(deparser, 'deparser', 'mint')
   if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to mint with an atomic 'initial' argument, ",
                                                                "length(initial) must equal abs(lag).")                 
@@ -3618,8 +3632,9 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 #' `hint` calculates harmonic intervals in a vector, or across records of a [humdrumR data object][humdrumRclass].
 #' 
 #' @family {relative pitch functions}
-#' @family {Lagged pitch interval functions}
-#' @name hint
+#' @family {Lagged vector functions}
+#'
+#' @rdname xint
 #' @export
 hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
                          classify = FALSE, ..., 

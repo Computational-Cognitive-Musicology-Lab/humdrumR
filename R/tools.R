@@ -2112,7 +2112,7 @@ checkArg <- function(arg,  argname, callname = NULL,
     # 
     if (length(sys.calls()) > 10L) return(arg) 
     
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(arg, quote = TRUE), ')') else quotemark(arg)
+    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argname, quote = TRUE), ')') else quotemark(argname)
     if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
     callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
     
