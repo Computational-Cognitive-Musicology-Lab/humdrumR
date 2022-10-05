@@ -3552,7 +3552,7 @@ xint <- function(to, from = tint(0L, 0L), deparser = interval,
 
 #' @rdname xint
 #' @export 
-mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
+mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, approach = TRUE,
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
@@ -3562,7 +3562,6 @@ mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE
                                                                "length(initial) must equal abs(lag).")                 
   checkTF(bracket, 'bracket', 'mint')
   checkTF(classify, 'classify', 'mint')
-  
   
   lagged <- lag(x, lag, groupby = groupby, orderby = orderby)
   initLocs <- !is.na(x) & is.na(lagged)
@@ -3577,10 +3576,9 @@ mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE
   if (!is.null(initial) && any(initLocs)) {
     
     if (is.function(initial) && inherits(initial, 'pitchFunction')) {
-      output[initLocs] <- do(initial, c(list(if (lag < 0L) lagged[initLocs] else x[initLocs], 
-                                             Exclusive = Exclusive, 
-                                             Key = Key), 
-                                        ...))
+      output[initLocs] <- do(initial, list(if (lag < 0) lagged[initLocs] else x[initLocs], 
+                                             Exclusive = Exclusive[initLocs], 
+                                             Key = Key[initLocs], ...))
     }
     
     if (is.atomic(initial)) output[initLocs] <- initial
@@ -3590,29 +3588,6 @@ mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE
   output
 }
 
-
-.mint <- function(X, L, lag, deparser, initial, bracket, parseArgs, Exclusive, Key, ...) {
-  Xtint <- do.call('tonalInterval', c(list(X, Exclusive = Exclusive, Key = Key), parseArgs))
-  Ltint <- do.call('tonalInterval', c(list(L, Exclusive = Exclusive, Key = Key), parseArgs))
-  tint <- if (lag >= 0) Xtint - Ltint else Ltint - Xtint
-  
-  output <- do(deparser, list(tint, ...))
-  
-  initLocs <- !is.na(Xtint) & is.na(Ltint)
-  
-  if (!is.null(initial) && any(initLocs)) {
-    
-    if (is.function(initial)) output[initLocs] <- do(initial, c(list(Xtint[initLocs], 
-                                                                       Exclusive = Exclusive, 
-                                                                       Key = Key), 
-                                                                  ...))
-                                                           
-    if (is.atomic(initial)) output[initLocs] <- initial
-    if (bracket) output[initLocs] <- paste0('[', output[initLocs], ']')
-  }
-
-  output
-}
 
 mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   
@@ -3654,27 +3629,29 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 #'
 #' @rdname xint
 #' @export
-hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
-                         classify = FALSE, ..., 
+hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE,
+                         classify = FALSE, ...,
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
-  
+
   checkVector(x, 'x', 'hint', min.length = 1L)
   checkFunction(deparser, 'deparser', 'hint')
   if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to hint with an atomic 'initial' argument, ",
-                                                               "length(initial) must equal abs(lag).")                 
+                                                               "length(initial) must equal abs(lag).")
   checkTF(bracket, 'bracket', 'hint')
   checkTF(classify, 'classify', 'hint')
-  
-  
-  
+
+  if (is.numeric(lag)) {
+    browser()
+  }
+
   lagged <- if (is.numeric(lag)) lag(x, lag, groupby = groupby, orderby = orderby) else {
     lagged <- ditto.default(x, null = !lag, groupby = groupby, initial = '_next_')
     lagged[lag] <- NA
     lagged
   }
-  
-  
-  hinterval <- do(.mint, args = list(x, lagged, lag = 1, deparser = deparser, initial = initial, bracket = bracket, 
+
+
+  hinterval <- do(.mint, args = list(x, lagged, lag = 1, deparser = deparser, initial = initial, bracket = bracket,
                                      parseArgs = parseArgs, Exclusive = Exclusive, Key = Key, ...)) # Use do so memoize is invoked
 
   reorderer(hinterval)

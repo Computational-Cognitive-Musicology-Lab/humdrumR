@@ -52,7 +52,8 @@ humdrumRroot <- system.file(package = 'humdrumR')
 
 exclusiveFunctions <- c('mint', 'hint')
 keyedFunctions <- c()
-boundedFunctions <- c('mint', 'hint', 'delta', 'sigma', 'lag', 'ditto')
+melodicBounds <- c('mint', 'delta', 'sigma', 'lag', 'ditto')
+harmonicBounds <- c('hint')
 
 setOldClass('quosure')
 

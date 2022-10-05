@@ -1119,12 +1119,22 @@ keyedArgsQuo <- function(funcQuosure, fields) {
 
 
 boundedArgsQuo <- function(funcQuosure) {
-  # functions that require a Key argument
-  
-  predicate <- \(Head) Head %in% boundedFunctions
+  # melodic
+  predicate <- \(Head) Head %in% melodicBounds
   
   do <- \(exprA) {
     if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path))
+    exprA
+  }
+  
+  funcQuosure <- withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  
+  # harmonic
+  predicate <- \(Head) Head %in% harmonicBounds
+  
+  do <- \(exprA) {
+    if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Record))
+    if (!'orderby' %in% names(exprA$Args)) exprA$Args$orderby <- quote(list(File, Record, Spine))
     exprA
   }
   

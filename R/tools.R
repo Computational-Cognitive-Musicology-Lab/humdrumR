@@ -200,7 +200,11 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list(), ord
   
           if (length(x) == 0L || n == 0) return(x)
           
-          reorder(x = x, orderby = orderby)
+          groupby <- checkWindows(x, groupby)
+          orderby <- checkWindows(x, orderby)
+          
+          groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+          reorder(list(x = x), orderby = orderby)
           
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
           
@@ -270,8 +274,8 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = 
           output
 }
 
-reorder <- function(..., orderby = list(), toEnv = TRUE) {
-  xs <- list(...)
+reorder <- function(xs, orderby = list(), toEnv = TRUE) {
+  
   xs <- checkWindows(xs[[1]], xs)
   orderby <- checkWindows(xs[[1]], orderby)
   
@@ -643,13 +647,15 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' 
 #' @inheritParams lag
 #' @inheritSection sigma Grouping
+#' @inheritSection sigma Order
 #' @family {Lagged vector functions}
 #' @export
 ditto <- function(x, ...) UseMethod('ditto')
 
 #' @rdname ditto
 #' @export
-ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, groupby = list()) {
+ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, 
+                          groupby = list(), orderby = list()) {
     if (!(is.function(null) || (is.logical(null) && length(null) == length(x)))) {
       .stop("In a call to ditto, the 'null' argument must either be a function or a logical vector",
             " which is the same length as the 'x' argument.")
@@ -662,9 +668,12 @@ ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reve
     groupby <- checkWindows(x, groupby)
   
     if (length(x) == 0L) return(x)
+    
     hits <- !(if (is.function(null)) null(x) else null)
     
-    groupby <- checkWindows(x, groupby)
+    groupby <- checkWindows(x, reorder(groupby, orderby = orderby, toEnv = FALSE))
+    reorder(list(x = x, hits = hits), orderby = orderby)
+    
     
     groupby <- if (length(groupby)) {
       do.call('changes', c(groupby, list(reverse = reverse)))
@@ -684,7 +693,9 @@ ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reve
     vals <- x[hits | groupby]
     
     
-    setNames(rep(vals, rle(seg)$lengths), seg)
+    output <- setNames(rep(vals, rle(seg)$lengths), seg)
+    
+    reorder(output)
 }
 
 #' @rdname ditto
@@ -1313,7 +1324,8 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), 
   groupby <- checkWindows(x, groupby)
   orderby <- checkWindows(x, orderby)
   
-  reorder(x = x, orderby = orderby)
+  groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+  reorder(list(x = x), orderby = orderby)
   
   if (length(groupby)) {
     segments <- segments(do.call('changes', c(groupby, list(...))))
@@ -1467,7 +1479,8 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
     checkTF(right, 'right', 'delta')
     
-    reorder(x = x, orderby = orderby)
+    groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+    reorder(list(x = x), orderby = orderby)
     
     init <- rep(init, length.out = abs(lag))
     if (lag < 0) {
