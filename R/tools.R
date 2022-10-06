@@ -612,9 +612,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' with non-null values from earlier/later in the same vector.
 #' The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 #' The `reverse` argument can be used to cause "backward" filling, where the *next* (higher index) non-null value is used.
-
 #' If the input begins (or ends if `reverse == TRUE`) with a null value, the `initial` argument is filled instead; defaults to `NA`.
-#' As a special option, `initial == "_next_"` will cause the first (or last) non-null value to be filled backwards into the initial nulls.
 #' 
 #' Which values are considered "null" can be controlled using the `null` argument.
 #' The `null` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
@@ -682,12 +680,7 @@ ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reve
     }
     
     
-    if (!is.na(initial) && initial == '_next_') { 
-      initial <- x[closest(which(groupby), which(hits), direction = if (reverse) 'below' else 'above')]
-    }
-    
     x[groupby & !hits] <- initial
-    
     
     seg <- segments(hits | groupby, reverse = reverse)
     vals <- x[hits | groupby]

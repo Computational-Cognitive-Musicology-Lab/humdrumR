@@ -168,12 +168,12 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 
 getRoot <- function(dset){
-  checkArg(dset, classes = 'diatonicSet')
+  checkArg(dset, 'dset', 'getRoot', classes = 'diatonicSet')
   dset@Root %<-matchdim% dset
 } 
 
 getRootTint <- function(dset) {
-    checkArg(dset, classes = 'diatonicSet')
+    checkArg(dset, 'dset', 'getRootTint', classes = 'diatonicSet')
     root <- getRoot(dset)
     
     tint( , c(root)) %<-matchdim% dset
@@ -181,12 +181,12 @@ getRootTint <- function(dset) {
 }
 
 getSignature <- function(dset){
-    checkArg(dset)
+    checkArg(dset, 'dset', 'getSignature', classes = 'diatonicSet')
     dset@Signature %<-matchdim% dset
 }  
 
 getMode <- function(dset) {
-    checkArg(dset)
+    checkArg(dset, 'dset', 'getMode', classes = 'diatonicSet')
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset)
     sign <- getSignature(dset)
