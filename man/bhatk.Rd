@@ -161,8 +161,8 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 Other {relative pitch functions}: 
 \code{\link{degree}()},
 \code{\link{interval}()},
-\code{\link{solfa}()},
-\code{\link{xint}()}
+\code{\link{int}()},
+\code{\link{solfa}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},

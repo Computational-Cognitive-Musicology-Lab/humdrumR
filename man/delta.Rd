@@ -15,6 +15,7 @@ delta(x, lag, skip, init, right, ...)
   init = as(NA, class(x)),
   right = FALSE,
   groupby = list(),
+  orderby = list(),
   ...
 )
 
@@ -38,6 +39,9 @@ By default, \code{right == FALSE} so the \code{init} padding is at the beginning
 
 \item{groupby}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
 across groups indicated by the \code{groupby} vector(s).}
+
+\item{orderby}{(vector of same length as \code{x}, or a list of such vectors) Differences in \code{x} are calculated
+based on the order of \code{orderby} vector(s), as determined by \code{\link[base:order]{base::order()}}.}
 }
 \description{
 Calculate sequential differences of values in numeric vectors.
@@ -149,7 +153,7 @@ except generally faster when the number of groups is large.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
@@ -248,8 +252,8 @@ This function's inverse is \code{\link[=sigma]{sigma()}}.
 
 Other {Lagged vector functions}: 
 \code{\link{ditto}()},
+\code{\link{int}()},
 \code{\link{lag}()},
-\code{\link{sigma}()},
-\code{\link{xint}()}
+\code{\link{sigma}()}
 }
 \concept{{Lagged vector functions}}

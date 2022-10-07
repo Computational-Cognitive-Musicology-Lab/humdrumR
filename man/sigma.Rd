@@ -166,7 +166,7 @@ except generally faster when the number of groups is large.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{groupby} arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
 Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
@@ -219,7 +219,7 @@ This function's inverse is \code{\link[=delta]{delta()}}.
 Other {Lagged vector functions}: 
 \code{\link{delta}()},
 \code{\link{ditto}()},
-\code{\link{lag}()},
-\code{\link{xint}()}
+\code{\link{int}()},
+\code{\link{lag}()}
 }
 \concept{{Lagged vector functions}}

@@ -83,7 +83,8 @@
   skip <span class="op">=</span> <span class="va">is.na</span>,
   init <span class="op">=</span> <span class="fu">as</span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,
   right <span class="op">=</span> <span class="cn">FALSE</span>,
-  boundaries <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  orderby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   <span class="va">...</span>
 <span class="op">)</span>
 
@@ -108,18 +109,21 @@ The skipped values are returned as is in the output vector.</p></dd>
 <dt>right</dt>
 <dd><p>(single <code>logical</code> value) Should the <code>init</code> padding be at the "right" (end of the vector)?
 By default, <code>right == FALSE</code> so the <code>init</code> padding is at the beginning of the output.</p></dd>
-<dt>boundaries</dt>
+<dt>groupby</dt>
 <dd><p>(vector of same length as <code>x</code>, or a list of such vectors) Differences are not calculated
-across groups indicated by the <code>boundaries</code> vector(s).</p></dd>
+across groups indicated by the <code>groupby</code> vector(s).</p></dd>
+<dt>orderby</dt>
+<dd><p>(vector of same length as <code>x</code>, or a list of such vectors) Differences in <code>x</code> are calculated
+based on the order of <code>orderby</code> vector(s), as determined by <code><a href="https://rdrr.io/r/base/order.html" class="external-link">base::order()</a></code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>delta</code> is very similar base-<code>R</code> <code><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff()</a></code>.
 However, <code>delta</code> should be favored in <a href="humdrumR.html">humdrumR</a> use because:</p><ol><li><p>Its output is <em>always</em> the same length as its  input.
 This is achieved by padding the beginning or end of the output with1 <code>NA</code> values (or other options).</p></li>
-<li><p>It has a <code>boundaries</code> argument, which is <em>automatically</em> used by <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a>
+<li><p>It has a <code>groupby</code> argument, which is <em>automatically</em> used by <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a>
 commands to constrain the differences within files/spines/paths of <code>humdrum</code> data.
-The <code>boundaries</code> approach (details below) is generally faster than applying the commands within <code>groupby</code> groups.</p></li>
+The <code>groupby</code> approach (details below) is generally faster than applying the commands within <code>groupby</code> groups.</p></li>
 <li><p>They (can) automatically skip <code>NA</code> (or other) values.</p></li>
 </ol><p>If applied to a matrix, <code>delta</code> is applied separately to each column, unless <code>margin</code> is set to <code>1</code> (rows)
 or, if you have a higher-dimensional array, a higher value.</p>
@@ -173,27 +177,68 @@ equivalent positive lag, but <code>* -1</code>.</p><ul><li><p>\(x_1 - NA\)</p></
 <li><p>\(x_4 - x_5\)</p></li>
 </ul></div>
     <div class="section level2">
-    <h2 id="boundaries">Boundaries<a class="anchor" aria-label="anchor" href="#boundaries"></a></h2>
+    <h2 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a></h2>
     
 
 
 <p>In many cases we want to perform lagged calculations in a vector, but <em>not across certain boundaries</em>.
 For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 between pieces, only within pieces.
-The <code>boundaries</code> argument indicates one, or more, grouping vectors, which break the <code>x</code> (input) argument
+The <code>groupby</code> argument indicates one, or more, grouping vectors, which break the <code>x</code> (input) argument
 into groups.
-If more than <code>boundaries</code> vectors are given, a change in <em>any</em> vector indicates a boundary.</p>
+If more than <code>groupby</code> vectors are given, a change in <em>any</em> vector indicates a boundary.</p>
 <p>Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using boundaries should be essentially identical to using <code>tapply(x, boundaries, laggedFunction, ...)</code>,
+Basically, using groupby should be essentially identical to using <code>tapply(x, groupby, laggedFunction, ...)</code>,
 except generally faster when the number of groups is large.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want <code>boundaries = list(File, Spine, Path )</code>.
+For this, we want <code>groupby = list(File, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
-three fields as <code>boundaries</code> arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
+three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, or ditto.
 Do any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set <code>boundaries = list(File, Record)</code>.</p>
+you could manually set <code>groupby = list(File, Record)</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="order">Order<a class="anchor" aria-label="anchor" href="#order"></a></h2>
+    
+
+
+<p>When performing lagged calculations, we typically assume that the order of the values in the input vector
+(<code>x</code>) is the order we want to "lag" across.
+E.g., the first element is "before" the second element, which is "before" the third element, etc.
+[Humdrum tables][humTable] are always ordered <code>File &gt; Piece &gt; Spine &gt; Path &gt; Record &gt; Stop</code>.
+Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
+the <em>next</em> element is the next element in the spine path.
+For example, consider this data:</p><div class="sourceCode"><pre><code>**kern  **kern
+a       d
+b       e
+c       f
+*-      *-
+</code></pre></div>
+
+<p>The default order of these tokens (in the <code>Token</code> field) would be <code>a b c d e f</code>.
+If we wanted to instead lag across our tokens <em>harmonically</em> (across records) we'd need to specifiy a different order
+For example, we could say <code>orderby = list(File, Record, Spine)</code>---the lagged function
+would interpret the <code>Token</code> field above as <code>a d b e c f</code>.</p>
+<p>For another example, note <code>Stop</code> comes last in the order.
+Let's consider what happens then if here are stops in our data:</p><div class="sourceCode"><pre><code>**kern  **kern
+a       d
+b D     e g
+c A     f a
+*-      *-
+```
+
+The default ordering here (`File &gt; Spine &gt; Record &gt; Stop`) "sees" this in the order `a b D c A d e g f a`.
+That may or may not be what you want!
+If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+The resulting order would be `a b c d e f D G g a`.
+
+   
+
+[humTable]: R:humTable
+</code></pre></div>
+
     </div>
     <div class="section level2">
     <h2 id="invertability">Invertability<a class="anchor" aria-label="anchor" href="#invertability"></a></h2>
@@ -204,7 +249,7 @@ you could manually set <code>boundaries = list(File, Record)</code>.</p>
 <code>sigma(delta(x)) == x</code> and <code>delta(sigma(x)) == x</code>.
 In other words, the two functions "reverse" each other.
 The key is that the <code>init</code> argument needs to be set to <code>0</code>, and all other
-arguments (<code>lag</code>, <code>skip</code>, <code>boundaries</code>, etc.) need to match.
+arguments (<code>lag</code>, <code>skip</code>, <code>groupby</code>, etc.) need to match.
 So <em>actually</em>,  <code>sigma(delta(x, init = 0, ...)) == x</code> and <code>delta(sigma(x), init = 0)) == x</code>.</p>
 <p>When we take the differences between values (<code>delta(x)</code>), the resulting differences can't tell us
 fully how to reconstruct the original unless we know where to "start" (a constant offset).
@@ -225,6 +270,7 @@ only holds true if <code>right = FALSE</code> (the default).</p>
     <div class="dont-index"><p>This function's inverse is <code><a href="sigma.html">sigma()</a></code>.</p>
 <p>Other Lagged vector functions: 
 <code><a href="ditto.html">ditto</a>()</code>,
+<code><a href="int.html">int</a>()</code>,
 <code><a href="lag.html">lag</a>()</code>,
 <code><a href="sigma.html">sigma</a>()</code></p></div>
     </div>

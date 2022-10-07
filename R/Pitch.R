@@ -3462,48 +3462,78 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
-#' Calculate melodic intervals
+#' Calculate intervals between pitches
 #' 
-#' `mint` calculates melodic intervals in a vector, or across spine/paths of a [humdrumR data object][humdrumRclass].
-#' A vector is interpreted as an ordered sequence of notes, forming a "melody,"
-#' and the intervals *between* successive pitches are calculated.
+#' These functions allow us to calculate intervals between pitches.
+#' `int()` is the most basic form, calculating the interval(s) between two input vectors.
+#' `mint()` and `hint()` are special forms for calculating intervals "melodically" or "harmonically," respectively.
 #'
 #' @details 
 #' 
-#' Input vector `x` is [parsed as pitch information][tonalInterval()].
-#' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. `Key` and `Exclusive` are also passed to the parser.)
-#'
-#' The parsed pitch vector is copied and lagged using [lag()], and pairs which cross `groupby` are ignored.
-#' The melodic intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
-#' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
-#' However, the only alternative deparser that would be *commonly* used (other than [intervals()]) would be [semits()].
+#' Input vectors `x` (and `from`) are [parsed as pitches][tonalInterval()] ([tonal interval objects][tonalIntervaS4]), if possible.
+#' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. 
+#' `Key` and `Exclusive` arguments are also passed to the parser.)
+#' Any inputs that fail to parse will show up as `NA` in the output.
 #' 
+#' Once parsed, the intervals between the pitches are calculated as `x - from`.
+#' The resulting intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
+#' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
+#' However, the only alternative deparser that would be *commonly* used (besides [intervals()]) would be [semits()].
+#' If `deparser` is `NULL`, the raw [tonalIntervals][tonalIntervalS4] are returned.
+#' 
+#' @section Melodic and Harmonic intervals:
+#'
+#' `mint` and `hint` calculate "melodic" and "harmonic" intervals respectively.
+#' In this context, "melodies" are sequences of notes within a **spine path**, while
+#' "harmonies" are intervals between notes occurring in the same **record** (at the same time).
+#' Outside of a [with(in)][withinHumdrum] call, `mint` or `hint` are exactly the same;
+#' It is only when used in a call to [with(in)][withinHumdrum] that you will see them have different behaviors,
+#' as [with(in)][withinHumdrum] will automatically apply them across spine paths (`mint()`) or records (`hint()`).
+#' This is achieved by modifying the `groupby` and `orderby` arguments to [lag()]---you can manually achieve
+#' the default behaviors, or other behaviors, by setting these arguments yourself.
+#' 
+#' When used in a [with(in)][withinHumdrum] expression, `mint()` will (by default) calculate the melodic interval *approaching* each note 
+#' from the previous note:
+#' for example, `mint('C4', 'D4', 'Eb4')` fill return `c('[c]', '+M2', '+m2')`, because D4 is approached by
+#' ascending whole step *from* C4, and Eb4 is approached by ascending half step *from* D4.
+#' Similarly, the default [with(in)][withinHumdrum] behavior of `hint()` is to calculate successive intervals in the same record 
+#' (*across* spine paths), from left to right.
+#' So the record `C3  G4  C5` will return values `[CC]  +P12  +P4`, because the G4 is a perfect 12th above C3, and
+#' C5 is a perfect fourth above G4.
+#' 
+#' 
+#' `mint()` and `hint()` work by passing [lagged][lag()] and/or [dittoed][ditto()]
+#' versions of `x` as the `from` argument to `int()`.
+#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)`
+#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)`.
+#' In either case, the parsed pitch vector is copied and lagged using [lag()], with pairs crossing outside `groupby` groups ignored.
 #' The `lag` argument controls how far apart in the melody intervals are calculated.
 #' For instance, a lag of `2` will calculate intervals between *every other* note in the vector.
-#' Positive lags will calculate **approaching** intervals: each token represents the interval between the current note
+#' Positive lags (the default) will calculate **approaching** intervals: each token represents the interval between the current note
 #' and the *previous* note.
-#' Negative lags will calculate **departing** intervals: each token reprseents the interval 
+#' Negative lags will calculate **departing** intervals: each token represents the interval 
 #' between the current note and the *next* note.
-#' 
-#' Note that you by passing `directed = FALSE` through the the deparser, the undirected (absolute value)
+#' Note that, by passing `directed = FALSE` through the the [deparser][pitchDeparsing], the undirected (absolute value)
 #' of the melodic intervals can be returned.
 #' 
-#' @section Initial value padding:
+#' @section Incomplete value padding:
 #' 
-#' Any output of `mint` is necessarily padded by `abs(lag)` undefined intervals at the beginning
-#' (positive lag) or end (negative lag).
-#' The `initial` argument controls how these initial values are presented.
-#' 
-#' If `initial` is a function, the "initial" pitches are parsed "absolutely" relative to middle-C;
-#' in this case, `initial` should be another [pitch function][pitchFunctions] to deparse these pitches.
-#' The default is the [kern()] function.
-#' If `bracket == TRUE`, these initial values are are surrounded with `[]`, so they are easier to distinguish from the
-#' actual melodic intervals.
-#' 
-#' If `initial` is an atomic value, these value are used as the padder;
-#' An atomic (vector) `initial` must be the same length as `abs(lag)`.
-#' For example, you could set `initial = 'start'` to label these locations as the character string `'start'`.
-#' If `initial` is `NULL`, the initial values are simply padded with `NA`.
+#' By default, `int` will return `NA` anywhere where `x` **or** `from` is `NA`.
+#' However, if `from` is `NA` but `x` is *not* `NA`, we can ask for different output for these "incomplete" pairs.
+#' using the `incomplete` argument.
+#' If `incomplete` is an atomic value, incomplete outputs indices are willed with this value.
+#' If the incomplete argument is a [pitch function][pitchFunctions] (like the `deparser` argument),
+#' this function is used to (re)parse the values of `x` where `from` is missing.
+#' If `bracket == TRUE`, incomplete output values are surrounded with `[]`, so they are easier to distinguish from the
+#' actual intervals.
+#'
+#' The main use of the `incomplete` argument is in `mint()` and `hint()`.
+#' The lagged `from` arguments used in `mint()`/`hint()` (see previous section) are necessarily padded by `abs(lag)` `NA`
+#' values at the beginning (positive lag) or end (negative lag).
+#' These are thus "incomplete" pairs passed to `int()`, and can controlled using the `incomplete` argument.
+#' By default, both `mint()` and `hint()` set `incomplete = kern(), bracket = TRUE` which cause these
+#' notes to show up as bracketed kern, like `[ee-]` or `[C#]`.
+#' If `incomplete` is `NULL`, the incomplete values are simply padded with `NA`.
 #' 
 #' 
 #' @section Interval classification:
@@ -3511,7 +3541,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' If the `classify` argument is set to `TRUE`, intervals are classified as either `"Unison"`,
 #' `"Step"`, `"Skip"`, or `"Leap"`.
 #' Alternatively, skips can be interpreted as leaps by setting `skips = FALSE`.
-#' (Note that classification will only work if `deparser = interval`, which is the default).
+#' (`classify = TRUE` overrides the `deparser` argument.)
 #'
 #' By default, intervals are categorized tonally, meaning that the interval in tonal *steps*
 #' is used as the basis of classification.
@@ -3524,9 +3554,62 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' If so, intervals are categorized based only on semitone (enharmonic) intervals:
 #' D# and Eb are classified the same.
 #' 
+#' @section Logical(ditto) lags:
 #' 
+#' For calls to `hint()` and `mint()` the default behavior is a `numeric` `lag` argument passed to [lag()].
+#' An alternate option is to specify the `lag` argument as  `logical` vector the same length as the input (`x` argument).
+#' Rather than calculating the interval between a pitch and another pitch separated by a regular lag,
+#' a `logical` `lag` argument "lags" each pitch back to the previous value where `lag == TRUE`.
+#' This means that more than one interval can be calculated from those same `TRUE` indices.
 #' 
+#' The canonic use of this "logical lag" feature is to calculate harmonic intervals relative to the same voice, like the bass voice.
+#' For example, consider this file:
+#' 
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'       C             e             g            cc
+#'       G             d             f             b
+#'       C             c             e            cc             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' If we [read][readHumdrum()] this file and applied `hint()` to the `Token` field (with default arguments)
+#' the result would be:
+#' 
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'     [C]          +M10           +m3           +P4
+#'     [G]           +P5           +m3           +A4
+#'     [C]           +P8           +M3           +m6             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' In each record, we see the intervals as lagged (`lag == 1`) from left right:
+#' we see the intervals between the bass and the tenoir, the tenor and the alto, and the alto
+#' and the soprano.
+#' What if we wanted to see all the intervals with the bass?
+#' Well, we can use a `logical` `lag` argument, where we would specify that `Spine == 1`:
+#' `with(humData, hint(Token, lag = Spine == 1)`.
+#' This means that all `from` values are "lagged" back to the previous value where `Spine == 1`.
+#' The result would be:
 #'
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'     [C]          +M10          +P12          +P14
+#'     [G]           +P5           +m7          +M10
+#'     [C]           +P8          +M10          +P14             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' Now we see all the intervals relative to the bass.
+#' 
+#' The `logical` `lag` only takes place within the `groupby` groups.
+#' However, note that any values *before* the first index where `lag == TRUE`
+#' are calculated relative to that first value.
+#' 
 #'
 #' @family {relative pitch functions}
 #' @family {Lagged vector functions}
@@ -3534,26 +3617,32 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' @seealso {`mint` uses [lag()] to "lag" the input pitches, and also makes use of [pitch parsers][tonalInterval()] and [pitch functions][pitchFunctions].}
 #' @inheritSection sigma Grouping
 #;
-#' @name xint
+#' @name int
 #' @export
-xint <- function(to, from = tint(0L, 0L), deparser = interval, incomplete = NULL, bracket = TRUE,
-                 classify = FALSE, ..., parseArgs = list()) {
-  checkArg(deparser, 'deparser', callname = 'xint', classes = c('pitchFunction'))
-  from <- rep(from, length.out = length(to))
+int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, bracket = TRUE,
+                classify = FALSE, 
+                ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
+  
+  if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'int', classes = c('pitchFunction'))
+  from <- rep(from, length.out = length(x))
   
   if (classify) deparser <- mintClass
+ 
+  x    <- do.call('tonalInterval', c(list(x,    Exclusive = Exclusive, Key = Key), parseArgs))
+  from <- do.call('tonalInterval', c(list(from, Exclusive = Exclusive, Key = Key), parseArgs))
   
-  to <- do.call('tonalInterval', c(list(to), parseArgs))
-  from <- do.call('tonalInterval', c(list(from), parseArgs))
+  interval <- x - from
   
+  if (is.null(deparser)) return(interval)
   
-  output <- if (is.null(deparser)) to - from else deparser(to - from, ...)
-  missing <- !is.na(to) & is.na(output)
+  output <- deparser(interval, ...) 
+  
+  missing <- !is.na(x) & is.na(output)
   
   if (!is.null(incomplete) && any(missing)) {
     
     if (is.function(incomplete) && inherits(incomplete, 'pitchFunction')) {
-      output[missing] <- incomplete(to[missing]) # need Exclusive right?
+      output[missing] <- incomplete(x[missing]) # need Exclusive right?
     }
     
     if (is.atomic(incomplete)) output[missing] <- incomplete
@@ -3564,44 +3653,58 @@ xint <- function(to, from = tint(0L, 0L), deparser = interval, incomplete = NULL
 }
 
 
-#' @rdname xint
+#' @rdname int
 #' @export 
-mint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE,
+mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
   checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
   checkFunction(deparser, 'deparser', 'mint')
-  if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to mint with an atomic 'initial' argument, ",
-                                                               "length(initial) must equal abs(lag).")                 
+  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to mint with an atomic 'incomplete' argument, ",
+                                                               "length(incomplete) must equal abs(lag).")                 
   checkTF(bracket, 'bracket', 'mint')
   checkTF(classify, 'classify', 'mint')
   
-  lagged <- lag(x, lag, groupby = groupby, orderby = orderby)
   
+  if (is.numeric(lag)) {
+    if (lag >= 0L) {
+      from <- lag(x, lag, groupby = groupby, orderby = orderby)
+     
+    } else {
+      from <- x
+      x <- lag(from, lag, groupby = groupby, orderby = orderby)
+      na <- is.na(x) & !is.na(from)
+      x[na] <- from[na]
+      from[na] <- NA
+    }
+    
+    
+  } else {
+    from <- ditto.default(x,    null = !lag, groupby = groupby, orderby = orderby)
+    from <- ditto.default(from, null = !lag & (is.na(from) & !is.na(x)), groupby = groupby, orderby = orderby, reverse = TRUE)
+    from[lag] <- NA
+  }
   
-  if (lag < 0L) list2env(list(x = lagged, lagged = x), rlang::current_env())
-  
-  output <- xint(x, lagged, deparser = deparser, parseArgs = parseArgs,  
-                 Exclusive = Exclusive, Key = Key, incomplete = initial, bracket = bracket)
+  int(x, from, deparser = deparser, parseArgs = parseArgs, 
+      Exclusive = Exclusive, Key = Key, 
+      incomplete = incomplete, bracket = bracket, 
+      classify = classify, ...)
  
   
-  #
-
-  
-  output
 }
 
 
 mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   
+  int <- rep(NA_integer_, length(x))
   if (atonal) {
-    int <- tint2semits(x)
+    int[!is.na(x)] <- tint2semits(x[!is.na(x)])
     sign <- c('-', '', '+')[sign(int) + 2L]
     breaks <- c(-Inf, 0, 2, 4, Inf)
 
   } else {
-    int <- tint2interval(x, step.labels = NULL, specific = FALSE, compound = FALSE)
+    int[!is.na(x)] <- tint2interval(x[!is.na(x)], step.labels = NULL, specific = FALSE, compound = FALSE)
     sign <- stringr::str_extract(int, '^[+-]?')
     int <- as.numeric(int)
     
@@ -3620,44 +3723,26 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 
 
 
-
-
 ## Harmonic Intervals ####
 
-#' Calculate harmonic intervals
-#' 
-#' `hint` calculates harmonic intervals in a vector, or across records of a [humdrumR data object][humdrumRclass].
-#' 
-#' @family {relative pitch functions}
-#' @family {Lagged vector functions}
-#'
-#' @rdname xint
+#' @rdname int
 #' @export
-hint <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE,
-                         classify = FALSE, ...,
-                         parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
+hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
+                 ...,
+                 parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
 
   checkVector(x, 'x', 'hint', min.length = 1L)
   checkFunction(deparser, 'deparser', 'hint')
-  if (is.numeric(initial) && length(initial) != abs(lag)) .stop("In a call to hint with an atomic 'initial' argument, ",
-                                                               "length(initial) must equal abs(lag).")
+  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to hint with an atomic 'incomplete' argument, ",
+                                                               "length(incomplete) must equal abs(lag).")
   checkTF(bracket, 'bracket', 'hint')
-  checkTF(classify, 'classify', 'hint')
-
-  if (is.numeric(lag)) {
-    mint(x, lag = lag, deparser = deparser, initial = initial, bracket = bracket,
-         classify = classify, parseArgs = parseArgs, 
-         Exclusive = Exclusive, Key = Key, 
-         groupby = groupby, orderby = orderby, ...)
-  } else {
-    from <- ditto.default(x,    null = !lag, groupby = groupby, orderby = orderby)
-    from <- ditto.default(from, null = !lag & (is.na(from) & !is.na(x)), groupby = groupby, orderby = orderby, reverse = TRUE)
-    from[lag] <- NA
-    xint(x, from, deparser = deparser, incomplete = initial, bracket = bracket,
-         classify = classify, parseArgs = parseArgs, 
-         Exclusive = Exclusive, Key = Key, ...)
-  }
-
+  
+  mint(x, lag = lag, deparser = deparser, incomplete = incomplete, bracket = bracket,
+       parseArgs = parseArgs, 
+       Exclusive = Exclusive, Key = Key, 
+       groupby = groupby, orderby = orderby, ...)
+  
+  
  
 }
 
@@ -3681,8 +3766,8 @@ allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)
 allints <- allints[!is.na(allints)]
 cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
-for (int in allints) {
-  assign(int, interval2tint(int))
+for (i in allints) {
+  assign(i, interval2tint(i))
 }
 rm(allints)
 unison <- P1

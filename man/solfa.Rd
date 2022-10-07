@@ -161,7 +161,7 @@ Other {relative pitch functions}:
 \code{\link{bhatk}()},
 \code{\link{degree}()},
 \code{\link{interval}()},
-\code{\link{xint}()}
+\code{\link{int}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},

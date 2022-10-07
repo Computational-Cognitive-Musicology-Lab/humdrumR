@@ -259,15 +259,15 @@ Thus, <em>these</em> two calls are also the same:</p><div class="sourceCode"><pr
 with(humData, table(lag(Token, 1), lag(Token, 2))
 </code></pre></div>
 
-<p><code><a href="lag.html">lag()</a></code> is a function with a <code>boundaries</code> argument, which <code>with</code>/<code>within.humdrumR</code>
+<p><code><a href="lag.html">lag()</a></code> is a function with a <code>groupby</code> argument, which <code>with</code>/<code>within.humdrumR</code>
 will automatically feed the fields <code>list(File, Spine, Path)</code>.
 This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
-<code>boundaries</code> argument to the lagged index, like <code>Token[lag = 1, boundaries = list(...)]</code>.</p>
+<code>groupby</code> argument to the lagged index, like <code>Token[lag = 1, groupby = list(...)]</code>.</p>
 <p>Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
 For example, if you want to create character-string 5-grams of your data, you could call:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
-<p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>boundaries = list(File, Spine, Path)</code>
+<p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>groupby = list(File, Spine, Path)</code>
 to <code><a href="lag.html">lag()</a></code>, these are true "melodic" n-grams, only created within spine-paths within each file.</p>
 </div>
 

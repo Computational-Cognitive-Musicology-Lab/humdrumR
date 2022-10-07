@@ -1134,7 +1134,7 @@ boundedArgsQuo <- function(funcQuosure) {
   
   do <- \(exprA) {
     if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Record))
-    if (!'orderby' %in% names(exprA$Args)) exprA$Args$orderby <- quote(list(File, Record, Spine))
+    if (!'orderby' %in% names(exprA$Args)) exprA$Args$orderby <- quote(list(File, Record, Spine, Path))
     exprA
   }
   

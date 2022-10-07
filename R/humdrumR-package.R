@@ -50,8 +50,8 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-exclusiveFunctions <- c('mint', 'hint')
-keyedFunctions <- c()
+exclusiveFunctions <- c('mint', 'hint', 'int')
+keyedFunctions <- c('mint', 'hint', 'int')
 melodicBounds <- c('mint', 'delta', 'sigma', 'lag', 'ditto')
 harmonicBounds <- c('hint')
 

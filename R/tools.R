@@ -277,6 +277,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = 
 reorder <- function(xs, orderby = list(), toEnv = TRUE) {
   
   xs <- checkWindows(xs[[1]], xs)
+  if (length(xs) == 0L & !toEnv) return(xs)
   orderby <- checkWindows(xs[[1]], orderby)
   
   if (length(orderby)) {
@@ -1239,7 +1240,7 @@ checkWindows <- function(x, windows) {
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
 #' For this, we want `groupby = list(File, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `groupby` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
+#' three fields as `groupby` arguments to certain functions: `r harvard(melodicBounds, 'or')`.
 #' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

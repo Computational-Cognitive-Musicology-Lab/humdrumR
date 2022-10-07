@@ -114,6 +114,7 @@ reference:
   - LO5th
   - transpose
   - invert
+  - int
   - mint
   - hint
   - is.simple
