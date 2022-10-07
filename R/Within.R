@@ -572,13 +572,14 @@ with.humdrumR <- function(data, ...,
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
+  
   if (drop) {
-    if (nrow(result) == 0L) return(NULL)
     
     parts <- grepl('^_(by|subset)=..*_$', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
     result <- result[[max(which(!parts))]]
+    if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
@@ -1499,7 +1500,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     partition <- as.factor(partition)
     
-    nparts <- max(as.integer(partition))
+    nparts <- max(as.integer(partition), na.rm = TRUE)
     
     if (nparts > 1e5L) message("Your group-by expression {by = ",
                                rlang::as_label(partQuos$Quo[[1]]),
@@ -1538,12 +1539,15 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
 }
 evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
-  if (!is.logical(partition)) stop(call. = FALSE,
-                                   "In your call to with(in)Humdrum with a 'subset = x' expression, 
-                                     your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
-                                   "The expression you've provided {",
-                                   rlang::as_label(partQuos$Quo[[1]]),
-                                   "} evaluates to something of class {class(partition)}")
+  if (!is.logical(partition)) .stop("In your call to with(in).humdrumR with a 'subset = x' expression,",
+                                    "your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
+                                   "The expression you've provided {{ {rlang::as_label(partQuos$Quo[[1]])} }}",
+                                   " evaluates to something of class {class(partition)}.")
+  
+    
+  if (!any(partition)) warning(call. = FALSE, 
+                               "In your call to with(in).humdrumR, your subset never evaluates TRUE.",
+                               " Your within-expression is being evaluated on nothing.")
   
     if (nrow(partQuos) > 1L) {
       
@@ -1592,7 +1596,7 @@ parseResult <- function(results) {
   firstResult <- results[[lastResult]][[1]][[1]]
   
   keyLengths <- lengths(unlist(results[['_rowKey_']], recursive = FALSE))
-  resultLengths <- if (!is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
+  resultLengths <- if (length(firstResult) && !is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
   
   
   
@@ -1614,15 +1618,15 @@ parseResult <- function(results) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
-                      object <- !is.factor(first) && is.object(first)
+                      object <- length(first) && !is.factor(first) && is.object(first)
                       
+                      # if (is.table(result) && length(result) == 0L) result <- integer(0)
                       result <- unlist(result, recursive = FALSE)
-                      
                       
                       if (!object) {
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
-                      } 
+                      }
                       attr(result, 'visible') <- NULL
                       result
                     })

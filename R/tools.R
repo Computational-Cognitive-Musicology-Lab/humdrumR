@@ -1839,7 +1839,9 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 
 unanalyzeExpr <- function(exprA) {
   
+    if (exprA$Type == 'atomic' && exprA$Head == 'c' && length(exprA$Args) == 1L) exprA$Type <- 'scalar'
     expr <- switch(exprA$Type,
+                   scalar = exprA$Args[[1]],
                    atomic = ,
                    call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
                    symbol = rlang::sym(exprA$Head),
