@@ -5,47 +5,67 @@
 \alias{collapseStops}
 \alias{collapsePaths}
 \alias{collapseRecords}
-\title{HumdrumR data "Shape"}
+\title{"Collapse" humdrumR data into a field}
 \usage{
 collapseHumdrum(
   humdrumR,
-  byfields,
+  by,
+  collapseField = getActiveFields(humdrumR)[1],
+  dataTypes = "GLIMDd",
   collapseAtomic = TRUE,
-  sep = " ",
-  padPaths = FALSE
+  sep = " "
 )
 
-collapseStops(humdrumR, collapseAtomic = TRUE, sep = " ")
+collapseStops(
+  humdrumR,
+  collapseField = getActiveFields(humdrumR)[1],
+  collapseAtomic = TRUE,
+  sep = " "
+)
 
-collapsePaths(humdrumR, collapseAtomic = TRUE, sep = " ")
+collapsePaths(
+  humdrumR,
+  collapseField = getActiveFields(humdrumR)[1],
+  collapseAtomic = TRUE,
+  sep = " "
+)
 
-collapseRecords(humdrumR, collapseAtomic = TRUE, sep = " ", padPaths = FALSE)
+collapseRecords(
+  humdrumR,
+  collapseField = getActiveFields(humdrumR)[1],
+  collapseAtomic = TRUE,
+  sep = " "
+)
 }
 \arguments{
-\item{humdrumR}{A \link{humdrumRclass} data object.
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{collapseAtomic}{\code{logical}. If \code{collapseAtomic == TRUE}, each stop is collapsed to a single string
-\code{collapseAtomic == FALSE}, each stop is collapsed to a list of tokens.}
+\item{by}{(\code{character}) A vector of field names to group the data by.
+Data in the \code{collapseField} will be collapsed within these groups.}
 
-\item{sep}{\code{character}. If \code{collapseAtomic == TRUE}, collapsed tokens are separated by this string.}
+\item{collapseField}{(\code{character}, \code{length == 1}) The target
+field in the \code{humdrumR} data to collapse. Defaults to the first \link[=humActive]{active field}.}
 
-\item{pad}{\code{logical}. Should \link[=humColumns]{path/column padding tokens} be included?}
+\item{dataTypes}{(\code{character}) Which types of humdrum records to collapse.
+Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'} or any combination of
+these (e.g., \code{"LIM"}).}
+
+\item{collapseAtomic}{(\code{logical}, \code{length == 1}) If \code{TRUE}, data is collapsed
+into a single \code{character} string.
+If \code{FALSE}, data is conctanated in a \code{list}.}
+
+\item{sep}{(\code{character}, \code{length == 1}) If \code{collapseAtomic == TRUE}, collapsed tokens
+are separated by this string.}
 }
 \description{
-These functions are used to change the "shape"
-of data stored in \link[=humTable]{humdrum tables}
-(held within \link{humdrumRclass} objects of course).
-}
-\details{
-The \code{collapseXXX} family allows you collapse all
-\link[=humTable]{user fields}
-across groups in another field.
+\code{collapseHumdrum} allows you collapse a data field across
+across groups within the data indicated by the \code{by} argument.
+Data is "collapsed" either by \link[base:paste]{pasting} the data into a string,
+or by putting them into \link[base:list]{list}.
+\code{collapseStops}, \code{collapsePaths}, and \code{collapseRecords} are built-in
+calls to \code{collapseHumtab}, with some additional optimizations.
 }
 \seealso{
-Other {Humdrum data "reshaping" functions.}: 
-\code{\link{foldExclusive}()},
-\code{\link{foldGraceNotes}()},
-\code{\link{foldHumdrum}()}
+The humdrum \link[=foldHumdrum]{folding functions} serve a similar function,
+"folding" data into \emph{new} fields, rather than collapsing it within a field.
 }
-\concept{{Humdrum data "reshaping" functions.}}

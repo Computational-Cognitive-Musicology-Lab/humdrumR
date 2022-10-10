@@ -5,30 +5,96 @@
 \alias{lead}
 \title{Shift data within a vector/matrix/data.frame}
 \usage{
-lag(x, n = 1, fill, wrap, boundaries, ...)
+lag(x, n = 1, fill, wrap, groupby, ...)
 
 lead(x, n, ...)
 }
 \arguments{
-\item{x}{The input argument. Should be vector (including lists), array, or data.frame}
+\item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}
 
-\item{n}{The amount to lag/lead the data.}
+\item{n}{The amount to lag/lead the data.  If \code{n == 0}, \code{x} is returned unchanged.}
 
-\item{fill}{If \code{wrap = FALSE} and/or \code{windows = NULL}, parts of the output are padded with the \code{fill} argument. Defaults to \code{NA}.}
+\item{fill}{If \code{wrap = FALSE} parts of the output are padded with the \code{fill} argument.
+Defaults to \code{NA}.}
 
-\item{wrap}{If \code{wrap = TRUE}, data from the end (head or tail) is copied to the other end of the output, "wrapping" the data
+\item{wrap}{If \code{wrap = TRUE}, data from the end (head or tail) is copied to the
+other end of the output, "wrapping" the data
 within the data structure.}
 
-\item{boundaries}{A vector or list of vectors, all of the same length as \code{x}. Lags crossing the boundaries indicated in \code{windows}
-are filled.}
+\item{groupby}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
+by the \code{groupby} vector(s) is treated separately.}
 
-\item{margin}{Arrays and data.frames can be lagged lead in multiple dimensions using the \code{margin} argument.}
+\item{margin}{Arrays and data.frames can be lagged lead in multiple dimensions
+using the \code{margin} argument: \code{margin == 1} shifts across rows while \code{margin == 2}
+shifts across columns.}
 }
 \description{
-The \code{lag} and \code{lead} functions take input vectors, matrices, or data.frames and shifts their data
+The \code{lag} and \code{lead} functions take input vectors, matrices, or data.frames and
+shifts their data
 by \code{n} indices.
-They are similiar to the \link[data.table:shift]{data.table::shift} function, but with a few additional options:
+They are similar to the \code{\link[data.table:shift]{data.table::shift()}} function, but with a few additional options.
 }
+\details{
+A lagged vector has the same values as the original vector, except offset by \code{n} indices.
+\code{lag} moves each value to a high index (if \code{n > 0}); \code{lead} does the opposite,
+moving each value to a lower index (if \code{n > 0}).
+\code{n} can be positive or negative---negative lags are equivalent to leads, and vice versa.
+Values near the end/beginning are either "wrapped" to the opposite end of the
+vector, or replaced/padded with the value of the \code{fill} argument.
+
+The vector a
+b
+c
+d
+e
+f
+g can be lagged by \code{n==1} is NA
+a
+b
+c
+d
+e
+f.
+If we set \code{wrap == TRUE}, the \code{"g"} moved to the beginning of the output:
+is g
+a
+b
+c
+d
+e
+f.
+}
+\section{Grouping}{
+
+
+In many cases we want to perform lagged calculations in a vector, but \emph{not across certain boundaries}.
+For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
+between pieces, only within pieces.
+The \code{groupby} argument indicates one, or more, grouping vectors, which break the \code{x} (input) argument
+into groups.
+If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
+
+Value pairs which cross between groups are treated as if they were at the beginning.
+Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
+except generally faster when the number of groups is large.
+
+The most common use case in humdrum data, is looking at "melodies" within spines.
+For this, we want \code{groupby = list(File, Spine, Path)}.
+In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
+Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+in a "melodic" way, within each spine path of each file.
+However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
+you could manually set \code{groupby = list(File, Record)}.
+}
+
 \seealso{
 \code{\link[data.table:shift]{data.table::shift()}}
+
+Other {Lagged vector functions}: 
+\code{\link{delta}()},
+\code{\link{ditto}()},
+\code{\link{int}()},
+\code{\link{sigma}()}
 }
+\concept{{Lagged vector functions}}

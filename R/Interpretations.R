@@ -8,6 +8,8 @@
 ### for instance "*clefG2" and "*clefF4" are both examples of the same type
 ### of tandem information.
 
+#' @format 
+#' @rdname readHumdrum
 #' @export
 knownInterpretations <- data.table::fread(system.file('extdata', 'KnownInterpretations.tsv', package = 'humdrumR'))
 # Preprocess self-referential {}s in the file KnownInterperations.tsv

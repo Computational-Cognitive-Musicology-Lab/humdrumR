@@ -1,10 +1,10 @@
 ---
-title: "The Humdrum Syntax"
+title: "The humdrum syntax"
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{The Humdrum Syntax}
+  %\VignetteIndexEntry{The humdrum syntax}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,6 +12,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -28,9 +30,9 @@ You can open plain-text files in simple text editors like **Notepad** (Windows) 
 To be a humdrum file, your text-file must have very general layout which is called the *humdrum syntax*.
 Such a file can be said "to conform to the humdrum syntax," "to be valid humdrum," or most simply "to be a humdrum file."
 
-> In computer programming, you will often encounter words like "characters", "text", and "strings" used interchangibly.
+> In computer programming, you will often encounter words like "characters", "text", and "strings" used interchangeably.
 > You'll also hear combinations like "character-strings" and "text-strings."
-> These all (generally) refer to the same things: collectiosn of letters, numbers, punctuation, and a control/spacing characters like SPACEBAR (` `), TAB (`\t`), NEWLINE (`\n`), etc.
+> These all (generally) refer to the same things: collections of letters, numbers, punctuation, and a control/spacing characters like SPACEBAR (` `), TAB (`\t`), NEWLINE (`\n`), etc.
 > Technically, humdrum text files are supposed to use the ASCII character set.
 
 ### Structure vs Content
@@ -55,7 +57,7 @@ We could call it `**drums` and we'd be ready to create humdrum data!
 
 # Syntax
 
-The humdrum syntax is, at first glange, nothing but a simple, tab-delineated spread sheet.
+The humdrum syntax is, at first glance, nothing but a simple, tab-delineated spread sheet.
 ("tab-delineated" just means that the columns of the spreadsheet are separated by TABs.)
 This *is* the basic idea, but there are a few extra features to learn!
 
@@ -100,7 +102,7 @@ Or with the real data again:
 
 There is one fundamental assumption regarding how the humdrum syntax encodes information:
 as we travel downward through a file (from top to bottom) we are encoding information in the order it occurs in time.
-This is true of data records---interpetation and comment records are all associated with the moment in time of the first data record that occurs below them.
+This is true of data records---interpretation and comment records are all associated with the moment in time of the first data record that occurs below them.
 Information that appears in the same record (within one spine, or in different spines) is assumed to happen at the same time.
 
 
@@ -129,7 +131,7 @@ If a token starts with `*`, it is an interpretation token.
 Two stars `**` indicates an **exclusive** interpretation.
 Every spine must start with an exclusive interpretation, and can only have one.
 The exclusive interpretation for a spine tells us the type of information is encoded in that spine, for the whole spine.
-For instance, our `**drums` interpration that we invented above is an exclusive interpetation.
+For instance, our `**drums` interpretation that we invented above is an exclusive interpretation.
 
 In the examples we're using here, the exclusive interpretation in both spines is `**kern`, is the most widely used humdrum interpretation, used to encode music notation.
 Note that a humdrum file can have different exclusive interpretations in each spine---they don't have to be the same, as they are in this example.
@@ -150,10 +152,10 @@ In our example,
 `*C:` is used in `**kern` to indicate the key of C major.
 `*Ibass` indicates what instrument is associated with that spine (bass voice).
 `*M4/4` and `*M3/4` indicate 4/4 and 3/4 meter respectively.
-This last case brings up something important about tandem interprations:
-a tandem interpretation is applied to all subsequent data points, unless it is cancelled or replaced by another tandem intepretation of the same type.
+This last case brings up something important about tandem interpretations:
+a tandem interpretation is applied to all subsequent data points, unless it is cancelled or replaced by another tandem interpretation of the same type.
 Thus, this humdrum file indicates 4/4 time starting at record 5, but switches to 3/4 time at record 13.
-However, the `*M4/4` in record 4 doesn't replace the `*C:` in record 3, because they are different types of tandem intepretations.
+However, the `*M4/4` in record 4 doesn't replace the `*C:` in record 3, because they are different types of tandem interpretations.
 
 
 

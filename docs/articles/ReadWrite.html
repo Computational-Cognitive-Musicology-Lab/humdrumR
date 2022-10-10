@@ -6,12 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="humdrumR">
-<title>Reading and writing data with humdrumR • humdrumR</title>
+<title>Reading and writing data • humdrumR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reading and writing data with humdrumR">
+<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Reading and writing data">
 <meta property="og:description" content="humdrumR">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,18 +41,27 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <h6 class="dropdown-header" data-toc-skip>Basics</h6>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
-    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
-    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
-    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
-    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
+    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>R/Humdrum background</h6>
+    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The humdrum syntax</a>
+    <a class="dropdown-item" href="../articles/RPrimer.html">An R primer for humdrumR users</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
+    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
+    <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
+    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
+    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
       </ul>
@@ -62,7 +71,7 @@
 
       <ul class="navbar-nav">
 <li class="nav-item">
-  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -79,39 +88,60 @@
 
 <div class="row">
   <main id="main"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Reading and writing data with humdrumR</h1>
-                        <h4 data-toc-skip class="author">Nathaniel Condit-Schultz</h4>
+      <img src="" class="logo" alt=""><h1>Reading and writing data</h1>
+                        <h4 data-toc-skip class="author">Nathaniel
+Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-07-18</h4>
+            <h4 data-toc-skip class="date">2022-10-07</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd"><code>vignettes/ReadWrite.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd" class="external-link"><code>vignettes/ReadWrite.Rmd</code></a></small>
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
     </div>
 
     
     
-<p>Welcome to “Reading and writing data with humdrumR”! This document will give you a detailed overview of humdrumR’s data reading and writing functionality. This document closely parallels parts of humdrumR’s code documentation; within an R session, you can read more concise version the material in this document by calling:</p>
+<p>Welcome to “Reading and writing data with humdrumR”! This document
+will give you a detailed overview of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s data reading and writing
+functionality. This document closely parallels parts of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s code documentation;
+within an R session, you can read more concise version the material in
+this document by calling:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
 
 <span class="op">?</span><span class="va">readHumdrum</span>
 <span class="op">?</span><span class="va">writeHumdrum</span></code></pre></div>
 <hr>
 <blockquote>
-<p><strong>Note</strong>: humdrumR is primarily intended to be used for analyzing existing humdrum data, and most users will be reading humdrum data a lot more often than writing it. humdrumR <em>is</em> able to write modified humdrum data back to humdrum-syntax text files, but this is a secondary use-case, and has recieved relatively little attention/thought in the current version of the package.</p>
+<p><strong>Note</strong>: Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> is primarily intended to be
+used for analyzing existing humdrum data, and most users will be reading
+humdrum data a lot more often than writing it. Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> <em>is</em> able to write
+modified humdrum data back to humdrum-syntax text files, but this is a
+secondary use-case, and has received relatively little attention/thought
+in the current version of the package.</p>
 </blockquote>
 <div class="section level2">
 <h2 id="reading-humdrum-data">Reading humdrum data<a class="anchor" aria-label="anchor" href="#reading-humdrum-data"></a>
 </h2>
-<p>The <code>readHumdrum</code> function is the gateway to humdrumR: it is the function we use to read humdrum data, encoded in humdrum-syntax text files, into R.</p>
+<p>The <code>readHumdrum</code> function is the gateway to humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>: it is the function we use
+to read humdrum data, encoded in humdrum-syntax text files, into R.</p>
 <div class="section level4">
 <h4 id="practice-data">Practice Data<a class="anchor" aria-label="anchor" href="#practice-data"></a>
 </h4>
-<p>In the following examples, we will make use the small number of raw humdrum data files which are included with humdrumR. To access these files, we need to navigate to the directory where your computer installed humdrumR—fortunately, humdrumR records where this directory is on your computer in a variable called <code>humdrumRroot</code>. Once we load the humdrumR library, we just need to set our R “working directory” to that location using the command <code>setwd</code>.</p>
+<p>In the following examples, we will make use the small number of raw
+humdrum data files which are included with humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>. To access these files, we
+need to navigate to the directory where your computer installed
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>—fortunately,
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> records where
+this directory is on your computer in a variable called
+<code>humdrumRroot</code>. Once we load the humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> library, we just need to
+set our R “working directory” to that location using the command
+<code>setwd</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span></code></pre></div>
-<p>The humdrum data is stored in a subdirectory called “HumdrumData”—we can look at the contents of this directory using <code>dir(recursive = TRUE)</code>:</p>
+<p>The humdrum data is stored in a subdirectory called “HumdrumData”—we
+can look at the contents of this directory using
+<code>dir(recursive = TRUE)</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -165,14 +195,22 @@
 <span class="co">#&gt; [48] "RollingStoneCorpus/living_for_the_city.hum"</span>
 <span class="co">#&gt; [49] "RollingStoneCorpus/me_and_bobby_mcgee.hum" </span>
 <span class="co">#&gt; [50] "RollingStoneCorpus/your_song.hum"</span></code></pre></div>
-<p>As we can see, there are five directories containing a total of fifty files.</p>
+<p>As we can see, there are five directories containing a total of fifty
+files.</p>
 </div>
 <div class="section level3">
 <h3 id="targeting-files">Targeting files<a class="anchor" aria-label="anchor" href="#targeting-files"></a>
 </h3>
-<p>To use <code>readHumdrum</code> we call the function with one (or more) character-string arguments. (In the function documentation (<code><a href="../reference/readHumdrum.html">?readHumdrum</a></code>), you’ll see these arguments called <code>...</code>—in R, <code>...</code> means <em>any</em> number of arguments.) These arguments are interpreted as <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external-link">regular expressions</a>, and matched against directories and files on your system. We call these “<strong>REpath-patterns</strong>,” short for Regular Expression directory-path patterns. For example,</p>
+<p>To use <code>readHumdrum</code> we call the function with one (or
+more) character-string arguments. (In the function documentation
+(<code><a href="../reference/readHumdrum.html">?readHumdrum</a></code>), you’ll see these arguments called
+<code>...</code>—in R, <code>...</code> means <em>any</em> number of
+arguments.) These arguments are interpreted as <a href="https://en.wikipedia.org/wiki/Regular_expression" class="external-link">regular
+expressions</a>, and matched against directories and files on your
+system. We call these “<strong>REpath-patterns</strong>,” short for
+Regular Expression directory-path patterns. For example,</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR">humdrumR</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/BachChorales/chor.*.krn'</span><span class="op">)</span>
@@ -270,10 +308,33 @@
 <span class="co">#&gt;  humdrumR corpus of ten files.</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>uses the REpath-pattern <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in the ‘HumdrumData/BachChorales’ directory whose name matches the regular expression “chor.<em>.krn.” As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)—using your operating system’s appopriate delimeter (”" for windows, ”/” for everybody else)—</em>and* a pattern for matching file paths. <em>Each</em> directory is also treated as a regular expression, possibly matching multiple directories. Let’s break this down: <code>humdrumR</code> splits your REpath-pattern input string into three parts: <code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and treats <em>each</em> of the three as regular expressions. The the first two expressions are used to match directories, while the last expression is used to match files. So, while <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code> matches all the files with the”.krn” extension in the “BeethovenVariations” directories and <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches all the files in the “MozartVariations” directories, the command <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code> will match all kern files in both directories!</p>
+<p>uses the REpath-pattern
+<code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in
+the ‘HumdrumData/BachChorales’ directory whose name matches the regular
+expression “chor.<em>.krn.” As you can see, the REpath-pattern includes
+directory (folder) paths (relative or absolute)—using your operating
+system’s appopriate delimeter (”" for windows, ”/” for everybody
+else)—</em>and* a pattern for matching file paths. <em>Each</em>
+directory is also treated as a regular expression, possibly matching
+multiple directories. Let’s break this down: humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> splits your REpath-pattern
+input string into three parts: <code>"HumdrumData"</code>,
+<code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and
+treats <em>each</em> of the three as regular expressions. The the first
+two expressions are used to match directories, while the last expression
+is used to match files. So, while
+<code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code>
+matches all the files with the”.krn” extension in the
+“BeethovenVariations” directories and
+<code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches
+all the files in the “MozartVariations” directories, the command
+<code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code> will match
+all kern files in both directories!</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/.*Variations/.*.krn'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
+<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
+<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -311,16 +372,13 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
-<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
-<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
-<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -367,7 +425,16 @@
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
 <blockquote>
-<p>Be careful: since each directory/file name is always treated like a regular expression, we can sometimes specify something that is more general than we intend. For instance, the command <code>readHumdrum('MyFolder/.*')</code> will match files in a folder called “MyFolder,” but would also match folders names “MyFolder_Also”, or “ThisIsMyFolder.” If you want to be sure to match exactly one and only one directory/file, use “^” and “$” regular-expression markers to explicitely mark the beginning and end of your pattern: the command <code>readHumdrum('^MyFolder$/.*')</code> will only read files from one directory “MyFolder.”</p>
+<p>Be careful: since each directory/file name is always treated like a
+regular expression, we can sometimes specify something that is more
+general than we intend. For instance, the command
+<code>readHumdrum('MyFolder/.*')</code> will match files in a folder
+called “MyFolder,” but would also match folders names “MyFolder_Also”,
+or “ThisIsMyFolder.” If you want to be sure to match exactly one and
+only one directory/file, use “^” and “$” regular-expression markers to
+explicitely mark the beginning and end of your pattern: the command
+<code>readHumdrum('^MyFolder$/.*')</code> will only read files from one
+directory “MyFolder.”</p>
 </blockquote>
 <p>To read <em>all</em> of our test files we can enter:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -468,26 +535,45 @@
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
 <blockquote>
-<p>Note: Since humdrumR can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched. If this happens, humdrumR identifies each file with enough of it’s directory path to make sure they are all unique.</p>
+<p>Note: Since humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+can read files from multiple directories at once, it is possible that
+two or more files with the same file name, but in different directories
+are matched. If this happens, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> identifies each file with
+enough of it’s directory path to make sure they are all unique.</p>
 </blockquote>
 <hr>
 <div class="section level4">
 <h4 id="multi-argument-approach">Multi-Argument Approach<a class="anchor" aria-label="anchor" href="#multi-argument-approach"></a>
 </h4>
-<p>Earlier we mentioned that we can have one <em>or more</em> of these RE-path patterns. Why more than one? Well, we can divided our RE-path patterns across multiple arguments (from left to right): Instead of writing <code>readHumdrum("HumdrumData/BachChorales/chor.*.krn")</code>, we can write <code>readHumdrum("HumdrumData", "BachChorales", "chor.*.krn")</code>. Thus these two approaches</p>
+<p>Earlier we mentioned that we can have one <em>or more</em> of these
+RE-path patterns. Why more than one? Well, we can divided our RE-path
+patterns across multiple arguments (from left to right): Instead of
+writing <code>readHumdrum("HumdrumData/BachChorales/chor.*.krn")</code>,
+we can write
+<code>readHumdrum("HumdrumData", "BachChorales", "chor.*.krn")</code>.
+Thus these two approaches</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">"HumdrumData/BachChorales/chor.*.krn"</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">"HumdrumData"</span>, <span class="st">"BachChorales"</span>, <span class="st">"chor.*.krn"</span><span class="op">)</span></code></pre></div>
-<p>are identical. What’s the advantage of this approach? We’ll see in the next section.</p>
+<p>are identical. What’s the advantage of this approach? We’ll see in
+the next section.</p>
 </div>
 <div class="section level4">
 <h4 id="multiple-patterns">Multiple Patterns<a class="anchor" aria-label="anchor" href="#multiple-patterns"></a>
 </h4>
-<p>Sometimes, expressing all the files you want in a single regular expression is not possible. Luckily, <code>readHumdrum</code> can accept as many separate patterns you want, just group them into a vector. Instead of writing <code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code>, you could be explicit and write</p>
+<p>Sometimes, expressing all the files you want in a single regular
+expression is not possible. Luckily, <code>readHumdrum</code> can accept
+as many separate patterns you want, just group them into a vector.
+Instead of writing
+<code>readHumdrum('HumdrumData/.*Variations/.*.krn')</code>, you could
+be explicit and write</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'HumdrumData/BeethovenVariations/.*.krn'</span>, <span class="st">'HumdrumData/MozartVariations/.*.krn'</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
+<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
+<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -525,16 +611,13 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
-<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
-<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
-<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -577,15 +660,21 @@
 <span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
 <span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;  humdrumR corpus of twenty files.</span>
+<span class="co">#&gt;  humdrumR corpus of twenty files (two subcorpora: _1, _2).</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>I’ve used the <code>c</code> command to create a vector with two REpath-patterns. However, that was a lot of (bug-prone) typing…what if we combine these multiple patterns with the Multi-Argument Approach from above?:</p>
+<p>I’ve used the <code>c</code> command to create a vector with two
+REpath-patterns. However, that was a lot of (bug-prone) typing…what if
+we combine these multiple patterns with the Multi-Argument Approach from
+above?:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
+<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
+<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -623,16 +712,13 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
-<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
-<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
-<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -675,33 +761,61 @@
 <span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
 <span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;  humdrumR corpus of twenty files.</span>
+<span class="co">#&gt;  humdrumR corpus of twenty files (two subcorpora: _1, _2).</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>We get the same result! How did this work exactly? We’ve fed three arguments to <code>readHumdrum</code>. The first and last arguments (<code>"HumdrumData"</code> and <code>".*.krn"</code>) are length one. However, the middle argument (<code>"...Variations"</code>) is of length two. <code>readHumdrum</code> concatenates the three arguments together, making <em>two</em> separate REpath-patterns:</p>
+<p>We get the same result! How did this work exactly? We’ve fed three
+arguments to <code>readHumdrum</code>. The first and last arguments
+(<code>"HumdrumData"</code> and <code>".*.krn"</code>) are length one.
+However, the middle argument (<code>"...Variations"</code>) is of length
+two. <code>readHumdrum</code> concatenates the three arguments together,
+making <em>two</em> separate REpath-patterns:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="st">"HumdrumData/BeethovenVariations/.*.krn"</span></code></pre></div>
 <p><strong>AND</strong></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="st">"HumdrumData/MozartVariations/.*.krn"</span></code></pre></div>
 <blockquote>
-<p>Note: It is possible to write multiple patterns which match some (or all) of the same files. If the argument <code>multipleInstances = FALSE</code>, each unique file will only be read once (into the first matching pattern). If <code>multipleInstances = TRUE</code>, the same file(s) can be read more than once.</p>
+<p>Note: It is possible to write multiple patterns which match some (or
+all) of the same files. If the argument
+<code>multipleInstances = FALSE</code>, each unique file will only be
+read once (into the first matching pattern). If
+<code>multipleInstances = TRUE</code>, the same file(s) can be read more
+than once.</p>
 </blockquote>
 <div class="section level5">
 <h5 id="pattern-names">Pattern Names<a class="anchor" aria-label="anchor" href="#pattern-names"></a>
 </h5>
-<p>Whenever we specific more than one REpath-pattern, <code>humdrumR</code> gives them names which we can access in the <code>Label</code> field of the resulting <code>humdrumR</code> data object. You can choose these labels by giving names to the patterns in your multi-pattern vectors: Thus, we could write</p>
+<p>Whenever we specific more than one REpath-pattern, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> gives them names which we
+can access in the <code>Label</code> field of the resulting humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data object. You can choose
+these labels by giving names to the patterns in your multi-pattern
+vectors: Thus, we could write</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Rap  <span class="op">=</span> <span class="st">'Rap/.*'</span>,
               Rock <span class="op">=</span> <span class="st">'RollingStone/.*'</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">rapAndRock</span></code></pre></div>
-<p>and these two separate patterns will be matched and read <em>and</em> the names <code>"Rap"</code> and <code>"Rock"</code> will be associated with them in the resulting <code>Label</code> field. This feature is very useful if you are working with multiple heterogenous datasets and you want to be able to apply some analyses/parsing to only one of the data subsets.</p>
+<p>and these two separate patterns will be matched and read <em>and</em>
+the names <code>"Rap"</code> and <code>"Rock"</code> will be associated
+with them in the resulting <code>Label</code> field. This feature is
+very useful if you are working with multiple heterogeneous datasets and
+you want to be able to apply some analyses/parsing to only one of the
+data subsets.</p>
 </div>
 </div>
 <div class="section level4">
 <h4 id="contains">Contains<a class="anchor" aria-label="anchor" href="#contains"></a>
 </h4>
-<p>Sometimes you want to only read humdrum files which contain particular data. For instance, you might want to read only the files in a minor key. One option is to read all the files in the corpus then filter out the files you don’t want (see the <a href="Filtering.html">humdrumR filtering vignette</a> to learn how. However, in some cases, it can save a lot of time and effort to filter the files you want before parsing them. The <code>contains</code> argument of <code>readHumdrum</code> can be used in just this way! The contains argument must be a character vector—each character string is treated as a regular expression, and only files which contain matches to all of these regular expressions will be read. Thus, we could only read pieces with minor keys by writing:</p>
+<p>Sometimes you want to only read humdrum files which contain
+particular data. For instance, you might want to read only the files in
+a minor key. One option is to read all the files in the corpus then
+filter out the files you don’t want (see the <a href="Filtering.html">humdrumR filtering vignette</a> to learn how.
+However, in some cases, it can save a lot of time and effort to filter
+the files you want before parsing them. The <code>contains</code>
+argument of <code>readHumdrum</code> can be used in just this way! The
+contains argument must be a character vector—each character string is
+treated as a regular expression, and only files which contain matches to
+all of these regular expressions will be read. Thus, we could only read
+pieces with minor keys by writing:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, <span class="st">'BachChorales'</span>, <span class="st">'chor.*.krn'</span>,
             contains <span class="op">=</span> <span class="st">'\\*[a-g][-b#]*:'</span><span class="op">)</span> 
@@ -799,40 +913,98 @@
 <span class="co">#&gt;  humdrumR corpus of three files.</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>(This regular expression matches standard humdrum tandem interpretations for minor keys.)</p>
+<p>(This regular expression matches standard humdrum tandem
+interpretations for minor keys.)</p>
 </div>
 </div>
 <div class="section level3">
 <h3 id="finding-files">Finding Files<a class="anchor" aria-label="anchor" href="#finding-files"></a>
 </h3>
-<p><code>readHumdrum</code> interprets REpath-patterns and finds files using the helper function <code>findHumdrum</code>. If you are not sure where your humdrum files are, or what pattern you want to use to find them, you might start be using <code>findHumdrum</code>. <code>findHumdrum</code> takes the same input as <code>readHumdrum</code>, but doesn’t fully parse the input into <code>humdrumR</code>. Instead, it returns a <code>data.table</code> containing matching filenames (if any) and raw file content.</p>
-<p>If you use the <code>verbose = TRUE</code> option for either <code>findHumdrum</code> or <code>readHumdrum</code>, a complete list of all the matches files will be printed. This is useful to check if you are reading the files you <em>intend</em> to read.</p>
+<p><code>readHumdrum</code> interprets REpath-patterns and finds files
+using the helper function <code>findHumdrum</code>. If you are not sure
+where your humdrum files are, or what pattern you want to use to find
+them, you might start be using <code>findHumdrum</code>.
+<code>findHumdrum</code> takes the same input as
+<code>readHumdrum</code>, but doesn’t fully parse the input into
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>. Instead, it
+returns a <code>data.table</code> containing matching filenames (if any)
+and raw file content.</p>
+<p>If you use the <code>verbose = TRUE</code> option for either
+<code>findHumdrum</code> or <code>readHumdrum</code>, a complete list of
+all the matches files will be printed. This is useful to check if you
+are reading the files you <em>intend</em> to read.</p>
 <div class="section level4">
 <h4 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
 </h4>
-<p><code>findHumdrum</code>, and by extension <code>readHumdrum</code>, are smart functions that will ignore non-humdrum files matched by your pattern. Non-text files (like <code>.pdf</code> or <code>.jpg</code>) will be ignored. Whatsmore, text files which fail to conform to the humdrum syntax will not be read either. You will see a message that checks which files are “valid humdrum,” and tell you how many (if any) text files are not read.</p>
-<p>If you are trying to read a file which you <em>think</em> should be valid humdrum, but <code>readHumdrum</code> won’t read it, use <code>validateHumdrum</code> with the exact same REpath-pattern arguments, and specify and <code>errorReport.path</code> to see a detailed report of the problem. <code>humdrumR</code> won’t read files with <em>any</em> humdrum-syntax violations—there might be minor problems in the data that you need to fix. Call <code><a href="../reference/humValidation.html">?validateHumdrum</a></code> or read our <a href="Validation.html">humdrum data validation vignette</a> to learn more about <code>humdrumR</code>’s data validation tools, and how they can be used to identify errors in your humdrum data. (<code>validateHumdrum</code> does not automatically check if the humdrum <em>data</em> is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.)</p>
+<p><code><a href="../reference/readHumdrum.html">findHumdrum()</a></code>, and by extension
+<code><a href="../reference/readHumdrum.html">readHumdrum()</a></code>, are smart functions that will ignore
+non-humdrum files matched by your pattern. Non-text files (like
+<code>.pdf</code> or <code>.jpg</code>) will be ignored. Whats more,
+text files which fail to conform to the humdrum syntax will not be read
+either. You will see a message that checks which files are “valid
+humdrum,” and tell you how many (if any) text files are not read.</p>
+<p>If you are trying to read a file which you <em>think</em> should be
+valid humdrum but <code><a href="../reference/readHumdrum.html">readHumdrum()</a></code> won’t read it, use
+<code><a href="../reference/validateHumdrum.html">validateHumdrum()</a></code> to see a detailed report of the problem.
+Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> won’t read
+files with <em>any</em> humdrum-syntax violations, even relatively minor
+ones. Once you see the problems that <code><a href="../reference/validateHumdrum.html">validateHumdrum()</a></code> is
+finding in your data, you’ll need to fix them yourself before you can
+use humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> on the
+data. Check out the [validateHumdrum][reference/validateHumdrum.html]
+documentation to learn more about humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s data validation tools,
+and how they can be used to identify errors in your humdrum data.</p>
+<blockquote>
+<p>Note that <code><a href="../reference/validateHumdrum.html">validateHumdrum()</a></code> does not automatically check
+if the humdrum <em>data</em> is encoded correctly or makes sense, just
+that it is structurally sound, in accordance with the humdrum
+syntax.</p>
+</blockquote>
 </div>
 </div>
 <div class="section level3">
 <h3 id="reading">Reading<a class="anchor" aria-label="anchor" href="#reading"></a>
 </h3>
-<p>So, what actually happens when we run <code>readHumdrum</code>? By now, you’ve seen that <code>readHumdrum</code> prints out a few messages describing its process.</p>
+<p>So, what actually happens when we run <code>readHumdrum</code>? By
+now, you’ve seen that <code>readHumdrum</code> prints out a few messages
+describing its process.</p>
 <ol style="list-style-type: decimal">
-<li>First, the files which match your search patterns (if any) are identified, and their text is read into R.</li>
-<li>Next, these files are checked to see if they are valid humdrum files.</li>
-<li>The files are parsed—i.e., translated into <code>humdrumR</code>‘s <a href="HumdrumTable.html">data.table backend</a>. This step takes the longest by far, as it includes parsing all the humdrum files’ data tokens, interpretations, reference records, and (worst of all) spine paths. Indeed, reading humdrum data with spine paths will take significantly longer than reading pathless data. To save yourself some time, you can potentially use the <code>tandems</code> and <code>reference</code> arguments (see “Parsing Metadata” below).</li>
+<li>First, the files which match your search patterns (if any) are
+identified, and their text is read into R.</li>
+<li>Next, these files are checked to see if they are valid humdrum
+files.</li>
+<li>The files are parsed—i.e., translated into humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s <a href="HumdrumTable.html">data.table backend</a>. This step takes the
+longest by far, as it includes parsing all the humdrum files’ data
+tokens, interpretations, reference records, and (worst of all) spine
+paths. Indeed, reading humdrum data with spine paths will take
+significantly longer than reading pathless data. To save yourself some
+time, you can potentially use the <code>tandems</code> and
+<code>reference</code> arguments (see “Parsing Metadata” below).</li>
 </ol>
 </div>
 <div class="section level3">
 <h3 id="parsing-metadata">Parsing Metadata<a class="anchor" aria-label="anchor" href="#parsing-metadata"></a>
 </h3>
-<p>By default, humdrumR parses all metadata in the humdrum files it reads. This includes the true global metadata for files, encoded in humdrum <em>reference records</em>, as well as the more local <em>tandem interpretations</em>.</p>
+<p>By default, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+parses all metadata in the humdrum files it reads. This includes the
+true global metadata for files, encoded in humdrum <em>reference
+records</em>, as well as the more local <em>tandem
+interpretations</em>.</p>
 <div class="section level4">
 <h4 id="reference-records">Reference Records<a class="anchor" aria-label="anchor" href="#reference-records"></a>
 </h4>
-<p>By default, humdrumR parses all reference records in the files it reads, creating a unique field for each reference key. (If there are more than one instance of any given key, they are combined in a string separated by semicolons.) If there are a lot of unique reference keys in a dataset, they can end up taking a lot of memory in a humdrum table. In these cases, you might find it useful to limit <code>readHumdrum</code> to only parsing those reference records which you are actually going to use. This can be accomplished quite easily with the <code>reference</code> argument.</p>
-<p>The <code>reference</code> argument defaults to <code>"all"</code>, which means all reference records are parsed. However, reference can also be a character vector of reference codes.</p>
+<p>By default, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+parses all reference records in the files it reads, creating a unique
+field for each reference key. (If there are more than one instance of
+any given key, they are combined in a string separated by semicolons.)
+If there are a lot of unique reference keys in a dataset, they can end
+up taking a lot of memory in a humdrum table. In these cases, you might
+find it useful to limit <code>readHumdrum</code> to only parsing those
+reference records which you are actually going to use. This can be
+accomplished quite easily with the <code>reference</code> argument.</p>
+<p>The <code>reference</code> argument defaults to <code>"all"</code>,
+which means all reference records are parsed. However, reference can
+also be a character vector of reference codes.</p>
 <p>Thus,</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
@@ -840,6 +1012,9 @@
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
+<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
+<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -877,16 +1052,13 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
-<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
-<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
-<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -929,16 +1101,21 @@
 <span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
 <span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;  humdrumR corpus of twenty files.</span>
+<span class="co">#&gt;  humdrumR corpus of twenty files (two subcorpora: _1, _2).</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>will only parse the <code>COM</code> reference record in each piece. We can use this to rename our reference fields if we like—in this case,</p>
+<p>will only parse the <code>COM</code> reference record in each piece.
+We can use this to rename our reference fields if we like—in this
+case,</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>,
             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'BeethovenVariations'</span>, <span class="st">'MozartVariations'</span><span class="op">)</span>,
             <span class="st">'.*.krn'</span>,
             reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Composer <span class="op">=</span> <span class="st">'COM'</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; ################ vvv B075_00_01_a.krn vvv ################</span>
+<span class="co">#&gt;     1:  !!!COM: Beethoven</span>
+<span class="co">#&gt;     2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="co">#&gt;     3:  !!!Variation: Theme a</span>
 <span class="co">#&gt;     4:    **function  **harm     **kern             **kern</span>
 <span class="co">#&gt;     5:             *       *    *clefG2            *clefG2</span>
 <span class="co">#&gt;     6:             *       *     *k[b-]             *k[b-]</span>
@@ -976,16 +1153,13 @@
 <span class="co">#&gt;    38:            4D     4V7        8cL          (8b-L 8ee</span>
 <span class="co">#&gt;    39:             .       .        8cJ         16b-L 16dd</span>
 <span class="co">#&gt;    40:             .       .          .            16eeJJ)</span>
-<span class="co">#&gt;    41:             *       *    *clefF4                  *</span>
-<span class="co">#&gt;    42:            =8      =8         =8                 =8</span>
-<span class="co">#&gt;    43:            4T      4I         4F             8a 8ff</span>
-<span class="co">#&gt; 44-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; 41-45:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ################ ^^^ B075_00_01_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (18 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ############### vvv M354_01_04d_a.krn vvv ################</span>
-<span class="co">#&gt;  4-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;  1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt;    15:             .       .          .     .      (16ccLL</span>
 <span class="co">#&gt;    16:             .       .          .     .         16b-</span>
 <span class="co">#&gt;    17:             .       .         8f     .          16a</span>
@@ -1028,18 +1202,30 @@
 <span class="co">#&gt;    54:            *-      *-         *-                 *-</span>
 <span class="co">#&gt; ############### ^^^ M354_01_04d_a.krn ^^^ ################</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;  humdrumR corpus of twenty files.</span>
+<span class="co">#&gt;  humdrumR corpus of twenty files (two subcorpora: _1, _2).</span>
 <span class="co">#&gt;   Data fields: </span>
 <span class="co">#&gt;          *Token :: character</span></code></pre></div>
-<p>the <code>COM</code> reference records will be parsed but saved into a field called <code>Composer</code> instead of <code>COM</code>.</p>
-<p>If you don’t want to parse <em>any</em> reference records, specify <code>reference = NULL</code>.</p>
+<p>the <code>COM</code> reference records will be parsed but saved into
+a field called <code>Composer</code> instead of <code>COM</code>.</p>
+<p>If you don’t want to parse <em>any</em> reference records, specify
+<code>reference = NULL</code>.</p>
 </div>
 <div class="section level4">
 <h4 id="tandem-interpretations">Tandem Interpretations<a class="anchor" aria-label="anchor" href="#tandem-interpretations"></a>
 </h4>
-<p>Tandem interpretations are used in humdrum data to represent “local,” real-time metainformation associated with specific spines—review our <a href="HumdrumSyntax.html">humdrum syntax</a> vignette for more details.</p>
-<p>HumdrumR can read any arbitrary tandem interpertations in humdrum data. However, if non-standard intrepretations are used, <code>humdrumR</code> has no way of knowing how to parse them.</p>
-<p>By default, <code>humdrumR</code> always reads tandem interpretations into a field called <code>Tandem</code>. This field tabulates all tandem interperations that have so far appeared in a spine in order, concatenating them into a single comma-delimited, from most recent to most distant. For instance, the <code>Tandem</code> field for the spine</p>
+<p>Tandem interpretations are used in humdrum data to represent “local,”
+real-time metainformation associated with specific spines—review our <a href="HumdrumSyntax.html">humdrum syntax</a> vignette for more
+details.</p>
+<p>Humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> can read
+any arbitrary tandem interpretations in humdrum data. However, if
+non-standard interpretations are used, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> has no way of knowing how
+to parse them.</p>
+<p>By default, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>
+always reads tandem interpretations into a field called
+<code>Tandem</code>. This field tabulates all tandem interpretations
+that have so far appeared in a spine in order, concatenating them into a
+single comma-delimited, from most recent to most distant. For instance,
+the <code>Tandem</code> field for the spine</p>
 <pre><code>**kern
 *C:
 *M4/4
@@ -1059,8 +1245,18 @@ MM100,M4/4,C:
 D:,MM100,M4/4,C:
 D:,MM100,M4/4,C:
 D:,MM100,M4/4,C:</code></pre>
-<p>So, the interpretations pile up into a longer and longer string as a piece progresses. Notice that the <code>"D:"</code> and <code>"C:"</code> intrerpretations get piled up separately, just like any other interpretation, even though they are of the same tandem class, and the <code>"D:"</code> should supercede the <code>"C:"</code>. Why do this? Well, <em>in general</em> there is no way to know if an arbitrary tandem interpretations are of the same class. If you create some humdrum data with new interpretations in it, <code>humdrumR</code> doesn’t know how to parse them, so will just pile them up like this in the <code>Tandem</code> field.</p>
-<p>Fortunately, <code>humdrumR</code> <em>does</em> know how to parse many standard tandem interpretations. If you run the command</p>
+<p>So, the interpretations pile up into a longer and longer string as a
+piece progresses. Notice that the <code>"D:"</code> and
+<code>"C:"</code> interpretations get piled up separately, just like any
+other interpretation, even though they are of the same tandem class, and
+the <code>"D:"</code> should supersede the <code>"C:"</code>. Why do
+this? Well, <em>in general</em> there is no way to know if an arbitrary
+tandem interpretations are of the same class. If you create some humdrum
+data with new interpretations in it, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> doesn’t know how to parse
+them, so will just pile them up like this in the <code>Tandem</code>
+field.</p>
+<p>Fortunately, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> <em>does</em> know how to
+parse many standard tandem interpretations. If you run the command</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">knownInterpretations</span><span class="op">[</span><span class="va">Type</span> <span class="op">==</span> <span class="st">'Tandem'</span><span class="op">]</span> 
 <span class="co">#&gt;                      Name Exclusive</span>
@@ -1085,7 +1281,10 @@ D:,MM100,M4/4,C:</code></pre>
 <span class="co">#&gt;  8:                                             I[^C,]+     I_ Tandem</span>
 <span class="co">#&gt;  9:                                             IC[^,]*    IC_ Tandem</span>
 <span class="co">#&gt; 10:                                            ITr[^,]*   ITr_ Tandem</span></code></pre></div>
-<p>we see that there are currently ten classes of tandem interpretations that <code>humdrumR</code> recognizes, each associated with a regular expression. Thus, if we really apply <code>readHumdrum</code> to this file</p>
+<p>we see that there are currently ten classes of tandem interpretations
+that <code>humdrumR</code> recognizes, each associated with a regular
+expression. Thus, if we really apply <code>readHumdrum</code> to this
+file</p>
 <pre><code>**kern
 *C:
 *M4/4
@@ -1095,7 +1294,10 @@ c g
 *D:
 d f#
 *-</code></pre>
-<p>it will recognize that the tokens <code>"C:"</code> and <code>"D:"</code> both match the known regular expression for the <code>Key</code> tandem interpretation, and parse them into a field called <code>Key</code>, which would look like:</p>
+<p>it will recognize that the tokens <code>"C:"</code> and
+<code>"D:"</code> both match the known regular expression for the
+<code>Key</code> tandem interpretation, and parse them into a field
+called <code>Key</code>, which would look like:</p>
 <pre><code>NA
 C:
 C:
@@ -1105,12 +1307,34 @@ C:
 D:
 D:
 D:</code></pre>
-<p>Likewise, we’d get both <code>TimeSignature</code> and <code>BPM</code> fields.</p>
+<p>Likewise, we’d get both <code>TimeSignature</code> and
+<code>BPM</code> fields.</p>
 <div class="section level5">
 <h5 id="custom-tandems">Custom Tandems<a class="anchor" aria-label="anchor" href="#custom-tandems"></a>
 </h5>
-<p><code>readHumdrum</code> has a <code>tandems</code> argument which allows us take control of the tandem interpretation parsing process. <code>tandems</code> is a character vector, defaulting to <code>known</code>, which parses all known interpretations into their own fields (following the <code>knownInterpretations</code> table). We can use <code>tandems</code> two ways. 1.) We can remove <code>"known"</code> from the vector and specify the <code>Name</code> of specific tandem interpretations we do want to parse. For instance, if we write <code>tandem = "Clef"</code>, the <code>Clef</code> pattern from the <code>knownInterpretations</code> table will be parsed, (but not any of the others). 2.) If a character string in <code>tandems</code> is not <code>"known"</code> or an exact match for a <code>Name</code> in <code>knownInterpretations</code>, it is instead treated as a regular expression to match a new tandem interpretation class. For instance, <code>tandems = "[Aa]pple|[Bb]anana"</code> would match “*Apple”, “*apple”, “*Banana”, or “*banana,” parsing these four patterns into their own field (called <code>[Aa]pple|[Bb]anana]</code>). We could give this field a name by writing <code>tandems = c(Fruit = "[Aa]pple|[Bb]anana")</code>. (In fact, we can rename known interpretations as well, for instance writing <code>tandems = c(Meter = "TimeSignature"</code>.)</p>
-<p>If <code>tandems = NULL</code>, no tandem interpretations are parsed at all—this can be used to shorten parsing time.</p>
+<p><code>readHumdrum</code> has a <code>tandems</code> argument which
+allows us take control of the tandem interpretation parsing process.
+<code>tandems</code> is a character vector, defaulting to
+<code>known</code>, which parses all known interpretations into their
+own fields (following the <code>knownInterpretations</code> table). We
+can use <code>tandems</code> two ways. 1.) We can remove
+<code>"known"</code> from the vector and specify the <code>Name</code>
+of specific tandem interpretations we do want to parse. For instance, if
+we write <code>tandem = "Clef"</code>, the <code>Clef</code> pattern
+from the <code>knownInterpretations</code> table will be parsed, (but
+not any of the others). 2.) If a character string in
+<code>tandems</code> is not <code>"known"</code> or an exact match for a
+<code>Name</code> in <code>knownInterpretations</code>, it is instead
+treated as a regular expression to match a new tandem interpretation
+class. For instance, <code>tandems = "[Aa]pple|[Bb]anana"</code> would
+match “*Apple”, “*apple”, “*Banana”, or “*banana,” parsing these four
+patterns into their own field (called <code>[Aa]pple|[Bb]anana]</code>).
+We could give this field a name by writing
+<code>tandems = c(Fruit = "[Aa]pple|[Bb]anana")</code>. (In fact, we can
+rename known interpretations as well, for instance writing
+<code>tandems = c(Meter = "TimeSignature"</code>.)</p>
+<p>If <code>tandems = NULL</code>, no tandem interpretations are parsed
+at all—this can be used to shorten parsing time.</p>
 </div>
 </div>
 </div>
@@ -1123,12 +1347,13 @@ D:</code></pre>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+<p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

@@ -93,27 +93,6 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     
 }
 
-#' @export
-popRE <- function(str, regex) {
-    var <- rlang::enexpr(str)
-    
-    loc <- stringi::stri_locate_first_regex(str, regex)
-    hits <- !is.na(loc[ , 1])
-    # match if any
-    match <- character(length(str))
-    match[hits] <- stringi::stri_sub(c(str)[hits], loc[hits, 'start'], loc[hits , 'end'])
-    match <- match %<-matchdim% str
-    
-    # rest if any
-    str[hits] <- stringi::stri_sub(str[hits], loc[hits , 'end'] + 1L)
-    str <- str %<-matchdim% match
-    
-    if (length(var) == 1L && !is.atomic(var)) eval(rlang::expr(!!var <- !!str), envir = parent.frame())
-    
-    match
-    
-}
-
 
 
 # Regex dispatch ----
@@ -146,18 +125,26 @@ regexFindMethod <- function(str, regexes) {
 }
 
 
-REapply <- function(str, regex, .func, inPlace = TRUE, ..., outputClass = 'character') {
+REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outputClass = 'character') {
     if (!is.character(str)) .stop(call. = FALSE,
                                 "Sorry, REapply can only apply to an x argument that is a character vector.")
   
+    
     regex <- getRE(regex)
-
     matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     
     #
     hits <- !is.na(matches)
+    
+    args <- local({
+      args <- c(list(matches), args, list(...))
+      firstArgLength <- length(str)
+      args[lengths(args) == firstArgLength] <- lapply(args[lengths(args) == firstArgLength], '[', i = hits)
+      args
+    })
+    
     result <- vectorNA(length(str), outputClass)
-    if (any(hits)) result[hits] <- do...(.func, c(list(matches[hits]), list(...))) 
+    if (any(hits)) result[hits] <- do(.func, args)
     
     if (inPlace && outputClass == 'character') result <- stringi::stri_replace_first_fixed(str, matches, result)
     
@@ -181,50 +168,89 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., outputClass = 'chara
 
 #' Match strings against regular expression
 #' 
-#' These infix functions are simply syntactic sugar for
-#' existing `R` regular expression matching functions.
-#' If the a vector of regexes is given as the right argument, matches to *any* of the regexes are returned.
+#' The functions give you a concise way to search for regular expressions in `character` vectors.
+#' They are "infix" functions, meaning you write the function between its two arguments:
+#' `myvector %~% regex`.
+#'  
 #' 
-#' + `%grepl%`: Matches `pattern` in `x` and returns `logical`. Shorthand for [base::grepl()].
-#' + `%grep%`: The "default"---same as `%grepl%`.
-#' + `%grepi%`: Matches `pattern` in `x` and returns `integer` indices. Shorthand for [base::grep()].
-#' + `%grepn%`: Matches `pattern` in `x` and returns `integer` counts (can be greater than one if more 
-#'   than one match occurs in the same token). Shorthand for [stringi::stri_count_regex()].
-#' + `%grepm%`: Matches `pattern` in `x` and returns matching strings (or NA if no match). Shorthand for [stringi::stri_extract_first_regex()]
+#' @details 
+#' 
+#' Each version of the function returns a different type of information about regex matches (if any)
+#' in the input vector:
+#' 
+#' + `%~l%`: returns `logical` (`TRUE`/`FALSE`) indicating where in `x` there are matches.
+#' + `%~i%`: returns `integer` indicating the indices of matches in `x`.
+#' + `%~n%`: returns `integer` indicating the number (count) of matches in each string.
+#' + `%~m%`: returns `character` string of the matched string itself. Returns `NA`
+#'   where there is no match.
+#' 
+#' The basic function (`%~%`) is the same as `%~l%`.
+#' There is also a negative versions of the `l` and `i` functions: giving all
+#' strings that *don't* match the given regular expression.
+#' These are `%!~%`, `%!~l%`, and `%!~i%`.
 #'
-#' Each regex infix has an "lapply" version, called `%lgrepx%`.
+#' These functions are simply syntactic sugar for
+#' existing `R` regular expression matching functions:
 #' 
-#' @param x A vector to search in
-#' @param list A list of vectors (all the same length) to search in
-#' @param pattern One or more regular expression
+#' + `%~l%`: [base::grepl()]
+#' + `%~i%`: [base::grep()]
+#' + `%~n%`: [stringi::stri_count_regex()]
+#' + `%~m%`: [stringi::stri_extract_first_regex()]
+#' 
+#' @section Multiple regexes:
+#' 
+#' If more than one regex is supplied,
+#' `%~l%` and `%~i%` return the indices where *any* of the regexes match.
+#' In the case of `%~n%`, each matching regex is counted separately, and they are all summed.
+#' In the case of `%~m%`, all matches (if any) are pasted together, 
+#' including multiple matches of the same string.
+#' 
+#' 
+#' @param x A `character` vector to search in.
+#' @param regex One or more regular expressions. If more than one regex is supplied,
+#'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export
 #' @name RegexFind
-`%grepl%` <- function(x, pattern) Reduce('|', lapply(pattern, grepl, x = x))
+`%~l%` <- function(x, regex) {
+  checkVector(x, 'x', '%~l%')
+  checkCharacter(regex, 'regex', "%~l%", min.length = 1L)
+  Reduce('|', lapply(regex, grepl, x = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepi%` <- function(x, pattern) which(x %grepl% pattern)
+`%~i%` <- function(x, regex) {
+  checkVector(x, 'x', '%~i%')
+  checkCharacter(regex, 'regex', "%~i%", min.length = 1L)
+  Reduce('union', lapply(regex, grep, x = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepn%` <- function(x, pattern) Reduce('+', lapply(pattern, stringi::stri_count_regex, str = x))
+`%~n%` <- function(x, regex) {
+  checkVector(x, 'x', '%~n%')
+  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
+}
 #' @export
 #' @rdname RegexFind
-`%grepm%` <- function(x, pattern) Reduce('paste0', lapply(pattern, stringi::stri_extract_first_regex, str = x))
+`%~m%` <- function(x, regex) {
+  checkVector(x, 'x', '%~n%')
+  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  
+  do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
+}
 #' @rdname RegexFind
 #' @export
-`%grep%` <- `%grepl%`
+`%~%` <- `%~l%`
 #' @rdname RegexFind
 #' @export
-`%!grep%` <- Negate(`%grepl%`)
-#' @export
+`%!~%` <- Negate(`%~l%`)
 #' @rdname RegexFind
-`%lgrepl%` <- function(list, pattern) Reduce(`|`, lapply(list, `%grepl%`, pattern = pattern)) 
 #' @export
+`%!~l%` <- Negate(`%~l%`)
 #' @rdname RegexFind
-`%lgrepi%` <- function(list, pattern) which(list %lgrepl% pattern)
 #' @export
-#' @rdname RegexFind
-`%lgrepn%` <- function(list, pattern) Reduce('+', lapply(list, `%grepn%`, pattern = pattern))
+`%!~i%` <- function(x, pattern) which(!x %~l% pattern)
 
 
 
@@ -335,18 +361,18 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
         
     }
     
-    if (!parse.exhaust && length(REs) > 1L) {
+    output <- if (!parse.exhaust && length(REs) > 1L) {
       Reduce(\(head, last) paste0(head, sep,  '(.*(', last, '))'), REs, right = TRUE )
     } else {
       do.call('.paste', c(as.list(unname(REs)), list(sep = if (is.null(sep)) "" else sep)))
       # paste(REs, collapse = if (is.null(sep)) "" else sep)
     }
     
-  
+    list(output)
     
 }
 
-####. REs for tonalIntervals ####
+#### REs for tonalIntervals ----
 
 makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...)  {
     if (is.null(step.labels)) return('[1-9][0-9]*')
@@ -498,9 +524,9 @@ makeRE.alterations <- function(..., qualities = FALSE) {
 
     
     makeRE <- partialApply(makeRE.tonalChroma,
-                       parts = c("species", "step"), step.signed = FALSE, flat = 'b',
-                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
-                       regexname = 'alterations')
+                           parts = c("species", "step"), step.signed = FALSE, flat = 'b',
+                           step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
+                           regexname = 'alterations')
     
     paste0('(', makeRE(..., qualities = qualities), ')*')
 }
@@ -581,26 +607,52 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for tertian sets ####
 
-makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
+makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts = c("step", 'species'),
+    REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,
-                              step.sign = FALSE, collapse = FALSE, ...)
+                              step.sign = FALSE, ...)
     
-    qualityRE <- captureRE(c(major, minor, augment, diminish))
-    REs['quality'] <-  paste0('(', 
-                              qualityRE, '{3}',  
-                              captureRE(c(perfect, augment, diminish)), 
-                              qualityRE, 
-                              '?)|(', 
-                              qualityRE, '{1,3})')
+    REs$incomplete <- '[135]?'
+    
+    qualityRE <- captureRE(c(major, minor, augment, diminish, '.'))
+    REs$quality <-  paste0('((', 
+                           qualityRE, '{3}',  
+                           captureRE(c(perfect, augment, diminish, '.')), 
+                           qualityRE, 
+                           '?)|(', 
+                           qualityRE, '{1,3}))')
+    
+    REs$inversion <- '(/[1-7])?'
    
-    REs <- REs[c("step", "species", "quality")]
     
-    if (collapse) setNames(cREs(REs), 'sciChord') else REs
+    REs <- REs[c("tonalChroma", "incomplete", "quality", "inversion")]
+    
+    if (collapse) setNames(cREs(REs), 'tertian') else REs
 }
 
-makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', 
+                                bass.sep = '/', flat = 'b', 
+                                collapse = TRUE) {
+  REs <- makeRE.tonalChroma(parts = c("step", "species"), flat = flat,
+                            step.labels = '[A-G]', qualities = FALSE,
+                            step.sign = FALSE, ...)
+  
+  REs$quality <- captureRE(c(major, minor, augment, diminish), '?')
+  
+  REs$figurations <- makeRE.alterations(...)
+  
+  REs$bass <- paste0('(', bass.sep, REs$tonalChroma, ')?')
+  
+  REs <- REs[c("tonalChroma", "quality", "figurations", "bass")]
+  
+  
+  
+  if (collapse) setNames(cREs(REs), 'chord') else REs
+  
+}
+
+makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
     augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
@@ -614,23 +666,23 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
     REs$triadalt <- captureRE(c(diminish, augment), n = '?')
 
     
-    REs['figurations'] <- makeRE.alterations(...)
+    REs$figurations <- makeRE.alterations(...)
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
-    if (collapse) setNames(cREs(REs), 'chord') else REs
+    if (collapse) setNames(cREs(REs), 'roman') else REs
 }
 
 
 
 makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
     
-    romanChord <- makeRE.romanChord(...)
+    roman <- makeRE.roman(...)
     
     
     key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0(romanChord, '(', split, key, ')', if (!mustPartition) '?')
+    paste0(roman, '(', split, key, ')', if (!mustPartition) '?')
 }
 
 

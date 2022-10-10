@@ -422,10 +422,10 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' These functions find valid humdrum files on your local machine and read them into `humdrumR`.
 #' 
-#' `findHumdrum` does the work of finding and reading the text files into R.
+#' `findHumdrum` does the work of finding and reading the text files into `R`.
 #' `readHumdrum` utilizes `findHumdrum` to read files, then parses them to
-#' create a [humTable] and build
-#' a [humdrumR][humdrumR::humdrumRclass] data object around the table.
+#' create a [humdrum table][humTable] and build
+#' a [humdrumR data object][humdrumRclass] around the table.
 #' 
 #' 
 #' @param ... character: One or more patterns used to identify files to read.
@@ -479,6 +479,7 @@ shortFilenames <- function(fileFrame) {
 #' look for any kern files in directories containing "Mozart" OR "Beethoven."
 #' If patterns are named, these names will show up as identifying patterns in the `[humdrumR][humdrumR]` object's
 #' `Label` field. Unnamed patterns are simply labeled with numbers.
+#' We refer to files matched from regex patterns to be "subcorpora" of the total corpus.
 #' 
 #' Normal (system appropriate) conventions (i.e., directories separated by `"/"`, 
 #' `'~'` at beginning to indicate home, `".."` to indicate directory above working directory, etc.)
@@ -497,41 +498,45 @@ shortFilenames <- function(fileFrame) {
 #' until the names are unique.)
 #' 
 #' If a single humdrum file has multiple pieces in it---meaning that all spine paths close with `*-`, then
-#' open again with `**`---then they are parsed separetely.
+#' open again with `**`---then they are parsed separately.
 #' They are distinguished in the `Piece` field.
 #' If there are no multi-piece files, `Piece` and `File` will be identical.
 #' 
 #' @section Validity:
 #' 
 #' `findHumdrum` and `readHumdrum` automatically ignore non-text files.
-#' Whatsmore, any files which contain humdrum syntax errors (checked by `[validateHumdrum][validateHumdrum]`) are automatically
-#' skipped. If you want to see specifically what errors occured, call `[validateHumdrum][validateHumdrum]` 
-#' directly and its `errorReport.path` argument.
+#' What's more, any files which contain humdrum syntax errors (checked by [validateHumdrum()]) are automatically
+#' skipped. If you want to see specifically what errors occurred, call [validateHumdrum()]
+#' directly and use its `errorReport.path` argument.
 #' 
 #' @section Tandem Interpretations:
 #' 
-#' The `tandems` argument controls which tandem interpretations
+#' All tandem interpretations in a humdrum dataset are summarized in the [humdrum table's][humTable]
+#' `Tandem` field, which is described in detail [here][extractTandem()].
+#' In addition, certain "known" tandem interpretations are parsed into their *own* fields automatically.
+#' For example, `*clefG4` and "`*clefF2` are parsed as `Clef` data, while `*k[b-]` is parsed as a `KeySignature`.
+#' The "known" tandem interpretations that `humdrumR` recognizes are encoded in a built-in
+#' table called `knownInterpretations`. 
+#' Each interpretation has a humdrumR name (`"Clef"`, `"TimeSignature"`, etc.) as well as a regular expression
+#' associated with it.
+#' 
+#' The `tandems` argument to `readHumdrum` controls which tandem interpretations are
 #' parsed into their own fields. This can be helpful to either save processing time and memory
 #' by *not* parsing interpretations you won't need, or to parse interpretations that 
 #' humdrumR doesn't recognize.
-#' The "known" tandem interpretations that humdrumR recognizes are encoded in a build humdrumR
-#' table called `knownInterpretations`. 
-#' Each interpretation has a humdrumR name ("Clef", "TimeSignature", etc.) as well as a regular expression
-#' associated with it.
 #' The default value for the `tandems` argument is `"known"`. If the `tandems` argument
 #' contains `"known"` *all* tandem interpretations in the built-in `knownInterpretations` 
 #' table are parsed.
 #' Users may specify different interpretations to parse in two ways: 
 #' 
 #' 1) character strings 
-#' matching one of the name values from the `Name` column of `knownInterpretations`.
-#' For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
-#' and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
-#' 
-#' 2) if the chracter string(s) in `tandem` do not exactly match one of the names in 
-#' `knownInterpretations$Name`, they are treated as regular expressions and used to match
-#' tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
-#' that humdrumR doesn't already know about.
+#'    matching one of the name values from the `Name` column of `knownInterpretations`.
+#'    For instance, if you specify `tandems = c('Clef', 'TimeSignature')`, only clef (e.g., `"*clefG2"`),
+#'    and time signature (e.g., `"*M3/4"`) intepretations will be parsed.
+#' 2) if the character string(s) in `tandem` do not exactly match one of the names in 
+#'    `knownInterpretations$Name`, they are treated as regular expressions and used to match
+#'    tandem interpretations in the data. This allows users to parse non-standard tandem interpretations
+#'    that humdrumR doesn't already know about.
 #' 
 #' If any values in `tandems` are named, these names will be used for resulting fields.
 #' If no matches to an given interpretation are found, no field is created for that interpretation.
@@ -560,6 +565,38 @@ shortFilenames <- function(fileFrame) {
 #' or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 #' 
 #' 
+#' @section Spines and Paths:
+#' 
+#' 
+#' In the [humdrum syntax](http://www.humdrum.org/guide/ch05/), data is placed in "spines,"
+#' which are not the same as "columns" in a spreadsheet. A "column" refers to a 
+#' tab-delineated group of values.
+#' "Spines" can be a single column, or they may (at any time) split into multiple columns,
+#' which can in turn split again, using the `"*^"` interpretation token. The reverse can happen as well,
+#' with two or more columns merging into a single column, using the `"v"` token.
+#' This means that, while humdrum data at first glance looks like a simple two-dimensional table,
+#' it is actually a flexible tree structure. As spines split and merge, the total number of columns
+#' can change during a piece, creating a "ragged" edge.
+#' Another similar issue is that a corpus of humdrum files may have varying numbers of spines/columns, between pieces.
+#' ("Global" comment/reference records are also a special case, as that are always a single value, even if interspersed with
+#' multi-column local records.)
+# 
+#' `readHumdrum` assumes a slightly more strict version of the humdrum syntax:
+#' that all the spines which appear at the beginning of a file (headed with exclusive interpretations
+#' like `"**kern"`) can never merge into each other. Thus, a humdrum file read into `humdrumR`
+#' must not end with fewer columns than it starts.
+#' Spine merges (`"*v"`) can only happen within spine paths that originally split off the same spine.
+#' This extra-strict specification of spine paths in the humdrum syntax is, fortunately, something that has been
+#' informally followed in most humdrum datasets.
+#' 
+#' Our strict spine-path definition makes everything work fairly simply: 
+#' Within a piece, the spines which appear at the beginning of the piece are the "true" spines throughout the piece, numbered
+#' from left to right, starting from `1L`.
+#' For each local token, the value in the `Spine` field is an integer indicating which of these
+#' "true" spines it belongs to---global tokens have a `NA` value in their `Spine` field, because they do not belong to any spine.
+#' Any spine path splits (`"*^"`) from the main spines form **spine paths**.
+#' Every spine's paths are numbered in the `Path` field, from right to left, starting from `0L`.
+#' A spine with no splits will have all `0L`s in its `Path` field.
 #' 
 #' 
 #' @section Result:
@@ -567,7 +604,7 @@ shortFilenames <- function(fileFrame) {
 #' `findHumdrum` returns a "fileFrame" (`data.table`), listing all file names,
 #' the patterns they match, the directories they were found in, *and* the raw text content of these files.
 #' 
-#' `readHumdrum` returns a fully parsed `humdrumR` object.
+#' `readHumdrum` returns a fully parsed [humdrumR object][humdrumRclass].
 #' 
 #' @examples 
 #' 
@@ -636,9 +673,11 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     ## Other general information about tokens
     humtab[ , Type := parseTokenType(Token)]
-    humtab[ , Null := Token %in% c('.', '!', '*', '=', '_P')]
+    humtab <- humtab[Type != 'P']
+    humtab[ , Null := Token %in% c('.', '!', '*', '=')]
     humtab[ , Filter := FALSE]
     humtab[ , Global := is.na(Spine)]
+    humtab[ , Pattern := NULL]
     
     #
     tandemTab <- parseTandem(humtab$Tandem, tandems)
@@ -647,7 +686,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     #
     message('Done!\n')
     
-    makeHumdrumR(humtab, unique(fileFrame$Pattern), 
+    makeHumdrumR(humtab, pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
                  tandemcol = colnames(humtab) %in% colnames(tandemTab))
     
     
@@ -802,14 +841,13 @@ parseLocal <- function(records) {
   # Don't need recordns to be characters anymore.
   recordns  <- as.integer(recordns)
   humtab <- data.table::data.table(Token = tokens,
-                                 Column = Columns,
-                                 Spine = SpineNumbers[Columns],
-                                 Path  = SpinePaths[Columns],
-                                 Record = recordns,
-                                 Stop = stopNs,
-                                 Exclusive = exclusives[Columns],
-                                 Tandem = tandems,
-                                 barlines)
+                                   Spine = SpineNumbers[Columns],
+                                   Path  = SpinePaths[Columns],
+                                   Record = recordns,
+                                   Stop = stopNs,
+                                   Exclusive = exclusives[Columns],
+                                   Tandem = tandems,
+                                   barlines)
 
   if (ncol(sections) > 0L) humtab <- cbind(humtab, sections)
   # humtab <- humtab[Token != '_P'] # "_P" tokens were inserted as padding by parseSpinePaths
@@ -852,6 +890,7 @@ separatePieces <- function(fileFrame) {
     
     ## spread out 
     newFrame <- data.table(FileLines = unlist(filelines, recursive = FALSE),
+                           Pattern   = rep(fileFrame$Pattern, lengths(filelines)),
                            Filepath  = rep(fileFrame$Filepath, lengths(filelines)))
     newFrame[ , Piece := 1:nrow(newFrame)]
     # newFrame[ , Piece := unlist(lapply(lengths(filelines), seq_len))]
@@ -1000,6 +1039,101 @@ parseTandem <- function(tandems, known) {
     as.data.table(tandemMat)
 }
 
+
+
+#' Get tandem interpretation information from humdrum data
+#' 
+#' `extractTandem` extracts tandem interpretations from the raw `Tandem`
+#' spine in [humdrumR object][humdrumRclass].
+#' 
+#' @details 
+#'
+#' Every [humdrumR][humdrumRclass] object has a field called
+#' `Tandem`, which is a vector of strings which accumulates
+#' tandem interpretations in each Spine.
+#' At each record, all the previous tandems that occured in each spine
+#' are listed (comma separated), with the most recent appearing first.
+#' 
+#' For example, consider this file:
+#' 
+#' ```
+#' **kern **kern
+#' *C:    *C:
+#' *Ibass *Isoprn
+#' 2G     4g
+#' .      4f
+#' 2C     2e
+#' *G:    *G:
+#' 2D     2f#
+#' 2G     2g
+#' *-     *-
+#' ```
+#' 
+#' The `Tandem` field for these two spines would look like this:
+#' 
+#' ```
+#' ""
+#' "C:"                 "C:"
+#' "Ibass,C:"           "Isoprn,C:"
+#' "Ibass,C:"           "Isoprn,C:"
+#' "Ibass,C:"           "Isoprn,C:"
+#' "Ibass,C:"           "Isoprn,C:"
+#' "G:,Ibass,C:"        "G:,Isoprn,C:"
+#' "G:,Ibass,C:"        "G:,Isoprn,C:"
+#' "G:,Ibass,C:"        "G:,Isoprn,C:"
+#' "G:,Ibass,C:"        "G:,Isoprn,C:"
+#' ```
+#'
+#' Notice that the `"C:"` isn't erased by the appearance of `"G:"`---this is a naive parser
+#' that doesn't "know" that `"C:"` and `"G:"` are related.
+#' The earlier tandem (`"C:"`) is just pushed further back onto the stack.
+#' 
+#' 
+#' Don't worry, the [humdrumR data parser][readHumdrum()] *does* recognize many
+#' common tandem interpretations (like `*C:` and `*G:`) and will automatically parse
+#' them if they are present---in this case, they are put into the `Key` field automatically.
+#' However, the `Tandem` field is retained in case your data contains any novel tandem intepretations
+#' that `humdrumR` does not recognize.
+#' 
+#' @section extractTandem:
+#' 
+#' If your data *does* contain novel/unknown tandem interpretations, you can use the
+#' `extractTandem` function to pull them out of the `Tandem` field.
+#' The first argument to `extractTandem` must be the `Tandem` field from a 
+#' [humdrumR object][humdrumRclass].
+#' The second argument (`regex`) is a regular expression which is matched against
+#' the the tandem interpretations.
+#' For each token in `Tandem`, the most recent match (if any) is retained.
+#' 
+#' For example, if we wanted to manually extract the key information from the `Tandem` field 
+#' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
+#' 
+#' @param Tandem Should always be the `Tandem` field from a [humdrumR object][humdrumRclass].
+#' @param regex (`character`, `length == 1`). A single regular expression to match against the 
+#'   tandem interpretations. You should not include a `*` at the beginning---the `*` marker
+#'   for tandem interpretations are already removed from the `Tandem` field.
+#' 
+#' @seealso {Read more about tandem interpretations in `humdrumR` in the 
+#' [humdrum table docs][humTable]. [readHumdrum()] also preprocesses
+#'  some "known" tandem interpretations. }
+#' @export
+extractTandem <- function(Tandem, regex) {
+  
+  
+  checkCharacter(regex, 'regex', 'extractTandem', max.length = 1L)
+  
+  Tandem <- paste0(',', Tandem, ',')
+  
+  regex <- gsub('\\^', '', regex)
+  regex <- gsub('\\$', '', regex)
+  regex <- paste0(',', regex, ',')
+  
+  matches <- stringr::str_extract(Tandem, pattern = regex)
+  stringr::str_sub(matches, 2L, -2L) # get rid of commas
+  
+}
+
+
 parseMultiStops <- function(spine) {
     # This function is used by parseLocal to stretch out spines 
     # containing multi stops (i.e., tokens separate by spaces) represented by their own tokens.
@@ -1086,3 +1220,41 @@ parseBarlines <- function(spine) {
 
 
 
+
+readTSV <- function(paths) {
+  if (dir.exists('.humdrumR_tmp')) {
+    content <- dir('.humdrumR_tmp', full.names = TRUE)
+    for (file in content) file.remove(file)
+  } else {
+    dir.create('.humdrumR_tmp')
+  }
+  
+  message("Naively converting ", num2str(length(paths)), ' tsv file', 
+          plural(length(paths), 's', ''), ' to basic humdrum files...', 
+          appendLF = FALSE)
+  newfilepaths <- lapply(paths,
+                  \(path) {
+                    tsv <- fread(file = path)
+                    
+                    colnames(tsv) <- paste0('**', colnames(tsv))
+                    
+                    tsv[] <- lapply(tsv, as.character)
+                    tsv[] <- lapply(tsv, \(col) {col[col == '' | is.na(col)] <- '.'; col})
+                    ender <- replicate(ncol(tsv), '*-')
+                    ender <- rlang::eval_tidy(rlang::expr(data.table(!!!ender)))
+                    colnames(ender) <- colnames(tsv)
+                    tsv <- rbind(tsv, ender)
+                    newpath <- paste0('.humdrumR_tmp', .Platform$file.sep, basename(path), '.humdrumR')
+                    fwrite(tsv,  sep = '\t', file = newpath)
+                    newpath
+                  })
+  
+  message('done!')
+  
+  corpus <- readHumdrum('.humdrumR_tmp/.*')
+  
+  for (file in newfilepaths) file.remove(file)
+  file.remove('.humdrumR_tmp')
+  
+  corpus
+}

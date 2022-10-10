@@ -10,7 +10,7 @@
 \alias{denominator,rational-method}
 \alias{is.rational}
 \alias{is.numeric,rational-method}
-\alias{order.rational}
+\alias{order,rational-method}
 \alias{Compare,rational,rational-method}
 \alias{Compare,rational,ANY-method}
 \alias{Compare,ANY,rational-method}
@@ -50,7 +50,7 @@ is.rational(x)
 
 \S4method{is.numeric}{rational}(x)
 
-order.rational(
+\S4method{order}{rational}(
   x,
   ...,
   na.last = TRUE,
@@ -102,24 +102,18 @@ as.fraction(x, sep = "/")
 }
 \description{
 R has no built in rational number representation; \code{humdrumR} defines one.
+}
+\details{
+Using rational numbers, we can represent numbers like 1/3 without any numeric inaccuracies.
+In other words, \eqn{1/3 * 3 = 3}, never \eqn{.999999999}.
+On the other hand, if our rational numbers start to have numerators or demoninators that are too large, we can run into
+integer overflow problems.
+We assume that the rational numbers we'll be using in the context of music analysis are relatively simple;
+We can safely use such numbers without any numeric inaccuracy.
 
-#' @rdname real
-#' @export
-as.real <- function(x, ...) UseMethod('as.real')
-#' @export
-as.real.character <- function(x) {
-x[grepl('\link[=^0-9.\%/\\\\(\\\\)-]{^0-9.\%/\\(\\)-}', x)] <- NA
-as.real.fraction(x)
-}
-#' @export
-as.real.numeric <- real
-#' @export
-as.real.rational <- function(x) real(as.double(x))
-#' @export
-as.real.fraction <- function(x) {
-exprs <- parse(text = stringi::stri_replace_all_fixed(x, '\%', '/'))
-real(sapply(exprs, eval) \%<-matchdim\% x)
-}
+\code{fraction} is a class (and associated constructor) which represents rational numbers as \code{character} strings.
+Unlike \code{rational}, the \code{fraction} class is not numeric and thus cannot do arithmetic.
+However, \code{fraction} can be converted to/from \code{rational}.
 }
 \seealso{
 \code{\link[=as.real]{as.real()}} \code{\link[=as.numeric]{as.numeric()}}

@@ -1,10 +1,10 @@
 ---
-title: "Shaping Humdrum Data"
+title: "Shaping humdrum data"
 author: "Nathaniel Condit-Schultz"
 date:   "July 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Shaping Humdrum Data}
+  %\VignetteIndexEntry{Shaping humdrum data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
   comment = ">\t"
 )
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 library(humdrumR)
 ```
 
@@ -47,6 +49,9 @@ In addition, the `**harm` spine indicates the harmony accompanying the vocal par
 # Filtering Data
 
 The first step might to remove data we don't need.
+In *this* article, we'll show you the most common, basic, ways you might filter your data.
+For more details about other `r hm` filtering functionality, check out 
+the [data filtering](Filtering.html "Filtering Humdrum Data") article.
 
 ## Indexing
 
@@ -131,7 +136,7 @@ example$Rhythm
 # Pasting/Aligning
 
 The next step might be to align/combine information that is currently separated.
-In many humrum datasets, we have multiple pieces of information spread across multiple spines, or in some cases, across spine paths or stops.
+In many `r hm` datasets, we have multiple pieces of information spread across multiple spines, or in some cases, across spine paths or stops.
 If, given our research question, we need to think of multiple pieces of information as describing a *single data point*, we'll reshape the data.
 For example, in our example file the `**silbe` (lyric) spines associate each syllable with exactly one note in the adjacent `**kern` spines.
 
@@ -149,6 +154,7 @@ In our example, we want to align the notes in the `**kern` spines with the sylla
 We can do this directly using `foldHumdrum`: use the `fold` argument to indicate which spine to fold, and the `onto` argument to indicate which spine to move it onto.
 
 ```{r}
+example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 foldHumdrum(example, fold = 2, onto = 1)
 
 ```
@@ -188,7 +194,7 @@ example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
 kernonly <- example[[ , '**kern']]
 
-foldHumdrum(kernonly, 2, 1) -> kernonly$Spine2
+kernonly <- foldHumdrum(kernonly, 2, 1, newFieldNames = 'Spine2') 
 
 ```
 
@@ -230,7 +236,7 @@ example_stops <- readHumdrum(humdrumRroot, 'examples/Reshaping_example2_stops.hu
 example_stops
 ```
 
-By default, humdrumR treats each token (note) in *each* stop as a separate data observation, with its own row in the humdrum table.
+By default, `r hm` treats each token (note) in *each* stop as a separate data observation, with its own row in the humdrum table.
 If we are studying harmony, we might want to align those stops "on top" of each other, in different fields.
 Try the `foldStops` function!
 

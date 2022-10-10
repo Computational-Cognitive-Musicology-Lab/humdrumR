@@ -106,14 +106,14 @@ parseAnchor.formula <- function(anchor, x, name){
       return(rlang::new_quosure(anchors, env = env))
     }
     anchor <- rlang::f_rhs(anchor)
-    anchor <- modifyExpression(anchor, 
+    anchor <- withinExpression(anchor, 
                                \(Head) Head == 'hop', 
                                \(exprA) {
                                  exprA$Args <- c(quote(x), exprA$Args)
                                  exprA
                                  })
     
-    anchor <- modifyExpression(anchor, applyTo = 'atomic',
+    anchor <- withinExpression(anchor, applyTo = 'atomic',
                                \(Class) Class == 'character',
                                \(exprA) {
                                  exprA$Args <- list(quote(x), exprA$Head)
@@ -128,7 +128,7 @@ parseAnchor.formula <- function(anchor, x, name){
 grepi_multi <- function(x, pattern) {
   pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
   
-  ns <- x %grepn% pattern
+  ns <- x %~n% pattern
   rep(x %grepi% pattern, ns[ns > 0L])
   
 }
@@ -139,7 +139,7 @@ grepi_multi <- function(x, pattern) {
 #' @export
 #' @name humWindows
 windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
-                    nest = FALSE, depth = NULL, boundaries = NULL,
+                    nest = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf) {
   
   
@@ -157,10 +157,10 @@ windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
   windowFrame <- depth(windowFrame, nest = nest, depth = depth)
   
   
-  if (!is.null(boundaries)) {
-    if (any(lengths(boundaries) != length(x))) .stop("In a call to windows, all vectors in the list boundaries must be", 
+  if (!is.null(groupby)) {
+    if (any(lengths(groupby) != length(x))) .stop("In a call to windows, all vectors in the list groupby must be", 
                                                      "the same length as x.")
-    windowFrame <- removeCrossing(windowFrame, boundaries)
+    windowFrame <- removeCrossing(windowFrame, groupby)
   }
   
   attr(windowFrame, 'vector') <- x
@@ -224,11 +224,11 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
   ind 
 }
 
-removeCrossing <- function(x, boundaries) {
+removeCrossing <- function(x, groupby) {
   
-  boundaries <- sort(unlist(lapply(boundaries, \(b) which(b != lag(b)))))
+  groupby <- sort(unlist(lapply(groupby, \(b) which(b != lag(b)))))
   
-  bad <- outer(boundaries, x$Open, '>') & outer(boundaries, x$Close, '<=')
+  bad <- outer(groupby, x$Open, '>') & outer(groupby, x$Close, '<=')
   remove <- colSums(bad) > 0L
   
   x[remove == FALSE]

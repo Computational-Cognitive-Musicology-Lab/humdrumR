@@ -4,61 +4,70 @@
 
 #' Summarize humdrumR corpora
 #' 
-#' [humdrumR] includes a number of built in functions for creating quick summaries of [humdrumR][humdrumRclass]
-#' corpora:
+#' Summarizes the content of a [humdrumR corpus][humdrumRclass], by calling five different
+#' corpus summary functions and printing their results.
+#' 
+#' @details 
+
+#' [humdrumR] includes a number of separate functions for summarizing different
+#' aspects of [humdrumR data objects][humdrumRclass]:
 #'
-#' 1. [census][humCensus()]
+#' * [census()]
 #'     + Tabulates the raw size of the humdrumR corpus.
-#' 2. [reference][humReference()]
+#' * [reference()]
 #'     + Tabulates reference records (metadata) for each file.
-#' 3. [spines][humSpines()]
+#' * [spines()]
 #'     + Tabulates the number of spines and spine paths in files in the corpus.
-#' 4. [interpretations][humInterpretations()]
+#' * [interpretations()]
 #'     + Tabulates the types of exclusive and tandem interpretations in the corpus.
-#' 5. [sections][humSections()]
-#'     + Tabulates any formal data (`*>`) in the corpus.
+#' * [sections()]
+#'     + Tabulates any formal data (`*>`) in the corpus, including barlines.
 #'
 #'
-#' Each function takes a [humdrumR][humdrumRclass] object and returns a
-#' special class of data.table.
-#' The `summary` method for [humdrumR objects][humdrumRclass] calls all of the above functions and prints a condensed version of each.
+#' Each function takes a [humdrumR][humdrumRclass] object and returns a data.table.
+#' The `summary` method for [humdrumR objects][humdrumRclass] simply calls all of the above 
+#' functions and prints a condensed version of each.
 #'
 #' @name humSummary
-#' @family humdrum data summary functions
+#' @aliases summary
+#' @family corpus summary functions
 #' @export 
-setMethod('summary', 'humdrumR',
-          function(object, ...) {
-            cat('\t\tSummary of humdrumR object:\n\n')
+summary.humdrumR <- function(object) {
+            quoted <- substitute(object) # enexpr won't work!
+            corpusName <- rlang::as_label(quoted)
+            cat('\t\tSummary of humdrumR corpus "', corpusName, '":\n', sep = '')
             
+            funcs <- c(`Token Census` = quote(census), 
+                       `Reference Records` = quote(reference), 
+                       `Spine Structure` = quote(spines), 
+                       `Intepretation Content` = quote(interpretations)) #, sections)
             
-            funcs <- c(`Token Census` = census, `Reference Records` = reference, 
-                       `Spine Structure` = spines, `Intepretation Content` = interpretations) #, sections)
-            
-            summaries <- lapply(funcs, \(f) f(object, ...))
+            summaries <- lapply(funcs, 
+                                \(f) {
+                                  eval(rlang::expr((!!f)(!!quoted))) 
+                                  })
             
             for (i in seq_along(summaries)) {
               # cat('\t', names(funcs)[i], ':\n', sep ='')
               print(summaries[[i]], showEach = FALSE)
-              cat('\n')
             }
             invisible(summaries)
-          })
+          }
 
 
 ######## Census ----
 
 #' Tabulate records and tokens in a humdrumR corpus
 #' 
+#' `census` tabulates the raw "size" of a [humdrumR corpus][humdrumRclass],
+#' including the total number of records and tokens.
 #' `census` is one of [humdrumR]'s
-#' [summary functions][humSummary], used to
-#' tabulate the raw size of a [humdrumR][humdrumRclass] corpus.
-#' `census` takes a [humdrumR][humdrumRclass] object
-#' and and returns a `humCensus` table.
-#' The `dataType` argument controls what types of records to tabulate:
-#' legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' The default is `"D"`.
+#' basic [corpus summary functions][humSummary].
 #' 
+#' 
+#' @details 
+#' 
+#' `census` returns a special `data.frame` called a `humCensus` table.
 #' A `humCensus` table has five columns of information:
 #' 
 #' 1. Records
@@ -68,78 +77,104 @@ setMethod('summary', 'humdrumR',
 #' 3. (unique)
 #'     + The number of **unique** tokens
 #' 4. Characters
-#'     + The total numder of characters. This includes humdrum control characters like `*` and `!!`.
+#'     + The total number of characters. 
+#'       (This includes humdrum control characters like `*` and `!!`.)
 #' 5. (per token)
 #'     + This is simply `Characters / Tokens`, indicating the mean length of each token.
 #' 
-#' A `humCensus` table has one row for each file in the corpus.
-#' Rows are labeled with each file's corresponding 
-#' number (from the [humTable's][humTable] **File** field) and name (the **Filename** field).
-#' In addition, when a `humCensus` object is printed,
+#' By default, `census` tabulates data within files in the corpus,
+#' with each file tabulated in a row of the `humCensus` table.
+#' Rows are labeled with each filename.
+#' When a `humCensus` object is printed,
 #' the totals across all files are printed as well---(unique) and (per token)
-#' across all files are calculated across all files as well, not summed.
+#' values are calculated across all files as well, not summed.
+#' The `by` argument can be used to tabulate data across other divisions in the data (see next section).
+#' 
+#' 
+#' 
+#' @section Tabulate "by" other groups:
+#' 
+#' The `by` argument to `census` indicates groupings in the data to tabulate within, grouping 
+#' across filenames in the corpus by default.
+#' `by` can be an arbitrary expression which is evaluated inside the [humdrum table][humTable],
+#' like the `groupby` argument to a [with/within][withHumdrum] call.
+#' The by expression must be the full length of the humdrum table.
 #'  
-#' @param humdrumR A humdrumR object
-#' @param dataTypes A `character` string of length 1. 
-#' @param by A `character` string of length 1. Must be a [field][humdrumRclass] in the humdrumR object.
-#'  
-#'  
-#' @section Indexing:
+#' @param humdrumR A [humdrumR object][humdrumRclass]
+#' @param dataTypes Which types of humdrum records to include in the census. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#'    or any combination of these (e.g., `"LIM"`).
+#'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#' @param by An arbitrary expression which indicates how to group the data.
+#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
+#'     as a regular expression against the "by-group" names.
+#' @param removeEmpty (`logical`, `length == 1`) If set `TRUE`, any groups that have zero tokens are 
+#' not included in the `humCensus` table.
+#' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
+#' a `humCensus` table.
 #'
-#' Rows of a `humCensus` object can be selected with a single argument `i`: e.g., `censusTable[i]`.
-#' If `i` is `numeric`, the corresponding rows are selected ordinally (not by `File` number).
-#' If `i` is a `character` string, this string is mached as a regular expression against file names.
-#' If `i` is a formula, the right-hand side of the formula is evaluated within the table---if it evaluates to a logical vector,
-#' files are selected accordingly. For instance,
-#' `censusTable[~Tokens > 100]` will select all files
-#' with more than 100 tokens. (The '(unique)' and '(per token)' columns
-#' must be referred to with their names enclosed in `\``---for example,
-#' `censusTable[~\`(unique)\` > 100]` will return all files with
-#' more than 100 unique tokens.
-#' 
-#' A `drop` argument is also available. If `TRUE`, a plain 
-#' [data.table::data.table()] is returned.
-#' 
-#' @name humCensus
-#' @family humdrum data summary functions
+#'
+#' @family corpus summary functions
 #' @export
-census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty = FALSE) {
-  ## This function creates a data.table of class humCensus
-  corpusName <- substitute(humdrumR)
-  corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
+census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = FALSE, drop = FALSE) {
+  corpusName <- rlang::as_label(rlang::enexpr(humdrumR))
+  by <- rlang::enexpr(by)
   
   ## ARGUMENT CHECKS:
   checkhumdrumR(humdrumR, 'census')
   dataTypes <- checkTypes(dataTypes, 'census')
   checkTF(removeEmpty, 'removeEmpty', 'census')
-  
-  ##
-  
-  if (removeEmpty) humdrumR <- removeEmptyFiles(humdrumR)
+  checkTF(drop, 'drop', 'census')
   
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
   
+  ##get the partitioning vector
+  partition <- rlang::eval_tidy(by, data = humtab)
+  if (!is.list(partition)) partition <- list(partition)
+  partition <- lapply(partition, rep, length.out = nrow(humtab))
+  levels <- Reduce(paste, do.call('expand.grid', lapply(partition, unique)))
+  partition <- as.factor(Reduce(paste, partition))
   
-  ##ADD MULTISTOPS, MOVE BARS TO sections FUNCTION
+  if (length(partition) != nrow(humtab)) .stop("In your call to census, your by expression doesn't evaluate to a vector matching the length of",
+                                               "the humdrum table.")
   
-  censusTable <- humtab[ , .(
-    Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
-    Tokens           = nrow(.SD),
-    `(unique)`       = list(unique(Token)),
-    Characters       = sum(nchar(Token)),
-    `(per token)`    = round(mean(nchar(Token)), 2)
-  ),
-  # Bars             = length(unique(Bar))),
-  by = by]
+  ## create the table
+  censusTable <- humtab[ , 
+      .(
+        Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
+        Tokens           = nrow(.SD),
+        `(unique)`       = list(unique(Token)),
+        Characters       = sum(nchar(Token)),
+        `(per token)`    = round(mean(nchar(Token)), 2),
+        Files            = list(unique(File))
+      )
+  ,
+  by = partition]
   
+  # levels that aren't present
+  emptylevels <- setdiff(levels, censusTable$partition)
+  if (!removeEmpty && length(emptylevels) > 0L) {
+    censusTable <- rbind(censusTable, 
+                         data.table(partition = emptylevels,
+                                    Records = 0L, Tokens = 0L, `(unique)` = list(), Characters = 0L, `(per token)` = NA_integer_))
+  }
+
+  censusTable$partition <- as.character(censusTable$partition)
+  data.table::setorder(censusTable, partition)
   
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- paste(dataTypes, collapse = '')
-  attr(censusTable, 'by') <- by
-  censusTable %class% 'humCensus'
+  attr(censusTable, 'by') <- rlang::as_label(by)
+  attr(censusTable, 'nfiles') <- length(unique(humtab$Filename))
+  
+  if (drop) {
+    censusTable$`(unique)` <- lengths(censusTable$`(unique)`)
+    censusTable
+  } else {
+    censusTable %class% 'humCensus'
+  }
 }
 
-#' @name humCensus
+#' @rdname census
 #' @usage census(humdata)[i]
 #' @export
 `[.humCensus` <- function(censusTable, i, drop = FALSE) {
@@ -147,15 +182,11 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
   
   corpusName <- attr(censusTable, 'corpusName')          
   dataTypes  <- attr(censusTable, 'dataTypes')      
-  by <- attr(censusTable, 'by')
-  
-  if (rlang::is_formula(i)) expr <- rlang::f_rhs(i)
-  if (is.character(i)) expr <- call('grepl', quote(i), as.symbol(attr(censusTable, 'by')))
-  if (is.numeric(i)) expr <- quote(i)
   
   censusTable <- popclass(censusTable)
-  indexpr <- call('[', quote(censusTable), expr)
-  censusTable <- eval(indexpr)
+  if (is.character(i)) i <- grepl(i, censusTable$partition)
+  
+  censusTable <- censusTable[i]
   
   
   if (!drop) censusTable <- censusTable %class% 'humCensus' 
@@ -164,36 +195,41 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = 'Filename', removeEmpty 
   corpusName <- paste0(corpusName, '[i]')
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- dataTypes
-  attr(censusTable, 'by') <- by
   censusTable
 }
 
 
-#' @name humCensus
+#' @rdname census
 #' @export
 print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
   
   
   censusTable <- data.table::copy(popclass(censusTable))
-  nfiles <- nrow(censusTable)
+  ngroups <- nrow(censusTable)
+  nfiles <- length(unique(unlist(censusTable$Files)))
+  
+  by <- attr(censusTable, 'by')
+  by <- if (grepl('[^a-zA-Z0-9]', by)) paste0(num2print(ngroups), " unique results of ", by) else num2print(ngroups, by)
   
   # Corpus message (name and n files)
-  corpusMessage <- paste0("\n###### humdrumR census of ",
-                          attr(censusTable, 'dataTypes'), ' records in humdrumR corpus "',
-                          attr(censusTable, 'corpusName'), 
-                          '" (', num2print(nfiles, attr(censusTable, 'by')), ")\n")
+  corpusMessage <- paste0("\n###### Census of ",
+                          attr(censusTable, 'dataTypes'), ' records', if (!showEach) ':\n')
+  
+  if (showEach) corpusMessage <- paste0(corpusMessage, 
+                                        ' in humdrumR corpus "',  attr(censusTable, 'corpusName'), '" ',
+                                        '(', num2print(nfiles, 'file'), '):\n')
   
   
   
-  if (nfiles < 1L) {
+  if (ngroups < 1L) {
     cat('Empty humdrum corpus.\n') 
     return(invisible(NULL))
   }
   
   ##
-  by <- attr(censusTable, 'by')
-  files <- censusTable[ , paste0(trimTokens(get(by), 70L), ' [', num2str(seq_along(get(by)), pad = TRUE), ']')]
-  censusTable[ , get('by') := NULL] # in place!
+  partition <- censusTable[ , paste0(trimTokens(as.character(partition), 70L), ' [', num2str(seq_along(partition), pad = TRUE), ']')]
+  censusTable[ , partition := NULL] # in place!
+  censusTable[ , Files := NULL] # in place!
   
   #
   sums <- censusTable[, lapply(.SD,
@@ -213,7 +249,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   censusTable[ , '(per token)' := paste0('(', `(per token)`, ')')] # in place!
   
   #
-  censusTable <- cbind(files, censusTable)
+  censusTable <- cbind(partition, censusTable)
   colNames    <- colnames(censusTable)
   colNames[1] <- "" # don't print "Filename" as header
   
@@ -238,20 +274,20 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   cat(corpusMessage)
   if (showEach) {
-    cat("###### By", by, ":\n")
+    cat("###### Grouped by ", by, ":\n", sep = '')
     cat(colNames_str, stars, '\n', sep = '')
     # 
-    censusTable[, cat(paste(padder(unlist(.SD)[screen], lenCol), collapse = ''), stars, '\n', sep = ''), by = seq_len(nfiles)]
-    if (nfiles > 10L ) cat(colNames_str, stars, '\n', sep = '')
+    censusTable[, cat(paste(padder(unlist(.SD)[screen], lenCol), collapse = ''), stars, '\n', sep = ''), by = seq_len(ngroups)]
+    if (ngroups > 10L ) cat(colNames_str, stars, '\n', sep = '')
     
   }
   
   
-  cat("###### Totals:\n")
+  if (showEach) cat("###### Totals:\n")
   if (!showEach) cat(colNames_str, stars, '\n', sep = '')
   cat(padder(sums[screen], lenCol), stars,  '\n', sep = '') #sums
   
-  if (showEach && nfiles > 10L) cat(corpusMessage) else cat('\n')
+  if (showEach && ngroups > 10L) cat(corpusMessage) else cat('\n')
   
   if (stars != '') {
     cat('\n') 
@@ -271,71 +307,84 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 
 #' Summarize reference records in a humdrumR corpus
 #' 
-#' `reference` is one of [humdrumR]'s
-#' [summary functions][humSummary], used to
+#' `reference` is used to
 #' tabulate the reference records
 #' present in a [humdrumR][humdrumRclass] corpus.
-#' `reference` takes a [humdrumR][humdrumRclass] object
-#' and and returns a `humReference` table.
-#' Alternatively, `reference` can take a `character` string,
-#' which it will check against known reference codes and print a
-#' information about matching codes. For instance, `reference('OTL')`
+#' `reference` is one of [humdrumR]'s
+#' basic [corpus summary functions][humSummary].
+#' 
+#' @details 
+#' 
+#' 
+#' `reference` can be used to look up information about common reference
+#' codes: supply a reference code as a `character` string to `reference`
+#' and it will check it against known reference codes and print
+#' information about matching codes (if there is one). For instance, `reference('OTL')`
 #' returns a description of the standard humdrum `!!!OTL` reference record
 #' (original title metadata).
 #' 
+#' 
+#' When applied to a [humdrumR corpus][humdrumRclass] 
+#' `reference` returns a special `data.frame` called a `humReference` table.
 #' A `humReference` table has one column for 
-#' each reference code that appears in a [humdrumR][humdrumRclass] corpus.
-#' Since reference records can be long (too much to print on one screen),
-#' and humdrum files can have multiple of the same type of reference code
-#' (for instance multiple composers annotated with "!!!COM"),
-#' by default, a `humReference` only prints the number of each type of 
+#' each reference code that appears in the corpus.
+#' Since reference records can be too long to print on one screen,
+#' and humdrum files can have multiple of the same type of reference code,
+#' a `humReference` table normally prints only the number of each type of 
 #' reference record to appear in each file.
 #' However, if only one type of reference code is present in a
 #' `humReference` table, the complete reference records for that code
-#' will be printed for each file. Likewise, if only one file is present
+#' *will* be printed for each file. Likewise, if only one file is present
 #' in the table, all of that file's complete reference records are printed.
-#' Thus, if you want to see actualy reference records, try indexing the
+#' Thus, if you want to see actual reference records, try indexing the
 #' `humReference` table down to one column or row (see below).
 #' 
 #' A `humReference` table has one row for each file in the corpus.
-#' Rows are labeled with each file's corresponding 
-#' number (from the [humTable]'s **File** field) and name (the **Filename** field).
+#' Rows are labeled with each file name.
 #' In addition, when a `humReference` object is printed,
 #' three different summary totals are printed for each reference code:
-#' **Any** indicates how many files in the corpus have at least
-#' one example of each code in them. 
-#' **Sum** indicates the total number of each reference code to appear
-#' in the corpus, including multiple appearances in one file (like multiple "!!!COM"
+#' 
+#' + **Any** indicates how many files in the corpus contain at least
+#'    one example of each code.
+#' + **Sum** indicates the total number of each reference code to appear
+#'    in the corpus, including multiple appearances in one file (like multiple `"!!!COM"`
 #' records).
-#' Finally, **Unique** tabulates the number of unique tokens in each reference
-#' code---if your corpus only hase two unique composers (encoded in "!!!COM"),
-#' the **Unique** total will be `2`.
+#' + **Unique** tabulates the number of unique token in the corpus, for each code. 
+#'    If your corpus only has two unique composers (encoded in "!!!COM"),
+#'    the **Unique** total will be `2`.
+#'    This assumes that tokens are *exactly* identical, including white space;
+#'    so `"!!!COM: J.S. Bach"` and `"!!!COM: JS Bach"` will be counted as two 
+#'    unique reference records.
 #' 
-#' @section Indexing:
+#' @param x A `character` string (to look up a reference code) or a [humdrumR object][humdrumRclass].
+#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
+#'     as a regular expression against filenames in the corpus.
+#' @param j if `numeric` selects columns by index. If `character`, [partially matched][partialMatching]
+#'     against column names (reference codes).
+#' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] 
+#'     is returned instead of `humReference` table.
 #' 
-#' `humReference` tables can be indexed much like base `R` `[data.frames][base::data.frame()], 
-#' with two arguments: `i` (rows) and `j` (columns).
-#' If `i` or `j` are `numeric`, they select rows or columns respectively, ordinally.
-#' If `i` is a `character`, it is matched as a regular expression
-#' against filenames in the corpus.
-#' If `j` is a `character`, it is [partially matched][base::pmatch()]
-#'  against column names.
-#' 
-#' A `drop` argument is also available. If `TRUE`, a plain
-#' `[data.table][data.table::data.table()]` is returned.
 #'       
-#' @name humReference
+#' @examples 
+#' 
+#' reference('COM')
+#' 
+#' reference(humData)[ , 'COM']
+#' 
+#' reference(humData)[3, ]
+#'        
+#' @family corpus summary functions
 #' @export
-reference <- function(x) UseMethod('reference')
+reference <- function(x, ...) UseMethod('reference')
 
 
-#' @rdname humReference
+#' @rdname reference
 #' @usage reference('OTL')
 #' @export
 reference.character <- function(str) {
-  checkArg(str, classes = c('string'))
   str <- gsub('^!*', '', str)
   
+  ReferenceCodes$Examples <- sapply(ReferenceCodes$Examples, paste, collapse = '\n\t\t\t')
   ReferenceCodes[] <- lapply(ReferenceCodes, as.character)
   hits <- ReferenceCodes[rownames(ReferenceCodes) %in% str, ]
   
@@ -343,7 +392,6 @@ reference.character <- function(str) {
     cat("Unknown reference code\n")
     return(invisible(NULL))
   } 
-  
   lapply(unique(hits$Category),
          \(Cat) {
            curhits <- hits[hits$Category == Cat, ]
@@ -362,7 +410,7 @@ reference.character <- function(str) {
                cat('\n')
              }
              
-             if (length(curhits$Examples[[i]]) > 0) {
+             if (curhits$Examples[[i]] != "") {
                cat('\n\t', 'Examples:\n', sep = '')
                cat(paste0('\t\t\t', curhits$Examples[[i]], '\n'), sep = '')
                cat('\n')
@@ -374,17 +422,12 @@ reference.character <- function(str) {
   return(invisible(hits))
 }
 
-#' @rdname humReference
+#' @rdname reference
 #' @usage reference(humdata)
 #' @export
-reference.humdrumR <- function(humdrumR) {
+reference.humdrumR <- function(humdrumR, drop = FALSE) {
+  corpusName <- rlang::as_label(substitute(humdrumR)) # enexpr won't work!
 
-  checkhumdrumR(humdrumR, 'reference.humdrumR')
-    
-  # This function simply extracts the refernence columns from a humdrumR object
-  
-  corpusName <- substitute(humdrumR)
-  corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
   humtab <- getHumtab(humdrumR)
   fieldtable <- fields(humdrumR, fieldTypes = 'Reference')
@@ -395,11 +438,11 @@ reference.humdrumR <- function(humdrumR) {
   refTable <- refTable[!duplicated(Filename)]
   
   attr(refTable, 'corpusName') <- corpusName
-  refTable %class% 'humReference'
+  if (drop) refTable else refTable %class% 'humReference'
 }
 
 
-#' @name humReference
+#' @rdname reference
 #' @export
 `[.humReference` <- function(refTable, i, j, drop = FALSE) {
   if (missing(i) && missing(j)) return(if (drop) popclass(refTable) else refTable)
@@ -436,7 +479,7 @@ reference.humdrumR <- function(humdrumR) {
 }
 
 
-#' @name humReference
+#' @rdname reference
 #' @usage NULL
 #' @export
 print.humReference <- function(refTable, showEach = TRUE, screenWidth = options('width')$width - 10L) {
@@ -445,9 +488,11 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
   nfiles <- nrow(refTable)
   
   ### 
-  corpusMessage <- paste0('\n###### Reference records in humdrumR corpus "',
-                          attr(refTable, 'corpusName'),
-                          '" (', num2print(nfiles, 'file'), ")\n")
+  corpusMessage <- paste0('\n###### Reference records', if (!showEach) ':\n')
+  
+  if (showEach) corpusMessage <- paste0(corpusMessage, 'in humdrumR corpus "',
+                                        attr(refTable, 'corpusName'),
+                                        '" (', num2print(nfiles, 'file'), "):\n")
   
   if (nfiles < 1L) {
     cat('Empty humdrumR object.\n') 
@@ -537,7 +582,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
   }
   
   
-  cat("###### Totals:\n")
+  if (showEach) cat("###### Totals:\n")
   if (!showEach) cat(colNames_str, stars, '\n', sep = '')
   
   Map(function(tot, totname) {
@@ -566,22 +611,48 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 
 #' Summarize spines in humdrum dataset.
 #'
-#' `spines` is one of [humdrumR]'s [summary functions][humSummary],
-#' used to summarize the spines and spine paths in the pieces of a humdrumR corpus.
+#' `spines` tabulates the spines and spine paths within the files in a
+#' [humdrumR corpus][humdrumRclass].
+#' `spines` is one of [humdrumR]'s
+#' basic [corpus summary functions][humSummary].
+#' 
+#' @details 
 #'
-#' @name humSpines
-#' @family humdrum data summary functions
+#' `spines` returns a special `data.frame` called a `humSpines` table.
+#' A `humSpines` table has five columns of information about each file:
+#' 
+#' 1. Spines
+#'     + The number of spines.
+#' 2. Paths
+#'     + The total number of spine paths.
+#' 3. In
+#'     + The number of spines which contain any spine paths.
+#' 4. *^
+#'     + The total number of spine splits (`"*^"`).
+#' 5. *v
+#'     + The total number of spine joins (`"*v"`).
+#'     
+#' When `humSpine` table prints on the command line, "tallies"
+#' of the unique combinations of spines and paths in the files are also printed.
+#' 
+#' @param humdrumR A [humdrumR object][humdrumRclass]
+#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
+#'     as a regular expression against filenames in the corpus.
+#' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of a `humSpine` table.
+#' 
+#' @family corpus summary functions
 #' @export
-spines  <- function(humdrumR) {
+spines  <- function(humdrumR, drop = FALSE) {
 
   checkhumdrumR(humdrumR, 'spines')
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
   humtab <- getHumtab(humdrumR)
+  humtab$Column <- getColumn(humtab, 'piece')
   
   spines <- humtab[Global == FALSE , 
-                   .(File            = unique(File),
+                   .(File             = unique(File),
                      Spines           = length(unique(Spine)),
                      Columns          = length(unique(Column)),
                      Splits           = sum(grepl('\\*\\^', Token)),
@@ -593,32 +664,29 @@ spines  <- function(humdrumR) {
   
   
   attr(spines, 'corpusName') <- corpusName
-  spines %class% 'humSpines'
+  if (drop) spines else spines %class% 'humSpines'
 }
 
 
-#' @rdname humSpines
+#' @rdname spines
 #' @export
-`[.humSpines` <- function(spines, i, j) {
-  if (missing(i) && missing(j)) return(spines)
+`[.humSpines` <- function(spineTable, i, drop = FALSE) {
+  if (missing(i)) return(if (drop) popclass(spineTable) else spineTable)
   
-  if (missing(j)) j <- seq_len(ncol(spines) - 2)
-  if (missing(i)) i <- seq_len(nrow(spines)) 
   
-  if (is.character(j)) j <- pmatch(j, colnames(spines)) - 2
-  if (is.character(i)) i <- pmatch(i, spines$Filename)
+  corpusName <- attr(spineTable, 'corpusName')
+  spineTable <- popclass(spineTable)
   
-  corpusName <- attr(spines, 'corpusName')
-  spines <- popclass(spines)
-  spines <- spines[i, c(1, 2, j + 2), with = FALSE]
+  if (is.character(i)) i <- grep(i, spineTable$Filename)
+  spineTable <- spineTable[i]
   
-  attr(spines, 'corpusName') <- corpusName
-  spines %class% 'humSpines'
+  attr(spineTable, 'corpusName') <- corpusName
+  if (drop) spineTable else spineTable %class% 'humSpines'
 }
 
 
 
-#' @rdname humSpines
+#' @rdname spines
 #' @export
 print.humSpines <- function(spineTable, showEach = TRUE) {
   nfiles <- nrow(spineTable)
@@ -626,9 +694,12 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
   if (nfiles < 1L) {cat('Empty humdrumR object.\n') ; return(invisible(NULL))}
   
   ### 
-  corpusMessage <- paste0('\n###### Spine structure in in humdrumR corpus "',
-                          attr(spineTable, 'corpusName'),
-                          '" (', num2print(nfiles, 'file'), ")\n")
+  corpusMessage <- paste0('\n###### Spine structure', if (!showEach) ':\n')
+  
+  if (showEach) corpusMessage <- paste0(corpusMessage,
+                                        ' in in humdrumR corpus "',
+                                        attr(spineTable, 'corpusName'),
+                                        '" (', num2print(nfiles, 'file'), "):\n")
   
   spineTable <- popclass(spineTable)
   spineTable$File <- paste0(num2str(spineTable$File), ":")
@@ -639,6 +710,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
   anypaths <- any(spineTable$Columns > 0)
   
   
+
   cat(corpusMessage)
   if (nrow(spineTable) == 1) {
     cat(spineTable$Filename, ': ', spineTable$Spines, ' spines', if (anypaths) paste0(' + ', spineTable$Columns, {if ( spineTable$Columns > 1) ' paths:' else ' path:'}) else '', '\n', sep = '')
@@ -653,43 +725,48 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
                 c('File', 'Filename', 'Spines',
                   'Columns', 'In', 'Splits', 'Splices'))
     
+    spineTable[ , Filename := paste0(trimTokens(Filename, 70L), ' [', num2str(seq_along(Filename), pad = TRUE), ']')]
+    spineTable[ , File := NULL]
     
-    cols <- if (anypaths) 1:7 else 1:3
-    colNames <- c('', 'Filename', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
+    cols <- 1:6
+    colNames <- c('', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
     
     
-    lenCol <- pmax(c(0,8,0,0,0,0,0)[cols], #Tallies: is 8 long
+    lenCol <- pmax(c(8,0,0,0,0,0)[cols], #Tallies: is 8 long
                    nchar(colNames), sapply(spineTable[ , cols, with = FALSE], \(x) max(nchar(x)))) + 2L
     
     if (showEach) {
       cat(padder(colNames, lenCol), '\n', sep = '')
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
-      spineTable[ , { row <- unlist(.SD)
-      if (Columns == 0) row[4:7] <- ' '
-      paste(padder(row[cols], lenCol), collapse = '') 
-      }, 
-      by = 1:nrow(spineTable)]$V1 -> strs
+      spineTable[ , { 
+        row <- unlist(.SD)
+        if (Columns == 0) row[4:7] <- ' '
+        paste(padder(row[cols], lenCol), collapse = '') 
+        }, by = 1:nrow(spineTable)]$V1 -> strs
       
       cat(paste(strs, collapse = '\n'), '\n', sep = '')
       cat(stringr::str_dup('#', sum(lenCol)), '\n', sep = '')
       
+      cat(padder(colNames, lenCol), '\n\n', sep = '')
+      cat(padder(c('Tallies:'), sum(lenCol[1:2])), '\n', sep = '')
     }
     
     
-    cat(padder(colNames, lenCol), '\n\n', sep = '')
     
     #
-    cat(padder(c('Tallies:'), sum(lenCol[1:2])), '\n', sep = '')
     
     tab <- spineTable[ , table(Spines, Columns)]
     tab <- tab[order(tab[ , 1], decreasing = TRUE), , drop = FALSE]
     for (i in 1:nrow(tab)) {
-      row <- c('', sum(tab[i, ]), paste0('with ', (rownames(tab)[i])))
+      row <- c('', sum(tab[i, ]), paste0(' files with ', (rownames(tab)[i]), ' spines'))
       row <- padder(row, lenCol[1:3])
       if (anypaths) {
         notzero <- which(tab[i, ] > 0)
-        row <- c(row, ' (', harvard(paste0(tab[i, notzero], '*',  colnames(tab)[notzero], ' paths'), 'and'), ')')
+        row <- c(row, ' (', harvard(paste0(tab[i, notzero], 
+                                           ' with ',  
+                                           colnames(tab)[notzero], 
+                                           plural(as.numeric(colnames(tab)[notzero]), ' paths', ' path')), 'and'), ')')
       }
       cat(row, '\n', sep = '')
     }
@@ -707,14 +784,17 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 
 #' Summarize humdrum corpus interpretations.
 #' 
-#' `interpretations` is one of [humdrumR]'s [summary functions][humSummary],
-#' used to summarize the interpretations in the pieces of a humdrumR corpus,
+#' `interpretations` is used to summarize the interpretations in the pieces of a humdrumR corpus,
 #' including *exclusive* (`**`) and *tandem* (`*`) interpretations.
-#' It returns a `humInterpretations` argument which prints as a informative table in the terminal.
+#' `interpretations` is one of [humdrumR]'s
+#' basic [corpus summary functions][humSummary].
 #' 
-#' Each row in the output table represents a single piece in the corus.
-#' The first column (`(n)`) indicates a unique "exclusive pattern" associated with
-#' each piece---the exclusive patterns are tallied at the bottom.
+#' @details
+#' 
+#' `interpretations` returns a special `data.frame` called a `humInterpretations` table.
+#' Each row in the table represents a single piece in the corpus.
+#' The first column (`{X}`) is a variable indicating a unique "exclusive pattern" associated with
+#' each file---the exclusive patterns are tallied at the bottom of the printout.
 #' The remaining columns indicate how many of each interpretation (indicated by column name)
 #' appear in each piece.
 #' 
@@ -755,10 +835,10 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #'     
 #'     
 #' @param humdrumR A [humdrumR][humdrumR-class] data object.
+#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
+#'     as a regular expression against the filenames in the corpus.
 #' 
-#' 
-#' @name humInterpretations
-#' @family humdrum data summary functions
+#' @family corpus summary functions
 #' @export
 interpretations <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'interpretations')
@@ -796,15 +876,33 @@ interpretations <- function(humdrumR) {
                  ExclusivePat = exclusivePats,
                  Tandem    = list(Number    = tandemN, 
                                   NUnique   = tandemUN,
-                                  InNSpines = tandemIn)) %class% 'humInterpretations'
+                                  InNSpines = tandemIn)) 
   
   attr(output, 'corpusNames') <- corpusName
   
-  output
+  output %class% 'humInterpretations'
   
 }
 
-#' @rdname humInterpretations
+#' @rdname interpretations
+#' @export
+`[.humInterpretations` <- function(interps, i) {
+  if (missing(i)) return(interps)
+  
+  corpusName <- attr(interps, 'corpusName')
+  if (is.character(i)) i <- grepl(i, interps$Filename)
+  
+  interps <- rapply(interps, how = 'replace',
+                    \(x) {
+                      if (hasdim(x)) x[i , , drop = FALSE] else x[i]
+                    })
+  attr(interps, 'corpusName') <- corpusName
+                        
+  interps %class% 'humInterpretations'
+}
+
+
+#' @rdname interpretations
 #' @export
 print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = options('width')$width - 10L) {
   if (nrow(interps$Exclusive) < 1 || any(sapply(interps$Tandem, nrow) < 1)) { cat('No interpretations.\n') ; return(invisible(NULL))}
@@ -815,19 +913,24 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   
   tallies <- sort(table(interps$ExclusivePat), decreasing = TRUE)
   
-  interpmat <- data.table(File = paste0(num2str(interps$File), ':'), Filename = interps$Filename, 
-                          "(n)" = paste0('(', match(interps$ExclusivePat, names(tallies)), ')'), 
+  interpmat <- data.table(File = paste0(trimTokens(interps$Filename, 70L), ' [', num2str(seq_along(interps$Filename), pad = TRUE), ']'), 
+                          "{X}" = paste0('{', LETTERS[match(interps$ExclusivePat, names(tallies))], '}'), 
                           interps$Exclusive,
                           tandems)
   nfiles <- nrow(interpmat)
   
-  corpusMessage <- paste0('\n###### Interpretation content in humdrumR corpus "',
-                          attr(interps, 'corpusName'), 
-                          '" (', num2print(nfiles, 'file'), ")\n")
+  corpusMessage <- paste0('\n###### Interpretation content', if (!showEach) ':\n')
+                          
+  if (showEach) corpusMessage <- paste0(corpusMessage,
+                                        ' in humdrumR corpus "',
+                                        attr(interps, 'corpusName'), 
+                                        '" (', num2print(nfiles, 'file'), "):\n")
+                                        
+                       
   
   
   exclusive <- grepl('^\\*\\*', colnames(interpmat))
-  colNames <- c('', 'Filename', colnames(interpmat)[-1:-2])
+  colNames <- c('', colnames(interpmat)[-1])
   
   lenCol <- pmax(interpmat[ , sapply(.SD, \(x) max(nchar(x)))],  
                  nchar(colnames(interpmat)), 
@@ -848,6 +951,8 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   ## PRINTING BEGINS:
   cat(corpusMessage)
   
+
+  
   if (nfiles == 1L || showEach) {
     cat(padder(colNames, lenCol), stars, '\n', sep = '')
     cat(key)
@@ -863,11 +968,12 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   }
   
   if (nfiles > 1L) {
-    if (showEach) cat(key)
-    cat("###### Totals:\n")
+    if (showEach) {
+      cat(key)
+      cat("###### Totals:\n")
+    }
     cat(padder(colNames, lenCol), stars, '\n', sep = '')
-    cat(padder(c('',
-                 'Hits:',
+    cat(padder(c('Hits:',
                  '',
                  sapply(as.list(interpmat)[exclusive & screen], \(col) sum(col > 0)),
                  colSums(interps$Tandem$NUnique[ , seq_len(max(0L, max(which(screen)) - max(which(exclusive)))), drop = FALSE]  > 0)),
@@ -888,8 +994,8 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   
   ## tallying patterns
   cat(padder(c('Tallies:'), 12), '\n', sep = '')
-  tab <- cbind(names(tallies), 
-               paste0('(', seq_along(tallies), '):'), 
+  tab <- cbind(paste0('{', LETTERS[seq_along(tallies)], '} = '), 
+               paste0(names(tallies), ':'),  
                tallies)
   lenCol <- c(12, apply(nchar(tab), 2, max) + 2L)
   for (i in 1:nrow(tab)) {
@@ -903,6 +1009,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
 
 #### Sections ----
 
+#' @family corpus summary functions
 #' @export
 sections <- function(humdrumR) {
   checkhumdrumR(humdrumR, 'sections')

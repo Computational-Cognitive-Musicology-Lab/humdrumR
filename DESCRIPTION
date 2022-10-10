@@ -1,7 +1,8 @@
 Package: humdrumR
 Title: humdrumR
-Version: 0.3.0.9000
-Authors@R: person("Nathaniel", "Condit-Schultz", email = "natsguitar@gmail.com", role = c("aut", "cre"))
+Version: 0.4.0.9000
+Authors@R: c(person("Nathaniel", "Condit-Schultz", email = "natcs@gatech.edu", role = c("aut", "cre")),
+             person("Claire", "Arthur", email = "claire.arthur@gatech.edu", role = "aut"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
 Depends: R(>= 4.1), rlang
 Imports: MASS, combinat, stringr, glue(>= 1.3.0), data.table, abind, stringi, lubridate
@@ -11,27 +12,24 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
-         Compose.R
+         Dispatch.R
          humdrumR-class.R
+         Interpretations.R
          Summary.R
          Read.R
          Write.R
-         Apply.R
-         Filter.R
+         Within.R
+         Subset.R
          Windows.R
-         Plot.R
-         Interpretations.R
          Regex.R
          Validation.R
-         Vector.R
+         Struct.R
          Rational.R
-         tonalInterval.R
-         diatonicSet.R
-         tertianSet.R
-         rhythmInterval.R
+         Pitch.R
+         Keys.R
+         Chords.R
+         Rhythm.R
          Metric.R
-         Graphics.R
-         Formulae.R
 	 Lyrics.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

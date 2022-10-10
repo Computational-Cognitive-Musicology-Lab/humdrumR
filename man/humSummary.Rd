@@ -2,46 +2,51 @@
 % Please edit documentation in R/Summary.R
 \name{humSummary}
 \alias{humSummary}
+\alias{summary.humdrumR}
+\alias{summary}
 \title{Summarize humdrumR corpora}
 \usage{
-\S4method{summary}{humdrumR}(object, ...)
+\method{summary}{humdrumR}(object)
 }
 \description{
-\link{humdrumR} includes a number of built in functions for creating quick summaries of \link[=humdrumRclass]{humdrumR}
-corpora:
+Summarizes the content of a \link[=humdrumRclass]{humdrumR corpus}, by calling five different
+corpus summary functions and printing their results.
 }
 \details{
-\enumerate{
-\item \link[=humCensus]{census}
+\link{humdrumR} includes a number of separate functions for summarizing different
+aspects of \link[=humdrumRclass]{humdrumR data objects}:
+\itemize{
+\item \code{\link[=census]{census()}}
 \itemize{
 \item Tabulates the raw size of the humdrumR corpus.
 }
-\item \link[=humReference]{reference}
+\item \code{\link[=reference]{reference()}}
 \itemize{
 \item Tabulates reference records (metadata) for each file.
 }
-\item \link[=humSpines]{spines}
+\item \code{\link[=spines]{spines()}}
 \itemize{
 \item Tabulates the number of spines and spine paths in files in the corpus.
 }
-\item \link[=humInterpretations]{interpretations}
+\item \code{\link[=interpretations]{interpretations()}}
 \itemize{
 \item Tabulates the types of exclusive and tandem interpretations in the corpus.
 }
-\item \link[=humSections]{sections}
+\item \code{\link[=sections]{sections()}}
 \itemize{
-\item Tabulates any formal data (\verb{*>}) in the corpus.
+\item Tabulates any formal data (\verb{*>}) in the corpus, including barlines.
 }
 }
 
-Each function takes a \link[=humdrumRclass]{humdrumR} object and returns a
-special class of data.table.
-The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} calls all of the above functions and prints a condensed version of each.
+Each function takes a \link[=humdrumRclass]{humdrumR} object and returns a data.table.
+The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} simply calls all of the above
+functions and prints a condensed version of each.
 }
 \seealso{
-Other humdrum data summary functions: 
-\code{\link{humCensus}},
-\code{\link{humInterpretations}},
-\code{\link{humSpines}}
+Other corpus summary functions: 
+\code{\link{census}()},
+\code{\link{interpretations}()},
+\code{\link{reference}()},
+\code{\link{spines}()}
 }
-\concept{humdrum data summary functions}
+\concept{corpus summary functions}

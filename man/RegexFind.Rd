@@ -2,56 +2,75 @@
 % Please edit documentation in R/Regex.R
 \name{RegexFind}
 \alias{RegexFind}
-\alias{\%grepl\%}
-\alias{\%grepi\%}
-\alias{\%grepn\%}
-\alias{\%grepm\%}
-\alias{\%grep\%}
-\alias{\%!grep\%}
-\alias{\%lgrepl\%}
-\alias{\%lgrepi\%}
-\alias{\%lgrepn\%}
+\alias{\%~l\%}
+\alias{\%~i\%}
+\alias{\%~n\%}
+\alias{\%~m\%}
+\alias{\%~\%}
+\alias{\%!~\%}
+\alias{\%!~l\%}
+\alias{\%!~i\%}
 \title{Match strings against regular expression}
 \usage{
-x \%grepl\% pattern
+x \%~l\% regex
 
-x \%grepi\% pattern
+x \%~i\% regex
 
-x \%grepn\% pattern
+x \%~n\% regex
 
-x \%grepm\% pattern
+x \%~m\% regex
 
-x \%grep\% pattern
+x \%~\% regex
 
-... \%!grep\% NA
+... \%!~\% NA
 
-list \%lgrepl\% pattern
+... \%!~l\% NA
 
-list \%lgrepi\% pattern
-
-list \%lgrepn\% pattern
+x \%!~i\% pattern
 }
 \arguments{
-\item{x}{A vector to search in}
+\item{x}{A \code{character} vector to search in.}
 
-\item{pattern}{One or more regular expression}
-
-\item{list}{A list of vectors (all the same length) to search in}
+\item{regex}{One or more regular expressions. If more than one regex is supplied,
+matches to \emph{any} of the regexes are returned. (See "Multiple regexes" section.)}
 }
 \description{
-These infix functions are simply syntactic sugar for
-existing \code{R} regular expression matching functions.
-If the a vector of regexes is given as the right argument, matches to \emph{any} of the regexes are returned.
+The functions give you a concise way to search for regular expressions in \code{character} vectors.
+They are "infix" functions, meaning you write the function between its two arguments:
+\code{myvector \%~\% regex}.
 }
 \details{
+Each version of the function returns a different type of information about regex matches (if any)
+in the input vector:
 \itemize{
-\item \verb{\%grepl\%}: Matches \code{pattern} in \code{x} and returns \code{logical}. Shorthand for \code{\link[base:grep]{base::grepl()}}.
-\item \verb{\%grep\%}: The "default"---same as \verb{\%grepl\%}.
-\item \verb{\%grepi\%}: Matches \code{pattern} in \code{x} and returns \code{integer} indices. Shorthand for \code{\link[base:grep]{base::grep()}}.
-\item \verb{\%grepn\%}: Matches \code{pattern} in \code{x} and returns \code{integer} counts (can be greater than one if more
-than one match occurs in the same token). Shorthand for \code{\link[stringi:stri_count]{stringi::stri_count_regex()}}.
-\item \verb{\%grepm\%}: Matches \code{pattern} in \code{x} and returns matching strings (or NA if no match). Shorthand for \code{\link[stringi:stri_extract]{stringi::stri_extract_first_regex()}}
+\item \verb{\%~l\%}: returns \code{logical} (\code{TRUE}/\code{FALSE}) indicating where in \code{x} there are matches.
+\item \verb{\%~i\%}: returns \code{integer} indicating the indices of matches in \code{x}.
+\item \verb{\%~n\%}: returns \code{integer} indicating the number (count) of matches in each string.
+\item \verb{\%~m\%}: returns \code{character} string of the matched string itself. Returns \code{NA}
+where there is no match.
 }
 
-Each regex infix has an "lapply" version, called \verb{\%lgrepx\%}.
+The basic function (\verb{\%~\%}) is the same as \verb{\%~l\%}.
+There is also a negative versions of the \code{l} and \code{i} functions: giving all
+strings that \emph{don't} match the given regular expression.
+These are \verb{\%!~\%}, \verb{\%!~l\%}, and \verb{\%!~i\%}.
+
+These functions are simply syntactic sugar for
+existing \code{R} regular expression matching functions:
+\itemize{
+\item \verb{\%~l\%}: \code{\link[base:grep]{base::grepl()}}
+\item \verb{\%~i\%}: \code{\link[base:grep]{base::grep()}}
+\item \verb{\%~n\%}: \code{\link[stringi:stri_count]{stringi::stri_count_regex()}}
+\item \verb{\%~m\%}: \code{\link[stringi:stri_extract]{stringi::stri_extract_first_regex()}}
 }
+}
+\section{Multiple regexes}{
+
+
+If more than one regex is supplied,
+\verb{\%~l\%} and \verb{\%~i\%} return the indices where \emph{any} of the regexes match.
+In the case of \verb{\%~n\%}, each matching regex is counted separately, and they are all summed.
+In the case of \verb{\%~m\%}, all matches (if any) are pasted together,
+including multiple matches of the same string.
+}
+

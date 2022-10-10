@@ -1,10 +1,10 @@
 ---
-title: Pitch and Tonality in humdrumR
+title: Pitch and tonality in humdrumR
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Pitch and Tonality in humdrumR}
+  %\VignetteIndexEntry{Pitch and tonality in humdrumR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,6 +13,8 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE, message = FALSE,
   comment = ">\t")
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 library(humdrumR)
 par(mar=c(1,1,1,1))
 
@@ -20,14 +22,14 @@ pitchFunctions <- humdrumR:::pitchFunctions
 ```
 
 
-As a computational musicology toolkit, `humdrumR`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
-For the most part, `humdrumR`'s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
+As a computational musicology toolkit, `r hm`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
+For the most part, `r hm`'s pitch tools are focused on the Western system of tonality, and tools for representing pitches in a tonal context are the focus of *this* vignette---we also have standard tools for looking at pitch from a Western, 12-tone atonal setting as well.
 
 
 # Pitches and Intervals
 
 
-`humdrumR` defines a suite of pitch functions, like `kern`, `solfa`, `interval`, and `semits`.
+`r Hm` defines a suite of pitch functions, like `kern`, `solfa`, `interval`, and `semits`.
 These functions all work in essentially the same way: they take in an input argument and output pitch information in their own particular format.
 For example,
 

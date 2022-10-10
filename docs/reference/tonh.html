@@ -12,7 +12,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,25 +26,34 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <h6 class="dropdown-header" data-toc-skip>Basics</h6>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The Humdrum Syntax</a>
-    <a class="dropdown-item" href="../articles/Intervals.html">Rhythm and Pitch Intervals</a>
-    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for Coders</a>
-    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and Tertian Sets in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Overview.html">Overview of humdrumR</a>
-    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and Tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data with humdrumR</a>
-    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and Meter in humdrumR</a>
-    <a class="dropdown-item" href="../articles/Validation.html">Validating Humdrum Data</a>
-    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with Humdrum Data</a>
+    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>R/Humdrum background</h6>
+    <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The humdrum syntax</a>
+    <a class="dropdown-item" href="../articles/RPrimer.html">An R primer for humdrumR users</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
+    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
+    <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
+    <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
+    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <div class="dropdown-divider"></div>
+    <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
+    <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -57,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>German-style pitch notation.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/tonalInterval.R"><code>R/tonalInterval.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Pitch.R" class="external-link"><code>R/Pitch.R</code></a></small>
       <div class="d-none name"><code>tonh.Rd</code></div>
     </div>
 
@@ -86,14 +95,14 @@
     <dl><dt>x</dt>
 <dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the pitch deparser.
+<dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
 There are also two hidden (advanced) argumens you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information (accidentals and qualites) is discarded.</p></dd>
 <dt>simple</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="diatonicSet.html">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
+<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
 the parser, deparser, and transposer.</p></dd>
 <dt>transposeArgs</dt>
 <dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <a href="transpose.html">transpose</a>.</p></dd>
@@ -101,7 +110,7 @@ the parser, deparser, and transposer.</p></dd>
 <dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
 <dt>inPlace</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
-<em>and</em> there is extral, non-pitch information in the strings "beside" the pitch information.
+<em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-pitch information.
 If <code>inPlace = FALSE</code>, only the pitch output information will be returned (details below).</p></dd>
 <dt>S</dt>
@@ -112,7 +121,7 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
     
 
 
-<p>Each pitch function has a few standard arguments (details above), which control details of the output.
+<p>Each pitch function has a few standard arguments which control details of the output.
 The most important are the <code>generic</code> and <code>simple</code> arguments, which allow you to control what type of pitch information
 is returned.</p><div class="section">
 <h3 id="generic-vs-specific">Generic vs Specific<a class="anchor" aria-label="anchor" href="#generic-vs-specific"></a></h3>
@@ -120,8 +129,8 @@ is returned.</p><div class="section">
 
 <p>If <code>generic = TRUE</code>, <a href="https://en.wikipedia.org/wiki/Generic_and_specific_intervals" class="external-link">specific pitch information</a>
 (accidentals or qualities) is omitted from the output.
-As an alternative way of controlling the same functionality, you can use the <code>specific</code> argument, where <code>specific == !generic</code>.
-In the case of atonal outputs, the "generic" version of that pitch is output:
+As an alternative way of controlling the same functionality, you can use the <code>specific</code> argument, where <code>specific == !generic</code>.</p>
+<p>In the case of atonal functions, the "generic" version of that pitch is output:
 for example, <code>semits('c#', generic = TRUE)</code> will return <code>0</code>, because the "generic" version of <em>C#</em> is <em>C</em>, which corresponds to <code>0</code>.
 However, note that the generic version of a pitch follows the key, so <code>semits('c#', generic = TRUE, Key = 'A:')</code> will return <code>1</code>!</p>
 </div>
@@ -135,14 +144,15 @@ However, note that the generic version of a pitch follows the key, so <code>semi
 As an alternative way of controlling the same functionality, you can use the <code>compound</code> argument ,where <code>compound == !simple</code>.</p>
 <p>There is actually more than one way you might want to divide compound intervals up into simple and octave parts.
 For example, you might like to call an output <code>-M2</code> (descending major 2nd) <em>OR</em> <code>+m7</code> (ascending minor 7th in the octave below).
-This functionality can be controlled with the <code>octave.round</code> argument: see the "advanced deparsing" section below.</p>
+This functionality can be controlled with the <code>octave.round</code> argument:
+see the <a href="pitchDeparsing.html">pitch deparsing documentation</a>.</p>
 </div>
 
 <div class="section">
 <h3 id="key">Key<a class="anchor" aria-label="anchor" href="#key"></a></h3>
 
 
-<p>The <code>Key</code> argument must be a <a href="diatonicSet.html">diatonicSet</a>, or something that can be parsed into one.
+<p>The <code>Key</code> argument must be a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, or something that can be parsed into one.
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose---<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
@@ -172,8 +182,8 @@ For example, we can get the exact same result as before by typing <code>kern('CX
 to <code><a href="transpose.html">transpose()</a></code>, allowing us to easily transpose pitch information.
 For example, we could type <code>kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))</code> can get the output <code>c('d', 'e', 'f#')</code>.
 The possible transpose args are:</p><ul><li><p><code>by</code> (<a href="tonalIntervalS4.html">tonalInterval</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>from</code> (<a href="diatonicSet.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>to</code>  (<a href="diatonicSet.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>from</code> (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>to</code>  (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
 <li><p><code>real</code> (<code>logical</code>, <code>length == 1</code>) Should transposition be real or tonal?</p></li>
 <li><p><code>relative</code> (<code>logical</code>, <code>length == 1</code>) Should key-wise transposition be based on relative or parallel keys?</p></li>
 </ul><p>As a convenient shorthand, or "syntactic sugar," you can specify <code>transposeArgs</code> in an alternate way:
@@ -219,278 +229,7 @@ This is controlled with the <code>inPlace</code> argument, which is <code>FALSE<
 So, <code>pitch('4.ee-[', inPlace = TRUE)</code> will return 4.Eb5[---keeping the <code>"4."</code> and the <code>"["</code>.
 (This obviously only works if the input is a string, not a numeric!)
 Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return numeric values, to return character strings
-<em>if</em> their input is a character string.Advanced Deparsing Options</p>
-<p>Though each of the pitch functions (listed at top) outputs a different pitch representation,
-they share a lot of common "deparsing" functionality.
-This is why basic arguments like <code>generic</code> and <code>simple</code> will work with any pitch function.
-By using more "advanced" deparsing arguments, you can tweak how this deparsing is done, so as to generate even more output representations!
-This means we are controlling the bin the second step of our pipeline:</p><ul><li><p><strong>Input</strong> representation <code>|&gt;</code></p><ul><li><p><em>Parsing</em> <code>|&gt;</code></p><ul><li><p><strong>Intermediate</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
-<li><p><strong>Transformation</strong>  <code>|&gt;</code></p></li>
-</ul></li>
-<li><p><em>Deparsing</em> (DEPARSING ARGS GO HERE) <code>|&gt;</code></p></li>
-</ul></li>
-<li><p><strong>Output</strong> representation</p></li>
-</ul><p>Note that these arguments are similar or identical to parallel <a href="pitchParsing.html">parsing arguments</a>.
-The following "advanced" deparsing arguments are available (read all the details about them further down):</p><ul><li><p><strong>Steps</strong></p><ul><li><p><code>step.labels</code></p></li>
-<li><p><code>step.signed</code></p></li>
-</ul></li>
-<li><p><strong>Species</strong> (accidentals or qualities)</p><ul><li><p><code>qualities</code></p></li>
-<li><p><code>specifier.maximum</code></p></li>
-<li><p><em>Accidentals</em></p><ul><li><p><code>natural</code>, <code>flat</code>, <code>sharp</code>, <code>doubleflat</code>, <code>doublesharp</code></p></li>
-</ul></li>
-<li><p><em>Qualities</em></p><ul><li><p><code>perfect</code>, <code>major</code>, <code>minor</code>, <code>augment</code>, <code>diminish</code></p></li>
-</ul></li>
-<li><p><em>Implicit vs Explicit Species</em></p><ul><li><p><code>implicitSpecies</code></p></li>
-<li><p><code>absoluteSpecies</code></p></li>
-<li><p><code>explicitNaturals</code></p></li>
-<li><p><code>cautionary</code></p></li>
-<li><p><code>memory</code>, <code>memoryWindows</code></p></li>
-</ul></li>
-</ul></li>
-<li><p><strong>Octave</strong></p><ul><li><p><code>octave.integer</code></p></li>
-<li><p><code>up</code>, <code>down</code>, <code>same</code></p></li>
-<li><p><code>octave.offset</code></p></li>
-<li><p><code>octave.round</code></p></li>
-<li><p><code>octave.relative</code>, <code>octave.absolute</code></p></li>
-</ul></li>
-<li><p><strong>String parsing</strong></p><ul><li><p><code>parts</code></p></li>
-<li><p><code>sep</code>.</p></li>
-</ul></li>
-</ul><p>These "advanced" arguments can be used directly in <em>any</em> <a href="pitchFunctions.html">pitch function</a>: for example, <code>kern(x, qualities = TRUE)</code>.</p>
-<p>Each of the <code>humdrumR</code> pitch functions is associated with default deparsing arguments.
-For example, if you use <code><a href="kern.html">kern()</a></code>, <code>flat</code> is set (by default) to <code>"-"</code>.
-However, if you wanted to print <code>**kern</code>-like pitch data, <strong>except</strong> with a different flat symbol, like <code>"_"</code>, you could modify the deparser:
-<code>kern('Eb5', flat = "_")</code>.
-This overrides the default value for <code>**kern</code>, so the output would be <code>"ee_"</code> instead of <code>"ee-"</code>.</p>
-</div>
-
-
-</div>
-
-<div class="section">
-<h3 id="steps">Steps<a class="anchor" aria-label="anchor" href="#steps"></a></h3>
-
-
-<p>All representations of "tonal" pitch information include a representation of <em>diatonic steps</em>.
-You can control how the deparser writes diatonic steps using the <code>step.labels</code> argument.
-The <code>step.labels</code> argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
-Examples of <code>step.labels</code> arguments that are currently used by <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> include:</p><ul><li><p><code>step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G')</code></p></li>
-<li><p><code>step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')</code></p></li>
-<li><p><code>step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't')</code></p></li>
-</ul><p>If <code>step.labels</code> is <code>NULL</code>, steps are assumed printed as integers, including negative integers representing downward steps.</p>
-<p>There is also a <code>step.signed</code> (<code>logical</code>, <code>length == 1</code>) argument: if <code>step.signed = TRUE</code>, lowercase versions of <code>step.labels</code> are interpreted as negative (downward) steps and
-uppercase versions of <code>step.labels</code> are interpreted as positive (upwards) steps.
-This option is used, for example, by the default <code><a href="kern.html">kern()</a></code> and <code><a href="helmholtz.html">helmholtz()</a></code> parsers.</p>
-</div>
-
-<div class="section">
-<h3 id="species">Species<a class="anchor" aria-label="anchor" href="#species"></a></h3>
-
-
-<p>In tonal pitch representations, "<em>specific</em>" versions of tonal pitches---the tonal "species"---are indicated by "specifiers":
-either <em>accidentals</em> or <em>qualities</em>.
-The <code>qualities</code> (<code>logical</code>, <code>length == 1</code>) argument indicates whether accidentals are used (<code>qualities = FALSE</code>) or qualities (<code>qualities = TRUE</code>).
-Some specifiers can be repeated any number of times, like "triple sharps" or "doubly augmented";
-The <code>specifier.maximum</code> (<code>integer</code>, <code>length == 1</code>) argument sets a maximum limit on the number of specifiers to write.
-For example, you could force all triple sharps (<code>"###"</code>) or double sharps (<code>"##"</code>) to deparse as just <code>"#"</code>, by specifying <code>specifier.maximum = 1L</code>.</p><div class="section">
-<h4 id="accidentals">Accidentals<a class="anchor" aria-label="anchor" href="#accidentals"></a></h4>
-
-
-<p>If <code>qualities = FALSE</code> the deparser will print accidentals of three types: naturals, flats, and sharps.
-The <code>natural</code>, <code>flat</code>, and/or <code>sharp</code> (<code>character</code>, <code>length == 1</code>) arguments can be used to indicate
-how accidentals are printed in the output.
-For example, if set the <code>kern('Eb5', flat = 'flat')</code> you get the output <code>"eeflat"</code>.</p>
-<p>Examples of accidental argument combinations that are currently used by <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> include:</p><ul><li><p><code>(flat = "b", sharp = "#")</code> -&gt;  <code><a href="pitch.html">pitch()</a></code></p></li>
-<li><p><code>(flat = "-", sharp = "#")</code> -&gt;  <code><a href="kern.html">kern()</a></code></p></li>
-<li><p><code>(flat = "es", sharp = "is")</code> -&gt; <code><a href="lilypond.html">lilypond()</a></code></p></li>
-<li><p><code>(flat = "-", sharp = "+")</code> -&gt; <code><a href="degree.html">degree()</a></code></p></li>
-</ul><p>The <code>doubleflat</code>, and <code>doublesharp</code> (<code>character</code>, <code>length == 1</code>) arguments are <code>NULL</code> by default, but can be set if a special symbol is wanted
-to represent two sharps or flats. For example, you could modify <code><a href="pitch.html">pitch()</a></code> to use a special double sharp symbol:
-<code>pitch("f##", doublesharp = "x")</code> and the output will be <code>"Fx4"</code>.</p>
-<p>The printing of naturals is controlled by the <code>natural</code> argument.
-However, by default, the <code>humdrumR</code> deparsers don't both printing naturals.
-You can force <em>all</em> naturals to print my setting the <code>explicitNaturals</code> (<code>logical</code>, <code>length == 1</code>)
-argument to <code>TRUE</code>.
-The exact behavior of <code>explicitNaturals</code> depends on the <code>implicitSpecies</code>, <code>absoluteSpecies</code>,
-and <code>Key</code> argument (details below).</p>
-</div>
-
-<div class="section">
-<h4 id="qualities">Qualities<a class="anchor" aria-label="anchor" href="#qualities"></a></h4>
-
-
-<p>If <code>qualities = TRUE</code> the deparser will print qualities, of five types: perfect, minor, major, augmented, and diminished.
-The <code>perfect</code>, <code>major</code>, <code>minor</code>, <code>diminish</code>, and/or <code>augment</code> (<code>character</code>, <code>length == 1</code>) arguments
-can be used to indicate how qualities are printed in the output.
-(Note: we are talking about interval/degree qualities here, not chord qualities!)
-For example, you can write <code>interval(c("g-", "f#"), augment = 'aug', diminish = 'dim')</code>
-and the output <code>c("+dim5", "+aug4")</code>.
-Examples of quality argument combinations that are currently used by <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> include:</p><ul><li><p><code>parse(major = "M", minor = "m", perfect = "P", diminish = "d", augment = "A")</code></p></li>
-<li><p><code>parse(diminish = "o", augment = "+")</code></p></li>
-</ul></div>
-
-<div class="section">
-<h4 id="implicit-vs-explicit-species">Implicit vs Explicit Species<a class="anchor" aria-label="anchor" href="#implicit-vs-explicit-species"></a></h4>
-
-
-<p>In some musical data, specifiers (e.g., accidentals or qualities) are not explicitly indicated; instead,
-you must infer the species of each pitch from the context---like the key signature!.</p><div class="section">
-<h5 id="from-the-key">From the Key<a class="anchor" aria-label="anchor" href="#from-the-key"></a></h5>
-
-
-<p>The most important argument here is <code>implicitSpecies</code> (<code>logical</code>, <code>length == 1</code>):
-if <code>implicitSpecies = TRUE</code>, the species of input without an explicit species indicated is interpreted using the <code>Key</code>.
-For example,</p><ul><li><p><code>kern('C', Key = 'A:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C#"</code></p><ul><li><p>C is sharp in A major.</p></li>
-</ul></li>
-<li><p><code>kern('C', Key = 'a:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C"</code></p><ul><li><p>C is natural in A minor.</p></li>
-</ul></li>
-<li><p><code>kern('C', Key = 'a-:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C-"</code></p><ul><li><p>C is flat in A-flat minor.</p></li>
-</ul></li>
-</ul><p>By default, if you input <em>already has</em> specifiers, they are interpreted absolutely---overriding the "implicit" <code>Key</code>---,
-even if <code>implicitSpecies = TRUE</code>.
-Thus, if we are in A major:</p><ul><li><p><code>kern("C#", Key = 'A:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C#"</code>.</p><ul><li><p>The <code>"#"</code> is unnecessary.</p></li>
-</ul></li>
-<li><p><code>kern("Cn", Key = 'A:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C"</code>.</p><ul><li><p>The <code>"n"</code> overrides the <code>Key</code>.</p></li>
-</ul></li>
-<li><p><code>kern("C#", Key = 'a:', parse(implicitSpecies = TRUE))</code> is parsed as <code>"C#"</code>.</p><ul><li><p>The <code>"#"</code> overrides the <code>Key</code>.</p></li>
-</ul></li>
-</ul><p>However! You can also change this behavior by setting the <code>absoluteSpecies</code> (<code>logical</code>, <code>length == 1</code>) argument to <code>FALSE</code>.
-If you do so, the specifiers in the input are interpreted "on top of" the key accidental:</p><ul><li><p><code>kern("C#", Key = 'A:', parse(implicitSpecies = TRUE, absoluteSpecies = FALSE))</code> is parsed as <code>"C##"</code>.</p><ul><li><p>The <code>"#"</code> from the input is added to the <code>"#"</code> from the <code>Key</code>, resulting in double sharp!</p></li>
-</ul></li>
-</ul><p>This is an unusual behavior, for absolute pitch representations like <code>**kern</code>.
-However, for use with scale or chord degrees, <code>absoluteSpecies = FALSE</code> might be appropriate.
-For example, if we are reading a <a href="https://en.wikipedia.org/wiki/Figured_bass" class="external-link">figured bass</a> in the key of E minor,
-a <code>"b7"</code> figure above an E in the bass should be interpreted as a <em>double flat</em> (diminished) 7th (Db over E)!
-If this is how your data is encoded, use <code>absoluteSpecies = FALSE</code>.</p>
-</div>
-
-<div class="section">
-<h5 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h5>
-
-
-<p>In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
-or until a different accidental replaces it.
-Fortunately, the <code>humdrumR</code> parser (<code><a href="pitchParsing.html">tonalInterval()</a></code>) also knows how to parse data encoded with "memory" this way.
-If <code>memory = TRUE</code>, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
-For example,</p><ul><li><p><code>kern(c("D#", "E", "D", "E", "Dn", "C", "D"), parse(memory = TRUE))</code></p><ul><li><p>is parsed as <code>c("D#", "E", "D#", "E", "D", "C", "D")</code></p></li>
-</ul></li>
-</ul><p>If we want the "memory" to only last when specific time windows (like bars), we can also specify a
-<code>memoryWindows</code> argument. <code>memoryWindows</code> must be an atomic vector which is the same length as the input (<code>x</code> argument).
-Each unique value within the <code>memoryWindows</code> vector is treated as a "window" within which <code>memory</code> operates.
-The most common use case would be to pass the <code>Bar</code> field from a <code>humdrumR</code> dataset to <code>memoryWindows</code>!</p>
-<p>The <code>memory</code> and <code>memoryWindows</code> argument work whatever values of <code>implicitSpecies</code> or <code>absoluteSpecies</code> are specified!
-Though all the examples here use accidentals, these arguments all have the same effect if parsing qualities (<code>qualities = TRUE</code>).</p>
-</div>
-
-
-</div>
-
-
-</div>
-
-<div class="section">
-<h3 id="octave">Octave<a class="anchor" aria-label="anchor" href="#octave"></a></h3>
-
-
-<p>The final piece of information encoded in most (but not) all pitch representations is an indication of the "compound pitch"---
-incorporating octave information.
-In <code>humdrumR</code> octaves are <em>always</em> defined in terms of scale steps: so two notes with the same scale degree/letter name will always be the same octave.
-This mainly comes up with regards to Cb and B#: Cb4 is a semitone below ; B#3 is enharmonically the same as middle-<strong>C</strong>.</p><div class="section">
-<h4 id="integer-octaves">Integer Octaves<a class="anchor" aria-label="anchor" href="#integer-octaves"></a></h4>
-
-
-<p>The simplest way octave information can be encoded is as an integer value, as in <a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a>.
-If you need to parse integer-encoded octaves, set the <code>octave.integer</code> (<code>logical</code>, <code>length == 1</code>) argument to <code>TRUE</code>.
-By default, <code>humdrumR</code> considers the "central" octave (<code>octave == 0</code>) to be the octave of , or equivalently, a unison.
-However, if a different octave is used as the central octave, you can specify the <code>octave.offset</code> (<code>integer</code>, <code>length == 1</code>) argument.</p>
-<p>To illustrate, the default <a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a> parser used the arguments:</p><ul><li><p><code>kern('C5', parse(octave.integer = TRUE, octave.offset = 4)</code></p><ul><li><p>Returns <code>"cc"</code> (the octave above middle C).</p></li>
-</ul></li>
-</ul></div>
-
-<div class="section">
-<h4 id="non-integer-octave-markers">Non-integer Octave Markers<a class="anchor" aria-label="anchor" href="#non-integer-octave-markers"></a></h4>
-
-
-<p>If <code>octave.integer = FALSE</code>, the <code>humdrumR</code> parser instead looks for three possible symbols to indicate octave information.
-These symbols are controlled using the <code>up</code>, <code>down</code>, and <code>same</code> (<code>character</code>, <code>length == 1</code>) arguments.
-A <code>same</code> symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the <code>up</code> or <code>down</code> symbols indicate
-increasing positive (<code>up</code>) or negative (<code>down</code>) octaves.
-For example, in <code>lilypond</code> notation, <code>,</code> represents lower octaves, and <code>'</code> (single apostrophe) represents upper octaves.
-So the default <code><a href="lilypond.html">lilypond()</a></code> parser uses these arguments:</p><ul><li><p><code>pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))</code></p><ul><li><p>Returns <code>c("C2", "C3", "C4")</code>.</p></li>
-</ul></li>
-</ul><p>(Note that lilypond makes the octave <em>below</em>  the central octave, using <code>octave.offset = 1</code>.)</p>
-</div>
-
-<div class="section">
-<h4 id="octave-rounding-">Octave "Rounding"<a class="anchor" aria-label="anchor" href="#octave-rounding-"></a></h4>
-
-
-<p>In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
-In most absolute pitch representations (e.g., <code><a href="kern.html">kern()</a></code>, <code><a href="pitch.html">pitch()</a></code>), the "boundary" between one octave and the next is
-between B (degree 7) and C (degree 1).
-However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range <code>-P4</code> (<code>G</code>) to <code>+P4</code> (<code>f</code>).
-In this case, the "octave boundary" is <em>centered</em> around the unison (or ), rather than starting <em>at</em> middle-<strong>C</strong>/unison.
-If our data was represented this way, we could use the <code>octave.round</code> argument; <code>octave.round</code> must be a rounding <em>function</em>,
-either round, floor, ceiling, trunc, or <a href="expand.html">expand</a>.
-These functions indicate how we interpret simple pitches "rounding" to the nearest C/unison.
-The default behavior for most pitch representations is <code>octave.round = floor</code>: each scale step is rounded downwards to the nearest C.
-So B is associated with the C 7 steps below it.
-If, on the other hand, <code>octave.round = round</code>, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C <em>above</em> them.
-Indeed, <code>octave.round = round</code> gets us the <code>-P4</code> &lt;-&gt; <code>+P4</code> behavior we mentioned earlier!</p>
-<p>When working parsing <a href="interval.html">intervals</a>, the <code>octave.round</code> option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
-For example, we might think of a ascending major 12th as being an ascending octave <em>plus</em> a ascending perfect 5th: ** +P8 + P5**.
-<strong>Or</strong> we could encode that same interval as <em>two</em> ascending octaves <em>minus</em> a perfect fourth: <strong>+ P15 - P4</strong>.
-The following table illustrates how different <code>octave.round</code> arguments "partition" compound intervals into simple parts and octaves:</p><table class="table table"><tr><td></td><td>round</td><td>floor</td><td>ceiling</td><td>trunc</td><td>expand</td></tr><tr><td>-P12:</td><td>-P15 + P4</td><td>-P15 + P4</td><td>-P8  - P5</td><td>-P8  - P5</td><td>-P15 + P4</td></tr><tr><td>-P11:</td><td>-P8  - P4</td><td>-P15 + P5</td><td>-P8  - P4</td><td>-P8  - P4</td><td>-P15 + P5</td></tr><tr><td>-P8:</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td></tr><tr><td>-P5:</td><td>-P8  + P4</td><td>-P8  + P4</td><td>+P1  - P5</td><td>+P1  - P5</td><td>-P8  + P4</td></tr><tr><td>-P4:</td><td>+P1  - P4</td><td>-P8  + P5</td><td>+P1  - P4</td><td>+P1  - P4</td><td>-P8  + P5</td></tr><tr><td>P1:</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td></tr><tr><td>+P4:</td><td>+P1  + P4</td><td>+P1  + P4</td><td>+P8  - P5</td><td>+P1  + P4</td><td>+P8  - P5</td></tr><tr><td>+P5:</td><td>+P8  - P4</td><td>+P1  + P5</td><td>+P8  - P4</td><td>+P1  + P5</td><td>+P8  - P4</td></tr><tr><td>+P8:</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td></tr><tr><td>+P11:</td><td>+P8  + P4</td><td>+P8  + P4</td><td>+P15 - P5</td><td>+P8  + P4</td><td>+P15 - P5</td></tr><tr><td>+P12:</td><td>+P15 - P4</td><td>+P8  + P5</td><td>+P15 - P4</td><td>+P8  + P5</td><td>+P15 - P4</td></tr><tr><td>+P15:</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td></tr><tr><td>+P18:</td><td>+P15 + P4</td><td>+P15 + P4</td><td>+P22 - P5</td><td>+P15 + P4</td><td>+P22 - P5</td></tr><tr><td>+P19:</td><td>+P22 - P4</td><td>+P15 + P5</td><td>+P22 - P4</td><td>+P15 + P5</td><td>+P22 - P4</td></tr></table><p>Notice that, if <code>octave.floor</code> is being used, all simple intervals are represented as ascending.</p>
-<p>When parsing <a href="pitch.html">"absolute" pitch</a> representations, the <code>octave.round</code> option allows you to control which octave notes are associated with.
-The following table illustrates:</p><table class="table table"><tr><td></td><td>round</td><td>floor</td><td>ceiling</td><td>trunc</td><td>expand</td></tr><tr><td>FF:</td><td>F2</td><td>F2</td><td>F3</td><td>F3</td><td>F2</td></tr><tr><td>GG:</td><td>G3</td><td>G2</td><td>G3</td><td>G3</td><td>G2</td></tr><tr><td>C:</td><td>C3</td><td>C3</td><td>C3</td><td>C3</td><td>C3</td></tr><tr><td>F:</td><td>F3</td><td>F3</td><td>F4</td><td>F4</td><td>F3</td></tr><tr><td>G:</td><td>G4</td><td>G3</td><td>G4</td><td>G4</td><td>G3</td></tr><tr><td>c:</td><td>C4</td><td>C4</td><td>C4</td><td>C4</td><td>C4</td></tr><tr><td>f:</td><td>F4</td><td>F4</td><td>F5</td><td>F4</td><td>F5</td></tr><tr><td>g:</td><td>G5</td><td>G4</td><td>G5</td><td>G4</td><td>G5</td></tr><tr><td>cc:</td><td>C5</td><td>C5</td><td>C5</td><td>C5</td><td>C5</td></tr><tr><td>ff:</td><td>F5</td><td>F5</td><td>F6</td><td>F5</td><td>F6</td></tr><tr><td>gg:</td><td>G6</td><td>G5</td><td>G6</td><td>G5</td><td>G6</td></tr><tr><td>ccc:</td><td>C6</td><td>C6</td><td>C6</td><td>C6</td><td>C6</td></tr><tr><td>fff:</td><td>F6</td><td>F6</td><td>F7</td><td>F6</td><td>F7</td></tr><tr><td>ggg:</td><td>G7</td><td>G6</td><td>G7</td><td>G6</td><td>G7</td></tr></table></div>
-
-<div class="section">
-<h4 id="absolute-or-relative-contour-octave">Absolute or Relative (contour) Octave<a class="anchor" aria-label="anchor" href="#absolute-or-relative-contour-octave"></a></h4>
-
-
-<p>In some notation encoding schemes, the "octave" of each note is interpreted <em>relative</em> the previous note, rather than any absolute reference.
-The most prominent system is Lilypond's <a href="https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry" class="external-link">relative octave entry</a> style.
-This style is often used in combination with scale degree representations---as in the <a href="http://rockcorpus.midside.com/melodic_transcriptions.html" class="external-link">RS200</a> corpus.
-For example, a data set might say <code>Do Re Mi vSo La Ti Do</code>, with the <code>"v"</code> indicating a jump down to <code>So</code>.
-To activate relative-octave parsing, set <code>octave.relative = TRUE</code>---alternatively, you can use <code>octave.absolute = FALSE</code>, which is equivalent.</p>
-<p>In a relative-octave data, we assume that octave indications indicate a shift relative to the previous note.
-This would usually be used in combination with octave markers like <code>"^"</code> (up) or <code>"v"</code> (down).
-Different combinations of <code>octave.round</code> allow us to parse different behaviors:</p><ul><li><p>If <code>octave.round = round</code>, a <code>same</code> marker (or no marker) indicates that the note is the pitch <em>closest</em> to the previous pitch.
-Octave markers indicate alterations to this assumption.
-As always, this is based on scale steps, not semitones!
-Any fourth is "closer" than any fifth, regardless of their quality: So <em>C F#</em> is ascending and <em>C Gb</em> is descending!
-A ascending diminished 5th would be written <code>C ^Gb</code>---with <code>up = ^</code>.</p></li>
-<li><p>If <code>octave.round = floor</code>, a <code>same</code> marker (or no marker) indicates that the note is in the octave above the previous pitch.
-Octave markers indicate alterations to this assumption.
-With this setting, going from <em>C</em> down to <em>B</em> always requires a <code>down</code> mark.</p></li>
-</ul></div>
-
-
-</div>
-
-<div class="section">
-<h3 id="string-parsing">String Parsing<a class="anchor" aria-label="anchor" href="#string-parsing"></a></h3>
-
-
-<p>In addition to the three types of <em>musical</em> parsing considerations reviewed above (steps, species, and octaves), there are also some general
-string-parsing issues that we can consider/control.</p><div class="section">
-<h4 id="parts-and-order">Parts and Order<a class="anchor" aria-label="anchor" href="#parts-and-order"></a></h4>
-
-
-<p>So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
-the <code>humdrumR</code> parser can be modified to handle different options.
-However, there are two general parsing issues/options to consider: what information is encoded, and in <em>what order</em>?
-The <code>parts</code> argument can be specifyied to indicate this.
-The <code>parts</code> argument must be a <code>character</code> vector of length 1--3.
-The characters in the must <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partial match</a> either <code>"step"</code>, <code>"species"</code>, or <code>"octave"</code>.
-The presense of any of these strings in the <code>parts</code> vector indicate that that information should be parsed.
-The <em>order</em> of the strings indicates what order the pieces of pitch information are encoded in input strings.</p>
-<p>To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., <code>M2</code> and <code>P5</code>---except the
-quality appears <em>after</em> the step---e.g., <code>2M</code> and <code>5P</code>.
-We could call <code>interval(c("2M", "5P"), parse(parts = c("step", "species")))</code> and sure enough we'd get the correct parse!</p>
-<p>One final string-parsing argument is <code>sep</code>, which indicates if there is a character string separating the pitch information components:
-The most common case would be a comma or space.
-For example, we could use a parse command like this: <code>kern("E flat 5", parse(flat = "flat", sep = " "))</code>.</p>
+<em>if</em> their input is a character string.</p>
 </div>
 
 
@@ -500,7 +239,7 @@ For example, we could use a parse command like this: <code>kern("E flat 5", pars
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>To better understand how this function works, read about the <a href="pitchFunctions.html">family of pitch functions</a>,
-or how pitches are <a href="pitchParsing.html">parsed</a> and deparsed.</p>
+or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDeparsing.html">deparsed</a>.</p>
 <p>Other absolute pitch functions: 
 <code><a href="degree.html">degree</a>()</code>,
 <code><a href="helmholtz.html">helmholtz</a>()</code>,
@@ -511,7 +250,6 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and deparsed.</p>
 <p>Other pitch functions: 
 <code><a href="accidental.html">accidental</a>()</code>,
 <code><a href="bhatk.html">bhatk</a>()</code>,
-<code><a href="cents.html">cents</a>()</code>,
 <code><a href="degree.html">degree</a>()</code>,
 <code><a href="freq.html">freq</a>()</code>,
 <code><a href="helmholtz.html">helmholtz</a>()</code>,
@@ -533,11 +271,12 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and deparsed.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by <a href="http://fathermckenzie.net/" class="external-link">Nathaniel Condit-Schultz</a>.</p>
+  <p></p><p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer></div>

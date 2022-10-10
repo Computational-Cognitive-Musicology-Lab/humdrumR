@@ -6,7 +6,7 @@ test_that('Delta and sigma work right', {
   for (x in list(rep(NA_real_, 10),
                  sample(c(NA,1:10), 100,rep=T),
                  integer(0))) {
-    a
+  
     len <- length(x)
     
     for (lag in c(-5:-1, 1:5)) {

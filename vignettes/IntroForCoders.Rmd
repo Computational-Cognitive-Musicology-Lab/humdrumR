@@ -1,23 +1,27 @@
 ---
-title: "HumdrumR for Coders"
+title: "HumdrumR for coders"
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{HumdrumR for Coders}
+  %\VignetteIndexEntry{HumdrumR for coders}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
+hm <- "humdrum$_{\\mathbb{R}}$"
+Hm <- "Humdrum$_{\\mathbb{R}}$"
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
 
-This document is tutorial/introduction for the humdrumR package aimed at experienced programmers/coders.
+This document is tutorial/introduction for the `r hm` package aimed at experienced programmers/coders.
 It moves along relatively quickly and uses more technical programming jargon.
 If you are looking for something easier and less technical, check out (Getting started with humdrumR)[GettingStarted.html "Getting started with humdrumR"] instead.
 This tutorial assumes you understand many major principles of coding, but not necessarily that you are experienced coding in R specifically---thus, we *will* take time to introduce an explain some R-specific syntax and philosophies.
 
+
+**UNDER CONSTRUCTION**

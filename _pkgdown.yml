@@ -1,53 +1,94 @@
-
-authors: 
-    Nathaniel Condit-Schultz:
-       href: http://fathermckenzie.net/
-    Claire Arthur:
-       href: https://clairearthur.com/
-url: https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR
+url: https://computational-cognitive-musicology-lab.github.io/humdrumR
 home:
   sidebar:
     structure: [links, license, community, citation, authors, dev, toc]
+  links:
+  - text: R language official website
+    href: https://www.r-project.org
+  - text: Humdrum website
+    href: https://www.humdrum.org/
+  - text: Computational and Cognitive Musicology Lab
+    href: https://ccml.gtcmt.gatech.edu/
+  - text: Georgia Tech Center for Music Technology
+    href: https://gtcmt.gatech.edu/
 template:
   bootstrap: 5
   bootswatch: flatly
+articles:
+- title: Basics
+  navbar: Basics
+  contents:
+  - GettingStarted
+  - IntroForCoders
+- title: Background
+  desc: Background info on humdrum and R
+  navbar: R/Humdrum background
+  contents:
+  - HumdrumSyntax
+  - RPrimer
+- title: Preparing data
+  desc: Getting your data ready for analysis
+  navbar: Data prep
+  contents: 
+  - ReadWrite
+  - Reshaping
+  - Filtering
+- title: Analysis
+  desc: Tools for analysis
+  navbar: Analysis
+  contents:
+  - Summary
+  - WorkingWithData
+- title: Musical Processing
+  desc: Funcitonality for analyzing musical information
+  navbar: Musical tools
+  contents:
+  - PitchAndTonality
+  - RhythmAndMeter
+  - KeysAndChord
 reference:
 - title: "Reading and Summarizing Data"
   desc: "These tools allow you to import, validate, and abstractly summarize the content of humdrum data."
 - subtitle: "Reading and Writing"
   contents:
-  - humValidation
+  - validateHumdrum
   - readHumdrum
   - writeHumdrum
 - subtite: "Summarizing"
   contents:
   - humSummary
-  - humCensus
-  - humReference
-  - humSpines
+  - census
+  - interpretations
+  - reference
+  - spines
 - title: "Working with Data"
   desc: >
     These pages describe tools used to manipulate the musical data ensconced within humdrumR data structures.
 - subtitle: "Manipulating Humdrum Data"
   contents:
   - withinHumdrum
-  - filterHumdrum
+  - subset.humdrumR
+  - indexHumdrum
   - humWindows
-  - interpolateArguments
-  - humFormulae
 - title: "Musical Tools"
   desc: >
     These pages describe the classes and functions that directly represent or engage musical/music-theoretic concepts.
-  contents:
-  - delta
-  - sigma
 - subtitle: "Pitch overviews"
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
   - humdrumPitch
   - pitchFunctions
   - pitchParsing
+  - pitchDeparsing
+  - chordFunctions
+  - chordParsing
+  - chordDeparsing
+  - keyFunctions
+  - keyParsing
+  - keyDeparsing
   - tonalIntervalS4
+  - tertianSetS4
+  - diatonicSetS4
 - subtitle: "Pitch functions"
   desc: "These functions translate between pitch representations:"
   contents:
@@ -70,14 +111,28 @@ reference:
   - pc
   - cents
   - freq
-  - tonalTransformations
   - LO5th
-  - diatonicSet
-  - tertianSet
-  - romanNumerals
   - transpose
-  - chordTransformer
-  - keyTransformer
+  - invert
+  - int
+  - mint
+  - hint
+  - is.simple
+  - is.generic
+- subtitle: "Key and chord functions"
+  desc: "These functions translate between diatonic and tertian representations:"
+  contents:
+  - romanNumerals
+  - key
+  - signature
+  - romanKey
+  - roman
+  - harm
+  - chord
+  - tertian
+  - figuredBass
+  - is.major
+  - is.minor
 - subtitle: "Rhythm"
   desc: "Rhythm and meter classes and functions."
   contents:
@@ -85,7 +140,6 @@ reference:
   - rhythmDecompose
   - rhythmInterval
   - rhythmFunctions
-  - plotRhythm
   - humMeter
   - SOI
   - meter
@@ -101,24 +155,15 @@ reference:
     These are pages describe the data structures of humdrumR---which contain the musical data.
   contents:
   - humdrumRclass
-  - getFields
-  - getTandem
+  - extractTandem
   - humActive
-  - humAssignment
   - humCoercion
-  - humColumns
   - humMerge
-  - humInterpretations
+  - collapseHumdrum
   - foldHumdrum
   - foldExclusive
-  - foldStops
-  - foldPaths
   - foldGraceNotes
   - unfoldStops
-  - collapseHumdrum
-  - collapseStops
-  - collapsePaths
-  - collapseRecords
   - humSize
   - humTable
   - struct
@@ -130,8 +175,11 @@ reference:
   - expand
 - subtitle: "Manipulating Vectors"
   contents:
-  - fillThru
+  - delta
+  - ditto
   - lag
+  - segments
+  - sigma
 - subtitle: "Regular Expressions"
   desc: >
      [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression) are essential tools for working with humdrum data.
@@ -144,3 +192,4 @@ reference:
 - subtitle: "Miscallaneus"
   contents:
   - humdrumRroot
+  - partialMatching

@@ -3,8 +3,7 @@
 \docType{data}
 \name{humdrumRroot}
 \alias{humdrumRroot}
-\title{----------------------------------------------->      NEEDS DOCUMENTATION (A SECTION IS INCOMPLETE)       <------------------------------------------------------
-\code{humdrumR}'s root directory on your machine.}
+\title{\code{humdrumR}'s root directory on your machine.}
 \format{
 An object of class \code{character} of length 1.
 }
@@ -13,6 +12,6 @@ humdrumRroot
 }
 \description{
 \code{humdrumRroot} is the path to where the \code{humdrumR} package is install on your machine.
-A few simple humdrum files are stored here.
+When you installed \code{humdrumR} a few basic humdrum files were stored here as well, in subdirectories \code{examples} and \code{HumdrumData}.
 }
 \keyword{datasets}

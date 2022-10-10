@@ -11,22 +11,22 @@ Tens of thousands of musical scores (and other musical data) have been encoded i
 \href{http://kern.ccarh.org/}{KernScores}.
 }
 \details{
-\code{humdrumR} is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, levaraging
-the power of R to give us enprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
+\code{humdrumR} is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, leveraging
+the power of \code{R} to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 }
 \section{Package design}{
 
 
-The package \code{humdrumR} has XXX main components:
+The package \code{humdrumR} has seven main components:
 \itemize{
 \item To represent humdrum data in R, we have the \link[=humdrumRclass]{humdrumR} \href{http://adv-r.had.co.nz/S4.html}{S4 class}, and it's core component
 the \link[=humTable]{humdrum table}.
 \item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
 \code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
-\item To filter and "index" \code{humdrumR} data, we have the \link{filterHumdrum} function, which can also be called in a variety of
-short hands using R's standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item To manipulate and modify \code{humdrumR} data, we have the \link[=with-in-Humdrum]{with(in)Humdrum} and \link{humApply} functions.
-\item To facilate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
+\item To filter \code{humdrumR} data, we have the \code{\link[=subset.humdrumR]{subset.humdrumR()}} function, which can also be called
+using \code{R}'s standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
+\item To manipulate and modify \code{humdrumR} data, we have the \link[=withinHumdrum]{with and within} methods for \code{humdrumR} objects.
+\item To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our \link[=humdrumDispatch]{regular-expression dispatch system}.
 \item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,
 including our core \link{tonalInterval} class to represent tonal pitch.

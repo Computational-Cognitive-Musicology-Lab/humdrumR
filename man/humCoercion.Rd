@@ -4,101 +4,125 @@
 \alias{humCoercion}
 \alias{as.lines}
 \alias{as.matrix.humdrumR}
+\alias{as.matrix}
 \alias{as.matrices}
 \alias{as.data.frames}
-\title{humdrumR Coercion.}
+\title{humdrumR coercion}
 \usage{
 \S4method{as.vector}{humdrumR}(x, mode = "any")
 
 as.lines(
   humdrumR,
   dataTypes = "GLIMDd",
-  fieldname = NULL,
-  alignColumns = FALSE,
-  padPaths = FALSE,
-  padder = "."
+  padPaths = "dont",
+  padder = "",
+  sep = "\\t"
 )
 
-\method{as.matrix}{humdrumR}(
-  x,
-  dataTypes = "D",
-  fieldnames = NULL,
-  alignColumns = TRUE,
-  padder = NA,
-  path.collapse = TRUE
-)
+\method{as.matrix}{humdrumR}(x, dataTypes = "GLIMDd", padPaths = "corpus", padder = NA)
 
-\S4method{as.data.frame}{humdrumR}(
-  x,
-  dataTypes = "D",
-  fieldname = NULL,
-  padder = NA,
-  collapse.path = TRUE
-)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", padPaths = "corpus", padder = NA)
 
-as.matrices(
-  humdrumR,
-  dataTypes = "D",
-  fieldnames = NULL,
-  padder = NA,
-  path.collapse = TRUE,
-  alignColumns = FALSE
-)
+\S4method{as.data.frame}{humdrumR}(x, dataTypes = "Dd", padPaths = "corpus", padder = NA)
 
-as.data.frames(
-  humdrumR,
-  dataTypes = "D",
-  fieldnames = NULL,
-  padder = NA,
-  path.collapse = TRUE
-)
+as.matrices(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
+
+as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 }
 \arguments{
-\item{mode}{If the \code{mode} argument is not \code{'any'}, it can be a single \code{character}
-string naming an atomic mode---the output will be coerced to this mode (if possible).}
+\item{mode}{A single \code{character}
+string naming an \link[base:vector]{atomic vector type} to coerce the output to (if possible).
+By default, set to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=evalActive]{evalActive()}}.}
+
+\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{Which types of humdrum records to include. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
-\item{padder}{An atomic value of length one. If \code{par.files} or \code{pad.paths} are true, the \code{padder}
-argument is used to fill in the desired gaps.}
+\item{padPaths}{(\code{character}, \code{length == 1}) One of three options: \code{"corpus"}, \code{"piece"}, or \code{"dont"}.
+See details for explanation.}
 
-\item{pad.files}{\code{logical} (default \code{TRUE}). If any pieces in the \link{humdrumRclass} corpus have fewer
-\verb{[humdrumR:humTable][spines/columns]} than the maximum, should they be padded with the \code{padder} argument (\code{par.files == TRUE}) or
-should an an error occur (\code{pad.files == FALSE})? Note that these "padded" points are not represented in the original humdrum data.}
+\item{padder}{An atomic value of length one. The value of the \code{padder}
+argument is used to fill in differences in the number of columns between files, and or spine paths.}
 
-\item{pad.paths}{\code{logical} If any spine path splits (\code{'*^'}) occur in the humdrumR data, should they be padded
-with the \code{padder} argument (\code{par.files == TRUE}) or
-should an an error occur (\code{pad.paths == FALSE})?
-Note that these "padded" points are not represented in the original humdrum data.}
-
-\item{field(s)}{If the \code{field} argument is \emph{not} \code{NULL}, it can instead be a \code{character} string matching
-the \link{humdrumRclass} object's fields. If so, these fields are extracted instead of the
-\link[=humActive]{Active expression}.
-For calls to \code{as.vector} and \code{as.data.frame}, only one field can be extracted.
-However, for calls to \code{as.matrix}, multiple fields can be extraced---these fields will be
-returned in a third matrix dimension, each field forming one rectangular slice.}
+\item{sep}{A single \code{character} string, indicating a separator to place between columns in collapsed lines.}
 }
 \description{
-Many users may wish to work with humdrum data without
-using the \verb{[humdrumR:humdrumR][humdrumR]} API, instead using
-basic \code{R} data types.
-For this purpose, \link{humdrumRclass} data objects can be coerced to
+Many users may wish to work with humdrum data,
+without having to rely on \code{humdrumR}'s \link[=withinHumdrum]{with(in).humdrumR} functionality.
+Rather, you'd like to just get "normal" \code{R} objects out of your humdrum data.
+\code{humdrumR} defines a number of functions/methods for "coercing" \link[=humdrumRclass]{humdrum data} into
 basic \code{R} data types.
 }
 \details{
-\link[base:vector]{as.vector(humdata)} evaluates the \link{humdrumRclass} object's
-\strong{Active} expression, and (attempts) to force the result to a vector of mode. This
-method is essentially a wrapper for \link{evalActive}.
+Generally, coercion works by evaluating a humdrumR object's the
+\link[=humActive]{active expression} and forcing the result to be an atomic vector.
+This process is accomplished by the \code{\link[=evalActive]{evalActive()}} command.
+The \link[base:vector]{as.vector(humdrumR)} method is essentially a wrapper for \code{\link[=evalActive]{evalActive()}}, with the additional
+option of coercing the resulting vector to a particular type using the \code{mode} argument.
 
-\link[base:matrix]{as.matrix(humdata} also evaluates the \link{humdrumRclass} object's
-\strong{Active} expression, but wraps it into a matrix of dimensions \verb{c([humdrumR:humSize][nrow(humdata), ncol(humdata)])}.
-Note that "\verb{[humdrumR:humTable][Columns]}" in humdrum data are not necesarily the same as spines.
+The \link[base:matrix]{as.matrix(humdrumR)} method take things a step further by putting the evaluated
+active expression into a two-dimensional matrix, with rows representing records and columns indicating
+spine paths (see Padding section below).
+\link[base:as.data.frame]{as.data.frame(humdrumR)} first calls \code{as.matrix} then converts the matrix to a
+\code{data.frame}.
+Note that \code{as.matrix(humdrumR)} places the \emph{entire} corpus object into one matrix, even if there are multiple pieces.
+In contrast, the plural \code{as.matrices} and \code{as.data.frames} call their respective singular versions
+separately on each individual file in a \link[=humdrumRclass]{humdrumR corpus} and return them all in a list.
+The \link[base:colnames]{row names}  of the \code{matrix}/\code{data.frame}(s) consist of two integer values,
+separated by a \code{.}, representing: \code{File.Record}.
 
-\link[base:as.data.frame]{as.data.frame(humdata)} first calls \code{as.matrix} then converts the matrix to a \link[base:data.frame]{data.frame}.
-\link[data.table:as.data.table]{as.data.table(humdata)} first calls \code{as.matrix} then converts the matrix to a \code{\link[data.table:data.table]{data.table::data.table()}}.
+The \code{as.lines} function converts a \link[=humdrumRclass]{humdrumR object} into a \code{character} vector of text lines,
+with columns separated by the \code{sep} argument (defaults to \code{"\\t"}), just as you'd see in a humdrum-syntax file.
+Each line is a single row from a \code{as.matrix.humdrumR}, with padded values at the right side removed.
+The matrix's \code{File.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
 
-\code{as.matrices}, \code{as.data.frames}, and \code{as.data.tables} call \code{as.matrix}/\code{as.data.frame}/\code{as.data.table}
-on each individual file in a \link{humdrumRclass} corpus, returning a list of matices/data.frames/data.tables.
+Note that multiple-stop token (where \code{Stop > 1L}) cannot by incorporated into the two
+dimensional \code{matrix}/\code{data.frame}. Thus, \code{as.matrix(humdrumR)} calls
+\link{collapseStops(collapseAtomic = TRUE, sep = " ")}
+on the \link[=humdrumRclass]{humdrumR object} before creating a matrix.
 }
+\section{Padding}{
+
+
+Different pieces in a single \link[=humdrumRclass]{humdrumR object}
+often differ in the number of spines and/or spine paths they contain.
+To squish them into a two dimensional object (\code{matrix} or \code{data.frame}) they must necessarily be padded to the same number of columns.
+(Global comments---which actually have \code{NA} spines---are also padded, placing the record in column 1.)
+The \code{pad} argument is a single atomic value which is used to pad the matrix.
+
+Another consideration is the behavior of spine paths.
+In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:\preformatted{**kern  **kern
+A       E
+*^      *
+A       C       E
+G       B       D
+*v      *v      *
+A       C        
+*-      *-
+}
+
+At the beginning and end of the file, the second column holds data for the second spine.
+However, in the middle of the file, the second column holds data from the second spine path of the first spine.
+To make the spine structure clearer, \code{as.matrix(humdrumR)} has the option to pad spine paths.
+For example, using \code{"_"} as our \code{pad} argument:\preformatted{**kern   _        **kern
+A        _        E
+*^       _        *
+A        C        E
+G        B        D
+*v       *v       *
+A        _        C        
+*-       _        *-
+}
+
+This aspect of the matrix padding behavior can be controlled with the \code{padPaths} argument, with three possible values/behaviors:
+\itemize{
+\item \code{"corpus"}: Paths are padded such that spine-paths across all pieces in the corpus all align in the same columns.
+If even one file has a spine path, all the other files are padded so their spines stay aligned.
+This is the default behavior for \code{as.matrix(humdrumR)}.
+\item \code{"piece"}: Paths are padded, but only \emph{within} each piece. The spines/paths between different pieces may not align.
+\item \code{"dont"}: Paths are not padded at all.
+}
+}
+
