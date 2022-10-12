@@ -287,12 +287,16 @@ reorder <- function(xs, orderby = list(), toEnv = TRUE) {
     ord <- do.call('order', orderby)
     
     xs <- lapply(xs, '[', i = ord)
-    xs$reorder <- \(X) X[match(seq_along(X), ord)]
+    reorder <- \(X) X[match(seq_along(X), ord)]
   } else {
-    xs$reorder <- force
+    reorder <- force
   } 
   
-  if (toEnv) list2env(xs[.names(xs) != ''], envir = parent.frame()) 
+  if (toEnv) {
+    xs$reorder <- reorder
+    list2env(xs[.names(xs) != ''], envir = parent.frame()) 
+  }
+    
 
   xs
 } 
@@ -469,14 +473,25 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
-tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
+tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     
-    output <- tapply(X, INDEX, FUN, ...)
-    if (is.list(output)) output <- do.call('c', output)
+    result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
-    indices <- tapply(seq_along(X), INDEX, force) |> unlist()
+    headortail <- if (head) match.fun('head') else tail
+    indices <- Map(\(x, n) headortail(x, n), tapply(seq_along(X), INDEX, force), lengths(result))
     
-    output[order(indices)]
+    result <- do.call('c', result)
+    indices <- do.call('c', indices)
+    
+    if (length(result) == length(X)) {
+      result[order(indices)]
+    } else {
+      output <- vectorNA(length(X), class(result))
+      output[is.na(output)] <- as(0, class(output))
+      output[indices] <- result
+      output
+    }
+    
 }
 
 #' Identify contiguous segments of data in a vector
@@ -1314,7 +1329,7 @@ sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('
 #' @export
 sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
-  checkNumeric(x, 'x', 'sigma')
+  checkArg(x, 'x', 'sigma', classes = c('numeric', 'integer', 'rational'))
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
   if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)

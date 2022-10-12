@@ -1044,7 +1044,7 @@ NULL
 makeChordTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   
-  keyedFunctions <<- c(keyedFunctions, callname)
+  withinFields$Key <<- c(withinFields$Key, callname)
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)

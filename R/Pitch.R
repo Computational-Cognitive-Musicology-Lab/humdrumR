@@ -2712,8 +2712,8 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
-  exclusiveFunctions <<- c(exclusiveFunctions, callname)
-  keyedFunctions <<- c(keyedFunctions, callname)
+  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  withinFields$Key        <<- c(withinFields$Key, callname)
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -3642,7 +3642,8 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
   if (!is.null(incomplete) && any(missing)) {
     
     if (is.function(incomplete) && inherits(incomplete, 'pitchFunction')) {
-      output[missing] <- incomplete(x[missing]) # need Exclusive right?
+      output[missing] <- incomplete(x[missing], 
+                                    Key = Key[missing], Exclusive = Exclusive[missing], ...) # need Exclusive right?
     }
     
     if (is.atomic(incomplete)) output[missing] <- incomplete
@@ -3662,7 +3663,7 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
   checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
   checkFunction(deparser, 'deparser', 'mint')
   if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to mint with an atomic 'incomplete' argument, ",
-                                                               "length(incomplete) must equal abs(lag).")                 
+                                                                                              "length(incomplete) must equal abs(lag).")                 
   checkTF(bracket, 'bracket', 'mint')
   checkTF(classify, 'classify', 'mint')
   
