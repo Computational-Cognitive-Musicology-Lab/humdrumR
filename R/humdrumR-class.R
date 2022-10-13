@@ -1111,8 +1111,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
                         newFieldNames = NULL) {
     # argument checks
     checkhumdrumR(humdrumR, 'foldHumdrum')
-    checkLooseInteger(fold)
-    checkLooseInteger(onto)
+    checkLooseInteger(fold, 'fold', 'foldHumdrum')
+    checkLooseInteger(onto, 'onto', 'foldHumdrum')
     
     checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')

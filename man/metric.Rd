@@ -11,7 +11,7 @@ Calculate metric positions from duration data.
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{SOI}()},
-\code{\link{rhythmDecompose}()}
+\code{\link{localDuration}()},
+\code{\link{timeline}()}
 }
 \concept{rhythm analysis tools}

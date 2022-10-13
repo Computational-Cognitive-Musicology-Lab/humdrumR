@@ -12,6 +12,7 @@ recip(
   Exclusive = NULL,
   parseArgs = list(),
   timeArgs = list(),
+  graceDurations = FALSE,
   inPlace = FALSE,
   memoize = TRUE,
   deparse = TRUE
@@ -23,6 +24,7 @@ duration(
   Exclusive = NULL,
   parseArgs = list(),
   timeArgs = list(),
+  graceDurations = FALSE,
   inPlace = FALSE,
   memoize = TRUE,
   deparse = TRUE

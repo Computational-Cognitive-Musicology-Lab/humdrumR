@@ -1253,14 +1253,17 @@ checkWindows <- function(x, windows) {
 #' If more than `groupby` vectors are given, a change in *any* vector indicates a boundary.
 #' 
 #' Value pairs which cross between groups are treated as if they were at the beginning.
-#' Basically, using groupby should be essentially identical to using `tapply(x, groupby, laggedFunction, ...)`,
-#' except generally faster when the number of groups is large.
+#' Basically, using the `groupby` argument to a function should be 
+#' similar or identical to using `tapply(x, groupby, laggedFunction, ...)` or using a `groupby`
+#' expession in a call to [with(in).humdrumR][withinHumdrum].
+#' However, using a `groupby` argument directly is usually much faster, as they have been
+#' specially optimized for this functions.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
 #' For this, we want `groupby = list(File, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `groupby` arguments to certain functions: `r harvard(melodicBounds, 'or')`.
-#' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
+#' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
+#' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 #' you could manually set `groupby = list(File, Record)`.

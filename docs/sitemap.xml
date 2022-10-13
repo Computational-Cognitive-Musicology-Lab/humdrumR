@@ -283,6 +283,9 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/lilypond.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/localDuration.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/measure.html</loc>
   </url>
   <url>
@@ -392,6 +395,9 @@
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/time.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/timeline.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonalIntervalS4.html</loc>

@@ -136,25 +136,30 @@ rint2double <- function(x) as.double(x)
 
 ### Symbolic ####
 
-recip2rint <- function(str) {
+recip2rint <- function(str, graceDurations = FALSE) {
   
+  REparse(str, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes grace and recip
   
   # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
-  str <- .ifelse(grepl('^0\\.|^0$', str),     gsub('^0',   '1%2', str), str)
-  str <- .ifelse(grepl('^00\\.|^00$', str),   gsub('^00',  '1%4', str), str)
-  str <- .ifelse(grepl('^000\\.|^000$', str), gsub('^000', '1%8', str), str)
+  recip <- .ifelse(grepl('^0\\.|^0$', recip),     gsub('^0',   '1%2', recip), recip)
+  recip <- .ifelse(grepl('^00\\.|^00$', recip),   gsub('^00',  '1%4', recip), recip)
+  recip <- .ifelse(grepl('^000\\.|^000$', recip), gsub('^000', '1%8', recip), recip)
   
-  ndots <- stringr::str_count(str, '\\.')
-  str <- gsub('\\.+', '', str)
+  ndots <- stringr::str_count(recip, '\\.')
+  recip <- gsub('\\.+', '', recip)
   
-  rational <- as.rational(str, sep = '%')
+  rational <- as.rational(recip, sep = '%')
   rational <- reciprocal(rational)
   
   
   dots <- 2L ^ ndots
   dotscale <- rational((2L * dots) - 1L, dots)
 
-  rational * dotscale
+  rint <- rational * dotscale
+  
+  if (!graceDurations) rint[grace != ''] <- rint[grace != ''] * 0
+  
+  rint
   
 }
 
@@ -219,6 +224,14 @@ rhythmInterval.default <- function(x, ...) as.rational(x, ...)
 
 #' @rdname rhythmInterval
 #' @export
+rhythmInterval.numeric <- function(x, ...) as.rational(x)
+
+#' @rdname rhythmInterval
+#' @export
+rhythmInterval.integer <- function(x, ...) as.rational(x)
+
+#' @rdname rhythmInterval
+#' @export
 rhythmInterval.NULL <- function(x, ...) NULL
 
 
@@ -258,6 +271,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
   
   args <- alist(x = , ... = , Exclusive = NULL,
                 parseArgs = list(), timeArgs = list(),
+                graceDurations = FALSE,
                 inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
   
   rlang::new_function(args, rlang::expr( {
@@ -286,7 +300,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
     
     output
     
-  }))
+  })) %class% 'rhythmFunction'
 }
 
 
@@ -314,22 +328,118 @@ duration <- makeRhythmTransformer(rint2double, 'duration')
 ## Time ####
 
 
-#' Time transformations
+#' Basic time transformations
 #' 
 #' @name time
 #' @export
 bpm2ms <- function(bpm) 60000/bpm
 
-#' @name time
+#' @rdname time
 #' @export
 ms2bpm <- function(ms) 60000/ms
 
-
+#' @rdname time
+#' @export
+seconds <- function(x, bpm) {
+  x * bpm2ms(bpm) / 250
+}
 
 ### Offset ####
 
+#' Calculate overall duration of a group
+#' 
+#' `localDuration()` calculates the "overall" duration within groups in an input vector.
+#' What the hell does that mean?
+#' Usually, it is used to find the duration of each *record* in a humdrum file.
+#' 
+#' @details 
+#' 
+#' The way rhythm and time are typically encoded in humdrum format, the "overall" duration of
+#' a record is determined by the shortest duration in the record, if there are any.
+#' So, if we have a file like this:
+#' 
+#' ```
+#' **kern  **kern     **silbe
+#'     4c      8g        Hum-
+#'      .      8f           _
+#'      !       !    !melisma  
+#'     8b      8f       -drum
+#'     8c      8e           _
+#'     2d      4a         da-
+#'      .       .           .
+#'      .      4g         -ta
+#'     G;      g;         ooh
+#'     *-      *-          *-     
+#' ```
+#'
+#' The "local" duration of each record would be (in `**duration`):
+#' 
+#' ```
+#' **kern  **kern     **silbe   -> 1%0
+#'     4c      8g        Hum-   -> 8
+#'      .      8f           _   -> 8
+#'      !       !    !melisma   -> 1%0
+#'     8b      8f       -drum   -> 8
+#'     8c      8e           _   -> 8
+#'     2d      4a         da-   -> 4
+#'      .       .           .   -> 1%0
+#'      .      4g         -ta   -> 4
+#'     G;      g;         ooh   -> 1%0
+#'     *-      *-          *-   -> 1%0
+#' ```
+#'
+#' Note that some records are length zero (`1%0`), because they are missing any duration information.
+#' (In this example we are showing durations of `1%0` for comment, interpretation, and null data records. In most cases, we'd 
+#' be doing `within(humData, dataTypes ='D')`, which is the default behavior, so these records wouldn't be counted at all.)
+#' 
+#' `localDuration()` begins with a call to [duration()] on the input argument `x`---the `parseArgs()` argument can be used to pass arguments to the [parser][rhythmParsing] (the `Exclusive` argument is passed as well).
+#' `localDuration()` then groups the durations based on unique combinations of values in the `groupby` argument, which must be a list of
+#' vectors that are the same length as `x`.
+#' By default, the minimum duration within each group is returned, recycled as necassary to match the input length.
+#' The `choose` argument can be set to another function, if desired.
+#' For example, you could use `localDuration(x, choose = max)` to find the *maximum* duration in each group.
+#' If the `groupby` argument is empty (the default) the durations are returned unchanged, except that `NA` durations are set to `0`.
+#' Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(File, Record)` is *automatically*
+#' passed (this can be overridden by explicitely setting the argument).
+#' This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
+#' 
+#' Note that, `localDuration()` follows the default behavior of [duration()] by treating grace-notes as duration `0`.
+#' If you want to use the duration(s) of grace notes, specify `graceDurations = TRUE`.
+#'
+#' The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
+#' For example, `deparser = recip` will return the output in `**recip` format.
+#' `...` arguments are passed to the deparser.
+#'
+#' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
+#' @param choose A function, which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
+#' @param deparser A [rhythm function][rhythmFunction] to generate the output representation.
+#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+#' @param groupBy A `list` of vectors, of the same length as `x`, which are used to group `x`
+#'   into.
+#'
+#' @family rhythm analysis tools
+#' @export 
+localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  
+  checkFunction(choose, 'choose', 'int')
+  if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'localDuration', classes = c('rhythmFunction'))
+  
+  durations <- do.call('duration', c(list(x, Exclusive = Exclusive), parseArgs))
+  
+  durations[is.na(durations) | durations == 0L] <- NA
+  
+  if (length(groupby)) {
+    groupby <- checkWindows(durations, groupby)
+    groups <- do.call('paste', groupby)
+    picks <- tapply(durations, groups, choose, na.rm = TRUE) 
+    durations <- picks[match(groups, names(picks))] %<-dim% NULL
+  } 
+  durations[is.na(durations)] <- 0
+  
+  deparser(durations, ...)
+}
 
-#' Onset/Offset interval since beginning.
+#' Rhythmic timeline of a piece.
 #' 
 #' Refers to a duration of rhythmic time elapsed since a starting point (usually, the beginning
 #' of a piece).
@@ -337,11 +447,11 @@ ms2bpm <- function(ms) 60000/ms
 #' we prefer to reserve the words "onset" and "offset" to refer
 #' to the beginning (attacK) and end (release) of rhythmic events.
 
-#' `STO` takes a vector of numbers representing durations
+#' `SOI()` takes a vector of numbers representing durations
 #' (numeric values) and cummulatively sums them from a starting value.
-#' Unlike [sigma()], `SOI` returns both the timestamp of the onset of 
+#' Unlike [sigma()], `SOI()` returns both the timestamp of the onset of 
 #' each rhythmic duration *and* the offset.
-#' `SOI` interprets the first duration as starting at zero---or a different
+#' `SOI()` interprets the first duration as starting at zero---or a different
 #' value specified by the `start` argument.
 #' 
 #' @return A S3 object of class `"rhythmOffset"`, which
@@ -355,57 +465,58 @@ ms2bpm <- function(ms) 60000/ms
 #' 
 #' @family rhythm analysis tools
 #' @export
-SOI <- function(durations, start = 0L) {
-  start <- as(start, class(durations))
+timeline <- function(durations, start = 0, groupby = list()) {
+  durations <- recordDuration(durations, groupby = groupby)
   
-  offset <- sigma(c(start, durations))
-  .data.frame(Onset = head(offset, -1), Offset = tail(offset, -1)) %class% "rhythmOffset"
-}                           
-
-rhythmAlign <- function(x, y) {
-  tick <- gcd(min(x), min(y))
-  xi <- as.integer(x / tick)
-  yi <- as.integer(y / tick)
-  
-  xi <- SOI(xi)$On
-  yi <- SOI(yi)$On
-  
-  alli <- union(xi, yi)
-  
-  ox <- vectorNA(length(alli), class(x))
-  oy <- vectorNA(length(alli), class(y))
-  ox[match(xi, alli)] <- x
-  oy[match(yi, alli)] <- y
-  
-  remove <- is.na(ox) & is.na(oy)
+  groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
+  groupby$Record <- groupby$Record %||% seq_along(durations)
   
   
-  .data.frame(ox[!remove], oy[!remove])
+  dt <- groupby <- as.data.table(checkWindows(durations, groupby))
+  dt$Duration <- durations
   
+  dtuniq <- dt[!duplicated(groupby)]
+  setorder(dtuniq, Piece, Record)
+  dtuniq[ , Duration := c(start, head(Duration, -1L)), by = Piece]
+  dtuniq[ , Time := sigma.default(Duration, groupby = list(Piece))]
   
+  dtuniq[dt, on = c('Piece', 'Record')]$Time
   
 }
 
-timestamp <- function(durations, whole = 4) {
-  if (!is.period(whole)) whole <- lubridate::period(whole, 'second')
-  soi <- SOI(durations)
+#' @rdname timeline
+#' @export
+timestamp <- function(durations, BPM = 'MM60', minutes = FALSE, ...) {
   
-  as.numeric(soi$Onset) * whole
-}
-
-durations <- function(soi) {
-  soi$Offset - soi$Onset
+  durations <- timeline(durations, ...)
+  
+  seconds <- seconds(durations, as.integer(gsub('MM', '', BPM)))
+  
+  if (minutes) {
+    minutes <- seconds %/% 60
+    seconds <- round(seconds %% 60, 3)
+    paste0(minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
+  } else {
+    seconds
+  }
+  
 }
 
 
 
-IOI <- function(ois) {
-  c(diff(soi$Onset), as(NA, class(soi$Onset)))
+IOI <- function(durations, rest = grepl('r', durations)) {
+  soi <- as.data.table(SOI(durations))
+  soi$Groups <- segments(!rest)
+  
+  soi[,c(max(Offset) - min(Onset), rep(NA_real_, length(Offset) - 1)), by = Groups]$V1
+  
 }
+
 
 
 tatum <- function(dur) {
-  do.call('gcd', as.list(unique(dur)))
+  rational <- lapply(dur, as.rational)
+  do.call('gcd', as.list(unique(rational)))
 }
 
 findLag2 <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', range = 5, allow.duplicates = FALSE) {
@@ -490,6 +601,31 @@ findLag <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', ra
   lagi <- seq_along(x) - unlist(offset)
   
   cbind(x, x[lagi], x - x[lagi])
+  
+  
+}
+
+
+rhythmAlign <- function(x, y) {
+  tick <- gcd(min(x), min(y))
+  xi <- as.integer(x / tick)
+  yi <- as.integer(y / tick)
+  
+  xi <- SOI(xi)$On
+  yi <- SOI(yi)$On
+  
+  alli <- union(xi, yi)
+  
+  ox <- vectorNA(length(alli), class(x))
+  oy <- vectorNA(length(alli), class(y))
+  ox[match(xi, alli)] <- x
+  oy[match(yi, alli)] <- y
+  
+  remove <- is.na(ox) & is.na(oy)
+  
+  
+  .data.frame(ox[!remove], oy[!remove])
+  
   
   
 }

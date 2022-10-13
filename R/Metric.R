@@ -23,7 +23,7 @@ setValidity('meter',
               tactus <- object@Tactus
               spans <- do.call('c', lapply(levels, sum))
               errors <- c(
-                if (any(diff(spans) > rational(0))) "Metric evels must get consecutively shorter.",
+                if (any(diff(spans) > rational(0))) "Metric levels must get consecutively shorter.",
                 if (!all(sapply(levels, is.rational))) "All levels of meter object must be rational vectors.",
                 if (any(lengths(levels) < 1L)) "All levels of meter object must have at least length 1.",
                 if (length(tactus) != 1L || tactus <= 0 || tactus > length(levels)) "Invalid tactus."
@@ -76,36 +76,6 @@ duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
 #' @name humMeter
 NULL
 
-#' Decompose durations in terms of other durations
-#' 
-#' 
-#' @family rhythm analysis tools
-#' @export
-rhythmDecompose <- function(rhythmInterval, into = rint(c(1, 2, 4, 8, 16, 32))) {
-          # into <- sort(into, decreasing = TRUE)
-          
-          lapply(as.list(rhythmInterval), 
-                 \(rs) {
-                           divs <- rs %/% into
-                           parts <- into * divs
-                           
-                           for (i in 2:length(parts)) {
-                                     parts[i] <- parts[i] - sum(parts[1:(i - 1)])       
-                           }
-                           parts
-                 }) -> decompositions
-          
-          lapply(1:length(into),
-                 \(j) {
-                           do.call('c', lapply(decompositions, '[', j))
-                 }) -> decompositions
-          
-          
-          decompositions <- do.call('.data.frame', decompositions)
-          colnames(decompositions) <- as.character(into)
-          rownames(decompositions) <- make.unique(as.character(rhythmInterval))
-          decompositions
-}
 
 #' Calculate metric positions from duration data.
 #' 
@@ -148,20 +118,12 @@ metric <- function(ioi, meter = duple(5), ..., remainderSubdivides = TRUE ) {
     ranked <- t(apply(remains, 1, order, decreasing = TRUE))
     
     if (remainderSubdivides) {
-      subdivide <- sapply(as.list(tatum), \(tat) ioi[remainders] %divides% tat)
+      subdivide <- sapply(as.list(tatum), \(tat) rhythmInterval(ioi)[remainders] %divides% tat)
       ranked[!subdivide] <- 1L
     }
     lowestLevel[remainders] <- max.col(ranked, ties.method = 'last')
   }
   
-    # remainderLevel <- local({
-    #   
-    #   subind <- which(subdivide, arr.ind = TRUE)
-    #   subind <- subind[order(subind[ , 'col'], subind[ , 'row'], decreasing = TRUE), ]
-    #   subind <- subind[!duplicated(subind[ , 'row']), ]
-    #   
-    #   subind[order(subind[ , 'row']), 'col']
-    # }) 
   
   remainder <- ois[cbind(seq_along(soi), lowestLevel)]
   
@@ -170,21 +132,19 @@ metric <- function(ioi, meter = duple(5), ..., remainderSubdivides = TRUE ) {
   counts[sweep(col(counts), 1L, parent[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
   
-  # counts[!matrix(tatum[remainderJ] %divides% tatum[c(col(counts))],ncol=ncol(counts))] <- 0
-  
-  
-  
-  
-  beats <- sapply(seq_along(tatum),
-                  \(j) recip(tatum[j] * counts[ , j]))
-  beats[counts == 0L] <- ""
-  
-  output <- cbind(beats, ifelse(remainder == 0, "", recip(remainder)))
+  beats <- lapply(seq_along(tatum), \(j) tatum[j] * counts[ , j])
+  output <- do.call('cbind', c(beats, Remainder = remainder))
   
   colnames(output) <- c(sapply(levels, \(l) paste(recip(l), collapse = '+')), 'Remainder')
-  output
+  rownames(output) <- ioi
+  attr(output, 'meter') <- meter
   
+  output <- recip(output)
+  output[output == '1%0'] <- ''
+  
+  output
 }
+
 
 metricPlot <- function(metric) {
   metric[metric == ""] <- NA
@@ -208,7 +168,10 @@ metricPlot <- function(metric) {
 #' @export
 #' @rdname meter
 measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
-  # if correct meter is known (and aligned with dur)
+  
+  # soi <- SOI(durations)$Onset
+  
+  beat <- rhythmInterval(beat)
   totalTatum <- sum(beat)
   
   
@@ -218,12 +181,12 @@ measure <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase =
   }
   
   mcount <- ((soi + phase) %/% totalTatum) 
-  mremain <- (soi - totalTatum * mcount)
+  mremain <- ((soi + phase) - totalTatum * mcount)
   
   
   if (length(beat) > 1L) {
     
-    beatoff <- soi(beat)
+    beatoff <- SOI(beat)
     
     subcount <-  outer(beatoff$Off, mremain, '<=') |> colSums()
     mcount <- mcount * length(beat) + subcount

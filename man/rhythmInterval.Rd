@@ -3,6 +3,8 @@
 \name{rhythmInterval}
 \alias{rhythmInterval}
 \alias{rhythmInterval.default}
+\alias{rhythmInterval.numeric}
+\alias{rhythmInterval.integer}
 \alias{rhythmInterval.NULL}
 \alias{rhythmInterval.character}
 \title{parse rhythmic information}
@@ -10,6 +12,10 @@
 rhythmInterval(x, ...)
 
 \method{rhythmInterval}{default}(x, ...)
+
+\method{rhythmInterval}{numeric}(x, ...)
+
+\method{rhythmInterval}{integer}(x, ...)
 
 \method{rhythmInterval}{`NULL`}(x, ...)
 

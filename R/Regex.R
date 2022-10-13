@@ -689,7 +689,12 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for durations ####
 
-makeRE.recip <- function(...) getRE('recip')
+makeRE.recip <- function(collapse = TRUE, grace = TRUE, fractions = TRUE, sep = '%', ...) {
+  REs <- list(grace = if (grace) '[Qq]?',
+              recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
+                             '[1-9][0-9]*\\.*|0{1,2})'))
+  if (collapse) setNames(cREs(REs), 'recip') else REs
+}
 
 
 makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {

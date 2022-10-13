@@ -48,6 +48,31 @@ hint(
   orderby = list()
 )
 }
+\arguments{
+\item{x}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+
+\item{from}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+
+\item{deparser}{A \link[=pitchFunction]{pitch function} to generate the output representation.
+Defaults to \code{\link[=interval]{interval()}}.}
+
+\item{incomplete}{Either a \link{pitch function} or an atomic value of \code{length(incomplete) == abs(lag)}.}
+
+\item{bracket}{(\code{logical}, \code{length == 1}) If \code{TRUE}, square brackets (\code{"[]"}) are printed around
+\code{incomplete} observations.}
+
+\item{classify}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the \code{deparser} is ignored and the output
+is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
+
+\item{parseArgs}{A \code{list} of arguments to pass to the \link[=tonalInterval]{pitch parser}.}
+
+\item{groupBy}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
+into.}
+
+\item{orderBy}{A \code{list} of vectors, of the same length as \code{x}, which are used to
+interpret the order of elements in \code{x}. Lagged computations are done in the indicated
+order, but the output is returned in the original order.}
+}
 \description{
 These functions allow us to calculate intervals between pitches.
 \code{int()} is the most basic form, calculating the interval(s) between two input vectors.
@@ -202,14 +227,17 @@ into groups.
 If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
 
 Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
-except generally faster when the number of groups is large.
+Basically, using the \code{groupby} argument to a function should be
+similar or identical to using \code{tapply(x, groupby, laggedFunction, ...)} or using a \code{groupby}
+expession in a call to \link[=withinHumdrum]{with(in).humdrumR}.
+However, using a \code{groupby} argument directly is usually much faster, as they have been
+specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
-Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 you could manually set \code{groupby = list(File, Record)}.

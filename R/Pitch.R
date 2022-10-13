@@ -3610,6 +3610,21 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' However, note that any values *before* the first index where `lag == TRUE`
 #' are calculated relative to that first value.
 #' 
+#' @param x A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param from A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param deparser A [pitch function][pitchFunction] to generate the output representation.
+#'    Defaults to [interval()].
+#' @param incomplete Either a [pitch function] or an atomic value of `length(incomplete) == abs(lag)`.
+#' @param bracket (`logical`, `length == 1`) If `TRUE`, square brackets (`"[]"`) are printed around
+#' `incomplete` observations.
+#' @param classify (`logical`, `length == 1`) If `TRUE`, the `deparser` is ignored and the output
+#' is classified as `Unison`, `Step`, `Skip`, or `Leap`.
+#' @param parseArgs A `list` of arguments to pass to the [pitch parser][tonalInterval()].
+#' @param groupBy A `list` of vectors, of the same length as `x`, which are used to group `x`
+#'   into.
+#' @param orderBy A `list` of vectors, of the same length as `x`, which are used to
+#' interpret the order of elements in `x`. Lagged computations are done in the indicated
+#' order, but the output is returned in the original order.
 #'
 #' @family {relative pitch functions}
 #' @family {Lagged vector functions}
@@ -3623,7 +3638,12 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
                 classify = FALSE, 
                 ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
+  
   if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'int', classes = c('pitchFunction'))
+  
+  checkTF(classify, 'classify', 'int')
+  checkTF(bracket, 'bracket', 'int')
+  
   from <- rep(from, length.out = length(x))
   
   if (classify) deparser <- mintClass

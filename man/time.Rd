@@ -4,12 +4,15 @@
 \alias{time}
 \alias{bpm2ms}
 \alias{ms2bpm}
-\title{Time transformations}
+\alias{seconds}
+\title{Basic time transformations}
 \usage{
 bpm2ms(bpm)
 
 ms2bpm(ms)
+
+seconds(x, bpm)
 }
 \description{
-Time transformations
+Basic time transformations
 }

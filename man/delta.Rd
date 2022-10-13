@@ -147,14 +147,17 @@ into groups.
 If more than \code{groupby} vectors are given, a change in \emph{any} vector indicates a boundary.
 
 Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using groupby should be essentially identical to using \code{tapply(x, groupby, laggedFunction, ...)},
-except generally faster when the number of groups is large.
+Basically, using the \code{groupby} argument to a function should be
+similar or identical to using \code{tapply(x, groupby, laggedFunction, ...)} or using a \code{groupby}
+expession in a call to \link[=withinHumdrum]{with(in).humdrumR}.
+However, using a \code{groupby} argument directly is usually much faster, as they have been
+specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
-Do any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
+So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 you could manually set \code{groupby = list(File, Record)}.

@@ -137,11 +137,11 @@ reference:
   desc: "Rhythm and meter classes and functions."
   contents:
   - time
-  - rhythmDecompose
+  - timeline
   - rhythmInterval
   - rhythmFunctions
   - humMeter
-  - SOI
+  - localDuration
   - meter
   - measure
   - metric

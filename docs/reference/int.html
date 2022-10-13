@@ -124,6 +124,33 @@ mint() and hint() are special forms for calculating intervals "melodically" or "
     </div>
 
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>x</dt>
+<dd><p>A vector which is parsed as a <a href="pitchParsing.html">tonal interval</a>.</p></dd>
+<dt>from</dt>
+<dd><p>A vector which is parsed as a <a href="pitchParsing.html">tonal interval</a>.</p></dd>
+<dt>deparser</dt>
+<dd><p>A pitch function to generate the output representation.
+Defaults to <code><a href="interval.html">interval()</a></code>.</p></dd>
+<dt>incomplete</dt>
+<dd><p>Either a pitch function or an atomic value of <code>length(incomplete) == abs(lag)</code>.</p></dd>
+<dt>bracket</dt>
+<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, square brackets (<code>"[]"</code>) are printed around
+<code>incomplete</code> observations.</p></dd>
+<dt>classify</dt>
+<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, the <code>deparser</code> is ignored and the output
+is classified as <code>Unison</code>, <code>Step</code>, <code>Skip</code>, or <code>Leap</code>.</p></dd>
+<dt>parseArgs</dt>
+<dd><p>A <code>list</code> of arguments to pass to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
+<dt>groupBy</dt>
+<dd><p>A <code>list</code> of vectors, of the same length as <code>x</code>, which are used to group <code>x</code>
+into.</p></dd>
+<dt>orderBy</dt>
+<dd><p>A <code>list</code> of vectors, of the same length as <code>x</code>, which are used to
+interpret the order of elements in <code>x</code>. Lagged computations are done in the indicated
+order, but the output is returned in the original order.</p></dd>
+</dl></div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Input vectors <code>x</code> (and <code>from</code>) are <a href="pitchParsing.html">parsed as pitches</a> (tonal interval objects), if possible.
 (Parsing arguments can be passed via the <code>parseArgs</code> list, or <code>parse(...)</code> sugar.
@@ -270,13 +297,16 @@ The <code>groupby</code> argument indicates one, or more, grouping vectors, whic
 into groups.
 If more than <code>groupby</code> vectors are given, a change in <em>any</em> vector indicates a boundary.</p>
 <p>Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using groupby should be essentially identical to using <code>tapply(x, groupby, laggedFunction, ...)</code>,
-except generally faster when the number of groups is large.</p>
+Basically, using the <code>groupby</code> argument to a function should be
+similar or identical to using <code>tapply(x, groupby, laggedFunction, ...)</code> or using a <code>groupby</code>
+expession in a call to <a href="withinHumdrum.html">with(in).humdrumR</a>.
+However, using a <code>groupby</code> argument directly is usually much faster, as they have been
+specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want <code>groupby = list(File, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
 three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, or ditto.
-Do any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
+So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
 you could manually set <code>groupby = list(File, Record)</code>.</p>

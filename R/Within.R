@@ -1084,63 +1084,41 @@ activateQuo <- function(funcQuosure, active) {
 #### Insert exclusive/keyed args where necessary
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
-  funcQuosure <- exclusiveArgsQuo(funcQuosure, fields)
-  funcQuosure <- keyedArgsQuo(funcQuosure, fields)
-  funcQuosure <- boundedArgsQuo(funcQuosure)
+  funcQuosure <- fieldArgQuo(funcQuosure, fields)
+  funcQuosure <- byArgsQuo(funcQuosure)
   funcQuosure
 }
 
 
-exclusiveArgsQuo <- function(funcQuosure, fields) {
-  if (!'Exclusive' %in% fields) return(funcQuosure)
+fieldArgQuo <- function(funcQuosure, fields) {
+  targetFields <- intersect(names(withinFields), fields)
   
-  predicate <- \(Head) Head %in% exclusiveFunctions 
-  do <- \(exprA) {
-    if (!'Exclusive' %in% names(exprA$Args)) exprA$Args$Exclusive <- quote(Exclusive)
-    exprA
+  for (field in targetFields) {
+    predicate <- \(Head) Head %in% withinFields[[field]]
+    do <- \(exprA) {
+      if (!field %in% names(exprA$Args)) exprA$Args[[field]] <- rlang::sym(field)
+      exprA
+    }
+    
+    funcQuosure <- withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+    
   }
   
-  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
-  
-}
-
-keyedArgsQuo <- function(funcQuosure, fields) {
-  # functions that require a Key argument
-  if (!'Key' %in% fields) return(funcQuosure)
-  
-  predicate <- \(Head) Head %in% keyedFunctions
-  
-  do <- \(exprA) {
-    if (!'Key' %in% names(exprA$Args)) exprA$Args$Key <- quote(Key)
-    exprA
-  }
-  
-  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  funcQuosure
 }
 
 
-boundedArgsQuo <- function(funcQuosure) {
-  # melodic
-  predicate <- \(Head) Head %in% melodicBounds
-  
+byArgsQuo <- function(funcQuosure) {
+  predicate <- \(Head) Head %in% byTable$Function
   do <- \(exprA) {
-    if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path))
+    byTab <- byTable[Function %in% exprA$Head & !Argument %in% names(exprA$Args)]
+    args <- setNames(byTab$Expression, byTab$Argument)
+    exprA$Args <- c(exprA$Args, args)
     exprA
   }
-  
-  funcQuosure <- withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
-  
-  # harmonic
-  predicate <- \(Head) Head %in% harmonicBounds
-  
-  do <- \(exprA) {
-    if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Record))
-    if (!'orderby' %in% names(exprA$Args)) exprA$Args$orderby <- quote(list(File, Record, Spine, Path))
-    exprA
-  }
-  
   withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
+
 
 #### Lag/Led vectors
 

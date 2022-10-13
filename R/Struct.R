@@ -379,7 +379,7 @@ checkSame <- function(x, y, call) {
 ##### [i, j] ----
 
 humvectorI <- function(i, x) {
-    c(outer(i, (seq_len(ncol(x)) - 1) * length(x), '+'))
+    c(outer(i, (seq_len(ncol(x)) - 1) * nrow(x), '+'))
 }
 humvectorJ <- function(j, x) {
     columns <- columns(x)
@@ -454,7 +454,7 @@ setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
           })
 setMethod('[', c(x = 'struct', i = 'logical', j = 'missing'),
           function(x, i, drop = FALSE) {
-              if (length(i) != length(x)) .stop(ifelse = !hasdim(x),
+              if (length(i) != if(hasdim(x)) nrow(x) else length(x)) .stop(ifelse = !hasdim(x),
                                               "Can't index[i<|, >] a {class(x)} with a logical vector of a length that does not match <length|nrow>({class(x)}).")
               
             x[which(i), drop = FALSE]

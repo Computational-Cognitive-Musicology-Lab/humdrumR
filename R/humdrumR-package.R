@@ -57,17 +57,14 @@ withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
 
 # groupby
 byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
-                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'timeline', 'timestamp'), 
+                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto'), 
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path =Path)))),
                   data.table(Argument = 'groupby', Type = 'harmonic',
-                             Function = c('hint'),
+                             Function = c('hint', 'localDuration', 'timeline', 'timestamp'),
                              Expression = list(quote(list(Piece = Piece, Record = Record)))),
                   data.table(Argument = 'orderby', Type = 'harmonic',
                              Function = 'hint',
-                             Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))),
-                  data.table(Argument = 'collapseby', Type = 'Stop',
-                             Function = c('timeline', 'timestamp'),
-                             Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path))))
+                             Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop))))
                   )
 
 setOldClass('quosure')
