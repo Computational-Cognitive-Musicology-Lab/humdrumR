@@ -23,7 +23,7 @@ localDuration(
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
 
-\item{groupBy}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
+\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
 into.}
 }
 \description{
@@ -57,10 +57,12 @@ The "local" duration of each record would be (in \verb{**duration}):\preformatte
      .       .           .   -> 1\%0
      .      4g         -ta   -> 4
     G;      g;         ooh   -> 1\%0
-    *-      *-          *-     
+    *-      *-          *-   -> 1\%0
 }
 
 Note that some records are length zero (\verb{1\%0}), because they are missing any duration information.
+(In this example we are showing durations of \verb{1\%0} for comment, interpretation, and null data records. In most cases, we'd
+be doing \code{within(humData, dataTypes ='D')}, which is the default behavior, so these records wouldn't be counted at all.)
 
 \code{localDuration()} begins with a call to \code{\link[=duration]{duration()}} on the input argument \code{x}---the \code{parseArgs()} argument can be used to pass arguments to the \link[=rhythmParsing]{parser} (the \code{Exclusive} argument is passed as well).
 \code{localDuration()} then groups the durations based on unique combinations of values in the \code{groupby} argument, which must be a list of
@@ -79,6 +81,13 @@ If you want to use the duration(s) of grace notes, specify \code{graceDurations 
 The output representation can be controlled using the \code{deparser} argument, defaulting to \code{\link[=duration]{duration()}}.
 For example, \code{deparser = recip} will return the output in \verb{**recip} format.
 \code{...} arguments are passed to the deparser.
+}
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
+
+within(humData, localDuration(Token))
+
 }
 \seealso{
 Other rhythm analysis tools: 

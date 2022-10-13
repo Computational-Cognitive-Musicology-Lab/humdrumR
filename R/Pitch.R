@@ -3620,9 +3620,9 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' @param classify (`logical`, `length == 1`) If `TRUE`, the `deparser` is ignored and the output
 #' is classified as `Unison`, `Step`, `Skip`, or `Leap`.
 #' @param parseArgs A `list` of arguments to pass to the [pitch parser][tonalInterval()].
-#' @param groupBy A `list` of vectors, of the same length as `x`, which are used to group `x`
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`
 #'   into.
-#' @param orderBy A `list` of vectors, of the same length as `x`, which are used to
+#' @param orderby A `list` of vectors, of the same length as `x`, which are used to
 #' interpret the order of elements in `x`. Lagged computations are done in the indicated
 #' order, but the output is returned in the original order.
 #'

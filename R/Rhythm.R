@@ -344,6 +344,17 @@ seconds <- function(x, bpm) {
   x * bpm2ms(bpm) / 250
 }
 
+
+minutes <- function(seconds, format = TRUE) {
+  
+  sign <- ifelse(seconds >= 0, '', '-')
+  seconds <- abs(seconds)
+  
+  minutes <- seconds %/% 60
+  
+  seconds <- round(seconds %% 60, 3)
+  paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
+}
 ### Offset ####
 
 #' Calculate overall duration of a group
@@ -409,12 +420,18 @@ seconds <- function(x, bpm) {
 #' The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
 #' For example, `deparser = recip` will return the output in `**recip` format.
 #' `...` arguments are passed to the deparser.
+#' 
+#' @examples 
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
+#' 
+#' within(humData, localDuration(Token))
 #'
 #' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
 #' @param choose A function, which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
 #' @param deparser A [rhythm function][rhythmFunction] to generate the output representation.
 #' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#' @param groupBy A `list` of vectors, of the same length as `x`, which are used to group `x`
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`
 #'   into.
 #'
 #' @family rhythm analysis tools
@@ -431,7 +448,7 @@ localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive 
   if (length(groupby)) {
     groupby <- checkWindows(durations, groupby)
     groups <- do.call('paste', groupby)
-    picks <- tapply(durations, groups, choose, na.rm = TRUE) 
+    picks <- tapply(durations[!is.na(durations)], groups[!is.na(durations)], choose) 
     durations <- picks[match(groups, names(picks))] %<-dim% NULL
   } 
   durations[is.na(durations)] <- 0
@@ -439,34 +456,78 @@ localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive 
   deparser(durations, ...)
 }
 
-#' Rhythmic timeline of a piece.
+#' Rhythmic timeline of a piece
 #' 
-#' Refers to a duration of rhythmic time elapsed since a starting point (usually, the beginning
-#' of a piece).
-#' In `music21` these are described as "offsets"---however,
+#' These functions calculate the ammount of time (either in beats, or seconds)
+#' that have unfolded since the beginning of a piece, giving a sense of the timeline in which events unfold.
+#' In `music21` this inforfmation is described as "offsets"---however,
 #' we prefer to reserve the words "onset" and "offset" to refer
-#' to the beginning (attacK) and end (release) of rhythmic events.
+#' to the beginning (attack) and end (release) of rhythmic events.
+#'
+#' @details 
+#'
+#' Music unfolds over time, and humdrum data typically represents this 
+#' by placing simultanteous events in the same record, with successive events
+#' in ever higher records---progressing "top down" through the file.
+#' In some humdrum data, only this (implicit) ordering of data over time is present.
+#' The `Record` and `NData` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.
+#' However, many (probably most) humdrum data files contain at least some information about the relative 
+#' duration of events, representing more detailed information about timing and rhythm.
+#' 
+#' `timeline()` parses and input vector `x` as [durations][duration()],
+#' computes the [cumulative sum][sigma()] of the durations, with the `start` argument appended to the beginning.
+#' The result is a `numeric` vector representing the total duration since the beginning of the vector (plus the value of `start`, which defaults to zero).
+#' The cumulative durations of `timeline()` represent musical duration units, where `1` equals a whole note.
+#' `timestamp()` converts these durations to seconds, either using the `BPM` argument/field to determine the tempo or using the
+#' default tempo of 60 beats per minute.
+#' If `minutes == TRUE`, the output is formatted into `"minute:seconds.milliseconds"` character strings.
+#'
+#' If a `groupby` argument is provided, [localDuration()] is used to compute the minimum durations in each group before 
+#' computing the cumulative sum only with unique values from each `Record` in the `groupby`.
+#' By default, [with(in).humdrumR][withinHumdrum] will automatically pass `groupby = list(Piece = Piece, Record = Record)`
+#' into calls to `timeline()` or `timestamp()`.
+#' Thus, a call like `within(humData, timeline(Token))` will compute the correct timeline position for *all*
+#' tokens across all spines/paths/stops---all values in the same record will be the same.
+#' 
+#' 
+#' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
+#' If you want to use the duration(s) of grace notes, specify `graceDurations = TRUE`.
+#' 
+#' @section Logical start:
+#' 
+#' Another option is to pass the `start` argument a logical vector of the same length as the input `x`.
+#' Within each piece, the the *first* timepoint where the `start` logical is `TRUE` is used as the zero:
+#' all early points will be negative numbers.
+#' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
+#' Thus, a common use for a `logical` `start` argument is `within(humData, timeline(Token, start = Bar == 1)`, which makes the downbeat of
+#' the first complete bar `0`---any notes in a pickup bar are give negative numbers on the timeline.
 
-#' `SOI()` takes a vector of numbers representing durations
-#' (numeric values) and cummulatively sums them from a starting value.
-#' Unlike [sigma()], `SOI()` returns both the timestamp of the onset of 
-#' each rhythmic duration *and* the offset.
-#' `SOI()` interprets the first duration as starting at zero---or a different
-#' value specified by the `start` argument.
+#' @examples 
 #' 
-#' @return A S3 object of class `"rhythmOffset"`, which
-#' is essentially a data.frame with two columns---`Onset` and `Offset`---
-#' of numeric values of the same class as the input `durations` argument.
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
+#' 
+#' within(humData, timeline(Token))
+#' 
+#' within(humData, timestamp(Token, minutes = TRUE))
 #' 
 #' 
-#' @param durations A vector of numeric values representing durations.
-#' @param start A duration value (coerced to same class as `durations`), from which the
-#' offset begins. 
-#' 
+#' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
+#' @param start A `numeric` value from which the timeline begins, or a `logical` vector of same length as `x`.
+#' @param minutes (`logical`, `length == 1`) If `TRUE`, output seconds are converted to a character string
+#' encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
+#' @param `BPM` A numeric values or `character` string in the format `"MM120"` (for 120 bpm). By default,
+#' [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x` into.
+#'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
+#'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
+#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+#'   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(durations, start = 0, groupby = list()) {
-  durations <- recordDuration(durations, groupby = groupby)
+timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  durations <- localDuration(x, groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive)
+
+  
   
   groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
   groupby$Record <- groupby$Record %||% seq_along(durations)
@@ -475,30 +536,37 @@ timeline <- function(durations, start = 0, groupby = list()) {
   dt <- groupby <- as.data.table(checkWindows(durations, groupby))
   dt$Duration <- durations
   
+  
+  if (is.logical(start)) {
+    if (length(start) != length(x)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
+    dt$Start <- start
+    start <- 0L
+  } else {
+    checkArg(start, 'start', 'timeline', classes = c('logical', 'numeric'), max.length = 1L, min.length = 1L)
+  }
+  
   dtuniq <- dt[!duplicated(groupby)]
   setorder(dtuniq, Piece, Record)
   dtuniq[ , Duration := c(start, head(Duration, -1L)), by = Piece]
   dtuniq[ , Time := sigma.default(Duration, groupby = list(Piece))]
+  if (!is.null(dtuniq$Start)) dtuniq[ , Time := Time - Time[which(Start)[1]], by = Piece]
   
   dtuniq[dt, on = c('Piece', 'Record')]$Time
+  
   
 }
 
 #' @rdname timeline
 #' @export
-timestamp <- function(durations, BPM = 'MM60', minutes = FALSE, ...) {
+timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  durations <- duration(x, Exclusive = Exclusive, ...)
+  seconds <- seconds(durations, as.integer(gsub('\\*?MM', '', BPM)))
   
-  durations <- timeline(durations, ...)
+  seconds <- timeline(seconds, Exclusive = Exclusive, groupby = groupby, ...)
   
-  seconds <- seconds(durations, as.integer(gsub('MM', '', BPM)))
+
   
-  if (minutes) {
-    minutes <- seconds %/% 60
-    seconds <- round(seconds %% 60, 3)
-    paste0(minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
-  } else {
-    seconds
-  }
+  if (minutes) minutes(seconds) else seconds
   
 }
 

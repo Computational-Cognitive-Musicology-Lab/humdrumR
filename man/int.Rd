@@ -66,10 +66,10 @@ is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=tonalInterval]{pitch parser}.}
 
-\item{groupBy}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
+\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
 into.}
 
-\item{orderBy}{A \code{list} of vectors, of the same length as \code{x}, which are used to
+\item{orderby}{A \code{list} of vectors, of the same length as \code{x}, which are used to
 interpret the order of elements in \code{x}. Lagged computations are done in the indicated
 order, but the output is returned in the original order.}
 }

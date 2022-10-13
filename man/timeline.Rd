@@ -3,35 +3,99 @@
 \name{timeline}
 \alias{timeline}
 \alias{timestamp}
-\title{Onset/Offset interval since beginning.}
+\title{Rhythmic timeline of a piece}
 \usage{
-timeline(durations, start = 0, groupby = list())
+timeline(
+  x,
+  start = 0,
+  ...,
+  Exclusive = NULL,
+  parseArgs = list(),
+  groupby = list()
+)
 
-timestamp(durations, BPM = "MM60", minutes = FALSE, ...)
+timestamp(
+  x,
+  BPM = "MM60",
+  start = 0,
+  minutes = FALSE,
+  ...,
+  Exclusive = NULL,
+  parseArgs = list(),
+  groupby = list()
+)
 }
 \arguments{
-\item{durations}{A vector of numeric values representing durations.}
+\item{x}{An input vector, which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{start}{A duration value (coerced to same class as \code{durations}), from which the
-offset begins.}
-}
-\value{
-A S3 object of class \code{"rhythmOffset"}, which
-is essentially a data.frame with two columns---\code{Onset} and \code{Offset}---
-of numeric values of the same class as the input \code{durations} argument.
+\item{start}{A \code{numeric} value from which the timeline begins, or a \code{logical} vector of same length as \code{x}.}
+
+\item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
+
+\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
+Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
+
+\item{minutes}{(\code{logical}, \code{length == 1}) If \code{TRUE}, output seconds are converted to a character string
+encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
+
+\item{`BPM`}{A numeric values or \code{character} string in the format \code{"MM120"} (for 120 bpm). By default,
+\link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
 }
 \description{
-Refers to a duration of rhythmic time elapsed since a starting point (usually, the beginning
-of a piece).
-In \code{music21} these are described as "offsets"---however,
+These functions calculate the ammount of time (either in beats, or seconds)
+that have unfolded since the beginning of a piece, giving a sense of the timeline in which events unfold.
+In \code{music21} this inforfmation is described as "offsets"---however,
 we prefer to reserve the words "onset" and "offset" to refer
-to the beginning (attacK) and end (release) of rhythmic events.
-\code{SOI()} takes a vector of numbers representing durations
-(numeric values) and cummulatively sums them from a starting value.
-Unlike \code{\link[=sigma]{sigma()}}, \code{SOI()} returns both the timestamp of the onset of
-each rhythmic duration \emph{and} the offset.
-\code{SOI()} interprets the first duration as starting at zero---or a different
-value specified by the \code{start} argument.
+to the beginning (attack) and end (release) of rhythmic events.
+}
+\details{
+Music unfolds over time, and humdrum data typically represents this
+by placing simultanteous events in the same record, with successive events
+in ever higher records---progressing "top down" through the file.
+In some humdrum data, only this (implicit) ordering of data over time is present.
+The \code{Record} and \code{NData} \link[=fields]{fields} capture this ordering in all data parsed by \code{humdrumR}.
+However, many (probably most) humdrum data files contain at least some information about the relative
+duration of events, representing more detailed information about timing and rhythm.
+
+\code{timeline()} parses and input vector \code{x} as \link[=duration]{durations},
+computes the \link[=sigma]{cumulative sum} of the durations, with the \code{start} argument appended to the beginning.
+The result is a \code{numeric} vector representing the total duration since the beginning of the vector (plus the value of \code{start}, which defaults to zero).
+The cumulative durations of \code{timeline()} represent musical duration units, where \code{1} equals a whole note.
+\code{timestamp()} converts these durations to seconds, either using the \code{BPM} argument/field to determine the tempo or using the
+default tempo of 60 beats per minute.
+If \code{minutes == TRUE}, the output is formatted into \code{"minute:seconds.milliseconds"} character strings.
+
+If a \code{groupby} argument is provided, \code{\link[=localDuration]{localDuration()}} is used to compute the minimum durations in each group before
+computing the cumulative sum only with unique values from each \code{Record} in the \code{groupby}.
+By default, \link[=withinHumdrum]{with(in).humdrumR} will automatically pass \code{groupby = list(Piece = Piece, Record = Record)}
+into calls to \code{timeline()} or \code{timestamp()}.
+Thus, a call like \code{within(humData, timeline(Token))} will compute the correct timeline position for \emph{all}
+tokens across all spines/paths/stops---all values in the same record will be the same.
+
+Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
+If you want to use the duration(s) of grace notes, specify \code{graceDurations = TRUE}.
+}
+\section{Logical start}{
+
+
+Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{x}.
+Within each piece, the the \emph{first} timepoint where the \code{start} logical is \code{TRUE} is used as the zero:
+all early points will be negative numbers.
+In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
+Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, timeline(Token, start = Bar == 1)}, which makes the downbeat of
+the first complete bar \code{0}---any notes in a pickup bar are give negative numbers on the timeline.
+}
+
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
+
+within(humData, timeline(Token))
+
+within(humData, timestamp(Token, minutes = TRUE))
+
+
 }
 \seealso{
 Other rhythm analysis tools: 

@@ -415,8 +415,8 @@ setMethod('as.rational', 'numeric',
               frac <- attr(MASS::fractions(x, cycles = 8), 'fracs')
               frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
               
-              
               if (ncol(frac) == 1L) frac <- cbind(frac, '1')
+              frac[frac[ , 2] == '', 2] <- '1'
               
               numerator <- as.numeric(frac[ , 1])
               denominator <- as.numeric(frac[ , 2])
