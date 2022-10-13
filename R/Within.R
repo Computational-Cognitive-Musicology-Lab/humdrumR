@@ -574,11 +574,10 @@ with.humdrumR <- function(data, ...,
   ### Do we want extract the results from the data.table? 
   
   if (drop) {
-    
     parts <- grepl('^_(by|subset)=..*_$', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
-    result <- result[[max(which(!parts))]]
+    result <- if (any(!parts)) result[[max(which(!parts))]]
     if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
