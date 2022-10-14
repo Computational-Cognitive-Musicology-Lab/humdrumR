@@ -355,7 +355,8 @@ minutes <- function(seconds, format = TRUE) {
   seconds <- round(seconds %% 60, 3)
   paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
 }
-### Offset ####
+
+## timelines ----
 
 #' Calculate overall duration of a group
 #' 
@@ -570,22 +571,49 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
   
 }
 
+## IOI ----
 
-
-IOI <- function(durations, rest = grepl('r', durations)) {
-  soi <- as.data.table(SOI(durations))
-  soi$Groups <- segments(!rest)
+ioi <- function(x, onsets = !grepl('r', x)) {
   
-  soi[,c(max(Offset) - min(Onset), rep(NA_real_, length(Offset) - 1)), by = Groups]$V1
+  durations <- duration(x)
+  
+  dt <- data.table(Durations = durations,
+                   Segments = segments(onsets), 
+                   Key = seq_along(durations))
+
+  summed <- dt[ , list(Sum = sum(Durations), Key = Key[1]), by = Segments]  
+  
+  
+  summed[dt, on = c('Key')]$Sum
   
 }
 
 
 
-tatum <- function(dur) {
+untie <- function(x) {
+  open <- grepl('\\[', x)
+  close <- grepl('\\]', x)
+  x <- duration(x)
+  
+  ties <- Map(`:`, which(open), which(close))
+  
+  x[open] <- sapply(ties, \(i) sum(x[i]))
+  
+  x[unlist(lapply(ties, '[', i = -1L))] <- NA
+  
+  x
+  
+}
+
+
+
+
+findTatum <- function(dur) {
   rational <- lapply(dur, as.rational)
   do.call('gcd', as.list(unique(rational)))
 }
+
+## Find lag ----
 
 findLag2 <- function(x, lag = 1, minlag = 0, maxlag = Inf, prefer = 'closest', range = 5, allow.duplicates = FALSE) {
   candidates <- sapply(1:range, \(l) delta(x, lag = l))
