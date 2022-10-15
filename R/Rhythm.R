@@ -573,35 +573,55 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 
 ## IOI ----
 
-ioi <- function(x, onsets = !grepl('r', x)) {
+ioi <- function(x, onsets = !grepl('r', x), ..., 
+                deparser = partialApply(reParse, reParsers =  c('recip', 'duration')), 
+                inPlace = TRUE) {
   
-  durations <- duration(x)
+  rint <- rhythmInterval(x, ...)
   
-  dt <- data.table(Durations = durations,
-                   Segments = segments(onsets), 
-                   Key = seq_along(durations))
-
-  summed <- dt[ , list(Sum = sum(Durations), Key = Key[1]), by = Segments]  
+  iois <- tapply_inplace(rint, segments(onsets), sum)
   
   
-  summed[dt, on = c('Key')]$Sum
+  output <- deparser(iois)
+  
+  if (is.character(output)) {
+    if (inPlace) output <- rePlace(output) else humdrumRattr(output) <- NULL
+  }  
+  
+  output
+  
   
 }
 
 
 
-untie <- function(x) {
-  open <- grepl('\\[', x)
-  close <- grepl('\\]', x)
-  x <- duration(x)
+untie <- function(x, open = '\\[', close = '\\]', ..., 
+                  deparser = partialApply(reParse, reParsers =  c('recip', 'duration')), 
+                  inPlace = TRUE) {
   
-  ties <- Map(`:`, which(open), which(close))
   
-  x[open] <- sapply(ties, \(i) sum(x[i]))
+  openl <- grepl(open, x)
+  closel <- grepl(close, x)
   
-  x[unlist(lapply(ties, '[', i = -1L))] <- NA
+  rint <- rhythmInterval(x, ...)
   
-  x
+  ties <- Map(`:`, which(openl), which(closel))
+  
+  rint[openl] <- do.call('c', lapply(ties, \(i) sum(rint[i])))
+  
+  rint[unlist(lapply(ties, '[', i = -1L))] <- rational(NA)
+  
+  output <- deparser(rint)
+  
+  if (is.character(output)) {
+    if (inPlace) output <- rePlace(output) else humdrumRattr(output) <- NULL
+    stringr::str_remove_all(output, paste0(open, '|', close))
+  } else {
+    
+    output
+  }
+  
+ 
   
 }
 

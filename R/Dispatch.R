@@ -514,12 +514,13 @@ humdrumRattr <- function(x) {
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  if (is.null(value)) attributes(x) <- attributes(x)[!names(attributes(x)) %in% known]
   for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
   x
 }
 
-rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
+rePlace <- function(result, dispatched = attr(result, 'dispatch')) {
   if (is.null(dispatched) || length(result) != length(dispatched$Original) || !is.atomic(result)) return(result)
   names <- names(result)
   
@@ -528,10 +529,15 @@ rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
   result
 }
 
-reParse <- function(result, dispatched = attr(result, 'dispatched'), reParsers) {
+reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
   if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
+  
+  humAttr <- humdrumRattr(result)
+  
   names <- names(result)
   exclusives <- dispatched$Exclusives
+  
+  
   
   result <- split(result, dispatched$Segments)
   
@@ -541,6 +547,9 @@ reParse <- function(result, dispatched = attr(result, 'dispatched'), reParsers) 
   }, result, exclusives))
   
   names(result) <- names
+  
+  humAttr$Exclusives <- NULL
+  humdrumRattr(result) <- humAttr
   
   result
   

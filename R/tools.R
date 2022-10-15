@@ -474,7 +474,7 @@ remove.duplicates <- function(listofvalues) {
 }
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
-    
+    attr <- humdrumRattr(X)
     result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
     headortail <- if (head) match.fun('head') else tail
@@ -483,14 +483,18 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     result <- do.call('c', result)
     indices <- do.call('c', indices)
     
-    if (length(result) == length(X)) {
+    result <- if (length(result) == length(X)) {
       result[order(indices)]
     } else {
       output <- vectorNA(length(X), class(result))
-      output[is.na(output)] <- as(0, class(output))
+      # output[is.na(output)] <- as(0, class(output))
       output[indices] <- result
       output
     }
+    
+    humdrumRattr(result) <- attr
+    
+    result
     
 }
 
