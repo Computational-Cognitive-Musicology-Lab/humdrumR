@@ -574,20 +574,20 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 ## IOI ----
 
 ioi <- function(x, onsets = !grepl('r', x), ..., 
-                deparser = partialApply(reParse, reParsers =  c('recip', 'duration')), 
+                groupby = list(),
                 inPlace = TRUE) {
   
   rint <- rhythmInterval(x, ...)
   
-  iois <- tapply_inplace(rint, segments(onsets), sum)
+  durations <- duration(rint)
+  iois <- windowApply(durations, sum, windows = windows(x, onsets), passOutside = TRUE)
   
+  dispatch <- attr(rint, 'dispatch')
+  output <- reParse(iois, dispatch, reParsers = c('recip', 'duration'))
   
-  output <- deparser(iois)
+  if (inPlace && is.character(output)) output <- rePlace(output, dispatch)
   
-  if (is.character(output)) {
-    if (inPlace) output <- rePlace(output) else humdrumRattr(output) <- NULL
-  }  
-  
+  output[is.na(output) & !is.na(rint)] <- '.'
   output
   
   

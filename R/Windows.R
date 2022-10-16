@@ -290,7 +290,7 @@ Prev <- function(x) lag(x, 1L)
 
 align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateClose = FALSE) {
   
-  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close)) {
+  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close, na.rm = TRUE)) {
     data.table(Open = open, Close = close) 
   } else {
     if (is.null(nearest)) nearest <- 0L
@@ -342,10 +342,10 @@ windowApply <- function(x, func = c, windows, ..., passOutside = FALSE, referenc
   if (rebuild) {
     
     if (all(lengths(result_windowed) == 1L)) {
-      result <- unlist(result_windowed)
+      result <- do.call('c', result_windowed)
       x[if (leftEdge) windows$Open else windows$Close ] <- result
       if (passOutside) {
-        x[setdiff(unlist(indices), windows$Open)] <- NA
+        x[setdiff(unlist(indices), windows$Open)] <- as(NA, class(result))
         
       } else {
         notstarts <- seq_along(x)

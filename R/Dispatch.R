@@ -197,6 +197,7 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   humattr <- humdrumRattr(result)
   
   result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
+  if ('dispatch' %in% names(humattr)) humattr$dispatch$Original <- firstArg
   humdrumRattr(result) <- humattr
   
   result

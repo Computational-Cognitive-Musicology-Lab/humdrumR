@@ -245,7 +245,6 @@ setMethod('sum', 'rational', \(x, ...) {
     nums <- x@Numerator
     dens <- x@Denominator
     
-    
     nums <- tapply(nums, dens, sum)
     dens <- tapply(dens, dens, unique)
     den <- do.call('lcm', as.list(dens))
