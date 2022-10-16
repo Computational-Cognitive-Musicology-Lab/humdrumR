@@ -579,11 +579,26 @@ ioi <- function(x, onsets = !grepl('r', x), ...,
   
   rint <- rhythmInterval(x, ...)
   
-  durations <- duration(rint)
-  iois <- windowApply(durations, sum, windows = windows(x, onsets), passOutside = TRUE)
+  windows <- windows(x, onsets, groupby = groupby)
+  
+  # durations <- duration(rint)
+  
+  
+  for (l in 1:min(max(unique(windows$Length)), 10L)) { # 10 is arbitrary...could be optimized for number of instances?
+    windows[Length >= l & Length <= 10L, 
+            {
+              curClose <- Open + l
+              rint[Open] <<- rint[Open] + rint[curClose]
+              rint[curClose] <<- rational(NA)
+              
+            }]
+    windows <- windows[Length != l]
+  }
+  
+  if (nrow(windows)) rint <- windowApply(rint, sum, windows = windows, passOutside = TRUE)
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(iois, dispatch, reParsers = c('recip', 'duration'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
   
   if (inPlace && is.character(output)) output <- rePlace(output, dispatch)
   

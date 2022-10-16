@@ -156,15 +156,12 @@ windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
   
   windowFrame <- depth(windowFrame, nest = nest, depth = depth)
   
+  if (length(groupby)) windowFrame <- removeCrossing(windowFrame, checkWindows(x, groupby))
   
-  if (!is.null(groupby)) {
-    if (any(lengths(groupby) != length(x))) .stop("In a call to windows, all vectors in the list groupby must be", 
-                                                     "the same length as x.")
-    windowFrame <- removeCrossing(windowFrame, groupby)
-  }
   
   attr(windowFrame, 'vector') <- x
-  windowFrame[ , list(Open, Close)]
+  # windowFrame[ , list(Open, Close)]
+  windowFrame
   
 }
 
@@ -224,16 +221,9 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
   ind 
 }
 
-removeCrossing <- function(x, groupby) {
-  
-  groupby <- sort(unlist(lapply(groupby, \(b) which(b != lag(b)))))
-  
-  bad <- outer(groupby, x$Open, '>') & outer(groupby, x$Close, '<=')
-  remove <- colSums(bad) > 0L
-  
-  x[remove == FALSE]
-  
-  
+removeCrossing <- function(windowFrame, groupby) {
+  groupby <- do.call('paste', groupby)
+  windowFrame[groupby[Open] == groupby[Close]]
 }
 
 ### Window finding rules ----
@@ -328,10 +318,11 @@ align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateC
 
 #' @rdname humWindows
 #' @export
-windowApply <- function(x, func = c, windows, ..., passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
+windowApply <- function(x, func = c, windows, ..., groupby = list(), passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
   if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
   
   if (missing(windows)) windows <- windows(reference, ...)
+
   
   indices <- Map(':', windows$Open, windows$Close)
   
