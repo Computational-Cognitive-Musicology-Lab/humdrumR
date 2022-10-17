@@ -21,15 +21,14 @@ Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat
 Lyrics.R	wort.Rd			960	X	X	wort		606
 Metric.R	humMeter.Rd			516	X	X	humMeter		1082
 Metric.R	meter.Rd			450	X	X	meter, measure		564
-Metric.R	metric.Rd	rhythm analysis tools		417	X	X	metric		208
-Metric.R	rhythmDecompose.Rd	rhythm analysis tools		433	X	X	rhythmDecompose		122
+Metric.R	metric.Rd	rhythm analysis tools		420	X	X	metric		208
 Pitch.R	LO5th.Rd	core pitch representations		1411	Yes	Minimal	LO5th		27
 Pitch.R	accidental.Rd	partial pitch functions, pitch functions		2003		Empty	accidental		59
 Pitch.R	bhatk.Rd	pitch functions, relative pitch functions		9973		Empty	bhatk		29
 Pitch.R	degree.Rd	absolute pitch functions, pitch functions, relative pitch functions		11317	Yes	Minimal	degree, deg		23
 Pitch.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions		10612		Empty	freq		20
 Pitch.R	helmholtz.Rd	absolute pitch functions, pitch functions		9987		Empty	helmholtz		201
-Pitch.R	int.Rd	Lagged vector functions, relative pitch functions		11852	Yes	Yes	int, mint, hint		
+Pitch.R	int.Rd	Lagged vector functions, relative pitch functions		13260	Yes	Yes	int, mint, hint		
 Pitch.R	interval.Rd	Lagged pitch interval functions, pitch functions, relative pitch functions		10033		Empty	interval		60
 Pitch.R	invert.Rd	tonal transformations		338		Empty	invert		25
 Pitch.R	is.simple.Rd	Tonal feature functions		2044			is.simple, is.simple.tonalInterval, is.simple.default, is.generic, is.generic.tonalInterval		
@@ -55,12 +54,14 @@ Read.R	readHumdrum.Rd			13014	Yes	Yes	knownInterpretations, readHumdrum, findHum
 Regex.R	REparser.Rd			922	Yes	Minimal	REparser, REparse		561
 Regex.R	RegexFind.Rd			2458	Yes	Yes	RegexFind, \%~l\%, \%~i\%, \%~n\%, \%~m\%, \%~\%, \%!~\%, \%!~l\%, \%!~i\%		38
 Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE		559
-Rhythm.R	SOI.Rd	rhythm analysis tools		1392	X	X	SOI		15
-Rhythm.R	rhythmFunctions.Rd			514	X	X	rhythmFunctions, recip, duration		575
-Rhythm.R	rhythmInterval.Rd			483	X	X	rhythmInterval, rhythmInterval.default, rhythmInterval.NULL, rhythmInterval.character		56
-Rhythm.R	time.Rd			227	X	X	time, bpm2ms, ms2bpm		167
+Rhythm.R	ioi.Rd			3579	Yes	Yes	ioi, untie		
+Rhythm.R	localDuration.Rd	rhythm analysis tools		4478	Yes	Yes	localDuration		
+Rhythm.R	rhythmFunctions.Rd			564	X	X	rhythmFunctions, recip, duration		575
+Rhythm.R	rhythmInterval.Rd			623	X	X	rhythmInterval, rhythmInterval.default, rhythmInterval.numeric, rhythmInterval.integer, rhythmInterval.NULL, rhythmInterval.character		56
+Rhythm.R	time.Rd			269	X	X	time, bpm2ms, ms2bpm, seconds		167
+Rhythm.R	timeline.Rd	rhythm analysis tools		5115	Yes	Yes	timeline, timestamp		
 Struct.R	struct.Rd			8357	Yes?	Yes	struct, is.struct		67
-Subset.R	indexHumdrum.Rd			7148	Yes	Yes	indexHumdrum, [,humdrumR,missing,ANY,ANY-method, [,humdrumR,numeric,ANY,ANY-method, [,humdrumR,character,ANY,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method		571
+Subset.R	indexHumdrum.Rd			7136	Yes	Yes	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method		571
 Subset.R	subset.humdrumR.Rd		Filtering	4318	Yes	Yes	subset.humdrumR, subset, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops		23
 Summary.R	census.Rd	corpus summary functions		3161	Yes	Yes	census, [.humCensus, print.humCensus		
 Summary.R	humSummary.Rd	corpus summary functions		1573	Yes	Yes	humSummary, summary.humdrumR, summary		173
@@ -68,7 +69,7 @@ Summary.R	interpretations.Rd	corpus summary functions		2744	Yes	Yes	interpretati
 Summary.R	reference.Rd	corpus summary functions		3635	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference		
 Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, print.humSpines		
 Validation.R	validateHumdrum.Rd			3912	Yes	Yes	validateHumdrum		
-Windows.R	humWindows.Rd			778	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
+Windows.R	humWindows.Rd			797	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
 Within.R	withinHumdrum.Rd		WorkingWithData	24277	Yes	Yes	withinHumdrum, within, with, with.humdrumR, within.humdrumR		376
 Write.R	writeHumdrum.Rd			3583	Yes	Yes	writeHumdrum		562
 humdrumR-class.R	collapseHumdrum.Rd			2194	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36
@@ -86,9 +87,9 @@ humdrumR-package.R	humdrumPitch.Rd			2408	Yes	Missing chords/keys	humdrumPitch		
 humdrumR-package.R	humdrumR.Rd			2271	Yes	OK	humdrumR		80
 humdrumR-package.R	humdrumRroot.Rd			554	Yes	Yes	humdrumRroot		562
 humdrumR-package.R	partialMatching.Rd			1563	Yes	Yes	partialMatching		
-tools.R	delta.Rd	Lagged vector functions		9544	Yes	Yes	delta, delta.default, delta.matrix		47
-tools.R	ditto.Rd	Lagged vector functions		6853	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
+tools.R	delta.Rd	Lagged vector functions		9748	Yes	Yes	delta, delta.default, delta.matrix		47
+tools.R	ditto.Rd	Lagged vector functions		7057	Yes	Yes	ditto, ditto.default, ditto.data.frame, ditto.matrix, ditto.humdrumR		
 tools.R	expand.Rd			1781	Yes	Yes	expand		38
-tools.R	lag.Rd	Lagged vector functions		3620	Yes	Yes	lag, lead		53
+tools.R	lag.Rd	Lagged vector functions		3824	Yes	Yes	lag, lead		53
 tools.R	segments.Rd	Window functions		3388	Yes	Yes	segments, changes		
-tools.R	sigma.Rd	Lagged vector functions		9374	Yes	Yes	sigma, sigma.default, sigma.matrix		32
+tools.R	sigma.Rd	Lagged vector functions		9578	Yes	Yes	sigma, sigma.default, sigma.matrix		32

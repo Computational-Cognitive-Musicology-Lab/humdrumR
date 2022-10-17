@@ -1,4 +1,5 @@
 
+
 test_that('Basic rhythm functions work', {
   reci <- c('4a', '8b', '8.c', '4.d', NA, 'x', '16e', '16.f', '3g', '6h', '0i', '00KK', '0.J', '1LL', '2.X')
   durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 2, 1, 0.75 )
@@ -25,14 +26,18 @@ test_that("ioi and untie work correctly", {
   
   expect_equal(ioi(test), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', NA, '.' ))
   expect_equal(ioi(test, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', NA, '.' ))
-  expect_equal(ioi(test, endOnset = TRUE), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', '2A', '.' ))
-  expect_equal(ioi(test, endOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', '2', '.' ))
+  expect_equal(ioi(test, finalOnset = TRUE), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', '2A', '.' ))
+  expect_equal(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', '2', '.' ))
   
+  
+  expect_equal(ioi(c('4a','4r','4a','4.a','8r','4a'), groupby = list(c(1,1,1,2,2,2))),
+               c("2a", ".", NA, "2a", ".", NA)) 
   # 
+  
   mc <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
   
   mc <- foldHumdrum(mc[[ , c(1, 6)]], 2, 1, newFieldNames = 'IPA')
-  mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', endOnset = TRUE))
+  mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
   pairs <- with(mc$IOI,  data.frame(IOI, Token))
   expect_true(all(Reduce('>=', lapply(pairs, duration))))
@@ -45,6 +50,20 @@ test_that("ioi and untie work correctly", {
   
   # both
   test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
-  expect_equal(ioi(untie(test), endOnset = TRUE), 
-               untie(ioi(test, endOnset = TRUE)))
+  expect_equal(ioi(untie(test), finalOnset = TRUE), 
+               untie(ioi(test, finalOnset = TRUE)))
+})
+
+test_that('Examples from rhythm man are correct', {
+  
+  expect_equal(untie(c('[4a', '4a]', '2g')), 
+               c('2a', '.', '2g'))
+  
+  expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r')),
+               c("2a", ".",  "2a", ".", NA, "." ))
+  
+  expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE),
+               c("2a", ".",  "2a", ".", '1a', "." ))
+  
+  
 })

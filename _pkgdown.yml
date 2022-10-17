@@ -142,6 +142,8 @@ reference:
   - rhythmFunctions
   - humMeter
   - localDuration
+  - ioi
+  - untie
   - meter
   - measure
   - metric

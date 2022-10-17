@@ -15,16 +15,15 @@ localDuration(
 )
 }
 \arguments{
-\item{x}{An input vector, which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+\item{x}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{choose}{A function, which takes a vector of \code{numeric} and returns a single \code{numeric} value. Defaults to \code{min}; \code{max}, \code{median}, or \code{mode} might be reasonable alternatives.}
+\item{choose}{A function which takes a vector of \code{numeric} and returns a single \code{numeric} value. Defaults to \code{min}; \code{max}, \code{median}, or \code{mode} might be reasonable alternatives.}
 
 \item{deparser}{A \link[=rhythmFunction]{rhythm function} to generate the output representation.}
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
-into.}
+\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}.}
 }
 \description{
 \code{localDuration()} calculates the "overall" duration within groups in an input vector.

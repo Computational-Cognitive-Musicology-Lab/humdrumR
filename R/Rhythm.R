@@ -436,12 +436,11 @@ minutes <- function(seconds, format = TRUE) {
 #' 
 #' within(humData, localDuration(Token))
 #'
-#' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
-#' @param choose A function, which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
+#' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
+#' @param choose A function which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
 #' @param deparser A [rhythm function][rhythmFunction] to generate the output representation.
 #' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`
-#'   into.
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
 #'
 #' @family rhythm analysis tools
 #' @export 
@@ -520,7 +519,7 @@ localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive 
 #' within(humData, timestamp(Token, minutes = TRUE))
 #' 
 #' 
-#' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
+#' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
 #' @param start A `numeric` value from which the timeline begins, or a `logical` vector of same length as `x`.
 #' @param minutes (`logical`, `length == 1`) If `TRUE`, output seconds are converted to a character string
 #' encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
@@ -581,11 +580,56 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 
 ## IOI ----
 
+#' Sum "connected" durations
+#' 
+#' These functions are used to (melodically) adjacent sum rhythmic duration values which are not associated with new onsets/attacks.
+#' `ioi()` adds the duration of [rests](https://en.wikipedia.org/wiki/Rest_(music)) to the previous
+#' non-rest (onset) duration, to create [interonset intervals](https://en.wikipedia.org/wiki/Time_point#Interonset_interval) (IOIs).
+#' `untie` sums [tied](https://en.wikipedia.org/wiki/Tie_(music)) durations.
+#' 
+#' @details 
+#' 
+#' 
+#' Both functions return "collapsed" durations are as null data tokens. 
+#' For example, `untie(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
+#' 
+#' For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no *next* onset, so there
+#' can't really be a "interonset" interval.
+#' Thus, by default, `ioi()` will return `NA` at the location of the final duration.
+#' However, if the `finalOnset` argument is set to `TRUE`, the function will act like there is one additional onset *after* the end of the sequence:
+#' the last "IOI" is calculated between the last onset and this fictional "final onset."
+#' For example, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'))` the result is `c("2a", ".", "2a", ".", NA, ".")`,
+#' with the last onset (`2a`) returning `NA`.
+#' However, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE)` the result is `c("2a", ".", "2a", ".", "1a", ".")`---the
+#' last onset's whole duration through the end is returned!
+#' 
+#' Non-onsets (rests) that occur *before* the first onset are returned as null.
+#' 
+#' @param x An input vector which is parsed for duration information using the 
+#' [rhythm parser][rhythmParsing]. `max`, `median`, or `mode` might be reasonable alternatives.
+#' @param onsets A `logical` vector of the same length as `x`. All durations in `x` where `onsets == FALSE`
+#' are added to the previous value where `onsets == TRUE`.
+#' @param finalOnset (`logical`, `length == 1`) If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
+#' Otherwise, this last IOI is undefined (`NA`).
+#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#'        *and* there is extra, non-pitch information in the input strings "besides" the duration information.
+#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-duration information.
+#'        If `inPlace = FALSE`, only the rhythm output information will be returned.
+#'        
+#' @export
 ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
-                groupby = list(),
-                endOnset = FALSE,
+                finalOnset = FALSE,
+                groupby = list(), parseArgs = list(), Exclusive = NULL,
                 inPlace = TRUE) {
-  rint <- rhythmInterval(x, ...)
+  
+  checkLogical(onsets, 'onsets', 'ioi')
+  if (length(x) != length(onsets)) .stop("In a call to ioi(), the 'onsets' and 'x' arguments must be the same length.")
+  checkTF(finalOnset, 'finalOnset', 'ioi')
+  checkTF(inPlace, 'inPlace', 'ioi')
+  
+  rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
   
   if (any(!onsets)) {
     windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
@@ -602,7 +646,15 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
     output[!onsets] <- as(NA, class(output))
   }
  
-  if (!endOnset) output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
+  if (!finalOnset) {
+    if (length(groupby)) {
+      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- as(NA, class(output))
+      
+    } else {
+      output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
+      
+    }
+  }
   
 
   output
@@ -610,11 +662,17 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
 }
 
-
-
+#' @param open A `character` string (regular expression) to identify the beginning of ties.
+#'   (May also be formula: see [humWindows].)
+#' @param close A `character` string (regular expression) to identify the end of ties.
+#'   (May also be formula: see [humWindows].)
+#' @rdname ioi
+#' @export
 untie <- function(x, open = '[', close = ']', ..., 
                   groupby = list(), 
                   inPlace = TRUE) {
+  checkTF(inPlace, 'inPlace', 'untie')
+  
   rint <- rhythmInterval(x, ...)
   
   
@@ -630,8 +688,8 @@ untie <- function(x, open = '[', close = ']', ...,
   if (is.character(output)){
     if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
     output[null] <- '.'
-    output <- stringr::str_remove(output, 
-                                  if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
+    if (is.character(open)) output <- stringr::str_remove(output, 
+                                                          if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
   } else {
     output[null] <- as(NA, class(output))
   }

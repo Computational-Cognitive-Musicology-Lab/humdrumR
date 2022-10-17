@@ -26,7 +26,7 @@ timestamp(
 )
 }
 \arguments{
-\item{x}{An input vector, which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+\item{x}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
 
 \item{start}{A \code{numeric} value from which the timeline begins, or a \code{logical} vector of same length as \code{x}.}
 
