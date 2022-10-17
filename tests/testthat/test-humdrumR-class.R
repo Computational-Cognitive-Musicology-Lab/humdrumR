@@ -27,8 +27,9 @@ test_that('Spine folding works properly when stops are present, and vice versa',
   
   spinesWithStops <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_stops.hum')
   
-  tab1 <- getHumtab(foldHumdrum(spinesWithStops, 2, 1))
-  tab2 <- getHumtab(foldHumdrum(spinesWithStops, 1, 2))
+  tab1 <- getHumtab(foldHumdrum(spinesWithStops, 2, 1), dataTypes = 'Dd')
+  tab2 <- getHumtab(foldHumdrum(spinesWithStops, 1, 2), dataTypes = 'Dd')
+   #the exclusive interpretations get changed by update_Exclusive, so only look at Dd
   
   if (expect_true(identical(dim(tab1), dim(tab2)))) {
     expect_true(all(tab1$Result1 == tab2$Token, na.rm = TRUE))
@@ -36,8 +37,8 @@ test_that('Spine folding works properly when stops are present, and vice versa',
   }
   
   #
-  tab1 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 2, 1), fromField = 'Token'))
-  tab2 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 1, 2), fromField = 'Result1'))
+  tab1 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 2, 1), fromField = 'Token'), dataTypes = 'Dd')
+  tab2 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 1, 2), fromField = 'Result1'), dataTypes = 'Dd')
   if (expect_true(identical(dim(tab1), dim(tab2)))) {
     expect_true(all(tab1$Token == tab2$Result1))
     expect_true(all(tab1$Result1 == tab2$Token))
@@ -176,6 +177,23 @@ test_that("Exclusive (spine) folding works properly", {
 })
 
 
+# Update Exclusive
+
+test_that("Exclusive is updated by update_Exclusive", {
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+  
+  chorales <- within(chorales,
+                     Semits <- semits(Token),
+                     Pitch <- pitch(Token),
+                     Nchar <- nchar(Token))
+  
+  expect_equal(with(chorales$Semits, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**semits')
+  expect_equal(with(chorales$Nchar, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
+  # (semits and Nchar update Token because they are not character)
+  expect_equal(with(chorales$Pitch, .[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**pitch')
+  expect_equal(with(chorales$Token, .[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
+  
+  })
 
 
 

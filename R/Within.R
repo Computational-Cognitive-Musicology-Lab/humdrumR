@@ -1595,6 +1595,7 @@ parseResult <- function(results) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
+                      humattr <- humdrumRattr(first)
                       object <- length(first) && !is.factor(first) && is.object(first)
                       
                       # if (is.table(result) && length(result) == 0L) result <- integer(0)
@@ -1604,6 +1605,8 @@ parseResult <- function(results) {
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
                       }
+                      
+                      humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
                       result
                     })

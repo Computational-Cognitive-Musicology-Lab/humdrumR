@@ -2433,8 +2433,10 @@ matched <- function(x, table, nomatch = NA) {
   glue::glue(strs, .envir = envir)
 }
 
-harvard <- function(x, conjunction = '', quote = FALSE) {
-  if (quote) x <- quotemark(x)
+harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {
+  x <- as.character(x)
+  if (quote) x <- quotemark(x, quoteNA = quoteNA)
+  x[is.na(x)] <- "NA"
   if (conjunction != '') conjunction <- paste0(if (length(x) > 2L) ',', ' ', conjunction, ' ')
   glue::glue_collapse(x, sep = ', ', last = conjunction)
 }
@@ -2442,7 +2444,7 @@ harvard <- function(x, conjunction = '', quote = FALSE) {
 
 plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
 
-quotemark <- function(x) if (is.character(x)) paste0("'", x, "'") else x
+quotemark <- function(x, quoteNA = FALSE) if(quoteNA) paste0("'", x, "'") else .paste("'", x, "'")
 
 nthfix <- function(n) {
   affix <- rep('th', length(n))

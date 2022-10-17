@@ -410,5 +410,35 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 }
 
 
-
+windowsSum <- function(x, windowFrame, cuttoff = 10) {
+  
+  lengths <- table(windowFrame[Length > 1L, Length])
+  
+  vectorize <- lengths >= cuttoff & as.integer(names(lengths)) < 20
+  
+  if (any(vectorize)) {
+    maxsize <- max(as.integer(names(lengths)[vectorize]))
+    
+    na <- as(NA, class(x))
+    for (l in 1:(maxsize - 1L)) {
+      
+      windowFrame[Length == l, 
+              {
+                curClose <- Open + l
+                x[Open] <<- x[Open] + x[curClose]
+                x[curClose] <<- na
+                
+              }]
+      windowFrame <- windowFrame[Length != l]
+    }
+  }
+  
+  
+  
+  if (nrow(windowFrame)) x <- windowApply(x, sum, windows = windowFrame, passOutside = TRUE)
+  
+  x
+  
+  
+}
 

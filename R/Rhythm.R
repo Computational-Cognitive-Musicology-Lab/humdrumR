@@ -265,7 +265,10 @@ NULL
 
 
 makeRhythmTransformer <- function(deparser, callname, outputClass = 'character') {
-  # this function will create various pitch transform functions
+  # this function will create various rhythm transform functions
+  
+  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
@@ -296,7 +299,12 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
     deparseArgs <- c(list(parsedRint), deparseArgs)
     output <- if (deparse && is.rational(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize, 
                                                           outputClass = !!outputClass) else parsedRint
-    if (deparse && inPlace) output <- rePlace(output, attr(parsedRint, 'dispatch'))
+    if (deparse && !is.null(output)) {
+      dispatch <- attr(parsedRint, 'dispatch')
+      if (inPlace) output <- rePlace(output, dispatch)
+      
+      if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
+    }
     
     output
     
@@ -575,34 +583,28 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 
 ioi <- function(x, onsets = !grepl('r', x), ..., 
                 groupby = list(),
+                endOnset = FALSE,
                 inPlace = TRUE) {
-  
   rint <- rhythmInterval(x, ...)
   
-  windows <- windows(x, onsets, groupby = groupby)
-  
-  # durations <- duration(rint)
-  
-  
-  for (l in 1:min(max(unique(windows$Length)), 10L)) { # 10 is arbitrary...could be optimized for number of instances?
-    windows[Length >= l & Length <= 10L, 
-            {
-              curClose <- Open + l
-              rint[Open] <<- rint[Open] + rint[curClose]
-              rint[curClose] <<- rational(NA)
-              
-            }]
-    windows <- windows[Length != l]
+  if (any(!onsets)) {
+    windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
+    rint <- windowsSum(rint, windows)
   }
-  
-  if (nrow(windows)) rint <- windowApply(rint, sum, windows = windows, passOutside = TRUE)
-  
+
   dispatch <- attr(rint, 'dispatch')
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
   
-  if (inPlace && is.character(output)) output <- rePlace(output, dispatch)
+  if (is.character(output)){
+    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
+    output[!onsets] <- '.'
+  } else {
+    output[!onsets] <- as(NA, class(output))
+  }
+ 
+  if (!endOnset) output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
   
-  output[is.na(output) & !is.na(rint)] <- '.'
+
   output
   
   
@@ -640,7 +642,7 @@ untie <- function(x, open = '\\[', close = '\\]', ...,
   
 }
 
-
+## Find tatum
 
 
 findTatum <- function(dur) {
