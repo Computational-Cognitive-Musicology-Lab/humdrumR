@@ -1120,7 +1120,7 @@ lcm <- function(...) {
     x <- list(...)
     x <- x[lengths(x) > 0]
     if (length(x) == 1L) return(x[[1]])
-    if (length(x) == 0L) return(numeric(0))
+    if (length(x) == 0L) return(vector(class(x[[1]]), length = 0))
     
     na <- Reduce('|', lapply(x, is.na))
     
@@ -1130,7 +1130,9 @@ lcm <- function(...) {
 }
 
 .lcm <- function(x, y) {
-    abs(x * y) / .gcd(x, y)
+    output <- abs(x * y) / .gcd(x, y)
+    
+    if (is.integer(x) & is.integer(y)) as.integer(output) else output
 }
 
 `%divides%` <- function(e1, e2) gcd(e1, e2) == e1

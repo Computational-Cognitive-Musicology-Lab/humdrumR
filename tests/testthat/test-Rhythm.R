@@ -20,6 +20,7 @@ test_that('Basic rhythm functions work', {
 
 test_that("ioi and untie work correctly", {
   
+  # ioi()
   test <- c('4a', '4a', '4b', '4r', '8c', '16r', '8.c~',  '8G', '8A', '4.r')
   
   expect_equal(ioi(test), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', NA, '.' ))
@@ -36,5 +37,14 @@ test_that("ioi and untie work correctly", {
   pairs <- with(mc$IOI,  data.frame(IOI, Token))
   expect_true(all(Reduce('>=', lapply(pairs, duration))))
   
+  # untie()
   
+  test <- c('4a', '[4a',']8a', NA, '8g','8G','[8a','_2a','4a]','4G')
+  expect_equal(untie(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
+  expect_equal(untie(test, inPlace = FALSE), c( '4', '4.', '.', NA, '8', '8', '2..', '.', '.', '4' ))
+  
+  # both
+  test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
+  expect_equal(ioi(untie(test), endOnset = TRUE), 
+               untie(ioi(test, endOnset = TRUE)))
 })

@@ -581,7 +581,7 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 
 ## IOI ----
 
-ioi <- function(x, onsets = !grepl('r', x), ..., 
+ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
                 groupby = list(),
                 endOnset = FALSE,
                 inPlace = TRUE) {
@@ -612,32 +612,35 @@ ioi <- function(x, onsets = !grepl('r', x), ...,
 
 
 
-untie <- function(x, open = '\\[', close = '\\]', ..., 
-                  deparser = partialApply(reParse, reParsers =  c('recip', 'duration')), 
+untie <- function(x, open = '[', close = ']', ..., 
+                  groupby = list(), 
                   inPlace = TRUE) {
-  
-  
-  openl <- grepl(open, x)
-  closel <- grepl(close, x)
-  
   rint <- rhythmInterval(x, ...)
   
-  ties <- Map(`:`, which(openl), which(closel))
   
-  rint[openl] <- do.call('c', lapply(ties, \(i) sum(rint[i])))
+  windows <- windows(x, open, close, groupby = groupby)
   
-  rint[unlist(lapply(ties, '[', i = -1L))] <- rational(NA)
+  rint <- windowsSum(rint, windows)
   
-  output <- deparser(rint)
   
-  if (is.character(output)) {
-    if (inPlace) output <- rePlace(output) else humdrumRattr(output) <- NULL
-    stringr::str_remove_all(output, paste0(open, '|', close))
+  dispatch <- attr(rint, 'dispatch')
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
+  
+  null <- unlist(Map(":", windows$Open + 1L, windows$Close))
+  if (is.character(output)){
+    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
+    output[null] <- '.'
+    output <- stringr::str_remove(output, 
+                                  if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
   } else {
-    
-    output
+    output[null] <- as(NA, class(output))
   }
   
+  
+  output
+  
+  
+ 
  
   
 }

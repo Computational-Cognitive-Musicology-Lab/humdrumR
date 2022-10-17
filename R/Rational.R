@@ -245,13 +245,13 @@ setMethod('sum', 'rational', \(x, ...) {
     nums <- x@Numerator
     dens <- x@Denominator
     
-    nums <- tapply(nums, dens, sum)
-    dens <- tapply(dens, dens, unique)
+    nums <- tapply(nums, dens, sum) %<-dim% NULL
+    dens <- tapply(dens, dens, unique) %<-dim% NULL
     den <- do.call('lcm', as.list(dens))
     if (den > 1e6) {
         as.rational(sum(as.double(x)))
     } else {
-        rational(sum(nums * (den / dens)), den)
+        rational(sum(nums * as.integer(den / dens)), den)
     }
     
 })

@@ -57,7 +57,7 @@ withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
 
 # groupby
 byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
-                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi'), 
+                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie'), 
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path =Path)))),
                   data.table(Argument = 'groupby', Type = 'harmonic',
                              Function = c('hint', 'localDuration', 'timeline', 'timestamp'),
