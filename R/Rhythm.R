@@ -709,13 +709,7 @@ untie <- function(x, open = '[', close = ']', ...,
   
 }
 
-## Find tatum
 
-
-findTatum <- function(dur) {
-  rational <- lapply(dur, as.rational)
-  do.call('gcd', as.list(unique(rational)))
-}
 
 ## Find lag ----
 

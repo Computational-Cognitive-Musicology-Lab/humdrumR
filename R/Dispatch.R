@@ -531,7 +531,8 @@ rePlace <- function(result, dispatched = attr(result, 'dispatch')) {
 }
 
 reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
-  if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
+  # if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
+  if (is.null(dispatched) || is.character(result)) return(result)
   
   humAttr <- humdrumRattr(result)
   

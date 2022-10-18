@@ -3,10 +3,18 @@
 \docType{class}
 \name{meter}
 \alias{meter}
-\alias{measure}
+\alias{meter.rational}
+\alias{meter.character}
+\alias{measurex}
 \title{Meter class}
 \usage{
-measure(
+meter(x, ...)
+
+\method{meter}{rational}(x, ...)
+
+\method{meter}{character}(x, ..., sep = "/", Exclusive = NULL, multiDispatch = FALSE)
+
+measurex(
   soi,
   beat = rational(1L),
   start = as(0, class(dur)),

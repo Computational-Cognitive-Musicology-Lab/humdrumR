@@ -516,7 +516,7 @@ makeRE.pc <- function(ten = 'A', eleven = 'B', ...) {
   captureRE(c(0:11, ten, eleven))
 }
 
-####. REs for diatonic sets ####
+#### REs for diatonic sets ####
 
 makeRE.alterations <- function(..., qualities = FALSE) {
     # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
@@ -605,7 +605,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 }
 
 
-####. REs for tertian sets ####
+#### REs for tertian sets ####
 
 makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
     
@@ -687,7 +687,7 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 
 
-####. REs for durations ####
+#### REs for durations ####
 
 makeRE.recip <- function(collapse = TRUE, grace = TRUE, fractions = TRUE, sep = '%', ...) {
   REs <- list(grace = if (grace) '[Qq]?',
@@ -698,13 +698,16 @@ makeRE.recip <- function(collapse = TRUE, grace = TRUE, fractions = TRUE, sep = 
 
 
 makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
-    REs <- list(star = '\\*?',
-         em   = 'M?',
-         numerator = '[1-9][0-9]*',
-         sep = sep,
-         denominator = '[1-9][0-9]*'
-         )
-    
+  REs <- list(star = '\\*?',
+              em   = 'M?',
+              numerator = '[1-9][0-9]*([+][1-9][0-9]*)*',
+              sep = sep,
+              denominator = '[1-9][0-9]*'
+  )
+  
     if (collapse) setNames(cREs(REs), 'timeSignature') else REs
     
 }
+
+
+
