@@ -121,7 +121,6 @@ setValidity('struct',
                 #
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
-                
                 dim <- object@dim
                 rownames <- object@rownames
                 colnames <- object@colnames
@@ -130,8 +129,7 @@ setValidity('struct',
                             all(lengths(slots) == slotlen)
                                     }) glue::glue("Vectors in {class} data slots must all be the same length."),
                     if (!{
-                            all(sapply(slots, is.vector)) && 
-                            all(sapply(slots, is.atomic))
+                            all(sapply(slots, is.vector)) #&&  all(sapply(slots, is.atomic))
                                     }) glue::glue('{class} data slots must all be atomic vectors.'),
                     
                     ######## if dim is NULL
@@ -197,7 +195,7 @@ setMethod('initialize',
               .Object
           } )
 
-getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character')) {
+getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character', 'list')) {
     slotinfo <- methods::getSlots(class(x))
     slotinfo <- slotinfo[!names(slotinfo) %in% c('dim', 'colnames', 'rownames')]
     slotinfo <- slotinfo[slotinfo %in% classes]
