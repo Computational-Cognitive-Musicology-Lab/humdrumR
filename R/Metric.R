@@ -2,7 +2,7 @@
 #' 
 #' @name meter
 #' @export
-setClass('meter', slots = c(Levels = 'list', Tactus = 'integer'))
+setClass('meter', contains = 'struct', slots = c(Levels = 'list', Tactus = 'integer'))
 
 #' Meter S4 class
 #' 
@@ -18,7 +18,7 @@ meter.rational <- function(x, ...) {
                -lengths(levels), 
                decreasing = TRUE)
   
-  new('meter', Levels = levels[ord], Tactus = which(ord == 1L))
+  new('meter', Levels = list(levels[ord]), Tactus = which(ord == 1L))
   
 }
 
@@ -27,48 +27,66 @@ setValidity('meter',
             \(object) {
               levels <- object@Levels
               tactus <- object@Tactus
-              spans <- do.call('c', lapply(levels, sum))
-              errors <- c(
-                if (any(diff(spans) > rational(0))) "Metric levels must get consecutively shorter.",
-                if (!all(sapply(levels, is.rational))) "All levels of meter object must be rational vectors.",
-                if (any(lengths(levels) < 1L)) "All levels of meter object must have at least length 1.",
-                if (length(tactus) != 1L || tactus <= 0 || tactus > length(levels)) "Invalid tactus."
-              )
+              errors <- Map(\(ls, ts) {
+                spans <- do.call('c', lapply(ls, sum))
+                errors <- c(
+                  if (any(diff(spans) > rational(0))) "Metric levels must get consecutively shorter.",
+                  if (!all(sapply(ls, is.rational))) "All levels of meter object must be rational vectors.",
+                  if (any(lengths(ls) < 1L)) "All levels of meter object must have at least length 1.",
+                  if (length(ts) != 1L || ts <= 0 || ts > length(ls)) "Invalid tactus."
+                )
+                
+              }, levels, tactus) 
+              
+              errors <- unlist(errors)
+              
+              if (length(errors)) errors else TRUE
+              
+           
               
             })
 
 
 
-setMethod('show', 'meter',
-          \(object) {
-            levels <- object@Levels
-            
-            spans <- do.call('c', lapply(levels, sum))
-            span <- max(spans)
-            tactus <- levels[[object@Tactus]]
-            
-            numerator <- paste(span %/% tactus, collapse = '+')
-            if (length(tactus) > 1) numerator <- paste0('(', numerator, ')')
-      
-            
-            denominator <- rint2recip(Reduce('gcd', as.list(tactus)))
-            
-            cat(paste0('*M', numerator , '/', denominator), '\n')
-            
-            
-            
-          })
 
-
+#' @rdname meter
+#' @export
 duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
-  if (tactus > nlevels) .stop("You can't make a duple meter with a tactus level that doesn't exist.")
-  new('meter', Levels = lapply(2^((1:nlevels) - 1), \(d) rational(1, d) * measure),
-      Tactus = tactus)
+  measure <- rhythmInterval(measure)
+  match_size(nlevels = nlevels, measure = measure, tactus = tactus, toEnv = TRUE)
+  
+  tactus <- pmin(nlevels, tactus)
+  
+  levels <- Map(\(n, m) lapply(2^((1:n) - 1), \(d) rational(1, d) * m), nlevels, as.list(measure))
+  new('meter', Levels = levels,
+      Tactus = as.integer(tactus))
   
   
 }
 
 
+###################################################################### ###
+# Deparsing Meter Representations (meter2x) ##############################
+###################################################################### ###
+
+meter2timeSignature <- function(x) {
+  unlist(Map(\(ls, ts) {
+    tactus <- ls[[ts]]
+    if (tactus@Numerator == 3L) tactus <- tactus / 3L
+    
+    spans <- do.call('c', lapply(ls, sum))
+    span <- max(spans)
+    numerator <- paste(span %/% tactus, collapse = '+')
+    if (length(tactus) > 1L) numerator <- paste0('(', numerator, ')')
+    
+    
+    denominator <- rint2recip(Reduce('gcd', as.list(tactus)))
+    paste0('*M', numerator , '/', denominator)
+    
+  }, x@Levels, x@Tactus))
+}
+  
+  
 
 ###################################################################### ### 
 # Parsing Meter Representations (x2meter) ################################
@@ -78,6 +96,7 @@ timesignature2meter <- function(x, sep = '/') {
   x <- gsub('^\\*?M?', '', x)
   REparse(x, makeRE.timeSignature(sep = sep, collapse = FALSE),
           toEnv = TRUE)
+  
   
   numerator <- lapply(strsplit(numerator, split = '\\+'), as.integer)
   denominator <- as.integer(denominator)
@@ -97,14 +116,11 @@ timesignature2meter <- function(x, sep = '/') {
       }
       
     }
-    
     do.call('meter.rational', levels)
   }, denominator, beats) 
   
-  results
+  do.call('c', results)
 }
-
-
 
 
 ## Meter Parsing Dispatch ######################################
@@ -113,9 +129,9 @@ timesignature2meter <- function(x, sep = '/') {
 #' @export
 meter.character <- makeHumdrumDispatcher(list('any', makeRE.timeSignature, timesignature2meter),
                                          funcName = 'meter.character',
-                                         outputClass = 'list')
+                                         outputClass = 'meter')
 
-
+setMethod('as.character', 'meter', meter2timeSignature)
 
 ## Meter ####
 
@@ -274,7 +290,7 @@ tatum <- function(x, ...) UseMethod('tatum')
 #' @rdname tatum
 #' @export
 tatum.meter <- function(x) {
-  tatum.rational(do.call('c', x@Levels))
+  do.call('c', lapply(x@Levels, tatum.rational))
 }
 #' @rdname tatum
 #' @export
@@ -298,7 +314,7 @@ tactus <- function(x, deparser, ...) UseMethod('tactus')
 #' @rdname tactus
 #' @export
 tactus.meter <- function(x, deparser = recip) {
-  result <- x@Levels[[x@Tactus]]
+  result <- do.call('c', Map(\(ls, ts) ls[[ts]], x@Levels, x@Tactus))
   if (!is.null(deparser)) deparser(result) else result
 } 
 #' @rdname tactus
@@ -312,8 +328,8 @@ tactus.character <- function(x, deparser = recip) {
 measure <- function(x, deparser, ...) UseMethod('measure') 
 #' @rdname tactus
 #' @export
-measure.meter <- function(x, deparser = result) {
-  result <- max(do.call('c', lapply(x@Levels, sum)))
+measure.meter <- function(x, deparser = recip) {
+  result <- do.call('c', lapply(x@Levels, \(ls) max(do.call('c', lapply(ls, sum)))))
   if (!is.null(deparser)) deparser(result) else result
   
   

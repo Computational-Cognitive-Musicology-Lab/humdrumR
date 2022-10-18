@@ -77,10 +77,14 @@ predicateParse <- function(predicateFunc, args, anyMatch = NULL,
   restorer <- function(result) { 
     if (is.table(result) || !(is.struct(result) || is.atomic(result)) || length(result) != sum(hits)) return(result)
     
-    output <- vectorNA(length(firstArg), class(result))
-    
-    output[hits] <- result
-    output
+    if (any(!hits)) {
+      output <- vectorNA(length(firstArg), class(result))
+      
+      output[hits] <- result
+    } else {
+      result
+    }
+   
   }
   
   

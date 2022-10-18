@@ -167,7 +167,7 @@ setValidity('struct',
                         )
                     })
                             
-                if (length(errors) == 0L) TRUE else errors 
+                if (length(errors))  errors else TRUE
                 
             })
 
@@ -221,7 +221,9 @@ columns <- function(humvec) {
     rep(1:ncol, each = length(humvec))
 }
 
-vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
+vectorNA <- function(n, mode = 'character') {
+  rep(as(NA_integer_, Class = mode), n)
+}
 
 ########## shape ----
 

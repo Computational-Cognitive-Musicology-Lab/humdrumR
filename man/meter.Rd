@@ -4,6 +4,7 @@
 \name{meter}
 \alias{meter}
 \alias{meter.rational}
+\alias{duple}
 \alias{meter.character}
 \alias{measurex}
 \title{Meter class}
@@ -11,6 +12,8 @@
 meter(x, ...)
 
 \method{meter}{rational}(x, ...)
+
+duple(nlevels = 4, measure = rational(1), tactus = 3L)
 
 \method{meter}{character}(x, ..., sep = "/", Exclusive = NULL, multiDispatch = FALSE)
 

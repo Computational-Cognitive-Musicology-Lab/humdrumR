@@ -19,7 +19,7 @@ tactus(x, deparser, ...)
 
 measure(x, deparser, ...)
 
-\method{measure}{meter}(x, deparser = result)
+\method{measure}{meter}(x, deparser = recip)
 
 \method{measure}{character}(x, deparser = recip)
 
