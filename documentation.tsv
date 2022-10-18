@@ -20,8 +20,11 @@ Keys.R	signature.Rd			237			signature
 Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
 Lyrics.R	wort.Rd			960	X	X	wort		606
 Metric.R	humMeter.Rd			516	X	X	humMeter		1082
-Metric.R	meter.Rd			450	X	X	meter, measure		564
+Metric.R	measurex.Rd			423			measurex		
+Metric.R	meter.Rd			479	X	X	meter, meter.rational, meter.list, duple, meter.character		564
 Metric.R	metric.Rd	rhythm analysis tools		420	X	X	metric		208
+Metric.R	tactus.Rd	Metric functions		695	Empty	Empty	tactus, tactus.meter, tactus.character, tactus.NULL, measure, measure.meter, measure.character, measure.NULL		
+Metric.R	tatum.Rd	Metric functions		445	Empty	Empty	tatum, tatum.meter, tatum.default, tatum.rational, tatum.NULL		
 Pitch.R	LO5th.Rd	core pitch representations		1411	Yes	Minimal	LO5th		27
 Pitch.R	accidental.Rd	partial pitch functions, pitch functions		2003		Empty	accidental		59
 Pitch.R	bhatk.Rd	pitch functions, relative pitch functions		9973		Empty	bhatk		29

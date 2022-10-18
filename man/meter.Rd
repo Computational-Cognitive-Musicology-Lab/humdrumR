@@ -4,28 +4,23 @@
 \name{meter}
 \alias{meter}
 \alias{meter.rational}
+\alias{meter.list}
 \alias{duple}
 \alias{meter.character}
-\alias{measurex}
 \title{Meter class}
 \usage{
 meter(x, ...)
 
 \method{meter}{rational}(x, ...)
 
+\method{meter}{list}(x, ...)
+
 duple(nlevels = 4, measure = rational(1), tactus = 3L)
 
 \method{meter}{character}(x, ..., sep = "/", Exclusive = NULL, multiDispatch = FALSE)
-
-measurex(
-  soi,
-  beat = rational(1L),
-  start = as(0, class(dur)),
-  phase = rational(0L),
-  Bar = NULL
-)
 }
 \description{
-Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
-how many beats have passed, and the offset between each attack and the nearest beat.
+Meter class
+
+Meter S4 class
 }

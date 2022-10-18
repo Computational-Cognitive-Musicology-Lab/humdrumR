@@ -4,6 +4,52 @@
 #' @export
 setClass('meter', contains = 'struct', slots = c(Levels = 'list', Tactus = 'integer'))
 
+
+setValidity('meter', 
+            \(object) {
+              levels <- object@Levels
+              tactus <- object@Tactus
+              errors <- Map(\(ls, ts) {
+                if (length(ls) == 1L && is.na(ls)) {
+                   return (if (!is.na(ts)) "NA levels must have an NA tactus.")
+                  
+                }
+                spans <- do.call('c', lapply(ls, sum))
+                errors <- c(
+                  if (any(diff(spans) > rational(0))) "Metric levels must get consecutively shorter.",
+                  if (!all(sapply(ls, is.rational))) "All levels of meter object must be rational vectors.",
+                  if (any(lengths(ls) < 1L)) "All levels of meter object must have at least length 1.",
+                  if (length(ts) > 1L || ts <= 0 || ts > length(ls)) "Invalid tactus."
+                )
+                
+              }, levels, tactus) 
+              
+              errors <- unlist(errors)
+              
+              if (length(errors)) errors else TRUE
+              
+              
+              
+            })
+
+
+setMethod('initialize', 
+          'meter',
+          function(.Object, Levels, Tactus) {
+            Tactus <- rep(Tactus, length.out = length(Levels))
+            na <- lengths(Levels) == 0L | is.na(Tactus)
+            
+            Levels[na] <- NA
+            Tactus[na] <- NA
+            
+            .Object <- callNextMethod()
+            .Object@Levels <- Levels
+            .Object@Tactus <- Tactus
+            
+            .Object
+            
+          })
+
 #' Meter S4 class
 #' 
 #' @export
@@ -21,30 +67,14 @@ meter.rational <- function(x, ...) {
   new('meter', Levels = list(levels[ord]), Tactus = which(ord == 1L))
   
 }
-
-
-setValidity('meter', 
-            \(object) {
-              levels <- object@Levels
-              tactus <- object@Tactus
-              errors <- Map(\(ls, ts) {
-                spans <- do.call('c', lapply(ls, sum))
-                errors <- c(
-                  if (any(diff(spans) > rational(0))) "Metric levels must get consecutively shorter.",
-                  if (!all(sapply(ls, is.rational))) "All levels of meter object must be rational vectors.",
-                  if (any(lengths(ls) < 1L)) "All levels of meter object must have at least length 1.",
-                  if (length(ts) != 1L || ts <= 0 || ts > length(ls)) "Invalid tactus."
-                )
-                
-              }, levels, tactus) 
-              
-              errors <- unlist(errors)
-              
-              if (length(errors)) errors else TRUE
-              
-           
-              
-            })
+#' @rdname meter
+#' @export
+meter.list <- function(x, ...) {
+  x <- x[sapply(x, class) == 'list']
+  
+  if (length(x) == 0L) return(new('meter', Levels = list(), Tactus = integer(0)))
+  do.call('c', lapply(x, \(ls) do.call('meter.rational', ls)))
+}
 
 
 
@@ -52,6 +82,8 @@ setValidity('meter',
 #' @rdname meter
 #' @export
 duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
+  checkLooseInteger(nlevels, 'nlevels', 'duple', minval = 1, min.length = 1L)
+  
   measure <- rhythmInterval(measure)
   match_size(nlevels = nlevels, measure = measure, tactus = tactus, toEnv = TRUE)
   
@@ -71,6 +103,8 @@ duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
 
 meter2timeSignature <- function(x) {
   unlist(Map(\(ls, ts) {
+    if (length(ls) == 0L || is.na(ls[1]) || is.na(ts) ) return(NA_character_)
+    
     tactus <- ls[[ts]]
     if (tactus@Numerator == 3L) tactus <- tactus / 3L
     
@@ -132,6 +166,11 @@ meter.character <- makeHumdrumDispatcher(list('any', makeRE.timeSignature, times
                                          outputClass = 'meter')
 
 setMethod('as.character', 'meter', meter2timeSignature)
+
+#### setAs meter ####
+setAs('integer', 'meter', \(from) new('meter', 
+                                      Levels = as.list(rep(NA, length(from))), 
+                                      Tactus = rep(NA_integer_, length(from))))
 
 ## Meter ####
 
@@ -237,7 +276,6 @@ metricPlot <- function(metric) {
 #' Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
 #' how many beats have passed, and the offset between each attack and the nearest beat.
 #' @export
-#' @rdname meter
 measurex <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   
   # soi <- SOI(durations)$Onset
@@ -290,21 +328,25 @@ tatum <- function(x, ...) UseMethod('tatum')
 #' @rdname tatum
 #' @export
 tatum.meter <- function(x) {
-  do.call('c', lapply(x@Levels, tatum.rational))
+  do.call('c', lapply(x@Levels, \(ls) tatum.rational(do.call('c', ls))))
 }
 #' @rdname tatum
 #' @export
 tatum.default <- function(x) {
-  rint <- rhythmInterval(x)
-  
-  result <- tatum.rational(rint)
-  
-  reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
+  if (is.character(x) && any(grepl('\\*M', x))) {
+    recip(tatum.meter(meter.character(x)))
+  } else {
+    rint <- rhythmInterval(x)
+    result <- tatum.rational(rint)
+    reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
+  }
 }
 #' @rdname tatum
 #' @export
 tatum.rational <- function(x)  do.call('gcd', as.list(unique(x)))
-
+#' @rdname tatum
+#' @export
+tatum.NULL <- function(x) NULL
 
 #' Properties of meters
 #' 
@@ -314,14 +356,18 @@ tactus <- function(x, deparser, ...) UseMethod('tactus')
 #' @rdname tactus
 #' @export
 tactus.meter <- function(x, deparser = recip) {
-  result <- do.call('c', Map(\(ls, ts) ls[[ts]], x@Levels, x@Tactus))
+  
+  result <- do.call('c', Map('[[', x@Levels, x@Tactus))
   if (!is.null(deparser)) deparser(result) else result
 } 
 #' @rdname tactus
 #' @export
 tactus.character <- function(x, deparser = recip) {
-  do.call('c', lapply(meter(x), tactus.meter, deparser = deparser))
+ tactus.meter(meter.character(x), deparser = deparser)
 }
+#' @rdname tactus
+#' @export
+tactus.NULL <- function(x) NULL
 
 #' @rdname tactus
 #' @export
@@ -331,25 +377,27 @@ measure <- function(x, deparser, ...) UseMethod('measure')
 measure.meter <- function(x, deparser = recip) {
   result <- do.call('c', lapply(x@Levels, \(ls) max(do.call('c', lapply(ls, sum)))))
   if (!is.null(deparser)) deparser(result) else result
-  
-  
 }
 #' @rdname tactus
 #' @export
 measure.character <- function(x, deparser = recip) do.call('c', lapply(meter(x), measure.meter, deparser = deparser))
-
+#' @rdname tactus
+#' @export
+measure.NULL <- function(x) NULL
 
 
 #' @export
 nbeats <- function(x, deparser, ...) UseMethod('nbeats') 
-#' @rdname tactus
+#' @rdname nbeats
 #' @export
 nbeats.meter <- function(x, deparser = result) {
   measure.meter(x, deparser = NULL) %/% tactus.meter(x, deparser = NULL)
   
 }
-#' @rdname tactus
+#' @rdname nbeats
 #' @export
 nbeats.character <- function(x, deparser = recip) unlist(lapply(meter(x), beats.meter))
-
+#' @rdname nbeats
+#' @export
+nbeats.NULL <- function(x) NULL
 

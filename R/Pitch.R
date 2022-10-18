@@ -2553,9 +2553,9 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 #### setAs tonal interval ####
 
-setAs('integer', 'tonalInterval', function(from) semits2tint(from))
-setAs('numeric', 'tonalInterval', function(from) semits2tint(as.integer(from)))
-setAs('character', 'tonalInterval', function(from) {
+setAs('integer', 'tonalInterval', \(from) semits2tint(from))
+setAs('numeric', 'tonalInterval', \(from) semits2tint(as.integer(from)))
+setAs('character', 'tonalInterval', \(from) {
   output <- tint(rep(NA, length(from)))
   if (any(!is.na(from))) output[!is.na(from)] <- tonalInterval.character(from[!is.na(from)])
   output

@@ -147,6 +147,9 @@ reference:
   - meter
   - measure
   - metric
+  - tatum
+  - tactus
+  - nbeats
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:

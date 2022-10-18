@@ -39,10 +39,11 @@ setMethod('initialize', 'rational',
               .Object <- callNextMethod()
               # negative numbers should live in the numerator
               na <- is.na(Numerator) | is.na(Denominator)
+              
               Numerator[!na & Denominator < 0L] <- -Numerator[!na & Denominator < 0L]
               Denominator <- abs(Denominator)
               
-              fraction <- reduce_fraction(.Object@Numerator, .Object@Denominator)
+              fraction <- reduce_fraction(Numerator, Denominator)
               # fraction <- do.call('match_size', fraction) 
               fraction <- lapply(fraction, as.integer)
               
@@ -59,7 +60,7 @@ setMethod('initialize', 'rational',
 #' @export
 rational <- function(numerator, denominator = 1L) {
     if (any(denominator == 0L, na.rm = TRUE)) stop(call. = FALSE, "Can't have rational number with denominator of 0.")
-    
+    match_size(numerator = numerator, denominator = denominator, toEnv = TRUE)
     new('rational',  Denominator = as.integer(denominator),  Numerator = as.integer(numerator))
 }
 

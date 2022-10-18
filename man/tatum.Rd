@@ -5,6 +5,7 @@
 \alias{tatum.meter}
 \alias{tatum.default}
 \alias{tatum.rational}
+\alias{tatum.NULL}
 \title{Metric units}
 \usage{
 tatum(x, ...)
@@ -14,6 +15,8 @@ tatum(x, ...)
 \method{tatum}{default}(x)
 
 \method{tatum}{rational}(x)
+
+\method{tatum}{`NULL`}(x)
 }
 \description{
 Metric units

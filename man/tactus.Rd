@@ -4,11 +4,11 @@
 \alias{tactus}
 \alias{tactus.meter}
 \alias{tactus.character}
+\alias{tactus.NULL}
 \alias{measure}
 \alias{measure.meter}
 \alias{measure.character}
-\alias{nbeats.meter}
-\alias{nbeats.character}
+\alias{measure.NULL}
 \title{Properties of meters}
 \usage{
 tactus(x, deparser, ...)
@@ -17,15 +17,15 @@ tactus(x, deparser, ...)
 
 \method{tactus}{character}(x, deparser = recip)
 
+\method{tactus}{`NULL`}(x)
+
 measure(x, deparser, ...)
 
 \method{measure}{meter}(x, deparser = recip)
 
 \method{measure}{character}(x, deparser = recip)
 
-\method{nbeats}{meter}(x, deparser = result)
-
-\method{nbeats}{character}(x, deparser = recip)
+\method{measure}{`NULL`}(x)
 }
 \description{
 Properties of meters
