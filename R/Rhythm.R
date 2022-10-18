@@ -60,10 +60,10 @@ rint2notevalue <- function(rint) {
     recip <- recip(rint)
     
     # base notation
-    parsed<- REparse(recip,
-                     res = list(denominator = "^[0-9]+", 
-                                numerator = "(%[1-9][0-9]*)?", 
-                                dots = '[.]*$'))
+    parsed <- REparse(recip,
+                      res = list(denominator = "^[0-9]+", 
+                                 numerator = "(%[1-9][0-9]*)?", 
+                                 dots = '[.]*$'))
     
     
     symbols <- setNames(notevalue.unicode$Unicode, notevalue.unicode$Recip)
@@ -94,7 +94,7 @@ rint2notevalue <- function(rint) {
                           '1')
         
         base[which(unknown)[fitbase]] <- symbols[newbase[fitbase]]
-        divides[which(unknown)[fitbase]] <- paste0("\U2215", primes[i])
+        divides[which(unknown)[fitbase]] <- paste0(" \U2215", primes[i])
         
         unknown <- is.na(base) & !is.na(recip)
         i <- i + 1L
@@ -103,12 +103,18 @@ rint2notevalue <- function(rint) {
     # add multiples
     multiples <- .ifelse(parsed[ , 'numerator'] == "", 
                         "",
-                        paste0("\U2217", 
+                        paste0(#"\U2217", 
                                stringr::str_sub(parsed[, 'numerator'], start = 2)))
-    notes <- paste0(base, divides, multiples)
+    notes <- paste0(multiples, 
+                    base, 
+                    # ifelse(divides != '', '\U2009', ''), 
+                    divides, ' ')
     
     # add dots
-    dots <- gsub('.', '\U1D16D', parsed[ , 'dots'])
+    dots <- stringr::str_replace_all(parsed[ , 'dots'],
+                                     '\\.', 
+                                     '\U1D16D\U2009')
+    # dots <- gsub('\\.', '\U1D16D', dots)
     
     paste0(notes, dots)
     
