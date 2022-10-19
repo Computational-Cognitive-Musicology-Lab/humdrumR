@@ -44,10 +44,10 @@ If \code{inPlace = FALSE}, only the rhythm output information will be returned.}
 (May also be formula: see \link{humWindows}.)}
 }
 \description{
-These functions are used to (melodically) adjacent sum rhythmic duration values which are not associated with new onsets/attacks.
+These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
 \code{ioi()} adds the duration of \href{https://en.wikipedia.org/wiki/Rest_(music)}{rests} to the previous
 non-rest (onset) duration, to create \href{https://en.wikipedia.org/wiki/Time_point#Interonset_interval}{interonset intervals} (IOIs).
-\code{untie} sums \href{https://en.wikipedia.org/wiki/Tie_(music)}{tied} durations.
+\code{untie()} sums \href{https://en.wikipedia.org/wiki/Tie_(music)}{tied} durations.
 }
 \details{
 Both functions return "collapsed" durations are as null data tokens.

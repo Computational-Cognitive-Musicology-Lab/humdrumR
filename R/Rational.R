@@ -2,7 +2,10 @@
 # rational S4 class ####################
 #################################### ###
 
-## Definition, validity, initialization ####
+
+## rational documentation ----
+
+
 
 #' Rational numbers
 #' 
@@ -12,8 +15,8 @@
 #' In other words, \eqn{1/3 * 3 = 3}, never \eqn{.999999999}.
 #' On the other hand, if our rational numbers start to have numerators or demoninators that are too large, we can run into 
 #' integer overflow problems.
-#' We assume that the rational numbers we'll be using in the context of music analysis are relatively simple;
-#' We can safely use such numbers without any numeric inaccuracy.
+#' Since the rational numbers we'll be using in the context of music analysis are relatively simple,
+#' we can safely use such numbers without any numeric inaccuracy.
 #' 
 #' `fraction` is a class (and associated constructor) which represents rational numbers as `character` strings.
 #' Unlike `rational`, the `fraction` class is not numeric and thus cannot do arithmetic.
@@ -23,6 +26,11 @@
 #' @seealso [as.real()] [as.numeric()] 
 #' @family {humdrumR numeric functions}
 #' @name rational
+NULL
+
+## Definition, validity, initialization ####
+
+
 setClass('rational', 
          contains = 'struct', 
          slots = c(Numerator = 'integer', Denominator = 'integer')) 
@@ -375,15 +383,10 @@ setMethod('as.integer', 'rational', \(x) as.integer(as.double(x)) %<-matchdim% x
 
 setMethod('as.character', 'rational', \(x, sep = '/') paste0(x@Numerator, sep, x@Denominator) %<-matchdim% x)
 
-setMethod('as.logical', 'rational', \(x) (x != rational(0)) %<-matchdim% x)
+setMethod('as.logical', 'rational', \(x) (x != rational(0L)) %<-matchdim% x)
 
 
-#### setAs tonal rational ####
 
-setAs('integer', 'rational', function(from) as.rational(from))
-setAs('numeric', 'rational', function(from) as.rational(from))
-setAs('logical', 'rational', function(from) as.rational(from))
-setAs('character', 'rational', function(from) as.rational(from))
 
 ###################################################################### ### 
 # Parsing Rational Representations (x2rational) ##########################
@@ -471,12 +474,23 @@ setMethod('as.rational', 'character',
               
               output
               
-              
-              
           })
 
+#' @rdname rational
+#' @export
+setMethod('as.rational', 'fraction',
+          \(x, sep = '/|%') {
+              as.rational(unclass(x), sep = sep)
+          })
+          
 
 
+#### setAs rational  ####
+
+setAs('integer', 'rational', function(from) as.rational(from))
+setAs('numeric', 'rational', function(from) as.rational(from))
+setAs('logical', 'rational', function(from) as.rational(from))
+setAs('character', 'rational', function(from) as.rational(from))
 
 #################################### ###
 # Other numeric S3 classes #############
@@ -531,11 +545,15 @@ fraction <- function(numerator, denominator, sep = '/') {
 #' @rdname rational
 #' @export
 as.fraction <- function(x, sep = '/') {
-    if (!is.rational(x)) x <- as.rational(x)
+    if (!is.rational(x)) x <- as.rational(unclass(x), sep = sep)
     as.character(x, sep = sep) %class% 'fraction'
 }
 
+#' @rdname rational
+#' @export
 as.double.fraction <- function(x) as.double(as.rational(x))
+#' @rdname rational
+#' @export
 as.integer.fraction <- function(x) as.integer(as.rational(x))
 
 

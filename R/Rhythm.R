@@ -3,12 +3,22 @@
 ###################################################################### ###
 
 
+
+## Deparsing (rhythmInterval) documentation ----
+
+#' Generating ("deparsing") rhythm representations
+#' 
+#' @seealso All `humdrumR` [rhythm functions][rhythmFunctions] make use of the 
+#' deparsing functionality.
+#' @name rhythmDeparsing
+NULL
+
 ## Rhythm deparsers ####
 
 ### Symbolic ####
 
 
-rint2recip <- function(rint) {
+rint2recip <- function(rint, sep = '%') {
           #modify this to print 0 and 00
           num <- rint@Numerator
           den <- rint@Denominator
@@ -42,7 +52,7 @@ rint2recip <- function(rint) {
           den[(num / den) %in% c(2, 4, 8)] <- strrep('0', log(num / den, 2)[(num / den) %in% c(2, 4, 8)])
           num[den %in% c('0', '00', '000')] <- '1'
           
-          output <- .ifelse(num == 1L, den, .paste(den, '%', num)) 
+          output <- .ifelse(num == 1L, den, .paste(den, sep, num)) 
 
           .paste(SIGN, output, strrep('.', dots))
 
@@ -138,6 +148,17 @@ rint2double <- function(x) as.double(x)
 # Parsing Rhythm Representations (x2rint) ################################
 ###################################################################### ### 
 
+## Parsing (rhythmInterval) documentation ----
+
+#' Parsing rhythm information
+#' 
+#' 
+#' @seealso All `humdrumR` [rhythm functions][rhythmFunctions] make use of the
+#'  parsing functionality.
+#' @name rhythmParsing
+NULL
+
+
 ## Rhythm parsers ####
 
 ### Symbolic ####
@@ -207,36 +228,34 @@ notevalue2rint <- function(notevalues) {
 
 duration2rint <- function(x, ...) as.rational(x)
 
+
+
+
+
+
 ## Rhythm Parsing Dispatch ######################################
 
 
 ### Parse 2rint generic and methods ####
 
 
-##### As x #####
-
-
-####. generics ####
-
-#' parse rhythmic information
-#' 
-#' @name rhythmInterval
+#' @name rhythmParsing
 #' @export 
 rhythmInterval <- function(x, ...) UseMethod('rhythmInterval')
 
-#' @rdname rhythmInterval
+#' @rdname rhythmParsing
 #' @export 
 rhythmInterval.default <- function(x, ...) as.rational(x, ...)
 
-#' @rdname rhythmInterval
+#' @rdname rhythmParsing
 #' @export
 rhythmInterval.numeric <- function(x, ...) as.rational(x)
 
-#' @rdname rhythmInterval
+#' @rdname rhythmParsing
 #' @export
 rhythmInterval.integer <- function(x, ...) as.rational(x)
 
-#' @rdname rhythmInterval
+#' @rdname rhythmParsing
 #' @export
 rhythmInterval.NULL <- function(x, ...) NULL
 
@@ -244,7 +263,7 @@ rhythmInterval.NULL <- function(x, ...) NULL
 
 #### Characters ####
 
-#' @rdname rhythmInterval
+#' @rdname rhythmParsing
 #' @export
 rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
                                                   list('any',                      makeRE.timeSignature, timesignature2rint),
@@ -252,23 +271,28 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
                                                   funcName = 'rhythmInterval.character',
                                                   outputClass = 'rational')
 
+#### setAs rhythmInterval ####
 
+# See "setAs rational"
 
 ###################################################################### ### 
 # Translating Rhythm Representations (x2y) ###############################
 ###################################################################### ### 
 
-## Rhythm transformer documentation ####
+## Rhythm function documentation ####
 
 #' Manipulate pitch data
 #'  
 #' @name rhythmFunctions
-#' @seealso rhythmInterval
+#' @seealso To better understand how these functions work, 
+#' read about how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 NULL
 
 ## Rhythm transform maker ####
 
-
+rhythmArgCheck <- function(args, callname) {
+  args
+}
 
 makeRhythmTransformer <- function(deparser, callname, outputClass = 'character') {
   # this function will create various rhythm transform functions
@@ -278,32 +302,59 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
-  args <- alist(x = , ... = , Exclusive = NULL,
+  args <- alist(x = , 
+                ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
+                Exclusive = NULL,
                 parseArgs = list(), timeArgs = list(),
                 graceDurations = FALSE,
-                inPlace = FALSE,  memoize = TRUE, deparse = TRUE)
+                inPlace = FALSE)
+  
+  fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
     
+    checkVector(x, structs = 'rational', argname = 'x', 
+                callname = !!callname, matrix = TRUE)
+    
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
-    c('args', 'parseArgs', 'timeArgs') %<-% specialArgs(rlang::enquos(...), parse = parseArgs, time = timeArgs)
+    c('args...', 'parseArgs', 'timeArgs') %<-% specialArgs(rlang::enquos(...), 
+                                                        parse = parseArgs, 
+                                                        time = timeArgs)
 
-    args$Exclusive <- parseArgs$Exclusive <- parseArgs$Exclusive %||% Exclusive
-    deparseArgs <- args
-    # parseArgs   <- rhythmArgCheck(parseArgs, !!callname)
-    # deparseArgs <- rhythmArgCheck(args,      !!callname)
     
-  
+    formalArgs <- list(!!!fargcall)
+    namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
+    # There are four kinds of arguments: 
+    # ... arguments (now in args...), 
+    # FORMAL arguments, if specified (now in namedArgs)
+    # parseArgs
+    # timeArgs
     
-    # Parse
-    parsedRint <- do(rhythmInterval, c(list(x), parseArgs), memoize = memoize, outputClass = 'rhythmInterval')
     
-    # if (length(transposeArgs) > 0L && is.tonalInterval(parsedRint)) {
-    #   parsedRint <- do(transpose.tonalInterval, c(list(parsedRint), transposeArgs))
-    # }
+    # Exclusive
+    parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive
+    
+    parseArgs   <- rhythmArgCheck(parseArgs, !!callname)
+    deparseArgs <- rhythmArgCheck(c(args..., namedArgs), !!callname)
+    
+    # memoize % deparse
+    memoize <- args...$memoize %||% TRUE
+    deparse <- args...$deparse %||% TRUE
+    
+    ############# #
+    ### Parse
+    ############# #
+    
+    parsedRint <- do(rhythmInterval, 
+                     c(list(x), parseArgs), 
+                     memoize = memoize, 
+                     outputClass = 'rational')
+    
     
     deparseArgs <- c(list(parsedRint), deparseArgs)
-    output <- if (deparse && is.rational(parsedRint))  do(!!deparser, deparseArgs, memoize = memoize, 
+    output <- if (deparse && is.rational(parsedRint))  do(!!deparser, 
+                                                          deparseArgs, 
+                                                          memoize = memoize, 
                                                           outputClass = !!outputClass) else parsedRint
     if (deparse && !is.null(output)) {
       dispatch <- attr(parsedRint, 'dispatch')
@@ -318,12 +369,25 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character')
 }
 
 
-### Rhythm Transformers ####
+### Rhythm functions ####
 
-#' @rdname rhythmFunctions
+#' Reciprocal representation of duration
+#' 
+#' @seealso To better understand how this function works, 
+#' read about the [family of rhythm functions][rhythmFunctions], 
+#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
+#' @family {rhythm functions}
+#' @inheritParams rhythmFunctions
 #' @export 
 recip <- makeRhythmTransformer(rint2recip, 'recip')
-#' @rdname rhythmFunctions
+
+#' Numeric (double) representation of duration
+#' 
+#' @seealso To better understand how this function works, 
+#' read about the [family of rhythm functions][rhythmFunctions], 
+#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
+#' @family {rhythm functions}
+#' @inheritParams rhythmFunctions
 #' @export 
 duration <- makeRhythmTransformer(rint2double, 'duration')
 
@@ -339,7 +403,131 @@ duration <- makeRhythmTransformer(rint2double, 'duration')
 # Manipulating rhythm intervals ##########################################
 ###################################################################### ###
 
-## Time ####
+
+
+## IOI ----
+
+#' Sum "connected" durations
+#' 
+#' These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
+#' `ioi()` adds the duration of [rests](https://en.wikipedia.org/wiki/Rest_(music)) to the previous
+#' non-rest (onset) duration, to create [interonset intervals](https://en.wikipedia.org/wiki/Time_point#Interonset_interval) (IOIs).
+#' `untie()` sums [tied](https://en.wikipedia.org/wiki/Tie_(music)) durations.
+#' 
+#' @details 
+#' 
+#' 
+#' Both functions return "collapsed" durations are as null data tokens. 
+#' For example, `untie(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
+#' 
+#' For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no *next* onset, so there
+#' can't really be a "interonset" interval.
+#' Thus, by default, `ioi()` will return `NA` at the location of the final duration.
+#' However, if the `finalOnset` argument is set to `TRUE`, the function will act like there is one additional onset *after* the end of the sequence:
+#' the last "IOI" is calculated between the last onset and this fictional "final onset."
+#' For example, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'))` the result is `c("2a", ".", "2a", ".", NA, ".")`,
+#' with the last onset (`2a`) returning `NA`.
+#' However, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE)` the result is `c("2a", ".", "2a", ".", "1a", ".")`---the
+#' last onset's whole duration through the end is returned!
+#' 
+#' Non-onsets (rests) that occur *before* the first onset are returned as null.
+#' 
+#' @param x An input vector which is parsed for duration information using the 
+#' [rhythm parser][rhythmParsing]. `max`, `median`, or `mode` might be reasonable alternatives.
+#' @param onsets A `logical` vector of the same length as `x`. All durations in `x` where `onsets == FALSE`
+#' are added to the previous value where `onsets == TRUE`.
+#' @param finalOnset (`logical`, `length == 1`) If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
+#' Otherwise, this last IOI is undefined (`NA`).
+#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#'        *and* there is extra, non-pitch information in the input strings "besides" the duration information.
+#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-duration information.
+#'        If `inPlace = FALSE`, only the rhythm output information will be returned.
+#'        
+#' @export
+ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
+                finalOnset = FALSE,
+                groupby = list(), parseArgs = list(), Exclusive = NULL,
+                inPlace = TRUE) {
+  
+  checkLogical(onsets, 'onsets', 'ioi')
+  if (length(x) != length(onsets)) .stop("In a call to ioi(), the 'onsets' and 'x' arguments must be the same length.")
+  checkTF(finalOnset, 'finalOnset', 'ioi')
+  checkTF(inPlace, 'inPlace', 'ioi')
+  
+  rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  
+  if (any(!onsets)) {
+    windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
+    rint <- windowsSum(rint, windows)
+  }
+  
+  dispatch <- attr(rint, 'dispatch')
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
+  
+  if (is.character(output)){
+    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
+    output[!onsets] <- '.'
+  } else {
+    output[!onsets] <- as(NA, class(output))
+  }
+  
+  if (!finalOnset) {
+    if (length(groupby)) {
+      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- as(NA, class(output))
+      
+    } else {
+      output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
+      
+    }
+  }
+  
+  
+  output
+  
+  
+}
+
+#' @param open A `character` string (regular expression) to identify the beginning of ties.
+#'   (May also be formula: see [humWindows].)
+#' @param close A `character` string (regular expression) to identify the end of ties.
+#'   (May also be formula: see [humWindows].)
+#' @rdname ioi
+#' @export
+untie <- function(x, open = '[', close = ']', ..., 
+                  groupby = list(), 
+                  inPlace = TRUE) {
+  checkTF(inPlace, 'inPlace', 'untie')
+  
+  rint <- rhythmInterval(x, ...)
+  
+  
+  windows <- windows(x, open, close, groupby = groupby)
+  
+  rint <- windowsSum(rint, windows)
+  
+  
+  dispatch <- attr(rint, 'dispatch')
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
+  
+  null <- unlist(Map(":", windows$Open + 1L, windows$Close))
+  if (is.character(output)){
+    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
+    output[null] <- '.'
+    if (is.character(open)) output <- stringr::str_remove(output, 
+                                                          if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
+  } else {
+    output[null] <- as(NA, class(output))
+  }
+  
+  
+  output
+  
+}
+
+
+## Time ----
 
 
 #' Basic time transformations
@@ -370,7 +558,7 @@ minutes <- function(seconds, format = TRUE) {
   paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
 }
 
-## timelines ----
+### timelines ----
 
 #' Calculate overall duration of a group
 #' 
@@ -581,131 +769,6 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusiv
 
   
   if (minutes) minutes(seconds) else seconds
-  
-}
-
-## IOI ----
-
-#' Sum "connected" durations
-#' 
-#' These functions are used to (melodically) adjacent sum rhythmic duration values which are not associated with new onsets/attacks.
-#' `ioi()` adds the duration of [rests](https://en.wikipedia.org/wiki/Rest_(music)) to the previous
-#' non-rest (onset) duration, to create [interonset intervals](https://en.wikipedia.org/wiki/Time_point#Interonset_interval) (IOIs).
-#' `untie` sums [tied](https://en.wikipedia.org/wiki/Tie_(music)) durations.
-#' 
-#' @details 
-#' 
-#' 
-#' Both functions return "collapsed" durations are as null data tokens. 
-#' For example, `untie(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
-#' 
-#' For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no *next* onset, so there
-#' can't really be a "interonset" interval.
-#' Thus, by default, `ioi()` will return `NA` at the location of the final duration.
-#' However, if the `finalOnset` argument is set to `TRUE`, the function will act like there is one additional onset *after* the end of the sequence:
-#' the last "IOI" is calculated between the last onset and this fictional "final onset."
-#' For example, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'))` the result is `c("2a", ".", "2a", ".", NA, ".")`,
-#' with the last onset (`2a`) returning `NA`.
-#' However, if we run `ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE)` the result is `c("2a", ".", "2a", ".", "1a", ".")`---the
-#' last onset's whole duration through the end is returned!
-#' 
-#' Non-onsets (rests) that occur *before* the first onset are returned as null.
-#' 
-#' @param x An input vector which is parsed for duration information using the 
-#' [rhythm parser][rhythmParsing]. `max`, `median`, or `mode` might be reasonable alternatives.
-#' @param onsets A `logical` vector of the same length as `x`. All durations in `x` where `onsets == FALSE`
-#' are added to the previous value where `onsets == TRUE`.
-#' @param finalOnset (`logical`, `length == 1`) If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
-#' Otherwise, this last IOI is undefined (`NA`).
-#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-pitch information in the input strings "besides" the duration information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-duration information.
-#'        If `inPlace = FALSE`, only the rhythm output information will be returned.
-#'        
-#' @export
-ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
-                finalOnset = FALSE,
-                groupby = list(), parseArgs = list(), Exclusive = NULL,
-                inPlace = TRUE) {
-  
-  checkLogical(onsets, 'onsets', 'ioi')
-  if (length(x) != length(onsets)) .stop("In a call to ioi(), the 'onsets' and 'x' arguments must be the same length.")
-  checkTF(finalOnset, 'finalOnset', 'ioi')
-  checkTF(inPlace, 'inPlace', 'ioi')
-  
-  rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
-  
-  if (any(!onsets)) {
-    windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
-    rint <- windowsSum(rint, windows)
-  }
-
-  dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
-  
-  if (is.character(output)){
-    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
-    output[!onsets] <- '.'
-  } else {
-    output[!onsets] <- as(NA, class(output))
-  }
- 
-  if (!finalOnset) {
-    if (length(groupby)) {
-      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- as(NA, class(output))
-      
-    } else {
-      output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
-      
-    }
-  }
-  
-
-  output
-  
-  
-}
-
-#' @param open A `character` string (regular expression) to identify the beginning of ties.
-#'   (May also be formula: see [humWindows].)
-#' @param close A `character` string (regular expression) to identify the end of ties.
-#'   (May also be formula: see [humWindows].)
-#' @rdname ioi
-#' @export
-untie <- function(x, open = '[', close = ']', ..., 
-                  groupby = list(), 
-                  inPlace = TRUE) {
-  checkTF(inPlace, 'inPlace', 'untie')
-  
-  rint <- rhythmInterval(x, ...)
-  
-  
-  windows <- windows(x, open, close, groupby = groupby)
-  
-  rint <- windowsSum(rint, windows)
-  
-  
-  dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration'))
-  
-  null <- unlist(Map(":", windows$Open + 1L, windows$Close))
-  if (is.character(output)){
-    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
-    output[null] <- '.'
-    if (is.character(open)) output <- stringr::str_remove(output, 
-                                                          if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
-  } else {
-    output[null] <- as(NA, class(output))
-  }
-  
-  
-  output
-  
-  
- 
- 
   
 }
 

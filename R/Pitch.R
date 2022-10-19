@@ -2034,7 +2034,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' `NULL` inputs (`x` argument) return a `NULL` output.
 #' `NA` values in the input `x` are propagated to the output.
 #' 
-#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the deparsing functionality.
+#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the parsing functionality.
 #' @name pitchParsing
 NULL
 
@@ -2654,7 +2654,8 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' `NA` values in the input `x` are propagated to the output.
 #'
 #' @name pitchFunctions
-#' @seealso To better understand how these functions work, read about how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @seealso To better understand how these functions work, read about 
+#' how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 NULL
 
 ## Pitch transform maker ####
@@ -2710,7 +2711,9 @@ pitchArgCheck <- function(args,  callname) {
 }
 
 
-makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
+makePitchTransformer <- function(deparser, callname, 
+                                 outputClass = 'character', 
+                                 removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
@@ -2732,11 +2735,13 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   
   rlang::new_function(args, rlang::expr( {
     
-    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname, matrix = TRUE)
+    checkVector(x, structs = 'tonalInterval', argname = 'x', 
+                callname = !!callname, matrix = TRUE)
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
-                                                                parse = parseArgs, transpose = transposeArgs)
+                                                                parse = parseArgs, 
+                                                                transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)
     namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
     # There are four kinds of arguments: 
@@ -2767,14 +2772,21 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     deparse <- args...$deparse %||% TRUE
     
     
-    # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
+    ############# #
+    ### Parse 
+    ############# #
+    
+    parsedTint <- do(tonalInterval, 
+                     c(list(x, memoize = memoize), parseArgs), 
+                     memoize = memoize, 
+                     outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
-    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
+    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, 
+                                                               deparseArgs, 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse && !is.null(output)) {

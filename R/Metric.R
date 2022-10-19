@@ -385,7 +385,8 @@ measure.character <- function(x, deparser = recip) do.call('c', lapply(meter(x),
 #' @export
 measure.NULL <- function(x) NULL
 
-
+#' Counting beats
+#' 
 #' @export
 nbeats <- function(x, deparser, ...) UseMethod('nbeats') 
 #' @rdname nbeats

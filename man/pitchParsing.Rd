@@ -574,5 +574,5 @@ length and dimensions as `x`.
 
 }
 \seealso{
-All \code{humdrumR} \link[=pitchFunctions]{pitch functions} make use of the deparsing functionality.
+All \code{humdrumR} \link[=pitchFunctions]{pitch functions} make use of the parsing functionality.
 }

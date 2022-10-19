@@ -103,5 +103,6 @@ To read more details about each specific function, click on the links in the lis
 or type \code{?func} in the R command line: for example, \code{?kern}.
 }
 \seealso{
-To better understand how these functions work, read about how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
+To better understand how these functions work, read about
+how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 }

@@ -2,37 +2,11 @@
 % Please edit documentation in R/Rhythm.R
 \name{rhythmFunctions}
 \alias{rhythmFunctions}
-\alias{recip}
-\alias{duration}
 \title{Manipulate pitch data}
-\usage{
-recip(
-  x,
-  ...,
-  Exclusive = NULL,
-  parseArgs = list(),
-  timeArgs = list(),
-  graceDurations = FALSE,
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
-)
-
-duration(
-  x,
-  ...,
-  Exclusive = NULL,
-  parseArgs = list(),
-  timeArgs = list(),
-  graceDurations = FALSE,
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
-)
-}
 \description{
 Manipulate pitch data
 }
 \seealso{
-rhythmInterval
+To better understand how these functions work,
+read about how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
 }
