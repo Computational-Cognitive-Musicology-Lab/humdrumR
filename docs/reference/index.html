@@ -441,7 +441,7 @@ representations:</p>
 
       <dl><dt>
           
-          <code><a href="time.html">bpm2ms()</a></code> <code><a href="time.html">ms2bpm()</a></code> <code><a href="time.html">seconds()</a></code> 
+          <code><a href="time.html">bpm2sec()</a></code> <code><a href="time.html">sec2bpm()</a></code> <code><a href="time.html">bpm2ms()</a></code> <code><a href="time.html">ms2bpm()</a></code> <code><a href="time.html">seconds()</a></code> <code><a href="time.html">ms()</a></code> 
         </dt>
         <dd>Basic time transformations</dd>
       </dl><dl><dt>
@@ -451,12 +451,12 @@ representations:</p>
         <dd>Rhythmic timeline of a piece</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmInterval.html">rhythmInterval</a></code> 
+          <code><a href="rhythmParsing.html">rhythmParsing</a></code> 
         </dt>
-        <dd>parse rhythmic information</dd>
+        <dd>Parsing rhythm information</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmFunctions.html">recip()</a></code> <code><a href="rhythmFunctions.html">duration()</a></code> 
+          <code><a href="rhythmFunctions.html">rhythmFunctions</a></code> 
         </dt>
         <dd>Manipulate pitch data</dd>
       </dl><dl><dt>
@@ -476,9 +476,14 @@ representations:</p>
         <dd>Sum "connected" durations</dd>
       </dl><dl><dt>
           
-          <code><a href="meter.html">meter()</a></code> <code><a href="meter.html">duple()</a></code> <code><a href="meter.html">measurex()</a></code> 
+          <code><a href="meter.html">meter()</a></code> <code><a href="meter.html">duple()</a></code> 
         </dt>
         <dd>Meter class</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tactus.html">tactus</a></code> 
+        </dt>
+        <dd>Properties of meters</dd>
       </dl><dl><dt>
           
           <code><a href="metric.html">metric()</a></code> 
@@ -491,9 +496,24 @@ representations:</p>
         <dd>Metric units</dd>
       </dl><dl><dt>
           
-          <code><a href="tactus.html">tactus</a></code> 
+          <code><a href="nbeats.html">nbeats</a></code> 
         </dt>
-        <dd>Properties of meters</dd>
+        <dd>Counting beats</dd>
+      </dl><dl><dt>
+          
+          <code><a href="semibreves.html">semibreves()</a></code> <code><a href="semibreves.html">breves()</a></code> <code><a href="semibreves.html">crotchets()</a></code> <code><a href="semibreves.html">quavers()</a></code> <code><a href="semibreves.html">semiquavers()</a></code> 
+        </dt>
+        <dd>Numeric (double) representation of durations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="recip.html">recip()</a></code> 
+        </dt>
+        <dd>Reciprocal representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="noteValue.html">noteValue()</a></code> 
+        </dt>
+        <dd>Note value representation of duration</dd>
       </dl></div><div class="section level2">
       
       <h3 id="lyrics">Lyrics<a class="anchor" aria-label="anchor" href="#lyrics"></a></h3>
@@ -611,7 +631,7 @@ contain the musical data.</p>
 
       <dl><dt>
           
-          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">order(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> 
+          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">order(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> <code><a href="rational.html">as.double(<i>&lt;fraction&gt;</i>)</a></code> <code><a href="rational.html">as.integer(<i>&lt;fraction&gt;</i>)</a></code> 
         </dt>
         <dd>Rational numbers</dd>
       </dl><dl><dt>

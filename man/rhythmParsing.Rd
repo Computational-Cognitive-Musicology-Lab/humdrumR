@@ -4,9 +4,9 @@
 \alias{rhythmParsing}
 \alias{rhythmInterval}
 \alias{rhythmInterval.default}
-\alias{rhythmInterval.numeric}
 \alias{rhythmInterval.integer}
 \alias{rhythmInterval.NULL}
+\alias{rhythmInterval.numeric}
 \alias{rhythmInterval.character}
 \title{Parsing rhythm information}
 \usage{
@@ -14,13 +14,19 @@ rhythmInterval(x, ...)
 
 \method{rhythmInterval}{default}(x, ...)
 
-\method{rhythmInterval}{numeric}(x, ...)
-
 \method{rhythmInterval}{integer}(x, ...)
 
 \method{rhythmInterval}{`NULL`}(x, ...)
 
-\method{rhythmInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+\method{rhythmInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+
+\method{rhythmInterval}{character}(
+  x,
+  ...,
+  unit = rational(1L),
+  Exclusive = NULL,
+  multiDispatch = FALSE
+)
 }
 \description{
 Parsing rhythm information

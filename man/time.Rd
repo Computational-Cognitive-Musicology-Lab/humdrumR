@@ -2,16 +2,39 @@
 % Please edit documentation in R/Rhythm.R
 \name{time}
 \alias{time}
+\alias{bpm2sec}
+\alias{sec2bpm}
 \alias{bpm2ms}
 \alias{ms2bpm}
 \alias{seconds}
+\alias{ms}
 \title{Basic time transformations}
 \usage{
-bpm2ms(bpm)
+bpm2sec(BPM, unit = 0.25)
 
-ms2bpm(ms)
+sec2bpm(sec, unit = 0.25)
 
-seconds(x, bpm)
+bpm2ms(BPM, unit = 0.25)
+
+ms2bpm(ms, unit = 0.25)
+
+seconds(
+  x,
+  ...,
+  parseArgs = list(),
+  timeArgs = list(),
+  graceDurations = FALSE,
+  inPlace = FALSE
+)
+
+ms(
+  x,
+  ...,
+  parseArgs = list(),
+  timeArgs = list(),
+  graceDurations = FALSE,
+  inPlace = FALSE
+)
 }
 \description{
 Basic time transformations

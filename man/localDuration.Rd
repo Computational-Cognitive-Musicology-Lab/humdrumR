@@ -7,7 +7,7 @@
 localDuration(
   x,
   choose = min,
-  deparser = duration,
+  deparser = semibreves,
   ...,
   Exclusive = NULL,
   parseArgs = list(),
@@ -46,7 +46,7 @@ So, if we have a file like this:\preformatted{**kern  **kern     **silbe
     *-      *-          *-     
 }
 
-The "local" duration of each record would be (in \verb{**duration}):\preformatted{**kern  **kern     **silbe   -> 1\%0
+The "local" duration of each record would be (in \verb{**recip}):\preformatted{**kern  **kern     **silbe   -> 1\%0
     4c      8g        Hum-   -> 8
      .      8f           _   -> 8
      !       !    !melisma   -> 1\%0
@@ -63,7 +63,7 @@ Note that some records are length zero (\verb{1\%0}), because they are missing a
 (In this example we are showing durations of \verb{1\%0} for comment, interpretation, and null data records. In most cases, we'd
 be doing \code{within(humData, dataTypes ='D')}, which is the default behavior, so these records wouldn't be counted at all.)
 
-\code{localDuration()} begins with a call to \code{\link[=duration]{duration()}} on the input argument \code{x}---the \code{parseArgs()} argument can be used to pass arguments to the \link[=rhythmParsing]{parser} (the \code{Exclusive} argument is passed as well).
+\code{localDuration()} begins with a call to \code{\link[=semibreves]{semibreves()}} on the input argument \code{x}---the \code{parseArgs()} argument can be used to pass arguments to the \link[=rhythmParsing]{parser} (the \code{Exclusive} argument is passed as well).
 \code{localDuration()} then groups the durations based on unique combinations of values in the \code{groupby} argument, which must be a list of
 vectors that are the same length as \code{x}.
 By default, the minimum duration within each group is returned, recycled as necassary to match the input length.
@@ -74,10 +74,10 @@ Luckily, if \code{localDuration()} is used inside a \link[=withinHumdrum]{with(i
 passed (this can be overridden by explicitely setting the argument).
 This means that \code{with(humData, localDuration(Token))} will automatically calculate the minimum duration of each record.
 
-Note that, \code{localDuration()} follows the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
+Note that, \code{localDuration()} follows the default behavior of \code{\link[=semibreves]{semibreves()}} by treating grace-notes as duration \code{0}.
 If you want to use the duration(s) of grace notes, specify \code{graceDurations = TRUE}.
 
-The output representation can be controlled using the \code{deparser} argument, defaulting to \code{\link[=duration]{duration()}}.
+The output representation can be controlled using the \code{deparser} argument, defaulting to \code{\link[=semibreves]{semibreves()}}.
 For example, \code{deparser = recip} will return the output in \verb{**recip} format.
 \code{...} arguments are passed to the deparser.
 }

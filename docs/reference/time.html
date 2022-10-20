@@ -74,11 +74,31 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bpm2ms</span><span class="op">(</span><span class="va">bpm</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">bpm2sec</span><span class="op">(</span><span class="va">BPM</span>, unit <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>
 
-<span class="fu">ms2bpm</span><span class="op">(</span><span class="va">ms</span><span class="op">)</span>
+<span class="fu">sec2bpm</span><span class="op">(</span><span class="va">sec</span>, unit <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>
 
-<span class="fu">seconds</span><span class="op">(</span><span class="va">x</span>, <span class="va">bpm</span><span class="op">)</span></code></pre></div>
+<span class="fu">bpm2ms</span><span class="op">(</span><span class="va">BPM</span>, unit <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>
+
+<span class="fu">ms2bpm</span><span class="op">(</span><span class="va">ms</span>, unit <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>
+
+<span class="fu">seconds</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  timeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  graceDurations <span class="op">=</span> <span class="cn">FALSE</span>,
+  inPlace <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span>
+
+<span class="fu">ms</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  timeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  graceDurations <span class="op">=</span> <span class="cn">FALSE</span>,
+  inPlace <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
 

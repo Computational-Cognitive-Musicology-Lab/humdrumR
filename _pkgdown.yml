@@ -140,9 +140,15 @@ reference:
   - timeline
   - rhythmInterval
   - rhythmFunctions
+  - rhythmParsing
+  - rhythmDeparsing
   - humMeter
   - localDuration
   - ioi
+  - recip
+  - semibreves
+  - noteValue
+  - seconds
   - untie
   - meter
   - measure

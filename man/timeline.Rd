@@ -58,7 +58,7 @@ The \code{Record} and \code{NData} \link[=fields]{fields} capture this ordering 
 However, many (probably most) humdrum data files contain at least some information about the relative
 duration of events, representing more detailed information about timing and rhythm.
 
-\code{timeline()} parses and input vector \code{x} as \link[=duration]{durations},
+\code{timeline()} parses and input vector \code{x} as \link[=semibreves]{durations},
 computes the \link[=sigma]{cumulative sum} of the durations, with the \code{start} argument appended to the beginning.
 The result is a \code{numeric} vector representing the total duration since the beginning of the vector (plus the value of \code{start}, which defaults to zero).
 The cumulative durations of \code{timeline()} represent musical duration units, where \code{1} equals a whole note.
@@ -73,7 +73,7 @@ into calls to \code{timeline()} or \code{timestamp()}.
 Thus, a call like \code{within(humData, timeline(Token))} will compute the correct timeline position for \emph{all}
 tokens across all spines/paths/stops---all values in the same record will be the same.
 
-Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
+Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=semibreves]{semibreves()}} by treating grace-notes as duration \code{0}.
 If you want to use the duration(s) of grace notes, specify \code{graceDurations = TRUE}.
 }
 \section{Logical start}{

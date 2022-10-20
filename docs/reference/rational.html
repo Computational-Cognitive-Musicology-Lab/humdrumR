@@ -158,9 +158,18 @@
 <span class="co"># S4 method for character</span>
 <span class="fu">as.rational</span><span class="op">(</span><span class="va">x</span>, sep <span class="op">=</span> <span class="st">"/|%"</span><span class="op">)</span>
 
+<span class="co"># S4 method for fraction</span>
+<span class="fu">as.rational</span><span class="op">(</span><span class="va">x</span>, sep <span class="op">=</span> <span class="st">"/|%"</span><span class="op">)</span>
+
 <span class="fu">fraction</span><span class="op">(</span><span class="va">numerator</span>, <span class="va">denominator</span>, sep <span class="op">=</span> <span class="st">"/"</span><span class="op">)</span>
 
-<span class="fu">as.fraction</span><span class="op">(</span><span class="va">x</span>, sep <span class="op">=</span> <span class="st">"/"</span><span class="op">)</span></code></pre></div>
+<span class="fu">as.fraction</span><span class="op">(</span><span class="va">x</span>, sep <span class="op">=</span> <span class="st">"/"</span><span class="op">)</span>
+
+<span class="co"># S3 method for fraction</span>
+<span class="fu"><a href="https://rdrr.io/r/base/double.html" class="external-link">as.double</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+
+<span class="co"># S3 method for fraction</span>
+<span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -169,8 +178,8 @@
 In other words, \(1/3 * 3 = 3\), never \(.999999999\).
 On the other hand, if our rational numbers start to have numerators or demoninators that are too large, we can run into
 integer overflow problems.
-We assume that the rational numbers we'll be using in the context of music analysis are relatively simple;
-We can safely use such numbers without any numeric inaccuracy.</p>
+Since the rational numbers we'll be using in the context of music analysis are relatively simple,
+we can safely use such numbers without any numeric inaccuracy.</p>
 <p><code>fraction</code> is a class (and associated constructor) which represents rational numbers as <code>character</code> strings.
 Unlike <code>rational</code>, the <code>fraction</code> class is not numeric and thus cannot do arithmetic.
 However, <code>fraction</code> can be converted to/from <code>rational</code>.</p>

@@ -7,7 +7,6 @@
 recip(
   x,
   ...,
-  Exclusive = NULL,
   parseArgs = list(),
   timeArgs = list(),
   graceDurations = FALSE,
@@ -23,6 +22,7 @@ read about the \link[=rhythmFunctions]{family of rhythm functions},
 or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
 
 Other {rhythm functions}: 
-\code{\link{duration}()}
+\code{\link{noteValue}()},
+\code{\link{semibreves}()}
 }
 \concept{{rhythm functions}}

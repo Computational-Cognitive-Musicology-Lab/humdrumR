@@ -2,19 +2,19 @@
 
 test_that('Basic rhythm functions work', {
   reci <- c('4a', '8b', '8.c', '4.d', NA, 'x', '16e', '16.f', '3g', '6h', '0i', '00KK', '0.J', '1LL', '2.X')
-  durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 2, 1, 0.75 )
+  durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 3, 1, 0.75 )
   
   
-  expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0', '1', '2.' ))
+  expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
   expect_equal(recip(reci, inPlace = TRUE), reci)
   
-  expect_equal(duration(reci), durs)
-  expect_equal(duration(reci, inPlace = TRUE), 
+  expect_equal(semibreves(reci), durs)
+  expect_equal(semibreves(reci, inPlace = TRUE), 
               c( '0.25a', '0.125b', '0.1875c', '0.375d', NA, 'x', '0.0625e', '0.09375f', '0.333333333333333g',
-                 '0.166666666666667h', '2i', '4KK', '2.J', '1LL', '0.75X' ))
+                 '0.166666666666667h', '2i', '4KK', '3J', '1LL', '0.75X' ))
   
   expect_equal(recip(durs), recip(reci))
-  expect_equal(duration(reci), durs)
+  expect_equal(semibreves(reci), durs)
   
 })
 
@@ -40,7 +40,7 @@ test_that("ioi and untie work correctly", {
   mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
   pairs <- with(mc$IOI,  data.frame(IOI, Token))
-  expect_true(all(Reduce('>=', lapply(pairs, duration))))
+  expect_true(all(Reduce('>=', lapply(pairs, semibreves))))
   
   # untie()
   
@@ -65,5 +65,10 @@ test_that('Examples from rhythm man are correct', {
   expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE),
                c("2a", ".",  "2a", ".", '1a', "." ))
   
+  ##
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
   
+  x <- with(chorales, table(noteValue(Token)), side = barplot(., cex.names = 2))
+  
+  expect_equal(unname(x["𝅗𝅥 "]), 222)
 })
