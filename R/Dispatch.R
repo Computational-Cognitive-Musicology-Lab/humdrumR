@@ -430,10 +430,11 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
-  
   if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
+  
+  Exclusive <- stringr::str_remove(Exclusive, '^\\*{1,2}')
   
   dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc))]
   

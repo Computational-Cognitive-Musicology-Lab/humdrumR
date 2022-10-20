@@ -20,49 +20,53 @@ Keys.R	signature.Rd			237			signature
 Lyrics.R	silbeFormat.Rd			748	X	X	silbeFormat		
 Lyrics.R	wort.Rd			960	X	X	wort		606
 Metric.R	humMeter.Rd			516	X	X	humMeter		1082
-Metric.R	measurex.Rd			423			measurex		
 Metric.R	meter.Rd			479	X	X	meter, meter.rational, meter.list, duple, meter.character		564
 Metric.R	metric.Rd	rhythm analysis tools		420	X	X	metric		208
+Metric.R	nbeats.Rd			374	Empty	Empty	nbeats, nbeats.meter, nbeats.character, nbeats.NULL		
 Metric.R	tactus.Rd	Metric functions		695	Empty	Empty	tactus, tactus.meter, tactus.character, tactus.NULL, measure, measure.meter, measure.character, measure.NULL		
 Metric.R	tatum.Rd	Metric functions		445	Empty	Empty	tatum, tatum.meter, tatum.default, tatum.rational, tatum.NULL		
 Pitch.R	LO5th.Rd	core pitch representations		1411	Yes	Minimal	LO5th		27
-Pitch.R	accidental.Rd	partial pitch functions, pitch functions		2003		Empty	accidental		59
-Pitch.R	bhatk.Rd	pitch functions, relative pitch functions		9973		Empty	bhatk		29
-Pitch.R	degree.Rd	absolute pitch functions, pitch functions, relative pitch functions		11317	Yes	Minimal	degree, deg		23
-Pitch.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions		10612		Empty	freq		20
-Pitch.R	helmholtz.Rd	absolute pitch functions, pitch functions		9987		Empty	helmholtz		201
+Pitch.R	accidental.Rd	partial pitch functions, pitch functions		2004		Empty	accidental		59
+Pitch.R	bhatk.Rd	pitch functions, relative pitch functions		9988		Empty	bhatk		29
+Pitch.R	degree.Rd	absolute pitch functions, pitch functions, relative pitch functions		11332	Yes	Minimal	degree, deg		23
+Pitch.R	freq.Rd	atonal pitch functions, frequency-based pitch functions, pitch functions		10627		Empty	freq		20
+Pitch.R	helmholtz.Rd	absolute pitch functions, pitch functions		10002		Empty	helmholtz		201
 Pitch.R	int.Rd	Lagged vector functions, relative pitch functions		13260	Yes	Yes	int, mint, hint		
-Pitch.R	interval.Rd	Lagged pitch interval functions, pitch functions, relative pitch functions		10033		Empty	interval		60
+Pitch.R	interval.Rd	Lagged pitch interval functions, pitch functions, relative pitch functions		10048		Empty	interval		60
 Pitch.R	invert.Rd	tonal transformations		338		Empty	invert		25
 Pitch.R	is.simple.Rd	Tonal feature functions		2044			is.simple, is.simple.tonalInterval, is.simple.default, is.generic, is.generic.tonalInterval		
-Pitch.R	kern.Rd	absolute pitch functions, pitch functions		11603	Yes	Yes	kern		218
-Pitch.R	lilypond.Rd	absolute pitch functions, pitch functions		10259		Empty	lilypond		15
-Pitch.R	octave.Rd	partial pitch functions, pitch functions		2001	No	Empty	octave		304
-Pitch.R	pc.Rd	atonal pitch functions, pitch functions		10211		Empty	pc		20
-Pitch.R	pitch.Rd	absolute pitch functions, pitch functions		10055		Empty	pitch		109
-Pitch.R	pitchDeparsing.Rd			29328	Yes	Mostly	pitchDeparsing		
-Pitch.R	pitchFunctions.Rd		Incomplete	4753	Yes	Yes?	pitchFunctions		52
-Pitch.R	pitchParsing.Rd			33910	Yes	Yes?	pitchParsing, tonalInterval, tonalInterval.tonalInterval, tonalInterval.logical, tonalInterval.NULL, tonalInterval.numeric, tonalInterval.character		18
-Pitch.R	quality.Rd	partial pitch functions, pitch functions		1994		Empty	quality		97
-Pitch.R	semits.Rd	atonal pitch functions, pitch functions		11829	Yes	Yes	semits, midi, cents		35
-Pitch.R	solfa.Rd	pitch functions, relative pitch functions		9998		Empty	solfa		38
-Pitch.R	solfg.Rd	absolute pitch functions, pitch functions		10119		Empty	solfg		17
-Pitch.R	step.Rd	partial pitch functions, pitch functions		2130		Empty	step		12
+Pitch.R	kern.Rd	absolute pitch functions, pitch functions		11618	Yes	Yes	kern		218
+Pitch.R	lilypond.Rd	absolute pitch functions, pitch functions		10274		Empty	lilypond		15
+Pitch.R	octave.Rd	partial pitch functions, pitch functions		2002	No	Empty	octave		304
+Pitch.R	pc.Rd	atonal pitch functions, pitch functions		10226		Empty	pc		20
+Pitch.R	pitch.Rd	absolute pitch functions, pitch functions		10070		Empty	pitch		109
+Pitch.R	pitchDeparsing.Rd			29473	Yes	Mostly	pitchDeparsing		
+Pitch.R	pitchFunctions.Rd		Incomplete	4836	Yes	Yes?	pitchFunctions		52
+Pitch.R	pitchParsing.Rd			33959	Yes	Yes?	pitchParsing, tonalInterval, tonalInterval.tonalInterval, tonalInterval.logical, tonalInterval.NULL, tonalInterval.numeric, tonalInterval.character		18
+Pitch.R	quality.Rd	partial pitch functions, pitch functions		1995		Empty	quality		97
+Pitch.R	semits.Rd	atonal pitch functions, pitch functions		11844	Yes	Yes	semits, midi, cents		35
+Pitch.R	solfa.Rd	pitch functions, relative pitch functions		10013		Empty	solfa		38
+Pitch.R	solfg.Rd	absolute pitch functions, pitch functions		10134		Empty	solfg		17
+Pitch.R	step.Rd	partial pitch functions, pitch functions		2131		Empty	step		12
 Pitch.R	tonalIntervalS4.Rd	Tonal S4 classes, core pitch representations	Needs one?	7611	Yes	Yes	tonalIntervalS4, tonalInterval-class, tint, is.tonalInterval, order.tonalInterval		53
-Pitch.R	tonh.Rd	absolute pitch functions, pitch functions		10197	Yes	Mostly	tonh		17
+Pitch.R	tonh.Rd	absolute pitch functions, pitch functions		10212	Yes	Mostly	tonh		17
 Pitch.R	transpose.Rd	tonal transformations		8048	Yes?	Yes	transpose		26
-Rational.R	rational.Rd	humdrumR numeric functions		3020	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, fraction, as.fraction		81
+Rational.R	rational.Rd	humdrumR numeric functions		3196	Yes	Ok	rational, \%R\%, numerator, denominator, numerator,rational-method, denominator,rational-method, is.rational, is.numeric,rational-method, order,rational-method, Compare,rational,rational-method, Compare,rational,ANY-method, Compare,ANY,rational-method, Summary,rational-method, prod,rational-method, abs,rational-method, sign,rational-method, max,rational-method, min,rational-method, mean,rational-method, sum,rational-method, cumsum,rational-method, as.rational, as.rational,rational-method, as.rational,matrix-method, as.rational,integer-method, as.rational,numeric-method, as.rational,logical-method, as.rational,character-method, as.rational,fraction-method, fraction, as.fraction, as.double.fraction, as.integer.fraction		81
 Read.R	extractTandem.Rd			3146	Yes	Yes	extractTandem	Needs	
 Read.R	readHumdrum.Rd			13014	Yes	Yes	knownInterpretations, readHumdrum, findHumdrum		89
 Regex.R	REparser.Rd			922	Yes	Minimal	REparser, REparse		561
 Regex.R	RegexFind.Rd			2458	Yes	Yes	RegexFind, \%~l\%, \%~i\%, \%~n\%, \%~m\%, \%~\%, \%!~\%, \%!~l\%, \%!~i\%		38
 Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, captureRE, captureUniq, orRE		559
-Rhythm.R	ioi.Rd			3579	Yes	Yes	ioi, untie		
-Rhythm.R	localDuration.Rd	rhythm analysis tools		4478	Yes	Yes	localDuration		
-Rhythm.R	rhythmFunctions.Rd			564	X	X	rhythmFunctions, recip, duration		575
-Rhythm.R	rhythmInterval.Rd			623	X	X	rhythmInterval, rhythmInterval.default, rhythmInterval.numeric, rhythmInterval.integer, rhythmInterval.NULL, rhythmInterval.character		56
-Rhythm.R	time.Rd			269	X	X	time, bpm2ms, ms2bpm, seconds		167
-Rhythm.R	timeline.Rd	rhythm analysis tools		5115	Yes	Yes	timeline, timestamp		
+Rhythm.R	ioi.Rd			3581	Yes	Yes	ioi, untie		
+Rhythm.R	localDuration.Rd	rhythm analysis tools		4489	Yes	Yes	localDuration		
+Rhythm.R	noteValue.Rd	rhythm functions		3052	Yes	Minimal	noteValue		
+Rhythm.R	recip.Rd	rhythm functions		3279	Yes	Yes	recip		
+Rhythm.R	rhythmDeparsing.Rd			3748	Yes	Minimal	rhythmDeparsing		
+Rhythm.R	rhythmFunctions.Rd			3986	Yes	Minimal	rhythmFunctions		575
+Rhythm.R	rhythmParsing.Rd			6908	Yes	Minimal	rhythmParsing, rhythmInterval, rhythmInterval.default, rhythmInterval.integer, rhythmInterval.NULL, rhythmInterval.numeric, rhythmInterval.character		
+Rhythm.R	semibreves.Rd	rhythm functions		2987	Yes	Missing some	semibreves, breves, crotchets, quavers, semiquavers		
+Rhythm.R	time.Rd	rhythm functions		1227	X	X	time, bpm2sec, sec2bpm, bpm2ms, ms2bpm, seconds, ms		167
+Rhythm.R	timeline.Rd	rhythm analysis tools		5121	Yes	Yes	timeline, timestamp		
 Struct.R	struct.Rd			8357	Yes?	Yes	struct, is.struct		67
 Subset.R	indexHumdrum.Rd			7136	Yes	Yes	indexHumdrum, [,humdrumR,missing,ANY-method, [,humdrumR,numeric,ANY-method, [,humdrumR,character,ANY-method, [[,humdrumR,numeric,missing-method, [[,humdrumR,missing,numeric-method, [[,humdrumR,character,missing-method, [[,humdrumR,missing,character-method, [[,humdrumR,ANY,ANY-method		571
 Subset.R	subset.humdrumR.Rd		Filtering	4318	Yes	Yes	subset.humdrumR, subset, clearFilter, removeEmptyFiles, removeEmptySpines, removeEmptyPaths, removeEmptyRecords, removeEmptyStops		23

@@ -16,6 +16,10 @@ test_that('Basic rhythm functions work', {
   expect_equal(recip(durs), recip(reci))
   expect_equal(semibreves(reci), durs)
   
+  ## scale argument
+  x <- c(1 / (1:10), 1:10)
+  expect_true(all(semibreves(x, scale = 1/x) == 1))
+  
 })
 
 
@@ -55,6 +59,16 @@ test_that("ioi and untie work correctly", {
 })
 
 test_that('Examples from rhythm man are correct', {
+  expect_equal(semibreves('4.ee-['), 0.375)
+  expect_equal(semibreves('4.ee-[', inPlace = TRUE), '0.375ee-[')
+  
+  expect_equal(seconds('4.'), 1.5)
+  expect_equal(pitch('4.', Exclusive = 'notevalue'), NA_character_)
+  
+  expect_equal(recip('2', scale = 1/16), '32')
+  
+  
+  expect_equal(recip('4%5', sep ='/'), '4/5')
   
   expect_equal(untie(c('[4a', '4a]', '2g')), 
                c('2a', '.', '2g'))

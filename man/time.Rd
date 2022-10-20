@@ -10,19 +10,20 @@
 \alias{ms}
 \title{Basic time transformations}
 \usage{
-bpm2sec(BPM, unit = 0.25)
+bpm2sec(BPM, scale = 0.25)
 
-sec2bpm(sec, unit = 0.25)
+sec2bpm(sec, scale = 0.25)
 
-bpm2ms(BPM, unit = 0.25)
+bpm2ms(BPM, scale = 0.25)
 
-ms2bpm(ms, unit = 0.25)
+ms2bpm(ms, scale = 0.25)
 
 seconds(
   x,
   ...,
+  BPM = "*M60",
+  scale = 1,
   parseArgs = list(),
-  timeArgs = list(),
   graceDurations = FALSE,
   inPlace = FALSE
 )
@@ -30,12 +31,28 @@ seconds(
 ms(
   x,
   ...,
+  BPM = "*M60",
+  scale = 1,
   parseArgs = list(),
-  timeArgs = list(),
   graceDurations = FALSE,
   inPlace = FALSE
 )
 }
-\description{
-Basic time transformations
+\arguments{
+\item{BPM}{A \code{character} string (which may or may not be be prefixed with \code{"*MM"}) or numeric values,
+which are interpreted as a beats-per-minute value.}
 }
+\description{
+Functions for translating rhythmic values to/from specific timespans.
+The \code{BPM} (beats-per-minute) argument translates between rhythmic values (determined by \code{scale} argument)
+and seconds/milliseconds.
+As is convention, the "beats" in beats-per-minute are take to by quarter-note (\code{\link[=crotchet]{crotchet()}}) beats:
+i.e., \code{scale / 4}.
+}
+\seealso{
+Other {rhythm functions}: 
+\code{\link{noteValue}()},
+\code{\link{recip}()},
+\code{\link{semibreves}()}
+}
+\concept{{rhythm functions}}

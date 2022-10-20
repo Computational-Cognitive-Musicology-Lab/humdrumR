@@ -567,9 +567,12 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' Various pitch representations like `**kern`, `**solfa`, and `**semits` can be generated using predefined [pitch functions][pitchFunctions] like [kern()]
 #' [semits()], and [solfa()] respectively.
 #' All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-#' to the deparser.
+#' to the deparser.a
 #' By modifying these *"deparsing" arguments*, you can exercise 
 #' fine control over how you want pitch information to be represented in your output.
+#' *This* documentation talks about this deparsing step.
+#' For an overview of the parsing process, look [here][pitchParsing].
+
 #' 
 #' @section Basic pitch arguments:
 #' 
@@ -661,7 +664,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' check out the [transpose()] docs for more details!
 #' 
 #' 
-#' ### In-place parsing
+#' ## In-place parsing
 #' 
 #' In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
@@ -673,7 +676,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
 #' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
 #' (This obviously only works if the input is a string, not a numeric!)
-#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return numeric values, to return character strings
+#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a character string.
 #' 
 #' @section Deparsing arguments:
@@ -1576,8 +1579,8 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' # Dispatch
 #' 
-#' The pitch parser (`tonalInterval`) is a generic function, meaning it can accepts a variety of inputs 
-#' and automatically "dispatches" the appropriate method for parsing the input.
+#' The pitch parser (`tonalInterval()`) is a generic function, meaning it accepts a variety of inputs 
+#' and automatically "dispatches" the appropriate method for parsing ehe input.
 #' R's standard `S3` system is used to dispatch for either `numeric` or `character`-string input:
 #' Generally, `numeric` (or `integer`) inputs are interpreted as various *atonal* pitch representations while
 #' `character` strings are interpreted as various *tonal* pitch representations.
@@ -1589,9 +1592,9 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Since humdrum data is inherently string-based, the most powerful part of the `humdrumR` pitch-parser
 #' is its system for parsing pitch (mostly tonal) information from character strings.
 #' (This includes character tokens with pitch information embedded alongside other information; Details below.)
-#' The pitch parser (`tonalInterval`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
+#' The pitch parser (`tonalInterval()`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
 #' parse an input string.
-#' There are twelve regular-expression patterns for pitch that `tonalInterval` knows how to parse automatically:
+#' There are twelve regular-expression patterns for pitch that `tonalInterval()` knows how to parse automatically:
 #' 
 #' | Representation                                                                     | Exclusive                 | Example          |
 #' | ---------------------------------------------------------------------------------- | ------------------------: | ---------------: |
@@ -1610,7 +1613,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Exclusive Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
 #' that `Exclusive` argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the 
 #' table above.
 #' For example, `kern(x, Exclusive = 'solfa')` will force the parser to interpret `x` as `**solfa` data.
@@ -1622,7 +1625,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Regex Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
 #' or `NULL`, `humdrumR` will instead use regular-expression patterns to select a known interpretation.
 #' For example, `pitch('so')` will automatically recognize that `'so'` is solfege, and will interpret the data accordingly (the output should be `r pitch('so')`).
 #' If there are more than one matches, `humdrumR` will use the longest match, and if they tie, pick based on the order in the table above (topmost first).
@@ -1636,7 +1639,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
-#' The `humdrumR` parser (`tonalInterval`) will automatically "pull out" pitch information from within strings, if it can find any, 
+#' The `humdrumR` pitch parser (`tonalInterval()`) will automatically "pull out" pitch information from within strings, if it can find any, 
 #' using the appropriate known regular expressions.
 #' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
@@ -2027,7 +2030,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' kern('E x 5', parse(doublesharp = 'x', sep = ' '))
 #' 
-#' #' @returns 
+#' @returns 
 #' 
 #' `tonalInterval()` returns a [tonalInterval][tonalIntervalS4] object of the same
 #' length and dimensions as `x`.
@@ -2590,8 +2593,13 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 
 #' Translate between pitch representations.
 #' 
-#' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-#' The functions are:
+#' These functions are used to extract and translate between different representations
+#' of pitch information.
+#' The functions can also do things like transposing and simplifying pitches.
+#' 
+#' @details 
+#' 
+#' The full list of pitch functions is:
 #' 
 #' ```{r echo = FALSE, results = 'asis'}
 #' 
@@ -2608,23 +2616,6 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' 
 #' ```
 #' 
-#'     
-#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
-#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
-#'        There are also two hidden (advanced) argumens you can specify: `memoize` and `deparse` (see the details below).
-#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
-#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
-#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
-#'        the parser, deparser, and transposer.
-#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
-#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
-#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
-#'  
-#'     
-#' @details
 #' 
 #' These pitch functions all work in similar ways, with similar arguments and functionality.
 #' Each function takes an input pitch representation (which can be anything) and outputs
@@ -2646,6 +2637,20 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
 #'     
+#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
+#'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
+#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
+#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
+#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
+#'        the parser, deparser, and transposer.
+#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
+#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
+#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
+#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
+#' 
 #' 
 #' @returns 
 #' 
@@ -2724,11 +2729,12 @@ makePitchTransformer <- function(deparser, callname,
   args <- c(alist(x = , 
                   ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
                   generic = FALSE, simple = FALSE, octave.relative = FALSE, 
-                  Key = NULL,
-                  transposeArgs = list(),
+                  Key = NULL),
+            extraArgs,
+            alist( transposeArgs = list(),
                   parseArgs = list(), 
-                  inPlace = FALSE),
-            extraArgs)
+                  inPlace = FALSE))
+
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))

@@ -2,9 +2,83 @@
 % Please edit documentation in R/Rhythm.R
 \name{rhythmFunctions}
 \alias{rhythmFunctions}
-\title{Manipulate pitch data}
+\title{Translate between rhythm representations.}
+\arguments{
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
+value.}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
+If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+}
 \description{
-Manipulate pitch data
+These functions are used to extract and translate between different representations
+of rhythmic (time duration) information.
+}
+\details{
+The full list of rhythm functions is:
+\itemize{
+\item \strong{Metric rhythm representations}
+\itemize{
+\item \emph{Symbolic rhythm representations}
+\itemize{
+\item \code{\link[=recip]{recip()}} (reciprocal note values)
+\item \code{\link[=noteValue]{noteValue()}} (traditional note-value symbols)
+}
+\item \emph{Numeric rhythm representations}
+\itemize{
+\item \code{\link[=breves]{breves()}} (double whole notes)
+\item \code{\link[=semibreves]{semibreves()}} (whole notes)
+\item \code{\link[=crotchets]{crotchets()}} (quarter notes)
+\item \code{\link[=quavers]{quavers()}} (eighth notes)
+\item \code{\link[=semiquavers]{semiquavers()}} (sixteenth notes)
+}
+}
+\item \strong{Ametric rhythm representations}
+\itemize{
+\item \emph{Symbolic rhythm representations}
+\itemize{
+\item \code{\link[=dur]{dur()}} (durations of time)
+}
+\item \emph{Numeric rhythm representations}
+\itemize{
+\item \code{\link[=seconds]{seconds()}}
+\item \code{\link[=ms]{ms()}} (milliseconds)
+}
+}
+}
+
+These rhythm functions all work in similar ways, with similar arguments and functionality.
+Each function takes an input rhythm (time duration) representation (which can be anything) and outputs
+\emph{its} own rhythm representation.
+For example, \code{\link[=recip]{recip()}} takes any input representation and outputs \verb{**recip}
+(\href{https://www.humdrum.org/rep/recip/index.html}{reciprocal durations}) data.
+Underneath the hood, the full processing of each function looks like this:
+\itemize{
+\item \strong{Input} representation (e.g., \verb{**recip} or \verb{**dur}) \verb{|>}
+\itemize{
+\item \emph{Parsing} (done by \code{\link[=rhythmInterval]{rhythmInterval()}}) \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link{rational}) representation \verb{|>}
+}
+\item \emph{Deparsing} \verb{|>}
+}
+\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**semibreve})
+}
+
+To read the details of the parsing step, read \link[=rhythmParsing]{this}.
+To read the details of the "deparsing" step, read \link[=rhythmDeparsing]{this}.
+To read more details about each specific function, click on the links in the list above,
+or type \code{?func} in the R command line: for example, \code{?noteValue}.
 }
 \seealso{
 To better understand how these functions work,

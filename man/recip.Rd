@@ -7,14 +7,52 @@
 recip(
   x,
   ...,
+  sep = "\%",
+  scale = new("rational", Numerator = 1L, Denominator = 1L, dim = NULL, rownames =
+    NULL, colnames = NULL),
   parseArgs = list(),
-  timeArgs = list(),
   graceDurations = FALSE,
   inPlace = FALSE
 )
 }
+\arguments{
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{sep}{(\code{character}, \code{length == 1}) A \code{character} string to use as the separator
+between denominator and numerator.}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
+value.}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
+If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+}
 \description{
-Reciprocal representation of duration
+The standard approach to representing conventional note values in humdrum
+is the "reciprocal" \href{https://www.humdrum.org/rep/recip/index.html}{**recip}.
+Representation.
+The \verb{**recip} rhythmic values are often used as a part of \verb{**kern} representation,
+which also includes \link[=kern]{pitch} information and notation details.
+}
+\details{
+\verb{**recip} values are literally the reciprocal of a duration value.
+Since most note values in conventional music notation are simple fractions
+the reciprocal approach is highly concise and very similar to conventional western notation and terminology.
+A "quarter note" is represented as the reciprocal of 1/4: simply \code{"4"}.
+Full reciprocal fractions can be specified: \code{"2\%3"} to indicate 3/2.
+The \verb{\%} separator can be changed using the \code{sep} argument.
+
+As in conventional \link[=noteValue]{note values}, "dots" can be added after a value to increase the duration by
+the ratio of \code{(2 - (2^{-n}))}, where \code{n} is the number of dots.
+(One dot is 3/2; two dots is 7/4; etc.).
 }
 \seealso{
 To better understand how this function works,
@@ -23,6 +61,7 @@ or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{dep
 
 Other {rhythm functions}: 
 \code{\link{noteValue}()},
-\code{\link{semibreves}()}
+\code{\link{semibreves}()},
+\code{\link{time}()}
 }
 \concept{{rhythm functions}}
