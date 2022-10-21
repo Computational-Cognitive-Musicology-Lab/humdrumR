@@ -84,10 +84,11 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     
     if (reverse) matches <- rev(matches)
     
-    if (toEnv) list2env(matches, parent.frame())
+    matches <- lapply(matches, `names<-`, value = NULL)
     
+    if (toEnv) list2env(matches, parent.frame())
+
     output <- do.call('cbind', matches)
-    # if (length(str) > 0L) rownames(output) <- str
     
     if (toEnv) invisible(output) else output
     
@@ -688,6 +689,20 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 
 #### REs for durations ####
+
+makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.', collapse = TRUE) {
+  number <- '[0-9]*'
+  
+  REs <- list(prefix = captureRE(c('~', '>', '<'), n = '?'),
+              datetime = paste0('(', number, sep.date, '){0,3}',
+                                '(', number, sep.time, '){0,2}',
+                                number),
+              decimal = paste0('(', sep.decimal, '[0-9]+)?'))
+  
+  if (collapse) setNames(cREs(REs), 'dur') else REs
+  
+  
+}
 
 makeRE.recip <- function(collapse = TRUE, grace = TRUE, fractions = TRUE, sep = '%', ...) {
   REs <- list(grace = if (grace) '[Qq]?',

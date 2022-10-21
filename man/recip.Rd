@@ -61,7 +61,6 @@ or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{dep
 
 Other {rhythm functions}: 
 \code{\link{noteValue}()},
-\code{\link{semibreves}()},
-\code{\link{time}()}
+\code{\link{semibreves}()}
 }
 \concept{{rhythm functions}}

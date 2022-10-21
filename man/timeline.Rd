@@ -9,6 +9,7 @@ timeline(
   x,
   start = 0,
   ...,
+  scale = 1,
   Exclusive = NULL,
   parseArgs = list(),
   groupby = list()
@@ -18,7 +19,7 @@ timestamp(
   x,
   BPM = "MM60",
   start = 0,
-  minutes = FALSE,
+  minutes = TRUE,
   ...,
   Exclusive = NULL,
   parseArgs = list(),

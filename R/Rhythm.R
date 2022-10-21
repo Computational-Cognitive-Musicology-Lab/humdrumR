@@ -35,8 +35,70 @@ bpm2ms <- function(BPM, scale = .25) bpm2sec(BPM, scale) * 1000
 ms2bpm <- function(ms, scale = .25) sec2bpm(ms / 1000, scale)
 
 
-
-
+#' @rdname time
+#' @export
+sec2dur <- function(x, 
+                    minutes = FALSE,
+                    hours = FALSE,
+                    days = FALSE,
+                    months = FALSE,
+                    years = FALSE,
+                    milliseconds = TRUE,
+                    trim = TRUE,
+                    sep.date = '/', sep.time = ':', sep.decimal = '.') {
+  
+  secsPerUnit <- rev(cumprod(c(1, 60, 60, 24, 365)))
+  
+  counts <- outer(x, secsPerUnit, `%/%`)
+  
+  modulo <- c(365,  24, 60, 60)
+  counts[ , -1] <- sweep(counts[ , -1, drop = FALSE], 2, modulo, '%%')
+  
+  
+  units <- c(years | months, days, hours, minutes)
+  if (any(!units)) {
+    for (j in which(!units)) {
+      counts[ , j + 1] <- counts[ , j + 1] + counts[ , j] * modulo[j]
+    }
+    counts <- sweep(counts, 2, c(units, TRUE), '*')
+  }
+  
+  ##
+  counts <- cbind(counts[ , 1, drop = FALSE], 0, counts[ , -1, drop = FALSE])
+  if (months) {
+    for (j in 3:6) {
+      mods <- c(30, 30 * 24, 30 * 24 * 60, 30 * 24 * 3600)
+      if (units[j - 1]) {
+        counts[ , 2] <- counts[ , 2] + counts[ , j] %/% mods[j - 2]
+        counts[ , j] <- counts[ , j] %% mods[j - 2]
+        break
+      }
+    }
+  }
+  
+  ## output format
+  counts[] <- format(counts, scientific = FALSE, trim = TRUE)
+  counts[counts == '0'] <- ''
+  
+  output <- paste0(applyrows(counts[ , 1:3, drop = FALSE], paste, collapse = sep.date),
+                   sep.date,
+                   applyrows(counts[ , 4:6, drop = FALSE], paste, collapse = sep.time))
+  
+  if (trim) {
+    output <- stringr::str_replace(output, paste0('^', sep.date, '+', sep.time, '+'), sep.time)
+    output <- stringr::str_replace(output, paste0('^', sep.date, '{3}'), '')
+    output <- stringr::str_replace(output, paste0(sep.date, '+', sep.time, '+', '$'), sep.date)
+  }
+  
+  if (milliseconds) {
+    
+    milli <-  round((x %% 1) * 1000)
+    if (trim) milli[milli == 0] <- ''
+    output <- paste0(output, ifelse(milli == '', '', sep.decimal), milli)
+  } 
+  
+  output
+}
 
 
 ###################################################################### ###
@@ -114,6 +176,18 @@ NULL
 
 ### Symbolic ####
 
+rint2dur <- function(x, sep.time = ':', 
+                     sep.date = '/', sep.decimal = '.',
+                     BPM = 60, scale = 1,
+                     ...) {
+  
+  secs <- rint2seconds(x, BPM = BPM, scale = scale)
+  
+  sec2dur(secs, 
+          sep.time = sep.time, sep.date = sep.date, sep.decimal = sep.decimal,
+          ...)
+
+}
 
 rint2recip <- function(x, sep = '%', scale = rational(1L)) {
           #modify this to print 0 and 00
@@ -359,6 +433,54 @@ NULL
 
 ### Symbolic ####
 
+
+
+dur2rint <- function(x, 
+                     sep.time = ':', 
+                     sep.date = '/', sep.decimal = '\\.',
+                     BPM = 60, scale = 1, ...) {
+  REparse(x, 
+          makeRE.dur(collapse = FALSE, sep.time = ':', sep.date = '/', sep.decimal = '\\.'), 
+          toEnv = TRUE)
+  
+  datetimes <- strsplit(datetime, split = '')
+  
+  datetimes <- sapply(datetimes, 
+                \(dt) {
+               
+                  
+                  time <- dt == sep.time
+                  date <- dt == sep.date
+                  
+                  
+                  
+                  groups <- if (any(time | date)) cumsum(time | date) else rep(6, length(dt))
+                  
+                  if (any(time)) {
+                    groups <- groups + (6L - (sum(time | date)))
+                  }
+                  if (any(date)) {
+                    groups <- groups + 1 - (3 - sum(time)) * any(time)
+                  }
+                  
+                  as.integer(tapply(dt[!(time | date)],
+                                    factor(groups[!(time | date)], 1:6), 
+                                    paste, collapse = ''))
+                })
+  
+  rownames(datetimes) <- c('Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds')
+  datetimes[is.na(datetimes)] <- 0
+  
+  secsPerUnit <- rev(cumprod(c(1, 60, 60, 24, 30, 365/30)))
+  secs <- colSums(sweep(datetimes, 1, secsPerUnit, '*'))
+  
+  # decimal
+  decimal[decimal == ''] <- '0'
+  secs <- secs + as.numeric(decimal)
+  
+  seconds2rint(secs, BPM = BPM, scale = scale, ...)
+}
+
 recip2rint <- function(x, graceDurations = FALSE, scale = rational(1L)) {
   
   REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes grace and recip
@@ -479,10 +601,11 @@ rhythmInterval.numeric <- makeHumdrumDispatcher(list('semibreves' ,        NA, s
 
 #' @rdname rhythmParsing
 #' @export
-rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,  recip2rint),
+rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,         recip2rint),
+                                                  list('dur',                      makeRE.dur,           dur2rint),
                                                   list('any',                      makeRE.timeSignature, timesignature2rint),
-                                                  list('semibreves',                 makeRE.double, semibreves2rint),
-                                                  list('any',                      makeRE.noteValue(), noteValue2rint),
+                                                  list('semibreves',               makeRE.double,        semibreves2rint),
+                                                  list('noteValue',                makeRE.noteValue(),   noteValue2rint),
                                                   funcName = 'rhythmInterval.character',
                                                   outputClass = 'rational')
 
@@ -747,7 +870,6 @@ semiquavers <- makeRhythmTransformer(rint2semibreves, 'semiquavers', 'numeric', 
 noteValue <- makeRhythmTransformer(rint2noteValue, 'noteValue')
 
 
-#' @family {rhythm functions}
 #' @rdname time
 #' @inheritParams rhythmFunctions
 #' @export
@@ -757,6 +879,15 @@ seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', scale = 1, 
 #' @export
 ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', scale = 1, extraArgs = alist(BPM = '*M60'))
 
+#' @rdname time
+#' @export
+dur <- makeRhythmTransformer(rint2dur, 'dur', scale = 1, extraArgs = alist(BPM = '*M60', 
+                                                                           minutes = FALSE,
+                                                                           hours = FALSE,
+                                                                           days = FALSE,
+                                                                           months = FALSE,
+                                                                           years = FALSE,
+                                                                           milliseconds = TRUE))
 
 ###################################################################### ###
 # Manipulating rhythm intervals ##########################################
@@ -823,7 +954,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   }
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'semibreves'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'semibreves', 'noteValue'))
   
   if (is.character(output)){
     if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
@@ -868,7 +999,7 @@ untie <- function(x, open = '[', close = ']', ...,
   
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'semibreves'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'semibreves', 'noteValue'))
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))
   if (is.character(output)){
@@ -1067,8 +1198,8 @@ localDuration <- function(x,  choose = min, deparser = semibreves, ..., Exclusiv
 #'   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  durations <- localDuration(x, groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive)
+timeline <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
 
   
   
@@ -1101,15 +1232,14 @@ timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), gr
 
 #' @rdname timeline
 #' @export
-timestamp <- function(x, BPM = 'MM60', start = 0, minutes = FALSE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  durations <- semibreves(x, Exclusive = Exclusive, ...)
-  seconds <- seconds(durations, as.integer(gsub('\\*?MM', '', BPM)))
+timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  seconds <- seconds(x, BPM = BPM, Exclusive = Exclusive, ...)
   
   seconds <- timeline(seconds, Exclusive = Exclusive, groupby = groupby, ...)
   
 
   
-  if (minutes) minutes(seconds) else seconds
+  dur(seconds, BPM = BPM, minutes = minutes, ...)
   
 }
 

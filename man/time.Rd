@@ -6,8 +6,10 @@
 \alias{sec2bpm}
 \alias{bpm2ms}
 \alias{ms2bpm}
+\alias{sec2dur}
 \alias{seconds}
 \alias{ms}
+\alias{dur}
 \title{Basic time transformations}
 \usage{
 bpm2sec(BPM, scale = 0.25)
@@ -17,6 +19,20 @@ sec2bpm(sec, scale = 0.25)
 bpm2ms(BPM, scale = 0.25)
 
 ms2bpm(ms, scale = 0.25)
+
+sec2dur(
+  x,
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  milliseconds = TRUE,
+  trim = TRUE,
+  sep.date = "/",
+  sep.time = ":",
+  sep.decimal = "."
+)
 
 seconds(
   x,
@@ -37,10 +53,42 @@ ms(
   graceDurations = FALSE,
   inPlace = FALSE
 )
+
+dur(
+  x,
+  ...,
+  BPM = "*M60",
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  milliseconds = TRUE,
+  scale = 1,
+  parseArgs = list(),
+  graceDurations = FALSE,
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{BPM}{A \code{character} string (which may or may not be be prefixed with \code{"*MM"}) or numeric values,
 which are interpreted as a beats-per-minute value.}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
+value.}
+
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
+If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
 }
 \description{
 Functions for translating rhythmic values to/from specific timespans.
@@ -49,10 +97,3 @@ and seconds/milliseconds.
 As is convention, the "beats" in beats-per-minute are take to by quarter-note (\code{\link[=crotchet]{crotchet()}}) beats:
 i.e., \code{scale / 4}.
 }
-\seealso{
-Other {rhythm functions}: 
-\code{\link{noteValue}()},
-\code{\link{recip}()},
-\code{\link{semibreves}()}
-}
-\concept{{rhythm functions}}
