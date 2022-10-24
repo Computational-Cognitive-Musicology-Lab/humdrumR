@@ -167,6 +167,7 @@ sec2dur <- function(x,
 #' Note that `inPlace = TRUE` will force functions like `semibreves`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a `character` string. 
 #' 
+#' 
 #' @seealso All `humdrumR` [rhythm functions][rhythmFunctions] make use of the 
 #' deparsing functionality.
 #' @name rhythmDeparsing
@@ -481,9 +482,9 @@ dur2rint <- function(x,
   seconds2rint(secs, BPM = BPM, scale = scale, ...)
 }
 
-recip2rint <- function(x, graceDurations = FALSE, scale = rational(1L)) {
+recip2rint <- function(x, scale = rational(1L)) {
   
-  REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes grace and recip
+  REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes recip
   
   # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
   recip <- gsub('^000', '1%8', recip)
@@ -503,8 +504,6 @@ recip2rint <- function(x, graceDurations = FALSE, scale = rational(1L)) {
   rint <- rational * dotscale
   
   rint <- rint / rhythmInterval(scale)
-  if (!graceDurations) rint[grace != ''] <- rint[grace != ''] * 0
-  
   
   rint
   
@@ -669,6 +668,20 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?noteValue`.
 #' 
+#' ## Grace notes
+#' 
+#' The `grace` controls the output associated with grace notes.
+#' In humdrum data, grace notes are marked with `"q"` or `"Q"`; `q` should be reserved
+#' for tokens with no (other) duration information, while `Q` should be marked along with
+#' duration information: for example, `aa-q` or `16aa-Q`.
+#' In practice, this distinction is not always made, and is rarely important.
+#' 
+#' If `grace = TRUE`, grace-note durations (like the `16` in `"16aa-Q"`) are parsed like any other duration
+#' and included in the output with a `"q"` appended to them.
+#' If `grace = FALSE` or `grace = NA`, grace-notes return as `NA`.
+#' The `grace` argument can also be any other atomic value, which is returned for grace notes:
+#' the most common use is to return grace notes as having zero duration, by specifying `grace = 0`.
+#' 
 #' 
 #' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [rational (rhythmInterval)][rational], or `NULL`.
 #' @param ... These arguments are passed to the [rhythm deparser][rhythmDeparsing]. 
@@ -676,6 +689,7 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' @param scale A `numeric` or [rational] value which is used as the output unit of measurement: the default value for most functions
 #'   is `rational(1, 1)`, a whole-note or "semibreve." The [breves()], [crotchets()], [quavers()], and [semiquavers()] each use a different default
 #'   value.
+#' @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
 #' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [rhythm parser][rhythmParsing].
 #' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
 #'        *and* there is extra, non-duration information in the input strings "besides" the rhythm information.
@@ -714,7 +728,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             list(scale = scale),
             alist(parseArgs = list(), 
-                  graceDurations = FALSE,
+                  grace = NA,
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -748,12 +762,19 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     ############# #
     ### Parse
     ############# #
+   if (is.character(x)) {
+     graceNotes <- stringr::str_detect(x, '[Qq]')
+      x <- stringr::str_remove(x, '[qQ]')
+    } else {
+      graceNotes <-  FALSE
+    }
     
     parsedRint <- do(rhythmInterval, 
                      c(list(x), parseArgs), 
                      memoize = memoize, 
                      outputClass = 'rational')
     
+  
     
     deparseArgs <- c(list(parsedRint), deparseArgs)
     output <- if (deparse && is.rational(parsedRint))  do(!!deparser, 
@@ -762,10 +783,21 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
                                                           outputClass = !!outputClass) else parsedRint
     if (deparse && !is.null(output)) {
       dispatch <- attr(parsedRint, 'dispatch')
+      
       if (inPlace) output <- rePlace(output, dispatch)
+      
+      if (any(graceNotes) && !(!is.na(grace) && is.logical(grace) && grace)) {
+        output[graceNotes] <- grace 
+      } else {
+        output[graceNotes] <- paste0(output[graceNotes], 'q')
+      }
+      
       
       if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
+    
+    
+
     
     output
     
@@ -1090,7 +1122,7 @@ minutes <- function(seconds, format = TRUE) {
 #' This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
 #' 
 #' Note that, `localDuration()` follows the default behavior of [semibreves()] by treating grace-notes as duration `0`.
-#' If you want to use the duration(s) of grace notes, specify `graceDurations = TRUE`.
+#' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
 #'
 #' The output representation can be controlled using the `deparser` argument, defaulting to [semibreves()].
 #' For example, `deparser = recip` will return the output in `**recip` format.
@@ -1165,7 +1197,7 @@ localDuration <- function(x,  choose = min, deparser = semibreves, ..., Exclusiv
 #' 
 #' 
 #' Note that, `timeline()` and `timestamp()` follow the default behavior of [semibreves()] by treating grace-notes as duration `0`.
-#' If you want to use the duration(s) of grace notes, specify `graceDurations = TRUE`.
+#' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
 #' 
 #' @section Logical start:
 #' 
