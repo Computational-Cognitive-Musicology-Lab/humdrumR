@@ -696,6 +696,15 @@ NULL
 rhythmArgCheck <- function(args, callname) {
   argnames <- .names(args)
   
+  if ('count' %in% argnames) {
+    checkTF(args$count, 'count', callname)
+  }
+ 
+  if ('remainder' %in% argnames) {
+    checkTF(args$remainder, 'remainder', callname)
+  }
+
+  
   if ('scale' %in% argnames){
     args$scale <- rhythmInterval(args$scale[1])
     if (is.null(args$scale) || is.na(args$scale)) .stop("In your call to {callname}, your 'scale' argument cannot be parsed by rhythmInterval().")
@@ -726,6 +735,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             alist(parseArgs = list(), 
                   scale = 1, unit = 1, grace = NA,
+                  count = TRUE, remainder = TRUE, 
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -740,8 +750,8 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
                                                parse = parseArgs)
     
     formalArgs <- list(!!!fargcall)
-    namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
-    namedArgs$scale <- namedArgs$scale %||% formalArgs$scale
+    namedArgs <- formalArgs[names(formalArgs) %in% names(as.list(match.call())[-1])] 
+    # namedArgs$scale <- namedArgs$scale %||% formalArgs$scale
     # There are three kinds of arguments: 
     # ... arguments (now in args...), 
     # FORMAL arguments, if specified (now in namedArgs)
@@ -750,7 +760,9 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive
     
     parseArgs   <- rhythmArgCheck(parseArgs, !!callname)
-    deparseArgs <- rhythmArgCheck(c(args..., namedArgs), !!callname)
+    deparseArgs <- rhythmArgCheck(c(args..., 
+                                    namedArgs, 
+                                    formalArgs[!names(formalArgs) %in% names(namedArgs)]), !!callname)
     
     # memoize % deparse
     memoize <- args...$memoize %||% TRUE
@@ -780,6 +792,11 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     ## scaling
     if (scale != 1L) parsedRint <- parsedRint * scale
     
+    
+    ## remainder
+    parsedRint <- do(euclid, c(list(parsedRint), deparseArgs))
+    
+    
     deparseArgs <- c(list(parsedRint), deparseArgs)
     output <- if (deparse && is.rational(parsedRint))  do(!!deparser, 
                                                           deparseArgs, 
@@ -806,6 +823,15 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
   })) %class% 'rhythmFunction'
 }
 
+
+euclid <- function(rint, count.round = floor, count = TRUE, remainder = TRUE) {
+  if (count && remainder) return(rint)
+  if (!(count || remainder)) return(rint * rational(0L))
+  
+  count <- count.round(rint)
+  
+  if (remainder) rint - count else count
+}
 
 ### Rhythm functions ####
 

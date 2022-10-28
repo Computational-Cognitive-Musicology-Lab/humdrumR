@@ -275,7 +275,7 @@ metricPlot <- function(metric) {
 # 
 # Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
 # how many beats have passed, and the offset between each attack and the nearest beat.
-measurex <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
+count <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
   
   # soi <- SOI(durations)$Onset
   

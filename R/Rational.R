@@ -224,6 +224,42 @@ setMethod('mean', 'rational', \(x) {
     sum(x) / rational(length(x))
 })
 
+#### Rounding ----
+
+#' @rdname rational
+#' @export
+setMethod('round', 'rational', 
+          \(x) {
+              rational(round(x@Numerator / x@Denominator), 1L)
+          })
+
+#' @rdname rational
+#' @export
+setMethod('floor', 'rational', 
+          \(x) {
+              rational(floor(x@Numerator / x@Denominator), 1L)
+})
+
+#' @rdname rational
+#' @export
+setMethod('ceiling', 'rational', 
+          \(x) {
+              rational(ceiling(x@Numerator / x@Denominator), 1L)
+          })
+
+#' @rdname rational
+#' @export
+setMethod('trunc', 'rational', 
+          \(x) {
+              rational(trunc(x@Numerator / x@Denominator), 1L)
+          })
+
+#' @rdname rational
+#' @export
+setMethod('expand', 'rational', 
+          \(x) {
+              rational(expand(x@Numerator / x@Denominator), 1L)
+          })
 
 
 
@@ -367,6 +403,7 @@ setMethod('%%', signature = c(e1 = 'rational', e2 = 'rational'),
           function(e1, e2) {
               e1 - (e2 * (e1 %/% e2))
           })
+
 
 
 

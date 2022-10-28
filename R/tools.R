@@ -1590,9 +1590,11 @@ delta.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' 
 #' @export
-expand <- function(x) {
-    .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
-}
+setGeneric('expand', def = \(x) {
+  .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
+})
+
+         
 
 locate <- function(x, table) {
     if (is.null(dim(table)) || length(dim(x)) == 1) {
