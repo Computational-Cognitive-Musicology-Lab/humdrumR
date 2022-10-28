@@ -436,7 +436,7 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   
   Exclusive <- stringr::str_remove(Exclusive, '^\\*{1,2}')
   
-  dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc))]
+  dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc)), ]
   
   
 
