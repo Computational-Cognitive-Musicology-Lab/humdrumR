@@ -271,44 +271,67 @@ metricPlot <- function(metric) {
 
 # normalizeMeasures <- function(dur, )
 
-# Measure
+# Count the number of beats in a duration
 # 
-# Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
 # how many beats have passed, and the offset between each attack and the nearest beat.
-count <- function(soi, beat = rational(1L), start = as(0, class(dur)), phase = rational(0L), Bar = NULL) {
+count <- function(durs, beat = rational(1L), 
+                  phase = rational(0L), beat.round = floor) {
   
-  # soi <- SOI(durations)$Onset
+  durs <- rhythmInterval(durs)
+  
+  beat <- rhythmInterval(beat)
+  totalTatum <- sum(beat)
+  #
+
+  
+  mcount <- beat.round((durs + phase) / totalTatum) 
+  
+  if (length(beat) > 1L) {
+    
+    beatoff <- sigma(beat)
+    mremain <- ((durs + phase) - totalTatum * mcount)
+    
+    subcount <-  outer(beatoff, mremain, '<=') |> colSums()
+    mcount <- mcount * length(beat) + subcount
+    
+    
+    # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
+    
+  }
+  
+  numerator(mcount)
+}
+
+
+subpos <- function(durs, beat = rational(1L), deparser = recip, 
+                   phase = rational(0L), beat.round = floor, Bar = NULL) {
+  
+  durs <- rhythmInterval(durs)
   
   beat <- rhythmInterval(beat)
   totalTatum <- sum(beat)
   
+  mcount <- beat.round((durs + phase) / totalTatum) 
   
-  # 
-  if (!is.null(Bar) & any(Bar > 0, na.rm = TRUE)) {
-    soi <- soi - soi[which(Bar > 0)[1]]
-  }
-  
-  mcount <- ((soi + phase) %/% totalTatum) 
-  mremain <- ((soi + phase) - totalTatum * mcount)
-  
+  mremain <- ((durs + phase) - totalTatum * mcount)
   
   if (length(beat) > 1L) {
     
-    beatoff <- SOI(beat)
+    beatoff <- sigma(beat)
+    mremain <- ((durs + phase) - totalTatum * mcount)
     
-    subcount <-  outer(beatoff$Off, mremain, '<=') |> colSums()
+    subcount <-  outer(beatoff, mremain, '<=') |> colSums()
     mcount <- mcount * length(beat) + subcount
     
     
-    mremain <- mremain - (beatoff$On[1L + subcount])
+    mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
     
   }
   
-  output <- .data.frame(N = mcount, SOI = mremain)
-  
-  attr(output, 'beat') <- beat
+  deparser(mremain)
+  # 
 
-  output
+  
 }
 
 
