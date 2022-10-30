@@ -20,13 +20,7 @@ rhythmInterval(x, ...)
 
 \method{rhythmInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
-\method{rhythmInterval}{character}(
-  x,
-  ...,
-  scale = rational(1L),
-  Exclusive = NULL,
-  multiDispatch = FALSE
-)
+\method{rhythmInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} rhythm (time duration) information:
@@ -34,7 +28,7 @@ various basic rhythm representations (including \code{numeric} and \code{charact
 representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=rhythmFunctions]{rhythm function},
-like \code{\link[=recip]{recip()}}, \code{\link[=dur]{dur()}}, or \code{\link[=semibreves]{semibreves()}}.
+like \code{\link[=recip]{recip()}}, \code{\link[=dur]{dur()}}, or \code{\link[=duration]{duration()}}.
 }
 \details{
 The underlying parser used by all \code{humdrumR} \link[=rhythmFunctions]{rhythm functions} can be called explicitly using the function \code{rhythmInterval()}.
@@ -52,7 +46,7 @@ Thus, the underlying pipeline for \code{humdrumR} \link[=rhythmFunctions]{rhythm
 }
 \item \emph{Deparsing} \verb{|>}
 }
-\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**semibreves})
+\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**duration})
 }
 
 \emph{This} documentation talks about the parsing step.
@@ -100,7 +94,7 @@ you don't need to explicitly do anything with the \code{Exclusive} argument!
 If you call \code{rhythmInterval()} (or \emph{any} \link[=rhythmFunctions]{rhythm function}) on a \code{character}-string vector, but the \code{Exclusive} argument is missing
 or \code{NULL}, \code{humdrumR} will instead use regular-expression patterns to select a known interpretation.
 For example, \code{seconds('4.')} will automatically recognize that \code{'4.'} is a \verb{**recip} token, and will interpret the
-data accordingly (the output should be 1.5).
+data accordingly (the output should be 0.375).
 If there are more than one matches, \code{humdrumR} will use the longest match, and if they tie,
 pick based on the order in the table above (topmost first).
 

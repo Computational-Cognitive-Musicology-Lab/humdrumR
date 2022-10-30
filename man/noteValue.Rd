@@ -7,10 +7,10 @@
 noteValue(
   x,
   ...,
-  scale = new("rational", Numerator = 1L, Denominator = 1L, dim = NULL, rownames =
-    NULL, colnames = NULL),
   parseArgs = list(),
-  graceDurations = FALSE,
+  scale = 1,
+  unit = 1,
+  grace = NA,
   inPlace = FALSE
 )
 }
@@ -20,11 +20,12 @@ noteValue(
 \item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
-value.}
-
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "duration."}
+
+\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
@@ -55,7 +56,7 @@ read about the \link[=rhythmFunctions]{family of rhythm functions},
 or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
 
 Other {rhythm functions}: 
-\code{\link{recip}()},
-\code{\link{semibreves}()}
+\code{\link{duration}()},
+\code{\link{recip}()}
 }
 \concept{{rhythm functions}}

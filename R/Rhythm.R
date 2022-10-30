@@ -127,9 +127,9 @@ sec2dur <- function(x,
 #'   + *Deparsing* (DEPARSING ARGS GO HERE) `|>`
 #' +  **Output** representation 
 #' 
-#' Various rhythm representations like `**recip`, `**dur`, and `**durations` can be generated
+#' Various rhythm representations like `**recip`, `**dur`, and `**duration` can be generated
 #'  using predefined [rhythm functions][rhythmFunctions] like [recip()]
-#' [dur()], and [durations()] respectively.
+#' [dur()], and [duration()] respectively.
 #' All of these functions use a common deparsing framework.
 #' *This* documentation talks about this deparsing step.
 #' For an overview of the parsing process, look [here][rhythmParsing].
@@ -148,8 +148,6 @@ sec2dur <- function(x,
 #' For example, a recip value represents a fraction of the unit: e.g., `"2"` equals 1/2 of the unit.
 #' If we call `recip('2', scale = 1/16)` this is telling us to get half of a sixteenth: which in this case would be `'32'`.
 #' 
-#' The functions [breves()], [durations()], [crotchets()], [quavers()], and [semiquavers()] are all identical, except with different
-#' default values of the `scale` argument.
 #' 
 #' 
 #' 
@@ -159,12 +157,12 @@ sec2dur <- function(x,
 #' for example, `**recip` data might include tokens like `"4.ee-[`.
 #' The `humdrumR` parser (`rhythmInterval`) will automatically "pull out" rhythm information from within strings, if it can find any 
 #' using the appropriate known regular expressions.
-#' For example, `durations('4.ee-[')` returns `r durations('4.ee-[')`.
+#' For example, `duration('4.ee-[')` returns `r duration('4.ee-[')`.
 #' However, all the pitch functions (like [recip()] and [dur()]) have an option to keep the "extra" information
 #' and return the result "in place"---i.e., embedded right where it was found in the input string.
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
-#' So, `durations('4.ee-[', inPlace = TRUE)` will return `r durations('4.ee-[', inPlace = TRUE)`---keeping the `"ee-["`.
-#' Note that `inPlace = TRUE` will force functions like `durations`, which normally return `numeric` values, to return `character` strings
+#' So, `duration('4.ee-[', inPlace = TRUE)` will return `r duration('4.ee-[', inPlace = TRUE)`---keeping the `"ee-["`.
+#' Note that `inPlace = TRUE` will force functions like `duration`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a `character` string. 
 #' 
 #' 
@@ -307,18 +305,18 @@ rint2noteValue <- function(x) {
 ### Numeric ####
 
 
-rint2durations <- function(x) {
+rint2duration <- function(x) {
   as.double(x)
 } 
 
 
 rint2seconds <- function(x, BPM = 60) {
-  rint2durations(x) * bpm2sec(BPM)
+  rint2duration(x) * bpm2sec(BPM)
 }
 
 
 rint2ms <- function(x, BPM = 60) {
-  rint2durations(x) * bpm2ms(BPM)
+  rint2duration(x) * bpm2ms(BPM)
 }
 
 
@@ -339,7 +337,7 @@ rint2ms <- function(x, BPM = 60) {
 #' representations) can be "parsed"---read
 #' and interpreted by `humdrumR`.
 #' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [rhythm function][rhythmFunctions], 
-#' like [recip()], [dur()], or [durations()].
+#' like [recip()], [dur()], or [duration()].
 #' 
 #' @details 
 #' 
@@ -354,7 +352,7 @@ rint2ms <- function(x, BPM = 60) {
 #'   + *Parsing* (done by `rhythmInterval()`) `|>`
 #'     + **Intermediate** ([rational]) representation `|>`
 #'   + *Deparsing* `|>`
-#' +  **Output** representation (e.g. `**recip` or `**durations`)
+#' +  **Output** representation (e.g. `**recip` or `**duration`)
 #' 
 #' *This* documentation talks about the parsing step.
 #' For an overview of the "deparsing" process, look [here][rhythmDeparsing].
@@ -675,8 +673,7 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' @param ... These arguments are passed to the [rhythm deparser][rhythmDeparsing]. 
 #'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
 #' @param scale A `numeric` or [rational] value which is used as the output unit of measurement: the default value for most functions
-#'   is `rational(1, 1)`, a whole-note or "duration." The [breves()], [crotchets()], [quavers()], and [semiquavers()] each use a different default
-#'   value.
+#'   is `rational(1, 1)`, a whole-note or "duration." 
 #' @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
 #' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [rhythm parser][rhythmParsing].
 #' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
@@ -695,15 +692,6 @@ NULL
 
 rhythmArgCheck <- function(args, callname) {
   argnames <- .names(args)
-  
-  if ('count' %in% argnames) {
-    checkTF(args$count, 'count', callname)
-  }
- 
-  if ('remainder' %in% argnames) {
-    checkTF(args$remainder, 'remainder', callname)
-  }
-
   
   if ('scale' %in% argnames){
     args$scale <- rhythmInterval(args$scale[1])
@@ -735,7 +723,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             alist(parseArgs = list(), 
                   scale = 1, unit = 1, grace = NA,
-                  count = TRUE, remainder = TRUE, 
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -750,8 +737,8 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
                                                parse = parseArgs)
     
     formalArgs <- list(!!!fargcall)
-    namedArgs <- formalArgs[names(formalArgs) %in% names(as.list(match.call())[-1])] 
-    # namedArgs$scale <- namedArgs$scale %||% formalArgs$scale
+    namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
+    namedArgs$scale <- namedArgs$scale %||% formalArgs$scale
     # There are three kinds of arguments: 
     # ... arguments (now in args...), 
     # FORMAL arguments, if specified (now in namedArgs)
@@ -760,9 +747,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive
     
     parseArgs   <- rhythmArgCheck(parseArgs, !!callname)
-    deparseArgs <- rhythmArgCheck(c(args..., 
-                                    namedArgs, 
-                                    formalArgs[!names(formalArgs) %in% names(namedArgs)]), !!callname)
+    deparseArgs <- rhythmArgCheck(c(args..., namedArgs), !!callname)
     
     # memoize % deparse
     memoize <- args...$memoize %||% TRUE
@@ -792,11 +777,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     ## scaling
     if (scale != 1L) parsedRint <- parsedRint * scale
     
-    
-    ## remainder
-    parsedRint <- do(euclid, c(list(parsedRint), deparseArgs))
-    
-    
     deparseArgs <- c(list(parsedRint), deparseArgs)
     output <- if (deparse && is.rational(parsedRint))  do(!!deparser, 
                                                           deparseArgs, 
@@ -823,15 +803,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
   })) %class% 'rhythmFunction'
 }
 
-
-euclid <- function(rint, count.round = floor, count = TRUE, remainder = TRUE) {
-  if (count && remainder) return(rint)
-  if (!(count || remainder)) return(rint * rational(0L))
-  
-  count <- count.round(rint)
-  
-  if (remainder) rint - count else count
-}
 
 ### Rhythm functions ####
 
@@ -871,13 +842,16 @@ recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%')
 
 #' Numeric (double) representation of durations
 #' 
+#' Output is `numeric` (real number).
+#' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
+#' 
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
 #' @export 
-durations  <- makeRhythmTransformer(rint2durations, 'durations', 'numeric')
+duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 
 
 #' Note value representation of duration
@@ -997,7 +971,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   }
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'durations', 'noteValue'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'noteValue'))
   
   if (is.character(output)){
     if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
@@ -1042,7 +1016,7 @@ untie <- function(x, open = '[', close = ']', ...,
   
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'durations', 'noteValue'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'noteValue'))
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))
   if (is.character(output)){
@@ -1121,7 +1095,7 @@ minutes <- function(seconds, format = TRUE) {
 #' (In this example we are showing durations of `1%0` for comment, interpretation, and null data records. In most cases, we'd 
 #' be doing `within(humData, dataTypes ='D')`, which is the default behavior, so these records wouldn't be counted at all.)
 #' 
-#' `localDuration()` begins with a call to [durations()] on the input argument `x`---the `parseArgs()` argument can be used to pass arguments to the [parser][rhythmParsing] (the `Exclusive` argument is passed as well).
+#' `localDuration()` begins with a call to [duration()] on the input argument `x`---the `parseArgs()` argument can be used to pass arguments to the [parser][rhythmParsing] (the `Exclusive` argument is passed as well).
 #' `localDuration()` then groups the durations based on unique combinations of values in the `groupby` argument, which must be a list of
 #' vectors that are the same length as `x`.
 #' By default, the minimum duration within each group is returned, recycled as necassary to match the input length.
@@ -1132,10 +1106,10 @@ minutes <- function(seconds, format = TRUE) {
 #' passed (this can be overridden by explicitely setting the argument).
 #' This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
 #' 
-#' Note that, `localDuration()` follows the default behavior of [durations()] by treating grace-notes as duration `0`.
+#' Note that, `localDuration()` follows the default behavior of [duration()] by treating grace-notes as duration `0`.
 #' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
 #'
-#' The output representation can be controlled using the `deparser` argument, defaulting to [durations()].
+#' The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
 #' For example, `deparser = recip` will return the output in `**recip` format.
 #' `...` arguments are passed to the deparser.
 #' 
@@ -1153,12 +1127,12 @@ minutes <- function(seconds, format = TRUE) {
 #'
 #' @family rhythm analysis tools
 #' @export 
-localDuration <- function(x,  choose = min, deparser = durations, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   checkFunction(choose, 'choose', 'int')
   if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'localDuration', classes = c('rhythmFunction'))
   
-  durations <- do.call('durations', c(list(x, Exclusive = Exclusive), parseArgs))
+  durations <- do.call('duration', c(list(x, Exclusive = Exclusive), parseArgs))
   
   durations[is.na(durations) | durations == 0L] <- NA
   
@@ -1191,7 +1165,7 @@ localDuration <- function(x,  choose = min, deparser = durations, ..., Exclusive
 #' However, many (probably most) humdrum data files contain at least some information about the relative 
 #' duration of events, representing more detailed information about timing and rhythm.
 #' 
-#' `timeline()` parses and input vector `x` as [durations][durations()],
+#' `timeline()` parses and input vector `x` as [durations][duration()],
 #' computes the [cumulative sum][sigma()] of the durations, with the `start` argument appended to the beginning.
 #' The result is a `numeric` vector representing the total duration since the beginning of the vector (plus the value of `start`, which defaults to zero).
 #' The cumulative durations of `timeline()` represent musical duration units, where `1` equals a whole note.
@@ -1207,7 +1181,7 @@ localDuration <- function(x,  choose = min, deparser = durations, ..., Exclusive
 #' tokens across all spines/paths/stops---all values in the same record will be the same.
 #' 
 #' 
-#' Note that, `timeline()` and `timestamp()` follow the default behavior of [durations()] by treating grace-notes as duration `0`.
+#' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
 #' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
 #' 
 #' @section Logical start:

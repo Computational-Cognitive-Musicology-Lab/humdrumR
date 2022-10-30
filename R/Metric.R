@@ -259,7 +259,7 @@ metric <- function(ioi, meter = duple(5), ..., remainderSubdivides = TRUE ) {
 metricPlot <- function(metric) {
   metric[metric == ""] <- NA
   
-  durations <- semibreves(metric)
+  durations <- duration(metric)
   durations[is.na(durations)] <- 0
   y <- barplot(t(durations), horiz = TRUE, col = c(gray.colors(ncol(metric) - 1), 'red'))
   
@@ -337,7 +337,7 @@ tatum.default <- function(x) {
   } else {
     rint <- rhythmInterval(unique(x))
     result <- tatum.rational(rint)
-    reParse(result, attr(rint, 'dispatch'), c('recip', 'semibreves'))
+    reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
   }
 }
 #' @rdname tatum

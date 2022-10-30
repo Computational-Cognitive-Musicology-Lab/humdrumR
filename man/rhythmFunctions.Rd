@@ -10,8 +10,9 @@
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
-value.}
+is \code{rational(1, 1)}, a whole-note or "duration."}
+
+\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
 
@@ -36,11 +37,8 @@ The full list of rhythm functions is:
 }
 \item \emph{Numeric rhythm representations}
 \itemize{
-\item \code{\link[=breves]{breves()}} (double whole notes)
-\item \code{\link[=semibreves]{semibreves()}} (whole notes)
-\item \code{\link[=crotchets]{crotchets()}} (quarter notes)
-\item \code{\link[=quavers]{quavers()}} (eighth notes)
-\item \code{\link[=semiquavers]{semiquavers()}} (sixteenth notes)
+\item \code{\link[=duration]{duration()}} (Whole notes)
+\item \code{\link[=quarters]{quarters()}} (quarter notes (crotchets))
 }
 }
 \item \strong{Ametric rhythm representations}
@@ -72,13 +70,27 @@ Underneath the hood, the full processing of each function looks like this:
 }
 \item \emph{Deparsing} \verb{|>}
 }
-\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**semibreve})
+\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**duration})
 }
 
 To read the details of the parsing step, read \link[=rhythmParsing]{this}.
 To read the details of the "deparsing" step, read \link[=rhythmDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
 or type \code{?func} in the R command line: for example, \code{?noteValue}.
+\subsection{Grace notes}{
+
+The \code{grace} controls the output associated with grace notes.
+In humdrum data, grace notes are marked with \code{"q"} or \code{"Q"}; \code{q} should be reserved
+for tokens with no (other) duration information, while \code{Q} should be marked along with
+duration information: for example, \code{aa-q} or \verb{16aa-Q}.
+In practice, this distinction is not always made, and is rarely important.
+
+If \code{grace = TRUE}, grace-note durations (like the \code{16} in \code{"16aa-Q"}) are parsed like any other duration
+and included in the output with a \code{"q"} appended to them.
+If \code{grace = FALSE} or \code{grace = NA}, grace-notes return as \code{NA}.
+The \code{grace} argument can also be any other atomic value, which is returned for grace notes:
+the most common use is to return grace notes as having zero duration, by specifying \code{grace = 0}.
+}
 }
 \seealso{
 To better understand how these functions work,

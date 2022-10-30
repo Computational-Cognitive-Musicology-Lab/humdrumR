@@ -26,9 +26,9 @@ Deparsing is the second step in the \link[=rhythmFunctions]{rhythm function} pro
 \item \strong{Output} representation
 }
 
-Various rhythm representations like \verb{**recip}, \verb{**dur}, and \verb{**semibreves} can be generated
+Various rhythm representations like \verb{**recip}, \verb{**dur}, and \verb{**duration} can be generated
 using predefined \link[=rhythmFunctions]{rhythm functions} like \code{\link[=recip]{recip()}}
-\code{\link[=dur]{dur()}}, and \code{\link[=semibreves]{semibreves()}} respectively.
+\code{\link[=dur]{dur()}}, and \code{\link[=duration]{duration()}} respectively.
 All of these functions use a common deparsing framework.
 \emph{This} documentation talks about this deparsing step.
 For an overview of the parsing process, look \link[=rhythmParsing]{here}.
@@ -42,13 +42,10 @@ The most important is the \code{scale} argument.
 
 The \code{scale} argument is a \code{numeric} or \link{rational} value which indicates the reference unit used
 for duration values: what is "1" duration?
-By default, the unit is a "whole note" or semibreve.
+By default, the unit is a "whole note" or duration.
 By changing the unit, you can rescale your output.
 For example, a recip value represents a fraction of the unit: e.g., \code{"2"} equals 1/2 of the unit.
 If we call \code{recip('2', scale = 1/16)} this is telling us to get half of a sixteenth: which in this case would be \code{'32'}.
-
-The functions \code{\link[=breves]{breves()}}, \code{\link[=semibreves]{semibreves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} are all identical, except with different
-default values of the \code{scale} argument.
 }
 
 \subsection{In-place parsing}{
@@ -57,12 +54,12 @@ In humdrum data, character strings are often encoded with multiple pieces of mus
 for example, \verb{**recip} data might include tokens like \verb{"4.ee-[}.
 The \code{humdrumR} parser (\code{rhythmInterval}) will automatically "pull out" rhythm information from within strings, if it can find any
 using the appropriate known regular expressions.
-For example, \code{semibreves('4.ee-[')} returns 0.375.
+For example, \code{duration('4.ee-[')} returns 0.375.
 However, all the pitch functions (like \code{\link[=recip]{recip()}} and \code{\link[=dur]{dur()}}) have an option to keep the "extra" information
 and return the result "in place"---i.e., embedded right where it was found in the input string.
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
-So, \code{semibreves('4.ee-[', inPlace = TRUE)} will return 0.375ee-[---keeping the \code{"ee-["}.
-Note that \code{inPlace = TRUE} will force functions like \code{semibreves}, which normally return \code{numeric} values, to return \code{character} strings
+So, \code{duration('4.ee-[', inPlace = TRUE)} will return 0.375ee-[---keeping the \code{"ee-["}.
+Note that \code{inPlace = TRUE} will force functions like \code{duration}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a \code{character} string.
 }
 }

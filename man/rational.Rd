@@ -20,6 +20,11 @@
 \alias{max,rational-method}
 \alias{min,rational-method}
 \alias{mean,rational-method}
+\alias{round,rational-method}
+\alias{floor,rational-method}
+\alias{ceiling,rational-method}
+\alias{trunc,rational-method}
+\alias{expand,rational-method}
 \alias{sum,rational-method}
 \alias{cumsum,rational-method}
 \alias{as.rational}
@@ -79,6 +84,16 @@ is.rational(x)
 \S4method{min}{rational}(x, ..., na.rm = FALSE)
 
 \S4method{mean}{rational}(x)
+
+\S4method{round}{rational}(x)
+
+\S4method{floor}{rational}(x)
+
+\S4method{ceiling}{rational}(x)
+
+\S4method{trunc}{rational}(x)
+
+\S4method{expand}{rational}(x)
 
 \S4method{sum}{rational}(x, ..., na.rm = FALSE)
 

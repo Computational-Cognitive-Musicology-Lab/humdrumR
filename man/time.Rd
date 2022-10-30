@@ -12,13 +12,13 @@
 \alias{dur}
 \title{Basic time transformations}
 \usage{
-bpm2sec(BPM, scale = 0.25)
+bpm2sec(BPM, unit = 0.25)
 
-sec2bpm(sec, scale = 0.25)
+sec2bpm(sec, unit = 0.25)
 
-bpm2ms(BPM, scale = 0.25)
+bpm2ms(BPM, unit = 0.25)
 
-ms2bpm(ms, scale = 0.25)
+ms2bpm(ms, unit = 0.25)
 
 sec2dur(
   x,
@@ -38,9 +38,10 @@ seconds(
   x,
   ...,
   BPM = "*M60",
-  scale = 1,
   parseArgs = list(),
-  graceDurations = FALSE,
+  scale = 1,
+  unit = 1,
+  grace = NA,
   inPlace = FALSE
 )
 
@@ -48,9 +49,10 @@ ms(
   x,
   ...,
   BPM = "*M60",
-  scale = 1,
   parseArgs = list(),
-  graceDurations = FALSE,
+  scale = 1,
+  unit = 1,
+  grace = NA,
   inPlace = FALSE
 )
 
@@ -64,9 +66,10 @@ dur(
   months = FALSE,
   years = FALSE,
   milliseconds = TRUE,
-  scale = 1,
   parseArgs = list(),
-  graceDurations = FALSE,
+  scale = 1,
+  unit = 1,
+  grace = NA,
   inPlace = FALSE
 )
 }
@@ -74,16 +77,17 @@ dur(
 \item{BPM}{A \code{character} string (which may or may not be be prefixed with \code{"*MM"}) or numeric values,
 which are interpreted as a beats-per-minute value.}
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "semibreve." The \code{\link[=breves]{breves()}}, \code{\link[=crotchets]{crotchets()}}, \code{\link[=quavers]{quavers()}}, and \code{\link[=semiquavers]{semiquavers()}} each use a different default
-value.}
-
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "duration."}
+
+\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
