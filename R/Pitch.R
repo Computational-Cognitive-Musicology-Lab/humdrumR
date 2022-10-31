@@ -1062,7 +1062,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
+tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, directed = TRUE, ...) {
 
   
   if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
@@ -1072,7 +1072,7 @@ tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
   semits <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
   if (!compound) semits <- semits %% 12L
-
+  if (!directed) semits <- abs(semits)
   semits
   
 }
