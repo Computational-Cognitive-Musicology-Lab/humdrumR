@@ -763,6 +763,9 @@ anyStops <- function(humdrumR) {
 }
 
 
+
+
+
 #' Does humdrumR corpus contain subcorpora?
 #' 
 #' [HumdrumR][humdrumRclass] objects can be divided into "subcorpora."
@@ -842,6 +845,73 @@ mergeHumdrum <- function(...) {
     
     
 }
+
+
+#' Expand paths into new spines
+#' 
+#' This function takes a [humdrumR object][humdrumRclass]
+#' and "expands" the content of any spine paths by filling them in with
+#' the content of their parent path(s).
+#' 
+#' @details 
+#' 
+#' For example, imagine that in humdrum representation of a eight-measure
+#' piano score, the annotator included an [ossia](https://en.wikipedia.org/wiki/Ossia)
+#' passage in the seventh measure.
+#' If we want to simply ignore the ossia passage, we can just specify a [subset()] where `Path == 0`.
+#' If we want to study *only* the ossia passage, we can grab a [subset()] where `Path == 1`.
+#' However, what if we want to study the ossia as it would be performed, with the ossia measure
+#' swapped in for measure 7, but still using measures 1-6 and 8 from the main path?
+#' `expandPaths()` will help us do just this:
+#' `expandPaths()` will copy the contents of measure 1-6 and 8 into the second path and,
+#' if `asSpines = TRUE`, then copy the path into it's own new spine.
+#' We can then treat that new "full" path/spine just like any other path/spine.
+#' 
+#' @param x A [humdrumR object][humdrumClass].
+#' @param asSpines (`logical`, `length == 1`) If `TRUE`, the expanded paths are copied into their
+#' own new spines (shifting higher spines over as needed).
+#' 
+#' 
+#' @export
+expandPaths <- function(x, asSpines) UseMethod('expandPaths')
+#' @export
+expandPaths.humdrumR <- function(x, asSpines = TRUE) {
+    checkTF(asSpines, 'asSpines', 'expandPaths')
+    
+    if (!anyPaths(x)) return(x)
+    
+    
+    putHumtab(x) <- expandPaths.data.table(getHumtab(x), asSpines = asSpines)
+    
+    x
+}
+expandPaths.data.table <- function(humtab, asSpines = TRUE) {
+    
+    humtab[ , PieceRecord := paste0(Piece, Record)]
+    for (path in setdiff(unique(humtab$Path), 0L)) {
+        pathrecs <- humtab[Path == path, unique(PieceRecord)]
+        parent <- humtab[Path == path, ParentPath[1]]
+        
+        new <- humtab[(Path == parent & !PieceRecord %in% pathrecs)]
+        new[ , Path := path]
+        humtab <- rbind(humtab, new)
+    }
+    humtab[ , PieceRecord := NULL]
+    humtab <- orderHumtab(humtab)
+    
+    if (asSpines) {
+        humtab[ , Spine := 1L + Path + ((Spine - 1L) * max(Path, na.rm = TRUE))]
+        humtab[ , Path := 0L]
+        renumberSpines.data.table(humtab)
+        
+    }
+    
+    if ('I' %in% humtab$Type) humtab[ , Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
+    
+    
+    humtab
+}
+
 
 
 ### collapseHumdrum ----

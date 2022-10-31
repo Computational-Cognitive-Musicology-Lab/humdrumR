@@ -814,7 +814,13 @@ parseLocal <- function(records) {
   if (any(SpinePaths) > 0L) {
     ind <- which(mat != '_P', arr.ind = TRUE)
     ind <- ind[!duplicated(ind[ , 2]), ]
-    ParentPaths[SpinePaths > 0L] <- SpinePaths[which(mat[ind[ , 'row'] - 1L,] == '*^', arr.ind = TRUE)[ , 'col']]
+    
+    # targets <- unique(which(mat[ind[SpinePaths > 0L, 'row'] - 1L, , drop = FALSE] == '*^', arr.ind = TRUE))[ , 'col']
+    splitrows <- mat[ind[SpinePaths > 0L, 'row'] - 1L, , drop = FALSE]
+    splitrows <- which(splitrows == '*^' | splitrows == '*+', arr.ind = TRUE)
+    targets <- tapply(splitrows[ , 'col'], splitrows[ , 'row'], max)
+    
+    ParentPaths[SpinePaths > 0L] <- SpinePaths[targets]
   }
   
   #sections
