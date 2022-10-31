@@ -149,8 +149,10 @@ is.tertianSet <- function(x) inherits(x, 'tertianSet')
 #' @export
 is.major.default <- function(x, ...) {
    parsed <- tertianSet(x, ...)
-   
-   if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
+   if (any(is.na(parsed))) {
+     keys <- diatonicSet(x, ...)
+     if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
+   }
   
    is.major.diatonicSet(parsed) 
    
@@ -159,7 +161,10 @@ is.major.default <- function(x, ...) {
 #' @export
 is.minor.default <- function(x, ...) {
   parsed <- tertianSet(x, ...)
-  if (any(is.na(parsed))) parsed[is.na(parsed)] <- diatonicSet(parsed[is.na(parsed)], ...)
+  if (any(is.na(parsed))) {
+    keys <- diatonicSet(x, ...)
+    if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
+  }
   
   is.minor.diatonicSet(parsed) 
   
@@ -533,7 +538,6 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
 
 
 tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
-  
   figArgs <- list(implicitSpecies = FALSE, qualities = FALSE, 
                   flat = 'm', natural = 'M', perfect = 'P')
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -546,7 +550,7 @@ tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
                        inversion.labels = c('', 'b', 'c', 'd', 'e', 'f', 'g'),
                        extension.shorthand = TRUE, extension.simple = TRUE, extension.decreasing = FALSE,
                        extension.sus = TRUE, extension.add = TRUE,
-                       inversion = TRUE)
+                       inversion = FALSE)
   
   t2tH(x, figurationArgs = figArgs, Key = Key, ...)
   
@@ -772,7 +776,6 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
 ### Chord representations ####  
 
 roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
-  
   Key <- CKey(Key)
   REparse(x,
           makeRE.roman(..., diminish = diminish, augment = augment, collapse = FALSE),
@@ -813,7 +816,6 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
                  inversion = figurations$Inversion)
 
   # if (implicitSpecies) output <- output + Key
-
   output
   
 }
@@ -957,33 +959,38 @@ char2tset <- makeHumdrumDispatcher(list('any', makeRE.roman,      roman2tset),
                                    outputClass = 'tertianSet')
 
 mapoftset <- function(str, Key = NULL, ..., split = '/') {
+  Key <- Key %||% dset(0L, 0L)
+  Key <- rep(Key, length.out = length(str))
   
   parts <- strPartition(str, split = split)
   Keys <- parts[-1]
-  
   if (length(Keys) > 0L) {
     Keys[] <- head(Reduce(\(x, y) {
       y[!is.na(x)] <- char2dset(x[!is.na(x)], Key = y[!is.na(x)], ...)
       y
-    }, right = TRUE, init = Key %||% dset(integer(length(str)), 0), Keys, accumulate = TRUE), -1L) 
+    }, right = TRUE, 
+    init = dset(integer(length(str)), 0L), 
+    Keys, 
+    accumulate = TRUE), -1L) 
+    
   } else {
     Keys <- list(dset(integer(length(str)), 0))
   }
   
-  Mode <- CKey(Keys[[1]])
+  ofMode <- CKey(Keys[[1]])
   root <- Reduce('+', lapply(Keys, getRoot))
-  Key <- Mode + dset(root, root)
+  ofKey <- ofMode + dset(root, root)
   
-  tset <- char2tset(parts$base, Key = Key, ...)
+  tset <- char2tset(parts$base, Key = Key + ofKey, ...)
   tset + dset(root, root, 0L)
 }
 
 #' @rdname chordParsing
 #' @export
-tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.roman,            roman2tset),
+tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.tertianPartition, mapoftset), 
+                                              list('any', makeRE.roman,            roman2tset),
                                               list('any', makeRE.tertian,          tertian2tset),
                                               list('any', makeRE.chord,            chord2tset),
-                                              list('any', makeRE.tertianPartition, mapoftset),
                                               funcName = 'tertianSet.character',
                                               outputClass = 'tertianSet')
   
