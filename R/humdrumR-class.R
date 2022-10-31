@@ -30,8 +30,8 @@
 #' 5. Reference fields
 #' 
 #' When first created by a call to [readHumdrum()] every
-#' humdrum table has at least eighteen fields: one data field (`Token`), two interpretation 
-#' fields (`Tandem` and `Exclusive`), three formal fields, and fourteen structure fields. Additional
+#' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
+#' fields (`Tandem` and `Exclusive`), three formal fields, and fifteen structure fields. Additional
 #' interpretation or reference fields
 #' may be present depending on the content of the humdrum file(s), and users can create additional data fields
 #' by using [within(humdrumR)][withinHumdrum] (and some other functions).
@@ -49,7 +49,7 @@
 #' 
 #' ### Structure fields:
 #' 
-#' Every humdrum table starts with fourteen *Structure* fields,
+#' Every humdrum table starts with fifteen *Structure* fields,
 #' which describe where each data token was "located" in the original humdrum data: 
 #' which file, which spine, which record, etc.
 #' See the vignette on humdrum syntax to fully understand the terms here.
@@ -81,6 +81,9 @@
 #'           is numbered `0` with additional paths numbered with integers to the right.
 #'           (If there are no spine path splits, the `Path` field is all `0`s.)
 #'         + This field is always `NA` when `Global == TRUE`. 
+#'     + `ParentPath` :: `integer`
+#'         + For spine paths (i.e., where `Path > 0`), which path was the parent from
+#'           which this path split? Where `Path == 0`, parent path is also `0`.
 #'     + `Record` :: `integer`
 #'         + The record (i.e., line) number in the original file.
 #'     + `NData` :: `integer`
@@ -330,7 +333,7 @@ setMethod('initialize', 'humdrumR',
             fields <- colnames(humtab)
             fieldcategories <- list(Data = 'Token',
                                     Structure = c('Filename', 'Filepath', 'File', 'Label', 'Piece',
-                                                  'Spine', 'Path', 'Stop',
+                                                  'Spine', 'Path', 'ParentPath', 'Stop',
                                                   'Record', 'NData', 'Global', 'Null', 'Filter', 'Type'),
                                     Interpretation   = c('Exclusive', 'Tandem',
                                                          fields[tandemcol]),

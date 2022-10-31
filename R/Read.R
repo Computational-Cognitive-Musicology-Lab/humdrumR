@@ -810,6 +810,13 @@ parseLocal <- function(records) {
   SpinePaths   <- unlist(use.names = FALSE, tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
   Columns      <- seq_along(SpineNumbers)
   
+  ParentPaths  <- integer(length(SpineNumbers)) 
+  if (any(SpinePaths) > 0L) {
+    ind <- which(mat != '_P', arr.ind = TRUE)
+    ind <- ind[!duplicated(ind[ , 2]), ]
+    ParentPaths[SpinePaths > 0L] <- SpinePaths[which(mat[ind[ , 'row'] - 1L,] == '*^', arr.ind = TRUE)[ , 'col']]
+  }
+  
   #sections
   sections <- parseSections(mat[ , 1])
   barlines <- parseBarlines(mat[ , 1])
@@ -843,6 +850,7 @@ parseLocal <- function(records) {
   humtab <- data.table::data.table(Token = tokens,
                                    Spine = SpineNumbers[Columns],
                                    Path  = SpinePaths[Columns],
+                                   ParentPath = ParentPaths[Columns],
                                    Record = recordns,
                                    Stop = stopNs,
                                    Exclusive = exclusives[Columns],

@@ -1127,7 +1127,7 @@ minutes <- function(seconds, format = TRUE) {
 #'
 #' @family rhythm analysis tools
 #' @export 
-localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   checkFunction(choose, 'choose', 'int')
   if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'localDuration', classes = c('rhythmFunction'))
@@ -1216,8 +1216,8 @@ localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive 
 #' @family rhythm analysis tools
 #' @export
 timeline <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
-
+  # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
+ ## need to get local urat
   
   
   groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
@@ -1246,6 +1246,53 @@ timeline <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs =
   
   
 }
+
+
+timeline2 <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
+  ## need to get local urat
+  
+   durations <- as.numeric(rhythmInterval(x))
+  groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
+  groupby$Record <- groupby$Record %||% seq_along(durations)
+  
+  
+  dt <- groupby <- as.data.table(checkWindows(durations, groupby))
+  dt$Duration <- durations
+  
+  dt_ <- data.table::copy(dt)
+  setorder(dt_, Piece, Spine, Record)
+  
+  pathTable <- dt_[ , {
+    pathTable <- table(Record, Path)
+    pathStarts <- apply(pathTable, 2, \(x) which(x > 0)[1])
+    browser()
+    }, by = list(Piece, Spine)]
+  
+  
+  browser()
+  
+  dt_[ , PieceRecord := paste0(Piece, '.', Record)]  
+  
+  dt_[ , Duration := c(start, head(Duration, 1L)), by = list(Piece, Spine)]
+    
+  paths <- lapply(unique(dt_$Path), 
+                                  \(path) {
+                                    pathrecs <- dt_[Path == path, unique(PieceRecord)]
+                                    
+                                    dt_[(Path == 0L & !PieceRecord %in% pathrecs) | (Path == path), 
+                                       list(Time = start + sigma.default(c(0, head(Duration, -1L)), groupby = list(Piece, Spine)), 
+                                            Spine = Spine, Piece = Piece, Record = Record,
+                                            Path = Path)][Path == path]
+                                    
+                                    }) |> rbindlist()
+  # if (!is.null(dtuniq$Start)) dtuniq[ , Time := Time - Time[which(Start)[1]], by = Piece]
+  
+  paths[dt, on = c('Piece', 'Spine', 'Path', 'Record')]$Time
+  
+  
+}
+
 
 #' @rdname timeline
 #' @export
