@@ -827,6 +827,9 @@ harm2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implici
           makeRE.harm(..., collapse = FALSE),
           parse.exhaust = FALSE, parse.strict = FALSE,
           toEnv = TRUE)  # adds accidental numeral triadalt figurations and inversion to the environment
+  
+  Key <- romanNumeral2dset(stringr::str_sub(of, start = 2L), Key = Key)
+  Key[is.na(Key)] <- dset(0L, 0L)
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
                            parts = c('species', 'step'), qualities = FALSE,
                            implicitSpecies = implicitSpecies,
@@ -851,6 +854,7 @@ harm2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implici
   
   # if 1 is altered!
   root <- root + setNames(c(-7L, 7L, 0L), c(diminish, augment, 'P'))[stringr::str_sub(qualities, 1L, 1L)]
+  root <- root + getRoot(Key)
   
   ###
   output <- tset(root, 
@@ -911,7 +915,6 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   x <- stringr::str_replace(x, 'maj([91])', 'majn7\\1')
   
   #
-  
   REparse(x,
           makeRE.chord(..., flat = flat, collapse = FALSE),
           toEnv = TRUE) -> parsed
@@ -947,8 +950,13 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
                               }))
   sciQualities <- do.call('paste0', as.data.frame(sciQualities))
   
-  tertian2tset(paste0(tonalChroma, quality, sciQualities), flat = flat, ...)
+  tset <- tertian2tset(paste0(tonalChroma, quality, sciQualities), flat = flat, ...)
   
+  bassint <- integer(length(tset))
+  bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getRoot(tset[bass != ''])
+  tset@Inversion <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint + 1L]
+  
+  tset
   
   
   
@@ -994,12 +1002,7 @@ tertianSet.integer <- integer2tset
 
 
 
-char2tset <- makeHumdrumDispatcher(list('any', makeRE.roman,      roman2tset),
-                                   list('harm', makeRE.harm,      harm2tset),
-                                   list('any', makeRE.tertian,    tertian2tset),
-                                   list('any', makeRE.chord,      chord2tset),
-                                   funcName = 'char2tset',
-                                   outputClass = 'tertianSet')
+
 
 mapoftset <- function(str, Key = NULL, ..., split = '/') {
   Key <- Key %||% dset(0L, 0L)
@@ -1030,11 +1033,10 @@ mapoftset <- function(str, Key = NULL, ..., split = '/') {
 
 #' @rdname chordParsing
 #' @export
-tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.tertianPartition, mapoftset), 
-                                              list('any', makeRE.roman,            roman2tset),
-                                              list('harm', makeRE.harm,      harm2tset),
-                                              list('any', makeRE.tertian,          tertian2tset),
-                                              list('any', makeRE.chord,            chord2tset),
+tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,      harm2tset),
+                                              list('any',  makeRE.roman,            roman2tset),
+                                              list('any',  makeRE.tertian,          tertian2tset),
+                                              list('any',  makeRE.chord,            chord2tset),
                                               funcName = 'tertianSet.character',
                                               outputClass = 'tertianSet')
   

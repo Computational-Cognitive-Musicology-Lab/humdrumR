@@ -589,8 +589,6 @@ makeRE.romanKey <- function(..., collapse = TRUE, sep = '/') {
                           collapse = TRUE, 
                           ...)
     
-    key <- makeRE.key(..., collapse = TRUE)
-    
     
     REs <- list(head = paste0('(', numeral, ')'),
                 rest = paste0('(', sep, '(', numeral, '))*'))
@@ -665,7 +663,7 @@ makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', di
   
 }
 
-makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.roman <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
     augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
@@ -683,10 +681,17 @@ makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
+    key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                           parts = c('species', 'step', 'mode', 'alterations'),
+                           collapse = TRUE, 
+                           ...)
+    
+    REs$of <- paste0('(', sep, '(', key, '))*')
+    
     if (collapse) setNames(cREs(REs), 'roman') else REs
 }
 
-makeRE.harm <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.harm <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
   augment <- paste0('[', augment, ']') # because "+" is a special character!
   
   REs <- list()
@@ -704,6 +709,13 @@ makeRE.harm <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
   REs$inversion <- '[a-g]?'
   REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations', 'inversion')]
   
+  
+  key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                    parts = c('species', 'step', 'mode', 'alterations'),
+                    collapse = TRUE, 
+                    ...)
+  
+  REs$of <- paste0('(', sep, '(', key, '))*')
   
   if (collapse) setNames(cREs(REs), 'harm') else REs
 }
