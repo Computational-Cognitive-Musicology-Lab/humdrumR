@@ -582,12 +582,20 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
-makeRE.romanKey <- function(..., flat = 'b') {
+makeRE.romanKey <- function(..., collapse = TRUE, sep = '/') {
 
-    makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-               parts = c('species', 'step', 'mode', 'alterations'),
-               flat = flat,
-               ...)
+    numeral <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                          parts = c('species', 'step', 'mode', 'alterations'),
+                          collapse = TRUE, 
+                          ...)
+    
+    key <- makeRE.key(..., collapse = TRUE)
+    
+    
+    REs <- list(head = paste0('(', numeral, ')'),
+                rest = paste0('(', sep, '(', numeral, '))*'))
+    
+    if (collapse) setNames(cREs(REs), 'romanKey') else REs
     
 }
 
@@ -606,7 +614,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     re <- orRE(key, romanNumeral)
     
-    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '*')
+    paste0(romanNumeral, '(', split, re, ')', if (mustPartition) '+' else '*')
 }
 
 

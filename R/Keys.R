@@ -598,7 +598,6 @@ dset2key <- function(x, Key = NULL, ...) {
 NULL
 
 dset2romanNumeral <- function(x, flat = 'b', Key = NULL, ...) {
-    if (!is.null(Key)) x <- x + getRootTint(Key %||% x(0, 0))
   
     tint <- getRootTint(x)
     
@@ -857,8 +856,7 @@ key2dset <- function(x, parts = c('step', 'species', 'mode', 'alterations'),
     
     dset <- dset(root, signature, alterations)
     
-   
-    if (keyed && !is.null(Key)) dset <- dset - Key
+    if (keyed && !is.null(Key)) dset <- dset - getRootTint(Key)
     
     # if (!is.null(of) && Key != dset(0, 0)) {
     #   of <- CKey(diatonicSet(Key))
@@ -875,15 +873,32 @@ key2dset <- function(x, parts = c('step', 'species', 'mode', 'alterations'),
 
 ##... From roman numeral
 
-romanNumeral2dset <- function(x, Key = NULL, flat = 'b', ...) {
-    dset <- key2dset(x, c('species', 'step', 'mode', 'alterations'), 
-                     step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-                     flat = flat, keyed = FALSE,
-                     Key = Key, ...)
-    
 
+
+romanNumeral2dset <- function(x, Key = NULL, flat = '-', sep = '/', ...) {
+  REparse(x, makeRE.romanKey(..., sep = sep, collapse = FALSE), toEnv = TRUE) # makes head rest and base
+  
+  parts <- strPartition(paste0(head, rest), split = sep)
+  
+  Key <- if (is.null(Key)) dset(integer(length(x)), 0L) else rep(diatonicSet(Key), length.out = length(x))
+  
+  parts[] <- head(Reduce(\(x, y) {
+    na <- is.na(x)
+    y[!na] <- key2dset(x[!na], c('species', 'step', 'mode', 'alterations'), 
+                       step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                       flat = flat, keyed = FALSE,
+                       Key = y[!na], ...)
+    y
     
+    }, right = TRUE, init = Key, parts, accumulate = TRUE), -1) 
+  
+  dset <- parts$base
+  if (length(parts) > 1L) {
+    of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
+    dset + dset(of, of, 0L)
+  }  else {
     dset
+  }
 }
 
 
@@ -927,29 +942,13 @@ diatonicSet.integer <- integer2dset
 #### Characters ####
 
 
-char2dset <- makeHumdrumDispatcher(list('any', makeRE.key,       key2dset),
-                                   list('any', makeRE.romanKey,  romanNumeral2dset),
-                                   list('any', makeRE.signature, signature2dset),
-                                   funcName = 'char2dset',
-                                   outputClass = 'diatonicSet')
 
-mapofdset <- function(str, Key = NULL, ..., split = '/') {
 
-   parts <- strPartition(str, split = split)
-   
-   parts[] <- head(Reduce(\(x, y) char2dset(x, Key = y, ...), right = TRUE, init = dset(0, 0), parts, accumulate = TRUE), -1) 
-   
-   of <- Reduce('+', lapply(parts[ , colnames(parts) == 'of', drop = FALSE], getRoot))
-    
-   dset <- parts$base
-   dset + dset(of, of, 0L)
-}
 
 #' @rdname keyParsing
 #' @export
-diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.key,       key2dset),
-                                               list('any', makeRE.romanKey,  romanNumeral2dset),
-                                               list('any', makeRE.diatonicPartition, mapofdset),
+diatonicSet.character <- makeHumdrumDispatcher(list('any', makeRE.romanKey,  romanNumeral2dset),
+                                               list('any', makeRE.key,       key2dset),
                                                list('any', makeRE.signature, signature2dset),
                                                funcName = 'diatonicSet.character',
                                                outputClass = 'diatonicSet')
@@ -1032,6 +1031,8 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
     
     # Key
     Key     <- diatonicSet(Key %||% dset(0L, 0L))
+    deparseArgs$Key <- Key
+    parseArgs$Key <- Key
     
     # memoize % deparse
     memoize <- args...$memoize %||% TRUE
