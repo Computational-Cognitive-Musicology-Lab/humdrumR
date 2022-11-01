@@ -338,6 +338,11 @@ escaper <- function(str) {
 }
 
 
+escape <- function(str) {
+  stringr::str_replace_all(str, "([+*?])", "\\\\\\1")
+}
+
+
 
 
 cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
@@ -671,6 +676,28 @@ makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
     
     
     if (collapse) setNames(cREs(REs), 'roman') else REs
+}
+
+makeRE.harm <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+  augment <- paste0('[', augment, ']') # because "+" is a special character!
+  
+  REs <- list()
+  REs$accidental <- makeRE.accidentals(...)
+  
+  upper <- paste0('(?=[IV]+', augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
+  lower <- paste0('(?=[iv]+', diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
+  REs$numeral <- orRE(upper, lower)
+  
+  
+  REs$triadalt <- captureRE(c(diminish, augment), n = '?')
+  
+  
+  REs$figurations <- makeRE.alterations(diminish = 'D', augment = 'A', qualities = TRUE, ...)
+  REs$inversion <- '[a-g]?'
+  REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations', 'inversion')]
+  
+  
+  if (collapse) setNames(cREs(REs), 'harm') else REs
 }
 
 

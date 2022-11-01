@@ -670,20 +670,20 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
       x <- sapply(x, \(s) paste(s[ord], collapse = ''))
     }
     
+    mode <- modes_int[x]
     if (allow_partial) {
-      mode <- sapply(paste0('^', x), \(x) modes_int[which(stringr::str_detect(names(modes_int), x))[1]])
-    } else {
-      mode <- modes_int[x]
-    }
-    
+      mode[is.na(mode)] <- sapply(paste0('^', x[is.na(mode)]), 
+                                  \(x) modes_int[which(stringr::str_detect(names(modes_int), escape(x)))[1]], USE.NAMES = FALSE)
+    } 
     alterations <- integer(length(x))
     if (any(is.na(mode))) {
       altered <- is.na(mode)
-      quality.labels <- c(diminish, minor, perfect, major, augment) # reorder for rank
+      quality.labels <- escape(c(diminish, minor, perfect, major, augment)) # reorder for rank
       modes <- do.call('cbind', modes)
       
       mode_alterations <- lapply(strsplit(x[altered], split = ''),
                                  \(qualities) {
+                                   qualities <- escape(qualities)
                                    hits <- qualities == modes[1L:length(qualities), ]
                                    
                                    # only want to alter 1 5 or 3 as last resort

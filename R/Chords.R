@@ -685,7 +685,7 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
 
 
 
-extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) {
+extensions2qualities <- function(root, figurations, triadalts, Key = NULL, qualities = FALSE, ...) {
   
   
   mode <- if(is.null(Key)) 0L else getMode(Key)
@@ -697,7 +697,7 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
     acc <- acc[!redundantroot]
     if (length(deg) == 0L) return(dots)
     step <- step2tint(deg, step.labels = 1L:14L)
-    alterations <- specifier2tint(acc, step, qualities = FALSE,  ...)
+    alterations <- specifier2tint(acc, step, qualities = qualities,  ...)
     
     qualities <- tint2specifier((step %% dset(-r, m - r)) + alterations, qualities = TRUE, ...)
     
@@ -709,17 +709,17 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, ...) 
   
 }
 
-parseFiguration <- function(str, figureFill = TRUE, flat = 'b', ...) {
+parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, ...) {
   
   # str[str == ''] <- '35'
   
   makeRE <- partialApply(makeRE.tonalChroma, step.labels = 13:1, 
-                         parts = c('species', 'step'), qualities = FALSE,
+                         parts = c('species', 'step'),
                          collapse = TRUE)
   
-  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat)[[1]], simplify = FALSE)
+  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat, qualities = qualities)[[1]], simplify = FALSE)
 
-  figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat))
+  figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat, qualities = qualities))
   
   lapply(figures, 
          \(parsedfig) {
@@ -821,6 +821,48 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
 }
 
 
+harm2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
+  Key <- CKey(Key)
+  REparse(x,
+          makeRE.harm(..., collapse = FALSE),
+          parse.exhaust = FALSE, parse.strict = FALSE,
+          toEnv = TRUE)  # adds accidental numeral triadalt figurations and inversion to the environment
+  root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
+                           parts = c('species', 'step'), qualities = FALSE,
+                           implicitSpecies = implicitSpecies,
+                           step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                           Key = Key, ...)@Fifth
+  figurations <- parseFiguration(figurations, qualities = TRUE, diminish = 'D', augument = 'A')
+  ### quality of degress
+  # extension qualities
+  qualities <- extensions2qualities(root, figurations, triadalt, Key = Key, qualities = TRUE, 
+                                    diminish = 'D', augment = 'A', ...)
+  # incorporate quality of triad
+  qualities <- local({
+    triad <- rep('M', length(numeral))
+    triad[numeral == tolower(numeral)] <- 'm'
+    triad[triadalt == diminish] <- diminish
+    triad[triadalt == augment]  <- augment
+    
+    triad2sciQuality(triad, qualities, incomplete = '', diminish = diminish, augment = augment, ...)
+  })
+  
+  qualitytset <-  sciQualities2tset(qualities, ..., diminish = diminish, augment = augment)
+  
+  # if 1 is altered!
+  root <- root + setNames(c(-7L, 7L, 0L), c(diminish, augment, 'P'))[stringr::str_sub(qualities, 1L, 1L)]
+  
+  ###
+  output <- tset(root, 
+                 root + getMode(qualitytset),
+                 alterations = qualitytset@Alteration,
+                 extension = figurations$Extension, 
+                 inversion = ifelse(inversion == '', 0L, match(inversion, letters) - 1L))
+  
+  # if (implicitSpecies) output <- output + Key
+  output
+  
+}
 
 sciQualities2tset <- function(str, inversion = 0L, ...) {
   
@@ -953,6 +995,7 @@ tertianSet.integer <- integer2tset
 
 
 char2tset <- makeHumdrumDispatcher(list('any', makeRE.roman,      roman2tset),
+                                   list('harm', makeRE.harm,      harm2tset),
                                    list('any', makeRE.tertian,    tertian2tset),
                                    list('any', makeRE.chord,      chord2tset),
                                    funcName = 'char2tset',
@@ -989,6 +1032,7 @@ mapoftset <- function(str, Key = NULL, ..., split = '/') {
 #' @export
 tertianSet.character <- makeHumdrumDispatcher(list('any', makeRE.tertianPartition, mapoftset), 
                                               list('any', makeRE.roman,            roman2tset),
+                                              list('harm', makeRE.harm,      harm2tset),
                                               list('any', makeRE.tertian,          tertian2tset),
                                               list('any', makeRE.chord,            chord2tset),
                                               funcName = 'tertianSet.character',
