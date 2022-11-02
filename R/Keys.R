@@ -644,7 +644,7 @@ NULL
 ### Key representations ####  
 
 qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, 
-                            major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', ...) {
+                            major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', ...) {
     
     
     # modes are the 7 13th-chord/modes in L05th order

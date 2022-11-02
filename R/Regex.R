@@ -618,7 +618,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 ####. REs for tertian sets ####
 
-makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
+makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,

@@ -241,6 +241,7 @@ tset2alterations <- function(x, Key = dset(0,0),
                              qualities = FALSE, 
                              inversion = TRUE, 
                              absoluteSpecies = TRUE,  implicitSpecies = FALSE, 
+                             dominantSpecies = FALSE,
                              explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   
@@ -248,8 +249,9 @@ tset2alterations <- function(x, Key = dset(0,0),
   bass <- getBass(x)
   
   if (absoluteSpecies) {
+    roots <- getRoot(x)
     x <- x - getRoot(x)
-    Key <- dset(0, -1L)
+    Key <- if (dominantSpecies) dset(0, -1L) else dset(0L, getMode(Key) - roots)
   }
   if (explicitNaturals) {
     x <- x - getRoot(Key)
@@ -547,8 +549,8 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
 
 
 tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
-  figArgs <- list(implicitSpecies = FALSE, qualities = FALSE, absoluteSpecies = FALSE,
-                  flat = 'b', natural = 'M', sharp = '#',
+  figArgs <- list(implicitSpecies = TRUE, qualities = TRUE, absoluteSpecies = TRUE,
+                  diminish = 'D', augment = 'A', 
                   extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
                   extension.sus = TRUE, extension.add = TRUE)
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -566,7 +568,7 @@ tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
 }
 
 tset2tertian <- function(x,  figurationArgs = c(), ...) {
-  figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE,
+  figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, diminish = 'o', augment = '+',
                   absoluteSpecies = TRUE, qualities = TRUE, step = FALSE)
   
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -587,7 +589,7 @@ tset2tertian <- function(x,  figurationArgs = c(), ...) {
 
 
 tset2chord <- function(x, figurationArgs = c(), major = NULL, ...) {
-  figArgs <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE,
+  figArgs <- list(absoluteSpecies = TRUE, implicitSpecies = TRUE, extension.decreasing = FALSE, dominantSpecies = TRUE,
                   flat = 'b', qualities = FALSE, natural = 'maj')
   figArgs[names(figurationArgs)] <- figurationArgs
   
@@ -667,7 +669,7 @@ extension2bit <- function(str) {
 
 
 triad2sciQuality <- function(triad, extensionQualities, incomplete,
-                             major = 'M', minor = 'm', perfect = 'P', diminish = 'd', augment = 'A',
+                             major = 'M', minor = 'm', perfect = 'P', diminish = 'o', augment = '+',
                              ...) {
   
   
@@ -812,7 +814,7 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
     
     triad2sciQuality(triad, qualities, incomplete = '', diminish = diminish, augment = augment, ...)
   })
-
+  
   qualitytset <-  sciQualities2tset(qualities, ..., diminish = diminish, augment = augment)
   
   # if 1 is altered!
@@ -903,7 +905,7 @@ sciQualities2tset <- function(str, inversion = 0L, ...) {
 tertian2tset <- function(x, Key = dset(0, 0), ...) {
   
     REparse(x,
-            makeRE.tertian(..., collapse = FALSE),
+            makeRE.tertian(..., collapse = FALSE), # makes root, quality, inversion, and incomplete
             toEnv = TRUE) -> parsed
   
     Key <- diatonicSet(Key)
