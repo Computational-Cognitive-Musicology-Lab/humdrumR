@@ -269,15 +269,15 @@ tset2alterations <- function(x, Key = dset(0,0),
 }
 
 
-tset2extensions <- function(x, extension.simple = FALSE, inversion = TRUE, ...) {
+tset2extensions <- function(x, extension.simple = FALSE, inversion = TRUE, inverted, ...) {
   extensions <- c(1L, 3L, 5L, 7L, 9L, 11L, 13L)
-  if (extension.simple) extensions <- genericStep(extensions)
   
   if (!inversion) x <- rootPosition(x)
   
   extensions <- matrix(extensions, byrow = TRUE, ncol = 7L, nrow = length(x))
   colnames(extensions) <- c('Root', nthfix(c(3, 5, 7, 9, 11, 13)))
   
+  if (extension.simple) extensions[inverted, ] <- genericStep(extensions[inverted, ])
   extensions[!getExtensions(x)] <- NA_integer_
   
   extensions
@@ -358,16 +358,23 @@ reduceFigures <- function(alterations, extensions,
   present <- !is.na(alterations) 
   tags <- array(NA_character_, dim = dim(alterations))
   
+
+  roots  <- sweep(col(extensions), 1, ((1L - inversion - 1L) %% 7L) + 1L, '==')
+  thirds <- sweep(col(extensions), 1, ((2L - inversion - 1L) %% 7L) + 1L, '==')
+  fifths <- sweep(col(extensions), 1, ((3L - inversion - 1L) %% 7L) + 1L, '==')
   
   # get rid of alterations that are already taken care of by the quality!
   if (!is.null(triadQuality)) {
-    if (root.case) {
-      alterations[col(alterations) == 2L & alterations %in% c(flat, minor)] <- ""
-      alterations[col(alterations) == 3L & alterations == diminish] <- ""
-    }
-    alterations[triadQuality != '?', 1:3] <- ""
+   
     
-    alterations[col(alterations) <= 3L & alterations == 'n'] <- ""
+    if (root.case) {
+      alterations[thirds & alterations %in% c(flat, minor)] <- '' 
+      alterations[fifths & alterations  ==     diminish   ] <- ''
+    }
+    alterations[!is.na(alterations) & 
+                  (roots | thirds | fifths) & 
+                  ((row(alterations) %in% which(triadQuality != '?')) | (alterations == 'n'))] <- ""
+    
   }
 
   
@@ -391,11 +398,11 @@ reduceFigures <- function(alterations, extensions,
   }
   
   # missing triad tones
-  tags[is.na(extensions) & col(tags) %in% 2L:3L & is.na(tags)] <- 'no'
+  tags[!row(extensions) %in% which(inverted) & is.na(extensions) & col(tags) %in% 2L:3L & is.na(tags)] <- 'no'
   extensions[which(tags == 'no')] <- ((col(extensions)[which(tags == 'no')] - 1L) * 2L) + 1L
   #
   if (extension.shorthand) {
-    # if (!extension.simple && any(inverted)) {
+    # if (extension.simple && any(inverted)) {
       # extensions[inverted, ] <- genericstep(extensions[inverted, ])
     # }
     chorddegree <- sweep(extensions, 1, 2L * inversion, '+')
@@ -403,6 +410,8 @@ reduceFigures <- function(alterations, extensions,
     chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] <- chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] - 14L
     
     hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<') 
+    if (any(inverted)) hide <- hide & !sweep(chorddegree > 5, 1, inverted, '&')
+    
     
     extensions[(hide & alterations == "" & is.na(tags)) | extensions == 1L] <- NA_integer_
     
@@ -463,7 +472,7 @@ tset2tonalHarmony <- function(x,
  
   
   figuration <- if (figuration) {
-    extensions  <- do.call('tset2extensions', c(list(x, inversion = inversion), figurationArgs))
+    extensions  <- do.call('tset2extensions', c(list(x, inversion = inversion, inverted = getInversion(x) > 0L), figurationArgs))
     alterations <- do.call('tset2alterations', c(list(x, Key = Key, inversion = inversion, step = FALSE), figurationArgs[names(figurationArgs) != 'step']))
     
     figuration <- do.call('reduceFigures', c(list(alterations, extensions, ...,
@@ -519,7 +528,9 @@ tset2figuredBass <- function(x, figurationArgs = list(),  ...) {
 
 tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
   
-  figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE)
+  figArgs <- list(implicitSpecies = TRUE, flat = 'b', qualities = FALSE, 
+                  extension.shorthand = TRUE, extension.simple = TRUE, absoluteSpecies = FALSE,
+                  extension.sus = TRUE, extension.add = TRUE)
   figArgs[names(figurationArgs)] <- figurationArgs
   
   t2tH <- partialApply(tset2tonalHarmony, 
@@ -528,8 +539,6 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
                        implicitSpecies = TRUE,
                        rootCase = TRUE,
                        inversion.labels = NULL,
-                       extension.shorthand = TRUE, extension.simple=TRUE,
-                       extension.sus = TRUE, extension.add = TRUE,
                        inversion = TRUE)
   
   t2tH(x, figurationArgs = figArgs, Key = Key, ...)
@@ -538,8 +547,10 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
 
 
 tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
-  figArgs <- list(implicitSpecies = FALSE, qualities = FALSE, 
-                  flat = 'm', natural = 'M', perfect = 'P')
+  figArgs <- list(implicitSpecies = TRUE, qualities = FALSE, absoluteSpecies = FALSE, 
+                  flat = 'm', natural = 'M', perfect = 'P',
+                  extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
+                  extension.sus = TRUE, extension.add = TRUE)
   figArgs[names(figurationArgs)] <- figurationArgs
   
   t2tH <- partialApply(tset2tonalHarmony, 
@@ -548,8 +559,6 @@ tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
                        implicitSpecies = TRUE,
                        rootCase = TRUE,
                        inversion.labels = c('', 'b', 'c', 'd', 'e', 'f', 'g'),
-                       extension.shorthand = TRUE, extension.simple = TRUE, extension.decreasing = FALSE,
-                       extension.sus = TRUE, extension.add = TRUE,
                        inversion = FALSE)
   
   t2tH(x, figurationArgs = figArgs, Key = Key, ...)
@@ -841,22 +850,21 @@ harm2tset <- function(x, Key = dset(0,0),
                            Key = Key, ...)@Fifth
   
   # 
-  figurationArgs$diminish  <- figurationArgs$diminish  %||% 'D'
-  figurationArgs$augment   <- figurationArgs$augment   %||% 'A'
-  figurationArgs$qualities <- figurationArgs$qualities %||% TRUE
+  figArgs <- list(diminish = 'D', augment = 'A', qualities = TRUE)
+  figArgs[names(figurationArgs)] <- figurationArgs
   
-  figurations <- do.call('parseFiguration', c(list(figurations), figurationArgs))
+  figurations <- do.call('parseFiguration', c(list(figurations), figArgs))
   ### quality of degress
   # extension qualities
   qualities <- do.call('extensions2qualities',
-                       c(list(root, figurations, triadalt, Key = Key), figurationArgs)) 
+                       c(list(root, figurations, triadalt, Key = Key), figArgs)) 
   
   # incorporate quality of triad
   qualities <- local({
     triad <- rep('M', length(numeral))
     triad[numeral == tolower(numeral)] <- 'm'
-    triad[triadalt == diminish] <- figurationArgs$diminish
-    triad[triadalt == augment]  <- figurationArgs$augment
+    triad[triadalt == diminish] <- figArgs$diminish
+    triad[triadalt == augment]  <- figArgs$augment
     
     triad2sciQuality(triad, qualities, incomplete = '', diminish = 'D', augment = 'A', ...)
   })
@@ -920,14 +928,13 @@ tertian2tset <- function(x, Key = dset(0, 0), ...) {
 
 chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = 'b') {
   
-  
   # preprocessing
   x <- stringr::str_replace(x, 'maj7', 'majn7')
   x <- stringr::str_replace(x, 'maj([91])', 'majn7\\1')
   
   #
   REparse(x,
-          makeRE.chord(..., flat = flat, collapse = FALSE),
+          makeRE.chord(..., flat = flat, collapse = FALSE), # makes tonalChroma, bass, quality, figurations
           toEnv = TRUE) -> parsed
   
   quality[quality == ''] <- major
@@ -963,9 +970,12 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
   tset <- tertian2tset(paste0(tonalChroma, quality, sciQualities), flat = flat, ...)
   
-  bassint <- integer(length(tset))
-  bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getRoot(tset[bass != ''])
-  tset@Inversion <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint + 1L]
+  if (any(bass != '')) {
+    bassint <- integer(length(tset))
+    bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getRoot(tset[bass != ''])
+    tset@Inversion <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint + 1L]
+  }
+  
   
   tset
   
@@ -1095,7 +1105,7 @@ setAs('tertianSet', 'diatonicSet', function(from) tset(from@Root, from@Signature
 #' + [roman()]
 #' + [tertian()]
 #' 
-#' @seealso To better understand how these functions work, read about how diatonic keys are 
+#' @seealso To better understand how these functions work, read about how tertian harmonies are 
 #' [parsed][chordParsing] and [deparsed][chordDeparsing].
 #' 
 #' @name chordFunctions
@@ -1220,8 +1230,13 @@ harm <- makeChordTransformer(tset2harm, 'harm')
 
 #' Roman numeral representation of harmony
 #' 
-
-#' Unlike the more standard humdrum [harm()] representation, inversions are indicated using traditional figures.
+#' The output format of `roman()` is very similar to `**harm`.
+#' The main difference is that inversions are indicated using traditional figures
+#' , like `653`, instead of `**harm`'s simpler system (using letters).
+#' So, for example, if we take the input `E7/B` in the key of A major, we'll get:
+#'
+#' + `harm('E7/B', Key = 'A:')` => `"V7d"`
+#' + `roman('E7/B', Key = 'A:')` => `"V65"`
 #' 
 #' @rdname harm
 #' @export 
