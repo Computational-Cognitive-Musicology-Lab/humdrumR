@@ -547,8 +547,8 @@ tset2roman <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
 
 
 tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
-  figArgs <- list(implicitSpecies = TRUE, qualities = FALSE, absoluteSpecies = FALSE, 
-                  flat = 'm', natural = 'M', perfect = 'P',
+  figArgs <- list(implicitSpecies = FALSE, qualities = FALSE, absoluteSpecies = FALSE,
+                  flat = 'b', natural = 'M', sharp = '#',
                   extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
                   extension.sus = TRUE, extension.add = TRUE)
   figArgs[names(figurationArgs)] <- figurationArgs
@@ -972,7 +972,7 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
   if (any(bass != '')) {
     bassint <- integer(length(tset))
-    bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getRoot(tset[bass != ''])
+    bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getFifth(kern2tint(tonalChroma))
     tset@Inversion <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint + 1L]
   }
   
@@ -1235,8 +1235,8 @@ harm <- makeChordTransformer(tset2harm, 'harm')
 #' , like `653`, instead of `**harm`'s simpler system (using letters).
 #' So, for example, if we take the input `E7/B` in the key of A major, we'll get:
 #'
-#' + `harm('E7/B', Key = 'A:')` => `"V7d"`
-#' + `roman('E7/B', Key = 'A:')` => `"V65"`
+#' + `harm('E7/B', Key = 'A:')` => `"V7c"`
+#' + `roman('E7/B', Key = 'A:')` => `"V643"`
 #' 
 #' @rdname harm
 #' @export 
