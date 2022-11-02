@@ -2273,9 +2273,10 @@ specifier2tint <- function(x, step = NULL, Key = NULL,
   
   natural <- stringi::stri_detect_fixed(x, natural)
   lof <- (if (qualities) {
-    updownN(x, up = augment, down = diminish) -
-      (substr(x, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
-      (x == 'm')
+    lof <- updownN(x, up = augment, down = diminish) -
+      (substr(x, 1L, 1L) == diminish & step >= 3L)  - # 3rd, 6th, and 7th diminish differently
+      (x == minor)
+    
   } else {
     updownN(x, up = sharp, down = flat)
   } ) 

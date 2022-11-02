@@ -676,6 +676,7 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
                            quals
                            
                          })
+  
   extensionQualities[col(extensionQualities) <= 3L & extensionQualities == '.'] <- triadQualities[col(extensionQualities) <= 3L & extensionQualities == '.']
   extensionQualities[ , 2L:3L] <- triadQualities[ , 2L:3L]
   
@@ -687,7 +688,6 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
 
 extensions2qualities <- function(root, figurations, triadalts, Key = NULL, qualities = FALSE, ...) {
   
-  
   mode <- if(is.null(Key)) 0L else getMode(Key)
   
   dots <- rep('.', 7L)
@@ -697,9 +697,11 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, quali
     acc <- acc[!redundantroot]
     if (length(deg) == 0L) return(dots)
     step <- step2tint(deg, step.labels = 1L:14L)
-    alterations <- specifier2tint(acc, step, qualities = qualities,  ...)
     
-    qualities <- tint2specifier((step %% dset(-r, m - r)) + alterations, qualities = TRUE, ...)
+    alterations <- specifier2tint(acc, step, qualities = qualities,  
+                                  Key = dset(0L, m - r), implicitSpecies = TRUE, ...)
+    
+    qualities <- tint2specifier(step + alterations, qualities = TRUE, ...)
     
     dots[1L + ((deg - 1L) %/% 2L)] <- qualities
     dots
@@ -718,7 +720,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
                          collapse = TRUE)
   
   figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat, qualities = qualities)[[1]], simplify = FALSE)
-
+ 
   figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat, qualities = qualities))
   
   lapply(figures, 
@@ -821,7 +823,9 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
 }
 
 
-harm2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implicitSpecies = FALSE, ...) {
+harm2tset <- function(x, Key = dset(0,0), 
+                      figurationArgs = list(),
+                      augment = '+', diminish = 'o', implicitSpecies = TRUE, ...) {
   Key <- CKey(Key)
   REparse(x,
           makeRE.harm(..., collapse = FALSE),
@@ -835,22 +839,29 @@ harm2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implici
                            implicitSpecies = implicitSpecies,
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                            Key = Key, ...)@Fifth
-  figurations <- parseFiguration(figurations, qualities = TRUE, diminish = 'D', augument = 'A')
+  
+  # 
+  figurationArgs$diminish  <- figurationArgs$diminish  %||% 'D'
+  figurationArgs$augment   <- figurationArgs$augment   %||% 'A'
+  figurationArgs$qualities <- figurationArgs$qualities %||% TRUE
+  
+  figurations <- do.call('parseFiguration', c(list(figurations), figurationArgs))
   ### quality of degress
   # extension qualities
-  qualities <- extensions2qualities(root, figurations, triadalt, Key = Key, qualities = TRUE, 
-                                    diminish = 'D', augment = 'A', ...)
+  qualities <- do.call('extensions2qualities',
+                       c(list(root, figurations, triadalt, Key = Key), figurationArgs)) 
+  
   # incorporate quality of triad
   qualities <- local({
     triad <- rep('M', length(numeral))
     triad[numeral == tolower(numeral)] <- 'm'
-    triad[triadalt == diminish] <- diminish
-    triad[triadalt == augment]  <- augment
+    triad[triadalt == diminish] <- figurationArgs$diminish
+    triad[triadalt == augment]  <- figurationArgs$augment
     
-    triad2sciQuality(triad, qualities, incomplete = '', diminish = diminish, augment = augment, ...)
+    triad2sciQuality(triad, qualities, incomplete = '', diminish = 'D', augment = 'A', ...)
   })
   
-  qualitytset <-  sciQualities2tset(qualities, ..., diminish = diminish, augment = augment)
+  qualitytset <-  sciQualities2tset(qualities, ..., diminish = 'D', augment = 'A')
   
   # if 1 is altered!
   root <- root + setNames(c(-7L, 7L, 0L), c(diminish, augment, 'P'))[stringr::str_sub(qualities, 1L, 1L)]
