@@ -886,6 +886,7 @@ mergeHumdrum <- function(...) {
 #' own new spines (shifting higher spines over as needed).
 #' 
 #' 
+#' @family {Humdrum data reshaping functions}
 #' @export
 expandPaths <- function(x, asSpines) UseMethod('expandPaths')
 #' @export
@@ -954,6 +955,7 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
 #' @param sep (`character`, `length == 1`) If `collapseAtomic == TRUE`, collapsed tokens 
 #' are separated by this string.
 #' 
+#' @family {Humdrum data reshaping functions}
 #' @seealso The humdrum [folding functions][foldHumdrum()] serve a similar function,
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
@@ -1193,6 +1195,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' @seealso The [collapse family of functions][collapseHumdrum()] serves a somewhat
 #' similar function, "collapsing" data *within* a field.
 #' @family {Folding functions}
+#' @family {Humdrum data reshaping functions}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
                         fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE,

@@ -177,6 +177,7 @@ reference:
   - humCoercion
   - humMerge
   - collapseHumdrum
+  - expandPaths
   - foldHumdrum
   - foldExclusive
   - foldGraceNotes

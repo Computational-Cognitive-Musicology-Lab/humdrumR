@@ -9,7 +9,6 @@ timeline(
   x,
   start = 0,
   ...,
-  scale = 1,
   Exclusive = NULL,
   parseArgs = list(),
   groupby = list()

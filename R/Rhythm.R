@@ -311,12 +311,12 @@ rint2duration <- function(x) {
 
 
 rint2seconds <- function(x, BPM = 60) {
-  rint2duration(x) * bpm2sec(BPM)
+  rint2duration(x) * bpm2sec(BPM) * 4
 }
 
 
 rint2ms <- function(x, BPM = 60) {
-  rint2duration(x) * bpm2ms(BPM)
+  rint2duration(x) * bpm2ms(BPM) * 4
 }
 
 
@@ -1215,49 +1215,39 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #'   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
- ## need to get local urat
+  ## need to get local urat
   
+  durations <- duration(x, Exclusive = Exclusive, parseArgs = parseArgs, ...)
   
-  groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
-  groupby$Record <- groupby$Record %||% seq_along(durations)
-  
-  
-  dt <- groupby <- as.data.table(checkWindows(durations, groupby))
-  dt$Duration <- durations
-  
-  
-  if (is.logical(start)) {
-    if (length(start) != length(x)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
-    dt$Start <- start
-    start <- 0L
-  } else {
-    checkArg(start, 'start', 'timeline', classes = c('logical', 'numeric'), max.length = 1L, min.length = 1L)
-  }
-  
-  dtuniq <- dt[!duplicated(groupby)]
-  setorder(dtuniq, Piece, Record)
-  dtuniq[ , Duration := c(start, head(Duration, -1L)), by = Piece]
-  dtuniq[ , Time := sigma.default(Duration, groupby = list(Piece))]
-  if (!is.null(dtuniq$Start)) dtuniq[ , Time := Time - Time[which(Start)[1]], by = Piece]
-  
-  dtuniq[dt, on = c('Piece', 'Record')]$Time
+  pathSigma(durations, groupby = groupby, start = start)
   
   
 }
 
 
-timeline2 <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
-  ## need to get local urat
+#' @rdname timeline
+#' @export
+timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+  seconds <- seconds(x, BPM = BPM, Exclusive = Exclusive, parseArgs = parseArgs, ...)
   
-  durations <- as.numeric(rhythmInterval(x))
+  seconds <- pathSigma(seconds, start = start, groupby = groupby)
   
-  .SD <- structureTab(Duration = durations, Start = start, groupby = groupby)
+
+  
+  dur(seconds,  minutes = minutes, ...)
+  
+}
+
+
+pathSigma <- function(durations, groupby, start) {
+  # this does most of work for timestamp and timeline
+  
+  .SD <- structureTab(Duration = durations, groupby = groupby)
   
   if (is.logical(start)) {
-    if (length(start) != length(x)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
+    if (length(start) != length(durations)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
     .SD$Start <- start
     start <- 0L
   } else {
@@ -1273,24 +1263,7 @@ timeline2 <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs 
   if (!is.null(.SD_expanded$Start)) .SD_expanded[ , Time := Time - Time[which(Start)[1]], by = Piece]
   
   .SD_expanded[.SD, on = c('Piece', 'Spine', 'Path', 'Record')]$Time
-  
-  
 }
-
-
-#' @rdname timeline
-#' @export
-timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  seconds <- seconds(x, BPM = BPM, Exclusive = Exclusive, ...)
-  
-  seconds <- timeline(seconds, Exclusive = Exclusive, groupby = groupby, ...)
-  
-
-  
-  dur(seconds, BPM = BPM, minutes = minutes, ...)
-  
-}
-
 
 
 ## Find lag ----

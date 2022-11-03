@@ -171,5 +171,10 @@ Other {Folding functions}:
 \code{\link{foldExclusive}()},
 \code{\link{foldGraceNotes}()},
 \code{\link{unfoldStops}()}
+
+Other {Humdrum data reshaping functions}: 
+\code{\link{collapseHumdrum}()},
+\code{\link{expandPaths}()}
 }
 \concept{{Folding functions}}
+\concept{{Humdrum data reshaping functions}}
