@@ -1252,43 +1252,27 @@ timeline2 <- function(x, start = 0, ..., scale = 1, Exclusive = NULL, parseArgs 
   # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
   ## need to get local urat
   
-   durations <- as.numeric(rhythmInterval(x))
-  groupby$Piece <- groupby$Piece %||% rep(1, length(durations))
-  groupby$Record <- groupby$Record %||% seq_along(durations)
+  durations <- as.numeric(rhythmInterval(x))
+  
+  .SD <- structureTab(Duration = durations, Start = start, groupby = groupby)
+  
+  if (is.logical(start)) {
+    if (length(start) != length(x)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
+    .SD$Start <- start
+    start <- 0L
+  } else {
+    checkArg(start, 'start', 'timeline', classes = c('logical', 'numeric'), max.length = 1L, min.length = 1L)
+  }
   
   
-  dt <- groupby <- as.data.table(checkWindows(durations, groupby))
-  dt$Duration <- durations
+  .SD_expanded <- expandPaths.data.table(.SD)
+  .SD_expanded <- .SD_expanded[Stop == 1L]
   
-  dt_ <- data.table::copy(dt)
-  setorder(dt_, Piece, Spine, Record)
+  .SD_expanded[ , Time := start + sigma.default(c(0, head(Duration, -1L))), by = list(Piece, Spine, Path)]
   
-  pathTable <- dt_[ , {
-    pathTable <- table(Record, Path)
-    pathStarts <- apply(pathTable, 2, \(x) which(x > 0)[1])
-    browser()
-    }, by = list(Piece, Spine)]
+  if (!is.null(.SD_expanded$Start)) .SD_expanded[ , Time := Time - Time[which(Start)[1]], by = Piece]
   
-  
-  browser()
-  
-  dt_[ , PieceRecord := paste0(Piece, '.', Record)]  
-  
-  dt_[ , Duration := c(start, head(Duration, 1L)), by = list(Piece, Spine)]
-    
-  paths <- lapply(unique(dt_$Path), 
-                                  \(path) {
-                                    pathrecs <- dt_[Path == path, unique(PieceRecord)]
-                                    
-                                    dt_[(Path == 0L & !PieceRecord %in% pathrecs) | (Path == path), 
-                                       list(Time = start + sigma.default(c(0, head(Duration, -1L)), groupby = list(Piece, Spine)), 
-                                            Spine = Spine, Piece = Piece, Record = Record,
-                                            Path = Path)][Path == path]
-                                    
-                                    }) |> rbindlist()
-  # if (!is.null(dtuniq$Start)) dtuniq[ , Time := Time - Time[which(Start)[1]], by = Piece]
-  
-  paths[dt, on = c('Piece', 'Spine', 'Path', 'Record')]$Time
+  .SD_expanded[.SD, on = c('Piece', 'Spine', 'Path', 'Record')]$Time
   
   
 }

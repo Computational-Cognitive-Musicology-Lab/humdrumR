@@ -354,6 +354,20 @@ setMethod('initialize', 'humdrumR',
           })
 
 
+structureTab <- function(..., groupby = list()) {
+    
+    fields <- as.data.frame(list(...))
+    
+    groupby <- checkWindows(fields[[1]], groupby)
+    
+    fields$Piece <- fields$Spine <- fields$Stop <- 1L
+    fields$Record <- seq_len(nrow(fields))
+    fields$Path <- 0L
+    fields[names(groupby)] <- groupby
+    
+    as.data.table(fields)
+}
+
 
 # humdrumR core methods ####
 
@@ -886,6 +900,7 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     x
 }
 expandPaths.data.table <- function(humtab, asSpines = TRUE) {
+    if (!any(humtab$Path > 0L)) return(humtab)
     
     humtab[ , PieceRecord := paste0(Piece, Record)]
     for (path in setdiff(unique(humtab$Path), 0L)) {
