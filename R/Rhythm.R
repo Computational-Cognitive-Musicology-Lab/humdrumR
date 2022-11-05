@@ -1255,9 +1255,8 @@ pathSigma <- function(durations, groupby, start) {
   }
   
   
-  .SD_expanded <- expandPaths.data.table(.SD)
+  .SD_expanded <- expandPaths.data.table(.SD, asSpines = FALSE)
   .SD_expanded <- .SD_expanded[Stop == 1L]
-  
   .SD_expanded[ , Time := start + sigma.default(c(0, head(Duration, -1L))), by = list(Piece, Spine, Path)]
   
   if (!is.null(.SD_expanded$Start)) .SD_expanded[ , Time := Time - Time[which(Start)[1]], by = Piece]

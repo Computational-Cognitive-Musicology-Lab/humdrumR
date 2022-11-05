@@ -360,9 +360,9 @@ structureTab <- function(..., groupby = list()) {
     
     groupby <- checkWindows(fields[[1]], groupby)
     
-    fields$Piece <- fields$Spine <- fields$Stop <- 1L
+    fields$Piece <- fields$Spine <- fields$Stop <- fields$File <- 1L
     fields$Record <- seq_len(nrow(fields))
-    fields$Path <- 0L
+    fields$Path <- fields$ParentPath <- 0L
     fields[names(groupby)] <- groupby
     
     as.data.table(fields)
@@ -901,28 +901,52 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     x
 }
 expandPaths.data.table <- function(humtab, asSpines = TRUE) {
-    if (!any(humtab$Path > 0L)) return(humtab)
+    if (!any(humtab$Path > 0L, na.rm = TRUE)) return(humtab)
     
-    humtab[ , PieceRecord := paste0(Piece, Record)]
-    for (path in setdiff(unique(humtab$Path), 0L)) {
-        pathrecs <- humtab[Path == path, unique(PieceRecord)]
-        parent <- humtab[Path == path, ParentPath[1]]
-        
-        new <- humtab[(Path == parent & !PieceRecord %in% pathrecs)]
-        new[ , Path := path]
-        humtab <- rbind(humtab, new)
+    humtab[ , Piece.Spine.Record := paste(Piece, Spine, Record, sep = ':')]
+    humtab[ , Piece.Spine := paste(Piece, Spine, sep = ':')]
+    
+    paths <- unique(humtab[!is.na(Path) & Path > 0L, c('ParentPath', 'Path'), with = FALSE])
+    
+    for(path in unique(paths$Path)) {
+        for (parent in paths[Path == path, ParentPath]) {
+            cat(path, ',', parent, '\n')
+            
+            recordsWithPaths <- humtab[Path == path & ParentPath == parent, unique(Piece.Spine.Record)]
+            spinesWithPaths <- humtab[Path == path & ParentPath == parent, unique(Piece.Spine)]
+            
+            new <- humtab[Piece.Spine %in% spinesWithPaths & 
+                              !Piece.Spine.Record %in% recordsWithPaths &
+                              Path < path]
+            new[ , Path := path]
+            new[ , ParentPath := parent]
+            
+            humtab <- rbind(new, humtab)
+        }
     }
-    humtab[ , PieceRecord := NULL]
+    
+    
+    humtab[ , Piece.Spine.Record := NULL]
+    humtab[ , Piece.Spine := NULL]
+
     humtab <- orderHumtab(humtab)
     
+    
+    
     if (asSpines) {
-        humtab[ , Spine := 1L + Path + ((Spine - 1L) * max(Path, na.rm = TRUE))]
+        humtab[ , Spine := 1L + Path + ((Spine - 1L) * (1L + max(Path, na.rm = TRUE))), by = Piece]
         humtab[ , Path := 0L]
         renumberSpines.data.table(humtab)
         
     }
     
-    if ('I' %in% humtab$Type) humtab[ , Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
+    if ('I' %in% humtab$Type) {
+        if (asSpines) {
+            humtab[Type == 'I', Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
+        } else {
+            humtab[Type == 'I' & Path > 0L, Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
+        }
+    }
     
     
     humtab

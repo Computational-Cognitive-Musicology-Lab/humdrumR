@@ -64,7 +64,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                              Expression = list(quote(list(Piece = Piece, Record = Record)))),
                   data.table(Argument = 'groupby', Type = 'path',
                              Function = c('timeline', 'timestamp'),
-                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, Record = Record)))),
+                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
                   data.table(Argument = 'orderby', Type = 'harmonic',
                              Function = 'hint',
                              Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop))))

@@ -274,22 +274,84 @@ metricPlot <- function(metric) {
 # Count the number of beats in a duration
 # 
 # how many beats have passed, and the offset between each attack and the nearest beat.
-count <- function(durs, beat = rational(1L), 
+
+count <- function(dur, beat = rational(1L), phase = rational(0L), beat.round = floor) {
+  
+  dur <- rhythmInterval(dur)
+  
+  beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
+  beat <- rep(beat, length(dur))
+  
+  totalTatum <- do.call('c', lapply(beat, sum))
+  
+  
+  dur <- dur / totalTatum
+  beat <- Map(`/`, beat, as.list(totalTatum))
+  
+  browser()
+
+  #
+  
+  mcount <- beat.round((dur + phase)) 
+  
+  # if (length(beat) > 1L) {
+    
+    # beatoff <- sigma(beat)
+    # mremain <- ((dur + phase) - totalTatum * mcount)
+    
+    # subcount <-  outer(beatoff, mremain, '<=') |> colSums()
+    # mcount <- mcount * length(beat) + subcount
+    
+    
+    # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
+    
+  # }
+  
+  numerator(mcount)
+}
+
+
+count2 <- function(timeline, beat = rational(1L), 
                   phase = rational(0L), beat.round = floor) {
   
-  durs <- rhythmInterval(durs)
   
+  if (length(beat) == length(timeline) && length(unique(beat)) > 1L) {
+    beatchange <- changes(beat)
+    groupsizes <- delta(timeline[beatchange], right = TRUE)
+    groupsizes[is.na(groupsizes)] <- 0
+    
+    # need to split timeline into separate parts, but subtract the missing parts from each place.
+    timelines <- lapply(unique(beat), 
+           \(b) { 
+             offsets <- cumsum(ifelse(attr(beatchange, 'values') == b, 0, -groupsizes))
+             offsets <- rep(offsets, rle(beat)$lengths)
+             (timeline + offsets)[beat == b]
+             }) 
+    
+    mcounts <- Map(\(t, b) count(t, b), timelines, unique(beat))
+    
+    
+    
+    mcount <- unlist(mcounts)[order(unlist(tapply(seq_along(timeline), beat, list)))]
+    diff <- delta(mcount)
+    diff[beatchange] <- 1L
+    mcount <- sigma(diff)
+    return(mcount)
+ 
+  }
+  
+  timeline <- rhythmInterval(timeline)
   beat <- rhythmInterval(beat)
   totalTatum <- sum(beat)
   #
 
   
-  mcount <- beat.round((durs + phase) / totalTatum) 
+  mcount <- beat.round((timeline + phase) / totalTatum) 
   
   if (length(beat) > 1L) {
     
     beatoff <- sigma(beat)
-    mremain <- ((durs + phase) - totalTatum * mcount)
+    mremain <- ((timeline + phase) - totalTatum * mcount)
     
     subcount <-  outer(beatoff, mremain, '<=') |> colSums()
     mcount <- mcount * length(beat) + subcount
@@ -303,7 +365,7 @@ count <- function(durs, beat = rational(1L),
 }
 
 
-subpos <- function(durs, beat = rational(1L), deparser = recip, 
+subpos <- function(durs, beat = rational(1L), deparser = recip, ...,
                    phase = rational(0L), beat.round = floor, Bar = NULL) {
   
   durs <- rhythmInterval(durs)
@@ -328,7 +390,7 @@ subpos <- function(durs, beat = rational(1L), deparser = recip,
     
   }
   
-  deparser(mremain)
+  deparser(mremain, ...)
   # 
 
   
