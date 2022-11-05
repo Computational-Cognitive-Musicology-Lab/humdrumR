@@ -1222,7 +1222,7 @@ timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), gr
   durations <- duration(x, Exclusive = Exclusive, parseArgs = parseArgs, ...)
   
   pathSigma(durations, groupby = groupby, start = start)
-  
+ 
   
 }
 
@@ -1243,8 +1243,10 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive
 
 pathSigma <- function(durations, groupby, start) {
   # this does most of work for timestamp and timeline
-  
+  durations[is.na(durations)] <- 0
   .SD <- structureTab(Duration = durations, groupby = groupby)
+  
+  
   
   if (is.logical(start)) {
     if (length(start) != length(durations)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
@@ -1254,14 +1256,13 @@ pathSigma <- function(durations, groupby, start) {
     checkArg(start, 'start', 'timeline', classes = c('logical', 'numeric'), max.length = 1L, min.length = 1L)
   }
   
+  .SD[Stop == 1L, Time := start + sigma.default(c(0, head(Duration, -1L))), by = list(Piece, Spine, Path)]
   
-  .SD_expanded <- expandPaths.data.table(.SD, asSpines = FALSE)
-  .SD_expanded <- .SD_expanded[Stop == 1L]
-  .SD_expanded[ , Time := start + sigma.default(c(0, head(Duration, -1L))), by = list(Piece, Spine, Path)]
+  .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
   
-  if (!is.null(.SD_expanded$Start)) .SD_expanded[ , Time := Time - Time[which(Start)[1]], by = Piece]
+  if (!is.null(.SD$Start)) .SD[ , Time := Time - Time[which(Start)[1]], by = Piece]
   
-  .SD_expanded[.SD, on = c('Piece', 'Spine', 'Path', 'Record')]$Time
+  .SD$Time
 }
 
 

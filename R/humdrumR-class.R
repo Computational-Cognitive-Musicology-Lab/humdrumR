@@ -910,7 +910,6 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
     
     for(path in unique(paths$Path)) {
         for (parent in paths[Path == path, ParentPath]) {
-            cat(path, ',', parent, '\n')
             
             recordsWithPaths <- humtab[Path == path & ParentPath == parent, unique(Piece.Spine.Record)]
             spinesWithPaths <- humtab[Path == path & ParentPath == parent, unique(Piece.Spine)]
@@ -1054,7 +1053,7 @@ collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
                              collapseAtomic = collapseAtomic, sep = sep)
     
     putHumtab(humdrumR, overwriteEmpty = 'D') <- humtab
-    humdrumR
+    removeEmptyStops(humdrumR)
 
 }
 
