@@ -1130,7 +1130,9 @@ lcm <- function(...) {
 }
 
 .lcm <- function(x, y) {
-    output <- abs(x * y) / .gcd(x, y)
+    gcd <- .gcd(x, y)
+    # output <- abs(x * y) / .gcd(x, y)
+    output <- (abs(x) / gcd) * abs(y)
     
     if (is.integer(x) & is.integer(y)) as.integer(output) else output
 }
