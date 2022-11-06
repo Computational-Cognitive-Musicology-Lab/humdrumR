@@ -563,12 +563,15 @@ NULL
 #' @export
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
+                          expandPaths = FALSE,
                           drop = TRUE,
                           variables = list()) {
   
   checkhumdrumR(data, 'with.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
+  
+
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
@@ -597,9 +600,9 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
+within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
   checkhumdrumR(data, 'within.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -654,9 +657,12 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
 
 }
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
+  
+  if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
+  
   humtab <- getHumtab(humdrumR)
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
@@ -693,6 +699,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   curmfg <- par('mfg')
   par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
   par(mfg = curmfg, new = FALSE)
+  
+  if (expandPaths) {
+    result <- result[!humtab[is.na(ParentPath)], on = '_rowKey_']
+    humtab <- humtab[!is.na(ParentPath)]
+  }
   
   list(humdrumR = humdrumR, 
        humtab = humtab,

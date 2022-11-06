@@ -916,9 +916,10 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
             
             new <- humtab[Piece.Spine %in% spinesWithPaths & 
                               !Piece.Spine.Record %in% recordsWithPaths &
-                              Path < path]
+                              Path < path &
+                              !is.na(ParentPath)]
             new[ , Path := path]
-            new[ , ParentPath := parent]
+            new[ , ParentPath := NA_integer_]
             
             humtab <- rbind(new, humtab)
         }
@@ -951,6 +952,10 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
     humtab
 }
 
+
+contractPaths <- function(humtab) {
+    humtab[!is.na(parentPath)]
+}
 
 
 ### collapseHumdrum ----
