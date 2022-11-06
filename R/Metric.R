@@ -275,18 +275,20 @@ metricPlot <- function(metric) {
 # 
 # how many beats have passed, and the offset between each attack and the nearest beat.
 
-count <- function(dur, beat = rational(1L), phase = rational(0L), beat.round = floor) {
+count <- function(dur, beat = rational(1L), phase = rational(0L), beat.round = floor, groupby = list()) {
   
   dur <- rhythmInterval(dur)
   
   beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
-  beat <- rep(beat, length(dur))
+  beat <- rep(beat, length.out = length(dur))
   
   totalTatum <- do.call('c', lapply(beat, sum))
   
   
   dur <- dur / totalTatum
   beat <- Map(`/`, beat, as.list(totalTatum))
+  
+  timeline(dur, groupby = groupby)
   
   browser()
 
