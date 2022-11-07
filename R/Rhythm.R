@@ -196,7 +196,7 @@ rint2recip <- function(x, sep = '%') {
           
           
           # Get the sign
-          SIGN <- c('-', '', '')[2 + sign(num)]
+          SIGN <- c('-', '', '')[2 + as.integer(sign(num))]
           num <- abs(num)
           den[num == 0L] <- 1L
           
@@ -478,7 +478,6 @@ dur2rint <- function(x,
 }
 
 recip2rint <- function(x) {
-  
   REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes recip
   
   # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes

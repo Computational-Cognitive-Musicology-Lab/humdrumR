@@ -1056,6 +1056,12 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+setAs('integer', 'integer64', \(from) as.integer64.integer(from))
+setAs('numeric', 'integer64', \(from) as.integer64.double(from))
+setAs('logical', 'integer64', \(from) as.integer64.logical(from))
+setAs('character', 'integer64', \(from) as.integer64.character(from))
+
+
 entropy <- function(x, base) UseMethod('entropy')
 entropy.table <- function(x, base = 2) {
   if (sum(x) != 1) x <- x / sum(x)
@@ -1089,9 +1095,8 @@ is.whole <- function(x) x %% 1 == 0
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
     gcds <- do(gcd, list(n, d))
-    
-    num <- as.integer(n / gcds)
-    den <- as.integer(d / gcds)
+    num <- n %/% gcds
+    den <- d %/% gcds
     list(Numerator = num, Denominator = den)
 }
 
@@ -1109,6 +1114,7 @@ gcd <- function(...) {
 }
 
 .gcd <- function(x, y) {
+  if (is.na(x) || is.na(y)) return(as(NA, class(x)))
     r <- x %% y
     
     notyet <- r > 0
@@ -1116,12 +1122,13 @@ gcd <- function(...) {
     y
 }
 
+
+
 lcm <- function(...) {
     x <- list(...)
     x <- x[lengths(x) > 0]
     if (length(x) == 1L) return(x[[1]])
-    if (length(x) == 0L) return(vector(class(x[[1]]), length = 0))
-    
+    if (length(x) == 0L) return(vectorNA(0, 'integer64'))
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vectorNA(length(x[[1]]), class(x[[1]]))
@@ -1132,9 +1139,10 @@ lcm <- function(...) {
 .lcm <- function(x, y) {
     gcd <- .gcd(x, y)
     # output <- abs(x * y) / .gcd(x, y)
-    output <- (abs(x) / gcd) * abs(y)
+    output <- (abs(x) %/% gcd) * abs(y)
     
-    if (is.integer(x) & is.integer(y)) as.integer(output) else output
+    output
+    # if (is.integer(x) & is.integer(y)) as.integer(output) else output
 }
 
 `%divides%` <- function(e1, e2) gcd(e1, e2) == e1

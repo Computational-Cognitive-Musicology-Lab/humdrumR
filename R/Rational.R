@@ -33,17 +33,18 @@ NULL
 
 setClass('rational', 
          contains = 'struct', 
-         slots = c(Numerator = 'integer', Denominator = 'integer')) 
+         slots = c(Numerator = 'integer64', Denominator = 'integer64')) 
 
 setValidity('rational', 
             function(object) {
-                all(object@Denominator[!is.na(object@Denominator)] != 0L)
+                na <- is.na(object@Denominator)
+                all(na) || all(object@Denominator[!na] != as.integer64(0L))
             }
 )
 
 
 setMethod('initialize', 'rational',
-          function(.Object, Numerator = 1L, Denominator = 4L) {
+          function(.Object, Numerator = as.integer64(1L), Denominator = as.integer64(4L)) {
               .Object <- callNextMethod()
               # negative numbers should live in the numerator
               na <- is.na(Numerator) | is.na(Denominator)
@@ -53,7 +54,7 @@ setMethod('initialize', 'rational',
               
               fraction <- reduce_fraction(Numerator, Denominator)
               # fraction <- do.call('match_size', fraction) 
-              fraction <- lapply(fraction, as.integer)
+              # fraction <- lapply(fraction, as.integer64)
               
               .Object@Numerator <- fraction$Numerator
               .Object@Denominator <- fraction$Denominator
@@ -66,10 +67,10 @@ setMethod('initialize', 'rational',
 
 #' @rdname rational
 #' @export
-rational <- function(numerator, denominator = 1L) {
+rational <- function(numerator, denominator = as.integer64(1L)) {
     if (any(denominator == 0L, na.rm = TRUE)) stop(call. = FALSE, "Can't have rational number with denominator of 0.")
     match_size(numerator = numerator, denominator = denominator, toEnv = TRUE)
-    new('rational',  Denominator = as.integer(denominator),  Numerator = as.integer(numerator))
+    new('rational',  Denominator = as.integer64(denominator),  Numerator = as.integer64(numerator))
 }
 
 #' @rdname rational
@@ -167,7 +168,13 @@ setMethod('Compare', signature = c('ANY', 'rational'),
 
 setGeneric('reciprocal', \(x) standardGeneric('reciprocal'))
 
-setMethod('reciprocal', 'rational', \(x) rational(x@Denominator, ifelse(x@Numerator == 0L, NA_integer_, x@Numerator)))
+setMethod('reciprocal', 'rational', \(x) {
+    newden <- vectorNA(length(x), 'integer64')
+    valid <- !(x@Numerator == as.integer64(0) | is.na(x@Numerator))
+    newden[valid] <- x@Numerator[valid]
+    
+    rational(x@Denominator, newden)
+})
 setMethod('reciprocal', 'numeric', \(x) 1/x)
 
 ### Math
@@ -201,7 +208,7 @@ setMethod('abs', 'rational', \(x) {
 #' @rdname rational
 #' @export
 setMethod('sign', 'rational', \(x) {
-    sign(x@Numerator)
+    as.integer(sign(x@Numerator))
 })
 
 #' @rdname rational
@@ -284,19 +291,21 @@ setMethod('+', signature = c(e1 = 'rational', e2 = 'rational'),
 
 #' @rdname rational
 #' @export
-setMethod('sum', 'rational', \(x, ...) {
+setMethod('sum', 'rational', \(x, ..., na.rm = FALSE) {
     x <- do.call('c', list(x, ...))
+    
+    if (any(is.na(x)) && !na.rm) return(rational(NA_integer64_))
+    
+    x <- x[!is.na(x)]
     
     nums <- x@Numerator
     dens <- x@Denominator
     
-    nums <- tapply(nums, dens, sum) %<-dim% NULL
-    dens <- tapply(dens, dens, unique) %<-dim% NULL
-    den <- do.call('lcm', as.list(dens))
-    if (den > 1e6) {
+    den <- do.call('lcm', as.list.numeric_version(unique(dens)))
+    if (is.na(den) || den > as.integer64(1e9)) {
         as.rational(sum(as.double(x)))
     } else {
-        rational(sum(nums * as.integer(den / dens)), den)
+        rational(sum(nums * (den %/% dens)), den)
     }
     
 })
@@ -307,18 +316,35 @@ setMethod('cumsum', 'rational', \(x) {
     nums <- x@Numerator
     dens <- x@Denominator
     
-    
-    den <- do.call('lcm', as.list(unique(dens)))
-    if (den > 1e6) {
+    den <- unique(dens)
+    den <- do.call('lcm', as.list(den))
+    if (den > 1e10) {
         as.rational(cumsum(as.double(x)))
     } else {
-        rational(cumsum(nums * (den / dens)), den)
+        rational(cumsum(nums * (den %/% dens)), den)
     }
     
 })
 
 
 
+cumsumg <- function(x, g) {
+    nums <- numerator(x)
+    dens <- denominator(x)
+    
+    den <- do.call('lcm', as.list(sort(unique(dens), decreasing = TRUE)))
+    
+    if (den > 1e6) {
+       as.rational(tapply_inplace(as.double(x), g, cumsum))
+        
+    } else {
+       nums <- nums * (den / dens)
+       num <- tapply_inplace(nums, g, cumsum)
+       rational(num, den)
+    }
+    
+    
+}
 
 ### Subtraction ####
 
@@ -461,10 +487,6 @@ setMethod('as.rational', 'numeric',
               numerator <- as.numeric(frac[ , 1])
               denominator <- as.numeric(frac[ , 2])
               
-              frac <- reduce_fraction(numerator, denominator)
-              numerator <- frac$Numerator
-              denominator <- frac$Denominator
-              
               denominator[is.na(denominator)] <- 1L
               
               rational(numerator, denominator)
@@ -475,7 +497,7 @@ setMethod('as.rational', 'numeric',
 #' @export
 setMethod('as.rational', 'logical', 
           \(x) {
-              as.rational(as.integer(x))
+              as.rational(as.integer64(x))
           })
 
 #' @rdname rational
@@ -499,8 +521,6 @@ setMethod('as.rational', 'character',
               
               # whole values interpreted directly as rational
               whole <- sapply(x, \(x) all(is.whole(x))) 
-              
-              
               wholerat <- Reduce('rational', dfx[whole & !na, ])
               
               # nonwhole values are just computed as real and converted to rational

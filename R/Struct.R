@@ -122,6 +122,8 @@ setValidity('struct',
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
                 dim <- object@dim
+                
+                
                 rownames <- object@rownames
                 colnames <- object@colnames
                 errors <- c(
@@ -129,7 +131,7 @@ setValidity('struct',
                             all(lengths(slots) == slotlen)
                                     }) glue::glue("Vectors in {class} data slots must all be the same length."),
                     if (!{
-                            all(sapply(slots, is.vector)) #&&  all(sapply(slots, is.atomic))
+                            all(sapply(slots, \(slot) is.vector(slot) | is.integer64(slot))) #&&  all(sapply(slots, is.atomic))
                                     }) glue::glue('{class} data slots must all be atomic vectors.'),
                     
                     ######## if dim is NULL
@@ -188,14 +190,15 @@ setMethod('initialize',
               
               ## NA in any slot is NA in all slots
               na <- Reduce(`|`, lapply(slots, is.na))
-              slots <- lapply(slots, \(slot) `[<-`(slot, na, NA))
+              
+              slots <- lapply(slots, \(slot) {slot[na] <- NA; slot})
               
               setSlots(.Object) <- slots
               validObject(.Object)
               .Object
           } )
 
-getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character', 'list')) {
+getSlots <- function(x, classes = c('numeric', 'integer', 'integer64', 'logical', 'character', 'list')) {
     slotinfo <- methods::getSlots(class(x))
     slotinfo <- slotinfo[!names(slotinfo) %in% c('dim', 'colnames', 'rownames')]
     slotinfo <- slotinfo[slotinfo %in% classes]
@@ -207,7 +210,6 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 
 `setSlots<-` <- function(x, value) {
     slotnames <- slotNames(x)
-    
     slotnames <- slotnames[!slotnames %in% c('dim', 'colnames', 'rownames')]
     for (s in slotnames) {
         slot(x, s) <- value[[s]]
@@ -224,6 +226,8 @@ columns <- function(humvec) {
 vectorNA <- function(n, mode = 'character') {
   rep(as(NA_integer_, Class = mode), n)
 }
+
+
 
 ########## shape ----
 
