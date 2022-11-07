@@ -328,23 +328,7 @@ setMethod('cumsum', 'rational', \(x) {
 
 
 
-cumsumg <- function(x, g) {
-    nums <- numerator(x)
-    dens <- denominator(x)
-    
-    den <- do.call('lcm', as.list(sort(unique(dens), decreasing = TRUE)))
-    
-    if (den > 1e6) {
-       as.rational(tapply_inplace(as.double(x), g, cumsum))
-        
-    } else {
-       nums <- nums * (den / dens)
-       num <- tapply_inplace(nums, g, cumsum)
-       rational(num, den)
-    }
-    
-    
-}
+
 
 ### Subtraction ####
 

@@ -1094,10 +1094,27 @@ is.whole <- function(x) x %% 1 == 0
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
+    sign <- sign(n)
+    n <- abs(n)
     gcds <- do(gcd, list(n, d))
     num <- n %/% gcds
     den <- d %/% gcds
-    list(Numerator = num, Denominator = den)
+    list(Numerator = sign * num, Denominator = den)
+}
+
+match_fraction <- function(n, d) {
+
+  newdenominator <- do.call('lcm', as.list.numeric_version(sort(unique(d), decreasing = TRUE)))
+  
+  if (newdenominator > 1e9) {
+    data.frame(Numerator = n / d, Denominator = rep(1L, length(n)))
+    
+  } else {
+    newnumerators <- n * (newdenominator %/% d)
+    list(Numerator = newnumerators, Denominator = newdenominator)
+  }
+  
+  
 }
 
 gcd <- function(...) {

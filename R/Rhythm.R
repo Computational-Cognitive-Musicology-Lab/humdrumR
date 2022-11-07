@@ -191,14 +191,14 @@ rint2dur <- function(x, sep.time = ':',
 rint2recip <- function(x, sep = '%') {
           #modify this to print 0 and 00
   
-          num <- x@Numerator
-          den <- x@Denominator
+          num <- as.numeric(x@Numerator)
+          den <- as.numeric(x@Denominator)
           
           
           # Get the sign
-          SIGN <- c('-', '', '')[2 + as.integer(sign(num))]
+          SIGN <- c('-', '', '')[2 + sign(num)]
           num <- abs(num)
-          den[num == 0L] <- 1L
+          den[num == 0L] <- 1
           
           while (any(doubles <- den <= 1L & den >= .25 & num > 2L & num < 16L & num %% 2 == 0 & num %% 5 != 0)) {
               # if we want dotted "0" "00" or "000" values, we need to do some transformations
@@ -1214,13 +1214,16 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #'   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
   ## need to get local urat
   
-  durations <- duration(x, Exclusive = Exclusive, parseArgs = parseArgs, ...)
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+   
+  timerints <- pathSigma(rints, groupby = groupby, start = start, callname = 'timeline')
   
-  pathSigma(durations, groupby = groupby, start = start)
+  deparser(timerints, ...)
+  
  
   
 }
@@ -1240,28 +1243,45 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive
 }
 
 
-pathSigma <- function(durations, groupby, start) {
+pathSigma <- function(rints, groupby, start, callname) {
   # this does most of work for timestamp and timeline
-  durations[is.na(durations)] <- 0
-  .SD <- structureTab(Duration = durations, groupby = groupby)
   
   
   
   if (is.logical(start)) {
-    if (length(start) != length(durations)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
-    .SD$Start <- start
-    start <- 0L
+    if (length(start) != length(rints)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
+    logicalStart <- start
+    start <- rational(0)
   } else {
-    checkArg(start, 'start', 'timeline', classes = c('logical', 'numeric'), max.length = 1L, min.length = 1L)
+    checkArg(start, 'start', callname, max.length = 1L, min.length = 1L)
+    logicalStart <- NULL
+    start <- rhythmInterval(start)
+    
   }
   
-  .SD[Stop == 1L, Time := start + sigma.default(c(0, head(Duration, -1L))), by = list(Piece, Spine, Path)]
+  rints[is.na(rints)] <- rational(0L)
+  
+  fractions <- match_fraction(numerator(c(start, rints)), denominator(c(start, rints)))
+  
+  start <- fractions$Numerator[1]
+  
+  .SD <- structureTab(Numerator = fractions$Numerator[-1L], groupby = groupby)
+  
+  .SD[Stop == 1L, Time := sigma.default(c(as.integer64(0L), head(Numerator, -1L))), by = list(Piece, Spine, Path)]
+  
+  .SD[ , Time := Time + start]
   
   .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
   
-  if (!is.null(.SD$Start)) .SD[ , Time := Time - Time[which(Start)[1]], by = Piece]
+  if (!is.null(logicalStart)) {
+    .SD$logicalStart <- logicalStart
+    .SD[ , Time := {
+      if (!any(logicalStart)) Time else Time - Time[which(logicalStart)[1]]
+      }, by = list(Piece, Spine, Path)]
+  }
   
-  .SD$Time
+  
+  rational(.SD$Time, fractions$Denominator)
 }
 
 

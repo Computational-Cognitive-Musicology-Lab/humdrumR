@@ -613,7 +613,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
           function(x, i, value) {
               checkSame(x, value, '[i , ]<-')
               
-              if (length(value) == 0 || any(dim(value) == 0L)) return(x)
+              if (length(value) == 0 || any(dim(value) == 0L) || (is.logical(i) && !any(i))) return(x)
               # if either are vectors, make them into column vectors
               dimx <- dim(x)
               if (!hasdim(x)) x@dim <- c(length(x), 1L)
