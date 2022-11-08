@@ -41,7 +41,7 @@
 \alias{as.integer.fraction}
 \title{Rational numbers}
 \usage{
-rational(numerator, denominator = 1L)
+rational(numerator, denominator = as.integer64(1L))
 
 e1 \%R\% e2
 

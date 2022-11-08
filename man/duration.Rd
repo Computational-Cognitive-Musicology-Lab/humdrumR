@@ -4,15 +4,7 @@
 \alias{duration}
 \title{Numeric (double) representation of durations}
 \usage{
-duration(
-  x,
-  ...,
-  parseArgs = list(),
-  scale = 1,
-  unit = 1,
-  grace = NA,
-  inPlace = FALSE
-)
+duration(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
@@ -24,8 +16,6 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 
 \item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
 is \code{rational(1, 1)}, a whole-note or "duration."}
-
-\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.

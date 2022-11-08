@@ -1103,7 +1103,9 @@ reduce_fraction <- function(n, d) {
 }
 
 match_fraction <- function(n, d) {
-
+  # d <- d[!is.na(d)]
+  # if (length(d) == 0L) return(list(Numerator = rep(as(NA, class(n))), length(d), Denominator = as(NA, class(n))))
+  
   newdenominator <- do.call('lcm', as.list.numeric_version(sort(unique(d), decreasing = TRUE)))
   
   if (newdenominator > 1e9) {

@@ -895,7 +895,6 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     
     if (!anyPaths(x)) return(x)
     
-    
     putHumtab(x) <- expandPaths.data.table(getHumtab(x), asSpines = asSpines)
     
     x
@@ -916,8 +915,7 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
             
             new <- humtab[Piece.Spine %in% spinesWithPaths & 
                               !Piece.Spine.Record %in% recordsWithPaths &
-                              Path < path &
-                              !is.na(ParentPath)]
+                              Path == parent ]
             new[ , Path := path]
             new[ , ParentPath := NA_integer_]
             
@@ -944,7 +942,7 @@ expandPaths.data.table <- function(humtab, asSpines = TRUE) {
         if (asSpines) {
             humtab[Type == 'I', Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
         } else {
-            humtab[Type == 'I' & Path > 0L, Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
+            humtab[Type == 'I' & is.na(ParentPath), Token := stringr::str_replace(Token, '\\*[v^+]', '*')]
         }
     }
     

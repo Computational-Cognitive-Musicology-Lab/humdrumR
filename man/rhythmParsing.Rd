@@ -94,7 +94,7 @@ you don't need to explicitly do anything with the \code{Exclusive} argument!
 If you call \code{rhythmInterval()} (or \emph{any} \link[=rhythmFunctions]{rhythm function}) on a \code{character}-string vector, but the \code{Exclusive} argument is missing
 or \code{NULL}, \code{humdrumR} will instead use regular-expression patterns to select a known interpretation.
 For example, \code{seconds('4.')} will automatically recognize that \code{'4.'} is a \verb{**recip} token, and will interpret the
-data accordingly (the output should be 0.375).
+data accordingly (the output should be 1.5).
 If there are more than one matches, \code{humdrumR} will use the longest match, and if they tie,
 pick based on the order in the table above (topmost first).
 

@@ -391,7 +391,7 @@ humvectorJ <- function(j, x) {
 }
 
 emptyslots <- function(x) {
-    setSlots(x) <- lapply(getSlots(x), \(slot) vector(class(slot), 0L))
+    setSlots(x) <- lapply(getSlots(x), \(slot) vectorNA(0L, class(slot)))
     x
 }
 

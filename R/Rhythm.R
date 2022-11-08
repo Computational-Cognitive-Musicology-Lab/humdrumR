@@ -477,18 +477,19 @@ dur2rint <- function(x,
   seconds2rint(secs, BPM = BPM, ...)
 }
 
-recip2rint <- function(x) {
-  REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes recip
+recip2rint <- function(x, grace = FALSE, sep = '%') {
+  REparse(x, makeRE.recip(collapse = FALSE), toEnv = TRUE) # makes recip, graceMark1, and graceMark2
+  
   
   # Get rid of 0 and 00 ---shorthand for double and quadruple whole notes
-  recip <- gsub('^000', '1%8', recip)
-  recip <- gsub('^00',  '1%4', recip)
-  recip <- gsub('^0',   '1%2', recip)
+  recip <- gsub('^000', paste0('1', sep, '8'), recip)
+  recip <- gsub('^00',  paste0('1', sep, '4'), recip)
+  recip <- gsub('^0',   paste0('1', sep, '2'), recip)
   
   ndots <- stringr::str_count(recip, '\\.')
   recip <- gsub('\\.+', '', recip)
   
-  rational <- as.rational(recip, sep = '%')
+  rational <- as.rational(recip, sep = sep)
   rational <- reciprocal(rational)
   
   
@@ -496,6 +497,11 @@ recip2rint <- function(x) {
   dotscale <- rational((2L * dots) - 1L, dots)
 
   rint <- rational * dotscale
+  
+  if (is.na(grace) || !grace) {
+    graceNotes <- grepl('^[Qq]', graceMark1) | graceMark2 != ''
+    rint[graceNotes] <- if (is.na(grace)) rational(NA) else rational(0L)
+  }
   
   
   rint
@@ -721,7 +727,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
                   ... = ), # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
             extraArgs,
             alist(parseArgs = list(), 
-                  scale = 1, unit = 1, grace = NA,
+                  scale = 1, unit = 1,
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -756,14 +762,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     ### Parse
     ############# #
     
-    ## grace notes
-    if (is.character(x)) {
-     graceNotes <- stringr::str_detect(x, '[Qq]')
-      x <- stringr::str_remove(x, '[qQ]')
-    } else {
-      graceNotes <-  FALSE
-    }
-    
     unit <- (parseArgs$unit %||% 1L) / (deparseArgs$unit %||% 1L)
     scale <- deparseArgs$scale * unit
     parseArgs$unit <- deparseArgs$unit <- deparseArgs$scale <- NULL
@@ -785,10 +783,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
       dispatch <- attr(parsedRint, 'dispatch')
       
       if (inPlace) output <- rePlace(output, dispatch)
-      
-      if (any(graceNotes)) {
-        output[graceNotes] <- if (!(!is.na(grace) && is.logical(grace) && grace)) grace else paste0(output[graceNotes], 'q')
-      } 
       
       
       if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
@@ -1223,6 +1217,7 @@ timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, p
   timerints <- pathSigma(rints, groupby = groupby, start = start, callname = 'timeline')
   
   deparser(timerints, ...)
+  # as.numeric(timerints)
   
  
   
@@ -1281,6 +1276,7 @@ pathSigma <- function(rints, groupby, start, callname) {
   }
   
   
+  # .SD$Time
   rational(.SD$Time, fractions$Denominator)
 }
 

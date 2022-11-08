@@ -11,7 +11,6 @@ recip(
   parseArgs = list(),
   scale = 1,
   unit = 1,
-  grace = NA,
   inPlace = FALSE
 )
 }
@@ -28,8 +27,6 @@ between denominator and numerator.}
 
 \item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
 is \code{rational(1, 1)}, a whole-note or "duration."}
-
-\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.

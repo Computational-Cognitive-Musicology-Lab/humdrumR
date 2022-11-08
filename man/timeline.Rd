@@ -8,6 +8,7 @@
 timeline(
   x,
   start = 0,
+  deparser = duration,
   ...,
   Exclusive = NULL,
   parseArgs = list(),
