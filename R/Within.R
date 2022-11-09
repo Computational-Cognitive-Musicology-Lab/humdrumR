@@ -611,7 +611,8 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
-  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     if ('Token' %in% overWrote[bad]) {

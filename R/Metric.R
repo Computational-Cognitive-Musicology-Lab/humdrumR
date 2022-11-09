@@ -275,26 +275,36 @@ metricPlot <- function(metric) {
 # 
 # how many beats have passed, and the offset between each attack and the nearest beat.
 
-count <- function(dur, beat = rational(1L), phase = rational(0L), beat.round = floor, groupby = list()) {
+count <- function(dur, beat = rational(1L), start = rational(0),
+                  phase = rational(0L), beat.round = floor, groupby = list()) {
   
   dur <- rhythmInterval(dur)
   
-  beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
-  beat <- rep(beat, length.out = length(dur))
+  # beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
   
-  totalTatum <- do.call('c', lapply(beat, sum))
+  if (length(beat) > 1L && length(beat) == length(dur)) {
+     # durs <- tapply(dur, beat, list)
+     # i <- tapply(seq_along(dur), beat, list)
+     # uniqueBeat <- rhythmInterval(names(durs))
+     # 
+     # 
+     # durs <- Map('/', durs, as.list(uniqueBeat))
+     # dur <- .unlist(durs)[unlist(i)]
+     
+    dur <- dur / rhythmInterval(beat)
+  } else {
+    dur <- dur / rhythmInterval(beat)
+  }
   
   
-  dur <- dur / totalTatum
-  beat <- Map(`/`, beat, as.list(totalTatum))
+  # beat <- Map(`/`, beat, as.list(totalTatum))
   
-  timeline(dur, groupby = groupby)
   
-  browser()
+  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
 
   #
   
-  mcount <- beat.round((dur + phase)) 
+  mcount <- beat.round((timeline + phase)) 
   
   # if (length(beat) > 1L) {
     
@@ -309,7 +319,7 @@ count <- function(dur, beat = rational(1L), phase = rational(0L), beat.round = f
     
   # }
   
-  numerator(mcount)
+  as.integer(numerator(mcount))
 }
 
 

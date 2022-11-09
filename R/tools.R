@@ -1367,7 +1367,7 @@ sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('
 #' @export
 sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
-  checkArg(x, 'x', 'sigma', classes = c('numeric', 'integer', 'rational'))
+  checkArg(x, 'x', 'sigma', classes = c('numeric', 'integer', 'rational', 'integer64'))
   checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
   if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
   checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)

@@ -705,11 +705,10 @@ makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.',
 }
 
 makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
-  REs <- list(graceMark1 = '[Qq]?[^0-9q]*',
+  REs <- list(graceMark1 = '([Qq][^0-9q]*)?',
               recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
                              '[1-9][0-9]*\\.*|0{1,2}\\.*)'),
-              other = '[^qQ]*',
-              graceMark2 = '[Qq]?')
+              graceMark2 = '([^qQ]*[Qq])?')
   if (collapse) setNames(cREs(REs), 'recip') else REs
 }
 

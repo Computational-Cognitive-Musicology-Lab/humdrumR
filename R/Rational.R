@@ -411,7 +411,7 @@ setMethod('%/%', signature = c(e1 = 'rational', e2 = 'rational'),
 #' @export
 setMethod('%%', signature = c(e1 = 'rational', e2 = 'rational'),
           function(e1, e2) {
-              e1 - (e2 * (e1 %/% e2))
+              e1 - (e2 * floor(e1 / e2))
           })
 
 

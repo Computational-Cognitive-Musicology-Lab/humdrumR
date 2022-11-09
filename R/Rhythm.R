@@ -499,7 +499,7 @@ recip2rint <- function(x, grace = FALSE, sep = '%') {
   rint <- rational * dotscale
   
   if (is.na(grace) || !grace) {
-    graceNotes <- grepl('^[Qq]', graceMark1) | graceMark2 != ''
+    graceNotes <- grepl('^[Qq]', graceMark1) | grepl('[Qq]$', graceMark2)
     rint[graceNotes] <- if (is.na(grace)) rational(NA) else rational(0L)
   }
   
