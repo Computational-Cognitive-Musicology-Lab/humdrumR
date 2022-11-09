@@ -281,36 +281,15 @@ metricPlot <- function(metric) {
 count <- function(dur, beat = rational(1L), start = rational(0),
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
-  dur <- rhythmInterval(dur)
+ 
   
-  checkArg(beat, argname = 'beat', callname = 'count',
-           valid = \(x) length(x) == 1L || length(x) == length(dur), min.length = 1L)
-  # beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
-  
-  if (is.list(beat)) {
-    uniqueBeats <- valind(beat)
-    
-    uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
-    
-    irregular <- lengths(uniqueBeats$values) > 1L
-      
-    tatum <- .unlist(lapply(uniqueBeats$values, tatum.rational))
-    
-    beat <- tatum[uniqueBeats$i]
-    
-  } else {
-    irregular <- logical(length(dur))
-  }
-
-  dur <- dur / rhythmInterval(beat)
-  
-  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
-
+ 
+  timeline <- scaled_timeline(dur, beat, start, groupby, callname = 'count')
   #
   
-  mcount <- as.integer(numerator(beat.round((timeline + phase))))
+  mcount <- as.integer(numerator(beat.round((timeline$Timeline + phase))))
   
-  if (any(irregular)) {
+  if (any(timeline$Irregular)) {
     subcounts <- Map(\(bs, tat) cumsum(as.integer(numerator(bs / tat))), 
                      uniqueBeats$values, 
                      as.list(tatum))
@@ -340,6 +319,61 @@ count <- function(dur, beat = rational(1L), start = rational(0),
   mcount + 1L
 }
 
+subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = duration, 
+                    phase = rational(0L), beat.round = floor, groupby = list(), ...) {
+  
+  scaled <- scaled_timeline(dur, beat, start, groupby, callname = 'subpos', sumBeats = TRUE)
+  
+  timeline <- (scaled$Timeline %% rational(1)) * scaled$Scale
+  
+  if (any(scaled$Irregular)) {
+    irregular <- scaled$Irregular
+    indices <- scaled$indices
+    irregTimeline <- Map(split(timeline[irregular], indices[irregular]),
+                         scaled$values[unique(indices[irregular])], 
+                         f =  \(tl, bts) {
+                           
+                           subcount <- numerator(tl / sum(bts))
+                           btcounts <- cumsum(numerator(bts / sum(bts)))
+                           bts <- cumsum(c(rational(0L), bts))[findInterval(subcount, btcounts, rightmost.closed = FALSE, left.open = FALSE) + 1L]
+                           tl - bts
+                         })
+    
+    timeline[unlist(split(seq_along(indices)[irregular], indices[irregular]))] <- .unlist(irregTimeline)
+  }
+  
+  if (is.null(deparser)) timeline else deparser(timeline, ...)
+}
+
+scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALSE) {
+  dur <- rhythmInterval(dur)
+  
+  checkArg(beat, argname = 'beat', callname = callname,
+           valid = \(x) length(x) == 1L || length(x) == length(dur), min.length = 1L)
+  
+  if (is.list(beat)) {
+    uniqueBeats <- valind(beat)
+    
+    uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
+    
+    irregular <- (lengths(uniqueBeats$values) > 1L)[uniqueBeats$i]
+    
+    tatum <- .unlist(lapply(uniqueBeats$values, if(sumBeats) sum else tatum.rational))
+    
+    beat <- tatum[uniqueBeats$i]
+    
+  } else {
+    irregular <- logical(length(dur))
+    beat <- rhythmInterval(beat)
+  }
+  
+  
+  dur <- dur / beat
+  
+  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
+  
+  c(list(Timeline = timeline, Scale = beat, Irregular = irregular), get0('uniqueBeats'))
+}
 # # count2 uses precomputed timeline
 # count2 <- function(timeline, beat = rational(1L), 
 #                   phase = rational(0L), beat.round = floor) {
@@ -395,7 +429,7 @@ count <- function(dur, beat = rational(1L), start = rational(0),
 # }
 
 
-subpos <- function(durs, beat = rational(1L), deparser = recip, ...,
+subpos2 <- function(durs, beat = rational(1L), deparser = recip, ...,
                    phase = rational(0L), beat.round = floor, Bar = NULL) {
   
   durs <- rhythmInterval(durs)
