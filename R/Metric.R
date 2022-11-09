@@ -280,101 +280,116 @@ count <- function(dur, beat = rational(1L), start = rational(0),
   
   dur <- rhythmInterval(dur)
   
+  checkArg(beat, argname = 'beat', callname = 'count',
+           valid = \(x) length(x) == 1L || length(x) == length(dur), min.length = 1L)
   # beat <- if (is.list(beat)) lapply(beat, rhythmInterval) else as.list(rhythmInterval(beat))
   
-  if (length(beat) > 1L && length(beat) == length(dur)) {
-     # durs <- tapply(dur, beat, list)
-     # i <- tapply(seq_along(dur), beat, list)
-     # uniqueBeat <- rhythmInterval(names(durs))
-     # 
-     # 
-     # durs <- Map('/', durs, as.list(uniqueBeat))
-     # dur <- .unlist(durs)[unlist(i)]
-     
-    dur <- dur / rhythmInterval(beat)
+  if (is.list(beat)) {
+    uniqueBeats <- valind(beat)
+    
+    uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
+    
+    irregular <- lengths(uniqueBeats$values) > 1L
+      
+    tatum <- .unlist(lapply(uniqueBeats$values, tatum.rational))
+    
+    beat <- tatum[uniqueBeats$i]
+    
   } else {
-    dur <- dur / rhythmInterval(beat)
+    irregular <- logical(length(dur))
   }
-  
-  
-  # beat <- Map(`/`, beat, as.list(totalTatum))
-  
+
+  dur <- dur / rhythmInterval(beat)
   
   timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
 
   #
   
-  mcount <- beat.round((timeline + phase)) 
+  mcount <- as.integer(numerator(beat.round((timeline + phase))))
   
-  # if (length(beat) > 1L) {
+  if (any(irregular)) {
+    subcounts <- Map(\(bs, tat) cumsum(as.integer(numerator(bs / tat))), 
+                     uniqueBeats$values, 
+                     as.list(tatum))
+    segments <- segments(uniqueBeats$indices)
+    mcounts <- split(mcount, segments)
     
-    # beatoff <- sigma(beat)
-    # mremain <- ((dur + phase) - totalTatum * mcount)
+    mcounts <- Map(\(m, sc) {
+      m <- m - min(m)
+      
+      if (length(sc) == 1L) return(m)
+      
+      sub <- findInterval(m %% max(sc), sc, rightmost.closed = TRUE, left.open = FALSE)
+      
+      (length(sc) * (m %/% max(sc))) + sub
+      }, 
+               mcounts, 
+               subcounts[attr(segments, 'values')])
     
-    # subcount <-  outer(beatoff, mremain, '<=') |> colSums()
-    # mcount <- mcount * length(beat) + subcount
+    mcount <- unlist(mcounts, use.names = FALSE)
     
-    
-    # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
-    
-  # }
+    mcount <- delta.default(mcount)
+    mcount[mcount < 0L] <- 1L
+    mcount <- sigma(mcount)
+  }
+
   
-  as.integer(numerator(mcount))
+  mcount + 1L
 }
 
-
-count2 <- function(timeline, beat = rational(1L), 
-                  phase = rational(0L), beat.round = floor) {
-  
-  
-  if (length(beat) == length(timeline) && length(unique(beat)) > 1L) {
-    beatchange <- changes(beat)
-    groupsizes <- delta(timeline[beatchange], right = TRUE)
-    groupsizes[is.na(groupsizes)] <- 0
-    
-    # need to split timeline into separate parts, but subtract the missing parts from each place.
-    timelines <- lapply(unique(beat), 
-           \(b) { 
-             offsets <- cumsum(ifelse(attr(beatchange, 'values') == b, 0, -groupsizes))
-             offsets <- rep(offsets, rle(beat)$lengths)
-             (timeline + offsets)[beat == b]
-             }) 
-    
-    mcounts <- Map(\(t, b) count(t, b), timelines, unique(beat))
-    
-    
-    
-    mcount <- unlist(mcounts)[order(unlist(tapply(seq_along(timeline), beat, list)))]
-    diff <- delta(mcount)
-    diff[beatchange] <- 1L
-    mcount <- sigma(diff)
-    return(mcount)
- 
-  }
-  
-  timeline <- rhythmInterval(timeline)
-  beat <- rhythmInterval(beat)
-  totalTatum <- sum(beat)
-  #
-
-  
-  mcount <- beat.round((timeline + phase) / totalTatum) 
-  
-  if (length(beat) > 1L) {
-    
-    beatoff <- sigma(beat)
-    mremain <- ((timeline + phase) - totalTatum * mcount)
-    
-    subcount <-  outer(beatoff, mremain, '<=') |> colSums()
-    mcount <- mcount * length(beat) + subcount
-    
-    
-    # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
-    
-  }
-  
-  numerator(mcount)
-}
+# # count2 uses precomputed timeline
+# count2 <- function(timeline, beat = rational(1L), 
+#                   phase = rational(0L), beat.round = floor) {
+#   
+#   
+#   if (length(beat) == length(timeline) && length(unique(beat)) > 1L) {
+#     beatchange <- changes(beat)
+#     groupsizes <- delta(timeline[beatchange], right = TRUE)
+#     groupsizes[is.na(groupsizes)] <- 0
+#     
+#     # need to split timeline into separate parts, but subtract the missing parts from each place.
+#     timelines <- lapply(unique(beat), 
+#            \(b) { 
+#              offsets <- cumsum(ifelse(attr(beatchange, 'values') == b, 0, -groupsizes))
+#              offsets <- rep(offsets, rle(beat)$lengths)
+#              (timeline + offsets)[beat == b]
+#              }) 
+#     
+#     mcounts <- Map(\(t, b) count(t, b), timelines, unique(beat))
+#     
+#     
+#     
+#     mcount <- unlist(mcounts)[order(unlist(tapply(seq_along(timeline), beat, list)))]
+#     diff <- delta(mcount)
+#     diff[beatchange] <- 1L
+#     mcount <- sigma(diff)
+#     return(mcount)
+#  
+#   }
+#   
+#   timeline <- rhythmInterval(timeline)
+#   beat <- rhythmInterval(beat)
+#   totalTatum <- sum(beat)
+#   #
+# 
+#   
+#   mcount <- beat.round((timeline + phase) / totalTatum) 
+#   
+#   if (length(beat) > 1L) {
+#     
+#     beatoff <- sigma(beat)
+#     mremain <- ((timeline + phase) - totalTatum * mcount)
+#     
+#     subcount <-  outer(beatoff, mremain, '<=') |> colSums()
+#     mcount <- mcount * length(beat) + subcount
+#     
+#     
+#     # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
+#     
+#   }
+#   
+#   numerator(mcount)
+# }
 
 
 subpos <- function(durs, beat = rational(1L), deparser = recip, ...,
@@ -428,13 +443,18 @@ tatum.meter <- function(x) {
 }
 #' @rdname tatum
 #' @export
-tatum.default <- function(x) {
-  if (is.character(x) && any(grepl('\\*M', x))) {
-    recip(tatum.meter(meter.character(x)))
+tatum.default <- function(x, deparse = TRUE) {
+  if (is.character(x) && any(grepl('\\*?M', x))) {
+    result <- tatum.meter(meter.character(x))
+    if (deparse) recip(result) else result
   } else {
     rint <- rhythmInterval(unique(x))
     result <- tatum.rational(rint)
-    reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
+    if (deparse) {
+      reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
+    } else {
+      result
+    }
   }
 }
 #' @rdname tatum

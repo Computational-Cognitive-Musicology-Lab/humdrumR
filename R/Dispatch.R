@@ -539,9 +539,7 @@ reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
   names <- names(result)
   exclusives <- dispatched$Exclusives
   
-  
-  
-  result <- split(result, dispatched$Segments)
+  result <- if (length(result) > 1L && length(result) == length(dispatched$Segments)) split(result, dispatched$Segments) else list(result)
   
   result <- unlist(Map(\(res, excl) {
     reParser <- match.fun(if (excl %in% reParsers)  excl else reParsers[1])

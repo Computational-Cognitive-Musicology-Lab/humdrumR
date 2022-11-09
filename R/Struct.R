@@ -1076,6 +1076,7 @@ setMethod('as.data.frame', 'struct',
           })
 
 .unlist <- function(x, recursive = TRUE, use.names = TRUE) {
+  if (!is.list(x)) return(x)
   if (is.struct(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
   
 }

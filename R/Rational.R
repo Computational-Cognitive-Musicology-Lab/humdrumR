@@ -316,8 +316,7 @@ setMethod('cumsum', 'rational', \(x) {
     nums <- x@Numerator
     dens <- x@Denominator
     
-    den <- unique(dens)
-    den <- do.call('lcm', as.list(den))
+    den <- do.call('lcm', as.list.numeric_version(unique(dens)))
     if (den > 1e10) {
         as.rational(cumsum(as.double(x)))
     } else {

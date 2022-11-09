@@ -113,8 +113,15 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 # Arrays/Vectors ----
 
+valind <- function(vec) {
+  
+  values <- unique(vec)
+  list(indices = match(vec, values), values = values)
+  
+}
 
-
+inverse.valind <- function(valind) valind$values[valind$i]
+  
 .apply <- function(x, margin = 1, f, ...){
     result <- apply(x, margin, f, ..., simplify = FALSE)
     result[lengths(result) == 0L] <- list(NA)
@@ -341,12 +348,7 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     
     output
     
-    
   }
-  
-
-  
-  
   
 }
 
