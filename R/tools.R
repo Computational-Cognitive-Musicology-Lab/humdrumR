@@ -116,7 +116,13 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 valind <- function(vec) {
   
   values <- unique(vec)
-  list(indices = match(vec, values), values = values)
+  
+  group <- if (!is.atomic(values)) {
+    as.character(vec)
+  } else {
+    vec
+  }
+  list(indices = match(group, unique(group)), values = values)
   
 }
 
@@ -2538,7 +2544,7 @@ object2str <- function(object) {
            },
            list = {
              if (length(object) < 5) {
-               glue::glue('list({harvard(unlist(object))})')
+               glue::glue('list({harvard(unlist(object), quote = is.character(unlist(object)))})')
              } else {
                glue::glue('list[{num2str(length(object))}]')
              }

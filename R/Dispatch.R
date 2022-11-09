@@ -205,6 +205,16 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   
 }
 
+dofunc <- function(doArgs = c(), .func) {
+  formals <- formals(.func)
+  args <- setNames(rlang::syms(names(formals)), names(formals))
+  rlang::new_function(formals, 
+                      rlang::expr({
+                        do(.func, args = list(!!!args), doArgs = !!doArgs)
+                      }))
+  
+
+}
 
 `%do%` <- function(e1, e2) do(e1, e2)
 

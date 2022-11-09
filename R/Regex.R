@@ -715,7 +715,7 @@ makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
 
 makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
   REs <- list(star = '\\*?',
-              em   = 'M?',
+              em   = 'M',
               numerator = '[1-9][0-9]*([+][1-9][0-9]*)*',
               sep = sep,
               denominator = '[1-9][0-9]*'

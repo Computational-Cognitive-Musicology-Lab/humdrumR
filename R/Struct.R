@@ -1214,7 +1214,7 @@ setMethod('Compare', signature = c('matrix', 'struct'),
 #' @export
 duplicated.struct <- function(x, incomparables = FALSE, fromLast = FALSE, nmax = NA) {
 
-    duplicated(as.data.frame(getSlots(x)), incomparables = incomparables, fromLast, nmax)
+    duplicated(as.data.frame(lapply(getSlots(x), I)), incomparables = incomparables, fromLast, nmax)
 }
 
 #### arithmatic ----

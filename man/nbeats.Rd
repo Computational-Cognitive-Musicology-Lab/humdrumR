@@ -5,16 +5,26 @@
 \alias{nbeats.meter}
 \alias{nbeats.character}
 \alias{nbeats.NULL}
+\alias{beats.meter}
+\alias{beats.character}
+\alias{beats.NULL}
 \title{Counting beats}
 \usage{
-nbeats(x, deparser, ...)
+nbeats(x)
 
-\method{nbeats}{meter}(x, deparser = result)
+\method{nbeats}{meter}(x)
 
-\method{nbeats}{character}(x, deparser = recip)
+\method{nbeats}{character}(x)
 
 \method{nbeats}{`NULL`}(x)
+
+\method{beats}{meter}(x)
+
+\method{beats}{character}(x)
+
+\method{beats}{`NULL`}(x)
 }
 \description{
 Counting beats
 }
+\concept{{Metric functions}'}

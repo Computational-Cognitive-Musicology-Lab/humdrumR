@@ -12,7 +12,7 @@ tatum(x, ...)
 
 \method{tatum}{meter}(x)
 
-\method{tatum}{default}(x)
+\method{tatum}{default}(x, deparse = TRUE)
 
 \method{tatum}{rational}(x)
 

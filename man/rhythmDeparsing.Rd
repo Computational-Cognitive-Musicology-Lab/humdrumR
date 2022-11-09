@@ -58,7 +58,7 @@ For example, \code{duration('4.ee-[')} returns 0.375.
 However, all the pitch functions (like \code{\link[=recip]{recip()}} and \code{\link[=dur]{dur()}}) have an option to keep the "extra" information
 and return the result "in place"---i.e., embedded right where it was found in the input string.
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
-So, \code{duration('4.ee-[', inPlace = TRUE)} will return 0.375---keeping the \code{"ee-["}.
+So, \code{duration('4.ee-[', inPlace = TRUE)} will return 0.375ee-[---keeping the \code{"ee-["}.
 Note that \code{inPlace = TRUE} will force functions like \code{duration}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a \code{character} string.
 }

@@ -510,7 +510,15 @@ recip2rint <- function(x, grace = FALSE, sep = '%') {
 
 timesignature2rint <- function(x, sep = '/') {
   x <- stringr::str_remove(x, '^\\*?M?')
-  as.rational(x, sep = '/')
+  
+  x <- strsplit(x, split = sep)
+  numerator <- sapply(x, '[', 1)
+  numerator <- sapply(strsplit(numerator, split = '\\+'), \(n) sum(as.integer(n)))
+  
+  
+  denominator <- as.integer(sapply(x, '[', 2))
+  
+  rational(numerator, denominator)
 }
 
 

@@ -73,7 +73,7 @@ meter.list <- function(x, ...) {
   x <- x[sapply(x, class) == 'list']
   
   if (length(x) == 0L) return(new('meter', Levels = list(), Tactus = integer(0)))
-  do.call('c', lapply(x, \(ls) do.call('meter.rational', ls)))
+  .unlist(lapply(x, \(ls) do.call('meter.rational', ls)))
 }
 
 
@@ -106,16 +106,20 @@ meter2timeSignature <- function(x) {
     if (length(ls) == 0L || is.na(ls[1]) || is.na(ts) ) return(NA_character_)
     
     tactus <- ls[[ts]]
-    if (tactus@Numerator == 3L) tactus <- tactus / 3L
     
-    spans <- do.call('c', lapply(ls, sum))
-    span <- max(spans)
-    numerator <- paste(span %/% tactus, collapse = '+')
-    if (length(tactus) > 1L) numerator <- paste0('(', numerator, ')')
-    
-    
-    denominator <- rint2recip(Reduce('gcd', as.list(tactus)))
-    paste0('*M', numerator , '/', denominator)
+    if (length(tactus) == 1L) {
+      if (tactus@Numerator == 3L) tactus <- tactus / 3L
+      measure <- max( do.call('c', lapply(ls, sum)))
+      
+      numerator <- measure %/% tactus
+      denominator <- tactus
+    } else {
+      denominator <- Reduce('gcd', as.list(tactus))
+      numerator <- paste(tactus %/% denominator, collapse = '+')
+    }
+   
+  
+    paste0('*M', numerator , '/', rint2recip(denominator))
     
   }, x@Levels, x@Tactus))
 }
@@ -127,23 +131,22 @@ meter2timeSignature <- function(x) {
 ###################################################################### ### 
 
 timesignature2meter <- function(x, sep = '/') {
-  x <- gsub('^\\*?M?', '', x)
   REparse(x, makeRE.timeSignature(sep = sep, collapse = FALSE),
           toEnv = TRUE)
   
-  
   numerator <- lapply(strsplit(numerator, split = '\\+'), as.integer)
   denominator <- as.integer(denominator)
-  
   #
   beats <- Map(rational, numerator, denominator)
   denominator <- as.list(rational(1L, denominator))
   
   results <- Map(\(den, bts) {
     levels <- if (length(bts) > 1) {
-      list(den, bts, sum(bts))
+      list(bts, den, sum(bts))
     } else {
-      if (3L %divides% bts@Numerator && (den@Numerator == 1L && 2L %divides% den@Denominator)) {
+      if (as.integer64(3L) %divides% bts@Numerator && 
+          (den@Numerator == as.integer64(1L) && 
+           as.integer64(2L) %divides% den@Denominator)) {
         c(list(den * 3L), den, bts)
       } else {
         list(den, bts)
@@ -152,8 +155,8 @@ timesignature2meter <- function(x, sep = '/') {
     }
     do.call('meter.rational', levels)
   }, denominator, beats) 
-  
-  do.call('c', results)
+
+  .unlist(results)
 }
 
 
@@ -443,7 +446,8 @@ tatum.meter <- function(x) {
 }
 #' @rdname tatum
 #' @export
-tatum.default <- function(x, deparse = TRUE) {
+tatum.default <- dofunc('x', function(x, deparse = TRUE) {
+  
   if (is.character(x) && any(grepl('\\*?M', x))) {
     result <- tatum.meter(meter.character(x))
     if (deparse) recip(result) else result
@@ -456,7 +460,7 @@ tatum.default <- function(x, deparse = TRUE) {
       result
     }
   }
-}
+})
 #' @rdname tatum
 #' @export
 tatum.rational <- function(x)  do.call('gcd', as.list(unique(x)))
@@ -471,16 +475,19 @@ tatum.NULL <- function(x) NULL
 tactus <- function(x, deparser, ...) UseMethod('tactus') 
 #' @rdname tactus
 #' @export
-tactus.meter <- function(x, deparser = recip) {
+tactus.meter <- function(x, deparser = recip, ...) {
   
-  result <- do.call('c', Map('[[', x@Levels, x@Tactus))
-  if (!is.null(deparser)) deparser(result) else result
+  result <- Map('[[', x@Levels, x@Tactus)
+  
+  
+  if (!is.null(deparser)) lapply(result, deparser, ...) else result
 } 
 #' @rdname tactus
 #' @export
-tactus.character <- function(x, deparser = recip) {
- tactus.meter(meter.character(x), deparser = deparser)
-}
+tactus.character <- dofunc('x', function(x, deparser = recip) {
+ tactus.meter(meter.character(x, deparser = deparser))
+})
+
 #' @rdname tactus
 #' @export
 tactus.NULL <- function(x) NULL
@@ -491,30 +498,53 @@ measure <- function(x, deparser, ...) UseMethod('measure')
 #' @rdname tactus
 #' @export
 measure.meter <- function(x, deparser = recip) {
-  result <- do.call('c', lapply(x@Levels, \(ls) max(do.call('c', lapply(ls, sum)))))
+  x <- valind(x)
+
+  x$values <- lapply(x$values@Levels, \(ls) max(.unlist(lapply(ls, sum))))
+
+  
+  x$values <- .unlist(x$values)
+  result <- inverse.valind(x)
+  
   if (!is.null(deparser)) deparser(result) else result
 }
 #' @rdname tactus
 #' @export
-measure.character <- function(x, deparser = recip) do.call('c', lapply(meter(x), measure.meter, deparser = deparser))
+measure.character <- function(x, deparser = recip) measure.meter(meter(x), deparser = deparser)
 #' @rdname tactus
 #' @export
 measure.NULL <- function(x) NULL
 
 #' Counting beats
-#' 
+#
+#' @family {Metric functions}' 
 #' @export
-nbeats <- function(x, deparser, ...) UseMethod('nbeats') 
+nbeats <- function(x) UseMethod('nbeats') 
 #' @rdname nbeats
 #' @export
-nbeats.meter <- function(x, deparser = result) {
+nbeats.meter <- function(x) {
+  as.integer(measure.meter(x, deparser = NULL) %/% tactus.meter(x, deparser = NULL))
+  
+}
+#' @rdname nbeats
+#' @export
+nbeats.character <- function(x) unlist(lapply(meter(x), nbeats.meter))
+#' @rdname nbeats
+#' @export
+nbeats.NULL <- function(x) NULL
+
+ 
+#' @export
+beats <- function(x) UseMethod('beats') 
+#' @rdname nbeats
+#' @export
+beats.meter <- function(x) {
   measure.meter(x, deparser = NULL) %/% tactus.meter(x, deparser = NULL)
   
 }
 #' @rdname nbeats
 #' @export
-nbeats.character <- function(x, deparser = recip) unlist(lapply(meter(x), beats.meter))
+beats.character <- function(x) unlist(lapply(meter(x), beats.meter))
 #' @rdname nbeats
 #' @export
-nbeats.NULL <- function(x) NULL
-
+beats.NULL <- function(x) NULL
