@@ -4,7 +4,15 @@
 \alias{metric}
 \title{Calculate metric positions from duration data.}
 \usage{
-metric(ioi, meter = duple(5), ..., remainderSubdivides = TRUE)
+metric(
+  dur,
+  meter = duple(5),
+  start = rational(0),
+  groupby = list(),
+  ...,
+  parseArgs = list(),
+  remainderSubdivides = TRUE
+)
 }
 \description{
 Calculate metric positions from duration data.

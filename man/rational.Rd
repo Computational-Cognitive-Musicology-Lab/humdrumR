@@ -10,6 +10,7 @@
 \alias{is.rational}
 \alias{is.numeric,rational-method}
 \alias{order,rational-method}
+\alias{rank,rational-method}
 \alias{Compare,rational,rational-method}
 \alias{Compare,rational,ANY-method}
 \alias{Compare,ANY,rational-method}
@@ -64,6 +65,8 @@ is.rational(x)
   decreasing = FALSE,
   method = c("auto", "shell", "radix")
 )
+
+\S4method{rank}{rational}(x, na.last = TRUE, ties.method = "average")
 
 \S4method{Compare}{rational,rational}(e1, e2)
 

@@ -132,6 +132,16 @@ setMethod('order', 'rational',
 
 #' @rdname rational
 #' @export
+setMethod('rank', 'rational', 
+          function(x, na.last = TRUE, ties.method = 'average') {
+              rank(as.double(x), 
+                    na.last = na.last,
+                    ties.method = ties.method)
+          })
+
+
+#' @rdname rational
+#' @export
 setMethod('Compare', signature = c('rational', 'rational'),
           function(e1, e2) {
               checkSame(e1, e2, 'Compare')

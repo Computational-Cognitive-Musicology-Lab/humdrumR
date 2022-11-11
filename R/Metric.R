@@ -195,81 +195,78 @@ NULL
 #' 
 #' @family rhythm analysis tools
 #' @export
-metric <- function(ioi, meter = duple(5), ..., remainderSubdivides = TRUE ) {
+metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
   
-  soi <- SOI(ioi)$Onset
+  dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
   
+  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'metric')
 
-
-  levels <- meter@Levels
-  tatum <- .unlist(lapply(levels, sum))
+  levels <- meter@Levels[[1]]
+  spans <- .unlist(lapply(levels, sum))
+  nbeats <- lengths(levels)
   
-  parent <- bottommost(outer(tatum, tatum, \(x, y) x > y & y %divides% x), TRUE)[ , 'row']
+  counts <- do.call('cbind', lapply(levels, count, dur = dur, start = start, groupby = list()))
+  counts <- counts - 1L
   
-  ois <- counts <- vector('list', length(levels))
+  rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
+  remainders <- do.call('cbind', lapply(rounded_timelines, \(rt) timeline - rt))
   
-  for (i in seq_along(levels)) {
-    higherLevel <- max(0L, which(tatum[i] < tatum & tatum[i] %divides% tatum))
+  ## get counts
+  parent <- unlist(Map(lengths(levels), 
+                       as.list(spans),  
+                       f = \(ln, spn) {
+                         hits <- ln == 1L & (spn < spans & spn %divides% spans)
+                         if (any(hits)) max(which(hits)) else 0L
+                       }))
+  
+  scale <- as.numeric((spans[parent[parent > 0L]] %/% spans[parent > 0L]) * (nbeats[parent[parent > 0L]] / nbeats[parent > 0L]))
+  
+  counts <- cbind(counts[ , 1],
+                  counts[, parent > 0L] - sweep((counts[ , parent[parent > 0L]]), 2, scale, '*'))
+  
+  ## figure out remainders
+  lowestLevel <- leftmost(remainders == rational(0L), which = TRUE)[ , 'col']
+  onbeat <- lowestLevel > 0L
+  
+  
+  if (any(!onbeat)) {
     
-    curMeasure <- measure(if (higherLevel == 0L) soi else ois[[higherLevel]], 
-                          levels[[i]])
-    
-    counts[[i]] <- curMeasure$N
-    ois[[i]] <- curMeasure$SOI
-  }
-  
-  counts <- do.call('cbind', counts)
-  ois <- do.call('cbind', ois)
-  
-  lowestLevel <- leftmost(ois == 0, which = TRUE)[,'col']
-  
-  remainders <- lowestLevel == 0L
-  
-  if (any(remainders)) {
-    remains <- as.double(ois[remainders, ])
-    
-    ranked <- t(apply(remains, 1, order, decreasing = TRUE))
+    rows <- split(c(remainders[!onbeat, ]), c(row(remainders[!onbeat, ])))
+    ranked <- do.call('rbind', lapply(rows, rank, ties.method = 'last'))
+    ranked <- ncol(ranked) + 1 - ranked
     
     if (remainderSubdivides) {
-      subdivide <- sapply(as.list(tatum), \(tat) rhythmInterval(ioi)[remainders] %divides% tat)
+      subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[!onbeat] %divides% span))
       ranked[!subdivide] <- 1L
     }
-    lowestLevel[remainders] <- max.col(ranked, ties.method = 'last')
+    
+    lowestLevel[!onbeat] <- max.col(ranked, ties.method = 'last')
+    
   }
-  
-  
-  remainder <- ois[cbind(seq_along(soi), lowestLevel)]
-  
+  remainder <- remainders[cbind(seq_len(nrow(remainders)), lowestLevel)]
+    
   # remove redundant counts
   counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
   counts[sweep(col(counts), 1L, parent[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
   
-  beats <- lapply(seq_along(tatum), \(j) tatum[j] * counts[ , j])
-  output <- do.call('cbind', c(beats, Remainder = remainder))
   
-  colnames(output) <- c(sapply(levels, \(l) paste(recip(l), collapse = '+')), 'Remainder')
-  rownames(output) <- ioi
-  attr(output, 'meter') <- meter
+  # 
+  # beats <- lapply(seq_along(tatum), \(j) tatum[j] * counts[ , j])
+  # output <- do.call('cbind', c(beats, Remainder = remainder))
+  # 
+  # colnames(output) <- c(sapply(levels, \(l) paste(recip(l), collapse = '+')), 'Remainder')
+  # rownames(output) <- ioi
+  # attr(output, 'meter') <- meter
+  # 
+  # output <- recip(output)
+  # output[output == '1%0'] <- ''
   
-  output <- recip(output)
-  output[output == '1%0'] <- ''
-  
-  output
+  # output
+  data.frame(recip(dur), counts, recip(remainder))
 }
 
 
-metricPlot <- function(metric) {
-  metric[metric == ""] <- NA
-  
-  durations <- duration(metric)
-  durations[is.na(durations)] <- 0
-  y <- barplot(t(durations), horiz = TRUE, col = c(gray.colors(ncol(metric) - 1), 'red'))
-  
-  x <- t(apply(durations,1,cumsum))
-  y <- replicate(ncol(x), y)
-  text(x[x != 0], y[x != 0], metric[x != 0], pos = 2, cex=.5)
-}
 
 
 # normalizeMeasures <- function(dur, )
@@ -278,7 +275,7 @@ metricPlot <- function(metric) {
 # 
 # how many beats have passed, and the offset between each attack and the nearest beat.
 
-count <- function(dur, beat = rational(1L), start = rational(0),
+count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE,
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
  
@@ -290,23 +287,28 @@ count <- function(dur, beat = rational(1L), start = rational(0),
   mcount <- as.integer(numerator(beat.round((timeline$Timeline + phase))))
   
   if (any(timeline$Irregular)) {
-    subcounts <- Map(\(bs, tat) cumsum(as.integer(numerator(bs / tat))), 
-                     uniqueBeats$values, 
-                     as.list(tatum))
-    segments <- segments(uniqueBeats$indices)
+    subcounts <- Map(timeline$values, 
+                     as.list(timeline$tatum),
+                     f = \(bs, tat) cumsum(as.integer(numerator(bs / tat))))
+    
+    segments <- segments(timeline$indices)
     mcounts <- split(mcount, segments)
     
-    mcounts <- Map(\(m, sc) {
-      m <- m - min(m)
-      
-      if (length(sc) == 1L) return(m)
-      
-      sub <- findInterval(m %% max(sc), sc, rightmost.closed = TRUE, left.open = FALSE)
-      
-      (length(sc) * (m %/% max(sc))) + sub
-      }, 
-               mcounts, 
-               subcounts[attr(segments, 'values')])
+    mcounts <- Map(mcounts, 
+                   subcounts[attr(segments, 'values')],
+                   f = \(m, sc) {
+                     m <- m - min(m)
+                     
+                     if (length(sc) == 1L) return(m)
+                     
+                     sub <- m %% max(sc)
+                     
+                     if (!offBeats) sub[!sub %in% c(0, sc)] <- NA
+                     
+                     sub <- findInterval(sub, sc, rightmost.closed = TRUE, left.open = FALSE)
+                       
+                     (length(sc) * (m %/% max(sc))) + sub
+                   })
     
     mcount <- unlist(mcounts, use.names = FALSE)
     
@@ -315,6 +317,8 @@ count <- function(dur, beat = rational(1L), start = rational(0),
     mcount <- sigma(mcount)
   }
 
+  
+  if (!offBeats) mcount[!timeline$Irregular & !(rational(1) %divides% (timeline$Timeline + 1))] <- NA
   
   mcount + 1L
 }
@@ -372,7 +376,7 @@ scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALS
   
   timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
   
-  c(list(Timeline = timeline, Scale = beat, Irregular = irregular), get0('uniqueBeats'))
+  c(list(Timeline = timeline, Scale = beat, Irregular = irregular, tatum = tatum), get0('uniqueBeats'))
 }
 # # count2 uses precomputed timeline
 # count2 <- function(timeline, beat = rational(1L), 
@@ -429,36 +433,6 @@ scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALS
 # }
 
 
-subpos2 <- function(durs, beat = rational(1L), deparser = recip, ...,
-                   phase = rational(0L), beat.round = floor, Bar = NULL) {
-  
-  durs <- rhythmInterval(durs)
-  
-  beat <- rhythmInterval(beat)
-  totalTatum <- sum(beat)
-  
-  mcount <- beat.round((durs + phase) / totalTatum) 
-  
-  mremain <- ((durs + phase) - totalTatum * mcount)
-  
-  if (length(beat) > 1L) {
-    
-    beatoff <- sigma(beat)
-    mremain <- ((durs + phase) - totalTatum * mcount)
-    
-    subcount <-  outer(beatoff, mremain, '<=') |> colSums()
-    mcount <- mcount * length(beat) + subcount
-    
-    
-    mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
-    
-  }
-  
-  deparser(mremain, ...)
-  # 
-
-  
-}
 
 
 

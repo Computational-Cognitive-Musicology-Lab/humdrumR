@@ -220,7 +220,7 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'integer64', 'logical'
 
 columns <- function(humvec) {
     ncol <- if (hasdim(humvec)) ncol(humvec) else 1L
-    rep(1:ncol, each = length(humvec))
+    rep(1:ncol, each = nrow(humvec))
 }
 
 vectorNA <- function(n, mode = 'character') {
@@ -472,7 +472,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
               if (matclass %in% c('character', 'numeric', 'integer')) {
                   if (ncol(i) == 1L) return(x[c(i), ])
                   if (nrow(i) == 1L) return(x[ , c(i)])
-                  if (nrow(i) == nrow(x) && ncol(i) == 2)  return(x[i[ , 1], i[ , 2], cartesian = TRUE])
+                  if (ncol(i) == 2)  return(x[i[ , 1], i[ , 2], cartesian = TRUE])
                   
                   .stop("To index a {class(x)} a numeric or character matrix, that matrix must either:\n",
                         "\t1) Be a 1-column (index rows) or 1-row (index columns) matrix---in which case, it is treated like a vector.\n",
@@ -503,7 +503,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
 setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
           function(x, j, drop = FALSE) {
               if (!hasdim(x)) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
-              
+            
               j <- j[j != 0] # zeros are ignored
               
               ### First, special cases where j is empty
@@ -1124,11 +1124,10 @@ setMethod('as.character', 'struct',
 setMethod('show', signature = c(object = 'struct'), 
           function(object) { 
             cat(class(object), 
-                if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
+                if (hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
                 '\n', sep = '')
             
             if (length(object) > 0L) {
-              
               toprint <- c(object)
               toprint <-  ifelse(is.na(toprint), 'NA', as.character(toprint))
               dim(toprint) <- dim(object)
