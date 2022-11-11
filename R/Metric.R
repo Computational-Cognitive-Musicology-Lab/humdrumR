@@ -195,7 +195,7 @@ NULL
 #' 
 #' @family rhythm analysis tools
 #' @export
-metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
+metric <- function(dur, meter = duple(5), start = rational(0), offBeats = TRUE,  groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
   
   dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
   
@@ -205,25 +205,39 @@ metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(),
   spans <- .unlist(lapply(levels, sum))
   nbeats <- lengths(levels)
   
-  counts <- do.call('cbind', lapply(levels, count, dur = dur, start = start, groupby = list()))
+  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, start = start, groupby = list()))
   counts <- counts - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
   remainders <- do.call('cbind', lapply(rounded_timelines, \(rt) timeline - rt))
   
   ## get counts
-  parent <- unlist(Map(lengths(levels), 
-                       as.list(spans),  
-                       f = \(ln, spn) {
-                         hits <- ln == 1L & (spn < spans & spn %divides% spans)
-                         if (any(hits)) max(which(hits)) else 0L
-                       }))
+  parents <- unlist(Map(as.list(spans),  
+                        seq_along(spans),
+                        f = \(spn, i) {
+                          hits <- seq_along(spans) < i & 
+                            spn <= spans & 
+                            spn %divides% spans &
+                            !(nbeats[i] > 1 & nbeats > 1)
+                          if (any(hits)) max(which(hits)) else 0L
+                        }))
   
-  scale <- as.numeric((spans[parent[parent > 0L]] %/% spans[parent > 0L]) * (nbeats[parent[parent > 0L]] / nbeats[parent > 0L]))
-  
-  counts <- cbind(counts[ , 1],
-                  counts[, parent > 0L] - sweep((counts[ , parent[parent > 0L]]), 2, scale, '*'))
-  
+  counts <- do.call('cbind', 
+                    Map(parents, seq_along(spans),
+                        f = \(parent, self) {
+                          if (parent == 0L) return(counts[ , self])
+                          
+                          beatsPerParent <- (spans[parent] %/% spans[self]) * nbeats[self]
+                          count <- counts[,self] %% beatsPerParent
+                          
+                          if (nbeats[parent] > nbeats[self]) {
+                            beats <- cumsum(c(0L, as.integer(levels[[parent]] %/% spans[self])))
+                            count <- count - beats[(counts[ , parent] %% nbeats[parent]) + 1L]
+                          }
+                          count
+                          
+                        })) 
+
   ## figure out remainders
   lowestLevel <- leftmost(remainders == rational(0L), which = TRUE)[ , 'col']
   onbeat <- lowestLevel > 0L
@@ -247,23 +261,18 @@ metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(),
     
   # remove redundant counts
   counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
-  counts[sweep(col(counts), 1L, parent[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
+  counts[sweep(col(counts), 1L, parents[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
+  
+  counts[] <- as.integer(counts)
   
   
-  
-  # 
-  # beats <- lapply(seq_along(tatum), \(j) tatum[j] * counts[ , j])
-  # output <- do.call('cbind', c(beats, Remainder = remainder))
-  # 
-  # colnames(output) <- c(sapply(levels, \(l) paste(recip(l), collapse = '+')), 'Remainder')
-  # rownames(output) <- ioi
-  # attr(output, 'meter') <- meter
-  # 
-  # output <- recip(output)
-  # output[output == '1%0'] <- ''
+  colnames(counts) <- sapply(levels, \(l) paste(recip(l), collapse = '+'))
+  rownames(counts) <- recip(dur)
+
+  if (!offBeats) counts[remainder > rational(0), ] <- NA_integer_
   
   # output
-  data.frame(recip(dur), counts, recip(remainder))
+  counts
 }
 
 
