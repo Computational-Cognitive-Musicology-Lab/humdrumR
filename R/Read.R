@@ -325,7 +325,7 @@ readTextFiles <- function(fpaths) {
     
 splitFiles2Lines <- function(filestrs) {
     lines <- stringi::stri_split_lines(filestrs)
-    lapply(lines, head, n = -1L)
+    lapply(lines, \(ls) if (ls[length(ls)] == "") ls[-length(ls)] else ls)
 }
 
 
@@ -1217,6 +1217,10 @@ parseBarlines <- function(spine) {
              row.names = names(spine), stringsAsFactors = FALSE)
 }
 
+
+#############################################################################################---
+########################### readTSV ----
+################################################################--
 
 
 
