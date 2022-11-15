@@ -968,7 +968,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
   if (any(!onsets)) {
     windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
-    rint <- windowsSum(rint, windows)
+    rint <- windowsSum(rint, windows, na.rm = TRUE)
   }
   
   dispatch <- attr(rint, 'dispatch')

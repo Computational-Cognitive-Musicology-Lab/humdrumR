@@ -195,7 +195,37 @@ NULL
 #' 
 #' @family rhythm analysis tools
 #' @export
-metric <- function(dur, meter = duple(5), start = rational(0), offBeats = TRUE,  groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
+metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
+                   groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
+  
+  met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides, ...)
+  
+  
+  metlev <- met$MetLev
+  
+  if (value) {
+    metlev <- if (is.null(deparser)) {
+      .unlist(lapply(met$Levels, sum))[metlev]
+      
+    } else {
+      sapply(met$Levels, 
+                       \(lev) {
+                         output <- deparser(lev, ...)
+                         if (length(output) > 1L) paste(output, collapse = '+') else output
+                         
+                       })[metlev]
+    } 
+  }
+  
+  
+  if (!offBeats) metlev[met$Remainder != rational(0L)] <- as(NA, class(metlev))
+  
+  metlev
+  
+  
+}
+
+.metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
   
   dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
   
@@ -266,13 +296,9 @@ metric <- function(dur, meter = duple(5), start = rational(0), offBeats = TRUE, 
   counts[] <- as.integer(counts)
   
   
-  colnames(counts) <- sapply(levels, \(l) paste(recip(l), collapse = '+'))
-  rownames(counts) <- recip(dur)
-
-  if (!offBeats) counts[remainder > rational(0), ] <- NA_integer_
   
-  # output
-  counts
+
+  list(Counts = counts + 1L, Remainder = remainder, Levels = levels, MetLev = lowestLevel)
 }
 
 
@@ -565,3 +591,21 @@ beats.character <- function(x) unlist(lapply(meter(x), beats.meter))
 #' @rdname nbeats
 #' @export
 beats.NULL <- function(x) NULL
+
+
+
+###################################################################### ###
+# Metric analysis tools ##################################################
+###################################################################### ###
+
+
+syncopation <- function(dur, meter = duple(5), groupby = list()) {
+  levs <- metlev(dur, meter = meter, groupby = groupby, deparser = duration)
+  
+  dur <- rhythmInterval(dur)
+  
+  dur > levs
+  
+  
+}
+

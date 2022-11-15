@@ -490,7 +490,7 @@ setMethod('as.rational', 'numeric',
 #' @export
 setMethod('as.rational', 'logical', 
           \(x) {
-              as.rational(as.integer64(x))
+              as.rational(as.integer(x))
           })
 
 #' @rdname rational

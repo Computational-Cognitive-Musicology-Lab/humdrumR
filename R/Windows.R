@@ -328,15 +328,15 @@ windowApply <- function(x, func = c, windows, ..., groupby = list(), passOutside
   
   x_windowed <- lapply(indices, \(i) x[i])
   
-  result_windowed <- lapply(x_windowed, func)
+  result_windowed <- lapply(x_windowed, func, ...)
   
   if (rebuild) {
     
     if (all(lengths(result_windowed) == 1L)) {
-      result <- do.call('c', result_windowed)
+      result <- .unlist(result_windowed)
       x[if (leftEdge) windows$Open else windows$Close ] <- result
       if (passOutside) {
-        x[setdiff(unlist(indices), windows$Open)] <- as(NA, class(result))
+        x[setdiff(unlist(indices), c(windows$Open, which(is.na(x))))] <- as(NA, class(result))
         
       } else {
         notstarts <- seq_along(x)
@@ -410,11 +410,11 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 }
 
 
-windowsSum <- function(x, windowFrame, cuttoff = 10) {
+windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
   
   lengths <- table(windowFrame[Length > 1L, Length])
   
-  vectorize <- lengths >= cuttoff & as.integer(names(lengths)) < 20
+  vectorize <- lengths >= cuttoff & as.integer(names(lengths)) < 20L
   
   if (any(vectorize)) {
     maxsize <- max(as.integer(names(lengths)[vectorize]))
@@ -435,7 +435,7 @@ windowsSum <- function(x, windowFrame, cuttoff = 10) {
   
   
   
-  if (nrow(windowFrame)) x <- windowApply(x, sum, windows = windowFrame, passOutside = TRUE)
+  if (nrow(windowFrame)) x <- windowApply(x, sum, na.rm = na.rm, windows = windowFrame, passOutside = TRUE)
   
   x
   
