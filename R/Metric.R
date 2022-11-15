@@ -101,7 +101,7 @@ duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
 # Deparsing Meter Representations (meter2x) ##############################
 ###################################################################### ###
 
-meter2timeSignature <- function(x) {
+meter2timeSignature <- dofunc('x', function(x) {
   unlist(Map(\(ls, ts) {
     if (length(ls) == 0L || is.na(ls[1]) || is.na(ts) ) return(NA_character_)
     
@@ -109,7 +109,7 @@ meter2timeSignature <- function(x) {
     
     if (length(tactus) == 1L) {
       if (tactus@Numerator == 3L) tactus <- tactus / 3L
-      measure <- max( do.call('c', lapply(ls, sum)))
+      measure <- max(.unlist(lapply(ls, sum)))
       
       numerator <- measure %/% tactus
       denominator <- tactus
@@ -122,7 +122,7 @@ meter2timeSignature <- function(x) {
     paste0('*M', numerator , '/', rint2recip(denominator))
     
   }, x@Levels, x@Tactus))
-}
+})
   
   
 

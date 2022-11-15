@@ -11,7 +11,6 @@ dimParse <- function(args) {
   # if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
   
   
-  
   if (hasdim(firstArg)) {
     names <- dimnames(firstArg) 
     olddim <- dim(firstArg)
@@ -172,6 +171,7 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 
 do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
+  
   if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   

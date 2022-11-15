@@ -121,14 +121,15 @@ setValidity('struct',
                 #
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
-                dim <- object@dim
+                slots <- lapply(slots, '[', i = !Reduce('&', lapply(slots, duplicated)))
                 
+                dim <- object@dim
                 
                 rownames <- object@rownames
                 colnames <- object@colnames
                 errors <- c(
                     if (!{
-                            all(lengths(slots) == slotlen)
+                            all(lengths(slots) == length(slots[[1]]))
                                     }) glue::glue("Vectors in {class} data slots must all be the same length."),
                     if (!{
                             all(sapply(slots, \(slot) is.vector(slot) | is.integer64(slot))) #&&  all(sapply(slots, is.atomic))
@@ -244,13 +245,18 @@ setMethod('lengths', signature = 'struct',
 setMethod('dim<-', 'struct',
           function(x, value) {
               value %!<-% as.integer(value)
+            
               if (is.null(value) || any(dim(x) != value)) {
                   x@colnames <- NULL
                   x@rownames <- NULL
+                  x@dim <- value
+              } else {
+                x@dim <- value
+                validObject(x)
               }
-              x@dim <- value
               
-              validObject(x)
+              
+              
               x
               
           })
@@ -1102,7 +1108,10 @@ list2dt <- function(l) {
     structs <- sapply(l, is.struct)
     
     l[structs] <- lapply(l[structs],
-                            \(struct) as.data.table(getSlots(struct)))
+                            \(struct) { 
+                              slots <- getSlots(struct)
+                              slots[sapply(slots, is.list)] <- lapply(slots[sapply(slots, is.list)], \(x) match(x, unique(x)))
+                              as.data.table(slots)})
     
     as.data.table(l)
 }
