@@ -154,11 +154,13 @@ reference:
   contents:
   - timeline
   - localDuration
+  - metlev
+  - count
+  - subpos
   - ioi
   - recip
   - untie
   - measure
-  - metric
   - tatum
   - tactus
   - nbeats

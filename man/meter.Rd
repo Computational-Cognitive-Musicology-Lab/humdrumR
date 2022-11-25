@@ -3,6 +3,7 @@
 \docType{class}
 \name{meter}
 \alias{meter}
+\alias{meter.meter}
 \alias{meter.rational}
 \alias{meter.list}
 \alias{duple}
@@ -10,6 +11,8 @@
 \title{Meter class}
 \usage{
 meter(x, ...)
+
+\method{meter}{meter}(x)
 
 \method{meter}{rational}(x, ...)
 

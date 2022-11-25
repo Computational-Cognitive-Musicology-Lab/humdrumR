@@ -56,6 +56,9 @@ setMethod('initialize',
 meter <- function(x, ...) UseMethod('meter')
 #' @rdname meter
 #' @export
+meter.meter <- function(x) x
+#' @rdname meter
+#' @export
 meter.rational <- function(x, ...) {
   
   levels <- list(x, ...)
@@ -146,10 +149,10 @@ timesignature2meter <- function(x, sep = '/') {
     } else {
       if (as.integer64(3L) %divides% bts@Numerator && 
           (den@Numerator == as.integer64(1L) && 
-           as.integer64(2L) %divides% den@Denominator)) {
+           as.integer64(8L) %divides% den@Denominator)) {
         c(list(den * 3L), den, bts)
       } else {
-        list(den, bts)
+        list(den, bts, den / 2L, den / 4L)
       }
       
     }
@@ -195,10 +198,23 @@ NULL
 #' 
 #' @family rhythm analysis tools
 #' @export
+metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
+                   groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE) {
+  
+  .metric(dur, meter = meter, start = start, groupby = groupby, 
+          offBeats = offBeats, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides, ...,
+          callname = 'metric')
+  
+  
+}
+
+#' @rdname metric
+#' @export
 metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
                    groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
   
-  met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides, ...)
+  met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, 
+                 remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)
   
   
   metlev <- met$MetLev
@@ -211,7 +227,7 @@ metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
       sapply(met$Levels, 
                        \(lev) {
                          output <- deparser(lev, ...)
-                         if (length(output) > 1L) paste(output, collapse = '+') else output
+                         paste(output, collapse = '+')
                          
                        })[metlev]
     } 
@@ -222,20 +238,71 @@ metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
   
   metlev
   
-  
 }
 
-.metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
+
+#' @rdname metric
+#' @export
+metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
+                     offBeats = FALSE,
+                     start = rational(0), groupby = list(), parseArgs = list(), remainderSubdivides = TRUE) {
+  
+  met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, 
+                 remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
+  
+  counts <- met$Counts
+  
+  
+  if (is.character(level) && any(!level %in% colnames(counts))) {
+    .stop("In your call to metcount(), {harvard(unique(level[!level %in% colnames(counts)]), 'and', quote = TRUE)}",
+          "<are not names of metric levels|is not a name of a metric level>",
+          "in the input meter.",
+          "These levels as {harvard(colnames(counts), 'and', quote = TRUE)}.",
+          ifelse = length(level[!level %in% colnames(counts)]) == 1L)
+  }
+  
+  if (is.numeric(level) && any(level < 1 || level > ncol(counts))) {
+    .stop("In your call to metcount(), {harvard(unique(level[level < 1 || level > ncol(counts)]), 'and')}",
+          "<are not valid metric levels|is not a valid metric level>",
+          "as, the in the input meter only has {num2word(ncol(counts))} levels.",
+          ifelse = length(level[level < 1 || level > ncol(counts)]) == 1L)
+  }
+
+  mcount <- if (length(level) == 1L) {
+    counts[, level]
+  }  else {
+    counts[cbind(seq_len(nrow(counts)), rep(level, length.out = nrow(counts)))]
+  }
+  
+  
+  if (!offBeats) mcount[!met$OnBeat[ , level]] <- NA_integer_
+  
+  mcount
+    
+}
+
+
+.metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., 
+                    parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
+  
+  if (length(unique(meter)) > 1L) {
+    return(.metrics(dur, meter = meter, start = start, 
+                    groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                    callname = callname, ...))
+  }
   
   dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
   
-  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'metric')
+  meter <- meter(meter)
+  
+  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = callname)
+  
 
   levels <- meter@Levels[[1]]
   spans <- .unlist(lapply(levels, sum))
   nbeats <- lengths(levels)
   
-  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, start = start, groupby = list()))
+  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, start = start, groupby = groupby))
   counts <- counts - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
@@ -293,17 +360,79 @@ metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
   counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
   counts[sweep(col(counts), 1L, parents[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
-  counts[] <- as.integer(counts)
+  counts <- as.integer(counts) %<-dim% dim(counts)
+  onbeats <- remainders == rational(0)
   
-  
-  
+  colnames(counts) <-  colnames(onbeats) <- sapply(levels, \(ls) paste(recip(ls), collapse = '+'))
 
-  list(Counts = counts + 1L, Remainder = remainder, Levels = levels, MetLev = lowestLevel)
+  list(Counts = counts + 1L, 
+       Remainder = remainder, 
+       OnBeat = onbeats, 
+       Levels = levels,
+       MetLev = lowestLevel)
 }
 
-
-
-
+.metrics <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., 
+                     parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
+  
+  uniqmeters <- unique(meter)
+  
+  mets <- lapply(seq_along(uniqmeters), 
+                \(i) {
+                  targets <- meter == uniqmeters[i]
+                  
+                  met <- .metric(dur[targets], uniqmeters[i], 
+                                 start = if (length(start) == length(dur)) start[targets] else start, 
+                                 groupby = lapply(groupby, '[', i = targets),
+                                 parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                                 callname = callname, ...)
+                  met$Indices <- which(targets)
+                  met
+                })
+  
+  ## get full counts table
+  topLevels <- unique(unlist(lapply(mets, \(met) colnames(met$Count)[1])))
+  allCols <- unique(unlist(lapply(mets, \(met) colnames(met$Count))))
+  
+  
+  counts <- matrix(NA_integer_, 
+                   nrow = length(dur), ncol = length(allCols),
+                   dimnames = list(NULL, allCols))
+  
+  
+  for (met in mets) {
+    counts[cbind(rep(met$Indices, ncol(met$Counts)), 
+                 rep(match(colnames(met$Counts), allCols), each = length(met$Indices)))] <- c(met$Counts)
+  }
+  
+  # need to make counts in the same beat accumulate across changes in meter
+  counts[, colnames(counts) %in% topLevels] <- apply(counts[, colnames(counts) %in% topLevels],
+                                                     2,
+                                                     makeCumulative,
+                                                     groupby = c(list(segments(meter)), groupby))
+  
+  # levels
+  levels <- unique(.unlist(lapply(mets, '[[', 'Levels')))
+  neworder <- order(as.double(.unlist(lapply(levels, sum))), lengths(levels), decreasing = TRUE)
+  
+  counts <- counts[, neworder, drop = FALSE]
+  levels <- levels[neworder]
+  
+  
+  # get other stuff
+  indices <- unlist(lapply(mets, '[[', 'Indices'))
+  remainder <- .unlist(lapply(mets, '[[', 'Remainder'))[order(indices)]
+  onbeats <- .unlist(lapply(mets, '[[', 'OnBeat'))[order(indices)]
+  lowestLevel <- match(unlist(lapply(mets, \(met) colnames(met$Counts)[met$MetLev])), allCols[neworder])[order(indices)]
+  
+    
+  
+  list(Counts = counts, 
+       Remainder = remainder, 
+       OnBeat = onbeats, 
+       Levels = levels,
+       MetLev = lowestLevel)
+}
 # normalizeMeasures <- function(dur, )
 
 # Count the number of beats in a duration
@@ -518,12 +647,14 @@ tatum.NULL <- function(x) NULL
 tactus <- function(x, deparser, ...) UseMethod('tactus') 
 #' @rdname tactus
 #' @export
-tactus.meter <- function(x, deparser = recip, ...) {
+tactus.meter <- function(x, deparser = recip, sep = '+', ...) {
   
   result <- Map('[[', x@Levels, x@Tactus)
-  
-  
-  if (!is.null(deparser)) lapply(result, deparser, ...) else result
+  if (is.null(deparser)) {
+    result
+  } else {
+    sapply(result, \(x) paste(deparser(x, ...), collapse = sep))
+  }
 } 
 #' @rdname tactus
 #' @export

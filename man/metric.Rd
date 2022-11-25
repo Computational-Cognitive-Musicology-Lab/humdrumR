@@ -2,14 +2,46 @@
 % Please edit documentation in R/Metric.R
 \name{metric}
 \alias{metric}
+\alias{metlev}
+\alias{metcount}
 \title{Calculate metric positions from duration data.}
 \usage{
 metric(
   dur,
   meter = duple(5),
   start = rational(0),
+  value = TRUE,
+  offBeats = TRUE,
+  numeric = FALSE,
+  deparser = recip,
   groupby = list(),
   ...,
+  parseArgs = list(),
+  remainderSubdivides = TRUE
+)
+
+metlev(
+  dur,
+  meter = duple(5),
+  start = rational(0),
+  value = TRUE,
+  offBeats = TRUE,
+  numeric = FALSE,
+  deparser = recip,
+  groupby = list(),
+  ...,
+  parseArgs = list(),
+  remainderSubdivides = TRUE
+)
+
+metcount(
+  dur,
+  meter = duple(5),
+  level = tactus(meter),
+  ...,
+  offBeats = FALSE,
+  start = rational(0),
+  groupby = list(),
   parseArgs = list(),
   remainderSubdivides = TRUE
 )

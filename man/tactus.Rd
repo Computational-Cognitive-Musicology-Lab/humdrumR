@@ -13,7 +13,7 @@
 \usage{
 tactus(x, deparser, ...)
 
-\method{tactus}{meter}(x, deparser = recip, ...)
+\method{tactus}{meter}(x, deparser = recip, sep = "+", ...)
 
 \method{tactus}{character}(x, deparser = recip)
 
