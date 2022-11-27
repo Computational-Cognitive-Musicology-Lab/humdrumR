@@ -188,7 +188,7 @@ lag <- function(x, n = 1, fill, wrap, groupby, ...) UseMethod('lag')
 
 #' @rdname lag
 #' @export
-lead <- function(x, n, ...) lag(x, -n, ...)
+lead <- function(x, n = 1, ...) lag(x, -n, ...)
 
 
 #' @export

@@ -1103,7 +1103,6 @@ setMethod('LO5th', 'diatonicSet',
             LO5ths <- do.call('rbind', LO5ths)
             LO5ths[cbind((1:nrow(LO5ths))[notna], 1L + ((7L - inversion[notna]) %% 7L))] <- root[notna]
             
-            
             rownames(LO5ths) <- dset2key(dset)
             colnames(LO5ths) <- c('Root', nthfix(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
             # 

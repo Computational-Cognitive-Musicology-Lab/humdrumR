@@ -649,7 +649,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
                   if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
                   
                   #
-                  if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
+                  if (length(value) == 1L && length(i) != 1L) value <- rep(c(value), length.out = length(i))
                   if (length(value) != length(i)) stop(call. = FALSE, 
                                                        glue::glue("Can't row-assign ([i]<-) a {class(value)} with {length(value)} rows into {length(i)} rows of another {class(x)}.\n",
                                                                   "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
@@ -1008,7 +1008,9 @@ setMethod('diag', signature = 'struct',
 #' @export
 setMethod('is.na', signature = 'struct',
           function(x) {
-              na <- is.na(getSlots(x)[[1]])
+            slots <- getSlots(x)
+            na <- lapply(slots, is.na)
+            na <- Reduce('|', na)
               na %<-matchdim% x
           })
 
