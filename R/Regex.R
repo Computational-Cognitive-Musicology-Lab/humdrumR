@@ -339,6 +339,11 @@ escaper <- function(str) {
 }
 
 
+escape <- function(str) {
+  stringr::str_replace_all(str, "([+*?])", "\\\\\\1")
+}
+
+
 
 
 cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
@@ -578,12 +583,18 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
-makeRE.romanKey <- function(..., flat = 'b') {
+makeRE.romanKey <- function(..., collapse = TRUE, sep = '/') {
 
-    makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-               parts = c('species', 'step', 'mode', 'alterations'),
-               flat = flat,
-               ...)
+    numeral <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                          parts = c('species', 'step', 'mode', 'alterations'),
+                          collapse = TRUE, 
+                          ...)
+    
+    
+    REs <- list(head = paste0('(', numeral, ')'),
+                rest = paste0('(', sep, '(', numeral, '))*'))
+    
+    if (collapse) setNames(cREs(REs), 'romanKey') else REs
     
 }
 
@@ -602,13 +613,13 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     re <- orRE(key, romanNumeral)
     
-    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '*')
+    paste0(romanNumeral, '(', split, re, ')', if (mustPartition) '+' else '*')
 }
 
 
 #### REs for tertian sets ####
 
-makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = 'A', diminish = 'd', perfect = 'P', collapse = TRUE) {
+makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
     
     REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,
@@ -653,7 +664,7 @@ makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', di
   
 }
 
-makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.roman <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
     augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
@@ -671,7 +682,43 @@ makeRE.roman <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
+    key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                           parts = c('species', 'step', 'mode', 'alterations'),
+                           collapse = TRUE, 
+                           ...)
+    
+    REs$of <- paste0('(', sep, '(', key, '))*')
+    
     if (collapse) setNames(cREs(REs), 'roman') else REs
+}
+
+makeRE.harm <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
+  augment <- paste0('[', augment, ']') # because "+" is a special character!
+  
+  REs <- list()
+  REs$accidental <- makeRE.accidentals(...)
+  
+  upper <- paste0('(?=[IV]+', augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
+  lower <- paste0('(?=[iv]+', diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
+  REs$numeral <- orRE(upper, lower)
+  
+  
+  REs$triadalt <- captureRE(c(diminish, augment), n = '?')
+  
+  
+  REs$figurations <- makeRE.alterations(diminish = 'D', augment = 'A', qualities = TRUE, ...)
+  REs$inversion <- '[a-g]?'
+  REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations', 'inversion')]
+  
+  
+  key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                    parts = c('species', 'step', 'mode', 'alterations'),
+                    collapse = TRUE, 
+                    ...)
+  
+  REs$of <- paste0('(', sep, '(', key, '))*')
+  
+  if (collapse) setNames(cREs(REs), 'harm') else REs
 }
 
 

@@ -1065,7 +1065,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
+tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, directed = TRUE, ...) {
 
   
   if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
@@ -1075,7 +1075,7 @@ tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
   semits <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
   if (!compound) semits <- semits %% 12L
-
+  if (!directed) semits <- abs(semits)
   semits
   
 }
@@ -2276,9 +2276,10 @@ specifier2tint <- function(x, step = NULL, Key = NULL,
   
   natural <- stringi::stri_detect_fixed(x, natural)
   lof <- (if (qualities) {
-    updownN(x, up = augment, down = diminish) -
-      (substr(x, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
-      (x == 'm')
+    lof <- updownN(x, up = augment, down = diminish) -
+      (substr(x, 1L, 1L) == diminish & step >= 3L)  - # 3rd, 6th, and 7th diminish differently
+      (x == minor)
+    
   } else {
     updownN(x, up = sharp, down = flat)
   } ) 
