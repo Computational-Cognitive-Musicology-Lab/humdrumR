@@ -213,10 +213,12 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
     ind <- ind[Depth %in% depth | RevDepth %in% depth]
   }
   
-  ind[ , OpenDepth := Depth - min(Depth), by = Open]
-  ind[ , CloseDepth := Depth - min(Depth), by = Open]
-  ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
-  ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
+  if (nrow(ind)) {
+    ind[ , OpenDepth := Depth - min(Depth), by = Open]
+    ind[ , CloseDepth := Depth - min(Depth), by = Open]
+    ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
+    ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
+  }
   
   ind 
 }

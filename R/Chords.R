@@ -843,7 +843,7 @@ harm2tset <- function(x, Key = dset(0,0),
           parse.exhaust = FALSE, parse.strict = FALSE,
           toEnv = TRUE)  # adds accidental numeral triadalt figurations and inversion to the environment
   
-  Key <- romanNumeral2dset(stringr::str_sub(of, start = 2L), Key = Key)
+  Key <- romanNumeral2dset(stringr::str_sub(of, start = 2L), Key = Key, implicitSpecies = implicitSpecies, ...)
   Key[is.na(Key)] <- dset(0L, 0L)
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
                            parts = c('species', 'step'), qualities = FALSE,

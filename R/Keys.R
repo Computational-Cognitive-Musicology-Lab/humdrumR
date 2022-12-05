@@ -495,7 +495,7 @@ dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
 
     mode <- getMode(dset)
     
-    altered <- !is.na(dset@Alteration) & dset@Alteration != 0L & mode > -7L & mode < 2L
+    altered <- !is.na(dset) & dset@Alteration != 0L & mode > -7L & mode < 2L
     
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(augment, diminish, "")[match(alterations, c(7, -7, 0))]
@@ -507,7 +507,7 @@ dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
 
     alterations[] <- paste0(alterations, labs)
     
-    alterations <- apply(alterations, 1, paste, collapse='')
+    alterations <- apply(alterations, 1, paste, collapse = '')
     output <- character(length(mode))
     output[altered] <- alterations
     output

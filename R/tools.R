@@ -491,7 +491,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     result <- do.call('c', result)
     indices <- do.call('c', indices)
     
-    result <- if (length(result) == length(X)) {
+    result <- if (length(result) > 0L && length(result) == length(X)) {
       result[order(indices)]
     } else {
       output <- vectorNA(length(X), class(result))
