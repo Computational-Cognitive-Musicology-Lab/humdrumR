@@ -267,15 +267,21 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
           "as, the in the input meter only has {num2word(ncol(counts))} levels.",
           ifelse = length(level[level < 1 || level > ncol(counts)]) == 1L)
   }
+  
 
+  if (is.character(level)) {
+    level <- match(level, colnames(counts))
+  }
+  
   mcount <- if (length(level) == 1L) {
     counts[, level]
   }  else {
+    
     counts[cbind(seq_len(nrow(counts)), rep(level, length.out = nrow(counts)))]
   }
   
   
-  if (!offBeats) mcount[!met$OnBeat[ , level]] <- NA_integer_
+  if (!offBeats) mcount[!met$OnBeat[cbind(seq_len(nrow(counts)), rep(level, length.out = nrow(counts)))]] <- NA_integer_
   
   mcount
     
@@ -303,7 +309,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   nbeats <- lengths(levels)
   
   counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, start = start, groupby = groupby))
-  counts <- counts - 1L
+  counts[counts >= 1L] <- counts[counts >= 1L] - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
   remainders <- do.call('cbind', lapply(rounded_timelines, \(rt) timeline - rt))
@@ -325,7 +331,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
                           if (parent == 0L) return(counts[ , self])
                           
                           beatsPerParent <- (spans[parent] %/% spans[self]) * nbeats[self]
-                          count <- counts[,self] %% beatsPerParent
+                          count <- counts[,self] %% as.integer(beatsPerParent) # the %% method for integer64 is screwed up!
                           
                           if (nbeats[parent] > nbeats[self]) {
                             beats <- cumsum(c(0L, as.integer(levels[[parent]] %/% spans[self])))
@@ -484,7 +490,9 @@ count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE
   
   if (!offBeats) mcount[!timeline$Irregular & !(rational(1) %divides% (timeline$Timeline + 1))] <- NA
   
-  mcount + 1L
+  mcount[mcount >= 0L] <- mcount[mcount >= 0L] + 1L
+  
+  mcount
 }
 
 subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = duration, 
