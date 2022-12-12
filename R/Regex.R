@@ -760,7 +760,7 @@ makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
 }
 
 
-makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
+makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
   REs <- list(star = '\\*?',
               em   = 'M',
               numerator = '[1-9][0-9]*([+][1-9][0-9]*)*',
@@ -778,7 +778,7 @@ noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
                                             '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
                                 Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
 
-makeRE.noteValue <- function(sep = " \U2215", collapse = TRUE, ...) {
+makeRE.noteValue <- function(..., sep = " \U2215", collapse = TRUE) {
   
   REs <- list(multiplies = '([1-9][0-9]*)?',
               value = captureRE(noteValue.unicode$Unicode),

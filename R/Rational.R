@@ -118,17 +118,21 @@ setMethod('is.numeric', signature = c('rational'), \(x) TRUE)
 
 ## Order/relations methods ####
 
-#' @rdname rational
 #' @export
-setMethod('order', 'rational', 
-          function(x, ..., na.last = TRUE, decreasing = FALSE,
-                                 method = c("auto", "shell", "radix")) {
+order.rational <-  function(x, ..., na.last = TRUE, decreasing = FALSE,
+                            method = c("auto", "shell", "radix")) {
     order(as.double(x), 
           na.last = na.last,
           decreasing = decreasing,
           method = method
     )
-})
+}
+
+
+#' @export
+xtfrm.rational <-  function(x) {
+    xtfrm(as.double(x))
+}
 
 #' @rdname rational
 #' @export
@@ -471,6 +475,7 @@ setMethod('as.rational', 'integer', \(x) rational(x, 1L))
 #' @export
 setMethod('as.rational', 'numeric', 
           \(x) {
+              if (length(x) == 0L) return(vectorNA(0L, 'rational'))
               frac <- attr(MASS::fractions(x, cycles = 8), 'fracs')
               frac <- stringi::stri_split_fixed(frac, '/', simplify = TRUE)
               

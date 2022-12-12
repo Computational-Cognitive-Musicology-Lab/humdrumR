@@ -12,15 +12,40 @@
 \usage{
 meter(x, ...)
 
-\method{meter}{meter}(x)
+\method{meter}{meter}(x, ...)
 
-\method{meter}{rational}(x, ...)
+\method{meter}{rational}(
+  x,
+  ...,
+  measure = NULL,
+  tactus = NULL,
+  sub = 2,
+  intra = TRUE,
+  hyper = NULL,
+  tatum = FALSE
+)
 
-\method{meter}{list}(x, ...)
+\method{meter}{list}(
+  x,
+  measure = NULL,
+  tactus = NULL,
+  sub = 2,
+  intra = TRUE,
+  hyper = NULL,
+  tatum = FALSE,
+  ...
+)
 
 duple(nlevels = 4, measure = rational(1), tactus = 3L)
 
-\method{meter}{character}(x, ..., sep = "/", Exclusive = NULL, multiDispatch = FALSE)
+\method{meter}{character}(
+  x,
+  ...,
+  sep = "/",
+  compound = TRUE,
+  Exclusive = NULL,
+  multiDispatch = FALSE
+)
 }
 \description{
 Meter class

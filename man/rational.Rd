@@ -9,7 +9,6 @@
 \alias{denominator,rational-method}
 \alias{is.rational}
 \alias{is.numeric,rational-method}
-\alias{order,rational-method}
 \alias{rank,rational-method}
 \alias{Compare,rational,rational-method}
 \alias{Compare,rational,ANY-method}
@@ -57,14 +56,6 @@ denominator(x)
 is.rational(x)
 
 \S4method{is.numeric}{rational}(x)
-
-\S4method{order}{rational}(
-  x,
-  ...,
-  na.last = TRUE,
-  decreasing = FALSE,
-  method = c("auto", "shell", "radix")
-)
 
 \S4method{rank}{rational}(x, na.last = TRUE, ties.method = "average")
 

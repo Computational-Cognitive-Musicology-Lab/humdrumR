@@ -38,8 +38,8 @@ dimParse <- function(args) {
   list(Restore = restorer, Args = args)
 }
 
-predicateParse <- function(predicateFunc, args, anyMatch = NULL, 
-                            dispatchArgs = c(), verbose = FALSE, ...) {
+predicateParse <- function(predicateFunc, ..., args, anyMatch = NULL, 
+                            dispatchArgs = c(), verbose = FALSE) {
   
   firstArg <- args[[1]]
   
@@ -88,7 +88,7 @@ predicateParse <- function(predicateFunc, args, anyMatch = NULL,
 
 ###### "Memoify" ----
 
-memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, lag = 0L, ...) {
+memoizeParse <- function(args, ..., dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, lag = 0L) {
   
   firstArg <- args[[1]]
   
@@ -169,7 +169,7 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 
 
 
-do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
+do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
   
   if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
@@ -181,7 +181,7 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   
   memoize <- memoizeParse(dimension$Args, dispatchArgs = doArgs, memoize = memoize, ...)
   
-  naskip <- predicateParse(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
+  naskip <- predicateParse(Negate(is.na), args = memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
   
   
@@ -398,7 +398,6 @@ humdrumDispatch <-  function(x, dispatchDF,  Exclusive = NULL, funcName = NULL,
 
 regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 'character', ..., funcName = 'regexDispatch') {
   if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'x' argument.")
-  
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
   matches <- do.call('cbind', lapply(dispatchDF$regex, \(re) stringi::stri_extract_first_regex(str, pattern = re)))
@@ -526,8 +525,11 @@ humdrumRattr <- function(x) {
 }
 `humdrumRattr<-` <- function(x, value) {
   known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
-  if (is.null(value)) attributes(x) <- attributes(x)[!names(attributes(x)) %in% known]
-  for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
+  if (is.null(value)) {
+    for (att in known) attr(x, att) <- NULL
+  } else {
+    for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
+  }
   x
 }
 
@@ -624,7 +626,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   body <- rlang::expr({
     args <- list(!!!formalSymbols)
     result <- do(!!dispatcher, outputClass = !!outputClass, 
-                 c(args,  
+                 args = c(args,  
                    list(..., dispatchDF = dispatchDF, 
                         regexApply = !!regexApply, outputClass = !!outputClass, funcName = !!funcName)),
        ...)

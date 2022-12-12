@@ -7,7 +7,7 @@
 \usage{
 lag(x, n = 1, fill, wrap, groupby, ...)
 
-lead(x, n, ...)
+lead(x, n = 1, ...)
 }
 \arguments{
 \item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}

@@ -1155,7 +1155,7 @@ lcm <- function(...) {
     x <- list(...)
     x <- x[lengths(x) > 0]
     if (length(x) == 1L) return(x[[1]])
-    if (length(x) == 0L) return(vectorNA(0, 'integer64'))
+    if (length(x) == 0L) return(integer64(0))
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vectorNA(length(x[[1]]), class(x[[1]]))
@@ -1166,7 +1166,7 @@ lcm <- function(...) {
 .lcm <- function(x, y) {
     gcd <- .gcd(x, y)
     # output <- abs(x * y) / .gcd(x, y)
-    output <- (abs(x) %/% gcd) * abs(y)
+    output <- as.integer(abs(x) %/% gcd) * abs(y)
     
     output
     # if (is.integer(x) & is.integer(y)) as.integer(output) else output
@@ -1187,6 +1187,23 @@ checkWindows <- function(x, windows) {
   if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows 
 }
 
+
+harmonicInterpolate <- function(x, y, includeEdges = TRUE, bigFirst = TRUE) {
+  # finds integers between x and y, which can be found as 
+  # cummulative products starting with x
+  
+  ratio <- as.integer(y %/% x)
+  pFactors <- numbers::primeFactors(ratio)
+  if (bigFirst) pFactors <- rev(pFactors)
+  
+  cumFactors <- cumprod(pFactors)
+  cumFactors <- cumFactors[cumFactors < ratio]
+  
+  z <- x * cumFactors
+  
+  sort(if (includeEdges) c(x, z, y) else z)
+  
+}
 
 #' Cumulative sum of numeric vector
 #' 

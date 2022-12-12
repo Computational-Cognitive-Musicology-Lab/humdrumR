@@ -90,7 +90,6 @@ within(humData, localDuration(Token))
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{metric}()},
 \code{\link{timeline}()}
 }
 \concept{rhythm analysis tools}

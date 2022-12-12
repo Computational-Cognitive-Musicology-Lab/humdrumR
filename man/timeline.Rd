@@ -100,7 +100,6 @@ within(humData, timestamp(Token, minutes = TRUE))
 }
 \seealso{
 Other rhythm analysis tools: 
-\code{\link{localDuration}()},
-\code{\link{metric}()}
+\code{\link{localDuration}()}
 }
 \concept{rhythm analysis tools}

@@ -1,3 +1,13 @@
+#################################### ###
+# meter S4 class #######################
+#################################### ###
+
+
+## meter documentation ----
+
+
+## Definition, validity, initialization ####
+
 #' Meter class
 #' 
 #' @name meter
@@ -50,37 +60,65 @@ setMethod('initialize',
             
           })
 
+## Constructors ####
+
 #' Meter S4 class
 #' 
 #' @export
 meter <- function(x, ...) UseMethod('meter')
 #' @rdname meter
 #' @export
-meter.meter <- function(x) x
+meter.meter <- function(x, ...) x
 #' @rdname meter
 #' @export
-meter.rational <- function(x, ...) {
-  
+meter.rational <- function(x, ..., measure = NULL, tactus = NULL, sub = 2, intra = TRUE, hyper = NULL, tatum = FALSE) {
   levels <- list(x, ...)
   
-  ord <- order(sapply(levels, \(l) sum(as.double(l))),
-               -lengths(levels), 
-               decreasing = TRUE)
-  
-  new('meter', Levels = list(levels[ord]), Tactus = which(ord == 1L))
+  meter.list(levels, measure = measure, tactus = tactus, sub = sub, intra = TRUE, hyper = hyper, tatum = tatum, ...)
   
 }
+
 #' @rdname meter
 #' @export
-meter.list <- function(x, ...) {
-  x <- x[sapply(x, class) == 'list']
+meter.list <- function(x, measure = NULL, tactus = NULL, sub = 2, intra = TRUE, hyper = NULL, tatum = FALSE, ...) {
   
-  if (length(x) == 0L) return(new('meter', Levels = list(), Tactus = integer(0)))
-  .unlist(lapply(x, \(ls) do.call('meter.rational', ls)))
+  levels <- lapply(x, rhythmInterval)
+  tactus <- if (is.null(tactus)) {
+    tactus <- levels[[1]] 
+  } else {
+    rhythmInterval(tactus)
+  }
+  
+  if (is.null(measure)) {
+    measure <- do.call('lcm', lapply(levels, sum))
+  } else {
+    measure <- rhythmInterval(measure)
+    levels <- levels[sapply(levels, \(lev) lev %divides% measure)]
+  }
+  
+  if (intra) {
+    
+    interpolated <- harmonicInterpolate(tactus, measure, ...)
+    
+    if (length(interpolated)) levels <- c(levels, as.list(interpolated))
+    
+  }
+   
+  if (!is.null(hyper)) levels <- c(levels, lapply(hyper, \(n) n * measure))
+  if (!is.null(sub)) levels <- c(levels, lapply(sub, \(n) tactus / n))
+  
+  if (tatum) levels <- c(levels, tatum.rational(.unlist(c(levels, lapply(levels, sum)))))
+  
+  levels <- c(list(tactus, measure), levels)
+  levels <- unique(lapply(levels, `humdrumRattr<-`, value = NULL))
+  
+  ord <- order(.unlist(lapply(levels, sum)),
+               -lengths(levels), 
+               decreasing = TRUE)
+  new('meter', Levels = list(levels[ord]), Tactus = which(ord == 1L))
+  
+  
 }
-
-
-
 
 #' @rdname meter
 #' @export
@@ -99,6 +137,19 @@ duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
   
 }
 
+
+## Logic methods ####
+
+setMethod('==', c('meter', 'meter'),
+          function(e1, e2) {
+            
+            unlist(Map(e1@Levels, e2@Levels,
+                       f = \(levs1, levs2) {
+                         
+                         length(levs1) == length(levs2) &&
+                           all(.unlist(levs1) == .unlist(levs2))
+                       }))
+          })
 
 ###################################################################### ###
 # Deparsing Meter Representations (meter2x) ##############################
@@ -133,9 +184,10 @@ meter2timeSignature <- dofunc('x', function(x) {
 # Parsing Meter Representations (x2meter) ################################
 ###################################################################### ### 
 
-timesignature2meter <- function(x, sep = '/') {
+timesignature2meter <- function(x, ..., sep = '/', compound = TRUE) {
   REparse(x, makeRE.timeSignature(sep = sep, collapse = FALSE),
           toEnv = TRUE)
+  
   
   numerator <- lapply(strsplit(numerator, split = '\\+'), as.integer)
   denominator <- as.integer(denominator)
@@ -143,20 +195,23 @@ timesignature2meter <- function(x, sep = '/') {
   beats <- Map(rational, numerator, denominator)
   denominator <- as.list(rational(1L, denominator))
   
+  levels <- lapply(list(...), rhythmInterval)
   results <- Map(\(den, bts) {
-    levels <- if (length(bts) > 1) {
-      list(bts, den, sum(bts))
-    } else {
-      if (as.integer64(3L) %divides% bts@Numerator && 
-          (den@Numerator == as.integer64(1L) && 
-           as.integer64(8L) %divides% den@Denominator)) {
-        c(list(den * 3L), den, bts)
-      } else {
-        list(den, bts, den / 2L, den / 4L)
-      }
-      
-    }
-    do.call('meter.rational', levels)
+    
+    measure <- sum(bts)
+    
+    
+    tactus <- if (length(bts) > 1)  bts  else den
+    
+    if (compound && 
+        as.integer64(3L) %divides% bts@Numerator && 
+        (den@Numerator == as.integer64(1L) && 
+         as.integer64(8L) %divides% den@Denominator)) {
+      # compound meters
+      tactus <- tactus * 3L
+    } 
+    do.call('meter.rational', list(tactus, ..., measure = measure))
+    # levels <- c(levels, subdiv)
   }, denominator, beats) 
 
   .unlist(results)
@@ -185,19 +240,12 @@ setAs('integer', 'meter', \(from) new('meter',
 #' [humdrumR] includes a number of useful
 #' functions for working with rhythms and meter.
 #'
-#' + [rhythmDecompose()] decomposes a series of rhythms in terms of desired pulses.
-#' + [rhythmOffset()] Calculates the cummulative offset of durations from a starting point.
 #' 
 #' 
 #' @name humMeter
 NULL
 
 
-#' Calculate metric positions from duration data.
-#' 
-#' 
-#' @family rhythm analysis tools
-#' @export
 metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
                    groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE) {
   
@@ -208,7 +256,6 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
   
 }
 
-#' @rdname metric
 #' @export
 metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
                    groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
@@ -241,7 +288,7 @@ metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 }
 
 
-#' @rdname metric
+#' @rdname metlev
 #' @export
 metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
                      offBeats = FALSE,
@@ -348,16 +395,14 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   
   if (any(!onbeat)) {
     
-    rows <- split(c(remainders[!onbeat, ]), c(row(remainders[!onbeat, ])))
-    ranked <- do.call('rbind', lapply(rows, rank, ties.method = 'last'))
-    ranked <- ncol(ranked) + 1 - ranked
+    offbeats <- as.double(remainders[!onbeat , ])
     
     if (remainderSubdivides) {
       subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[!onbeat] %divides% span))
-      ranked[!subdivide] <- 1L
+      offbeats[!subdivide] <- max(offbeats)
     }
     
-    lowestLevel[!onbeat] <- max.col(ranked, ties.method = 'last')
+    lowestLevel[!onbeat] <- max.col(-offbeats, ties.method = 'last')
     
   }
   remainder <- remainders[cbind(seq_len(nrow(remainders)), lowestLevel)]
