@@ -1188,7 +1188,7 @@ checkWindows <- function(x, windows) {
 }
 
 
-harmonicInterpolate <- function(x, y, includeEdges = TRUE, bigFirst = TRUE) {
+harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
   # finds integers between x and y, which can be found as 
   # cummulative products starting with x
   

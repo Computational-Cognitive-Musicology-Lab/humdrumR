@@ -71,45 +71,36 @@ meter <- function(x, ...) UseMethod('meter')
 meter.meter <- function(x, ...) x
 #' @rdname meter
 #' @export
-meter.rational <- function(x, ..., measure = NULL, tactus = NULL, sub = 2, intra = TRUE, hyper = NULL, tatum = FALSE) {
+meter.rational <- function(x, ..., measure = NULL, tactus = NULL, tatum = '16', fill.levels = TRUE, subdiv = NULL, hyper = NULL) {
   levels <- list(x, ...)
   
-  meter.list(levels, measure = measure, tactus = tactus, sub = sub, intra = TRUE, hyper = hyper, tatum = tatum, ...)
+  meter.list(levels, measure = measure, tactus = tactus, tatum = tatum, fill.levels = fill.levels, subdiv = subdiv, hyper = hyper, ...)
   
 }
 
 #' @rdname meter
 #' @export
-meter.list <- function(x, measure = NULL, tactus = NULL, sub = 2, intra = TRUE, hyper = NULL, tatum = FALSE, ...) {
+meter.list <- function(x, measure = NULL, tactus = NULL, tatum = '16', fill.levels = TRUE, hyper = NULL, subdiv = NULL, ...) {
   
   levels <- lapply(x, rhythmInterval)
-  tactus <- if (is.null(tactus)) {
-    tactus <- levels[[1]] 
-  } else {
-    rhythmInterval(tactus)
-  }
+  spans <- lapply(levels, sum)
   
-  if (is.null(measure)) {
-    measure <- do.call('lcm', lapply(levels, sum))
-  } else {
-    measure <- rhythmInterval(measure)
-    levels <- levels[sapply(levels, \(lev) lev %divides% measure)]
-  }
+  #
+  measure <- if (is.null(measure)) do.call('lcm', spans) else rhythmInterval(measure)
+  tactus  <- if (is.null(tactus))  levels[[1]] else rhythmInterval(tactus)
+  tatum   <- if (is.null(tatum))   tatum.rational(.unlist(c(levels, lapply(levels, sum)))) else rhythmInterval(tatum)
+
+  #
+  if (fill.levels) levels <- c(levels,
+                               harmonicInterpolate(sum(tactus), measure, ...),
+                               harmonicInterpolate(tatum, sum(tactus), ...))
   
-  if (intra) {
-    
-    interpolated <- harmonicInterpolate(tactus, measure, ...)
-    
-    if (length(interpolated)) levels <- c(levels, as.list(interpolated))
-    
-  }
    
   if (!is.null(hyper)) levels <- c(levels, lapply(hyper, \(n) n * measure))
-  if (!is.null(sub)) levels <- c(levels, lapply(sub, \(n) tactus / n))
+  if (!is.null(subdiv)) levels <- c(levels, lapply(sub, \(n) tactus / n))
   
-  if (tatum) levels <- c(levels, tatum.rational(.unlist(c(levels, lapply(levels, sum)))))
   
-  levels <- c(list(tactus, measure), levels)
+  levels <- c(list(tactus, measure, tatum), levels)
   levels <- unique(lapply(levels, `humdrumRattr<-`, value = NULL))
   
   ord <- order(.unlist(lapply(levels, sum)),
@@ -297,6 +288,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
+  
   counts <- met$Counts
   
   
@@ -346,7 +338,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   
   dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
   
-  meter <- meter(meter)
+  meter <- meter(meter, ...)
   
   timeline <- pathSigma(dur, groupby = groupby, start = start, callname = callname)
   
@@ -389,7 +381,8 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
                         })) 
 
   ## figure out remainders
-  lowestLevel <- leftmost(remainders == rational(0L), which = TRUE)[ , 'col']
+  onbeats <- remainders == rational(0L)
+  lowestLevel <- leftmost(onbeats, which = TRUE)[ , 'col']
   onbeat <- lowestLevel > 0L
   
   
@@ -412,7 +405,6 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   counts[sweep(col(counts), 1L, parents[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
   counts <- as.integer(counts) %<-dim% dim(counts)
-  onbeats <- remainders == rational(0)
   
   colnames(counts) <-  colnames(onbeats) <- sapply(levels, \(ls) paste(recip(ls), collapse = '+'))
 
@@ -446,14 +438,19 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   allCols <- unique(unlist(lapply(mets, \(met) colnames(met$Count))))
   
   
-  counts <- matrix(NA_integer_, 
-                   nrow = length(dur), ncol = length(allCols),
-                   dimnames = list(NULL, allCols))
+  counts  <- matrix(NA_integer_, 
+                    nrow = length(dur), ncol = length(allCols),
+                    dimnames = list(NULL, allCols))
+  onbeats <- matrix(NA, 
+                    nrow = length(dur), ncol = length(allCols),
+                    dimnames = list(NULL, allCols))
   
   
   for (met in mets) {
     counts[cbind(rep(met$Indices, ncol(met$Counts)), 
                  rep(match(colnames(met$Counts), allCols), each = length(met$Indices)))] <- c(met$Counts)
+    onbeats[cbind(rep(met$Indices, ncol(met$OnBeat)), 
+                  rep(match(colnames(met$Counts), allCols), each = length(met$Indices)))] <- c(met$OnBeat)
   }
   
   # need to make counts in the same beat accumulate across changes in meter
@@ -467,13 +464,13 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   neworder <- order(as.double(.unlist(lapply(levels, sum))), lengths(levels), decreasing = TRUE)
   
   counts <- counts[, neworder, drop = FALSE]
+  onbeats <- onbeats[ , neworder, drop = FALSE]
   levels <- levels[neworder]
   
   
   # get other stuff
   indices <- unlist(lapply(mets, '[[', 'Indices'))
   remainder <- .unlist(lapply(mets, '[[', 'Remainder'))[order(indices)]
-  onbeats <- .unlist(lapply(mets, '[[', 'OnBeat'))[order(indices)]
   lowestLevel <- match(unlist(lapply(mets, \(met) colnames(met$Counts)[met$MetLev])), allCols[neworder])[order(indices)]
   
     
@@ -712,7 +709,7 @@ tactus.meter <- function(x, deparser = recip, sep = '+', ...) {
 #' @rdname tactus
 #' @export
 tactus.character <- dofunc('x', function(x, deparser = recip) {
- tactus.meter(meter.character(x, deparser = deparser))
+ tactus.meter(meter.character(x), deparser = deparser)
 })
 
 #' @rdname tactus

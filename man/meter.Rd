@@ -29,10 +29,10 @@ meter(x, ...)
   x,
   measure = NULL,
   tactus = NULL,
-  sub = 2,
-  intra = TRUE,
+  tatum = "16",
+  fill = TRUE,
   hyper = NULL,
-  tatum = FALSE,
+  subdiv = NULL,
   ...
 )
 
