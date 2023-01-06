@@ -92,8 +92,8 @@ meter.list <- function(x, measure = NULL, tactus = NULL, tatum = '16', fill.leve
 
   #
   if (fill.levels) levels <- c(levels,
-                               harmonicInterpolate(sum(tactus), measure, ...),
-                               harmonicInterpolate(tatum, sum(tactus), ...))
+                               as.list(harmonicInterpolate(sum(tactus), measure, ...)),
+                               as.list(harmonicInterpolate(tatum, sum(tactus), ...)))
   
    
   if (!is.null(hyper)) levels <- c(levels, lapply(hyper, \(n) n * measure))
