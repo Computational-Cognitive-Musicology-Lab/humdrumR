@@ -145,6 +145,7 @@ reference:
   contents:
   - bpm2sec
   - recip
+  - duration
   - noteValue
   - seconds
   - meter
@@ -165,7 +166,6 @@ reference:
   - tatum
   - tactus
   - nbeats
-  - beats
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:

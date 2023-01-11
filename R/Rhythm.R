@@ -1272,15 +1272,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @family rhythm analysis tools
 #' @export
 timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  # durations <- localDuration(x, groupby = groupby, scale = scale, parseArgs = parseArgs, Exclusive = Exclusive)
-  ## need to get local urat
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
    
-  timerints <- pathSigma(rints, groupby = groupby, start = start, callname = 'timeline')
+  timerints <- pathSigma(rints, groupby = groupby, start = as.rational(start), callname = 'timeline')
   
-  deparser(timerints, ...)
-  # as.numeric(timerints)
+  if (!is.null(deparser)) deparser(timerints, ...) else timerints
   
  
   
@@ -1290,13 +1287,11 @@ timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, p
 #' @rdname timeline
 #' @export
 timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
-  seconds <- seconds(x, BPM = BPM, Exclusive = Exclusive, parseArgs = parseArgs, ...)
   
-  seconds <- pathSigma(seconds, start = start, groupby = groupby)
+  timerints <- timeline(x, BPM = BPM, start = start, ..., Exclusive = Exclusive, parseArgs = parseArgs, groupby = groupby, deparser = NULL)
   
-
+  rint2dur(timerints, BPM = BPM, minutes = minutes, ...)
   
-  dur(seconds,  minutes = minutes, ...)
   
 }
 
