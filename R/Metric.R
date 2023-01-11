@@ -247,6 +247,9 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
   
 }
 
+#' Calculate metric information
+#' 
+#' 
 #' @export
 metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
                    groupby = list(), ..., parseArgs = list(), remainderSubdivides = TRUE ) {
@@ -483,10 +486,10 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 }
 # normalizeMeasures <- function(dur, )
 
-# Count the number of beats in a duration
-# 
-# how many beats have passed, and the offset between each attack and the nearest beat.
-
+#' Count the number of beats in a duration
+#' 
+#' how many beats have passed, and the offset between each attack and the nearest beat.
+#' @export
 count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE,
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
@@ -537,6 +540,8 @@ count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE
   mcount
 }
 
+#' @rdname count
+#' @export
 subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = duration, 
                     phase = rational(0L), beat.round = floor, groupby = list(), ...) {
   

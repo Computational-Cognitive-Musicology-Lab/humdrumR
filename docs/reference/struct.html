@@ -193,12 +193,12 @@ If these definitions don't work for your subclass, you'll need to create your ow
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># all of these should work:</span></span>
 <span class="r-in"><span class="va">test</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1,10 2,9  3,8  4,7  5,6 </span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test</span><span class="op">)</span>  <span class="op">==</span> <span class="va">test</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[10 , 2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 1,10 1,10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 2,9  2,9 </span>
@@ -211,14 +211,14 @@ If these definitions don't work for your subclass, you'll need to create your ow
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 9,2  9,2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 10,1 10,1</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1,10 2,9  3,8  4,7  5,6  6,5  7,4  8,3  9,2  10,1 1,10 2,9  3,8  4,7  5,6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [16] 6,5  7,4  8,3  9,2  10,1</span>
 <span class="r-in"><span class="va">test</span> <span class="op">*</span> <span class="fl">3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 3,30  6,27  9,24  12,21 15,18 18,15 21,12 24,9  27,6  30,3 </span>
 <span class="r-in"><span class="va">test</span> <span class="op">-</span> <span class="va">test</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0</span>
 <span class="r-in"></span>
 <span class="r-in"></span>

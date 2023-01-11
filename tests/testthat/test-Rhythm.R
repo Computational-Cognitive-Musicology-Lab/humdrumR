@@ -7,18 +7,15 @@ test_that('Basic rhythm functions work', {
   
   expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
   expect_equal(recip(reci, inPlace = TRUE), reci)
-  
-  expect_equal(semibreves(reci), durs)
-  expect_equal(semibreves(reci, inPlace = TRUE), 
-              c( '0.25a', '0.125b', '0.1875c', '0.375d', NA, 'x', '0.0625e', '0.09375f', '0.333333333333333g',
-                 '0.166666666666667h', '2i', '4KK', '3J', '1LL', '0.75X' ))
+
   
   expect_equal(recip(durs), recip(reci))
-  expect_equal(semibreves(reci), durs)
+
   
   ## scale argument
-  x <- c(1 / (1:10), 1:10)
-  expect_true(all(semibreves(x, scale = 1/x) == 1))
+  expect_equal(duration(reci, scale = 2), duration(reci) * 2)
+  expect_equal(duration(reci, unit = 4), duration(reci) / 4)
+  expect_equal(duration(reci, unit = 4, scale = 4), duration(reci))
   
 })
 
@@ -44,7 +41,7 @@ test_that("ioi and untie work correctly", {
   mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
   pairs <- with(mc$IOI,  data.frame(IOI, Token))
-  expect_true(all(Reduce('>=', lapply(pairs, semibreves))))
+  expect_true(all(Reduce('>=', lapply(pairs, duration))))
   
   # untie()
   
@@ -59,8 +56,8 @@ test_that("ioi and untie work correctly", {
 })
 
 test_that('Examples from rhythm man are correct', {
-  expect_equal(semibreves('4.ee-['), 0.375)
-  expect_equal(semibreves('4.ee-[', inPlace = TRUE), '0.375ee-[')
+  expect_equal(duration('4.ee-['), 0.375)
+  expect_equal(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
   
   expect_equal(seconds('4.'), 1.5)
   expect_equal(pitch('4.', Exclusive = 'notevalue'), NA_character_)

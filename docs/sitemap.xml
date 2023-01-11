@@ -79,6 +79,9 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bhatk.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bpm2sec.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/census.html</loc>
   </url>
   <url>
@@ -118,7 +121,13 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ditto.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/duration.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expand.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expandPaths.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/extractTandem.html</loc>
@@ -296,6 +305,9 @@
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/meter.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/metlev.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/metric.html</loc>

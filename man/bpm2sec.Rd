@@ -33,14 +33,5 @@ for the change of scale between seconds and milliseconds.
 \seealso{
 Other time functions: 
 \code{\link{time}()}
-
-Other time functions: 
-\code{\link{time}()}
-
-Other time functions: 
-\code{\link{time}()}
-
-Other time functions: 
-\code{\link{time}()}
 }
 \concept{time functions}

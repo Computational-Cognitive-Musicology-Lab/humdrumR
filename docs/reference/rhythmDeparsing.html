@@ -98,9 +98,9 @@ or into new formats that you create!</p>
 <li><p><em>Deparsing</em> (DEPARSING ARGS GO HERE) <code>|&gt;</code></p></li>
 </ul></li>
 <li><p><strong>Output</strong> representation</p></li>
-</ul><p>Various rhythm representations like <code>**recip</code>, <code>**dur</code>, and <code>**semibreves</code> can be generated
+</ul><p>Various rhythm representations like <code>**recip</code>, <code>**dur</code>, and <code>**duration</code> can be generated
 using predefined <a href="rhythmFunctions.html">rhythm functions</a> like <code><a href="recip.html">recip()</a></code>
-<code>dur()</code>, and <code><a href="semibreves.html">semibreves()</a></code> respectively.
+<code><a href="time.html">dur()</a></code>, and <code><a href="duration.html">duration()</a></code> respectively.
 All of these functions use a common deparsing framework.
 <em>This</em> documentation talks about this deparsing step.
 For an overview of the parsing process, look <a href="rhythmParsing.html">here</a>.</p>
@@ -117,12 +117,10 @@ The most important is the <code>scale</code> argument.</p><div class="section">
 
 <p>The <code>scale</code> argument is a <code>numeric</code> or <a href="rational.html">rational</a> value which indicates the reference unit used
 for duration values: what is "1" duration?
-By default, the unit is a "whole note" or semibreve.
+By default, the unit is a "whole note" or duration.
 By changing the unit, you can rescale your output.
 For example, a recip value represents a fraction of the unit: e.g., <code>"2"</code> equals 1/2 of the unit.
 If we call <code>recip('2', scale = 1/16)</code> this is telling us to get half of a sixteenth: which in this case would be <code>'32'</code>.</p>
-<p>The functions <code><a href="semibreves.html">breves()</a></code>, <code><a href="semibreves.html">semibreves()</a></code>, <code><a href="semibreves.html">crotchets()</a></code>, <code><a href="semibreves.html">quavers()</a></code>, and <code><a href="semibreves.html">semiquavers()</a></code> are all identical, except with different
-default values of the <code>scale</code> argument.</p>
 </div>
 
 <div class="section">
@@ -133,12 +131,12 @@ default values of the <code>scale</code> argument.</p>
 for example, <code>**recip</code> data might include tokens like <code>"4.ee-[</code>.
 The <code>humdrumR</code> parser (<code>rhythmInterval</code>) will automatically "pull out" rhythm information from within strings, if it can find any
 using the appropriate known regular expressions.
-For example, <code>semibreves('4.ee-[')</code> returns 0.375.
-However, all the pitch functions (like <code><a href="recip.html">recip()</a></code> and <code>dur()</code>) have an option to keep the "extra" information
+For example, <code>duration('4.ee-[')</code> returns 0.375.
+However, all the pitch functions (like <code><a href="recip.html">recip()</a></code> and <code><a href="time.html">dur()</a></code>) have an option to keep the "extra" information
 and return the result "in place"---i.e., embedded right where it was found in the input string.
 This is controlled with the <code>inPlace</code> argument, which is <code>FALSE</code> by default.
-So, <code>semibreves('4.ee-[', inPlace = TRUE)</code> will return 0.375ee-[---keeping the <code>"ee-["</code>.
-Note that <code>inPlace = TRUE</code> will force functions like <code>semibreves</code>, which normally return <code>numeric</code> values, to return <code>character</code> strings
+So, <code>duration('4.ee-[', inPlace = TRUE)</code> will return 0.375ee-[---keeping the <code>"ee-["</code>.
+Note that <code>inPlace = TRUE</code> will force functions like <code>duration</code>, which normally return <code>numeric</code> values, to return <code>character</code> strings
 <em>if</em> their input is a <code>character</code> string.</p>
 </div>
 

@@ -143,9 +143,8 @@ reference:
 - subtitle: "Rhythm functions"
   desc: "These functions translate between rhythm representations:"
   contents:
-  - time
+  - bpm2sec
   - recip
-  - semibreves
   - noteValue
   - seconds
   - meter
@@ -153,9 +152,11 @@ reference:
   desc: "Rhythm and meter analysis functions."
   contents:
   - timeline
+  - timestamp
   - localDuration
   - metlev
   - count
+  - metcount
   - subpos
   - ioi
   - recip
@@ -164,6 +165,7 @@ reference:
   - tatum
   - tactus
   - nbeats
+  - beats
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:

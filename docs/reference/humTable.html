@@ -165,8 +165,8 @@ to a <em>row</em> in the humdrum table while a "field" refers to a <em>column</e
 <li><p>Formal fields</p></li>
 <li><p>Reference fields</p></li>
 </ol><p>When first created by a call to <code><a href="readHumdrum.html">readHumdrum()</a></code> every
-humdrum table has at least eighteen fields: one data field (<code>Token</code>), two interpretation
-fields (<code>Tandem</code> and <code>Exclusive</code>), three formal fields, and fourteen structure fields. Additional
+humdrum table has at least nineteen fields: one data field (<code>Token</code>), two interpretation
+fields (<code>Tandem</code> and <code>Exclusive</code>), three formal fields, and fifteen structure fields. Additional
 interpretation or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
 by using <a href="withinHumdrum.html">within(humdrumR)</a> (and some other functions).</p><div class="section">
@@ -186,7 +186,7 @@ Users can create as many additional data fields as they like. Every call to
 <h3 id="structure-fields-">Structure fields:<a class="anchor" aria-label="anchor" href="#structure-fields-"></a></h3>
 
 
-<p>Every humdrum table starts with fourteen <em>Structure</em> fields,
+<p>Every humdrum table starts with fifteen <em>Structure</em> fields,
 which describe where each data token was "located" in the original humdrum data:
 which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.</p><ul><li><p><em>File info</em>:</p><ul><li><p><code>Filename</code> :: <code>character</code></p><ul><li><p>The unique name of the humdrum file. This may include an appended path
@@ -214,6 +214,9 @@ the humdrum data, the right side of the split becomes a new "path." The original
 is numbered <code>0</code> with additional paths numbered with integers to the right.
 (If there are no spine path splits, the <code>Path</code> field is all <code>0</code>s.)</p></li>
 <li><p>This field is always <code>NA</code> when <code>Global == TRUE</code>.</p></li>
+</ul></li>
+<li><p><code>ParentPath</code> :: <code>integer</code></p><ul><li><p>For spine paths (i.e., where <code>Path &gt; 0</code>), which path was the parent from
+which this path split? Where <code>Path == 0</code>, parent path is also <code>0</code>.</p></li>
 </ul></li>
 <li><p><code>Record</code> :: <code>integer</code></p><ul><li><p>The record (i.e., line) number in the original file.</p></li>
 </ul></li>

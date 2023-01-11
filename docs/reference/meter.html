@@ -79,16 +79,44 @@ Meter S4 class"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">meter</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
 
-<span class="co"># S3 method for rational</span>
+<span class="co"># S3 method for meter</span>
 <span class="fu">meter</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
 
+<span class="co"># S3 method for rational</span>
+<span class="fu">meter</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  measure <span class="op">=</span> <span class="cn">NULL</span>,
+  tactus <span class="op">=</span> <span class="cn">NULL</span>,
+  tatum <span class="op">=</span> <span class="st">"16"</span>,
+  fill.levels <span class="op">=</span> <span class="cn">TRUE</span>,
+  subdiv <span class="op">=</span> <span class="cn">NULL</span>,
+  hyper <span class="op">=</span> <span class="cn">NULL</span>
+<span class="op">)</span>
+
 <span class="co"># S3 method for list</span>
-<span class="fu">meter</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
+<span class="fu">meter</span><span class="op">(</span>
+  <span class="va">x</span>,
+  measure <span class="op">=</span> <span class="cn">NULL</span>,
+  tactus <span class="op">=</span> <span class="cn">NULL</span>,
+  tatum <span class="op">=</span> <span class="st">"16"</span>,
+  fill.levels <span class="op">=</span> <span class="cn">TRUE</span>,
+  hyper <span class="op">=</span> <span class="cn">NULL</span>,
+  subdiv <span class="op">=</span> <span class="cn">NULL</span>,
+  <span class="va">...</span>
+<span class="op">)</span>
 
 <span class="fu">duple</span><span class="op">(</span>nlevels <span class="op">=</span> <span class="fl">4</span>, measure <span class="op">=</span> <span class="fu"><a href="rational.html">rational</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, tactus <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">meter</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, sep <span class="op">=</span> <span class="st">"/"</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">meter</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  sep <span class="op">=</span> <span class="st">"/"</span>,
+  compound <span class="op">=</span> <span class="cn">TRUE</span>,
+  Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
+  multiDispatch <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
 

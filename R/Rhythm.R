@@ -1207,14 +1207,14 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' 
 #' These functions calculate the ammount of time (either in beats, or seconds)
 #' that have unfolded since the beginning of a piece, giving a sense of the timeline in which events unfold.
-#' In `music21` this inforfmation is described as "offsets"---however,
+#' In `music21` this information is described as "offsets"---however,
 #' we prefer to reserve the words "onset" and "offset" to refer
 #' to the beginning (attack) and end (release) of rhythmic events.
 #'
 #' @details 
 #'
 #' Music unfolds over time, and humdrum data typically represents this 
-#' by placing simultanteous events in the same record, with successive events
+#' by placing simultaneous events in the same record, with successive events
 #' in ever higher records---progressing "top down" through the file.
 #' In some humdrum data, only this (implicit) ordering of data over time is present.
 #' The `Record` and `NData` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.

@@ -90,10 +90,9 @@ which also includes <a href="kern.html">pitch</a> information and notation detai
   <span class="va">x</span>,
   <span class="va">...</span>,
   sep <span class="op">=</span> <span class="st">"%"</span>,
-  scale <span class="op">=</span> <span class="fu">new</span><span class="op">(</span><span class="st">"rational"</span>, Numerator <span class="op">=</span> <span class="fl">1L</span>, Denominator <span class="op">=</span> <span class="fl">1L</span>, dim <span class="op">=</span> <span class="cn">NULL</span>, rownames <span class="op">=</span>
-    <span class="cn">NULL</span>, colnames <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
-  graceDurations <span class="op">=</span> <span class="cn">FALSE</span>,
+  scale <span class="op">=</span> <span class="fl">1</span>,
+  unit <span class="op">=</span> <span class="fl">1</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -108,12 +107,11 @@ There are also two hidden (advanced) arguments you can specify: <code>memoize</c
 <dt>sep</dt>
 <dd><p>(<code>character</code>, <code>length == 1</code>) A <code>character</code> string to use as the separator
 between denominator and numerator.</p></dd>
-<dt>scale</dt>
-<dd><p>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement: the default value for most functions
-is <code>rational(1, 1)</code>, a whole-note or "semibreve." The <code><a href="semibreves.html">breves()</a></code>, <code><a href="semibreves.html">crotchets()</a></code>, <code><a href="semibreves.html">quavers()</a></code>, and <code><a href="semibreves.html">semiquavers()</a></code> each use a different default
-value.</p></dd>
 <dt>parseArgs</dt>
 <dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dt>scale</dt>
+<dd><p>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement: the default value for most functions
+is <code>rational(1, 1)</code>, a whole-note or "duration."</p></dd>
 <dt>inPlace</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-duration information in the input strings "besides" the rhythm information.
@@ -138,9 +136,8 @@ the ratio of <code>(2 - (2^{-n}))</code>, where <code>n</code> is the number of 
 read about the <a href="rhythmFunctions.html">family of rhythm functions</a>,
 or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDeparsing.html">deparsed</a>.</p>
 <p>Other rhythm functions: 
-<code><a href="noteValue.html">noteValue</a>()</code>,
-<code><a href="semibreves.html">semibreves</a>()</code>,
-<code><a href="time.html">time</a>()</code></p></div>
+<code><a href="duration.html">duration</a>()</code>,
+<code><a href="noteValue.html">noteValue</a>()</code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
