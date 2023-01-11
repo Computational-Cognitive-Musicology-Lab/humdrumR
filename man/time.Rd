@@ -2,38 +2,11 @@
 % Please edit documentation in R/Rhythm.R
 \name{time}
 \alias{time}
-\alias{bpm2sec}
-\alias{sec2bpm}
-\alias{bpm2ms}
-\alias{ms2bpm}
-\alias{sec2dur}
 \alias{seconds}
 \alias{ms}
 \alias{dur}
-\title{Basic time transformations}
+\title{Clock-time representations of duration}
 \usage{
-bpm2sec(BPM, unit = 0.25)
-
-sec2bpm(sec, unit = 0.25)
-
-bpm2ms(BPM, unit = 0.25)
-
-ms2bpm(ms, unit = 0.25)
-
-sec2dur(
-  x,
-  minutes = FALSE,
-  hours = FALSE,
-  days = FALSE,
-  months = FALSE,
-  years = FALSE,
-  milliseconds = TRUE,
-  trim = TRUE,
-  sep.date = "/",
-  sep.time = ":",
-  sep.decimal = "."
-)
-
 seconds(
   x,
   ...,
@@ -71,9 +44,6 @@ dur(
 )
 }
 \arguments{
-\item{BPM}{A \code{character} string (which may or may not be be prefixed with \code{"*MM"}) or numeric values,
-which are interpreted as a beats-per-minute value.}
-
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
@@ -90,9 +60,31 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
 }
 \description{
-Functions for translating rhythmic values to/from specific timespans.
-The \code{BPM} (beats-per-minute) argument translates between rhythmic values (determined by \code{scale} argument)
-and seconds/milliseconds.
-As is convention, the "beats" in beats-per-minute are take to by quarter-note (\code{\link[=crotchet]{crotchet()}}) beats:
-i.e., \code{scale / 4}.
+These functions convert duration values to clock-time representations.
+\code{seconds()} and \code{ms()} output \code{numeric} values.
+\code{dur()} outputs a \code{character} string encoding the humdrum \href{https://www.humdrum.org/rep/dur/index.html}{**dur}
+representation of time.
 }
+\details{
+These functions require a \code{BPM} (beats-per-minute) argument to be specified.
+By default, the value is 60 bpm.
+}
+\section{dur}{
+
+
+The \href{https://www.humdrum.org/rep/dur/index.html}{**dur} output can be modified to include different clock-time units:
+The \code{minutes}, \code{hours}, \code{days}, \code{months}, and \code{years} arguments are all true/false \code{logical} arguments, indicating whether
+to use that unit in the output (all default to \code{FALSE}).
+For example, if \code{minutes = FALSE}, an input of 90 seconds will return \code{":90"} (90 seconds!), but if
+\code{minutes = TRUE}, the output will be \verb{:1:30} (one minute and thirty seconds).
+}
+
+\seealso{
+To better understand how this function works,
+read about the \link[=rhythmFunctions]{family of rhythm functions},
+or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
+
+Other time functions: 
+\code{\link{bpm2sec}()}
+}
+\concept{time functions}

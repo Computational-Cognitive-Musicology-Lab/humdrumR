@@ -3,40 +3,62 @@
 ###################################################################### ###
 
 
-#' Basic time transformations
+#' Translate between durations and tempos
 #' 
-#' Functions for translating rhythmic values to/from specific timespans.
-#' The `BPM` (beats-per-minute) argument translates between rhythmic values (determined by `scale` argument)
-#' and seconds/milliseconds.
-#' As is convention, the "beats" in beats-per-minute are take to by quarter-note ([crotchet()]) beats:
-#' i.e., `scale / 4`.
+#' Functions for translating between durations (in seconds) and *tempos*---expressed as BPM (beats-per-minute).
+#' The "beats" in beats-per-minute are specified using the `unit` argument; 
+#' `unit` defaults to `.25` (a quarter-note), as is conventional.
 #' 
-#' 
+#' The pairs of functions involving `ms` (milliseconds) and `sec` (seconds), are identical except
+#' for the change of scale between seconds and milliseconds.
 #' 
 #' @param BPM A `character` string (which may or may not be be prefixed with `"*MM"`) or numeric values,
 #'        which are interpreted as a beats-per-minute value.
-#' @name time
+#' @param unit A value which can be interpreted as a [duration()]``
+#'  
+#' @family time functions
 #' @export
 bpm2sec <- function(BPM, unit = .25) {
-  BPM <- as.numeric(gsub('\\*?MM', '', BPM))
-  240 * unit / BPM
+  checkArg(BPM,  'BPM',  max.length = 1L, classes = c('integer', 'numeric', 'character'), valid = function(n) n > 0)
+  checkArg(unit, 'unit', max.length = 1L)
+  
+  dur <- duration(unit)
+  tempo  <- as.numeric(gsub('\\*?MM', '', BPM))
+  
+  
+  if (is.na(dur)) .stop("The unit argument {quotemark(unit)} cannot be interpreted as a duration.")
+  if (is.na(tempo)) .stop("The BPM argument {quotemark(BPM)} cannot be interpreted as a tempo.")
+  
+  240 * dur / tempo
+  
 }
 
-#' @rdname time
+#' @rdname bpm2sec
 #' @export
-sec2bpm <- function(sec, unit  =.25 ) 240 * unit / sec
+sec2bpm <- function(sec, unit  =.25 ) {
+  checkNumeric(sec, 'sec')
+  if (sec < 0) .stop('The sec argument cannot be negative. You provided {sec}.')
+  
+  checkArg(unit, 'unit', max.length = 1L)
+  
+  dur <- duration(unit)
+  if (is.na(dur)) .stop("The unit argument {quotemark(unit)} cannot be interpreted as a duration.")
+  
+  
+  
+  240 * unit / sec
+  
+}
 
-#' @rdname time
+#' @rdname bpm2sec
 #' @export
 bpm2ms <- function(BPM, unit = .25) bpm2sec(BPM, unit) * 1000
 
-#' @rdname time
+#' @rdname bpm2sec
 #' @export
 ms2bpm <- function(ms, unit = .25) sec2bpm(ms / 1000, unit)
 
 
-#' @rdname time
-#' @export
 sec2dur <- function(x, 
                     minutes = FALSE,
                     hours = FALSE,
@@ -550,7 +572,7 @@ noteValue2rint <- function(x, sep =" \U2215") {
 
 ### Numbers ####
 
-duration2rint <- function(x, ...)  as.rational(x) 
+duration2rint <- function(x, ...)  as.rational(ifelse(x > 0, x, NA)) 
 
 
 seconds2rint <- function(x, BPM = 60, ...) {
@@ -888,8 +910,41 @@ duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 noteValue <- makeRhythmTransformer(rint2noteValue, 'noteValue')
 
 
-#' @rdname time
+#' Clock-time representations of duration
+#'
+#' These functions convert duration values to clock-time representations.
+#' `seconds()` and `ms()` output `numeric` values.
+#' `dur()` outputs a `character` string encoding the humdrum [**dur](https://www.humdrum.org/rep/dur/index.html)
+#' representation of time.
+#'
+#' @details 
+#' 
+#' These functions require a `BPM` (beats-per-minute) argument to be specified.
+#' By default, the value is 60 bpm.
+#' 
+#' @section dur:
+#' 
+#' The [**dur](https://www.humdrum.org/rep/dur/index.html) output can be modified to include different clock-time units:
+#' The `minutes`, `hours`, `days`, `months`, and `years` arguments are all true/false `logical` arguments, indicating whether
+#' to use that unit in the output (all default to `FALSE`).
+#' For example, if `minutes = FALSE`, an input of 90 seconds will return `":90"` (90 seconds!), but if
+#' `minutes = TRUE`, the output will be `:1:30` (one minute and thirty seconds).
+#' 
+#' 
+#
+#' 
+#' @par minutes (`logical`, T/F) Should the `dur` output include minutes?
+#' @par hours (`logical`, T/F) Should the `dur` output include hours?
+#' @par days (`logical`, T/F) Should the `dur` output include days?
+#' @par months (`logical`, T/F) Should the `dur` output include months?
+#' @par years (`logical`, T/F) Should the `dur` output include years?
+#' 
+#' @family time functions
+#' @seealso To better understand how this function works, 
+#' read about the [family of rhythm functions][rhythmFunctions], 
+#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @inheritParams rhythmFunctions
+#' @name time
 #' @export
 seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'))
 

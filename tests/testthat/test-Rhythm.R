@@ -85,4 +85,7 @@ test_that('Examples from rhythm man are correct', {
   x <- with(chorales, table(noteValue(Token)), side = barplot(., cex.names = 2))
   
   expect_equal(unname(x["𝅗𝅥 "]), 222)
+  
+  samp <- c('4', '4.', '4%5')
+  expect_equal(seconds(samp) * 1000, ms(samp))
 })

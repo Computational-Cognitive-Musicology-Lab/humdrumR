@@ -19,10 +19,10 @@ meter(x, ...)
   ...,
   measure = NULL,
   tactus = NULL,
-  sub = 2,
-  intra = TRUE,
-  hyper = NULL,
-  tatum = FALSE
+  tatum = "16",
+  fill.levels = TRUE,
+  subdiv = NULL,
+  hyper = NULL
 )
 
 \method{meter}{list}(
@@ -30,7 +30,7 @@ meter(x, ...)
   measure = NULL,
   tactus = NULL,
   tatum = "16",
-  fill = TRUE,
+  fill.levels = TRUE,
   hyper = NULL,
   subdiv = NULL,
   ...
