@@ -3611,19 +3611,21 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' However, note that any values *before* the first index where `lag == TRUE`
 #' are calculated relative to that first value.
 #' 
-#' @param x A vector which is parsed as a [tonal interval][tonalInterval()].
-#' @param from A vector which is parsed as a [tonal interval][tonalInterval()].
-#' @param deparser A [pitch function][pitchFunction] to generate the output representation.
-#'    Defaults to [interval()].
-#' @param incomplete Either a [pitch function] or an atomic value of `length(incomplete) == abs(lag)`.
+#' @param x (`atomic` vector) A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param from (`atomic` vector) A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param lag (`int` or `logical` vector) For [mint()] and [hint()], set the lag between notes to calculate [int()]. Defaults to `1`. 
+#'    A `logical` vector with the same length as `x` is also accepted, see [Logical(ditto) lags].
+#' @param deparser (`Function`) A [pitch function][pitchFunctions] to generate the output representation.
+#'    Defaults to [interval][interval()].
+#' @param incomplete (`Function ` or `atomic`) Either a [pitch function][pitchFunctions] or an atomic value of `length(incomplete) == abs(lag)`.
 #' @param bracket (`logical`, `length == 1`) If `TRUE`, square brackets (`"[]"`) are printed around
 #' `incomplete` observations.
 #' @param classify (`logical`, `length == 1`) If `TRUE`, the `deparser` is ignored and the output
 #' is classified as `Unison`, `Step`, `Skip`, or `Leap`.
-#' @param parseArgs A `list` of arguments to pass to the [pitch parser][tonalInterval()].
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`
+#' @param parseArgs (`list`) A `list` of arguments to pass to the [pitch parser][tonalInterval()].
+#' @param groupby (`list`) A `list` of vectors, of the same length as `x`, which are used to group `x`
 #'   into.
-#' @param orderby A `list` of vectors, of the same length as `x`, which are used to
+#' @param orderby (`list`) A `list` of vectors, of the same length as `x`, which are used to
 #' interpret the order of elements in `x`. Lagged computations are done in the indicated
 #' order, but the output is returned in the original order.
 #'
