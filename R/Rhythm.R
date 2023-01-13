@@ -19,15 +19,15 @@
 #' @family time functions
 #' @export
 bpm2sec <- function(BPM, unit = .25) {
-  checkArg(BPM,  'BPM',  max.length = 1L, classes = c('integer', 'numeric', 'character'), valid = function(n) n > 0)
+  checkArg(BPM,  'BPM',  max.length = 1L, alt.length = length(BPM), classes = c('integer', 'numeric', 'character'), valid = function(n) n > 0)
   checkArg(unit, 'unit', max.length = 1L)
   
   dur <- duration(unit)
   tempo  <- as.numeric(gsub('\\*?MM', '', BPM))
   
   
-  if (is.na(dur)) .stop("The unit argument {quotemark(unit)} cannot be interpreted as a duration.")
-  if (is.na(tempo)) .stop("The BPM argument {quotemark(BPM)} cannot be interpreted as a tempo.")
+  if (any(is.na(dur))) .stop("The unit argument {quotemark(unit[is.na(dur)])} cannot be interpreted as a duration.")
+  if (any(is.na(tempo))) .stop("The BPM argument {quotemark(BPM[is.na(tempo)])} cannot be interpreted as a tempo.")
   
   240 * dur / tempo
   
@@ -100,7 +100,7 @@ sec2dur <- function(x,
   
   ## output format
   counts[] <- format(counts, scientific = FALSE, trim = TRUE)
-  counts[counts == '0'] <- ''
+  counts[counts == '0' & col(counts) < 6L] <- ''
   
   output <- paste0(applyrows(counts[ , 1:3, drop = FALSE], paste, collapse = sep.date),
                    sep.date,
@@ -332,6 +332,10 @@ rint2duration <- function(x) {
 } 
 
 
+rint2quarters <- function(x) {
+  as.double(x) * 4
+}
+
 rint2seconds <- function(x, BPM = 60) {
   rint2duration(x) * bpm2sec(BPM) * 4
 }
@@ -519,7 +523,6 @@ recip2rint <- function(x, grace = FALSE, sep = '%') {
   dotscale <- rational((2L * dots) - 1L, dots)
 
   rint <- rational * dotscale
-  
   if (is.na(grace) || !grace) {
     graceNotes <- grepl('^[Qq]', graceMark1) | grepl('[Qq]$', graceMark2)
     rint[graceNotes] <- if (is.na(grace)) rational(NA) else rational(0L)
@@ -641,7 +644,7 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
 ## Rhythm function documentation ####
 
 rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note values', 'noteValue' = 'traditional note-value symbols'),
-                                       Numeric = c('duration' = 'Whole notes', 'quarters' = 'quarter notes (crotchets)')),
+                                       Numeric = c('duration' = 'Whole notes', 'quarters' = 'quarter notes/crotchets')),
                         Ametric = list(Symbolic = c('dur' = 'durations of time'),
                                        Numeric = c('seconds', 'ms' = 'milliseconds'))
                         )
@@ -691,17 +694,20 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' 
 #' ## Grace notes
 #' 
-#' The `grace` controls the output associated with grace notes.
+#' `**recip` and `**kern` data sometime include tokens indicating [grace notes](https://en.wikipedia.org/wiki/Grace_note)---a special
+#' category of duration, usually used to indicate "freely" a-metric notes in an otherwise metric context.
 #' In humdrum data, grace notes are marked with `"q"` or `"Q"`; `q` should be reserved
 #' for tokens with no (other) duration information, while `Q` should be marked along with
 #' duration information: for example, `aa-q` or `16aa-Q`.
 #' In practice, this distinction is not always made, and is rarely important.
-#' 
-#' If `grace = TRUE`, grace-note durations (like the `16` in `"16aa-Q"`) are parsed like any other duration
-#' and included in the output with a `"q"` appended to them.
-#' If `grace = FALSE` or `grace = NA`, grace-notes return as `NA`.
-#' The `grace` argument can also be any other atomic value, which is returned for grace notes:
-#' the most common use is to return grace notes as having zero duration, by specifying `grace = 0`.
+
+#' By default, the `**recip` parser treats input marked as grace notes as having a duration of zero.
+#' However, if you pass a `grace` argument to the [rhythm parser][rhythmParsing], you can control this behavior.
+#' If `parse(grace = TRUE)`, grace-note durations (like the `16` in `"16aa-Q"`) are parsed like any other duration.
+#' If `grace = NA`, grace-notes return as `NA`.
+#' If `grace = FALSE`, the duration returns as zero (the default behavior).
+# The `grace` argument can also be any other atomic value, which is returned for grace notes:
+# the most common use is to return grace notes as having zero duration, by specifying `grace = 0`.
 #' 
 #' 
 #' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [rational (rhythmInterval)][rational], or `NULL`.
@@ -709,13 +715,13 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
 #' @param scale A `numeric` or [rational] value which is used as the output unit of measurement: the default value for most functions
 #'   is `rational(1, 1)`, a whole-note or "duration." 
-#' @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
 #' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [rhythm parser][rhythmParsing].
 #' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
 #'        *and* there is extra, non-duration information in the input strings "besides" the rhythm information.
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-rhythm information.
 #'        If `inPlace = FALSE`, only the rhythm output information will be returned (details below).
 #'  
+# @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
 #'     
 #' 
 #' @name rhythmFunctions
@@ -876,6 +882,9 @@ recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%')
 #' @export 
 duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 
+#' @rdname duration
+#' @export 
+quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 
 #' Note value representation of duration
 #' 
@@ -1092,16 +1101,16 @@ untie <- function(x, open = '[', close = ']', ...,
 
 
 
-minutes <- function(seconds, format = TRUE) {
-  
-  sign <- ifelse(seconds >= 0, '', '-')
-  seconds <- abs(seconds)
-  
-  minutes <- seconds %/% 60
-  
-  seconds <- round(seconds %% 60, 3)
-  paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
-}
+# minutes <- function(seconds, format = TRUE) {
+#   
+#   sign <- ifelse(seconds >= 0, '', '-')
+#   seconds <- abs(seconds)
+#   
+#   minutes <- seconds %/% 60
+#   
+#   seconds <- round(seconds %% 60, 3)
+#   paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
+# }
 
 ### timelines ----
 
@@ -1275,9 +1284,9 @@ timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, p
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
    
-  timerints <- pathSigma(rints, groupby = groupby, start = as.rational(start), callname = 'timeline')
+  timerints <- pathSigma(rints, groupby = groupby, start = if (is.logical(start)) start else as.rational(start), callname = 'timeline')
   
-  if (!is.null(deparser)) deparser(timerints, ...) else timerints
+  rint2duration(timerints, ...)
   
  
   
@@ -1288,9 +1297,12 @@ timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, p
 #' @export
 timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
-  timerints <- timeline(x, BPM = BPM, start = start, ..., Exclusive = Exclusive, parseArgs = parseArgs, groupby = groupby, deparser = NULL)
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  seconds <- rint2seconds(rints, BPM = BPM)
+  rints <- as.rational(seconds)
+  timerints <- pathSigma(rints, groupby = groupby, start = if (is.logical(start)) start else as.rational(start), callname = 'timestamp')
   
-  rint2dur(timerints, BPM = BPM, minutes = minutes, ...)
+  rint2dur(timerints, BPM = 240, minutes = minutes, ...) # BPM has already been incorporated, 240 is value we need now.
   
   
 }
@@ -1302,7 +1314,7 @@ pathSigma <- function(rints, groupby, start, callname) {
   
   
   if (is.logical(start)) {
-    if (length(start) != length(rints)) .stop("In a call to timeline, a logical 'start' argument must be the same length as the x argument.")
+    if (length(start) != length(rints)) .stop("In a call to {callname}, a logical 'start' argument must be the same length as the x argument.")
     logicalStart <- start
     start <- rational(0)
   } else {

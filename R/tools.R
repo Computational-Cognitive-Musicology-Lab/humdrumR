@@ -2275,7 +2275,7 @@ specialArgs <- function(quos, ...) {
 
 checkArg <- function(arg,  argname, callname = NULL, 
                      atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, classes = NULL) {
+                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, alt.length = NULL, classes = NULL) {
     # arg a argument to check
     # 
     if (length(sys.calls()) > 10L) return(arg) 
@@ -2286,12 +2286,15 @@ checkArg <- function(arg,  argname, callname = NULL,
     
     if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
     
-    if (length(arg) <  min.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at least {min.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
-    if (length(arg) > max.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at most {max.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
+    if (!(!is.null(alt.length) && length(arg) == alt.length)) {
+      if (length(arg) <  min.length) .stop(callname, 
+                                           "The length of the '{argname}' argument must be at least {min.length}.",
+                                           "In your call, length({argname}) == {length(arg)}.")
+      if (length(arg) > max.length) .stop(callname, 
+                                          "The length of the '{argname}' argument must be at most {max.length}.",
+                                          "In your call, length({argname}) == {length(arg)}.")
+    }
+   
     
     if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
         classNames <- harvard(classes, 'or', quote = TRUE)
