@@ -420,12 +420,6 @@ minutes <- function(seconds, format = TRUE) {
 #' The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
 #' For example, `deparser = recip` will return the output in `**recip` format.
 #' `...` arguments are passed to the deparser.
-#' 
-#' @examples 
-#' 
-#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
-#' 
-#' within(humData, localDuration(Token))
 #'
 #' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
 #' @param choose A function, which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
@@ -501,15 +495,7 @@ localDuration <- function(x,  choose = min, deparser = duration, ..., Exclusive 
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for a `logical` `start` argument is `within(humData, timeline(Token, start = Bar == 1)`, which makes the downbeat of
 #' the first complete bar `0`---any notes in a pickup bar are give negative numbers on the timeline.
-
-#' @examples 
-#' 
-#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
-#' 
-#' within(humData, timeline(Token))
-#' 
-#' within(humData, timestamp(Token, minutes = TRUE))
-#' 
+#'
 #' 
 #' @param x An input vector, which is parsed for duration information using the [rhythm parser][rhythmParsing].
 #' @param start A `numeric` value from which the timeline begins, or a `logical` vector of same length as `x`.
