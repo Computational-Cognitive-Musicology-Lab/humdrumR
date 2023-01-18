@@ -2,28 +2,32 @@
 # Checking arguments ----
 
 ## argCheck class ----
-setClass('argCheck', slots = c(Function = 'function', Rule = 'character', ProblemDescription = 'function')) 
+setClass('argCheck', slots = c(Function = 'function', Logic = 'character', Rule = 'character', ProblemDescription = 'function')) 
 
 
-argCheck <- function(func, rule, problem) new('argCheck', Function = func, Rule = rule, ProblemDescription = problem)
+argCheck <- function(func, rule, problem, logic = 'force') new('argCheck', Function = func, Logic = logic, Rule = rule, ProblemDescription = problem)
   
 
 setMethod('|', c('argCheck', 'argCheck') ,
           \(e1, e2) {
-            argCheck(\(arg) e1@Function(arg) || e2@Function(arg),
-                     paste0('[', e1@Rule, ' OR ', e2@Rule, ']'),
-                     \(arg) harvard(unique(c(e1@ProblemDescription(arg), e2@ProblemDescription(arg))), 'AND'))
+            argCheck(\(arg) list(e1, e2),
+                     logic = '||',
+                     c(e1@Rule, e2@Rule),
+                     \(arg) c(e1@ProblemDescription(arg), e2@ProblemDescription(arg)))
             
           })
 
 
 setMethod('&', c('argCheck', 'argCheck') ,
           \(e1, e2) {
-            argCheck(\(arg) e1@Function(arg) && e2@Function(arg),
-                     paste0('[', e1@Rule, ' AND ', e2@Rule, ']'),
-                     \(arg) harvard(unique(c(e1@ProblemDescription(arg), e2@ProblemDescription(arg))), 'AND'))
+            argCheck(\(arg) list(e1 , e2),
+                     logic = '&&',
+                     c(e1@Rule, e2@Rule),
+                     \(arg) c(e1@ProblemDescription(arg), e2@ProblemDescription(arg)))
             
           })
+
+
 
 setMethod('+', c('argCheck', 'character'),
           \(e1, e2) {
@@ -65,15 +69,44 @@ checks <- function(arg, argcheck) {
 
 
 
-
 docheck <- function(argcheck, arg) {
-  bad <- !argcheck@Function(arg)
-  if (any(bad)) {
-    glue::glue("The 'argname' argument must be ",
-               argcheck@Rule,
-               "; In your call, ",
-               harvard(unique(argcheck@ProblemDescription(arg)), 'AND'), '.')
+  result <- docheck_recurse(argcheck, arg)
+  if (!result$Good)  glue::glue("The 'argname' argument must be ", result$Rule, ';\nIn your call, ', harvard(unique(result$Problem), 'and'), '.')
+ 
+}
+
+docheck_recurse <- function(argcheck, arg) {
+  good <- argcheck@Function(arg)
+  if (is.list(good)) {
+    results <- lapply(good, docheck_recurse, arg = arg)
+    
+    goods <- lapply(results, '[[', 'Good')
+    rules <- lapply(results, '[[', 'Rule')
+    descriptions <- lapply(results, '[[', 'Problem')
+    
+    
+    
+    if (argcheck@Logic == '&&' && !goods[[1]])  {
+      rule <- rules[[1]] 
+      description <- descriptions[[1]]
+    } else {
+      logic <- c(`&&` = ' and ', `||` = ' or ')[argcheck@Logic]
+      rules <- rules[!sapply(rules, is.null)]
+      rule <- do.call('paste', c(rules, list(sep = toupper(logic))))
+      
+      if (length(rules) > 1L) rule <- paste0('[', rule, ']')
+      description <- unique(unlist(descriptions))
+    }
+    
+    return(list (Good = do.call(argcheck@Logic, goods), Rule = rule, Problem = description))
+    
+  } else {
+      list(Good = good, Rule = argcheck@Rule, Problem = argcheck@ProblemDescription(arg))
+    
   }
+  
+  
+
 }
 
 dochecks <- function(arg, ...) {
@@ -180,9 +213,9 @@ dochecks <- function(arg, ...) {
                            if (sum(bad) > 6L) ", as well as {sum(bad) - 6} other negative values." else ".")
 } 
 
-...notzero <- argCheck(\(arg) arg != 0,
+...notzero <- argCheck(\(arg) all(arg != 0),
                         "not zero",
-                        \(arg) "'argname' includes {sum(arg == 0)} {plural(sum(arg == 0), 'zero', 'zeroes')}")
+                        \(arg) "'argname' includes {sum(arg == 0)} {plural(sum(arg == 0), 'zeroes', 'zero')}")
 
 ### Length -----
 
@@ -199,12 +232,9 @@ dochecks <- function(arg, ...) {
 
 
 
-...scalar <- function(arg) {
-  c(...atomic(arg),
-    if (length(arg) != 1L) glue::glue("The 'argname' argument must be a single scalar value (e.g., a vector of length  == 1).",
-                                      .arg_function(arg, length, 'length')))
-}
-  
+...scalar <- argCheck(\(arg) is.atomic(arg) && length(arg) == 1L,
+                      "a single scalar value (e.g., a vector of length  == 1)",
+                      \(arg) if (is.atomic(arg)) .mismatch(length)(arg) else paste0(.mismatch(is.atomic)(arg), '(not an atomic vector class)'))
 
 
   
@@ -213,8 +243,8 @@ dochecks <- function(arg, ...) {
 ...match <- function(match, matchname, orscalar = TRUE) {
   
   argCheck(\(arg) length(arg) == length(match),
-           "must be the same length as the 'match' argument",
-           \(arg) glue::glue("length(argname) == {length(arg)}; length({matchname}) == {length(match)}"))
+           "the same length as the 'match' argument",
+           \(arg) glue::glue("length(argname) == {length(arg)} and length({matchname}) == {length(match)}"))
   # \(arg) {
   #   if (any(ldim(arg) != ldim(match)) && (orscalar && length(arg) != 1L)) {
   #     glue::glue("The 'argname' argument must {if (orscalar) 'either' else ''} be the same size as the '{matchname}' argument", .sep = ' ', 

@@ -486,17 +486,28 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 }
 # normalizeMeasures <- function(dur, )
 
-#' Count the number of beats in a duration
+## Count ----
+
+#' Count the number of elapsed beats (or measures)
+#' 
+#' 
 #' 
 #' how many beats have passed, and the offset between each attack and the nearest beat.
 #' @export
-count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE,
+count <- function(dur, beat = rational(1L), start = 1L, offBeats = TRUE,
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
+
+   
+  checks(start,  
+         #+ "This is because the first beat to count occurs at the starting instant, so there is no 'zeroth' beat"
+         (...number & ...scalar & ...notzero ) |
+           (...logical & ...match(dur, 'dur')))
+         # ...match(dur, 'dur'), ...natural,
+         # list(...notzero, "This is because the first beat to count occurs at the starting instant, so there is no 'zeroth' beat.")
+         # )
  
-  
- 
-  timeline <- scaled_timeline(dur, beat, start, groupby, callname = 'count')
+  timeline <- scaled_timeline(dur, beat, start = if (is.logical(start)) start else rational(0L), groupby, callname = 'count')
   #
   
   mcount <- as.integer(numerator(beat.round((timeline$Timeline + phase))))
@@ -535,7 +546,10 @@ count <- function(dur, beat = rational(1L), start = rational(0), offBeats = TRUE
   
   if (!offBeats) mcount[!timeline$Irregular & !(rational(1) %divides% (timeline$Timeline + 1))] <- NA
   
-  mcount[mcount >= 0L] <- mcount[mcount >= 0L] + 1L
+  if (!is.logical(start)) {
+    mcount <- mcount + as.integer(start) 
+    if (start < 0L) mcount[mcount >= 0L] <- mcount[mcount >= 0L] + 1L
+    }
   
   mcount
 }
@@ -572,9 +586,10 @@ scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALS
   dur <- rhythmInterval(dur)
   
   checkArg(beat, argname = 'beat', callname = callname,
-           valid = \(x) length(x) == 1L || length(x) == length(dur), min.length = 1L)
+           min.length = 1L, max.length = 1L, alt.length = length(dur))
   
   if (is.list(beat)) {
+    beat <- rep(beat, length.out = length(dur))
     uniqueBeats <- valind(beat)
     
     uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
