@@ -1,6 +1,9 @@
 
 # Checking arguments ----
 
+## Check patterns ----
+
+
 ## argCheck class ----
 setClass('argCheck', slots = c(Function = 'function', Logic = 'character', Rule = 'character', ProblemDescription = 'function')) 
 
@@ -71,41 +74,61 @@ checks <- function(arg, argcheck) {
 
 docheck <- function(argcheck, arg) {
   result <- docheck_recurse(argcheck, arg)
-  if (!result$Good)  glue::glue("The 'argname' argument must be ", result$Rule, ';\nIn your call, ', harvard(unique(result$Problem), 'and'), '.')
+  if (!result$Good)  {
+    result <- glue::glue("The 'argname' argument ", result$Rule, ';\nIn your call, ', harvard(unique(result$Problem), 'and'), '.')
+    result
+  }
+  
+
  
 }
 
 docheck_recurse <- function(argcheck, arg) {
   good <- argcheck@Function(arg)
+  
   if (is.list(good)) {
-    results <- lapply(good, docheck_recurse, arg = arg)
+    logic <- argcheck@Logic
     
-    goods <- lapply(results, '[[', 'Good')
-    rules <- lapply(results, '[[', 'Rule')
-    descriptions <- lapply(results, '[[', 'Problem')
+    result1 <- docheck_recurse(good[[1]], arg)
     
-    
-    
-    if (argcheck@Logic == '&&' && !goods[[1]])  {
-      rule <- rules[[1]] 
-      description <- descriptions[[1]]
+    result2 <- if (logic == '&&' && !result1$Good) {
+       list(Good = FALSE, Rule = "", Problem = "", Depth = 0L)
     } else {
-      logic <- c(`&&` = ' and ', `||` = ' or ')[argcheck@Logic]
-      rules <- rules[!sapply(rules, is.null)]
-      rule <- do.call('paste', c(rules, list(sep = toupper(logic))))
+       docheck_recurse(good[[2]], arg)
+    }
+    results <- list(result1, result2)
+    
+    goods <- sapply(results, '[[', 'Good')
+    rules <- sapply(results, '[[', 'Rule')
+    descriptions <- sapply(results, '[[', 'Problem')
+    depths <- sapply(results, '[[', 'Depth')
+    
+    good <- match.fun(argcheck@Logic)(goods[1], goods[2])
+
+    depth <- sum(depths)
+    targets <- if (logic == '&&') {
       
-      if (length(rules) > 1L) rule <- paste0('[', rule, ']')
-      description <- unique(unlist(descriptions))
+      if (!goods[1]) {
+        1
+        } else {
+          depth <- 1 + sum(depths)
+          2
+        }
+    } else {
+      if (!any(good) && sum(depths > 0) == 1) which.max(depths) else 1:2
     }
     
-    return(list (Good = do.call(argcheck@Logic, goods), Rule = rule, Problem = description))
+    rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' and ' else ' or ')
+    description <- unique(descriptions[targets])
+    
     
   } else {
-      list(Good = good, Rule = argcheck@Rule, Problem = argcheck@ProblemDescription(arg))
-    
+    depth <- 0L
+    rule <- argcheck@Rule
+    description <- argcheck@ProblemDescription(arg)
   }
   
-  
+  list(Good = good, Rule = rule, Depth = depth, Problem = description)
 
 }
 
@@ -122,16 +145,25 @@ dochecks <- function(arg, ...) {
   uniq <- unique(bad)
   
   message <- if (length(bad) == 0L) {
-    "Your 'argname' is empty: {class(bad)[1]}(0)."
+    "your 'argname' is empty: {class(bad)[1]}(0)."
   } else {
     if (length(uniq) == 1L) {
-      "Your 'argname' has the value {bad}" 
+      "your 'argname' includes the value {bad}" 
     } else {
-      "Your 'argname' includes the values {harvard(head(uniq, n), 'and', is.character(bad))}"
+      "your 'argname' includes the values {harvard(head(uniq, n), 'and', is.character(bad))}"
     }
   }
   
   glue::glue(message)
+}
+
+.values <- function(arg, n = 6, conj = 'and') {
+  arg <- unique(arg)
+  if (is.character(arg)) arg <- quotemark(arg)
+  if (length(arg) > n) {
+    arg <- c(arg[1:n], glue::glue('{length(arg) - n} more values.'))
+  }
+  harvard(arg, conj, FALSE)
 }
 .show_vector <- function(arg, n = 6) {
   if (length(arg) == 0L) {
@@ -146,6 +178,11 @@ dochecks <- function(arg, ...) {
     
   }
   
+}
+
+`%miss%` <- function(e1, e2) {
+  funcname <- rlang::expr_name(rlang::enexpr(e1))
+  glue::glue("{funcname}(argname) == {.show_vector(e1(e2))}")
 }
 
 .mismatch <- function(func) {
@@ -165,7 +202,7 @@ dochecks <- function(arg, ...) {
   
   argCheck(\(arg) class(arg)[1] %in% classes,
            # glue::glue("a {harvard(classes, 'or', quote = TRUE)} object"),
-           glue::glue("a {paste(quotemark(classes), collapse = '|')} object"),
+           glue::glue("must be a {paste(quotemark(classes), collapse = '|')} object"),
            .mismatch(class))
   
 }
@@ -174,27 +211,29 @@ dochecks <- function(arg, ...) {
 ...logical <- ...class('logical')
 ...integer <- ...class('integer')
 ...numeric <- ...class('numeric')
-...number  <- ...class('number')
 
-...atomic <- function(arg) {
-  if (!is.atomic(arg)) {
-    glue::glue("The 'argname' argument must be an 'atomic' value; i.e., a basic R vector (either logical, numeric, integer, or character).",
-               "You have provided a {class(arg)} value, which is not atomic.")
-  }
-  
-}
+.numericClasses <- c('integer', 'integer64', 'numeric')
+...number  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric", .mismatch(class))
+
+# ...atomic <- function(arg) {
+#   if (!is.atomic(arg)) {
+#     glue::glue("The 'argname' argument must be an 'atomic' value; i.e., a basic R vector (either logical, numeric, integer, or character).",
+#                "You have provided a {class(arg)} value, which is not atomic.")
+#   }
+#   
+# }
 
 ### Number stuff ----
 
-...natural <- function(arg) {
-  numb <- ...number(arg)
-  if (length(numb) == 0L && arg != round(arg)) glue::glue("The 'argname' argument must be",
-                                                          if (length(arg) > 1) "whole numbers." else "a whole number.", .sep = ' ',
-                                                          "Your 'argname' includes",
-                                                          if (sum( arg != round(arg) ) > 1L) "the values" else "the value",
-                                                          "{arg[arg != round(arg)]}.") else numb
-
-}
+# ...natural <- function(arg) {
+#   numb <- ...number(arg)
+#   if (length(numb) == 0L && arg != round(arg)) glue::glue("The 'argname' argument must be",
+#                                                           if (length(arg) > 1) "whole numbers." else "a whole number.", .sep = ' ',
+#                                                           "Your 'argname' includes",
+#                                                           if (sum( arg != round(arg) ) > 1L) "the values" else "the value",
+#                                                           "{arg[arg != round(arg)]}.") else numb
+# 
+# }
 
 
 
@@ -214,27 +253,53 @@ dochecks <- function(arg, ...) {
 } 
 
 ...notzero <- argCheck(\(arg) all(arg != 0),
-                        "not zero",
+                        "must not be zero",
                         \(arg) "'argname' includes {sum(arg == 0)} {plural(sum(arg == 0), 'zeroes', 'zero')}")
 
 ### Length -----
 
+
 ...maxlength <- function(n = 1) {
   argCheck(\(arg) length(arg) <= n,
-           glue::glue("at most {n} long"),
+           glue::glue("can be at most {n} long"),
            .mismatch(length))
 }
 ...minlength <- function(n = 1) {
   argCheck(\(arg) length(arg) >= n,
-           glue::glue("at least {n} long"),
+           glue::glue("must be at least {n} long"),
            .mismatch(length))
 }
 
+...length1 <- argCheck(\(arg) length(arg) == 1L, glue::glue("must be a single value"), .mismatch(length))
 
 
-...scalar <- argCheck(\(arg) is.atomic(arg) && length(arg) == 1L,
-                      "a single scalar value (e.g., a vector of length  == 1)",
-                      \(arg) if (is.atomic(arg)) .mismatch(length)(arg) else paste0(.mismatch(is.atomic)(arg), '(not an atomic vector class)'))
+
+...scalar <- function(target = 'atomic') {
+  miss <- .mismatch(class)
+  
+  if (target == 'number') {
+    print <- 'number'
+    target <- .numericClasses
+    check <- \(arg) class(arg)[1] %in% target && length(arg) == 1L
+  } else {
+    if (target == 'atomic') {
+      print <- 'atomic value'
+      check <- \(arg) is.atomic(arg) && length(arg) == 1L
+      target <- c(.numericClasses, 'logical', 'character')
+      miss <- .mismatch(is.atomic)
+    } else {
+      print <- paste(target, collapse = '|')
+      check <- \(arg) class(arg)[1] %in% target && length(arg) == 1L
+    }
+  }
+  
+
+
+  
+  argCheck(check,
+           glue::glue("a single {print}"),
+           \(arg) if (class(arg)[1] %in% target) .mismatch(length)(arg) else miss(arg))
+}
 
 
   
@@ -243,7 +308,7 @@ dochecks <- function(arg, ...) {
 ...match <- function(match, matchname, orscalar = TRUE) {
   
   argCheck(\(arg) length(arg) == length(match),
-           "the same length as the 'match' argument",
+           "must be the same length as the 'match' argument",
            \(arg) glue::glue("length(argname) == {length(arg)} and length({matchname}) == {length(match)}"))
   # \(arg) {
   #   if (any(ldim(arg) != ldim(match)) && (orscalar && length(arg) != 1L)) {
@@ -266,6 +331,18 @@ dochecks <- function(arg, ...) {
 }
 
 
+### Specific valid values ----
+
+...legal <- function(values) {
+  argCheck(\(arg) all(arg %in% values), 
+           glue::glue("contains invalid values; valid values are {.values(values)}."),
+           \(arg) .show_values(arg[!arg %in% values]))
+}
+
+
+...recordtypes <- ...character & ...length1 & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd'))), 
+                           glue::glue("must be a string of characters representing humdrum's six record types: {.values(c('G', 'L', 'I', 'M', 'D','d'), conj = 'or')}"),
+                           \(arg) glue::glue("'argname' includes the character(s) {.values(setdiff(unlist(strsplit(arg, split = '')), c('G', 'L', 'I', 'M', 'D', 'd')))}"))
 ##
 
 checkArg <- function(arg,  argname, callname = NULL, 
@@ -401,6 +478,18 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
               classes = "character")
 }
 
+## Common predicates ----
+
+is.length1 <- function(x) length(x) == 1L
+
+is.scalar <- function(x) is.atomic(x) && length(x) == 1L
+
+is.zero <- function(x) if (is.numeric(x)) x == 0 else logical(length(x))
+
+is.whole <- function(x) x %% 1 == 0
+
+is.positive <- function(x, strict = FALSE) if (is.numeric(x)) (if (strict) x > 0 else x >= 0) else logical(length(x))
+is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 else x <= 0) else logical(length(x))
 
 # Error messages ----
 
@@ -435,4 +524,5 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
           call. = FALSE,
           immediate. = immediate.)
 }
+
 
