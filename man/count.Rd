@@ -3,12 +3,12 @@
 \name{count}
 \alias{count}
 \alias{subpos}
-\title{Count the number of beats in a duration}
+\title{Count the number of elapsed beats (or measures)}
 \usage{
 count(
   dur,
   beat = rational(1L),
-  start = rational(0),
+  start = 1L,
   offBeats = TRUE,
   phase = rational(0L),
   beat.round = floor,
@@ -27,5 +27,8 @@ subpos(
 )
 }
 \description{
+Count the number of elapsed beats (or measures)
+}
+\details{
 how many beats have passed, and the offset between each attack and the nearest beat.
 }

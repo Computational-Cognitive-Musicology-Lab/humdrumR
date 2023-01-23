@@ -486,9 +486,8 @@ is.humdrumR <- function(x){
 setMethod('as.vector', 
           signature = c(x = 'humdrumR'),
           function(x, mode = 'any') {
-              checkArg(mode, 'mode', 'as.vector.humdrumR',
-                       validoptions = c('any', 'logical', 'numeric', 'integer', 'character'),
-                       min.length = 1L, max.length = 1L)
+	  checks(mode, xcharacter & xlen1 & xlegal(c('any', 'logical', 'numeric', 'integer', 'character')))
+
                     if (is.empty(x)) return(vector(mode, 0L))
                     
                     vec <- evalActive(x, 'D')
@@ -501,12 +500,12 @@ setMethod('as.vector',
 #' @export
 as.lines <- function(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont', padder = '', sep = '\t') {
     
-          checkhumdrumR(humdrumR, 'as.lines')
-          dataTypes <- checkTypes(dataTypes, 'as.lines')
-          checkArg(padPaths, 'padPaths', 'as.lines', classes = 'character',
-                   validoptions = c('corpus', 'piece', 'dont'))
-          checkVector(padder, 'padder', 'as.lines', max.length = 1, min.length = 1)
-          checkCharacter(sep, 'sep', 'as.lines', max.length = 1L, min.length = 1L)
+          # dataTypes <- checkTypes(dataTypes, 'as.lines')
+          checks(dataTypes, xrecordtypes)
+          checks(humdrumR, xhumdrumR)
+          checks(padPaths, xcharacter & xlen1 & xlegal(c('corpus', 'piece', 'dont', "don't")))
+          checks(padder, xatomic & xlen1)
+          checks(sep, xatomic & xlen1)
           
           mat <- as.matrix(humdrumR, dataTypes, padPaths = padPaths, padder = padder)
           lines <- applyrows(mat, paste, collapse = sep)
@@ -529,11 +528,10 @@ as.lines <- function(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont', padder =
 #' @export
 as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', padder = NA) { 
     
-    checkhumdrumR(x, 'as.matrix.humdrumR')
+    checks(x, xhumdrumR)
     dataTypes <- checkTypes(dataTypes, 'as.matrix.humdrumR')
-    checkArg(padPaths, 'padPaths', 'as.matrix.humdrumR', classes = 'character',
-             validoptions = c('corpus', 'piece', 'dont'))
-    checkVector(padder, 'padder', 'as.matrix.humdrumR', max.length = 1, min.length = 1)
+    checks(padPaths, xcharacter & xlegal(c('corpus', 'piece', 'dont', "don't")))
+    checks(padder, xatomic & xlen1)
 
     x <- collapseStops(x)
     humtab <- getHumtab(x, dataTypes)
@@ -588,11 +586,10 @@ setMethod('as.data.frame',
 #' @name humCoercion
 #' @export
 as.matrices <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', padder = NA) {
-    checkhumdrumR(humdrumR, 'as.matrices')
+    checks(humdrumR, xhumdrumR)
     dataTypes <- checkTypes(dataTypes, 'as.matrices')
-    checkArg(padPaths, 'padPaths', 'as.matrices.humdrumR', classes = 'character',
-             validoptions = c('corpus', 'piece', 'dont'))
-    checkVector(padder, 'padder', 'as.matrix.humdrumR', max.length = 1, min.length = 1)
+    checks(padPaths, xcharacter & xlegal(c('corpus', 'piece', 'dont', "don't")))
+    checks(padder, xatomic & xlen1)
     
     
     mat <- as.matrix.humdrumR(humdrumR, dataTypes = dataTypes, padPaths = padPaths, padder = padder)
@@ -613,11 +610,10 @@ as.matrices <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', padde
 #' @name humCoercion
 #' @export 
 as.data.frames <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', padder = NA) {
-    checkhumdrumR(humdrumR, 'as.data.frames')
+    checks(humdrumR, xhumdrumR)
     dataTypes <- checkTypes(dataTypes, 'as.data.frames')
-    checkArg(padPaths, 'padPaths', 'as.data.frames.humdrumR', classes = 'character',
-             validoptions = c('corpus', 'piece', 'dont'))
-    checkVector(padder, 'padder', 'as.data.frames.humdrumR', max.length = 1, min.length = 1)
+    checks(padPaths, xcharacter & xlegal(c('corpus', 'piece', 'dont', "don't")))
+    checks(padder, xatomic & xlen1)
     
     
     lapply(as.matrices(humdrumR,dataTypes = dataTypes, padPaths = padPaths, padder = padder), 
@@ -628,7 +624,7 @@ as.data.frames <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', pa
 # active columns contain atomic data ("isActiveAtomic") or not (tables, lists, matrices, etc.).
 # this function tests if the active column is a vector or not
 isActiveAtomic <- function(humdrumR) {
-          checkhumdrumR(humdrumR, 'isActiveAtomic')
+          checks(humdrumR, xhumdrumR)
           act <- rlang::eval_tidy(x@Active, x@Humtable)
           is.atomic(act) || (!is.object(act) && !is.list(act))
 }
@@ -682,7 +678,7 @@ isActiveAtomic <- function(humdrumR) {
 #' @name humSize
 #' @export
 nrecord <- function(humdrumR, dataTypes = 'GLIMDd') {
-          checkhumdrumR(humdrumR, 'nrecord')
+          checks(humdrumR, xhumdrumR)
           dataTypes <- checkTypes(dataTypes, 'dataTypes', 'nrecord')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
@@ -699,7 +695,7 @@ setMethod('nrow',  signature = c(x = 'humdrumR'), \(x) nrecord(x))
 #' @name humSize
 #' @export
 ntoken <- function(humdrumR, dataTypes = 'GLIMDd') {
-          checkhumdrumR(humdrumR, 'ntoken')
+          checks(humdrumR, xhumdrumR)
           dataTypes <- checkTypes(dataTypes, 'dataTypes', 'ntoken')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
           
@@ -709,7 +705,7 @@ ntoken <- function(humdrumR, dataTypes = 'GLIMDd') {
 #' @name humSize
 #' @export
 npiece <- function(humdrumR) {
-          checkhumdrumR(humdrumR, 'npiece')
+          checks(humdrumR, xhumdrumR)
           
           length(unique(getHumtab(humdrumR)$Piece))
 }
@@ -717,7 +713,7 @@ npiece <- function(humdrumR) {
 #' @name humSize
 #' @export
 nfile <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'npiece')
+    checks(humdrumR, xhumdrumR)
     
     length(unique(getHumtab(humdrumR)$File))
 }
@@ -741,7 +737,7 @@ setMethod('dim',  signature = c(x = 'humdrumR'),  \(x) c(nrecord(x), ncol(x)))
 #' @name humSize
 #' @export
 is.empty <- function(humdrumR){
-    checkhumdrumR(humdrumR, 'is.empty')
+    checks(humdrumR, xhumdrumR)
     nrow(getHumtab(humdrumR, 'D')) == 0L
 } 
 
@@ -752,14 +748,14 @@ is.empty <- function(humdrumR){
 #' @rdname humSize
 #' @export
 anyMultiPieceFiles <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'anyPieces')
+    checks(humdrumR, xhumdrumR)
     nfile(humdrumR) != npiece(humdrumR)
 }
 
 #' @rdname humSize
 #' @export
 anyPaths <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'anyPaths')
+    checks(humdrumR, xhumdrumR)
     humtab <- getHumtab(humdrumR)
     
     any(humtab$Path > 0L, na.rm = TRUE)
@@ -769,7 +765,7 @@ anyPaths <- function(humdrumR) {
 #' @rdname humSize
 #' @export
 anyStops <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'anyStops')
+    checks(humdrumR, xhumdrumR)
     
     humtab <- getHumtab(humdrumR)
     any(humtab$Stop > 1L, na.rm = TRUE)
@@ -788,7 +784,7 @@ anyStops <- function(humdrumR) {
 #' @name humSize
 #' @export
 anySubcorpora <- function(humdrumR){
-    checkhumdrumR(humdrumR, 'anySubcorpora')
+    checks(humdrumR, xhumdrumR)
     
     humtab <- getHumtab(humdrumR)
     
@@ -798,7 +794,7 @@ anySubcorpora <- function(humdrumR){
 #' @name humSize
 #' @export
 namesSubcorpora <- function(humdrumR) {
-    checkhumdrumR(humdrumR, 'namesSubcorpora')
+    checks(humdrumR, xhumdrumR)
     
     humtab <- getHumtab(humdrumR)
     
@@ -891,7 +887,7 @@ mergeHumdrum <- function(...) {
 expandPaths <- function(x, asSpines) UseMethod('expandPaths')
 #' @export
 expandPaths.humdrumR <- function(x, asSpines = TRUE) {
-    checkTF(asSpines, 'asSpines', 'expandPaths')
+    checks(asSpines, xTF)
     
     if (!anyPaths(x)) return(x)
     
@@ -990,12 +986,12 @@ collapseHumdrum <- function(humdrumR, by,
                             dataTypes = 'GLIMDd', 
                             collapseAtomic = TRUE, sep = ' ') {
  
-    checkhumdrumR(humdrumR, 'collapseHumdrum')
+    checks(humdrumR, xhumdrumR)
     by <- fieldMatch(humdrumR, by, 'collapseHumdrum', 'by')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
     dataTypes <- checkTypes(dataTypes, ,'collapseHumdrum', argname = 'dataTypes')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapseHumdrum')
-    checkCharacter(sep, 'sep', 'collapseHumdrum', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
+    checks(collapseAtomic, xTF)
+    checks(sep, xcharacter & xlen1)
     
     humtab <- getHumtab(humdrumR, dataTypes)
     
@@ -1044,10 +1040,11 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
 #' @rdname collapseHumdrum
 #' @export 
 collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
-    checkhumdrumR(humdrumR, 'collapseStops')
+    checks(humdrumR, xhumdrumR)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapseStops')
-    checkCharacter(sep, 'sep', 'collapseStops', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
+    checks(collapseAtomic, xTF)
+    checks(sep, xcharacter & xlen1)
+    
     
     humtab <- getHumtab(humdrumR, 'D')
     humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Path', 'Record'),
@@ -1065,10 +1062,10 @@ collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
 #' @rdname collapseHumdrum
 #' @export
 collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
-    checkhumdrumR(humdrumR, 'collapsePaths')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapsePaths')
+    checks(humdrumR, xhumdrumR)
+    checks(collapseAtomic, xTF)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapsePaths', 'collapseField')
-    checkCharacter(sep, 'sep', 'collapsePaths', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
+    checks(sep, xcharacter & xlen1)
     
     humtab <- getHumtab(humdrumR)
     humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Record'),
@@ -1084,11 +1081,10 @@ collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
 #' @rdname collapseHumdrum
 #' @export
 collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
-    checkhumdrumR(humdrumR, 'collapseRecords')
-    checkTF(collapseAtomic, 'collapseAtomic', 'collapseRecords')
+    checks(humdrumR, xhumdrumR)
+    checks(collapseAtomic, xTF)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseRecords', 'collapseField')
-    checkCharacter(sep, 'sep', 'collapseRecords', allowEmpty = TRUE, max.length = 1L, min.length = 1L)
-    
+    checks(sep, xcharacter & xlen1)
     
     collapseHumdrum(humdrumR, dataTypes = 'GLIMDd', 
                     by = c('File', 'Record'),
@@ -1227,14 +1223,13 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
                         fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE,
                         newFieldNames = NULL) {
     # argument checks
-    checkhumdrumR(humdrumR, 'foldHumdrum')
-    checkLooseInteger(fold, 'fold', 'foldHumdrum')
-    checkLooseInteger(onto, 'onto', 'foldHumdrum')
+    checks(humdrumR, xhumdrumR)
+    checks(fold, xnatural)
+    checks(onto, xnatural)
     
-    checkCharacter(fromField, 'fromField', 'foldHumdrum', max.length = 1L)
+    checks(fromField, xcharacter & xlen1)
     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
-    checkArg(what, 'what', 'foldHumdrum', max.length = 1L,
-             validoptions = c('Spine', 'Path', 'Stop', 'Record', 'NData'))
+    checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'NData')))
     
     # start work
     humdrumR <- setActiveFields(humdrumR, fromField)
@@ -1327,7 +1322,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
 }
 
 foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NULL) {
-    checkNumeric(fold, 'fold', 'foldHumdrum')
+    checks(fold, xwholenum)
     
     
     if (!is.null(File)) {
@@ -1405,10 +1400,10 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' @family {Folding functions}
 #' @export
 foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1]) {
-    checkhumdrumR(humdrumR, 'foldExclusive')
+    checks(humdrumR, xhumdrumR)
     
-    checkCharacter(fold, 'fold', 'foldExclusive', allowEmpty = FALSE)
-    checkCharacter(onto, 'onto', 'foldExclusive', max.length = 1L, allowEmpty = FALSE)
+    checks(fold, xcharnotempty)
+    checks(onto, xcharnotempty & xlen1)
     
     fold <- unique(gsub('^\\*\\*', '', fold))
     onto <- unique(gsub('^\\*\\*', '', onto))
@@ -1473,7 +1468,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
 #' @rdname foldHumdrum
 #' @export
 foldPaths <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = TRUE) {
-    checkhumdrumR(humdrumR, 'foldPaths')
+    checks(humdrumR, xhumdrumR)
     
     paths <- unique(getHumtab(humdrumR)$Path)
     paths <- paths[!is.na(paths)]
@@ -1496,7 +1491,7 @@ foldPaths <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFr
 #' @rdname foldHumdrum
 #' @export
 foldStops <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE) {
-    checkhumdrumR(humdrumR, 'foldStops')
+    checks(humdrumR, xhumdrumR)
            
    stops <- unique(getHumtab(humdrumR)$Stop)
    stops <- stops[!is.na(stops)] 
@@ -1525,10 +1520,9 @@ foldStops <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFr
 #' @seealso The opposite (kinda) of [foldStops()]
 #' @export
 unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
-    checkhumdrumR(humdrumR, 'unfoldStops', 'humdrumR')
+    checks(humdrumR, xhumdrumR)
     if (!anyStops(humdrumR)) return(humdrumR)
-    checkCharacter(fromFields, 'fromFields', 'unfoldStops')
-    fromFields <- fieldMatch(humdrumR, fromFields, 'unfoldStops', 'fromFields')
+    checks(fromFields, xcharacter & xlen0)
     
     #
     humtab <- getHumtab(humdrumR, 'D')
@@ -1576,11 +1570,11 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' @rdname humTable
 #' @export
-getHumtab <- function(humdrumR, dataTypes = c('G', 'L', 'I', 'M', 'D', 'd')) {
+getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
           humtab <- humdrumR@Humtable
           
            
-          checkhumdrumR(humdrumR, 'getHumtab')
+          checks(humdrumR, xhumdrumR)
           dataTypes <- checkTypes(dataTypes, 'getHumtab')
           
           if (length(setdiff(c('G', 'L', 'I', 'M', 'D', 'd'), dataTypes))) {
@@ -1857,11 +1851,11 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' @name humActive 
 #' @export
 evalActive <- function(humdrumR, dataTypes = 'D', forceAtomic = TRUE, sep = ', ', nullChar = FALSE)  {
-    checkhumdrumR(humdrumR, 'evalActive')
+    checks(humdrumR, xhumdrumR)
     dataTypes <- checkTypes(dataTypes, 'evalActive')
-    checkTF(forceAtomic, 'forceAtomic', 'evalActive')
-    checkCharacter(sep, 'sep', 'evalActive', max.length = 1L)
-    checkTF(nullChar, 'nullChar', 'evalActive')
+    checks(forceAtomic, xTF)
+    checks(sep, xcharacter & xlen1)
+    checks(nullChar, xTF)
     
     humtab <- getHumtab(humdrumR, dataTypes)
     
@@ -1928,7 +1922,7 @@ evalActive <- function(humdrumR, dataTypes = 'D', forceAtomic = TRUE, sep = ', '
 #' @rdname humActive
 #' @export
 getActive <- function(humdrumR){
-    checkhumdrumR(humdrumR, 'getActive')
+    checks(humdrumR, xhumdrumR)
     humdrumR@Active 
 } 
 
@@ -1944,7 +1938,7 @@ getActiveFields <- function(humdrumR) {
 #' @rdname humActive
 #' @export
 setActive <- function(humdrumR, expr) {
-  checkhumdrumR(humdrumR, 'setActive')
+  checks(humdrumR, xhumdrumR)
   putActive(humdrumR, rlang::enquo(expr))
 }
 
@@ -1957,7 +1951,7 @@ setActive <- function(humdrumR, expr) {
 #' @rdname humActive
 #' @export
 setActiveFields <- function(humdrumR, fieldnames) {
-  checkhumdrumR(humdrumR, 'setActiveFields')
+  checks(humdrumR, xhumdrumR)
   fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'setActiveFields', argname = 'fieldnames')
   actquo <- if (length(fieldnames) > 1L) {
             rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
@@ -2002,12 +1996,7 @@ putActive <- function(humdrumR, actquo) {
 checkFieldTypes <- function(types, argname, callname) {
     valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
     types <- matched(types, valid, nomatch = types)
-    checkArg(types,
-             valid = \(arg) arg %in% valid,
-             validoptions = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference'),
-             argname, callname, 
-             min.length = 0L, max.length = 5L,
-             classes = 'character')
+    checks(types, xcharacter & xmaxlength(5) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')))
 }
 
 #' The `$` operator controls which humdrumR data are printed and default target for result.
@@ -2073,7 +2062,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 #' @export
 getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 'D') {
     
-    checkhumdrumR(humdrumR, 'getFields')
+    checks(humdrumR, xhumdrumR)
     
     dataTypes <- checkTypes(dataTypes, 'getFields')
     
@@ -2105,7 +2094,7 @@ getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
   #
 
-  checkhumdrumR(humdrumR, 'fields')
+  checks(humdrumR, xhumdrumR)
   fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', 'fields')
             
   fields <- unlist(humdrumR@Fields[fieldTypes])
@@ -2271,7 +2260,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
                          max.records.file = 40L, max.token.length = 30L, collapseNull = 30L) {
     
-  checkhumdrumR(humdrumR, 'print_humtab')
+  checks(humdrumR, xhumdrumR)
     
   dataTypes <- checkTypes(dataTypes, "print_humtab")
   

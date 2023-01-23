@@ -2685,32 +2685,28 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('octave.offset' %in% argnames) {
-    checkLooseInteger(args$octave.offset, 'octave.offset', callname)
+    checks(args$octave.offset, argname = 'octave.offset', xwholenum)
   }
   
   if ('octave.round' %in% argnames) {
-    checkRoundingFunction(args$octave.round, 'octave.round', callname)
+    checks(args$octave.round, argname = 'octave.round', xrounding)
   }
   
   if ('parts' %in% argnames) {
-    checkArg(args$parts, argname = 'parts', callname = callname, classes = 'character', 
-                   valid = \(arg) !is.na(pmatch(args$parts, c('step', 'species', 'octave'))),
-                   validoptions = c('step', 'species', 'octave'))
+    checks(args$parts, argname = 'parts', xcharacter & xplegal(c('step', 'species', 'octave')))
     
   }
   
-  checkTFs( args[intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic',
-                                       'octave.absolute', 'octave.relative'))], callname = callname)
+  for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
+ 	checks(args[[arg]], argname = arg, xTF)
+  }
     
-  singlechar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
+  scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
                   'diminish', 'augment', 'major', 'minor', 'perfect',
                   'up', 'down', 'same')
-  Map(\(arg, name) {
-    checkCharacter(arg, allowEmpty = TRUE, max.length = 1L, argname = name, callname = callname)
-  },
-  args[argnames %in% singlechar],
-  argnames[argnames %in% singlechar])
-         
+  for (arg in intersect(argnames, scalarchar)) {
+  	checks(args[[arg]], xcharacter & xlen1)
+  }
   
   args 
   
@@ -2742,8 +2738,7 @@ makePitchTransformer <- function(deparser, callname,
   
   rlang::new_function(args, rlang::expr( {
     
-    checkVector(x, structs = 'tonalInterval', argname = 'x', 
-                callname = !!callname, matrix = TRUE)
+    checks(x, xatomic | xclass('tonalInterval'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
@@ -3658,10 +3653,10 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
                 ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
   
-  if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'int', classes = c('pitchFunction'))
+  checks(deparser, xnull | xclass('pitchFunction'))
   
-  checkTF(classify, 'classify', 'int')
-  checkTF(bracket, 'bracket', 'int')
+  checks(classify, xTF)
+  checks(bracket, xTF)
   
   from <- rep(from, length.out = length(x))
   
@@ -3699,12 +3694,14 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
-  checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
-  checkFunction(deparser, 'deparser', 'mint')
-  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to mint with an atomic 'incomplete' argument, ",
-                                                                                              "length(incomplete) must equal abs(lag).")                 
-  checkTF(bracket, 'bracket', 'mint')
-  checkTF(classify, 'classify', 'mint')
+  checks(lag, xwholenumber & xlen1 & xnotzero)
+  checks(deparser, xclass('function'))
+  checks(incomplete, xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  checks(bracket, xTF)
+  checks(classify, xTF)
   
   
   if (is.numeric(lag)) {
@@ -3771,11 +3768,15 @@ hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                  ...,
                  parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
 
-  checkVector(x, 'x', 'hint', min.length = 1L)
-  checkFunction(deparser, 'deparser', 'hint')
-  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to hint with an atomic 'incomplete' argument, ",
-                                                               "length(incomplete) must equal abs(lag).")
-  checkTF(bracket, 'bracket', 'hint')
+  # all checks are conducted by mint, so don't need to repeat them
+  #checks(x, xatomic & xminlength(1))
+  #checks(lag, xwholenumber & xlen1 & xnotzero)
+  #checks(deparser, xclass('function'))
+  #checks(incomplete, xatomic & xminlength(1) & 
+  #        argCheck(\(arg) length(arg) <= abs(lag), 
+  #                 "must be as short or shorter than the absolute lag",  
+  #                 \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  #checks(bracket, xTF)
   
   mint(x, lag = lag, deparser = deparser, incomplete = incomplete, bracket = bracket,
        parseArgs = parseArgs, 

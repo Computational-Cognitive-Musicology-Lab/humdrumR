@@ -137,33 +137,33 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyFiles <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'removeEmptyFiles')
+  checks(humdrumR, xclass('humdrumR'))
   removeNull(humdrumR, 'File', 'GLIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
 removeEmptySpines <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'removeEmptySpines')
+  checks(humdrumR, xclass('humdrumR'))
   removeNull(humdrumR,  c('File', 'Spine'), 'LIMd')
 }
 
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyPaths <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'removeEmptyPaths')
+  checks(humdrumR, xclass('humdrumR'))
   removeNull(humdrumR,  c('File', 'Spine', 'Path'), 'LIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyRecords <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'removeEmptyRecords')
+  checks(humdrumR, xclass('humdrumR'))
   removeNull(humdrumR, c('File', 'Record'), 'd')
 }
 
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyStops <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'removeEmptyStops')
+  checks(humdrumR, xclass('humdrumR'))
   removeNull(humdrumR, c('File', 'Stop'), 'd')
 }
 

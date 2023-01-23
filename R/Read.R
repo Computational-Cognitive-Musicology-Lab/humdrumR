@@ -1134,7 +1134,7 @@ parseTandem <- function(tandems, known) {
 extractTandem <- function(Tandem, regex) {
   
   
-  checkCharacter(regex, 'regex', 'extractTandem', max.length = 1L)
+  checks(regex, xcharacter & xlen1)
   
   Tandem <- paste0(',', Tandem, ',')
   

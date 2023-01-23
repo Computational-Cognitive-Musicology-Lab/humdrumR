@@ -214,29 +214,29 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' @export
 #' @name RegexFind
 `%~l%` <- function(x, regex) {
-  checkVector(x, 'x', '%~l%')
-  checkCharacter(regex, 'regex', "%~l%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('|', lapply(regex, grepl, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~i%` <- function(x, regex) {
-  checkVector(x, 'x', '%~i%')
-  checkCharacter(regex, 'regex', "%~i%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('union', lapply(regex, grep, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~n%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~m%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   
   do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
 }

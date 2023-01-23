@@ -12,8 +12,6 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 \item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
 is \code{rational(1, 1)}, a whole-note or "duration."}
 
-\item{grace}{A single \code{atomic} value. Controls the parsing/deparsing of grace notes.}
-
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
@@ -38,7 +36,7 @@ The full list of rhythm functions is:
 \item \emph{Numeric rhythm representations}
 \itemize{
 \item \code{\link[=duration]{duration()}} (Whole notes)
-\item \code{\link[=quarters]{quarters()}} (quarter notes (crotchets))
+\item \code{\link[=quarters]{quarters()}} (quarter notes/crotchets)
 }
 }
 \item \strong{Ametric rhythm representations}
@@ -79,17 +77,17 @@ To read more details about each specific function, click on the links in the lis
 or type \code{?func} in the R command line: for example, \code{?noteValue}.
 \subsection{Grace notes}{
 
-The \code{grace} controls the output associated with grace notes.
+\verb{**recip} and \verb{**kern} data sometime include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special
+category of duration, usually used to indicate "freely" a-metric notes in an otherwise metric context.
 In humdrum data, grace notes are marked with \code{"q"} or \code{"Q"}; \code{q} should be reserved
 for tokens with no (other) duration information, while \code{Q} should be marked along with
 duration information: for example, \code{aa-q} or \verb{16aa-Q}.
 In practice, this distinction is not always made, and is rarely important.
-
-If \code{grace = TRUE}, grace-note durations (like the \code{16} in \code{"16aa-Q"}) are parsed like any other duration
-and included in the output with a \code{"q"} appended to them.
-If \code{grace = FALSE} or \code{grace = NA}, grace-notes return as \code{NA}.
-The \code{grace} argument can also be any other atomic value, which is returned for grace notes:
-the most common use is to return grace notes as having zero duration, by specifying \code{grace = 0}.
+By default, the \verb{**recip} parser treats input marked as grace notes as having a duration of zero.
+However, if you pass a \code{grace} argument to the \link[=rhythmParsing]{rhythm parser}, you can control this behavior.
+If \code{parse(grace = TRUE)}, grace-note durations (like the \code{16} in \code{"16aa-Q"}) are parsed like any other duration.
+If \code{grace = NA}, grace-notes return as \code{NA}.
+If \code{grace = FALSE}, the duration returns as zero (the default behavior).
 }
 }
 \seealso{

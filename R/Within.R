@@ -567,7 +567,7 @@ with.humdrumR <- function(data, ...,
                           drop = TRUE,
                           variables = list()) {
   
-  checkhumdrumR(data, 'with.humdrumR')
+  checks(data, xclass('humdrumR'))
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
   
@@ -601,7 +601,7 @@ with.humdrumR <- function(data, ...,
 #' @rdname withinHumdrum
 #' @export
 within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
-  checkhumdrumR(data, 'within.humdrumR')
+  checks(data, xclass('humdrumR'))
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
@@ -843,7 +843,7 @@ parseKeywords <- function(quoTab, withFunc) {
                               "you can't have multiple 'ngram'-keyword arguments.")
     
     ngram <- rlang::eval_tidy(quoTab$Quo[[i]])
-    checkLooseInteger(ngram, 'ngram', withFunc)
+    checks(ngram, xpnatural)
     quoTab$Quo[[i]] <- ngram
   }
   
@@ -1395,7 +1395,6 @@ windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
 # @param namedArgs A list of named arguments. Unnamed arguments are simply ignored.
 # 
 interpolateArguments <- function(quo, namedArgs) {
-    checkArg(namedArgs)
     expr <- rlang::quo_get_expr(quo)
     expr <- .interpolateArguments(expr, namedArgs)
     

@@ -168,12 +168,12 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 
 getRoot <- function(dset){
-  checkArg(dset, 'dset', 'getRoot', classes = 'diatonicSet')
+  checks(dset, xclass('diatonicSet'))
   dset@Root %<-matchdim% dset
 } 
 
 getRootTint <- function(dset) {
-    checkArg(dset, 'dset', 'getRootTint', classes = 'diatonicSet')
+    checks(dset, xclass('diatonicSet'))
     root <- getRoot(dset)
     
     tint( , c(root)) %<-matchdim% dset
@@ -181,12 +181,12 @@ getRootTint <- function(dset) {
 }
 
 getSignature <- function(dset){
-    checkArg(dset, 'dset', 'getSignature', classes = 'diatonicSet')
+    checks(dset, xclass('diatonicSet'))
     dset@Signature %<-matchdim% dset
 }  
 
 getMode <- function(dset) {
-    checkArg(dset, 'dset', 'getMode', classes = 'diatonicSet')
+    checks(dset, xclass('diatonicSet'))
     # mode is sign - root (the signature RELATIVE to the root)
     root <- getRoot(dset)
     sign <- getSignature(dset)
@@ -269,7 +269,6 @@ is.minor.diatonicSet <- function(x) getMode(x) < -1L
 #' @export
 order.diatonicSet <- function(x, ..., parallel = TRUE, na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
-                    checkArg(x)
                     x <- do.call('c', list(x, ...))
                     if (parallel) {
                       order(x@Root, -x@Signature,
@@ -1009,7 +1008,7 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
   
   rlang::new_function(args, rlang::expr({
     
-    checkVector(x, structs = 'diatonicSet', argname = 'x', callname = !!callname)
+    checks(x, xatomic | xclass('diatonicSet'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
     c('args...', 'parseArgs') %<-% specialArgs(rlang::enquos(...), 

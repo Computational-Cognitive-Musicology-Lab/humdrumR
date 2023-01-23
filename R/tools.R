@@ -210,9 +210,9 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupb
 }
 #' @export
 lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
-          checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
-          checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
-          checkTF(wrap, 'wrap', 'lag')
+          checks(n, xwholenum & xlen1)
+          checks(fill, xatomic & xlen1)
+          checks(wrap, xTF)
   
           if (length(x) == 0L || n == 0) return(x)
           
@@ -571,8 +571,8 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #' @family {Window functions}
 #' @export
 segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
-  checkTF(any, 'any', 'segments')
-  checkTF(reverse, 'reverse', 'segments')
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -607,10 +607,10 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
 #' @export
 #' @rdname segments
 changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE) {
-  checkTF(first, 'first', 'changes')
-  checkTF(value, 'value', 'changes')
-  checkTF(any, 'any', 'changes')
-  checkTF(reverse, 'reverse', 'changes')
+  checks(first, xTF)
+  checks(value, xTF)
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -686,15 +686,11 @@ ditto <- function(x, ...) UseMethod('ditto')
 #' @export
 ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, 
                           groupby = list(), orderby = list()) {
-    if (!(is.function(null) || (is.logical(null) && length(null) == length(x)))) {
-      .stop("In a call to ditto, the 'null' argument must either be a function or a logical vector",
-            " which is the same length as the 'x' argument.")
-    }
-    if ((class(x) != class(initial)) && (!is.na(initial) && initial != '_next_')) {
-      .stop("In a call to ditto, the 'initial' argument must be the same class as the 'x' argument.")
-    }
-    checkArg(initial, 'initial', 'ditto', max.length = 1L)
-    checkTF(reverse, 'reverse', 'dito')
+
+    checks(x, xatomic)
+    checks(null, xclass('function') | (xlogical & xmatch(x)))
+    checks(initial, (xmatchclass(x) | xlegal('_next_')) & xlen1)
+    checks(reverse, xTF)
     groupby <- checkWindows(x, groupby)
   
     if (length(x) == 0L) return(x)
@@ -733,7 +729,7 @@ ditto.data.frame <- function(x, ...) {
 #' @rdname ditto
 #' @export
 ditto.matrix <- function(x, margin = 2, ...) {
-  checkLooseInteger(margin, 'margin', 'ditto.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
+  checks(margin, xwholenum & xlen1 & xmin(1) & xmax(2))
   result <- apply(x, margin, ditto, ..., simplify = FALSE)
   
   do.call(if (margin == 1) 'rbind' else 'cbind', result)
@@ -743,7 +739,7 @@ ditto.matrix <- function(x, margin = 2, ...) {
 #' @rdname ditto
 #' @export
 ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = paste0(field, '_ditto')) {
-  checkCharacter(newField, max.length = 1L)
+  checks(newField, xcharacter & xlen1)
   field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
   newField <- rlang::sym(newField)
   rlang::eval_tidy(rlang::expr({
@@ -1098,7 +1094,7 @@ find2Dlayout <- function(n) {
 
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
-is.whole <- function(x) x %% 1 == 0
+
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
@@ -1392,10 +1388,15 @@ sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('
 #' @export
 sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
-  checkArg(x, 'x', 'sigma', classes = c('numeric', 'integer', 'rational', 'integer64'))
-  checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-  if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
-  checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
+  
+  checks(x, xnumber)
+  checks(lag, xwholenum & xlen1 & xnotzero)
+  checks(skip, xnull | xclass('function'))
+  checks(init, xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  
   
   groupby <- checkWindows(x, groupby)
   orderby <- checkWindows(x, orderby)
@@ -1549,11 +1550,14 @@ delta <- function(x, lag, skip, init, right, ...) UseMethod('delta')
 delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
                           groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checkNumeric(x, 'x', 'delta')
-    checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-    if (!is.null(skip))  checkFunction(skip, 'skip', 'delta')
-    checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
-    checkTF(right, 'right', 'delta')
+    checks(x, xnumber)
+    checks(lag, xwholenum & xlen1 & xnotzero)
+    checks(skip, xnull | xclass('function'))
+    checks(init, xatomic & xminlength(1) & 
+             argCheck(\(arg) length(arg) <= abs(lag), 
+                      "must be as short or shorter than the absolute lag",  
+                      \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+    checks(right, xTF)
     
     groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
     reorder(list(x = x), orderby = orderby)

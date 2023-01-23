@@ -114,7 +114,7 @@ meter.list <- function(x, measure = NULL, tactus = NULL, tatum = '16', fill.leve
 #' @rdname meter
 #' @export
 duple <- function(nlevels = 4, measure = rational(1), tactus = 3L) {
-  checkLooseInteger(nlevels, 'nlevels', 'duple', minval = 1, min.length = 1L)
+  checks(nlevels, xpnatural & xminlength(1))
   
   measure <- rhythmInterval(measure)
   match_size(nlevels = nlevels, measure = measure, tactus = tactus, toEnv = TRUE)
@@ -497,15 +497,10 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 count <- function(dur, beat = rational(1L), start = 1L, offBeats = TRUE,
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
-
-   
   checks(start,  
          #+ "This is because the first beat to count occurs at the starting instant, so there is no 'zeroth' beat"
-         (...number & ...scalar & ...notzero ) |
-           (...logical & ...match(dur, 'dur')))
-         # ...match(dur, 'dur'), ...natural,
-         # list(...notzero, "This is because the first beat to count occurs at the starting instant, so there is no 'zeroth' beat.")
-         # )
+         (xnumber & xlen1 & xnotzero ) |
+           (xlogical & xmatch(dur)))
  
   timeline <- scaled_timeline(dur, beat, start = if (is.logical(start)) start else rational(0L), groupby, callname = 'count')
   #
@@ -585,8 +580,7 @@ subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = dur
 scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALSE) {
   dur <- rhythmInterval(dur)
   
-  checkArg(beat, argname = 'beat', callname = callname,
-           min.length = 1L, max.length = 1L, alt.length = length(dur))
+  checks(beat, (xatomic & xlen1) | (xclass('list') & xmatch(dur)))
   
   if (is.list(beat)) {
     beat <- rep(beat, length.out = length(dur))

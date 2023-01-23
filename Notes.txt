@@ -2,11 +2,10 @@
 Nat's ToDo:
 	Rethink relationship beween Piece and File field.
 
+	Add grace slot to rhythmInterval?
+
 Features:
 
-	Collapse multiple spines to one spine with two layers
-
-	Ditto
 
 	Windowing
 

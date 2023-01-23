@@ -2,9 +2,12 @@
 % Please edit documentation in R/Rhythm.R
 \name{duration}
 \alias{duration}
+\alias{quarters}
 \title{Numeric (double) representation of durations}
 \usage{
 duration(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
+quarters(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}

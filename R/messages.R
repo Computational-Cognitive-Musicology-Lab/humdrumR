@@ -40,11 +40,11 @@ setMethod('+', c('argCheck', 'character'),
 
 ## Checking functionality ----
 
-checks <- function(arg, argcheck) {
+checks <- function(arg, argcheck, argname) {
   
   sys <- sys.calls()
   if (length(sys) > 10L) return(arg) 
-  argname <- rlang::expr_name(rlang::enexpr(arg))
+  argname <- if (missing(argname)) rlang::expr_name(rlang::enexpr(arg))
   callname <- rlang::expr_name(sys[[1]][[1]])
   
   messages <- docheck(argcheck, arg)
@@ -66,8 +66,9 @@ checks <- function(arg, argcheck) {
   
   premessage <- glue::glue("There is a problem with the call {callname}(..., {argname} = {argprint}): ")
   
+  postmessage <- glue::glue("----------------------------------------------------> See ?{callname} for further explanation.")
   
-  .stop(paste(c(premessage, messages), collapse = '\n\t'))
+  .stop(paste(c(premessage, messages, postmessage), collapse = '\n '))
 }
 
 
@@ -148,7 +149,7 @@ dochecks <- function(arg, ...) {
     "your 'argname' is empty: {class(bad)[1]}(0)."
   } else {
     if (length(uniq) == 1L) {
-      "your 'argname' includes the value {bad}" 
+      "your 'argname' includes the value {if (is.character(bad)) quotemark(bad) else bad}" 
     } else {
       "your 'argname' includes the values {harvard(head(uniq, n), 'and', is.character(bad))}"
     }
@@ -180,15 +181,12 @@ dochecks <- function(arg, ...) {
   
 }
 
-`%miss%` <- function(e1, e2) {
-  funcname <- rlang::expr_name(rlang::enexpr(e1))
-  glue::glue("{funcname}(argname) == {.show_vector(e1(e2))}")
-}
+
 
 .mismatch <- function(func) {
   funcname <- rlang::expr_name(rlang::enexpr(func))
-  function(arg) {
-    glue::glue("{funcname}(argname) == {.show_vector(func(arg))}")
+  function(arg, argname = 'argname') {
+    glue::glue("{funcname}({argname}) == {.show_vector(func(arg))}")
   }
 }
 
@@ -197,7 +195,9 @@ dochecks <- function(arg, ...) {
 
 ### Class ----
 
-...class <- function(classes) {
+xnull <- argCheck(\(arg) is.null(arg), 'must be NULL', .mismatch(is.null))
+
+xclass <- function(classes) {
   if ('number' %in% classes) classes <- c('numeric', 'integer', 'integer64', classes)
   
   argCheck(\(arg) class(arg)[1] %in% classes,
@@ -207,13 +207,21 @@ dochecks <- function(arg, ...) {
   
 }
 
-...character <- ...class('character')
-...logical <- ...class('logical')
-...integer <- ...class('integer')
-...numeric <- ...class('numeric')
+
+
+
+xhumdrumR <- xclass('humdrumR')
+xcharacter <- xclass('character')
+xlogical <- xclass('logical')
+xinteger <- xclass('integer')
+xnumeric <- xclass('numeric')
 
 .numericClasses <- c('integer', 'integer64', 'numeric')
-...number  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric", .mismatch(class))
+xnumber  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric", .mismatch(class))
+
+xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, numeric, character, or logical", .mismatch(class))
+
+xcharnotempty <-  xcharacter & argCheck(\(arg) nchar(arg) > 0L, 'cannot be an empty string ("")', \(arg) glue::glue("includes {sum(nchar(arg) == 0)} empty strings"))
 
 # ...atomic <- function(arg) {
 #   if (!is.atomic(arg)) {
@@ -223,260 +231,141 @@ dochecks <- function(arg, ...) {
 #   
 # }
 
-### Number stuff ----
-
-# ...natural <- function(arg) {
-#   numb <- ...number(arg)
-#   if (length(numb) == 0L && arg != round(arg)) glue::glue("The 'argname' argument must be",
-#                                                           if (length(arg) > 1) "whole numbers." else "a whole number.", .sep = ' ',
-#                                                           "Your 'argname' includes",
-#                                                           if (sum( arg != round(arg) ) > 1L) "the values" else "the value",
-#                                                           "{arg[arg != round(arg)]}.") else numb
-# 
-# }
+### Numbers ----
 
 
 
-...max <- function(n) \(arg) if (any(arg > n)) glue::glue("The 'argname' argument cannot by more than {n}. ", 
-                                                          .arg_function(arg, max, 'max'))
-...min <- function(n) \(arg) if (any(arg < n)) glue::glue("The 'argname' argument cannot by less than {n}. ", 
-                                                          .arg_function(arg, min, 'min'))
+xmax <- function(n) xnumber & argCheck(\(arg) all(arg <= n), glue::glue("must be {n} or less"), \(arg) .show_values(arg[arg > n]))
+xmin <- function(n) xnumber & argCheck(\(arg) all(arg >= n), glue::glue("must be {n} or more"), \(arg) .show_values(arg[arg < n]))
 
-...min1 <- ...min(1)
-...max1 <- ...max(1)
 
-...positive <- function(arg, strict = TRUE) {
-  bad <- if (strict) arg <= 0 else arg < 0
-  if (any(bad)) glue::glue("The 'argname' argument must be ", if (strict) "strictly (no zeros) " else "", "positive. ",
-                           .arg_values(arg[bad]),
-                           if (sum(bad) > 6L) ", as well as {sum(bad) - 6} other negative values." else ".")
-} 
+xpositive       <- xnumber & argCheck(\(arg) all(arg > 0), "must be greater than zero", \(arg) .show_values(arg[arg <= 0]))
+xpositiveorzero <- xnumber & argCheck(\(arg) all(arg >= 0), "must be zero or more", \(arg) .show_values(arg[arg < 0]))
 
-...notzero <- argCheck(\(arg) all(arg != 0),
+
+xnegative       <- xnumber & argCheck(\(arg) all(arg > 0), "must be less than zero", \(arg) .show_values(arg[arg <= 0]))
+xnegativeorzero <- xnumber & argCheck(\(arg) all(arg >= 0), "must be zero or less", \(arg) .show_values(arg[arg < 0]))
+
+
+xnotzero <- argCheck(\(arg) all(arg != 0),
                         "must not be zero",
                         \(arg) "'argname' includes {sum(arg == 0)} {plural(sum(arg == 0), 'zeroes', 'zero')}")
+
+
+xwholenum <- xnumber & argCheck(\(arg) all(arg == round(arg)), 'must be whole number(s)', \(arg) .show_values(arg[arg != round(arg)]))
+
+xnatural <- xnumber & xmin(0) & xwholenum
+xpnatural <- xnumber & xmin(1) & xwholenum
 
 ### Length -----
 
 
-...maxlength <- function(n = 1) {
+xmaxlength <- function(n = 1) {
   argCheck(\(arg) length(arg) <= n,
            glue::glue("can be at most {n} long"),
            .mismatch(length))
 }
-...minlength <- function(n = 1) {
+xminlength <- function(n = 1) {
   argCheck(\(arg) length(arg) >= n,
            glue::glue("must be at least {n} long"),
            .mismatch(length))
 }
 
-...length1 <- argCheck(\(arg) length(arg) == 1L, glue::glue("must be a single value"), .mismatch(length))
+xlen1 <- argCheck(\(arg) length(arg) == 1L, "must be a single value", .mismatch(length))
 
 
-
-...scalar <- function(target = 'atomic') {
-  miss <- .mismatch(class)
-  
-  if (target == 'number') {
-    print <- 'number'
-    target <- .numericClasses
-    check <- \(arg) class(arg)[1] %in% target && length(arg) == 1L
-  } else {
-    if (target == 'atomic') {
-      print <- 'atomic value'
-      check <- \(arg) is.atomic(arg) && length(arg) == 1L
-      target <- c(.numericClasses, 'logical', 'character')
-      miss <- .mismatch(is.atomic)
-    } else {
-      print <- paste(target, collapse = '|')
-      check <- \(arg) class(arg)[1] %in% target && length(arg) == 1L
-    }
-  }
-  
-
+xlen <- argCheck(\(arg) length(arg) > 0L, "must not be empty", .mismatch(length))
 
   
-  argCheck(check,
-           glue::glue("a single {print}"),
-           \(arg) if (class(arg)[1] %in% target) .mismatch(length)(arg) else miss(arg))
+## Matching another argument ----
+
+
+
+xmatch <- function(match) {
+  matchname <- rlang::expr_name(rlang::enexpr(match))
+  
+  dims <- hasdim(match)
+  rule <- glue::glue("must be the same ", if (dims) "dimensions as the '{matchname}' argument" else "length as the '{matchname}' argument")  
+  
+  matcher <- if (dims) .mismatch(dim) else .mismatch(length)  # if must happen outside .mismatch
+  describe <- \(arg) glue::glue("{matcher(arg)} and ", matcher(match, matchname))
+  argCheck(\(arg) if (dims) all(ldim(arg) == ldim(match)) else length(arg) == length(match),
+           rule,
+           describe)
+
+}
+
+xmatchclass <- function(match) {
+  
+  matchname <- rlang::expr_name(rlang::enexpr(match))
+  targetclass <- class(match)[1]
+  
+  argChech(\(arg) class(arg) == targetclass,
+           glue::glue("must be the same class as the '{matchname}' argument"),
+           \(arg) glue::glue(.mismatch(class)(arg), 'class({matchname}) == {targetclass}'))
 }
 
 
-  
+xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
+                  "is an on/off switch: It must be a single TRUE or FALSE value",
+                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg)))
 
 
-...match <- function(match, matchname, orscalar = TRUE) {
-  
-  argCheck(\(arg) length(arg) == length(match),
-           "must be the same length as the 'match' argument",
-           \(arg) glue::glue("length(argname) == {length(arg)} and length({matchname}) == {length(match)}"))
-  # \(arg) {
-  #   if (any(ldim(arg) != ldim(match)) && (orscalar && length(arg) != 1L)) {
-  #     glue::glue("The 'argname' argument must {if (orscalar) 'either' else ''} be the same size as the '{matchname}' argument", .sep = ' ', 
-  #                if (orscalar) 'or be length == 1.' else '.',
-  #                "However, the 'argname' argument you have provided",
-  #                if (hasdim(arg)) "has dimensions {paste(dim(arg), collapse = ' x ')}" else "is length {length(arg)}",
-  #                "while the '{matchname}' argument",
-  #                if (hasdim(match)) "has dimensions {paste(dim(match), collapse = ' x ')}" else "is length {length(match)}.")
-  #     
-  #   }
-  # }
-}
-
-
-
-...TF <- function(arg) {
-  if (!is.logical(arg) || length(arg) != 1L) glue::glue("The 'argname' argument is a On/Off switch argument: It must be a single TRUE or FALSE value. ",
-                                                        if (!is.logical(arg)) .arg_function(arg, class, 'class') else .arg_function(arg, length, 'length'))
-}
 
 
 ### Specific valid values ----
 
-...legal <- function(values) {
+
+xlegal <- function(values) {
   argCheck(\(arg) all(arg %in% values), 
            glue::glue("contains invalid values; valid values are {.values(values)}."),
            \(arg) .show_values(arg[!arg %in% values]))
 }
 
-
-...recordtypes <- ...character & ...length1 & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd'))), 
-                           glue::glue("must be a string of characters representing humdrum's six record types: {.values(c('G', 'L', 'I', 'M', 'D','d'), conj = 'or')}"),
-                           \(arg) glue::glue("'argname' includes the character(s) {.values(setdiff(unlist(strsplit(arg, split = '')), c('G', 'L', 'I', 'M', 'D', 'd')))}"))
-##
-
-checkArg <- function(arg,  argname, callname = NULL, 
-                     atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, alt.length = NULL, classes = NULL) {
-    # arg a argument to check
-    # 
-    if (length(sys.calls()) > 10L) return(arg) 
-    
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argname, quote = TRUE), ')') else quotemark(argname)
-    if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
-    callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
-    
-    if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
-    
-    if (!(!is.null(alt.length) && length(arg) == alt.length)) {
-      if (length(arg) <  min.length) .stop(callname, 
-                                           "The length of the '{argname}' argument must be at least {min.length}.",
-                                           "In your call, length({argname}) == {length(arg)}.")
-      if (length(arg) > max.length) .stop(callname, 
-                                          "The length of the '{argname}' argument must be at most {max.length}.",
-                                          "In your call, length({argname}) == {length(arg)}.")
-    }
-   
-    
-    if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
-        classNames <- harvard(classes, 'or', quote = TRUE)
-        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
-    }
-    
-    if (missing(valid) && !is.null(validoptions)) valid <- \(x) x %in% validoptions
-    if (!missing(valid) && !is.null(valid)) {
-        ill <- !valid(arg)
-        
-        if (any(ill)) {
-            if (is.null(validoptions)) {
-                .stop(callname, "{arg} is not a valid value for the {argname} argument.")
-            } else {
-                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
-                illNames <- harvard(arg[ill], 'and', quote = TRUE)
-                legalNames <-  paste0(harvard(validoptions, quote = TRUE), '.')
-                
-                message <- list(callname, illNames, case, 'Valid options are ', legalNames)
-                
-                .stop(message)
-            }
-            
-        }
-        
-        arg[!ill]
-    } else {
-        arg
-    }
-    
-    
-    
+xplegal <- function(values) {
+  xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values)}"),
+                     \(arg) .show_values(arg[is.na(pmatch(arg, values))]))
 }
 
-checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, matrix = FALSE, min.length = 0L, ...) {
-  if (matrix && is.matrix(x)) x <- c(x)
-  
-  checkArg(x, argname = argname, callname = callname, ..., 
-           valid = NULL,
-           classes = c('numeric', 'integer', 'character', 'logical', structs, 
-                       if (null) 'NULL'),
-           min.length = min.length)
-}
+xrounding <- argCheck(\(arg) any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = arg)),
+                      "must be a rounding function: round(), floor(), ceiling(), trunc(), or expand()",
+                      \(arg) "is not one of these functions")
 
 
-checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('numeric', 'integer'), 
-             valid = \(arg) is.na(arg) | arg >= minval & arg <= maxval,
-             ...)
-}
-checkLooseInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-  checkArg(x, argname = argname, callname = callname,
-           classes = c('numeric', 'integer'), 
-           valid = \(arg) arg >= minval & arg <= maxval & arg == round(arg),
-           ...)
-}
 
-checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('integer'), 
-             valid = \(arg) arg >= minval & arg <= maxval & !is.double(x),
-             ...)
-}
-checkCharacter <- function(x, argname, callname = NULL, allowEmpty = TRUE, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('character'),
-             valid = if (!allowEmpty) \(arg) arg != "", ...)
-}
-checkLogical <- function(x, argname, callname = NULL, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('logical'), ...)
-}
-
-checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) !is.na(arg), 
-                                                   validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
-checkTFs <- function(args = list(), ..., callname = NULL) {
-    args <- c(args, list(...))
-    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
-}
-
-checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
-    if (!is.humdrumR((x))) .stop("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object.")      
-}
-
-checkFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  message <- "In the call {callname}({argname} = {label}), the argument {argname}"
-  
-  if (!is.function(x)) .stop(message, " must be a function!")
+xcharclass <- function(chars, single = TRUE) {
+  charclass <- paste0('^[', chars, ']+$')
+  chars <- strsplit(chars, split = '')
+  xcharacter & argCheck(\(arg) all(grepl(charclass, arg)),
+                        glue::glue('must be made up solely of the characters {.values(chars, n = 12)}'),
+                        \(arg) {
+                          arg <- unique(unlist(strsplit(arg, split = '')))
+                          bad <- !arg %in% chars
+                          .show_values(arg[bad])
+                        })
   
 }
 
-checkRoundingFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = x))) {
-    .stop(message, 
-          " must be one of the five 'rounding' functions: round, floor, celing, trunc, or expand.")
-  }
-}
+xrecordtypes <- xcharacter & xminlength(1) & xmaxlength(6) & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd'))), 
+                                              glue::glue("must be a string of characters representing humdrum's six record types: {.values(c('G', 'L', 'I', 'M', 'D','d'), conj = 'or')}"),
+                                              \(arg) glue::glue("'argname' includes the character(s) {.values(setdiff(unlist(strsplit(arg, split = '')), c('G', 'L', 'I', 'M', 'D', 'd')))}"))
+
+
+
+
 
 checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
-    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
-    checkArg(dataTypes,
-             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd'),
-              validoptions = c('G', 'L', 'I', 'M', 'D', 'd'),
-              argname, callname,
-              min.length = 1L, max.length = 7L,
-              classes = "character")
+  # checks if datatypes (e.g. GLIMDd) are valid, but also 
+  # returns dataTypes as a vector of single-characters
+  # which is what many functions want to work with
+  
+  checks(dataTypes, xrecordtypes)
+  unique(unlist(strsplit(dataTypes, split = '')))
 }
+
+
+##
+
 
 ## Common predicates ----
 

@@ -19,8 +19,8 @@
 #' @family time functions
 #' @export
 bpm2sec <- function(BPM, unit = .25) {
-  checkArg(BPM,  'BPM',  max.length = 1L, alt.length = length(BPM), classes = c('integer', 'numeric', 'character'), valid = function(n) n > 0)
-  checkArg(unit, 'unit', max.length = 1L)
+  checks(BPM, xpositive) #"The BPM argument must be positive...you can't have a negative tempo!")
+  checks(unit, (xnumber | xcharacter) & xlen1)
   
   dur <- duration(unit)
   tempo  <- as.numeric(gsub('\\*?MM', '', BPM))
@@ -36,10 +36,8 @@ bpm2sec <- function(BPM, unit = .25) {
 #' @rdname bpm2sec
 #' @export
 sec2bpm <- function(sec, unit  =.25 ) {
-  checkNumeric(sec, 'sec')
-  if (sec < 0) .stop('The sec argument cannot be negative. You provided {sec}.')
-  
-  checkArg(unit, 'unit', max.length = 1L)
+  checks(sec, xpositive)
+  checks(unit, (xnumber | xcharacter) & xlen1)
   
   dur <- duration(unit)
   if (is.na(dur)) .stop("The unit argument {quotemark(unit)} cannot be interpreted as a duration.")
@@ -744,8 +742,8 @@ rhythmArgCheck <- function(args, callname) {
   }
   
   if ('grace' %in% argnames) {
-    
-    checkArg(args$grace, 'grace', callname, classes = c('numeric', 'character', 'logical', 'rational'), max.length = 1L)
+    checks(args$grace, argname = 'grace',
+           xatomic & xlen1)
   }
   
   args
@@ -770,8 +768,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
   
   rlang::new_function(args, rlang::expr( {
     
-    checkVector(x, structs = 'rational', argname = 'x', 
-                callname = !!callname, matrix = TRUE)
+    checks(x, xatomic | xclass('rational'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or tranpose()
     c('args...', 'parseArgs') %<-% specialArgs(rlang::enquos(...), 
@@ -1023,10 +1020,9 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
                 groupby = list(), parseArgs = list(), Exclusive = NULL,
                 inPlace = TRUE) {
   
-  checkLogical(onsets, 'onsets', 'ioi')
-  if (length(x) != length(onsets)) .stop("In a call to ioi(), the 'onsets' and 'x' arguments must be the same length.")
-  checkTF(finalOnset, 'finalOnset', 'ioi')
-  checkTF(inPlace, 'inPlace', 'ioi')
+  checks(onsets, xlogical & xmatch(x))
+  checks(finalOnset, xTF)
+  checks(inPlace, xTF)
   
   rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
   
@@ -1070,7 +1066,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
 untie <- function(x, open = '[', close = ']', ..., 
                   groupby = list(), 
                   inPlace = TRUE) {
-  checkTF(inPlace, 'inPlace', 'untie')
+  checks(inPlace, xTF)
   
   rint <- rhythmInterval(x, ...)
   
@@ -1194,8 +1190,8 @@ untie <- function(x, open = '[', close = ']', ...,
 #' @export 
 localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
-  checkFunction(choose, 'choose', 'int')
-  if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'localDuration', classes = c('rhythmFunction'))
+  checks(choose, xclass('function'))
+  checks(deparser, xnull || xclass('rhythmFunction'))
   
   durations <- do.call('duration', c(list(x, Exclusive = Exclusive), parseArgs))
   
@@ -1311,14 +1307,11 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive
 pathSigma <- function(rints, groupby, start, callname) {
   # this does most of work for timestamp and timeline
   
-  
-  
+
   if (is.logical(start)) {
-    if (length(start) != length(rints)) .stop("In a call to {callname}, a logical 'start' argument must be the same length as the x argument.")
     logicalStart <- start
     start <- rational(0)
   } else {
-    checkArg(start, 'start', callname, max.length = 1L, min.length = 1L)
     logicalStart <- NULL
     start <- rhythmInterval(start)
     

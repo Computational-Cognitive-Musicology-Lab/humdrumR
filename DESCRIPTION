@@ -12,6 +12,7 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
+         messages.R
          Dispatch.R
          humdrumR-class.R
          Interpretations.R
