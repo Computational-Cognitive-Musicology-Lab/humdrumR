@@ -129,8 +129,11 @@ regexFindMethod <- function(str, regexes) {
 REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outputClass = 'character') {
     if (!is.character(str)) .stop(call. = FALSE,
                                 "Sorry, REapply can only apply to an x argument that is a character vector.")
-  
+    checks(str, xcharacter)
+    checks(regex, xcharacter)
+    checks(inPlace, xTF)
     
+  
     regex <- getRE(regex)
     matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     

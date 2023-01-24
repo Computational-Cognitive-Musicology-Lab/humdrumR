@@ -54,7 +54,7 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
   callstack <- sys.calls()
   if (length(callstack) > 20L) return(arg) 
   
-  argname <- if (missing(argname)) rlang::expr_name(rlang::enexpr(arg))
+  if (missing(argname)) argname <- rlang::expr_name(rlang::enexpr(arg))
   callname <- rlang::expr_name(callstack[[1]][[1]])
   
   seealso <- c(paste0('?', callname), seealso)
@@ -352,14 +352,16 @@ xmatchclass <- function(match) {
 }
 
 
+
+
+
+## Specific valid values ----
+
+xnotna <- argCheck(\(arg) all(!is.na(arg)), "must not include NA values", \(arg) "'argname' includes {sum(is.na(arg))} {plural(sum(is.na(arg)), 'NAs', 'NA')}")
+
 xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
                   "is an on/off switch: It must be a single TRUE or FALSE value",
-                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg)))
-
-
-
-
-### Specific valid values ----
+                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
 
 
 xlegal <- function(values) {

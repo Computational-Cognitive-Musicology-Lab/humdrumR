@@ -2669,6 +2669,17 @@ NULL
 pitchArgCheck <- function(args,  callname) {
   argnames <- .names(args)
   
+  for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
+    checks(args[[arg]], argname = arg, xTF, seealso = '?pitchDeparsing')
+  }
+  scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
+                  'diminish', 'augment', 'major', 'minor', 'perfect',
+                  'up', 'down', 'same')
+  for (arg in intersect(argnames, scalarchar)) {
+    checks(args[[arg]], xcharacter & xlen1, seealso = '?pitchDeparsing')
+  }
+  
+  
   if ('generic' %in% argnames) {
     if ('specific' %in% argnames && !xor(args$generic, args$specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
     args$specific <- !args$generic
@@ -2697,16 +2708,8 @@ pitchArgCheck <- function(args,  callname) {
     
   }
   
-  for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
- 	checks(args[[arg]], argname = arg, xTF)
-  }
     
-  scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
-                  'diminish', 'augment', 'major', 'minor', 'perfect',
-                  'up', 'down', 'same')
-  for (arg in intersect(argnames, scalarchar)) {
-  	checks(args[[arg]], xcharacter & xlen1)
-  }
+
   
   args 
   
@@ -2739,6 +2742,9 @@ makePitchTransformer <- function(deparser, callname,
   rlang::new_function(args, rlang::expr( {
     
     checks(x, xatomic | xclass('tonalInterval'))
+    checks(inPlace, xTF)
+    checks(parseArgs, xclass('list'))
+    checks(transposeArgs, xclass('list'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
