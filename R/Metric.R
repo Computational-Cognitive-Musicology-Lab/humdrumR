@@ -498,9 +498,8 @@ count <- function(dur, beat = rational(1L), start = 1L, offBeats = TRUE,
                   phase = rational(0L), beat.round = floor, groupby = list()) {
   
   checks(start,  
-         #+ "This is because the first beat to count occurs at the starting instant, so there is no 'zeroth' beat"
-         (xnumber & xlen1 & xnotzero ) |
-           (xlogical & xmatch(dur)))
+         (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )) |
+           (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
  
   timeline <- scaled_timeline(dur, beat, start = if (is.logical(start)) start else rational(0L), groupby, callname = 'count')
   #

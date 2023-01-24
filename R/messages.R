@@ -5,17 +5,23 @@
 
 
 ## argCheck class ----
-setClass('argCheck', slots = c(Function = 'function', Logic = 'character', Rule = 'character', ProblemDescription = 'function')) 
+setClass('argCheck', slots = c(Function = 'function', Logic = 'character', Rule = 'character', Explanation = 'character', ProblemDescription = 'function')) 
 
 
-argCheck <- function(func, rule, problem, logic = 'force') new('argCheck', Function = func, Logic = logic, Rule = rule, ProblemDescription = problem)
-  
+argCheck <- function(func, rule, problem, logic = 'force', explanation = character(0L)) new('argCheck',  
+                                                                                               Function = func, 
+                                                                                               Logic = logic, 
+                                                                                               Explanation = explanation,
+                                                                                               Rule = rule, 
+                                                                                               ProblemDescription = problem)
+
 
 setMethod('|', c('argCheck', 'argCheck') ,
           \(e1, e2) {
             argCheck(\(arg) list(e1, e2),
                      logic = '||',
                      c(e1@Rule, e2@Rule),
+                     explanation = c(e1@Explanation, e2@Explanation),
                      \(arg) c(e1@ProblemDescription(arg), e2@ProblemDescription(arg)))
             
           })
@@ -26,29 +32,34 @@ setMethod('&', c('argCheck', 'argCheck') ,
             argCheck(\(arg) list(e1 , e2),
                      logic = '&&',
                      c(e1@Rule, e2@Rule),
+                     explanation = c(e1@Explanation, e2@Explanation),
                      \(arg) c(e1@ProblemDescription(arg), e2@ProblemDescription(arg)))
             
           })
 
 
 
+
+
 setMethod('+', c('argCheck', 'character'),
           \(e1, e2) {
-            e1@Rule <- paste0(e1@Rule, '; ', e2)
+            e1@Explanation <- paste(c(e1@Explanation, e2), collapse = '; ')
             e1
           })
 
 ## Checking functionality ----
 
-checks <- function(arg, argcheck, argname) {
+checks <- function(arg, argcheck, argname, seealso = c()) {
   
-  sys <- sys.calls()
-  if (length(sys) > 10L) return(arg) 
+  callstack <- sys.calls()
+  if (length(callstack) > 20L) return(arg) 
+  
   argname <- if (missing(argname)) rlang::expr_name(rlang::enexpr(arg))
-  callname <- rlang::expr_name(sys[[1]][[1]])
+  callname <- rlang::expr_name(callstack[[1]][[1]])
   
-  messages <- docheck(argcheck, arg)
-  messages <- gsub("argname", argname, messages)
+  seealso <- c(paste0('?', callname), seealso)
+  
+  messages <- docheck(argcheck, arg, argname)
  
   
   if (length(messages) == 0L) return(arg)
@@ -64,23 +75,49 @@ checks <- function(arg, argcheck, argname) {
     
   }
   
-  premessage <- glue::glue("There is a problem with the call {callname}(..., {argname} = {argprint}): ")
+  # premessage <- glue::glue("\nThere is a problem with the call {callname}(..., {argname} = {argprint}): ", trim = FALSE)
+  alert <- glue::glue("There is a problem with the call {rlang::expr_text(callstack[[1]])}.", trim = FALSE)
+
   
-  postmessage <- glue::glue("----------------------------------------------------> See ?{callname} for further explanation.")
-  
-  .stop(paste(c(premessage, messages, postmessage), collapse = '\n '))
+  ## see also
+  seealso <- paste0('> See ', harvard(seealso, 'or'), ' for ', if (length(argcheck@Explanation)) 'further ' else '', 'explanation. <')
+  padn <- options('width')$width - nchar(seealso)
+  seealso <- paste0('\n', strrep('-', padn %/% 2), seealso, strrep('-', padn %/% 2))
+            
+  # message()
+  # stop(call.=FALSE)
+  .showstack()
+  stop(call. = FALSE, paste0(alert, '\n', messages, seealso))
+  # .stop(paste0(premessage, '\n', messages, seealso))
 }
 
 
 
-docheck <- function(argcheck, arg) {
+docheck <- function(argcheck, arg, argname) {
   result <- docheck_recurse(argcheck, arg)
   if (!result$Good)  {
-    result <- glue::glue("The 'argname' argument ", result$Rule, ';\nIn your call, ', harvard(unique(result$Problem), 'and'), '.')
-    result
+    leftpad <- 16L
+    
+    headers <- c("Requirement", "Problem", "Explanation")
+    
+    headers <- paste0(strrep('!', leftpad - nchar(headers) - 1), ' ', headers, ':')
+    
+    pad <- paste0(strrep('!', leftpad), ': ')
+    
+    rule <- glue::glue(pad, "The 'argname' argument {result$Rule}", '.', trim = FALSE)
+    problem <- glue::glue(pad, 'In your call, ', harvard(unique(unlist(result$Problem)), 'and'), '.', trim = FALSE)
+    
+    message <- c(headers[1], rule, headers[2], problem)
+    
+    
+    if (length(result$Explanation)) {
+      explanation <- paste0(pad, paste(result$Explanation, collapse = '; '), '.')
+      message <- c(message, headers[3], explanation)
+    }
+    
+    gsub('argname', argname, paste(message, collapse = '\n'))
   }
   
-
  
 }
 
@@ -93,7 +130,7 @@ docheck_recurse <- function(argcheck, arg) {
     result1 <- docheck_recurse(good[[1]], arg)
     
     result2 <- if (logic == '&&' && !result1$Good) {
-       list(Good = FALSE, Rule = "", Problem = "", Depth = 0L)
+       list(Good = FALSE, Rule = c(), Problem = c(), Depth = 0L, Explanation = character(0L))
     } else {
        docheck_recurse(good[[2]], arg)
     }
@@ -101,14 +138,20 @@ docheck_recurse <- function(argcheck, arg) {
     
     goods <- sapply(results, '[[', 'Good')
     rules <- sapply(results, '[[', 'Rule')
-    descriptions <- sapply(results, '[[', 'Problem')
-    depths <- sapply(results, '[[', 'Depth')
     
+    descriptions <- sapply(results, '[[', 'Problem') # functions
+    explanations <- lapply(results, '[[', 'Explanation') # vectors
+    
+    
+    # success?
     good <- match.fun(argcheck@Logic)(goods[1], goods[2])
 
+    # How deep are we?
+    depths <- sapply(results, '[[', 'Depth')
     depth <- sum(depths)
+    
+    # which messages etc. do we pass up?
     targets <- if (logic == '&&') {
-      
       if (!goods[1]) {
         1
         } else {
@@ -119,17 +162,20 @@ docheck_recurse <- function(argcheck, arg) {
       if (!any(good) && sum(depths > 0) == 1) which.max(depths) else 1:2
     }
     
+    
     rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' and ' else ' or ')
     description <- unique(descriptions[targets])
+    explanation <- unique(unlist(explanations[targets]))
     
     
   } else {
     depth <- 0L
+    explanation <- argcheck@Explanation
     rule <- argcheck@Rule
     description <- argcheck@ProblemDescription(arg)
   }
   
-  list(Good = good, Rule = rule, Depth = depth, Problem = description)
+  list(Good = good, Rule = rule, Depth = depth, Problem = description, Explanation = explanation)
 
 }
 
@@ -300,7 +346,7 @@ xmatchclass <- function(match) {
   matchname <- rlang::expr_name(rlang::enexpr(match))
   targetclass <- class(match)[1]
   
-  argChech(\(arg) class(arg) == targetclass,
+  argCheck(\(arg) class(arg) == targetclass,
            glue::glue("must be the same class as the '{matchname}' argument"),
            \(arg) glue::glue(.mismatch(class)(arg), 'class({matchname}) == {targetclass}'))
 }
@@ -382,6 +428,22 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
 
 # Error messages ----
 
+
+.showstack <- function() {
+  stack <- lapply(head(sys.calls(), -1L), rlang::expr_deparse)
+  stack <- sapply(stack, paste, collapse = '\n')
+  
+  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
+ 
+  cut <- 15
+  stack[-1] <- paste0(' -> ', stack[-1])
+  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
+  # 
+  message('humdrumR error in:')
+  message('\t', stack, sep = '')
+   
+}
+
 .stop <- function(..., ifelse = TRUE, sep = ' ') {
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
@@ -396,7 +458,7 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   message('humdrumR error in:')
   message('\t', stack, sep = '')
   
-  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1))
+  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
   
   stop(call. = FALSE, message)
 }

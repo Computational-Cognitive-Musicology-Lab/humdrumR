@@ -689,7 +689,7 @@ ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reve
 
     checks(x, xatomic)
     checks(null, xclass('function') | (xlogical & xmatch(x)))
-    checks(initial, (xmatchclass(x) | xlegal('_next_')) & xlen1)
+    checks(initial, xatomic & xlen1)
     checks(reverse, xTF)
     groupby <- checkWindows(x, groupby)
   
@@ -2306,7 +2306,7 @@ matched <- function(x, table, nomatch = NA) {
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
+.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame()) {
   strs <- unlist(list(...))
   ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
   ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
@@ -2329,7 +2329,7 @@ matched <- function(x, table, nomatch = NA) {
   strs, ifelses)
   
   strs <- paste(unlist(strs), collapse = sep)
-  glue::glue(strs, .envir = envir, .sep = sep)
+  glue::glue(strs, .envir = envir, .sep = sep, trim = trim)
 }
 
 harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {
