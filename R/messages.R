@@ -262,7 +262,7 @@ xlogical <- xclass('logical')
 xinteger <- xclass('integer')
 xnumeric <- xclass('numeric')
 
-.numericClasses <- c('integer', 'integer64', 'numeric')
+.numericClasses <- c('integer', 'integer64', 'numeric', 'rational')
 xnumber  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric", .mismatch(class))
 
 xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, numeric, character, or logical", .mismatch(class))
@@ -284,6 +284,9 @@ xcharnotempty <-  xcharacter & argCheck(\(arg) nchar(arg) > 0L, 'cannot be an em
 xmax <- function(n) xnumber & argCheck(\(arg) all(arg <= n), glue::glue("must be {n} or less"), \(arg) .show_values(arg[arg > n]))
 xmin <- function(n) xnumber & argCheck(\(arg) all(arg >= n), glue::glue("must be {n} or more"), \(arg) .show_values(arg[arg < n]))
 
+xrange <- function(min, max) xnumber & argCheck(\(arg) all(arg >= min & arg <= max), 
+                                                glue::glue("must be between {min} and {max} (inclusive)"),
+                                                \(arg) .show_values(arg[arg > max | arg < min]))
 
 xpositive       <- xnumber & argCheck(\(arg) all(arg > 0), "must be greater than zero", \(arg) .show_values(arg[arg <= 0]))
 xpositiveorzero <- xnumber & argCheck(\(arg) all(arg >= 0), "must be zero or more", \(arg) .show_values(arg[arg < 0]))

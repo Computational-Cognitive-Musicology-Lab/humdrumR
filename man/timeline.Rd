@@ -81,8 +81,8 @@ If you want to use the duration(s) of grace notes, specify \code{grace = TRUE}.
 
 
 Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{x}.
-Within each piece, the the \emph{first} timepoint where the \code{start} logical is \code{TRUE} is used as the zero:
-all early points will be negative numbers.
+Within each piece, the the \emph{first} index where the \code{start} logical is \code{TRUE} is used as the zero:
+all earlier points will be negative numbers, measured backwards from the start index.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, timeline(Token, start = Bar == 1)}, which makes the downbeat of
 the first complete bar \code{0}---any notes in a pickup bar are give negative numbers on the timeline.
@@ -99,6 +99,8 @@ within(humData, timestamp(Token, minutes = TRUE))
 
 }
 \seealso{
+{The \code{\link[=count]{count()}} and \code{\link[=metcount]{metcount()}} functions provide "higher level" musical interpretations of timeline information.}
+
 Other rhythm analysis tools: 
 \code{\link{localDuration}()}
 }

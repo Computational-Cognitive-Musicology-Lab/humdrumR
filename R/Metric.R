@@ -488,23 +488,134 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 
 ## Count ----
 
-#' Count the number of elapsed beats (or measures)
+#' Count beats or measures
+#' 
+#' 
+#' The `count()` function takes a vector of rhythmic duration values and
+#' counts (in the musical sense) the number of *beats* (or *measures*) which have occurred since the starting point.
+
+#' The `subpos()` function is paired with `count()`, computing how far (in rhythmic time) each onset is from its
+#' associated beat; if `subpos()` returns `0`, this means that an onset is *on* the beat.
+#' Finally, `onbeat()` is simply a convenient shorthand for `subpos() == 0`, returning
+#' a `logical` vector for indicating where onset fall on or off beat.
+#' 
+#' @details
+#' 
+#' In many basic use cases, using `count()` is essentially the same as using `floor(timeline())`.
+#' However, `count()` gives us a few additional options which add musicological power over [timeline()].
+#' `count()` also starts from `1` not `0`, as [timeline()] does.
+#' 
+#' The first beat in an input vector is assigned the value of the `start` argument, which defaults to `start = 1L`.
+#' There is no 'zeroth' count, as the first beat occurs at the instant of the starting time---i.e., the first onset in the input vector.
+#' Every rhythmic onset is associated with one beat, but multiple onsets may occur within the same beat---thus
+#' the output of `count()` assigns (rounds) each onset to the previous beat onset.
+#' However, if `offBeats = FALSE`, only onsets that *land* on a beat are counted with offbeat values returning `NA`.
+#' 
+#' The `phase` and `beat.round` arguments can be used to control how offbeats are associated with nearby beats.
+#' The `beat.round` argument must be a [rounding function][expand()], which is used to "round" onsets to nearby beats.
+#' By default, `beat.round = floor`, which means each beat is "rounded down" to the previous beat.
+#' If `beat.round = round`, each offbeat onset is rounded to the *nearest* beat, while `beat.round = ceiling`
+#' will associate each offbeat onset to the *next* beat.
+#' The `phase` argument can be used for finer grain control: `phase` must be a numeric value from `-1` to `1`, where `1`
+#' is the full value of the `beat` argument.
+#' The `phase` argument causes the "boundary" between beats to be shifted by that proportion of the beat.
+#' This can be used to, for example, associate the first 3/8s of a measure with the previous measure, and the next 5/8s
+#' of the measure with the next measure.
+#' This could be achieved with a command like `count(dur, beat = '1', phase = 3/8)`.
+#' 
+#'
 #' 
 #' 
 #' 
-#' how many beats have passed, and the offset between each attack and the nearest beat.
+#' @section "Beats":
+#' 
+#' The `beat` argument is used to indicate what size of beat you want to count.
+#' The default `beat` is a whole note, equivalent to a measure of `M4/4` time.
+#' The `beat` argument uses the [rhythm parser][rhythmInterval()], so it can understand beat values input in a variety of formats:
+#' thus, you could specify quarter-note beats as either `beat = '4'` or `beat = 0.25`.
+#' The parser also understands how to parse the (full) duration of time signature: for example, `beat = 'M3/4'` would use a dotted-half-note beat (`'2.'`).
+#' 
+#' ### Changing meter
+#' 
+#' If your data has changing meters (either between pieces, or within pieces), you can specify
+#' the `beat` argument as a vector which is the same length as `dur`, indicating the
+#' beat size at each moment/index. 
+#' This feature is very easy to use with any dataset that includes time signature interpretations, like `"*M4/4"`;
+#' these interpetations, if present, are automatically [read into][readHumdrum()] a field called `TimeSignature`.
+#' For such a dataset, you can simply pass the `TimeSignature` field to the `beat` argument of `count()`, and 
+#' the measures of the piece will be correctly counted (even when changing!): `count(x, beat = TimeSignature)`.
+#' Alternatively, you can use the [tactus()] command to extract the tactus beat from a time signature, like `count(x, beat = tactus(TimeSignature))`.
+#' 
+#' ### Irregular meter
+#' 
+#' Some musical meters consist of a pattern of irregular beats.
+#' For example, the meter `M7/8` is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
+#' If we want to count each eighth-note, we can simply specify `beat = '8'` and get the `M7/8` beats counted as c(`1`, `3`, `5`).
+#' However, if we want to count each short *or* long beat as a single unit, we must specify the desired pattern as a `list` of beat durations: for example, `beat = list(c("4", "4", "4."))`.
+#' Let's see what these two cases look like, applied to two `M7/8` measures of straight eighth-notes:
+#' 
+#' ```
+#' rhythm <- rep('8', 14)
+#' 
+#' count(rhythm, beat = '8'),
+#' 
+#' # output is: 1  2  3  4  5  6  7  8  9 10 11 12 13 14
+#' 
+#' count(rhythm, beat = list(c('4', '4', '4.')))
+#' 
+#' # output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
+#' ```
+#'
+#' To accommodate changing meters, the `beat` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
+#'
+#' @examples 
+#' 
+#' 
+#' `within(humdata, count(Token, beat = TimeSignature))`
+#' `within(humdata, count(Token, beat = tactus(TimeSignature)))`
+#' 
+#' @section Logical start:
+#' 
+#' Another option is to pass the `start` argument a logical vector of the same length as the input `dur`.
+#' Within each piece, the the *first* index where the `start` logical is `TRUE` is used as the beat `1`:
+#' all earlier points will be negative counts, counting backwards from the start.
+#' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
+#' Thus, a common use for a `logical` `start` argument is `within(humData, count(Token, start = Bar == 1)`, which makes the downbeat of
+#' the first complete bar `1`---any notes in a pickup bar are give negative counts on the timeline.
+#' 
+#' **Note that there is never a 'beat zero'.**
+#' Beats before the starting point progress directly from `-1` to `1` (the start).
+#' As a result, doing arithmetic or other math with beat "counts" can be problematic when using a `logical` `start` argument.
+#' It may be better to use `round(timeline())` in cases where you want to do much math with counts.
+#'
+#' @param dur An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
+#' @param beat An input vector of length 1, or the same length as `dur`, which is parsed as duration information using the [rhythm parser][rhythmParsing]---or a list of vectors.
+#' @param start A whole-number value from which the counting begins, or a `logical` vector of same length as `x`.
+#' @param phase A vector of numbers, either length 1 or the same length as dur, all between `-1` and `1`. `0` is the default.
+#' @param beat.round A [rounding function][expand()].
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x` into.
+#'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
+#'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
+#'   
+#'   
+#' @seealso {`count()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `count()` within a metric framework.}
 #' @export
-count <- function(dur, beat = rational(1L), start = 1L, offBeats = TRUE,
-                  phase = rational(0L), beat.round = floor, groupby = list()) {
+count <- function(dur, beat = rational(1L), start = 1L, phase = rational(0L), beat.round = floor,
+                  offBeats = TRUE,  groupby = list()) {
   
   checks(start,  
          (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )) |
            (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
  
+  checks(beat.round, xrounding)
+  checks(phase, xnumber & (xlen1 | xmatch(dur)) & xrange(-1, 1))
+  
   timeline <- scaled_timeline(dur, beat, start = if (is.logical(start)) start else rational(0L), groupby, callname = 'count')
   #
   
-  mcount <- as.integer(numerator(beat.round((timeline$Timeline + phase))))
+  phase <- as.rational(phase)
+  
+  mcount <- as.integer(numerator(beat.round((timeline$Timeline - phase))))
   
   if (any(timeline$Irregular)) {
     subcounts <- Map(timeline$values, 
@@ -534,26 +645,27 @@ count <- function(dur, beat = rational(1L), start = 1L, offBeats = TRUE,
     
     mcount <- delta.default(mcount)
     mcount[mcount < 0L] <- 1L
-    mcount <- sigma(mcount)
+    mcount <- as.integer(sigma(mcount))
   }
 
   
   if (!offBeats) mcount[!timeline$Irregular & !(rational(1) %divides% (timeline$Timeline + 1))] <- NA
   
-  if (!is.logical(start)) {
-    mcount <- mcount + as.integer(start) 
-    if (start < 0L) mcount[mcount >= 0L] <- mcount[mcount >= 0L] + 1L
-    }
+  # start at 1
+  if (!is.logical(start))  mcount <- mcount + as.integer(start - (start > 0L))
+  mcount[mcount >= 0L] <- mcount[mcount >= 0L] + 1L
+  
+  
   
   mcount
 }
 
 #' @rdname count
 #' @export
-subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = duration, 
-                    phase = rational(0L), beat.round = floor, groupby = list(), ...) {
+subpos <- function(dur, beat = rational(1L), phase = rational(0L), deparser = duration, 
+                   beat.round = floor, groupby = list(), ...) {
   
-  scaled <- scaled_timeline(dur, beat, start, groupby, callname = 'subpos', sumBeats = TRUE)
+  scaled <- scaled_timeline(dur, beat, start = rational(0L), groupby, callname = 'subpos', sumBeats = TRUE)
   
   timeline <- (scaled$Timeline %% rational(1)) * scaled$Scale
   
@@ -579,7 +691,7 @@ subpos <- function(dur, beat = rational(1L), start = rational(0), deparser = dur
 scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALSE) {
   dur <- rhythmInterval(dur)
   
-  checks(beat, (xatomic & xlen1) | (xclass('list') & xmatch(dur)))
+  checks(beat, (xatomic | xclass(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
   
   if (is.list(beat)) {
     beat <- rep(beat, length.out = length(dur))
@@ -605,66 +717,14 @@ scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALS
   
   c(list(Timeline = timeline, Scale = beat, Irregular = irregular, tatum = tatum), get0('uniqueBeats'))
 }
-# # count2 uses precomputed timeline
-# count2 <- function(timeline, beat = rational(1L), 
-#                   phase = rational(0L), beat.round = floor) {
-#   
-#   
-#   if (length(beat) == length(timeline) && length(unique(beat)) > 1L) {
-#     beatchange <- changes(beat)
-#     groupsizes <- delta(timeline[beatchange], right = TRUE)
-#     groupsizes[is.na(groupsizes)] <- 0
-#     
-#     # need to split timeline into separate parts, but subtract the missing parts from each place.
-#     timelines <- lapply(unique(beat), 
-#            \(b) { 
-#              offsets <- cumsum(ifelse(attr(beatchange, 'values') == b, 0, -groupsizes))
-#              offsets <- rep(offsets, rle(beat)$lengths)
-#              (timeline + offsets)[beat == b]
-#              }) 
-#     
-#     mcounts <- Map(\(t, b) count(t, b), timelines, unique(beat))
-#     
-#     
-#     
-#     mcount <- unlist(mcounts)[order(unlist(tapply(seq_along(timeline), beat, list)))]
-#     diff <- delta(mcount)
-#     diff[beatchange] <- 1L
-#     mcount <- sigma(diff)
-#     return(mcount)
-#  
-#   }
-#   
-#   timeline <- rhythmInterval(timeline)
-#   beat <- rhythmInterval(beat)
-#   totalTatum <- sum(beat)
-#   #
-# 
-#   
-#   mcount <- beat.round((timeline + phase) / totalTatum) 
-#   
-#   if (length(beat) > 1L) {
-#     
-#     beatoff <- sigma(beat)
-#     mremain <- ((timeline + phase) - totalTatum * mcount)
-#     
-#     subcount <-  outer(beatoff, mremain, '<=') |> colSums()
-#     mcount <- mcount * length(beat) + subcount
-#     
-#     
-#     # mremain <- mremain - c(rational(0), beatoff)[subcount + 1]
-#     
-#   }
-#   
-#   numerator(mcount)
-# }
 
 
+#' @rdname count
+#' @export
+onbeat <- function(dur, beat = rational(1L), groupby = list(), ...) {
+  subpos(dur, beat = beat, groupby = groupby, deparser = NULL) == rational(0L)
+}
 
-
-
-# test <- data.table(Dur = c('4.','8','4','4','4','4','2','4.','8','4','4.','8','4','4','8','8','2'),
-                   # Meter = c(1, 1, 1, 1, 1, 1, .75, .75, .75, .75, .75, .75, .75, 1,1,1,1))
 # Meter extraction tools ----
 
 ## Find tatum

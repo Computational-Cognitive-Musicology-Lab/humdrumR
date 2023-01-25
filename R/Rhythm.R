@@ -1248,8 +1248,8 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @section Logical start:
 #' 
 #' Another option is to pass the `start` argument a logical vector of the same length as the input `x`.
-#' Within each piece, the the *first* timepoint where the `start` logical is `TRUE` is used as the zero:
-#' all early points will be negative numbers.
+#' Within each piece, the the *first* index where the `start` logical is `TRUE` is used as the zero:
+#' all earlier points will be negative numbers, measured backwards from the start index.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for a `logical` `start` argument is `within(humData, timeline(Token, start = Bar == 1)`, which makes the downbeat of
 #' the first complete bar `0`---any notes in a pickup bar are give negative numbers on the timeline.
@@ -1274,6 +1274,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
 #'   
+#' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @export
 timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {

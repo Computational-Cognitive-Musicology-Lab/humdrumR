@@ -7,7 +7,7 @@
 \alias{fields}
 \title{Humdrum tables (and their Fields)}
 \usage{
-getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
+getHumtab(humdrumR, dataTypes = "GLIMDd")
 
 getFields(humdrumR, fields = getActiveFields(humdrumR), dataTypes = "D")
 

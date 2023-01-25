@@ -85,4 +85,14 @@ test_that('Examples from rhythm man are correct', {
   
   samp <- c('4', '4.', '4%5')
   expect_equal(seconds(samp) * 1000, ms(samp))
+  
+  
+  ## count() man
+  rhythm <- rep('8', 14)
+  expect_identical(count(rhythm, beat = '8'), 1L:14L)
+  expect_identical(count(rhythm, beat = list(c('4','4', '4.'))), as.integer(c(1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6)))
+  
+  
+  expect_equal(duration('M3/4'), 0.75)
+  expect_identical(count(rep('8', 8), beat = '1', phase = -3/8), as.integer(rep(c(1,2), c(5, 3))))
 })

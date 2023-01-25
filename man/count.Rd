@@ -3,32 +3,141 @@
 \name{count}
 \alias{count}
 \alias{subpos}
-\title{Count the number of elapsed beats (or measures)}
+\alias{onbeat}
+\title{Count beats or measures}
 \usage{
 count(
   dur,
   beat = rational(1L),
   start = 1L,
-  offBeats = TRUE,
   phase = rational(0L),
   beat.round = floor,
+  offBeats = TRUE,
   groupby = list()
 )
 
 subpos(
   dur,
   beat = rational(1L),
-  start = rational(0),
-  deparser = duration,
   phase = rational(0L),
+  deparser = duration,
   beat.round = floor,
   groupby = list(),
   ...
 )
+
+onbeat(dur, beat = rational(1L), groupby = list(), ...)
+}
+\arguments{
+\item{dur}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{beat}{An input vector of length 1, or the same length as \code{dur}, which is parsed as duration information using the \link[=rhythmParsing]{rhythm parser}---or a list of vectors.}
+
+\item{start}{A whole-number value from which the counting begins, or a \code{logical} vector of same length as \code{x}.}
+
+\item{phase}{A vector of numbers, either length 1 or the same length as dur, all between \code{-1} and \code{1}. \code{0} is the default.}
+
+\item{beat.round}{A \link[=expand]{rounding function}.}
+
+\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
+Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 }
 \description{
-Count the number of elapsed beats (or measures)
+The \code{count()} function takes a vector of rhythmic duration values and
+counts (in the musical sense) the number of \emph{beats} (or \emph{measures}) which have occurred since the starting point.
+The \code{subpos()} function is paired with \code{count()}, computing how far (in rhythmic time) each onset is from its
+associated beat; if \code{subpos()} returns \code{0}, this means that an onset is \emph{on} the beat.
+Finally, \code{onbeat()} is simply a convenient shorthand for \code{subpos() == 0}, returning
+a \code{logical} vector for indicating where onset fall on or off beat.
 }
 \details{
-how many beats have passed, and the offset between each attack and the nearest beat.
+In many basic use cases, using \code{count()} is essentially the same as using \code{floor(timeline())}.
+However, \code{count()} gives us a few additional options which add musicological power over \code{\link[=timeline]{timeline()}}.
+\code{count()} also starts from \code{1} not \code{0}, as \code{\link[=timeline]{timeline()}} does.
+
+The first beat in an input vector is assigned the value of the \code{start} argument, which defaults to \code{start = 1L}.
+There is no 'zeroth' count, as the first beat occurs at the instant of the starting time---i.e., the first onset in the input vector.
+Every rhythmic onset is associated with one beat, but multiple onsets may occur within the same beat---thus
+the output of \code{count()} assigns (rounds) each onset to the previous beat onset.
+However, if \code{offBeats = FALSE}, only onsets that \emph{land} on a beat are counted with offbeat values returning \code{NA}.
+
+The \code{phase} and \code{beat.round} arguments can be used to control how offbeats are associated with nearby beats.
+The \code{beat.round} argument must be a \link[=expand]{rounding function}, which is used to "round" onsets to nearby beats.
+By default, \code{beat.round = floor}, which means each beat is "rounded down" to the previous beat.
+If \code{beat.round = round}, each offbeat onset is rounded to the \emph{nearest} beat, while \code{beat.round = ceiling}
+will associate each offbeat onset to the \emph{next} beat.
+The \code{phase} argument can be used for finer grain control: \code{phase} must be a numeric value from \code{-1} to \code{1}, where \code{1}
+is the full value of the \code{beat} argument.
+The \code{phase} argument causes the "boundary" between beats to be shifted by that proportion of the beat.
+This can be used to, for example, associate the first 3/8s of a measure with the previous measure, and the next 5/8s
+of the measure with the next measure.
+This could be achieved with a command like \code{count(dur, beat = '1', phase = 3/8)}.
+}
+\section{"Beats"}{
+
+
+The \code{beat} argument is used to indicate what size of beat you want to count.
+The default \code{beat} is a whole note, equivalent to a measure of \code{M4/4} time.
+The \code{beat} argument uses the \link[=rhythmInterval]{rhythm parser}, so it can understand beat values input in a variety of formats:
+thus, you could specify quarter-note beats as either \code{beat = '4'} or \code{beat = 0.25}.
+The parser also understands how to parse the (full) duration of time signature: for example, \code{beat = 'M3/4'} would use a dotted-half-note beat (\code{'2.'}).
+\subsection{Changing meter}{
+
+If your data has changing meters (either between pieces, or within pieces), you can specify
+the \code{beat} argument as a vector which is the same length as \code{dur}, indicating the
+beat size at each moment/index.
+This feature is very easy to use with any dataset that includes time signature interpretations, like \code{"*M4/4"};
+these interpetations, if present, are automatically \link[=readHumdrum]{read into} a field called \code{TimeSignature}.
+For such a dataset, you can simply pass the \code{TimeSignature} field to the \code{beat} argument of \code{count()}, and
+the measures of the piece will be correctly counted (even when changing!): \code{count(x, beat = TimeSignature)}.
+Alternatively, you can use the \code{\link[=tactus]{tactus()}} command to extract the tactus beat from a time signature, like \code{count(x, beat = tactus(TimeSignature))}.
+}
+
+\subsection{Irregular meter}{
+
+Some musical meters consist of a pattern of irregular beats.
+For example, the meter \code{M7/8} is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
+If we want to count each eighth-note, we can simply specify \code{beat = '8'} and get the \code{M7/8} beats counted as c(\code{1}, \code{3}, \code{5}).
+However, if we want to count each short \emph{or} long beat as a single unit, we must specify the desired pattern as a \code{list} of beat durations: for example, \code{beat = list(c("4", "4", "4."))}.
+Let's see what these two cases look like, applied to two \code{M7/8} measures of straight eighth-notes:\preformatted{rhythm <- rep('8', 14)
+
+count(rhythm, beat = '8'),
+
+# output is: 1  2  3  4  5  6  7  8  9 10 11 12 13 14
+
+count(rhythm, beat = list(c('4', '4', '4.')))
+
+# output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
+}
+
+To accommodate changing meters, the \code{beat} argument can still accept \code{list} of such patterns, so long as the list is the same length as \code{dur}.
+}
+}
+
+\section{Logical start}{
+
+
+Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{dur}.
+Within each piece, the the \emph{first} index where the \code{start} logical is \code{TRUE} is used as the beat \code{1}:
+all earlier points will be negative counts, counting backwards from the start.
+In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
+Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, count(Token, start = Bar == 1)}, which makes the downbeat of
+the first complete bar \code{1}---any notes in a pickup bar are give negative counts on the timeline.
+
+\strong{Note that there is never a 'beat zero'.}
+Beats before the starting point progress directly from \code{-1} to \code{1} (the start).
+As a result, doing arithmetic or other math with beat "counts" can be problematic when using a \code{logical} \code{start} argument.
+It may be better to use \code{round(timeline())} in cases where you want to do much math with counts.
+}
+
+\examples{
+
+
+`within(humdata, count(Token, beat = TimeSignature))`
+`within(humdata, count(Token, beat = tactus(TimeSignature)))`
+
+}
+\seealso{
+{\code{count()} and \code{subpos()} are closely related to the \code{\link[=timeline]{timeline()}} function. The \code{\link[=metcount]{metcount()}} function applies \code{count()} within a metric framework.}
 }
