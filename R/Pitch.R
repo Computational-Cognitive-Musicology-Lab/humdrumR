@@ -3488,7 +3488,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
   around <- tonalInterval(around)
   
   output <- (around + around - tint) 
-  if (!is.null(Key)) output <- output %% Key
+  if (!is.null(Key)) output <- output %% diatonicSet(Key)
   
   output
 }

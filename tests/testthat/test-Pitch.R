@@ -320,3 +320,27 @@ test_that("int, mint, and hint work", {
     expect_equal(with(chorale, table(hint(Token, lag = Spine == 4))['-M17']), 7)
     
 })
+
+
+test_that("transpose and invert work", {
+    x <- c('A4','B4','C#5', 'D5', 'E5', 'F#5', 'G#5', 'A5')
+    
+    ## transpose
+    expect_equal(transpose(x, by = M9), c("B5", "C#6", "D#6", "E6", "F#6", "G#6", "A#6", "B6"))
+    expect_equal(transpose(x, by = M3, tonal = TRUE, from = 'A:'), transpose(x, by = M3, tonal = TRUE, from = 'A:'))
+    expect_equal(transpose(x, from = 'A:', to = 'C:'), c("C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"))
+    expect_equal(transpose(x, from = 'a:', to = 'G:', relative = TRUE), c("E4", "F#4", "G#4", "A4", "B4", "C#5", "D#5", "E5"))
+    expect_equal(transpose(x, from = 'A:', to = 'g:', tonal = TRUE), c("G4", "A4", "Bb4", "C5", "D5", "Eb5", "F5", "G5"))
+    
+    
+    # arithmetic style
+    expect_equal((x + P8) - P8, x)
+    expect_equal(x + M2 + m7, x + P5 + P4)
+    expect_equal(x - m3 + M6, x + P8 - d5)
+    
+    
+    ## invert
+    expect_equal(invert(x), c("Eb3", "Db3", "Cb3", "Bb2", "Ab2", "Gb2", "Fb2", "Eb2"))
+    expect_equal(invert(x, around = x[1]), c("A4", "G4", "F4", "E4", "D4", "C4", "Bb3", "A3"))
+    expect_equal(invert(x, around = M9, Key = 'A:'), c("G#5", "F#5", "E5", "D5", "C#5", "B4", "A4", "G#4"))
+})
