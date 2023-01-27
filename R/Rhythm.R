@@ -573,7 +573,7 @@ noteValue2rint <- function(x, sep =" \U2215") {
 
 ### Numbers ####
 
-duration2rint <- function(x, ...)  as.rational(ifelse(x > 0, x, NA)) 
+duration2rint <- function(x, ...)  as.rational(ifelse(x >= 0, x, NA)) 
 
 
 seconds2rint <- function(x, BPM = 60, ...) {

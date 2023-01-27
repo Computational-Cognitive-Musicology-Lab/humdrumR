@@ -10,8 +10,7 @@ count(
   dur,
   beat = rational(1L),
   start = 1L,
-  phase = rational(0L),
-  beat.round = floor,
+  phase = 0,
   offBeats = TRUE,
   groupby = list()
 )
@@ -19,9 +18,8 @@ count(
 subpos(
   dur,
   beat = rational(1L),
-  phase = rational(0L),
+  phase = 0,
   deparser = duration,
-  beat.round = floor,
   groupby = list(),
   ...
 )
@@ -35,9 +33,10 @@ onbeat(dur, beat = rational(1L), groupby = list(), ...)
 
 \item{start}{A whole-number value from which the counting begins, or a \code{logical} vector of same length as \code{x}.}
 
-\item{phase}{A vector of numbers, either length 1 or the same length as dur, all between \code{-1} and \code{1}. \code{0} is the default.}
+\item{phase}{(length 1 or the same length as \code{dur}) An atomic vector which can be parsed by the \link[=rhythmParsing]{rhythm parser}. \code{0} is the default. The largest \code{phase}
+value must be smaller than the smallest rhythmic value in \code{beat}.}
 
-\item{beat.round}{A \link[=expand]{rounding function}.}
+\item{offBeats}{(\code{logical} TRUE/False) If \code{FALSE}, offbeat onsets return \code{NA}.}
 
 \item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
@@ -45,33 +44,30 @@ Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdru
 }
 \description{
 The \code{count()} function takes a vector of rhythmic duration values and
-counts (in the musical sense) the number of \emph{beats} (or \emph{measures}) which have occurred since the starting point.
+counts (in the musical sense) the number of \emph{beats} (or \emph{measures}) which have occurred since the starting point,
+associating each rhythmic onsets with a beat.
 The \code{subpos()} function is paired with \code{count()}, computing how far (in rhythmic time) each onset is from its
 associated beat; if \code{subpos()} returns \code{0}, this means that an onset is \emph{on} the beat.
 Finally, \code{onbeat()} is simply a convenient shorthand for \code{subpos() == 0}, returning
-a \code{logical} vector for indicating where onset fall on or off beat.
+a \code{logical} vector for indicating where onsets fall on or off beat.
 }
 \details{
 In many basic use cases, using \code{count()} is essentially the same as using \code{floor(timeline())}.
-However, \code{count()} gives us a few additional options which add musicological power over \code{\link[=timeline]{timeline()}}.
-\code{count()} also starts from \code{1} not \code{0}, as \code{\link[=timeline]{timeline()}} does.
+However, \code{count()} gives us a few additional options which add musicological power compared to \code{\link[=timeline]{timeline()}}.
+(\code{count()} also starts from \code{1} not \code{0}, as \code{\link[=timeline]{timeline()}} does.)
 
 The first beat in an input vector is assigned the value of the \code{start} argument, which defaults to \code{start = 1L}.
 There is no 'zeroth' count, as the first beat occurs at the instant of the starting time---i.e., the first onset in the input vector.
 Every rhythmic onset is associated with one beat, but multiple onsets may occur within the same beat---thus
 the output of \code{count()} assigns (rounds) each onset to the previous beat onset.
-However, if \code{offBeats = FALSE}, only onsets that \emph{land} on a beat are counted with offbeat values returning \code{NA}.
+However, if \code{offBeats = FALSE}, only onsets that \emph{land} on a beat are counted, with offbeat values returning \code{NA}.
 
-The \code{phase} and \code{beat.round} arguments can be used to control how offbeats are associated with nearby beats.
-The \code{beat.round} argument must be a \link[=expand]{rounding function}, which is used to "round" onsets to nearby beats.
-By default, \code{beat.round = floor}, which means each beat is "rounded down" to the previous beat.
-If \code{beat.round = round}, each offbeat onset is rounded to the \emph{nearest} beat, while \code{beat.round = ceiling}
-will associate each offbeat onset to the \emph{next} beat.
-The \code{phase} argument can be used for finer grain control: \code{phase} must be a numeric value from \code{-1} to \code{1}, where \code{1}
-is the full value of the \code{beat} argument.
-The \code{phase} argument causes the "boundary" between beats to be shifted by that proportion of the beat.
-This can be used to, for example, associate the first 3/8s of a measure with the previous measure, and the next 5/8s
-of the measure with the next measure.
+The \code{phase} controls how offbeat onsets are associated with nearby beats.
+\code{phase} is \link[=rhythmParsing]{parsed} as a rhythmic value and must be rhythmic values that are smaller than the smallest \code{beat} value.
+The \code{phase} argument shifts the "boundary" between beats backwards, before the beat onset.
+By default, \code{phase = 0} so the beat-association boundary lands on the beat: only onsets on or after each beat "belong" to that beat.
+If \code{phase = '8'}, the beat boundary is pushed back to capture one eighth-note \emph{before} the beat itself.
+This can be used to, for example, associate the last 3/8s of a measure with the next measure (like pick ups);
 This could be achieved with a command like \code{count(dur, beat = '1', phase = 3/8)}.
 }
 \section{"Beats"}{
@@ -136,7 +132,8 @@ It may be better to use \code{round(timeline())} in cases where you want to do m
 
 `within(humdata, count(Token, beat = TimeSignature))`
 `within(humdata, count(Token, beat = tactus(TimeSignature)))`
-
+ 
+  
 }
 \seealso{
 {\code{count()} and \code{subpos()} are closely related to the \code{\link[=timeline]{timeline()}} function. The \code{\link[=metcount]{metcount()}} function applies \code{count()} within a metric framework.}

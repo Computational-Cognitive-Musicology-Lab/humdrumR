@@ -1162,7 +1162,7 @@ laggedQuo <- function(funcQuosure) {
 #### Interpretations in expressions
 
 #tandemsQuo <- function(funcQuosure) {
- # This function inserts calls to getTandem
+ # This function inserts calls to extractTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
  # If input is a quosure (it should be), it keeps the quosure intact,
@@ -1175,7 +1175,7 @@ laggedQuo <- function(funcQuosure) {
 #             
 #             if (interp) {
 #               regex <- stringr::str_sub(exstr, start = 2L)
-#               rlang::expr(getTandem(Tandem, !!regex))
+#               rlang::expr(extractTandem(Tandem, !!regex))
 #             } else {
 #               ex
 #             }
