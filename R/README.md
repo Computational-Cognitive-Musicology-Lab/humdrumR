@@ -447,6 +447,44 @@ mean(x - (if (TRUE) 10 else y))
 ```
 
 
+## Anonymous functions
+
+### Map()
+
+When using an anonymous function as the `f` argument to `Map()`, the only way to make the indentation look readable is to put the
+mapped (`...`) arguments first, then put the anonymous function after them on a new line.
+This *requires* that the function argument is named (`f`).
+This when the mapped arguments are concise, this isn't a big improvement,
+but it's much more readable when the mapped arguments are even remotely complicated.
+
+Example:
+
+```
+
+#BAD 
+
+Map(\(x, y) {
+	# code here
+	# code here
+
+	},
+    code(here, for(the[x], argument)),
+    code(here, for(the[y], argument)))
+
+#GOOD
+
+
+Map(# code(here, for(the[x], argument)),
+    # code(here, for(the[y], argument)),
+    \(x, y) {
+	# code here
+	# code here
+
+	})
+    )
+
+```
+
 # Naming
 
 Generally, few variables should be used.

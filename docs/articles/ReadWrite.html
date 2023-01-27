@@ -60,7 +60,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-09-28</h4>
+            <h4 data-toc-skip class="date">2023-01-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd" class="external-link"><code>vignettes/ReadWrite.Rmd</code></a></small>
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
@@ -214,7 +214,7 @@ Regular Expression directory-path patterns. For example,</p>
 <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData/BachChorales/chor.*.krn'</span><span class="op">)</span>
-<span class="co">#&gt; ############################ vvv chor001.krn vvv #############################</span>
+<span class="co">#&gt; ############################# vvv chor001.krn vvv #############################</span>
 <span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
 <span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
 <span class="co">#&gt;      3:  !!!OTL@@DE: Aus meines Herzens Grunde</span>
@@ -222,88 +222,88 @@ Regular Expression directory-path patterns. For example,</p>
 <span class="co">#&gt;      5:  !!!SCT: BWV 269</span>
 <span class="co">#&gt;      6:  !!!PC#: 1</span>
 <span class="co">#&gt;      7:  !!!AGN: chorale</span>
-<span class="co">#&gt;    126:          **kern        **kern        **kern        **kern</span>
-<span class="co">#&gt;    127:          *ICvox        *ICvox        *ICvox        *ICvox</span>
-<span class="co">#&gt;    128:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
-<span class="co">#&gt;    129:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
-<span class="co">#&gt;    130:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
-<span class="co">#&gt;    131:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
-<span class="co">#&gt;    132:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
-<span class="co">#&gt;    133:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
-<span class="co">#&gt;    134:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
-<span class="co">#&gt;      8:             *G:           *G:           *G:           *G:</span>
-<span class="co">#&gt;      9:             *F:             *             *             *</span>
-<span class="co">#&gt;     10:           *M3/4         *M3/4         *M3/4         *M3/4</span>
-<span class="co">#&gt;     11:          *MM100        *MM100        *MM100        *MM100</span>
-<span class="co">#&gt;     12:             4GG            4B            4d            4g</span>
-<span class="co">#&gt;     13:              =1            =1            =1            =1</span>
-<span class="co">#&gt;     14:              4G            4B            4d            2g</span>
-<span class="co">#&gt;     15:              4E           8cL            4e             .</span>
-<span class="co">#&gt;     16:               .           8BJ             .             .</span>
-<span class="co">#&gt;     17:             4F#            4A            4d           4dd</span>
-<span class="co">#&gt;     18:              =2            =2            =2            =2</span>
-<span class="co">#&gt;     19:              4G            4G            2d           4.b</span>
-<span class="co">#&gt;     20:              4D           4F#             .             .</span>
-<span class="co">#&gt;     21:               .             .             .            8a</span>
-<span class="co">#&gt;     22:              4E            4G            4B            4g</span>
-<span class="co">#&gt;     23:              =3            =3            =3            =3</span>
-<span class="co">#&gt;     24:              4C           8cL           8eL           4.g</span>
-<span class="co">#&gt;     25:               .           8BJ            8d             .</span>
-<span class="co">#&gt;     26:            8BBL            4c            8e             .</span>
-<span class="co">#&gt;     27:            8AAJ             .          8f#J            8a</span>
-<span class="co">#&gt;     28:             4GG            4d            4g            4b</span>
-<span class="co">#&gt;     29:              =4            =4            =4            =4</span>
-<span class="co">#&gt;     30:             2D;           2d;          2f#;           2a;</span>
-<span class="co">#&gt;     31:             4GG            4d            4g            4b</span>
-<span class="co">#&gt; 32-125::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ############################ ^^^ chor001.krn ^^^ #############################</span>
+<span class="co">#&gt;      8:          **kern        **kern        **kern        **kern</span>
+<span class="co">#&gt;      9:          *ICvox        *ICvox        *ICvox        *ICvox</span>
+<span class="co">#&gt;     10:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
+<span class="co">#&gt;     11:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
+<span class="co">#&gt;     12:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
+<span class="co">#&gt;     13:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
+<span class="co">#&gt;     14:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
+<span class="co">#&gt;     15:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
+<span class="co">#&gt;     16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
+<span class="co">#&gt;     17:             *G:           *G:           *G:           *G:</span>
+<span class="co">#&gt;     18:             *F:             *             *             *</span>
+<span class="co">#&gt;     19:           *M3/4         *M3/4         *M3/4         *M3/4</span>
+<span class="co">#&gt;     20:          *MM100        *MM100        *MM100        *MM100</span>
+<span class="co">#&gt;     21:             4GG            4B            4d            4g</span>
+<span class="co">#&gt;     22:              =1            =1            =1            =1</span>
+<span class="co">#&gt;     23:              4G            4B            4d            2g</span>
+<span class="co">#&gt;     24:              4E           8cL            4e             .</span>
+<span class="co">#&gt;     25:               .           8BJ             .             .</span>
+<span class="co">#&gt;     26:             4F#            4A            4d           4dd</span>
+<span class="co">#&gt;     27:              =2            =2            =2            =2</span>
+<span class="co">#&gt;     28:              4G            4G            2d           4.b</span>
+<span class="co">#&gt;     29:              4D           4F#             .             .</span>
+<span class="co">#&gt;     30:               .             .             .            8a</span>
+<span class="co">#&gt;     31:              4E            4G            4B            4g</span>
+<span class="co">#&gt;     32:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     33:              4C           8cL           8eL           4.g</span>
+<span class="co">#&gt;     34:               .           8BJ            8d             .</span>
+<span class="co">#&gt;     35:            8BBL            4c            8e             .</span>
+<span class="co">#&gt;     36:            8AAJ             .          8f#J            8a</span>
+<span class="co">#&gt;     37:             4GG            4d            4g            4b</span>
+<span class="co">#&gt;     38:              =4            =4            =4            =4</span>
+<span class="co">#&gt;     39:             2D;           2d;          2f#;           2a;</span>
+<span class="co">#&gt;     40:             4GG            4d            4g            4b</span>
+<span class="co">#&gt; 41-134:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ############################# ^^^ chor001.krn ^^^ #############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (8 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ############################ vvv chor010.krn vvv #############################</span>
-<span class="co">#&gt;   1-51::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;     52:            2AA;           2c;           2e;           2a;</span>
-<span class="co">#&gt;     53:              2A            2e            2a           2cc</span>
-<span class="co">#&gt;     54:              =9            =9            =9            =9</span>
-<span class="co">#&gt;     55:              4E            4e            4g            4b</span>
-<span class="co">#&gt;     56:             8DL            4e            4g           4cc</span>
-<span class="co">#&gt;     57:             8CJ             .             .             .</span>
-<span class="co">#&gt;     58:             4BB            4d           8gL           4dd</span>
-<span class="co">#&gt;     59:               .             .           8fJ             .</span>
-<span class="co">#&gt;     60:              4C            4c            4e            4g</span>
-<span class="co">#&gt;     61:             =10           =10           =10           =10</span>
-<span class="co">#&gt;     62:              4D           8F#            4d            4b</span>
-<span class="co">#&gt;     63:               .            4G             .             .</span>
-<span class="co">#&gt;     64:              4D             .            4c            4a</span>
-<span class="co">#&gt;     65:               .           8F#             .             .</span>
-<span class="co">#&gt;     66:            2GG;           2G;           2B;           2g;</span>
-<span class="co">#&gt;     67:             =11           =11           =11           =11</span>
-<span class="co">#&gt;     68:              2C            2G            2e            2g</span>
-<span class="co">#&gt;     69:             4AA            4A            4e           4cc</span>
-<span class="co">#&gt;     70:              4E           4G#           8eL            4b</span>
-<span class="co">#&gt;     71:               .             .           8dJ             .</span>
-<span class="co">#&gt;     72:             =12           =12           =12           =12</span>
-<span class="co">#&gt;     73:              4F            4A            4c            4a</span>
-<span class="co">#&gt;     74:              4C            4G            4c            4e</span>
-<span class="co">#&gt;     75:            4BB-            4G           [2d            4g</span>
-<span class="co">#&gt;     76:             4AA            4A             .            4f</span>
-<span class="co">#&gt;     77:             =13           =13           =13           =13</span>
-<span class="co">#&gt;     78:            4GG#            4B           4d]           1e;</span>
-<span class="co">#&gt;     79:             4AA            4A            4c             .</span>
-<span class="co">#&gt;     80:            2EE;         2G#X;           2B;             .</span>
-<span class="co">#&gt;     81:              ==            ==            ==            ==</span>
-<span class="co">#&gt;     82:              *-            *-            *-            *-</span>
-<span class="co">#&gt;     83:  !!!hum2abc: -Q ''</span>
-<span class="co">#&gt;     84:  !!!title: @{PC#}. @{OTL@@DE}</span>
-<span class="co">#&gt;     85:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian ***</span>
-<span class="co">#&gt;     86:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;***</span>
-<span class="co">#&gt;     87:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371***</span>
-<span class="co">#&gt;     88:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.***</span>
-<span class="co">#&gt;     89:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
-<span class="co">#&gt;     90:  !!!EED:  Craig Stuart Sapp</span>
-<span class="co">#&gt;     91:  !!!EEV:  2009/05/22</span>
-<span class="co">#&gt; ############################ ^^^ chor010.krn ^^^ #############################</span>
-<span class="co">#&gt;                       (***four global comments truncated due to screen size***)</span>
+<span class="co">#&gt; ############################# vvv chor010.krn vvv #############################</span>
+<span class="co">#&gt;   1-60:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;     61:            2AA;           2c;           2e;           2a;</span>
+<span class="co">#&gt;     62:              2A            2e            2a           2cc</span>
+<span class="co">#&gt;     63:              =9            =9            =9            =9</span>
+<span class="co">#&gt;     64:              4E            4e            4g            4b</span>
+<span class="co">#&gt;     65:             8DL            4e            4g           4cc</span>
+<span class="co">#&gt;     66:             8CJ             .             .             .</span>
+<span class="co">#&gt;     67:             4BB            4d           8gL           4dd</span>
+<span class="co">#&gt;     68:               .             .           8fJ             .</span>
+<span class="co">#&gt;     69:              4C            4c            4e            4g</span>
+<span class="co">#&gt;     70:             =10           =10           =10           =10</span>
+<span class="co">#&gt;     71:              4D           8F#            4d            4b</span>
+<span class="co">#&gt;     72:               .            4G             .             .</span>
+<span class="co">#&gt;     73:              4D             .            4c            4a</span>
+<span class="co">#&gt;     74:               .           8F#             .             .</span>
+<span class="co">#&gt;     75:            2GG;           2G;           2B;           2g;</span>
+<span class="co">#&gt;     76:             =11           =11           =11           =11</span>
+<span class="co">#&gt;     77:              2C            2G            2e            2g</span>
+<span class="co">#&gt;     78:             4AA            4A            4e           4cc</span>
+<span class="co">#&gt;     79:              4E           4G#           8eL            4b</span>
+<span class="co">#&gt;     80:               .             .           8dJ             .</span>
+<span class="co">#&gt;     81:             =12           =12           =12           =12</span>
+<span class="co">#&gt;     82:              4F            4A            4c            4a</span>
+<span class="co">#&gt;     83:              4C            4G            4c            4e</span>
+<span class="co">#&gt;     84:            4BB-            4G           [2d            4g</span>
+<span class="co">#&gt;     85:             4AA            4A             .            4f</span>
+<span class="co">#&gt;     86:             =13           =13           =13           =13</span>
+<span class="co">#&gt;     87:            4GG#            4B           4d]           1e;</span>
+<span class="co">#&gt;     88:             4AA            4A            4c             .</span>
+<span class="co">#&gt;     89:            2EE;         2G#X;           2B;             .</span>
+<span class="co">#&gt;     90:              ==            ==            ==            ==</span>
+<span class="co">#&gt;     91:              *-            *-            *-            *-</span>
+<span class="co">#&gt;     92:  !!!hum2abc: -Q ''</span>
+<span class="co">#&gt;     93:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="co">#&gt;     94:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="co">#&gt;     95:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="co">#&gt;     96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="co">#&gt;     97:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="co">#&gt;     98:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="co">#&gt;     99:  !!!EED:  Craig Stuart Sapp</span>
+<span class="co">#&gt;    100:  !!!EEV:  2009/05/22</span>
+<span class="co">#&gt; ############################# ^^^ chor010.krn ^^^ #############################</span>
+<span class="co">#&gt;                        (***four global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of ten files.</span>
 <span class="co">#&gt;   Data fields: </span>
@@ -311,19 +311,20 @@ Regular Expression directory-path patterns. For example,</p>
 <p>uses the REpath-pattern
 <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in
 the ‘HumdrumData/BachChorales’ directory whose name matches the regular
-expression “chor.<em>.krn.” As you can see, the REpath-pattern includes
-directory (folder) paths (relative or absolute)—using your operating
-system’s appopriate delimeter (”" for windows, ”/” for everybody
-else)—</em>and* a pattern for matching file paths. <em>Each</em>
-directory is also treated as a regular expression, possibly matching
-multiple directories. Let’s break this down: humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> splits your REpath-pattern
-input string into three parts: <code>"HumdrumData"</code>,
-<code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and
-treats <em>each</em> of the three as regular expressions. The the first
-two expressions are used to match directories, while the last expression
-is used to match files. So, while
+expression <code>chor.*.krn</code>. As you can see, the REpath-pattern
+includes directory (folder) paths (relative or absolute)—using your
+operating system’s appropriate delimiter (“" for windows,”/” for
+everybody else)—<em>and</em> a pattern for matching file paths.
+<em>Each</em> directory is also treated as a regular expression,
+possibly matching multiple directories. Let’s break this down:
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> splits your
+REpath-pattern input string into three parts:
+<code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em>
+<code>"chor.*.krn"</code>, and treats <em>each</em> of the three as
+regular expressions. The first two expressions are used to match
+directories, while the last expression is used to match files. So, while
 <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code>
-matches all the files with the”.krn” extension in the
+matches all the files with the “.krn” extension in the
 “BeethovenVariations” directories and
 <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches
 all the files in the “MozartVariations” directories, the command
@@ -432,7 +433,7 @@ general than we intend. For instance, the command
 called “MyFolder,” but would also match folders names “MyFolder_Also”,
 or “ThisIsMyFolder.” If you want to be sure to match exactly one and
 only one directory/file, use “^” and “$” regular-expression markers to
-explicitely mark the beginning and end of your pattern: the command
+explicitly mark the beginning and end of your pattern: the command
 <code>readHumdrum('^MyFolder$/.*')</code> will only read files from one
 directory “MyFolder.”</p>
 </blockquote>
@@ -448,86 +449,86 @@ directory “MyFolder.”</p>
 <span class="co">#&gt;      5:  !!!SCT: BWV 269</span>
 <span class="co">#&gt;      6:  !!!PC#: 1</span>
 <span class="co">#&gt;      7:  !!!AGN: chorale</span>
-<span class="co">#&gt;    126:          **kern        **kern        **kern        **kern</span>
-<span class="co">#&gt;    127:          *ICvox        *ICvox        *ICvox        *ICvox</span>
-<span class="co">#&gt;    128:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
-<span class="co">#&gt;    129:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
-<span class="co">#&gt;    130:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
-<span class="co">#&gt;    131:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
-<span class="co">#&gt;    132:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
-<span class="co">#&gt;    133:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
-<span class="co">#&gt;    134:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
-<span class="co">#&gt;      8:             *G:           *G:           *G:           *G:</span>
-<span class="co">#&gt;      9:             *F:             *             *             *</span>
-<span class="co">#&gt;     10:           *M3/4         *M3/4         *M3/4         *M3/4</span>
-<span class="co">#&gt;     11:          *MM100        *MM100        *MM100        *MM100</span>
-<span class="co">#&gt;     12:             4GG            4B            4d            4g</span>
-<span class="co">#&gt;     13:              =1            =1            =1            =1</span>
-<span class="co">#&gt;     14:              4G            4B            4d            2g</span>
-<span class="co">#&gt;     15:              4E           8cL            4e             .</span>
-<span class="co">#&gt;     16:               .           8BJ             .             .</span>
-<span class="co">#&gt;     17:             4F#            4A            4d           4dd</span>
-<span class="co">#&gt;     18:              =2            =2            =2            =2</span>
-<span class="co">#&gt;     19:              4G            4G            2d           4.b</span>
-<span class="co">#&gt;     20:              4D           4F#             .             .</span>
-<span class="co">#&gt;     21:               .             .             .            8a</span>
-<span class="co">#&gt;     22:              4E            4G            4B            4g</span>
-<span class="co">#&gt;     23:              =3            =3            =3            =3</span>
-<span class="co">#&gt;     24:              4C           8cL           8eL           4.g</span>
-<span class="co">#&gt;     25:               .           8BJ            8d             .</span>
-<span class="co">#&gt;     26:            8BBL            4c            8e             .</span>
-<span class="co">#&gt;     27:            8AAJ             .          8f#J            8a</span>
-<span class="co">#&gt;     28:             4GG            4d            4g            4b</span>
-<span class="co">#&gt;     29:              =4            =4            =4            =4</span>
-<span class="co">#&gt;     30:             2D;           2d;          2f#;           2a;</span>
-<span class="co">#&gt;     31:             4GG            4d            4g            4b</span>
-<span class="co">#&gt; 32-125:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;      8:          **kern        **kern        **kern        **kern</span>
+<span class="co">#&gt;      9:          *ICvox        *ICvox        *ICvox        *ICvox</span>
+<span class="co">#&gt;     10:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
+<span class="co">#&gt;     11:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
+<span class="co">#&gt;     12:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
+<span class="co">#&gt;     13:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
+<span class="co">#&gt;     14:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
+<span class="co">#&gt;     15:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
+<span class="co">#&gt;     16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
+<span class="co">#&gt;     17:             *G:           *G:           *G:           *G:</span>
+<span class="co">#&gt;     18:             *F:             *             *             *</span>
+<span class="co">#&gt;     19:           *M3/4         *M3/4         *M3/4         *M3/4</span>
+<span class="co">#&gt;     20:          *MM100        *MM100        *MM100        *MM100</span>
+<span class="co">#&gt;     21:             4GG            4B            4d            4g</span>
+<span class="co">#&gt;     22:              =1            =1            =1            =1</span>
+<span class="co">#&gt;     23:              4G            4B            4d            2g</span>
+<span class="co">#&gt;     24:              4E           8cL            4e             .</span>
+<span class="co">#&gt;     25:               .           8BJ             .             .</span>
+<span class="co">#&gt;     26:             4F#            4A            4d           4dd</span>
+<span class="co">#&gt;     27:              =2            =2            =2            =2</span>
+<span class="co">#&gt;     28:              4G            4G            2d           4.b</span>
+<span class="co">#&gt;     29:              4D           4F#             .             .</span>
+<span class="co">#&gt;     30:               .             .             .            8a</span>
+<span class="co">#&gt;     31:              4E            4G            4B            4g</span>
+<span class="co">#&gt;     32:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     33:              4C           8cL           8eL           4.g</span>
+<span class="co">#&gt;     34:               .           8BJ            8d             .</span>
+<span class="co">#&gt;     35:            8BBL            4c            8e             .</span>
+<span class="co">#&gt;     36:            8AAJ             .          8f#J            8a</span>
+<span class="co">#&gt;     37:             4GG            4d            4g            4b</span>
+<span class="co">#&gt;     38:              =4            =4            =4            =4</span>
+<span class="co">#&gt;     39:             2D;           2d;          2f#;           2a;</span>
+<span class="co">#&gt;     40:             4GG            4d            4g            4b</span>
+<span class="co">#&gt; 41-134:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
 <span class="co">#&gt; ############################ ^^^ chor001.krn ^^^ ############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (48 more files...)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ########################### vvv your_song.hum vvv ###########################</span>
-<span class="co">#&gt; 1-1189:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;   1190:               .             .             3             .</span>
-<span class="co">#&gt;   1191:               .             .             .             .</span>
-<span class="co">#&gt;   1192:               .             .             2             .</span>
-<span class="co">#&gt;   1193:               .             .             1             .</span>
-<span class="co">#&gt;   1194:               .             .             .             .</span>
-<span class="co">#&gt;   1195:            =119          =119          =119          =119</span>
-<span class="co">#&gt;   1196:            ii65            IV             2       222.340</span>
-<span class="co">#&gt;   1197:               .             .             .             .</span>
-<span class="co">#&gt;   1198:               .             .             .             .</span>
-<span class="co">#&gt;   1199:               .             .             6             .</span>
-<span class="co">#&gt;   1200:               .             .             .             .</span>
-<span class="co">#&gt;   1201:               .             .             .             .</span>
+<span class="co">#&gt; 1-1194:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;   1195:               .             .             3             .</span>
+<span class="co">#&gt;   1196:               .             .             .             .</span>
+<span class="co">#&gt;   1197:               .             .             2             .</span>
+<span class="co">#&gt;   1198:               .             .             1             .</span>
+<span class="co">#&gt;   1199:               .             .             .             .</span>
+<span class="co">#&gt;   1200:            =119          =119          =119          =119</span>
+<span class="co">#&gt;   1201:            ii65            IV             2       222.340</span>
 <span class="co">#&gt;   1202:               .             .             .             .</span>
-<span class="co">#&gt;   1203:               .             .             6             .</span>
-<span class="co">#&gt;   1204:            =120          =120          =120          =120</span>
-<span class="co">#&gt;   1205:               .             .            b3       224.253</span>
-<span class="co">#&gt;   1206:               .             .             2             .</span>
+<span class="co">#&gt;   1203:               .             .             .             .</span>
+<span class="co">#&gt;   1204:               .             .             6             .</span>
+<span class="co">#&gt;   1205:               .             .             .             .</span>
+<span class="co">#&gt;   1206:               .             .             .             .</span>
 <span class="co">#&gt;   1207:               .             .             .             .</span>
-<span class="co">#&gt;   1208:               .             .             1             .</span>
-<span class="co">#&gt;   1209:               .             .             .             .</span>
-<span class="co">#&gt;   1210:               .             .             1             .</span>
-<span class="co">#&gt;   1211:               .             .             1             .</span>
+<span class="co">#&gt;   1208:               .             .             6             .</span>
+<span class="co">#&gt;   1209:            =120          =120          =120          =120</span>
+<span class="co">#&gt;   1210:               .             .            b3       224.253</span>
+<span class="co">#&gt;   1211:               .             .             2             .</span>
 <span class="co">#&gt;   1212:               .             .             .             .</span>
-<span class="co">#&gt;   1213:            =121          =121          =121          =121</span>
-<span class="co">#&gt;   1214:            *tb1          *tb1          *tb1             *</span>
-<span class="co">#&gt;   1215:               I             I             .       226.135</span>
-<span class="co">#&gt;   1216:            =122          =122          =122          =122</span>
-<span class="co">#&gt;   1217:              IV          IV64             .       228.013</span>
-<span class="co">#&gt;   1218:            =123          =123          =123          =123</span>
-<span class="co">#&gt;   1219:               V           Vs4             .       229.838</span>
-<span class="co">#&gt;   1220:            =124          =124          =124          =124</span>
-<span class="co">#&gt;   1221:              IV          IV64             .       231.691</span>
-<span class="co">#&gt;   1222:            =125          =125          =125          =125</span>
-<span class="co">#&gt;   1223:               I             I             .       233.583</span>
-<span class="co">#&gt;   1224:              *-            *-            *-            *-</span>
-<span class="co">#&gt;   1225:  !!!ONB: Translated from original encodings in the Rolling Stone C***</span>
-<span class="co">#&gt;   1226:  !!!ONB: Original transcribers noted in comments in each spine: !D***</span>
-<span class="co">#&gt;   1227:  !!!YOE: David Temperley, Trevor de Clercq</span>
-<span class="co">#&gt;   1228:  !!!EED: Nathaniel Condit-Schultz (fathermckenzie.net)</span>
-<span class="co">#&gt;   1229:  !!!ENC: Nathaniel Condit-Schultz (fathermckenzie.net), automated</span>
+<span class="co">#&gt;   1213:               .             .             1             .</span>
+<span class="co">#&gt;   1214:               .             .             .             .</span>
+<span class="co">#&gt;   1215:               .             .             1             .</span>
+<span class="co">#&gt;   1216:               .             .             1             .</span>
+<span class="co">#&gt;   1217:               .             .             .             .</span>
+<span class="co">#&gt;   1218:            =121          =121          =121          =121</span>
+<span class="co">#&gt;   1219:            *tb1          *tb1          *tb1             *</span>
+<span class="co">#&gt;   1220:               I             I             .       226.135</span>
+<span class="co">#&gt;   1221:            =122          =122          =122          =122</span>
+<span class="co">#&gt;   1222:              IV          IV64             .       228.013</span>
+<span class="co">#&gt;   1223:            =123          =123          =123          =123</span>
+<span class="co">#&gt;   1224:               V           Vs4             .       229.838</span>
+<span class="co">#&gt;   1225:            =124          =124          =124          =124</span>
+<span class="co">#&gt;   1226:              IV          IV64             .       231.691</span>
+<span class="co">#&gt;   1227:            =125          =125          =125          =125</span>
+<span class="co">#&gt;   1228:               I             I             .       233.583</span>
+<span class="co">#&gt;   1229:              *-            *-            *-            *-</span>
+<span class="co">#&gt;   1230:  !!!ONB: Translated from original encodings in the Rolling Stone C***</span>
+<span class="co">#&gt;   1231:  !!!ONB: Original transcribers noted in comments in each spine: !D***</span>
+<span class="co">#&gt;   1232:  !!!YOE: David Temperley, Trevor de Clercq</span>
+<span class="co">#&gt;   1233:  !!!EED: Nathaniel Condit-Schultz (fathermckenzie.net)</span>
+<span class="co">#&gt;   1234:  !!!ENC: Nathaniel Condit-Schultz (fathermckenzie.net), automated</span>
 <span class="co">#&gt; ########################### ^^^ your_song.hum ^^^ ###########################</span>
 <span class="co">#&gt;                     (***three global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
@@ -819,7 +820,7 @@ pieces with minor keys by writing:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="st">'HumdrumData'</span>, <span class="st">'BachChorales'</span>, <span class="st">'chor.*.krn'</span>,
             contains <span class="op">=</span> <span class="st">'\\*[a-g][-b#]*:'</span><span class="op">)</span> 
-<span class="co">#&gt; ############################ vvv chor003.krn vvv #############################</span>
+<span class="co">#&gt; ############################# vvv chor003.krn vvv #############################</span>
 <span class="co">#&gt;      1:  !!!COM: Bach, Johann Sebastian</span>
 <span class="co">#&gt;      2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
 <span class="co">#&gt;      3:  !!!OTL@@DE: Ach Gott, vom Himmel sieh darein</span>
@@ -828,87 +829,87 @@ pieces with minor keys by writing:</p>
 <span class="co">#&gt;      6:  !!!SCT: BWV 153/1</span>
 <span class="co">#&gt;      7:  !!!PC#: 3</span>
 <span class="co">#&gt;      8:  !!!AGN: chorale</span>
-<span class="co">#&gt;    101:          **kern        **kern        **kern        **kern</span>
-<span class="co">#&gt;    102:          *ICvox        *ICvox        *ICvox        *ICvox</span>
-<span class="co">#&gt;    103:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
-<span class="co">#&gt;    104:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
-<span class="co">#&gt;    105:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
-<span class="co">#&gt;    106:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
-<span class="co">#&gt;    107:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
-<span class="co">#&gt;    108:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
-<span class="co">#&gt;    109:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
-<span class="co">#&gt;    110:             *a:           *a:           *a:           *a:</span>
-<span class="co">#&gt;      9:         !dorian       !dorian       !dorian       !dorian</span>
-<span class="co">#&gt;     10:           *M4/4         *M4/4         *M4/4         *M4/4</span>
-<span class="co">#&gt;     11:         *met(c)       *met(c)       *met(c)       *met(c)</span>
-<span class="co">#&gt;     12:          *MM100        *MM100        *MM100        *MM100</span>
-<span class="co">#&gt;     13:              4E            4e           4g#            4b</span>
-<span class="co">#&gt;     14:              =1            =1            =1            =1</span>
-<span class="co">#&gt;     15:              4A            4e            4a           4cc</span>
-<span class="co">#&gt;     16:              4B            4d           4g#            4b</span>
-<span class="co">#&gt;     17:              4c            4e            4a            4a</span>
-<span class="co">#&gt;     18:             8BL           8dL          8g#L           4ee</span>
-<span class="co">#&gt;     19:             8AJ           8cJ           8aJ             .</span>
-<span class="co">#&gt;     20:              =2            =2            =2            =2</span>
-<span class="co">#&gt;     21:             4G#            4B            4b          8eeL</span>
-<span class="co">#&gt;     22:               .             .             .          8ddJ</span>
-<span class="co">#&gt;     23:              4A           8cL           8eL           4cc</span>
-<span class="co">#&gt;     24:               .           8dJ          8f#J             .</span>
-<span class="co">#&gt;     25:             4E;           4e;          4g#;           4b;</span>
-<span class="co">#&gt;     26:             4BB            4f           4g#           4dd</span>
-<span class="co">#&gt;     27:              =3            =3            =3            =3</span>
-<span class="co">#&gt;     28:             8CL            4e            4a           4cc</span>
-<span class="co">#&gt;     29:             8DJ             .             .             .</span>
-<span class="co">#&gt;     30:              4E           8eL           4g#            4b</span>
-<span class="co">#&gt; 31-100::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt; ############################ ^^^ chor003.krn ^^^ #############################</span>
+<span class="co">#&gt;      9:          **kern        **kern        **kern        **kern</span>
+<span class="co">#&gt;     10:          *ICvox        *ICvox        *ICvox        *ICvox</span>
+<span class="co">#&gt;     11:          *Ibass       *Itenor        *Ialto       *Isoprn</span>
+<span class="co">#&gt;     12:         *I"Bass      *I"Tenor       *I"Alto    *I"Soprano</span>
+<span class="co">#&gt;     13:       *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]     *&gt;[A,A,B]</span>
+<span class="co">#&gt;     14:    *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]  *&gt;norep[A,B]</span>
+<span class="co">#&gt;     15:             *&gt;A           *&gt;A           *&gt;A           *&gt;A</span>
+<span class="co">#&gt;     16:         *clefF4      *clefGv2       *clefG2       *clefG2</span>
+<span class="co">#&gt;     17:          *k[f#]        *k[f#]        *k[f#]        *k[f#]</span>
+<span class="co">#&gt;     18:             *a:           *a:           *a:           *a:</span>
+<span class="co">#&gt;     19:         !dorian       !dorian       !dorian       !dorian</span>
+<span class="co">#&gt;     20:           *M4/4         *M4/4         *M4/4         *M4/4</span>
+<span class="co">#&gt;     21:         *met(c)       *met(c)       *met(c)       *met(c)</span>
+<span class="co">#&gt;     22:          *MM100        *MM100        *MM100        *MM100</span>
+<span class="co">#&gt;     23:              4E            4e           4g#            4b</span>
+<span class="co">#&gt;     24:              =1            =1            =1            =1</span>
+<span class="co">#&gt;     25:              4A            4e            4a           4cc</span>
+<span class="co">#&gt;     26:              4B            4d           4g#            4b</span>
+<span class="co">#&gt;     27:              4c            4e            4a            4a</span>
+<span class="co">#&gt;     28:             8BL           8dL          8g#L           4ee</span>
+<span class="co">#&gt;     29:             8AJ           8cJ           8aJ             .</span>
+<span class="co">#&gt;     30:              =2            =2            =2            =2</span>
+<span class="co">#&gt;     31:             4G#            4B            4b          8eeL</span>
+<span class="co">#&gt;     32:               .             .             .          8ddJ</span>
+<span class="co">#&gt;     33:              4A           8cL           8eL           4cc</span>
+<span class="co">#&gt;     34:               .           8dJ          8f#J             .</span>
+<span class="co">#&gt;     35:             4E;           4e;          4g#;           4b;</span>
+<span class="co">#&gt;     36:             4BB            4f           4g#           4dd</span>
+<span class="co">#&gt;     37:              =3            =3            =3            =3</span>
+<span class="co">#&gt;     38:             8CL            4e            4a           4cc</span>
+<span class="co">#&gt;     39:             8DJ             .             .             .</span>
+<span class="co">#&gt;     40:              4E           8eL           4g#            4b</span>
+<span class="co">#&gt; 41-110:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt; ############################# ^^^ chor003.krn ^^^ #############################</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;      (1 more files...)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ############################ vvv chor010.krn vvv #############################</span>
-<span class="co">#&gt;   1-51::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
-<span class="co">#&gt;     52:            2AA;           2c;           2e;           2a;</span>
-<span class="co">#&gt;     53:              2A            2e            2a           2cc</span>
-<span class="co">#&gt;     54:              =9            =9            =9            =9</span>
-<span class="co">#&gt;     55:              4E            4e            4g            4b</span>
-<span class="co">#&gt;     56:             8DL            4e            4g           4cc</span>
-<span class="co">#&gt;     57:             8CJ             .             .             .</span>
-<span class="co">#&gt;     58:             4BB            4d           8gL           4dd</span>
-<span class="co">#&gt;     59:               .             .           8fJ             .</span>
-<span class="co">#&gt;     60:              4C            4c            4e            4g</span>
-<span class="co">#&gt;     61:             =10           =10           =10           =10</span>
-<span class="co">#&gt;     62:              4D           8F#            4d            4b</span>
-<span class="co">#&gt;     63:               .            4G             .             .</span>
-<span class="co">#&gt;     64:              4D             .            4c            4a</span>
-<span class="co">#&gt;     65:               .           8F#             .             .</span>
-<span class="co">#&gt;     66:            2GG;           2G;           2B;           2g;</span>
-<span class="co">#&gt;     67:             =11           =11           =11           =11</span>
-<span class="co">#&gt;     68:              2C            2G            2e            2g</span>
-<span class="co">#&gt;     69:             4AA            4A            4e           4cc</span>
-<span class="co">#&gt;     70:              4E           4G#           8eL            4b</span>
-<span class="co">#&gt;     71:               .             .           8dJ             .</span>
-<span class="co">#&gt;     72:             =12           =12           =12           =12</span>
-<span class="co">#&gt;     73:              4F            4A            4c            4a</span>
-<span class="co">#&gt;     74:              4C            4G            4c            4e</span>
-<span class="co">#&gt;     75:            4BB-            4G           [2d            4g</span>
-<span class="co">#&gt;     76:             4AA            4A             .            4f</span>
-<span class="co">#&gt;     77:             =13           =13           =13           =13</span>
-<span class="co">#&gt;     78:            4GG#            4B           4d]           1e;</span>
-<span class="co">#&gt;     79:             4AA            4A            4c             .</span>
-<span class="co">#&gt;     80:            2EE;         2G#X;           2B;             .</span>
-<span class="co">#&gt;     81:              ==            ==            ==            ==</span>
-<span class="co">#&gt;     82:              *-            *-            *-            *-</span>
-<span class="co">#&gt;     83:  !!!hum2abc: -Q ''</span>
-<span class="co">#&gt;     84:  !!!title: @{PC#}. @{OTL@@DE}</span>
-<span class="co">#&gt;     85:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian ***</span>
-<span class="co">#&gt;     86:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;***</span>
-<span class="co">#&gt;     87:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371***</span>
-<span class="co">#&gt;     88:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.***</span>
-<span class="co">#&gt;     89:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
-<span class="co">#&gt;     90:  !!!EED:  Craig Stuart Sapp</span>
-<span class="co">#&gt;     91:  !!!EEV:  2009/05/22</span>
-<span class="co">#&gt; ############################ ^^^ chor010.krn ^^^ #############################</span>
-<span class="co">#&gt;                       (***four global comments truncated due to screen size***)</span>
+<span class="co">#&gt; ############################# vvv chor010.krn vvv #############################</span>
+<span class="co">#&gt;   1-60:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="co">#&gt;     61:            2AA;           2c;           2e;           2a;</span>
+<span class="co">#&gt;     62:              2A            2e            2a           2cc</span>
+<span class="co">#&gt;     63:              =9            =9            =9            =9</span>
+<span class="co">#&gt;     64:              4E            4e            4g            4b</span>
+<span class="co">#&gt;     65:             8DL            4e            4g           4cc</span>
+<span class="co">#&gt;     66:             8CJ             .             .             .</span>
+<span class="co">#&gt;     67:             4BB            4d           8gL           4dd</span>
+<span class="co">#&gt;     68:               .             .           8fJ             .</span>
+<span class="co">#&gt;     69:              4C            4c            4e            4g</span>
+<span class="co">#&gt;     70:             =10           =10           =10           =10</span>
+<span class="co">#&gt;     71:              4D           8F#            4d            4b</span>
+<span class="co">#&gt;     72:               .            4G             .             .</span>
+<span class="co">#&gt;     73:              4D             .            4c            4a</span>
+<span class="co">#&gt;     74:               .           8F#             .             .</span>
+<span class="co">#&gt;     75:            2GG;           2G;           2B;           2g;</span>
+<span class="co">#&gt;     76:             =11           =11           =11           =11</span>
+<span class="co">#&gt;     77:              2C            2G            2e            2g</span>
+<span class="co">#&gt;     78:             4AA            4A            4e           4cc</span>
+<span class="co">#&gt;     79:              4E           4G#           8eL            4b</span>
+<span class="co">#&gt;     80:               .             .           8dJ             .</span>
+<span class="co">#&gt;     81:             =12           =12           =12           =12</span>
+<span class="co">#&gt;     82:              4F            4A            4c            4a</span>
+<span class="co">#&gt;     83:              4C            4G            4c            4e</span>
+<span class="co">#&gt;     84:            4BB-            4G           [2d            4g</span>
+<span class="co">#&gt;     85:             4AA            4A             .            4f</span>
+<span class="co">#&gt;     86:             =13           =13           =13           =13</span>
+<span class="co">#&gt;     87:            4GG#            4B           4d]           1e;</span>
+<span class="co">#&gt;     88:             4AA            4A            4c             .</span>
+<span class="co">#&gt;     89:            2EE;         2G#X;           2B;             .</span>
+<span class="co">#&gt;     90:              ==            ==            ==            ==</span>
+<span class="co">#&gt;     91:              *-            *-            *-            *-</span>
+<span class="co">#&gt;     92:  !!!hum2abc: -Q ''</span>
+<span class="co">#&gt;     93:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="co">#&gt;     94:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="co">#&gt;     95:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="co">#&gt;     96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="co">#&gt;     97:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="co">#&gt;     98:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="co">#&gt;     99:  !!!EED:  Craig Stuart Sapp</span>
+<span class="co">#&gt;    100:  !!!EEV:  2009/05/22</span>
+<span class="co">#&gt; ############################# ^^^ chor010.krn ^^^ #############################</span>
+<span class="co">#&gt;                        (***four global comments truncated due to screen size***)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  humdrumR corpus of three files.</span>
 <span class="co">#&gt;   Data fields: </span>

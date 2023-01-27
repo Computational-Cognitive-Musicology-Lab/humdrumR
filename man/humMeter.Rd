@@ -7,9 +7,3 @@
 \link{humdrumR} includes a number of useful
 functions for working with rhythms and meter.
 }
-\details{
-\itemize{
-\item \code{\link[=rhythmDecompose]{rhythmDecompose()}} decomposes a series of rhythms in terms of desired pulses.
-\item \code{\link[=rhythmOffset]{rhythmOffset()}} Calculates the cummulative offset of durations from a starting point.
-}
-}

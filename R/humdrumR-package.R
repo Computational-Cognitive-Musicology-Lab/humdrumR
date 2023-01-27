@@ -50,9 +50,28 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-exclusiveFunctions <- c('mint', 'hint')
-keyedFunctions <- c()
-boundedFunctions <- c('mint', 'hint', 'delta', 'sigma', 'lag', 'ditto')
+withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
+                     Key = c('mint', 'hint', 'int'),
+                     BPM = c('timestamp'))
+
+
+# groupby
+byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
+                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie'), 
+                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
+                  data.table(Argument = 'groupby', Type = 'harmonic',
+                             Function = c('hint'),
+                             Expression = list(quote(list(Piece = Piece, Record = Record)))),
+                           data.table(Argument = 'groupby', Type = 'structure',       
+                             Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),
+                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
+                  data.table(Argument = 'orderby', Type = 'harmonic',
+                             Function = 'hint',
+                             Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))),
+                  data.table(Argument = 'meter', Type = 'meter',
+                             Function = c('metlev', 'metcount'),
+                             Expression = list(quote(TimeSignature)))
+                  )
 
 setOldClass('quosure')
 

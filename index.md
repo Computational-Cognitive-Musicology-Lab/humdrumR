@@ -120,7 +120,7 @@ which makes it easy to dispatch different methods based on matches to regular ex
 ### Installing R
 
 To use humdrum$_{\mathbb{R}}$, you'll first need to install [R](https://www.r-project.org/), version 4.1 or later.
-We *highly* recommend that you install the Integrated Development Environment [Rstudio](https://rstudio.com/) as well!
+We *highly* recommend that you install the Integrated Development Environment [RStudio](https://rstudio.com/) as well!
 This link---[Installing R and RStudio](https://rstudio-education.github.io/hopr/starting.html)---is a good starting place.
 
 ### Installing humdrum$_{\mathbb{R}}$
@@ -170,7 +170,7 @@ devtools::install()
 ```
 
 
-> If you downloaded Rstudio, you can use the "Open Project" option and select the file `humdrumR.Rproj` from the repository.
+> If you downloaded RStudio, you can use the "Open Project" option and select the file `humdrumR.Rproj` from the repository.
 > Once you've done this you can just click "Install and Restart" in the "Build" pane.
 
 ---
@@ -182,6 +182,24 @@ Once you've completed the installation of humdrum$_{\mathbb{R}}$ you can used it
 library(humdrumR)
 
 ```
+
+### Updating humdrum$_{\mathbb{R}}$
+
+Humdrum$_{\mathbb{R}}$ is under active development, with new features being added, documentation being updated, and bugs being fixed on a weekly basis.
+We recommend you keep up to date with the newest version of humdrum$_{\mathbb{R}}$.
+Luckily, you can easily update to the latest version by simply running the same `devtools::install_github()` command from above in an R session.
+However, *if* you have already loaded the humdrumR$_{\mathbb{R}}$ library in your R session---using `library(humdrumR)`---you'll need to 
+"detach" the old version before the new version will work.
+You can do this be either 1) quitting R studio and opening it again, 2) going to RStudio's package panel and unchecking `humdrumR`, or 3) running the command
+`detach("package:humdrumR", unload = TRUE)`.
+
+If you installed humdrum$_{\mathbb{R}}$ from source using the `git clone` command, you can't simply run `clone` again.
+Instead, you should navigate to the package directory and run `git pull origin main`.
+This will "pull" the latest changes down to your local machine.
+You can then rerun `devtools::install()`.
+
+
+
 
 ## Learning humdrum$_{\mathbb{R}}$
 

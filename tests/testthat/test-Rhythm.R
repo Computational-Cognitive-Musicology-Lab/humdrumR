@@ -1,1 +1,138 @@
-context('')
+
+
+test_that('Basic rhythm functions work', {
+  reci <- c('4a', '8b', '8.c', '4.d', NA, 'x', '16e', '16.f', '3g', '6h', '0i', '00KK', '0.J', '1LL', '2.X')
+  durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 3, 1, 0.75 )
+  
+  
+  expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
+  expect_equal(recip(reci, inPlace = TRUE), reci)
+
+  
+  expect_equal(recip(durs), recip(reci))
+
+  
+  ## scale argument
+  expect_equal(duration(reci, scale = 2), duration(reci) * 2)
+  expect_equal(duration(reci, unit = 4), duration(reci) / 4)
+  expect_equal(duration(reci, unit = 4, scale = 4), duration(reci))
+  
+})
+
+
+test_that('count() and subpos() work correctly', {
+  
+  ## basics
+  fourfour <- c('4', '8', '8', '4', '8', '8', '8','4','8','2')
+  
+  # count()
+  expect_identical(count(fourfour), c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L))
+  expect_identical(count(fourfour, phase = '4'), c(1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L))
+  expect_identical(count(fourfour, beat = '4'), c(1L, 2L, 2L, 3L, 4L, 4L, 5L, 5L, 6L, 7L))
+  expect_identical(count(fourfour, beat = '4', offBeats = FALSE), c(1L, 2L, NA, 3L, 4L, NA, 5L, NA, NA, 7L))
+  expect_identical(count(fourfour, start = 2L), 1L + c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L))
+  expect_identical(count(fourfour, beat = '2', start = -2L),  c(-2L, -2L, -2L, -1L, -1L, -1L, 1L, 1L, 1L, 2L))
+  expect_identical(count(fourfour, beat = '4', start = seq_along(fourfour) == 2L),  c(-1L, 1L, 1L, 2L, 3L, 3L, 4L, 4L, 5L, 6L))
+  
+  # subpos()
+  expect_identical(subpos(fourfour), c(0, 0.25, 0.375, 0.5, 0.75, 0.875, 0, 0.125, 0.375, 0.5))
+  expect_identical(subpos(fourfour, phase = '4'), c(0, 0.25, 0.375, 0.5, -0.250, -0.125, 0, 0.125, 0.375, 0.5))
+  expect_identical(subpos(fourfour, beat = '4'), c(0, 0, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0))
+  expect_identical(subpos(fourfour, beat = '4', deparser = recip), c("1%0", "1%0", "8", "1%0", "1%0", "8", "1%0", "8", "8", "1%0"))
+  
+  
+  ## irregular
+  
+  fourtwo <- rep(head(fourfour, -1), 2)
+  met <- rep(c('M4/4', 'M2/4', 'M4/4', 'M2/4'), c(6, 3, 6, 3))
+  expect_identical(count(fourtwo, beat = met), c(1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 4L, 4L, 4L) )
+  expect_identical(subpos(fourtwo, beat = met), c(0, 0.25, 0.375, 0.5, 0.75, 0.875, 0, 0.125, 0.375, 0, 0.25, 0.375, 0.5, 0.75, 0.875, 0, 0.125, 0.375) )
+  
+  
+  seven <- c('4', '4', '4.', '4', '4', '4', '8', '8', '16', '16', '4', '4.')
+  expect_identical(count(seven, beat = list(c('4', '4', '4.'))), c(1L, 2L, 3L, 4L, 5L, 6L, 6L, 7L, 7L, 7L, 8L, 9L))
+  expect_identical(count(seven, beat = list(c('4', '4', '4.')), phase = '8'), c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 7L, 8L, 8L, 8L, 9L))
+  expect_identical(subpos(seven, beat = list(c('4', '4', '4.'))), c(0, 0, 0, 0, 0, 0, 0.25, 0, 0.125, .1875, 0, 0))
+  expect_identical(subpos(seven, beat = list(c('4', '4', '4.')), phase = '8'), c(0, 0, 0, 0, 0, 0, -0.125, 0, -0.125, -0.0625, 0, 0))
+  
+  # subpos()
+  
+  
+})
+
+test_that("ioi and untie work correctly", {
+  
+  # ioi()
+  test <- c('4a', '4a', '4b', '4r', '8c', '16r', '8.c~',  '8G', '8A', '4.r')
+  
+  expect_equal(ioi(test), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', NA, '.' ))
+  expect_equal(ioi(test, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', NA, '.' ))
+  expect_equal(ioi(test, finalOnset = TRUE), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', '2A', '.' ))
+  expect_equal(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', '2', '.' ))
+  
+  
+  expect_equal(ioi(c('4a','4r','4a','4.a','8r','4a'), groupby = list(c(1,1,1,2,2,2))),
+               c("2a", ".", NA, "2a", ".", NA)) 
+  # 
+  
+  mc <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
+  
+  mc <- foldHumdrum(mc[[ , c(1, 6)]], 2, 1, newFieldNames = 'IPA')
+  mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
+  
+  pairs <- with(mc$IOI,  data.frame(IOI, Token))
+  expect_true(all(Reduce('>=', lapply(pairs, duration))))
+  
+  # untie()
+  
+  test <- c('4a', '[4a',']8a', NA, '8g','8G','[8a','_2a','4a]','4G')
+  expect_equal(untie(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
+  expect_equal(untie(test, inPlace = FALSE), c( '4', '4.', '.', NA, '8', '8', '2..', '.', '.', '4' ))
+  
+  # both
+  test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
+  expect_equal(ioi(untie(test), finalOnset = TRUE), 
+               untie(ioi(test, finalOnset = TRUE)))
+})
+
+test_that('Examples from rhythm man are correct', {
+  expect_equal(duration('4.ee-['), 0.375)
+  expect_equal(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
+  
+  expect_equal(seconds('4.'), 1.5)
+  expect_equal(pitch('4.', Exclusive = 'notevalue'), NA_character_)
+  
+  expect_equal(recip('2', scale = 1/16), '32')
+  
+  
+  expect_equal(recip('4%5', sep ='/'), '4/5')
+  
+  expect_equal(untie(c('[4a', '4a]', '2g')), 
+               c('2a', '.', '2g'))
+  
+  expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r')),
+               c("2a", ".",  "2a", ".", NA, "." ))
+  
+  expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = TRUE),
+               c("2a", ".",  "2a", ".", '1a', "." ))
+  
+  ##
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
+  
+  x <- with(chorales, table(noteValue(Token)), side = barplot(., cex.names = 2))
+  
+  expect_equal(unname(x["𝅗𝅥 "]), 222)
+  
+  samp <- c('4', '4.', '4%5')
+  expect_equal(seconds(samp) * 1000, ms(samp))
+  
+  
+  ## count() man
+  rhythm <- rep('8', 14)
+  expect_identical(count(rhythm, beat = '8'), 1L:14L)
+  expect_identical(count(rhythm, beat = list(c('4','4', '4.'))), as.integer(c(1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6)))
+  
+  
+  expect_equal(duration('M3/4'), 0.75)
+  expect_identical(count(rep('8', 8), beat = '1', phase = 3/8), as.integer(rep(c(1,2), c(5, 3))))
+})

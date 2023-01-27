@@ -80,7 +80,15 @@ reference:
   - pitchFunctions
   - pitchParsing
   - pitchDeparsing
+  - chordFunctions
+  - chordParsing
+  - chordDeparsing
+  - keyFunctions
+  - keyParsing
+  - keyDeparsing
   - tonalIntervalS4
+  - tertianSetS4
+  - diatonicSetS4
 - subtitle: "Pitch functions"
   desc: "These functions translate between pitch representations:"
   contents:
@@ -104,27 +112,59 @@ reference:
   - cents
   - freq
   - LO5th
-  - diatonicSet
-  - tertianSet
-  - romanNumerals
   - transpose
   - invert
-  - chordTransformer
-  - keyTransformer
+  - int
   - mint
   - hint
-- subtitle: "Rhythm"
-  desc: "Rhythm and meter classes and functions."
+  - is.simple
+  - is.generic
+- subtitle: "Key and chord functions"
+  desc: "These functions translate between diatonic and tertian representations:"
   contents:
-  - time
-  - rhythmDecompose
-  - rhythmInterval
+  - romanNumerals
+  - key
+  - signature
+  - romanKey
+  - roman
+  - harm
+  - chord
+  - tertian
+  - figuredBass
+  - is.major
+  - is.minor
+- subtitle: "Rhythm overviews"
+  desc: "These pages overview general concepts in humdrumR pitch:"
+  contents:
   - rhythmFunctions
+  - rhythmParsing
+  - rhythmDeparsing
   - humMeter
-  - SOI
+- subtitle: "Rhythm functions"
+  desc: "These functions translate between rhythm representations:"
+  contents:
+  - bpm2sec
+  - recip
+  - duration
+  - noteValue
+  - seconds
   - meter
+- subtitle: "Rhythm and Meter"
+  desc: "Rhythm and meter analysis functions."
+  contents:
+  - timeline
+  - timestamp
+  - metlev
+  - count
+  - metcount
+  - subpos
+  - ioi
+  - recip
+  - untie
   - measure
-  - metric
+  - tatum
+  - tactus
+  - nbeats
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:
@@ -140,6 +180,7 @@ reference:
   - humCoercion
   - humMerge
   - collapseHumdrum
+  - expandPaths
   - foldHumdrum
   - foldExclusive
   - foldGraceNotes

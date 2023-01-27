@@ -43,7 +43,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -98,7 +98,7 @@ the content of humdrum data.</p>
           
           <code><a href="writeHumdrum.html">writeHumdrum()</a></code> 
         </dt>
-        <dd>Write <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> to humdrum files</dd>
+        <dd>Write humdrumR data to humdrum files</dd>
       </dl></div><div id="" class="section level2">
       
       
@@ -207,9 +207,49 @@ represent or engage musical/music-theoretic concepts.</p>
         <dd>Generating ("deparsing") pitch representations</dd>
       </dl><dl><dt>
           
-          <code><a href="tonalIntervalS4.html">tint()</a></code> <code><a href="tonalIntervalS4.html">is.tonalInterval()</a></code> 
+          <code><a href="chordFunctions.html">chordFunctions</a></code> 
+        </dt>
+        <dd>Parsing and deparsing chord information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="chordParsing.html">chordParsing</a></code> 
+        </dt>
+        <dd>Parsing chord information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="chordDeparsing.html">chordDeparsing</a></code> 
+        </dt>
+        <dd>Generating ("deparsing") chord representations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="keyFunctions.html">keyFunctions</a></code> 
+        </dt>
+        <dd>Parsing and deparsing key information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="keyParsing.html">keyParsing</a></code> 
+        </dt>
+        <dd>Parsing key information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="keyDeparsing.html">keyDeparsing</a></code> 
+        </dt>
+        <dd>Generating ("deparsing") key representations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tonalIntervalS4.html">tint()</a></code> <code><a href="tonalIntervalS4.html">is.tonalInterval()</a></code> <code><a href="tonalIntervalS4.html">order.tonalInterval()</a></code> 
         </dt>
         <dd>Representation of tonal pitch information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tertianSetS4.html">tset()</a></code> <code><a href="tertianSetS4.html">is.tertianSet()</a></code> 
+        </dt>
+        <dd>Tertian set</dd>
+      </dl><dl><dt>
+          
+          <code><a href="diatonicSetS4.html">diatonicSet()</a></code> <code><a href="diatonicSetS4.html">dset()</a></code> <code><a href="diatonicSetS4.html">is.diatonicSet()</a></code> <code><a href="diatonicSetS4.html">order.diatonicSet()</a></code> <code><a href="diatonicSetS4.html">`==`(<i>&lt;diatonicSet&gt;</i>,<i>&lt;diatonicSet&gt;</i>)</a></code> <code><a href="diatonicSetS4.html">Compare(<i>&lt;diatonicSet&gt;</i>,<i>&lt;diatonicSet&gt;</i>)</a></code> <code><a href="diatonicSetS4.html">`==`(<i>&lt;tertianSet&gt;</i>,<i>&lt;tertianSet&gt;</i>)</a></code> 
+        </dt>
+        <dd>Tonal (diatonic) sets</dd>
       </dl></div><div class="section level2">
       
       <h3 id="pitch-functions">Pitch functions<a class="anchor" aria-label="anchor" href="#pitch-functions"></a></h3>
@@ -300,7 +340,7 @@ represent or engage musical/music-theoretic concepts.</p>
           
           <code><a href="pc.html">pc()</a></code> 
         </dt>
-        <dd>Representation of Atonal Pitch classes</dd>
+        <dd>Representation of atonal pitch classes</dd>
       </dl><dl><dt>
           
           <code><a href="freq.html">freq()</a></code> 
@@ -313,21 +353,6 @@ represent or engage musical/music-theoretic concepts.</p>
         <dd>Line of Fifths</dd>
       </dl><dl><dt>
           
-          <code><a href="diatonicSet.html">dset()</a></code> <code><a href="diatonicSet.html">is.diatonicSet()</a></code> <code><a href="diatonicSet.html">is.diatonicSet()</a></code> <code><a href="diatonicSet.html">order.diatonicSet()</a></code> <code><a href="diatonicSet.html">`==`(<i>&lt;diatonicSet&gt;</i>,<i>&lt;diatonicSet&gt;</i>)</a></code> <code><a href="diatonicSet.html">Compare(<i>&lt;diatonicSet&gt;</i>,<i>&lt;diatonicSet&gt;</i>)</a></code> <code><a href="diatonicSet.html">diatonicSet(<i>&lt;diatonicSet&gt;</i>)</a></code> <code><a href="diatonicSet.html">diatonicSet(<i>&lt;logical&gt;</i>)</a></code> <code><a href="diatonicSet.html">diatonicSet(<i>&lt;numeric&gt;</i>)</a></code> <code><a href="diatonicSet.html">diatonicSet(<i>&lt;integer&gt;</i>)</a></code> <code><a href="diatonicSet.html">diatonicSet(<i>&lt;character&gt;</i>)</a></code> <code><a href="diatonicSet.html">as.character(<i>&lt;tertianSet&gt;</i>)</a></code> <code><a href="diatonicSet.html">`==`(<i>&lt;tertianSet&gt;</i>,<i>&lt;tertianSet&gt;</i>)</a></code> 
-        </dt>
-        <dd>Tonal (diatonic) sets</dd>
-      </dl><dl><dt>
-          
-          <code><a href="tertianSet.html">tertianSet()</a></code> <code><a href="tertianSet.html">tset()</a></code> <code><a href="tertianSet.html">is.tertianSet()</a></code> 
-        </dt>
-        <dd>Tertian set</dd>
-      </dl><dl><dt>
-          
-          <code><a href="romanNumerals.html">romanNumerals</a></code> 
-        </dt>
-        <dd>Roman Numeral</dd>
-      </dl><dl><dt>
-          
           <code><a href="transpose.html">transpose()</a></code> 
         </dt>
         <dd>Transpose pitches and keys</dd>
@@ -338,28 +363,19 @@ represent or engage musical/music-theoretic concepts.</p>
         <dd>Invert or transpose tonal intervals.</dd>
       </dl><dl><dt>
           
-          <code><a href="chordTransformer.html">figuredBass()</a></code> 
+          <code><a href="int.html">int()</a></code> <code><a href="int.html">mint()</a></code> <code><a href="int.html">hint()</a></code> 
         </dt>
-        <dd>Parsing and deparsing chord information.</dd>
+        <dd>Calculate intervals between pitches</dd>
       </dl><dl><dt>
           
-          <code><a href="keyTransformer.html">key()</a></code> 
+          <code><a href="is.simple.html">is.simple()</a></code> <code><a href="is.simple.html">is.generic()</a></code> 
         </dt>
-        <dd>Parsing and deparsing key information</dd>
-      </dl><dl><dt>
-          
-          <code><a href="mint.html">mint()</a></code> 
-        </dt>
-        <dd>Calculate melodic intervals</dd>
-      </dl><dl><dt>
-          
-          <code><a href="hint.html">hint()</a></code> 
-        </dt>
-        <dd>Calculate harmonic intervals</dd>
+        <dd>Test the properties of tonal information</dd>
       </dl></div><div class="section level2">
       
-      <h3 id="rhythm">Rhythm<a class="anchor" aria-label="anchor" href="#rhythm"></a></h3>
-      <p class="section-desc"></p><p>Rhythm and meter classes and functions.</p>
+      <h3 id="key-and-chord-functions">Key and chord functions<a class="anchor" aria-label="anchor" href="#key-and-chord-functions"></a></h3>
+      <p class="section-desc"></p><p>These functions translate between diatonic and tertian
+representations:</p>
 
       
     </div><div id="" class="section level2">
@@ -369,44 +385,172 @@ represent or engage musical/music-theoretic concepts.</p>
 
       <dl><dt>
           
-          <code><a href="time.html">bpm2ms()</a></code> <code><a href="time.html">ms2bpm()</a></code> 
+          <code><a href="romanNumerals.html">romanNumerals</a></code> 
         </dt>
-        <dd>Time transformations</dd>
+        <dd>Roman Numeral</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmDecompose.html">rhythmDecompose()</a></code> 
+          <code><a href="key.html">key()</a></code> 
         </dt>
-        <dd>Decompose durations in terms of other durations</dd>
+        <dd>Humdrum key interpretation</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmInterval.html">rhythmInterval</a></code> 
+          <code><a href="signature.html">signature()</a></code> 
         </dt>
-        <dd>parse rhythmic information</dd>
+        <dd>Humdrum key signature</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmFunctions.html">recip()</a></code> <code><a href="rhythmFunctions.html">duration()</a></code> 
+          <code><a href="romanKey.html">romanKey()</a></code> 
         </dt>
-        <dd>Manipulate pitch data</dd>
+        <dd>Roman numeral key areas</dd>
+      </dl><dl><dt>
+          
+          <code><a href="harm.html">harm()</a></code> <code><a href="harm.html">roman()</a></code> 
+        </dt>
+        <dd>Roman numeral representations of harmony</dd>
+      </dl><dl><dt>
+          
+          <code><a href="chord.html">chord()</a></code> 
+        </dt>
+        <dd>"Pop/Jazz" chord symbols</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tertian.html">tertian()</a></code> 
+        </dt>
+        <dd>Tertian quality chord representation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="figuredBass.html">figuredBass()</a></code> 
+        </dt>
+        <dd>Figured bass representation of harmony</dd>
+      </dl><dl><dt>
+          
+          <code><a href="is.major.html">is.major()</a></code> <code><a href="is.major.html">is.minor()</a></code> 
+        </dt>
+        <dd>Test the major/minor modality of a set</dd>
+      </dl></div><div class="section level2">
+      
+      <h3 id="rhythm-overviews">Rhythm overviews<a class="anchor" aria-label="anchor" href="#rhythm-overviews"></a></h3>
+      <p class="section-desc"></p><p>These pages overview general concepts in humdrumR pitch:</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="rhythmFunctions.html">rhythmFunctions</a></code> 
+        </dt>
+        <dd>Translate between rhythm representations.</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rhythmParsing.html">rhythmParsing</a></code> 
+        </dt>
+        <dd>Parsing rhythm information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rhythmDeparsing.html">rhythmDeparsing</a></code> 
+        </dt>
+        <dd>Generating ("deparsing") rhythm representations</dd>
       </dl><dl><dt>
           
           <code><a href="humMeter.html">humMeter</a></code> 
         </dt>
         <dd>Tools for analyzing rhythm and meter.</dd>
-      </dl><dl><dt>
+      </dl></div><div class="section level2">
+      
+      <h3 id="rhythm-functions">Rhythm functions<a class="anchor" aria-label="anchor" href="#rhythm-functions"></a></h3>
+      <p class="section-desc"></p><p>These functions translate between rhythm representations:</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
-          <code><a href="SOI.html">SOI()</a></code> 
+          <code><a href="bpm2sec.html">bpm2sec()</a></code> <code><a href="bpm2sec.html">sec2bpm()</a></code> <code><a href="bpm2sec.html">bpm2ms()</a></code> <code><a href="bpm2sec.html">ms2bpm()</a></code> 
         </dt>
-        <dd>Onset/Offset interval since beginning.</dd>
+        <dd>Translate between durations and tempos</dd>
       </dl><dl><dt>
           
-          <code><a href="meter.html">measure()</a></code> 
+          <code><a href="recip.html">recip()</a></code> 
+        </dt>
+        <dd>Reciprocal representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="duration.html">duration()</a></code> <code><a href="duration.html">quarters()</a></code> 
+        </dt>
+        <dd>Numeric (double) representation of durations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="noteValue.html">noteValue()</a></code> 
+        </dt>
+        <dd>Note value representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="time.html">seconds()</a></code> <code><a href="time.html">ms()</a></code> <code><a href="time.html">dur()</a></code> 
+        </dt>
+        <dd>Clock-time representations of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="meter.html">meter()</a></code> <code><a href="meter.html">duple()</a></code> 
         </dt>
         <dd>Meter class</dd>
+      </dl></div><div class="section level2">
+      
+      <h3 id="rhythm-and-meter">Rhythm and Meter<a class="anchor" aria-label="anchor" href="#rhythm-and-meter"></a></h3>
+      <p class="section-desc"></p><p>Rhythm and meter analysis functions.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="timeline.html">timeline()</a></code> <code><a href="timeline.html">timestamp()</a></code> 
+        </dt>
+        <dd>Rhythmic timeline of a piece</dd>
       </dl><dl><dt>
           
-          <code><a href="metric.html">metric()</a></code> 
+          <code><a href="metlev.html">metlev()</a></code> <code><a href="metlev.html">metcount()</a></code> 
         </dt>
-        <dd>Calculate metric positions from duration data.</dd>
+        <dd>Calculate metric information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="count.html">count()</a></code> <code><a href="count.html">subpos()</a></code> <code><a href="count.html">onbeat()</a></code> 
+        </dt>
+        <dd>Count beats or measures</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ioi.html">ioi()</a></code> <code><a href="ioi.html">untie()</a></code> 
+        </dt>
+        <dd>Sum "connected" durations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="recip.html">recip()</a></code> 
+        </dt>
+        <dd>Reciprocal representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tactus.html">tactus</a></code> 
+        </dt>
+        <dd>Properties of meters</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tatum.html">tatum</a></code> 
+        </dt>
+        <dd>Metric units</dd>
+      </dl><dl><dt>
+          
+          <code><a href="nbeats.html">nbeats</a></code> 
+        </dt>
+        <dd>Counting beats</dd>
       </dl></div><div class="section level2">
       
       <h3 id="lyrics">Lyrics<a class="anchor" aria-label="anchor" href="#lyrics"></a></h3>
@@ -454,7 +598,7 @@ contain the musical data.</p>
           
           <code><a href="humActive.html">evalActive()</a></code> <code><a href="humActive.html">getActive()</a></code> <code><a href="humActive.html">getActiveFields()</a></code> <code><a href="humActive.html">setActive()</a></code> <code><a href="humActive.html">setActiveFields()</a></code> <code><a href="humActive.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>The "Active expression" of a <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR object</a></dd>
+        <dd>The "Active expression" of a humdrumR object</dd>
       </dl><dl><dt>
           
           <code><a href="humCoercion.html">as.vector(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.lines()</a></code> <code><a href="humCoercion.html">as.matrix(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.matrices()</a></code> <code><a href="humCoercion.html">as.data.frames()</a></code> 
@@ -470,6 +614,11 @@ contain the musical data.</p>
           <code><a href="collapseHumdrum.html">collapseHumdrum()</a></code> <code><a href="collapseHumdrum.html">collapseStops()</a></code> <code><a href="collapseHumdrum.html">collapsePaths()</a></code> <code><a href="collapseHumdrum.html">collapseRecords()</a></code> 
         </dt>
         <dd>"Collapse" humdrumR data into a field</dd>
+      </dl><dl><dt>
+          
+          <code><a href="expandPaths.html">expandPaths()</a></code> 
+        </dt>
+        <dd>Expand paths into new spines</dd>
       </dl><dl><dt>
           
           <code><a href="foldHumdrum.html">foldHumdrum()</a></code> <code><a href="foldHumdrum.html">foldPaths()</a></code> <code><a href="foldHumdrum.html">foldStops()</a></code> 
@@ -494,7 +643,7 @@ contain the musical data.</p>
           
           <code><a href="humSize.html">nrecord()</a></code> <code><a href="humSize.html">nrow(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ntoken()</a></code> <code><a href="humSize.html">npiece()</a></code> <code><a href="humSize.html">nfile()</a></code> <code><a href="humSize.html">length(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ncol(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">dim(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">is.empty()</a></code> <code><a href="humSize.html">anyMultiPieceFiles()</a></code> <code><a href="humSize.html">anyPaths()</a></code> <code><a href="humSize.html">anyStops()</a></code> <code><a href="humSize.html">anySubcorpora()</a></code> <code><a href="humSize.html">namesSubcorpora()</a></code> 
         </dt>
-        <dd><a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> size and shape</dd>
+        <dd>humdrumR data size and shape</dd>
       </dl><dl><dt>
           
           <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">getFields()</a></code> <code><a href="humTable.html">fields()</a></code> 
@@ -524,7 +673,7 @@ contain the musical data.</p>
 
       <dl><dt>
           
-          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">order(<i>&lt;Rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> 
+          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">rank(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">round(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">floor(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">ceiling(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">trunc(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">expand(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> <code><a href="rational.html">as.double(<i>&lt;fraction&gt;</i>)</a></code> <code><a href="rational.html">as.integer(<i>&lt;fraction&gt;</i>)</a></code> 
         </dt>
         <dd>Rational numbers</dd>
       </dl><dl><dt>

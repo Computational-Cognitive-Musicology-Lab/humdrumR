@@ -84,10 +84,11 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     
     if (reverse) matches <- rev(matches)
     
-    if (toEnv) list2env(matches, parent.frame())
+    matches <- lapply(matches, `names<-`, value = NULL)
     
+    if (toEnv) list2env(matches, parent.frame())
+
     output <- do.call('cbind', matches)
-    # if (length(str) > 0L) rownames(output) <- str
     
     if (toEnv) invisible(output) else output
     
@@ -128,8 +129,11 @@ regexFindMethod <- function(str, regexes) {
 REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outputClass = 'character') {
     if (!is.character(str)) .stop(call. = FALSE,
                                 "Sorry, REapply can only apply to an x argument that is a character vector.")
-  
+    checks(str, xcharacter)
+    checks(regex, xcharacter)
+    checks(inPlace, xTF)
     
+  
     regex <- getRE(regex)
     matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     
@@ -213,29 +217,29 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' @export
 #' @name RegexFind
 `%~l%` <- function(x, regex) {
-  checkVector(x, 'x', '%~l%')
-  checkCharacter(regex, 'regex', "%~l%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('|', lapply(regex, grepl, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~i%` <- function(x, regex) {
-  checkVector(x, 'x', '%~i%')
-  checkCharacter(regex, 'regex', "%~i%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('union', lapply(regex, grep, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~n%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~m%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   
   do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
 }
@@ -338,6 +342,11 @@ escaper <- function(str) {
 }
 
 
+escape <- function(str) {
+  stringr::str_replace_all(str, "([+*?])", "\\\\\\1")
+}
+
+
 
 
 cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
@@ -361,18 +370,18 @@ cREs <- function(REs, parse.exhaust = TRUE, sep = NULL) {
         
     }
     
-    if (!parse.exhaust && length(REs) > 1L) {
+    output <- if (!parse.exhaust && length(REs) > 1L) {
       Reduce(\(head, last) paste0(head, sep,  '(.*(', last, '))'), REs, right = TRUE )
     } else {
       do.call('.paste', c(as.list(unname(REs)), list(sep = if (is.null(sep)) "" else sep)))
       # paste(REs, collapse = if (is.null(sep)) "" else sep)
     }
     
-  
+    list(output)
     
 }
 
-####. REs for tonalIntervals ####
+#### REs for tonalIntervals ----
 
 makeRE.steps <- function(step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...)  {
     if (is.null(step.labels)) return('[1-9][0-9]*')
@@ -516,7 +525,7 @@ makeRE.pc <- function(ten = 'A', eleven = 'B', ...) {
   captureRE(c(0:11, ten, eleven))
 }
 
-####. REs for diatonic sets ####
+#### REs for diatonic sets ####
 
 makeRE.alterations <- function(..., qualities = FALSE) {
     # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
@@ -524,9 +533,9 @@ makeRE.alterations <- function(..., qualities = FALSE) {
 
     
     makeRE <- partialApply(makeRE.tonalChroma,
-                       parts = c("species", "step"), step.signed = FALSE, flat = 'b',
-                       step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
-                       regexname = 'alterations')
+                           parts = c("species", "step"), step.signed = FALSE, flat = 'b',
+                           step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
+                           regexname = 'alterations')
     
     paste0('(', makeRE(..., qualities = qualities), ')*')
 }
@@ -577,12 +586,18 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
     if (collapse) setNames(cREs(REs), 'key') else REs
 }
 
-makeRE.romanKey <- function(..., flat = 'b') {
+makeRE.romanKey <- function(..., collapse = TRUE, sep = '/') {
 
-    makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
-               parts = c('species', 'step', 'mode', 'alterations'),
-               flat = flat,
-               ...)
+    numeral <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                          parts = c('species', 'step', 'mode', 'alterations'),
+                          collapse = TRUE, 
+                          ...)
+    
+    
+    REs <- list(head = paste0('(', numeral, ')'),
+                rest = paste0('(', sep, '(', numeral, '))*'))
+    
+    if (collapse) setNames(cREs(REs), 'romanKey') else REs
     
 }
 
@@ -601,32 +616,58 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
     
     re <- orRE(key, romanNumeral)
     
-    paste0(re, '(', split, re, ')', if (mustPartition) '+' else '*')
+    paste0(romanNumeral, '(', split, re, ')', if (mustPartition) '+' else '*')
 }
 
 
-####. REs for tertian sets ####
+#### REs for tertian sets ####
 
-makeRE.sciChord <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
+makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
     
-    REs <- makeRE.tonalChroma(parts = c("step", 'species'),
+    REs <- makeRE.tonalChroma(parts = c("step", "species"),
                               step.labels = '[A-G]', qualities = FALSE,
-                              step.sign = FALSE, collapse = FALSE, ...)
+                              step.sign = FALSE, ...)
     
-    qualityRE <- captureRE(c(major, minor, augment, diminish))
-    REs['quality'] <-  paste0('(', 
-                              qualityRE, '{3}',  
-                              captureRE(c(perfect, augment, diminish)), 
-                              qualityRE, 
-                              '?)|(', 
-                              qualityRE, '{1,3})')
+    REs$incomplete <- '[135]?'
+    
+    qualityRE <- captureRE(c(major, minor, augment, diminish, '.'))
+    REs$quality <-  paste0('((', 
+                           qualityRE, '{3}',  
+                           captureRE(c(perfect, augment, diminish, '.')), 
+                           qualityRE, 
+                           '?)|(', 
+                           qualityRE, '{1,3}))')
+    
+    REs$inversion <- '(/[1-7])?'
    
-    REs <- REs[c("step", "species", "quality")]
     
-    if (collapse) setNames(cREs(REs), 'sciChord') else REs
+    REs <- REs[c("tonalChroma", "incomplete", "quality", "inversion")]
+    
+    if (collapse) setNames(cREs(REs), 'tertian') else REs
 }
 
-makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRUE) {
+makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', 
+                                bass.sep = '/', flat = 'b', 
+                                collapse = TRUE) {
+  REs <- makeRE.tonalChroma(parts = c("step", "species"), flat = flat,
+                            step.labels = '[A-G]', qualities = FALSE,
+                            step.sign = FALSE, ...)
+  
+  REs$quality <- captureRE(c(major, minor, augment, diminish), '?')
+  
+  REs$figurations <- makeRE.alterations(...)
+  
+  REs$bass <- paste0('(', bass.sep, REs$tonalChroma, ')?')
+  
+  REs <- REs[c("tonalChroma", "quality", "figurations", "bass")]
+  
+  
+  
+  if (collapse) setNames(cREs(REs), 'chord') else REs
+  
+}
+
+makeRE.roman <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
     augment <- paste0('[', augment, ']') # because "+" is a special character!
     
     REs <- list()
@@ -640,40 +681,114 @@ makeRE.romanChord <- function(..., diminish = 'o', augment = '+', collapse = TRU
     REs$triadalt <- captureRE(c(diminish, augment), n = '?')
 
     
-    REs['figurations'] <- makeRE.alterations(...)
+    REs$figurations <- makeRE.alterations(...)
     REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations')]
     
     
-    if (collapse) setNames(cREs(REs), 'chord') else REs
+    key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                           parts = c('species', 'step', 'mode', 'alterations'),
+                           collapse = TRUE, 
+                           ...)
+    
+    REs$of <- paste0('(', sep, '(', key, '))*')
+    
+    if (collapse) setNames(cREs(REs), 'roman') else REs
+}
+
+makeRE.harm <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {
+  augment <- paste0('[', augment, ']') # because "+" is a special character!
+  
+  REs <- list()
+  REs$accidental <- makeRE.accidentals(...)
+  
+  upper <- paste0('(?=[IV]+', augment,  '?)', captureRE(c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII')))
+  lower <- paste0('(?=[iv]+', diminish, '?)', captureRE(c('i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii')))
+  REs$numeral <- orRE(upper, lower)
+  
+  
+  REs$triadalt <- captureRE(c(diminish, augment), n = '?')
+  
+  
+  REs$figurations <- makeRE.alterations(diminish = 'D', augment = 'A', qualities = TRUE, ...)
+  REs$inversion <- '[a-g]?'
+  REs <- REs[c('accidental', 'numeral', 'triadalt', 'figurations', 'inversion')]
+  
+  
+  key <- makeRE.key(step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
+                    parts = c('species', 'step', 'mode', 'alterations'),
+                    collapse = TRUE, 
+                    ...)
+  
+  REs$of <- paste0('(', sep, '(', key, '))*')
+  
+  if (collapse) setNames(cREs(REs), 'harm') else REs
 }
 
 
 
 makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
     
-    romanChord <- makeRE.romanChord(...)
+    roman <- makeRE.roman(...)
     
     
     key <- makeRE.diatonicPartition(..., split = split, mustPartition = FALSE)
     
-    paste0(romanChord, '(', split, key, ')', if (!mustPartition) '?')
+    paste0(roman, '(', split, key, ')', if (!mustPartition) '?')
 }
 
 
 
-####. REs for durations ####
+#### REs for durations ####
 
-makeRE.recip <- function(...) getRE('recip')
+makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.', collapse = TRUE) {
+  number <- '[0-9]*'
+  
+  REs <- list(prefix = captureRE(c('~', '>', '<'), n = '?'),
+              datetime = paste0('(', number, sep.date, '){0,3}',
+                                '(', number, sep.time, '){0,2}',
+                                number),
+              decimal = paste0('(', sep.decimal, '[0-9]+)?'))
+  
+  if (collapse) setNames(cREs(REs), 'dur') else REs
+  
+  
+}
+
+makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
+  REs <- list(graceMark1 = '([Qq][^0-9q]*)?',
+              recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
+                             '[1-9][0-9]*\\.*|0{1,2}\\.*)'),
+              graceMark2 = '([^qQ]*[Qq])?')
+  if (collapse) setNames(cREs(REs), 'recip') else REs
+}
 
 
-makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
-    REs <- list(star = '\\*?',
-         em   = 'M?',
-         numerator = '[1-9][0-9]*',
-         sep = sep,
-         denominator = '[1-9][0-9]*'
-         )
-    
+makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
+  REs <- list(star = '\\*?',
+              em   = 'M',
+              numerator = '[1-9][0-9]*([+][1-9][0-9]*)*',
+              sep = sep,
+              denominator = '[1-9][0-9]*'
+  )
+  
     if (collapse) setNames(cREs(REs), 'timeSignature') else REs
     
 }
+
+
+noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
+                                Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
+                                            '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
+                                Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
+
+makeRE.noteValue <- function(..., sep = " \U2215", collapse = TRUE) {
+  
+  REs <- list(multiplies = '([1-9][0-9]*)?',
+              value = captureRE(noteValue.unicode$Unicode),
+              divides = paste0('(', sep, '[1-9][0-9]*)?'),
+              space = ' ',
+              dots = paste0('(',  '\U1D16D\U2009',')*'))
+  
+  if (collapse) setNames(cREs(REs), 'noteValue') else REs
+}
+

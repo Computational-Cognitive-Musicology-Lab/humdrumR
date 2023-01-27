@@ -2,35 +2,95 @@
 % Please edit documentation in R/Rhythm.R
 \name{rhythmFunctions}
 \alias{rhythmFunctions}
-\alias{recip}
-\alias{duration}
-\title{Manipulate pitch data}
-\usage{
-recip(
-  x,
-  ...,
-  Exclusive = NULL,
-  parseArgs = list(),
-  timeArgs = list(),
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
-)
+\title{Translate between rhythm representations.}
+\arguments{
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
 
-duration(
-  x,
-  ...,
-  Exclusive = NULL,
-  parseArgs = list(),
-  timeArgs = list(),
-  inPlace = FALSE,
-  memoize = TRUE,
-  deparse = TRUE
-)
+\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "duration."}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
+If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
 }
 \description{
-Manipulate pitch data
+These functions are used to extract and translate between different representations
+of rhythmic (time duration) information.
+}
+\details{
+The full list of rhythm functions is:
+\itemize{
+\item \strong{Metric rhythm representations}
+\itemize{
+\item \emph{Symbolic rhythm representations}
+\itemize{
+\item \code{\link[=recip]{recip()}} (reciprocal note values)
+\item \code{\link[=noteValue]{noteValue()}} (traditional note-value symbols)
+}
+\item \emph{Numeric rhythm representations}
+\itemize{
+\item \code{\link[=duration]{duration()}} (Whole notes)
+\item \code{\link[=quarters]{quarters()}} (quarter notes/crotchets)
+}
+}
+\item \strong{Ametric rhythm representations}
+\itemize{
+\item \emph{Symbolic rhythm representations}
+\itemize{
+\item \code{\link[=dur]{dur()}} (durations of time)
+}
+\item \emph{Numeric rhythm representations}
+\itemize{
+\item \code{\link[=seconds]{seconds()}}
+\item \code{\link[=ms]{ms()}} (milliseconds)
+}
+}
+}
+
+These rhythm functions all work in similar ways, with similar arguments and functionality.
+Each function takes an input rhythm (time duration) representation (which can be anything) and outputs
+\emph{its} own rhythm representation.
+For example, \code{\link[=recip]{recip()}} takes any input representation and outputs \verb{**recip}
+(\href{https://www.humdrum.org/rep/recip/index.html}{reciprocal durations}) data.
+Underneath the hood, the full processing of each function looks like this:
+\itemize{
+\item \strong{Input} representation (e.g., \verb{**recip} or \verb{**dur}) \verb{|>}
+\itemize{
+\item \emph{Parsing} (done by \code{\link[=rhythmInterval]{rhythmInterval()}}) \verb{|>}
+\itemize{
+\item \strong{Intermediate} (\link{rational}) representation \verb{|>}
+}
+\item \emph{Deparsing} \verb{|>}
+}
+\item \strong{Output} representation (e.g. \verb{**recip} or \verb{**duration})
+}
+
+To read the details of the parsing step, read \link[=rhythmParsing]{this}.
+To read the details of the "deparsing" step, read \link[=rhythmDeparsing]{this}.
+To read more details about each specific function, click on the links in the list above,
+or type \code{?func} in the R command line: for example, \code{?noteValue}.
+\subsection{Grace notes}{
+
+\verb{**recip} and \verb{**kern} data sometime include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special
+category of duration, usually used to indicate "freely" a-metric notes in an otherwise metric context.
+In humdrum data, grace notes are marked with \code{"q"} or \code{"Q"}; \code{q} should be reserved
+for tokens with no (other) duration information, while \code{Q} should be marked along with
+duration information: for example, \code{aa-q} or \verb{16aa-Q}.
+In practice, this distinction is not always made, and is rarely important.
+By default, the \verb{**recip} parser treats input marked as grace notes as having a duration of zero.
+However, if you pass a \code{grace} argument to the \link[=rhythmParsing]{rhythm parser}, you can control this behavior.
+If \code{parse(grace = TRUE)}, grace-note durations (like the \code{16} in \code{"16aa-Q"}) are parsed like any other duration.
+If \code{grace = NA}, grace-notes return as \code{NA}.
+If \code{grace = FALSE}, the duration returns as zero (the default behavior).
+}
 }
 \seealso{
-rhythmInterval
+To better understand how these functions work,
+read about how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
 }

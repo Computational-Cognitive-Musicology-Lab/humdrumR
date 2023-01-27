@@ -3,18 +3,52 @@
 \docType{class}
 \name{meter}
 \alias{meter}
-\alias{measure}
+\alias{meter.meter}
+\alias{meter.rational}
+\alias{meter.list}
+\alias{duple}
+\alias{meter.character}
 \title{Meter class}
 \usage{
-measure(
-  soi,
-  beat = rational(1L),
-  start = as(0, class(dur)),
-  phase = rational(0L),
-  Bar = NULL
+meter(x, ...)
+
+\method{meter}{meter}(x, ...)
+
+\method{meter}{rational}(
+  x,
+  ...,
+  measure = NULL,
+  tactus = NULL,
+  tatum = "16",
+  fill.levels = TRUE,
+  subdiv = NULL,
+  hyper = NULL
+)
+
+\method{meter}{list}(
+  x,
+  measure = NULL,
+  tactus = NULL,
+  tatum = "16",
+  fill.levels = TRUE,
+  hyper = NULL,
+  subdiv = NULL,
+  ...
+)
+
+duple(nlevels = 4, measure = rational(1), tactus = 3L)
+
+\method{meter}{character}(
+  x,
+  ...,
+  sep = "/",
+  compound = TRUE,
+  Exclusive = NULL,
+  multiDispatch = FALSE
 )
 }
 \description{
-Takes a sequence of rhythmic offsets and a regular or irregular beat unit, and counts
-how many beats have passed, and the offset between each attack and the nearest beat.
+Meter class
+
+Meter S4 class
 }

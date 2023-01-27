@@ -284,3 +284,63 @@ test_that('Pitch arguments return correct values!', {
     expect_equal(kern(c('e-','e','f','f#','f'), explicitNaturals = TRUE),
                  c("e-", "en",  "fn",  "f#", "fn" ))
 })
+
+
+test_that("int, mint, and hint work", {
+    inputs <- list(kern = c('A-', 'e-', 'bb-', 'f', 'c', 'g', 'ddd', 'AAA', 'e', 'b--', 'f#', 'c#'),
+                   pitch = c("Ab3", "Eb4", "Bb5", "F4", "C4", "G4", "D6", "A1", "E4", "Bbb4", "F#4", "C#4"),
+                   interval = c("-M3", "+m3", "+m14", "+P4", "P1", "+P5", "+M16", "-m17", "+M3", "+d7", "+A4", "+A1"),
+                   solfa = c("vle", "me", "^te", "fa", "do", "so", "^^re", "vvvla", "mi", "te-", "fi", "di"))
+    
+    expect_equal(nrow(unique(do.call('rbind', lapply(inputs, mint)))), 1L)
+    expect_equal(nrow(unique(do.call('rbind', lapply(inputs, hint)))), 1L)
+    
+    expect_equal(mint(inputs$kern, incomplete = NULL),
+                 c(NA, "+P5", "+P12", "-P11", "-P4", "+P5", "+P12", "-P32", "+P19", "+dd5", "-dd4", "-P4"))
+    expect_equal(mint(inputs$kern, directed = FALSE, incomplete = pitch, bracket = FALSE),
+                 c('Ab3', "P5", "P12", "P11", "P4", "P5", "P12", "P32", "P19", "dd5", "dd4", "P4"))
+    
+    classif <- c('c', 'd', 'f', 'g','g','c','b', 'c','c#', 'd','d#','e','g--')
+    expect_equal(mint(classif, bracket = TRUE, classify = TRUE),
+                 c("[c]", "+Step", "+Skip", "+Step", "Unison", "-Leap", "+Leap", "-Leap", "+Unison", "+Step", "+Unison", "+Step", "+Skip"))
+    expect_equal(mint(classif, classify = TRUE, atonal = TRUE, skips = FALSE),
+                 c("[c]", "+Step", "+Leap", "+Step", "Unison", "-Leap", "+Leap", "-Leap", "+Step", "+Step", "+Step", "+Step", "+Step"))
+    
+    ##
+    chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001*.krn')
+    
+    chorale <- within(chorale,
+                      Lag <- hint(Token),
+                      Bass <- hint(Token, lag = Spine == 1)
+                      )
+    
+    expect_true(with(chorale, subset = Spine < 3, all(Bass == Lag)))
+    
+    expect_equal(with(chorale, table(mint(Token))['+M2']), 45)
+    expect_equal(with(chorale, table(hint(Token, lag = Spine == 4))['-M17']), 7)
+    
+})
+
+
+test_that("transpose and invert work", {
+    x <- c('A4','B4','C#5', 'D5', 'E5', 'F#5', 'G#5', 'A5')
+    
+    ## transpose
+    expect_equal(transpose(x, by = M9), c("B5", "C#6", "D#6", "E6", "F#6", "G#6", "A#6", "B6"))
+    expect_equal(transpose(x, by = M3, tonal = TRUE, from = 'A:'), transpose(x, by = M3, tonal = TRUE, from = 'A:'))
+    expect_equal(transpose(x, from = 'A:', to = 'C:'), c("C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"))
+    expect_equal(transpose(x, from = 'a:', to = 'G:', relative = TRUE), c("E4", "F#4", "G#4", "A4", "B4", "C#5", "D#5", "E5"))
+    expect_equal(transpose(x, from = 'A:', to = 'g:', tonal = TRUE), c("G4", "A4", "Bb4", "C5", "D5", "Eb5", "F5", "G5"))
+    
+    
+    # arithmetic style
+    expect_equal((x + P8) - P8, x)
+    expect_equal(x + M2 + m7, x + P5 + P4)
+    expect_equal(x - m3 + M6, x + P8 - d5)
+    
+    
+    ## invert
+    expect_equal(invert(x), c("Eb3", "Db3", "Cb3", "Bb2", "Ab2", "Gb2", "Fb2", "Eb2"))
+    expect_equal(invert(x, around = x[1]), c("A4", "G4", "F4", "E4", "D4", "C4", "Bb3", "A3"))
+    expect_equal(invert(x, around = M9, Key = 'A:'), c("G#5", "F#5", "E5", "D5", "C#5", "B4", "A4", "G#4"))
+})

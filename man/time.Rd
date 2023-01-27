@@ -2,14 +2,89 @@
 % Please edit documentation in R/Rhythm.R
 \name{time}
 \alias{time}
-\alias{bpm2ms}
-\alias{ms2bpm}
-\title{Time transformations}
+\alias{seconds}
+\alias{ms}
+\alias{dur}
+\title{Clock-time representations of duration}
 \usage{
-bpm2ms(bpm)
+seconds(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
 
-ms2bpm(ms)
+ms(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
+dur(
+  x,
+  ...,
+  BPM = "*M60",
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  milliseconds = TRUE,
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+}
+\arguments{
+\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
+is \code{rational(1, 1)}, a whole-note or "duration."}
+
+\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
+If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
+If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
 }
 \description{
-Time transformations
+These functions convert duration values to clock-time representations.
+\code{seconds()} and \code{ms()} output \code{numeric} values.
+\code{dur()} outputs a \code{character} string encoding the humdrum \href{https://www.humdrum.org/rep/dur/index.html}{**dur}
+representation of time.
 }
+\details{
+These functions require a \code{BPM} (beats-per-minute) argument to be specified.
+By default, the value is 60 bpm.
+}
+\section{dur}{
+
+
+The \href{https://www.humdrum.org/rep/dur/index.html}{**dur} output can be modified to include different clock-time units:
+The \code{minutes}, \code{hours}, \code{days}, \code{months}, and \code{years} arguments are all true/false \code{logical} arguments, indicating whether
+to use that unit in the output (all default to \code{FALSE}).
+For example, if \code{minutes = FALSE}, an input of 90 seconds will return \code{":90"} (90 seconds!), but if
+\code{minutes = TRUE}, the output will be \verb{:1:30} (one minute and thirty seconds).
+}
+
+\seealso{
+To better understand how this function works,
+read about the \link[=rhythmFunctions]{family of rhythm functions},
+or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
+
+Other time functions: 
+\code{\link{bpm2sec}()}
+}
+\concept{time functions}

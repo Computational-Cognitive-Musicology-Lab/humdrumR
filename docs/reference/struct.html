@@ -43,7 +43,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -88,8 +88,8 @@ make all the new types we <em>do</em> define act as much like atomic vectors as 
 atomic vectors as a single vector/matrix-like object---simply make your new subclass <a href="https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)" class="external-link">inherit</a> <code>struct</code>
 and it is all taken care of. (To do this, specify <code>contains = "struct"</code> in your call to <a href="https://rdrr.io/r/methods/setClass.html" class="external-link">setClass</a>.)</p>
 <p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="tonalIntervalS4.html">tonal intervals</a></p></li>
-<li><p><a href="diatonicSet.html">diatonicSet</a></p></li>
-<li><p><a href="tertianSet.html">tertianSet</a></p></li>
+<li><p><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a></p></li>
+<li><p><a href="chordParsing.html">tertianSet</a></p></li>
 <li><p><code><a href="rational.html">rational()</a></code></p></li>
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
@@ -182,7 +182,7 @@ If these definitions don't work for your subclass, you'll need to create your ow
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmInterval.html">rhythmInterval</a> <a href="diatonicSet.html">diatonicSet</a> <a href="tertianSet.html">tertianSet</a></p></div>
+    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmParsing.html">rhythmInterval</a> <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> <a href="chordParsing.html">tertianSet</a></p></div>
     </div>
 
     <div class="section level2">
@@ -193,12 +193,12 @@ If these definitions don't work for your subclass, you'll need to create your ow
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># all of these should work:</span></span>
 <span class="r-in"><span class="va">test</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1,10 2,9  3,8  4,7  5,6 </span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">test</span><span class="op">)</span>  <span class="op">==</span> <span class="va">test</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[10 , 2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 1,10 1,10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 2,9  2,9 </span>
@@ -211,14 +211,14 @@ If these definitions don't work for your subclass, you'll need to create your ow
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 9,2  9,2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 10,1 10,1</span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">test</span>, <span class="va">test</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1,10 2,9  3,8  4,7  5,6  6,5  7,4  8,3  9,2  10,1 1,10 2,9  3,8  4,7  5,6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [16] 6,5  7,4  8,3  9,2  10,1</span>
 <span class="r-in"><span class="va">test</span> <span class="op">*</span> <span class="fl">3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 3,30  6,27  9,24  12,21 15,18 18,15 21,12 24,9  27,6  30,3 </span>
 <span class="r-in"><span class="va">test</span> <span class="op">-</span> <span class="va">test</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mynewsubclass</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0,0</span>
 <span class="r-in"></span>
 <span class="r-in"></span>

@@ -60,7 +60,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -238,7 +238,7 @@ based on matches to regular expressions.</p>
 <p>To use humdrum<span class="math inline"><sub>ℝ</sub></span>, you’ll
 first need to install <a href="https://www.r-project.org/" class="external-link">R</a>,
 version 4.1 or later. We <em>highly</em> recommend that you install the
-Integrated Development Environment <a href="https://rstudio.com/" class="external-link">Rstudio</a> as well! This link—<a href="https://rstudio-education.github.io/hopr/starting.html" class="external-link">Installing
+Integrated Development Environment <a href="https://rstudio.com/" class="external-link">RStudio</a> as well! This link—<a href="https://rstudio-education.github.io/hopr/starting.html" class="external-link">Installing
 R and RStudio</a>—is a good starting place.</p>
 </div>
 <div class="section level3">
@@ -279,7 +279,7 @@ using <code>devtools</code>: Open an R session and use
 you just downloaded (i.e., cloned). Once there, type</p>
 <pre class="{r}"><code><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="op">)</span></code></pre>
 <blockquote>
-<p>If you downloaded Rstudio, you can use the “Open Project” option and
+<p>If you downloaded RStudio, you can use the “Open Project” option and
 select the file <code>humdrumR.Rproj</code> from the repository. Once
 you’ve done this you can just click “Install and Restart” in the “Build”
 pane.</p>
@@ -289,6 +289,29 @@ pane.</p>
 calling:</p>
 <pre class="{r}"><code><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span></code></pre>
 </div>
+</div>
+<div class="section level3">
+<h3 id="updating-humdrum_mathbbr">Updating humdrum<span class="math inline"><sub>ℝ</sub></span>
+<a class="anchor" aria-label="anchor" href="#updating-humdrum_mathbbr"></a>
+</h3>
+<p>Humdrum<span class="math inline"><sub>ℝ</sub></span> is under active
+development, with new features being added, documentation being updated,
+and bugs being fixed on a weekly basis. We recommend you keep up to date
+with the newest version of humdrum<span class="math inline"><sub>ℝ</sub></span>. Luckily, you can easily update
+to the latest version by simply running the same
+<code><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">devtools::install_github()</a></code> command from above in an R
+session. However, <em>if</em> you have already loaded the humdrumR<span class="math inline"><sub>ℝ</sub></span> library in your R session—using
+<code><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">library(humdrumR)</a></code>—you’ll need to “detach” the old version
+before the new version will work. You can do this be either 1) quitting
+R studio and opening it again, 2) going to RStudio’s package panel and
+unchecking <code>humdrumR</code>, or 3) running the command
+<code>detach("package:humdrumR", unload = TRUE)</code>.</p>
+<p>If you installed humdrum<span class="math inline"><sub>ℝ</sub></span>
+from source using the <code>git clone</code> command, you can’t simply
+run <code>clone</code> again. Instead, you should navigate to the
+package directory and run <code>git pull origin main</code>. This will
+“pull” the latest changes down to your local machine. You can then rerun
+<code><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">devtools::install()</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
