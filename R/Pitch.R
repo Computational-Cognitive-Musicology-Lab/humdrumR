@@ -2061,7 +2061,7 @@ octave2tint <- function(str, simpletint, roottint,
   }
   
   #
-  steps <- tint2step(simpletint, 0:6) + tint2step(roottint, 0:6)
+  steps <- tint2step(simpletint, 0:6) # + tint2step(roottint, 0:6)
   n <- if (octave.relative) {
     steps <- delta(steps)
     
@@ -2678,7 +2678,6 @@ pitchArgCheck <- function(args,  callname) {
   for (arg in intersect(argnames, scalarchar)) {
     checks(args[[arg]], xcharacter & xlen1, seealso = '?pitchDeparsing')
   }
-  
   
   if ('generic' %in% argnames) {
     if ('specific' %in% argnames && !xor(args$generic, args$specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
@@ -3394,7 +3393,6 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   from <- diatonicSet((from %||% dset(0, 0)))
   from[is.na(from)] <- dset(0, 0)
   
-  
   if (!is.null(to)) {
     to <- diatonicSet(to)
     to[is.na(to)] <- dset(0, 0)
@@ -3421,17 +3419,35 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
     
     altered <- x$Alteration != tint(0, 0)
     if (any(altered)) {
-      comma <- tintPartition(x$Generic[altered] + x$Alteration[altered], 'harmonic', Key = to, ...)$Comma
+      comma <- tintPartition(x$Generic[altered] + x$Alteration[altered], 'harmonic', Key = to)$Comma
       x$Alteration[which(altered)[comma != tint(0,0)]] <- tint(0, 0)
     }
     
-    
     x$Generic + x$Alteration
-    
   }
   
   x
+}
+
+#' @export
+transpose.character <- function(x, by = NULL, from = NULL, to = NULL, ...) {
+  x <- tonalInterval.character(x, ...)
+  tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
   
+  dispatch <- attr(x, 'dispatch')
+  rePlace(reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
+}
+
+#' @export
+transpose.numeric <- function(x, by = NULL, from = NULL, to = NULL, ...) {
+  x <- tonalInterval.numeric(x, ...)
+  tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
+  
+  
+  dispatch <- attr(x, 'dispatch')
+  y <- reParse(tints, dispatch, c('semits', 'freq', 'midi', 'cents', 'lof'))
+  humdrumRattr(y) <- NULL
+  y
 }
 
 
@@ -3454,7 +3470,7 @@ transposeArgCheck <- function(args) {
   args
 }
 
-### Transposition methods ####
+
 
 
 
@@ -3462,19 +3478,39 @@ transposeArgCheck <- function(args) {
 
 
 
-#' Invert or transpose tonal intervals.
+#' Invert or transpose pitches.
 #'
 #' @family tonal transformations
 #' @export 
 invert <- function(tint, around, Key, ...) UseMethod('invert')
 #' @export 
 invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
-  if (!is.tonalInterval(around)) around <- tonalInterval(around)
+  around <- tonalInterval(around)
   
   output <- (around + around - tint) 
   if (!is.null(Key)) output <- output %% Key
   
   output
+}
+
+
+#' @export
+invert.character <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
+  x <- tonalInterval.character(x, ...)
+  tints <- invert.tonalInterval(x, around = around, Key = Key)
+  
+  dispatch <- attr(x, 'dispatch')
+  rePlace(reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
+}
+
+#' @export
+invert.numeric <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
+  x <- tonalInterval.numeric(x, ...)
+  tints <- invert.tonalInterval(x, around = around, Key = Key)
+  
+  y <- reParse(tints, dispatch, c('semits', 'freq', 'midi', 'cents', 'lof'))
+  humdrumRattr(y) <- NULL
+  y
 }
 
 ### Inversion methods ####
@@ -3700,7 +3736,7 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
-  checks(lag, xwholenumber & xlen1 & xnotzero)
+  checks(lag, xwholenum & xlen1 & xnotzero)
   checks(deparser, xclass('function'))
   checks(incomplete, xatomic & xminlength(1) & 
            argCheck(\(arg) length(arg) <= abs(lag), 

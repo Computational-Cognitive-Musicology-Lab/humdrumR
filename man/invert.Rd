@@ -2,12 +2,12 @@
 % Please edit documentation in R/Pitch.R
 \name{invert}
 \alias{invert}
-\title{Invert or transpose tonal intervals.}
+\title{Invert or transpose pitches.}
 \usage{
 invert(tint, around, Key, ...)
 }
 \description{
-Invert or transpose tonal intervals.
+Invert or transpose pitches.
 }
 \seealso{
 Other tonal transformations: 
