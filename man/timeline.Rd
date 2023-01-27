@@ -88,20 +88,7 @@ Thus, a common use for a \code{logical} \code{start} argument is \verb{within(hu
 the first complete bar \code{0}---any notes in a pickup bar are give negative numbers on the timeline.
 }
 
-\examples{
-
-humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
-
-within(humData, timeline(Token))
-
-within(humData, timestamp(Token, minutes = TRUE))
-
-
-}
 \seealso{
 {The \code{\link[=count]{count()}} and \code{\link[=metcount]{metcount()}} functions provide "higher level" musical interpretations of timeline information.}
-
-Other rhythm analysis tools: 
-\code{\link{localDuration}()}
 }
 \concept{rhythm analysis tools}

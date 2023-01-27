@@ -154,7 +154,6 @@ reference:
   contents:
   - timeline
   - timestamp
-  - localDuration
   - metlev
   - count
   - metcount

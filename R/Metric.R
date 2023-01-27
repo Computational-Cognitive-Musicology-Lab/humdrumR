@@ -588,9 +588,11 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 #'   
 #' @examples 
 #' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' `within(humdata, count(Token, beat = TimeSignature))`
-#' `within(humdata, count(Token, beat = tactus(TimeSignature)))`
+#' show(within(humData, count(Token, beat = TimeSignature, start = NBar == 1)))
+#' 
+#' show(within(humData, count(Token, beat = tactus(TimeSignature))))
 #'  
 #'   
 #' @seealso {`count()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `count()` within a metric framework.}

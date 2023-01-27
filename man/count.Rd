@@ -129,9 +129,11 @@ It may be better to use \code{round(timeline())} in cases where you want to do m
 
 \examples{
 
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
-`within(humdata, count(Token, beat = TimeSignature))`
-`within(humdata, count(Token, beat = tactus(TimeSignature)))`
+show(within(humData, count(Token, beat = TimeSignature, start = NBar == 1)))
+
+show(within(humData, count(Token, beat = tactus(TimeSignature))))
  
   
 }

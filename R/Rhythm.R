@@ -1110,84 +1110,82 @@ untie <- function(x, open = '[', close = ']', ...,
 
 ### timelines ----
 
-#' Calculate overall duration of a group
-#' 
-#' `localDuration()` calculates the "overall" duration within groups in an input vector.
-#' What the hell does that mean?
-#' Usually, it is used to find the duration of each *record* in a humdrum file.
-#' 
-#' @details 
-#' 
-#' The way rhythm and time are typically encoded in humdrum format, the "overall" duration of
-#' a record is determined by the shortest duration in the record, if there are any.
-#' So, if we have a file like this:
-#' 
-#' ```
-#' **kern  **kern     **silbe
-#'     4c      8g        Hum-
-#'      .      8f           _
-#'      !       !    !melisma  
-#'     8b      8f       -drum
-#'     8c      8e           _
-#'     2d      4a         da-
-#'      .       .           .
-#'      .      4g         -ta
-#'     G;      g;         ooh
-#'     *-      *-          *-     
-#' ```
-#'
-#' The "local" duration of each record would be (in `**recip`):
-#' 
-#' ```
-#' **kern  **kern     **silbe   -> 1%0
-#'     4c      8g        Hum-   -> 8
-#'      .      8f           _   -> 8
-#'      !       !    !melisma   -> 1%0
-#'     8b      8f       -drum   -> 8
-#'     8c      8e           _   -> 8
-#'     2d      4a         da-   -> 4
-#'      .       .           .   -> 1%0
-#'      .      4g         -ta   -> 4
-#'     G;      g;         ooh   -> 1%0
-#'     *-      *-          *-   -> 1%0
-#' ```
-#'
-#' Note that some records are length zero (`1%0`), because they are missing any duration information.
-#' (In this example we are showing durations of `1%0` for comment, interpretation, and null data records. In most cases, we'd 
-#' be doing `within(humData, dataTypes ='D')`, which is the default behavior, so these records wouldn't be counted at all.)
-#' 
-#' `localDuration()` begins with a call to [duration()] on the input argument `x`---the `parseArgs()` argument can be used to pass arguments to the [parser][rhythmParsing] (the `Exclusive` argument is passed as well).
-#' `localDuration()` then groups the durations based on unique combinations of values in the `groupby` argument, which must be a list of
-#' vectors that are the same length as `x`.
-#' By default, the minimum duration within each group is returned, recycled as necassary to match the input length.
-#' The `choose` argument can be set to another function, if desired.
-#' For example, you could use `localDuration(x, choose = max)` to find the *maximum* duration in each group.
-#' If the `groupby` argument is empty (the default) the durations are returned unchanged, except that `NA` durations are set to `0`.
-#' Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(File, Record)` is *automatically*
-#' passed (this can be overridden by explicitely setting the argument).
-#' This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
-#' 
-#' Note that, `localDuration()` follows the default behavior of [duration()] by treating grace-notes as duration `0`.
-#' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
-#'
-#' The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
-#' For example, `deparser = recip` will return the output in `**recip` format.
-#' `...` arguments are passed to the deparser.
-#' 
-#' @examples 
-#' 
-#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
-#' 
-#' within(humData, localDuration(Token))
-#'
-#' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
-#' @param choose A function which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
-#' @param deparser A [rhythm function][rhythmFunction] to generate the output representation.
-#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
-#'
-#' @family rhythm analysis tools
-#' @export 
+# Calculate overall duration of a group
+# 
+# `localDuration()` calculates the "overall" duration within groups in an input vector.
+# What the hell does that mean?
+# Usually, it is used to find the duration of each *record* in a humdrum file.
+# 
+# @details 
+# 
+# The way rhythm and time are typically encoded in humdrum format, the "overall" duration of
+# a record is determined by the shortest duration in the record, if there are any.
+# So, if we have a file like this:
+# 
+# ```
+# **kern  **kern     **silbe
+#     4c      8g        Hum-
+#      .      8f           _
+#      !       !    !melisma  
+#     8b      8f       -drum
+#     8c      8e           _
+#     2d      4a         da-
+#      .       .           .
+#      .      4g         -ta
+#     G;      g;         ooh
+#     *-      *-          *-     
+# ```
+#
+# The "local" duration of each record would be (in `**recip`):
+# 
+# ```
+# **kern  **kern     **silbe   -> 1%0
+#     4c      8g        Hum-   -> 8
+#      .      8f           _   -> 8
+#      !       !    !melisma   -> 1%0
+#     8b      8f       -drum   -> 8
+#     8c      8e           _   -> 8
+#     2d      4a         da-   -> 4
+#      .       .           .   -> 1%0
+#      .      4g         -ta   -> 4
+#     G;      g;         ooh   -> 1%0
+#     *-      *-          *-   -> 1%0
+# ```
+#
+# Note that some records are length zero (`1%0`), because they are missing any duration information.
+# (In this example we are showing durations of `1%0` for comment, interpretation, and null data records. In most cases, we'd 
+# be doing `within(humData, dataTypes ='D')`, which is the default behavior, so these records wouldn't be counted at all.)
+# 
+# `localDuration()` begins with a call to [duration()] on the input argument `x`---the `parseArgs()` argument can be used to pass arguments to the [parser][rhythmParsing] (the `Exclusive` argument is passed as well).
+# `localDuration()` then groups the durations based on unique combinations of values in the `groupby` argument, which must be a list of
+# vectors that are the same length as `x`.
+# By default, the minimum duration within each group is returned, recycled as necassary to match the input length.
+# The `choose` argument can be set to another function, if desired.
+# For example, you could use `localDuration(x, choose = max)` to find the *maximum* duration in each group.
+# If the `groupby` argument is empty (the default) the durations are returned unchanged, except that `NA` durations are set to `0`.
+# Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(File, Record)` is *automatically*
+# passed (this can be overridden by explicitely setting the argument).
+# This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
+# 
+# Note that, `localDuration()` follows the default behavior of [duration()] by treating grace-notes as duration `0`.
+# If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
+#
+# The output representation can be controlled using the `deparser` argument, defaulting to [duration()].
+# For example, `deparser = recip` will return the output in `**recip` format.
+# `...` arguments are passed to the deparser.
+# 
+# @examples 
+# 
+# humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
+# 
+# within(humData, localDuration(Token))
+#
+# @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
+# @param choose A function which takes a vector of `numeric` and returns a single `numeric` value. Defaults to `min`; `max`, `median`, or `mode` might be reasonable alternatives.
+# @param deparser A [rhythm function][rhythmFunction] to generate the output representation.
+# @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+# @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
+#
 localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   checks(choose, xclass('function'))
@@ -1253,14 +1251,6 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for a `logical` `start` argument is `within(humData, timeline(Token, start = Bar == 1)`, which makes the downbeat of
 #' the first complete bar `0`---any notes in a pickup bar are give negative numbers on the timeline.
-
-#' @examples 
-#' 
-#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/.*krn")
-#' 
-#' within(humData, timeline(Token))
-#' 
-#' within(humData, timestamp(Token, minutes = TRUE))
 #' 
 #' 
 #' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
@@ -1273,7 +1263,8 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
 #'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#'   
+#'
+#' 
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @export
