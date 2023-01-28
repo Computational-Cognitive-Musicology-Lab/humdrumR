@@ -3736,12 +3736,12 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
-  checks(lag, xwholenum & xlen1 & xnotzero)
-  checks(deparser, xclass('function'))
-  checks(incomplete, xatomic & xminlength(1) & 
+  checks(lag, (xlogical & xmatch(x)) | (xwholenum & xlen1 & xnotzero))
+  checks(deparser, xclass('pitchFunction'))
+  checks(incomplete, xnull | xclass('pitchFunction') | (xatomic & xminlength(1) & 
            argCheck(\(arg) length(arg) <= abs(lag), 
                     "must be as short or shorter than the absolute lag",  
-                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag))))
   checks(bracket, xTF)
   checks(classify, xTF)
   

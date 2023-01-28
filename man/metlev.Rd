@@ -3,7 +3,7 @@
 \name{metlev}
 \alias{metlev}
 \alias{metcount}
-\title{Calculate metric information}
+\title{Count or measure metric position}
 \usage{
 metlev(
   dur,
@@ -32,5 +32,7 @@ metcount(
 )
 }
 \description{
-Calculate metric information
+Count or measure metric position
+
+Count metric positions
 }

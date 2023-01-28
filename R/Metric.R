@@ -247,7 +247,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
   
 }
 
-#' Calculate metric information
+#' Count or measure metric position
 #' 
 #' 
 #' @export
@@ -282,6 +282,9 @@ metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 }
 
 
+#' Count metric positions
+#' 
+#' 
 #' @rdname metlev
 #' @export
 metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,

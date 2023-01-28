@@ -9,13 +9,13 @@
 # scale <- sort(tint( , -12L:12L))
 # scale <- c(scale - octave*2, scale - octave, scale, scale + octave)
 # 
-# correct <- data.frame(kern = tint2kern(scale),
-#                       interval = tint2interval(scale),
-#                       solfa = tint2solfa(scale),
-#                       semits = tint2semits(scale),
-#                       lilypond = tint2lilypond(scale),
-#                       helmholtz = tint2helmholtz(scale),
-#                       degree = tint2degree(scale)
+# correct <- data.frame(kern = humdrumR:::tint2kern(scale),
+#                       interval = humdrumR:::tint2interval(scale),
+#                       solfa = humdrumR:::tint2solfa(scale),
+#                       semits = humdrumR:::tint2semits(scale),
+#                       lilypond = humdrumR:::tint2lilypond(scale),
+#                       helmholtz = humdrumR:::tint2helmholtz(scale),
+#                       degree = humdrumR:::tint2degree(scale)
 # )
 
 test_that('tonalIntervalS4 math works', {
@@ -138,16 +138,15 @@ test_that("Functions are invertible", {
                    lilypond = c("aes", "ees'", "bes''", "f'", "c'", "g'", "d'''", "a,,", "e'", "beses'", "fis'", "cis'"))
     
     #
-    devtools::load_all()
     
-    # expect_invertible(tint2pitch,  pitch2tint,  inputs$tint)
-    expect_invertible(tint2kern, kern2tint, inputs$tint)
-    expect_invertible(tint2interval,  interval2tint,  inputs$tint)
+    # expect_invertible(humdrumR:::tint2pitch,  humdrumR:::pitch2tint,  inputs$tint)
+    expect_invertible(humdrumR:::tint2kern, humdrumR:::kern2tint, inputs$tint)
+    expect_invertible(humdrumR:::tint2interval,  humdrumR:::interval2tint,  inputs$tint)
 
-    expect_invertible(kern2tint, tint2kern, inputs$kern)
-    expect_invertible(pitch2tint, tint2pitch, inputs$pitch)
-    expect_invertible(interval2tint, tint2interval, inputs$interval)
-    expect_invertible(solfa2tint, tint2solfa, inputs$solfa)
+    expect_invertible(humdrumR:::kern2tint, humdrumR:::tint2kern, inputs$kern)
+    expect_invertible(humdrumR:::pitch2tint, humdrumR:::tint2pitch, inputs$pitch)
+    expect_invertible(humdrumR:::interval2tint, humdrumR:::tint2interval, inputs$interval)
+    expect_invertible(humdrumR:::solfa2tint, humdrumR:::tint2solfa, inputs$solfa)
     
     # exported functions
     expect_invertible(kern, kern, inputs$kern)
