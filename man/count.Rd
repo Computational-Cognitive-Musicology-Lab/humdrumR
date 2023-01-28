@@ -11,6 +11,7 @@ count(
   beat = rational(1L),
   start = 1L,
   phase = 0,
+  pickup = NULL,
   offBeats = TRUE,
   groupby = list()
 )
@@ -19,6 +20,7 @@ subpos(
   dur,
   beat = rational(1L),
   phase = 0,
+  pickup = NULL,
   deparser = duration,
   groupby = list(),
   ...
@@ -31,10 +33,12 @@ onbeat(dur, beat = rational(1L), groupby = list(), ...)
 
 \item{beat}{An input vector of length 1, or the same length as \code{dur}, which is parsed as duration information using the \link[=rhythmParsing]{rhythm parser}---or a list of vectors.}
 
-\item{start}{A whole-number value from which the counting begins, or a \code{logical} vector of same length as \code{x}.}
+\item{start}{A whole-number value from which the counting begins.}
 
 \item{phase}{(length 1 or the same length as \code{dur}) An atomic vector which can be parsed by the \link[=rhythmParsing]{rhythm parser}. \code{0} is the default. The largest \code{phase}
 value must be smaller than the smallest rhythmic value in \code{beat}.}
+
+\item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
 
 \item{offBeats}{(\code{logical} TRUE/False) If \code{FALSE}, offbeat onsets return \code{NA}.}
 
@@ -111,19 +115,21 @@ To accommodate changing meters, the \code{beat} argument can still accept \code{
 }
 }
 
-\section{Logical start}{
+\section{Pickups}{
 
 
-Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{dur}.
-Within each piece, the the \emph{first} index where the \code{start} logical is \code{TRUE} is used as the beat \code{1}:
-all earlier points will be negative counts, counting backwards from the start.
+Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{dur}.
+Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
+indicate a pickup.
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the location of beat \code{1}:
+all the earlier (\code{pickup == TRUE}) points will be negative counts, counting backwards from the start.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
-Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, count(Token, start = Bar == 1)}, which makes the downbeat of
-the first complete bar \code{1}---any notes in a pickup bar are give negative counts on the timeline.
+Thus, a common use for the \code{pickup} argument is \verb{within(humData, count(Token, pickup = Bar < 1)}, which makes the downbeat of
+the first complete bar \code{1} the stating point---any notes in pickup bars are give negative counts.
 
 \strong{Note that there is never a 'beat zero'.}
 Beats before the starting point progress directly from \code{-1} to \code{1} (the start).
-As a result, doing arithmetic or other math with beat "counts" can be problematic when using a \code{logical} \code{start} argument.
+As a result, doing arithmetic or other math with beat "counts" can be problematic when using a \code{pickup} argument.
 It may be better to use \code{round(timeline())} in cases where you want to do much math with counts.
 }
 
@@ -131,7 +137,7 @@ It may be better to use \code{round(timeline())} in cases where you want to do m
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
-show(within(humData, count(Token, beat = TimeSignature, start = NBar == 1)))
+show(within(humData, count(Token, beat = TimeSignature, pickup = Bar < 1)))
 
 show(within(humData, count(Token, beat = tactus(TimeSignature))))
  

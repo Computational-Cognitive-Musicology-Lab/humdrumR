@@ -32,7 +32,13 @@ metcount(
 )
 }
 \description{
-Count or measure metric position
+These functions take vectors of rhythmic duration values and
+compute the metric position of each rhythmic onset.
+\code{metlev()} identifies the "highest" (longest) metric \emph{level} of each onset;
+\code{metcount()} counts beats within a measure, while \code{metsubpos()} measures the distance
+between an onset and the nearest metric beat.
+\code{metcount()} and \code{metsubpos()} parallel the more general \code{count()} and \code{subpos()} functions.
+}
+\details{
 
-Count metric positions
 }

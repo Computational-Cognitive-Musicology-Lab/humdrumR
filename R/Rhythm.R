@@ -19,6 +19,8 @@
 #' @family time functions
 #' @export
 bpm2sec <- function(BPM, unit = .25) {
+  if (is.character(BPM)) BPM <- as.numeric(gsub('^MM', '', BPM))
+  
   checks(BPM, xpositive) #"The BPM argument must be positive...you can't have a negative tempo!")
   checks(unit, (xnumber | xcharacter) & xlen1)
   
@@ -1243,18 +1245,21 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
 #' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
 #' 
-#' @section Logical start:
+#' @section Pickups:
 #' 
-#' Another option is to pass the `start` argument a logical vector of the same length as the input `x`.
-#' Within each piece, the the *first* index where the `start` logical is `TRUE` is used as the zero:
-#' all earlier points will be negative numbers, measured backwards from the start index.
+#' Another option is to pass the `pickup` argument a logical vector of the same length as the input `x`.
+#' Within each piece/group, any block of `TRUE` values at the *beginning* of the `pickup` vector 
+#' indicate a pickup.
+#' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline.
+#' all the earlier (`pickup == TRUE`) points will be negative numbers, measured backwards from the start index.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
-#' Thus, a common use for a `logical` `start` argument is `within(humData, timeline(Token, start = Bar == 1)`, which makes the downbeat of
-#' the first complete bar `0`---any notes in a pickup bar are give negative numbers on the timeline.
+#' Thus, a common use for the `pickup` argument is `within(humData, timeline(Token, pickup = Bar < 1)`, which makes the downbeat of
+#' the first complete bar `1` the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 #' 
 #' 
 #' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
-#' @param start A `numeric` value from which the timeline begins, or a `logical` vector of same length as `x`.
+#' @param start A `numeric` value from which the timeline begins. Defauls to `0`.
+#' @param pickup `NULL`, or a `logical` vector of same length as `x`.
 #' @param minutes (`logical`, `length == 1`) If `TRUE`, output seconds are converted to a character string
 #' encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
 #' @param `BPM` A numeric values or `character` string in the format `"MM120"` (for 120 bpm). By default,
@@ -1268,11 +1273,11 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timeline <- function(x, start = 0, pickup = NULL, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
    
-  timerints <- pathSigma(rints, groupby = groupby, start = if (is.logical(start)) start else as.rational(start), callname = 'timeline')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, callname = 'timeline')
   
   rint2duration(timerints, ...)
   
@@ -1283,12 +1288,12 @@ timeline <- function(x, start = 0, deparser = duration, ..., Exclusive = NULL, p
 
 #' @rdname timeline
 #' @export
-timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)
   rints <- as.rational(seconds)
-  timerints <- pathSigma(rints, groupby = groupby, start = if (is.logical(start)) start else as.rational(start), callname = 'timestamp')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, callname = 'timestamp')
   
   rint2dur(timerints, BPM = 240, minutes = minutes, ...) # BPM has already been incorporated, 240 is value we need now.
   
@@ -1296,18 +1301,10 @@ timestamp <- function(x, BPM = 'MM60', start = 0, minutes = TRUE, ..., Exclusive
 }
 
 
-pathSigma <- function(rints, groupby, start, callname) {
+pathSigma <- function(rints, groupby, start, pickup, callname) {
   # this does most of work for timestamp and timeline
-  
 
-  if (is.logical(start)) {
-    logicalStart <- start
-    start <- rational(0)
-  } else {
-    logicalStart <- NULL
-    start <- rhythmInterval(start)
-    
-  }
+  start <- rhythmInterval(start)
   
   rints[is.na(rints)] <- rational(0L)
   
@@ -1323,10 +1320,10 @@ pathSigma <- function(rints, groupby, start, callname) {
   
   .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
   
-  if (!is.null(logicalStart)) {
-    .SD$logicalStart <- logicalStart
+  if (!is.null(pickup)) {
+    .SD$Pickup <- pickup
     .SD[ , Time := {
-      if (!any(logicalStart)) Time else Time - Time[which(logicalStart)[1]]
+      if (all(!Pickup)) Time else Time - Time[which(!Pickup)[1]]
       }, by = list(Piece, Spine, Path)]
   }
   

@@ -249,6 +249,16 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 
 #' Count or measure metric position
 #' 
+#' These functions take vectors of rhythmic duration values and
+#' compute the metric position of each rhythmic onset.
+#' `metlev()` identifies the "highest" (longest) metric *level* of each onset;
+#' `metcount()` counts beats within a measure, while `metsubpos()` measures the distance
+#' between an onset and the nearest metric beat.
+#' `metcount()` and `metsubpos()` parallel the more general `count()` and `subpos()` functions.
+#' 
+#' @details 
+#' 
+#' 
 #' 
 #' @export
 metlev <- function(dur, meter = duple(5), start = rational(0), value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
@@ -291,7 +301,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
                      offBeats = FALSE,
                      start = rational(0), groupby = list(), parseArgs = list(), remainderSubdivides = TRUE) {
   
-  met <- .metric(dur = dur, meter = meter, start = start, groupby = groupby, parseArgs = parseArgs, 
+  met <- .metric(dur = dur, meter = meter, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
   
@@ -333,7 +343,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 }
 
 
-.metric <- function(dur, meter = duple(5), start = rational(0), groupby = list(), ..., 
+.metric <- function(dur, meter = duple(5),  groupby = list(), ..., 
                     parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
   
   if (length(unique(meter)) > 1L) {
@@ -346,14 +356,14 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
   
   meter <- meter(meter, ...)
   
-  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = callname)
+  timeline <- pathSigma(dur, groupby = groupby, start = rational(0), callname = callname)
   
 
   levels <- meter@Levels[[1]]
   spans <- .unlist(lapply(levels, sum))
   nbeats <- lengths(levels)
   
-  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, start = start, groupby = groupby))
+  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, groupby = groupby))
   counts[counts >= 1L] <- counts[counts >= 1L] - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
@@ -565,25 +575,28 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 #'
 #' To accommodate changing meters, the `beat` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
 #'
-#' @section Logical start:
+#' @section Pickups:
 #' 
-#' Another option is to pass the `start` argument a logical vector of the same length as the input `dur`.
-#' Within each piece, the the *first* index where the `start` logical is `TRUE` is used as the beat `1`:
-#' all earlier points will be negative counts, counting backwards from the start.
+#' Another option is to pass the `pickup` argument a logical vector of the same length as the input `dur`.
+#' Within each piece/group, any block of `TRUE` values at the *beginning* of the `pickup` vector 
+#' indicate a pickup.
+#' The *first* index where the `pickup` logical is `FALSE` is used as the location of beat `1`:
+#' all the earlier (`pickup == TRUE`) points will be negative counts, counting backwards from the start.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
-#' Thus, a common use for a `logical` `start` argument is `within(humData, count(Token, start = Bar == 1)`, which makes the downbeat of
-#' the first complete bar `1`---any notes in a pickup bar are give negative counts on the timeline.
+#' Thus, a common use for the `pickup` argument is `within(humData, count(Token, pickup = Bar < 1)`, which makes the downbeat of
+#' the first complete bar `1` the stating point---any notes in pickup bars are give negative counts.
 #' 
 #' **Note that there is never a 'beat zero'.**
 #' Beats before the starting point progress directly from `-1` to `1` (the start).
-#' As a result, doing arithmetic or other math with beat "counts" can be problematic when using a `logical` `start` argument.
+#' As a result, doing arithmetic or other math with beat "counts" can be problematic when using a `pickup` argument.
 #' It may be better to use `round(timeline())` in cases where you want to do much math with counts.
 #'
 #' @param dur An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
 #' @param beat An input vector of length 1, or the same length as `dur`, which is parsed as duration information using the [rhythm parser][rhythmParsing]---or a list of vectors.
-#' @param start A whole-number value from which the counting begins, or a `logical` vector of same length as `x`.
+#' @param start A whole-number value from which the counting begins.
 #' @param phase (length 1 or the same length as `dur`) An atomic vector which can be parsed by the [rhythm parser][rhythmParsing]. `0` is the default. The largest `phase`
 #' value must be smaller than the smallest rhythmic value in `beat`.
+#' @param pickup `NULL`, or a `logical` vector of same length as `x`.
 #' @param offBeats (`logical` TRUE/False) If `FALSE`, offbeat onsets return `NA`.
 #' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x` into.
 #'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
@@ -593,23 +606,21 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), ...,
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' show(within(humData, count(Token, beat = TimeSignature, start = NBar == 1)))
+#' show(within(humData, count(Token, beat = TimeSignature, pickup = Bar < 1)))
 #' 
 #' show(within(humData, count(Token, beat = tactus(TimeSignature))))
 #'  
 #'   
 #' @seealso {`count()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `count()` within a metric framework.}
 #' @export
-count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  offBeats = TRUE,  groupby = list()) {
+count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list()) {
   
-  checks(start,  
-         (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )) |
-           (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
- 
+  checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   
   
-  scaled <- scaled_timeline(dur, beat, start = if (is.logical(start)) start else rational(0L), groupby, callname = 'count')
+  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'count')
   
   # phase
   phase_rint <- rhythmInterval(phase) 
@@ -658,10 +669,9 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  offBeats = T
   
   if (!offBeats) mcount[!scaled$Irregular & !(rational(1) %divides% (scaled$Timeline + 1))] <- NA
   
-  # start at 1
-  if (!is.logical(start))  mcount <- mcount + as.integer(start - (start > 0L))
+  # start at 1 (skip 0)
+  mcount <- mcount + as.integer(start - (start > 0L))
   mcount[!is.na(mcount) & mcount >= 0L] <- mcount[!is.na(mcount) & mcount >= 0L] + 1L
-  
   
   
   mcount
@@ -669,9 +679,9 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  offBeats = T
 
 #' @rdname count
 #' @export
-subpos <- function(dur, beat = rational(1L), phase = 0, deparser = duration,  groupby = list(), ...) {
+subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser = duration,  groupby = list(), ...) {
   
-  scaled <- scaled_timeline(dur, beat, ..., groupby = groupby, callname = 'subpos', sumBeats = TRUE)
+  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
   
   # phase
   phase_rint <- rhythmInterval(phase) 
@@ -703,7 +713,7 @@ subpos <- function(dur, beat = rational(1L), phase = 0, deparser = duration,  gr
   if (is.null(deparser)) timeline else deparser(timeline, ...)
 }
 
-scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALSE) {
+scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeats = FALSE) {
   dur <- rhythmInterval(dur)
   
   checks(beat, (xatomic | xclass(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
@@ -729,7 +739,7 @@ scaled_timeline <- function(dur, beat, start, groupby, callname, sumBeats = FALS
   
   dur <- dur / beat
   
-  timeline <- pathSigma(dur, groupby = groupby, start = start, callname = 'count')
+  timeline <- pathSigma(dur, groupby = groupby, start = start, pickup = pickup, callname = 'count')
   
   c(list(Timeline = timeline, Scale = beat, Irregular = irregular, tatum = tatum), uniqueBeats)
 }

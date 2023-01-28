@@ -271,8 +271,13 @@ timeline(row, start = 2)
 
 ----
 
-An alternative way of using the `start` argument is be feeding the `start` argument a `logical` vector the same length as the input (`x`): the first `TRUE` value in the `start` vector is chosen as the start of th timeline.
-This is useful for specifying a pick-up.
+### Pickups
+
+The `pickup` argument gives us another option to control where our timeline starts.
+In many datasets, the first few events in the music are a *anacrusis* or "pick up"; we'd generally like our timeline to start *after* the pickup.
+To make this happen, the `pickup` argument can be passed a `logical` vector which is the same length as the input (`x`): 
+Any `TRUE` values at the beginning of the vector are considered a pickup;
+Thus, the *first* `FALSE` value in the `pickup` vector is chosen as the start of th timeline.
 For example, let's say we have the melody
 
 ```{r}
@@ -281,7 +286,7 @@ melody <- c('8c', '8d','2e', '2f','1e')
 ```
 
 but the first two notes are a pickup.
-Since we can see that the pickup has a duration of `.25` (quarte-note), we *could* do this:
+Since we can see that the pickup has a duration of `.25` (quarte-note), we *could* use the `start` argument to do this:
 
 ```{r}
 timeline(melody, start = -.25)
@@ -290,27 +295,29 @@ timeline(melody, start = -.25)
 ```
 
 Now `0` is on the downbeat, and events before that `start` are negative on the timeline!
-However, we could also use the `logical` approach---we want the downbeat (`0`) to be on that `2e`, so
+
+To do this with the `logical` `pickup` argument, we could do this:
 
 ```{r}
-timeline(melody, start = melody == '2e')
-
+timeline(melody, pickup = melody != '2e')
 ```
 
----
-
-A common technique for identifying pickups in `humdrumR` datasets is be looking at the `Bar` field.
-The first downbeat will typically be the first place the `Bar == 1`---pickups will have `Bar == 0`.
+This might seem *less* intuitive!
+However, this approach can be very useful when working with actual humdrumR datasets.
+In many humdrum datasets, pickup measures are indicated by have barlines labeled `=0` or `=-`.
+When `r hm` reads a file, it counts the barlines and creates a field called `Bar`, and it numbers pickup measures as zero (or negative numbers, if there are more than one).
+This means pickups will have `Bar < 1`.
 So, in our Bach chorales:
 
 ```{r}
 
-within(chorales, timeline(Token, start = Bar == 1))
+within(chorales, timeline(Token, pickup = Bar == 1))
 
 
 ```
 
 Now the `0` in our timelines corresponds to the first downbeat of each spine, in each file.
+The key advantage is that this will work even if different pieces in the corpus have pickups of different lengths, even if there is *no* pickup.
 
 ### Timestamp
 
