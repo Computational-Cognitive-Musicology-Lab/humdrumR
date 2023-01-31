@@ -31,6 +31,7 @@ windowApply(
   func = c,
   windows,
   ...,
+  groupby = list(),
   passOutside = FALSE,
   reference = x,
   rebuild = TRUE,

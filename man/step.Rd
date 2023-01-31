@@ -10,7 +10,7 @@ step(x, ..., simple = FALSE, Key = NULL, parseArgs = list(), inPlace = FALSE)
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
-There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
 

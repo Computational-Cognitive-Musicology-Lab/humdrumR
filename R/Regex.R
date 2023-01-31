@@ -84,10 +84,11 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     
     if (reverse) matches <- rev(matches)
     
-    if (toEnv) list2env(matches, parent.frame())
+    matches <- lapply(matches, `names<-`, value = NULL)
     
+    if (toEnv) list2env(matches, parent.frame())
+
     output <- do.call('cbind', matches)
-    # if (length(str) > 0L) rownames(output) <- str
     
     if (toEnv) invisible(output) else output
     
@@ -128,8 +129,11 @@ regexFindMethod <- function(str, regexes) {
 REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outputClass = 'character') {
     if (!is.character(str)) .stop(call. = FALSE,
                                 "Sorry, REapply can only apply to an x argument that is a character vector.")
-  
+    checks(str, xcharacter)
+    checks(regex, xcharacter)
+    checks(inPlace, xTF)
     
+  
     regex <- getRE(regex)
     matches <- stringi::stri_extract_first_regex(str = str, pattern = regex)
     
@@ -213,29 +217,29 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' @export
 #' @name RegexFind
 `%~l%` <- function(x, regex) {
-  checkVector(x, 'x', '%~l%')
-  checkCharacter(regex, 'regex', "%~l%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('|', lapply(regex, grepl, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~i%` <- function(x, regex) {
-  checkVector(x, 'x', '%~i%')
-  checkCharacter(regex, 'regex', "%~i%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('union', lapply(regex, grep, x = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~n%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
 }
 #' @export
 #' @rdname RegexFind
 `%~m%` <- function(x, regex) {
-  checkVector(x, 'x', '%~n%')
-  checkCharacter(regex, 'regex', "%~n%", min.length = 1L)
+  checks(x, xatomic)
+  checks(regex, xcharacter & xminlength(1))
   
   do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
 }
@@ -521,7 +525,7 @@ makeRE.pc <- function(ten = 'A', eleven = 'B', ...) {
   captureRE(c(0:11, ten, eleven))
 }
 
-####. REs for diatonic sets ####
+#### REs for diatonic sets ####
 
 makeRE.alterations <- function(..., qualities = FALSE) {
     # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
@@ -616,7 +620,7 @@ makeRE.diatonicPartition <- function(..., split = '/', mustPartition = FALSE) {
 }
 
 
-####. REs for tertian sets ####
+#### REs for tertian sets ####
 
 makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', collapse = TRUE) {
     
@@ -734,24 +738,57 @@ makeRE.tertianPartition <- function(..., split = '/', mustPartition = FALSE) {
 
 
 
-####. REs for durations ####
+#### REs for durations ####
 
-makeRE.recip <- function(collapse = TRUE, grace = TRUE, fractions = TRUE, sep = '%', ...) {
-  REs <- list(grace = if (grace) '[Qq]?',
+makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.', collapse = TRUE) {
+  number <- '[0-9]*'
+  
+  REs <- list(prefix = captureRE(c('~', '>', '<'), n = '?'),
+              datetime = paste0('(', number, sep.date, '){0,3}',
+                                '(', number, sep.time, '){0,2}',
+                                number),
+              decimal = paste0('(', sep.decimal, '[0-9]+)?'))
+  
+  if (collapse) setNames(cREs(REs), 'dur') else REs
+  
+  
+}
+
+makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
+  REs <- list(graceMark1 = '([Qq][^0-9q]*)?',
               recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
-                             '[1-9][0-9]*\\.*|0{1,2})'))
+                             '[1-9][0-9]*\\.*|0{1,2}\\.*)'),
+              graceMark2 = '([^qQ]*[Qq])?')
   if (collapse) setNames(cREs(REs), 'recip') else REs
 }
 
 
-makeRE.timeSignature <- function(sep = '/', collapse = TRUE, ...) {
-    REs <- list(star = '\\*?',
-         em   = 'M?',
-         numerator = '[1-9][0-9]*',
-         sep = sep,
-         denominator = '[1-9][0-9]*'
-         )
-    
+makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
+  REs <- list(star = '\\*?',
+              em   = 'M',
+              numerator = '[1-9][0-9]*([+][1-9][0-9]*)*',
+              sep = sep,
+              denominator = '[1-9][0-9]*'
+  )
+  
     if (collapse) setNames(cREs(REs), 'timeSignature') else REs
     
 }
+
+
+noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
+                                Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
+                                            '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
+                                Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
+
+makeRE.noteValue <- function(..., sep = " \U2215", collapse = TRUE) {
+  
+  REs <- list(multiplies = '([1-9][0-9]*)?',
+              value = captureRE(noteValue.unicode$Unicode),
+              divides = paste0('(', sep, '[1-9][0-9]*)?'),
+              space = ' ',
+              dots = paste0('(',  '\U1D16D\U2009',')*'))
+  
+  if (collapse) setNames(cREs(REs), 'noteValue') else REs
+}
+

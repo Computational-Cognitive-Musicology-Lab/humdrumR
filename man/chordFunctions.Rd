@@ -17,6 +17,6 @@ The functions are:
 }
 }
 \seealso{
-To better understand how these functions work, read about how diatonic keys are
+To better understand how these functions work, read about how tertian harmonies are
 \link[=chordParsing]{parsed} and \link[=chordDeparsing]{deparsed}.
 }

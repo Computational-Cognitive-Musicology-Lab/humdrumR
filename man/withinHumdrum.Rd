@@ -8,9 +8,16 @@
 \alias{within.humdrumR}
 \title{with(in)Humdrum}
 \usage{
-\method{with}{humdrumR}(data, ..., dataTypes = "D", drop = TRUE, variables = list())
+\method{with}{humdrumR}(
+  data,
+  ...,
+  dataTypes = "D",
+  expandPaths = FALSE,
+  drop = TRUE,
+  variables = list()
+)
 
-\method{within}{humdrumR}(data, ..., dataTypes = "D", variables = list())
+\method{within}{humdrumR}(data, ..., dataTypes = "D", expandPaths = FALSE, variables = list())
 }
 \arguments{
 \item{data}{A \verb{[humdrumR][humdrumRclass]} data object.}

@@ -60,7 +60,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2022-10-13</h4>
+            <h4 data-toc-skip class="date">2023-01-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/ReadWrite.Rmd" class="external-link"><code>vignettes/ReadWrite.Rmd</code></a></small>
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
@@ -311,19 +311,20 @@ Regular Expression directory-path patterns. For example,</p>
 <p>uses the REpath-pattern
 <code>"HumdrumData/BachChorales/chor.*.krn"</code> to match all files in
 the ‘HumdrumData/BachChorales’ directory whose name matches the regular
-expression “chor.<em>.krn.” As you can see, the REpath-pattern includes
-directory (folder) paths (relative or absolute)—using your operating
-system’s appopriate delimeter (”" for windows, ”/” for everybody
-else)—</em>and* a pattern for matching file paths. <em>Each</em>
-directory is also treated as a regular expression, possibly matching
-multiple directories. Let’s break this down: humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> splits your REpath-pattern
-input string into three parts: <code>"HumdrumData"</code>,
-<code>"BachChorales"</code>, <em>and</em> <code>"chor.*.krn"</code>, and
-treats <em>each</em> of the three as regular expressions. The the first
-two expressions are used to match directories, while the last expression
-is used to match files. So, while
+expression <code>chor.*.krn</code>. As you can see, the REpath-pattern
+includes directory (folder) paths (relative or absolute)—using your
+operating system’s appropriate delimiter (“" for windows,”/” for
+everybody else)—<em>and</em> a pattern for matching file paths.
+<em>Each</em> directory is also treated as a regular expression,
+possibly matching multiple directories. Let’s break this down:
+humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> splits your
+REpath-pattern input string into three parts:
+<code>"HumdrumData"</code>, <code>"BachChorales"</code>, <em>and</em>
+<code>"chor.*.krn"</code>, and treats <em>each</em> of the three as
+regular expressions. The first two expressions are used to match
+directories, while the last expression is used to match files. So, while
 <code>readHumdrum('HumdrumData/BeethovenVariations/.*.krn')</code>
-matches all the files with the”.krn” extension in the
+matches all the files with the “.krn” extension in the
 “BeethovenVariations” directories and
 <code>readHumdrum('HumdrumData/MozartVariations/.*.krn')</code> matches
 all the files in the “MozartVariations” directories, the command
@@ -432,7 +433,7 @@ general than we intend. For instance, the command
 called “MyFolder,” but would also match folders names “MyFolder_Also”,
 or “ThisIsMyFolder.” If you want to be sure to match exactly one and
 only one directory/file, use “^” and “$” regular-expression markers to
-explicitely mark the beginning and end of your pattern: the command
+explicitly mark the beginning and end of your pattern: the command
 <code>readHumdrum('^MyFolder$/.*')</code> will only read files from one
 directory “MyFolder.”</p>
 </blockquote>

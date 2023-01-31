@@ -82,11 +82,11 @@ readHumdrum('HumdrumData/BachChorales/chor.*.krn')
 
 ```
 
-uses the REpath-pattern `"HumdrumData/BachChorales/chor.*.krn"` to match all files in the 'HumdrumData/BachChorales' directory whose name matches the regular expression "chor.*.krn."
-As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)---using your operating system's appopriate delimeter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
+uses the REpath-pattern `"HumdrumData/BachChorales/chor.*.krn"` to match all files in the 'HumdrumData/BachChorales' directory whose name matches the regular expression `chor.*.krn`.
+As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)---using your operating system's appropriate delimiter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
 *Each* directory is also treated as a regular expression, possibly matching multiple directories.
 Let's break this down: `r hm` splits your REpath-pattern input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
-The the first two expressions are used to match directories, while the last expression is used to match files.
+The first two expressions are used to match directories, while the last expression is used to match files.
 So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" directories and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" directories, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all kern files in both directories!
 
 
@@ -96,7 +96,7 @@ readHumdrum('HumdrumData/.*Variations/.*.krn')
 
 > Be careful: since each directory/file name is always treated like a regular expression, we can sometimes specify something that is more general than we intend. 
 > For instance, the command `readHumdrum('MyFolder/.*')` will match files in a folder called "MyFolder," but would also match folders names "MyFolder_Also", or "ThisIsMyFolder."
-> If you want to be sure to match exactly one and only one directory/file, use "^" and "\$" regular-expression markers to explicitely mark the beginning and end of your pattern:
+> If you want to be sure to match exactly one and only one directory/file, use "^" and "\$" regular-expression markers to explicitly mark the beginning and end of your pattern:
 > the command `readHumdrum('^MyFolder$/.*')` will only read files from one directory "MyFolder."
 
 To read *all* of our test files we can enter:

@@ -7,7 +7,7 @@
 \alias{fields}
 \title{Humdrum tables (and their Fields)}
 \usage{
-getHumtab(humdrumR, dataTypes = c("G", "L", "I", "M", "D", "d"))
+getHumtab(humdrumR, dataTypes = "GLIMDd")
 
 getFields(humdrumR, fields = getActiveFields(humdrumR), dataTypes = "D")
 
@@ -76,8 +76,8 @@ There are five types of fields in a humdrum table:
 }
 
 When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}} every
-humdrum table has at least eighteen fields: one data field (\code{Token}), two interpretation
-fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fourteen structure fields. Additional
+humdrum table has at least nineteen fields: one data field (\code{Token}), two interpretation
+fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fifteen structure fields. Additional
 interpretation or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
 by using \link[=withinHumdrum]{within(humdrumR)} (and some other functions).
@@ -94,7 +94,7 @@ Users can create as many additional data fields as they like. Every call to
 
 \subsection{Structure fields:}{
 
-Every humdrum table starts with fourteen \emph{Structure} fields,
+Every humdrum table starts with fifteen \emph{Structure} fields,
 which describe where each data token was "located" in the original humdrum data:
 which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.
@@ -142,6 +142,11 @@ the humdrum data, the right side of the split becomes a new "path." The original
 is numbered \code{0} with additional paths numbered with integers to the right.
 (If there are no spine path splits, the \code{Path} field is all \code{0}s.)
 \item This field is always \code{NA} when \code{Global == TRUE}.
+}
+\item \code{ParentPath} :: \code{integer}
+\itemize{
+\item For spine paths (i.e., where \code{Path > 0}), which path was the parent from
+which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 }
 \item \code{Record} :: \code{integer}
 \itemize{

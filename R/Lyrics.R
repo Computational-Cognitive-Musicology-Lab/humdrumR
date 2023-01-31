@@ -396,7 +396,6 @@ wort <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
 #' 13
 #' 
 silbeFormat <- function(cVector){
-  #checkArg(cVector, classes = c('character'))
   index <- 1:length(cVector)
   index <- cbind(index)
   index <- as.data.frame(index)

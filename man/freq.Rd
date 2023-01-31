@@ -11,19 +11,19 @@ freq(
   simple = FALSE,
   octave.relative = FALSE,
   Key = NULL,
-  transposeArgs = list(),
-  parseArgs = list(),
-  inPlace = FALSE,
   tonalHarmonic = 2^(19/12),
   frequency.reference = 440,
-  frequence.reference.note = "a"
+  frequence.reference.note = "a",
+  transposeArgs = list(),
+  parseArgs = list(),
+  inPlace = FALSE
 )
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
-There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
 
@@ -31,6 +31,12 @@ There are also two hidden (advanced) argumens you can specify: \code{memoize} an
 
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
 the parser, deparser, and transposer.}
+
+\item{tonalHarmonic}{(\code{numeric}, \code{length == 1}) What frequency is the "tonal harmonic" (perfect 10th) tuned to?
+By default, the value is \code{2^(19/12)}, the 12-tone equal-temperament10th.
+For \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}, set \code{tonalHarmonic = 3}.}
+
+\item{frequency.reference}{(\code{numeric}, \code{length == 1}) What is the reference frequency---default is \code{440} (Hz).}
 
 \item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
 
@@ -40,12 +46,6 @@ the parser, deparser, and transposer.}
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
-
-\item{tonalHarmonic}{(\code{numeric}, \code{length == 1}) What frequency is the "tonal harmonic" (perfect 10th) tuned to?
-By default, the value is \code{2^(19/12)}, the 12-tone equal-temperament10th.
-For \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}, set \code{tonalHarmonic = 3}.}
-
-\item{frequency.reference}{(\code{numeric}, \code{length == 1}) What is the reference frequency---default is \code{440} (Hz).}
 
 \item{frequency.reference.note}{(Any parsable pitch representation, \code{length == 1}) What note is the \code{reference.frequency} tuned to?
 Default is \code{"a"}---the \strong{A} above middle-\strong{C}.}
@@ -146,6 +146,8 @@ The \code{real} and \code{relative} arguments give you special control of how ke
 check out the \code{\link[=transpose]{transpose()}} docs for more details!
 }
 
+}
+
 \subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -158,10 +160,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a character string.
-}
-
 }
 }
 

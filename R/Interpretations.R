@@ -49,7 +49,7 @@ getRE <- function(pattern = NULL, types = c('Tandem', 'Exclusive', 'Atomic'), st
 
 #' @export
 getREexclusive <- function(pattern) {
-    checkCharacter(pattern, 'pattern', 'getREexclusive')
+    checks(pattern, xcharacter)
     exclusive <- knownInterpretations[knownInterpretations$RE == getRE(pattern), ]$Exclusive  
     if (length(exclusive) == 0L || exclusive == "") NULL else exclusive
 }
@@ -57,13 +57,13 @@ getREexclusive <- function(pattern) {
 
 matchKnownExclusive <- function(strs) {
   #' @export
-  checkCharacter(strs, 'strs', 'matchKnownExclusive')
+  checks(strs, xcharacter)
   sapply(knownInterpretations[knownInterpretations$Type == 'Exclusive', ], stringr::str_detect, string = strs)
 }
 
 matchKnownTandem <- function(strs) {
   #' @export
-  checkCharacter(strs, 'strs', 'matchKnownTandem')
+  checks(strs, xcharacter)
   knownTand <- knownInterpretations[knownInterpretations$Type == 'Tandem', ]
   output <- sapply(knownTand$RE, stringr::str_detect, string = strs, simplify = TRUE)
   dim(output) <- c(length(strs), nrow(knownTand))
@@ -74,12 +74,12 @@ matchKnownTandem <- function(strs) {
 
 isKnownTandem <- function(strs) {
   #' @export
-  checkCharacter(strs, 'strs', 'isKnownTandem')
+  checks(strs, xcharacter)
   rowSums(matchKnownTandem(strs)) > 0L
 }
 
 generalizeTandem <- function(strs) {
-  checkCharacter(strs, 'strs', 'generalizeTandem')
+  checks(strs, xcharacter)
   hits <- matchKnownTandem(strs)
   misses <- rowSums(hits) == 0
   output <- setNames(strs, strs)
@@ -94,7 +94,7 @@ generalizeTandem <- function(strs) {
 
 #' @export
 idTandem <- function(strs) {
-  checkCharacter(strs, 'strs', 'idTandem')
+  checks(strs, xcharacter)
   hits <- matchKnownTandem(strs)
   misses <- rowSums(hits) == 0
   output <- setNames(strs, strs)

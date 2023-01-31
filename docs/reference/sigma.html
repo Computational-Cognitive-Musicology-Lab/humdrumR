@@ -43,7 +43,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -201,7 +201,7 @@ specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want <code>groupby = list(File, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
-three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, or ditto.
+three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, or untie.
 So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

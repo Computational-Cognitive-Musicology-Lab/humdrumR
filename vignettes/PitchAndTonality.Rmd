@@ -60,7 +60,27 @@ solfa(input, inPlace = TRUE)
 ```
 
 
+The cool thing is that each of these functions can read any of the other function's output.
+So you can do things like:
 
+```{r}
+
+
+kern('Cb6')
+
+pitch("eee-")
+
+pitch(-4) # semio
+
+kern('-4')
+
+solfa('A#6')
+
+semits('Ab3')
+
+
+
+```
 
 
 
@@ -83,6 +103,8 @@ cat(unlist(pfs), sep = '\n')
 
 ```
 
+
+#### Documentation
 
 The global documentation for *all* the pitch functions can be seen by calling `?pitchFunctions`.
 You can also call documentation for any individual function, like `?kern`.

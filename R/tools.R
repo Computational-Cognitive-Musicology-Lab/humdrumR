@@ -113,8 +113,21 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 # Arrays/Vectors ----
 
+valind <- function(vec) {
+  
+  values <- unique(vec)
+  
+  group <- if (!is.atomic(values)) {
+    as.character(vec)
+  } else {
+    vec
+  }
+  list(indices = match(group, unique(group)), values = values)
+  
+}
 
-
+inverse.valind <- function(valind) valind$values[valind$i]
+  
 .apply <- function(x, margin = 1, f, ...){
     result <- apply(x, margin, f, ..., simplify = FALSE)
     result[lengths(result) == 0L] <- list(NA)
@@ -175,7 +188,7 @@ lag <- function(x, n = 1, fill, wrap, groupby, ...) UseMethod('lag')
 
 #' @rdname lag
 #' @export
-lead <- function(x, n, ...) lag(x, -n, ...)
+lead <- function(x, n = 1, ...) lag(x, -n, ...)
 
 
 #' @export
@@ -197,9 +210,9 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupb
 }
 #' @export
 lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
-          checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
-          checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
-          checkTF(wrap, 'wrap', 'lag')
+          checks(n, xwholenum & xlen1)
+          checks(fill, xatomic & xlen1)
+          checks(wrap, xTF)
   
           if (length(x) == 0L || n == 0) return(x)
           
@@ -341,12 +354,7 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     
     output
     
-    
   }
-  
-
-  
-  
   
 }
 
@@ -474,7 +482,7 @@ remove.duplicates <- function(listofvalues) {
 }
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
-    
+    attr <- humdrumRattr(X)
     result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
     headortail <- if (head) match.fun('head') else tail
@@ -483,14 +491,18 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     result <- do.call('c', result)
     indices <- do.call('c', indices)
     
-    if (length(result) == length(X)) {
+    result <- if (length(result) > 0L && length(result) == length(X)) {
       result[order(indices)]
     } else {
       output <- vectorNA(length(X), class(result))
-      output[is.na(output)] <- as(0, class(output))
+      # output[is.na(output)] <- as(0, class(output))
       output[indices] <- result
       output
     }
+    
+    humdrumRattr(result) <- attr
+    
+    result
     
 }
 
@@ -559,8 +571,8 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #' @family {Window functions}
 #' @export
 segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
-  checkTF(any, 'any', 'segments')
-  checkTF(reverse, 'reverse', 'segments')
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -595,10 +607,10 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
 #' @export
 #' @rdname segments
 changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE) {
-  checkTF(first, 'first', 'changes')
-  checkTF(value, 'value', 'changes')
-  checkTF(any, 'any', 'changes')
-  checkTF(reverse, 'reverse', 'changes')
+  checks(first, xTF)
+  checks(value, xTF)
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -674,15 +686,11 @@ ditto <- function(x, ...) UseMethod('ditto')
 #' @export
 ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, 
                           groupby = list(), orderby = list()) {
-    if (!(is.function(null) || (is.logical(null) && length(null) == length(x)))) {
-      .stop("In a call to ditto, the 'null' argument must either be a function or a logical vector",
-            " which is the same length as the 'x' argument.")
-    }
-    if ((class(x) != class(initial)) && (!is.na(initial) && initial != '_next_')) {
-      .stop("In a call to ditto, the 'initial' argument must be the same class as the 'x' argument.")
-    }
-    checkArg(initial, 'initial', 'ditto', max.length = 1L)
-    checkTF(reverse, 'reverse', 'dito')
+
+    checks(x, xatomic)
+    checks(null, xclass('function') | (xlogical & xmatch(x)))
+    checks(initial, xatomic & xlen1)
+    checks(reverse, xTF)
     groupby <- checkWindows(x, groupby)
   
     if (length(x) == 0L) return(x)
@@ -721,7 +729,7 @@ ditto.data.frame <- function(x, ...) {
 #' @rdname ditto
 #' @export
 ditto.matrix <- function(x, margin = 2, ...) {
-  checkLooseInteger(margin, 'margin', 'ditto.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
+  checks(margin, xwholenum & xlen1 & xmin(1) & xmax(2))
   result <- apply(x, margin, ditto, ..., simplify = FALSE)
   
   do.call(if (margin == 1) 'rbind' else 'cbind', result)
@@ -731,7 +739,7 @@ ditto.matrix <- function(x, margin = 2, ...) {
 #' @rdname ditto
 #' @export
 ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = paste0(field, '_ditto')) {
-  checkCharacter(newField, max.length = 1L)
+  checks(newField, xcharacter & xlen1)
   field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
   newField <- rlang::sym(newField)
   rlang::eval_tidy(rlang::expr({
@@ -1052,6 +1060,12 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+setAs('integer', 'integer64', \(from) as.integer64.integer(from))
+setAs('numeric', 'integer64', \(from) as.integer64.double(from))
+setAs('logical', 'integer64', \(from) as.integer64.logical(from))
+setAs('character', 'integer64', \(from) as.integer64.character(from))
+
+
 entropy <- function(x, base) UseMethod('entropy')
 entropy.table <- function(x, base = 2) {
   if (sum(x) != 1) x <- x / sum(x)
@@ -1080,15 +1094,33 @@ find2Dlayout <- function(n) {
 
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
-is.whole <- function(x) x %% 1 == 0
+
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
+    sign <- sign(n)
+    n <- abs(n)
     gcds <- do(gcd, list(n, d))
+    num <- n %/% gcds
+    den <- d %/% gcds
+    list(Numerator = sign * num, Denominator = den)
+}
+
+match_fraction <- function(n, d) {
+  # d <- d[!is.na(d)]
+  # if (length(d) == 0L) return(list(Numerator = rep(as(NA, class(n))), length(d), Denominator = as(NA, class(n))))
+  
+  newdenominator <- do.call('lcm', as.list.numeric_version(sort(unique(d), decreasing = TRUE)))
+  
+  if (newdenominator > 1e9) {
+    data.frame(Numerator = n / d, Denominator = rep(1L, length(n)))
     
-    num <- as.integer(n / gcds)
-    den <- as.integer(d / gcds)
-    list(Numerator = num, Denominator = den)
+  } else {
+    newnumerators <- n * (newdenominator %/% d)
+    list(Numerator = newnumerators, Denominator = newdenominator)
+  }
+  
+  
 }
 
 gcd <- function(...) {
@@ -1105,6 +1137,7 @@ gcd <- function(...) {
 }
 
 .gcd <- function(x, y) {
+  if (is.na(x) || is.na(y)) return(as(NA, class(x)))
     r <- x %% y
     
     notyet <- r > 0
@@ -1112,12 +1145,13 @@ gcd <- function(...) {
     y
 }
 
+
+
 lcm <- function(...) {
     x <- list(...)
     x <- x[lengths(x) > 0]
     if (length(x) == 1L) return(x[[1]])
-    if (length(x) == 0L) return(numeric(0))
-    
+    if (length(x) == 0L) return(integer64(0))
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vectorNA(length(x[[1]]), class(x[[1]]))
@@ -1126,7 +1160,12 @@ lcm <- function(...) {
 }
 
 .lcm <- function(x, y) {
-    abs(x * y) / .gcd(x, y)
+    gcd <- .gcd(x, y)
+    # output <- abs(x * y) / .gcd(x, y)
+    output <- as.integer(abs(x) %/% gcd) * abs(y)
+    
+    output
+    # if (is.integer(x) & is.integer(y)) as.integer(output) else output
 }
 
 `%divides%` <- function(e1, e2) gcd(e1, e2) == e1
@@ -1144,6 +1183,23 @@ checkWindows <- function(x, windows) {
   if (length(windows)) windows[sapply(windows, \(w) !is.null(w) && length(w) == length(x))] else windows 
 }
 
+
+harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
+  # finds integers between x and y, which can be found as 
+  # cummulative products starting with x
+  
+  ratio <- as.integer(y %/% x)
+  pFactors <- numbers::primeFactors(ratio)
+  if (bigFirst) pFactors <- rev(pFactors)
+  
+  cumFactors <- cumprod(pFactors)
+  cumFactors <- cumFactors[cumFactors < ratio]
+  
+  z <- x * cumFactors
+  
+  sort(if (includeEdges) c(x, z, y) else z)
+  
+}
 
 #' Cumulative sum of numeric vector
 #' 
@@ -1332,10 +1388,15 @@ sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('
 #' @export
 sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
-  checkArg(x, 'x', 'sigma', classes = c('numeric', 'integer', 'rational'))
-  checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-  if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
-  checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
+  
+  checks(x, xnumber)
+  checks(lag, xwholenum & xlen1 & xnotzero)
+  checks(skip, xnull | xclass('function'))
+  checks(init, xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  
   
   groupby <- checkWindows(x, groupby)
   orderby <- checkWindows(x, orderby)
@@ -1489,11 +1550,14 @@ delta <- function(x, lag, skip, init, right, ...) UseMethod('delta')
 delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
                           groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checkNumeric(x, 'x', 'delta')
-    checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-    if (!is.null(skip))  checkFunction(skip, 'skip', 'delta')
-    checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
-    checkTF(right, 'right', 'delta')
+    checks(x, xnumber)
+    checks(lag, xwholenum & xlen1 & xnotzero)
+    checks(skip, xnull | xclass('function'))
+    checks(init, xatomic & xminlength(1) & 
+             argCheck(\(arg) length(arg) <= abs(lag), 
+                      "must be as short or shorter than the absolute lag",  
+                      \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+    checks(right, xTF)
     
     groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
     reorder(list(x = x), orderby = orderby)
@@ -1544,6 +1608,14 @@ delta.matrix <- function(x, margin = 2L, ...) {
          results)
 }
 
+makeCumulative <- function(n, groupby = list()) {
+  if (length(groupby) == 0L) return(n)
+  
+  diff <- delta.default(n, init = 0L)
+  diff[diff <= 0 & do.call('changes', groupby)] <- 1
+  # diff[which(!is.na(n))[1]] <- 1
+  sigma.default(diff, init = NA)
+}
 
 .cummax <- function(x) {
   x[!is.na(x)] <- cummax(x[!is.na(x)])
@@ -1584,9 +1656,11 @@ delta.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' 
 #' @export
-expand <- function(x) {
-    .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
-}
+setGeneric('expand', def = \(x) {
+  .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
+})
+
+         
 
 locate <- function(x, table) {
     if (is.null(dim(table)) || length(dim(x)) == 1) {
@@ -2194,179 +2268,8 @@ specialArgs <- function(quos, ...) {
 # }
 
 
-## Building smart functions ----
 
 
-
-
-
-# Checking arguments ----
-
-
-checkArg <- function(arg,  argname, callname = NULL, 
-                     atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, classes = NULL) {
-    # arg a argument to check
-    # 
-    if (length(sys.calls()) > 10L) return(arg) 
-    
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(argname, quote = TRUE), ')') else quotemark(argname)
-    if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
-    callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
-    
-    if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
-    
-    if (length(arg) <  min.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at least {min.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
-    if (length(arg) > max.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at most {max.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
-    
-    if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
-        classNames <- harvard(classes, 'or', quote = TRUE)
-        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
-    }
-    
-    if (missing(valid) && !is.null(validoptions)) valid <- \(x) x %in% validoptions
-    if (!missing(valid) && !is.null(valid)) {
-        ill <- !valid(arg)
-        
-        if (any(ill)) {
-            if (is.null(validoptions)) {
-                .stop(callname, "{arg} is not a valid value for the {argname} argument.")
-            } else {
-                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
-                illNames <- harvard(arg[ill], 'and', quote = TRUE)
-                legalNames <-  paste0(harvard(validoptions, quote = TRUE), '.')
-                
-                message <- list(callname, illNames, case, 'Valid options are ', legalNames)
-                
-                .stop(message)
-            }
-            
-        }
-        
-        arg[!ill]
-    } else {
-        arg
-    }
-    
-    
-    
-}
-
-checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, matrix = FALSE, min.length = 0L, ...) {
-  if (matrix && is.matrix(x)) x <- c(x)
-  
-  checkArg(x, argname = argname, callname = callname, ..., 
-           valid = NULL,
-           classes = c('numeric', 'integer', 'character', 'logical', structs, 
-                       if (null) 'NULL'),
-           min.length = min.length)
-}
-
-
-checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('numeric', 'integer'), 
-             valid = \(arg) is.na(arg) | arg >= minval & arg <= maxval,
-             ...)
-}
-checkLooseInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-  checkArg(x, argname = argname, callname = callname,
-           classes = c('numeric', 'integer'), 
-           valid = \(arg) arg >= minval & arg <= maxval & x == round(x),
-           ...)
-}
-
-checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('integer'), 
-             valid = \(arg) arg >= minval & arg <= maxval & !is.double(x),
-             ...)
-}
-checkCharacter <- function(x, argname, callname = NULL, allowEmpty = TRUE, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('character'),
-             valid = if (!allowEmpty) \(arg) arg != "", ...)
-}
-checkLogical <- function(x, argname, callname = NULL, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('logical'), ...)
-}
-
-checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) !is.na(arg), 
-                                                   validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
-checkTFs <- function(args = list(), ..., callname = NULL) {
-    args <- c(args, list(...))
-    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
-}
-
-checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
-    if (!is.humdrumR((x))) .stop("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object.")      
-}
-
-checkFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  message <- "In the call {callname}({argname} = {label}), the argument {argname}"
-  
-  if (!is.function(x)) .stop(message, " must be a function!")
-  
-}
-
-checkRoundingFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = x))) {
-    .stop(message, 
-          " must be one of the five 'rounding' functions: round, floor, celing, trunc, or expand.")
-  }
-}
-
-checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
-    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
-    checkArg(dataTypes,
-             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd'),
-              validoptions = c('G', 'L', 'I', 'M', 'D', 'd'),
-              argname, callname,
-              min.length = 1L, max.length = 7L,
-              classes = "character")
-}
-
-
-# Error messages ----
-
-.stop <- function(..., ifelse = TRUE, sep = ' ') {
-  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
-  stack <- sapply(stack, paste, collapse = '\n')
-  
-  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
-  # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
-  
-  cut <- 15
-  stack[-1] <- paste0(' -> ', stack[-1])
-  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
-  # 
-  message('humdrumR error in:')
-  message('\t', stack, sep = '')
-  
-  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1))
-  
-  stop(call. = FALSE, message)
-}
-
-
-.warn <- function(...,  ifelse = TRUE, sep = ' ', immediate. = FALSE) {
-  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
-  stack <- sapply(stack, paste, collapse = '\n')
-  
-  call <- sys.calls()[[1]]
-  
-  warning('In your call ', rlang::expr_deparse(call), ': ',
-          .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
-          call. = FALSE,
-          immediate. = immediate.)
-}
 
 
 # Strings ----
@@ -2403,7 +2306,7 @@ matched <- function(x, table, nomatch = NA) {
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
+.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame()) {
   strs <- unlist(list(...))
   ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
   ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
@@ -2426,11 +2329,13 @@ matched <- function(x, table, nomatch = NA) {
   strs, ifelses)
   
   strs <- paste(unlist(strs), collapse = sep)
-  glue::glue(strs, .envir = envir)
+  glue::glue(strs, .envir = envir, .sep = sep, trim = trim)
 }
 
-harvard <- function(x, conjunction = '', quote = FALSE) {
-  if (quote) x <- quotemark(x)
+harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {
+  x <- as.character(x)
+  if (quote) x <- quotemark(x, quoteNA = quoteNA)
+  x[is.na(x)] <- "NA"
   if (conjunction != '') conjunction <- paste0(if (length(x) > 2L) ',', ' ', conjunction, ' ')
   glue::glue_collapse(x, sep = ', ', last = conjunction)
 }
@@ -2438,7 +2343,7 @@ harvard <- function(x, conjunction = '', quote = FALSE) {
 
 plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
 
-quotemark <- function(x) if (is.character(x)) paste0("'", x, "'") else x
+quotemark <- function(x, quoteNA = FALSE) if(quoteNA) paste0("'", x, "'") else .paste("'", x, "'")
 
 nthfix <- function(n) {
   affix <- rep('th', length(n))
@@ -2497,7 +2402,7 @@ object2str <- function(object) {
            },
            list = {
              if (length(object) < 5) {
-               glue::glue('list({harvard(unlist(object))})')
+               glue::glue('list({harvard(unlist(object), quote = is.character(unlist(object)))})')
              } else {
                glue::glue('list[{num2str(length(object))}]')
              }

@@ -51,7 +51,7 @@ semit(), or solfa().'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -118,6 +118,13 @@ The output <code>tonalInterval</code> is output <em>within the key</em>: thus, <
 returns the tint representing a <strong>Major 3rd</strong>, because <em>C#</em> is the major third of A major.</p></dd>
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p><code>tonalInterval()</code> returns a <a href="tonalIntervalS4.html">tonalInterval</a> object of the same
+length and dimensions as <code>x</code>.
+<code>NULL</code> inputs (<code>x</code> argument) return a <code>NULL</code> output.
+<code>NA</code> values in the input <code>x</code> are propagated to the output.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The underlying parser used by all <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> can be called explicitly using the function <code>tonalInterval()</code>.
 The <code>tonalInterval</code> parser will attempt to parse any input information into a <a href="tonalIntervalS4.html">tonalInterval</a> object---a back-end pitch representation
@@ -137,8 +144,8 @@ for example, call <code><a href="kern.html">?kern</a></code> to learn about <cod
     </div>
     <div class="section level2">
     <h2 id="dispatch">Dispatch<a class="anchor" aria-label="anchor" href="#dispatch"></a></h2>
-    <p>The pitch parser (<code>tonalInterval</code>) is a generic function, meaning it can accepts a variety of inputs
-and automatically "dispatches" the appropriate method for parsing the input.
+    <p>The pitch parser (<code>tonalInterval()</code>) is a generic function, meaning it accepts a variety of inputs
+and automatically "dispatches" the appropriate method for parsing ehe input.
 R's standard <code>S3</code> system is used to dispatch for either <code>numeric</code> or <code>character</code>-string input:
 Generally, <code>numeric</code> (or <code>integer</code>) inputs are interpreted as various <em>atonal</em> pitch representations while
 <code>character</code> strings are interpreted as various <em>tonal</em> pitch representations.
@@ -150,13 +157,13 @@ exclusive interpretation matching to dispatch specific parsing methods.</p>
     <p>Since humdrum data is inherently string-based, the most powerful part of the <code>humdrumR</code> pitch-parser
 is its system for parsing pitch (mostly tonal) information from character strings.
 (This includes character tokens with pitch information embedded alongside other information; Details below.)
-The pitch parser (<code>tonalInterval</code>) uses a combination of regular-expressions and exclusive interpretations to decide how to
+The pitch parser (<code>tonalInterval()</code>) uses a combination of regular-expressions and exclusive interpretations to decide how to
 parse an input string.
-There are twelve regular-expression patterns for pitch that <code>tonalInterval</code> knows how to parse automatically:</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td><a href="https://www.humdrum.org/rep/kern/index.html" class="external-link">Kern</a></td><td>**kern</td><td><code>ee-</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a></td><td>**pitch</td><td><code>Eb5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Helmholtz pitch</a></td><td>none</td><td><code>eb'</code></td></tr><tr><td><a href="https://lilypond.org/doc/v2.22/Documentation/notation/pitches" class="external-link">Lilypond pitch</a></td><td>none</td><td><code>ees'</code></td></tr><tr><td><a href="https://www.humdrum.org/rep/Tonh/index.html" class="external-link">German pitch</a> notation</td><td>**Tonh</td><td><code>S5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Interval_(music)" class="external-link">Interval</a></td><td>**hint/**mint/**int</td><td><code>+m3</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Degree_(music)" class="external-link">Scale degree</a></td><td>**deg or **degree</td><td><code>^^3-</code> or <code>3-/5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Pitch_class#Integer_notation" class="external-link">Pitch Class</a></td><td>**pc</td><td><code>3</code></td></tr><tr><td>Relative-do <a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Solfege</a></td><td>**solfa</td><td><code>^me</code></td></tr><tr><td>Fixed-do <a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Solfege</a></td><td>**solfg</td><td><code>mi~b5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Svara" class="external-link">Swara</a></td><td>**bhatk</td><td><code>g</code></td></tr></table><div class="section">
+There are twelve regular-expression patterns for pitch that <code>tonalInterval()</code> knows how to parse automatically:</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td><a href="https://www.humdrum.org/rep/kern/index.html" class="external-link">Kern</a></td><td>**kern</td><td><code>ee-</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">Scientific Pitch</a></td><td>**pitch</td><td><code>Eb5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Helmholtz pitch</a></td><td>none</td><td><code>eb'</code></td></tr><tr><td><a href="https://lilypond.org/doc/v2.22/Documentation/notation/pitches" class="external-link">Lilypond pitch</a></td><td>none</td><td><code>ees'</code></td></tr><tr><td><a href="https://www.humdrum.org/rep/Tonh/index.html" class="external-link">German pitch</a> notation</td><td>**Tonh</td><td><code>S5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Interval_(music)" class="external-link">Interval</a></td><td>**hint/**mint/**int</td><td><code>+m3</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Degree_(music)" class="external-link">Scale degree</a></td><td>**deg or **degree</td><td><code>^^3-</code> or <code>3-/5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Pitch_class#Integer_notation" class="external-link">Pitch Class</a></td><td>**pc</td><td><code>3</code></td></tr><tr><td>Relative-do <a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Solfege</a></td><td>**solfa</td><td><code>^me</code></td></tr><tr><td>Fixed-do <a href="https://en.wikipedia.org/wiki/Solf%C3%A8ge" class="external-link">Solfege</a></td><td>**solfg</td><td><code>mi~b5</code></td></tr><tr><td><a href="https://en.wikipedia.org/wiki/Svara" class="external-link">Swara</a></td><td>**bhatk</td><td><code>g</code></td></tr></table><div class="section">
 <h3 id="exclusive-dispatch">Exclusive Dispatch<a class="anchor" aria-label="anchor" href="#exclusive-dispatch"></a></h3>
 
 
-<p>If you call <code>tonalInterval</code> (or <em>any</em> <a href="pitchFunctions.html">pitch function</a>) on a <code>character</code>-string vector, with a non-<code>NULL</code> <code>Exclusive</code> argument,
+<p>If you call <code>tonalInterval()</code> (or <em>any</em> <a href="pitchFunctions.html">pitch function</a>) on a <code>character</code>-string vector, with a non-<code>NULL</code> <code>Exclusive</code> argument,
 that <code>Exclusive</code> argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the
 table above.
 For example, <code>kern(x, Exclusive = 'solfa')</code> will force the parser to interpret <code>x</code> as <code>**solfa</code> data.
@@ -171,7 +178,7 @@ you don't need to explicitly do anything with the <code>Exclusive</code> argumen
 <h3 id="regex-dispatch">Regex Dispatch<a class="anchor" aria-label="anchor" href="#regex-dispatch"></a></h3>
 
 
-<p>If you call <code>tonalInterval</code> (or <em>any</em> <a href="pitchFunctions.html">pitch function</a>) on a <code>character</code>-string vector, but the <code>Exclusive</code> argument is missing
+<p>If you call <code>tonalInterval()</code> (or <em>any</em> <a href="pitchFunctions.html">pitch function</a>) on a <code>character</code>-string vector, but the <code>Exclusive</code> argument is missing
 or <code>NULL</code>, <code>humdrumR</code> will instead use regular-expression patterns to select a known interpretation.
 For example, <code>pitch('so')</code> will automatically recognize that <code>'so'</code> is solfege, and will interpret the data accordingly (the output should be G4).
 If there are more than one matches, <code>humdrumR</code> will use the longest match, and if they tie, pick based on the order in the table above (topmost first).</p>
@@ -183,7 +190,7 @@ Remember, if <code>Exclusive</code> is specified, it overrides the regex-based d
 
 <p>In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 for example, <code>**kern</code> data might include tokens like <code>"4.ee-[</code>.
-The <code>humdrumR</code> parser (<code>tonalInterval</code>) will automatically "pull out" pitch information from within strings, if it can find any,
+The <code>humdrumR</code> pitch parser (<code>tonalInterval()</code>) will automatically "pull out" pitch information from within strings, if it can find any,
 using the appropriate known regular expressions.
 Various <a href="pitchFunctions.html">pitch parsing functions</a> have an option to keep the original "extra" data, using their <code>inPlace</code> argument.</p>
 </div>
@@ -500,12 +507,20 @@ For example, while <code>kern(0:2)</code> returns <code>c("c", "d-", "d")</code>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>All <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> make use of the deparsing functionality.</p></div>
+    <div class="dont-index"><p>All <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> make use of the parsing functionality.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
+<span class="r-in"><span class="fu">tonalInterval</span><span class="op">(</span><span class="st">'II#'</span>, step.labels <span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'I'</span>, <span class="st">'II'</span>, <span class="st">'III'</span>,<span class="st">'IV'</span>,<span class="st">'V'</span>,<span class="st">'VI'</span>,<span class="st">'VII'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -d7</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="st">'E x 5'</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>doublesharp <span class="op">=</span> <span class="st">'x'</span>, sep <span class="op">=</span> <span class="st">' '</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ee##"</span>
+<span class="r-in"></span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

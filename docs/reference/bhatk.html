@@ -45,7 +45,7 @@ in hindustani music---like solfege."><!-- mathjax --><script src="https://cdnjs.
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -96,7 +96,7 @@ in hindustani music---like solfege.</p>
 <dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
 <dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
-There are also two hidden (advanced) argumens you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information (accidentals and qualites) is discarded.</p></dd>
 <dt>simple</dt>
@@ -212,8 +212,11 @@ all the pitches in the input will be transposed from whatever keys they are in t
 check out the <code><a href="transpose.html">transpose()</a></code> docs for more details!</p>
 </div>
 
+
+</div>
+
 <div class="section">
-<h4 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h4>
+<h3 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h3>
 
 
 <p>In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -226,11 +229,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the <code>inPlace</code> argument, which is <code>FALSE</code> by default.
 So, <code>pitch('4.ee-[', inPlace = TRUE)</code> will return 4.Eb5[---keeping the <code>"4."</code> and the <code>"["</code>.
 (This obviously only works if the input is a string, not a numeric!)
-Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return numeric values, to return character strings
+Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return <code>numeric</code> values, to return <code>character</code> strings
 <em>if</em> their input is a character string.</p>
-</div>
-
-
 </div>
 
     </div>

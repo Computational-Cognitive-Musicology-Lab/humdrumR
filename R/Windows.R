@@ -128,8 +128,8 @@ parseAnchor.formula <- function(anchor, x, name){
 grepi_multi <- function(x, pattern) {
   pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
   
-  ns <- x %~n% pattern
-  rep(x %grepi% pattern, ns[ns > 0L])
+  ns <- x %~n% pattern %|% 0L
+  rep(x %~i% pattern, ns[ns > 0L])
   
 }
 
@@ -156,15 +156,12 @@ windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
   
   windowFrame <- depth(windowFrame, nest = nest, depth = depth)
   
+  if (length(groupby)) windowFrame <- removeCrossing(windowFrame, checkWindows(x, groupby))
   
-  if (!is.null(groupby)) {
-    if (any(lengths(groupby) != length(x))) .stop("In a call to windows, all vectors in the list groupby must be", 
-                                                     "the same length as x.")
-    windowFrame <- removeCrossing(windowFrame, groupby)
-  }
   
   attr(windowFrame, 'vector') <- x
-  windowFrame[ , list(Open, Close)]
+  # windowFrame[ , list(Open, Close)]
+  windowFrame
   
 }
 
@@ -216,24 +213,19 @@ depth <- function(ind, nest = FALSE, depth = NULL) {
     ind <- ind[Depth %in% depth | RevDepth %in% depth]
   }
   
-  ind[ , OpenDepth := Depth - min(Depth), by = Open]
-  ind[ , CloseDepth := Depth - min(Depth), by = Open]
-  ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
-  ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
+  if (nrow(ind)) {
+    ind[ , OpenDepth := Depth - min(Depth), by = Open]
+    ind[ , CloseDepth := Depth - min(Depth), by = Open]
+    ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
+    ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
+  }
   
   ind 
 }
 
-removeCrossing <- function(x, groupby) {
-  
-  groupby <- sort(unlist(lapply(groupby, \(b) which(b != lag(b)))))
-  
-  bad <- outer(groupby, x$Open, '>') & outer(groupby, x$Close, '<=')
-  remove <- colSums(bad) > 0L
-  
-  x[remove == FALSE]
-  
-  
+removeCrossing <- function(windowFrame, groupby) {
+  groupby <- do.call('paste', groupby)
+  windowFrame[groupby[Open] == groupby[Close]]
 }
 
 ### Window finding rules ----
@@ -290,7 +282,7 @@ Prev <- function(x) lag(x, 1L)
 
 align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateClose = FALSE) {
   
-  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close)) {
+  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close, na.rm = TRUE)) {
     data.table(Open = open, Close = close) 
   } else {
     if (is.null(nearest)) nearest <- 0L
@@ -328,24 +320,25 @@ align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateC
 
 #' @rdname humWindows
 #' @export
-windowApply <- function(x, func = c, windows, ..., passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
+windowApply <- function(x, func = c, windows, ..., groupby = list(), passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
   if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
   
   if (missing(windows)) windows <- windows(reference, ...)
+
   
   indices <- Map(':', windows$Open, windows$Close)
   
   x_windowed <- lapply(indices, \(i) x[i])
   
-  result_windowed <- lapply(x_windowed, func)
+  result_windowed <- lapply(x_windowed, func, ...)
   
   if (rebuild) {
     
     if (all(lengths(result_windowed) == 1L)) {
-      result <- unlist(result_windowed)
+      result <- .unlist(result_windowed)
       x[if (leftEdge) windows$Open else windows$Close ] <- result
       if (passOutside) {
-        x[setdiff(unlist(indices), windows$Open)] <- NA
+        x[setdiff(unlist(indices), c(windows$Open, which(is.na(x))))] <- as(NA, class(result))
         
       } else {
         notstarts <- seq_along(x)
@@ -419,5 +412,35 @@ applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE,
 }
 
 
-
+windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
+  
+  lengths <- table(windowFrame[Length > 1L, Length])
+  
+  vectorize <- lengths >= cuttoff & as.integer(names(lengths)) < 20L
+  
+  if (any(vectorize)) {
+    maxsize <- max(as.integer(names(lengths)[vectorize]))
+    
+    na <- as(NA, class(x))
+    for (l in 1:(maxsize - 1L)) {
+      
+      windowFrame[Length == l, 
+              {
+                curClose <- Open + l
+                x[Open] <<- x[Open] + x[curClose]
+                x[curClose] <<- na
+                
+              }]
+      windowFrame <- windowFrame[Length != l]
+    }
+  }
+  
+  
+  
+  if (nrow(windowFrame)) x <- windowApply(x, sum, na.rm = na.rm, windows = windowFrame, passOutside = TRUE)
+  
+  x
+  
+  
+}
 

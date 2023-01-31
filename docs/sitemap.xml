@@ -67,22 +67,16 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/RegexFind.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/SOI.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/accidental.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/apply2Humdrum.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bhatk.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/census.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bpm2sec.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/cents.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/census.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chord.html</loc>
@@ -97,10 +91,10 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chordParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chordTransformer.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/collapseHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/collapseHumdrum.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/count.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/degree.html</loc>
@@ -109,28 +103,25 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/delta.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSet.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSetS4.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ditto.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/duration.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expand.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expandPaths.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/extractTandem.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/figuredBass.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/fillThru.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/filterHumdrum.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/foldExclusive.html</loc>
@@ -145,40 +136,16 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/freq.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/getFields.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/getTandem.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/harm.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/helmholtz.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/hint.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humActive.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humAssignment.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humCensus.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humCoercion.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humColumns.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humFormulae.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humInterpretations.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humMerge.html</loc>
@@ -187,28 +154,13 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humMeter.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humMetric.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humPipe.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humReference.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humSize.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humSpines.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humSummary.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humTable.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humValidation.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humWindows.html</loc>
@@ -238,19 +190,16 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/int.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/interpolateArguments.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/interpretations.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/interval.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/intervalCalculus.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/invert.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/invert.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ioi.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/is.major.html</loc>
@@ -274,28 +223,22 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/keyParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/keyTransformer.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/lag.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/lilypond.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/localDuration.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/measure.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/meter.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/metric.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/metlev.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/mint.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/nbeats.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/noteValue.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/octave.html</loc>
@@ -319,9 +262,6 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/plotRhythm.html</loc>
-  </url>
-  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/quality.html</loc>
   </url>
   <url>
@@ -331,19 +271,22 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/readHumdrum.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/recip.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/reference.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/regexConstruction.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmDecompose.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmDeparsing.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmFunctions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmInterval.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmParsing.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/romanKey.html</loc>
@@ -385,10 +328,13 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/subset.humdrumR.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertian.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tactus.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSet.html</loc>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tatum.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertian.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSetS4.html</loc>
@@ -401,9 +347,6 @@
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonalIntervalS4.html</loc>
-  </url>
-  <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonalTransformations.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonh.html</loc>

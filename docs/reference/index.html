@@ -43,7 +43,7 @@
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -430,8 +430,8 @@ representations:</p>
         <dd>Test the major/minor modality of a set</dd>
       </dl></div><div class="section level2">
       
-      <h3 id="rhythm">Rhythm<a class="anchor" aria-label="anchor" href="#rhythm"></a></h3>
-      <p class="section-desc"></p><p>Rhythm and meter classes and functions.</p>
+      <h3 id="rhythm-overviews">Rhythm overviews<a class="anchor" aria-label="anchor" href="#rhythm-overviews"></a></h3>
+      <p class="section-desc"></p><p>These pages overview general concepts in humdrumR pitch:</p>
 
       
     </div><div id="" class="section level2">
@@ -441,44 +441,116 @@ representations:</p>
 
       <dl><dt>
           
-          <code><a href="time.html">bpm2ms()</a></code> <code><a href="time.html">ms2bpm()</a></code> <code><a href="time.html">seconds()</a></code> 
+          <code><a href="rhythmFunctions.html">rhythmFunctions</a></code> 
         </dt>
-        <dd>Basic time transformations</dd>
+        <dd>Translate between rhythm representations.</dd>
       </dl><dl><dt>
+          
+          <code><a href="rhythmParsing.html">rhythmParsing</a></code> 
+        </dt>
+        <dd>Parsing rhythm information</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rhythmDeparsing.html">rhythmDeparsing</a></code> 
+        </dt>
+        <dd>Generating ("deparsing") rhythm representations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="humMeter.html">humMeter</a></code> 
+        </dt>
+        <dd>Tools for analyzing rhythm and meter.</dd>
+      </dl></div><div class="section level2">
+      
+      <h3 id="rhythm-functions">Rhythm functions<a class="anchor" aria-label="anchor" href="#rhythm-functions"></a></h3>
+      <p class="section-desc"></p><p>These functions translate between rhythm representations:</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="bpm2sec.html">bpm2sec()</a></code> <code><a href="bpm2sec.html">sec2bpm()</a></code> <code><a href="bpm2sec.html">bpm2ms()</a></code> <code><a href="bpm2sec.html">ms2bpm()</a></code> 
+        </dt>
+        <dd>Translate between durations and tempos</dd>
+      </dl><dl><dt>
+          
+          <code><a href="recip.html">recip()</a></code> 
+        </dt>
+        <dd>Reciprocal representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="duration.html">duration()</a></code> <code><a href="duration.html">quarters()</a></code> 
+        </dt>
+        <dd>Numeric (double) representation of durations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="noteValue.html">noteValue()</a></code> 
+        </dt>
+        <dd>Note value representation of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="time.html">seconds()</a></code> <code><a href="time.html">ms()</a></code> <code><a href="time.html">dur()</a></code> 
+        </dt>
+        <dd>Clock-time representations of duration</dd>
+      </dl><dl><dt>
+          
+          <code><a href="meter.html">meter()</a></code> <code><a href="meter.html">duple()</a></code> 
+        </dt>
+        <dd>Meter class</dd>
+      </dl></div><div class="section level2">
+      
+      <h3 id="rhythm-and-meter">Rhythm and Meter<a class="anchor" aria-label="anchor" href="#rhythm-and-meter"></a></h3>
+      <p class="section-desc"></p><p>Rhythm and meter analysis functions.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="timeline.html">timeline()</a></code> <code><a href="timeline.html">timestamp()</a></code> 
         </dt>
         <dd>Rhythmic timeline of a piece</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmInterval.html">rhythmInterval</a></code> 
+          <code><a href="metlev.html">metlev()</a></code> <code><a href="metlev.html">metcount()</a></code> 
         </dt>
-        <dd>parse rhythmic information</dd>
+        <dd>Calculate metric information</dd>
       </dl><dl><dt>
           
-          <code><a href="rhythmFunctions.html">recip()</a></code> <code><a href="rhythmFunctions.html">duration()</a></code> 
+          <code><a href="count.html">count()</a></code> <code><a href="count.html">subpos()</a></code> <code><a href="count.html">onbeat()</a></code> 
         </dt>
-        <dd>Manipulate pitch data</dd>
+        <dd>Count beats or measures</dd>
       </dl><dl><dt>
           
-          <code><a href="humMeter.html">humMeter</a></code> 
+          <code><a href="ioi.html">ioi()</a></code> <code><a href="ioi.html">untie()</a></code> 
         </dt>
-        <dd>Tools for analyzing rhythm and meter.</dd>
+        <dd>Sum "connected" durations</dd>
       </dl><dl><dt>
           
-          <code><a href="localDuration.html">localDuration()</a></code> 
+          <code><a href="recip.html">recip()</a></code> 
         </dt>
-        <dd>Calculate overall duration of a group</dd>
+        <dd>Reciprocal representation of duration</dd>
       </dl><dl><dt>
           
-          <code><a href="meter.html">measure()</a></code> 
+          <code><a href="tactus.html">tactus</a></code> 
         </dt>
-        <dd>Meter class</dd>
+        <dd>Properties of meters</dd>
       </dl><dl><dt>
           
-          <code><a href="metric.html">metric()</a></code> 
+          <code><a href="tatum.html">tatum</a></code> 
         </dt>
-        <dd>Calculate metric positions from duration data.</dd>
+        <dd>Metric units</dd>
+      </dl><dl><dt>
+          
+          <code><a href="nbeats.html">nbeats</a></code> 
+        </dt>
+        <dd>Counting beats</dd>
       </dl></div><div class="section level2">
       
       <h3 id="lyrics">Lyrics<a class="anchor" aria-label="anchor" href="#lyrics"></a></h3>
@@ -544,6 +616,11 @@ contain the musical data.</p>
         <dd>"Collapse" humdrumR data into a field</dd>
       </dl><dl><dt>
           
+          <code><a href="expandPaths.html">expandPaths()</a></code> 
+        </dt>
+        <dd>Expand paths into new spines</dd>
+      </dl><dl><dt>
+          
           <code><a href="foldHumdrum.html">foldHumdrum()</a></code> <code><a href="foldHumdrum.html">foldPaths()</a></code> <code><a href="foldHumdrum.html">foldStops()</a></code> 
         </dt>
         <dd>"Fold" humdrumR data into new fields</dd>
@@ -596,7 +673,7 @@ contain the musical data.</p>
 
       <dl><dt>
           
-          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">order(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> 
+          <code><a href="rational.html">rational()</a></code> <code><a href="rational.html">`%R%`</a></code> <code><a href="rational.html">numerator()</a></code> <code><a href="rational.html">denominator()</a></code> <code><a href="rational.html">is.rational()</a></code> <code><a href="rational.html">is.numeric(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">rank(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;rational&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="rational.html">Compare(<i>&lt;ANY&gt;</i>,<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">Summary(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">prod(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">abs(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sign(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">max(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">min(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">mean(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">round(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">floor(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">ceiling(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">trunc(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">expand(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">sum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">cumsum(<i>&lt;rational&gt;</i>)</a></code> <code><a href="rational.html">as.rational()</a></code> <code><a href="rational.html">fraction()</a></code> <code><a href="rational.html">as.fraction()</a></code> <code><a href="rational.html">as.double(<i>&lt;fraction&gt;</i>)</a></code> <code><a href="rational.html">as.integer(<i>&lt;fraction&gt;</i>)</a></code> 
         </dt>
         <dd>Rational numbers</dd>
       </dl><dl><dt>

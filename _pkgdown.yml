@@ -133,18 +133,38 @@ reference:
   - figuredBass
   - is.major
   - is.minor
-- subtitle: "Rhythm"
-  desc: "Rhythm and meter classes and functions."
+- subtitle: "Rhythm overviews"
+  desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
-  - time
-  - timeline
-  - rhythmInterval
   - rhythmFunctions
+  - rhythmParsing
+  - rhythmDeparsing
   - humMeter
-  - localDuration
+- subtitle: "Rhythm functions"
+  desc: "These functions translate between rhythm representations:"
+  contents:
+  - bpm2sec
+  - recip
+  - duration
+  - noteValue
+  - seconds
   - meter
+- subtitle: "Rhythm and Meter"
+  desc: "Rhythm and meter analysis functions."
+  contents:
+  - timeline
+  - timestamp
+  - metlev
+  - count
+  - metcount
+  - subpos
+  - ioi
+  - recip
+  - untie
   - measure
-  - metric
+  - tatum
+  - tactus
+  - nbeats
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:
@@ -160,6 +180,7 @@ reference:
   - humCoercion
   - humMerge
   - collapseHumdrum
+  - expandPaths
   - foldHumdrum
   - foldExclusive
   - foldGraceNotes

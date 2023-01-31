@@ -37,17 +37,17 @@ cents(
   simple = FALSE,
   octave.relative = FALSE,
   Key = NULL,
+  tonalHarmonic = 2^(19/12),
   transposeArgs = list(),
   parseArgs = list(),
-  inPlace = FALSE,
-  tonalHarmonic = 2^(19/12)
+  inPlace = FALSE
 )
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
-There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
 
@@ -184,6 +184,8 @@ The \code{real} and \code{relative} arguments give you special control of how ke
 check out the \code{\link[=transpose]{transpose()}} docs for more details!
 }
 
+}
+
 \subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -196,10 +198,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a character string.
-}
-
 }
 }
 

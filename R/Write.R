@@ -58,15 +58,18 @@ writeHumdrum <- function(humdrumR,
                          EMD = paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.Date())
                          ) {
     # This function will have bugs if the input files are read on different file systems, with different directory separators.
-    checkhumdrumR(humdrumR, 'writeHumdrum')
-    checkFunction(renamer, 'renamer', 'writeHumdrum')
-    checkCharacter(affix,  'affix',  'writeHumdrum', min.length = 1L, max.length = 1L)
-    checkCharacter(prefix, 'prefix', 'writeHumdrum', min.length = 1L, max.length = 1L)
-    directory %||% checkCharacter(prefix, 'directory', 'writeHumdrum', min.length = 1L, max.length = 1L)
-    if (!is.null(extension)) checkCharacter(extension, 'extension', 'writeHumdrum', min.length = 1L, max.length = 1L)
-    checkCharacter(EMD, 'EMD', 'writeHumdrum', min.length = 1L, max.length = 1L)
-    checkTF(overwrite, 'overwrite', 'writeHumdrum')
-    checkTF(verbose, 'verbose', 'writeHumdrum')
+    checks(humdrumR, xhumdrumR)
+    checks(renamer, xclass('function'))
+
+    checks(affix,  xcharacter & xlen1)
+    checks(prefix, xcharacter & xlen1)
+    checks(EMD,    xcharacter & xlen1)
+
+    checks(directory, xnull | (xcharacter & xlen1))
+    checks(extension, xnull | (xcharacter & xlen1))
+
+    checks(overwrite, xTF)
+    checks(verbose, xTF)
     
     
     cat('Writing humdrum data...\n')

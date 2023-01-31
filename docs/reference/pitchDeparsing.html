@@ -55,7 +55,7 @@ or into new formats that you create!'><!-- mathjax --><script src="https://cdnjs
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -102,9 +102,11 @@ or into new formats that you create!</p>
 </ul><p>Various pitch representations like <code>**kern</code>, <code>**solfa</code>, and <code>**semits</code> can be generated using predefined <a href="pitchFunctions.html">pitch functions</a> like <code><a href="kern.html">kern()</a></code>
 <code><a href="semits.html">semits()</a></code>, and <code><a href="solfa.html">solfa()</a></code> respectively.
 All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-to the deparser.
+to the deparser.a
 By modifying these <em>"deparsing" arguments</em>, you can exercise
-fine control over how you want pitch information to be represented in your output.</p>
+fine control over how you want pitch information to be represented in your output.
+<em>This</em> documentation talks about this deparsing step.
+For an overview of the parsing process, look <a href="pitchParsing.html">here</a>.</p>
     </div>
     <div class="section level2">
     <h2 id="basic-pitch-arguments">Basic pitch arguments<a class="anchor" aria-label="anchor" href="#basic-pitch-arguments"></a></h2>
@@ -204,8 +206,11 @@ all the pitches in the input will be transposed from whatever keys they are in t
 check out the <code><a href="transpose.html">transpose()</a></code> docs for more details!</p>
 </div>
 
+
+</div>
+
 <div class="section">
-<h4 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h4>
+<h3 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h3>
 
 
 <p>In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -218,11 +223,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the <code>inPlace</code> argument, which is <code>FALSE</code> by default.
 So, <code>pitch('4.ee-[', inPlace = TRUE)</code> will return 4.Eb5[---keeping the <code>"4."</code> and the <code>"["</code>.
 (This obviously only works if the input is a string, not a numeric!)
-Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return numeric values, to return character strings
+Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return <code>numeric</code> values, to return <code>character</code> strings
 <em>if</em> their input is a character string.</p>
-</div>
-
-
 </div>
 
     </div>

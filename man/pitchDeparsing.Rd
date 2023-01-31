@@ -30,9 +30,11 @@ Deparsing is the second step in the \link[=pitchFunctions]{pitch function} proce
 Various pitch representations like \verb{**kern}, \verb{**solfa}, and \verb{**semits} can be generated using predefined \link[=pitchFunctions]{pitch functions} like \code{\link[=kern]{kern()}}
 \code{\link[=semits]{semits()}}, and \code{\link[=solfa]{solfa()}} respectively.
 All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-to the deparser.
+to the deparser.a
 By modifying these \emph{"deparsing" arguments}, you can exercise
 fine control over how you want pitch information to be represented in your output.
+\emph{This} documentation talks about this deparsing step.
+For an overview of the parsing process, look \link[=pitchParsing]{here}.
 }
 \section{Basic pitch arguments}{
 
@@ -127,6 +129,8 @@ The \code{real} and \code{relative} arguments give you special control of how ke
 check out the \code{\link[=transpose]{transpose()}} docs for more details!
 }
 
+}
+
 \subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -139,10 +143,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a character string.
-}
-
 }
 }
 

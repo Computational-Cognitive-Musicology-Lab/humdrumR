@@ -31,5 +31,14 @@ Unlike traditional roman numerals, \verb{**harm} does not indicate inversions wi
 (\code{a}, \code{b}, \code{c}, etc.) instead.
 The \code{roman} function however does output (relatively) traditional figures.
 
-Unlike the more standard humdrum \code{\link[=harm]{harm()}} representation, inversions are indicated using traditional figures.
+The output format of \code{roman()} is very similar to \verb{**harm}.
+The main difference is that inversions are indicated using traditional figures
+, like \code{653}, instead of \verb{**harm}'s simpler system (using letters).
+So, for example, if we take the input \code{E7/B} in the key of A major, we'll get:
+}
+\details{
+\itemize{
+\item \code{harm('E7/B', Key = 'A:')} => \code{"V7c"}
+\item \code{roman('E7/B', Key = 'A:')} => \code{"V643"}
+}
 }

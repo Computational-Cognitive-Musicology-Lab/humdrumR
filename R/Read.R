@@ -810,6 +810,19 @@ parseLocal <- function(records) {
   SpinePaths   <- unlist(use.names = FALSE, tapply(SpineNumbers, SpineNumbers, seq_along, simplify = TRUE)) - 1L
   Columns      <- seq_along(SpineNumbers)
   
+  ParentPaths  <- integer(length(SpineNumbers)) 
+  if (any(SpinePaths) > 0L) {
+    ind <- which(mat != '_P', arr.ind = TRUE)
+    ind <- ind[!duplicated(ind[ , 2]), ]
+    
+    # targets <- unique(which(mat[ind[SpinePaths > 0L, 'row'] - 1L, , drop = FALSE] == '*^', arr.ind = TRUE))[ , 'col']
+    splitrows <- mat[ind[SpinePaths > 0L, 'row'] - 1L, , drop = FALSE]
+    splitrows <- which(splitrows == '*^' | splitrows == '*+', arr.ind = TRUE)
+    targets <- tapply(splitrows[ , 'col'], splitrows[ , 'row'], max)
+    
+    ParentPaths[SpinePaths > 0L] <- SpinePaths[targets]
+  }
+  
   #sections
   sections <- parseSections(mat[ , 1])
   barlines <- parseBarlines(mat[ , 1])
@@ -843,6 +856,7 @@ parseLocal <- function(records) {
   humtab <- data.table::data.table(Token = tokens,
                                    Spine = SpineNumbers[Columns],
                                    Path  = SpinePaths[Columns],
+                                   ParentPath = ParentPaths[Columns],
                                    Record = recordns,
                                    Stop = stopNs,
                                    Exclusive = exclusives[Columns],
@@ -1120,7 +1134,7 @@ parseTandem <- function(tandems, known) {
 extractTandem <- function(Tandem, regex) {
   
   
-  checkCharacter(regex, 'regex', 'extractTandem', max.length = 1L)
+  checks(regex, xcharacter & xlen1)
   
   Tandem <- paste0(',', Tandem, ',')
   

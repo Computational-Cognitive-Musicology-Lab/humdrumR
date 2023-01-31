@@ -567,9 +567,12 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' Various pitch representations like `**kern`, `**solfa`, and `**semits` can be generated using predefined [pitch functions][pitchFunctions] like [kern()]
 #' [semits()], and [solfa()] respectively.
 #' All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-#' to the deparser.
+#' to the deparser.a
 #' By modifying these *"deparsing" arguments*, you can exercise 
 #' fine control over how you want pitch information to be represented in your output.
+#' *This* documentation talks about this deparsing step.
+#' For an overview of the parsing process, look [here][pitchParsing].
+
 #' 
 #' @section Basic pitch arguments:
 #' 
@@ -661,7 +664,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' check out the [transpose()] docs for more details!
 #' 
 #' 
-#' ### In-place parsing
+#' ## In-place parsing
 #' 
 #' In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
@@ -673,7 +676,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
 #' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
 #' (This obviously only works if the input is a string, not a numeric!)
-#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return numeric values, to return character strings
+#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a character string.
 #' 
 #' @section Deparsing arguments:
@@ -1576,8 +1579,8 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' # Dispatch
 #' 
-#' The pitch parser (`tonalInterval`) is a generic function, meaning it can accepts a variety of inputs 
-#' and automatically "dispatches" the appropriate method for parsing the input.
+#' The pitch parser (`tonalInterval()`) is a generic function, meaning it accepts a variety of inputs 
+#' and automatically "dispatches" the appropriate method for parsing ehe input.
 #' R's standard `S3` system is used to dispatch for either `numeric` or `character`-string input:
 #' Generally, `numeric` (or `integer`) inputs are interpreted as various *atonal* pitch representations while
 #' `character` strings are interpreted as various *tonal* pitch representations.
@@ -1589,9 +1592,9 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Since humdrum data is inherently string-based, the most powerful part of the `humdrumR` pitch-parser
 #' is its system for parsing pitch (mostly tonal) information from character strings.
 #' (This includes character tokens with pitch information embedded alongside other information; Details below.)
-#' The pitch parser (`tonalInterval`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
+#' The pitch parser (`tonalInterval()`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
 #' parse an input string.
-#' There are twelve regular-expression patterns for pitch that `tonalInterval` knows how to parse automatically:
+#' There are twelve regular-expression patterns for pitch that `tonalInterval()` knows how to parse automatically:
 #' 
 #' | Representation                                                                     | Exclusive                 | Example          |
 #' | ---------------------------------------------------------------------------------- | ------------------------: | ---------------: |
@@ -1610,7 +1613,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Exclusive Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
 #' that `Exclusive` argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the 
 #' table above.
 #' For example, `kern(x, Exclusive = 'solfa')` will force the parser to interpret `x` as `**solfa` data.
@@ -1622,7 +1625,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Regex Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
 #' or `NULL`, `humdrumR` will instead use regular-expression patterns to select a known interpretation.
 #' For example, `pitch('so')` will automatically recognize that `'so'` is solfege, and will interpret the data accordingly (the output should be `r pitch('so')`).
 #' If there are more than one matches, `humdrumR` will use the longest match, and if they tie, pick based on the order in the table above (topmost first).
@@ -1636,7 +1639,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
-#' The `humdrumR` parser (`tonalInterval`) will automatically "pull out" pitch information from within strings, if it can find any, 
+#' The `humdrumR` pitch parser (`tonalInterval()`) will automatically "pull out" pitch information from within strings, if it can find any, 
 #' using the appropriate known regular expressions.
 #' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
@@ -2027,14 +2030,14 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' kern('E x 5', parse(doublesharp = 'x', sep = ' '))
 #' 
-#' #' @returns 
+#' @returns 
 #' 
 #' `tonalInterval()` returns a [tonalInterval][tonalIntervalS4] object of the same
 #' length and dimensions as `x`.
 #' `NULL` inputs (`x` argument) return a `NULL` output.
 #' `NA` values in the input `x` are propagated to the output.
 #' 
-#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the deparsing functionality.
+#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the parsing functionality.
 #' @name pitchParsing
 NULL
 
@@ -2554,9 +2557,9 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 #### setAs tonal interval ####
 
-setAs('integer', 'tonalInterval', function(from) semits2tint(from))
-setAs('numeric', 'tonalInterval', function(from) semits2tint(as.integer(from)))
-setAs('character', 'tonalInterval', function(from) {
+setAs('integer', 'tonalInterval', \(from) semits2tint(from))
+setAs('numeric', 'tonalInterval', \(from) semits2tint(as.integer(from)))
+setAs('character', 'tonalInterval', \(from) {
   output <- tint(rep(NA, length(from)))
   if (any(!is.na(from))) output[!is.na(from)] <- tonalInterval.character(from[!is.na(from)])
   output
@@ -2591,8 +2594,13 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 
 #' Translate between pitch representations.
 #' 
-#' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-#' The functions are:
+#' These functions are used to extract and translate between different representations
+#' of pitch information.
+#' The functions can also do things like transposing and simplifying pitches.
+#' 
+#' @details 
+#' 
+#' The full list of pitch functions is:
 #' 
 #' ```{r echo = FALSE, results = 'asis'}
 #' 
@@ -2609,23 +2617,6 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' 
 #' ```
 #' 
-#'     
-#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
-#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
-#'        There are also two hidden (advanced) argumens you can specify: `memoize` and `deparse` (see the details below).
-#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
-#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
-#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
-#'        the parser, deparser, and transposer.
-#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
-#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
-#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
-#'  
-#'     
-#' @details
 #' 
 #' These pitch functions all work in similar ways, with similar arguments and functionality.
 #' Each function takes an input pitch representation (which can be anything) and outputs
@@ -2647,6 +2638,20 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
 #'     
+#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
+#'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
+#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
+#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
+#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
+#'        the parser, deparser, and transposer.
+#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
+#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
+#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
+#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
+#' 
 #' 
 #' @returns 
 #' 
@@ -2655,13 +2660,25 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' `NA` values in the input `x` are propagated to the output.
 #'
 #' @name pitchFunctions
-#' @seealso To better understand how these functions work, read about how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @seealso To better understand how these functions work, read about 
+#' how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 NULL
 
 ## Pitch transform maker ####
 
 pitchArgCheck <- function(args,  callname) {
   argnames <- .names(args)
+  
+  for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
+    checks(args[[arg]], argname = arg, xTF, seealso = '?pitchDeparsing')
+  }
+  scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
+                  'diminish', 'augment', 'major', 'minor', 'perfect',
+                  'up', 'down', 'same')
+  for (arg in intersect(argnames, scalarchar)) {
+    checks(args[[arg]], xcharacter & xlen1, seealso = '?pitchDeparsing')
+  }
+  
   
   if ('generic' %in% argnames) {
     if ('specific' %in% argnames && !xor(args$generic, args$specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
@@ -2679,39 +2696,29 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('octave.offset' %in% argnames) {
-    checkLooseInteger(args$octave.offset, 'octave.offset', callname)
+    checks(args$octave.offset, argname = 'octave.offset', xwholenum)
   }
   
   if ('octave.round' %in% argnames) {
-    checkRoundingFunction(args$octave.round, 'octave.round', callname)
+    checks(args$octave.round, argname = 'octave.round', xrounding)
   }
   
   if ('parts' %in% argnames) {
-    checkArg(args$parts, argname = 'parts', callname = callname, classes = 'character', 
-                   valid = \(arg) !is.na(pmatch(args$parts, c('step', 'species', 'octave'))),
-                   validoptions = c('step', 'species', 'octave'))
+    checks(args$parts, argname = 'parts', xcharacter & xplegal(c('step', 'species', 'octave')))
     
   }
   
-  checkTFs( args[intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic',
-                                       'octave.absolute', 'octave.relative'))], callname = callname)
     
-  singlechar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
-                  'diminish', 'augment', 'major', 'minor', 'perfect',
-                  'up', 'down', 'same')
-  Map(\(arg, name) {
-    checkCharacter(arg, allowEmpty = TRUE, max.length = 1L, argname = name, callname = callname)
-  },
-  args[argnames %in% singlechar],
-  argnames[argnames %in% singlechar])
-         
+
   
   args 
   
 }
 
 
-makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
+makePitchTransformer <- function(deparser, callname, 
+                                 outputClass = 'character', 
+                                 removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
@@ -2722,22 +2729,27 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
   args <- c(alist(x = , 
                   ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
                   generic = FALSE, simple = FALSE, octave.relative = FALSE, 
-                  Key = NULL,
-                  transposeArgs = list(),
+                  Key = NULL),
+            extraArgs,
+            alist( transposeArgs = list(),
                   parseArgs = list(), 
-                  inPlace = FALSE),
-            extraArgs)
+                  inPlace = FALSE))
+
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
     
-    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname, matrix = TRUE)
+    checks(x, xatomic | xclass('tonalInterval'))
+    checks(inPlace, xTF)
+    checks(parseArgs, xclass('list'))
+    checks(transposeArgs, xclass('list'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
-                                                                parse = parseArgs, transpose = transposeArgs)
+                                                                parse = parseArgs, 
+                                                                transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)
     namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
     # There are four kinds of arguments: 
@@ -2768,14 +2780,21 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     deparse <- args...$deparse %||% TRUE
     
     
-    # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
+    ############# #
+    ### Parse 
+    ############# #
+    
+    parsedTint <- do(tonalInterval, 
+                     c(list(x, memoize = memoize), parseArgs), 
+                     memoize = memoize, 
+                     outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
-    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
+    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, 
+                                                               deparseArgs, 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse && !is.null(output)) {
@@ -3642,10 +3661,10 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
                 ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
   
-  if (!is.null(deparser)) checkArg(deparser, 'deparser', callname = 'int', classes = c('pitchFunction'))
+  checks(deparser, xnull | xclass('pitchFunction'))
   
-  checkTF(classify, 'classify', 'int')
-  checkTF(bracket, 'bracket', 'int')
+  checks(classify, xTF)
+  checks(bracket, xTF)
   
   from <- rep(from, length.out = length(x))
   
@@ -3683,12 +3702,14 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
-  checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
-  checkFunction(deparser, 'deparser', 'mint')
-  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to mint with an atomic 'incomplete' argument, ",
-                                                                                              "length(incomplete) must equal abs(lag).")                 
-  checkTF(bracket, 'bracket', 'mint')
-  checkTF(classify, 'classify', 'mint')
+  checks(lag, xwholenumber & xlen1 & xnotzero)
+  checks(deparser, xclass('function'))
+  checks(incomplete, xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  checks(bracket, xTF)
+  checks(classify, xTF)
   
   
   if (is.numeric(lag)) {
@@ -3755,11 +3776,15 @@ hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
                  ...,
                  parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
 
-  checkVector(x, 'x', 'hint', min.length = 1L)
-  checkFunction(deparser, 'deparser', 'hint')
-  if (!is.null(incomplete) && is.numeric(incomplete) && length(incomplete) != abs(lag)) .stop("In a call to hint with an atomic 'incomplete' argument, ",
-                                                               "length(incomplete) must equal abs(lag).")
-  checkTF(bracket, 'bracket', 'hint')
+  # all checks are conducted by mint, so don't need to repeat them
+  #checks(x, xatomic & xminlength(1))
+  #checks(lag, xwholenumber & xlen1 & xnotzero)
+  #checks(deparser, xclass('function'))
+  #checks(incomplete, xatomic & xminlength(1) & 
+  #        argCheck(\(arg) length(arg) <= abs(lag), 
+  #                 "must be as short or shorter than the absolute lag",  
+  #                 \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  #checks(bracket, xTF)
   
   mint(x, lag = lag, deparser = deparser, incomplete = incomplete, bracket = bracket,
        parseArgs = parseArgs, 

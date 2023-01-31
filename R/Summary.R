@@ -120,10 +120,10 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = 
   by <- rlang::enexpr(by)
   
   ## ARGUMENT CHECKS:
-  checkhumdrumR(humdrumR, 'census')
+  checks(humdrumR, xclass('humdrumR'))
   dataTypes <- checkTypes(dataTypes, 'census')
-  checkTF(removeEmpty, 'removeEmpty', 'census')
-  checkTF(drop, 'drop', 'census')
+  checks(removeEmpty, xTF)
+  checks(drop, xTF)
   
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
   
@@ -644,7 +644,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' @export
 spines  <- function(humdrumR, drop = FALSE) {
 
-  checkhumdrumR(humdrumR, 'spines')
+  checks(humdrumR, xclass('humdrumR'))
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
   
@@ -841,7 +841,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #' @family corpus summary functions
 #' @export
 interpretations <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'interpretations')
+  checks(humdrumR, xclass('humdrumR'))
   
   corpusName <- substitute(humdrumR)
   corpusName <- if (is.call(corpusName))  NULL else deparse(corpusName)
@@ -1012,7 +1012,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
 #' @family corpus summary functions
 #' @export
 sections <- function(humdrumR) {
-  checkhumdrumR(humdrumR, 'sections')
+  checks(humdrumR, xclass('humdrumR'))
   
   cat('The sections function is under construction ;p')
   

@@ -7,7 +7,7 @@
 \usage{
 lag(x, n = 1, fill, wrap, groupby, ...)
 
-lead(x, n, ...)
+lead(x, n = 1, ...)
 }
 \arguments{
 \item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}
@@ -84,7 +84,7 @@ specially optimized for this functions.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(File, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, or ditto.
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, or untie.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

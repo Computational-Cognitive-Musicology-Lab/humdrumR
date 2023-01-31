@@ -563,12 +563,15 @@ NULL
 #' @export
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
+                          expandPaths = FALSE,
                           drop = TRUE,
                           variables = list()) {
   
-  checkhumdrumR(data, 'with.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), 
+  checks(data, xclass('humdrumR'))
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
+  
+
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
@@ -597,9 +600,9 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
-  checkhumdrumR(data, 'within.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, 
+within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
+  checks(data, xclass('humdrumR'))
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -608,7 +611,8 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
-  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     if ('Token' %in% overWrote[bad]) {
@@ -654,9 +658,12 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
 
 }
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
+  
+  if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
+  
   humtab <- getHumtab(humdrumR)
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
@@ -693,6 +700,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   curmfg <- par('mfg')
   par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
   par(mfg = curmfg, new = FALSE)
+  
+  if (expandPaths) {
+    result <- result[!humtab[is.na(ParentPath)], on = '_rowKey_']
+    humtab <- humtab[!is.na(ParentPath)]
+  }
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -831,7 +843,7 @@ parseKeywords <- function(quoTab, withFunc) {
                               "you can't have multiple 'ngram'-keyword arguments.")
     
     ngram <- rlang::eval_tidy(quoTab$Quo[[i]])
-    checkLooseInteger(ngram, 'ngram', withFunc)
+    checks(ngram, xpnatural)
     quoTab$Quo[[i]] <- ngram
   }
   
@@ -1150,7 +1162,7 @@ laggedQuo <- function(funcQuosure) {
 #### Interpretations in expressions
 
 #tandemsQuo <- function(funcQuosure) {
- # This function inserts calls to getTandem
+ # This function inserts calls to extractTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
  # If input is a quosure (it should be), it keeps the quosure intact,
@@ -1163,7 +1175,7 @@ laggedQuo <- function(funcQuosure) {
 #             
 #             if (interp) {
 #               regex <- stringr::str_sub(exstr, start = 2L)
-#               rlang::expr(getTandem(Tandem, !!regex))
+#               rlang::expr(extractTandem(Tandem, !!regex))
 #             } else {
 #               ex
 #             }
@@ -1383,7 +1395,6 @@ windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
 # @param namedArgs A list of named arguments. Unnamed arguments are simply ignored.
 # 
 interpolateArguments <- function(quo, namedArgs) {
-    checkArg(namedArgs)
     expr <- rlang::quo_get_expr(quo)
     expr <- .interpolateArguments(expr, namedArgs)
     
@@ -1595,6 +1606,7 @@ parseResult <- function(results) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
+                      humattr <- humdrumRattr(first)
                       object <- length(first) && !is.factor(first) && is.object(first)
                       
                       # if (is.table(result) && length(result) == 0L) result <- integer(0)
@@ -1604,6 +1616,8 @@ parseResult <- function(results) {
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
                       }
+                      
+                      humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
                       result
                     })
