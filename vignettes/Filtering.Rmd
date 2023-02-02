@@ -13,13 +13,7 @@ editor_options:
 ---
 
 ```{r, include = FALSE, message=FALSE, echo = FALSE }
-knitr::opts_chunk$set(
-  collapse = TRUE, message = FALSE,
-  comment = ">\t"
-)
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-library(humdrumR)
+source('vignette_header.R')
 ```
 
 Most humdrum datasets contain a wealth of information: rhythms, pitches, lyrics, etc.

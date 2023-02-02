@@ -10,14 +10,9 @@ vignette: >
 ---
 
 ```{r, include = FALSE, message=FALSE, echo = FALSE }
-knitr::opts_chunk$set(
-  collapse = TRUE, message = FALSE,
-  comment = ">\t")
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-library(humdrumR)
-par(mar=c(1,1,1,1))
+source('vignette_header.R')
 
+par(mar=c(1,1,1,1))
 pitchFunctions <- humdrumR:::pitchFunctions
 ```
 
