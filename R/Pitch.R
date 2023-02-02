@@ -2826,6 +2826,11 @@ makePitchTransformer <- function(deparser, callname,
 #'       By default, the value is `2^(19/12)`, the 12-tone equal-temperament10th.
 #'       For [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning), set `tonalHarmonic = 3`.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- freq(exampleToken)
+#' results
+#' 
 #' @family {atonal pitch functions}
 #' @family {frequency-based pitch functions}
 #' @family {pitch functions}
@@ -2846,6 +2851,12 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(to
 #' `midi` place middle-C/unison at `60`.
 #' `cents` returns [cents](https://en.wikipedia.org/wiki/Cent_(music)), one hundredth of a semitone.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- semits(exampleToken)
+#' results
+#' results <- midi(exampleToken)
+#' results
 #' 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
@@ -2873,6 +2884,11 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' For example, `cents(440 * 10/9, Exclusive = 'freq')` returns `1082.404`---this would correspond to the 
 #' "[minor tone](https://en.wikipedia.org/wiki/Major_second#Major_and_minor_tones)" above A=440.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- cents(exampleToken)
+#' results
+#' 
 #' @inheritParams freq
 #' @rdname semits
 #' @export 
@@ -2893,6 +2909,12 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist
 #' @family {pitch functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- pc(exampleToken)
+#' results
+#' 
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @export 
@@ -2910,6 +2932,12 @@ pc <- makePitchTransformer(tint2pc, 'pc', 'character')
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' @inheritParams pitchFunctions
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- pitch(exampleToken)
+#' results
+#' 
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @export 
 pitch <- makePitchTransformer(tint2pitch, 'pitch')
@@ -2956,6 +2984,11 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' 
 #' ---
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- kern(exampleToken)
+#' results
+#' 
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
@@ -2973,6 +3006,10 @@ kern <- makePitchTransformer(tint2kern, 'kern')
 #' In [humdrumR], the `lilypond` function only relates to the *pitch* part of Lilypond notation:
 #' Lilypond-like *rhythms* can be creating using the [recip] function.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- lilypond(exampleToken)
+#' results
 #' 
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
@@ -2990,6 +3027,11 @@ lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' 
 #' @param S If `S = TRUE`, E-flat (`Ees`) will be written just `"S"`, while A-flat (`Aes`) will be written `"As"`.
 #'
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- tonh(exampleToken)
+#' results
+#'
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
@@ -3003,6 +3045,11 @@ tonh <- makePitchTransformer(tint2tonh, 'tonh')
 #' Helmholtz pitch representation
 #' 
 #' [Helmholtz notation](https://en.wikipedia.org/wiki/Helmholtz_pitch_notation)
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- helmholtz(exampleToken)
+#' results
 #' 
 #' 
 #' @family {absolute pitch functions}
@@ -3019,7 +3066,10 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' This returns the standard representations of [intervals](https://en.wikipedia.org/wiki/Interval_(music))
 #' in Western music.
 #' 
-#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- interval(exampleToken)
+#' results
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
@@ -3041,6 +3091,14 @@ interval <- makePitchTransformer(tint2interval, 'interval')
 #' In the `**deg` representation, the octave of each pitch is indicated *relative to the previous pitch*---
 #' a `"^"` indicates the pitch higher than the previous pitch while a `"v"` indicates a pitch lower than
 #' the previous pitch.
+#' 
+#' @examples
+#' 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- degree(exampleToken)
+#' results
+#' results <- deg(exampleToken)
+#' results
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
@@ -3067,6 +3125,12 @@ deg <- makePitchTransformer(tint2deg, 'deg')
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' 
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- solfa(exampleToken)
+#' results
+#' 
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @export 
@@ -3083,6 +3147,11 @@ solfa <- makePitchTransformer(tint2solfa, 'solfa')
 #' @seealso To better understand how this function works, read about the [family of pitch functions][pitchFunctions], 
 #' or how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- solfg(exampleToken)
+#' results
+#' 
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @export 
@@ -3092,6 +3161,11 @@ solfg <- makePitchTransformer(tint2solfg, 'solfg')
 #' 
 #' [Swara](https://en.wikipedia.org/wiki/Svara) are syllabes used to represent scale degrees
 #' in hindustani music---like solfege.
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- bhatk(exampleToken)
+#' results
 #' 
 #' @family {relative pitch functions}
 #' @family {pitch functions}
