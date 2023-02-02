@@ -253,6 +253,14 @@ xclass <- function(classes) {
   
 }
 
+xinherits <- function(parentclass) {
+  
+  argCheck(\(arg) inherits(arg, parentclass),
+           # glue::glue("a {harvard(classes, 'or', quote = TRUE)} object"),
+           glue::glue("must be or inherit from the class {parentclass}"),
+           .mismatch(class))
+  
+}
 
 
 
