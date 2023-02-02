@@ -41,6 +41,17 @@ test_that('count() and subpos() work correctly', {
 })
 
 
+test_that('metlev family works correctly', {
+  
+  triplets <- c('6','6','6','8','8','12','12','12')
+  
+  expect_equal(metsubpos(triplets), c(0, 1/6, 1/3, 0, 0, 0, 1/12, 1/6))
+  expect_equal(metsubpos(triplets, remainderSubdivides = FALSE), c(0, 1/24, 1/48, 0, 0, 0, 1/48, 1/24))
+  expect_equal(metsubpos(triplets, meter = meter('M4/4', '6')), c(0, 0, 0, 0, 0, 0, 0, 1/12 ))
+  expect_equal(metsubpos(triplets, meter = meter('M4/4', '12')), c(0, 0, 0, 0, 0, 0, 0, 0 ))
+  
+})
+
 test_that('Examples from Metric man work', {
   
   ## count() man
@@ -51,5 +62,26 @@ test_that('Examples from Metric man work', {
   
   expect_equal(duration('M3/4'), 0.75)
   expect_identical(count(rep('8', 8), beat = '1', phase = 3/8), as.integer(rep(c(1,2), c(5, 3))))
+  
+})
+
+
+test_that("'Meter extraction tools' work", {
+
+  # tatum  
+  expect_equal(tatum(c('1', '4', '8')), '8')
+  expect_equal(tatum(c('1', '4', '12')), '12')
+  expect_equal(tatum(c('1', '4', '8', '12')), '24')
+  expect_equal(tatum(c('4', '8', '12', '16')), '48')
+  
+  expect_equal(tatum(c(1, .25, 1/8, 1/12)), 1/24)
+  
+  
+  # tactus and measure
+  meters <- c('M4/4', 'M3/4', 'M12/8', 'M6/8', 'M7/8', 'M2+2+3/8')
+  expect_equal(tactus(meters), c('4', '4', '4.', '4.', '8', '4+4+4.'))
+  expect_equal(tactus(meters, deparser = duration), c('0.25', '0.25', '0.375', '0.375', '0.125', '0.25+0.25+0.375'))
+  expect_equal(measure(meters), c('1', '2.', '1.', '2.', '2..', '2..'))
+  expect_equal(measure(meters, deparser = duration), c(1, .75, 1.5, .75, .875, .875))
   
 })

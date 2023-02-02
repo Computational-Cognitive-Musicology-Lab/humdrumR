@@ -575,7 +575,7 @@ noteValue2rint <- function(x, sep =" \U2215") {
 
 ### Numbers ####
 
-duration2rint <- function(x, ...)  as.rational(ifelse(x >= 0, x, NA)) 
+duration2rint <- function(x, ...) as.rational(x) # as.rational(ifelse(x >= 0, x, NA)) 
 
 
 seconds2rint <- function(x, BPM = 60, ...) {
@@ -1250,8 +1250,8 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' Another option is to pass the `pickup` argument a logical vector of the same length as the input `x`.
 #' Within each piece/group, any block of `TRUE` values at the *beginning* of the `pickup` vector 
 #' indicate a pickup.
-#' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline.
-#' all the earlier (`pickup == TRUE`) points will be negative numbers, measured backwards from the start index.
+#' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline/count;
+#' All the earlier (`pickup == TRUE`) points will be negative numbers, measured backwards from the start index.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for the `pickup` argument is `within(humData, timeline(Token, pickup = Bar < 1)`, which makes the downbeat of
 #' the first complete bar `1` the starting point of the timeline---any notes in pickup bars are negative on the timeline.
@@ -1273,7 +1273,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, pickup = NULL, deparser = duration, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timeline <- function(x, start = 0, pickup = NULL, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
    
@@ -1492,3 +1492,6 @@ londonPlot <- function(pos, beat = 1) {
   # text(xy[ , 1]*1.1, xy[ , 2]*1.1, i, xpd = T)
   
 }
+
+
+

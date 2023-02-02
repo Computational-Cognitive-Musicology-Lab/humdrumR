@@ -6,7 +6,7 @@
 \alias{tatum.default}
 \alias{tatum.rational}
 \alias{tatum.NULL}
-\title{Metric units}
+\title{Find common denominator of beats}
 \usage{
 tatum(x, ...)
 
@@ -19,10 +19,27 @@ tatum(x, ...)
 \method{tatum}{`NULL`}(x)
 }
 \description{
-Metric units
+In \code{humdrumR}, we define a \emph{tatum} as the greatet common demoninator of
+a set of beats.
+In other words, given a set of beats, the largest beat that divides all the given beats---a common unit
+which can measure any of the other beats.
+}
+\details{
+\code{tatum()} is a generic function; it can read any input which can be parsed by the \link[=rhythmInterval]{rhythm parser}.
+If can also take a \code{\link[=meter]{meter()}} object (or a \code{character} string of the form \code{"MX/Y"}).
+}
+\examples{
+
+tatum(c("4", "8", "12"))
+
+tatum(c("M4/4"))
+
+tatum(meter("M4/4", '6'))
+
 }
 \seealso{
 Other {Metric functions}: 
+\code{\link{meter}},
 \code{\link{tactus}()}
 }
 \concept{{Metric functions}}

@@ -28,3 +28,7 @@ Windowing:
 
 	ditto for close
 	
+
+
+Minor:
+	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?

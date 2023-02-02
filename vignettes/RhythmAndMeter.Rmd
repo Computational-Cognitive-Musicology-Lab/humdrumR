@@ -67,12 +67,13 @@ So you can do things like:
 
 recip(0.375)
 
-recip("𝅘𝅥 𝅭 c")
-
-
+quarters('4.')
 quarters(0.375)
 
-quarters("𝅘𝅥 𝅭 c")
+#
+#
+recip("𝅘𝅥 𝅭 ")
+
 
 ```
 
@@ -311,7 +312,7 @@ So, in our Bach chorales:
 
 ```{r}
 
-within(chorales, timeline(Token, pickup = Bar == 1))
+within(chorales, timeline(Token, pickup = Bar < 1))
 
 
 ```
@@ -323,7 +324,7 @@ The key advantage is that this will work even if different pieces in the corpus 
 
 The `timestamp()` function is a special variant of `timeline()` which outputs a timeline in clock-time, using the `dur()` format.
 In order to do this `timestamp()` needs to know a tempo: by default, `with()` and `within()` will pass the `BPM` field from humdrum data (if there is one) to `timestamp()`.
-If the `BPM` argument is not provided, the default is 60BPM.
+If the `BPM` argument is not provided, the default is 60 bpm.
 
 
 

@@ -9,7 +9,7 @@
 \alias{measure.meter}
 \alias{measure.character}
 \alias{measure.NULL}
-\title{Properties of meters}
+\title{Extract levels from meters}
 \usage{
 tactus(x, deparser, ...)
 
@@ -27,11 +27,40 @@ measure(x, deparser, ...)
 
 \method{measure}{`NULL`}(x)
 }
+\arguments{
+\item{x}{A \code{\link[=meter]{meter()}} object or a \code{character} string time-signature to parse.}
+
+\item{deparser}{A \link[=rhythmFunctions]{rhythm function} to format the output. If \code{NULL}, a \code{\link[=rational]{rational()}} value is returned.}
+
+\item{sep}{If the tactus is a pattern of irregular beats, they are pasted together using this separator.}
+}
 \description{
-Properties of meters
+These functions take \code{\link[=meter]{meter()}} objects---or values parseable as meters---and return
+specific levels from the meter.
+\code{tactus()} extracts the tactus of a meter; \code{measure()} extracts the length of the full measure of a meter.
+\code{nbeats()} counts the number of tactus beats in the meter.
+These functions are particularly useful as arguments to the \link[=count]{count and subpos} functions.
+}
+\details{
+By default, \code{tactus()} and \code{measure()} deparse their output as \code{\link[=recip]{recip()}};
+an alternative deparser (output format) can be chosen using the \code{deparser} argument.
+}
+\examples{
+
+tactus("M4/4")
+
+tactus("M6/8")
+
+measure("M4/4")
+
+measure("M6/8")
+
+measure("M6/8", deparser = duration)
+ 
 }
 \seealso{
 Other {Metric functions}: 
+\code{\link{meter}},
 \code{\link{tatum}()}
 }
 \concept{{Metric functions}}

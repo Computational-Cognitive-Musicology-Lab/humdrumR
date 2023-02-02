@@ -9,7 +9,6 @@ timeline(
   x,
   start = 0,
   pickup = NULL,
-  deparser = duration,
   ...,
   Exclusive = NULL,
   parseArgs = list(),
@@ -87,8 +86,8 @@ If you want to use the duration(s) of grace notes, specify \code{grace = TRUE}.
 Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{x}.
 Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
 indicate a pickup.
-The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline.
-all the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/count;
+All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
 the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.

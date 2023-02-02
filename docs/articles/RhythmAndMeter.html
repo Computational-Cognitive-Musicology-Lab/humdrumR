@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-01-27</h4>
+            <h4 data-toc-skip class="date">2023-02-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -146,15 +146,15 @@ other function’s output. So you can do things like:</p>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">recip</span>(<span class="fl">0.375</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4."</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">recip</span>(<span class="st">"𝅘𝅥 𝅭 c"</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4."</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">quarters</span>(<span class="fl">0.375</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">quarters</span>(<span class="st">"𝅘𝅥 𝅭 c"</span>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">quarters</span>(<span class="st">'4.'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">quarters</span>(<span class="fl">0.375</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">recip</span>(<span class="st">"𝅘𝅥 𝅭 "</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4."</span></span></code></pre></div>
 <hr>
 <p>The complete list of basic pitch functions is:</p>
 <ul>
@@ -491,32 +491,42 @@ timeline:</p>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">17</span>] <span class="fl">4.500000</span> <span class="fl">4.583333</span> <span class="fl">4.666667</span> <span class="fl">4.750000</span> <span class="fl">4.833333</span> <span class="fl">4.916667</span> <span class="fl">5.000000</span> <span class="fl">5.166667</span></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">25</span>] <span class="fl">5.250000</span> <span class="fl">5.416667</span> <span class="fl">5.500000</span></span></code></pre></div>
 <hr>
-<p>An alternative way of using the <code>start</code> argument is be
-feeding the <code>start</code> argument a <code>logical</code> vector
-the same length as the input (<code>x</code>): the first
-<code>TRUE</code> value in the <code>start</code> vector is chosen as
-the start of th timeline. This is useful for specifying a pick-up. For
+<div class="section level4">
+<h4 id="pickups">Pickups<a class="anchor" aria-label="anchor" href="#pickups"></a>
+</h4>
+<p>The <code>pickup</code> argument gives us another option to control
+where our timeline starts. In many datasets, the first few events in the
+music are a <em>anacrusis</em> or “pick up”; we’d generally like our
+timeline to start <em>after</em> the pickup. To make this happen, the
+<code>pickup</code> argument can be passed a <code>logical</code> vector
+which is the same length as the input (<code>x</code>): Any
+<code>TRUE</code> values at the beginning of the vector are considered a
+pickup; Thus, the <em>first</em> <code>FALSE</code> value in the
+<code>pickup</code> vector is chosen as the start of th timeline. For
 example, let’s say we have the melody</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">melody</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'8c'</span>, <span class="st">'8d'</span>,<span class="st">'2e'</span>, <span class="st">'2f'</span>,<span class="st">'1e'</span><span class="op">)</span></code></pre></div>
 <p>but the first two notes are a pickup. Since we can see that the
 pickup has a duration of <code>.25</code> (quarte-note), we
-<em>could</em> do this:</p>
+<em>could</em> use the <code>start</code> argument to do this:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timeline</span>(melody, <span class="at">start =</span> <span class="sc">-</span>.<span class="dv">25</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="fl">0.250</span> <span class="sc">-</span><span class="fl">0.125</span>  <span class="fl">0.000</span>  <span class="fl">0.500</span>  <span class="fl">1.000</span></span></code></pre></div>
 <p>Now <code>0</code> is on the downbeat, and events before that
-<code>start</code> are negative on the timeline! However, we could also
-use the <code>logical</code> approach—we want the downbeat
-(<code>0</code>) to be on that <code>2e</code>, so</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timeline</span>(melody, <span class="at">start =</span> melody <span class="sc">==</span> <span class="st">'2e'</span>)</span>
+<code>start</code> are negative on the timeline!</p>
+<p>To do this with the <code>logical</code> <code>pickup</code>
+argument, we could do this:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">timeline</span>(melody, <span class="at">pickup =</span> melody <span class="sc">!=</span> <span class="st">'2e'</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="fl">0.250</span> <span class="sc">-</span><span class="fl">0.125</span>  <span class="fl">0.000</span>  <span class="fl">0.500</span>  <span class="fl">1.000</span></span></code></pre></div>
-<hr>
-<p>A common technique for identifying pickups in <code>humdrumR</code>
-datasets is be looking at the <code>Bar</code> field. The first downbeat
-will typically be the first place the <code>Bar == 1</code>—pickups will
-have <code>Bar == 0</code>. So, in our Bach chorales:</p>
+<p>This might seem <em>less</em> intuitive! However, this approach can
+be very useful when working with actual humdrumR datasets. In many
+humdrum datasets, pickup measures are indicated by have barlines labeled
+<code>=0</code> or <code>=-</code>. When humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> reads a file, it counts the
+barlines and creates a field called <code>Bar</code>, and it numbers
+pickup measures as zero (or negative numbers, if there are more than
+one). This means pickups will have <code>Bar &lt; 1</code>. So, in our
+Bach chorales:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales, <span class="fu">timeline</span>(Token, <span class="at">start =</span> Bar <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">within</span>(chorales, <span class="fu">timeline</span>(Token, <span class="at">pickup =</span> Bar <span class="sc">&lt;</span> <span class="dv">1</span>))</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# vvv chor001.krn vvv #############################</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>         <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
@@ -613,7 +623,10 @@ have <code>Bar == 0</code>. So, in our Bach chorales:</p>
 <span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> numeric</span></code></pre></div>
 <p>Now the <code>0</code> in our timelines corresponds to the first
-downbeat of each spine, in each file.</p>
+downbeat of each spine, in each file. The key advantage is that this
+will work even if different pieces in the corpus have pickups of
+different lengths, even if there is <em>no</em> pickup.</p>
+</div>
 <div class="section level4">
 <h4 id="timestamp">Timestamp<a class="anchor" aria-label="anchor" href="#timestamp"></a>
 </h4>
@@ -624,7 +637,7 @@ the <code><a href="../reference/time.html">dur()</a></code> format. In order to 
 <code><a href="../reference/withinHumdrum.html">with()</a></code> and <code><a href="../reference/withinHumdrum.html">within()</a></code> will pass the
 <code>BPM</code> field from humdrum data (if there is one) to
 <code><a href="../reference/timeline.html">timestamp()</a></code>. If the <code>BPM</code> argument is not
-provided, the default is 60BPM.</p>
+provided, the default is 60 bpm.</p>
 </div>
 </div>
 </div>

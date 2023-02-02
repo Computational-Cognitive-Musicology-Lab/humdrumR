@@ -22,8 +22,8 @@ subpos(
   phase = 0,
   pickup = NULL,
   deparser = duration,
-  groupby = list(),
-  ...
+  ...,
+  groupby = list()
 )
 
 onbeat(dur, beat = rational(1L), groupby = list(), ...)
