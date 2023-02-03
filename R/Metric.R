@@ -98,17 +98,40 @@
 #' 
 #' Any additional, unnamed arguments to `meter()` will be parsed as durations, and added as levels to the meter.
 #' 
-#' @param x A `list` of beats, or a time-signature `character` string.
-#' @param measure A duration to represent the measure.
-#' @param tactus A duration to set as the tactus.
-#' @param tick A duration to set as the tick.
-#' @param subdiv (Natural numbers, greater than 1) Subdivsions (fractions) of the tactus to add to the meter.
-#' @param hyper (Natural numbers, greater than 1) Multiples of the measure duration, to add to the meter.
-#' @param tatum (`logical` T/F argument) If `TRUE`, the least common demininator of all levels is added (if not already present)
-#' to the meter.
-#' @param fill.levels (`logical T/F argument` or single `character`) Controls which levels should be "filled" to the meter.
-#' Possible values are `'above'`, `'below'`, `'both'`, or `'neither'`. A `logical` `TRUE` is equivalent to `'both'` and 
-#' `FALSE` to `'neither'`.
+#' @param x ***A time signature or list of beats used to construct a meter.***
+#' 
+#' Must be a `character` string or a `list` of either `numeric` or `character` values.
+#' 
+#' A `character` input is parsed as a time signature, which is used to extract tactus and measure levels.
+#' The contents of `list` are parsed as durations using [rhythmInterval()]: these durations become the 
+#' levels of the meter.
+#' Failures to parse the input will result in an error.
+#' 
+#' @param measure,tick,tactus Durations to use longest (measure), shortest (tick), or tactus levels.
+#' 
+#' Must be a singleton `character` or `numeric` value, or a `list` containing a single vector of such values.
+#' 
+#' These are parsed as durations using [rhythmInterval()]; parse failures lead to errors.
+#' 
+#' @param subdiv ***Subdivisions (fractions) of the `tactus` to add to the meter.***
+#' 
+#' Must be positive natural numbers.
+#' 
+#' @param hyper ***Multiples of the `measure` duration to add to the meter.***
+#' 
+#' Must be positive natural numbers.
+#' 
+#' @param tatum ***Should the least common denominator of all levels be added to the meter?***
+#' 
+#' Must be a singleton `logical` value: a on/off switch.
+
+#' @param fill.levels Should "gaps" between specified levels be added to the meter?
+#' 
+#' Must be a singleton `logical` or `character` value; `character` values must be `'above'`, `'below'`, `'both'`, or `'neither'`.
+#' 
+#' `TRUE` is shorthand for `'both'`; `FALSE` is shorthand for `'neither'`.
+#' 
+#' 
 #'
 #' @name meter
 #' @family {Metric functions}
@@ -225,12 +248,21 @@ meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.
 #' The default arguments build a 4/4 meter with levels ranging from whole-notes down
 #' to sixteenth-notes, and a quarter-note tactus.
 #' 
-#' @param nlevels (positive natural number) The number of duple levels. 
-#' @param measure (`numeric` or `character`, [parsable][rhythmInterval()] as a 
-#' rhythmic duration) The full length of the meter (i.e., the highest metric level).
-#' @param tactus (positive natural number, `<= nlevels`) Which level is the tactus? This
-#' is indicated with an index, counting from the highest level down. So if the levels are
-#' `c("1", "2", "4", "8")`, `tactus = 2` would make the tactus `"2"`.
+#' @param nlevels ***The number of duple levels. ***
+#' 
+#' Must be a singleton, positive natural number
+#' 
+#' 
+#' @param measure ***The duration of the top level of the meter.***
+#' 
+#' Must be a singleton `numeric` or `character` value.
+#' 
+#' Is parsed as a duration by [rhythmInterval()]; a failure to parse leads to an error.
+
+#' @param tactus ***Which level is the tactus?***
+#' 
+#' Must be a singleton, positive natural number; must be less than or equal to `nlevels`.
+#'
 #' 
 #' @seealso {Use the [meter()] function to create abitrary meters.}
 #' @export
@@ -301,7 +333,6 @@ timesignature2meter <- function(x, ..., sep = '/', compound = TRUE) {
   REparse(x, makeRE.timeSignature(sep = sep, collapse = FALSE),
           toEnv = TRUE)
   
-  
   numerator <- lapply(strsplit(numerator, split = '\\+'), as.integer)
   denominator <- as.integer(denominator)
   
@@ -359,15 +390,39 @@ setAs('integer', 'meter', \(from) new('meter',
 
 #' Find common denominator of beats
 #' 
-#' In `humdrumR`, we define a *tatum* as the greatet common demoninator of 
-#' a set of beats.
-#' In other words, given a set of beats, the largest beat that divides all the given beats---a common unit
-#' which can measure any of the other beats.
+#' In `humdrumR`, we define a *tatum* as the greatest common denominator of 
+#' a set of durations.
+#' In other words, given a set of durations, the largest duration that divides all the given beats is the tatum---a common unit
+#' which can measure any of the other durations
 #' 
 #' @details 
 #' 
 #' `tatum()` is a generic function; it can read any input which can be parsed by the [rhythm parser][rhythmInterval].
-#' If can also take a [meter()] object (or a `character` string of the form `"MX/Y"`).
+#' If can also take a [meter()] object or `character` string of the form `"MX/Y"`.
+#' 
+#' The tatum of a [meter()] is the tatum of all that meters metric levels.
+#' If meters *and* durations are provided---like `tatum(c('M4/4', '6')`---, the tatum of all the meters'
+#' levels *and* all the durations is computed.
+#' 
+#' The `deparser` argument is a [rhythm function][rhythmFunction] which controls the output format.
+#' If `deparser` is `NULL`, the tatum is returned as a [rational()] value.
+#'
+#' @param x ***The input to compute the tatum of.***
+#' 
+#' Must be a [meter()] object, a singleton `character` value, or vector of either `character`, `numeric`, or [rational()] values.
+#' 
+#' For `character` input, valuest that match the regular expression `"^\*?M"` are parsed as a time signature using [meter()], while other strings are 
+#' parsed as durations using [rhythmInterval()]. 
+#' `numeric` input is also parsed using [rhythmInterval()]; parse failures result in errors.
+#' 
+#' @param deparser ***What output format is desired?***
+#' 
+#' For `character` or `meter` input, the default is [recip()]; for `numeric` input,
+#' the default is [duration()].
+#'
+#' Must be a [rhythm function][rhythmFunction] or `NULL`.
+#' 
+#' 
 #' 
 #' @examples 
 #' 
@@ -375,32 +430,41 @@ setAs('integer', 'meter', \(from) new('meter',
 #' 
 #' tatum(c("M4/4"))
 #' 
-#' tatum(meter("M4/4", '6'))
+#' tatum("M4/4", '6')
 #' 
 #' @family {Metric functions}
 #' @export
 tatum <- function(x, ...) UseMethod('tatum')
 #' @rdname tatum
 #' @export
-tatum.meter <- function(x) {
-  do.call('c', lapply(x@Levels, \(ls) tatum.rational(do.call('c', ls))))
+tatum.meter <- function(x, deparser = recip) {
+  result <- do.call('c', lapply(x@Levels, \(ls) tatum.rational(do.call('c', ls))))
+  
+  if (is.null(deparser)) result else deparser(result)
 }
 #' @rdname tatum
 #' @export
-tatum.default <- dofunc('x', function(x, deparse = TRUE) {
+tatum.character <- dofunc('x', function(x, deparser = recip) {
+  checks(deparser, xclass('rhythmFunction'))
   
-  if (is.character(x) && any(grepl('\\*?M', x))) {
-    result <- tatum.meter(meter.character(x))
-    if (deparse) recip(result) else result
-  } else {
-    rint <- rhythmInterval(unique(x))
-    result <- tatum.rational(rint)
-    if (deparse) {
-      reParse(result, attr(rint, 'dispatch'), c('recip', 'duration'))
-    } else {
-      result
-    }
-  }
+  timesignatures <- grepl('^\\*?M', x)
+  rint <- .unlist(c(if (any(timesignatures)) tatum.meter(meter.character(x[timesignatures])),
+                  if (any(!timesignatures)) rhythmInterval.character(unique(x[!timesignatures]))))
+  result <- tatum.rational(rint)
+  
+  if (is.null(deparser)) result else deparser(result)
+  
+})
+    
+#' @rdname tatum
+#' @export
+tatum.numeric <- dofunc('x', function(x, deparser = duration) {  
+  checks(deparser, xclass('rhythmFunction'))
+    
+  rint <- rhythmInterval(unique(x))
+  result <- tatum.rational(rint)
+  
+  if (is.null(deparser)) result else deparser(result)
 })
 #' @rdname tatum
 #' @export
@@ -423,9 +487,25 @@ tatum.NULL <- function(x) NULL
 #' By default, `tactus()` and `measure()` deparse their output as [recip()];
 #' an alternative deparser (output format) can be chosen using the `deparser` argument.
 #' 
-#' @param x A [meter()] object or a `character` string time-signature to parse.
-#' @param deparser A [rhythm function][rhythmFunctions] to format the output. If `NULL`, a [rational()] value is returned.
-#' @param sep If the tactus is a pattern of irregular beats, they are pasted together using this separator.
+#' @param x ***The input to compute the desired duration from.***
+#' 
+#' Must be a [meter()] object or a `character` vector.
+#' 
+#' A `character` input is parsed using [meter()]; failures to parse result in errors.
+#' 
+#' @param deparser ***What output format is desired?***
+#' 
+#' The default is [recip()].
+#'
+#' Must be a [rhythm function][rhythmFunction] or `NULL`.
+#'
+#' @param sep ***Seperator between irregular beat patterns.***
+#' 
+#' Defaults to `"+"`.
+#' 
+#' A singleton `character` value.
+#'
+#' If the tactus is a pattern of irregular beats, they are pasted together using this separator.
 #'
 #' 
 #' @examples 
@@ -622,16 +702,57 @@ beats.NULL <- function(x) NULL
 #' As a result, doing arithmetic or other math with beat "counts" can be problematic when using a `pickup` argument.
 #' It may be better to use `round(timeline())` in cases where you want to do much math with counts.
 #'
-#' @param dur An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
-#' @param beat An input vector of length 1, or the same length as `dur`, which is parsed as duration information using the [rhythm parser][rhythmParsing]---or a list of vectors.
-#' @param start A whole-number value from which the counting begins.
-#' @param phase (length 1 or the same length as `dur`) An atomic vector which can be parsed by the [rhythm parser][rhythmParsing]. `0` is the default. The largest `phase`
-#' value must be smaller than the smallest rhythmic value in `beat`.
-#' @param pickup `NULL`, or a `logical` vector of same length as `x`.
-#' @param offBeats (`logical` TRUE/False) If `FALSE`, offbeat onsets return `NA`.
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x` into.
-#'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
-#'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
+#' @param dur ***An input vector of rhythmic durations.***
+#'            
+#' Must be a `character` or `numeric` vector.
+#'      
+#' Is parsed using [rhythmInterval()]; 
+#' Wherever the input can't be parsed as a duration, 
+#' that element is treated as a duration of zero.
+#'             
+#' @param beat ***The size of "beat" (or measure) to count.***
+#' 
+#' Defaults to a whole-note (one measure of 4/4 time).
+#' 
+#' Must be a `character` or `numeric` vector, or a list of such vectors; 
+#' must be a singleton or the same length as `dur`.
+#' 
+#' Is parsed as a duration using [rhythmInterval()]; 
+#' If the input can't be parsed as a duration, the output will be all `NA`.
+#'
+#' @param start ***The number to start counting from.***
+#' 
+#' Must be a single whole-number value (either `numeric` or `integer`).
+#'
+#' @param phase ***The phase offset between onsets and beats.***
+#' 
+#' Defaults to `0`.
+#'
+#' Must be a `character` or `numeric` vector; must be length `1` or the same length as `dur`;
+#' The duration of `phase` must be smaller than the smallest duration value in `beat`.
+#' 
+#' Is parsed as a duration using [rhythmInterval()]; 
+#' If the input can't be parsed as a duration, an error occurs.
+#' 
+#' @param pickup ***Indicates which leading values in the input are pickups, if any.***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be `NULL`, or a `logical` vector of the same length as `dur`.
+#'
+#' @param offBeats ***Should off-beat onsets be numbered in the output, or `NA`?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a single `logical` value: a on/off switch.
+#'
+#' @param groupby ***Optional vectors to group by and count within.***
+#' 
+#' Defaults to empty `list()`.
+#'
+#' Must be a [list()], which is either empty or contains vectors whiare all the same length as `dur`.
+#' To function as a by-record timeline, the `groupby` list must include a *named* `Piece` and `Record` vectors.
+#' Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #'   
 #' @examples 
 #' 
@@ -938,20 +1059,75 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' If the `remainderSubdivides` argument is `TRUE`, off-beat onsets are associated with the previous metric level
 #' which the subposition makes an even subdivision of.
 #' 
-#' @param meter A `meter` object, or a `character` string which can be [parsed as a meter][meter()].
-#' @param value (`logical` T/F) If `TRUE`, `metlev()` deparses and returns the (duration) value of a metric level.
-#' If `FALSE`, the level is output as a number.
-#' @param level A single `character` string, [recip()] format, indicating which level in the meter to count.
-#' @param offBeats (`logical` T/F) If `FALSE`, any onsets that are offbeat return `NA`.
-#' @param remainderSubdivides (`logical` T/F switch) Controls how off-beat onsets are associated with beats.
+#' @param dur ***An input vector of rhythmic durations.***
+#'
+#' Must be a `character` or `numeric` vector.
+#'      
+#' Is parsed using [rhythmInterval()]; 
+#' Wherever the input can't be parsed as a duration, 
+#' that element is treated as a duration of zero.
+#' 
+#' @inheritParams timeline 
+#' @inheritParams count
+#' 
+#' @param meter ***The meter(s) to compute levels from.***
+#' 
+#' Defaults to a standard, five-level duple (4/4) meter.
+#' 
+#' Must be a [meter()] object or a `character` vector.
+#' 
+#' For `character` input, the string is parsed using [meter()]; a
+#' failure to parse will result in an error.
+#' 
+#' @param value Should the output levels be represented as rhythmic duration values?
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: a on/off switch.
+#' 
+#' @param level Which metric level should be counted? 
+#' 
+#' Defaults to the tactus of the `meter`.
+#' 
+#' A single `character` value or positive natural number.
+#' 
+#' A `character` string input must be a [recip()] value, matching a beat level in the meter.
+#' A numeric input directly indicates a level in the meter, starting from the highest level (`1`).
+#' 
+#' 
+#' @param remainderSubdivides Should off-beat onsets only be associated with beat levels that they evenly subdivide?
+#'
+#' Defaults to `FALSE`.
+#' 
+#' A singleton `logical` value: an on/off switch.
 #' 
 #' @inheritSection timeline Pickups
-#' @inheritParams timeline
+#'
+#' @examples
+#' 
+#' rhythm <- c('4', '8', '8', '4', '8', '16', '16','4.', '8','2')
+#' 
+#' metlev(rhythm)
+#' metlev(rhythm, meter = 'M6/8')
+#'
+#' metcount(rhythm)
+#' metcount(rhythm, offBeats = FALSE)
+#' metcount(rhythm, meter = 'M6/8', offBeats = FALSE)
+#' 
+#' # chorales
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') 
+#' 
+#' within(chorales, metlev(Token, pickup = Bar < 1))
+#' 
+#' within(chorales, metcount(Token, pickup = Bar < 1, fill.levels = 'below'))
+#'
 #' @seealso {The [count()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
 #' based only on counting a *single* beat level, rather then a hierarchy of beat levels.}
 #' @export
 metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
                    groupby = list(), ..., parseArgs = list(), remainderSubdivides = FALSE ) {
+  
+  checks(dur, xcharacter | xnumeric)
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)
@@ -1058,12 +1234,13 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   
   timeline <- pathSigma(dur, groupby = groupby, pickup = pickup, start = rational(0), callname = callname)
   
-
   levels <- meter@Levels[[1]]
   spans <- .unlist(lapply(levels, sum))
   nbeats <- lengths(levels)
   
-  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), count, dur = dur, groupby = groupby))
+  counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), 
+                                    count, 
+                                    pickup = pickup, dur = dur, groupby = groupby))
   counts[counts >= 1L] <- counts[counts >= 1L] - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
@@ -1140,8 +1317,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
                 \(i) {
                   targets <- meter == uniqmeters[i]
                   
-                  met <- .metric(dur[targets], uniqmeters[i], pickup = pickup %||% x[i],
-                                 start = if (length(start) == length(dur)) start[targets] else start, 
+                  met <- .metric(dur[targets], uniqmeters[i], pickup = if (!is.null(pickup)) pickup[targets],
                                  groupby = lapply(groupby, '[', i = targets),
                                  parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
                                  callname = callname, ...)

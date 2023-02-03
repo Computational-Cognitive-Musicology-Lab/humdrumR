@@ -7,14 +7,19 @@
 duple(nlevels = 4, measure = 1, tactus = 3L)
 }
 \arguments{
-\item{nlevels}{(positive natural number) The number of duple levels.}
+\item{nlevels}{***The number of duple levels. ***
 
-\item{measure}{(\code{numeric} or \code{character}, \link[=rhythmInterval]{parsable} as a
-rhythmic duration) The full length of the meter (i.e., the highest metric level).}
+Must be a singleton, positive natural number}
 
-\item{tactus}{(positive natural number, \verb{<= nlevels}) Which level is the tactus? This
-is indicated with an index, counting from the highest level down. So if the levels are
-\code{c("1", "2", "4", "8")}, \code{tactus = 2} would make the tactus \code{"2"}.}
+\item{measure}{\emph{\strong{The duration of the top level of the meter.}}
+
+Must be a singleton \code{numeric} or \code{character} value.
+
+Is parsed as a duration by \code{\link[=rhythmInterval]{rhythmInterval()}}; a failure to parse leads to an error.}
+
+\item{tactus}{\emph{\strong{Which level is the tactus?}}
+
+Must be a singleton, positive natural number; must be less than or equal to \code{nlevels}.}
 }
 \description{
 This function generates a \code{\link[=meter]{meter()}} objects representing duple meters.

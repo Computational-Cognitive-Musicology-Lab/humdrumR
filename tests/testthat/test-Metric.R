@@ -69,10 +69,11 @@ test_that('Examples from Metric man work', {
 test_that("'Meter extraction tools' work", {
 
   # tatum  
-  expect_equal(tatum(c('1', '4', '8')), '8')
+  expect_equal(tatum(c('1', '4', '8'), deparser = duration), 1/8)
   expect_equal(tatum(c('1', '4', '12')), '12')
   expect_equal(tatum(c('1', '4', '8', '12')), '24')
   expect_equal(tatum(c('4', '8', '12', '16')), '48')
+  expect_equal(tatum(c('M4/4', '6')), '48')
   
   expect_equal(tatum(c(1, .25, 1/8, 1/12)), 1/24)
   

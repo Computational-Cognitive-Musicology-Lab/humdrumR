@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-02-02</h4>
+            <h4 data-toc-skip class="date">2023-02-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -690,6 +690,53 @@ but using <code><a href="../reference/count.html">subpos()</a></code>:</p>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="fu">subpos</span>(seven8, <span class="at">beat =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)), <span class="at">scale =</span> <span class="dv">8</span>)</span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="meter">Meter<a class="anchor" aria-label="anchor" href="#meter"></a>
+</h2>
+<p>The <code><a href="../reference/count.html">count()</a></code> and <code><a href="../reference/count.html">subpos()</a></code> commands are great
+if we want count in a single beat/measure unit. To take things to the
+next level(s), we need to consider musical <em>meter</em>. From the
+point of view of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>, “meter” is a set of
+multiple “beat levels” occuring at the same time, with “lower”
+(faster/shorter) levels nested inside “higher” (slower/longer) levels.
+<code>R Hm</code> defines a number of useful tools for applying metric
+analyses to rhythmic data.</p>
+<div class="section level3">
+<h3 id="metric-levels">Metric levels<a class="anchor" aria-label="anchor" href="#metric-levels"></a>
+</h3>
+<p>The first thing we might want to do, is take a sequence of rhythm
+durations, and identify which metric level each onset lands on. To do
+this, use <code><a href="../reference/metlev.html">metlev()</a></code>:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>eighths <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">metlev</span>(eighths)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"1"</span> <span class="st">"8"</span> <span class="st">"4"</span> <span class="st">"8"</span> <span class="st">"2"</span> <span class="st">"8"</span> <span class="st">"4"</span> <span class="st">"8"</span></span></code></pre></div>
+<p>By default, <code><a href="../reference/metlev.html">metlev()</a></code> is assuming a duple meter for
+us—basically 4/4 time—so these eight eighth-notes make one measure of
+4/4. The first onset lands on the downbeat, coinciding with the highest
+level in the meter (as defined by default)—this highest level beat is a
+whole-note, which is why the output is <code>"1"</code> ([recip()]
+notation for a whole-note). Every odd eighth-note falls down at the
+eigth-note beat level, and is labeled <code>"8"</code>. 4/4 beats 2 and
+4 (the back beats) fall on the quarter-note level, and labeled
+<code>"4"</code>. Finally, beat 3 is on the half-note level
+(<code>"2"</code>).</p>
+<p>If you prefer to have your levels simply numbered from highest to
+lowest, use <code>metlev(..., value = FALSE)</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>eighths <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'8'</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">metlev</span>(eighths, <span class="at">value =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">4</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">3</span> <span class="dv">4</span></span></code></pre></div>
+<p>The whole-note level is <code>1</code> and (in this case) the
+eighth-note level is <code>4</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="controlling-meter">Controlling meter<a class="anchor" aria-label="anchor" href="#controlling-meter"></a>
+</h3>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

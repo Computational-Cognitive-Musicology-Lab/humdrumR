@@ -243,6 +243,13 @@ However, if you wanted, for instance, to calculate differences across spines (li
 you could manually set \code{groupby = list(File, Record)}.
 }
 
+\examples{
+
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+within(chorales, mint(Token))
+
+}
 \seealso{
 {\code{mint} uses \code{\link[=lag]{lag()}} to "lag" the input pitches, and also makes use of \link[=tonalInterval]{pitch parsers} and \link[=pitchFunctions]{pitch functions}.}
 

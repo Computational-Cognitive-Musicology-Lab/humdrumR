@@ -47,24 +47,38 @@ meter(x, ...)
 )
 }
 \arguments{
-\item{x}{A \code{list} of beats, or a time-signature \code{character} string.}
+\item{x}{\emph{\strong{A time signature or list of beats used to construct a meter.}}
 
-\item{measure}{A duration to represent the measure.}
+Must be a \code{character} string or a \code{list} of either \code{numeric} or \code{character} values.
 
-\item{tactus}{A duration to set as the tactus.}
+A \code{character} input is parsed as a time signature, which is used to extract tactus and measure levels.
+The contents of \code{list} are parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}: these durations become the
+levels of the meter.
+Failures to parse the input will result in an error.}
 
-\item{tick}{A duration to set as the tick.}
+\item{measure, tick, tactus}{Durations to use longest (measure), shortest (tick), or tactus levels.
 
-\item{fill.levels}{(\verb{logical T/F argument} or single \code{character}) Controls which levels should be "filled" to the meter.
-Possible values are \code{'above'}, \code{'below'}, \code{'both'}, or \code{'neither'}. A \code{logical} \code{TRUE} is equivalent to \code{'both'} and
-\code{FALSE} to \code{'neither'}.}
+Must be a singleton \code{character} or \code{numeric} value, or a \code{list} containing a single vector of such values.
 
-\item{subdiv}{(Natural numbers, greater than 1) Subdivsions (fractions) of the tactus to add to the meter.}
+These are parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}; parse failures lead to errors.}
 
-\item{hyper}{(Natural numbers, greater than 1) Multiples of the measure duration, to add to the meter.}
+\item{fill.levels}{Should "gaps" between specified levels be added to the meter?
 
-\item{tatum}{(\code{logical} T/F argument) If \code{TRUE}, the least common demininator of all levels is added (if not already present)
-to the meter.}
+Must be a singleton \code{logical} or \code{character} value; \code{character} values must be \code{'above'}, \code{'below'}, \code{'both'}, or \code{'neither'}.
+
+\code{TRUE} is shorthand for \code{'both'}; \code{FALSE} is shorthand for \code{'neither'}.}
+
+\item{subdiv}{\emph{\strong{Subdivisions (fractions) of the \code{tactus} to add to the meter.}}
+
+Must be positive natural numbers.}
+
+\item{hyper}{\emph{\strong{Multiples of the \code{measure} duration to add to the meter.}}
+
+Must be positive natural numbers.}
+
+\item{tatum}{\emph{\strong{Should the least common denominator of all levels be added to the meter?}}
+
+Must be a singleton \code{logical} value: a on/off switch.}
 }
 \description{
 \code{HumdrumR} represents musical meter, internally, using the S4-class \code{meter}.

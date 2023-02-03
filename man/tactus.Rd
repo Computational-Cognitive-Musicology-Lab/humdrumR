@@ -28,11 +28,25 @@ measure(x, deparser, ...)
 \method{measure}{`NULL`}(x)
 }
 \arguments{
-\item{x}{A \code{\link[=meter]{meter()}} object or a \code{character} string time-signature to parse.}
+\item{x}{\emph{\strong{The input to compute the desired duration from.}}
 
-\item{deparser}{A \link[=rhythmFunctions]{rhythm function} to format the output. If \code{NULL}, a \code{\link[=rational]{rational()}} value is returned.}
+Must be a \code{\link[=meter]{meter()}} object or a \code{character} vector.
 
-\item{sep}{If the tactus is a pattern of irregular beats, they are pasted together using this separator.}
+A \code{character} input is parsed using \code{\link[=meter]{meter()}}; failures to parse result in errors.}
+
+\item{deparser}{\emph{\strong{What output format is desired?}}
+
+The default is \code{\link[=recip]{recip()}}.
+
+Must be a \link[=rhythmFunction]{rhythm function} or \code{NULL}.}
+
+\item{sep}{\emph{\strong{Seperator between irregular beat patterns.}}
+
+Defaults to \code{"+"}.
+
+A singleton \code{character} value.
+
+If the tactus is a pattern of irregular beats, they are pasted together using this separator.}
 }
 \description{
 These functions take \code{\link[=meter]{meter()}} objects---or values parseable as meters---and return

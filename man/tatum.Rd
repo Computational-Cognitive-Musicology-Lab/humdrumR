@@ -3,30 +3,56 @@
 \name{tatum}
 \alias{tatum}
 \alias{tatum.meter}
-\alias{tatum.default}
+\alias{tatum.character}
+\alias{tatum.numeric}
 \alias{tatum.rational}
 \alias{tatum.NULL}
 \title{Find common denominator of beats}
 \usage{
 tatum(x, ...)
 
-\method{tatum}{meter}(x)
+\method{tatum}{meter}(x, deparser = recip)
 
-\method{tatum}{default}(x, deparse = TRUE)
+\method{tatum}{character}(x, deparser = recip)
+
+\method{tatum}{numeric}(x, deparser = duration)
 
 \method{tatum}{rational}(x)
 
 \method{tatum}{`NULL`}(x)
 }
+\arguments{
+\item{x}{\emph{\strong{The input to compute the tatum of.}}
+
+Must be a \code{\link[=meter]{meter()}} object, a singleton \code{character} value, or vector of either \code{character}, \code{numeric}, or \code{\link[=rational]{rational()}} values.
+
+For \code{character} input, valuest that match the regular expression \code{"^\\*?M"} are parsed as a time signature using \code{\link[=meter]{meter()}}, while other strings are
+parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}.
+\code{numeric} input is also parsed using \code{\link[=rhythmInterval]{rhythmInterval()}}; parse failures result in errors.}
+
+\item{deparser}{\emph{\strong{What output format is desired?}}
+
+For \code{character} or \code{meter} input, the default is \code{\link[=recip]{recip()}}; for \code{numeric} input,
+the default is \code{\link[=duration]{duration()}}.
+
+Must be a \link[=rhythmFunction]{rhythm function} or \code{NULL}.}
+}
 \description{
-In \code{humdrumR}, we define a \emph{tatum} as the greatet common demoninator of
-a set of beats.
-In other words, given a set of beats, the largest beat that divides all the given beats---a common unit
-which can measure any of the other beats.
+In \code{humdrumR}, we define a \emph{tatum} as the greatest common denominator of
+a set of durations.
+In other words, given a set of durations, the largest duration that divides all the given beats is the tatum---a common unit
+which can measure any of the other durations
 }
 \details{
 \code{tatum()} is a generic function; it can read any input which can be parsed by the \link[=rhythmInterval]{rhythm parser}.
-If can also take a \code{\link[=meter]{meter()}} object (or a \code{character} string of the form \code{"MX/Y"}).
+If can also take a \code{\link[=meter]{meter()}} object or \code{character} string of the form \code{"MX/Y"}.
+
+The tatum of a \code{\link[=meter]{meter()}} is the tatum of all that meters metric levels.
+If meters \emph{and} durations are provided---like \verb{tatum(c('M4/4', '6')}---, the tatum of all the meters'
+levels \emph{and} all the durations is computed.
+
+The \code{deparser} argument is a \link[=rhythmFunction]{rhythm function} which controls the output format.
+If \code{deparser} is \code{NULL}, the tatum is returned as a \code{\link[=rational]{rational()}} value.
 }
 \examples{
 
@@ -34,7 +60,7 @@ tatum(c("4", "8", "12"))
 
 tatum(c("M4/4"))
 
-tatum(meter("M4/4", '6'))
+tatum("M4/4", '6')
 
 }
 \seealso{

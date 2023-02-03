@@ -44,14 +44,36 @@ metsubpos(
 )
 }
 \arguments{
-\item{meter}{A \code{meter} object, or a \code{character} string which can be \link[=meter]{parsed as a meter}.}
+\item{dur}{\emph{\strong{An input vector of rhythmic durations.}}
+
+Must be a \code{character} or \code{numeric} vector.
+
+Is parsed using \code{\link[=rhythmInterval]{rhythmInterval()}};
+Wherever the input can't be parsed as a duration,
+that element is treated as a duration of zero.}
+
+\item{meter}{\emph{\strong{The meter(s) to compute levels from.}}
+
+Defaults to a standard, five-level duple (4/4) meter.
+
+Must be a \code{\link[=meter]{meter()}} object or a \code{character} vector.
+
+For \code{character} input, the string is parsed using \code{\link[=meter]{meter()}}; a
+failure to parse will result in an error.}
 
 \item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
 
-\item{value}{(\code{logical} T/F) If \code{TRUE}, \code{metlev()} deparses and returns the (duration) value of a metric level.
-If \code{FALSE}, the level is output as a number.}
+\item{value}{Should the output levels be represented as rhythmic duration values?
 
-\item{offBeats}{(\code{logical} T/F) If \code{FALSE}, any onsets that are offbeat return \code{NA}.}
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: a on/off switch.}
+
+\item{offBeats}{\emph{\strong{Should off-beat onsets be numbered in the output, or \code{NA}?}}
+
+Defaults to \code{TRUE}.
+
+Must be a single \code{logical} value: a on/off switch.}
 
 \item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
@@ -59,9 +81,20 @@ Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdru
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
 
-\item{remainderSubdivides}{(\code{logical} T/F switch) Controls how off-beat onsets are associated with beats.}
+\item{remainderSubdivides}{Should off-beat onsets only be associated with beat levels that they evenly subdivide?
 
-\item{level}{A single \code{character} string, \code{\link[=recip]{recip()}} format, indicating which level in the meter to count.}
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value: an on/off switch.}
+
+\item{level}{Which metric level should be counted?
+
+Defaults to the tactus of the \code{meter}.
+
+A single \code{character} value or positive natural number.
+
+A \code{character} string input must be a \code{\link[=recip]{recip()}} value, matching a beat level in the meter.
+A numeric input directly indicates a level in the meter, starting from the highest level (\code{1}).}
 }
 \description{
 These functions take vectors of rhythmic duration values and
@@ -207,6 +240,25 @@ Thus, a common use for the \code{pickup} argument is \verb{within(humData, timel
 the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 }
 
+\examples{
+
+rhythm <- c('4', '8', '8', '4', '8', '16', '16','4.', '8','2')
+
+metlev(rhythm)
+metlev(rhythm, meter = 'M6/8')
+
+metcount(rhythm)
+metcount(rhythm, offBeats = FALSE)
+metcount(rhythm, meter = 'M6/8', offBeats = FALSE)
+
+# chorales
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') 
+
+within(chorales, metlev(Token, pickup = Bar < 1))
+
+within(chorales, metcount(Token, pickup = Bar < 1, fill.levels = 'below'))
+
+}
 \seealso{
 {The \code{\link[=count]{count()}} and \code{\link[=subpos]{subpos()}} functions are more basic versions of \code{metcount()} and \code{metsubpos()},
 based only on counting a \emph{single} beat level, rather then a hierarchy of beat levels.}

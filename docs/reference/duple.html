@@ -98,14 +98,15 @@ to sixteenth-notes, and a quarter-note tactus.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>nlevels</dt>
-<dd><p>(positive natural number) The number of duple levels.</p></dd>
+<dd><p>The number of duple levels.</p>
+<p>Must be a singleton, positive natural number</p></dd>
 <dt>measure</dt>
-<dd><p>(<code>numeric</code> or <code>character</code>, <a href="rhythmParsing.html">parsable</a> as a
-rhythmic duration) The full length of the meter (i.e., the highest metric level).</p></dd>
+<dd><p>The duration of the top level of the meter.</p>
+<p>Must be a singleton <code>numeric</code> or <code>character</code> value.</p>
+<p>Is parsed as a duration by <code><a href="rhythmParsing.html">rhythmInterval()</a></code>; a failure to parse leads to an error.</p></dd>
 <dt>tactus</dt>
-<dd><p>(positive natural number, <code>&lt;= nlevels</code>) Which level is the tactus? This
-is indicated with an index, counting from the highest level down. So if the levels are
-<code>c("1", "2", "4", "8")</code>, <code>tactus = 2</code> would make the tactus <code>"2"</code>.</p></dd>
+<dd><p>Which level is the tactus?</p>
+<p>Must be a singleton, positive natural number; must be less than or equal to <code>nlevels</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -379,3 +379,48 @@ subpos(seven8, beat = list(c('4', '4', '4.')), scale = 8)
 
 
 ```
+
+
+# Meter
+
+The `count()` and `subpos()` commands are great if we want count in a single beat/measure unit.
+To take things to the next level(s), we need to consider musical *meter*.
+From the point of view of `r hm`, "meter" is a set of multiple "beat levels" occuring at the same time, with "lower" (faster/shorter) levels nested inside "higher" (slower/longer) levels.
+`R Hm` defines a number of useful tools for applying metric analyses to rhythmic data.
+
+## Metric levels
+
+The first thing we might want to do, is take a sequence of rhythm durations, and identify which metric level each onset lands on.
+To do this, use `metlev()`:
+
+```{r}
+
+eighths <- c('8', '8', '8', '8', '8', '8', '8', '8')
+
+metlev(eighths)
+
+```
+
+By default, `metlev()` is assuming a duple meter for us---basically 4/4 time---so these eight eighth-notes make one measure of 4/4.
+The first onset lands on the downbeat, coinciding with the highest level in the meter (as defined by default)---this highest level beat is a whole-note, which is why the output is `"1"` ([recip()] notation for a whole-note).
+Every odd eighth-note falls down at the eigth-note beat level, and is labeled `"8"`.
+4/4 beats 2 and 4 (the back beats) fall on the quarter-note level, and labeled `"4"`.
+Finally, beat 3 is on the half-note level (`"2"`).
+
+If you prefer to have your levels simply numbered from highest to lowest, use `metlev(..., value = FALSE)`:
+
+```{r}
+
+eighths <- c('8', '8', '8', '8', '8', '8', '8', '8')
+
+metlev(eighths, value = FALSE)
+
+```
+
+
+The whole-note level is `1` and (in this case) the eighth-note level is `4`.
+
+## Controlling meter
+
+
+

@@ -137,24 +137,29 @@ In addition, each meter has a <em>tactus</em>---the "main" beat level.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A <code>list</code> of beats, or a time-signature <code>character</code> string.</p></dd>
-<dt>measure</dt>
-<dd><p>A duration to represent the measure.</p></dd>
-<dt>tactus</dt>
-<dd><p>A duration to set as the tactus.</p></dd>
-<dt>tick</dt>
-<dd><p>A duration to set as the tick.</p></dd>
+<dd><p>A time signature or list of beats used to construct a meter.</p>
+<p>Must be a <code>character</code> string or a <code>list</code> of either <code>numeric</code> or <code>character</code> values.</p>
+<p>A <code>character</code> input is parsed as a time signature, which is used to extract tactus and measure levels.
+The contents of <code>list</code> are parsed as durations using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>: these durations become the
+levels of the meter.
+Failures to parse the input will result in an error.</p></dd>
+<dt>measure, tick, tactus</dt>
+<dd><p>Durations to use longest (measure), shortest (tick), or tactus levels.</p>
+<p>Must be a singleton <code>character</code> or <code>numeric</code> value, or a <code>list</code> containing a single vector of such values.</p>
+<p>These are parsed as durations using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>; parse failures lead to errors.</p></dd>
 <dt>fill.levels</dt>
-<dd><p>(<code>logical T/F argument</code> or single <code>character</code>) Controls which levels should be "filled" to the meter.
-Possible values are <code>'above'</code>, <code>'below'</code>, <code>'both'</code>, or <code>'neither'</code>. A <code>logical</code> <code>TRUE</code> is equivalent to <code>'both'</code> and
-<code>FALSE</code> to <code>'neither'</code>.</p></dd>
+<dd><p>Should "gaps" between specified levels be added to the meter?</p>
+<p>Must be a singleton <code>logical</code> or <code>character</code> value; <code>character</code> values must be <code>'above'</code>, <code>'below'</code>, <code>'both'</code>, or <code>'neither'</code>.</p>
+<p><code>TRUE</code> is shorthand for <code>'both'</code>; <code>FALSE</code> is shorthand for <code>'neither'</code>.</p></dd>
 <dt>subdiv</dt>
-<dd><p>(Natural numbers, greater than 1) Subdivsions (fractions) of the tactus to add to the meter.</p></dd>
+<dd><p>Subdivisions (fractions) of the <code>tactus</code> to add to the meter.</p>
+<p>Must be positive natural numbers.</p></dd>
 <dt>hyper</dt>
-<dd><p>(Natural numbers, greater than 1) Multiples of the measure duration, to add to the meter.</p></dd>
+<dd><p>Multiples of the <code>measure</code> duration to add to the meter.</p>
+<p>Must be positive natural numbers.</p></dd>
 <dt>tatum</dt>
-<dd><p>(<code>logical</code> T/F argument) If <code>TRUE</code>, the least common demininator of all levels is added (if not already present)
-to the meter.</p></dd>
+<dd><p>Should the least common denominator of all levels be added to the meter?</p>
+<p>Must be a singleton <code>logical</code> value: a on/off switch.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

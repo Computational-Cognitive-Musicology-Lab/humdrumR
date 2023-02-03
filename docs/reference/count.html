@@ -118,21 +118,41 @@ a <code>logical</code> vector for indicating where onsets fall on or off beat.</
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>dur</dt>
-<dd><p>An input vector which is parsed for duration information using the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dd><p><em><strong>An input vector of rhythmic durations.</strong></em></p>
+<p>Must be a <code>character</code> or <code>numeric</code> vector.</p>
+<p>Is parsed using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>;
+Wherever the input can't be parsed as a duration,
+that element is treated as a duration of zero.</p></dd>
 <dt>beat</dt>
-<dd><p>An input vector of length 1, or the same length as <code>dur</code>, which is parsed as duration information using the <a href="rhythmParsing.html">rhythm parser</a>---or a list of vectors.</p></dd>
+<dd><p><em><strong>The size of "beat" (or measure) to count.</strong></em></p>
+<p>Defaults to a whole-note (one measure of 4/4 time).</p>
+<p>Must be a <code>character</code> or <code>numeric</code> vector, or a list of such vectors;
+must be a singleton or the same length as <code>dur</code>.</p>
+<p>Is parsed as a duration using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>;
+If the input can't be parsed as a duration, the output will be all <code>NA</code>.</p></dd>
 <dt>start</dt>
-<dd><p>A whole-number value from which the counting begins.</p></dd>
+<dd><p><em><strong>The number to start counting from.</strong></em></p>
+<p>Must be a single whole-number value (either <code>numeric</code> or <code>integer</code>).</p></dd>
 <dt>phase</dt>
-<dd><p>(length 1 or the same length as <code>dur</code>) An atomic vector which can be parsed by the <a href="rhythmParsing.html">rhythm parser</a>. <code>0</code> is the default. The largest <code>phase</code>
-value must be smaller than the smallest rhythmic value in <code>beat</code>.</p></dd>
+<dd><p><em><strong>The phase offset between onsets and beats.</strong></em></p>
+<p>Defaults to <code>0</code>.</p>
+<p>Must be a <code>character</code> or <code>numeric</code> vector; must be length <code>1</code> or the same length as <code>dur</code>;
+The duration of <code>phase</code> must be smaller than the smallest duration value in <code>beat</code>.</p>
+<p>Is parsed as a duration using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>;
+If the input can't be parsed as a duration, an error occurs.</p></dd>
 <dt>pickup</dt>
-<dd><p><code>NULL</code>, or a <code>logical</code> vector of same length as <code>x</code>.</p></dd>
+<dd><p><em><strong>Indicates which leading values in the input are pickups, if any.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be <code>NULL</code>, or a <code>logical</code> vector of the same length as <code>dur</code>.</p></dd>
 <dt>offBeats</dt>
-<dd><p>(<code>logical</code> TRUE/False) If <code>FALSE</code>, offbeat onsets return <code>NA</code>.</p></dd>
+<dd><p><em><strong>Should off-beat onsets be numbered in the output, or <code>NA</code>?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a single <code>logical</code> value: a on/off switch.</p></dd>
 <dt>groupby</dt>
-<dd><p>A <code>list</code> of vectors, of the same length as <code>x</code>, which are used to group <code>x</code> into.
-To function as a by-record timeline, the <code>groupby</code> list music include a <em>named</em> <code>Piece</code> and <code>Record</code> fields.
+<dd><p><em><strong>Optional vectors to group by and count within.</strong></em></p>
+<p>Defaults to empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, which is either empty or contains vectors whiare all the same length as <code>dur</code>.
+To function as a by-record timeline, the <code>groupby</code> list must include a <em>named</em> <code>Piece</code> and <code>Record</code> vectors.
 Luckily, these are automatically passed by <a href="withinHumdrum.html">with(in).humdrumR</a>, so you won't need to worry about it!</p></dd>
 </dl></div>
     <div class="section level2">
@@ -227,7 +247,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpenymbb/temp_libpath32a156583ed8b/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/Bridge/Coding/R/Packages/humdrumR/inst/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

@@ -112,11 +112,18 @@ These functions are particularly useful as arguments to the <a href="count.html"
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A <code><a href="meter.html">meter()</a></code> object or a <code>character</code> string time-signature to parse.</p></dd>
+<dd><p>The input to compute the desired duration from.</p>
+<p>Must be a <code><a href="meter.html">meter()</a></code> object or a <code>character</code> vector.</p>
+<p>A <code>character</code> input is parsed using <code><a href="meter.html">meter()</a></code>; failures to parse result in errors.</p></dd>
 <dt>deparser</dt>
-<dd><p>A <a href="rhythmFunctions.html">rhythm function</a> to format the output. If <code>NULL</code>, a <code><a href="rational.html">rational()</a></code> value is returned.</p></dd>
+<dd><p>What output format is desired?</p>
+<p>The default is <code><a href="recip.html">recip()</a></code>.</p>
+<p>Must be a rhythm function or <code>NULL</code>.</p></dd>
 <dt>sep</dt>
-<dd><p>If the tactus is a pattern of irregular beats, they are pasted together using this separator.</p></dd>
+<dd><p>Seperator between irregular beat patterns.</p>
+<p>Defaults to <code>"+"</code>.</p>
+<p>A singleton <code>character</code> value.</p>
+<p>If the tactus is a pattern of irregular beats, they are pasted together using this separator.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -3685,6 +3685,12 @@ invert.numeric <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
 #' @family {relative pitch functions}
 #' @family {Lagged vector functions}
 #'
+#' @examples 
+#' 
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#'
+#' within(chorales, mint(Token))
+#'
 #' @seealso {`mint` uses [lag()] to "lag" the input pitches, and also makes use of [pitch parsers][tonalInterval()] and [pitch functions][pitchFunctions].}
 #' @inheritSection sigma Grouping
 #;
