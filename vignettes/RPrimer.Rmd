@@ -409,7 +409,7 @@ The `NA` values are still "values" in a vector, but they are used indicate when 
 Passing a vector with `NA` values to most functions does not lead to an error, though you'll often get a warning message instead.
 For example, consider what happens if we apply the command `as.numeric()` to the following strings:
 
-```r
+```{r}
 numbers <- as.numeric(c("1", "2", "apple", "4.2"))
 numbers
 ```

@@ -12,12 +12,11 @@ metlev(
   pickup = NULL,
   value = TRUE,
   offBeats = TRUE,
-  numeric = FALSE,
+  remainderSubdivides = FALSE,
   deparser = recip,
   groupby = list(),
   ...,
-  parseArgs = list(),
-  remainderSubdivides = FALSE
+  parseArgs = list()
 )
 
 metcount(
@@ -63,7 +62,7 @@ failure to parse will result in an error.}
 
 \item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
 
-\item{value}{Should the output levels be represented as rhythmic duration values?
+\item{value}{\emph{\strong{Should the output levels be represented as rhythmic duration values?}}
 
 Defaults to \code{TRUE}.
 
@@ -75,19 +74,19 @@ Defaults to \code{TRUE}.
 
 Must be a single \code{logical} value: a on/off switch.}
 
+\item{remainderSubdivides}{\emph{\strong{Should off-beat onsets only be associated with beat levels that they evenly subdivide?}}
+
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value: an on/off switch.}
+
 \item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
 
-\item{remainderSubdivides}{Should off-beat onsets only be associated with beat levels that they evenly subdivide?
-
-Defaults to \code{FALSE}.
-
-A singleton \code{logical} value: an on/off switch.}
-
-\item{level}{Which metric level should be counted?
+\item{level}{***Which metric level should be counted? ***
 
 Defaults to the tactus of the \code{meter}.
 

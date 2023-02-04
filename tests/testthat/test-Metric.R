@@ -86,3 +86,13 @@ test_that("'Meter extraction tools' work", {
   expect_equal(measure(meters, deparser = duration), c(1, .75, 1.5, .75, .875, .875))
   
 })
+
+test_that("Syncopation works correctly", {
+  
+  rhythm <- c('8.', '8.', '8.', '8.', '2.')
+  
+  expect_equal(syncopation(rhythm), c(FALSE, TRUE, TRUE, TRUE, TRUE))
+  expect_equal(syncopation(rhythm, levels = '8'), c(FALSE, FALSE, TRUE, FALSE, FALSE))
+  expect_equal(syncopation(rhythm, levels = c('16', '4')), c(FALSE, TRUE, FALSE, TRUE, TRUE))
+  
+})

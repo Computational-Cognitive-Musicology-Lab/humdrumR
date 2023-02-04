@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,7 +145,7 @@ or more input arguments:</p>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-02-02 16:41:51 EST"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-02-03 20:05:41 EST"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -304,7 +304,7 @@ same thing—a vector of length 1.</li>
 </ul>
 <hr>
 <p>Notice that vectors can’t mix-and-match different data types; which
-makes sense be cause a vector <em>is</em> a single type of thing. But
+makes sense because a vector <em>is</em> a single type of thing. But
 this means that commands like <code>c(3, "a")</code> will actually
 create a <code>character</code> vector, where the <code>3</code> is
 forced to be a character (<code>"3"</code>).</p>
@@ -334,7 +334,7 @@ easy!</p>
 </ol>
 <p>and multiplied them together! Notice that the entire Fibonacci vector
 is multiplied by two! We don’t have to worry about multiplying each
-number of the vector, its done for us.</p>
+number of the vector, it’s done for us.</p>
 <hr>
 <p>There are two ideal circumstances for working with vectors.</p>
 <ol style="list-style-type: decimal">
@@ -483,7 +483,45 @@ variables:</p>
 <h3 id="missing-data">Missing Data<a class="anchor" aria-label="anchor" href="#missing-data"></a>
 </h3>
 <p>Sometimes we’ll encounter data points which are irrelevant,
-meaningless, or “not applicable.”</p>
+meaningless, or “not applicable.” In other cases, there may be relevant
+data that is “missing.” R provides two distinct ways to represent
+missing/irrelevant data: <code>NULL</code> and <code>NA</code>.</p>
+<p><code>NULL</code> is a special R object/variable, which is used
+represent something that is totally missing or empty. <code>NULL</code>
+has no length (<code>length(NULL) == 0</code>) and no value. It cannot
+be indexed. Many functions will give an error if passed a
+<code>NULL</code>.</p>
+<p><code>NA</code> is quite different than <code>NULL</code>. Any atomic
+vector can have <code>NA</code> value at any (or all) indices—in fact,
+you can have vectors or <code>NA</code> values. The <code>NA</code>
+values are still “values” in a vector, but they are used indicate when
+there are values that are missing or problematic. Passing a vector with
+<code>NA</code> values to most functions does not lead to an error,
+though you’ll often get a warning message instead. For example, consider
+what happens if we apply the command <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code> to the
+following strings:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>numbers <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"apple"</span>, <span class="st">"4.2"</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span> NAs introduced by coercion</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>numbers</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.0</span> <span class="fl">2.0</span>  <span class="cn">NA</span> <span class="fl">4.2</span></span></code></pre></div>
+<p>Four of the strings in this vector are converted to numbers without a
+problem, but the string <code>"apple"</code> makes no sense as a number.
+So what does R do? It converts the three strings to numbers, just like
+<code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code> is supposed to, but the <code>"apple"</code>
+string appears as <code>NA</code> in the outut. We also get warning
+message: <code>NAs introduced by coercion</code>. You might see that
+warning sometimes, so now you know what it means!</p>
+<p>What would happen if we tried applying a different function onto our
+vector with an <code>NA</code>?</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(numbers)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.000000</span> <span class="fl">1.414214</span>       <span class="cn">NA</span> <span class="fl">2.049390</span></span></code></pre></div>
+<p>The <code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> function has no problem taking the
+square-roots of the three numbers, and it simply “propogates” the
+<code>NA</code> value in its input through to its output. The
+“propogation” of missing values is a very useful feature in R: it makes
+sure that we <em>keep track</em> of what data is missing, while keeping
+our vectors all their original lengths.</p>
 </div>
 </div>
 <div class="section level2">
@@ -515,6 +553,17 @@ vector.</li>
 <li>
 <code>x %in% y</code> — Which elements of the vector <code>x</code>
 appear in the vector <code>y</code>?</li>
+<li>
+<code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code> — How long is the vector (or
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>)?</li>
+<li>
+<code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code> and <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail()</a></code> — Return the first or
+last <span class="math inline">\(N\)</span> elements of a vector.
+<ul>
+<li>Provide the <code>n</code> argument a natural number to control
+<span class="math inline">\(N\)</span>.</li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section level3">
@@ -592,7 +641,7 @@ keyword, like so:</p>
 <p>For example, let’s make a function that subtracts the mean from a
 vector of numbers. We’ll have one argument, which we’ll call
 <code>numbers</code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">myfunc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">numbers</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">numbers</span><span class="op">)</span>
@@ -601,17 +650,17 @@ vector of numbers. We’ll have one argument, which we’ll call
 <p>We’ve created our function, and assigned it the name
 <code>myfunc</code>, just like any other assignment. Let’s try it
 out:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">myfunc</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">myfunc</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span></span></code></pre></div>
 <p>Notice that the <em>last</em> expression in your function definition
 is the value that gets “returned” by the function.</p>
 <hr>
 <p>If you are feeling lazy, you can also define a function using a few
 less keystrokes using the command <code>\()</code> instead of
 <code>function()</code>. For example,</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>\(x) x <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    \(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>\(x) x <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    \(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

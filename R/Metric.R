@@ -448,7 +448,7 @@ tatum.character <- dofunc('x', function(x, deparser = recip) {
   checks(deparser, xclass('rhythmFunction'))
   
   timesignatures <- grepl('^\\*?M', x)
-  rint <- .unlist(c(if (any(timesignatures)) tatum.meter(meter.character(x[timesignatures])),
+  rint <- .unlist(c(if (any(timesignatures)) tatum.meter(meter.character(x[timesignatures]), deparser = NULL),
                   if (any(!timesignatures)) rhythmInterval.character(unique(x[!timesignatures]))))
   result <- tatum.rational(rint)
   
@@ -767,9 +767,11 @@ beats.NULL <- function(x) NULL
 #' @export
 count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list()) {
   
+  checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
+  checks(offBeats, xTF)
   
   
   scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'count')
@@ -832,6 +834,11 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NUL
 #' @rdname count
 #' @export
 subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
+  
+  checks(dur, xcharacter | xnumber)
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
+  checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
+  checks(deparser, xclass('rhythmFunction'))
   
   scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
   
@@ -1079,13 +1086,13 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' For `character` input, the string is parsed using [meter()]; a
 #' failure to parse will result in an error.
 #' 
-#' @param value Should the output levels be represented as rhythmic duration values?
+#' @param value ***Should the output levels be represented as rhythmic duration values?***
 #' 
 #' Defaults to `TRUE`.
 #' 
 #' Must be a singleton `logical` value: a on/off switch.
 #' 
-#' @param level Which metric level should be counted? 
+#' @param level ***Which metric level should be counted? ***
 #' 
 #' Defaults to the tactus of the `meter`.
 #' 
@@ -1095,7 +1102,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' A numeric input directly indicates a level in the meter, starting from the highest level (`1`).
 #' 
 #' 
-#' @param remainderSubdivides Should off-beat onsets only be associated with beat levels that they evenly subdivide?
+#' @param remainderSubdivides ***Should off-beat onsets only be associated with beat levels that they evenly subdivide?***
 #'
 #' Defaults to `FALSE`.
 #' 
@@ -1124,10 +1131,15 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' @seealso {The [count()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
 #' based only on counting a *single* beat level, rather then a hierarchy of beat levels.}
 #' @export
-metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, numeric = FALSE, deparser = recip, 
-                   groupby = list(), ..., parseArgs = list(), remainderSubdivides = FALSE ) {
+metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
+                   groupby = list(), ..., parseArgs = list()) {
   
-  checks(dur, xcharacter | xnumeric)
+  checks(dur, xcharacter | xnumber)
+  checks(pickup, xnull | (xlogical & xmatch(dur)))
+  checks(offBeats, xTF)
+  checks(value, xTF)
+  checks(remainderSubdivides, xTF)
+  checks(deparser, xclass('rhythmFunction'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)
@@ -1162,6 +1174,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
 metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL, ...,
                      offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list()) {
   
+  checks(dur, xcharacter | xnumber)
   checks(offBeats, xTF)
   checks(remainderSubdivides, xTF)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
@@ -1211,6 +1224,10 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL
 #' @export
 metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration, ...,
                      remainderSubdivides = TRUE, groupby = list(), parseArgs = list()) {
+  
+  checks(dur, xcharacter | xnumber)
+  checks(pickup, xnull | (xlogical & xmatch(dur)))
+  checks(remainderSubdivides, xTF)
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metsubpos', ...)
@@ -1376,14 +1393,52 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 
 ### Syncopation ----
 
-
-syncopation <- function(dur, meter = duple(5), groupby = list()) {
-  levs <- metlev(dur, meter = meter, groupby = groupby, deparser = duration)
+#' Identify syncopated rhythms
+#' 
+#' The `syncopation()` function takes a vector of rhythmic duration values and a meter
+#' and identifies which durations are syncopated, return `TRUE` for synocopations and `FALSE`
+#' otherwise.
+#' The output syncopation depends a lot on how meter is specified/interpreted
+#' so check out the [meter()] documentation if you are looking for more control of the output.
+#' 
+#' @details 
+#' 
+#' A syncopation occurs whenever a rhythmic duration is longer than the highest
+#' metric level that it lands on.
+#' 
+#' 
+#' In some cases, we might want to restrict our attention to syncopations that occur
+#' at a specific metric level: for example, "eighth-note syncpations."
+#' We can proved a set of metric levels to the `levels` argument, to do this restriction.
+#' The `levels` must be parsable as durations which match the levels of the [meter()].
+#' 
+#' @inheritParams metlev
+#' @param levels ***On which metrics levels should we identify syncopations?***
+#' 
+#' Defaults to `"all"`.
+#' 
+#' Must be a non-empty `character` or `numeric` vector.
+#' 
+#' If `levels` is simply the singleton string `"all"`, syncopations at any
+#' metric level are identified.
+#' Otherwise, the `levels` are parsed with [rhythmInterval()]; fail to parse may lead to an error.
+#' The parsed levels must be levels of the given [meter()].
+#' 
+#' @export
+syncopation <- function(dur, meter = duple(5), levels = 'all', groupby = list()) {
+  checks(dur, xcharacter | xnumber)
+  
+  levs <- metlev(dur, meter = meter, groupby = groupby, deparser = NULL)
   
   dur <- rhythmInterval(dur)
+ 
+  syncopation <- dur > levs
   
-  dur > levs
+  if (!length(levels) == 1L || levels != 'all') {
+    syncopation <- syncopation & Reduce('|', lapply(as.list(rhythmInterval(levels)), `==`, e2 = levs))
+  }
   
+  syncopation
   
 }
 

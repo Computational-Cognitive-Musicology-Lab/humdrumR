@@ -16,7 +16,7 @@ which can measure any of the other durations"><!-- mathjax --><script src="https
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,13 +104,13 @@ which can measure any of the other durations</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>The input to compute the tatum of.</p>
+<dd><p><em><strong>The input to compute the tatum of.</strong></em></p>
 <p>Must be a <code><a href="meter.html">meter()</a></code> object, a singleton <code>character</code> value, or vector of either <code>character</code>, <code>numeric</code>, or <code><a href="rational.html">rational()</a></code> values.</p>
 <p>For <code>character</code> input, valuest that match the regular expression <code>"^\*?M"</code> are parsed as a time signature using <code><a href="meter.html">meter()</a></code>, while other strings are
 parsed as durations using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>.
 <code>numeric</code> input is also parsed using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>; parse failures result in errors.</p></dd>
 <dt>deparser</dt>
-<dd><p>What output format is desired?</p>
+<dd><p><em><strong>What output format is desired?</strong></em></p>
 <p>For <code>character</code> or <code>meter</code> input, the default is <code><a href="recip.html">recip()</a></code>; for <code>numeric</code> input,
 the default is <code><a href="duration.html">duration()</a></code>.</p>
 <p>Must be a rhythm function or <code>NULL</code>.</p></dd>

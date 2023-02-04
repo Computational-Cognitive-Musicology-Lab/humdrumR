@@ -22,7 +22,7 @@ In addition, each meter has a tactus---the "main" beat level.'><!-- mathjax --><
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,7 +137,7 @@ In addition, each meter has a <em>tactus</em>---the "main" beat level.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A time signature or list of beats used to construct a meter.</p>
+<dd><p><em><strong>A time signature or list of beats used to construct a meter.</strong></em></p>
 <p>Must be a <code>character</code> string or a <code>list</code> of either <code>numeric</code> or <code>character</code> values.</p>
 <p>A <code>character</code> input is parsed as a time signature, which is used to extract tactus and measure levels.
 The contents of <code>list</code> are parsed as durations using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>: these durations become the
@@ -152,13 +152,13 @@ Failures to parse the input will result in an error.</p></dd>
 <p>Must be a singleton <code>logical</code> or <code>character</code> value; <code>character</code> values must be <code>'above'</code>, <code>'below'</code>, <code>'both'</code>, or <code>'neither'</code>.</p>
 <p><code>TRUE</code> is shorthand for <code>'both'</code>; <code>FALSE</code> is shorthand for <code>'neither'</code>.</p></dd>
 <dt>subdiv</dt>
-<dd><p>Subdivisions (fractions) of the <code>tactus</code> to add to the meter.</p>
+<dd><p><em><strong>Subdivisions (fractions) of the <code>tactus</code> to add to the meter.</strong></em></p>
 <p>Must be positive natural numbers.</p></dd>
 <dt>hyper</dt>
-<dd><p>Multiples of the <code>measure</code> duration to add to the meter.</p>
+<dd><p><em><strong>Multiples of the <code>measure</code> duration to add to the meter.</strong></em></p>
 <p>Must be positive natural numbers.</p></dd>
 <dt>tatum</dt>
-<dd><p>Should the least common denominator of all levels be added to the meter?</p>
+<dd><p><em><strong>Should the least common denominator of all levels be added to the meter?</strong></em></p>
 <p>Must be a singleton <code>logical</code> value: a on/off switch.</p></dd>
 </dl></div>
     <div class="section level2">

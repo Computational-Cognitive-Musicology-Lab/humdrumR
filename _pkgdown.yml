@@ -40,7 +40,7 @@ articles:
   - Summary
   - WorkingWithData
 - title: Musical Processing
-  desc: Funcitonality for analyzing musical information
+  desc: Functionality for analyzing musical information
   navbar: Musical tools
   contents:
   - PitchAndTonality
@@ -161,6 +161,7 @@ reference:
   - tatum
   - count
   - metlev
+  - syncopation
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:
