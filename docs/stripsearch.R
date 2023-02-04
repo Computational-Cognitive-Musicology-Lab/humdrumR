@@ -6,5 +6,5 @@ search <- fromJSON('search.json')
 
 search$code <- ""
 
-write_json(toJSON(search), 'search.json')
+write_json(search, 'search.json')
 
