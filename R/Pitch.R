@@ -2831,7 +2831,7 @@ makePitchTransformer <- function(deparser, callname,
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, freq(Token))
+#' results <- with(exampleHumdrum[[,4]], freq(Token))
 #' results
 #' 
 #' @family {atonal pitch functions}
@@ -2862,9 +2862,9 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(to
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, semits(Token))
+#' results <- with(exampleHumdrum[[,4]], semits(Token))
 #' results
-#' results <- with(exampleHumdrum, midi(Token))
+#' results <- with(exampleHumdrum[[,4]], midi(Token))
 #' results
 #' 
 #' @family {atonal pitch functions}
@@ -2899,7 +2899,7 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, cents(Token))
+#' results <- with(exampleHumdrum[[,4]], cents(Token))
 #' results
 #' 
 #' @inheritParams freq
@@ -2929,7 +2929,7 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, pc(Token))
+#' results <- with(exampleHumdrum[[,4]], pc(Token))
 #' results
 #' 
 #' @inheritParams pitchFunctions
@@ -2956,7 +2956,7 @@ pc <- makePitchTransformer(tint2pc, 'pc', 'character')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, pitch(Token))
+#' results <- with(exampleHumdrum[[,4]], pitch(Token))
 #' results
 #' 
 #' @inheritSection pitchDeparsing Basic pitch arguments
@@ -3011,7 +3011,7 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, kern(Token))
+#' results <- with(exampleHumdrum[[,4]], kern(Token))
 #' results
 #' 
 #' 
@@ -3037,7 +3037,7 @@ kern <- makePitchTransformer(tint2kern, 'kern')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, lilypond(Token))
+#' results <- with(exampleHumdrum[[,4]], lilypond(Token))
 #' results
 #' 
 #' @family {absolute pitch functions}
@@ -3062,7 +3062,7 @@ lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, tonh(Token))
+#' results <- with(exampleHumdrum[[,4]], tonh(Token))
 #' results
 #' @family {absolute pitch functions}
 #' @family {pitch functions}
@@ -3083,7 +3083,7 @@ tonh <- makePitchTransformer(tint2tonh, 'tonh')
 #' results <- helmholtz(exampleToken)
 #' results
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, helmholtz(Token))
+#' results <- with(exampleHumdrum[[,4]], helmholtz(Token))
 #' results
 #' 
 #' @family {absolute pitch functions}
@@ -3105,7 +3105,7 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' results <- interval(exampleToken)
 #' results
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, interval(Token))
+#' results <- with(exampleHumdrum[[,4]], interval(Token))
 #' results
 #' @family {relative pitch functions}
 #' @family {pitch functions}
@@ -3137,9 +3137,9 @@ interval <- makePitchTransformer(tint2interval, 'interval')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, degree(Token))
+#' results <- with(exampleHumdrum[[,4]], degree(Token))
 #' results
-#' results <- with(exampleHumdrum, deg(Token))
+#' results <- with(exampleHumdrum[[,4]], deg(Token))
 #' results
 #' 
 #' @family {relative pitch functions}
@@ -3174,7 +3174,7 @@ deg <- makePitchTransformer(tint2deg, 'deg')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, solfa(Token))
+#' results <- with(exampleHumdrum[[,4]], solfa(Token))
 #' results
 #' 
 #' @inheritParams pitchFunctions
@@ -3199,7 +3199,7 @@ solfa <- makePitchTransformer(tint2solfa, 'solfa')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, solfg(Token))
+#' results <- with(exampleHumdrum[[,4]], solfg(Token))
 #' results
 #' 
 #' @inheritParams pitchFunctions
@@ -3218,7 +3218,7 @@ solfg <- makePitchTransformer(tint2solfg, 'solfg')
 #' results
 #' 
 #' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum, bhatk(Token))
+#' results <- with(exampleHumdrum[[,4]], bhatk(Token))
 #' results
 #' 
 #' @family {relative pitch functions}
