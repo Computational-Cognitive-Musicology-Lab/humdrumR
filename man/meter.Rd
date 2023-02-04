@@ -6,9 +6,8 @@
 \alias{meter.meter}
 \alias{meter.rational}
 \alias{meter.list}
-\alias{duple}
 \alias{meter.character}
-\title{Meter class}
+\title{Musical Meter in humdrumR}
 \usage{
 meter(x, ...)
 
@@ -19,24 +18,24 @@ meter(x, ...)
   ...,
   measure = NULL,
   tactus = NULL,
-  tatum = "16",
-  fill.levels = TRUE,
+  tick = "16",
+  fill.levels = "both",
   subdiv = NULL,
-  hyper = NULL
+  hyper = NULL,
+  tatum = FALSE
 )
 
 \method{meter}{list}(
   x,
+  ...,
   measure = NULL,
   tactus = NULL,
-  tatum = "16",
-  fill.levels = TRUE,
+  tick = "16",
+  fill.levels = "both",
   hyper = NULL,
   subdiv = NULL,
-  ...
+  tatum = FALSE
 )
-
-duple(nlevels = 4, measure = rational(1), tactus = 3L)
 
 \method{meter}{character}(
   x,
@@ -47,8 +46,135 @@ duple(nlevels = 4, measure = rational(1), tactus = 3L)
   multiDispatch = FALSE
 )
 }
-\description{
-Meter class
+\arguments{
+\item{x}{\emph{\strong{A time signature or list of beats used to construct a meter.}}
 
-Meter S4 class
+Must be a \code{character} string or a \code{list} of either \code{numeric} or \code{character} values.
+
+A \code{character} input is parsed as a time signature, which is used to extract tactus and measure levels.
+The contents of \code{list} are parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}: these durations become the
+levels of the meter.
+Failures to parse the input will result in an error.}
+
+\item{measure, tick, tactus}{Durations to use longest (measure), shortest (tick), or tactus levels.
+
+Must be a singleton \code{character} or \code{numeric} value, or a \code{list} containing a single vector of such values.
+
+These are parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}; parse failures lead to errors.}
+
+\item{fill.levels}{Should "gaps" between specified levels be added to the meter?
+
+Must be a singleton \code{logical} or \code{character} value; \code{character} values must be \code{'above'}, \code{'below'}, \code{'both'}, or \code{'neither'}.
+
+\code{TRUE} is shorthand for \code{'both'}; \code{FALSE} is shorthand for \code{'neither'}.}
+
+\item{subdiv}{\emph{\strong{Subdivisions (fractions) of the \code{tactus} to add to the meter.}}
+
+Must be positive natural numbers.}
+
+\item{hyper}{\emph{\strong{Multiples of the \code{measure} duration to add to the meter.}}
+
+Must be positive natural numbers.}
+
+\item{tatum}{\emph{\strong{Should the least common denominator of all levels be added to the meter?}}
+
+Must be a singleton \code{logical} value: a on/off switch.}
 }
+\description{
+\code{HumdrumR} represents musical meter, internally, using the S4-class \code{meter}.
+A \code{meter} is simply a collection of regular or irregular beat "levels," with each
+level represented as \link[=rhythmFunctions]{musical durations}.
+For example, the meter 4/4 could be represented as the \code{\link[=recip]{recip()}} beat-levels
+\code{c("1", "2", "4", "8", "16")}---that is,
+whole-note, half-note, quater-note, eighth-note, and sixteenth note.
+In addition, each meter has a \emph{tactus}---the "main" beat level.
+}
+\details{
+Generating meters in \code{humdrumR} can be done easily with the \code{meter()} function.
+If you pass a \code{character} string of a humdrum time signature, you'll get a meter object:
+for example, \code{meter("M4/4")} or \code{meter("M12/8")}.
+Additive time signatures, like \code{meter(M2+3/8)} are also parseable.
+\subsection{Adding or removing levels}{
+
+Time signatures leave a lot of room for interpretation.
+Even in "standard" 4/4 time, there are a number of questions you need to consider
+when analyzing meter:
+\itemize{
+\item What is the fastest level you want to count? 16ths? 32nds? 64ths?
+\item Do you want to count the half-note level, which is "in between" the full measure (whole-note)
+and the tactus quarter-note?
+\item How do you want to treat triplets or other tuplets? What is a piece uses a lot of
+\item Do you want to consider hypermeter, \emph{above} the measure level?
+triplet eighth-notes?
+}
+
+Fortunately, \code{humdrumR} and the \code{meter()} function give you options to precisely specify
+metric levels.
+The most transparent way is to simply pass \code{meter()} a \code{list} of duration values, like \code{meter(list("1", "4", "8"))}.
+However, \code{meter()} includes a number of helpful arguments that can be used to quickly streamline the process of defining a meter.
+To understand these arguments, lets first clarify some metric defitions used in \code{humdrumR}:
+\itemize{
+\item \emph{Measure}: The duration of the "measure" of the meter. I.e., the highest metric level, or
+the least common multiple of all levels.
+\item \emph{Hypermeter}: Metric levels above the measure indicated by the time signature.
+\item \emph{Tactus}: The "main,", usually central, level.
+\item \emph{Subdivision}: The level directly below the tactus.
+\item \emph{Tick}: The smallest/fastest metric level. (The "ticks" in the grid.)
+\item \emph{Tatum}: The smallest common denominator between a set of beats/duration.
+Note that a fully specified metric grid \emph{should} have the tick and the tatum be identical.
+However, we don't require that the tick be the tatum.
+}
+\subsection{Meter construction arguments}{
+
+The \emph{measure} (largest) and the \emph{tick} (smallest) levels capture the full range of a meter.
+The tactus is typically somewhere in the middle between these two, but this is not required.
+The \code{fill.levels} argument can be used to 'fill in' levels between the measure, tactus, and tick.
+This means that if there is room to "fit" (geometrically) duple or triple subdivisions between the higher and lower level,
+those subdivisions are added to the meter.
+The \code{fill.levels} argument must be a single \code{character} string, \link[=partialMatching]{partially matching} either
+\code{'above'}, \code{'below'}, \code{'both'}, or \code{'neither'}.
+"Above" means fill in any gap between the tactus and the measure;
+"Below" means fill in any gap between the tactus and the tick.
+As a shortcut, \code{logical} \code{TRUE} or \code{FALSE} can be used as an alternative way of specifiying
+\code{'both'} or \code{'neither'}, respectively.
+For example, if you start with levels measure-tactus-tick combination of \code{c("1", "4", "16")}, \code{fill.levels = TRUE},
+will fill in levels at \code{"2"} and \code{"8"}.
+
+The \code{tick} argument can be used to directly specify a tick for the meter.
+This is especially useful if you are parsing datasets with multiple meters, but want to force them all to use
+the same tick value. For example, \code{meter(TimeSignature, tick = '32')}.
+The \code{tick} argument must be a single value which can be \link[=rhythmInteval]{parsed} as a rhythmic duration.
+
+The \code{subdiv} argument can be used to explicitly control how the tactus is subdivided.
+\code{subdiv} should be a natural number (greater than 1), to divide the tactus by.
+Similarly, the \code{hyper} argument is a natural number to explicitly multiply the measure by.
+Thus, \code{hyper = 2} adds a two-measure hyper meter.
+
+The \code{tatum} argument, if \code{TRUE}, causes the tatum of all other metric levels to be added to the meter (if not already present).
+This is useful, for example, if you specify a meter with a mix of duple and triple levels and want to make sure the \emph{tick}
+of the meter is the tatum of the levels.
+For example, if you have levels \code{c("4", "6", "8")}, \code{tatum = TRUE} will add the level \code{"24"} to the meter.
+}
+
+\subsection{Constructing meters from time signatures}{
+
+The "meter construction arguments" above can \emph{also} be used when reading time signatures.
+This allows you to use time signatures from your datasets, while maintaining precise control of the metric levels used.
+For example, the command \code{meter("M4/4", fill.levels = FALSE)} generates a meter with levels \code{c("1", "4", "16")}.
+We could add an eighth-note level by adding \code{subdiv = 2}, or triple-eighth-notes with \code{subdiv = 3}.
+If we \emph{did} add triplet-eighth-notes (\code{subdiv = 3}), we might want to add \code{tatum = TRUE}, which would automatically
+calculate the common tatum of our levels---in this case, adding forty-eighth notes to the meter.
+On the opposite end, \code{hyper = 4} could add a four-measure hyper meter on top of our 4/4 bar.
+Finally, the \code{tactus} argument could be used to choose another tactus, like \code{tactus = "2"}.
+
+Any additional, unnamed arguments to \code{meter()} will be parsed as durations, and added as levels to the meter.
+}
+
+}
+}
+\seealso{
+Other {Metric functions}: 
+\code{\link{tactus}()},
+\code{\link{tatum}()}
+}
+\concept{{Metric functions}}

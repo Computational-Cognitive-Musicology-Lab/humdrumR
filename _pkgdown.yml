@@ -40,7 +40,7 @@ articles:
   - Summary
   - WorkingWithData
 - title: Musical Processing
-  desc: Funcitonality for analyzing musical information
+  desc: Functionality for analyzing musical information
   navbar: Musical tools
   contents:
   - PitchAndTonality
@@ -140,31 +140,28 @@ reference:
   - rhythmParsing
   - rhythmDeparsing
   - humMeter
-- subtitle: "Rhythm functions"
+- subtitle: "Duration and Time functions"
   desc: "These functions translate between rhythm representations:"
   contents:
   - bpm2sec
+  - timeline
   - recip
   - duration
   - noteValue
   - seconds
-  - meter
-- subtitle: "Rhythm and Meter"
+  - ioi
+  - untie
+- subtitle: "Beats and Meter"
   desc: "Rhythm and meter analysis functions."
   contents:
-  - timeline
-  - timestamp
-  - metlev
-  - count
-  - metcount
-  - subpos
-  - ioi
-  - recip
-  - untie
-  - measure
-  - tatum
+  - meter
+  - duple
   - tactus
   - nbeats
+  - tatum
+  - count
+  - metlev
+  - syncopation
 - subtitle: "Lyrics"
   desc: "Lyrics and text functions."
   contents:

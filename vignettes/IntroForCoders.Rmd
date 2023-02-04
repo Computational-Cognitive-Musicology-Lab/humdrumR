@@ -10,12 +10,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+source('vignette_header.R')
 ```
 
 This document is tutorial/introduction for the `r hm` package aimed at experienced programmers/coders.

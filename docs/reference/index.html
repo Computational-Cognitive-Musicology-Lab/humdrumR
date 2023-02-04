@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -360,7 +360,7 @@ represent or engage musical/music-theoretic concepts.</p>
           
           <code><a href="invert.html">invert()</a></code> 
         </dt>
-        <dd>Invert or transpose tonal intervals.</dd>
+        <dd>Invert or transpose pitches.</dd>
       </dl><dl><dt>
           
           <code><a href="int.html">int()</a></code> <code><a href="int.html">mint()</a></code> <code><a href="int.html">hint()</a></code> 
@@ -461,7 +461,7 @@ representations:</p>
         <dd>Tools for analyzing rhythm and meter.</dd>
       </dl></div><div class="section level2">
       
-      <h3 id="rhythm-functions">Rhythm functions<a class="anchor" aria-label="anchor" href="#rhythm-functions"></a></h3>
+      <h3 id="duration-and-time-functions">Duration and Time functions<a class="anchor" aria-label="anchor" href="#duration-and-time-functions"></a></h3>
       <p class="section-desc"></p><p>These functions translate between rhythm representations:</p>
 
       
@@ -475,6 +475,11 @@ representations:</p>
           <code><a href="bpm2sec.html">bpm2sec()</a></code> <code><a href="bpm2sec.html">sec2bpm()</a></code> <code><a href="bpm2sec.html">bpm2ms()</a></code> <code><a href="bpm2sec.html">ms2bpm()</a></code> 
         </dt>
         <dd>Translate between durations and tempos</dd>
+      </dl><dl><dt>
+          
+          <code><a href="timeline.html">timeline()</a></code> <code><a href="timeline.html">timestamp()</a></code> 
+        </dt>
+        <dd>Rhythmic timeline of a piece</dd>
       </dl><dl><dt>
           
           <code><a href="recip.html">recip()</a></code> 
@@ -497,12 +502,12 @@ representations:</p>
         <dd>Clock-time representations of duration</dd>
       </dl><dl><dt>
           
-          <code><a href="meter.html">meter()</a></code> <code><a href="meter.html">duple()</a></code> 
+          <code><a href="ioi.html">ioi()</a></code> <code><a href="ioi.html">untie()</a></code> 
         </dt>
-        <dd>Meter class</dd>
+        <dd>Sum "connected" durations</dd>
       </dl></div><div class="section level2">
       
-      <h3 id="rhythm-and-meter">Rhythm and Meter<a class="anchor" aria-label="anchor" href="#rhythm-and-meter"></a></h3>
+      <h3 id="beats-and-meter">Beats and Meter<a class="anchor" aria-label="anchor" href="#beats-and-meter"></a></h3>
       <p class="section-desc"></p><p>Rhythm and meter analysis functions.</p>
 
       
@@ -513,14 +518,29 @@ representations:</p>
 
       <dl><dt>
           
-          <code><a href="timeline.html">timeline()</a></code> <code><a href="timeline.html">timestamp()</a></code> 
+          <code><a href="meter.html">meter()</a></code> 
         </dt>
-        <dd>Rhythmic timeline of a piece</dd>
+        <dd>Musical Meter in humdrumR</dd>
       </dl><dl><dt>
           
-          <code><a href="metlev.html">metlev()</a></code> <code><a href="metlev.html">metcount()</a></code> 
+          <code><a href="duple.html">duple()</a></code> 
         </dt>
-        <dd>Calculate metric information</dd>
+        <dd>Generate duple meters</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tactus.html">tactus</a></code> 
+        </dt>
+        <dd>Extract levels from meters</dd>
+      </dl><dl><dt>
+          
+          <code><a href="nbeats.html">nbeats</a></code> 
+        </dt>
+        <dd>Counting beats</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tatum.html">tatum</a></code> 
+        </dt>
+        <dd>Find common denominator of beats</dd>
       </dl><dl><dt>
           
           <code><a href="count.html">count()</a></code> <code><a href="count.html">subpos()</a></code> <code><a href="count.html">onbeat()</a></code> 
@@ -528,29 +548,14 @@ representations:</p>
         <dd>Count beats or measures</dd>
       </dl><dl><dt>
           
-          <code><a href="ioi.html">ioi()</a></code> <code><a href="ioi.html">untie()</a></code> 
+          <code><a href="metlev.html">metlev()</a></code> <code><a href="metlev.html">metcount()</a></code> <code><a href="metlev.html">metsubpos()</a></code> 
         </dt>
-        <dd>Sum "connected" durations</dd>
+        <dd>Count or measure metric position</dd>
       </dl><dl><dt>
           
-          <code><a href="recip.html">recip()</a></code> 
+          <code><a href="syncopation.html">syncopation()</a></code> 
         </dt>
-        <dd>Reciprocal representation of duration</dd>
-      </dl><dl><dt>
-          
-          <code><a href="tactus.html">tactus</a></code> 
-        </dt>
-        <dd>Properties of meters</dd>
-      </dl><dl><dt>
-          
-          <code><a href="tatum.html">tatum</a></code> 
-        </dt>
-        <dd>Metric units</dd>
-      </dl><dl><dt>
-          
-          <code><a href="nbeats.html">nbeats</a></code> 
-        </dt>
-        <dd>Counting beats</dd>
+        <dd>Identify syncopated rhythms</dd>
       </dl></div><div class="section level2">
       
       <h3 id="lyrics">Lyrics<a class="anchor" aria-label="anchor" href="#lyrics"></a></h3>

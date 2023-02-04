@@ -13,13 +13,7 @@ editor_options:
 ---
 
 ```{r, include = FALSE, message=FALSE, echo = FALSE }
-knitr::opts_chunk$set(
-  collapse = TRUE, message = FALSE,
-  comment = ">\t"
-)
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-library(humdrumR)
+source('vignette_header.R')
 ```
 
 `r Hm` is a package for the R programming language.
@@ -218,10 +212,8 @@ In this example, we've created five vectors.
 
 ---
 
-Notice that vectors can't mix-and-match different data types; which makes sense
-be cause a vector *is* a single type of thing.
-But this means that commands like `c(3, "a")` will actually create
-a `character` vector, where the `3` is forced to be a character (`"3"`).
+Notice that vectors can't mix-and-match different data types; which makes sense because a vector *is* a single type of thing.
+But this means that commands like `c(3, "a")` will actually create a `character` vector, where the `3` is forced to be a character (`"3"`).
 
 
 
@@ -253,7 +245,7 @@ We created two `numeric` vectors:
 
 and multiplied them together!
 Notice that the entire Fibonacci vector is multiplied by two!
-We don't have to worry about multiplying each number of the vector, its done for us.
+We don't have to worry about multiplying each number of the vector, it's done for us.
 
 ----
 
@@ -405,6 +397,45 @@ with(df,
 ## Missing Data
 
 Sometimes we'll encounter data points which are irrelevant, meaningless, or "not applicable."
+In other cases, there may be relevant data that is "missing."
+R provides two distinct ways to represent missing/irrelevant data: `NULL` and `NA`.
+
+`NULL` is a special R object/variable, which is used represent something that is totally missing or empty.
+`NULL` has no length (`length(NULL) == 0`) and no value. It cannot be indexed. Many functions will give an error if passed a `NULL`.
+
+`NA` is quite different than `NULL`.
+Any atomic vector can have `NA` value at any (or all) indices---in fact, you can have vectors or `NA` values.
+The `NA` values are still "values" in a vector, but they are used indicate when there are values that are missing or problematic.
+Passing a vector with `NA` values to most functions does not lead to an error, though you'll often get a warning message instead.
+For example, consider what happens if we apply the command `as.numeric()` to the following strings:
+
+```{r}
+numbers <- as.numeric(c("1", "2", "apple", "4.2"))
+numbers
+```
+
+Four of the strings in this vector are converted to numbers without a problem,
+but the string `"apple"` makes no sense as a number.
+So what does R do?
+It converts the three strings to numbers, just like `as.numeric()` is supposed to,
+but the `"apple"` string appears as `NA` in the outut.
+We also get warning message: `NAs introduced by coercion`.
+You might see that warning sometimes, so now you know what it means!
+
+
+What would happen if we tried applying a different function onto our vector with an `NA`?
+
+```{r}
+
+sqrt(numbers)
+
+```
+
+The `sqrt()` function has no problem taking the square-roots of the three numbers, and it simply "propogates" the `NA` value in its input through to its output.
+The "propogation" of missing values is a very useful feature in R:
+it makes sure that we *keep track* of what data is missing, while keeping our vectors all their original lengths.
+
+
 
 
 # Common Functions
@@ -420,6 +451,9 @@ Sometimes we'll encounter data points which are irrelevant, meaningless, or "not
 + `rev()` --- Reverse the order of a vector.
 + `unique()` --- Returns only the unique values of a vector.
 + `x %in% y` --- Which elements of the vector `x` appear in the vector `y`?
++ `length()` --- How long is the vector (or `list()`)?
++ `head()` and `tail()` --- Return the first or last $N$ elements of a vector.
+  + Provide the `n` argument a natural number to control $N$.
 
 
 ## String functions

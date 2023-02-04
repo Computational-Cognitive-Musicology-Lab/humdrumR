@@ -8,7 +8,7 @@
 timeline(
   x,
   start = 0,
-  deparser = duration,
+  pickup = NULL,
   ...,
   Exclusive = NULL,
   parseArgs = list(),
@@ -17,8 +17,9 @@ timeline(
 
 timestamp(
   x,
-  BPM = "MM60",
+  BPM = 60,
   start = 0,
+  pickup = NULL,
   minutes = TRUE,
   ...,
   Exclusive = NULL,
@@ -29,7 +30,9 @@ timestamp(
 \arguments{
 \item{x}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{start}{A \code{numeric} value from which the timeline begins, or a \code{logical} vector of same length as \code{x}.}
+\item{start}{A \code{numeric} value from which the timeline begins. Defauls to \code{0}.}
+
+\item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
 
 \item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
 
@@ -77,15 +80,17 @@ tokens across all spines/paths/stops---all values in the same record will be the
 Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
 If you want to use the duration(s) of grace notes, specify \code{grace = TRUE}.
 }
-\section{Logical start}{
+\section{Pickups}{
 
 
-Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{x}.
-Within each piece, the the \emph{first} index where the \code{start} logical is \code{TRUE} is used as the zero:
-all earlier points will be negative numbers, measured backwards from the start index.
+Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{x}.
+Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
+indicate a pickup.
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/count;
+All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
-Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, timeline(Token, start = Bar == 1)}, which makes the downbeat of
-the first complete bar \code{0}---any notes in a pickup bar are give negative numbers on the timeline.
+Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
+the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 }
 
 \seealso{

@@ -168,12 +168,12 @@ dset <- function(root = 0L, signature = root, alterations = 0L) {
 
 
 getRoot <- function(dset){
-  checks(dset, xclass('diatonicSet'))
+  checks(dset, xinherits('diatonicSet'))
   dset@Root %<-matchdim% dset
 } 
 
 getRootTint <- function(dset) {
-    checks(dset, xclass('diatonicSet'))
+    checks(dset, xinherits('diatonicSet'))
     root <- getRoot(dset)
     
     tint( , c(root)) %<-matchdim% dset
@@ -181,7 +181,7 @@ getRootTint <- function(dset) {
 }
 
 getSignature <- function(dset){
-    checks(dset, xclass('diatonicSet'))
+    checks(dset, xinherits('diatonicSet'))
     dset@Signature %<-matchdim% dset
 }  
 

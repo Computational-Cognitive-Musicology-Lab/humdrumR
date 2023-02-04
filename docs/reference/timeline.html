@@ -18,7 +18,7 @@ to the beginning (attack) and end (release) of rhythmic events.'><!-- mathjax --
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,7 +89,7 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">timeline</span><span class="op">(</span>
   <span class="va">x</span>,
   start <span class="op">=</span> <span class="fl">0</span>,
-  deparser <span class="op">=</span> <span class="va">duration</span>,
+  pickup <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">...</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
@@ -98,8 +98,9 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
 
 <span class="fu">timestamp</span><span class="op">(</span>
   <span class="va">x</span>,
-  BPM <span class="op">=</span> <span class="st">"MM60"</span>,
+  BPM <span class="op">=</span> <span class="fl">60</span>,
   start <span class="op">=</span> <span class="fl">0</span>,
+  pickup <span class="op">=</span> <span class="cn">NULL</span>,
   minutes <span class="op">=</span> <span class="cn">TRUE</span>,
   <span class="va">...</span>,
   Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
@@ -113,7 +114,9 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
     <dl><dt>x</dt>
 <dd><p>An input vector which is parsed for duration information using the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>start</dt>
-<dd><p>A <code>numeric</code> value from which the timeline begins, or a <code>logical</code> vector of same length as <code>x</code>.</p></dd>
+<dd><p>A <code>numeric</code> value from which the timeline begins. Defauls to <code>0</code>.</p></dd>
+<dt>pickup</dt>
+<dd><p><code>NULL</code>, or a <code>logical</code> vector of same length as <code>x</code>.</p></dd>
 <dt>parseArgs</dt>
 <dd><p>A <code>list</code> of arguments to pass to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>groupby</dt>
@@ -153,16 +156,18 @@ tokens across all spines/paths/stops---all values in the same record will be the
 If you want to use the duration(s) of grace notes, specify <code>grace = TRUE</code>.</p>
     </div>
     <div class="section level2">
-    <h2 id="logical-start">Logical start<a class="anchor" aria-label="anchor" href="#logical-start"></a></h2>
+    <h2 id="pickups">Pickups<a class="anchor" aria-label="anchor" href="#pickups"></a></h2>
     
 
 
-<p>Another option is to pass the <code>start</code> argument a logical vector of the same length as the input <code>x</code>.
-Within each piece, the the <em>first</em> index where the <code>start</code> logical is <code>TRUE</code> is used as the zero:
-all earlier points will be negative numbers, measured backwards from the start index.
+<p>Another option is to pass the <code>pickup</code> argument a logical vector of the same length as the input <code>x</code>.
+Within each piece/group, any block of <code>TRUE</code> values at the <em>beginning</em> of the <code>pickup</code> vector
+indicate a pickup.
+The <em>first</em> index where the <code>pickup</code> logical is <code>FALSE</code> is used as the starting point of the timeline/count;
+All the earlier (<code>pickup == TRUE</code>) points will be negative numbers, measured backwards from the start index.
 In <code>humdrumR</code>, and datapoints before the first barline record (<code>=</code>) are labeled <code>Bar == 0</code> in the <code>Bar</code> <a href="humTable.html">field</a>.
-Thus, a common use for a <code>logical</code> <code>start</code> argument is <code>within(humData, timeline(Token, start = Bar == 1)</code>, which makes the downbeat of
-the first complete bar <code>0</code>---any notes in a pickup bar are give negative numbers on the timeline.</p>
+Thus, a common use for the <code>pickup</code> argument is <code>within(humData, timeline(Token, pickup = Bar &lt; 1)</code>, which makes the downbeat of
+the first complete bar <code>1</code> the starting point of the timeline---any notes in pickup bars are negative on the timeline.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

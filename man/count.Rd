@@ -11,6 +11,7 @@ count(
   beat = rational(1L),
   start = 1L,
   phase = 0,
+  pickup = NULL,
   offBeats = TRUE,
   groupby = list()
 )
@@ -19,27 +20,65 @@ subpos(
   dur,
   beat = rational(1L),
   phase = 0,
+  pickup = NULL,
   deparser = duration,
-  groupby = list(),
-  ...
+  ...,
+  groupby = list()
 )
 
 onbeat(dur, beat = rational(1L), groupby = list(), ...)
 }
 \arguments{
-\item{dur}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+\item{dur}{\emph{\strong{An input vector of rhythmic durations.}}
 
-\item{beat}{An input vector of length 1, or the same length as \code{dur}, which is parsed as duration information using the \link[=rhythmParsing]{rhythm parser}---or a list of vectors.}
+Must be a \code{character} or \code{numeric} vector.
 
-\item{start}{A whole-number value from which the counting begins, or a \code{logical} vector of same length as \code{x}.}
+Is parsed using \code{\link[=rhythmInterval]{rhythmInterval()}};
+Wherever the input can't be parsed as a duration,
+that element is treated as a duration of zero.}
 
-\item{phase}{(length 1 or the same length as \code{dur}) An atomic vector which can be parsed by the \link[=rhythmParsing]{rhythm parser}. \code{0} is the default. The largest \code{phase}
-value must be smaller than the smallest rhythmic value in \code{beat}.}
+\item{beat}{\emph{\strong{The size of "beat" (or measure) to count.}}
 
-\item{offBeats}{(\code{logical} TRUE/False) If \code{FALSE}, offbeat onsets return \code{NA}.}
+Defaults to a whole-note (one measure of 4/4 time).
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
-To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
+Must be a \code{character} or \code{numeric} vector, or a list of such vectors;
+must be a singleton or the same length as \code{dur}.
+
+Is parsed as a duration using \code{\link[=rhythmInterval]{rhythmInterval()}};
+If the input can't be parsed as a duration, the output will be all \code{NA}.}
+
+\item{start}{\emph{\strong{The number to start counting from.}}
+
+Must be a single whole-number value (either \code{numeric} or \code{integer}).}
+
+\item{phase}{\emph{\strong{The phase offset between onsets and beats.}}
+
+Defaults to \code{0}.
+
+Must be a \code{character} or \code{numeric} vector; must be length \code{1} or the same length as \code{dur};
+The duration of \code{phase} must be smaller than the smallest duration value in \code{beat}.
+
+Is parsed as a duration using \code{\link[=rhythmInterval]{rhythmInterval()}};
+If the input can't be parsed as a duration, an error occurs.}
+
+\item{pickup}{\emph{\strong{Indicates which leading values in the input are pickups, if any.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{NULL}, or a \code{logical} vector of the same length as \code{dur}.}
+
+\item{offBeats}{\emph{\strong{Should off-beat onsets be numbered in the output, or \code{NA}?}}
+
+Defaults to \code{TRUE}.
+
+Must be a single \code{logical} value: a on/off switch.}
+
+\item{groupby}{\emph{\strong{Optional vectors to group by and count within.}}
+
+Defaults to empty \code{list()}.
+
+Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors whiare all the same length as \code{dur}.
+To function as a by-record timeline, the \code{groupby} list must include a \emph{named} \code{Piece} and \code{Record} vectors.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 }
 \description{
@@ -111,19 +150,21 @@ To accommodate changing meters, the \code{beat} argument can still accept \code{
 }
 }
 
-\section{Logical start}{
+\section{Pickups}{
 
 
-Another option is to pass the \code{start} argument a logical vector of the same length as the input \code{dur}.
-Within each piece, the the \emph{first} index where the \code{start} logical is \code{TRUE} is used as the beat \code{1}:
-all earlier points will be negative counts, counting backwards from the start.
+Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{dur}.
+Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
+indicate a pickup.
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the location of beat \code{1}:
+all the earlier (\code{pickup == TRUE}) points will be negative counts, counting backwards from the start.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
-Thus, a common use for a \code{logical} \code{start} argument is \verb{within(humData, count(Token, start = Bar == 1)}, which makes the downbeat of
-the first complete bar \code{1}---any notes in a pickup bar are give negative counts on the timeline.
+Thus, a common use for the \code{pickup} argument is \verb{within(humData, count(Token, pickup = Bar < 1)}, which makes the downbeat of
+the first complete bar \code{1} the stating point---any notes in pickup bars are give negative counts.
 
 \strong{Note that there is never a 'beat zero'.}
 Beats before the starting point progress directly from \code{-1} to \code{1} (the start).
-As a result, doing arithmetic or other math with beat "counts" can be problematic when using a \code{logical} \code{start} argument.
+As a result, doing arithmetic or other math with beat "counts" can be problematic when using a \code{pickup} argument.
 It may be better to use \code{round(timeline())} in cases where you want to do much math with counts.
 }
 
@@ -131,7 +172,7 @@ It may be better to use \code{round(timeline())} in cases where you want to do m
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
-show(within(humData, count(Token, beat = TimeSignature, start = NBar == 1)))
+show(within(humData, count(Token, beat = TimeSignature, pickup = Bar < 1)))
 
 show(within(humData, count(Token, beat = tactus(TimeSignature))))
  

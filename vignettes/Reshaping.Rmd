@@ -13,13 +13,7 @@ editor_options:
 ---
 
 ```{r, include = FALSE, message=FALSE, echo = FALSE }
-knitr::opts_chunk$set(
-  collapse = TRUE, message = FALSE,
-  comment = ">\t"
-)
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-library(humdrumR)
+source('vignette_header.R')
 ```
 
 One of the great strengths of the [humdrum syntax](HumdrumSyntax.html "Intro to the humdrum syntax") is its flexibility---there are lots of ways you can structure your data to conveniently represent musical information.
