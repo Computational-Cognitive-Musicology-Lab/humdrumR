@@ -1053,15 +1053,44 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
 ### Key functions ####
 
 #' Humdrum key interpretation
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- key(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], key(Token))
+#' results
+#' 
 #' @export
 key <- makeKeyTransformer(dset2key, 'key')
 
 #' Humdrum key signature
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- signature(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], signature(Token))
+#' results
+#' 
 #' @export
 signature <- makeKeyTransformer(dset2signature, 'signature')
 
 #' Roman numeral key areas
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- romanKey(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], romanKey(Token))
+#' results
+#' 
 #' @export
 romanKey <- makeKeyTransformer(dset2romanNumeral, 'romanKey')
 

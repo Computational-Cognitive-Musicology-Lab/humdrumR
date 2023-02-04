@@ -1205,6 +1205,15 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 #' 
 #' This function outputs a generic "jazz" chord symbol representation of a tonal harmony.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- chord(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], chord(Token))
+#' results
+#' 
 #' @export 
 chord <- makeChordTransformer(tset2chord, 'chord')
 
@@ -1212,6 +1221,15 @@ chord <- makeChordTransformer(tset2chord, 'chord')
 #' 
 #' This function outputs a [figured bass](https://en.wikipedia.org/wiki/Figured_bass)
 #' representation of a tertian harmony.
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- figuredBass(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], figuredBass(Token))
+#' results
 #' 
 #' @export 
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
@@ -1224,6 +1242,19 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' Unlike traditional roman numerals, `**harm` does not indicate inversions with figuration, using lowercase letters
 #' (`a`, `b`, `c`, etc.) instead.
 #' The `roman` function however does output (relatively) traditional figures.
+#' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- harm(exampleToken)
+#' results
+#' results <- roman(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], harm(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], roman(Token))
+#' results
 #' 
 #' @export 
 harm <- makeChordTransformer(tset2harm, 'harm')
@@ -1277,6 +1308,14 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' Inversions are indicated with slash notation, with the scale degree to the right of the slash.
 #' For example, a first-inversion A major chord would be `AM/3`.
 #' 
+#' @examples
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- tertian(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], tertian(Token))
+#' results
 #' 
 #' @export 
 tertian <- makeChordTransformer(tset2tertian, 'tertian')
