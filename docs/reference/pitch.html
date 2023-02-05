@@ -12,7 +12,7 @@ approach to representing pitch in traditional Western music."><!-- mathjax --><s
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,7 @@ approach to representing pitch in traditional Western music."><!-- mathjax --><s
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -96,13 +96,13 @@ approach to representing pitch in traditional Western music.</p>
 <dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
 <dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
-There are also two hidden (advanced) argumens you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information (accidentals and qualites) is discarded.</p></dd>
 <dt>simple</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="diatonicSet.html">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
+<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
 the parser, deparser, and transposer.</p></dd>
 <dt>transposeArgs</dt>
 <dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <a href="transpose.html">transpose</a>.</p></dd>
@@ -150,7 +150,7 @@ see the <a href="pitchDeparsing.html">pitch deparsing documentation</a>.</p>
 <h3 id="key">Key<a class="anchor" aria-label="anchor" href="#key"></a></h3>
 
 
-<p>The <code>Key</code> argument must be a <a href="diatonicSet.html">diatonicSet</a>, or something that can be parsed into one.
+<p>The <code>Key</code> argument must be a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, or something that can be parsed into one.
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose---<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
@@ -180,8 +180,8 @@ For example, we can get the exact same result as before by typing <code>kern('CX
 to <code><a href="transpose.html">transpose()</a></code>, allowing us to easily transpose pitch information.
 For example, we could type <code>kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))</code> can get the output <code>c('d', 'e', 'f#')</code>.
 The possible transpose args are:</p><ul><li><p><code>by</code> (<a href="tonalIntervalS4.html">tonalInterval</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>from</code> (<a href="diatonicSet.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>to</code>  (<a href="diatonicSet.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>from</code> (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>to</code>  (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
 <li><p><code>real</code> (<code>logical</code>, <code>length == 1</code>) Should transposition be real or tonal?</p></li>
 <li><p><code>relative</code> (<code>logical</code>, <code>length == 1</code>) Should key-wise transposition be based on relative or parallel keys?</p></li>
 </ul><p>As a convenient shorthand, or "syntactic sugar," you can specify <code>transposeArgs</code> in an alternate way:
@@ -212,8 +212,11 @@ all the pitches in the input will be transposed from whatever keys they are in t
 check out the <code><a href="transpose.html">transpose()</a></code> docs for more details!</p>
 </div>
 
+
+</div>
+
 <div class="section">
-<h4 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h4>
+<h3 id="in-place-parsing">In-place parsing<a class="anchor" aria-label="anchor" href="#in-place-parsing"></a></h3>
 
 
 <p>In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -226,11 +229,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the <code>inPlace</code> argument, which is <code>FALSE</code> by default.
 So, <code>pitch('4.ee-[', inPlace = TRUE)</code> will return 4.Eb5[---keeping the <code>"4."</code> and the <code>"["</code>.
 (This obviously only works if the input is a string, not a numeric!)
-Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return numeric values, to return character strings
+Note that <code>inPlace = TRUE</code> will force functions like <code>semits</code>, which normally return <code>numeric</code> values, to return <code>character</code> strings
 <em>if</em> their input is a character string.</p>
-</div>
-
-
 </div>
 
     </div>

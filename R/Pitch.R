@@ -96,7 +96,6 @@
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
 #' 
-
 #' 
 #' 
 #' @examples 
@@ -129,12 +128,15 @@
 #' 
 #' 
 #' 
-#' @family {core pitch representation}
+#' @family {core pitch representations}
+#' @family {Tonal S4 classes}
 #' @seealso The main way to create `tonalInterval` S4 objects is with the [tonalInterval()] pitch parser.
 #' @name tonalIntervalS4
 NULL
 
 ## Definition, validity, initialization ####
+
+#' @rdname tonalIntervalS4
 #' @export 
 setClass('tonalInterval', 
          contains = 'struct',
@@ -178,7 +180,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
-    tint <- tint %<-matchdim% (if (size(tint) == size(LO5th)) LO5th else octave)
+    tint <- tint %<-matchdim% (if (hasdim(LO5th) && size(tint) == size(LO5th)) LO5th else octave)
     if (partition) tintPartition(tint, Key = Key, octave.round = octave.round) else tint
 }
 
@@ -242,29 +244,88 @@ genericFifth <- function(LO5th) ((LO5th + 1L) %% 7L) - 1L
 genericStep <- function(x) ((x - 1L) %% 7L) + 1L
 
 
-## Formatting methods ####
-
 
 ## Logic methods ####
 
 ### is.methods ####
 
 
-#' @name tonalIntervalS4
+#' @rdname tonalIntervalS4
 #' @export
 is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 
 #### Tonal is.methods ####
 
-is.simple <- function(tint) UseMethod('is.simple')
 
-is.simple.tonalInterval <- function(tint) abs(tint2semits(tint)) < 12
+#' Test the properties of tonal information
+#' 
+#' These functions test basic properties of pitch information.
+#' `is.simple` returns `TRUE` if pitch information is constrained 
+#' in one octave.
+#' `is.generic` returns `TRUE` if pitch information is "natural" to
+#' the key (`Key`) argument.
+#' 
+#' @details 
+#' 
+#' These functions can be called directly on [tonalIntervals][tonalIntervalS4];
+#' If called on anything else, the functions first calls the [tonalInterval()]
+#' parser. If any values fail to parse `NA` is returned.
+#'
+#' "Simple" intervals fall in a particular octave relative to middle-C/unison.
+#' The `octave.floor` argument can be used to change how this works:
+#' The default option, `floor`, interprets the (**kern) pitches  `c`, `d`, `e`, `f`, `g`, `a`, and `b` to be "simple."
+#' The most common alternative, `round`, identifies `G`, `A`, `B`, `c`, `d`, `e`, and `f` as "simple."
+#' See the [pitch deparsing docs][pitchDeparsing] for a more detailed explanation.
+#' 
+#' "Generic" intervals belong to a key.
+#' 
+#' @param x A `tonalInterval` or something that can be parsed as one.
+#' @param octave.round A [rouding function][expand()]. Controls how 
+#' simple intervals are interpreted relative to C. 
+#' @param Key A [diatonicSet][diatonicSetS4] (tonal key) or something which can be
+#' [parsed][diatonicSet()] as one.
+#' @param ... Parameters passed to [tonalInterval()].
+#' 
+#' @family {Tonal feature functions}
+#' @export
+is.simple <- function(x, ...) UseMethod('is.simple')
+
+#' @rdname is.simple
+#' @export 
+is.simple.tonalInterval <- function(x, octave.round = floor, ...) {
+  semits <- tint2semits(x, specific = FALSE, ...)
+  
+  octave.round(semits / 12) == 0
+}
 
 
+#' @rdname is.simple
+#' @export
+is.simple.default <- function(x, ...) is.simple.tonalInterval(tonalInterval(x, ...), ...)
+
+#' @rdname is.simple
+#' @export 
+is.generic <- function(x, Key, ...) UseMethod('is.generic')
+
+#' @rdname is.simple
+#' @export 
+is.generic.tonalInterval <- function(x, Key = NULL) {
+  Key <- diatonicSet(Key %||% dset(0L, 0L))
+  match_size(x = x, Key = Key, toEnv = TRUE)
+  
+  keynotes <- LO5th(Key)
+  
+  rowSums(sweep(keynotes, 1, x@Fifth, `-`) == 0L) > 0L
+  
+  
+}
+
+is.generic.default <- function(x, Key = NULL, ...) is.generic.tonalInterval(tonalInterval(x, Key = NULL, ...), Key = Key)
 
 ## Order/relations methods ####
 
 #' @export order.tonalInterval
+#' @rdname tonalIntervalS4
 #' @exportMethod > >= < <= Summary abs sign
 order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
@@ -486,7 +547,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 
 #' Generating ("deparsing") pitch representations
 #' 
-#' [humdrumR] includes a easy-to-use but generating a variety of tonal (or atonal) pitch representations,
+#' [humdrumR] includes a easy-to-use system for 
+#' generating a variety of tonal (or atonal) pitch representations,
 #' which can be flexibly modified by users.
 #' "Under the hood" `humdrumR` represents all tonal pitch information using the [same underlying representation][tonalIntervalS4],
 #' which is typically extracted from input data using the [pitch parser][pitchParsing].
@@ -505,9 +567,12 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' Various pitch representations like `**kern`, `**solfa`, and `**semits` can be generated using predefined [pitch functions][pitchFunctions] like [kern()]
 #' [semits()], and [solfa()] respectively.
 #' All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-#' to the deparser.
+#' to the deparser.a
 #' By modifying these *"deparsing" arguments*, you can exercise 
 #' fine control over how you want pitch information to be represented in your output.
+#' *This* documentation talks about this deparsing step.
+#' For an overview of the parsing process, look [here][pitchParsing].
+
 #' 
 #' @section Basic pitch arguments:
 #' 
@@ -599,7 +664,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' check out the [transpose()] docs for more details!
 #' 
 #' 
-#' ### In-place parsing
+#' ## In-place parsing
 #' 
 #' In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
@@ -611,7 +676,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
 #' So, `pitch('4.ee-[', inPlace = TRUE)` will return `r pitch('4.ee-[', inPlace = TRUE)`---keeping the `"4."` and the `"["`.
 #' (This obviously only works if the input is a string, not a numeric!)
-#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return numeric values, to return character strings
+#' Note that `inPlace = TRUE` will force functions like `semits`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a character string.
 #' 
 #' @section Deparsing arguments:
@@ -820,7 +885,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' ### Octave "Rounding"
 #' 
-#' In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+#' In some situations, pitch data might interpret the "groupby" between octaves a little differently.
 #' In most absolute pitch representations (e.g., [kern()], [pitch()]), the "boundary" between one octave and the next is 
 #' between B (degree 7) and C (degree 1).
 #' However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range `-P4` (`G`) to `+P4` (`f`).
@@ -1000,7 +1065,7 @@ LO5thNcentralOct2tint <- function(LO5th, centralOct) {
 
 #### Semitones ####
 
-tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
+tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, directed = TRUE, ...) {
 
   
   if (!is.null(Key) && length(x) > 0L) x <- x + diatonicSet(Key)
@@ -1010,7 +1075,7 @@ tint2semits <- function(x, Key = NULL, specific = TRUE, compound = TRUE, ...) {
   semits <- as.integer((((x@Fifth * 19L) + (x@Octave * 12L)) + (x@Cent / 100L)))
   
   if (!compound) semits <- semits %% 12L
-
+  if (!directed) semits <- abs(semits)
   semits
   
 }
@@ -1268,12 +1333,16 @@ tint2tonalChroma <- function(x,
 
 tint2pitch <- partialApply(tint2tonalChroma,  
                            step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
-                           octave.offset = 4L, integer = TRUE,
+                           octave.offset = 4L, octave.integer = TRUE,
                            flat = 'b', qualities = FALSE,
                            keyed = TRUE,
                            parts = c("step", "species", "octave"))
 
-
+tint2simplepitch <- partialApply(tint2tonalChroma,  
+                                 step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+                                 flat = 'b', qualities = FALSE,
+                                 keyed = FALSE,
+                                 parts = c("step", "species"))
 
 
 
@@ -1510,8 +1579,8 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' # Dispatch
 #' 
-#' The pitch parser (`tonalInterval`) is a generic function, meaning it can accepts a variety of inputs 
-#' and automatically "dispatches" the appropriate method for parsing the input.
+#' The pitch parser (`tonalInterval()`) is a generic function, meaning it accepts a variety of inputs 
+#' and automatically "dispatches" the appropriate method for parsing ehe input.
 #' R's standard `S3` system is used to dispatch for either `numeric` or `character`-string input:
 #' Generally, `numeric` (or `integer`) inputs are interpreted as various *atonal* pitch representations while
 #' `character` strings are interpreted as various *tonal* pitch representations.
@@ -1523,9 +1592,9 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' Since humdrum data is inherently string-based, the most powerful part of the `humdrumR` pitch-parser
 #' is its system for parsing pitch (mostly tonal) information from character strings.
 #' (This includes character tokens with pitch information embedded alongside other information; Details below.)
-#' The pitch parser (`tonalInterval`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
+#' The pitch parser (`tonalInterval()`) uses a combination of regular-expressions and exclusive interpretations to decide how to 
 #' parse an input string.
-#' There are twelve regular-expression patterns for pitch that `tonalInterval` knows how to parse automatically:
+#' There are twelve regular-expression patterns for pitch that `tonalInterval()` knows how to parse automatically:
 #' 
 #' | Representation                                                                     | Exclusive                 | Example          |
 #' | ---------------------------------------------------------------------------------- | ------------------------: | ---------------: |
@@ -1544,7 +1613,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Exclusive Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, with a non-`NULL` `Exclusive` argument,
 #' that `Exclusive` argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the 
 #' table above.
 #' For example, `kern(x, Exclusive = 'solfa')` will force the parser to interpret `x` as `**solfa` data.
@@ -1556,7 +1625,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Regex Dispatch
 #' 
-#' If you call `tonalInterval` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
+#' If you call `tonalInterval()` (or *any* [pitch function][pitchFunctions]) on a `character`-string vector, but the `Exclusive` argument is missing
 #' or `NULL`, `humdrumR` will instead use regular-expression patterns to select a known interpretation.
 #' For example, `pitch('so')` will automatically recognize that `'so'` is solfege, and will interpret the data accordingly (the output should be `r pitch('so')`).
 #' If there are more than one matches, `humdrumR` will use the longest match, and if they tie, pick based on the order in the table above (topmost first).
@@ -1570,7 +1639,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 #' for example, `**kern` data might include tokens like `"4.ee-[`.
-#' The `humdrumR` parser (`tonalInterval`) will automatically "pull out" pitch information from within strings, if it can find any, 
+#' The `humdrumR` pitch parser (`tonalInterval()`) will automatically "pull out" pitch information from within strings, if it can find any, 
 #' using the appropriate known regular expressions.
 #' Various [pitch parsing functions][pitchFunctions] have an option to keep the original "extra" data, using their `inPlace` argument.
 #' 
@@ -1961,13 +2030,14 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' kern('E x 5', parse(doublesharp = 'x', sep = ' '))
 #' 
-#' #' @returns 
+#' @returns 
 #' 
 #' `tonalInterval()` returns a [tonalInterval][tonalIntervalS4] object of the same
 #' length and dimensions as `x`.
 #' `NULL` inputs (`x` argument) return a `NULL` output.
 #' `NA` values in the input `x` are propagated to the output.
 #' 
+#' @seealso All `humdrumR` [pitch functions][pitchFunctions] make use of the parsing functionality.
 #' @name pitchParsing
 NULL
 
@@ -1991,7 +2061,7 @@ octave2tint <- function(str, simpletint, roottint,
   }
   
   #
-  steps <- tint2step(simpletint, 0:6) + tint2step(roottint, 0:6)
+  steps <- tint2step(simpletint, 0:6) # + tint2step(roottint, 0:6)
   n <- if (octave.relative) {
     steps <- delta(steps)
     
@@ -2042,8 +2112,8 @@ atonal2tint <- function(tint, accidental.melodic = FALSE, keyed = TRUE, Key = NU
   tint
 }
 
-semits2tint <- function(n, ...) {
-          wholen <- as.integer(c(n))
+semits2tint <- function(x, ...) {
+          wholen <- as.integer(c(x))
           
           pitchclass <- wholen %% 12L
           
@@ -2057,11 +2127,11 @@ semits2tint <- function(n, ...) {
           tints
 }
 
-cents2tint <- function(n, ...) {
-  roundedN <- round(n / 100)
+cents2tint <- function(x, ...) {
+  roundedN <- round(x / 100)
   tint <- semits2tint(roundedN, ...)
   
-  tint@Cent <- n - (roundedN * 100)
+  tint@Cent <- x - (roundedN * 100)
   
   tint
   
@@ -2069,8 +2139,8 @@ cents2tint <- function(n, ...) {
 }
 
 
-midi2tint <- function(n, ...) {
-  semits2tint(n - 60L, ...)
+midi2tint <- function(x, ...) {
+  semits2tint(x - 60L, ...)
 }
 
 
@@ -2115,9 +2185,9 @@ ratio2tint <- function(x, tonalHarmonic = 2^(19/12), centMargin = 25,  ...) {
 
 
 
-freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference.note = tint(-4, 3), ...) {
+freq2tint <- function(x, frequency.reference = 440L, frequency.reference.note = tint(-4, 3), ...) {
   
-  ratio <- frequency / frequency.reference
+  ratio <- x / frequency.reference
   
   tint <- ratio2tint(ratio, ...)
   
@@ -2132,15 +2202,15 @@ freq2tint <- function(frequency, frequency.reference = 440L, frequency.reference
 
 ### Tonal ####
 
+lof2tint <- function(x) tint(, x)
 
-
-step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...) {
+step2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), step.signed = FALSE, ...) {
   
   if (length(step.labels) %% 7L > 0) .stop('When parsing tonal pitches, the number of "step.labels" must be a multiple of 7.')
   
   
   
-  step <- if (is.null(step.labels)) as.integer(str) else match(toupper(str), toupper(step.labels), nomatch = NA_integer_) 
+  step <- if (is.null(step.labels)) as.integer(x) else match(toupper(x), toupper(step.labels), nomatch = NA_integer_) 
   
   
   # generic
@@ -2150,7 +2220,7 @@ step2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), s
   # specific
   octave <- (step - 1L) %/% 7L
   
-  if (step.signed) octave[str == toupper(str)] <- (octave[str == toupper(str)] + 1L) * -1
+  if (step.signed) octave[x == toupper(x)] <- (octave[x == toupper(x)] + 1L) * -1
   
   tint <- tint + tint(octave, 0L)
   
@@ -2167,7 +2237,7 @@ updownN <- function(str, up = '#', down = 'b')  stringi::stri_count_fixed(str, u
 
 
 
-specifier2tint <- function(str, step = NULL, Key = NULL, 
+specifier2tint <- function(x, step = NULL, Key = NULL, 
                            qualities = TRUE,
                            memory = FALSE, memoryWindows = NULL,
                            implicitSpecies = FALSE, absoluteSpecies = TRUE, 
@@ -2179,19 +2249,17 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   
   # step is lof = -1:5
   step <- if (is.null(step)) 0L else getFifth(step)
-   
+  
   if (qualities && !absoluteSpecies) .stop("When parsing tonal information, you can't use the absoluteSpecies == FALSE if the specifier type is 'quality'.")
     
   # use double sharp/flats?
-  if (!false(doublesharp)) str <- gsub(doublesharp, strrep(sharp, 2), str)
-  if (!false(doubleflat )) str <- gsub(doubleflat,  strrep(flat , 2), str)
-  
-  
+  if (!false(doublesharp)) x <- gsub(doublesharp, strrep(sharp, 2), x)
+  if (!false(doubleflat )) x <- gsub(doubleflat,  strrep(flat , 2), x)
   
   # incorporate memory?
   if (memory) {
-    memoryWindows <- if (truthy(memoryWindows) && length(memoryWindows) == length(str)) {
-      match_size(str,
+    memoryWindows <- if (truthy(memoryWindows) && length(memoryWindows) == length(x)) {
+      match_size(x,
                  step = step, 
                  memory = memory, 
                  toEnv = TRUE)
@@ -2200,19 +2268,20 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
       step
     }
   
-    str <- tapply_inplace(str, memoryWindows, ditto, nonnull = \(x) x != '')
+    x <- tapply_inplace(x, memoryWindows, ditto.default, null = \(x) x == '', initial = '')
    
   } 
   
   # calculate lof
   
-  natural <- stringi::stri_detect_fixed(str, natural)
+  natural <- stringi::stri_detect_fixed(x, natural)
   lof <- (if (qualities) {
-    updownN(str, up = augment, down = diminish) -
-      (substr(str, 1L, 1L) == diminish & step >= 3L) - # 3rd, 6th, and 7th diminish differently
-      (str == 'm')
+    lof <- updownN(x, up = augment, down = diminish) -
+      (substr(x, 1L, 1L) == diminish & step >= 3L)  - # 3rd, 6th, and 7th diminish differently
+      (x == minor)
+    
   } else {
-    updownN(str, up = sharp, down = flat)
+    updownN(x, up = sharp, down = flat)
   } ) 
 
   lof <- pmaxmin(lof, -specifier.maximum, specifier.maximum) * 7L
@@ -2221,7 +2290,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
   if (!is.null(Key) && implicitSpecies) {
     keyalt <- ifelse(natural, 0L, -(step - (step %% Key)) )
     if (absoluteSpecies) {
-      lof[str == ''] <- keyalt[str == '']
+      lof[x == ''] <- keyalt[x == '']
     } else {
       lof <- lof + keyalt
     }
@@ -2237,7 +2306,7 @@ specifier2tint <- function(str, step = NULL, Key = NULL,
 CKey <- function(dset) if (!is.null(dset)) dset - getRootTint(dset) 
 
 
-tonalChroma2tint <- function(str,  
+tonalChroma2tint <- function(x,  
                              parts = c("step", "species", "octave"), 
                              qualities = FALSE, 
                              parse.exhaust = TRUE, 
@@ -2248,11 +2317,12 @@ tonalChroma2tint <- function(str,
   
  parts <- matched(parts, c("sign", "step", "species", "octave"))
  
+ if (!is.null(Key)) Key <- diatonicSet(Key)
  
  ############# parse string
  # regular expressions for each part
  REs <-  makeRE.tonalChroma(parts, collapse = FALSE, qualities = qualities, ...)
- REparse(str, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, sep = sep, toEnv = TRUE) ## save to environment!
+ REparse(x, REs, parse.exhaust = parse.exhaust, parse.strict = TRUE, sep = sep, toEnv = TRUE) ## save to environment!
  
  ## simple part
  step    <- if ("step" %in% parts)    step2tint(step, ...) 
@@ -2268,7 +2338,7 @@ tonalChroma2tint <- function(str,
  
  if (keyed && !is.null(Key)) {
   Key <- rep(Key, length.out = length(tint))
-  tint[!is.na(Key)] <- tint[!is.na(Key)] - diatonicSet(Key[!is.na(Key)])
+  tint[!is.na(Key)] <- tint[!is.na(Key)] - Key[!is.na(Key)]
   
  }
  
@@ -2291,17 +2361,17 @@ lilypond2tint <- partialApply(tonalChroma2tint,
                               octave.integer = FALSE, octave.offset = 1L, up = "'", down = ",")
 
 
-tonh2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
+tonh2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), 
                       flat = 'es',   ...) {
   
   seven <- step.labels[7L]
   
-  str <- gsub('([AE])s', '\\1es', str)
-  str <- gsub('S', 'Ees', str)
+  x <- gsub('([AE])s', '\\1es', x)
+  x <- gsub('S', 'Ees', x)
   
-  str <- gsub(paste0('H', flat, flat), paste0(seven, flat, flat), str) # Heses -> Beses
-  str <- gsub(paste0(seven, '(-?[0-9])'), paste0(seven, flat, '\\1'), str)
-  str <- gsub('H', seven, str)
+  x <- gsub(paste0('H', flat, flat), paste0(seven, flat, flat), x) # Heses -> Beses
+  x <- gsub(paste0(seven, '(-?[0-9])'), paste0(seven, flat, '\\1'), x)
+  x <- gsub('H', seven, x)
    
   tC2t <- partialApply(tonalChroma2tint, 
                        parts = c('step', 'species', 'octave'),
@@ -2309,7 +2379,7 @@ tonh2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
                        octave.integer = TRUE, octave.offset = 4L,
                        sharp = 'is')
   
-  tC2t(str, flat = flat,  step.labels = step.labels, ...)
+  tC2t(x, flat = flat,  step.labels = step.labels, ...)
   
   
 }
@@ -2319,7 +2389,7 @@ helmholtz2tint <- partialApply(tonalChroma2tint,
                                step.signed = TRUE,
                                up = "'", down = ",", flat = 'b', octave.integer = FALSE, octave.offset = 1L)
 
-kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
+kern2tint <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  ...) {
   # letter <- stringr::str_extract(str, '[A-Ga-g]')
   # str_ <- stringr::str_replace(str, '([A-Ga-g])\\1*', toupper(letter)) # simple part
   step.labels <- unlist(lapply(1:50, strrep, x = step.labels))
@@ -2329,28 +2399,28 @@ kern2tint <- function(str, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),  
                        keyed = TRUE,  
                        qualities = FALSE,
                        step.signed = TRUE)
-  tint <- tC2t(str, step.labels = step.labels, ...)
+  tint <- tC2t(x, step.labels = step.labels, ...)
   
   
 }
 
-interval2tint <- function(str, ...) {
+interval2tint <- function(x, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                               parts = c('sign', 'species', "step"), 
                               qualities = TRUE, step.labels = NULL)
-  tC2t(str, ...)
+  tC2t(x, ...)
   
 }
 
 
-pc2tint <- function(str, ten = 'A', eleven = 'B', ...) {
-  str <- gsub(ten, '10', str)
-  str <- gsub(eleven, '11', str)
+pc2tint <- function(x, ten = 'A', eleven = 'B', ...) {
+  x <- gsub(ten, '10', x)
+  x <- gsub(eleven, '11', x)
   
-  str <- as.integer(str)
+  x <- as.integer(x)
   
-  semits2tint(str, ...)
+  semits2tint(x, ...)
   
 }
 
@@ -2370,8 +2440,8 @@ deg2tint <- partialApply(tonalChroma2tint, parts = c("octave", "step", "species"
                          up = '^', down = 'v',
                          flat = '-', sharp = "+")
 
-solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
-  syl <- stringr::str_extract(str, '[fdsrlmt][aeio]')
+solfa2tint <- function(x, ..., flat = '-', sharp = '#') {
+  syl <- stringr::str_extract(x, '[fdsrlmt][aeio]')
   
   base <- stringr::str_sub(syl, 1L, 1L)
   alt  <- stringr::str_sub(syl, 2L, 2L)
@@ -2387,7 +2457,7 @@ solfa2tint <- function(str, ..., flat = '-', sharp = '#') {
   
   sylalt <- alt.mat[cbind(base, alt)]
   
-  str_ <- stringr::str_replace(str, alt, sylalt)
+  str_ <- stringr::str_replace(x, alt, sylalt)
  
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c("octave", "step", "species"),
@@ -2405,7 +2475,7 @@ solfg2tint <- partialApply(tonalChroma2tint, flat = '~b', doubleflat = '~bb', sh
                            octave.integer = TRUE, octave.offset = 4L)
                            
 
-bhatk2tint <- function(str, ...) {
+bhatk2tint <- function(x, ...) {
   
   tC2t <- partialApply(tonalChroma2tint,
                        parts = c('step', 'octave'),
@@ -2413,11 +2483,11 @@ bhatk2tint <- function(str, ...) {
                        octave.integer = FALSE,
                        up = "'", down = ',')
   
-  tint <- tC2t(toupper(str))
+  tint <- tC2t(toupper(x))
   
   
   perfects <- abs(LO5th(tint)) <= 1L
-  altered <- str == tolower(str)
+  altered <- x == tolower(x)
   
   tint[altered] <- tint[altered] + tint( , ifelse(perfects[altered], 7L, -7L))
   
@@ -2446,9 +2516,10 @@ tonalInterval.logical <- function(x, ...) vectorNA(length(x), 'tonalInterval')
 
 #' @rdname pitchParsing
 #' @export
-tonalInterval.NULL <- function(x, ...) NULL
+tonalInterval.NULL <- function(x, ...) tint(c(), c())
 
 #### Numbers ####
+
 
 #' @rdname pitchParsing
 #' @export
@@ -2456,16 +2527,9 @@ tonalInterval.numeric  <- makeHumdrumDispatcher(list('semits', NA, semits2tint),
                                                 list('freq',  NA, freq2tint),
                                                 list('cents', NA, cents2tint),
                                                 list('midi',  NA, midi2tint),
+                                                list('lof',  NA, lof2tint),
                                                 funcName = 'tonalInterval.numeric',
                                                 outputClass ='tonalInterval')
-
-# #' @rdname pitchParsing
-# #' @export
-# tonalInterval.rational <- rational2tint
-# #' @rdname pitchParsing
-# #' @export
-# tonalInterval.fraction <- fraction2tint
-# 
 
 
 #### Characters ####
@@ -2490,11 +2554,17 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 
 
+
 #### setAs tonal interval ####
 
-setAs('integer', 'tonalInterval', function(from) semits2tint(from))
-setAs('numeric', 'tonalInterval', function(from) semits2tint(as.integer(from)))
-setAs('character', 'tonalInterval', function(from) tonalInterval.character(from))
+setAs('integer', 'tonalInterval', \(from) semits2tint(from))
+setAs('numeric', 'tonalInterval', \(from) semits2tint(as.integer(from)))
+setAs('character', 'tonalInterval', \(from) {
+  output <- tint(rep(NA, length(from)))
+  if (any(!is.na(from))) output[!is.na(from)] <- tonalInterval.character(from[!is.na(from)])
+  output
+} )
+
 setAs('matrix', 'tonalInterval', function(from) tonalInterval(c(from)) %<-matchdim% from)
 setAs('logical', 'tonalInterval', function(from) tint(rep(NA, length(from))) %<-matchdim% from)
 
@@ -2524,8 +2594,13 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 
 #' Translate between pitch representations.
 #' 
-#' These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-#' The functions are:
+#' These functions are used to extract and translate between different representations
+#' of pitch information.
+#' The functions can also do things like transposing and simplifying pitches.
+#' 
+#' @details 
+#' 
+#' The full list of pitch functions is:
 #' 
 #' ```{r echo = FALSE, results = 'asis'}
 #' 
@@ -2542,23 +2617,6 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' 
 #' ```
 #' 
-#'     
-#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
-#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
-#'        There are also two hidden (advanced) argumens you can specify: `memoize` and `deparse` (see the details below).
-#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
-#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
-#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
-#'        the parser, deparser, and transposer.
-#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
-#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
-#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
-#'  
-#'     
-#' @details
 #' 
 #' These pitch functions all work in similar ways, with similar arguments and functionality.
 #' Each function takes an input pitch representation (which can be anything) and outputs
@@ -2580,9 +2638,20 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
 #'     
-#' @section Pitch data class:
+#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
+#'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
+#' @param generic (`logical`, `length == 1`) If `generic = TRUE` the "specific" pitch information (accidentals and qualites) is discarded.
+#' @param simple (`logical`, `length == 1`) If `simple = TRUE` the "compound" pitch information (octave/contour) is discarded.
+#' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
+#'        the parser, deparser, and transposer.
+#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
+#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
+#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
+#'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
+#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
+#'        If `inPlace = FALSE`, only the pitch output information will be returned (details below).
 #' 
-#' All pitch functions return vectors with additional class `pitchData`.
 #' 
 #' @returns 
 #' 
@@ -2591,13 +2660,24 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' `NA` values in the input `x` are propagated to the output.
 #'
 #' @name pitchFunctions
-#' @seealso To better understand how these functions work, read about how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
+#' @seealso To better understand how these functions work, read about 
+#' how pitches are [parsed][pitchParsing] and [deparsed][pitchDeparsing].
 NULL
 
 ## Pitch transform maker ####
 
 pitchArgCheck <- function(args,  callname) {
   argnames <- .names(args)
+  
+  for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
+    checks(args[[arg]], argname = arg, xTF, seealso = '?pitchDeparsing')
+  }
+  scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
+                  'diminish', 'augment', 'major', 'minor', 'perfect',
+                  'up', 'down', 'same')
+  for (arg in intersect(argnames, scalarchar)) {
+    checks(args[[arg]], xcharacter & xlen1, seealso = '?pitchDeparsing')
+  }
   
   if ('generic' %in% argnames) {
     if ('specific' %in% argnames && !xor(args$generic, args$specific)) .stop("In your call to {callname}, you've specified contradictory 'generic' and 'specific' arguments...it has to be one or the other!")
@@ -2615,65 +2695,60 @@ pitchArgCheck <- function(args,  callname) {
   }
   
   if ('octave.offset' %in% argnames) {
-    checkLooseInteger(args$octave.offset, 'octave.offset', callname)
+    checks(args$octave.offset, argname = 'octave.offset', xwholenum)
   }
   
   if ('octave.round' %in% argnames) {
-    checkRoundingFunction(args$octave.round, 'octave.round', callname)
+    checks(args$octave.round, argname = 'octave.round', xrounding)
   }
   
   if ('parts' %in% argnames) {
-    checkArg(args$parts, argname = 'parts', callname = callname, classes = 'character', 
-                   valid = \(arg) !is.na(pmatch(args$parts, c('step', 'species', 'octave'))),
-                   validoptions = c('step', 'species', 'octave'))
+    checks(args$parts, argname = 'parts', xcharacter & xplegal(c('step', 'species', 'octave')))
     
   }
   
-  checkTFs( args[intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic',
-                                       'octave.absolute', 'octave.relative'))], callname = callname)
     
-  singlechar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
-                  'diminish', 'augment', 'major', 'minor', 'perfect',
-                  'up', 'down', 'same')
-  Map(\(arg, name) {
-    checkCharacter(arg, allowEmpty = TRUE, max.length = 1L, argname = name, callname = callname)
-  },
-  args[argnames %in% singlechar],
-  argnames[argnames %in% singlechar])
-         
+
   
   args 
   
 }
 
 
-makePitchTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
+makePitchTransformer <- function(deparser, callname, 
+                                 outputClass = 'character', 
+                                 removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
-  exclusiveFunctions <<- c(exclusiveFunctions, callname)
-  keyedFunctions <<- c(keyedFunctions, callname)
+  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  withinFields$Key        <<- c(withinFields$Key, callname)
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
   
   args <- c(alist(x = , 
-                ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
-                generic = FALSE, simple = FALSE, octave.relative = FALSE, 
-                Key = NULL,
-                transposeArgs = list(),
-                parseArgs = list(), 
-                inPlace = FALSE),
-            extraArgs)
+                  ... = , # don't move this! Needs to come before other arguments, otherwise unnamed parse() argument won't work!
+                  generic = FALSE, simple = FALSE, octave.relative = FALSE, 
+                  Key = NULL),
+            extraArgs,
+            alist( transposeArgs = list(),
+                  parseArgs = list(), 
+                  inPlace = FALSE))
+
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
+    
+    checks(x, xatomic | xclass('tonalInterval'))
+    checks(inPlace, xTF)
+    checks(parseArgs, xclass('list'))
+    checks(transposeArgs, xclass('list'))
+    
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
-    
-    checkVector(x, structs = 'tonalInterval', argname = 'x', callname = !!callname)
-    
     c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
-                                                                parse = parseArgs, transpose = transposeArgs)
+                                                                parse = parseArgs, 
+                                                                transpose = transposeArgs)
     formalArgs <- list(!!!fargcall)
     namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
     # There are four kinds of arguments: 
@@ -2696,22 +2771,29 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     parseArgs$Key   <- fromKey
     deparseArgs$Key <- toKey 
     
-    transposeArgs$from <- CKey(fromKey)
-    transposeArgs$to   <- CKey(toKey)
+    if (!is.null(transposeArgs$from)) transposeArgs$from <- CKey(fromKey)
+    if (!is.null(transposeArgs$to))   transposeArgs$to    <- CKey(toKey)
     
     # memoize % deparse
     memoize <- args...$memoize %||% TRUE
     deparse <- args...$deparse %||% TRUE
     
     
-    # Parse
-    parsedTint <- do(tonalInterval, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tonalInterval')
+    ############# #
+    ### Parse 
+    ############# #
+    
+    parsedTint <- do(tonalInterval, 
+                     c(list(x, memoize = memoize), parseArgs), 
+                     memoize = memoize, 
+                     outputClass = 'tonalInterval')
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
     
     deparseArgs <- c(list(parsedTint), deparseArgs)
-    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, deparseArgs, 
+    output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, 
+                                                               deparseArgs, 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse && !is.null(output)) {
@@ -2724,12 +2806,12 @@ makePitchTransformer <- function(deparser, callname, outputClass = 'character', 
     attr(output, 'Exclusive') <- callname
     output %class% 'pitchData'
     
-  }))
+  })) %class% 'pitchFunction'
 }
 
 
 
-### Pitch Transformers ####
+### Pitch functions ####
 
 
 
@@ -2756,7 +2838,6 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(to
 #' Atonal pitch representations
 #' 
 #' These function translates pitch information into basic atonal pitch values:
-
 #' `midi` and `semits` map pitches to standard 12-tone-equal-temperament 
 #' semitone (`integer`) values. For `semits` `0` (zero) is middle-C (or unison).
 #' In contrast, the [MIDI pitch values](https://en.wikipedia.org/wiki/MIDI) output by 
@@ -2797,7 +2878,7 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist
 
 
 
-#' Representation of Atonal Pitch classes
+#' Representation of atonal pitch classes
 #' 
 #' As encoded in the humdrum 
 #' [`**pc`](https://www.humdrum.org/rep/pc/index.html) interpretation.
@@ -3306,7 +3387,6 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   from <- diatonicSet((from %||% dset(0, 0)))
   from[is.na(from)] <- dset(0, 0)
   
-  
   if (!is.null(to)) {
     to <- diatonicSet(to)
     to[is.na(to)] <- dset(0, 0)
@@ -3333,17 +3413,35 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
     
     altered <- x$Alteration != tint(0, 0)
     if (any(altered)) {
-      comma <- tintPartition(x$Generic[altered] + x$Alteration[altered], 'harmonic', Key = to, ...)$Comma
+      comma <- tintPartition(x$Generic[altered] + x$Alteration[altered], 'harmonic', Key = to)$Comma
       x$Alteration[which(altered)[comma != tint(0,0)]] <- tint(0, 0)
     }
     
-    
     x$Generic + x$Alteration
-    
   }
   
   x
+}
+
+#' @export
+transpose.character <- function(x, by = NULL, from = NULL, to = NULL, ...) {
+  x <- tonalInterval.character(x, ...)
+  tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
   
+  dispatch <- attr(x, 'dispatch')
+  rePlace(reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
+}
+
+#' @export
+transpose.numeric <- function(x, by = NULL, from = NULL, to = NULL, ...) {
+  x <- tonalInterval.numeric(x, ...)
+  tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
+  
+  
+  dispatch <- attr(x, 'dispatch')
+  y <- reParse(tints, dispatch, c('semits', 'freq', 'midi', 'cents', 'lof'))
+  humdrumRattr(y) <- NULL
+  y
 }
 
 
@@ -3366,7 +3464,7 @@ transposeArgCheck <- function(args) {
   args
 }
 
-### Transposition methods ####
+
 
 
 
@@ -3374,19 +3472,39 @@ transposeArgCheck <- function(args) {
 
 
 
-#' Invert or transpose tonal intervals.
+#' Invert or transpose pitches.
 #'
 #' @family tonal transformations
 #' @export 
 invert <- function(tint, around, Key, ...) UseMethod('invert')
 #' @export 
 invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
-  if (!is.tonalInterval(around)) around <- tonalInterval(around)
+  around <- tonalInterval(around)
   
   output <- (around + around - tint) 
-  if (!is.null(Key)) output <- output %% Key
+  if (!is.null(Key)) output <- output %% diatonicSet(Key)
   
   output
+}
+
+
+#' @export
+invert.character <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
+  x <- tonalInterval.character(x, ...)
+  tints <- invert.tonalInterval(x, around = around, Key = Key)
+  
+  dispatch <- attr(x, 'dispatch')
+  rePlace(reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree')),  dispatch)
+}
+
+#' @export
+invert.numeric <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
+  x <- tonalInterval.numeric(x, ...)
+  tints <- invert.tonalInterval(x, around = around, Key = Key)
+  
+  y <- reParse(tints, dispatch, c('semits', 'freq', 'midi', 'cents', 'lof'))
+  humdrumRattr(y) <- NULL
+  y
 }
 
 ### Inversion methods ####
@@ -3394,52 +3512,78 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 
 ## Melodic Intervals ####
 
-#' Calculate melodic intervals
+#' Calculate intervals between pitches
 #' 
-#' `mint` calculates melodic intervals in a vector, or across spine/paths of a [humdrumR data object][humdrumRclass].
-#' A vector is interpreted as an ordered sequence of notes, forming a "melody,"
-#' and the intervals *between* successive pitches are calculated.
+#' These functions allow us to calculate intervals between pitches.
+#' `int()` is the most basic form, calculating the interval(s) between two input vectors.
+#' `mint()` and `hint()` are special forms for calculating intervals "melodically" or "harmonically," respectively.
 #'
 #' @details 
 #' 
-#' Input vector `x` is [parsed as pitch information][tonalInterval()].
-#' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. `Key` and `Exclusive` are also passed to the parser.)
-#'
-#' The parsed pitch vector is copied and lagged using [lag()], and pairs which cross `boundaries` are ignored.
-#' The melodic intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
-#' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
-#' However, the only alternative deparser that would be *commonly* used (other than [intervals()]) would be [semits()].
+#' Input vectors `x` (and `from`) are [parsed as pitches][tonalInterval()] ([tonal interval objects][tonalIntervaS4]), if possible.
+#' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. 
+#' `Key` and `Exclusive` arguments are also passed to the parser.)
+#' Any inputs that fail to parse will show up as `NA` in the output.
 #' 
+#' Once parsed, the intervals between the pitches are calculated as `x - from`.
+#' The resulting intervals are then "[deparsed][pitchDeparsing]" into a standard representation; by default, the [intervals()]
+#' representation is used, but you can set the `deparser` argument to any [pitch function][pitchFunctions].
+#' However, the only alternative deparser that would be *commonly* used (besides [intervals()]) would be [semits()].
+#' If `deparser` is `NULL`, the raw [tonalIntervals][tonalIntervalS4] are returned.
+#' 
+#' @section Melodic and Harmonic intervals:
+#'
+#' `mint` and `hint` calculate "melodic" and "harmonic" intervals respectively.
+#' In this context, "melodies" are sequences of notes within a **spine path**, while
+#' "harmonies" are intervals between notes occurring in the same **record** (at the same time).
+#' Outside of a [with(in)][withinHumdrum] call, `mint` or `hint` are exactly the same;
+#' It is only when used in a call to [with(in)][withinHumdrum] that you will see them have different behaviors,
+#' as [with(in)][withinHumdrum] will automatically apply them across spine paths (`mint()`) or records (`hint()`).
+#' This is achieved by modifying the `groupby` and `orderby` arguments to [lag()]---you can manually achieve
+#' the default behaviors, or other behaviors, by setting these arguments yourself.
+#' 
+#' When used in a [with(in)][withinHumdrum] expression, `mint()` will (by default) calculate the melodic interval *approaching* each note 
+#' from the previous note:
+#' for example, `mint('C4', 'D4', 'Eb4')` fill return `c('[c]', '+M2', '+m2')`, because D4 is approached by
+#' ascending whole step *from* C4, and Eb4 is approached by ascending half step *from* D4.
+#' Similarly, the default [with(in)][withinHumdrum] behavior of `hint()` is to calculate successive intervals in the same record 
+#' (*across* spine paths), from left to right.
+#' So the record `C3  G4  C5` will return values `[CC]  +P12  +P4`, because the G4 is a perfect 12th above C3, and
+#' C5 is a perfect fourth above G4.
+#' 
+#' 
+#' `mint()` and `hint()` work by passing [lagged][lag()] and/or [dittoed][ditto()]
+#' versions of `x` as the `from` argument to `int()`.
+#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)`
+#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)`.
+#' In either case, the parsed pitch vector is copied and lagged using [lag()], with pairs crossing outside `groupby` groups ignored.
 #' The `lag` argument controls how far apart in the melody intervals are calculated.
 #' For instance, a lag of `2` will calculate intervals between *every other* note in the vector.
-#' Positive lags will calculate **approaching** intervals: each token represents the interval between the current note
+#' Positive lags (the default) will calculate **approaching** intervals: each token represents the interval between the current note
 #' and the *previous* note.
-#' Negative lags will calculate **departing** intervals: each token reprseents the interval 
+#' Negative lags will calculate **departing** intervals: each token represents the interval 
 #' between the current note and the *next* note.
-#' 
-#' Note that you by passing `directed = FALSE` through the the deparser, the undirected (absolute value)
+#' Note that, by passing `directed = FALSE` through the the [deparser][pitchDeparsing], the undirected (absolute value)
 #' of the melodic intervals can be returned.
 #' 
-#' `mint` methods are defined for data.frames and matrices.
-#' The `data.frame` method simply applies `mint` to each column of the `data.frame` separately.
-#' For matrices, mint can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
+#' @section Incomplete value padding:
 #' 
-#' @section Initial value padding:
-#' 
-#' Any output of `mint` is necessarily padded by `abs(lag)` undefined intervals at the beginning
-#' (positive lag) or end (negative lag).
-#' The `initial` argument controls how these initial values are presented.
-#' 
-#' If `initial` is a function, the "initial" pitches are parsed "absolutely" relative to middle-C;
-#' in this case, `initial` should be another [pitch function][pitchFunctions] to deparse these pitches.
-#' The default is the [kern()] function.
-#' If `bracket == TRUE`, these initial values are are surrounded with `[]`, so they are easier to distinguish from the
-#' actual melodic intervals.
-#' 
-#' If `initial` is an atomic value, these value are used as the padder;
-#' An atomic (vector) `initial` must be the same length as `abs(lag)`.
-#' For example, you could set `initial = 'start'` to label these locations as the character string `'start'`.
-#' If `initial` is `NULL`, the initial values are simply padded with `NA`.
+#' By default, `int` will return `NA` anywhere where `x` **or** `from` is `NA`.
+#' However, if `from` is `NA` but `x` is *not* `NA`, we can ask for different output for these "incomplete" pairs.
+#' using the `incomplete` argument.
+#' If `incomplete` is an atomic value, incomplete outputs indices are willed with this value.
+#' If the incomplete argument is a [pitch function][pitchFunctions] (like the `deparser` argument),
+#' this function is used to (re)parse the values of `x` where `from` is missing.
+#' If `bracket == TRUE`, incomplete output values are surrounded with `[]`, so they are easier to distinguish from the
+#' actual intervals.
+#'
+#' The main use of the `incomplete` argument is in `mint()` and `hint()`.
+#' The lagged `from` arguments used in `mint()`/`hint()` (see previous section) are necessarily padded by `abs(lag)` `NA`
+#' values at the beginning (positive lag) or end (negative lag).
+#' These are thus "incomplete" pairs passed to `int()`, and can controlled using the `incomplete` argument.
+#' By default, both `mint()` and `hint()` set `incomplete = kern(), bracket = TRUE` which cause these
+#' notes to show up as bracketed kern, like `[ee-]` or `[C#]`.
+#' If `incomplete` is `NULL`, the incomplete values are simply padded with `NA`.
 #' 
 #' 
 #' @section Interval classification:
@@ -3447,7 +3591,7 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' If the `classify` argument is set to `TRUE`, intervals are classified as either `"Unison"`,
 #' `"Step"`, `"Skip"`, or `"Leap"`.
 #' Alternatively, skips can be interpreted as leaps by setting `skips = FALSE`.
-#' (Note that classification will only work if `deparser = interval`, which is the default).
+#' (`classify = TRUE` overrides the `deparser` argument.)
 #'
 #' By default, intervals are categorized tonally, meaning that the interval in tonal *steps*
 #' is used as the basis of classification.
@@ -3460,40 +3604,172 @@ invert.tonalInterval <- function(tint, around = tint(0L, 0L), Key = NULL) {
 #' If so, intervals are categorized based only on semitone (enharmonic) intervals:
 #' D# and Eb are classified the same.
 #' 
+#' @section Logical(ditto) lags:
 #' 
+#' For calls to `hint()` and `mint()` the default behavior is a `numeric` `lag` argument passed to [lag()].
+#' An alternate option is to specify the `lag` argument as  `logical` vector the same length as the input (`x` argument).
+#' Rather than calculating the interval between a pitch and another pitch separated by a regular lag,
+#' a `logical` `lag` argument "lags" each pitch back to the previous value where `lag == TRUE`.
+#' This means that more than one interval can be calculated from those same `TRUE` indices.
 #' 
+#' The canonic use of this "logical lag" feature is to calculate harmonic intervals relative to the same voice, like the bass voice.
+#' For example, consider this file:
+#' 
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'       C             e             g            cc
+#'       G             d             f             b
+#'       C             c             e            cc             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' If we [read][readHumdrum()] this file and applied `hint()` to the `Token` field (with default arguments)
+#' the result would be:
+#' 
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'     [C]          +M10           +m3           +P4
+#'     [G]           +P5           +m3           +A4
+#'     [C]           +P8           +M3           +m6             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' In each record, we see the intervals as lagged (`lag == 1`) from left right:
+#' we see the intervals between the bass and the tenoir, the tenor and the alto, and the alto
+#' and the soprano.
+#' What if we wanted to see all the intervals with the bass?
+#' Well, we can use a `logical` `lag` argument, where we would specify that `Spine == 1`:
+#' `with(humData, hint(Token, lag = Spine == 1)`.
+#' This means that all `from` values are "lagged" back to the previous value where `Spine == 1`.
+#' The result would be:
 #'
+#' ```
+#'  **kern        **kern        **kern        **kern
+#' *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
+#'     [C]          +M10          +P12          +P14
+#'     [G]           +P5           +m7          +M10
+#'     [C]           +P8          +M10          +P14             
+#'      *-            *-            *-            *-
+#' ```
+#' 
+#' Now we see all the intervals relative to the bass.
+#' 
+#' The `logical` `lag` only takes place within the `groupby` groups.
+#' However, note that any values *before* the first index where `lag == TRUE`
+#' are calculated relative to that first value.
+#' 
+#' @param x A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param from A vector which is parsed as a [tonal interval][tonalInterval()].
+#' @param deparser A [pitch function][pitchFunction] to generate the output representation.
+#'    Defaults to [interval()].
+#' @param incomplete Either a [pitch function] or an atomic value of `length(incomplete) == abs(lag)`.
+#' @param bracket (`logical`, `length == 1`) If `TRUE`, square brackets (`"[]"`) are printed around
+#' `incomplete` observations.
+#' @param classify (`logical`, `length == 1`) If `TRUE`, the `deparser` is ignored and the output
+#' is classified as `Unison`, `Step`, `Skip`, or `Leap`.
+#' @param parseArgs A `list` of arguments to pass to the [pitch parser][tonalInterval()].
+#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`
+#'   into.
+#' @param orderby A `list` of vectors, of the same length as `x`, which are used to
+#' interpret the order of elements in `x`. Lagged computations are done in the indicated
+#' order, but the output is returned in the original order.
 #'
 #' @family {relative pitch functions}
-#' @family {Lagged pitch interval functions}
+#' @family {Lagged vector functions}
+#'
+#' @examples 
+#' 
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#'
+#' within(chorales, mint(Token))
+#'
 #' @seealso {`mint` uses [lag()] to "lag" the input pitches, and also makes use of [pitch parsers][tonalInterval()] and [pitch functions][pitchFunctions].}
-#' @inheritSection sigma Boundaries
-#' @name mint
+#' @inheritSection sigma Grouping
+#;
+#' @name int
 #' @export
-mint <- function(x, ...) UseMethod('mint')
-
-#' @rdname mint
-#' @export
-mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
-                         classify = FALSE, ..., 
-                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, bracket = TRUE,
+                classify = FALSE, 
+                ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
-  checkVector(x, 'x', 'mint', min.length = 1L)
-  checkLooseInteger(lag, 'lag', 'mint', min.length = 1L, max.length = 1L)
-  checkFunction(deparser, 'deparser', 'mint')
-  if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to mint with an atomic 'initial' argument, ",
-                                                               "length(initial) must equal abs(lag).")                 
-  checkTF(bracket, 'bracket', 'mint')
-  checkTF(classify, 'classify', 'mint')
   
-  lagged <- lag(x, lag, boundaries = boundaries)
+  checks(deparser, xnull | xclass('pitchFunction'))
   
+  checks(classify, xTF)
+  checks(bracket, xTF)
+  
+  from <- rep(from, length.out = length(x))
   
   if (classify) deparser <- mintClass
+ 
+  x    <- do.call('tonalInterval', c(list(x,    Exclusive = Exclusive, Key = Key), parseArgs))
+  from <- do.call('tonalInterval', c(list(from, Exclusive = Exclusive, Key = Key), parseArgs))
   
-  minterval <- do(.mint, args = list(x, lagged, lag = lag, deparser = deparser, initial = initial, bracket = bracket, 
-                                     parseArgs = parseArgs, Exclusive = Exclusive, Key = Key, ...)) # Use do so memoize is invoked
-  minterval
+  interval <- x - from
+  
+  if (is.null(deparser)) return(interval)
+  
+  output <- deparser(interval, ...) 
+  
+  missing <- !is.na(x) & is.na(output)
+  
+  if (!is.null(incomplete) && any(missing)) {
+    
+    if (is.function(incomplete) && inherits(incomplete, 'pitchFunction')) {
+      output[missing] <- incomplete(x[missing], 
+                                    Key = Key[missing], Exclusive = Exclusive[missing], ...) # need Exclusive right?
+    }
+    
+    if (is.atomic(incomplete)) output[missing] <- incomplete
+    if (bracket) output[missing] <- paste0('[', output[missing], ']')
+  }
+  
+ output
+}
+
+
+#' @rdname int
+#' @export 
+mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
+                         classify = FALSE, ..., 
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
+  
+  checks(lag, (xlogical & xmatch(x)) | (xwholenum & xlen1 & xnotzero))
+  checks(deparser, xclass('pitchFunction'))
+  checks(incomplete, xnull | xclass('pitchFunction') | (xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag))))
+  checks(bracket, xTF)
+  checks(classify, xTF)
+  
+  
+  if (is.numeric(lag)) {
+    if (lag >= 0L) {
+      from <- lag(x, lag, groupby = groupby, orderby = orderby)
+     
+    } else {
+      from <- x
+      x <- lag(from, lag, groupby = groupby, orderby = orderby)
+      na <- is.na(x) & !is.na(from)
+      x[na] <- from[na]
+      from[na] <- NA
+    }
+    
+    
+  } else {
+    from <- ditto.default(x,    null = !lag, groupby = groupby, orderby = orderby)
+    from <- ditto.default(from, null = !lag & (is.na(from) & !is.na(x)), groupby = groupby, orderby = orderby, reverse = TRUE)
+    from[lag] <- NA
+  }
+  
+  int(x, from, deparser = deparser, parseArgs = parseArgs, 
+      Exclusive = Exclusive, Key = Key, 
+      incomplete = incomplete, bracket = bracket, 
+      classify = classify, ...)
+ 
   
 }
 
@@ -3522,13 +3798,14 @@ mint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracke
 
 mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   
+  int <- rep(NA_integer_, length(x))
   if (atonal) {
-    int <- tint2semits(x)
+    int[!is.na(x)] <- tint2semits(x[!is.na(x)])
     sign <- c('-', '', '+')[sign(int) + 2L]
     breaks <- c(-Inf, 0, 2, 4, Inf)
 
   } else {
-    int <- tint2interval(x, step.labels = NULL, specific = FALSE, compound = FALSE)
+    int[!is.na(x)] <- tint2interval(x[!is.na(x)], step.labels = NULL, specific = FALSE, compound = FALSE)
     sign <- stringr::str_extract(int, '^[+-]?')
     int <- as.numeric(int)
     
@@ -3545,73 +3822,33 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
   .paste(if (directed) sign, intClass)
 }
 
-#' @rdname mint
-#' @export
-mint.data.frame <- function(x, ...) {
-  x[] <- lapply(x, mint, ...)
-  x
-}
-
-#' @rdname mint
-#' @export
-mint.matrix <- function(x, margin = 2, ...) {
-  checkLooseInteger(margin, 'margin', 'mint.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
-  result <- apply(x, margin, mint, ..., simplify = FALSE)
-  
-  do.call(if (margin == 1) 'rbind' else 'cbind', result)
-  
-}
-
 
 
 ## Harmonic Intervals ####
 
-#' Calculate harmonic intervals
-#' 
-#' `hint` calculates harmonic intervals in a vector, or across records of a [humdrumR data object][humdrumRclass].
-#' 
-#' @family {relative pitch functions}
-#' @family {Lagged pitch interval functions}
-#' @name hint
+#' @rdname int
 #' @export
-hint <- function(x, ...) UseMethod('hint') 
+hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
+                 ...,
+                 parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
 
-
-
-#' @export
-hint.default <- function(x, lag = 1, deparser = interval, initial = kern, bracket = TRUE, 
-                         classify = FALSE, ..., 
-                         parseArgs = list(), Exclusive = NULL, Key = NULL, boundaries = list()) {
+  # all checks are conducted by mint, so don't need to repeat them
+  #checks(x, xatomic & xminlength(1))
+  #checks(lag, xwholenumber & xlen1 & xnotzero)
+  #checks(deparser, xclass('function'))
+  #checks(incomplete, xatomic & xminlength(1) & 
+  #        argCheck(\(arg) length(arg) <= abs(lag), 
+  #                 "must be as short or shorter than the absolute lag",  
+  #                 \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+  #checks(bracket, xTF)
   
-  checkVector(x, 'x', 'hint', min.length = 1L)
-  checkFunction(deparser, 'deparser', 'hint')
-  if (is.atomic(initial) && length(initial) != abs(lag)) .stop("In a call to hint with an atomic 'initial' argument, ",
-                                                               "length(initial) must equal abs(lag).")                 
-  checkTF(bracket, 'bracket', 'hint')
-  checkTF(classify, 'classify', 'hint')
-  
-  reorderer <- if (length(boundaries)) {
-    i <- do.call('order', boundaries)
-    x <- x[i]
-    if (is.logical(lag)) lag <- lag[i]
-    boundaries <- lapply(boundaries, '[', i = i)
-    \(z) z[match(seq_along(z), i)]
-  } else {
-    force
-  }
+  mint(x, lag = lag, deparser = deparser, incomplete = incomplete, bracket = bracket,
+       parseArgs = parseArgs, 
+       Exclusive = Exclusive, Key = Key, 
+       groupby = groupby, orderby = orderby, ...)
   
   
-  lagged <- if (is.numeric(lag)) lag(x, lag, boundaries = boundaries) else {
-    lagged <- ditto.default(x, null = !lag, boundaries = boundaries, initial = '_next_')
-    lagged[lag] <- NA
-    lagged
-  }
-  
-  
-  hinterval <- do(.mint, args = list(x, lagged, lag = 1, deparser = deparser, initial = initial, bracket = bracket, 
-                                     parseArgs = parseArgs, Exclusive = Exclusive, Key = Key, ...)) # Use do so memoize is invoked
-
-  reorderer(hinterval)
+ 
 }
 
 ###################################################################### ### 
@@ -3634,8 +3871,8 @@ allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)
 allints <- allints[!is.na(allints)]
 cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
-for (int in allints) {
-  assign(int, interval2tint(int))
+for (i in allints) {
+  assign(i, interval2tint(i))
 }
 rm(allints)
 unison <- P1

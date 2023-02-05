@@ -8,13 +8,13 @@
 \usage{
 \method{print}{pitchData}(x)
 
-table.pitchData(...)
+table.pitchData(..., generic = TRUE, simple = TRUE)
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
-There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
 
@@ -38,10 +38,12 @@ Otherwise, returns a vector/matrix of the same length/dimension as \code{x}.
 \code{NA} values in the input \code{x} are propagated to the output.
 }
 \description{
-These functions can be used to extract and "translate," or otherwise modify, data representing pitch information.
-The functions are:
+These functions are used to extract and translate between different representations
+of pitch information.
+The functions can also do things like transposing and simplifying pitches.
 }
 \details{
+The full list of pitch functions is:
 \itemize{
 \item \strong{Tonal pitch representations}
 \itemize{
@@ -109,12 +111,7 @@ To read the details of the "deparsing" step, read \link[=pitchDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
 or type \code{?func} in the R command line: for example, \code{?kern}.
 }
-\section{Pitch data class}{
-
-
-All pitch functions return vectors with additional class \code{pitchData}.
-}
-
 \seealso{
-To better understand how these functions work, read about how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
+To better understand how these functions work, read about
+how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 }

@@ -24,7 +24,7 @@ details on how tonalIntervals are used by humdrumR.'><!-- mathjax --><script src
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@ details on how tonalIntervals are used by humdrumR.'><!-- mathjax --><script src
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -104,7 +104,15 @@ details on how <code>tonalIntervals</code> are used by <code>humdrumR</code>.</p
   octave.round <span class="op">=</span> <span class="va">floor</span>
 <span class="op">)</span>
 
-<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+<span class="fu">is.tonalInterval</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+
+<span class="fu">order.tonalInterval</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  na.last <span class="op">=</span> <span class="cn">TRUE</span>,
+  decreasing <span class="op">=</span> <span class="cn">FALSE</span>,
+  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"shell"</span>, <span class="st">"radix"</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -200,7 +208,12 @@ Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE<
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>The main way to create <code>tonalInterval</code> S4 objects is with the <code><a href="pitchParsing.html">tonalInterval()</a></code> pitch parser.</p></div>
+    <div class="dont-index"><p>The main way to create <code>tonalInterval</code> S4 objects is with the <code><a href="pitchParsing.html">tonalInterval()</a></code> pitch parser.</p>
+<p>Other core pitch representations: 
+<code><a href="LO5th.html">LO5th</a>()</code></p>
+<p>Other Tonal S4 classes: 
+<code><a href="diatonicSetS4.html">diatonicSetS4</a></code>,
+<code><a href="tertianSetS4.html">tertianSetS4</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -212,7 +225,7 @@ Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE<
 <span class="r-in"><span class="va">M9</span> <span class="op">&lt;-</span> <span class="fu">tint</span><span class="op">(</span><span class="op">-</span><span class="fl">1L</span>, <span class="fl">2L</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">M9</span> <span class="op">-</span> <span class="va">M2</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] +P15</span>
 <span class="r-in"><span class="co"># = octave</span></span>
 <span class="r-in"><span class="va">M9</span> <span class="op">-</span> <span class="fl">2L</span></span>
@@ -236,7 +249,7 @@ Thus, <code>m3 &gt;= A2</code> and <code>A2 &gt;= m3</code> are both <code>TRUE<
 <span class="r-in"><span class="co"># 6 8 10 11 13 15 17</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">eMajor</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span> <span class="op">-</span> <span class="va">P8</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval[ , ]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tonalInterval</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -m3 -m2</span>
 <span class="r-in"><span class="co"># = -m3 -m2</span></span>
 <span class="r-in"></span>

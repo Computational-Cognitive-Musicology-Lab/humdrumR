@@ -16,7 +16,7 @@ They are similar to the data.table::shift() function, but with a few additional 
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@ They are similar to the data.table::shift() function, but with a few additional 
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -83,9 +83,9 @@ They are similar to the <code><a href="https://Rdatatable.gitlab.io/data.table/r
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lag</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">1</span>, <span class="va">fill</span>, <span class="va">wrap</span>, <span class="va">boundaries</span>, <span class="va">...</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lag</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">1</span>, <span class="va">fill</span>, <span class="va">wrap</span>, <span class="va">groupby</span>, <span class="va">...</span><span class="op">)</span>
 
-<span class="fu">lead</span><span class="op">(</span><span class="va">x</span>, <span class="va">n</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+<span class="fu">lead</span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -101,9 +101,9 @@ Defaults to <code>NA</code>.</p></dd>
 <dd><p>If <code>wrap = TRUE</code>, data from the end (head or tail) is copied to the
 other end of the output, "wrapping" the data
 within the data structure.</p></dd>
-<dt>boundaries</dt>
+<dt>groupby</dt>
 <dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Each segment of <code>x</code> delineated
-by the <code>boundaries</code> vector(s) is treated separately.</p></dd>
+by the <code>groupby</code> vector(s) is treated separately.</p></dd>
 <dt>margin</dt>
 <dd><p>Arrays and data.frames can be lagged lead in multiple dimensions
 using the <code>margin</code> argument: <code>margin == 1</code> shifts across rows while <code>margin == 2</code>
@@ -140,27 +140,30 @@ e
 f.</p>
     </div>
     <div class="section level2">
-    <h2 id="boundaries">Boundaries<a class="anchor" aria-label="anchor" href="#boundaries"></a></h2>
+    <h2 id="grouping">Grouping<a class="anchor" aria-label="anchor" href="#grouping"></a></h2>
     
 
 
 <p>In many cases we want to perform lagged calculations in a vector, but <em>not across certain boundaries</em>.
 For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 between pieces, only within pieces.
-The <code>boundaries</code> argument indicates one, or more, grouping vectors, which break the <code>x</code> (input) argument
+The <code>groupby</code> argument indicates one, or more, grouping vectors, which break the <code>x</code> (input) argument
 into groups.
-If more than <code>boundaries</code> vectors are given, a change in <em>any</em> vector indicates a boundary.</p>
+If more than <code>groupby</code> vectors are given, a change in <em>any</em> vector indicates a boundary.</p>
 <p>Value pairs which cross between groups are treated as if they were at the beginning.
-Basically, using boundaries should be essentially identical to using <code>tapply(x, boundaries, laggedFunction, ...)</code>,
-except generally faster when the number of groups is large.</p>
+Basically, using the <code>groupby</code> argument to a function should be
+similar or identical to using <code>tapply(x, groupby, laggedFunction, ...)</code> or using a <code>groupby</code>
+expession in a call to <a href="withinHumdrum.html">with(in).humdrumR</a>.
+However, using a <code>groupby</code> argument directly is usually much faster, as they have been
+specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want <code>boundaries = list(File, Spine, Path )</code>.
+For this, we want <code>groupby = list(File, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
-three fields as <code>boundaries</code> arguments to certain functions: mint, hint, delta, sigma, lag, or ditto.
-Do any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
+three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, or untie.
+So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set <code>boundaries = list(File, Record)</code>.</p>
+you could manually set <code>groupby = list(File, Record)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -168,6 +171,7 @@ you could manually set <code>boundaries = list(File, Record)</code>.</p>
 <p>Other Lagged vector functions: 
 <code><a href="delta.html">delta</a>()</code>,
 <code><a href="ditto.html">ditto</a>()</code>,
+<code><a href="int.html">int</a>()</code>,
 <code><a href="sigma.html">sigma</a>()</code></p></div>
     </div>
 

@@ -9,6 +9,7 @@ octave(
   ...,
   octave.relative = FALSE,
   Key = NULL,
+  transposeArgs = list(),
   parseArgs = list(),
   inPlace = FALSE
 )
@@ -17,10 +18,12 @@ octave(
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
-There are also two hidden (advanced) argumens you can specify: \code{memoize} and \code{deparse} (see the details below).}
+There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
 the parser, deparser, and transposer.}
+
+\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
 

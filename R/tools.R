@@ -113,21 +113,37 @@ allnamed <- function(x) { !is.null(names(x)) && !any(names(x) == '')}
 
 # Arrays/Vectors ----
 
-applyrows <- function(x, f, ...){
-    result <- apply(x, 1, f, ...)
-    result <- if (is.null(dim(result))) cbind(result) else t(result)
+valind <- function(vec) {
+  
+  values <- unique(vec)
+  
+  group <- if (!is.atomic(values)) {
+    as.character(vec)
+  } else {
+    vec
+  }
+  list(indices = match(group, unique(group)), values = values)
+  
+}
+
+inverse.valind <- function(valind) valind$values[valind$i]
+  
+.apply <- function(x, margin = 1, f, ...){
+    result <- apply(x, margin, f, ..., simplify = FALSE)
+    result[lengths(result) == 0L] <- list(NA)
     
-    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
+    result <- do.call(if (margin == 1) 'rbind' else 'cbind', result)
+    
+    if (all(dim(result) == dim(x))) {
+      dimnames(result) <- dimnames(x)
+    } else {
+      if (margin == 1)  rownames(result) <- rownames(x) else colnames(result) <- colnames(x)
+      
+    }
     result
 }
-applycols <- function(x, f, ...){
-    result <- apply(x, 2, f, ...)
-    result <- if (is.null(dim(result))) rbind(result) else result
-    
-    
-    if (all(dim(result) == dim(x))) dimnames(result) <- dimnames(x)
-    result
-}
+applyrows <- function(x, f, ...) .apply(x, 1, f, ...)
+applycols <- function(x, f, ...) .apply(x, 2, f, ...)
 
 
 #' Shift data within a vector/matrix/data.frame
@@ -158,30 +174,30 @@ applycols <- function(x, f, ...){
 #' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the
 #'  other end of the output, "wrapping" the data
 #' within the data structure.
-#' @param boundaries A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
-#' by the `boundaries` vector(s) is treated separately.
+#' @param groupby A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
+#' by the `groupby` vector(s) is treated separately.
 #' @param margin Arrays and data.frames can be lagged lead in multiple dimensions 
 #' using the `margin` argument: `margin == 1` shifts across rows while `margin == 2`
 #' shifts across columns.
 #' 
 #' @family {Lagged vector functions}
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
 #' @seealso [data.table::shift()]
 #' @export
-lag <- function(x, n = 1, fill, wrap, boundaries, ...) UseMethod('lag')
+lag <- function(x, n = 1, fill, wrap, groupby, ...) UseMethod('lag')
 
 #' @rdname lag
 #' @export
-lead <- function(x, n, ...) lag(x, -n, ...)
+lead <- function(x, n = 1, ...) lag(x, -n, ...)
 
 
 #' @export
-lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
+lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
          if (length(n) < length(margin)) n <- rep(n, length(margin))
         
          if (1L %in% margin) {
-             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, boundaries = boundaries)
-             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', boundaries = boundaries)
+             x[] <- lapply(x, lag, n = n[margin == 1L], fill = fill, wrap = wrap, groupby = groupby)
+             rown <- lag(rownames(x), n[margin == 1L], wrap = wrap, pad = '_', groupby = groupby)
              rown[rown == '_'] <- make.unique(rown[rown == '_'])
              rownames(x) <- rown
          } 
@@ -193,13 +209,19 @@ lag.data.frame <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, bounda
          x
 }
 #' @export
-lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) {
-          checkLooseInteger(n, 'n', 'lag', min.length = 1L, max.length = 1L)
-          checkVector(fill, 'fill', 'lag', min.length = 1L, max.length = 1L)
-          checkTF(wrap, 'wrap', 'lag')
+lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, groupby = list(), orderby = list()) {
+          checks(n, xwholenum & xlen1)
+          checks(fill, xatomic & xlen1)
+          checks(wrap, xTF)
   
           if (length(x) == 0L || n == 0) return(x)
-  
+          
+          groupby <- checkWindows(x, groupby)
+          orderby <- checkWindows(x, orderby)
+          
+          groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+          reorder(list(x = x), orderby = orderby)
+          
           if (wrap && n >= length(x))  n <- sign(n) * (abs(n) %% size) #if rotation is greater than size, or negative, modulo
           
           output <- data.table::shift(x, n, type = 'lag', fill = fill)
@@ -213,19 +235,19 @@ lag.default <- function(x, n = 1, fill = NA, wrap = FALSE, boundaries = list()) 
             }
           }
             
-          boundaries <- checkWindows(x, boundaries)
+          groupby <- checkWindows(x, groupby)
           
-          if (length(boundaries)) {
+          if (length(groupby)) {
               
-              boundaries <- Reduce('|', lapply(boundaries, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
-              output[boundaries] <- fill
+              groupby <- Reduce('|', lapply(groupby, \(w) w != lag(w, n = n, fill = NA, wrap = FALSE)))
+              output[groupby] <- fill
           }
 
-          output
+          reorder(output)
 }
 
 #' @export
-lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries = list()) {
+lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, groupby = list()) {
     if (length(n) > 1L && length(n) != length(margin)) .stop('rotation and margin args must be the same length.')
     
     
@@ -235,7 +257,7 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries
 
                     rest.rot <- if (length(n) > 1L) n[-1] else n
 
-                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, boundaries = boundaries())))
+                    on.exit(return(Recall(output, n = rest.rot, margin = rest.mar, wrap = wrap, fill = fill, groupby = groupby())))
           }
          if (is.na(dim(x)[margin])) .stop("This matrix can not be rotated in dimension", margin, "because it doesn't have that dimension!" )
          if (dim(x)[margin] == 0L) return(x)
@@ -268,7 +290,34 @@ lag.matrix <- function(x, n = 1, margin = 1, fill = NA, wrap = FALSE, boundaries
           output
 }
 
+reorder <- function(xs, orderby = list(), toEnv = TRUE) {
+  
+  xs <- checkWindows(xs[[1]], xs)
+  if (length(xs) == 0L & !toEnv) return(xs)
+  orderby <- checkWindows(xs[[1]], orderby)
+  
+  if (length(orderby)) {
+    ord <- do.call('order', orderby)
+    
+    xs <- lapply(xs, '[', i = ord)
+    reorder <- \(X) X[match(seq_along(X), ord)]
+  } else {
+    reorder <- force
+  } 
+  
+  if (toEnv) {
+    xs$reorder <- reorder
+    list2env(xs[.names(xs) != ''], envir = parent.frame()) 
+  }
+    
+
+  xs
+} 
+  
+   
+
 ## Matrices ----
+
 
 
 most <- function(mat, whatmost = 'right', which = FALSE) {
@@ -305,12 +354,7 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     
     output
     
-    
   }
-  
-
-  
-  
   
 }
 
@@ -437,14 +481,29 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
-tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
+tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
+    attr <- humdrumRattr(X)
+    result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
-    output <- tapply(X, INDEX, FUN, ...)
-    if (is.list(output)) output <- do.call('c', output)
+    headortail <- if (head) match.fun('head') else tail
+    indices <- Map(\(x, n) headortail(x, n), tapply(seq_along(X), INDEX, force), lengths(result))
     
-    indices <- tapply(seq_along(X), INDEX, force) |> unlist()
+    result <- do.call('c', result)
+    indices <- do.call('c', indices)
     
-    output[order(indices)]
+    result <- if (length(result) > 0L && length(result) == length(X)) {
+      result[order(indices)]
+    } else {
+      output <- vectorNA(length(X), class(result))
+      # output[is.na(output)] <- as(0, class(output))
+      output[indices] <- result
+      output
+    }
+    
+    humdrumRattr(result) <- attr
+    
+    result
+    
 }
 
 #' Identify contiguous segments of data in a vector
@@ -512,8 +571,8 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ...) {
 #' @family {Window functions}
 #' @export
 segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
-  checkTF(any, 'any', 'segments')
-  checkTF(reverse, 'reverse', 'segments')
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -548,10 +607,10 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
 #' @export
 #' @rdname segments
 changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE) {
-  checkTF(first, 'first', 'changes')
-  checkTF(value, 'value', 'changes')
-  checkTF(any, 'any', 'changes')
-  checkTF(reverse, 'reverse', 'changes')
+  checks(first, xTF)
+  checks(value, xTF)
+  checks(any, xTF)
+  checks(reverse, xTF)
   
   xs <- list(...)
   if (length(xs) == 0L) return(NULL)
@@ -585,9 +644,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' with non-null values from earlier/later in the same vector.
 #' The default, "forward," behavior fills each null value with the previous (lower index) non-null value, if there are any.
 #' The `reverse` argument can be used to cause "backward" filling, where the *next* (higher index) non-null value is used.
-
 #' If the input begins (or ends if `reverse == TRUE`) with a null value, the `initial` argument is filled instead; defaults to `NA`.
-#' As a special option, `initial == "_next_"` will cause the first (or last) non-null value to be filled backwards into the initial nulls.
 #' 
 #' Which values are considered "null" can be controlled using the `null` argument.
 #' The `null` argument can either be a logical vector which is the same length as the input (`x`) argument, a numeric
@@ -619,38 +676,47 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
 #' 
 #' @inheritParams lag
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
+#' @inheritSection sigma Order
 #' @family {Lagged vector functions}
 #' @export
 ditto <- function(x, ...) UseMethod('ditto')
 
 #' @rdname ditto
 #' @export
-ditto.default <- function(x, null = \(x) is.na(x) & x == '.', initial = NA, reverse = FALSE, boundaries = list()) {
+ditto.default <- function(x, null = \(x) is.na(x) | x == '.', initial = NA, reverse = FALSE, 
+                          groupby = list(), orderby = list()) {
+
+    checks(x, xatomic)
+    checks(null, xclass('function') | (xlogical & xmatch(x)))
+    checks(initial, xatomic & xlen1)
+    checks(reverse, xTF)
+    groupby <- checkWindows(x, groupby)
+  
     if (length(x) == 0L) return(x)
+    
     hits <- !(if (is.function(null)) null(x) else null)
     
-    boundaries <- checkWindows(x, boundaries)
+    groupby <- checkWindows(x, reorder(groupby, orderby = orderby, toEnv = FALSE))
+    reorder(list(x = x, hits = hits), orderby = orderby)
     
-    boundaries <- if (length(boundaries)) {
-      do.call('changes', c(boundaries, list(reverse = reverse)))
+    
+    groupby <- if (length(groupby)) {
+      do.call('changes', c(groupby, list(reverse = reverse)))
     } else {
       seq_along(x) == if (reverse) length(x) else 1L
     }
     
     
-    if (initial == '_next_') { 
-      initial <- x[closest(which(boundaries), which(hits), direction = if (reverse) 'below' else 'above')]
-    }
+    x[groupby & !hits] <- initial
     
-    x[boundaries] <- initial
-    
-    
-    seg <- segments(hits | boundaries, reverse = reverse)
-    vals <- x[hits | boundaries]
+    seg <- segments(hits | groupby, reverse = reverse)
+    vals <- x[hits | groupby]
     
     
-    setNames(rep(vals, rle(seg)$lengths), seg)
+    output <- setNames(rep(vals, rle(seg)$lengths), seg)
+    
+    reorder(output)
 }
 
 #' @rdname ditto
@@ -663,7 +729,7 @@ ditto.data.frame <- function(x, ...) {
 #' @rdname ditto
 #' @export
 ditto.matrix <- function(x, margin = 2, ...) {
-  checkLooseInteger(margin, 'margin', 'ditto.matrix', minval = 1L, maxval = 2, min.length = 1, max.length = 1)
+  checks(margin, xwholenum & xlen1 & xmin(1) & xmax(2))
   result <- apply(x, margin, ditto, ..., simplify = FALSE)
   
   do.call(if (margin == 1) 'rbind' else 'cbind', result)
@@ -673,7 +739,7 @@ ditto.matrix <- function(x, margin = 2, ...) {
 #' @rdname ditto
 #' @export
 ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = paste0(field, '_ditto')) {
-  checkCharacter(newField, max.length = 1L)
+  checks(newField, xcharacter & xlen1)
   field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
   newField <- rlang::sym(newField)
   rlang::eval_tidy(rlang::expr({
@@ -712,11 +778,11 @@ height <- function(x) {
 `%<-matchdim%` <- function(x, value) {
     # set the dimensions of x to equal the dimensions of value
     # only works if x is actually the right size!
-    if (inherits(x, 'partition')) {
-        x[] <- lapply(x, `%<-matchdim%`, value =value)
-        return(x)
-    }
-    
+    # if (inherits(x, 'partition')) {
+    #     x[] <- lapply(x, `%<-matchdim%`, value =value)
+    #     return(x)
+    # }
+    # 
     if (is.null(value)) {dim(x) <- NULL; return(x)}
     
     if (size(x) != size(value)) .stop("%<-matchdim% is trying to match the dimensions of two objects, but the target object is not the right size.")
@@ -819,7 +885,7 @@ match_size <- function(..., recycle = TRUE, toEnv = FALSE) {
           
 }
 
-recycle <- function(x,length.out = if (hasdim(x)) dim(x) else length(x)) {
+recycle <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
   .fillout(x, length.out, recycle = TRUE)
 }
 
@@ -842,7 +908,7 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
   
   length.out[seq_along(dim) > length(length.out)] <- dim[seq_along(dim) > length(length.out)]
   length.out[is.na(length.out)] <- dim[is.na(length.out)]
-  a
+  
   if (recycle) .recycle(x, length.out, dim) else .stretch(x, length.out, dim) 
 }
 
@@ -994,6 +1060,12 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+setAs('integer', 'integer64', \(from) as.integer64.integer(from))
+setAs('numeric', 'integer64', \(from) as.integer64.double(from))
+setAs('logical', 'integer64', \(from) as.integer64.logical(from))
+setAs('character', 'integer64', \(from) as.integer64.character(from))
+
+
 entropy <- function(x, base) UseMethod('entropy')
 entropy.table <- function(x, base = 2) {
   if (sum(x) != 1) x <- x / sum(x)
@@ -1022,15 +1094,33 @@ find2Dlayout <- function(n) {
 
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
-is.whole <- function(x) x %% 1 == 0
+
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
+    sign <- sign(n)
+    n <- abs(n)
     gcds <- do(gcd, list(n, d))
+    num <- n %/% gcds
+    den <- d %/% gcds
+    list(Numerator = sign * num, Denominator = den)
+}
+
+match_fraction <- function(n, d) {
+  # d <- d[!is.na(d)]
+  # if (length(d) == 0L) return(list(Numerator = rep(as(NA, class(n))), length(d), Denominator = as(NA, class(n))))
+  
+  newdenominator <- do.call('lcm', as.list.numeric_version(sort(unique(d), decreasing = TRUE)))
+  
+  if (newdenominator > 1e9) {
+    data.frame(Numerator = n / d, Denominator = rep(1L, length(n)))
     
-    num <- as.integer(n / gcds)
-    den <- as.integer(d / gcds)
-    list(Numerator = num, Denominator = den)
+  } else {
+    newnumerators <- n * (newdenominator %/% d)
+    list(Numerator = newnumerators, Denominator = newdenominator)
+  }
+  
+  
 }
 
 gcd <- function(...) {
@@ -1047,6 +1137,7 @@ gcd <- function(...) {
 }
 
 .gcd <- function(x, y) {
+  if (is.na(x) || is.na(y)) return(as(NA, class(x)))
     r <- x %% y
     
     notyet <- r > 0
@@ -1054,12 +1145,13 @@ gcd <- function(...) {
     y
 }
 
+
+
 lcm <- function(...) {
     x <- list(...)
     x <- x[lengths(x) > 0]
     if (length(x) == 1L) return(x[[1]])
-    if (length(x) == 0L) return(numeric(0))
-    
+    if (length(x) == 0L) return(integer64(0))
     na <- Reduce('|', lapply(x, is.na))
     
     output <- vectorNA(length(x[[1]]), class(x[[1]]))
@@ -1068,7 +1160,12 @@ lcm <- function(...) {
 }
 
 .lcm <- function(x, y) {
-    abs(x * y) / .gcd(x, y)
+    gcd <- .gcd(x, y)
+    # output <- abs(x * y) / .gcd(x, y)
+    output <- as.integer(abs(x) %/% gcd) * abs(y)
+    
+    output
+    # if (is.integer(x) & is.integer(y)) as.integer(output) else output
 }
 
 `%divides%` <- function(e1, e2) gcd(e1, e2) == e1
@@ -1087,6 +1184,23 @@ checkWindows <- function(x, windows) {
 }
 
 
+harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
+  # finds integers between x and y, which can be found as 
+  # cummulative products starting with x
+  
+  ratio <- as.integer(y %/% x)
+  pFactors <- numbers::primeFactors(ratio)
+  if (bigFirst) pFactors <- rev(pFactors)
+  
+  cumFactors <- cumprod(pFactors)
+  cumFactors <- cumFactors[cumFactors < ratio]
+  
+  z <- x * cumFactors
+  
+  sort(if (includeEdges) c(x, z, y) else z)
+  
+}
+
 #' Cumulative sum of numeric vector
 #' 
 #' Calculate sequential cummulative sum of values in numeric vectors.
@@ -1095,9 +1209,9 @@ checkWindows <- function(x, windows) {
 #' `sigma` is very similar base-`R` [cumsum()].
 #' However, `sigma` should be favored in [humdrumR] use because:
 #' 
-#' 1. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#' 1. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
-#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#'    Using the `groupby` argument to a function (details below) is generally faster than using a `groupby` argument to [withinHumdrum()].
 #' 2. They (can) automatically skip `NA` (or other) values.
 #' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
 #' section below.
@@ -1112,7 +1226,7 @@ checkWindows <- function(x, windows) {
 #' `sigma(delta(x)) == x` and `delta(sigma(x)) == x`.
 #' In other words, the two functions "reverse" each other.
 #' The key is that the `init` argument needs to be set to `0`, and all other 
-#' arguments (`lag`, `skip`, `boundaries`, etc.) need to match.
+#' arguments (`lag`, `skip`, `groupby`, etc.) need to match.
 #' So *actually*,  `sigma(delta(x, init = 0, ...)) == x` and `delta(sigma(x), init = 0)) == x`.
 #'
 #' When we take the differences between values (`delta(x)`), the resulting differences can't tell us 
@@ -1185,31 +1299,73 @@ checkWindows <- function(x, windows) {
 
 #'
 #' 
-#' @section Boundaries:
+#' @section Grouping:
 #' 
 #' In many cases we want to perform lagged calculations in a vector, but *not across certain boundaries*.
 #' For example, if your vector includes data from multiple pieces, we wouldn't want to calculate melodic intervals
 #' between pieces, only within pieces.
-#' The `boundaries` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
+#' The `groupby` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
 #' into groups.
-#' If more than `boundaries` vectors are given, a change in *any* vector indicates a boundary.
+#' If more than `groupby` vectors are given, a change in *any* vector indicates a boundary.
 #' 
 #' Value pairs which cross between groups are treated as if they were at the beginning.
-#' Basically, using boundaries should be essentially identical to using `tapply(x, boundaries, laggedFunction, ...)`,
-#' except generally faster when the number of groups is large.
+#' Basically, using the `groupby` argument to a function should be 
+#' similar or identical to using `tapply(x, groupby, laggedFunction, ...)` or using a `groupby`
+#' expession in a call to [with(in).humdrumR][withinHumdrum].
+#' However, using a `groupby` argument directly is usually much faster, as they have been
+#' specially optimized for this functions.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
-#' For this, we want `boundaries = list(File, Spine, Path )`.
+#' For this, we want `groupby = list(File, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `boundaries` arguments to certain functions: `r harvard(boundedFunctions, 'or')`.
-#' Do any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
+#' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
+#' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each file.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-#' you could manually set `boundaries = list(File, Record)`.
+#' you could manually set `groupby = list(File, Record)`.
+#' 
+#' @section Order:
+#' 
+#' When performing lagged calculations, we typically assume that the order of the values in the input vector
+#' (`x`) is the order we want to "lag" across.
+#' E.g., the first element is "before" the second element, which is "before" the third element, etc.
+#' [Humdrum tables][humTable] are always ordered `File > Piece > Spine > Path > Record > Stop`.
+#' Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
+#' the *next* element is the next element in the spine path.
+#' For example, consider this data:
+#' 
+#' ```
+#' **kern  **kern
+#' a       d
+#' b       e
+#' c       f
+#' *-      *-
+#' ```
+#' 
+#' The default order of these tokens (in the `Token` field) would be `a b c d e f`.
+#' If we wanted to instead lag across our tokens *harmonically* (across records) we'd need to specifiy a different order
+#' For example, we could say `orderby = list(File, Record, Spine)`---the lagged function
+#' would interpret the `Token` field above as `a d b e c f`.
+#' 
+#' For another example, note `Stop` comes last in the order.
+#' Let's consider what happens then if here are stops in our data:
+#' 
+#' ````
+#' **kern  **kern
+#' a       d
+#' b D     e g
+#' c A     f a
+#' *-      *-
+#' ```
+#' 
+#' The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+#' That may or may not be what you want!
+#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+#' The resulting order would be `a b c d e f D G g a`.
 #' 
 #'    
 #' @param x (Any numeric vector.) `NULL` values are returned `NULL`.
-#' @param lag (Non-zero integer.) Which lag to use. (See *Great lags* section, below.) 
+#' @param lag (Non-zero integer.) Which lag to use. (See *Greater lags* section, below.) 
 #' @param skip (`function`.) This must be a function which can be applied to `x` and returns a logical vector
 #' of the same length. And `TRUE` values are skipped over in the calculations.
 #' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
@@ -1218,27 +1374,38 @@ checkWindows <- function(x, windows) {
 #' (or end of `right == TRUE`) are filled with these values *before* summing.
 #' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
 #' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
-#' @param boundaries (vector of same length as `x`, or a list of such vectors) Differences are not calculated
-#' across groups indicated by the `boundaries` vector(s).
+#' @param groupby (vector of same length as `x`, or a list of such vectors) Differences are not calculated
+#' across groups indicated by the `groupby` vector(s).
+#' @param orderby (vector of same length as `x`, or a list of such vectors) Differences in `x` are calculated
+#' based on the order of `orderby` vector(s), as determined by [base::order()].
 #' 
 #' 
 #' @family {Lagged vector functions}
 #' @seealso This function's inverse is [delta()]. 
 #' @export
-sigma <- function(x, lag, skip = is.na, init, boundaries = list(), ...) UseMethod('sigma')
+sigma <- function(x, lag, skip = is.na, init, groupby = list(), ...) UseMethod('sigma')
 #' @rdname sigma
 #' @export
-sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(), ...) {
+sigma.default <- function(x, lag = 1, skip = is.na, init = 0, groupby = list(), orderby = list(), ...) {
   if (is.null(x)) return(NULL)
-  checkNumeric(x, 'x', 'sigma')
-  checkArg(lag, 'lag', 'sigma', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-  if (!is.null(skip))  checkFunction(skip, 'skip', 'sigma')
-  checkArg(init, 'init', 'sigma', max.length = abs(lag), atomic = TRUE)
   
-  boundaries <- checkWindows(x, boundaries)
+  checks(x, xnumber)
+  checks(lag, xwholenum & xlen1 & xnotzero)
+  checks(skip, xnull | xclass('function'))
+  checks(init, xatomic & xminlength(1) & 
+           argCheck(\(arg) length(arg) <= abs(lag), 
+                    "must be as short or shorter than the absolute lag",  
+                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
   
-  if (length(boundaries)) {
-    segments <- segments(do.call('changes', c(boundaries, list(...))))
+  
+  groupby <- checkWindows(x, groupby)
+  orderby <- checkWindows(x, orderby)
+  
+  groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+  reorder(list(x = x), orderby = orderby)
+  
+  if (length(groupby)) {
+    segments <- segments(do.call('changes', c(groupby, list(...))))
     return(unname(tapply_inplace(x, segments, sigma.default, lag = lag, skip = skip, init = init)))
   } 
   
@@ -1263,13 +1430,7 @@ sigma.default <- function(x, lag = 1, skip = is.na, init = 0, boundaries = list(
     cumsum(x)
   }
   
-
-  
-  result
-  
-  
-  
-  
+  reorder(result)
 }
 #' @rdname sigma
 #' @export
@@ -1297,9 +1458,9 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' 1. Its output is *always* the same length as its  input.
 #'    This is achieved by padding the beginning or end of the output with1 `NA` values (or other options).
-#' 2. It has a `boundaries` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
+#' 2. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
 #'    commands to constrain the differences within files/spines/paths of `humdrum` data.
-#'    The `boundaries` approach (details below) is generally faster than applying the commands within `groupby` groups.
+#'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
 #' 3. They (can) automatically skip `NA` (or other) values.
 #' 
 #' If applied to a matrix, `delta` is applied separately to each column, unless `margin` is set to `1` (rows)
@@ -1376,7 +1537,8 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' @param lag (Non-zero integer.) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
 #' 
 #' @inheritParams sigma
-#' @inheritSection sigma Boundaries
+#' @inheritSection sigma Grouping
+#' @inheritSection sigma Order
 #' @inheritSection sigma Invertability
 #' 
 #' @family {Lagged vector functions}
@@ -1385,13 +1547,20 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 delta <- function(x, lag, skip, init, right, ...) UseMethod('delta') 
 #' @rdname delta
 #' @export
-delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, boundaries = list(), ...) {
+delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
+                          groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checkNumeric(x, 'x', 'delta')
-    checkArg(lag, 'lag', 'delta', classes = c('numeric', 'integer'), valid = \(x) x == round(x) && x != 0)
-    if (!is.null(skip))  checkFunction(skip, 'skip', 'delta')
-    checkArg(init, 'init', 'delta', max.length = abs(lag), atomic = TRUE)
-    checkTF(right, 'right', 'delta')
+    checks(x, xnumber)
+    checks(lag, xwholenum & xlen1 & xnotzero)
+    checks(skip, xnull | xclass('function'))
+    checks(init, xatomic & xminlength(1) & 
+             argCheck(\(arg) length(arg) <= abs(lag), 
+                      "must be as short or shorter than the absolute lag",  
+                      \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
+    checks(right, xTF)
+    
+    groupby <- reorder(groupby, orderby = orderby, toEnv = FALSE)
+    reorder(list(x = x), orderby = orderby)
     
     init <- rep(init, length.out = abs(lag))
     if (lag < 0) {
@@ -1413,9 +1582,9 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     
     if (lag < 0) output <- rev(output)
     
-    boundaries <- checkWindows(x, boundaries)
-    if (length(boundaries)) {
-      bounds <- which(do.call('changes', c(boundaries, list(reverse = right, ...))))
+    groupby <- checkWindows(x, groupby)
+    if (length(groupby)) {
+      bounds <- which(do.call('changes', c(groupby, list(reverse = right, ...))))
       if (abs(lag) > 1L) {
         arith <- if (right) (\(l) bounds - l) else (\(l) bounds + l )
         bounds <- sort(Reduce(`union`, lapply((2:abs(lag)) - 1L, arith), init = bounds))
@@ -1423,9 +1592,7 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
       output[bounds] <- x[bounds] - rep(init, length.out = length(bounds))
     }
     
-    
-    output
-    
+    reorder(output)
 }
  
 #' @rdname delta
@@ -1441,7 +1608,19 @@ delta.matrix <- function(x, margin = 2L, ...) {
          results)
 }
 
+makeCumulative <- function(n, groupby = list()) {
+  if (length(groupby) == 0L) return(n)
+  
+  diff <- delta.default(n, init = 0L)
+  diff[diff <= 0 & do.call('changes', groupby)] <- 1
+  # diff[which(!is.na(n))[1]] <- 1
+  sigma.default(diff, init = NA)
+}
 
+.cummax <- function(x) {
+  x[!is.na(x)] <- cummax(x[!is.na(x)])
+  x
+}
 
 #' Expand numbers outwards from zero
 #' 
@@ -1477,9 +1656,11 @@ delta.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' 
 #' @export
-expand <- function(x) {
-    .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
-}
+setGeneric('expand', def = \(x) {
+  .ifelse(x >=0, ceiling(x), -ceiling(abs(x)))
+})
+
+         
 
 locate <- function(x, table) {
     if (is.null(dim(table)) || length(dim(x)) == 1) {
@@ -1614,7 +1795,7 @@ visible <- function(withV) {
   result
 }
 
-applyExpr <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
+withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
     exprA <- analyzeExpr(expr)
     output <- NULL
     if (exprA$Type %in% applyTo) {
@@ -1651,7 +1832,7 @@ namesInExpr <- function(names, expr, applyTo = 'symbol') {
     ## (not including things called as functions) in an expression 
     ## (or rhs for formula).
     
-    unlist(applyExpr(expr, applyTo = applyTo,
+    unlist(withExpression(expr, applyTo = applyTo,
               \(Head) Head %in% names,
               \(exprA) {
                   matches <- names[pmatch(exprA$Head, names)]
@@ -1713,24 +1894,28 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
                          call = as.character(expr[[1]]),
-                         atomic = expr,
+                         atomic = 'c',
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
-    # exprA$Args <- switch(exprA$Head[1],
-    #                      'function' = {
-    #                        exprA$Type <- 'lambda'
-    #                        exprA$Pairlist <- expr[[2]]
-    #                        list(expr[[3]])
-    #                      },
-    #                      call = as.list(expr[-1]),
-    #                      list())
+    exprA$Args <- switch(exprA$Head,
+                         'function' = {
+                           exprA$Type <- 'lambda'
+                           exprA$Pairlist <- expr[[2]]
+                           list(expr[[3]])
+                         },
+                         atomic = as.list(expr),
+                         call = as.list(expr[-1]),
+                         list())
     
     exprA$Args <- if (exprA$Head[1] == 'function') {
       exprA$Type <- 'lambda'
       exprA$Pairlist <- expr[[2]]
       list(expr[[3]])
     } else {
-      if (exprA$Type == 'call') as.list(expr[-1]) else list()
+      switch(exprA$Type,
+             call = as.list(expr[-1]),
+             atomic = as.list(expr),
+             list())
     }
 
     
@@ -1754,9 +1939,11 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 
 unanalyzeExpr <- function(exprA) {
   
+    if (exprA$Type == 'atomic' && exprA$Head == 'c' && length(exprA$Args) == 1L) exprA$Type <- 'scalar'
     expr <- switch(exprA$Type,
+                   scalar = exprA$Args[[1]],
+                   atomic = ,
                    call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
-                   atomic = exprA$Head,
                    symbol = rlang::sym(exprA$Head),
                    lambda = call('function', exprA$Pairlist, exprA$Args[[1]]))
     
@@ -1773,36 +1960,68 @@ unanalyzeExpr <- function(exprA) {
 
 
 
-modifyExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
-    if (is.null(expr)) return(expr)
-    exprA <- analyzeExpr(expr)
-    
-    if (exprA$Type %in% applyTo) {
-        hit <- do...(predicate, exprA, envir = parent.frame())
-        if (hit) {
-            exprA <- func(exprA)
-        } 
-    } else {
-        hit <- FALSE
+withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
+  if (is.null(expr)) return(expr)
+  exprA <- analyzeExpr(expr)
+  
+  if (exprA$Type %in% applyTo) {
+    hit <- do...(predicate, exprA, envir = parent.frame())
+    if (hit) {
+      exprA <- func(exprA)
+    } 
+  } else {
+    hit <- FALSE
+  }
+  
+  
+  if (exprA$Type == 'call' && !(hit && stopOnHit)) {
+    for (i in seq_along(exprA$Args)) {
+      # print(exprA$Args[[i]])
+      cur <- exprA$Args[[i]]
+      if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
+                                                                    func = func, 
+                                                                    predicate = predicate, 
+                                                                    stopOnHit = stopOnHit,
+                                                                    applyTo = applyTo)
     }
     
-
-    if (exprA$Type == 'call' && !(hit && stopOnHit)) {
-        for (i in seq_along(exprA$Args)) {
-          # print(exprA$Args[[i]])
-          cur <- exprA$Args[[i]]
-            if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
-                                                                     func = func, 
-                                                                     predicate = predicate, 
-                                                                     stopOnHit = stopOnHit,
-                                                                     applyTo = applyTo)
-        }
-       
-    }
-    
-    unanalyzeExpr(exprA)
-    
+  }
+  
+  unanalyzeExpr(exprA)
+  
 }
+
+withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic'), stopOnHit = TRUE) {
+  output <- list()
+  if (is.null(expr)) return(output)
+  
+  exprA <- analyzeExpr(expr)
+  
+  
+  if (exprA$Type %in% applyTo) {
+    hit <- do...(predicate, exprA, envir = parent.frame())
+    if (hit) {
+      output <- func(exprA)
+    } 
+  } else {
+    hit <- FALSE
+  }
+  
+  if (exprA$Type == 'call' && !(hit && stopOnHit)) {
+    outputRecurse <- list()
+    for (i in seq_along(exprA$Args)) {
+      outputRecurse[[i]] <- Recall(exprA$Args[[i]], 
+                            func = func, 
+                            predicate = predicate, 
+                            applyTo = applyTo)
+    }
+    if (length(outputRecurse) == 0L || all(lengths(outputRecurse) == 0L)) outputRecurse <- NULL
+    
+    output <- c(output, outputRecurse)
+  }
+  output
+}
+
 
 is.givenCall <- function(expr, call) {
     if (rlang::is_quosure(expr)) expr <- rlang::quo_squash(expr)
@@ -2049,177 +2268,8 @@ specialArgs <- function(quos, ...) {
 # }
 
 
-## Building smart functions ----
 
 
-
-
-
-# Checking arguments ----
-
-
-checkArg <- function(arg,  argname, callname = NULL, 
-                     atomic = FALSE,
-                     valid, validoptions = NULL, min.length = 1L, max.length = Inf, classes = NULL) {
-    # arg a argument to check
-    # 
-    if (length(sys.calls()) > 10L) return(arg) 
-    
-    argNames <- if (length(arg) > 1L) paste0('c(', harvard(arg, quote = TRUE), ')') else quotemark(arg)
-    if (length(argNames) == 0) argNames <- paste0(class(argNames), '(0)')
-    callname <- if (is.null(callname)) '' else glue::glue("In the call humdrumR::{callname}({argname} = {argNames}): ")
-    
-    if (atomic && !is.atomic(arg)) .stop(callname, "The {argname} argument must be an 'atomic' vector.")
-    
-    if (length(arg) <  min.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at least {min.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
-    if (length(arg) > max.length) .stop(callname, 
-                                         "The length of the '{argname}' argument must be at most {max.length}.",
-                                         "In your call, length({argname}) == {length(arg)}.")
-    
-    if (!is.null(classes) && !any(sapply(classes, inherits, x = arg))) {
-        classNames <- harvard(classes, 'or', quote = TRUE)
-        .stop(callname, "The '{argname}' argument must inherit the class <{classNames}>, but you have provided a <{class(arg)}> argument.")
-    }
-    
-    if (missing(valid) && !is.null(validoptions)) valid <- \(x) x %in% validoptions
-    if (!missing(valid) && !is.null(valid)) {
-        ill <- !valid(arg)
-        
-        if (any(ill)) {
-            if (is.null(validoptions)) {
-                .stop(callname, "{arg} is not a valid value for the {argname} argument.")
-            } else {
-                case <- glue::glue(plural(sum(ill), " are not valid {argname} values. ", "is not a valid value for the '{argname}' argument. "))
-                illNames <- harvard(arg[ill], 'and', quote = TRUE)
-                legalNames <-  paste0(harvard(validoptions, quote = TRUE), '.')
-                
-                message <- list(callname, illNames, case, 'Valid options are ', legalNames)
-                
-                .stop(message)
-            }
-            
-        }
-        
-        arg[!ill]
-    } else {
-        arg
-    }
-    
-    
-    
-}
-
-checkVector <- function(x, argname, callname = NULL, structs = NULL, null = TRUE, min.length = 0L, ...) {
-  checkArg(x, argname = argname, callname = callname, ..., 
-           valid = NULL,
-           classes = c('numeric', 'integer', 'character', 'logical', structs, 
-                       if (null) 'NULL'),
-           min.length = min.length)
-}
-
-
-checkNumeric <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('numeric', 'integer'), 
-             valid = \(arg) is.na(arg) | arg >= minval & arg <= maxval,
-             ...)
-}
-checkLooseInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-  checkArg(x, argname = argname, callname = callname,
-           classes = c('numeric', 'integer'), 
-           valid = \(arg) arg >= minval & arg <= maxval & x == round(x),
-           ...)
-}
-
-checkInteger <- function(x, argname, callname = NULL, minval = -Inf, maxval = Inf, ...) {
-    checkArg(x, argname = argname, callname = callname,
-             classes = c('integer'), 
-             valid = \(arg) arg >= minval & arg <= maxval & !is.double(x),
-             ...)
-}
-checkCharacter <- function(x, argname, callname = NULL, allowEmpty = TRUE, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('character'),
-             valid = if (!allowEmpty) \(arg) arg != "", ...)
-}
-checkLogical <- function(x, argname, callname = NULL, ...) {
-    checkArg(x, argname = argname, callname = callname, classes = c('logical'), ...)
-}
-
-checkTF <- function(x, argname, callname) checkArg(x, valid = \(arg) !is.na(arg), 
-                                                   validoptions = c(TRUE, FALSE), argname, callname, max.length = 1L, classes = 'logical')
-checkTFs <- function(args = list(), ..., callname = NULL) {
-    args <- c(args, list(...))
-    mapply(checkTF, args, names(args), MoreArgs = list(callname = callname))
-}
-
-checkhumdrumR <- function(x, callname, argname = 'humdrumR') {
-    if (!is.humdrumR((x))) .stop("In the call {callname}({argname} = _), the argument {argname} must be a humdrumR object.")      
-}
-
-checkFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  message <- "In the call {callname}({argname} = {label}), the argument {argname}"
-  
-  if (!is.function(x)) .stop(message, " must be a function!")
-  
-}
-
-checkRoundingFunction <- function(x, argname, callname) {
-  label <- rlang::as_label(rlang::enexpr(x))
-  
-  if (!any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = x))) {
-    .stop(message, 
-          " must be one of the five 'rounding' functions: round, floor, celing, trunc, or expand.")
-  }
-}
-
-checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
-    dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
-    checkArg(dataTypes,
-             valid = \(arg) arg %in% c('G', 'L', 'I', 'M', 'D', 'd'),
-              validoptions = c('G', 'L', 'I', 'M', 'D', 'd'),
-              argname, callname,
-              min.length = 1L, max.length = 7L,
-              classes = "character")
-}
-
-
-# Error messages ----
-
-.stop <- function(..., ifelse = TRUE, sep = ' ') {
-  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
-  stack <- sapply(stack, paste, collapse = '\n')
-  
-  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
-  # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
-  
-  cut <- 15
-  stack[-1] <- paste0(' -> ', stack[-1])
-  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
-  # 
-  message('humdrumR error in:')
-  message('\t', stack, sep = '')
-  
-  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1))
-  
-  stop(call. = FALSE, message)
-}
-
-
-.warn <- function(...,  ifelse = TRUE, sep = ' ', immediate. = FALSE) {
-  stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
-  stack <- sapply(stack, paste, collapse = '\n')
-  
-  call <- sys.calls()[[1]]
-  
-  warning('In your call ', rlang::expr_deparse(call), ': ',
-          .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
-          call. = FALSE,
-          immediate. = immediate.)
-}
 
 
 # Strings ----
@@ -2256,7 +2306,7 @@ matched <- function(x, table, nomatch = NA) {
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', envir = parent.frame()) {
+.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame()) {
   strs <- unlist(list(...))
   ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
   ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
@@ -2279,11 +2329,13 @@ matched <- function(x, table, nomatch = NA) {
   strs, ifelses)
   
   strs <- paste(unlist(strs), collapse = sep)
-  glue::glue(strs, .envir = envir)
+  glue::glue(strs, .envir = envir, .sep = sep, trim = trim)
 }
 
-harvard <- function(x, conjunction = '', quote = FALSE) {
-  if (quote) x <- quotemark(x)
+harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {
+  x <- as.character(x)
+  if (quote) x <- quotemark(x, quoteNA = quoteNA)
+  x[is.na(x)] <- "NA"
   if (conjunction != '') conjunction <- paste0(if (length(x) > 2L) ',', ' ', conjunction, ' ')
   glue::glue_collapse(x, sep = ', ', last = conjunction)
 }
@@ -2291,7 +2343,7 @@ harvard <- function(x, conjunction = '', quote = FALSE) {
 
 plural <- function(n, then, els) .ifelse(n > 1 | n == 0, then, els)
 
-quotemark <- function(x) if (is.character(x)) paste0("'", x, "'") else x
+quotemark <- function(x, quoteNA = FALSE) if(quoteNA) paste0("'", x, "'") else .paste("'", x, "'")
 
 nthfix <- function(n) {
   affix <- rep('th', length(n))
@@ -2303,6 +2355,23 @@ nthfix <- function(n) {
   
   paste0(n, affix)
   
+}
+
+
+pmatches <- function(x, table, error = TRUE, callname = 'pmatches') {
+  n <- pmatch(x, table, nomatch = 0, duplicates.ok = TRUE)
+  
+  
+  x[n > 0] <- table[n[n > 0]]
+  if (error && any(n == 0L)) {
+    bad <- harvard(x[n == 0L], 'and', quote = TRUE)
+    table <- harvard(table, 'or', quote = TRUE)
+    .stop('In a call to {callname}, The <value|values> {bad} <does|do> not unambiguously match anything in the set {table}.',
+          ifelse = sum(n == 0L) == 1)
+  } else {
+   x[n == 0] <- NA
+  }
+  x
 }
 
 pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
@@ -2333,7 +2402,7 @@ object2str <- function(object) {
            },
            list = {
              if (length(object) < 5) {
-               glue::glue('list({harvard(unlist(object))})')
+               glue::glue('list({harvard(unlist(object), quote = is.character(unlist(object)))})')
              } else {
                glue::glue('list[{num2str(length(object))}]')
              }

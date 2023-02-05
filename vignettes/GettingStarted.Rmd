@@ -11,15 +11,8 @@ vignette: >
 
 
 ```{r, include = FALSE}
-knitr::opts_knit$set(root.dir = humdrumR::humdrumRroot)
+source('vignette_header.R')
 
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-
-knitr::opts_chunk$set(
-  collapse = TRUE, message = FALSE,
-  comment = ">\t"
-)
 ```
 
 

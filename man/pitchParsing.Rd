@@ -18,9 +18,9 @@ tonalInterval(...)
 
 \method{tonalInterval}{`NULL`}(x, ...)
 
-\method{tonalInterval}{numeric}(x, Exclusive = NULL, ..., multiDispatch = FALSE)
+\method{tonalInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
-\method{tonalInterval}{character}(x, Exclusive = NULL, str, ..., multiDispatch = FALSE)
+\method{tonalInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 }
 \arguments{
 \item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
@@ -32,6 +32,12 @@ to interpret pitch representations.
 For example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 The output \code{tonalInterval} is output \emph{within the key}: thus, \code{tonalInterval('C#', Key = "A:")}
 returns the tint representing a \strong{Major 3rd}, because \emph{C#} is the major third of A major.}
+}
+\value{
+\code{tonalInterval()} returns a \link[=tonalIntervalS4]{tonalInterval} object of the same
+length and dimensions as \code{x}.
+\code{NULL} inputs (\code{x} argument) return a \code{NULL} output.
+\code{NA} values in the input \code{x} are propagated to the output.
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} pitch information:
@@ -66,8 +72,8 @@ To learn about the "deparsing" of specific representations, \link[=pitchFunction
 for example, call \code{?kern} to learn about \code{\link[=kern]{kern()}}.
 }
 \section{Dispatch}{
-The pitch parser (\code{tonalInterval}) is a generic function, meaning it can accepts a variety of inputs
-and automatically "dispatches" the appropriate method for parsing the input.
+The pitch parser (\code{tonalInterval()}) is a generic function, meaning it accepts a variety of inputs
+and automatically "dispatches" the appropriate method for parsing ehe input.
 R's standard \code{S3} system is used to dispatch for either \code{numeric} or \code{character}-string input:
 Generally, \code{numeric} (or \code{integer}) inputs are interpreted as various \emph{atonal} pitch representations while
 \code{character} strings are interpreted as various \emph{tonal} pitch representations.
@@ -79,9 +85,9 @@ exclusive interpretation matching to dispatch specific parsing methods.
 Since humdrum data is inherently string-based, the most powerful part of the \code{humdrumR} pitch-parser
 is its system for parsing pitch (mostly tonal) information from character strings.
 (This includes character tokens with pitch information embedded alongside other information; Details below.)
-The pitch parser (\code{tonalInterval}) uses a combination of regular-expressions and exclusive interpretations to decide how to
+The pitch parser (\code{tonalInterval()}) uses a combination of regular-expressions and exclusive interpretations to decide how to
 parse an input string.
-There are twelve regular-expression patterns for pitch that \code{tonalInterval} knows how to parse automatically:\tabular{lrr}{
+There are twelve regular-expression patterns for pitch that \code{tonalInterval()} knows how to parse automatically:\tabular{lrr}{
    Representation \tab Exclusive \tab Example \cr
    \href{https://www.humdrum.org/rep/kern/index.html}{Kern} \tab **kern \tab \verb{ee-} \cr
    \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific Pitch} \tab **pitch \tab \code{Eb5} \cr
@@ -98,7 +104,7 @@ There are twelve regular-expression patterns for pitch that \code{tonalInterval}
 
 \subsection{Exclusive Dispatch}{
 
-If you call \code{tonalInterval} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, with a non-\code{NULL} \code{Exclusive} argument,
+If you call \code{tonalInterval()} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, with a non-\code{NULL} \code{Exclusive} argument,
 that \code{Exclusive} argument will be used to choose the input interpretation you want, based on the "Exclusive" column in the
 table above.
 For example, \code{kern(x, Exclusive = 'solfa')} will force the parser to interpret \code{x} as \verb{**solfa} data.
@@ -111,7 +117,7 @@ you don't need to explicitly do anything with the \code{Exclusive} argument!
 
 \subsection{Regex Dispatch}{
 
-If you call \code{tonalInterval} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, but the \code{Exclusive} argument is missing
+If you call \code{tonalInterval()} (or \emph{any} \link[=pitchFunctions]{pitch function}) on a \code{character}-string vector, but the \code{Exclusive} argument is missing
 or \code{NULL}, \code{humdrumR} will instead use regular-expression patterns to select a known interpretation.
 For example, \code{pitch('so')} will automatically recognize that \code{'so'} is solfege, and will interpret the data accordingly (the output should be G4).
 If there are more than one matches, \code{humdrumR} will use the longest match, and if they tie, pick based on the order in the table above (topmost first).
@@ -123,7 +129,7 @@ Remember, if \code{Exclusive} is specified, it overrides the regex-based dispatc
 
 In lots of humdrum data, character strings are encoded with multiple pieces of musical information right besides each other:
 for example, \verb{**kern} data might include tokens like \verb{"4.ee-[}.
-The \code{humdrumR} parser (\code{tonalInterval}) will automatically "pull out" pitch information from within strings, if it can find any,
+The \code{humdrumR} pitch parser (\code{tonalInterval()}) will automatically "pull out" pitch information from within strings, if it can find any,
 using the appropriate known regular expressions.
 Various \link[=pitchFunctions]{pitch parsing functions} have an option to keep the original "extra" data, using their \code{inPlace} argument.
 }
@@ -565,11 +571,7 @@ tonalInterval('II#', step.labels =c('I', 'II', 'III','IV','V','VI','VII'))
 
 kern('E x 5', parse(doublesharp = 'x', sep = ' '))
 
-#' @returns 
-
-`tonalInterval()` returns a [tonalInterval][tonalIntervalS4] object of the same
-length and dimensions as `x`.
-`NULL` inputs (`x` argument) return a `NULL` output.
-`NA` values in the input `x` are propagated to the output.
-
+}
+\seealso{
+All \code{humdrumR} \link[=pitchFunctions]{pitch functions} make use of the parsing functionality.
 }

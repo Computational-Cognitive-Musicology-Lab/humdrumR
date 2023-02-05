@@ -4,7 +4,8 @@
 \alias{pitchDeparsing}
 \title{Generating ("deparsing") pitch representations}
 \description{
-\link{humdrumR} includes a easy-to-use but generating a variety of tonal (or atonal) pitch representations,
+\link{humdrumR} includes a easy-to-use system for
+generating a variety of tonal (or atonal) pitch representations,
 which can be flexibly modified by users.
 "Under the hood" \code{humdrumR} represents all tonal pitch information using the \link[=tonalIntervalS4]{same underlying representation},
 which is typically extracted from input data using the \link[=pitchParsing]{pitch parser}.
@@ -29,9 +30,11 @@ Deparsing is the second step in the \link[=pitchFunctions]{pitch function} proce
 Various pitch representations like \verb{**kern}, \verb{**solfa}, and \verb{**semits} can be generated using predefined \link[=pitchFunctions]{pitch functions} like \code{\link[=kern]{kern()}}
 \code{\link[=semits]{semits()}}, and \code{\link[=solfa]{solfa()}} respectively.
 All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-to the deparser.
+to the deparser.a
 By modifying these \emph{"deparsing" arguments}, you can exercise
 fine control over how you want pitch information to be represented in your output.
+\emph{This} documentation talks about this deparsing step.
+For an overview of the parsing process, look \link[=pitchParsing]{here}.
 }
 \section{Basic pitch arguments}{
 
@@ -126,6 +129,8 @@ The \code{real} and \code{relative} arguments give you special control of how ke
 check out the \code{\link[=transpose]{transpose()}} docs for more details!
 }
 
+}
+
 \subsection{In-place parsing}{
 
 In humdrum data, character strings are often encoded with multiple pieces of musical information right besides each other:
@@ -138,10 +143,8 @@ and return the result "in place"---i.e., embedded right where it was found in th
 This is controlled with the \code{inPlace} argument, which is \code{FALSE} by default.
 So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \code{"4."} and the \code{"["}.
 (This obviously only works if the input is a string, not a numeric!)
-Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return numeric values, to return character strings
+Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a character string.
-}
-
 }
 }
 
@@ -397,7 +400,7 @@ So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
 
 \subsection{Octave "Rounding"}{
 
-In some situations, pitch data might interpret the "boundaries" between octaves a little differently.
+In some situations, pitch data might interpret the "groupby" between octaves a little differently.
 In most absolute pitch representations (e.g., \code{\link[=kern]{kern()}}, \code{\link[=pitch]{pitch()}}), the "boundary" between one octave and the next is
 between B (degree 7) and C (degree 1).
 However, if for example, we are working with data representing intervals, we might think of an "octave" as spanning the range \code{-P4} (\code{G}) to \code{+P4} (\code{f}).

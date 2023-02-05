@@ -18,7 +18,7 @@ an the objects &quot;Active expression&quot;."><!-- mathjax --><script src="http
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@ an the objects &quot;Active expression&quot;."><!-- mathjax --><script src="http
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
-    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Rhythm and meter in humdrumR</a>
+    <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
 </li>
@@ -188,7 +188,7 @@ not <code>NA</code> if you call <code>recip</code> (rhythm).</p><div class="sour
 
 <span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">kerndata</span><span class="op">$</span><span class="va">Token</span>,
        <span class="va">Pitch</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>,
-       <span class="va">Rhythm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rhythmFunctions.html">recip</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kerndata</span></code></pre></div>
+       <span class="va">Rhythm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/recip.html">recip</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">kerndata</span></code></pre></div>
 
 <p>Now, if you change the active field between <code>Pitch</code> and <code>Rhythm</code> (using <code>$</code>) you'll see that there
 are different numbers of (non-null) data tokens: <code>ntoken(kerndata$Pitch ,'D')</code> vs <code>ntoken(kerndata$Rhythm, 'D)</code> will

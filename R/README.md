@@ -447,6 +447,44 @@ mean(x - (if (TRUE) 10 else y))
 ```
 
 
+## Anonymous functions
+
+### Map()
+
+When using an anonymous function as the `f` argument to `Map()`, the only way to make the indentation look readable is to put the
+mapped (`...`) arguments first, then put the anonymous function after them on a new line.
+This *requires* that the function argument is named (`f`).
+This when the mapped arguments are concise, this isn't a big improvement,
+but it's much more readable when the mapped arguments are even remotely complicated.
+
+Example:
+
+```
+
+#BAD 
+
+Map(\(x, y) {
+	# code here
+	# code here
+
+	},
+    code(here, for(the[x], argument)),
+    code(here, for(the[y], argument)))
+
+#GOOD
+
+
+Map(# code(here, for(the[x], argument)),
+    # code(here, for(the[y], argument)),
+    \(x, y) {
+	# code here
+	# code here
+
+	})
+    )
+
+```
+
 # Naming
 
 Generally, few variables should be used.
@@ -703,3 +741,83 @@ When using `for`, or doing `lapply`/`sapply` across indices, the index argument 
 `i` and `j` should only be used when the index number is an integer index (`i` for rows and `j` for columns, if those dimensions make sense).
 Otherwise, the argument should named to reflect that the thing is.
 
+
+# Documentation Style
+
+
+## param
+
+All exported functions should have all arguments described in roxygen2 `@param` fields.
+Each `@param` field should include two to four paragraphs, in the following order: 
+
+1. Description (mandatory)
+2. Default value (optional)
+3. Constraints (mandatory)
+4. Context/details (optional)
+
+This will look something like this:
+
+
+```
+#' @param argname ***Concise digestible description of what the argument does.***
+#' 
+#' Defaults to `value`.
+#'
+#' Must be a `class` vector; must be length `x` or less.
+#'
+#' This argument is parsed blah blah blah.
+```
+
+#### Description
+
+The description should be concise and readable.
+The description should convey to a user the *purpose* of the argument---why they would use it.
+Details of *how* to use the argument will appear in the main body of the function man.
+
+#### Defaults
+
+
+If an argument has not default value, simply omit this paragraph.
+
+The defaults paragraph should more or less just say "Defaults to `x`", where `x` is some value.
+However, each function manual's "signature" will already list the *literal* value.
+The @param field is a place to put the default in words---like saying "zero" instead of `0`.
+For example, in the `count()` man, I say the `beat` argument "Defaults to a whole-note", rather than `rational(1)`, which is the literal default.
+
+#### Constraints
+
+We now list the *requirements* for the argument.
+If these requirements aren't meant, errors will occur.
+The most important constraints involve the type/class restraints on the argument.
+The second most important is constraints on the length (or size/shape) of the argument.
+Constraints should be stated in sentences beginning "Must be...".
+
+We will refer to a `length(x) == 1` constraint as "a singleton."
+
+If there are more than one unrelated constraints, they can be presented in a semicolon-delimited list---the semicolon should be interpreted as an AND.
+However, when possible, constraints should be expressed more concisely in a single sentence.
+For example, instead of saying "Must be `character`; must be a singleton; the string must not be empty", we can write "Must be a singleton, non-empty `character` value."
+
++ Singleton logical arguments should always be written as "Must be a singleton `logical` value: a on/off switch."
++ Arguments that must be integers or natural numbers (i.e., whole numbers) but where the class is allowed to be `numeric` have special descriptions, either:
+  + "whole number(s)"
+  + "natural number(s)"
+  + "positive natural number(s)"
+
+
+#### Details
+
+Some arguments may require no extra details, in which case this paragraph is omitted.
+
+The most common "detail" to include involve explanations of how `NA` or `NULL` values are handled by the function.
+There might also be useful descriptions of how an argument is parsed or interpreted.
+Finally, sometimes a link to a related man should be included.
+
+
+### Param inheritance
+
+
+Whenever possible, arguments that are passed directly to internal functions should use `@inheritParams` to inherit the `@param` description from the internal function.
+This will require writing the parent description in a more general language, so it applies equally to all functions inheriting it.
+
+Put the `@inheritParams` tag(s) *above* the `@param` tag(s)!

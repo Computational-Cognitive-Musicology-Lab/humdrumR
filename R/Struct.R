@@ -121,17 +121,18 @@ setValidity('struct',
                 #
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
+                slots <- lapply(slots, '[', i = !Reduce('&', lapply(slots, duplicated)))
                 
                 dim <- object@dim
+                
                 rownames <- object@rownames
                 colnames <- object@colnames
                 errors <- c(
                     if (!{
-                            all(lengths(slots) == slotlen)
+                            all(lengths(slots) == length(slots[[1]]))
                                     }) glue::glue("Vectors in {class} data slots must all be the same length."),
                     if (!{
-                            all(sapply(slots, is.vector)) && 
-                            all(sapply(slots, is.atomic))
+                            all(sapply(slots, \(slot) is.vector(slot) | is.integer64(slot))) #&&  all(sapply(slots, is.atomic))
                                     }) glue::glue('{class} data slots must all be atomic vectors.'),
                     
                     ######## if dim is NULL
@@ -169,7 +170,7 @@ setValidity('struct',
                         )
                     })
                             
-                if (length(errors) == 0L) TRUE else errors 
+                if (length(errors))  errors else TRUE
                 
             })
 
@@ -190,14 +191,15 @@ setMethod('initialize',
               
               ## NA in any slot is NA in all slots
               na <- Reduce(`|`, lapply(slots, is.na))
-              slots <- lapply(slots, \(slot) `[<-`(slot, na, NA))
+              
+              slots <- lapply(slots, \(slot) {slot[na] <- NA; slot})
               
               setSlots(.Object) <- slots
               validObject(.Object)
               .Object
           } )
 
-getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character')) {
+getSlots <- function(x, classes = c('numeric', 'integer', 'integer64', 'logical', 'character', 'list')) {
     slotinfo <- methods::getSlots(class(x))
     slotinfo <- slotinfo[!names(slotinfo) %in% c('dim', 'colnames', 'rownames')]
     slotinfo <- slotinfo[slotinfo %in% classes]
@@ -209,7 +211,6 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 
 `setSlots<-` <- function(x, value) {
     slotnames <- slotNames(x)
-    
     slotnames <- slotnames[!slotnames %in% c('dim', 'colnames', 'rownames')]
     for (s in slotnames) {
         slot(x, s) <- value[[s]]
@@ -220,17 +221,21 @@ getSlots <- function(x, classes = c('numeric', 'integer', 'logical', 'character'
 
 columns <- function(humvec) {
     ncol <- if (hasdim(humvec)) ncol(humvec) else 1L
-    rep(1:ncol, each = length(humvec))
+    rep(1:ncol, each = nrow(humvec))
 }
 
-vectorNA <- function(n, mode = 'character') rep(as(NA_integer_, Class = mode), n)
+vectorNA <- function(n, mode = 'character') {
+  rep(as(NA_integer_, Class = mode), n)
+}
+
+
 
 ########## shape ----
 
 
 setMethod('nrow', signature = 'struct', function(x) x@dim[1])
 setMethod('ncol', signature = 'struct', function(x) x@dim[2])
-setMethod('length', signature = 'struct', function(x) if (is.null(x@dim)) length(getSlots(x)[[1]]) else x@dim[1])
+setMethod('length', signature = 'struct', function(x) length(getSlots(x)[[1]]))
 setMethod('dim', signature = 'struct', function(x) x@dim )
 setMethod('lengths', signature = 'struct', 
           function(x) {
@@ -240,13 +245,18 @@ setMethod('lengths', signature = 'struct',
 setMethod('dim<-', 'struct',
           function(x, value) {
               value %!<-% as.integer(value)
+            
               if (is.null(value) || any(dim(x) != value)) {
                   x@colnames <- NULL
                   x@rownames <- NULL
+                  x@dim <- value
+              } else {
+                x@dim <- value
+                validObject(x)
               }
-              x@dim <- value
               
-              validObject(x)
+              
+              
               x
               
           })
@@ -334,7 +344,7 @@ setMethod('colnames<-', c(x = 'struct'),
           })
 setMethod('rownames<-', c(x = 'struct'),
           function(x, value) {
-              if (!is.null(value) && length(value) != length(x)) .stop(ifelse = is.null(x@dim),
+              if (!is.null(value) && length(value) != nrow(x)) .stop(ifelse = is.null(x@dim),
                                                                        "Rownames assigned to {class(x)} must be ", 
                                                                        "<the same length as the {class(x)}|be of length nrow({class(x)})>",
                                                                        " In this case, you are tring to assign {length(value)} ",  plural(length(value), 'rownames', 'rowname'), 
@@ -379,7 +389,7 @@ checkSame <- function(x, y, call) {
 ##### [i, j] ----
 
 humvectorI <- function(i, x) {
-    c(outer(i, (seq_len(ncol(x)) - 1) * length(x), '+'))
+    c(outer(i, (seq_len(ncol(x)) - 1) * nrow(x), '+'))
 }
 humvectorJ <- function(j, x) {
     columns <- columns(x)
@@ -387,7 +397,7 @@ humvectorJ <- function(j, x) {
 }
 
 emptyslots <- function(x) {
-    setSlots(x) <- lapply(getSlots(x), \(slot) vector(class(slot), 0L))
+    setSlots(x) <- lapply(getSlots(x), \(slot) vectorNA(0L, class(slot)))
     x
 }
 
@@ -454,7 +464,7 @@ setMethod('[', c(x = 'struct', i = 'character', j = 'missing'),
           })
 setMethod('[', c(x = 'struct', i = 'logical', j = 'missing'),
           function(x, i, drop = FALSE) {
-              if (length(i) != length(x)) .stop(ifelse = !hasdim(x),
+              if (length(i) != if(hasdim(x)) nrow(x) else length(x)) .stop(ifelse = !hasdim(x),
                                               "Can't index[i<|, >] a {class(x)} with a logical vector of a length that does not match <length|nrow>({class(x)}).")
               
             x[which(i), drop = FALSE]
@@ -468,7 +478,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
               if (matclass %in% c('character', 'numeric', 'integer')) {
                   if (ncol(i) == 1L) return(x[c(i), ])
                   if (nrow(i) == 1L) return(x[ , c(i)])
-                  if (nrow(i) == nrow(x) && ncol(i) == 2)  return(x[i[ , 1], i[ , 2], cartesian = TRUE])
+                  if (ncol(i) == 2)  return(x[i[ , 1], i[ , 2], cartesian = TRUE])
                   
                   .stop("To index a {class(x)} a numeric or character matrix, that matrix must either:\n",
                         "\t1) Be a 1-column (index rows) or 1-row (index columns) matrix---in which case, it is treated like a vector.\n",
@@ -499,7 +509,7 @@ setMethod('[', c(x = 'struct', i = 'matrix', j = 'missing'),
 setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
           function(x, j, drop = FALSE) {
               if (!hasdim(x)) .stop("You can't take a j (column-wise) index of a {class(x)} object with no dimensions!")
-              
+            
               j <- j[j != 0] # zeros are ignored
               
               ### First, special cases where j is empty
@@ -608,8 +618,7 @@ setMethod('[', c(x = 'struct'),
 setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
           function(x, i, value) {
               checkSame(x, value, '[i , ]<-')
-              
-              if (length(value) == 0 || any(dim(value) == 0L)) return(x)
+              if (length(value) == 0 || any(dim(value) == 0L) || (is.logical(i) && !any(i))) return(x)
               # if either are vectors, make them into column vectors
               dimx <- dim(x)
               if (!hasdim(x)) x@dim <- c(length(x), 1L)
@@ -640,7 +649,7 @@ setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'missing', value = 'struct'),
                   if (any(i < 0)) stop(call. = FALSE, "Can't mix negative and positive numbers in struct assignment index.")
                   
                   #
-                  if (length(value) == 1L && length(i) != 1L) value <- rep(value, length.out = length(i))
+                  if (length(value) == 1L && length(i) != 1L) value <- rep(c(value), length.out = length(i))
                   if (length(value) != length(i)) stop(call. = FALSE, 
                                                        glue::glue("Can't row-assign ([i]<-) a {class(value)} with {length(value)} rows into {length(i)} rows of another {class(x)}.\n",
                                                                   "To conform, the value being assigned must have the same number of rows, or have only one row, in which case that one row is recycled."))
@@ -999,7 +1008,9 @@ setMethod('diag', signature = 'struct',
 #' @export
 setMethod('is.na', signature = 'struct',
           function(x) {
-              na <- is.na(getSlots(x)[[1]])
+            slots <- getSlots(x)
+            na <- lapply(slots, is.na)
+            na <- Reduce('|', na)
               na %<-matchdim% x
           })
 
@@ -1072,7 +1083,8 @@ setMethod('as.data.frame', 'struct',
           })
 
 .unlist <- function(x, recursive = TRUE, use.names = TRUE) {
-  if (is.struct(x[[1]])) do.call('c', x) else unlist(x, recursive, use.names)
+  if (!is.list(x)) return(x)
+  if (is.struct(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
   
 }
 .data.frame <- function(...) {
@@ -1098,7 +1110,10 @@ list2dt <- function(l) {
     structs <- sapply(l, is.struct)
     
     l[structs] <- lapply(l[structs],
-                            \(struct) as.data.table(getSlots(struct)))
+                            \(struct) { 
+                              slots <- getSlots(struct)
+                              slots[sapply(slots, is.list)] <- lapply(slots[sapply(slots, is.list)], \(x) match(x, unique(x)))
+                              as.data.table(slots)})
     
     as.data.table(l)
 }
@@ -1118,15 +1133,23 @@ setMethod('as.character', 'struct',
 #' @export
 setMethod('show', signature = c(object = 'struct'), 
           function(object) { 
+            cat(class(object), 
+                if (hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
+                '\n', sep = '')
+            
+            if (length(object) > 0L) {
+              toprint <- c(object)
+              toprint <-  ifelse(is.na(toprint), 'NA', as.character(toprint))
+              dim(toprint) <- dim(object)
+            
+              print(toprint, quote = FALSE)
               
-              cat(class(object), 
-                  if (!hasdim(object)) paste0('[', nrow(object), ' , ', ncol(object), ']'),
-                  '\n', sep = '')
-              if (length(object) > 0L) {
-                  print(ifelse(is.na(object), 'NA', as.character(object)), quote = FALSE)
-              }
+            }
+            
             invisible(object)
-            }  )
+              
+            
+          }  )
 
 ########## order, equality ----
 
@@ -1200,7 +1223,7 @@ setMethod('Compare', signature = c('matrix', 'struct'),
 #' @export
 duplicated.struct <- function(x, incomparables = FALSE, fromLast = FALSE, nmax = NA) {
 
-    duplicated(as.data.frame(getSlots(x)), incomparables = incomparables, fromLast, nmax)
+    duplicated(as.data.frame(lapply(getSlots(x), I)), incomparables = incomparables, fromLast, nmax)
 }
 
 #### arithmatic ----

@@ -11,7 +11,6 @@ dimParse <- function(args) {
   # if (!hasdim(firstArg)) return(list(Restore = force, Args = args))
   
   
-  
   if (hasdim(firstArg)) {
     names <- dimnames(firstArg) 
     olddim <- dim(firstArg)
@@ -39,8 +38,8 @@ dimParse <- function(args) {
   list(Restore = restorer, Args = args)
 }
 
-predicateParse <- function(predicateFunc, args, anyMatch = NULL, 
-                            dispatchArgs = c(), verbose = FALSE, ...) {
+predicateParse <- function(predicateFunc, ..., args, anyMatch = NULL, 
+                            dispatchArgs = c(), verbose = FALSE) {
   
   firstArg <- args[[1]]
   
@@ -76,9 +75,8 @@ predicateParse <- function(predicateFunc, args, anyMatch = NULL,
   
   restorer <- function(result) { 
     if (is.table(result) || !(is.struct(result) || is.atomic(result)) || length(result) != sum(hits)) return(result)
-    
+
     output <- vectorNA(length(firstArg), class(result))
-    
     output[hits] <- result
     output
   }
@@ -90,7 +88,7 @@ predicateParse <- function(predicateFunc, args, anyMatch = NULL,
 
 ###### "Memoify" ----
 
-memoizeParse <- function(args, dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, lag = 0L, ...) {
+memoizeParse <- function(args, ..., dispatchArgs = c(), minMemoize = 100L, memoize = TRUE, verbose = FALSE, lag = 0L) {
   
   firstArg <- args[[1]]
   
@@ -171,8 +169,9 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 
 
 
-do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
+do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
+  
   if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
@@ -182,7 +181,7 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   
   memoize <- memoizeParse(dimension$Args, dispatchArgs = doArgs, memoize = memoize, ...)
   
-  naskip <- predicateParse(Negate(is.na), memoize$Args, dispatchArgs = doArgs, 
+  naskip <- predicateParse(Negate(is.na), args = memoize$Args, dispatchArgs = doArgs, 
                             verboseMessage = '"not NA"', ...)
   
   
@@ -197,6 +196,7 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   humattr <- humdrumRattr(result)
   
   result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
+  if ('dispatch' %in% names(humattr)) humattr$dispatch$Original <- firstArg
   humdrumRattr(result) <- humattr
   
   result
@@ -205,6 +205,16 @@ do <- function(func, args, doArgs = c(), memoize = TRUE, ..., ignoreUnknownArgs 
   
 }
 
+dofunc <- function(doArgs = c(), .func) {
+  formals <- formals(.func)
+  args <- setNames(rlang::syms(names(formals)), names(formals))
+  rlang::new_function(formals, 
+                      rlang::expr({
+                        do(.func, args = list(!!!args), doArgs = !!doArgs)
+                      }))
+  
+
+}
 
 `%do%` <- function(e1, e2) do(e1, e2)
 
@@ -388,7 +398,6 @@ humdrumDispatch <-  function(x, dispatchDF,  Exclusive = NULL, funcName = NULL,
 
 regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 'character', ..., funcName = 'regexDispatch') {
   if (!is.character(str)) .stop("The function '{funcName %||% humdrumDispatch}' requires a character-vector 'x' argument.")
-  
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
   matches <- do.call('cbind', lapply(dispatchDF$regex, \(re) stringi::stri_extract_first_regex(str, pattern = re)))
@@ -418,6 +427,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
     }, c(dispatchDF$method, list(force))[sort(unique(dispatch))], tapply(matches, dispatch, list)))[order(unlist(i))]
   }
   
+
   
   attr(result, 'dispatch') <-  list(Original = str, 
                                     Regexes = unlist(dispatchDF$regex[unique(dispatch)]),
@@ -429,12 +439,13 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
-  
   if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   
-  dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc))]
+  Exclusive <- stringr::str_remove(Exclusive, '^\\*{1,2}')
+  
+  dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc)), ]
   
   
 
@@ -513,12 +524,16 @@ humdrumRattr <- function(x) {
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  
-  for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  if (is.null(value)) {
+    for (att in known) attr(x, att) <- NULL
+  } else {
+    for (attrname in names(value)) attr(x, attrname) <- value[[attrname]]
+  }
   x
 }
 
-rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
+rePlace <- function(result, dispatched = attr(result, 'dispatch')) {
   if (is.null(dispatched) || length(result) != length(dispatched$Original) || !is.atomic(result)) return(result)
   names <- names(result)
   
@@ -527,12 +542,16 @@ rePlace <- function(result, dispatched = attr(result, 'dispatched')) {
   result
 }
 
-reParse <- function(result, dispatched = attr(result, 'dispatched'), reParsers) {
-  if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
+reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
+  # if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
+  if (is.null(dispatched) || is.character(result)) return(result)
+  
+  humAttr <- humdrumRattr(result)
+  
   names <- names(result)
   exclusives <- dispatched$Exclusives
   
-  result <- split(result, dispatched$Segments)
+  result <- if (length(result) > 1L && length(result) == length(dispatched$Segments)) split(result, dispatched$Segments) else list(result)
   
   result <- unlist(Map(\(res, excl) {
     reParser <- match.fun(if (excl %in% reParsers)  excl else reParsers[1])
@@ -540,6 +559,9 @@ reParse <- function(result, dispatched = attr(result, 'dispatched'), reParsers) 
   }, result, exclusives))
   
   names(result) <- names
+  
+  humAttr$Exclusives <- NULL
+  humdrumRattr(result) <- humAttr
   
   result
   
@@ -589,33 +611,33 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   # Assemble the new function's arguments
   genericArgs <- local({
     sharedArgNames <- Reduce('intersect', lapply(dispatchDF$Args, names))
-    args <- c(alist(x = , Exclusive = NULL), 
-              args, 
+    args <- c(alist(x = , ... =), 
               unlist(dispatchDF$Args, recursive = FALSE)[sharedArgNames], 
-              alist(... = , multiDispatch = FALSE))
+              args, 
+              alist(Exclusive = NULL, multiDispatch = FALSE))
     args <- args[!duplicated(names(args))]
     args
 
   })
-  dispatchArgs <- genericArgs[!names(genericArgs) %in% c('x', 'str', 'Exclusive', '...', 'multiDispatch')]
-  dispatchArgs[names(dispatchArgs) %in% names(args)] <- lapply(names(dispatchArgs[names(dispatchArgs) %in% names(args)]),
-                                                               rlang::sym)
   
+  formalSymbols <- setNames(rlang::syms(names(genericArgs)), names(genericArgs))
+  formalSymbols <- formalSymbols[names(formalSymbols) != '...']
   ##################################################### #
-  
   body <- rlang::expr({
-    args <- list(x = x, dispatchDF = dispatchDF, Exclusive = Exclusive,
-                 multiDispatch = multiDispatch, regexApply = !!regexApply,
-                 outputClass = !!outputClass, funcName = !!funcName,
-                 ...)
-    # dispatchArgs <- list(!!!dispatchArgs)
-    # for (name in .names(dispatchArgs)) if (hasArg(name)) dispatchArgs[[name]] <- get(name0)
-    do(!!dispatcher, c(args, dispatchArgs), ...)
+    args <- list(!!!formalSymbols)
+    result <- do(!!dispatcher, outputClass = !!outputClass, 
+                 args = c(args,  
+                   list(..., dispatchDF = dispatchDF, 
+                        regexApply = !!regexApply, outputClass = !!outputClass, funcName = !!funcName)),
+       ...)
     
+    if (!(!!outputClass) %in% class(result)) result <- as(result, !!outputClass)
+    
+    result
   })
   
   genericFunc <- rlang::new_function(genericArgs, body, 
-                                     rlang::new_environment(list(dispatchDF = dispatchDF, dispatchArgs = dispatchArgs), parent = parent.frame()))
+                                     rlang::new_environment(list(dispatchDF = dispatchDF), parent = parent.frame()))
   
   attr(genericFunc, 'dispatch') <- dispatchDF
   genericFunc %class% 'humdrumDispatch'

@@ -68,4 +68,9 @@ calls to \code{collapseHumtab}, with some additional optimizations.
 \seealso{
 The humdrum \link[=foldHumdrum]{folding functions} serve a similar function,
 "folding" data into \emph{new} fields, rather than collapsing it within a field.
+
+Other {Humdrum data reshaping functions}: 
+\code{\link{expandPaths}()},
+\code{\link{foldHumdrum}()}
 }
+\concept{{Humdrum data reshaping functions}}

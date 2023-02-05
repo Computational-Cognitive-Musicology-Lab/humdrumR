@@ -193,11 +193,11 @@
 #' with(humData, table(lag(Token, 1), lag(Token, 2))
 #' ```
 #' 
-#' [lag()] is a function with a `boundaries` argument, which `with`/`within.humdrumR`
+#' [lag()] is a function with a `groupby` argument, which `with`/`within.humdrumR`
 #' will automatically feed the fields `list(File, Spine, Path)`.
 #' This is the default "melodic" behavior in most music.
 #' If you'd like to turn this off, you need to override it by adding your own
-#' `boundaries` argument to the lagged index, like `Token[lag = 1, boundaries = list(...)]`.
+#' `groupby` argument to the lagged index, like `Token[lag = 1, groupby = list(...)]`.
 #' 
 #' 
 #' Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
@@ -207,7 +207,7 @@
 #' with(humData, paste(Token[lag = 0:5], sep = '-'))
 #' ```
 #' 
-#' Note that, since `with`/`within.humdrumR` passes `boundaries = list(File, Spine, Path)`
+#' Note that, since `with`/`within.humdrumR` passes `groupby = list(File, Spine, Path)`
 #' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each file.
 #' 
 #' 
@@ -563,22 +563,25 @@ NULL
 #' @export
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
+                          expandPaths = FALSE,
                           drop = TRUE,
                           variables = list()) {
   
-  checkhumdrumR(data, 'with.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, withFunc = 'with.humdrumR'), 
+  checks(data, xclass('humdrumR'))
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
+  
+
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
+  
   if (drop) {
-    if (nrow(result) == 0L) return(NULL)
-    
     parts <- grepl('^_(by|subset)=..*_$', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
-    result <- result[[max(which(!parts))]]
+    result <- if (any(!parts)) result[[max(which(!parts))]]
+    if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
@@ -597,9 +600,9 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
-  checkhumdrumR(data, 'within.humdrumR')
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, variables = variables, 
+within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
+  checks(data, xclass('humdrumR'))
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -608,7 +611,8 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
-  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     if ('Token' %in% overWrote[bad]) {
@@ -654,9 +658,12 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', variables = list()) {
 
 }
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
+  
+  if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
+  
   humtab <- getHumtab(humdrumR)
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
@@ -693,6 +700,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', variables = list(), with
   curmfg <- par('mfg')
   par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
   par(mfg = curmfg, new = FALSE)
+  
+  if (expandPaths) {
+    result <- result[!humtab[is.na(ParentPath)], on = '_rowKey_']
+    humtab <- humtab[!is.na(ParentPath)]
+  }
   
   list(humdrumR = humdrumR, 
        humtab = humtab,
@@ -831,7 +843,7 @@ parseKeywords <- function(quoTab, withFunc) {
                               "you can't have multiple 'ngram'-keyword arguments.")
     
     ngram <- rlang::eval_tidy(quoTab$Quo[[i]])
-    checkLooseInteger(ngram, 'ngram', withFunc)
+    checks(ngram, xpnatural)
     quoTab$Quo[[i]] <- ngram
   }
   
@@ -1083,53 +1095,41 @@ activateQuo <- function(funcQuosure, active) {
 #### Insert exclusive/keyed args where necessary
 
 fieldsArgsQuo <- function(funcQuosure, fields) {
-  funcQuosure <- exclusiveArgsQuo(funcQuosure, fields)
-  funcQuosure <- keyedArgsQuo(funcQuosure, fields)
-  funcQuosure <- boundedArgsQuo(funcQuosure)
+  funcQuosure <- fieldArgQuo(funcQuosure, fields)
+  funcQuosure <- byArgsQuo(funcQuosure)
   funcQuosure
 }
 
 
-exclusiveArgsQuo <- function(funcQuosure, fields) {
-  if (!'Exclusive' %in% fields) return(funcQuosure)
+fieldArgQuo <- function(funcQuosure, fields) {
+  targetFields <- intersect(names(withinFields), fields)
   
-  predicate <- \(Head) Head %in% exclusiveFunctions 
-  do <- \(exprA) {
-    if (!'Exclusive' %in% names(exprA$Args)) exprA$Args$Exclusive <- quote(Exclusive)
-    exprA
+  for (field in targetFields) {
+    predicate <- \(Head) Head %in% withinFields[[field]]
+    do <- \(exprA) {
+      if (!field %in% names(exprA$Args)) exprA$Args[[field]] <- rlang::sym(field)
+      exprA
+    }
+    
+    funcQuosure <- withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+    
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
-  
-}
-
-keyedArgsQuo <- function(funcQuosure, fields) {
-  # functions that require a Key argument
-  if (!'Key' %in% fields) return(funcQuosure)
-  
-  predicate <- \(Head) Head %in% keyedFunctions
-  
-  do <- \(exprA) {
-    if (!'Key' %in% names(exprA$Args)) exprA$Args$Key <- quote(Key)
-    exprA
-  }
-  
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  funcQuosure
 }
 
 
-boundedArgsQuo <- function(funcQuosure) {
-  # functions that require a Key argument
-  
-  predicate <- \(Head) Head %in% boundedFunctions
-  
+byArgsQuo <- function(funcQuosure) {
+  predicate <- \(Head) Head %in% byTable$Function
   do <- \(exprA) {
-    if (!'boundaries' %in% names(exprA$Args)) exprA$Args$boundaries <- quote(list(File, Spine, Path))
+    byTab <- byTable[Function %in% exprA$Head & !Argument %in% names(exprA$Args)]
+    args <- setNames(byTab$Expression, byTab$Argument)
+    exprA$Args <- c(exprA$Args, args)
     exprA
   }
-  
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
 }
+
 
 #### Lag/Led vectors
 
@@ -1140,7 +1140,7 @@ laggedQuo <- function(funcQuosure) {
   do <- \(exprA) {
     
     args <- exprA$Args
-    if (!'boundaries' %in% .names(args)) args$boundaries <- expr(list(File, Spine, Path))
+    if (!'groupby' %in% .names(args)) args$groupby <- expr(list(File, Spine, Path))
     
     names(args)[tolower(names(args)) == 'lag'] <- 'n'
     n <- rlang::eval_tidy(args$n)
@@ -1155,27 +1155,27 @@ laggedQuo <- function(funcQuosure) {
     exprA
   }
   
-  modifyExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
+  withinExpression(funcQuosure, predicate, do, stopOnHit = TRUE)
   
 }
 
 #### Interpretations in expressions
 
 #tandemsQuo <- function(funcQuosure) {
- # This function inserts calls to getTandem
+ # This function inserts calls to extractTandem
  # into an expression, using any length == 1 subexpression
  # which begins with `*` as a regular expression.
  # If input is a quosure (it should be), it keeps the quosure intact,
  # (i.e., keeps it's environment).
           
-# applyExpr(funcQuosure,
+# withExpression(funcQuosure,
 #           \(ex) {
 #             exstr <- deparse(ex)
 #             interp <- grepl('^\\*[^*]', exstr)
 #             
 #             if (interp) {
 #               regex <- stringr::str_sub(exstr, start = 2L)
-#               rlang::expr(getTandem(Tandem, !!regex))
+#               rlang::expr(extractTandem(Tandem, !!regex))
 #             } else {
 #               ex
 #             }
@@ -1219,7 +1219,7 @@ splatQuo <- function(funcQuosure, humtab) {
     exprA
   }
   
-  funcQuosure <- modifyExpression(funcQuosure, predicate, do)
+  funcQuosure <- withinExpression(funcQuosure, predicate, do)
 
   # turn splat(x,y,z) to x,y,z
   predicate <- \(Args) any(sapply(Args, \(arg) identical(analyzeExpr(arg)$Head, 'splat')))
@@ -1235,7 +1235,7 @@ splatQuo <- function(funcQuosure, humtab) {
       exprA
   }
 
-  modifyExpression(funcQuosure, predicate, do)
+  withinExpression(funcQuosure, predicate, do)
   
 }
 
@@ -1329,7 +1329,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
-  if (!'boundaries' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['boundaries']] <- quote(list(File,Spine))
+  if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(File,Spine))
   if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
   
   applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])
@@ -1395,7 +1395,6 @@ windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
 # @param namedArgs A list of named arguments. Unnamed arguments are simply ignored.
 # 
 interpolateArguments <- function(quo, namedArgs) {
-    checkArg(namedArgs)
     expr <- rlang::quo_get_expr(quo)
     expr <- .interpolateArguments(expr, namedArgs)
     
@@ -1489,7 +1488,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
     partition <- as.factor(partition)
     
-    nparts <- max(as.integer(partition))
+    nparts <- max(as.integer(partition), na.rm = TRUE)
     
     if (nparts > 1e5L) message("Your group-by expression {by = ",
                                rlang::as_label(partQuos$Quo[[1]]),
@@ -1528,12 +1527,15 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     
 }
 evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
-  if (!is.logical(partition)) stop(call. = FALSE,
-                                   "In your call to with(in)Humdrum with a 'subset = x' expression, 
-                                     your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
-                                   "The expression you've provided {",
-                                   rlang::as_label(partQuos$Quo[[1]]),
-                                   "} evaluates to something of class {class(partition)}")
+  if (!is.logical(partition)) .stop("In your call to with(in).humdrumR with a 'subset = x' expression,",
+                                    "your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
+                                   "The expression you've provided {{ {rlang::as_label(partQuos$Quo[[1]])} }}",
+                                   " evaluates to something of class {class(partition)}.")
+  
+    
+  if (!any(partition)) warning(call. = FALSE, 
+                               "In your call to with(in).humdrumR, your subset never evaluates TRUE.",
+                               " Your within-expression is being evaluated on nothing.")
   
     if (nrow(partQuos) > 1L) {
       
@@ -1549,7 +1551,13 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     if (!is.null(ordoQuo)) {
         complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!partition]))
         complement[[partitionName]] <- FALSE
-        result <- data.table::rbindlist(list(result, complement))
+        
+        if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
+        
+        mismatch <-  !colnames(complement) %in% colnames(result)
+        colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
+        
+        result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
     }
     
    result
@@ -1576,7 +1584,7 @@ parseResult <- function(results) {
   firstResult <- results[[lastResult]][[1]][[1]]
   
   keyLengths <- lengths(unlist(results[['_rowKey_']], recursive = FALSE))
-  resultLengths <- if (!is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
+  resultLengths <- if (length(firstResult) && !is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
   
   
   
@@ -1598,15 +1606,18 @@ parseResult <- function(results) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
-                      object <- !is.factor(first) && is.object(first)
+                      humattr <- humdrumRattr(first)
+                      object <- length(first) && !is.factor(first) && is.object(first)
                       
+                      # if (is.table(result) && length(result) == 0L) result <- integer(0)
                       result <- unlist(result, recursive = FALSE)
-                      
                       
                       if (!object) {
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
-                      } 
+                      }
+                      
+                      humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
                       result
                     })

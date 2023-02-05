@@ -10,10 +10,7 @@ vignette: >
 ---
 
 ```{r}
-
-hm <- "humdrum$_{\\mathbb{R}}$"
-Hm <- "Humdrum$_{\\mathbb{R}}$"
-
+source('vignette_header.R')
 ```
 
 # Diatonic Sets
