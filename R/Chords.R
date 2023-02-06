@@ -1199,7 +1199,39 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 
 
 
+
 ### Chord functions ####
+
+#' @param x *** An `atomic` vector***
+#' 
+#' The `x` argument can be any ([atomic][base::vector]) vectors
+#' 
+#' @param Key *** The input `Key` used by the parser, deparser, and transposer. ***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
+#' 
+#' @param parseArgs *** A list of arguments that are passed to the [pitch parser][pitchParsing]. ***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`.
+#' 
+#' @param transposeArgs *** A list of arguments that are passed to a special call to [transpose]. ***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`.
+#' 
+#' @param inPlace *** Whether the result is placed in place or returned ***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a `logical`; must be length `1`.
+#' 
+#' @name chordFunctions
+NULL
 
 #' "Pop/Jazz" chord symbols
 #' 
@@ -1214,6 +1246,7 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 #' results <- with(exampleHumdrum[[,3:4]], chord(Token))
 #' results
 #' 
+#' @inheritParams chordFunctions
 #' @export 
 chord <- makeChordTransformer(tset2chord, 'chord')
 
@@ -1231,6 +1264,7 @@ chord <- makeChordTransformer(tset2chord, 'chord')
 #' results <- with(exampleHumdrum[[,3:4]], figuredBass(Token))
 #' results
 #' 
+#' @inheritParams chordFunctions
 #' @export 
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 
@@ -1256,6 +1290,7 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' results <- with(exampleHumdrum[[,3:4]], roman(Token))
 #' results
 #' 
+#' @inheritParams chordFunctions
 #' @export 
 harm <- makeChordTransformer(tset2harm, 'harm')
 
@@ -1317,6 +1352,7 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' results <- with(exampleHumdrum[[,3:4]], tertian(Token))
 #' results
 #' 
+#' @inheritParams chordFunctions
 #' @export 
 tertian <- makeChordTransformer(tset2tertian, 'tertian')
 

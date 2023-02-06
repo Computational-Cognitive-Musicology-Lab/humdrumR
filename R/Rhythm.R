@@ -12,9 +12,17 @@
 #' The pairs of functions involving `ms` (milliseconds) and `sec` (seconds), are identical except
 #' for the change of scale between seconds and milliseconds.
 #' 
-#' @param BPM A `character` string (which may or may not be be prefixed with `"*MM"`) or numeric values,
-#'        which are interpreted as a beats-per-minute value.
-#' @param unit A value which can be interpreted as a [duration()]``
+#' @param BPM *** Specify the tempo. ***
+#' 
+#' Defaults to `60`.
+#' 
+#' Must be `numeric` or `character` string in the format `"MM120"` (for 120 bpm). 
+#' 
+#' By default, [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
+#' 
+#' @param unit *** A value which can be interpreted as a [duration()]. ***
+#' 
+#' Must be a value which can be interpreted as a [duration()].
 #'  
 #' @family time functions
 #' @export
@@ -710,16 +718,30 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 # the most common use is to return grace notes as having zero duration, by specifying `grace = 0`.
 #' 
 #' 
-#' @param x (`atomic` vector) The `x` argument can be any ([atomic][base::vector]) vector, or a [rational (rhythmInterval)][rational], or `NULL`.
-#' @param ... These arguments are passed to the [rhythm deparser][rhythmDeparsing]. 
+#' @param x *** An `atomic` vector***
+#' 
+#' The `x` argument can be any ([atomic][base::vector]) vector, or a [rational (rhythmInterval)][rational], or `NULL`.
+#' 
+#' @param ... These arguments are passed to the [rhythm parser][rhythmParsing]. 
 #'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
-#' @param scale A `numeric` or [rational] value which is used as the output unit of measurement: the default value for most functions
-#'   is `rational(1, 1)`, a whole-note or "duration." 
-#' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [rhythm parser][rhythmParsing].
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-duration information in the input strings "besides" the rhythm information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-rhythm information.
-#'        If `inPlace = FALSE`, only the rhythm output information will be returned (details below).
+
+#' @param scale *** A `numeric` or [rational] value which is used as the output unit of measurement ***
+#'  
+#' Defaults to `rational(1, 1)`.
+#'  
+#' Must be `numeric` or [rational].
+#'   
+#' @param parseArgs *** A list of arguments that are passed to the [rhythm parser][rhythmParsing]. ***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`.
+#' 
+#' @param inPlace *** Whether the result is placed in place or returned ***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a `logical`; must be length `1`.
 #'  
 # @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
 #'     
@@ -869,8 +891,10 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' read about the [family of rhythm functions][rhythmFunctions], 
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @family {rhythm functions}
-#' @param sep (`character`, `length == 1`) A `character` string to use as the separator
-#' between denominator and numerator.
+#' @param sep *** A `character` string to use as the separator between denominator and numerator.***
+#' 
+#' Must be `character`; must be length `1`.
+#' 
 #' @inheritParams rhythmFunctions
 #'
 #' 
@@ -1041,18 +1065,46 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
 #' 
 #' Non-onsets (rests) that occur *before* the first onset are returned as null.
 #' 
-#' @param x An input vector which is parsed for duration information using the 
-#' [rhythm parser][rhythmParsing]. `max`, `median`, or `mode` might be reasonable alternatives.
-#' @param onsets A `logical` vector of the same length as `x`. All durations in `x` where `onsets == FALSE`
-#' are added to the previous value where `onsets == TRUE`.
-#' @param finalOnset (`logical`, `length == 1`) If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
+#' @param x *** An `atomic` vector***
+#' 
+#' The `x` argument can be any ([atomic][base::vector]) vector, or `NULL`. 
+#' 
+#' `max`, `median`, or `mode` might be reasonable alternatives.
+#' 
+#' @param onsets *** A `logical` vector denotes the onsets***
+#' 
+#' Defaults to `!grepl("r", x) & !is.na(x) & x != "."`.
+#' 
+#' Must be `logical`; must be length `length(x)`.
+#' 
+#' All durations in `x` where `onsets == FALSE` are added to the previous value where `onsets == TRUE`.
+#' 
+#' @param finalOnset *** Whether to count the last onset***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`; must be length `1`.
+#' 
+#' If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
 #' Otherwise, this last IOI is undefined (`NA`).
-#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x`.
-#' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
-#'        *and* there is extra, non-pitch information in the input strings "besides" the duration information.
-#'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-duration information.
-#'        If `inPlace = FALSE`, only the rhythm output information will be returned.
+#' 
+#' @param parseArgs *** A list of arguments that are passed to the [rhythm parser][rhythmParsing]. ***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`.
+#' 
+#' @param groupby *** A `list` of vectors to group `x`***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`; every element of the list must be length `length(x)`.
+#' 
+#' @param inPlace *** Whether the result is placed in place or returned ***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a `logical`; must be length `1`.
 #'        
 #' @export
 ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
@@ -1097,10 +1149,20 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
 }
 
-#' @param open A `character` string (regular expression) to identify the beginning of ties.
-#'   (May also be formula: see [humWindows].)
-#' @param close A `character` string (regular expression) to identify the end of ties.
-#'   (May also be formula: see [humWindows].)
+#' @param open *** A `character` string (regular expression) to identify the beginning of ties. ***
+#' 
+#' Defaults to `[`.
+#' 
+#' Must be `character`.
+#' 
+#' May also be formula: see [humWindows].
+#' @param close *** A `character` string (regular expression) to identify the end of ties. ***
+#' 
+#' Defaults to `]`.
+#' 
+#' Must be `character`.
+#' 
+#' May also be formula: see [humWindows].
 #' @rdname ioi
 #' @export
 untie <- function(x, open = '[', close = ']', ..., 
@@ -1294,18 +1356,52 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' the first complete bar `1` the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 #' 
 #' 
-#' @param x An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].
-#' @param start A `numeric` value from which the timeline begins. Defauls to `0`.
-#' @param pickup `NULL`, or a `logical` vector of same length as `x`.
-#' @param minutes (`logical`, `length == 1`) If `TRUE`, output seconds are converted to a character string
-#' encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
-#' @param `BPM` A numeric values or `character` string in the format `"MM120"` (for 120 bpm). By default,
-#' [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
-#' @param groupby A `list` of vectors, of the same length as `x`, which are used to group `x` into.
-#'   To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
-#'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
-#' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
+#' @param x *** An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing]. ***
+#' 
+#' Must be `atomic`, or `NULL`.
+#' 
+#' @param start *** A value from which the timeline begins. ***
 #'
+#' Defaults to `0`.
+#' 
+#' Must be `numeric`.
+#' 
+#' @param pickup *** A vector to indicate pickup. ***
+#' 
+#' Defaults to `NULL`
+#' 
+#' Must be `logical`; of same length `x`. Or `NULL`.
+#' 
+#' @param minutes *** Whether to return in minutes format. ***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be `logical`; must be length `1`.
+#' 
+#' If `TRUE`, output seconds are converted to a character string encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
+#' 
+#' @param BPM *** Specify the tempo. ***
+#' 
+#' Defaults to `60`.
+#' 
+#' Must be `numeric` or `character` string in the format `"MM120"` (for 120 bpm). 
+#' 
+#' By default, [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
+#' 
+#' @param groupby *** A `list` of vectors to group `x`***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`; every element of the list must be length `length(x)`.
+#' 
+#' To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
+#' Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
+#'
+#' @param parseArgs *** A list of arguments that are passed to the [rhythm parser][rhythmParsing]. ***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be a `list`.#'
 #' 
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
