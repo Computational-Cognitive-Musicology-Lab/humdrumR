@@ -1011,7 +1011,7 @@ tint2octave <- function(x,
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
                         octave.relative = FALSE, octave.round = floor, ...) {
 
-  if (octave.relative) x <- delta(x, init = x)
+  if (octave.relative) x <- delta(x, init = x[1])
   #
   octn <- octave.offset + tintPartition_compound(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)

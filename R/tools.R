@@ -367,6 +367,13 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 
 
+### table() generic ----
+
+
+### Other ----
+
+
+
 allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
@@ -1550,12 +1557,12 @@ delta <- function(x, lag, skip, init, right, ...) UseMethod('delta')
 delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
                           groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checks(x, xnumber)
+    checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
     checks(skip, xnull | xclass('function'))
-    checks(init, xatomic & xminlength(1) & 
-             argCheck(\(arg) length(arg) <= abs(lag), 
-                      "must be as short or shorter than the absolute lag",  
+    checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) &
+             argCheck(\(arg) length(arg) <= abs(lag),
+                      "must be as short or shorter than the absolute lag",
                       \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
     checks(right, xTF)
     
