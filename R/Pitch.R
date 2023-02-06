@@ -572,7 +572,6 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' fine control over how you want pitch information to be represented in your output.
 #' *This* documentation talks about this deparsing step.
 #' For an overview of the parsing process, look [here][pitchParsing].
-
 #' 
 #' @section Basic pitch arguments:
 #' 
@@ -1011,7 +1010,7 @@ tint2octave <- function(x,
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
                         octave.relative = FALSE, octave.round = floor, ...) {
 
-  if (octave.relative) x <- delta(x, init = x)
+  if (octave.relative) x <- delta(x, init = x[1])
   #
   octn <- octave.offset + tintPartition_compound(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
@@ -2552,6 +2551,15 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  outputClass = 'tonalInterval')
 
 
+#' @rdname pitchParsing
+#' @export
+tonalInterval.factor <- function(x, ...) {
+  levels <- levels(x)
+  
+  tints <- tonalInterval.character(levels, ...)
+  
+  tints[as.integer(x)]
+}
 
 
 
@@ -2798,13 +2806,16 @@ makePitchTransformer <- function(deparser, callname,
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse && !is.null(output)) {
       dispatch <- attr(parsedTint, 'dispatch')
-      if (inPlace) output <- rePlace(output, attr(parsedTint, 'dispatch'))
+      if (inPlace) {
+        output <- rePlace(output, attr(parsedTint, 'dispatch'))
+      } else {
+        output <- factor(output, levels = makeGamut(unique(parsedTint), generic = generic, simple = simple, deparser = !!deparser))
+      }
       
-      if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
+      # if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
     
     attr(output, 'Exclusive') <- callname
-    attr(output, 'pitchAttr') <- formalArgs[c('generic', 'simple')]
     output %class% 'pitchData'
     
   })) %class% 'pitchFunction'
@@ -3891,13 +3902,12 @@ pythagorean.comma <- (-dd2)
 #' @export
 print.pitchData <- function(x) {
   exclusive <- attr(x, 'Exclusive')
-  x <- unclass(x)
+  x <- as.character(x)
   attributes(x) <- NULL
   cat('**', exclusive, '\n',sep = '')
-  print(unclass(x), quote = FALSE, na.print = '.')
+  invisible(print(x, quote = FALSE, na.print = '.'))
 }
 
-#' @rdname table
 #' @export
 table.pitchData <- function(...) {
   vectors <- list(...)
@@ -3941,6 +3951,7 @@ makeGamut <- function(x = NULL,
   }
   
   gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
+  gamut <- unique(c(unique(x), gamut))
   
   if (!simple) gamut <- do.call('c', 
                                  lapply(octaveRange[1]:octaveRange[2], 
@@ -3949,7 +3960,7 @@ makeGamut <- function(x = NULL,
   gamut <- gamut[order(tint2octave(gamut), tint2step(gamut, step.labels = NULL))]
   # gamut <- sort(gamut)
   
-  if (!is.null(deparser)) deparser(gamut) else gamut
+  unique(if (!is.null(deparser)) deparser(gamut) else gamut)
 }
 
 #' @export

@@ -369,27 +369,6 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 ### table() generic ----
 
-#' My new table function
-#'
-#' My new table function able to handle objects of class foo.
-#'
-#' @param x an object
-#' @param ... other arguments
-#'
-#' @rdname table
-#' @export
-table <- function(x, ..., exclude = if (useNA == "no") c(NA, NaN), 
-                  useNA = c("no", "ifany", "always"),
-                  dnn = list.names(list(x, ...)), deparse.level = 1) {
-  
-  x <- list(x, ...)
-  
-  x <- lapply(x, \(arg) if (inherits(arg, 'humdrum_tokens')) factorize(arg) else arg)
-  
-  do.call(base::table, c(x, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
-}
-
-
 
 ### Other ----
 
@@ -1578,10 +1557,10 @@ delta <- function(x, lag, skip, init, right, ...) UseMethod('delta')
 delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
                           groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checks(x, xnumber)
+    checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
     checks(skip, xnull | xclass('function'))
-    checks(init, xatomic & xminlength(1) & 
+    checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) & 
              argCheck(\(arg) length(arg) <= abs(lag), 
                       "must be as short or shorter than the absolute lag",  
                       \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
