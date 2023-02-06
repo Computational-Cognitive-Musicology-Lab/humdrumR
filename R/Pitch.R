@@ -331,7 +331,7 @@ order.tonalInterval <- function(x, ..., na.last = TRUE, decreasing = FALSE,
                    method = c("auto", "shell", "radix")) {
               
               x <- do.call('c', list(x, ...))
-              order(tint2semits(x), 
+              order(tint2step(x), tint2semits(x), 
                     na.last = na.last,
                     decreasing = decreasing,
                     method = method
@@ -2804,6 +2804,7 @@ makePitchTransformer <- function(deparser, callname,
     }
     
     attr(output, 'Exclusive') <- callname
+    attr(output, 'pitchAttr') <- formalArgs[c('generic', 'simple')]
     output %class% 'pitchData'
     
   })) %class% 'pitchFunction'
@@ -3896,9 +3897,9 @@ print.pitchData <- function(x) {
   print(unclass(x), quote = FALSE, na.print = '.')
 }
 
-#' @rdname pitchFunctions
+#' @rdname table
 #' @export
-table.pitchData <- function(..., generic = TRUE, simple = TRUE) {
+table.pitchData <- function(...) {
   vectors <- list(...)
   
   exclusives <- sapply(vectors, attr, which = 'Exclusive')
@@ -3906,11 +3907,12 @@ table.pitchData <- function(..., generic = TRUE, simple = TRUE) {
   vectors <- lapply(vectors,
                     \(x) {
                       exclusive <- attr(x, 'Exclusive')
+                      pitchAttr <- attr(x, 'pitchAttr')
                       x <- unclass(x)
                       
                       if (!is.null(exclusive)) {
                         gamut <- makeGamut(tonalInterval(x),
-                                           generic = generic, simple = simple,
+                                           generic = pitchAttr$generic, simple = pitchAttr$simple,
                                            deparser = match.fun(exclusive))
                         x <- factor(x, levels = gamut)
                       }
@@ -3926,7 +3928,7 @@ table.pitchData <- function(..., generic = TRUE, simple = TRUE) {
 makeGamut <- function(x = NULL, 
                       generic = FALSE, simple = FALSE,
                       octaveRange =  c(-2L, 2L), 
-                      enharmonicRange =  c(-4L, 7L),
+                      enharmonicRange =  if (generic) c(-1L, 5L) else c(-4L, 7L),
                       deparser = NULL) {
   
   if (!is.null(x)) {
@@ -3940,11 +3942,12 @@ makeGamut <- function(x = NULL,
   
   gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
   
-  if (!generic) gamut <- do.call('c', 
+  if (!simple) gamut <- do.call('c', 
                                  lapply(octaveRange[1]:octaveRange[2], 
                                         \(o) gamut + tint(o, 0L)))
   
-  gamut <- sort(gamut)
+  gamut <- gamut[order(tint2octave(gamut), tint2step(gamut, step.labels = NULL))]
+  # gamut <- sort(gamut)
   
   if (!is.null(deparser)) deparser(gamut) else gamut
 }

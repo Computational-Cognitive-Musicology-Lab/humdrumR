@@ -367,6 +367,34 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 
 
+### table() generic ----
+
+#' My new table function
+#'
+#' My new table function able to handle objects of class foo.
+#'
+#' @param x an object
+#' @param ... other arguments
+#'
+#' @rdname table
+#' @export
+table <- function(x, ..., exclude = if (useNA == "no") c(NA, NaN), 
+                  useNA = c("no", "ifany", "always"),
+                  dnn = list.names(list(x, ...)), deparse.level = 1) {
+  
+  x <- list(x, ...)
+  
+  x <- lapply(x, \(arg) if (inherits(arg, 'humdrum_tokens')) factorize(arg) else arg)
+  
+  do.call(base::table, c(x, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+}
+
+
+
+### Other ----
+
+
+
 allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))

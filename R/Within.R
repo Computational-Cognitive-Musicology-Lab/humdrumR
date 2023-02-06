@@ -1584,7 +1584,7 @@ parseResult <- function(results) {
   firstResult <- results[[lastResult]][[1]][[1]]
   
   keyLengths <- lengths(unlist(results[['_rowKey_']], recursive = FALSE))
-  resultLengths <- if (length(firstResult) && !is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
+  resultLengths <- if (length(firstResult) && !is.factor(firstResult) && !is.atomic(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
   
   
   
@@ -1607,7 +1607,9 @@ parseResult <- function(results) {
                       first <- result[[1]][[1]]
                       
                       humattr <- humdrumRattr(first)
-                      object <- length(first) && !is.factor(first) && is.object(first)
+                      class <- class(first)[1]
+                      object <- length(first) && !is.factor(first) && (is.object(first) && !is.atomic(first))
+                      
                       
                       # if (is.table(result) && length(result) == 0L) result <- integer(0)
                       result <- unlist(result, recursive = FALSE)
@@ -1619,7 +1621,7 @@ parseResult <- function(results) {
                       
                       humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
-                      result
+                      result %class% class
                     })
   
 

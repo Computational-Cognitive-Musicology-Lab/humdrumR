@@ -1652,14 +1652,14 @@ update_Exclusive.humdrumR <- function(hum, ...) {
 }
 update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     field <- field[1]
-    excluder <- attr(hum[[field]], 'Exclusive')
+    Exclusive <- attr(hum[[field]], 'Exclusive')
     
     exclusives <- hum[, Type == 'I' & grepl('^\\*\\*', Token)]
     if (!is.character(hum[[field]])) field <- 'Token'
-    if (!is.null(excluder)) {
+    if (!is.null(Exclusive)) {
         
         
-        hum[[field]][exclusives] <- paste0('**', excluder(gsub('\\*\\*', '', hum[['Token']][exclusives])))
+        hum[[field]][exclusives] <- paste0('**', Exclusive)
         hum$Null[exclusives] <- FALSE
     } else {
         hum[[field]][exclusives] <- paste0('**', hum$Exclusive[exclusives])

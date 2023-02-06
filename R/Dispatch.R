@@ -439,7 +439,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
-  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
+  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   
@@ -518,13 +518,13 @@ do_attr <- function(func, x, ...) {
 }
 
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr')
   if (is.null(value)) {
     for (att in known) attr(x, att) <- NULL
   } else {
