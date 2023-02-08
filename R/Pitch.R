@@ -2553,14 +2553,19 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 
 #' @rdname pitchParsing
 #' @export
-tonalInterval.factor <- function(x, ...) {
+tonalInterval.factor <- function(x, Exclusive = NULL, ...) {
   levels <- levels(x)
   
-  tints <- tonalInterval.character(levels, ...)
+  tints <- tonalInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
   
-  tints[as.integer(x)]
+  c(tint(NA), tints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
 }
 
+#' @rdname pitchParsing
+#' @export
+tonalInterval.token <- function(x, Exclusive = NULL, ...) {
+ tonalInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+}
 
 
 #### setAs tonal interval ####
@@ -2581,6 +2586,44 @@ setMethod('as.double',    'tonalInterval', tint2double)
 setMethod('as.integer',   'tonalInterval', tint2semits)
 setMethod('as.character', 'tonalInterval', tint2interval)
 setMethod('as.numeric',   'tonalInterval', tint2double)
+
+
+###################################################################### ###
+# Making pitch factor levels #############################################
+###################################################################### ###
+
+
+
+
+makeGamut <- function(x = NULL, 
+                      generic = FALSE, simple = FALSE,
+                      octaveRange =  c(0L, 0L),
+                      enharmonicRange =  if (generic) c(-1L, 5L) else c(-4L, 7L),
+                      octave.relative = FALSE,
+                      deparser = NULL) {
+  
+  if (!is.null(x)) {
+    x <- tonalInterval(x)
+    xOctave <- tint2octave(x)
+    octaveRange <- c(min(octaveRange[1], xOctave, na.rm = TRUE),
+                     max(octaveRange[2], xOctave, na.rm = TRUE))
+    enharmonicRange <- c(min(enharmonicRange[1], x@Fifth, na.rm = TRUE),
+                         max(enharmonicRange[2], x@Fifth, na.rm = TRUE))
+    
+  }
+  
+  gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
+  
+  if (!simple) gamut <- do.call('c', 
+                                lapply(octaveRange[1]:octaveRange[2], 
+                                       \(o) gamut + tint(o, 0L)))
+  
+  gamut <- gamut[order(tint2octave(gamut), tint2step(gamut, step.labels = NULL))]
+  # gamut <- sort(gamut)
+  
+  unique(if (!is.null(deparser)) deparser(gamut) else gamut)
+}
+
 
 
 ###################################################################### ### 
@@ -2767,7 +2810,6 @@ makePitchTransformer <- function(deparser, callname,
     
     # Exclusive
     parseArgs$Exclusive <- parseArgs$Exclusive %||% args...$Exclusive 
-    
     parseArgs   <- pitchArgCheck(parseArgs, !!callname)
     deparseArgs <- pitchArgCheck(c(args..., namedArgs), !!callname)
     
@@ -2790,11 +2832,11 @@ makePitchTransformer <- function(deparser, callname,
     ############# #
     ### Parse 
     ############# #
-    
     parsedTint <- do(tonalInterval, 
-                     c(list(x, memoize = memoize), parseArgs), 
+                     c(list(x), parseArgs), 
                      memoize = memoize, 
                      outputClass = 'tonalInterval')
+    
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
@@ -2809,14 +2851,19 @@ makePitchTransformer <- function(deparser, callname,
       if (inPlace) {
         output <- rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        output <- factor(output, levels = makeGamut(unique(parsedTint), generic = generic, simple = simple, deparser = !!deparser))
+        output <- token(output, Exclusive = callname,
+                        levels = if (is.character(output)) makeGamut(unique(output),
+                                                                     generic = generic, simple = simple,
+                                                                     octave.relative = deparseArgs$octave.relative,
+                                                                     deparser = !!deparser))
+        
       }
       
       # if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
     
     attr(output, 'Exclusive') <- callname
-    output %class% 'pitchData'
+    output 
     
   })) %class% 'pitchFunction'
 }
@@ -3151,8 +3198,8 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE),
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
-octave <- makePitchTransformer(tint2octave, 'octave', 'integer',
-                               removeArgs = c('generic', 'simple'))
+octave <- makePitchTransformer(tint2octave, 'octave', 'integer')
+                               # removeArgs = c('generic', 'simple'))
 
 
 
@@ -3893,80 +3940,4 @@ pythagorean.comma <- (-dd2)
 
 
 
-###################################################################### ###
-# pitchData S3 class #####################################################
-###################################################################### ###
 
-
-#' @rdname pitchFunctions
-#' @export
-print.pitchData <- function(x) {
-  exclusive <- attr(x, 'Exclusive')
-  x <- as.character(x)
-  attributes(x) <- NULL
-  cat('**', exclusive, '\n',sep = '')
-  invisible(print(x, quote = FALSE, na.print = '.'))
-}
-
-#' @export
-table.pitchData <- function(...) {
-  vectors <- list(...)
-  
-  exclusives <- sapply(vectors, attr, which = 'Exclusive')
-  
-  vectors <- lapply(vectors,
-                    \(x) {
-                      exclusive <- attr(x, 'Exclusive')
-                      pitchAttr <- attr(x, 'pitchAttr')
-                      x <- unclass(x)
-                      
-                      if (!is.null(exclusive)) {
-                        gamut <- makeGamut(tonalInterval(x),
-                                           generic = pitchAttr$generic, simple = pitchAttr$simple,
-                                           deparser = match.fun(exclusive))
-                        x <- factor(x, levels = gamut)
-                      }
-                      x
-                    })
-
-  output <- do.call('table', vectors)
-  names(dimnames(output)) <- paste0('**', exclusives)
-  
-  output %class% 'humdrumRtable'
-}
-
-makeGamut <- function(x = NULL, 
-                      generic = FALSE, simple = FALSE,
-                      octaveRange =  c(-2L, 2L), 
-                      enharmonicRange =  if (generic) c(-1L, 5L) else c(-4L, 7L),
-                      deparser = NULL) {
-  
-  if (!is.null(x)) {
-    xOctave <- tint2octave(x)
-    octaveRange <- c(min(octaveRange[1], xOctave, na.rm = TRUE),
-                     max(octaveRange[2], xOctave, na.rm = TRUE))
-    enharmonicRange <- c(min(enharmonicRange[1], x@Fifth, na.rm = TRUE),
-                         max(enharmonicRange[2], x@Fifth, na.rm = TRUE))
-    
-  }
-  
-  gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
-  gamut <- unique(c(unique(x), gamut))
-  
-  if (!simple) gamut <- do.call('c', 
-                                 lapply(octaveRange[1]:octaveRange[2], 
-                                        \(o) gamut + tint(o, 0L)))
-  
-  gamut <- gamut[order(tint2octave(gamut), tint2step(gamut, step.labels = NULL))]
-  # gamut <- sort(gamut)
-  
-  unique(if (!is.null(deparser)) deparser(gamut) else gamut)
-}
-
-#' @export
-barplot.humdrumRtable <- function(x) {
-  x <- unclass(x)
-  barplot(x, border = FALSE, space = 0, axes = FALSE)
-  axis(2, pretty(x), tick = FALSE, las =1)
-  
-}

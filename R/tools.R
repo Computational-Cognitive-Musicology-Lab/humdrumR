@@ -367,7 +367,6 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 
 
-### table() generic ----
 
 
 ### Other ----
@@ -2543,4 +2542,75 @@ strPartition <- function(str, split = '/') {
 
 
 
+## Token S3 class ----
 
+
+
+#' Humdrum tokens
+#' @export
+token <- function(x, Exclusive = NULL, levels = NULL, ...) {
+  
+  if (!is.null(levels) && class(x) == 'character') {
+    if (is.function(levels)) levels <- levels(x, ...)
+    x <- factor(x, levels = levels)
+  }
+  
+  
+  attr(x, 'Exclusive') <- Exclusive
+  
+  class(x) <- c('token', class(x))
+  x
+  
+  
+}
+
+
+#' @rdname token
+#' @export
+`[.token` <- function(x, ...) {
+  
+  result <- NextMethod('[')
+  attr(result, 'Exclusive') <- attr(x, 'Exclusive') 
+  class(result) <- class(x)
+  result
+  
+}
+
+#' @rdname token
+#' @export
+print.token <- function(x) {
+  exclusive <- attr(x, 'Exclusive')
+  if (!is.null(exclusive)) {
+    cat('**')
+    cat(exclusive, sep = '**')
+    cat('\n')
+  }
+  
+  x <- as.character(x)
+  attr(x, 'Exclusive') <- NULL
+  attr(x, 'levels') <- NULL
+  print(x, quote = FALSE, na.print = '.')
+}
+
+#' @rdname token
+#' @export
+format.token <- function(x, ...) {
+  x[is.na(x)] <- '.'
+  x
+}
+
+#' @rdname token
+#' @export
+c.token <- function(...) {
+  args <- list(...)
+  
+  exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
+  
+  args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
+  result <- do.call('c', args)
+  
+  attr(result, 'Exclusive') <- exclusives
+  class(result) <- c('token', class(result))
+  result
+  
+}

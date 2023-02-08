@@ -440,20 +440,20 @@ Notice that, if \code{octave.floor} is being used, all simple intervals are repr
 When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
 The following table illustrates:\tabular{lrrrrr}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   FF: \tab 6 \tab 6 \tab 18 \tab 18 \tab 6 \cr
-   GG: \tab 20 \tab 8 \tab 20 \tab 20 \tab 8 \cr
-   C: \tab 13 \tab 13 \tab 13 \tab 13 \tab 13 \cr
-   F: \tab 18 \tab 18 \tab 30 \tab 30 \tab 18 \cr
-   G: \tab 32 \tab 20 \tab 32 \tab 32 \tab 20 \cr
-   c: \tab 25 \tab 25 \tab 25 \tab 25 \tab 25 \cr
-   f: \tab 30 \tab 30 \tab 42 \tab 30 \tab 42 \cr
-   g: \tab 44 \tab 32 \tab 44 \tab 32 \tab 44 \cr
-   cc: \tab 37 \tab 37 \tab 37 \tab 37 \tab 37 \cr
-   ff: \tab 42 \tab 42 \tab 54 \tab 42 \tab 54 \cr
-   gg: \tab 56 \tab 44 \tab 56 \tab 44 \tab 56 \cr
-   ccc: \tab 49 \tab 49 \tab 49 \tab 49 \tab 49 \cr
-   fff: \tab 54 \tab 54 \tab NA \tab 54 \tab NA \cr
-   ggg: \tab NA \tab 56 \tab NA \tab 56 \tab NA \cr
+   FF: \tab 6 \tab 6 \tab 6 \tab 6 \tab 6 \cr
+   GG: \tab 20 \tab 8 \tab 8 \tab 8 \tab 8 \cr
+   C: \tab 13 \tab 13 \tab 1 \tab 1 \tab 13 \cr
+   F: \tab 18 \tab 18 \tab 18 \tab 18 \tab 18 \cr
+   G: \tab 32 \tab 20 \tab 20 \tab 20 \tab 20 \cr
+   c: \tab 25 \tab 25 \tab 13 \tab 13 \tab 25 \cr
+   f: \tab 30 \tab 30 \tab 30 \tab 18 \tab 42 \cr
+   g: \tab 44 \tab 32 \tab 32 \tab 20 \tab 44 \cr
+   cc: \tab 37 \tab 37 \tab 25 \tab 25 \tab 37 \cr
+   ff: \tab 42 \tab 42 \tab 42 \tab 30 \tab 54 \cr
+   gg: \tab 56 \tab 44 \tab 44 \tab 32 \tab 56 \cr
+   ccc: \tab 49 \tab 49 \tab 37 \tab 37 \tab 49 \cr
+   fff: \tab 54 \tab 54 \tab 54 \tab 42 \tab 66 \cr
+   ggg: \tab 68 \tab 56 \tab 56 \tab 44 \tab 68 \cr
 }
 
 }

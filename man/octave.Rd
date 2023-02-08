@@ -7,6 +7,8 @@
 octave(
   x,
   ...,
+  generic = FALSE,
+  simple = FALSE,
   octave.relative = FALSE,
   Key = NULL,
   transposeArgs = list(),
@@ -19,6 +21,10 @@ octave(
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
+
+\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
+
+\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
 
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
 the parser, deparser, and transposer.}

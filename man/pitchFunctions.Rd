@@ -2,11 +2,7 @@
 % Please edit documentation in R/Pitch.R
 \name{pitchFunctions}
 \alias{pitchFunctions}
-\alias{print.pitchData}
 \title{Translate between pitch representations.}
-\usage{
-\method{print}{pitchData}(x)
-}
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 

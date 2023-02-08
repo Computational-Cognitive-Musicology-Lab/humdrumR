@@ -172,7 +172,7 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
   
-  if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
+  if (((is.atomic(firstArg) && !is.table(firstArg)) || is.list(firstArg)) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
   Exclusive <- attr(firstArg, 'Exclusive')
