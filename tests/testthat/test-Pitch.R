@@ -122,6 +122,8 @@ test_that("Pitch functions return same output, regardless of input.", {
     expect_allequal(interval, inputs)
     expect_allequal(semits, inputs)
     expect_allequal(solfa, inputs)
+    expect_allequal(degree, inputs)
+    expect_allequal(deg, inputs)
     
 })
  
@@ -148,20 +150,21 @@ test_that("Functions are invertible", {
     expect_invertible(humdrumR:::interval2tint, humdrumR:::tint2interval, inputs$interval)
     expect_invertible(humdrumR:::solfa2tint, humdrumR:::tint2solfa, inputs$solfa)
     
+    expect_invertible_factor <-function(func1, func2, x) expect_equal(as.character(func2(func1(x))), x)
     # exported functions
-    expect_invertible(kern, kern, inputs$kern)
-    expect_invertible(kern, pitch, inputs$pitch)
-    expect_invertible(kern, solfa, inputs$solfa)
-    expect_invertible(kern, interval, inputs$interval)
-    expect_invertible(kern, helmholtz, inputs$helmholtz)
-    expect_invertible(kern, lilypond, inputs$lilypond)
+    expect_invertible_factor(kern, kern, inputs$kern)
+    expect_invertible_factor(kern, pitch, inputs$pitch)
+    expect_invertible_factor(kern, solfa, inputs$solfa)
+    expect_invertible_factor(kern, interval, inputs$interval)
+    expect_invertible_factor(kern, helmholtz, inputs$helmholtz)
+    expect_invertible_factor(kern, lilypond, inputs$lilypond)
     
-    expect_invertible(pitch, kern, inputs$kern)
-    expect_invertible(pitch, pitch, inputs$pitch)
-    expect_invertible(pitch, solfa, inputs$solfa)
-    expect_invertible(pitch, interval, inputs$interval)
-    expect_invertible(pitch, helmholtz, inputs$helmholtz)
-    expect_invertible(pitch, lilypond, inputs$lilypond)
+    expect_invertible_factor(pitch, kern, inputs$kern)
+    expect_invertible_factor(pitch, pitch, inputs$pitch)
+    expect_invertible_factor(pitch, solfa, inputs$solfa)
+    expect_invertible_factor(pitch, interval, inputs$interval)
+    expect_invertible_factor(pitch, helmholtz, inputs$helmholtz)
+    expect_invertible_factor(pitch, lilypond, inputs$lilypond)
     
     expect_invertible(interval, kern, inputs$kern)
     expect_invertible(interval, pitch, inputs$pitch)

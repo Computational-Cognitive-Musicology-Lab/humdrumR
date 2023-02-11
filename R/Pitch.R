@@ -172,7 +172,7 @@ setMethod("initialize",
 
 #' @rdname tonalIntervalS4
 #' @export
-tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL, octave.round = floor) {
+tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition = FALSE, Key = NULL) {
 
     if (missing(octave) || is.null(octave)) {
       octave <- -floor(round(tint2semits(tint(integer(length(LO5th)), LO5th) %% tint(-11L, 7L)) / 12, 10))
@@ -180,7 +180,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
     
   
     tint <- new('tonalInterval',  Octave = as.integer(octave),  Fifth  = as.integer(LO5th),  Cent   = as.numeric(cent)) 
-    tint <- tint %<-matchdim% (if (hasdim(LO5th) && size(tint) == size(LO5th)) LO5th else octave)
+    tint <- tint %<-matchdim% if (hasdim(LO5th) && size(tint) == size(LO5th)) LO5th 
     if (partition) tintPartition(tint, Key = Key, octave.round = octave.round) else tint
 }
 
@@ -349,8 +349,8 @@ setMethod('>=', signature = c('tonalInterval', 'tonalInterval'),
           })
 
 setMethod('Summary', signature = c('tonalInterval'),
-          function(x) {
-              semits2tint(callGeneric(tint2semits(x)))
+          function(x, na.rm = TRUE) {
+              semits2tint(callGeneric(tint2semits(x), na.rm = na.rm))
           })
 
 setMethod('abs', signature = c('tonalInterval'),
@@ -1010,7 +1010,7 @@ tint2octave <- function(x,
                         octave.offset = 0L, octave.maximum = Inf, octave.minimum = -Inf,
                         octave.relative = FALSE, octave.round = floor, ...) {
 
-  if (octave.relative) x <- delta(x, init = x[1])
+  if (octave.relative) x <- delta(x, init = tint(0L, 0L))
   #
   octn <- octave.offset + tintPartition_compound(x, octave.round = octave.round)$Octave@Octave
   octn <- pmin(pmax(octn, octave.minimum), octave.maximum)
@@ -1345,7 +1345,7 @@ tint2simplepitch <- partialApply(tint2tonalChroma,
 
 
 
-tint2kern <- function(x, compound = TRUE, Key = NULL, ...) {
+tint2kern <- function(x, compound = TRUE, octave.round = floor, Key = NULL, ...) {
   
   t2tC <- partialApply(tint2tonalChroma,
                        step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
@@ -1364,7 +1364,10 @@ tint2kern <- function(x, compound = TRUE, Key = NULL, ...) {
   
   
   if (compound) {
-    kern <- octave.kernstyle(kern, tint2octave(if (is.null(Key)) x else x + Key, octave.integer = TRUE), step.case = TRUE)
+    kern <- octave.kernstyle(kern, 
+                             tint2octave(if (is.null(Key)) x else x + Key, 
+                                         octave.round = octave.round,
+                                         octave.integer = TRUE), step.case = TRUE)
   }
   
   kern
@@ -1381,6 +1384,7 @@ tint2lilypond <- partialApply(tint2tonalChroma,
                               octave.round = if (octave.relative) round else floor,
                               octave.offset = 1L, 
                               sharp = 'is', flat = 'es',
+                              keyed = TRUE,
                               parts = c("step", 'species', "octave"))
 
 
@@ -1389,6 +1393,7 @@ tint2tonh <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), fla
   t2tC <- partialApply(tint2tonalChroma,
                        parts = c('step', 'species', 'octave'),
                        octave.integer = TRUE, octave.offset = 4L,
+                       keyed = TRUE,
                        sharp = 'is')
   
   
@@ -1400,7 +1405,7 @@ tint2tonh <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), fla
   str <- gsub(paste0(seven, natural), 'H', str)
   str <- gsub(paste0(seven, '(-?[0-9])'), 'H\\1', str)
   
-  str <- gsub(paste0(seven, flat), 'B', str)
+  str[str == paste0(seven, flat)] <- 'B'
   
   if (S) {
     str <- gsub('([AE])es', '\\1s', str)
@@ -1420,6 +1425,7 @@ tint2helmholtz <- function(x, ...) {
   t2tC <- partialApply(tint2tonalChroma,  
                        step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b'),
                        flat = 'b', parts = c('step', 'species', 'octave'),
+                       keyed = TRUE,
                        up = "'", down = ",", octave.offset = 1L, octave.integer = FALSE)
   
   notes <- t2tC(x, ...)
@@ -2595,33 +2601,70 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 
 
 
-makeGamut <- function(x = NULL, 
+makeGamut <- function(x,
                       generic = FALSE, simple = FALSE,
-                      octaveRange =  c(0L, 0L),
-                      enharmonicRange =  if (generic) c(-1L, 5L) else c(-4L, 7L),
-                      octave.relative = FALSE,
+                      deparseArgs = list(),
                       deparser = NULL) {
   
-  if (!is.null(x)) {
-    x <- tonalInterval(x)
-    xOctave <- tint2octave(x)
-    octaveRange <- c(min(octaveRange[1], xOctave, na.rm = TRUE),
-                     max(octaveRange[2], xOctave, na.rm = TRUE))
-    enharmonicRange <- c(min(enharmonicRange[1], x@Fifth, na.rm = TRUE),
-                         max(enharmonicRange[2], x@Fifth, na.rm = TRUE))
+  deparseArgs <- local({
+    deparseFormals <- formals(deparser)
+    deparseFormals[names(deparseArgs)] <- deparseArgs
+    deparseFormals$x <- deparseFormals$... <- NULL
+    lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
+  })
+  
+  min.octave <- (if (simple) 0L else -2L) 
+  max.octave <- (if (simple) 0L else 1L) 
+  min.lof    <- (if (generic) -1L else -4L) 
+  max.lof    <- (if (generic) 5L else 7L) 
+  
+  #
+  if (length(x)) {
+    deparseOctave <- deparseArgs
+    deparseOctave$octave.integer <- TRUE
+    octaves <- do.call(tint2octave, c(list(x), deparseOctave)) - deparseArgs$octave.offset
+    
+    
+    min.octave <- min(min.octave, octaves, na.rm = TRUE)
+    max.octave <- max(max.octave, octaves, na.rm = TRUE)
+    
+    lofs <- LO5th(x)
+    if (generic) lofs <- genericFifth(lofs)
+    min.lof <- min(min.lof, lofs, na.rm = TRUE)
+    max.lof <- max(max.lof, lofs, na.rm = TRUE)
     
   }
+
   
-  gamut <- tint( , enharmonicRange[1]:enharmonicRange[2])
   
-  if (!simple) gamut <- do.call('c', 
-                                lapply(octaveRange[1]:octaveRange[2], 
-                                       \(o) gamut + tint(o, 0L)))
+  if (!simple) {
+    if (deparseArgs$octave.relative %||% FALSE) { 
+      octave.round <- deparseArgs$octave.round %||% floor
+      gamut <- .unlist(lapply(min.lof:max.lof,
+             \(lof) {
+               tint <- tint( , lof)
+               tint + tint(unique(sort(c(octaves[lofs == lof], -1L:1L))), 0L)
+             }))
+      gamut <- gamut[order(tint2step(gamut, step.labels = NULL), LO5th(gamut), do.call(tint2octave, c(list(gamut))))]
+    } else {
+       gamut <- tint( , min.lof:max.lof)
+       gamut <- do.call('c',lapply(min.octave:max.octave, \(o) gamut + tint(o, 0L)))
+       gamut <- gamut[order(do.call(tint2octave, c(list(gamut))) * 7L + tint2step(gamut, step.labels = NULL))]
+      
+       # if (length(x)) gamut <- gamut[gamut >= min(x, na.rm = TRUE) & gamut <= max(x, na.rm = TRUE)]
+    }
+    
+  } else {
+    
+       gamut <- sort(tint( , min.lof:max.lof))
+  }
   
-  gamut <- gamut[order(tint2octave(gamut), tint2step(gamut, step.labels = NULL))]
-  # gamut <- sort(gamut)
+  # x <- tint(, x@Fifth) + tint(octaves,0)
   
-  unique(if (!is.null(deparser)) deparser(gamut) else gamut)
+  deparseArgs$octave.relative <- FALSE
+  deparseArgs$octave.round <- floor
+  deparseArgs$Key <- NULL
+  if (!is.null(deparser)) do.call(deparser, c(list(gamut, simple = simple, generic = generic), deparseArgs)) else gamut
 }
 
 
@@ -2836,7 +2879,6 @@ makePitchTransformer <- function(deparser, callname,
                      c(list(x), parseArgs), 
                      memoize = memoize, 
                      outputClass = 'tonalInterval')
-    
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
@@ -2851,18 +2893,17 @@ makePitchTransformer <- function(deparser, callname,
       if (inPlace) {
         output <- rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
+        gamut <- if (is.character(output)) makeGamut(parsedTint[!is.na(parsedTint)],
+                                                     generic = generic, simple = simple,
+                                                     deparseArgs = deparseArgs[-1],
+                                                     deparser = !!deparser)
         output <- token(output, Exclusive = callname,
-                        levels = if (is.character(output)) makeGamut(unique(output),
-                                                                     generic = generic, simple = simple,
-                                                                     octave.relative = deparseArgs$octave.relative,
-                                                                     deparser = !!deparser))
+                        levels = gamut)
         
       }
-      
       # if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
     
-    attr(output, 'Exclusive') <- callname
     output 
     
   })) %class% 'pitchFunction'

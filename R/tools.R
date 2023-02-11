@@ -2585,10 +2585,8 @@ print.token <- function(x) {
     cat(exclusive, sep = '**')
     cat('\n')
   }
-  
-  x <- as.character(x)
-  attr(x, 'Exclusive') <- NULL
-  attr(x, 'levels') <- NULL
+  class(x) <- setdiff(class(x), 'token')
+  if (is.factor(x)) x <- as.character(x)
   print(x, quote = FALSE, na.print = '.')
 }
 
