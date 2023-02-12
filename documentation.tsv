@@ -62,7 +62,7 @@ Regex.R	regexConstruction.Rd			1035	Yes?	Missing some	regexConstruction, capture
 Rhythm.R	bpm2sec.Rd	time functions		1093	Yes	Minimal	bpm2sec, sec2bpm, bpm2ms, ms2bpm		
 Rhythm.R	duration.Rd	rhythm functions		1899	Yes	Minimal	duration, quarters		
 Rhythm.R	ioi.Rd			3581	Yes	Yes	ioi, untie		
-Rhythm.R	noteValue.Rd	rhythm functions		2718	Yes	Minimal	noteValue		
+Rhythm.R	notehead.Rd	rhythm functions		2718	Yes	Minimal	noteValue		
 Rhythm.R	recip.Rd	rhythm functions		2952	Yes	Yes	recip		
 Rhythm.R	rhythmDeparsing.Rd			3443	Yes	Minimal	rhythmDeparsing		
 Rhythm.R	rhythmFunctions.Rd			4699	Yes	Minimal	rhythmFunctions		575

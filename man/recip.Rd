@@ -48,7 +48,7 @@ A "quarter note" is represented as the reciprocal of 1/4: simply \code{"4"}.
 Full reciprocal fractions can be specified: \code{"2\%3"} to indicate 3/2.
 The \verb{\%} separator can be changed using the \code{sep} argument.
 
-As in conventional \link[=noteValue]{note values}, "dots" can be added after a value to increase the duration by
+As in conventional \link[=notehead]{note values}, "dots" can be added after a value to increase the duration by
 the ratio of \code{(2 - (2^{-n}))}, where \code{n} is the number of dots.
 (One dot is 3/2; two dots is 7/4; etc.).
 }
@@ -59,6 +59,6 @@ or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{dep
 
 Other {rhythm functions}: 
 \code{\link{duration}()},
-\code{\link{noteValue}()}
+\code{\link{notehead}()}
 }
 \concept{{rhythm functions}}

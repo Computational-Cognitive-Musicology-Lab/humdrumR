@@ -256,9 +256,9 @@ rint2recip <- function(x, sep = '%') {
 
 
 
-rint2noteValue <- function(x) {
+rint2notehead <- function(x, ...) {
   
-    recip <- recip(x)
+    recip <- rint2recip(x)
     
     recip[recip == '000.'] <- '1%12'
     recip[recip == '000']  <- '1%8'
@@ -275,7 +275,7 @@ rint2noteValue <- function(x) {
             toEnv = TRUE)
     
     
-    symbols <- setNames(noteValue.unicode$Unicode, noteValue.unicode$Recip)
+    symbols <- setNames(notehead.unicode$Unicode, notehead.unicode$Recip)
     
     base <- symbols[denominator]
     
@@ -327,21 +327,21 @@ rint2noteValue <- function(x) {
 ### Numeric ####
 
 
-rint2duration <- function(x) {
+rint2duration <- function(x, ...) {
   as.double(x)
 } 
 
 
-rint2quarters <- function(x) {
+rint2quarters <- function(x, ...) {
   as.double(x) * 4
 }
 
-rint2seconds <- function(x, BPM = 60) {
+rint2seconds <- function(x, BPM = 60, ...) {
   rint2duration(x) * bpm2sec(BPM) * 4
 }
 
 
-rint2ms <- function(x, BPM = 60) {
+rint2ms <- function(x, BPM = 60, ...) {
   rint2duration(x) * bpm2ms(BPM) * 4
 }
 
@@ -386,7 +386,7 @@ rint2ms <- function(x, BPM = 60) {
 #' for example, call `?recip` to learn about [recip()].
 #' 
 #' 
-#' # Dispatch
+#' @section Dispatch:
 #' 
 #' The rhythm parser (`rhythmInterval()`) is a generic function, meaning it accepts a variety of inputs 
 #' and automatically "dispatches" the appropriate method for the input.
@@ -396,7 +396,7 @@ rint2ms <- function(x, BPM = 60) {
 #' Given either a `character` string or a number, `humdrumR` then uses either regular-expression matching or humdrum
 #' exclusive interpretation matching to dispatch specific parsing methods.
 #' 
-#' # Symbolic Parsing (`character`-string inputs)
+#' @section Symbolic Parsing:
 #' 
 #' Since humdrum data is inherently string-based, all our input data ultimately starts as `character` strings.
 #' (This includes character tokens with rhythm information embedded alongside other information; Details below.)
@@ -547,22 +547,22 @@ timesignature2rint <- function(x, sep = '/') {
 }
 
 
-noteValue2rint <- function(x, sep =" \U2215") {
+notehead2rint <- function(x, sep =" \U2215") {
   
   
   
   REparse(x, 
-          makeRE.noteValue(sep = sep, collapse = FALSE),
+          makeRE.notehead(sep = sep, collapse = FALSE),
           toEnv = TRUE)
   
   # 
-  symbols <- setNames(noteValue.unicode$Recip, noteValue.unicode$Unicode)
-  noteValue <- symbols[value]
+  symbols <- setNames(notehead.unicode$Recip, notehead.unicode$Unicode)
+  notehead <- symbols[value]
   dots  <- stringr::str_replace_all(dots, '\U1D16D\U2009', '.')
   
   multiplies <- ifelse(multiplies == '', '', paste0('%', multiplies))
   
-  recip <- paste0(noteValue, multiplies, dots)
+  recip <- paste0(notehead, multiplies, dots)
   
   rint <- recip2rint(recip)
   
@@ -629,13 +629,55 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
                                                   list('dur',                      makeRE.dur,           dur2rint),
                                                   list('any',                      makeRE.timeSignature, timesignature2rint),
                                                   list('duration',                 makeRE.double,        duration2rint),
-                                                  list('noteValue',                makeRE.noteValue(),   noteValue2rint),
+                                                  list('notehead',                makeRE.notehead(),   notehead2rint),
                                                   funcName = 'rhythmInterval.character',
                                                   outputClass = 'rational')
+
+#' @rdname rhythmParsing
+#' @export
+rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
+  levels <- levels(x)
+  
+  rints <- rhythmInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  
+  c(rational(NA), rints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
+}
+
+#' @rdname rhythmParsing
+#' @export
+rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
+  rhythmInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+}
 
 #### setAs rhythmInterval ####
 
 # See "setAs rational"
+
+###################################################################### ###
+# Making duration factor levels ##########################################
+###################################################################### ###
+
+makeRamut <- function(x, deparseArgs = list(), deparser) {
+  deparseArgs <- local({
+    deparseFormals <- formals(deparser)
+    deparseFormals[names(deparseArgs)[names(deparseArgs) %in% names(formals)]] <- deparseArgs[names(deparseArgs) %in% names(formals)]
+    deparseFormals$x <- deparseFormals$... <- NULL
+    lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
+  })
+  
+  gamut <- unique(x)
+  if (length(gamut) > 1L) {
+    num1 <- numerator(gamut) == 1L
+    simple <- gamut[num1]
+    simple <- c(simple, rational(rep(1L, sum(!num1)), denominator(gamut[!num1])))
+    gamut <- sort(unique(c(x, 
+                           harmonicInterpolate(min(simple), max(simple), includeEdges = TRUE, bigFirst = TRUE),
+                           harmonicInterpolate(min(simple), max(simple), includeEdges = TRUE, bigFirst = FALSE))))
+  }
+  
+  if (!is.null(deparser)) do.call(deparser, c(list(gamut), deparseArgs)) else gamut
+}
+
 
 ###################################################################### ### 
 # Translating Rhythm Representations (x2y) ###############################
@@ -643,7 +685,7 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
 
 ## Rhythm function documentation ####
 
-rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note values', 'noteValue' = 'traditional note-value symbols'),
+rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note values', 'notehead' = 'traditional note-value symbols'),
                                        Numeric = c('duration' = 'Whole notes', 'quarters' = 'quarter notes/crotchets')),
                         Ametric = list(Symbolic = c('dur' = 'durations of time'),
                                        Numeric = c('seconds', 'ms' = 'milliseconds'))
@@ -690,7 +732,7 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' To read the details of the parsing step, read [this][rhythmParsing].
 #' To read the details of the "deparsing" step, read [this][rhythmDeparsing].
 #' To read more details about each specific function, click on the links in the list above, 
-#' or type `?func` in the R command line: for example, `?noteValue`.
+#' or type `?func` in the R command line: for example, `?notehead`.
 #' 
 #' ## Grace notes
 #' 
@@ -817,14 +859,17 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     if (deparse && !is.null(output)) {
       dispatch <- attr(parsedRint, 'dispatch')
       
-      if (inPlace) output <- rePlace(output, dispatch)
+      if (inPlace) {
+        output <- rePlace(output, dispatch)
+      } else {
+        gamut <- if (is.character(output)) makeRamut(parsedRint[!is.na(parsedRint)],
+                                                     deparseArgs = deparseArgs[-1],
+                                                     deparser = !!deparser)
+        output <- token(output, Exclusive = callname,
+                        levels = gamut)
+      }
       
-      
-      if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
-    
-    
-
     
     output
     
@@ -852,7 +897,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' The `%` separator can be changed using the `sep` argument.
 #' 
 #' 
-#' As in conventional [note values][noteValue()], "dots" can be added after a value to increase the duration by 
+#' As in conventional [note values][notehead()], "dots" can be added after a value to increase the duration by 
 #' the ratio of `(2 - (2^{-n}))`, where `n` is the number of dots.
 #' (One dot is 3/2; two dots is 7/4; etc.).
 #' 
@@ -904,7 +949,7 @@ quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' 
 #' ```
 #' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
-#' with(chorales, barplot(table(noteValue(Token)), cex.names = 2))
+#' with(chorales, barplot(table(notehead(Token)), cex.names = 2))
 #' 
 #' ```
 #' 
@@ -915,7 +960,7 @@ quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
 #' @export 
-noteValue <- makeRhythmTransformer(rint2noteValue, 'noteValue')
+notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 
 
 #' Clock-time representations of duration
@@ -1034,7 +1079,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   }
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'noteValue'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'))
   
   if (is.character(output)){
     if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
@@ -1079,7 +1124,7 @@ untie <- function(x, open = '[', close = ']', ...,
   
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'noteValue'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'))
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))
   if (is.character(output)){

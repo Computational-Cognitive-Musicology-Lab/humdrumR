@@ -2584,6 +2584,7 @@ print.token <- function(x) {
     cat('**')
     cat(exclusive, sep = '**')
     cat('\n')
+    attr(x, 'Exclusive') <- NULL
   }
   class(x) <- setdiff(class(x), 'token')
   if (is.factor(x)) x <- as.character(x)

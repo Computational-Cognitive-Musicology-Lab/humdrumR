@@ -427,11 +427,11 @@ The following table illustrates how different \code{octave.round} arguments "par
    +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
    +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
    +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
-   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
-   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
-   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
-   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
-   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab NA - P5 \tab +P8  + P4 \tab NA - P5 \cr
+   +P12: \tab NA - P4 \tab +P8  + P5 \tab NA - P4 \tab +P8  + P5 \tab NA - P4 \cr
+   NA: \tab NA + P1 \tab NA + P1 \tab NA + P1 \tab NA + P1 \tab NA + P1 \cr
+   NA: \tab NA + P4 \tab NA + P4 \tab NA - P5 \tab NA + P4 \tab NA - P5 \cr
+   NA: \tab NA - P4 \tab NA + P5 \tab NA - P4 \tab NA + P5 \tab NA - P4 \cr
 }
 
 
@@ -440,20 +440,20 @@ Notice that, if \code{octave.floor} is being used, all simple intervals are repr
 When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
 The following table illustrates:\tabular{lrrrrr}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   FF: \tab 54 \tab 54 \tab 66 \tab 66 \tab 54 \cr
-   GG: \tab 68 \tab 56 \tab 68 \tab 68 \tab 56 \cr
-   C: \tab 61 \tab 61 \tab 61 \tab 61 \tab 61 \cr
-   F: \tab 66 \tab 66 \tab 78 \tab 78 \tab 66 \cr
-   G: \tab 80 \tab 68 \tab 80 \tab 80 \tab 68 \cr
-   c: \tab 73 \tab 73 \tab 73 \tab 73 \tab 73 \cr
-   f: \tab 78 \tab 78 \tab 90 \tab 78 \tab 90 \cr
-   g: \tab 92 \tab 80 \tab 92 \tab 80 \tab 92 \cr
-   cc: \tab 85 \tab 85 \tab 85 \tab 85 \tab 85 \cr
-   ff: \tab 90 \tab 90 \tab 102 \tab 90 \tab 102 \cr
-   gg: \tab 104 \tab 92 \tab 104 \tab 92 \tab 104 \cr
-   ccc: \tab 97 \tab 97 \tab 97 \tab 97 \tab 97 \cr
-   fff: \tab 102 \tab 102 \tab 114 \tab 102 \tab 114 \cr
-   ggg: \tab 116 \tab 104 \tab 116 \tab 104 \tab 116 \cr
+   FF: \tab 6 \tab 6 \tab 18 \tab 18 \tab 6 \cr
+   GG: \tab 20 \tab 8 \tab 20 \tab 20 \tab 8 \cr
+   C: \tab 13 \tab 13 \tab 13 \tab 13 \tab 13 \cr
+   F: \tab 18 \tab 18 \tab 30 \tab 30 \tab 18 \cr
+   G: \tab 32 \tab 20 \tab 32 \tab 32 \tab 20 \cr
+   c: \tab 25 \tab 25 \tab 25 \tab 25 \tab 25 \cr
+   f: \tab 30 \tab 30 \tab 42 \tab 30 \tab 42 \cr
+   g: \tab 44 \tab 32 \tab 44 \tab 32 \tab 44 \cr
+   cc: \tab 37 \tab 37 \tab 37 \tab 37 \tab 37 \cr
+   ff: \tab 42 \tab 42 \tab 54 \tab 42 \tab 54 \cr
+   gg: \tab 56 \tab 44 \tab 56 \tab 44 \tab 56 \cr
+   NA: \tab 49 \tab 49 \tab 49 \tab 49 \tab 49 \cr
+   NA: \tab 54 \tab 54 \tab 66 \tab 54 \tab 66 \cr
+   NA: \tab 68 \tab 56 \tab 68 \tab 56 \tab 68 \cr
 }
 
 }

@@ -2824,7 +2824,7 @@ makePitchTransformer <- function(deparser, callname,
                   generic = FALSE, simple = FALSE, octave.relative = FALSE, 
                   Key = NULL),
             extraArgs,
-            alist( transposeArgs = list(),
+            alist(transposeArgs = list(),
                   parseArgs = list(), 
                   inPlace = FALSE))
 
@@ -2901,7 +2901,6 @@ makePitchTransformer <- function(deparser, callname,
                         levels = gamut)
         
       }
-      # if (!is.null(parseArgs$Exclusive)) humdrumRattr(output) <- list(Exclusive = makeExcluder(dispatch$Exclusives, !!callname))
     }
     
     output 
