@@ -2613,3 +2613,62 @@ c.token <- function(...) {
   result
   
 }
+
+
+## Plotting defaults stuff ----
+
+#' @export
+plot <- function(x, y, ..., col = sample(flatly[1:5], 1), pch = 16, cex = .5,
+                 log = "",
+                 xaxis, yaxis) {
+  
+  if (is.logical(log)) log <- if (log[1]) 'y' else ''
+  
+  base::plot(x, y, ..., col = col, pch = pch, cex = cex, axes = FALSE)
+  
+  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  axis(2, pretty(y, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+}
+
+#' @export
+hist <- function(x, ..., col = flatly[1],
+                 xaxis, yaxis, 
+                 freq = TRUE, probability = !freq) {
+  
+  
+  y <- graphics::hist(x, ..., 
+                      col = col, border = flatly[5],
+                      axes = FALSE, freq = freq, probability = probability)
+  
+  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  
+  y <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
+  axis(2, y, tick = FALSE, las = 1)
+  invisible(y)
+}
+
+#' @export
+barplot <- function(height,  ..., 
+                    beside = TRUE, col = NULL,
+                    ylim = NULL, log = '', border = NA, yaxis, 
+                    freq = TRUE, probability = !freq) {
+  if (!freq) {
+    height <- height / sum(height)
+    if (is.null(ylim)) ylim <- c(0, 1)
+    yaxis <- pretty(ylim, n = 10L, min.n = 5L)
+  }
+  
+  if (is.null(col)) {
+    col <- flatly[1:(if (hasdim(height) && length(dim(height)) > 1L) nrow(height) else length(height))]
+  }
+  
+  if (is.logical(log)) log <- if (log[1]) 'y' else ''
+  
+  graphics::barplot(height, ..., beside = beside, col = col, ylim = ylim, border = border, axes = FALSE, log = log)
+  
+  
+  if (missing(yaxis)) yaxis <- pretty(c(0, height), n = 10L, min.n = 5L)
+  axis(2, yaxis, las = 1, tick = FALSE)
+  
+}
+

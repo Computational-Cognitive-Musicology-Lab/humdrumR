@@ -142,3 +142,16 @@ NULL
 #' 
 #' @name partialMatching
 NULL
+
+
+# Default settings ----
+
+
+## Bootswatch flatly in plots ----
+
+flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50',
+            palette.colors(9))
+setHook('plot.new', function() {
+  par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5],
+      col.lab = flatly[5])
+  })
