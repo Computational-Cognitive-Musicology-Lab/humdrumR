@@ -431,32 +431,56 @@ shortFilenames <- function(fileFrame) {
 #' @param ... character: One or more patterns used to identify files to read.
 #' For details: see the "REpath-patterns" section below.
 #' 
-#' @param recursive
-#' logical: If `TRUE`, the final part of the search pattern (i.e., the file search) is searched for
-#' recursively through all sub directories.
+#' @param recursive *** Whether the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories. ***
 #' 
-#' @param allowDuplicates `logical` of length one, indicating what should happen if multiple search patterns match the same files.
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`; must be length `1`.
+#' 
+#' @param allowDuplicates ***Indicating what should happen if multiple search patterns match the same files.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`; must be length `1`.
+#' 
 #' If `allowDuplicates = TRUE`,
 #' any such files are read multiple times, grouped into their respective corpora by the `Label` field. 
 #' If `allowDuplicates = FALSE`, any redundant files are only read into the corpus of the first pattern they 
 #' match.
 #' 
-#' @param contains `character`. If `!is.null(contains)`, the `contains` argument is
+#' @param contains *** REGEX for filtering files. ***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be `character`. 
+#' 
+#' If `!is.null(contains)`, the `contains` argument is
 #' is treated as regular expressions: only files which contain matches to
 #'  *all* of these regular expressions are read.
 #' Thus, `readHumdrum('.*krn$', contains = "EEE")` will only read kern files which contain matches 
 #' to `"EE"`---which is kern for the E two octaves below middle C (or lower).
 #' 
 #' 
-#' @param verbose
-#' logical: If `TRUE`, the names of matching files are printed before parsing begins. This is very
+#' @param verbose *** Whether to print filename while reading or not. ***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`; must be length `1`.
+#' 
+#' If `TRUE`, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
 #' 
-#' @param tandems `character`. This argument controls which, if any, tandem interpretations 
-#' are parsed into their own fields. The default value is `"known"`. 
+#' @param tandems ***Controls which, if any, tandem interpretations are parsed into their own fields. ***
 #' 
-#' @param reference `character`. This argument controls which, if any, reference records
-#' are parsed into their own fields. The default value is `"all"`. 
+#' Defaults to `"known"`. 
+#' 
+#' Must be `character`.
+#' 
+#' @param reference ***Controls which, if any, reference recordsare parsed into their own fields.***  
+#' 
+#' Defaults to `"all"`. 
+#' 
+#' Must be `character`.
 #' 
 #' @section REpath-patterns:
 #' 
@@ -1122,10 +1146,17 @@ parseTandem <- function(tandems, known) {
 #' For example, if we wanted to manually extract the key information from the `Tandem` field 
 #' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
 #' 
-#' @param Tandem Should always be the `Tandem` field from a [humdrumR object][humdrumRclass].
-#' @param regex (`character`, `length == 1`). A single regular expression to match against the 
-#'   tandem interpretations. You should not include a `*` at the beginning---the `*` marker
-#'   for tandem interpretations are already removed from the `Tandem` field.
+#' @param Tandem *** The `Tandem` field from a [humdrumR object][humdrumRclass] ***
+#' 
+#' Must be `atomic`.
+#' 
+#' Should always be the `Tandem` field from a [humdrumR object][humdrumRclass].
+#' 
+#' @param regex ***A single regular expression to match against the tandem interpretations.***
+#'   
+#' Must be `character`; must be length `1`.
+#'   
+#' You should not include a `*` at the beginning---the `*` marker for tandem interpretations are already removed from the `Tandem` field.
 #' 
 #' @seealso {Read more about tandem interpretations in `humdrumR` in the 
 #' [humdrum table docs][humTable]. [readHumdrum()] also preprocesses

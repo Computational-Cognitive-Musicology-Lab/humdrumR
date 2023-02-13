@@ -54,8 +54,14 @@
 #' the remaining files are renumbered from `2:10` to `1:9`.
 #' Spine renumbering works the same, except it is done independently *within* each file.
 #' 
-#' @param x A [humdrumR data object][humdrumRclass].
-#' @param humdrumR A [humdrumR data object][humdrumRclass].
+#' @param x ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' 
+#' Must be `humdrumR`.
+#' 
+#' @param humdrumR ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' 
+#' Must be `humdrumR`.
+#' 
 #' @param ... Arbitrary expressions passed to [with(in)][withinHumdrum]---the "within" expression(s) must evaluate to
 #'   full-length `logical` values.
 #' 

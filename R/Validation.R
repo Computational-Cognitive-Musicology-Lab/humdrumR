@@ -61,7 +61,12 @@
 #' This is mainly used to pass [regex file-path search patterns][readHumdrum()], but may also be used to pass
 #' the `recursive` and/or `contains` arguments to [findHumdrum()].
 #'
-#' @param errorReport.path (`character`, `length == 1`) A directory path where to write error report files.
+#' @param errorReport.path ***A directory path where to write error report files.***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be `character`; must be length `1`.
+#' 
 #' If `NULL` (the default), no error report files are written.
 #'
 #' @export
