@@ -2656,7 +2656,8 @@ makeGamut <- function(x,
     
   } else {
     
-       gamut <- sort(tint( , min.lof:max.lof))
+       gamut <- tint( , min.lof:max.lof)
+       gamut <- gamut[order(tint2step(gamut, step.labels = NULL), min.lof:max.lof)]
   }
   
   # x <- tint(, x@Fifth) + tint(octaves,0)
