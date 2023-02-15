@@ -2129,6 +2129,8 @@ showFields <-  function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpret
           fields$Name[activefield] <- gsub('^ ', '*', fields$Name[activefield])
           fields$Name <- stringr::str_pad(fields$Name, width = max(nchar(fields$Name)), side = 'right')
 
+          fields$Class <- sapply(fields$Class,  
+                                 \(classes) paste(setdiff(classes, 'token'), collapse = ','))
           fields$Print <- paste0(fields$Name, ' :: ', fields$Class)
 
           fields[ ,
