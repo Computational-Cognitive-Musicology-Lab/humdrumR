@@ -252,16 +252,20 @@ rint2recip <- function(x, sep = '%') {
 }
 
 
-rint2grid <- function(x, tick = tatum.rational(x), sep = '', 
-                      on = '1', off = '0') {
-  x <- x / tick
+rint2grid <- function(x, tick = min(rational(1, 16), tatum.rational(x)), sep = '', 
+                      on = 'X', off = '0', offbeat = TRUE) {
+  x <- x / rhythmInterval(tick)
   
   ontick <- x == round(x)
   
   n <- numerator(round(x))
   
   
-  paste0(on, strrep(off, n - 1L))
+  grid <- paste0(ifelse(ontick, on, off), strrep(off, n - 1L))
+  
+  if (!offbeat) grid[!ontick] <- NA_character_
+  
+  grid
   
 }
 
@@ -561,17 +565,11 @@ timesignature2rint <- function(x, sep = '/') {
 }
 
 
-grid2rint <- function(x, tick = '16', sep = '', on = '1', off = '0', grid.split = FALSE) {
+grid2rint <- function(x, tick = '16', sep = '', on = '1', off = '0') {
   x <- strsplit(x, split = sep)
   
-  n <- if (grid.split) {
-    unlist(Map(x, lengths(x),  f = \(g, len) diff(c(which(g == on), len + 1L))))
-    
-  } else {
-    lengths(x)
-  }
+  lengths(x) * rhythmInterval(tick)
   
-  n * rhythmInterval(tick)
 }
 
 noteValue2rint <- function(x, sep =" \U2215") {
