@@ -775,6 +775,12 @@ makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
     
 }
 
+makeRE.grid <- function(..., sep = '', on = '1', off = '0', grid.split = FALSE) {
+  RE <- paste0(on, '(', sep, off, ')*')
+  if (grid.split) RE <- paste0('(', RE, ')+')
+  
+  setNames(RE, 'grid')
+}
 
 noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
                                 Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 

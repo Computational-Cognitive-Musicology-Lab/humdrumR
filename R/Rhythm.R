@@ -251,6 +251,20 @@ rint2recip <- function(x, sep = '%') {
 
 }
 
+
+rint2grid <- function(x, tick = tatum.rational(x), sep = '', 
+                      on = '1', off = '0') {
+  x <- x / tick
+  
+  ontick <- x == round(x)
+  
+  n <- numerator(round(x))
+  
+  
+  paste0(on, strrep(off, n - 1L))
+  
+}
+
 ###As unicode duration string
 
 
@@ -547,6 +561,19 @@ timesignature2rint <- function(x, sep = '/') {
 }
 
 
+grid2rint <- function(x, tick = '16', sep = '', on = '1', off = '0', grid.split = FALSE) {
+  x <- strsplit(x, split = sep)
+  
+  n <- if (grid.split) {
+    unlist(Map(x, lengths(x),  f = \(g, len) diff(c(which(g == on), len + 1L))))
+    
+  } else {
+    lengths(x)
+  }
+  
+  n * rhythmInterval(tick)
+}
+
 noteValue2rint <- function(x, sep =" \U2215") {
   
   
@@ -626,6 +653,7 @@ rhythmInterval.numeric <- makeHumdrumDispatcher(list('duration' ,         NA,  d
 #' @rdname rhythmParsing
 #' @export
 rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'), makeRE.recip,         recip2rint),
+                                                  list('grid',                     makeRE.grid,          grid2rint),
                                                   list('dur',                      makeRE.dur,           dur2rint),
                                                   list('any',                      makeRE.timeSignature, timesignature2rint),
                                                   list('duration',                 makeRE.double,        duration2rint),
@@ -884,6 +912,13 @@ duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 #' @rdname duration
 #' @export 
 quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
+
+
+#' Drum-machine grid representation of rhythm
+#' 
+#' @rdname grid
+#' @export
+grid <- makeRhythmTransformer(rint2grid, 'grid', 'character')
 
 #' Note value representation of duration
 #' 
