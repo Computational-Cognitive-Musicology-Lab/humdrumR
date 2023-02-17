@@ -432,6 +432,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
   attr(result, 'dispatch') <-  list(Original = str, 
                                     Regexes = unlist(dispatchDF$regex[unique(dispatch)]),
                                     Segments = dispatch,
+                                    Key = list(...)$Key,
                                     Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[unique(dispatch)])
   result
 }
@@ -474,6 +475,7 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   attr(result, 'dispatch') <-  list(Original = x, 
                                     Regexes = unlist(dispatchDF$regex),
                                     Segments = Exclusive, 
+                                    Key = args$Key,
                                     Exclusives = exclusives)
   result
   
@@ -518,13 +520,13 @@ do_attr <- function(func, x, ...) {
 }
 
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key')
   if (is.null(value)) {
     for (att in known) attr(x, att) <- NULL
   } else {

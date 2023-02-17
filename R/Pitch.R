@@ -2344,7 +2344,6 @@ tonalChroma2tint <- function(x,
  if (keyed && !is.null(Key)) {
   Key <- rep(Key, length.out = length(tint))
   tint[!is.na(Key)] <- tint[!is.na(Key)] - Key[!is.na(Key)]
-  
  }
  
  tint
@@ -2600,11 +2599,46 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 
 
 
-
-makeGamut <- function(x,
-                      generic = FALSE, simple = FALSE,
-                      deparseArgs = list(),
-                      deparser = NULL) {
+#' Make a pitch gamut
+#' 
+#' This function generates a [gamut](https://en.wikipedia.org/wiki/Gamut):
+#' a ordered range of notes.
+#' 
+#' @param generic Should the gamut include only generic intervals?
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: a on/off switch.
+#'
+#' 
+#' @param simple Should the gamut be constrained to one octave?
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: a on/off switch.
+#' 
+#' 
+#' @param tints ***An optional reference vector to base the gamut on.***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be a `NULL` or a [tonalInterval()].
+#' 
+#' @param deparser A [pitch function][pitchFunctions] to format the output.
+#' 
+#' Defaults to [kern()].
+#' 
+#' Must be a [pitch function][pitchFunctions].
+#' 
+#' @export
+gamut <- function(generic = FALSE, simple = FALSE,
+                  min.octave, max.octave, min.lof, max.lof,
+                  tints = NULL,
+                  deparser = kern, deparseArgs = list()) {
+  
+  checks(generic, xTF)
+  checks(simple, xTF)
+  checks(deparser, xclass('function'))
   
   deparseArgs <- local({
     deparseFormals <- formals(deparser)
@@ -2613,27 +2647,31 @@ makeGamut <- function(x,
     lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
   })
   
-  min.octave <- (if (simple) 0L else -2L) 
-  max.octave <- (if (simple) 0L else 1L) 
-  min.lof    <- (if (generic) -1L else -4L) 
-  max.lof    <- (if (generic) 5L else 7L) 
-  
+  # empty missing -> use default
+  # empty notmissing -> use given
+  # notempty missing -> use min(default, notempty)
+  # notempty notmissing -> use given
   #
-  if (length(x)) {
+  if (length(tints)) {
     deparseOctave <- deparseArgs
     deparseOctave$octave.integer <- TRUE
-    octaves <- do.call(tint2octave, c(list(x), deparseOctave)) - deparseArgs$octave.offset
+    offset <- deparseArgs$octave.offset %||% 0L
+    octaves <- do.call(tint2octave, c(list(tints), deparseOctave)) - deparseArgs$octave.offset
     
     
-    min.octave <- min(min.octave, octaves, na.rm = TRUE)
-    max.octave <- max(max.octave, octaves, na.rm = TRUE)
-    
-    lofs <- LO5th(x)
+    lofs <- LO5th(tints)
     if (generic) lofs <- genericFifth(lofs)
-    min.lof <- min(min.lof, lofs, na.rm = TRUE)
-    max.lof <- max(max.lof, lofs, na.rm = TRUE)
     
+  } else {
+    octaves <- lofs <- NULL
   }
+  
+  if (missing(min.octave)) min.octave <- min(if (simple) 0L else -1L, octaves, na.rm = TRUE)
+  if (missing(max.octave)) max.octave <- max(if (simple) 0L else 1L, octaves, na.rm = TRUE)
+  if (missing(min.lof))    min.lof    <- min(if (generic) -1L else -4L, lofs, na.rm = TRUE)
+  if (missing(max.lof))    max.lof    <- max(if (generic) 5L else 7L, lofs, na.rm = TRUE)
+  
+
 
   
   
@@ -2741,7 +2779,8 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' @param Key (a [diatonicSet] or something coercable to `diatonicSet`, `length == 1 | length == length(x)`) The input `Key` used by
 #'        the parser, deparser, and transposer.
 #' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
-#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose].
+#' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose()].
+#' @param factorArgs (`list`) `factorArgs` can be a list of arguments that are passed to a special call to [gamut()].
 #' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
 #'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
@@ -2827,6 +2866,8 @@ makePitchTransformer <- function(deparser, callname,
             extraArgs,
             alist(transposeArgs = list(),
                   parseArgs = list(), 
+                  as.factor = TRUE,
+                  factorArgs = list(),
                   inPlace = FALSE))
 
   if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
@@ -2839,11 +2880,14 @@ makePitchTransformer <- function(deparser, callname,
     checks(inPlace, xTF)
     checks(parseArgs, xclass('list'))
     checks(transposeArgs, xclass('list'))
+    checks(factorArgs, xclass('list'))
     
     # parse out args in ... and specified using the syntactic sugar parse() or transpose()
-    c('args...', 'parseArgs', 'transposeArgs') %<-% specialArgs(rlang::enquos(...), 
-                                                                parse = parseArgs, 
-                                                                transpose = transposeArgs)
+    c('args...', 'parseArgs', 
+      'transposeArgs', 'factorArgs') %<-% specialArgs(rlang::enquos(...), 
+                                                      parse = parseArgs, 
+                                                      transpose = transposeArgs,
+                                                      factor = factorArgs)
     formalArgs <- list(!!!fargcall)
     namedArgs <- formalArgs[.names(formalArgs) %in% .names(as.list(match.call())[-1])]
     # There are four kinds of arguments: 
@@ -2880,6 +2924,7 @@ makePitchTransformer <- function(deparser, callname,
                      c(list(x), parseArgs), 
                      memoize = memoize, 
                      outputClass = 'tonalInterval')
+    
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
@@ -2894,10 +2939,11 @@ makePitchTransformer <- function(deparser, callname,
       if (inPlace) {
         output <- rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        gamut <- if (is.character(output)) makeGamut(parsedTint[!is.na(parsedTint)],
-                                                     generic = generic, simple = simple,
-                                                     deparseArgs = deparseArgs[-1],
-                                                     deparser = !!deparser)
+        gamut <- if (is.character(output) && as.factor) do.call('gamut',
+                                                                c(list(tints = parsedTint[!is.na(parsedTint)] + (attr(parsedTint, 'dispatch')$Key %||% P1),
+                                                                       generic = generic, simple = simple,
+                                                                       deparser = !!deparser, deparseArgs = deparseArgs[-1]),
+                                                                  factorArgs))
         output <- token(output, Exclusive = callname,
                         levels = gamut)
         

@@ -2658,13 +2658,16 @@ barplot <- function(height,  ...,
     yaxis <- pretty(ylim, n = 10L, min.n = 5L)
   }
   
+  twoD <- hasdim(height) && length(dim(height)) > 1L
+  
   if (is.null(col)) {
-    col <- flatly[1:(if (hasdim(height) && length(dim(height)) > 1L) nrow(height) else length(height))]
+    col <- flatly[if (twoD) 1:nrow(height) else 1]
   }
   
   if (is.logical(log)) log <- if (log[1]) 'y' else ''
   
-  graphics::barplot(height, ..., beside = beside, col = col, ylim = ylim, border = border, axes = FALSE, log = log)
+  graphics::barplot(height, ..., beside = beside, legend.text = twoD, 
+                    col = col, ylim = ylim, border = border, axes = FALSE, log = log)
   
   
   if (missing(yaxis)) yaxis <- pretty(c(0, height), n = 10L, min.n = 5L)
