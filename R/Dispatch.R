@@ -196,7 +196,9 @@ do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs 
   humattr <- humdrumRattr(result)
   
   result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
-  if ('dispatch' %in% names(humattr)) humattr$dispatch$Original <- firstArg
+  if ('dispatch' %in% names(humattr)) {
+    humattr$dispatch$Original <- firstArg
+  }
   humdrumRattr(result) <- humattr
   
   result
@@ -432,7 +434,6 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
   attr(result, 'dispatch') <-  list(Original = str, 
                                     Regexes = unlist(dispatchDF$regex[unique(dispatch)]),
                                     Segments = dispatch,
-                                    Key = list(...)$Key,
                                     Exclusives = sapply(dispatchDF$Exclusives, '[', 1)[unique(dispatch)])
   result
 }
@@ -475,7 +476,6 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   attr(result, 'dispatch') <-  list(Original = x, 
                                     Regexes = unlist(dispatchDF$regex),
                                     Segments = Exclusive, 
-                                    Key = args$Key,
                                     Exclusives = exclusives)
   result
   

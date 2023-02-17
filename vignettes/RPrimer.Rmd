@@ -322,6 +322,87 @@ Generally, it is best to work with vectors that are all the same length and/or s
 so you can avoid worrying about how exactly R is "recycling" values.
 This brings us too...
 
+### Factors
+
+Factors are a useful modification of `character` vectors, which keep track of all the possible values ("levels")
+you expect in your data, *even when some of those levels are missing from the vector*.
+This is mainly useful when we are counting data with `table()`.
+
+For example, let's consider the built-in R object called `letters`:
+
+```{r}
+letters
+```
+
+
+What happens if we call `table()` on `letters`?:
+
+```{r}
+
+table(letters)
+
+```
+Every letter appears once in the table, duh!
+What if we randomly sample a handful letters and table the result?
+
+```{r}
+
+sample(letters, 15, replace = TRUE) |> table()
+
+```
+
+Notice that not all the letters from table appear in the output.
+E.g., if a letter never appears in the sample, it doesn't get counted.
+
+Let's try something new: before sampling, I will call the command `factor()` on `letters`:
+
+
+```{r}
+
+factor(letters) |> sample(15, replace = TRUE) |> table()
+
+
+```
+
+Ah! Now our table includes all possible letters, even though many of them appear `0` times.
+
+----
+
+
+So how does this work?
+Well the `factor()` function looks at a `character` vector and outputs a new "factor" vector.
+The factor vector acts just like a `character` vector, except it remembers all the unique values,
+or "levels", in the vector: 
+
+```{r}
+
+factor(letters)
+
+```
+
+Even if we remove some values from the factor vector, the vector will "remember" these levels.
+The factor will also remember the *order* of the levels, so you can make tables ordered the way you want them.
+
+
+You can access, or set, the levels of a factor using these using the `levels()` function, or with the `levels`
+argument to the `factor()` function itself.
+Maybe we want to tabulate the letters, but put the vowels first:
+
+```{r}
+
+factor(letters, levels = c('a', 'e', 'i', 'o', 'u',
+                           "b", "c", "d", "f", "g", "h", "j", "k", 
+                           "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z")) |>
+  sample(15) |>
+  table()
+
+```
+
+
+
+Note that if a `character` string contains values that you don't include in your `levels`, the value will show up `NA` in the resulting factor, and you may see warnigns like "`invalid factor level, NA generated`."
+
+
 
 ## Data frames
 
@@ -481,6 +562,13 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
 + `abs()` --- Absolute value of numbers; $|x|$
 + `round()` --- Round number to nearest integer; $\lfloor x \rceil$
 
+## Randomization functions
+
++ `sample()` --- Takes a random sample from a vector. Can also be used to randomize the order of a vector.
+
+## Analysis Functions
+
++ `table()` --- Tabulate all unique values in vector, or cross-tabulate across multiple vectors.
 
 # Making your own functions
 
@@ -528,3 +616,9 @@ For example,
 ```{r}
 \(x) x + 1
 ```
+
+
+# Common Errors and Warnings
+
+TBA
+

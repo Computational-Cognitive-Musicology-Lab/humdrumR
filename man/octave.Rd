@@ -13,6 +13,8 @@ octave(
   Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
+  as.factor = TRUE,
+  gamutArgs = list(),
   inPlace = FALSE
 )
 }
@@ -29,9 +31,11 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
 the parser, deparser, and transposer.}
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
+\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+
+\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
