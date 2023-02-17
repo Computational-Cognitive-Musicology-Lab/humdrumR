@@ -2617,8 +2617,33 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' Make a pitch gamut
 #' 
 #' This function generates a [gamut](https://en.wikipedia.org/wiki/Gamut):
-#' a ordered range of notes.
+#' an ordered range of notes used in music.
 #' It is used to generate [factor()] levels for [pitch functions][pitchFunctions].
+#' The output format of the gamut is controlled by the `deparser` argument (a function) and any `deparseArgs`
+#' that are passed to it, defaulting to [kern()].
+#' 
+#' @details 
+#' 
+#' A gamut is produced based on two criteria: what range on the line-of-fifths to include,
+#' and what range of octaves to include?
+#' These ranges can be controlled directly with the `min.octave`, `max.octave`, `min.lof`, and `max.lof` arguments,
+#' with the corresponding ranges being `min.octave:max.octave` and `min.log:max.log` respectively.
+#' If any of these arguments are missing (by default), the ranges default values based on the `simple/compound` and `generic/specific` arguments.
+#' These default ranges are:
+#' 
+#' + **Line-of-fifths**: 
+#'  + If `generic = TRUE`, `-1:5` (F to B)
+#'  + If `generic = FALSE`, `-4:7` (Ab to C#)
+#' + **Octaves**:
+#'  + If `simple = TRUE`, `0:0` (one octave only).
+#'  + If `simple = FALSE`, `-1:1`.
+#'  
+#' If a `tints` argument is provide (not `NULL`), `tints` is [parsed][tonalInterval()]
+#' as pitch data and the line-of-fifth and octave ranges of this data is used to set the gamut ranges.
+#' This assures that all values that appear in `tint` always make it into the gamut.
+#' However, if `min.octave`, `max.octave`, `min.lof`, or `max.lof` are present, they override the ranges of `tint`;
+#' this can be used to exclude values, even if they appear in `tint`.
+#' 
 #' 
 #' @param generic Should the gamut include only generic intervals?
 #' 
@@ -2638,7 +2663,10 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' 
 #' Defaults to `NULL`.
 #' 
-#' Must be a `NULL` or a [tonalInterval()].
+#' Must be either `NULL`, or a [tonalInterval()], `integer`, or `character` vector.
+#'
+#' This vector is [parsed as pitch][pitchParsing]. 
+#' If it can't be parsed as pitch, it will be ignored.
 #' 
 #' @param deparser A [pitch function][pitchFunctions] to format the output.
 #' 
@@ -2650,17 +2678,20 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 gamut <- function(generic = FALSE, simple = FALSE,
                   min.octave, max.octave, min.lof, max.lof,
                   tints = NULL,
-                  deparser = kern, deparseArgs = list()) {
+                  deparser = tint2kern, deparseArgs = list()) {
+  
+  tints <- tonalInterval(tints)
   
   checks(generic, xTF)
   checks(simple, xTF)
-  checks(deparser, xclass('function'))
+  checks(deparser, xinherits('function'))
   
   deparseArgs <- local({
     deparseFormals <- formals(deparser)
     deparseFormals[names(deparseArgs)] <- deparseArgs
     deparseFormals$x <- deparseFormals$... <- NULL
-    lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
+    deparseFormals
+    # lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
   })
   
   # empty missing -> use default
@@ -2717,9 +2748,10 @@ gamut <- function(generic = FALSE, simple = FALSE,
   # x <- tint(, x@Fifth) + tint(octaves,0)
   
   deparseArgs$octave.relative <- FALSE
-  deparseArgs$octave.round <- floor
+  deparseArgs$octave.round <- quote(floor)
   deparseArgs$Key <- NULL
-  if (!is.null(deparser)) do.call(deparser, c(list(gamut, simple = simple, generic = generic), deparseArgs)) else gamut
+  deparseArgs$as.factor <- FALSE
+  unique(if (!is.null(deparser)) do.call(deparser, c(list(gamut), deparseArgs)) else gamut)
 }
 
 
@@ -2867,7 +2899,7 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
-                                 keyed = TRUE,
+                                 keyed = TRUE, as.factor = TRUE,
                                  removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
@@ -2883,7 +2915,7 @@ makePitchTransformer <- function(deparser, callname,
             extraArgs,
             alist(transposeArgs = list(),
                   parseArgs = list(), 
-                  as.factor = TRUE,
+                  as.factor = as.factor,
                   gamutArgs = list(),
                   inPlace = FALSE))
 
@@ -2956,11 +2988,11 @@ makePitchTransformer <- function(deparser, callname,
       if (inPlace) {
         output <- rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        gamut <- if (is.character(output) && as.factor) do.call('gamut',
-                                                                c(list(tints = parsedTint[!is.na(parsedTint)] + (if (keyed) Key) %||% P1,
-                                                                       generic = generic, simple = simple,
-                                                                       deparser = !!deparser, deparseArgs = deparseArgs[-1]),
-                                                                  gamutArgs))
+        gamut <- if (as.factor) do.call('gamut',
+                                        c(list(tints = parsedTint[!is.na(parsedTint)] + (if (keyed) Key) %||% P1,
+                                               generic = generic, simple = simple,
+                                               deparser = !!deparser, deparseArgs = deparseArgs[-1]),
+                                          gamutArgs))
         output <- token(output, Exclusive = callname,
                         levels = gamut)
         
@@ -2996,9 +3028,10 @@ makePitchTransformer <- function(deparser, callname,
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Factor Levels
 #' @export 
-freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(tonalHarmonic = 2^(19/12),
-                                                                              frequency.reference = 440,
-                                                                              frequence.reference.note = 'a')) 
+freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', as.factor = FALSE, 
+                              extraArgs = alist(tonalHarmonic = 2^(19/12), 
+                                                frequency.reference = 440,
+                                                frequence.reference.note = 'a')) 
 #' Atonal pitch representations
 #' 
 #' These function translates pitch information into basic atonal pitch values:
@@ -3017,12 +3050,12 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', extraArgs = alist(to
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Factor Levels
 #' @export 
-semits <- makePitchTransformer(tint2semits, 'semits', 'integer')
+semits <- makePitchTransformer(tint2semits, 'semits', 'integer', as.factor = FALSE)
 
 
 #' @rdname semits
 #' @export 
-midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
+midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', as.factor = FALSE)
 
 #' @section Cents:
 #'
@@ -3039,7 +3072,8 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 #' @inheritParams freq
 #' @rdname semits
 #' @export 
-cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist(tonalHarmonic = 2^(19/12)))
+cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', as.factor = FALSE, 
+                               extraArgs = alist(tonalHarmonic = 2^(19/12)))
 
 
 

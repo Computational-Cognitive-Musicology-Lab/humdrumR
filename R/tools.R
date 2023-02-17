@@ -2550,7 +2550,7 @@ strPartition <- function(str, split = '/') {
 #' @export
 token <- function(x, Exclusive = NULL, levels = NULL, ...) {
   
-  if (!is.null(levels) && class(x) == 'character') {
+  if (!is.null(levels)) {
     if (is.function(levels)) levels <- levels(x, ...)
     x <- factor(x, levels = levels)
   }
