@@ -253,7 +253,7 @@ rint2recip <- function(x, sep = '%') {
 
 
 rint2grid <- function(x, tick = min(rational(1, 16), tatum.rational(x)), sep = '', 
-                      on = 'X', off = '0', offbeat = TRUE) {
+                      on = 'X', off = 'O', offbeat = TRUE) {
   x <- x / rhythmInterval(tick)
   
   ontick <- x == round(x)
@@ -565,7 +565,7 @@ timesignature2rint <- function(x, sep = '/') {
 }
 
 
-grid2rint <- function(x, tick = '16', sep = '', on = '1', off = '0') {
+grid2rint <- function(x, tick = '16', sep = '', on = 'X', off = 'O') {
   x <- strsplit(x, split = sep)
   
   lengths(x) * rhythmInterval(tick)
@@ -912,8 +912,23 @@ duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 
 
-#' Drum-machine grid representation of rhythm
+#' Drum-machine grid representation of rhythmic durations.
 #' 
+#' These functions read and write a sequencer-like rerpresentation of rhythm.
+#' The `grid()`, is a fully vectorized [rhythm function][rhythmFunctions], which translates
+#' *individual* durations to a grid-representation strings.
+#' The `fromgrid()` and `togrid()` functions create/read fuller (non-vectorized)
+#' grid representations.
+#' 
+#' @details 
+#' 
+#' @seealso To better understand how this function works, 
+#' read about the [family of rhythm functions][rhythmFunctions], 
+#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
+#' @family {rhythm functions}
+#' @param sep (`character`, `length == 1`) A `character` string to use as the separator
+#' between each tick.
+#' @inheritParams rhythmFunctions 
 #' @rdname grid
 #' @export
 grid <- makeRhythmTransformer(rint2grid, 'grid', 'character')
@@ -1478,6 +1493,81 @@ rhythmAlign <- function(x, y) {
   
   
 }
+
+
+## Grids ----
+
+### To grid ----
+
+#' @rdname grid
+#' @export
+togrid <- function(x, tick = '16', measure = '1', on = 'X', off = 'O', collapse = TRUE, sep = '') {
+  tick <- rhythmInterval(tick)
+  measure <- rhythmInterval(measure)
+  
+  n <- as.integer(measure %/% tick)
+  
+  grids <- grid(x, tick = tick, on = on, off = off)
+  
+  if (collapse) {
+    lens <- nchar(grids)
+    tapply(grids, head(cumsum(c(0, lens)), -1L) %/% n, paste, collapse = sep)
+  } else {
+    ticks <- unlist(strsplit(grids, split = ''))
+    
+    nrow <- ceiling(length(ticks) / n)
+    
+    matrix(c(ticks, rep(NA, (nrow * n) - length(ticks))),
+           nrow = nrow, ncol = n, byrow = TRUE)
+  }
+  
+  
+}
+
+
+
+### From grid ----
+#' @rdname grid
+#' @export
+fromgrid <- function(x, tick, meter) UseMethod('fromgrid')
+
+#' @rdname grid
+#' @export
+fromgrid.matrix <- function(x, tick = '16') {
+  fromgrid(c(t(x)))
+}
+
+#' @rdname grid
+#' @export
+fromgrid.character <- function(x, tick = '16', sep = '', on = 'X', off = 'O', deparser = recip, ...) {
+ fromgrid.logical(unlist(strsplit(x, split = sep)) == on, tick = tick, deparser = deparser, ...) 
+}
+
+#' @rdname grid
+#' @export
+fromgrid.logical <- function(x, tick = '16', deparser = recip, ...) {
+  
+  tick <- rhythmInterval(tick)
+  
+  rint <- diff(c(which(x), length(x) + 1L)) * tick
+  
+  if (!is.null(deparser)) deparser(rint, ...) else rint
+}
+
+#' @rdname grid
+#' @export
+fromgrid.numeric <- function(x, tick = '16', deparser = recip, ...) {
+  fromgrid.logical(x > 0, tick = tick, deparser = deparser, ...) 
+}
+  
+#' @rdname grid
+#' @export
+fromgrid.integer <- function(x, tick = '16', deparser = recip, ...) {
+  fromgrid.logical(x > 0, tick = tick, deparser = deparser, ...) 
+}
+
+
+
 
 ###################################################################### ###
 # Rhythmic visualizations rhythm intervals ###############################

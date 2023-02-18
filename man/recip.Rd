@@ -59,6 +59,7 @@ or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{dep
 
 Other {rhythm functions}: 
 \code{\link{duration}()},
+\code{\link{grid}()},
 \code{\link{noteValue}()}
 }
 \concept{{rhythm functions}}

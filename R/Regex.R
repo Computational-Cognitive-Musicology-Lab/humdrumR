@@ -775,7 +775,7 @@ makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
     
 }
 
-makeRE.grid <- function(..., sep = '', on = 'X', off = '0') {
+makeRE.grid <- function(..., sep = '', on = 'X', off = 'O') {
   RE <- paste0(on, '(', sep, off, ')*')
   
   setNames(RE, 'grid')
