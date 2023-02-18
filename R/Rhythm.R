@@ -793,7 +793,7 @@ rhythmArgCheck <- function(args, callname) {
   args
 }
 
-makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', extraArgs = list()) {
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', as.factor = TRUE, extraArgs = list()) {
   # this function will create various rhythm transform functions
   
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
@@ -806,6 +806,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             alist(parseArgs = list(), 
                   scale = 1, unit = 1,
+                  as.factor = as.factor,
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -862,9 +863,9 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
       if (inPlace) {
         output <- rePlace(output, dispatch)
       } else {
-        gamut <- if (is.character(output)) makeRamut(parsedRint[!is.na(parsedRint)],
-                                                     deparseArgs = deparseArgs[-1],
-                                                     deparser = !!deparser)
+        gamut <- if (as.factor) makeRamut(parsedRint[!is.na(parsedRint)],
+                                          deparseArgs = deparseArgs[-1],
+                                          deparser = !!deparser)
         output <- token(output, Exclusive = callname,
                         levels = gamut)
       }

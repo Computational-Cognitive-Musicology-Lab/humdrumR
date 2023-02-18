@@ -2899,7 +2899,7 @@ pitchArgCheck <- function(args,  callname) {
 
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
-                                 keyed = TRUE, as.factor = TRUE,
+                                 keyed = TRUE, factored = TRUE,
                                  removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
@@ -2915,7 +2915,7 @@ makePitchTransformer <- function(deparser, callname,
             extraArgs,
             alist(transposeArgs = list(),
                   parseArgs = list(), 
-                  as.factor = as.factor,
+                  as.factor = factored,
                   gamutArgs = list(),
                   inPlace = FALSE))
 
@@ -3028,7 +3028,7 @@ makePitchTransformer <- function(deparser, callname,
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Factor Levels
 #' @export 
-freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', as.factor = FALSE, 
+freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', factored =FALSE, 
                               extraArgs = alist(tonalHarmonic = 2^(19/12), 
                                                 frequency.reference = 440,
                                                 frequence.reference.note = 'a')) 
@@ -3050,12 +3050,12 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', as.factor = FALSE,
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Factor Levels
 #' @export 
-semits <- makePitchTransformer(tint2semits, 'semits', 'integer', as.factor = FALSE)
+semits <- makePitchTransformer(tint2semits, 'semits', 'integer', factored =FALSE)
 
 
 #' @rdname semits
 #' @export 
-midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', as.factor = FALSE)
+midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', factored =FALSE)
 
 #' @section Cents:
 #'
@@ -3072,7 +3072,7 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', as.factor = FALSE)
 #' @inheritParams freq
 #' @rdname semits
 #' @export 
-cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', as.factor = FALSE, 
+cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', factored =FALSE, 
                                extraArgs = alist(tonalHarmonic = 2^(19/12)))
 
 
