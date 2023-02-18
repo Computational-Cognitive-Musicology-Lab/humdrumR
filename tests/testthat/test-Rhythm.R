@@ -102,3 +102,20 @@ test_that("timeline() and timestamp() work correctly", {
   
   
 })
+
+test_that("Grid functions work", {
+  
+  rhythm <- c('8.', '8.', '8', '8.', '8', '16', '8')
+  
+  expect_equal(grid(rhythm), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
+  expect_equal(grid(rhythm, tick = '32'), c('XOOOOO', 'XOOOOO', 'XOOO', 'XOOOOO', 'XOOO', "XO", 'XOOO'))
+  expect_equal(grid(duration(rhythm)), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
+  
+  expect_equal(togrid(rhythm), paste(grid(rhythm), collapse = ''))
+  
+  expect_equal(togrid(rhythm, collapse = FALSE, on = '1', off = '0'), rbind(c('1', '0', '0', '1', '0', '0', '1', '0', '1', '0', '0', '1', '0', '1', '1', '0')))
+  
+  expect_equal(rhythm, fromgrid(togrid(rhythm)))
+  
+})
+  

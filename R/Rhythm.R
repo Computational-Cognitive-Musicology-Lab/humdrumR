@@ -254,6 +254,8 @@ rint2recip <- function(x, sep = '%') {
 
 rint2grid <- function(x, tick = min(rational(1, 16), tatum.rational(x)), sep = '', 
                       on = 'X', off = 'O', offbeat = TRUE) {
+  
+  
   x <- x / rhythmInterval(tick)
   
   ontick <- x == round(x)
@@ -566,6 +568,7 @@ timesignature2rint <- function(x, sep = '/') {
 
 
 grid2rint <- function(x, tick = '16', sep = '', on = 'X', off = 'O') {
+  
   x <- strsplit(x, split = sep)
   
   lengths(x) * rhythmInterval(tick)
@@ -769,9 +772,9 @@ rhythmArgCheck <- function(args, callname) {
     if (is.null(args$unit) || is.na(args$unit)) .stop("In your call to {callname}, your 'unit' argument cannot be parsed by rhythmInterval().")
   }
   
-  if ('grace' %in% argnames) {
-    checks(args$grace, argname = 'grace',
-           xatomic & xlen1)
+  
+  for (arg in intersect(c('grace', 'sep', 'on', 'off'), argnames)) {
+    checks(args[[arg]], argname = arg, xcharacter & xlen1)
   }
   
   args
@@ -912,26 +915,7 @@ duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 
 
-#' Drum-machine grid representation of rhythmic durations.
-#' 
-#' These functions read and write a sequencer-like rerpresentation of rhythm.
-#' The `grid()`, is a fully vectorized [rhythm function][rhythmFunctions], which translates
-#' *individual* durations to a grid-representation strings.
-#' The `fromgrid()` and `togrid()` functions create/read fuller (non-vectorized)
-#' grid representations.
-#' 
-#' @details 
-#' 
-#' @seealso To better understand how this function works, 
-#' read about the [family of rhythm functions][rhythmFunctions], 
-#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
-#' @family {rhythm functions}
-#' @param sep (`character`, `length == 1`) A `character` string to use as the separator
-#' between each tick.
-#' @inheritParams rhythmFunctions 
-#' @rdname grid
-#' @export
-grid <- makeRhythmTransformer(rint2grid, 'grid', 'character')
+
 
 #' Note value representation of duration
 #' 
@@ -1497,13 +1481,91 @@ rhythmAlign <- function(x, y) {
 
 ## Grids ----
 
+#' Drum-machine grid representation of rhythmic durations.
+#' 
+#' These functions read and write a sequencer-like representation of rhythm.
+#' Rhythms are represented as either strings or vectors of "on"/"off" values,
+#' which indicate where rhythmic onsets occur in a regular time grid.
+#' For example, `"X00X00X0"` or `c(1, 0, 0, 1, 0, 0, 1, 0)`.
+#'
+#' @details 
+#'
+#' The `grid()` function, is a fully vectorized [rhythm function][rhythmFunctions], which translates
+#' *individual* durations to a grid-representation strings.
+#' For example, on a 16th-note grid, a dotted eighth-note would be represented `"XOO"`.
+#' The `fromgrid()` and `togrid()` functions create/read fuller 
+#' grid representations, representing whole rhythms at once: in their case,
+#' the length of input and output will not be the same.
+#' 
+#' 
+#' @examples 
+#' 
+#' rhythm <- c('8.', '8.', '8', '8.', '8', '16', '8')
+#' 
+#' grid(rhythm)
+#' 
+#' togrid(rhythm, on = '1', off = '0')
+#' 
+#' togrid(rhythm, collapse = FALSE)
+#' 
+#' fromgrid('XOXOXOOXXOXOXXOO', tick = '8')
+#' 
+#' 
+#' @seealso To better understand how `grid()` works, 
+#' read about the [family of rhythm functions][rhythmFunctions], 
+#' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
+#' @family {rhythm functions}
+#'
+#' @param tick What is the unit of the grid?
+#' 
+#' Defaults to sixteenth-note (`fromgrid()`) or the [tatum()] of the `x` argument.
+#' 
+#' Must be parsed as a rhythm by [rhythmInterval()].
+#' 
+#' @param on,off What represents onsets (attacks) and rests in the grid?
+#' 
+#' Default to `"X"` and `"O"` respectively.
+#' 
+#' Must be singleton atomic values.
+#'
+#' @param collapse Should the output be collapsed to a single string per measure?
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be sinleton `logical` value: an on/off switch.
+#' 
+#' @param sep What separates each on/off tick in a string?
+#'
+#' Defaults to an empty string (no separator).
+#'  
+#' Must be a singleton `character` string.
+#' 
+#' @param deparser What output representation should be returned?
+#' 
+#' Defaults to [recip()].
+#' 
+#' Must be a function which accepts [rational()] numbers.
+#' 
+#' @param ... Argments passed to the `deparser`.
+#' 
+#' 
+#' @inheritParams rhythmFunctions 
+#' @rdname grid
+#' @export
+grid <- makeRhythmTransformer(rint2grid, 'grid', 'character')
+
 ### To grid ----
 
 #' @rdname grid
 #' @export
-togrid <- function(x, tick = '16', measure = '1', on = 'X', off = 'O', collapse = TRUE, sep = '') {
+togrid <- function(x, tick = tatum(x), measure = '1', on = 'X', off = 'O', collapse = TRUE, sep = '') {
   tick <- rhythmInterval(tick)
   measure <- rhythmInterval(measure)
+  
+  checks(collapse, xTF)
+  checks(sep, xcharacter & xlen1)
+  checks(on, xcharacter & xlen1)
+  checks(off, xcharacter & xlen1)
   
   n <- as.integer(measure %/% tick)
   
@@ -1511,7 +1573,7 @@ togrid <- function(x, tick = '16', measure = '1', on = 'X', off = 'O', collapse 
   
   if (collapse) {
     lens <- nchar(grids)
-    tapply(grids, head(cumsum(c(0, lens)), -1L) %/% n, paste, collapse = sep)
+    unname(c(tapply(grids, head(cumsum(c(0, lens)), -1L) %/% n, paste, collapse = sep)))
   } else {
     ticks <- unlist(strsplit(grids, split = ''))
     
@@ -1539,13 +1601,18 @@ fromgrid.matrix <- function(x, tick = '16') {
 
 #' @rdname grid
 #' @export
-fromgrid.character <- function(x, tick = '16', sep = '', on = 'X', off = 'O', deparser = recip, ...) {
+fromgrid.character <- function(x, tick = '16', on = 'X', off = 'O', sep = '', deparser = recip, ...) {
+  checks(sep, xcharacter & xlen1)
+  checks(on, xcharacter & xlen1)
+  checks(off, xcharacter & xlen1)
+  checks(deparser, xinherits('function'))
+  
  fromgrid.logical(unlist(strsplit(x, split = sep)) == on, tick = tick, deparser = deparser, ...) 
 }
 
 #' @rdname grid
 #' @export
-fromgrid.logical <- function(x, tick = '16', deparser = recip, ...) {
+fromgrid.logical <- function(x, tick = '16', deparser = rint2recip, ...) {
   
   tick <- rhythmInterval(tick)
   

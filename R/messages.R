@@ -277,6 +277,7 @@ xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, n
 
 xcharnotempty <-  xcharacter & argCheck(\(arg) nchar(arg) > 0L, 'cannot be an empty string ("")', \(arg) glue::glue("includes {sum(nchar(arg) == 0)} empty strings"))
 
+
 # ...atomic <- function(arg) {
 #   if (!is.atomic(arg)) {
 #     glue::glue("The 'argname' argument must be an 'atomic' value; i.e., a basic R vector (either logical, numeric, integer, or character).",

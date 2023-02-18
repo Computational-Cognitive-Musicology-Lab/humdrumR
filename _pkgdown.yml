@@ -146,8 +146,8 @@ reference:
   - bpm2sec
   - timeline
   - recip
-  - grid
   - duration
+  - grid
   - noteValue
   - seconds
   - ioi
