@@ -793,7 +793,7 @@ rhythmArgCheck <- function(args, callname) {
   args
 }
 
-makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', as.factor = TRUE, extraArgs = list()) {
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', factor.default = TRUE, extraArgs = list()) {
   # this function will create various rhythm transform functions
   
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
@@ -806,7 +806,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             alist(parseArgs = list(), 
                   scale = 1, unit = 1,
-                  as.factor = as.factor,
+                  as.factor = factor.default,
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -925,11 +925,11 @@ recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%')
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
 #' @export 
-duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
+duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric', factor.default = FALSE)
 
 #' @rdname duration
 #' @export 
-quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
+quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric', factor.default = FALSE)
 
 #' Note value representation of duration
 #' 
@@ -1000,11 +1000,11 @@ notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' @inheritParams rhythmFunctions
 #' @name time
 #' @export
-seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'))
+seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'), factor.default = FALSE)
 
 #' @rdname time
 #' @export
-ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'))
+ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'), factor.default = FALSE)
 
 #' @rdname time
 #' @export
