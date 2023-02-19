@@ -2291,14 +2291,13 @@ matched <- function(x, table, nomatch = NA) {
     args <- list(...)
         # return(paste(args[[1]], collapse = collapse))
     # }
-    
     args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)
     
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
     
-    if (length(sep) > 1L) {
+    if (length(sep) > 1L && length(args) > 1L) {
       args[1:(length(args) - 1L)] <- Map(\(arg, s) paste0(arg, s), 
                                          args[1:(length(args) - 1L)], 
                                           rep(sep, length.out = length(args) - 1L))

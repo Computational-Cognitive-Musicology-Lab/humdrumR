@@ -1,21 +1,23 @@
-
+expect_equalchar <- function(e1, e2) expect_equal(as.character(e1), as.character(e2))
+expect_equalnum <- function(e1, e2) expect_equal(as.numeric(e1), as.numeric(e2))
 
 test_that('Basic rhythm functions work', {
   reci <- c('4a', '8b', '8.c', '4.d', NA, 'x', '16e', '16.f', '3g', '6h', '0i', '00KK', '0.J', '1LL', '2.X')
   durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 3, 1, 0.75 )
   
+
   
-  expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
+  expect_equalchar(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
   expect_equal(recip(reci, inPlace = TRUE), reci)
 
   
-  expect_equal(recip(durs), recip(reci))
+  expect_equalchar(recip(durs), recip(reci))
 
   
   ## scale argument
-  expect_equal(duration(reci, scale = 2), duration(reci) * 2)
-  expect_equal(duration(reci, unit = 4), duration(reci) / 4)
-  expect_equal(duration(reci, unit = 4, scale = 4), duration(reci))
+  expect_equalnum(duration(reci, scale = 2), duration(reci) * 2)
+  expect_equalnum(duration(reci, unit = 4), duration(reci) / 4)
+  expect_equalnum(duration(reci, unit = 4, scale = 4), duration(reci))
   
 })
 
@@ -56,18 +58,18 @@ test_that("ioi and untie work correctly", {
 })
 
 test_that('Examples from rhythm man are correct', {
-  expect_equal(duration('4.ee-['), 0.375)
-  expect_equal(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
+  expect_equalnum(duration('4.ee-['), 0.375)
+  expect_equalnum(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
   
-  expect_equal(seconds('4.'), 1.5)
-  expect_equal(pitch('4.', Exclusive = 'notevalue'), NA_character_)
+  expect_equalnum(seconds('4.'), 1.5)
+  expect_equalchar(recip('4.', Exclusive = 'notevalue'), NA_character_)
   
-  expect_equal(recip('2', scale = 1/16), '32')
+  expect_equalchar(recip('2', scale = 1/16), '32')
   
   
   expect_equal(recip('4%5', sep ='/'), '4/5')
   
-  expect_equal(untie(c('[4a', '4a]', '2g')), 
+  expect_equalchar(untie(c('[4a', '4a]', '2g')), 
                c('2a', '.', '2g'))
   
   expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r')),
@@ -101,4 +103,12 @@ test_that("timeline() and timestamp() work correctly", {
   expect_equal(timestamp(x, BPM = 120), c(":0", ":0.500", ":1", ":1.250", ":1.500", ":2", ":2.375", ":2.500", ":2.750", ":3"))
   
   
+})
+
+
+test_that('Factors work correctly',{
+  expect_equal(table(recip(c('16', '4')))['8'] |> unname(), 0)
+  
+  expect_true(is.factor(recip(.25)))
+  expect_false(is.factor(recip(.25, as.factor = FALSE)))
 })

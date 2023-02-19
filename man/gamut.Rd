@@ -12,7 +12,7 @@ gamut(
   min.lof,
   max.lof,
   tints = NULL,
-  deparser = kern,
+  deparser = tint2kern,
   deparseArgs = list()
 )
 }
@@ -33,7 +33,10 @@ Must be a singleton \code{logical} value: a on/off switch.}
 
 Defaults to \code{NULL}.
 
-Must be a \code{NULL} or a \code{\link[=tonalInterval]{tonalInterval()}}.}
+Must be either \code{NULL}, or a \code{\link[=tonalInterval]{tonalInterval()}}, \code{integer}, or \code{character} vector.
+
+This vector is \link[=pitchParsing]{parsed as pitch}.
+If it can't be parsed as pitch, it will be ignored.}
 
 \item{deparser}{A \link[=pitchFunctions]{pitch function} to format the output.
 
@@ -43,6 +46,30 @@ Must be a \link[=pitchFunctions]{pitch function}.}
 }
 \description{
 This function generates a \href{https://en.wikipedia.org/wiki/Gamut}{gamut}:
-a ordered range of notes.
+an ordered range of notes used in music.
 It is used to generate \code{\link[=factor]{factor()}} levels for \link[=pitchFunctions]{pitch functions}.
+The output format of the gamut is controlled by the \code{deparser} argument (a function) and any \code{deparseArgs}
+that are passed to it, defaulting to \code{\link[=kern]{kern()}}.
+}
+\details{
+A gamut is produced based on two criteria: what range on the line-of-fifths to include,
+and what range of octaves to include?
+These ranges can be controlled directly with the \code{min.octave}, \code{max.octave}, \code{min.lof}, and \code{max.lof} arguments,
+with the corresponding ranges being \code{min.octave:max.octave} and \code{min.log:max.log} respectively.
+If any of these arguments are missing (by default), the ranges default values based on the \code{simple/compound} and \code{generic/specific} arguments.
+These default ranges are:
+\itemize{
+\item \strong{Line-of-fifths}:
+\item If \code{generic = TRUE}, \code{-1:5} (F to B)
+\item If \code{generic = FALSE}, \code{-4:7} (Ab to C#)
+\item \strong{Octaves}:
+\item If \code{simple = TRUE}, \code{0:0} (one octave only).
+\item If \code{simple = FALSE}, \code{-1:1}.
+}
+
+If a \code{tints} argument is provide (not \code{NULL}), \code{tints} is \link[=tonalInterval]{parsed}
+as pitch data and the line-of-fifth and octave ranges of this data is used to set the gamut ranges.
+This assures that all values that appear in \code{tint} always make it into the gamut.
+However, if \code{min.octave}, \code{max.octave}, \code{min.lof}, or \code{max.lof} are present, they override the ranges of \code{tint};
+this can be used to exclude values, even if they appear in \code{tint}.
 }

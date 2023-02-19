@@ -11,6 +11,7 @@ recip(
   parseArgs = list(),
   scale = 1,
   unit = 1,
+  as.factor = factor.default,
   inPlace = FALSE
 )
 }

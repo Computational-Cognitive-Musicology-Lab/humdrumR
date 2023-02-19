@@ -909,7 +909,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   
   
   doQuoTab$Quo <- Map(\(quo, used) {
-    lists <- vapply(humtab[1 , used, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
+    lists <- vapply(humtab[1 , used, with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) == 'list' 
     if (any(lists)) mapifyQuo(quo, used, depth = 1L) else quo
   }, doQuoTab$Quo, usedInExprs)
   

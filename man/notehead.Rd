@@ -4,7 +4,15 @@
 \alias{notehead}
 \title{Note value representation of duration}
 \usage{
-notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+notehead(
+  x,
+  ...,
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  as.factor = factor.default,
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}

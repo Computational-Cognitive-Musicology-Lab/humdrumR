@@ -418,8 +418,8 @@ For example, we might think of a ascending major 12th as being an ascending octa
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
 The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   NA: \tab NA + P4 \tab NA + P4 \tab -P8  - P5 \tab -P8  - P5 \tab NA + P4 \cr
-   NA: \tab -P8  - P4 \tab NA + P5 \tab -P8  - P4 \tab -P8  - P4 \tab NA + P5 \cr
+   -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
+   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
    -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
    -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
    -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
@@ -427,11 +427,11 @@ The following table illustrates how different \code{octave.round} arguments "par
    +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
    +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
    +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
-   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab NA - P5 \tab +P8  + P4 \tab NA - P5 \cr
-   +P12: \tab NA - P4 \tab +P8  + P5 \tab NA - P4 \tab +P8  + P5 \tab NA - P4 \cr
-   NA: \tab NA + P1 \tab NA + P1 \tab NA + P1 \tab NA + P1 \tab NA + P1 \cr
-   NA: \tab NA + P4 \tab NA + P4 \tab NA - P5 \tab NA + P4 \tab NA - P5 \cr
-   NA: \tab NA - P4 \tab NA + P5 \tab NA - P4 \tab NA + P5 \tab NA - P4 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
 }
 
 
@@ -440,8 +440,8 @@ Notice that, if \code{octave.floor} is being used, all simple intervals are repr
 When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
 The following table illustrates:\tabular{lrrrrr}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   NA: \tab 6 \tab 6 \tab 6 \tab 6 \tab 6 \cr
-   NA: \tab 20 \tab 8 \tab 8 \tab 8 \tab 8 \cr
+   FF: \tab 6 \tab 6 \tab 6 \tab 6 \tab 6 \cr
+   GG: \tab 20 \tab 8 \tab 8 \tab 8 \tab 8 \cr
    C: \tab 13 \tab 13 \tab 1 \tab 1 \tab 13 \cr
    F: \tab 18 \tab 18 \tab 18 \tab 18 \tab 18 \cr
    G: \tab 32 \tab 20 \tab 20 \tab 20 \tab 20 \cr
@@ -451,9 +451,9 @@ The following table illustrates:\tabular{lrrrrr}{
    cc: \tab 37 \tab 37 \tab 25 \tab 25 \tab 37 \cr
    ff: \tab 42 \tab 42 \tab 42 \tab 30 \tab 54 \cr
    gg: \tab 56 \tab 44 \tab 44 \tab 32 \tab 56 \cr
-   NA: \tab 49 \tab 49 \tab 37 \tab 37 \tab 49 \cr
-   NA: \tab 54 \tab 54 \tab 54 \tab 42 \tab 66 \cr
-   NA: \tab 68 \tab 56 \tab 56 \tab 44 \tab 68 \cr
+   ccc: \tab 49 \tab 49 \tab 37 \tab 37 \tab 49 \cr
+   fff: \tab 54 \tab 54 \tab 54 \tab 42 \tab 66 \cr
+   ggg: \tab 68 \tab 56 \tab 56 \tab 44 \tab 68 \cr
 }
 
 }

@@ -1396,7 +1396,7 @@ tint2lilypond <- partialApply(tint2tonalChroma,
                               up = "'", down = ",",
                               qualities = FALSE,
                               octave.relative = FALSE, octave.integer = FALSE,
-                              octave.round = if (octave.relative) round else floor,
+                              octave.round = floor,
                               octave.offset = 1L, 
                               sharp = 'is', flat = 'es',
                               keyed = TRUE,
@@ -2559,7 +2559,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('pitch',                  makeRE.sciPitch,    pitch2tint),
                                                  list('lilypond' ,              makeRE.lilypond,    lilypond2tint),
                                                  list('helmholtz' ,             makeRE.helmholtz,   helmholtz2tint),
-                                                 list(c('hint', 'mint', 'int'), makeRE.interval,    interval2tint),
+                                                 list(c('hint', 'mint', 'int', 'interval'), makeRE.interval,    interval2tint),
                                                  list('degree',                 makeRE.degree,      degree2tint),
                                                  list('deg',                    makeRE.deg,         deg2tint),
                                                  list('solfa',                  makeRE.solfa,       solfa2tint),
@@ -2703,7 +2703,7 @@ gamut <- function(generic = FALSE, simple = FALSE,
     deparseOctave <- deparseArgs
     deparseOctave$octave.integer <- TRUE
     offset <- deparseArgs$octave.offset %||% 0L
-    octaves <- do.call(tint2octave, c(list(tints), deparseOctave)) - deparseArgs$octave.offset
+    octaves <- do.call(tint2octave, c(list(tints), deparseOctave)) - offset
     
     
     lofs <- LO5th(tints)
@@ -2713,6 +2713,7 @@ gamut <- function(generic = FALSE, simple = FALSE,
     octaves <- lofs <- NULL
   }
   
+  if (missing(min.octave)) min.octave <- min(if (simple) 0L else -1L, octaves, na.rm = TRUE)
   if (missing(min.octave)) min.octave <- min(if (simple) 0L else -1L, octaves, na.rm = TRUE)
   if (missing(max.octave)) max.octave <- max(if (simple) 0L else 1L, octaves, na.rm = TRUE)
   if (missing(min.lof))    min.lof    <- min(if (generic) -1L else -4L, lofs, na.rm = TRUE)
@@ -2829,6 +2830,14 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' @param parseArgs (`list`) `parseArgs` can be a list of arguments that are passed to the [pitch parser][pitchParsing].
 #' @param transposeArgs (`list`) `transposeArgs` can be a list of arguments that are passed to a special call to [transpose()].
 #' @param gamutArgs (`list`) `gamutArgs` can be a list of arguments that are passed to a special call to [gamut()].
+#' @param as.factor Should the output be converted to a factor?
+#' 
+#' Defaults to `TRUE` for `character`-string output (like [kern()]) and `FALSE` for numeric output (like [semits()]).
+#' 
+#' Must be singleton `logical` value: an on/off switch.
+#' 
+#' If `inPlace = TRUE`, `as.factor` is forced to `FALSE`.
+#' 
 #' @param inPlace (`logical`, `length == 1`) This argument only has an effect if the input (the `x` argument) is `character` strings,
 #'        *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-pitch information.
@@ -2987,16 +2996,16 @@ makePitchTransformer <- function(deparser, callname,
       dispatch <- attr(parsedTint, 'dispatch')
       if (inPlace) {
         output <- rePlace(output, attr(parsedTint, 'dispatch'))
+        gamut <- NULL
       } else {
         gamut <- if (as.factor) do.call('gamut',
                                         c(list(tints = parsedTint[!is.na(parsedTint)] + (if (keyed) Key) %||% P1,
                                                generic = generic, simple = simple,
                                                deparser = !!deparser, deparseArgs = deparseArgs[-1]),
                                           gamutArgs))
-        output <- token(output, Exclusive = callname,
-                        levels = gamut)
         
       }
+      output <- token(output, Exclusive = callname, levels = gamut)
     }
     
     output 
@@ -3928,12 +3937,25 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
   if (!is.null(incomplete) && any(missing)) {
     
     if (is.function(incomplete) && inherits(incomplete, 'pitchFunction')) {
-      output[missing] <- incomplete(x[missing], 
-                                    Key = Key[missing], Exclusive = Exclusive[missing], ...) # need Exclusive right?
+      
+       incomplete <- as.character(incomplete(x[missing], Key = Key[missing], Exclusive = Exclusive[missing], ...)) # need Exclusive right?
+    } 
+    
+    if (bracket) incomplete <- paste0('[', incomplete, ']')
+    
+    
+    if (is.factor(output)) {
+      levs <- c(unique(as.character(incomplete)), levels(output))
+      class <- class(output)
+      output <- as.character(output)
+      output[missing] <- incomplete
+      output <- factor(output, levels = levs)
+      class(output) <- class
+    } else {
+      
+      output[missing] <- incomplete
     }
     
-    if (is.atomic(incomplete)) output[missing] <- incomplete
-    if (bracket) output[missing] <- paste0('[', output[missing], ']')
   }
   
  output

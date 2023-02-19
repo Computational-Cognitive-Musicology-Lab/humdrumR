@@ -1086,7 +1086,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
     if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
     output[!onsets] <- '.'
   } else {
-    output[!onsets] <- as(NA, class(output))
+    output[!onsets] <- NA #as(NA, class(output))
   }
   
   if (!finalOnset) {
@@ -1094,7 +1094,7 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
       output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- as(NA, class(output))
       
     } else {
-      output[max(which(onsets), na.rm = TRUE)] <- as(NA, class(output))
+      output[max(which(onsets), na.rm = TRUE)] <- NA #as(NA, class(output))
       
     }
   }
