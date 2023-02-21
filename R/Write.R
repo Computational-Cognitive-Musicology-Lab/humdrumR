@@ -37,7 +37,7 @@
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param renamer ***A `function` for change the type of `Filename` field.
+#' @param renamer ***A `function` for change the type of `Filename` field.***
 #' 
 #' Defaults to `force`.
 #' 

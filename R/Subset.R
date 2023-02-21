@@ -54,11 +54,11 @@
 #' the remaining files are renumbered from `2:10` to `1:9`.
 #' Spine renumbering works the same, except it is done independently *within* each file.
 #' 
-#' @param x ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' @param x ***A [humdrumR data object][humdrumRclass].***
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
 #' 
 #' Must be `humdrumR`.
 #' 

@@ -100,7 +100,7 @@ summary.humdrumR <- function(object) {
 #' like the `groupby` argument to a [with/within][withHumdrum] call.
 #' The by expression must be the full length of the humdrum table.
 #'  
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
 #' 
 #' Must be `humdrumR`.
 #' 

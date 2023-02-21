@@ -210,8 +210,15 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' including multiple matches of the same string.
 #' 
 #' 
-#' @param x A `character` vector to search in.
-#' @param regex One or more regular expressions. If more than one regex is supplied,
+#' @param x ***A `character` vector to search in.***
+#' 
+#' Must be `character`.
+#' 
+#' @param regex ***One or more regular expressions.***
+#' 
+#' Must be `character`.
+#' 
+#'  If more than one regex is supplied,
 #'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export

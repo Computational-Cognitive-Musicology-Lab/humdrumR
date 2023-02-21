@@ -336,15 +336,37 @@ partialApply <- function(func, ...) {
 #' 3. A function to dispatch.
 #' 
 #' 
-#' @param str The input `character` string, on which dispatch is called.
-#' @param dispatchDF A data.frame which describes what function should be called for 
-#'        which regex input. (See details).
-#' @param Exclusive Defaults to `NULL`. If `NULL`, only the regexes are used for dispatch.
+#' @param str ***The input `character` string, on which dispatch is called.***
+#' 
+#' Must be `character`.
+#' 
+#' @param dispatchDF ***A data.frame which describes what function should be called for which regex input. (See details).***
+#' 
+#' Must be `data.frame`.
+#' 
+#' @param Exclusive ***Exclusive interpretations to dispatch.***
+#' 
+#' Defaults to `NULL`. 
+#' 
+#' If `NULL`, only the regexes are used for dispatch.
+#' 
 #' @param ... Arguments to pass to dispatch functions.
-#' @param multiDispatch `logical`, length 1. If `FALSE` (the default) the "best" regex/exclusive match
-#'      is dispatched for each Exclusive segment. If `TRUE`, differenet functions can be dispatched
-#'      within the same input vector. 
-#' @param outputClass Character string: the default output class which the function should return.
+#' 
+#' @param multiDispatch ***Whether to use multiple dispatch function for each interpretation.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`; must be length `1`. 
+#' 
+#' If `FALSE` the "best" regex/exclusive match is dispatched for each Exclusive segment. 
+#' If `TRUE`, differenet functions can be dispatched
+#' within the same input vector. 
+#' 
+#' @param outputClass ***The default output class which the function should return.***
+#' 
+#' Defaults to `"character"`.
+#' 
+#' Must be `character`.
 #'        
 #'        
 #' 
