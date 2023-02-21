@@ -91,12 +91,19 @@ There are also two hidden (advanced) arguments you can specify: <code>memoize</c
 <dt>simple</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
+<dd><p>(a diatonicSet or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
 the parser, deparser, and transposer.</p></dd>
 <dt>parseArgs</dt>
 <dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
 <dt>transposeArgs</dt>
-<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <a href="transpose.html">transpose</a>.</p></dd>
+<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
+<dt>gamutArgs</dt>
+<dd><p>(<code>list</code>) <code>gamutArgs</code> can be a list of arguments that are passed to a special call to <code><a href="gamut.html">gamut()</a></code>.</p></dd>
+<dt>as.factor</dt>
+<dd><p>Should the output be converted to a factor?</p>
+<p>Defaults to <code>TRUE</code> for <code>character</code>-string output (like <code><a href="kern.html">kern()</a></code>) and <code>FALSE</code> for numeric output (like <code><a href="semits.html">semits()</a></code>).</p>
+<p>Must be singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>inPlace = TRUE</code>, <code>as.factor</code> is forced to <code>FALSE</code>.</p></dd>
 <dt>inPlace</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.

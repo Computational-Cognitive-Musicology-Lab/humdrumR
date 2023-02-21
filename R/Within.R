@@ -1617,13 +1617,15 @@ parseResult <- function(results) {
                       result <- unlist(result, recursive = FALSE)
                       
                       if (!object) {
+                        factors <- sum(sapply(result, is.factor))
+                        if (factors > 0L && factors < length(result)) result <- lapply(result, as.character)
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
                       }
                       
                       humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
-                      class(result) <- if (object) 'list' else class
+                      # class(result) <- if (object) 'list' else class
                       result 
                     })
   

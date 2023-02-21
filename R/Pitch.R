@@ -3643,6 +3643,18 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
 }
 
 #' @export
+transpose.token <- function(x, by = NULL, from = NULL, to = NULL, ...) {
+  x <- tonalInterval.character(as.character(x), ...)
+  tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
+  
+  dispatch <- attr(x, 'dispatch')
+  reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree'))
+}
+
+#' @export
+transpose.factor <- transpose.token
+
+#' @export
 transpose.character <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   x <- tonalInterval.character(x, ...)
   tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
@@ -3725,6 +3737,18 @@ invert.numeric <- function(x, around = tint(0L, 0L), Key = NULL, ...) {
   humdrumRattr(y) <- NULL
   y
 }
+
+#' @export
+invert.token <- function(x, around = tint(0L, 0L) , Key = NULL, ...) {
+  x <- tonalInterval.character(as.character(x), ...)
+  tints <- invert.tonalInterval(x, around = around, Key = Key, ...)
+  
+  dispatch <- attr(x, 'dispatch')
+  reParse(tints, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree'))
+}
+
+#' @export
+invert.factor <- invert.token
 
 ### Inversion methods ####
 

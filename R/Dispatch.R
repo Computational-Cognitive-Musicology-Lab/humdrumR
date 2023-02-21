@@ -544,7 +544,7 @@ rePlace <- function(result, dispatched = attr(result, 'dispatch')) {
   result
 }
 
-reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
+reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers, ...) {
   # if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
   if (is.null(dispatched) || is.character(result)) return(result)
   
@@ -555,9 +555,9 @@ reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
   
   result <- if (length(result) > 1L && length(result) == length(dispatched$Segments)) split(result, dispatched$Segments) else list(result)
   
-  result <- unlist(Map(\(res, excl) {
+  result <- do.call('c', Map(\(res, excl) {
     reParser <- match.fun(if (excl %in% reParsers)  excl else reParsers[1])
-    reParser(res, inPlace = FALSE)
+    reParser(res, inPlace = FALSE, ...)
   }, result, exclusives))
   
   names(result) <- names

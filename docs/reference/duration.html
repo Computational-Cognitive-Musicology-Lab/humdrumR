@@ -74,9 +74,25 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">duration</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fl">1</span>, unit <span class="op">=</span> <span class="fl">1</span>, inPlace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">duration</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  scale <span class="op">=</span> <span class="fl">1</span>,
+  unit <span class="op">=</span> <span class="fl">1</span>,
+  as.factor <span class="op">=</span> <span class="va">factor.default</span>,
+  inPlace <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span>
 
-<span class="fu">quarters</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fl">1</span>, unit <span class="op">=</span> <span class="fl">1</span>, inPlace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">quarters</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  scale <span class="op">=</span> <span class="fl">1</span>,
+  unit <span class="op">=</span> <span class="fl">1</span>,
+  as.factor <span class="op">=</span> <span class="va">factor.default</span>,
+  inPlace <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -103,7 +119,7 @@ If <code>inPlace = FALSE</code>, only the rhythm output information will be retu
 read about the <a href="rhythmFunctions.html">family of rhythm functions</a>,
 or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDeparsing.html">deparsed</a>.</p>
 <p>Other rhythm functions: 
-<code><a href="noteValue.html">noteValue</a>()</code>,
+<code><a href="notehead.html">notehead</a>()</code>,
 <code><a href="recip.html">recip</a>()</code></p></div>
     </div>
 

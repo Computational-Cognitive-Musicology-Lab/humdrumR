@@ -217,7 +217,7 @@ Ordinal comparisons (e.g., <code>&gt;</code>, <code>&lt;=</code>) between diaton
 
 
 <p><code>humdrumR</code> knows how to <a href="https://en.wikipedia.org/wiki/Type_conversion" class="external-link">coerce</a> several <a href="https://rdrr.io/r/base/vector.html" class="external-link">base-R atomic types</a> into diatonicSets.
-This can be done using the <a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a> function---e.g., <code>as(3, "diatonicSet")</code>---or more intuitively using the function <code><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet()</a></code>.
+This can be done using the <a href="https://rdrr.io/r/methods/as.html" class="external-link">as</a> function---e.g., <code>as(3, "diatonicSet")</code>---or more intuitively using the function <code>diatonicSet()</code>.
 Coercision methods are defined for</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a>: interpreted as root of major key</p></li>
 <li><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>: rounded to nearest integer and intepreted as root of major key</p></li>
 <li><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>: interpreted using <code>humdrumR</code>s regular expression dispatch system, as
@@ -225,7 +225,7 @@ explained fully here.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>The main way to create <code>diatonicSet</code> S4 objects is with the <code><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet()</a></code> pitch parser.</p>
+    <div class="dont-index"><p>The main way to create <code>diatonicSet</code> S4 objects is with the <code>diatonicSet()</code> pitch parser.</p>
 <p>Other Tonal S4 classes: 
 <code><a href="tertianSetS4.html">tertianSetS4</a></code>,
 <code><a href="tonalIntervalS4.html">tonalIntervalS4</a></code></p></div>

@@ -38,8 +38,9 @@ test_that('Examples from Working With Data vignette work', {
                     table())
   
   if (expect_true(class(kerntab) == 'table')) {
-    expect_length(kerntab, 56)
+    expect_length(kerntab, 72)
     expect_equal(unname(kerntab['dd#']), 4)
+    expect_equal(unname(kerntab['DD#']), 0)
   }
 
   #
@@ -129,7 +130,7 @@ test_that('Examples from Working With Data vignette work', {
   pitches <- with(chorales, pitch(Token))
   
   expect_length(pitches, 2433)
-  expect_equal(pitches[567], 'G#4')
+  expect_equalchar(pitches[567], 'G#4')
   
   #
   chorales <- within(chorales, Pitch <- pitch(Token))

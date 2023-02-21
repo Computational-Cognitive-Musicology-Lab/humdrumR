@@ -64,6 +64,8 @@ reference:
 - title: "Working with Data"
   desc: >
     These pages describe tools used to manipulate the musical data ensconced within humdrumR data structures.
+  contents:
+  - token
 - subtitle: "Manipulating Humdrum Data"
   contents:
   - withinHumdrum
@@ -148,7 +150,7 @@ reference:
   - timeline
   - recip
   - duration
-  - noteValue
+  - notehead
   - seconds
   - ioi
   - untie

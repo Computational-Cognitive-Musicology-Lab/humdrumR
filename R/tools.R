@@ -2641,8 +2641,8 @@ hist <- function(x, ..., col = flatly[1],
   
   axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
   
-  y <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
-  axis(2, y, tick = FALSE, las = 1)
+  yrange <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
+  axis(2, yrange, tick = FALSE, las = 1)
   invisible(y)
 }
 

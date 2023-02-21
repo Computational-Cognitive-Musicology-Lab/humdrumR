@@ -1,4 +1,6 @@
 # General expectations ----
+expect_equalchar <- function(e1, e2) expect_equal(as.character(e1), as.character(e2))
+expect_equalnum <- function(e1, e2) expect_equal(as.numeric(e1), as.numeric(e2))
 
 
 
@@ -200,9 +202,9 @@ test_that("Functions are invertible", {
 test_that('Tonal args work correctly', {
     test <- c('Eb5', 'G4')
     
-    expect_equal(kern(test, generic = TRUE), kern(test, specific = FALSE))
-    expect_equal(kern(test, generic = FALSE), kern(test, specific = TRUE))
-    expect_equal(kern(test, generic = FALSE, specific = TRUE), kern(test, specific = TRUE))
+    expect_equalchar(kern(test, generic = TRUE), kern(test, specific = FALSE))
+    expect_equalchar(kern(test, generic = FALSE), kern(test, specific = TRUE))
+    expect_equalchar(kern(test, generic = FALSE, specific = TRUE), kern(test, specific = TRUE))
     expect_error(kern(test, generic = TRUE, specific = TRUE))
     expect_error(kern(test, generic = FALSE, specific = FALSE))
     
@@ -211,8 +213,6 @@ test_that('Tonal args work correctly', {
 
 test_that('Pitch arguments return correct values!', {
     # These are used in documentation!:
-    expect_equalchar <- function(e1, e2) expect_equal(as.character(e1), as.character(e2))
-    expect_equalnum <- function(e1, e2) expect_equal(as.numeric(e1), as.numeric(e2))
     
     expect_equalchar(pitch('so'),  'G4')
     expect_equalchar(pitch('4.ee-['),  'Eb5')

@@ -210,7 +210,7 @@ rint2dur <- function(x, sep.time = ':',
 
 }
 
-rint2recip <- function(x, sep = '%') {
+rint2recip <- function(x, sep = '%', ...) {
           #modify this to print 0 and 00
   
           num <- as.numeric(x@Numerator)
@@ -660,9 +660,11 @@ rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
 makeRamut <- function(x, deparseArgs = list(), deparser) {
   deparseArgs <- local({
     deparseFormals <- formals(deparser)
-    deparseFormals[names(deparseArgs)[names(deparseArgs) %in% names(formals)]] <- deparseArgs[names(deparseArgs) %in% names(formals)]
+    # deparseFormals[intersect(names(deparseArgs), names(deparseFormals))] <- deparseArgs[intersect(names(deparseArgs), names(deparseFormals))]
+    deparseFormals[names(deparseArgs)] <- deparseArgs
     deparseFormals$x <- deparseFormals$... <- NULL
-    lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
+    deparseFormals
+    # lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
   })
   
   gamut <- unique(x)
@@ -1080,26 +1082,27 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   }
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
-  if (is.character(output)){
-    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
+  if (inPlace) {
+    output <- rePlace(as.character(output), dispatch) 
     output[!onsets] <- '.'
   } else {
-    output[!onsets] <- NA #as(NA, class(output))
+    
+    output[!onsets] <- NA 
   }
   
   if (!finalOnset) {
     if (length(groupby)) {
-      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- as(NA, class(output))
+      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- NA
       
     } else {
-      output[max(which(onsets), na.rm = TRUE)] <- NA #as(NA, class(output))
+      output[max(which(onsets), na.rm = TRUE)] <- NA
       
     }
   }
   
-  
+  humdrumRattr(output) <- list(dispatch = NULL)
   output
   
   
@@ -1125,18 +1128,19 @@ untie <- function(x, open = '[', close = ']', ...,
   
   
   dispatch <- attr(rint, 'dispatch')
-  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'))
+  output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))
-  if (is.character(output)){
-    if (inPlace) output <- rePlace(output, dispatch) else humdrumRattr(output) <- NULL
-    output[null] <- '.'
+  
+  if (inPlace) {
+    output <- rePlace(as.character(output), dispatch)
     if (is.character(open)) output <- stringr::str_remove(output, 
                                                           if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
+    output[null] <- '.'
   } else {
-    output[null] <- as(NA, class(output))
+    output[null] <- NA
   }
-  
+  humdrumRattr(output) <- list(dispatch = NULL)
   
   output
   

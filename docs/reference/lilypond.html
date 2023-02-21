@@ -92,6 +92,8 @@ Lilypond-like <em>rhythms</em> can be creating using the <a href="recip.html">re
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  as.factor <span class="op">=</span> <span class="va">factor.default</span>,
+  gamutArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -108,12 +110,19 @@ There are also two hidden (advanced) arguments you can specify: <code>memoize</c
 <dt>simple</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
+<dd><p>(a diatonicSet or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
 the parser, deparser, and transposer.</p></dd>
 <dt>transposeArgs</dt>
-<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <a href="transpose.html">transpose</a>.</p></dd>
+<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
 <dt>parseArgs</dt>
 <dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
+<dt>as.factor</dt>
+<dd><p>Should the output be converted to a factor?</p>
+<p>Defaults to <code>TRUE</code> for <code>character</code>-string output (like <code><a href="kern.html">kern()</a></code>) and <code>FALSE</code> for numeric output (like <code><a href="semits.html">semits()</a></code>).</p>
+<p>Must be singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>inPlace = TRUE</code>, <code>as.factor</code> is forced to <code>FALSE</code>.</p></dd>
+<dt>gamutArgs</dt>
+<dd><p>(<code>list</code>) <code>gamutArgs</code> can be a list of arguments that are passed to a special call to <code><a href="gamut.html">gamut()</a></code>.</p></dd>
 <dt>inPlace</dt>
 <dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.
@@ -156,7 +165,7 @@ see the <a href="pitchDeparsing.html">pitch deparsing documentation</a>.</p>
 <h3 id="key">Key<a class="anchor" aria-label="anchor" href="#key"></a></h3>
 
 
-<p>The <code>Key</code> argument must be a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, or something that can be parsed into one.
+<p>The <code>Key</code> argument must be a diatonicSet, or something that can be parsed into one.
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose---<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
@@ -186,8 +195,8 @@ For example, we can get the exact same result as before by typing <code>kern('CX
 to <code><a href="transpose.html">transpose()</a></code>, allowing us to easily transpose pitch information.
 For example, we could type <code>kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))</code> can get the output <code>c('d', 'e', 'f#')</code>.
 The possible transpose args are:</p><ul><li><p><code>by</code> (<a href="tonalIntervalS4.html">tonalInterval</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>from</code> (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>to</code>  (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>from</code> (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>to</code>  (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
 <li><p><code>real</code> (<code>logical</code>, <code>length == 1</code>) Should transposition be real or tonal?</p></li>
 <li><p><code>relative</code> (<code>logical</code>, <code>length == 1</code>) Should key-wise transposition be based on relative or parallel keys?</p></li>
 </ul><p>As a convenient shorthand, or "syntactic sugar," you can specify <code>transposeArgs</code> in an alternate way:
@@ -239,6 +248,23 @@ Note that <code>inPlace = TRUE</code> will force functions like <code>semits</co
 <em>if</em> their input is a character string.</p>
 </div>
 
+    </div>
+    <div class="section level2">
+    <h2 id="pitch-gamut-factor-levels">Pitch-Gamut Factor Levels<a class="anchor" aria-label="anchor" href="#pitch-gamut-factor-levels"></a></h2>
+    
+
+
+<p>All pitch formats have the option to be output (<a href="pitchDeparsing.html">deparsed</a>) as R <a href="https://rdrr.io/r/base/factor.html" class="external-link">factors</a>.
+(See the <code><a href="../articles/RPrimer.html">vignette('RPrimer')</a></code> for an explanation of what factors are.)
+For <code>character</code> representations, the <code>as.factor</code> argument defaults to <code>TRUE</code>; for <code>numeric</code>
+representations, <code>as.factor</code> defaults to <code>FALSE</code>---note that if <code>inPlace = TRUE</code>,
+<code>as.factor</code> is forced to <code>FALSE</code>.</p>
+<p>As factors, the pitch data will implicitly remember the <code><a href="gamut.html">gamut()</a></code> of possible pitches,
+and their order, so when you call <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code>, the resulting table is well formatted.
+The gamut is generated by the <code><a href="gamut.html">gamut()</a></code> function: the <code>simple</code>/<code>complex</code> and
+<code>generic</code>/<code>specific</code> arguments are automacitally passed to <code><a href="gamut.html">gamut()</a></code>; additional
+arguments can be passed to gamut using <code>gamutArgs = list(...)</code>, or with the syntactic sugar <code>gamut(...)</code>.
+Read the <code><a href="gamut.html">gamut()</a></code> docs for an explanation of gamut generation.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

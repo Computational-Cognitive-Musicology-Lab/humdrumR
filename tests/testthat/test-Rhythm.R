@@ -28,9 +28,9 @@ test_that("ioi and untie work correctly", {
   test <- c('4a', '4a', '4b', '4r', '8c', '16r', '8.c~',  '8G', '8A', '4.r')
   
   expect_equal(ioi(test), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', NA, '.' ))
-  expect_equal(ioi(test, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', NA, '.' ))
+  expect_equalchar(ioi(test, inPlace = FALSE), c( '4', '4', '2', NA, '8.', NA, '8.', '8', NA, NA ))
   expect_equal(ioi(test, finalOnset = TRUE), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', '2A', '.' ))
-  expect_equal(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', '2', '.' ))
+  expect_equalchar(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', NA, '8.', NA, '8.', '8', '2', NA))
   
   
   expect_equal(ioi(c('4a','4r','4a','4.a','8r','4a'), groupby = list(c(1,1,1,2,2,2))),
@@ -49,7 +49,7 @@ test_that("ioi and untie work correctly", {
   
   test <- c('4a', '[4a',']8a', NA, '8g','8G','[8a','_2a','4a]','4G')
   expect_equal(untie(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
-  expect_equal(untie(test, inPlace = FALSE), c( '4', '4.', '.', NA, '8', '8', '2..', '.', '.', '4' ))
+  expect_equalchar(untie(test, inPlace = FALSE), c( '4', '4.', NA, NA, '8', '8', '2..', NA, NA, '4' ))
   
   # both
   test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
@@ -59,7 +59,7 @@ test_that("ioi and untie work correctly", {
 
 test_that('Examples from rhythm man are correct', {
   expect_equalnum(duration('4.ee-['), 0.375)
-  expect_equalnum(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
+  expect_equal(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
   
   expect_equalnum(seconds('4.'), 1.5)
   expect_equalchar(recip('4.', Exclusive = 'notevalue'), NA_character_)
@@ -67,7 +67,7 @@ test_that('Examples from rhythm man are correct', {
   expect_equalchar(recip('2', scale = 1/16), '32')
   
   
-  expect_equal(recip('4%5', sep ='/'), '4/5')
+  expect_equalchar(recip('4%5', sep ='/'), '4/5')
   
   expect_equalchar(untie(c('[4a', '4a]', '2g')), 
                c('2a', '.', '2g'))
@@ -81,12 +81,12 @@ test_that('Examples from rhythm man are correct', {
   ##
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
   
-  x <- with(chorales, table(noteValue(Token)), side = barplot(., cex.names = 2))
+  x <- with(chorales, table(notehead(Token)))
   
-  expect_equal(unname(x["𝅗𝅥 "]), 222)
+  expect_equalchar(x["𝅗𝅥 "], 222)
   
   samp <- c('4', '4.', '4%5')
-  expect_equal(seconds(samp) * 1000, ms(samp))
+  expect_equalnum(seconds(samp) * 1000, ms(samp))
   
   
 })
@@ -112,3 +112,4 @@ test_that('Factors work correctly',{
   expect_true(is.factor(recip(.25)))
   expect_false(is.factor(recip(.25, as.factor = FALSE)))
 })
+

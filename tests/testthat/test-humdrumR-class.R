@@ -190,8 +190,8 @@ test_that("Exclusive is updated by update_Exclusive", {
   expect_equal(with(chorales$Semits, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**semits')
   expect_equal(with(chorales$Nchar, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
   # (semits and Nchar update Token because they are not character)
-  expect_equal(with(chorales$Pitch, .[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**pitch')
-  expect_equal(with(chorales$Token, .[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
+  expect_equal(with(chorales$Pitch, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**pitch')
+  expect_equal(with(chorales$Token, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
   
   })
 

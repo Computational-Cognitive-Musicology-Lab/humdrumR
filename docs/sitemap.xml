@@ -139,6 +139,9 @@
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/freq.html</loc>
   </url>
   <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/gamut.html</loc>
+  </url>
+  <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/harm.html</loc>
   </url>
   <url>
@@ -242,6 +245,9 @@
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/noteValue.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/notehead.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/octave.html</loc>
@@ -350,6 +356,9 @@
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/timeline.html</loc>
+  </url>
+  <url>
+    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/token.html</loc>
   </url>
   <url>
     <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonalIntervalS4.html</loc>

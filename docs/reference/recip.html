@@ -93,6 +93,7 @@ which also includes <a href="kern.html">pitch</a> information and notation detai
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   scale <span class="op">=</span> <span class="fl">1</span>,
   unit <span class="op">=</span> <span class="fl">1</span>,
+  as.factor <span class="op">=</span> <span class="va">factor.default</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -126,7 +127,7 @@ the reciprocal approach is highly concise and very similar to conventional weste
 A "quarter note" is represented as the reciprocal of 1/4: simply <code>"4"</code>.
 Full reciprocal fractions can be specified: <code>"2%3"</code> to indicate 3/2.
 The <code>%</code> separator can be changed using the <code>sep</code> argument.</p>
-<p>As in conventional <a href="noteValue.html">note values</a>, "dots" can be added after a value to increase the duration by
+<p>As in conventional <a href="notehead.html">note values</a>, "dots" can be added after a value to increase the duration by
 the ratio of <code>(2 - (2^{-n}))</code>, where <code>n</code> is the number of dots.
 (One dot is 3/2; two dots is 7/4; etc.).</p>
     </div>
@@ -137,7 +138,7 @@ read about the <a href="rhythmFunctions.html">family of rhythm functions</a>,
 or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDeparsing.html">deparsed</a>.</p>
 <p>Other rhythm functions: 
 <code><a href="duration.html">duration</a>()</code>,
-<code><a href="noteValue.html">noteValue</a>()</code></p></div>
+<code><a href="notehead.html">notehead</a>()</code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

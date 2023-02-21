@@ -101,7 +101,13 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 <span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+
+<span class="co"># S3 method for factor</span>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
+
+<span class="co"># S3 method for token</span>
+<span class="fu">tonalInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -111,7 +117,7 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 <dt>str</dt>
 <dd><p>(<code>character</code> or <code>numeric</code>) The input vector.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
+<dd><p>(a diatonicSet or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
 to interpret pitch representations.
 For example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.
 The output <code>tonalInterval</code> is output <em>within the key</em>: thus, <code>tonalInterval('C#', Key = "A:")</code>
@@ -412,7 +418,7 @@ For example, we might think of a ascending major 12th as being an ascending octa
 <strong>Or</strong> we could encode that same interval as <em>two</em> ascending octaves <em>minus</em> a perfect fourth: <strong>+ P15 - P4</strong>.
 The following table illustrates how different <code>octave.round</code> arguments "partition" compound intervals into simple parts and octaves:</p><table class="table table"><tr><td></td><td>round</td><td>floor</td><td>ceiling</td><td>trunc</td><td>expand</td></tr><tr><td>-P12:</td><td>-P15 + P4</td><td>-P15 + P4</td><td>-P8  - P5</td><td>-P8  - P5</td><td>-P15 + P4</td></tr><tr><td>-P11:</td><td>-P8  - P4</td><td>-P15 + P5</td><td>-P8  - P4</td><td>-P8  - P4</td><td>-P15 + P5</td></tr><tr><td>-P8:</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td><td>-P8  + P1</td></tr><tr><td>-P5:</td><td>-P8  + P4</td><td>-P8  + P4</td><td>+P1  - P5</td><td>+P1  - P5</td><td>-P8  + P4</td></tr><tr><td>-P4:</td><td>+P1  - P4</td><td>-P8  + P5</td><td>+P1  - P4</td><td>+P1  - P4</td><td>-P8  + P5</td></tr><tr><td>P1:</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td><td>+P1  + P1</td></tr><tr><td>+P4:</td><td>+P1  + P4</td><td>+P1  + P4</td><td>+P8  - P5</td><td>+P1  + P4</td><td>+P8  - P5</td></tr><tr><td>+P5:</td><td>+P8  - P4</td><td>+P1  + P5</td><td>+P8  - P4</td><td>+P1  + P5</td><td>+P8  - P4</td></tr><tr><td>+P8:</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td><td>+P8  + P1</td></tr><tr><td>+P11:</td><td>+P8  + P4</td><td>+P8  + P4</td><td>+P15 - P5</td><td>+P8  + P4</td><td>+P15 - P5</td></tr><tr><td>+P12:</td><td>+P15 - P4</td><td>+P8  + P5</td><td>+P15 - P4</td><td>+P8  + P5</td><td>+P15 - P4</td></tr><tr><td>+P15:</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td><td>+P15 + P1</td></tr><tr><td>+P18:</td><td>+P15 + P4</td><td>+P15 + P4</td><td>+P22 - P5</td><td>+P15 + P4</td><td>+P22 - P5</td></tr><tr><td>+P19:</td><td>+P22 - P4</td><td>+P15 + P5</td><td>+P22 - P4</td><td>+P15 + P5</td><td>+P22 - P4</td></tr></table><p>Notice that, if <code>octave.floor</code> is being used, all simple intervals are represented as ascending.</p>
 <p>When parsing <a href="pitch.html">"absolute" pitch</a> representations, the <code>octave.round</code> option allows you to control which octave notes are associated with.
-The following table illustrates:</p><table class="table table"><tr><td></td><td>round</td><td>floor</td><td>ceiling</td><td>trunc</td><td>expand</td></tr><tr><td>FF:</td><td>F2</td><td>F2</td><td>F3</td><td>F3</td><td>F2</td></tr><tr><td>GG:</td><td>G3</td><td>G2</td><td>G3</td><td>G3</td><td>G2</td></tr><tr><td>C:</td><td>C3</td><td>C3</td><td>C3</td><td>C3</td><td>C3</td></tr><tr><td>F:</td><td>F3</td><td>F3</td><td>F4</td><td>F4</td><td>F3</td></tr><tr><td>G:</td><td>G4</td><td>G3</td><td>G4</td><td>G4</td><td>G3</td></tr><tr><td>c:</td><td>C4</td><td>C4</td><td>C4</td><td>C4</td><td>C4</td></tr><tr><td>f:</td><td>F4</td><td>F4</td><td>F5</td><td>F4</td><td>F5</td></tr><tr><td>g:</td><td>G5</td><td>G4</td><td>G5</td><td>G4</td><td>G5</td></tr><tr><td>cc:</td><td>C5</td><td>C5</td><td>C5</td><td>C5</td><td>C5</td></tr><tr><td>ff:</td><td>F5</td><td>F5</td><td>F6</td><td>F5</td><td>F6</td></tr><tr><td>gg:</td><td>G6</td><td>G5</td><td>G6</td><td>G5</td><td>G6</td></tr><tr><td>ccc:</td><td>C6</td><td>C6</td><td>C6</td><td>C6</td><td>C6</td></tr><tr><td>fff:</td><td>F6</td><td>F6</td><td>F7</td><td>F6</td><td>F7</td></tr><tr><td>ggg:</td><td>G7</td><td>G6</td><td>G7</td><td>G6</td><td>G7</td></tr></table></div>
+The following table illustrates:</p><table class="table table"><tr><td></td><td>round</td><td>floor</td><td>ceiling</td><td>trunc</td><td>expand</td></tr><tr><td>FF:</td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td></tr><tr><td>GG:</td><td>20</td><td>8</td><td>8</td><td>8</td><td>8</td></tr><tr><td>C:</td><td>13</td><td>13</td><td>1</td><td>1</td><td>13</td></tr><tr><td>F:</td><td>18</td><td>18</td><td>18</td><td>18</td><td>18</td></tr><tr><td>G:</td><td>32</td><td>20</td><td>20</td><td>20</td><td>20</td></tr><tr><td>c:</td><td>25</td><td>25</td><td>13</td><td>13</td><td>25</td></tr><tr><td>f:</td><td>30</td><td>30</td><td>30</td><td>18</td><td>42</td></tr><tr><td>g:</td><td>44</td><td>32</td><td>32</td><td>20</td><td>44</td></tr><tr><td>cc:</td><td>37</td><td>37</td><td>25</td><td>25</td><td>37</td></tr><tr><td>ff:</td><td>42</td><td>42</td><td>42</td><td>30</td><td>54</td></tr><tr><td>gg:</td><td>56</td><td>44</td><td>44</td><td>32</td><td>56</td></tr><tr><td>ccc:</td><td>49</td><td>49</td><td>37</td><td>37</td><td>49</td></tr><tr><td>fff:</td><td>54</td><td>54</td><td>54</td><td>42</td><td>66</td></tr><tr><td>ggg:</td><td>68</td><td>56</td><td>56</td><td>44</td><td>68</td></tr></table></div>
 
 <div class="section">
 <h4 id="absolute-or-relative-contour-octave">Absolute or Relative (contour) Octave<a class="anchor" aria-label="anchor" href="#absolute-or-relative-contour-octave"></a></h4>
@@ -518,7 +524,8 @@ For example, while <code>kern(0:2)</code> returns <code>c("c", "d-", "d")</code>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -d7</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="st">'E x 5'</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>doublesharp <span class="op">=</span> <span class="st">'x'</span>, sep <span class="op">=</span> <span class="st">' '</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ee##"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] ee##</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>

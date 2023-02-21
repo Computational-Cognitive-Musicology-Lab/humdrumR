@@ -544,7 +544,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     
     field <- evalActive(x, dataTypes = dataTypes, nullChar = TRUE)
     if (is.factor(field)) field <- as.character(field) # R does't allow factors in matrices
-    padder <- as(padder, class(field))
+    # padder <- as(padder, class(field))
     
     output <- matrix(padder, nrow = max(i), ncol = max(j))
     
@@ -1655,14 +1655,17 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     Exclusive <- attr(hum[[field]], 'Exclusive')
     
     exclusives <- hum[, Type == 'I' & grepl('^\\*\\*', Token)]
-    if (!is.character(hum[[field]])) field <- 'Token'
+    
+    # if (!is.character(hum[[field]]) && !is.factor(hum[[field]])) field <- 'Token'
+    
+    # if (is.factor(hum[[field]])) hum[[field]] <- as.character(hum[[field]])
+    
     if (!is.null(Exclusive)) {
         
-        
-        hum[[field]][exclusives] <- paste0('**', Exclusive)
-        hum$Null[exclusives] <- FALSE
+        hum[['Token']][exclusives] <- paste0('**', Exclusive)
+        # hum$Null[exclusives] <- FALSE
     } else {
-        hum[[field]][exclusives] <- paste0('**', hum$Exclusive[exclusives])
+        hum[['Token']][exclusives] <- paste0('**', hum$Exclusive[exclusives])
     }
     hum
 }

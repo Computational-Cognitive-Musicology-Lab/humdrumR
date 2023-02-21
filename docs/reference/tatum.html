@@ -136,10 +136,16 @@ If <code>deparser</code> is <code>NULL</code>, the tatum is returned as a <code>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4"</span>, <span class="st">"8"</span>, <span class="st">"12"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "24"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M4/4"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "16"</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>invalid factor level, NA generated</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Setting class(x) to NULL;   result will no longer be an S4 object</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"Exclusive")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Levels: </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="st">"M4/4"</span>, <span class="st">'6'</span><span class="op">)</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in deparser(result):</span> could not find function "deparser"</span>
