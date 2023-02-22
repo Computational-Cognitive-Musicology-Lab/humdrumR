@@ -2659,7 +2659,7 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' Must be a singleton `logical` value: a on/off switch.
 #' 
 #' 
-#' @param tints ***An optional reference vector to base the gamut on.***
+#' @param reference ***An optional reference vector to base the gamut on.***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -2677,14 +2677,18 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' @export
 gamut <- function(generic = FALSE, simple = FALSE,
                   min.octave, max.octave, min.lof, max.lof,
-                  tints = NULL,
-                  deparser = tint2kern, deparseArgs = list()) {
-  
-  tints <- tonalInterval(tints)
+                  reference = NULL,
+                  deparser = tint2kern, deparseArgs = list(), ...) {
   
   checks(generic, xTF)
   checks(simple, xTF)
   checks(deparser, xinherits('function'))
+  
+  generic <- deparseArgs$generic %||% generic
+  simple <- deparseArgs$simple %||% simple
+  
+  reference <- do.call('tonalInterval', c(list(reference), deparseArgs))
+  
   
   deparseArgs <- local({
     deparseFormals <- formals(deparser)
@@ -2699,14 +2703,14 @@ gamut <- function(generic = FALSE, simple = FALSE,
   # notempty missing -> use min(default, notempty)
   # notempty notmissing -> use given
   #
-  if (length(tints)) {
+  if (length(reference)) {
     deparseOctave <- deparseArgs
     deparseOctave$octave.integer <- TRUE
     offset <- deparseArgs$octave.offset %||% 0L
-    octaves <- do.call(tint2octave, c(list(tints), deparseOctave)) - offset
+    octaves <- do.call(tint2octave, c(list(reference), deparseOctave)) - offset
     
     
-    lofs <- LO5th(tints)
+    lofs <- LO5th(reference)
     if (generic) lofs <- genericFifth(lofs)
     
   } else {
@@ -2755,6 +2759,16 @@ gamut <- function(generic = FALSE, simple = FALSE,
   unique(if (!is.null(deparser)) do.call(deparser, c(list(gamut), deparseArgs)) else gamut)
 }
 
+
+factorize.pitch <- function(token) {
+  deparseArgs <- attr(token, 'deparseArgs')
+  deparseArgs$Key <- NULL
+  deparser <- attr(token, 'deparser')
+  
+  levels <- gamut(reference = token, deparseArgs = deparseArgs, deparser = deparser)
+  
+  factor(token, levels = levels)
+}
 
 
 ###################################################################### ### 
@@ -2993,22 +3007,16 @@ makePitchTransformer <- function(deparser, callname,
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
     if (deparse && !is.null(output)) {
-      dispatch <- attr(parsedTint, 'dispatch')
-      if (inPlace) {
-        output <- rePlace(output, attr(parsedTint, 'dispatch'))
-        gamut <- NULL
+      output <- if (inPlace) {
+        rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        gamut <- if (as.factor) do.call('gamut',
-                                        c(list(tints = parsedTint[!is.na(parsedTint)] + (if (keyed) Key) %||% P1,
-                                               generic = generic, simple = simple,
-                                               deparser = !!deparser, deparseArgs = deparseArgs[-1]),
-                                          gamutArgs))
-        
+        do.call('token', list(output, Exclusive = callname, deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1], 
+                                      factorizer = factorize.pitch,
+                                      deparser = !!deparser))
       }
-      output <- token(output, Exclusive = callname, levels = gamut)
     }
     
-    output 
+    output
     
   })) %class% 'pitchFunction'
 }

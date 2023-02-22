@@ -2547,15 +2547,10 @@ strPartition <- function(str, split = '/') {
 
 #' Humdrum tokens
 #' @export
-token <- function(x, Exclusive = NULL, levels = NULL, ...) {
-  
-  if (!is.null(levels)) {
-    if (is.function(levels)) levels <- levels(x, ...)
-    x <- factor(x, levels = levels)
-  }
-  
+token <- function(x, Exclusive = NULL, ...) {
   
   attr(x, 'Exclusive') <- Exclusive
+  humdrumRattr(x) <- list(...)
   
   class(x) <- c('token', class(x))
   x
@@ -2569,7 +2564,7 @@ token <- function(x, Exclusive = NULL, levels = NULL, ...) {
 `[.token` <- function(x, ...) {
   
   result <- NextMethod('[')
-  attr(result, 'Exclusive') <- attr(x, 'Exclusive') 
+  humdrumRattr(result) <- humdrumRattr(x)
   class(result) <- class(x)
   result
   
@@ -2587,6 +2582,7 @@ print.token <- function(x) {
   }
   class(x) <- setdiff(class(x), 'token')
   if (is.factor(x)) x <- as.character(x)
+  attributes(x) <- list()
   print(x, quote = FALSE, na.print = '.')
 }
 
@@ -2604,14 +2600,48 @@ c.token <- function(...) {
   
   exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
   
+  humattr <- humdrumRattr(args[[1]])
+  
   args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
-  classes <- sapply(args, \(x) class(x)[1])
-  if (any(classes == 'factor') && !all(classes == 'factor')) args[classes != 'factor'] <- lapply(args[classes != 'factor'], factor)
   result <- do.call('c', args)
   
-  attr(result, 'Exclusive') <- exclusives
+  humdrumRattr(result) <- humattr
   class(result) <- c('token', class(result))
   result
+  
+}
+
+## table ----
+
+
+#' @export
+table <- function(..., 
+                  exclude = if (useNA == 'no') c(NA, NaN),
+                  useNA = 'ifany',
+                  dnn = names(list(...)),
+                  deparse.level = 1) {
+  
+  args <- list(...)
+  
+  args <- lapply(args,
+                 \(arg) {
+                   if (inherits(arg, 'token')) factorize(arg) else arg
+                 })
+  tab <- do.call(base::table,
+                 c(args, list(exclude = exclude, useNA = useNA,
+                              dnn = dnn, deparse.level = deparse.level)))
+  
+  names(tab)[is.na(names(tab))] <- '.'
+  tab
+
+}
+
+factorize <- function(token) {
+  factorizer <- attr(token, 'factorizer')
+  class(token) <- setdiff(class(token), 'token')
+  if (is.null(factorizer)) return(token)
+  
+  factorizer(token)
   
 }
 
@@ -2667,12 +2697,18 @@ barplot <- function(height,  ...,
   
   if (is.logical(log)) log <- if (log[1]) 'y' else ''
   
-  graphics::barplot(height, ..., beside = beside, legend.text = twoD, 
-                    col = col, ylim = ylim, border = border, axes = FALSE, log = log)
+  plot <- graphics::barplot(height, ..., beside = beside, legend.text = twoD, 
+                            col = col, ylim = ylim, border = border, axes = FALSE, log = log)
   
   
-  if (missing(yaxis)) yaxis <- pretty(c(0, height), n = 10L, min.n = 5L)
+  if (missing(yaxis)) {
+    yran <- range(setdiff(height, 0))
+    if (log == 'y') yran <- log10(yran)
+    yaxis <- axisTicks(yran, log = log == 'y', nint = 12)
+    
+  }
   axis(2, yaxis, las = 1, tick = FALSE)
-  
+ 
+  plot 
 }
 

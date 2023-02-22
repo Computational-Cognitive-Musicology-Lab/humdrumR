@@ -520,13 +520,14 @@ do_attr <- function(func, x, ...) {
 }
 
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key',
+             'deparser', 'factorizer', 'deparseArgs')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key', 'factorizer')
   if (is.null(value)) {
     for (att in known) attr(x, att) <- NULL
   } else {

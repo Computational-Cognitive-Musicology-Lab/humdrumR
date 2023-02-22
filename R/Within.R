@@ -1625,7 +1625,7 @@ parseResult <- function(results) {
                       
                       humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
-                      # class(result) <- if (object) 'list' else class
+                      class(result) <- if (object) 'list' else class
                       result 
                     })
   

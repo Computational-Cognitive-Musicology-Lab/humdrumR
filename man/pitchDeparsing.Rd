@@ -438,22 +438,22 @@ The following table illustrates how different \code{octave.round} arguments "par
 Notice that, if \code{octave.floor} is being used, all simple intervals are represented as ascending.
 
 When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
-The following table illustrates:\tabular{lrrrrr}{
+The following table illustrates:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
-   FF: \tab 6 \tab 6 \tab 6 \tab 6 \tab 6 \cr
-   GG: \tab 20 \tab 8 \tab 8 \tab 8 \tab 8 \cr
-   C: \tab 13 \tab 13 \tab 1 \tab 1 \tab 13 \cr
-   F: \tab 18 \tab 18 \tab 18 \tab 18 \tab 18 \cr
-   G: \tab 32 \tab 20 \tab 20 \tab 20 \tab 20 \cr
-   c: \tab 25 \tab 25 \tab 13 \tab 13 \tab 25 \cr
-   f: \tab 30 \tab 30 \tab 30 \tab 18 \tab 42 \cr
-   g: \tab 44 \tab 32 \tab 32 \tab 20 \tab 44 \cr
-   cc: \tab 37 \tab 37 \tab 25 \tab 25 \tab 37 \cr
-   ff: \tab 42 \tab 42 \tab 42 \tab 30 \tab 54 \cr
-   gg: \tab 56 \tab 44 \tab 44 \tab 32 \tab 56 \cr
-   ccc: \tab 49 \tab 49 \tab 37 \tab 37 \tab 49 \cr
-   fff: \tab 54 \tab 54 \tab 54 \tab 42 \tab 66 \cr
-   ggg: \tab 68 \tab 56 \tab 56 \tab 44 \tab 68 \cr
+   FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
+   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
+   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
+   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
+   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
 }
 
 }

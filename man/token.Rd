@@ -8,7 +8,7 @@
 \alias{c.token}
 \title{Humdrum tokens}
 \usage{
-token(x, Exclusive = NULL, levels = NULL, ...)
+token(x, Exclusive = NULL, ...)
 
 \method{[}{token}(x, ...)
 
