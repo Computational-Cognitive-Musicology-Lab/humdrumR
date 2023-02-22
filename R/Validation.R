@@ -64,6 +64,8 @@
 #' @param errorReport.path (`character`, `length == 1`) A directory path where to write error report files.
 #' If `NULL` (the default), no error report files are written.
 #'
+#' @examples 
+#' validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' @export
 validateHumdrum <- function(..., errorReport.path = NULL) {
 

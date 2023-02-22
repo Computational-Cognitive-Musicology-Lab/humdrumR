@@ -28,6 +28,10 @@
 #' The `summary` method for [humdrumR objects][humdrumRclass] simply calls all of the above 
 #' functions and prints a condensed version of each.
 #'
+#' @examples 
+#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+#' summary(chorales)
+#' 
 #' @name humSummary
 #' @aliases summary
 #' @family corpus summary functions
@@ -112,7 +116,10 @@ summary.humdrumR <- function(object) {
 #' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
 #' a `humCensus` table.
 #'
-#'
+#' @examples 
+#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+#' census(chorales)
+#' 
 #' @family corpus summary functions
 #' @export
 census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = FALSE, drop = FALSE) {
@@ -640,6 +647,10 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #'     as a regular expression against filenames in the corpus.
 #' @param drop If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of a `humSpine` table.
 #' 
+#' @examples
+#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+#' spines(chorales)
+#' 
 #' @family corpus summary functions
 #' @export
 spines  <- function(humdrumR, drop = FALSE) {
@@ -837,6 +848,10 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #' @param humdrumR A [humdrumR][humdrumR-class] data object.
 #' @param i If `numeric`, selects rows by index. If `character`, the string is matched
 #'     as a regular expression against the filenames in the corpus.
+#' 
+#' @examples 
+#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+#' interpretations(chorales)
 #' 
 #' @family corpus summary functions
 #' @export
