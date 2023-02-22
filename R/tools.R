@@ -2605,6 +2605,8 @@ c.token <- function(...) {
   exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
   
   args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
+  classes <- sapply(args, \(x) class(x)[1])
+  if (any(classes == 'factor') && !all(classes == 'factor')) args[classes != 'factor'] <- lapply(args[classes != 'factor'], factor)
   result <- do.call('c', args)
   
   attr(result, 'Exclusive') <- exclusives
