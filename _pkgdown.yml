@@ -190,6 +190,8 @@ reference:
   desc: "Other useful tools"
 - subtitle: "Numeric values"
   contents:
+  - entropy
+  - ptable
   - rational
   - expand
 - subtitle: "Manipulating Vectors"

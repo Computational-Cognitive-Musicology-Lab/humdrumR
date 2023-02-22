@@ -902,12 +902,14 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
+  if (!is.vector(x)) return(x)
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 
     } else {
       return (if (recycle) rep_len(x, length.out) else x[seq_len(length.out)])
     }
+    
   } 
   dim <- dim(x)
   dim[seq_along(length.out) > length(dim)] <- 1
@@ -1072,17 +1074,6 @@ setAs('numeric', 'integer64', \(from) as.integer64.double(from))
 setAs('logical', 'integer64', \(from) as.integer64.logical(from))
 setAs('character', 'integer64', \(from) as.integer64.character(from))
 
-
-entropy <- function(x, base) UseMethod('entropy')
-entropy.table <- function(x, base = 2) {
-  if (sum(x) != 1) x <- x / sum(x)
-  
-  -sum(x * log(x, base))
-  
-}
-entropy.default <- function(x, base = 2) {
-  entropy.table(table(x), base = base)
-}
 
 find2Dlayout <- function(n) {
   
