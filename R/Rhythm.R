@@ -15,7 +15,8 @@
 #' @param BPM A `character` string (which may or may not be be prefixed with `"*MM"`) or numeric values,
 #'        which are interpreted as a beats-per-minute value.
 #' @param unit A value which can be interpreted as a [duration()]``
-#'  
+#' 
+#' 
 #' @family time functions
 #' @export
 bpm2sec <- function(BPM, unit = .25) {
@@ -856,7 +857,14 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' the ratio of `(2 - (2^{-n}))`, where `n` is the number of dots.
 #' (One dot is 3/2; two dots is 7/4; etc.).
 #' 
-#'  
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- recip(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], recip(Token))
+#' results
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -865,12 +873,27 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' @param sep (`character`, `length == 1`) A `character` string to use as the separator
 #' between denominator and numerator.
 #' @inheritParams rhythmFunctions
+#' 
+#' 
 #' @export 
 recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%'))
 
 #' Numeric (double) representation of durations
 #' 
 #' Output is `numeric` (real number).
+#' 
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- duration(exampleToken)
+#' results
+#' results <- quarters(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], duration(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], quarters(Token))
+#' results
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -908,6 +931,14 @@ quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' 
 #' ```
 #' 
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- noteValue(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], noteValue(Token))
+#' results
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -948,6 +979,24 @@ noteValue <- makeRhythmTransformer(rint2noteValue, 'noteValue')
 #' @par years (`logical`, T/F) Should the `dur` output include years?
 #' 
 #' @family time functions
+#' 
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- ms(exampleToken)
+#' results
+#' results <- seconds(exampleToken)
+#' results
+#' results <- dur(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], ms(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], seconds(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], dur(Token))
+#' results
+#' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
@@ -1016,6 +1065,19 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
 #'        If so, and `inPlace = TRUE`, the output will be placed into an output string beside the original non-duration information.
 #'        If `inPlace = FALSE`, only the rhythm output information will be returned.
 #'        
+#' 
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- ioi(exampleToken)
+#' results
+#' results <- untie(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], ioi(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], untie(Token))
+#' results
 #' @export
 ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
                 finalOnset = FALSE,
@@ -1269,6 +1331,19 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #'   Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #' @param parseArgs A `list` of arguments to pass to the [rhythm parser][rhythmInterval()].
 #'
+#' 
+#' @examples 
+#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+#' results <- timeline(exampleToken)
+#' results
+#' results <- timestamp(exampleToken)
+#' results
+#' 
+#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' results <- with(exampleHumdrum[[,3:4]], timeline(Token))
+#' results
+#' results <- with(exampleHumdrum[[,3:4]], timestamp(Token))
+#' results
 #' 
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
