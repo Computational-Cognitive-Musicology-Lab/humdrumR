@@ -153,7 +153,7 @@ test_that("Functions are invertible", {
     expect_invertible(humdrumR:::interval2tint, humdrumR:::tint2interval, inputs$interval)
     expect_invertible(humdrumR:::solfa2tint, humdrumR:::tint2solfa, inputs$solfa)
     
-    expect_invertible_factor <-function(func1, func2, x) expect_equal(as.character(func2(func1(x))), x)
+    expect_invertible_factor <-function(func1, func2, x) expect_equal(c(unclass(func2(func1(x)))), x)
     # exported functions
     expect_invertible_factor(kern, kern, inputs$kern)
     expect_invertible_factor(kern, pitch, inputs$pitch)
@@ -330,6 +330,17 @@ test_that("transpose and invert work", {
     expect_equal(invert(x), c("Eb3", "Db3", "Cb3", "Bb2", "Ab2", "Gb2", "Fb2", "Eb2"))
     expect_equal(invert(x, around = x[1]), c("A4", "G4", "F4", "E4", "D4", "C4", "Bb3", "A3"))
     expect_equal(invert(x, around = M9, Key = 'A:'), c("G#5", "F#5", "E5", "D5", "C#5", "B4", "A4", "G#4"))
+    
+    
+    #
+    
+    chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+    
+    with(chorales, kern(Token, simple = TRUE, transposeArgs = list(to = 'C:'))) |> table() -> kerntab
+    with(chorales, solfa(Token, simple = TRUE)) |> table() -> solfatab
+    
+    expect_true(all(kerntab == solfatab))
+    
 })
 
 test_that('Factors constructed correctly', {
@@ -362,7 +373,5 @@ test_that('Factors constructed correctly', {
     expect_identical(kerntab, lilytab)
     
     
-    expect_true(is.factor(kern('Eb5')))
-    expect_false(is.factor(kern('Eb5', as.factor = FALSE)))
     
 })

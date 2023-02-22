@@ -11,9 +11,10 @@ gamut(
   max.octave,
   min.lof,
   max.lof,
-  tints = NULL,
+  reference = NULL,
   deparser = tint2kern,
-  deparseArgs = list()
+  deparseArgs = list(),
+  ...
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: a on/off switch.}
 
-\item{tints}{\emph{\strong{An optional reference vector to base the gamut on.}}
+\item{reference}{\emph{\strong{An optional reference vector to base the gamut on.}}
 
 Defaults to \code{NULL}.
 

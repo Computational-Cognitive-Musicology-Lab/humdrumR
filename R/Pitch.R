@@ -482,7 +482,6 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
           function(e1, e2) {
               if (length(e1) == 0L) return(e1)
               if (length(e2) == 0L) stop(call. = FALSE, "Can't take modulo (%%) with empty modulo.")
-            
               recycledim(e1 = e1, e2 = e2, funccall = '%%')
               
               f1 <- e1@Fifth
@@ -2760,12 +2759,14 @@ gamut <- function(generic = FALSE, simple = FALSE,
 }
 
 
-factorize.pitch <- function(token) {
+set.gamut <- function(token) {
   deparseArgs <- attr(token, 'deparseArgs')
   deparseArgs$Key <- NULL
-  deparser <- attr(token, 'deparser')
   
-  levels <- gamut(reference = token, deparseArgs = deparseArgs, deparser = deparser)
+  levels <- do.call(gamut, c(list(reference = token, 
+                                  deparseArgs = deparseArgs, 
+                                  deparser = attr(token, 'deparser')), 
+                                  attr(token, 'gamutArgs')))
   
   factor(token, levels = levels)
 }
@@ -3010,8 +3011,10 @@ makePitchTransformer <- function(deparser, callname,
       output <- if (inPlace) {
         rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        do.call('token', list(output, Exclusive = callname, deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1], 
-                                      factorizer = factorize.pitch,
+        do.call('token', list(output, Exclusive = callname, 
+                                      deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1], 
+                                      gamutArgs = gamutArgs,
+                                      factorizer = set.gamut,
                                       deparser = !!deparser))
       }
     }
@@ -4136,7 +4139,8 @@ allints <- c(allints)
 allints <- allints[!is.na(allints)]
 cat(paste0("#' @export ", unlist(tapply(allints, rep(1:5, length.out = length(allints)), paste, collapse = ' '))), sep = '\n')
 for (i in allints) {
-  assign(i, interval2tint(i))
+  val <- interval2tint(i)
+  assign(i, val)
 }
 rm(allints)
 unison <- P1

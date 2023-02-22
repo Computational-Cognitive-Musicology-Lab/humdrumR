@@ -901,6 +901,7 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
+  if (!is.vector(x)) return(x)
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 
@@ -2305,7 +2306,6 @@ matched <- function(x, table, nomatch = NA) {
     }
     
     
-    
     ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
 }
 
@@ -2383,6 +2383,11 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     # pastes named elements of ... using order supplied in order
     strs <- list(...) # named vector of strings,
     strs <- strs[lengths(strs) > 0L]
+    
+    if (length(sep) > 1L) {
+      sep <- sep[(order %in% names(strs))[-1]]
+      if (length(sep) == 0L) sep <- ''
+    }
     
     labels <- names(strs)
     ordered <- strs[pmatch( order, labels, nomatch = 0)]
