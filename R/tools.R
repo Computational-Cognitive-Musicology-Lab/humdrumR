@@ -2636,7 +2636,8 @@ table <- function(...,
                  c(args, list(exclude = exclude, useNA = useNA,
                               dnn = dnn, deparse.level = deparse.level)))
   
-  names(tab)[is.na(names(tab))] <- '.'
+  dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), '.', dn))
+  
   tab
 
 }

@@ -13,7 +13,6 @@ helmholtz(
   Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
-  as.factor = factor.default,
   gamutArgs = list(),
   inPlace = FALSE
 )
@@ -34,14 +33,6 @@ the parser, deparser, and transposer.}
 \item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
-
-\item{as.factor}{Should the output be converted to a factor?
-
-Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
-
-Must be singleton \code{logical} value: an on/off switch.
-
-If \code{inPlace = TRUE}, \code{as.factor} is forced to \code{FALSE}.}
 
 \item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.}
 

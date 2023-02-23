@@ -14,7 +14,6 @@ seconds(
   parseArgs = list(),
   scale = 1,
   unit = 1,
-  as.factor = factor.default,
   inPlace = FALSE
 )
 
@@ -25,7 +24,6 @@ ms(
   parseArgs = list(),
   scale = 1,
   unit = 1,
-  as.factor = factor.default,
   inPlace = FALSE
 )
 
@@ -42,7 +40,6 @@ dur(
   parseArgs = list(),
   scale = 1,
   unit = 1,
-  as.factor = factor.default,
   inPlace = FALSE
 )
 }

@@ -657,7 +657,7 @@ rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
 # Making duration factor levels ##########################################
 ###################################################################### ###
 
-makeRamut <- function(x, deparseArgs = list(), deparser) {
+makeRamut <- function(reference, deparseArgs = list(), deparser) {
   deparseArgs <- local({
     deparseFormals <- formals(deparser)
     # deparseFormals[intersect(names(deparseArgs), names(deparseFormals))] <- deparseArgs[intersect(names(deparseArgs), names(deparseFormals))]
@@ -667,17 +667,31 @@ makeRamut <- function(x, deparseArgs = list(), deparser) {
     # lapply(deparseFormals, eval, envir = rlang::new_environment(deparseFormals, environment(deparser)))
   })
   
-  gamut <- unique(x)
+  reference <- do.call('rhythmInterval', c(list(reference), deparseArgs))
+  
+  gamut <- unique(reference)
   if (length(gamut) > 1L) {
     num1 <- numerator(gamut) == 1L
     simple <- gamut[num1]
     simple <- c(simple, rational(rep(1L, sum(!num1)), denominator(gamut[!num1])))
-    gamut <- sort(unique(c(x, 
+    gamut <- sort(unique(c(reference, 
                            harmonicInterpolate(min(simple), max(simple), includeEdges = TRUE, bigFirst = TRUE),
                            harmonicInterpolate(min(simple), max(simple), includeEdges = TRUE, bigFirst = FALSE))))
   }
   
   if (!is.null(deparser)) do.call(deparser, c(list(gamut), deparseArgs)) else gamut
+}
+
+
+
+set.ramut <- function(token) {
+  deparseArgs <- attr(token, 'deparseArgs')
+  
+  levels <- do.call(makeRamut, c(list(reference = token, 
+                                  deparseArgs = deparseArgs, 
+                                  deparser = attr(token, 'deparser'))))
+  
+  factor(token, levels = levels)
 }
 
 
@@ -795,7 +809,7 @@ rhythmArgCheck <- function(args, callname) {
   args
 }
 
-makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', factor.default = TRUE, extraArgs = list()) {
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', extraArgs = list()) {
   # this function will create various rhythm transform functions
   
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
@@ -808,7 +822,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
             extraArgs,
             alist(parseArgs = list(), 
                   scale = 1, unit = 1,
-                  as.factor = factor.default,
                   inPlace = FALSE))
   
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
@@ -862,14 +875,13 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
     if (deparse && !is.null(output)) {
       dispatch <- attr(parsedRint, 'dispatch')
       
-      if (inPlace) {
-        output <- rePlace(output, dispatch)
+      output <- if (inPlace) {
+        rePlace(output, dispatch)
       } else {
-        gamut <- if (as.factor) makeRamut(parsedRint[!is.na(parsedRint)],
-                                          deparseArgs = deparseArgs[-1],
-                                          deparser = !!deparser)
-        output <- token(output, Exclusive = callname,
-                        levels = gamut)
+        do.call('token', list(output, Exclusive = callname, 
+                              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
+                              factorizer = set.ramut,
+                              deparser = !!deparser))
       }
       
     }
@@ -927,11 +939,11 @@ recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%')
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
 #' @export 
-duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric', factor.default = FALSE)
+duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 
 #' @rdname duration
 #' @export 
-quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric', factor.default = FALSE)
+quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 
 #' Note value representation of duration
 #' 
@@ -1002,11 +1014,11 @@ notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' @inheritParams rhythmFunctions
 #' @name time
 #' @export
-seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'), factor.default = FALSE)
+seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'))
 
 #' @rdname time
 #' @export
-ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'), factor.default = FALSE)
+ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'))
 
 #' @rdname time
 #' @export
