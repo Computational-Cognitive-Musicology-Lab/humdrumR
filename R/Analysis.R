@@ -35,10 +35,15 @@
 #' @export
 entropy <- function(x, base, ...) UseMethod('entropy')
 #' @export
-entropy.table <- function(x, base = 2) {
-  if (sum(x) != 1) x <- x / sum(x)
+entropy.table <- function(x, base = 2, margin = NULL, ...) {
+  info <- information(proportions(x, margin = margin), base = base)
+  frequency <- proportions(x, margin = NULL) 
   
-  sum(information(x), base = base)
+  info <- info[x > 0]
+  frequency <- frequency[x > 0]
+  
+  
+  sum(info * frequency)
   
 }
 #' @export
@@ -49,8 +54,8 @@ entropy.density <- function(x, base = 2) {
 #' @export
 entropy.numeric <- function(x, base = 2, ...) entropy.density(density(x, ...), base = base)
 #' @export
-entropy.default <- function(x, base = 2) {
-  entropy.table(table(x), base = base)
+entropy.default <- function(..., base = 2, margin = NULL) {
+  entropy.table(table(...), base = base, margin = margin)
 }
 
 
@@ -83,3 +88,32 @@ information <- function(ps, base = 2) -(log(ps, base = base))
 #' @export
 ptable <- function(..., margin = NULL) proportions(table(...), margin = margin) 
 
+
+#' Calculate mutual information of two or more variables
+#' 
+#' 
+#' @export
+mi <- function(x, ..., base = 2) UseMethod('mi') 
+
+#' @export
+mi.table <- function(x, base = 2) {
+  
+  joint <- proportions(x)
+  
+  marginals <- lapply(seq_along(dim(x)), \(m) apply(joint, m ,sum))
+  ind.joint <- Reduce('*', do.call(expand.grid, marginals))
+  dim(ind.joint) <- dim(x)
+  # ind.joint <- outer(rowSums(joint), colSums(joint), '*')
+  
+  joint <- joint[x > 0]
+  ind.joint <- ind.joint[x > 0]
+  
+  sum(log(joint / ind.joint, base = base) * joint)
+  
+}
+   
+#' @export
+mi.default <- function(..., base = 2) {
+  mi.table(table(...), base = base)
+}
+  
