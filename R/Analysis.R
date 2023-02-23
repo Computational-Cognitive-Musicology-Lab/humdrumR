@@ -1,12 +1,12 @@
 
-#' Calculate Shannon entropy/information of data 
+#' Calculate Entropy or Information Content of variables 
 #'
 #' Information content and entropy are fundamental concepts in [information theory](https://en.wikipedia.org/wiki/Information_theory),
 #' which quantify the amount of information (or "surprise") in a random variable.
 #' Both concepts are closely related the probability density/mass of events: improbable events have higher information content.
-#' The probablity of *each* observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
+#' The probability of *each* observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
 #' The average information content of a variable is the [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)).
-#' Infromation content/entropy can be calculated for discrete probabilities or continuous probabilities,
+#' Information content/entropy can be calculated for discrete probabilities or continuous probabilities,
 #' and humdrumR defines methods for calculating both.
 #' 
 #' @details 
@@ -30,8 +30,7 @@
 #' By default, the `distribution` argument is estimated using [density()] (`numeric` input) or [table()] (other input).
 #' 
 #' 
-#' 
-#' 
+#' @family {Information theory functions} 
 #' @export
 entropy <- function(x, base, ...) UseMethod('entropy')
 #' @export
@@ -61,7 +60,7 @@ entropy.default <- function(..., base = 2, margin = NULL) {
 
 #' @rdname entropy
 #' @export
-ic <- function(x, distribution, base) UseMethod('ic')
+ic <- function(..., distribution, base) UseMethod('ic')
 #' @export
 ic.numeric <-function(x, distribution = density(x), base = 2) {
   
@@ -72,15 +71,24 @@ ic.numeric <-function(x, distribution = density(x), base = 2) {
   
 }
 #' @export
-ic.default <- function(x, distribution = ptable(x), base = 2) {
+ic.default <- function(..., distribution = ptable(...), base = 2) {
+  checks(distribution, xclass('table'))
+  
+  observations <- lapply(list(...), as.character)
+  
+  if (length(observations) != length(dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
   
   distribution <- information(distribution, base = base)
   
-  distribution[as.character(x)]
+  distribution[do.call('cbind', observations)]
   
 }
 
-information <- function(ps, base = 2) -(log(ps, base = base))
+information <- function(ps, base = 2) {
+  lps <- -(log(ps, base = base))
+  lps[ps == 0] <- NA
+  lps
+}
 
 #' Tabulate and cross proportions
 #' 
@@ -89,31 +97,44 @@ information <- function(ps, base = 2) -(log(ps, base = base))
 ptable <- function(..., margin = NULL) proportions(table(...), margin = margin) 
 
 
-#' Calculate mutual information of two or more variables
+#' Calculate Mutual Information of variables
 #' 
-#' 
+#' @family {Information theory functions} 
 #' @export
-mi <- function(x, ..., base = 2) UseMethod('mi') 
+mutualInfo <- function(x, ..., base = 2) UseMethod('mutualInfo') 
 
 #' @export
-mi.table <- function(x, base = 2) {
+mutualInfo.table <- function(x, base = 2) {
+  sum(.mutualinfo(x, base = base) * proportions(x), na.rm = TRUE)
+}
+
+.mutualinfo <- function(tab, base = 2){
+  joint <- proportions(tab)
   
-  joint <- proportions(x)
-  
-  marginals <- lapply(seq_along(dim(x)), \(m) apply(joint, m ,sum))
+  marginals <- lapply(seq_along(dim(tab)), \(m) apply(joint, m ,sum))
   ind.joint <- Reduce('*', do.call(expand.grid, marginals))
-  dim(ind.joint) <- dim(x)
+  dim(ind.joint) <- dim(tab)
+  dimnames(ind.joint) <- dimnames(tab)
   # ind.joint <- outer(rowSums(joint), colSums(joint), '*')
   
-  joint <- joint[x > 0]
-  ind.joint <- ind.joint[x > 0]
+  joint[tab == 0] <- ind.joint[tab == 0] <- NA
   
-  sum(log(joint / ind.joint, base = base) * joint)
-  
+  log(joint / ind.joint, base = base) 
 }
    
 #' @export
-mi.default <- function(..., base = 2) {
-  mi.table(table(...), base = base)
+mutualInfo.default <- function(..., base = 2) {
+  mutualInfo.table(table(...), base = base)
 }
   
+#' @rdname mutualInfo
+#' @export 
+pmutualInfo <- function(..., base = base) {
+  
+  
+  info <- .mutualinfo(table(...), base = base)
+  
+  observations <- lapply(list(...), as.character)
+  
+  info[do.call('cbind', observations)]
+}
