@@ -32,14 +32,14 @@
 #' 
 #' @family {Information theory functions} 
 #' @export
-entropy <- function(x, base, ...) UseMethod('entropy')
+entropy <- function(..., base) UseMethod('entropy')
 #' @export
-entropy.table <- function(x, base = 2, margin = NULL, ...) {
-  info <- information(proportions(x, margin = margin), base = base)
-  frequency <- proportions(x, margin = NULL) 
+entropy.table <- function(tab, base = 2, margin = NULL, ...) {
+  info <- information(proportions(tab, margin = margin), base = base)
+  frequency <- proportions(tab, margin = NULL) 
   
-  info <- info[x > 0]
-  frequency <- frequency[x > 0]
+  info <- info[tab > 0]
+  frequency <- frequency[tab > 0]
   
   
   sum(info * frequency)
@@ -137,4 +137,34 @@ pmutualInfo <- function(..., base = base) {
   observations <- lapply(list(...), as.character)
   
   info[do.call('cbind', observations)]
+}
+
+
+#' @export
+crossentropy <- function(..., distribution, base) UseMethod('crossentropy')
+
+#' @export
+crossentropy.table <- function(tab, distribution, base = 2){
+  if (!all(dim(tab) == dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
+  
+  info <- information(proportions(tab), base = base)
+  
+  if (!is.table(distribution)) {
+    distribution <- if (is.list(distribution)) do.call('table', distribution) else table(distribution)
+  }
+  frequency <- proportions(distribution, margin = NULL) 
+  
+  info <- info[tab > 0]
+  frequency <- frequency[tab > 0]
+  
+  
+  sum(info * frequency)
+  
+}
+#' @export
+crossentropy.default <- function(..., distribution, base = 2) {
+  tab <- table(...)
+ 
+  
+  crossentropy.table(tab, distribution, base = base)
 }

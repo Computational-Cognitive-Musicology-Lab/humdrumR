@@ -3,19 +3,19 @@
 \name{entropy}
 \alias{entropy}
 \alias{ic}
-\title{Calculate Shannon entropy/information of data}
+\title{Calculate Entropy or Information Content of variables}
 \usage{
-entropy(x, base, ...)
+entropy(..., base)
 
-ic(x, distribution, base)
+ic(..., distribution, base)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
 which quantify the amount of information (or "surprise") in a random variable.
 Both concepts are closely related the probability density/mass of events: improbable events have higher information content.
-The probablity of \emph{each} observation maps to the \href{https://en.wikipedia.org/wiki/Information_content}{information content};
+The probability of \emph{each} observation maps to the \href{https://en.wikipedia.org/wiki/Information_content}{information content};
 The average information content of a variable is the \href{https://en.wikipedia.org/wiki/Entropy_(information_theory)}{entropy}.
-Infromation content/entropy can be calculated for discrete probabilities or continuous probabilities,
+Information content/entropy can be calculated for discrete probabilities or continuous probabilities,
 and humdrumR defines methods for calculating both.
 }
 \details{
@@ -37,3 +37,8 @@ The \code{ic()} function only accepts atomic vectors as its main (\code{x}) argu
 be provided a \code{distribution} argument.
 By default, the \code{distribution} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
 }
+\seealso{
+Other {Information theory functions}: 
+\code{\link{mutualInfo}()}
+}
+\concept{{Information theory functions}}
