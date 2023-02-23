@@ -90,12 +90,6 @@ information <- function(ps, base = 2) {
   lps
 }
 
-#' Tabulate and cross proportions
-#' 
-#' 
-#' @export
-ptable <- function(..., margin = NULL) proportions(table(...), margin = margin) 
-
 
 #' Calculate Mutual Information of variables
 #' 

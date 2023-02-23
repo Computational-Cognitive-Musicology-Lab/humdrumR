@@ -1069,6 +1069,44 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+#' Tabulate and cross proportions
+#' 
+#' 
+#' @export
+ptable <- function(...) UseMethod('ptable')
+
+#' @export
+ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
+  na <- is.na(tab)
+  tab[na] <- 0
+  ptab <- proportions(tab, margin = margin) 
+    
+  if (na.rm) ptab[na] <- NA
+  
+  ptab %class% 'ptable'
+}
+  
+#' @export
+ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
+
+
+#' @rdname ptable
+#' @export
+print.ptable <- function(x, digits = 4) {
+   zeros <- x == 0
+   x[] <- as.character(x)
+   n <- nchar(x) - 2
+   long <- n > digits & !is.na(x)
+   x[long] <- paste0(substr(x[long], start = 1, stop = digits + 2), '*')
+  
+   
+   x[zeros] <- '.'
+   x[] <- gsub('^0', '', x)
+   print(unclass(x), quote = FALSE, na.print = '.NA')
+}
+
+
+
 setAs('integer', 'integer64', \(from) as.integer64.integer(from))
 setAs('numeric', 'integer64', \(from) as.integer64.double(from))
 setAs('logical', 'integer64', \(from) as.integer64.logical(from))
