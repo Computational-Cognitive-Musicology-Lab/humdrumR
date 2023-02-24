@@ -2729,6 +2729,6 @@ barplot <- function(height,  ...,
   }
   axis(2, yaxis, las = 1, tick = FALSE)
  
-  plot 
+  invisible(plot)
 }
 

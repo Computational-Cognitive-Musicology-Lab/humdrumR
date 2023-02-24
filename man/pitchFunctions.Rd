@@ -20,15 +20,11 @@ the parser, deparser, and transposer.}
 
 \item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
 
-\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.}
-
-\item{as.factor}{Should the output be converted to a factor?
+\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
 
 Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
 
-Must be singleton \code{logical} value: an on/off switch.
-
-If \code{inPlace = TRUE}, \code{as.factor} is forced to \code{FALSE}.}
+Must be singleton \code{logical} value: an on/off switch.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.

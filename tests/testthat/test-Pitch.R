@@ -282,9 +282,9 @@ test_that("int, mint, and hint work", {
     expect_equal(nrow(unique(do.call('rbind', lapply(inputs, mint)))), 1L)
     expect_equal(nrow(unique(do.call('rbind', lapply(inputs, hint)))), 1L)
     
-    expect_equal(mint(inputs$kern, incomplete = NULL, as.factor = FALSE) |> as.character(),
+    expect_equal(mint(inputs$kern, incomplete = NULL) |> as.character(),
                  c(NA, "+P5", "+P12", "-P11", "-P4", "+P5", "+P12", "-P32", "+P19", "+dd5", "-dd4", "-P4"))
-    expect_equal(mint(inputs$kern, directed = FALSE, as.factor = FALSE, incomplete = pitch, bracket = FALSE) |> as.character(),
+    expect_equal(mint(inputs$kern, directed = FALSE, incomplete = pitch, bracket = FALSE) |> as.character(),
                  c('Ab3', "P5", "P12", "P11", "P4", "P5", "P12", "P32", "P19", "dd5", "dd4", "P4"))
     
     classif <- c('c', 'd', 'f', 'g','g','c','b', 'c','c#', 'd','d#','e','g--')

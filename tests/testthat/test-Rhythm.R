@@ -109,7 +109,5 @@ test_that("timeline() and timestamp() work correctly", {
 test_that('Factors work correctly',{
   expect_equal(table(recip(c('16', '4')))['8'] |> unname(), 0)
   
-  expect_true(is.factor(recip(.25)))
-  expect_false(is.factor(recip(.25, as.factor = FALSE)))
 })
 
