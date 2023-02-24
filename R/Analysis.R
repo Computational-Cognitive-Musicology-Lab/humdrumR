@@ -1,3 +1,89 @@
+# Probabilities ----
+
+#' Tabulate and cross proportions
+#' 
+#' 
+#' @export
+ptable <- function(...) UseMethod('ptable')
+
+#' @export
+ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
+  na <- is.na(tab)
+  tab[na] <- 0
+  ptab <- proportions(tab, margin = margin) 
+  
+  if (na.rm) ptab[na] <- NA
+  
+  attr(ptab, 'margin') <- margin
+  
+  dimnames <- names(dimnames(tab))
+  names(dimnames(tab)) <- ifelse(dimnames == '', 
+                                 make.unique(rep(c('X', 'Y', 'Z', LETTERS[9:23], letters[c(24:26, 9:23)]), length.out = length(dimnames))), 
+                                 dimnames)
+  
+  ptab %class% 'ptable'
+}
+
+#' @export
+ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
+
+
+
+#' @rdname ptable
+#' @export
+`[.ptable` <- function(ptab, i, j, ..., drop = FALSE) {
+  
+  new <- unclass(ptab)[i, j, ..., drop = drop]
+  
+  
+  class(new) <- class(ptab)
+  attr(new, 'margin') <- attr(new, 'margin')
+  new
+  
+}
+
+#' @rdname ptable
+#' @export
+print.ptable <- function(x, digits = 4) {
+  x <- unclass(x)
+  zeros <- x == 0
+  x[] <- as.character(x)
+  n <- nchar(x) - 2
+  long <- n > digits & !is.na(x)
+  x[long] <- paste0(substr(x[long], start = 1, stop = digits + 2), '*')
+  
+  # dimension names
+  header <- pdist.name(x)
+  attr(x, 'margin') <- NULL
+  
+  x[zeros] <- '.'
+  x[] <- gsub('^0', '', x)
+  print(x, quote = FALSE, na.print = '.NA')
+  cat('\t\tP(', header, ')\n', sep = '')
+}
+
+pdist.name <- function(ptab) {
+  dimnames <- names(dimnames(ptab))
+  
+  if (length(attr(ptab, 'margin'))) {
+    independent <- dimnames[attr(ptab, 'margin')]
+    dependent <- setdiff(dimnames, independent)
+    
+    paste0(paste(dependent, collapse = ','), 
+           '|', 
+           paste(independent, collapse = ','))
+    
+    
+  } else {
+    paste(dimnames, collapse = ',') 
+  }
+  
+}
+
+
+# Information theory ----
+
+
 
 #' Calculate Entropy or Information Content of variables 
 #'
@@ -35,14 +121,12 @@
 entropy <- function(..., base) UseMethod('entropy')
 #' @export
 entropy.table <- function(tab, base = 2, margin = NULL, ...) {
-  info <- information(proportions(tab, margin = margin), base = base)
+  info <- information(ptable(tab, margin = margin), base = base)
   frequency <- proportions(tab, margin = NULL) 
   
-  info <- info[tab > 0]
-  frequency <- frequency[tab > 0]
+  name <- paste0('H(', pdist.name(info), ')')
   
-  
-  sum(info * frequency)
+  setNames(sum(info * frequency, na.rm = TRUE), name)
   
 }
 #' @export

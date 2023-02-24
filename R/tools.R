@@ -49,7 +49,7 @@ false <- function(x) is.null(x) || is.logical(x) && !x[1]
 ###
 
 `%class%` <- function(object, newclass){
-  if (!newclass %in% class(object)) class(object) <- append(newclass, class(object))
+  class(object) <- append(newclass, setdiff(class(object), newclass))
   object
 }
 
@@ -1069,43 +1069,6 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
-#' Tabulate and cross proportions
-#' 
-#' 
-#' @export
-ptable <- function(...) UseMethod('ptable')
-
-#' @export
-ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
-  na <- is.na(tab)
-  tab[na] <- 0
-  ptab <- proportions(tab, margin = margin) 
-    
-  if (na.rm) ptab[na] <- NA
-  
-  ptab %class% 'ptable'
-}
-  
-#' @export
-ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
-
-
-#' @rdname ptable
-#' @export
-print.ptable <- function(x, digits = 4) {
-   zeros <- x == 0
-   x[] <- as.character(x)
-   n <- nchar(x) - 2
-   long <- n > digits & !is.na(x)
-   x[long] <- paste0(substr(x[long], start = 1, stop = digits + 2), '*')
-  
-   
-   x[zeros] <- '.'
-   x[] <- gsub('^0', '', x)
-   print(unclass(x), quote = FALSE, na.print = '.NA')
-}
-
-
 
 setAs('integer', 'integer64', \(from) as.integer64.integer(from))
 setAs('numeric', 'integer64', \(from) as.integer64.double(from))
@@ -1929,7 +1892,7 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA$Type <- if (is.null(expr)) 'NULL' else if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
     exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
-                         call = as.character(expr[[1]]),
+                         call = deparse(expr[[1]]),
                          atomic = 'c',
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
