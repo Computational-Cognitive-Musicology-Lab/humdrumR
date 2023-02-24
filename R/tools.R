@@ -901,7 +901,7 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
-  if (!is.vector(x)) return(x)
+  if (!(is.vector(x) || is.integer64(x))) return(x)
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 

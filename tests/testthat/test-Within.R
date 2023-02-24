@@ -38,7 +38,7 @@ test_that('Examples from Working With Data vignette work', {
                     table())
   
   if (expect_true(class(kerntab) == 'table')) {
-    expect_length(kerntab, 72)
+    expect_length(kerntab, 73)
     expect_equal(unname(kerntab['dd#']), 4)
     expect_equal(unname(kerntab['DD#']), 0)
   }
@@ -81,7 +81,7 @@ test_that('Examples from Working With Data vignette work', {
   
   spinetab <- with(chorales2, table(Pitch, Spine))
   expect_equal(ncol(spinetab), 4)
-  expect_equal(spinetab['2a', 3], 7)
+  expect_equal(spinetab['E#', 1], 4)
   expect_equal(spinetab['A', 1], 80)
   
   # group by

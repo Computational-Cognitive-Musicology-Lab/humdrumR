@@ -1612,7 +1612,6 @@ parseResult <- function(results) {
                       class <- class(first)
                       object <- length(first) && (is.table(first) || (is.object(first) && !is.atomic(first)))
                       
-                      
                       # if (is.table(result) && length(result) == 0L) result <- integer(0)
                       result <- unlist(result, recursive = FALSE)
                       
@@ -1625,7 +1624,7 @@ parseResult <- function(results) {
                       
                       humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
-                      class(result) <- if (object) 'list' else class
+                      if (!is.null(result)) class(result) <- if (object) 'list' else class
                       result 
                     })
   

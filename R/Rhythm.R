@@ -668,6 +668,7 @@ makeRamut <- function(reference, deparseArgs = list(), deparser) {
   })
   
   reference <- do.call('rhythmInterval', c(list(reference), deparseArgs))
+  reference <- reference[!is.na(reference)]
   
   gamut <- unique(reference)
   if (length(gamut) > 1L) {
