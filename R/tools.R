@@ -2623,20 +2623,34 @@ c.token <- function(...) {
 table <- function(..., 
                   exclude = if (useNA == 'no') c(NA, NaN),
                   useNA = 'ifany',
-                  dnn = names(list(...)),
+                  dnn = NULL,
                   deparse.level = 1) {
   
+  exprs <- rlang::enexprs(...)
+  
   args <- list(...)
+  dimnames <- .names(args)
+  if (is.null(dnn) && deparse.level > 0 && any(dimnames == '')) {
+    
+    symbols <- sapply(exprs, rlang::is_symbol)
+    labels <- sapply(exprs, rlang::expr_name)
+    
+    deparse <- switch(deparse.level,
+                      dimnames == '' & symbols,
+                      dimnames == '')
+    dimnames[deparse] <- labels[deparse]
+  }
+  
   
   args <- lapply(args,
                  \(arg) {
                    if (inherits(arg, 'token')) factorize(arg) else arg
                  })
   tab <- do.call(base::table,
-                 c(args, list(exclude = exclude, useNA = useNA,
-                              dnn = dnn, deparse.level = deparse.level)))
+                 c(args, list(exclude = exclude, useNA = useNA, deparse.level = 0)))
   
   dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), '.', dn))
+  names(dimnames(tab)) <- dimnames
   
   tab
 
