@@ -115,7 +115,7 @@ or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{dep
 
 Other {rhythm functions}: 
 \code{\link{duration}()},
-\code{\link{noteValue}()},
+\code{\link{notehead}()},
 \code{\link{recip}()}
 }
 \concept{{rhythm functions}}

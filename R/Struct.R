@@ -225,6 +225,7 @@ columns <- function(humvec) {
 }
 
 vectorNA <- function(n, mode = 'character') {
+  mode <- setdiff(mode, 'token')[1]
   rep(as(NA_integer_, Class = mode), n)
 }
 

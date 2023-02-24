@@ -16,7 +16,7 @@ which can measure any of the other durations"><!-- mathjax --><script src="https
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,10 +136,52 @@ If <code>deparser</code> is <code>NULL</code>, the tatum is returned as a <code>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"4"</span>, <span class="st">"8"</span>, <span class="st">"12"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "24"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M4/4"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "16"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"Exclusive")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "recip"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"deparseArgs")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> named list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"factorizer")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function (token) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     deparseArgs &lt;- attr(token, "deparseArgs")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     levels &lt;- do.call(makeRamut, c(list(reference = token, deparseArgs = deparseArgs, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         deparser = attr(token, "deparser"))))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     factor(token, levels = levels)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5644c25c4940&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:humdrumR&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"deparser")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function (x, sep = "%", ...) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     num &lt;- as.numeric(x@Numerator)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     den &lt;- as.numeric(x@Denominator)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     SIGN &lt;- c("-", "", "")[2 + sign(num)]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     num &lt;- abs(num)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     den[num == 0L] &lt;- 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     while (any(doubles &lt;- den &lt;= 1L &amp; den &gt;= 0.25 &amp; num &gt; 2L &amp; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         num &lt; 16L &amp; num%%2 == 0 &amp; num%%5 != 0)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         den &lt;- .ifelse(doubles, den/2, den)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         num &lt;- .ifelse(doubles, num/2, num)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dots &lt;- log(num + 1L, base = 2L)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dots &lt;- dots - 1L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     dots[!(dots %in% 1:100 &amp; (log(den, 2)%%1) == 0) | (num/den) &gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         16] &lt;- 0L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     num[dots != 0L] &lt;- 1L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     den[dots != 0L] &lt;- den[dots != 0L]/(2^dots[dots != 0L])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     den[(num/den) %in% c(2, 4, 8)] &lt;- strrep("0", log(num/den, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         2)[(num/den) %in% c(2, 4, 8)])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     num[den %in% c("0", "00", "000")] &lt;- "1"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     output &lt;- .ifelse(num == 1L, den, .paste(den, sep, num))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     .paste(SIGN, output, strrep(".", dots))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5644c252faa0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:humdrumR&gt;</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tatum</span><span class="op">(</span><span class="st">"M4/4"</span>, <span class="st">'6'</span><span class="op">)</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in deparser(result):</span> could not find function "deparser"</span>

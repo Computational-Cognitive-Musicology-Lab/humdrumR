@@ -13,6 +13,7 @@ solfa(
   Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
+  gamutArgs = list(),
   inPlace = FALSE
 )
 }
@@ -29,9 +30,15 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 \item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
 the parser, deparser, and transposer.}
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
+\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+
+\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+
+Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+
+Must be singleton \code{logical} value: an on/off switch.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
@@ -151,6 +158,22 @@ So, \code{pitch('4.ee-[', inPlace = TRUE)} will return 4.Eb5[---keeping the \cod
 Note that \code{inPlace = TRUE} will force functions like \code{semits}, which normally return \code{numeric} values, to return \code{character} strings
 \emph{if} their input is a character string.
 }
+}
+
+\section{Pitch-Gamut Levels}{
+
+
+The \code{\link[=table]{table()}} will automatically generate factor levels
+for pitch data using the \code{\link[=gamut]{gamut()}} function.
+This is makes sure tabulated data sorted in a logical order, and includes
+missing pitches.
+The \code{simple}/\code{complex} and  \code{generic}/\code{specific} arguments are automatically passed to \code{\link[=gamut]{gamut()}}; additional
+arguments can be passed to gamut using \code{gamutArgs = list(...)}, or with the syntactic sugar \code{gamut(...)}.
+(Read the \code{\link[=gamut]{gamut()}} docs for an explanation of gamut generation.)
+This feature be used to control table layout of pitch data, as well as to assure
+consistent tables when grouping data.
+
+When \code{inPlace = TRUE} no special tabulation will occur.
 }
 
 \seealso{

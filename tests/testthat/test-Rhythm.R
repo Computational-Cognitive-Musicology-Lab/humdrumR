@@ -1,21 +1,23 @@
-
+expect_equalchar <- function(e1, e2) expect_equal(as.character(e1), as.character(e2))
+expect_equalnum <- function(e1, e2) expect_equal(as.numeric(e1), as.numeric(e2))
 
 test_that('Basic rhythm functions work', {
   reci <- c('4a', '8b', '8.c', '4.d', NA, 'x', '16e', '16.f', '3g', '6h', '0i', '00KK', '0.J', '1LL', '2.X')
   durs <- c( 0.25, 0.125, 0.1875, 0.375, NA, NA, 0.0625, 0.09375, 0.333333333333333, 0.166666666666667, 2, 4, 3, 1, 0.75 )
   
+
   
-  expect_equal(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
+  expect_equalchar(recip(reci), c( '4', '8', '8.', '4.', NA, NA, '16', '16.', '3', '6', '0', '00', '0.', '1', '2.' ))
   expect_equal(recip(reci, inPlace = TRUE), reci)
 
   
-  expect_equal(recip(durs), recip(reci))
+  expect_equalchar(recip(durs), recip(reci))
 
   
   ## scale argument
-  expect_equal(duration(reci, scale = 2), duration(reci) * 2)
-  expect_equal(duration(reci, unit = 4), duration(reci) / 4)
-  expect_equal(duration(reci, unit = 4, scale = 4), duration(reci))
+  expect_equalnum(duration(reci, scale = 2), duration(reci) * 2)
+  expect_equalnum(duration(reci, unit = 4), duration(reci) / 4)
+  expect_equalnum(duration(reci, unit = 4, scale = 4), duration(reci))
   
 })
 
@@ -26,9 +28,9 @@ test_that("ioi and untie work correctly", {
   test <- c('4a', '4a', '4b', '4r', '8c', '16r', '8.c~',  '8G', '8A', '4.r')
   
   expect_equal(ioi(test), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', NA, '.' ))
-  expect_equal(ioi(test, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', NA, '.' ))
+  expect_equalchar(ioi(test, inPlace = FALSE), c( '4', '4', '2', NA, '8.', NA, '8.', '8', NA, NA ))
   expect_equal(ioi(test, finalOnset = TRUE), c( '4a', '4a', '2b', '.', '8.c', '.', '8.c~', '8G', '2A', '.' ))
-  expect_equal(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', '.', '8.', '.', '8.', '8', '2', '.' ))
+  expect_equalchar(ioi(test, finalOnset = TRUE, inPlace = FALSE), c( '4', '4', '2', NA, '8.', NA, '8.', '8', '2', NA))
   
   
   expect_equal(ioi(c('4a','4r','4a','4.a','8r','4a'), groupby = list(c(1,1,1,2,2,2))),
@@ -47,7 +49,7 @@ test_that("ioi and untie work correctly", {
   
   test <- c('4a', '[4a',']8a', NA, '8g','8G','[8a','_2a','4a]','4G')
   expect_equal(untie(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
-  expect_equal(untie(test, inPlace = FALSE), c( '4', '4.', '.', NA, '8', '8', '2..', '.', '.', '4' ))
+  expect_equalchar(untie(test, inPlace = FALSE), c( '4', '4.', NA, NA, '8', '8', '2..', NA, NA, '4' ))
   
   # both
   test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
@@ -56,18 +58,18 @@ test_that("ioi and untie work correctly", {
 })
 
 test_that('Examples from rhythm man are correct', {
-  expect_equal(duration('4.ee-['), 0.375)
+  expect_equalnum(duration('4.ee-['), 0.375)
   expect_equal(duration('4.ee-[', inPlace = TRUE), '0.375ee-[')
   
-  expect_equal(seconds('4.'), 1.5)
-  expect_equal(pitch('4.', Exclusive = 'notevalue'), NA_character_)
+  expect_equalnum(seconds('4.'), 1.5)
+  expect_equalchar(recip('4.', Exclusive = 'notevalue'), NA_character_)
   
-  expect_equal(recip('2', scale = 1/16), '32')
+  expect_equalchar(recip('2', scale = 1/16), '32')
   
   
-  expect_equal(recip('4%5', sep ='/'), '4/5')
+  expect_equalchar(recip('4%5', sep ='/'), '4/5')
   
-  expect_equal(untie(c('[4a', '4a]', '2g')), 
+  expect_equalchar(untie(c('[4a', '4a]', '2g')), 
                c('2a', '.', '2g'))
   
   expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r')),
@@ -79,12 +81,12 @@ test_that('Examples from rhythm man are correct', {
   ##
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
   
-  x <- with(chorales, table(noteValue(Token)), side = barplot(., cex.names = 2))
+  x <- with(chorales, table(notehead(Token)))
   
-  expect_equal(unname(x["𝅗𝅥 "]), 222)
+  expect_equalchar(x["𝅗𝅥 "], 222)
   
   samp <- c('4', '4.', '4%5')
-  expect_equal(seconds(samp) * 1000, ms(samp))
+  expect_equalnum(seconds(samp) * 1000, ms(samp))
   
   
 })
@@ -107,15 +109,21 @@ test_that("Grid functions work", {
   
   rhythm <- c('8.', '8.', '8', '8.', '8', '16', '8')
   
-  expect_equal(grid(rhythm), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
-  expect_equal(grid(rhythm, tick = '32'), c('XOOOOO', 'XOOOOO', 'XOOO', 'XOOOOO', 'XOOO', "XO", 'XOOO'))
-  expect_equal(grid(duration(rhythm)), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
+  expect_equalchar(grid(rhythm), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
+  expect_equalchar(grid(rhythm, tick = '32'), c('XOOOOO', 'XOOOOO', 'XOOO', 'XOOOOO', 'XOOO', "XO", 'XOOO'))
+  expect_equalchar(grid(duration(rhythm)), c('XOO', 'XOO', 'XO', 'XOO', 'XO', "X", 'XO'))
   
   expect_equal(togrid(rhythm), paste(grid(rhythm), collapse = ''))
   
   expect_equal(togrid(rhythm, collapse = FALSE, on = '1', off = '0'), rbind(c('1', '0', '0', '1', '0', '0', '1', '0', '1', '0', '0', '1', '0', '1', '1', '0')))
   
-  expect_equal(rhythm, fromgrid(togrid(rhythm)))
+  expect_equalchar(rhythm, fromgrid(togrid(rhythm)))
   
 })
   
+
+test_that('Factors work correctly',{
+  expect_equal(table(recip(c('16', '4')))['8'] |> unname(), 0)
+  
+})
+

@@ -367,7 +367,6 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 
 
-### table() generic ----
 
 
 ### Other ----
@@ -902,7 +901,9 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
-  if (!is.vector(x)) return(x)
+
+  if (!(is.vector(x) || is.integer64(x))) return(x)
+
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 
@@ -1552,9 +1553,9 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
     checks(skip, xnull | xclass('function'))
-    checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) &
-             argCheck(\(arg) length(arg) <= abs(lag),
-                      "must be as short or shorter than the absolute lag",
+    checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) & 
+             argCheck(\(arg) length(arg) <= abs(lag), 
+                      "must be as short or shorter than the absolute lag",  
                       \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
     checks(right, xTF)
     
@@ -2284,20 +2285,18 @@ matched <- function(x, table, nomatch = NA) {
     args <- list(...)
         # return(paste(args[[1]], collapse = collapse))
     # }
-    
     args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)
     
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
     
-    if (length(sep) > 1L) {
+    if (length(sep) > 1L && length(args) > 1L) {
       args[1:(length(args) - 1L)] <- Map(\(arg, s) paste0(arg, s), 
                                          args[1:(length(args) - 1L)], 
                                           rep(sep, length.out = length(args) - 1L))
       sep <- ''
     }
-    
     
     
     ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
@@ -2377,6 +2376,11 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     # pastes named elements of ... using order supplied in order
     strs <- list(...) # named vector of strings,
     strs <- strs[lengths(strs) > 0L]
+    
+    if (length(sep) > 1L) {
+      sep <- sep[(order %in% names(strs))[-1]]
+      if (length(sep) == 0L) sep <- ''
+    }
     
     labels <- names(strs)
     ordered <- strs[pmatch( order, labels, nomatch = 0)]
@@ -2535,4 +2539,72 @@ strPartition <- function(str, split = '/') {
 
 
 
+## Token S3 class ----
 
+
+
+#' Humdrum tokens
+#' @export
+token <- function(x, Exclusive = NULL, ...) {
+  
+  attr(x, 'Exclusive') <- Exclusive
+  humdrumRattr(x) <- list(...)
+  
+  class(x) <- c('token', class(x))
+  x
+  
+  
+}
+
+
+#' @rdname token
+#' @export
+`[.token` <- function(x, ...) {
+  
+  result <- NextMethod('[')
+  humdrumRattr(result) <- humdrumRattr(x)
+  class(result) <- class(x)
+  result
+  
+}
+
+#' @rdname token
+#' @export
+print.token <- function(x) {
+  exclusive <- attr(x, 'Exclusive')
+  if (!is.null(exclusive)) {
+    cat('**')
+    cat(exclusive, sep = '**')
+    cat('\n')
+    attr(x, 'Exclusive') <- NULL
+  }
+  class(x) <- setdiff(class(x), 'token')
+  if (is.factor(x)) x <- as.character(x)
+  attributes(x) <- list()
+  print(x, quote = FALSE, na.print = '.')
+}
+
+#' @rdname token
+#' @export
+format.token <- function(x, ...) {
+  x[is.na(x)] <- '.'
+  x
+}
+
+#' @rdname token
+#' @export
+c.token <- function(...) {
+  args <- list(...)
+  
+  exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
+  
+  humattr <- humdrumRattr(args[[1]])
+  
+  args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
+  result <- do.call('c', args)
+  
+  humdrumRattr(result) <- humattr
+  class(result) <- c('token', class(result))
+  result
+  
+}

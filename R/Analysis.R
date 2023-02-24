@@ -218,6 +218,10 @@ pmutualInfo <- function(..., base = base) {
 }
 
 
+#' Calculate cross entropy between two distributions
+#' 
+#' TBA
+#' @family {Information theory functions}
 #' @export
 crossentropy <- function(..., distribution, base) UseMethod('crossentropy')
 
@@ -246,3 +250,120 @@ crossentropy.default <- function(..., distribution, base = 2) {
   
   crossentropy.table(tab, distribution, base = base)
 }
+
+# table ----
+
+
+#' @export
+table <- function(..., 
+                  exclude = if (useNA == 'no') c(NA, NaN),
+                  useNA = 'ifany',
+                  dnn = NULL,
+                  deparse.level = 1) {
+  
+  exprs <- rlang::enexprs(...)
+  
+  args <- list(...)
+  dimnames <- .names(args)
+  if (is.null(dnn) && deparse.level > 0 && any(dimnames == '')) {
+    
+    symbols <- sapply(exprs, rlang::is_symbol)
+    labels <- sapply(exprs, rlang::expr_name)
+    
+    deparse <- switch(deparse.level,
+                      dimnames == '' & symbols,
+                      dimnames == '')
+    dimnames[deparse] <- labels[deparse]
+  }
+  
+  
+  args <- lapply(args,
+                 \(arg) {
+                   if (inherits(arg, 'token')) factorize(arg) else arg
+                 })
+  tab <- do.call(base::table,
+                 c(args, list(exclude = exclude, useNA = useNA, deparse.level = 0)))
+  
+  dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), '.', dn))
+  names(dimnames(tab)) <- dimnames
+  
+  tab
+
+}
+
+factorize <- function(token) {
+  factorizer <- attr(token, 'factorizer')
+  class(token) <- setdiff(class(token), 'token')
+  if (is.null(factorizer)) return(token)
+  
+  factorizer(token)
+  
+}
+
+
+## Plotting defaults stuff ----
+
+#' @export
+plot <- function(x, y, ..., col = sample(flatly[1:5], 1), pch = 16, cex = .5,
+                 log = "",
+                 xaxis, yaxis) {
+  
+  if (is.logical(log)) log <- if (log[1]) 'y' else ''
+  
+  base::plot(x, y, ..., col = col, pch = pch, cex = cex, axes = FALSE)
+  
+  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  axis(2, pretty(y, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+}
+
+#' @export
+hist <- function(x, ..., col = flatly[1],
+                 xaxis, yaxis, 
+                 freq = TRUE, probability = !freq) {
+  
+  
+  y <- graphics::hist(x, ..., 
+                      col = col, border = flatly[5],
+                      axes = FALSE, freq = freq, probability = probability)
+  
+  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  
+  yrange <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
+  axis(2, yrange, tick = FALSE, las = 1)
+  invisible(y)
+}
+
+#' @export
+barplot <- function(height,  ..., 
+                    beside = TRUE, col = NULL,
+                    ylim = NULL, log = '', border = NA, yaxis, 
+                    freq = TRUE, probability = !freq) {
+  if (!freq) {
+    height <- height / sum(height)
+    if (is.null(ylim)) ylim <- c(0, 1)
+    yaxis <- pretty(ylim, n = 10L, min.n = 5L)
+  }
+  
+  twoD <- hasdim(height) && length(dim(height)) > 1L
+  
+  if (is.null(col)) {
+    col <- flatly[if (twoD) 1:nrow(height) else 1]
+  }
+  
+  if (is.logical(log)) log <- if (log[1]) 'y' else ''
+  
+  plot <- graphics::barplot(height, ..., beside = beside, legend.text = twoD, 
+                            col = col, ylim = ylim, border = border, axes = FALSE, log = log)
+  
+  
+  if (missing(yaxis)) {
+    yran <- range(setdiff(height, 0))
+    if (log == 'y') yran <- log10(yran)
+    yaxis <- axisTicks(yran, log = log == 'y', nint = 12)
+    
+  }
+  axis(2, yaxis, las = 1, tick = FALSE)
+ 
+  invisible(plot)
+}
+

@@ -39,6 +39,7 @@ By default, the \code{distribution} argument is estimated using \code{\link[=den
 }
 \seealso{
 Other {Information theory functions}: 
+\code{\link{crossentropy}()},
 \code{\link{mutualInfo}()}
 }
 \concept{{Information theory functions}}

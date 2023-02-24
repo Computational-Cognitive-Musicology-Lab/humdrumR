@@ -781,19 +781,19 @@ makeRE.grid <- function(..., sep = '', on = 'X', off = 'O') {
   setNames(RE, 'grid')
 }
 
-noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
+notehead.unicode <- data.frame(stringsAsFactors = FALSE,
                                 Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
                                             '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
                                 Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
 
-makeRE.noteValue <- function(..., sep = " \U2215", collapse = TRUE) {
+makeRE.notehead <- function(..., sep = " \U2215", collapse = TRUE) {
   
   REs <- list(multiplies = '([1-9][0-9]*)?',
-              value = captureRE(noteValue.unicode$Unicode),
+              value = captureRE(notehead.unicode$Unicode),
               divides = paste0('(', sep, '[1-9][0-9]*)?'),
               space = ' ',
               dots = paste0('(',  '\U1D16D\U2009',')*'))
   
-  if (collapse) setNames(cREs(REs), 'noteValue') else REs
+  if (collapse) setNames(cREs(REs), 'notehead') else REs
 }
 

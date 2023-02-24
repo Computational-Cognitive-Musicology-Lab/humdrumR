@@ -38,8 +38,9 @@ test_that('Examples from Working With Data vignette work', {
                     table())
   
   if (expect_true(class(kerntab) == 'table')) {
-    expect_length(kerntab, 56)
+    expect_length(kerntab, 73)
     expect_equal(unname(kerntab['dd#']), 4)
+    expect_equal(unname(kerntab['DD#']), 0)
   }
 
   #
@@ -80,7 +81,7 @@ test_that('Examples from Working With Data vignette work', {
   
   spinetab <- with(chorales2, table(Pitch, Spine))
   expect_equal(ncol(spinetab), 4)
-  expect_equal(spinetab['2a', 3], 7)
+  expect_equal(spinetab['E#', 1], 4)
   expect_equal(spinetab['A', 1], 80)
   
   # group by
@@ -129,7 +130,7 @@ test_that('Examples from Working With Data vignette work', {
   pitches <- with(chorales, pitch(Token))
   
   expect_length(pitches, 2433)
-  expect_equal(pitches[567], 'G#4')
+  expect_equalchar(pitches[567], 'G#4')
   
   #
   chorales <- within(chorales, Pitch <- pitch(Token))
