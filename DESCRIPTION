@@ -22,7 +22,7 @@ Collate: humdrumR-package.R
          Write.R
          Within.R
          Subset.R
-         Windows.R
+         Context.R
          Regex.R
          Validation.R
          Struct.R

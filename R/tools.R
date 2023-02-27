@@ -1958,6 +1958,10 @@ unanalyzeExpr <- function(exprA) {
     expr
 }
 
+literalizeQuo <- function(quo) {
+  
+  if (identical(rlang::get_env(quo), rlang::empty_env())) rlang::eval_tidy(quo) else quo
+}
 
 
 withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
@@ -2173,7 +2177,7 @@ splitExpression <- function(expr, on = '|') {
     
     names(exprs) <- sapply(strsplit(names(exprs), split = '.', fixed = TRUE), \(n) tail(n[n != 'NA'], 1L))
     
-    if (rlang::is_formula(expr)) {
+    if (rlang::is_formula(expr) && !rlang::is_quosure(expr)) {
         lhs <- rlang::f_lhs(expr)
         env <- rlang::f_env(expr)
         exprs <- lapply(exprs, \(ex) rlang::new_formula(lhs, ex, env))

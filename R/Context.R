@@ -30,7 +30,7 @@ parseAnchors <- function(x, open, close, start = 1, end = length(x)) {
   # check that formulae can be evaluated in a safe order
   if (any(references)) {
     bad <- abs(eigen(diag(nrow(references)) - references)$values) < .00001 # is graph connected?!
-    if (any(bad)) .stop("In your calls to windows, your formulae arguments are mutually referential in a circular manner.")
+    if (any(bad)) .stop("In your calls to context, your formulae arguments are mutually referential in a circular manner.")
     
     anchors <- local({
       forms <- list()
@@ -69,18 +69,18 @@ parseAnchor.list <- function(anchor, x, name) {
   do.call('c', lapply(anchor, parseAnchor, x = x, name = name))
 }
 parseAnchor.logical <- function(anchor, x, name) {
-  if(length(anchor) != length(x)) .stop("If the {name} argument in a call to windows is logical", 
+  if(length(anchor) != length(x)) .stop("If the {name} argument in a call to context is logical", 
                                         "it must be the same length as the vector you are windowing across.")
   
   which(anchor)
 }
 parseAnchor.numeric <- function(anchor, x, name) {
 
-    if (any(anchor != round(anchor))) .stop("In a call to windows, a numeric {name} argument needs to be an integer value.")
+    if (any(anchor != round(anchor))) .stop("In a call to context, a numeric {name} argument needs to be an integer value.")
     anchor <- as.integer(anchor)
     
-    if (any(anchor < 0) && any(anchor > 0)) .stop("In a call to windows, you can't mix negative and positive numbers in a {name} argument.")
-    if (any(length(abs(anchor)) > length(x))) .stop("In a call to windows, the {name} argument can't be numeric values greater than the length",
+    if (any(anchor < 0) && any(anchor > 0)) .stop("In a call to context, you can't mix negative and positive numbers in a {name} argument.")
+    if (any(length(abs(anchor)) > length(x))) .stop("In a call to context, the {name} argument can't be numeric values greater than the length",
                                                     "of the vector you are windowing across.")
     
     if (all(anchor < 0)) anchor <- 1L + length(x) + anchor 
@@ -135,18 +135,18 @@ grepi_multi <- function(x, pattern) {
 
 ## Actual window finding ----
 
-#' Create arbitrary "windows" across vectors.
+#' Create arbitrary "context" across vectors.
 #' @export
 #' @name humWindows
-windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
-                    nest = FALSE, depth = NULL, groupby = NULL,
+context <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
+                    nest = FALSE, depth = NULL, groupby = NULL, ...,
                     min_length = 1L, max_length = Inf) {
   
   
   list2env(parseAnchors(x, open = open, close = close, start = start, end = end), envir = environment())
   
   
-  windowFrame <- align(open, close)
+  windowFrame <- align(open, close, ...)
 
   windowFrame <- windowFrame[Open <= end & Close <= end & Open >= start & Close >= start]
 
@@ -168,7 +168,7 @@ windows <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
 #' @export
 #' @rdname humWindows
 nested <- function(x, open, close, depth = 1L) {
-  windows(x, open, close, depth, nest = TRUE)
+  context(x, open, close, depth, nest = TRUE)
 }
 
 print.windows <- function(x) {
