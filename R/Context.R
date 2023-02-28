@@ -1,6 +1,16 @@
 
 
-
+#
+#
+# '(' ~ ')'
+# 
+# 1:N ~ +3
+# -3 ~ 1:2:N
+#
+# last + 1 ~ ';'
+# 'e' %after% last  ~ ';'
+#
+# 1:5:N ~ next
 
 # Finding windows ----
 
@@ -133,22 +143,80 @@ grepi_multi <- function(x, pattern) {
   
 }
 
+
+## Parsing context expressions ----
+
+parseFormula <- function(formula) list(open = parseContextExpression(rlang::f_lhs(formula)),
+                                       close = parseContextExpression(rlang::f_rhs(formula)))
+
+
+parseContextExpression <- function(expr) {
+  expr <- substituteName(expr, list(N = quote(length(x)),
+                                    'next' = quote(lead(., 1L)),
+                                    last = quote(lag(., 1L))))
+  
+  expr <- withinExpression(expr, applyTo = c('atomic'),
+                           \(Type, Class) Type == 'atomic' && Class == 'character',
+                           \(exprA) {
+                             exprA$Args <- rlang::expr(grepi_multi(x, !!exprA$Args[[1]]))
+                             exprA
+                           } )
+  
+  exprA <- analyzeExpr(expr)
+                        
+  if (exprA$Head == ':') expr <- parseContextRange(exprA)
+  if (exprA$Head == '|') {
+    exprA$Head <- 'c'
+    expr <- unanalyzeExpr(exprA)
+  }
+  expr
+}
+
+parseContextRange <- function(exprA) {
+  
+  arg1 <- exprA$Args[[1]]
+  
+  arg1A <- analyzeExpr(arg1)
+  if (arg1A$Type == 'call' && arg1A$Head == ':') {
+    by <- arg1A$Args[[2]]
+    from <- arg1A$Args[[1]]
+  } else {
+    from <- arg1A$Args[[1]]
+    by <- 1
+  }
+  
+  to <- exprA$Args[[2]]
+  # to <- withinExpression(to, \())
+  
+  rlang::expr(seq((!!from)[1], to = (!!to)[1], by = !!by))
+  
+}
+
 ## Actual window finding ----
 
 #' Create arbitrary "context" across vectors.
 #' @export
-#' @name humWindows
-context <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x), 
-                    nest = FALSE, depth = NULL, groupby = NULL, ...,
+context <- function(x, formula, ..., 
+                    nest = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf) {
   
+  formulae <- parseFormula(formula)
+  independent <- lengths(lapply(formulae, namesInExpr, names = '.')) == 0
   
-  list2env(parseAnchors(x, open = open, close = close, start = start, end = end), envir = environment())
+  if (!any(independent)) .stop("In your call to context, your formula argument is mutually referential in a circular manner.")
+  
+  indices <- list(Open = NULL, Close = NULL)
+  for (i in order(!independent)) {
+    indices[[i]] <- rlang::eval_tidy(formulae[[i]], data = list(x = x, . = indices[[setdiff(1:2, i)]]))
+  }
+  # definitions <- enquos(...)
   
   
-  windowFrame <- align(open, close, ...)
+  # 
+  windowFrame <- align(indices, ...)
 
-  windowFrame <- windowFrame[Open <= end & Close <= end & Open >= start & Close >= start]
+  # windowFrame <- windowFrame[Open <= end & Close <= end & Open >= start & Close >= start]
+  # nested <- nestedWindows(windowFrame)
 
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
   windowFrame[ , Length := Close - Open]
@@ -165,11 +233,6 @@ context <- function(x, open, close = ~Next(open) - 1L, start = 1, end = length(x
   
 }
 
-#' @export
-#' @rdname humWindows
-nested <- function(x, open, close, depth = 1L) {
-  context(x, open, close, depth, nest = TRUE)
-}
 
 print.windows <- function(x) {
   plot.new()
@@ -228,15 +291,65 @@ removeCrossing <- function(windowFrame, groupby) {
   windowFrame[groupby[Open] == groupby[Close]]
 }
 
+nestedWindows <- function(windowFrame) {
+  nested <- windowFrame[ , outer(Open, Open, '>=')] & windowFrame[ , outer(Close, Close, '<=')]
+  nested[row(nested) == col(nested)] <- FALSE
+  nested
+  
+}
+
 ### Window finding rules ----
 
+align <- function(indices, nearest = 0, duplicateOpen = TRUE, duplicateClose = TRUE) {
+  
+  open <- indices$Open
+  close <- indices$Close
+  
+  output <- if (length(open) == length(close) && nearest == 0 && all(open <= close, na.rm = TRUE)) {
+    data.table(Open = open, Close = close)
+  } else {
+    
+    close <- close[!is.na(close)]
+    open <- open[!is.na(open)]
+    i <- findInterval(close, open)
+    
+    dts <- lapply(nearest,
+                  \(o) {
+                    i <- i - o
+                    i[i <= 0L] <- NA_integer_
+                    data.table(Open = open[i], Close = ifelse(is.na(i), NA_integer_, close))
+                  })
+    rbindlist(dts)
+  }
+  
+  output <- output[!Reduce('|', lapply(output, is.na))]
+  
+  setorder(output, Open, Close)
+  
+  dups <- output[ , list(Open = !duplicateOpen & duplicated(Open),
+                         Close = !duplicateClose & duplicated(Close))]
+  
+  output <- output[!Reduce('|', dups)]
+  #
+  output
+  
+}
+# 
+# align <- function(open, close, ...) {
+#   pairs <- as.data.table(expand.grid(Open = unique(open), Close = unique(close)))
+#   pairs <- pairs[Close >= Open]
+#   setorder(pairs, Open, Close)
+#   pairs[ , .SD[1:sum(open == Open)], by = Open]
+# 
+# }
+# 
 
 
 # Tools ----
 
 
 #' @export
-#' @name humWindows
+#' @name context
 hop <- function(along, pattern = 1, start = 1L, end = length(along)) {
   if (is.character(start)) start <- grep(start, along)
   if (is.character(end))   end <- grep(end, along)
@@ -280,45 +393,13 @@ Prev <- function(x) lag(x, 1L)
   -rev(sort(-hits) %before% sort(-anchors))
 }
 
-align <- function(open, close, nearest = NULL, duplicateOpen = FALSE, duplicateClose = FALSE) {
-  
-  output <- if (length(open) == length(close) && is.null(nearest) && all(open <= close, na.rm = TRUE)) {
-    data.table(Open = open, Close = close) 
-  } else {
-    if (is.null(nearest)) nearest <- 0L
-    
-    close <- close[!is.na(close)]
-    open <- open[!is.na(open)]
-    i <- findInterval(close, open)
-    
-    dts <- lapply(nearest,
-                  \(o) {
-                    i <- i - o
-                    i[i <= 0L] <- NA_integer_
-                    data.table(Open = open[i], Close = ifelse(is.na(i), NA_integer_, close))
-                  })
-    
-    rbindlist(dts)
-  }
-  
-  output <- output[!Reduce('|', lapply(output, is.na))]
-  
-  setorder(output, Open, Close)
-  
-  dups <- output[ , list(Open = !duplicateOpen & duplicated(Open),
-                         Close = !duplicateClose & duplicated(Close))]
-    
-  output <- output[!Reduce('|', dups)]
-  # 
-  output
-  
-}
-
+# 
+# 
 
 
 # Applying functions across windows ----
 
-#' @rdname humWindows
+#' @rdname context
 #' @export
 windowApply <- function(x, func = c, windows, ..., groupby = list(), passOutside = FALSE, reference = x, rebuild = TRUE, leftEdge = TRUE) {
   if (length(x) != length(reference)) .stop('In a call to windowApply, x and reference must be the same length!')
@@ -358,7 +439,7 @@ windowApply <- function(x, func = c, windows, ..., groupby = list(), passOutside
   }
 }
 
-#' @rdname humWindows
+#' @rdname context
 #' @export
 applyNgram <- function(n = 2, vecs, f = c, by = NULL, pad = TRUE, 
                        fill = NA, splat = !is.null(by), ...) {
