@@ -158,6 +158,7 @@ parseFormula <- function(formula) list(open = parseContextExpression(rlang::f_lh
 
 
 parseContextExpression <- function(expr) {
+  if (is.null(expr)) expr <- quote('.')
   expr <- substituteName(expr, list(N = quote(length(x)),
                                     'next' = quote(lead(., 1L)),
                                     last = quote(lag(., 1L))))
@@ -208,6 +209,8 @@ context <- function(x, formula, ...,
                     nest = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf) {
   
+  if (!rlang::is_formula(formula)) formula <- rlang::new_formula(quote('.'), 
+                                                                 rhs = rlang::expr(!!formula))
   formulae <- parseFormula(formula)
   independent <- lengths(lapply(formulae, namesInExpr, names = '.')) == 0
   
