@@ -206,7 +206,7 @@ parseContextRange <- function(exprA) {
 #' Create arbitrary "context" across vectors.
 #' @export
 context <- function(x, formula, ..., 
-                    nest = FALSE, depth = NULL, groupby = NULL,
+                    nested = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf) {
   
   if (!rlang::is_formula(formula)) formula <- rlang::new_formula(quote('.'), 
@@ -224,18 +224,18 @@ context <- function(x, formula, ...,
   
   
   # 
-  windowFrame <- align(indices, length(x), min_length = min_length, max_length = max_length, 
-                       depth = depth, groupby = groupby, ...)
+  windowFrame <- align(indices$Open, indices$Close, 
+                       nested = nested, 
+                       min_length = min_length, max_length = max_length,
+                        ...)
+  windowFrame <- windowFrame[Open >= 1L & Open <= length(x) & Close >= 1L & Close <= length(x)]
+  if (length(groupby)) removeCrossing(windowFrame, groupby)
 
+  if (nested) windowFrame <- depth(windowFrame, depth = depth, ...)
 
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
-  # 
-  
-  
-  
   
   attr(windowFrame, 'vector') <- x
-  # windowFrame[ , list(Open, Close)]
   windowFrame
   
 }
@@ -256,117 +256,118 @@ print.windows <- function(x) {
 
 ### Window finding rules ----
 # 
-# align <- function(indices, nearest = 0, duplicateOpen = TRUE, duplicateClose = TRUE) {
-#   
+align <- function(open, close, nested = FALSE, min_length = 1L, max_length = Inf,...) {
+  # output <- if (length(open) == length(close) && all(ordPredicate(open, close), na.rm = TRUE)) {
+    # data.table(Open = open, Close = close)
+  # } 
+  
+  open <- open[!is.na(open)]
+  close <- close[!is.na(close)]
+  dists <- outer(close, open, '-')
+  
+  
+  steps <- c(rep(1, length(open)), rep(-1, length(close)))[order(c(open, close))]
+  depth <- cumsum(steps)
+    
+  if (nested) {
+    samelevel <- outer(depth[steps == -1L] + 1L, depth[steps == 1L], '==')
+    dists[!samelevel] <- NA
+  } 
+  
+  accept <- rightmost(!is.na(dists) & dists >= min_length & dists <= max_length)
+  accept <- shunt(accept)
+  
+  windowFrame <- data.table(Open = open[row(accept)[accept]], Close = close)
+  
+  windowFrame$Depth <-  depth[steps == -1L] + 1L
+  
+  
+  setorder(windowFrame, Open, Close)
+  
+  
+  windowFrame
+}
+
+shunt <- function(accept) {
+  bad <- colSums(accept) > 1L
+  
+  while (any(bad)) {
+    ind <- which(accept, arr.ind = TRUE)
+    ind <- ind[ind[ , 'col'] %in% which(bad), ]
+    
+    accept[ind] <- FALSE
+    
+    ind[ , 'col'] <- ind[ , 'col'] - unlist(lapply(rle(ind[ , 'col'])$lengths, \(l) l - seq_len(l)))
+    accept[ind] <- TRUE
+    ind <- ind[ind[ , 'col'] >= 1L, ]
+    
+    bad <- colSums(accept) > 1L
+  }
+  
+  accept
+  
+}
+# 
+# align <- function(indices, length, depth = NULL,
+#                   overlap = 'none', 
+#                   duplicateOpen = FALSE, duplicateClose = TRUE,
+#                   min_length = 1, max_length = Inf, 
+#                   groupby = list()) {
 #   open <- indices$Open
 #   close <- indices$Close
 #   
-#   output <- if (length(open) == length(close) && nearest == 0 && all(open <= close, na.rm = TRUE)) {
-#     data.table(Open = open, Close = close)
-#   } else {
-#     
-#     close <- close[!is.na(close)]
-#     open <- open[!is.na(open)]
-#     i <- findInterval(close, open)
-#     
-#     dts <- lapply(nearest,
-#                   \(o) {
-#                     i <- i - o
-#                     i[i <= 0L] <- NA_integer_
-#                     data.table(Open = open[i], Close = ifelse(is.na(i), NA_integer_, close))
-#                   })
-#     rbindlist(dts)
+#   
+#   windowFrame <- as.data.table(expand.grid(iOpen = seq_along(open), iClose = seq_along(close)))
+#   windowFrame[ , Open := open[iOpen]]
+#   windowFrame[ , Close := close[iClose]]
+#   setorder(windowFrame, iOpen, iClose)
+#   
+#   
+#   windowFrame <- windowFrame[ , Length := Close - Open]
+#   windowFrame <- windowFrame[Length <= max_length & Length >= min_length]
+#   
+#   if (length(groupby)) windowFrame <- removeCrossing(windowFrame, checkWindows(x, groupby))
+#   
+#   windowFrame[, XClose := seq_along(Open) - 1, by = factor(iOpen)]
+#   windowFrame[, XOpen := rev(seq_along(Close) - 1L), by = factor(iClose)]
+#   
+#   windowFrame <- switch(overlap,
+#                         nested = windowFrame[XOpen == XClose],
+#                         upward = windowFrame[XOpen == 0L],
+#                         downward = windowFrame[XClose == 0L],
+#                         none = windowFrame[XClose == 0L & XOpen == 0L],
+#                         windowFrame
+#   )
+#   if (overlap == 'shunted') {
+#     # each open pairs with next UNUSED close, no sharing
+#     windowFrame[ , X := seq_along(Open) - 1    , by = factor(iClose)]
+#     windowFrame[ , Y := rev(seq_along(Open)) -1, by = factor(iOpen)]
+#     windowFrame <- windowFrame[XClose == X | XOpen == Y]
+#     windowFrame[, c('X', 'Y') := NULL]
 #   }
 #   
-#   output <- output[!Reduce('|', lapply(output, is.na))]
+#   if (!duplicateOpen) windowFrame <- windowFrame[!duplicated(iOpen)]
+#   if (!duplicateClose) windowFrame <- windowFrame[!duplicated(iClose)]
 #   
-#   setorder(output, Open, Close)
+#   windowFrame <- depth(windowFrame, depth = depth)
 #   
-#   dups <- output[ , list(Open = !duplicateOpen & duplicated(Open),
-#                          Close = !duplicateClose & duplicated(Close))]
+#   windowFrame[, c('iClose', 'iOpen', 'XOpen', 'XClose') := NULL]
+#   windowFrame
 #   
-#   output <- output[!Reduce('|', dups)]
-#   #
-#   output
 #   
 # }
-# 
-align <- function(indices, length, depth = NULL,
-                  overlap = 'none', 
-                  duplicateOpen = FALSE, duplicateClose = TRUE,
-                  min_length = 1, max_length = Inf, 
-                  groupby = list()) {
-  open <- indices$Open
-  close <- indices$Close
-  
-  
-  windowFrame <- as.data.table(expand.grid(iOpen = seq_along(open), iClose = seq_along(close)))
-  windowFrame[ , Open := open[iOpen]]
-  windowFrame[ , Close := close[iClose]]
-  setorder(windowFrame, iOpen, iClose)
-  
-  
-  windowFrame <- windowFrame[ , Length := Close - Open]
-  windowFrame <- windowFrame[Length <= max_length & Length >= min_length]
-  
-  if (length(groupby)) windowFrame <- removeCrossing(windowFrame, checkWindows(x, groupby))
-  
-  windowFrame[, XClose := seq_along(Open) - 1, by = factor(iOpen)]
-  windowFrame[, XOpen := rev(seq_along(Close) - 1L), by = factor(iClose)]
-  
-  windowFrame <- switch(overlap,
-                        nested = windowFrame[XOpen == XClose],
-                        upward = windowFrame[XOpen == 0L],
-                        downward = windowFrame[XClose == 0L],
-                        none = windowFrame[XClose == 0L & XOpen == 0L],
-                        windowFrame
-  )
-  if (overlap == 'shunted') {
-    # each open pairs with next UNUSED close, no sharing
-    windowFrame[ , X := seq_along(Open) - 1    , by = factor(iClose)]
-    windowFrame[ , Y := rev(seq_along(Open)) -1, by = factor(iOpen)]
-    windowFrame <- windowFrame[XClose == X | XOpen == Y]
-    windowFrame[, c('X', 'Y') := NULL]
-  }
-  
-  if (!duplicateOpen) windowFrame <- windowFrame[!duplicated(iOpen)]
-  if (!duplicateClose) windowFrame <- windowFrame[!duplicated(iClose)]
-  
-  windowFrame <- depth(windowFrame, depth = depth)
-  
-  windowFrame[, c('iClose', 'iOpen', 'XOpen', 'XClose') := NULL]
-  windowFrame
-  
-  
-}
 
 ### Sorting, filtering, or modifying windows ----
 
-depth <- function(windowFrame, depth = NULL, absoluteDepth = TRUE) {
-  
-  steps <- windowFrame[ , c(rep(1, length(Open)), rep(-1, length(Close)))[order(c(Open, Close))]]
-  contour <- cumsum(steps)
-  windowFrame$Depth  <- contour[steps == 1L]
-  # windowFrame$DepthClose <- contour[steps == -1L] 
-  
+depth <- function(windowFrame, depth = NULL) {
 
-  maxdepth <- if (absoluteDepth) {
-    max(windowFrame$Depth)
-  } else {
-    tapply_inplace(contour, segments(contour == 0),\(x) rep(max(x), length(x)))[steps == 1]
-  }
+  maxdepth <- max(windowFrame$Depth)
   windowFrame$RevDepth <- windowFrame$Depth - maxdepth - 1L
   
   if (!is.null(depth)) {
     windowFrame <- windowFrame[Depth %in% depth | RevDepth %in% depth]
   }
   
-  # if (nrow(ind)) {
-  #   ind[ , OpenDepth := Depth - min(Depth), by = Open]
-  #   ind[ , CloseDepth := Depth - min(Depth), by = Open]
-  #   ind[ , OpenRevDepth := RevDepth - max(RevDepth), by = Open]
-  #   ind[ , CloseRevDepth := RevDepth - max(RevDepth), by = Close]
-  # }
   windowFrame
 }
 
