@@ -13,16 +13,36 @@ changes(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE)
 \item{...}{A list of atomic vectors. If the vectors differ in length,
 they are all recycled to match the length of the longest vector.}
 
-\item{first}{(\code{logical}, \code{length == 1}) Is the first index (or last index if \code{reverse == TRUE})
-marked as a "change."}
+\item{first}{\emph{\strong{Is the first index (or last index if \code{reverse == TRUE}) marked as a "change."}}
 
-\item{any}{(\code{logical}, \code{length == 1}) If \code{TRUE}, a change in \emph{any} input vector
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}.}
+
+\item{any}{\emph{\strong{Whether to mark changes in a change in any  or all input vector.}}
+
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, a change in \emph{any} input vector
 is marked a change. If \code{FALSE}, changes must occur in \emph{all} input vectors to be marked as a change.}
 
-\item{reverse}{(\code{logical}, \code{length == 1}) If \code{TRUE} the function is excecuted
-backwards through the input vector(s).}
+\item{reverse}{\emph{\strong{Whether the excecution order is reversed}}
 
-\item{value}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the input values where changes occur
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE} the function is excecuted backwards through the input vector(s).}
+
+\item{value}{\emph{\strong{Whether to return the changed value matrix}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, the input values where changes occur
 are returned in a matrix, with each row matching a change and each column containing the
 value from the associated input vector.}
 }

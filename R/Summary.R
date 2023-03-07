@@ -104,7 +104,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census. ***
+#' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
@@ -118,7 +118,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' @param i If `numeric`, selects rows by index. If `character`, the string is matched
 #'     as a regular expression against the "by-group" names.
-#' @param removeEmpty ***Whether to include zero tokens. ***
+#' @param removeEmpty ***Whether to include zero tokens.***
 #' 
 #' Defaults to `FALSE`
 #' 
@@ -126,7 +126,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' If set `TRUE`, any groups that have zero tokens are not included in the `humCensus` table.
 #' 
-#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table. ***
+#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -387,7 +387,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #'     as a regular expression against filenames in the corpus.
 #' @param j if `numeric` selects columns by index. If `character`, [partially matched][partialMatching]
 #'     against column names (reference codes).
-#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table. ***
+#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -674,7 +674,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' @param i If `numeric`, selects rows by index. If `character`, the string is matched
 #'     as a regular expression against filenames in the corpus.
 #'     
-#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table. ***
+#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 

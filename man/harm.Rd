@@ -23,6 +23,35 @@ roman(
   inPlace = FALSE
 )
 }
+\arguments{
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
+}
 \description{
 These functions output \href{https://en.wikipedia.org/wiki/Roman_numeral_analysis}{roman numeral}
 representations of a tertian harmony.
@@ -41,4 +70,18 @@ So, for example, if we take the input \code{E7/B} in the key of A major, we'll g
 \item \code{harm('E7/B', Key = 'A:')} => \code{"V7c"}
 \item \code{roman('E7/B', Key = 'A:')} => \code{"V643"}
 }
+}
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- harm(exampleToken)
+results
+results <- roman(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], harm(Token))
+results
+results <- with(exampleHumdrum[[,3:4]], roman(Token))
+results
+
 }

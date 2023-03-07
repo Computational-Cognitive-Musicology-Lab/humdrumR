@@ -22,7 +22,9 @@ is.minor(x, ...)
 \method{is.minor}{default}(x, ...)
 }
 \arguments{
-\item{x}{Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one.}
+\item{x}{*** Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one ***
+
+Must be a \code{diatonicSet} or \code{tertianSet} or something that can be parsed as one.}
 
 \item{...}{Parameters passed to the parsers (\code{\link[=tertianSet]{tertianSet()}} and \code{\link[=diatonicSet]{diatonicSet()}}).}
 }

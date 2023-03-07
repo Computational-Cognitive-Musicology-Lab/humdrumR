@@ -7,20 +7,30 @@
 notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
 
-\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmParsing]{rhythm parser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "duration."}
+Defaults to \code{list()}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+Must be a \code{list}.}
+
+\item{scale}{*** A \code{numeric} or \link{rational} value which is used as the output unit of measurement ***
+
+Defaults to \code{rational(1, 1)}.
+
+Must be \code{numeric} or \link{rational}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
 }
 \description{
 This function outputs duration information in as traditional \href{https://en.wikipedia.org/wiki/Note_value}{note value}.

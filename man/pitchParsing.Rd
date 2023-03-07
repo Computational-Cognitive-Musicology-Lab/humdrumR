@@ -29,12 +29,18 @@ tonalInterval(...)
 \method{tonalInterval}{token}(x, Exclusive = NULL, ...)
 }
 \arguments{
-\item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
+\item{Exclusive}{Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
 
-\item{str}{(\code{character} or \code{numeric}) The input vector.}
+\item{str}{*** The input vector. ***
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} is used
-to interpret pitch representations.
+Must be either \code{character} or \code{numeric}.}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}
+
 For example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 The output \code{tonalInterval} is output \emph{within the key}: thus, \code{tonalInterval('C#', Key = "A:")}
 returns the tint representing a \strong{Major 3rd}, because \emph{C#} is the major third of A major.}

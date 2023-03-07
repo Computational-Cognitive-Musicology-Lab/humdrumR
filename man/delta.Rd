@@ -22,25 +22,64 @@ delta(x, lag, skip, init, right, ...)
 \method{delta}{matrix}(x, margin = 2L, ...)
 }
 \arguments{
-\item{x}{(Any numeric vector.) \code{NULL} values are returned \code{NULL}.}
+\item{x}{\emph{\strong{The input vector}}
 
-\item{lag}{(Non-zero integer.) Which lag to use. Results will look like: \code{x[i] - x[i - lag]}.}
+Must be \code{atomic}.
 
-\item{skip}{(\code{function}.) This must be a function which can be applied to \code{x} and returns a logical vector
+\code{NULL} values are returned \code{NULL}.}
+
+\item{lag}{\emph{\strong{Which lag to use.}}
+
+Defaults to \code{1}.
+
+Must be integer \code{numeric}; must be length \code{1}.
+
+Results will look like: \code{x[i] - x[i - lag]}.}
+
+\item{skip}{\emph{\strong{A function to indicate which values to skip.}}
+
+Defaults to \code{is.na}.
+
+Must be \code{function}.
+
+This must be a function which can be applied to \code{x} and returns a logical vector
 of the same length. And \code{TRUE} values are skipped over in the calculations.
 By default, the \code{skip} function is \code{is.na}, so \code{NA} values in the input (\code{x} argument) are skipped.
 The skipped values are returned as is in the output vector.}
 
-\item{init}{(Atomic value of same class as \code{x}, with \code{length(init) <= lag}.) \code{NA} values at the beginning
+\item{init}{\emph{\strong{Init value to fill the beginning for calculation.}}
+
+Defaults to \code{0}.
+
+Should be the same class as \code{x}; length must be not longer than \code{lag}.
+
+\code{NA} values at the beginning
 (or end of \code{right == TRUE}) are filled with these values \emph{before} summing.}
 
-\item{right}{(single \code{logical} value) Should the \code{init} padding be at the "right" (end of the vector)?
+\item{right}{\emph{\strong{Should the \code{init} padding be at the "right" (end of the vector)?}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
 By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
 
-\item{groupby}{(vector of same length as \code{x}, or a list of such vectors) Differences are not calculated
+\item{groupby}{\emph{\strong{How to group the data.}}
+
+Defaults to \code{list()}.
+
+Should be \code{vector} or \code{list} of \code{vectors}; must be length \code{length(x)}.
+
+Differences are not calculated
 across groups indicated by the \code{groupby} vector(s).}
 
-\item{orderby}{(vector of same length as \code{x}, or a list of such vectors) Differences in \code{x} are calculated
+\item{orderby}{\emph{\strong{The order for calculating the difference.}}
+
+Defaults to \code{list()}.
+
+Should be \code{vector} or \code{list} of \code{vectors}; must be length \code{length(x)}.
+
+Differences in \code{x} are calculated
 based on the order of \code{orderby} vector(s), as determined by \code{\link[base:order]{base::order()}}.}
 }
 \description{

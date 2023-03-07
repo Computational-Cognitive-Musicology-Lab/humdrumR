@@ -539,7 +539,7 @@
 #' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
 #' Other evaluation options can be achieved with `recycle` or `side` arguments.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include. ***
+#' @param dataTypes ***Which types of humdrum records to include.***
 #' 
 #' Defaults to `"D"`.
 #' 
@@ -556,7 +556,7 @@
 #' 
 #' Must be `list`.
 #' 
-#' @param drop ***Whether to return a simplified data structure. ***
+#' @param drop ***Whether to return a simplified data structure.***
 #' 
 #' Defaults to `TRUE`.
 #' 

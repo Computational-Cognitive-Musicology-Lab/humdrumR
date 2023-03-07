@@ -15,23 +15,34 @@ recip(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
 
-\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmParsing]{rhythm parser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{sep}{(\code{character}, \code{length == 1}) A \code{character} string to use as the separator
-between denominator and numerator.}
+\item{sep}{*** A \code{character} string to use as the separator between denominator and numerator.***
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+Must be \code{character}; must be length \code{1}.}
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "duration."}
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{scale}{*** A \code{numeric} or \link{rational} value which is used as the output unit of measurement ***
+
+Defaults to \code{rational(1, 1)}.
+
+Must be \code{numeric} or \link{rational}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
 }
 \description{
 The standard approach to representing conventional note values in humdrum
@@ -51,6 +62,16 @@ The \verb{\%} separator can be changed using the \code{sep} argument.
 As in conventional \link[=notehead]{note values}, "dots" can be added after a value to increase the duration by
 the ratio of \code{(2 - (2^{-n}))}, where \code{n} is the number of dots.
 (One dot is 3/2; two dots is 7/4; etc.).
+}
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- recip(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], recip(Token))
+results
+
 }
 \seealso{
 To better understand how this function works,

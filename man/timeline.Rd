@@ -28,23 +28,52 @@ timestamp(
 )
 }
 \arguments{
-\item{x}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+\item{x}{*** An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}. ***
 
-\item{start}{A \code{numeric} value from which the timeline begins. Defauls to \code{0}.}
+Must be \code{atomic}, or \code{NULL}.}
 
-\item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
+\item{start}{*** A value from which the timeline begins. ***
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
+Defaults to \code{0}.
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+Must be \code{numeric}.}
+
+\item{pickup}{*** A vector to indicate pickup. ***
+
+Defaults to \code{NULL}
+
+Must be \code{logical}; of same length \code{x}. Or \code{NULL}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.#'}
+
+\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
-\item{minutes}{(\code{logical}, \code{length == 1}) If \code{TRUE}, output seconds are converted to a character string
-encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
+\item{BPM}{*** Specify the tempo. ***
 
-\item{`BPM`}{A numeric values or \code{character} string in the format \code{"MM120"} (for 120 bpm). By default,
-\link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
+Defaults to \code{60}.
+
+Must be \code{numeric} or \code{character} string in the format \code{"MM120"} (for 120 bpm).
+
+By default, \link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
+
+\item{minutes}{*** Whether to return in minutes format. ***
+
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, output seconds are converted to a character string encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
 }
 \description{
 These functions calculate the ammount of time (either in beats, or seconds)

@@ -13,9 +13,18 @@ spines(humdrumR, drop = FALSE)
 \method{print}{humSpines}(spineTable, showEach = TRUE)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR object}}
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object} to summarize.}}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of a \code{humSpine} table.}
+Must be \code{humdrumR}.}
+
+\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+a \code{humCensus} table.}
 
 \item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against filenames in the corpus.}

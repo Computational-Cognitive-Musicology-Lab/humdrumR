@@ -14,23 +14,32 @@ quality(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
-the parser, deparser, and transposer.}
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+Defaults to \code{NULL}.
 
-\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
 
-Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
 
-Must be singleton \code{logical} value: an on/off switch.}
+Defaults to \code{list()}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.
+
+This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}

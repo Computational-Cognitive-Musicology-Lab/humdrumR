@@ -469,7 +469,7 @@ is.humdrumR <- function(x){
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census. ***
+#' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
 #' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
@@ -704,7 +704,7 @@ isActiveAtomic <- function(humdrumR) {
 #' 
 #' Must be `humdrumRclass`.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census. ***
+#' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
@@ -1013,13 +1013,13 @@ contractPaths <- function(humtab) {
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param by  ***A vector of field names to group the data by. ***
+#' @param by  ***A vector of field names to group the data by.***
 #' 
 #' Must be `character`. 
 #' 
 #' Data in the `collapseField` will be collapsed within these groups.
 #' 
-#' @param collapseField (`character`, `length == 1`) ***The target field in the `humdrumR` data to collapse. ***
+#' @param collapseField (`character`, `length == 1`) ***The target field in the `humdrumR` data to collapse.***
 #' 
 #' Defaults to `getActiveFields(humdrumR)[1]`.
 #' 
@@ -1033,7 +1033,7 @@ contractPaths <- function(humtab) {
 #'    or any combination of these (e.g., `"LIM"`).
 #'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
 #'
-#' @param collapseAtomic *** Whether to collapse the data into single `character` string.***
+#' @param collapseAtomic ***Whether to collapse the data into single `character` string.***
 #' 
 #' Defaults to `TRUE`.
 #' 
@@ -1671,7 +1671,7 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census. ***
+#' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
@@ -1964,7 +1964,7 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' 
 #' Must be `humdrumR`.
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census. ***
+#' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"d"`.
 #' 

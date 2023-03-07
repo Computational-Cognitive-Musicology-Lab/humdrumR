@@ -7,12 +7,19 @@
 foldExclusive(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1])
 }
 \arguments{
-\item{fold}{(\code{character}) The target exclusive interpretation(s) \emph{from which}
-to "fold" spines to new fields.
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+
+Must be \code{humdrumR}.}
+
+\item{fold}{\emph{\strong{The target exclusive interpretation(s) from which to "fold" spines to new fields.}}
+
+Must be integer \code{numeric}.
+
 Must be specified \emph{without} the \verb{**} prefix: \code{"kern"} not \code{"**kern"}.}
 
-\item{onto}{(\code{character}, whole number) The target exclusive interpretation (must be only one) \emph{to which}
-the "fold" data is moved.}
+\item{onto}{\emph{\strong{The target exclusive interpretation (must be only one) to which the "fold" data is moved.}}
+
+Must be integer \code{numeric}.}
 }
 \description{
 \code{foldExclusive()} is a special version of \code{\link[=foldHumdrum]{foldHumdrum()}}, which

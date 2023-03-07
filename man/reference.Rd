@@ -17,10 +17,18 @@ reference(humdata)
 \method{[}{humReference}(refTable, i, j, drop = FALSE)
 }
 \arguments{
-\item{x}{A \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR object}.}
+\item{x}{\emph{\strong{Input for extracting reference information.}}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table}
-is returned instead of \code{humReference} table.}
+Must be a \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR}.}
+
+\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+a \code{humCensus} table.}
 
 \item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against filenames in the corpus.}

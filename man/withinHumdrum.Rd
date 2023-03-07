@@ -20,26 +20,43 @@
 \method{within}{humdrumR}(data, ..., dataTypes = "D", expandPaths = FALSE, variables = list())
 }
 \arguments{
-\item{data}{A \verb{[humdrumR][humdrumRclass]} data object.}
+\item{data}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object} to summarize.}}
+
+Must be \code{humdrumR}.}
 
 \item{...}{Any number of expressions to evaluate. Unnamed expressions are interpreted as the
 "main" \emph{within-expressions}. Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
 Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
 
-\item{dataTypes}{A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}.
+\item{dataTypes}{***Which types of humdrum records to include. ***
+
+Defaults to \code{"D"}.
+
+Must be \code{string}.
+
+A string or vector of characters drawn from \code{c("D", "d", "I", "L", "M","G")}.
 These characters  correspond to types of humdrum records: \strong{D}ata, null \strong{d}ata, \strong{I}nterpretations,
 \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
-is only evaluated on data drawn from the specified record types (defaults to \code{"D"}).}
+is only evaluated on data drawn from the specified record types.}
 
-\item{drop}{This argument is conceptually similar to the \code{drop} argument in R matrices.
+\item{drop}{***Whether to return a simplified data structure. ***
+
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+This argument is conceptually similar to the \code{drop} argument in R matrices.
 If \code{drop = TRUE}, the output of \code{with.humdrumR} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
 a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
 intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
 the output is consistent.}
 
-\item{variables}{A named \code{list} of values, which are interpolated into the within-expression(s)
-wherever a variable name matches a named from the list.}
+\item{variables}{\emph{\strong{A named \code{list} of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.}}
+
+Defaults to \code{list()}.
+
+Must be \code{list}.}
 }
 \value{
 From \code{within.humdrumR}  a new humdrumR data object.

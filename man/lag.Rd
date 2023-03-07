@@ -10,21 +10,46 @@ lag(x, n = 1, fill, wrap, groupby, ...)
 lead(x, n = 1, ...)
 }
 \arguments{
-\item{x}{The input argument. Should be a vector (including lists), \code{matrix}, or \code{data.frame}.}
+\item{x}{\emph{\strong{The input argument.}}
 
-\item{n}{The amount to lag/lead the data.  If \code{n == 0}, \code{x} is returned unchanged.}
+Should be \code{list}, \code{atomic}, \code{matrix}, or \code{data.frame}.}
 
-\item{fill}{If \code{wrap = FALSE} parts of the output are padded with the \code{fill} argument.
-Defaults to \code{NA}.}
+\item{n}{\emph{\strong{The amount to lag/lead the data.}}
 
-\item{wrap}{If \code{wrap = TRUE}, data from the end (head or tail) is copied to the
-other end of the output, "wrapping" the data
-within the data structure.}
+Defaults to \code{0}.
 
-\item{groupby}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
-by the \code{groupby} vector(s) is treated separately.}
+Must be \code{numeric}.
 
-\item{margin}{Arrays and data.frames can be lagged lead in multiple dimensions
+If \code{n == 0}, \code{x} is returned unchanged.}
+
+\item{fill}{\emph{\strong{Tokens used to pad the outputs.}}
+
+Defaults to \code{NA}.
+
+Should be the same class as \code{x}.
+
+If \code{wrap = FALSE} parts of the output are padded with the \code{fill} argument.}
+
+\item{wrap}{\emph{\strong{Whether to wrap the data.}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}. Must be length \code{1}.
+
+If \code{wrap = TRUE}, data from the end (head or tail) is copied to the
+other end of the output, "wrapping" the data within the data structure.}
+
+\item{groupby}{\emph{\strong{How to group the data.}}
+
+Should be \code{vector} or \code{list} of \code{vectors}; must be length \code{length(x)}.
+
+Each segment of \code{x} delineated by the \code{groupby} vector(s) is treated separately.}
+
+\item{margin}{\emph{\strong{Which dimension to shift.}}
+
+Must be \code{numeric}.
+
+Arrays and data.frames can be lagged lead in multiple dimensions
 using the \code{margin} argument: \code{margin == 1} shifts across rows while \code{margin == 2}
 shifts across columns.}
 }

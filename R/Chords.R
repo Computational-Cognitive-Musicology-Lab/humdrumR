@@ -1202,29 +1202,29 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 
 ### Chord functions ####
 
-#' @param x *** An `atomic` vector***
+#' @param x ***An `atomic` vector***
 #' 
 #' The `x` argument can be any ([atomic][base::vector]) vectors
 #' 
-#' @param Key *** The input `Key` used by the parser, deparser, and transposer. ***
+#' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
 #' 
 #' Defaults to `NULL`.
 #' 
 #' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
 #' 
-#' @param parseArgs *** A list of arguments that are passed to the [pitch parser][pitchParsing]. ***
+#' @param parseArgs ***A list of arguments that are passed to the [pitch parser][pitchParsing].***
 #' 
 #' Defaults to `list()`.
 #' 
 #' Must be a `list`.
 #' 
-#' @param transposeArgs *** A list of arguments that are passed to a special call to [transpose]. ***
+#' @param transposeArgs ***A list of arguments that are passed to a special call to [transpose].***
 #' 
 #' Defaults to `list()`.
 #' 
 #' Must be a `list`.
 #' 
-#' @param inPlace *** Whether the result is placed in place or returned ***
+#' @param inPlace ***Whether the result is placed in place or returned***
 #' 
 #' Defaults to `FALSE`.
 #' 

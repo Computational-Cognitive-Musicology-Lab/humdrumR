@@ -13,7 +13,46 @@ figuredBass(
   inPlace = FALSE
 )
 }
+\arguments{
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
+}
 \description{
 This function outputs a \href{https://en.wikipedia.org/wiki/Figured_bass}{figured bass}
 representation of a tertian harmony.
+}
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- figuredBass(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], figuredBass(Token))
+results
+
 }

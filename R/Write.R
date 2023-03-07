@@ -73,7 +73,7 @@
 #' If `FALSE`, `writeHumdrum` will refuse to overwrite
 #' any files. If `TRUE`, `writeHumdrum` will overwrite files, but only after an additional prompt from the user.
 #' 
-#' @param verbose ***Whether to show file names while writing. ***
+#' @param verbose ***Whether to show file names while writing.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -82,7 +82,7 @@
 #' If `TRUE`, each *new* output file name is printed on the console
 #' as the writing happens.
 #' 
-#' @param EMD ***A string to write to a new `!!!EMD:` record in each file. ***
+#' @param EMD ***A string to write to a new `!!!EMD:` record in each file.***
 #' 
 #' Defaults to `paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.Date())`.
 #' 

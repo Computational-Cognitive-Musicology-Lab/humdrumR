@@ -49,28 +49,71 @@ hint(
 )
 }
 \arguments{
-\item{x}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+\item{x}{*** An \code{atomic} vector***
 
-\item{from}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
-\item{deparser}{A \link[=pitchFunction]{pitch function} to generate the output representation.
-Defaults to \code{\link[=interval]{interval()}}.}
+\item{from}{*** An \code{atomic} vector to for calculate interval from. ***
 
-\item{incomplete}{Either a \link{pitch function} or an atomic value of \code{length(incomplete) == abs(lag)}.}
+Defaults to \code{tint(0L, 0L)}.
 
-\item{bracket}{(\code{logical}, \code{length == 1}) If \code{TRUE}, square brackets (\code{"[]"}) are printed around
-\code{incomplete} observations.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
-\item{classify}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the \code{deparser} is ignored and the output
-is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
+\item{deparser}{*** A \link[=pitchFunctions]{pitch function} to generate the output representation. ***
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=tonalInterval]{pitch parser}.}
+Defaults to \link[=interval]{interval}.
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
-into.}
+Must be a \code{Function}.}
 
-\item{orderby}{A \code{list} of vectors, of the same length as \code{x}, which are used to
-interpret the order of elements in \code{x}. Lagged computations are done in the indicated
+\item{incomplete}{*** Whether to pad the incomplete part. ***
+
+Defaults to \code{NULL} for \code{int()}, \code{kern} for \code{mint()} and \code{hint()}.
+
+Must be either a \link[=pitchFunctions]{pitch function} an atomic value of \code{length(incomplete) == abs(lag)}.}
+
+\item{bracket}{*** Whether print bracket for incomplete parts. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, square brackets (\code{"[]"}) are printed around \code{incomplete} observations.}
+
+\item{classify}{*** Whether output interval class or interval from deparser. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, the \code{deparser} is ignored and the output is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{lag}{*** For \code{\link[=mint]{mint()}} and \code{\link[=hint]{hint()}}, set the lag between notes to calculate \code{\link[=int]{int()}}. ***
+
+Defaults to \code{1}.
+
+Must be either\code{int} or \code{logical}; must be length \code{1}.
+
+A \code{logical} vector with the same length as \code{x} is also accepted, see \link{Logical(ditto) lags}.}
+
+\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.}
+
+\item{orderby}{*** A \code{list} of vectors to group \code{x}***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
+Used to interpret the order of elements in \code{x}. Lagged computations are done in the indicated
 order, but the output is returned in the original order.}
 }
 \description{
@@ -244,10 +287,17 @@ you could manually set \code{groupby = list(File, Record)}.
 }
 
 \examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- mint(exampleToken)
+results
+results <- hint(exampleToken)
+results
 
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
-
-within(chorales, mint(Token))
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], mint(Token))
+results
+results <- with(exampleHumdrum[[,3:4]], hint(Token))
+results
 
 }
 \seealso{

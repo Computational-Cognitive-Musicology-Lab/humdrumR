@@ -7,10 +7,18 @@
 expandPaths(x, asSpines)
 }
 \arguments{
-\item{x}{A \link[=humdrumClass]{humdrumR object}.}
+\item{asSpines}{\emph{\strong{Whether the expanded paths are copied into their own new spines (shifting higher spines over as needed).}}
 
-\item{asSpines}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the expanded paths are copied into their
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, the expanded paths are copied into their
 own new spines (shifting higher spines over as needed).}
+
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+
+Must be \code{humdrumR}.}
 }
 \description{
 This function takes a \link[=humdrumRclass]{humdrumR object}

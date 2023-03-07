@@ -7,11 +7,17 @@
 extractTandem(Tandem, regex)
 }
 \arguments{
-\item{Tandem}{Should always be the \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}.}
+\item{Tandem}{*** The \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object} ***
 
-\item{regex}{(\code{character}, \code{length == 1}). A single regular expression to match against the
-tandem interpretations. You should not include a \code{*} at the beginning---the \code{*} marker
-for tandem interpretations are already removed from the \code{Tandem} field.}
+Must be \code{atomic}.
+
+Should always be the \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}.}
+
+\item{regex}{\emph{\strong{A single regular expression to match against the tandem interpretations.}}
+
+Must be \code{character}; must be length \code{1}.
+
+You should not include a \code{*} at the beginning---the \code{*} marker for tandem interpretations are already removed from the \code{Tandem} field.}
 }
 \description{
 \code{extractTandem} extracts tandem interpretations from the raw \code{Tandem}

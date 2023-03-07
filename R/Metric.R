@@ -248,7 +248,7 @@ meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.
 #' The default arguments build a 4/4 meter with levels ranging from whole-notes down
 #' to sixteenth-notes, and a quarter-note tactus.
 #' 
-#' @param nlevels ***The number of duple levels. ***
+#' @param nlevels ***The number of duple levels.***
 #' 
 #' Must be a singleton, positive natural number
 #' 
@@ -1092,7 +1092,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' Must be a singleton `logical` value: a on/off switch.
 #' 
-#' @param level ***Which metric level should be counted? ***
+#' @param level ***Which metric level should be counted?***
 #' 
 #' Defaults to the tactus of the `meter`.
 #' 

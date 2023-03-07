@@ -19,18 +19,37 @@ census(humdata)[i]
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR object}}
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
 
-\item{dataTypes}{Which types of humdrum records to include in the census. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+Must be \code{humdrumR}.}
+
+\item{dataTypes}{***Which types of humdrum records to include in the census. ***
+
+Defaults to \code{"GLIMDd"}.
+
+Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 (see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
 
-\item{by}{An arbitrary expression which indicates how to group the data.}
+\item{by}{\emph{\strong{An arbitrary expression which indicates how to group the data.}}
 
-\item{removeEmpty}{(\code{logical}, \code{length == 1}) If set \code{TRUE}, any groups that have zero tokens are
-not included in the \code{humCensus} table.}
+Defaults to \code{Filename}.}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+\item{removeEmpty}{***Whether to include zero tokens. ***
+
+Defaults to \code{FALSE}
+
+Must be \code{logical}; must be length \code{1}.
+
+If set \code{TRUE}, any groups that have zero tokens are not included in the \code{humCensus} table.}
+
+\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
 a \code{humCensus} table.}
 
 \item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched

@@ -18,29 +18,50 @@ pitch(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
+\item{generic}{*** Whether the "specific" pitch information (accidentals and qualites) is discarded. ***
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
+Defaults to \code{FALSE}.
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
-the parser, deparser, and transposer.}
+Must be a \code{logical}; must be length \code{1}.}
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
+\item{simple}{*** Whether the "compound" pitch information (octave/contour) is discarded. ***
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+Defaults to \code{FALSE}.
 
-\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+Must be a \code{logical}; must be length \code{1}.}
 
-Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
 
-Must be singleton \code{logical} value: an on/off switch.}
+Defaults to \code{NULL}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.
+
+This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
@@ -177,6 +198,16 @@ consistent tables when grouping data.
 When \code{inPlace = TRUE} no special tabulation will occur.
 }
 
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- pitch(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], pitch(Token))
+results
+
+}
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.

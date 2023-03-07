@@ -232,7 +232,7 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 #' parser. If any values fail to parse (returning `NA`), the [diatonicSet()]
 #' parser is called on them.
 #' 
-#' @param x *** Either a `diatonicSet` or `tertianSet`, or something that can be parsed as one ***
+#' @param x ***Either a `diatonicSet` or `tertianSet`, or something that can be parsed as one***
 #' 
 #' Must be a `diatonicSet` or `tertianSet` or something that can be parsed as one.
 #' 
@@ -1055,17 +1055,17 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
 
 ### Key functions ####
 
-#' @param x *** An `atomic` vector***
+#' @param x ***An `atomic` vector***
 #' 
 #' The `x` argument can be any ([atomic][base::vector]) vectors
 #' 
-#' @param Key *** The input `Key` used by the parser, deparser, and transposer. ***
+#' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
 #' 
 #' Defaults to `NULL`.
 #' 
 #' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
 #' 
-#' @param parseArgs *** A list of arguments that are passed to the [pitch parser][pitchParsing]. ***
+#' @param parseArgs ***A list of arguments that are passed to the [pitch parser][pitchParsing].***
 #' 
 #' Defaults to `list()`.
 #' 

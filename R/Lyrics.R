@@ -6,7 +6,7 @@
 #' 
 #' Must be `character`.
 #' 
-#' @param nullTokens ***Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. ***
+#' @param nullTokens ***Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word.***
 #' 
 #' Defaults to `TRUE`.
 #' 

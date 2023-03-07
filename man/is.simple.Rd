@@ -19,15 +19,23 @@ is.generic(x, Key, ...)
 \method{is.generic}{tonalInterval}(x, Key = NULL)
 }
 \arguments{
-\item{x}{A \code{tonalInterval} or something that can be parsed as one.}
+\item{x}{*** A \code{tonalInterval} ***
+
+Must be a \code{tonalInterval} or something that can be parsed as one.}
 
 \item{...}{Parameters passed to \code{\link[=tonalInterval]{tonalInterval()}}.}
 
-\item{octave.round}{A \link[=expand]{rouding function}. Controls how
-simple intervals are interpreted relative to C.}
+\item{octave.round}{*** The rounding function. ***
 
-\item{Key}{A \link[=diatonicSetS4]{diatonicSet} (tonal key) or something which can be
-\link[=diatonicSet]{parsed} as one.}
+Must be a \link[=expand]{rouding function}.
+
+Controls how simple intervals are interpreted relative to C.}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
 }
 \description{
 These functions test basic properties of pitch information.

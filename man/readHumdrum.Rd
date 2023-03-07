@@ -34,29 +34,55 @@ readHumdrum(
 \item{...}{character: One or more patterns used to identify files to read.
 For details: see the "REpath-patterns" section below.}
 
-\item{contains}{\code{character}. If \code{!is.null(contains)}, the \code{contains} argument is
+\item{contains}{*** REGEX for filtering files. ***
+
+Defaults to \code{NULL}.
+
+Must be \code{character}.
+
+If \code{!is.null(contains)}, the \code{contains} argument is
 is treated as regular expressions: only files which contain matches to
 \emph{all} of these regular expressions are read.
 Thus, \code{readHumdrum('.*krn$', contains = "EEE")} will only read kern files which contain matches
 to \code{"EE"}---which is kern for the E two octaves below middle C (or lower).}
 
-\item{recursive}{logical: If \code{TRUE}, the final part of the search pattern (i.e., the file search) is searched for
-recursively through all sub directories.}
+\item{recursive}{*** Whether the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories. ***
 
-\item{allowDuplicates}{\code{logical} of length one, indicating what should happen if multiple search patterns match the same files.
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.}
+
+\item{allowDuplicates}{\emph{\strong{Indicating what should happen if multiple search patterns match the same files.}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
 If \code{allowDuplicates = TRUE},
 any such files are read multiple times, grouped into their respective corpora by the \code{Label} field.
 If \code{allowDuplicates = FALSE}, any redundant files are only read into the corpus of the first pattern they
 match.}
 
-\item{verbose}{logical: If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
+\item{verbose}{*** Whether to print filename while reading or not. ***
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{TRUE}, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!}
 
-\item{tandems}{\code{character}. This argument controls which, if any, tandem interpretations
-are parsed into their own fields. The default value is \code{"known"}.}
+\item{tandems}{***Controls which, if any, tandem interpretations are parsed into their own fields. ***
 
-\item{reference}{\code{character}. This argument controls which, if any, reference records
-are parsed into their own fields. The default value is \code{"all"}.}
+Defaults to \code{"known"}.
+
+Must be \code{character}.}
+
+\item{reference}{\emph{\strong{Controls which, if any, reference recordsare parsed into their own fields.}}
+
+Defaults to \code{"all"}.
+
+Must be \code{character}.}
 }
 \description{
 These functions find valid humdrum files on your local machine and read them into \code{humdrumR}.

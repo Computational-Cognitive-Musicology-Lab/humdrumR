@@ -21,41 +21,73 @@ freq(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
+\item{generic}{*** Whether the "specific" pitch information (accidentals and qualites) is discarded. ***
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
+Defaults to \code{FALSE}.
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
-the parser, deparser, and transposer.}
+Must be a \code{logical}; must be length \code{1}.}
 
-\item{tonalHarmonic}{(\code{numeric}, \code{length == 1}) What frequency is the "tonal harmonic" (perfect 10th) tuned to?
-By default, the value is \code{2^(19/12)}, the 12-tone equal-temperament10th.
+\item{simple}{*** Whether the "compound" pitch information (octave/contour) is discarded. ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{tonalHarmonic}{*** The frequency of the "tonal harmonic" (perfect 10th). ***
+
+Defaults to \code{2^(19/12)}, the 12-tone equal-temperament10th.
+
+Must be \code{numeric}; must be length \code{1}.
+
 For \href{https://en.wikipedia.org/wiki/Pythagorean_tuning}{Pythagorean tuning}, set \code{tonalHarmonic = 3}.}
 
-\item{frequency.reference}{(\code{numeric}, \code{length == 1}) What is the reference frequency---default is \code{440} (Hz).}
+\item{frequency.reference}{*** The reference frequency. ***
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
+Defaults to \code{440}.
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+Must be \code{numeric}; must be length \code{1}.}
 
-\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
 
-Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+Defaults to \code{list()}.
 
-Must be singleton \code{logical} value: an on/off switch.}
+Must be a \code{list}.}
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.
+
+This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 
-\item{frequency.reference.note}{(Any parsable pitch representation, \code{length == 1}) What note is the \code{reference.frequency} tuned to?
-Default is \code{"a"}---the \strong{A} above middle-\strong{C}.}
+\item{frequency.reference.note}{*** The note that the \code{reference.frequency} tuned to. ***
+
+Defaults to \code{"a"}.
+
+Can be any parsable pitch representation; must be length \code{1}.}
 }
 \description{
 Translate pitches to frequency (Hz)
@@ -188,6 +220,16 @@ consistent tables when grouping data.
 When \code{inPlace = TRUE} no special tabulation will occur.
 }
 
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- freq(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], freq(Token))
+results
+
+}
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.

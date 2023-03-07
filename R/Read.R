@@ -431,7 +431,7 @@ shortFilenames <- function(fileFrame) {
 #' @param ... character: One or more patterns used to identify files to read.
 #' For details: see the "REpath-patterns" section below.
 #' 
-#' @param recursive *** Whether the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories. ***
+#' @param recursive ***Whether the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -448,7 +448,7 @@ shortFilenames <- function(fileFrame) {
 #' If `allowDuplicates = FALSE`, any redundant files are only read into the corpus of the first pattern they 
 #' match.
 #' 
-#' @param contains *** REGEX for filtering files. ***
+#' @param contains ***REGEX for filtering files.***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -461,7 +461,7 @@ shortFilenames <- function(fileFrame) {
 #' to `"EE"`---which is kern for the E two octaves below middle C (or lower).
 #' 
 #' 
-#' @param verbose *** Whether to print filename while reading or not. ***
+#' @param verbose ***Whether to print filename while reading or not.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -470,7 +470,7 @@ shortFilenames <- function(fileFrame) {
 #' If `TRUE`, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
 #' 
-#' @param tandems ***Controls which, if any, tandem interpretations are parsed into their own fields. ***
+#' @param tandems ***Controls which, if any, tandem interpretations are parsed into their own fields.***
 #' 
 #' Defaults to `"known"`. 
 #' 
@@ -1146,7 +1146,7 @@ parseTandem <- function(tandems, known) {
 #' For example, if we wanted to manually extract the key information from the `Tandem` field 
 #' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
 #' 
-#' @param Tandem *** The `Tandem` field from a [humdrumR object][humdrumRclass] ***
+#' @param Tandem ***The `Tandem` field from a [humdrumR object][humdrumRclass].***
 #' 
 #' Must be `atomic`.
 #' 

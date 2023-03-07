@@ -7,7 +7,11 @@
 silbeFormat(cVector)
 }
 \arguments{
-\item{cVector}{The data to be checked for improper formatting (for now, please read in your spine as a dataframe with 1 column)}
+\item{cVector}{\emph{\strong{The data to be checked for improper formatting.}}
+
+Must be \code{data.frame}.
+
+For now, please read in your spine as a dataframe with 1 column.}
 }
 \value{
 "Formatted properly." if the lyrics are formatted properly, else print error message with corrections.

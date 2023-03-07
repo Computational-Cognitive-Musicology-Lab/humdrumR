@@ -38,24 +38,43 @@ collapseRecords(
 )
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
 
-\item{by}{(\code{character}) A vector of field names to group the data by.
+Must be \code{humdrumR}.}
+
+\item{by}{***A vector of field names to group the data by. ***
+
+Must be \code{character}.
+
 Data in the \code{collapseField} will be collapsed within these groups.}
 
-\item{collapseField}{(\code{character}, \code{length == 1}) The target
-field in the \code{humdrumR} data to collapse. Defaults to the first \link[=humActive]{active field}.}
+\item{collapseField}{(\code{character}, \code{length == 1}) ***The target field in the \code{humdrumR} data to collapse. ***
 
-\item{dataTypes}{(\code{character}) Which types of humdrum records to collapse.
-Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'} or any combination of
-these (e.g., \code{"LIM"}).}
+Defaults to \code{getActiveFields(humdrumR)[1]}.
 
-\item{collapseAtomic}{(\code{logical}, \code{length == 1}) If \code{TRUE}, data is collapsed
-into a single \code{character} string.
-If \code{FALSE}, data is conctanated in a \code{list}.}
+Must be \code{character}; must be length \code{1}.}
 
-\item{sep}{(\code{character}, \code{length == 1}) If \code{collapseAtomic == TRUE}, collapsed tokens
-are separated by this string.}
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to collapse.}}
+
+Defaults to \code{"GLIMDd"}.
+
+Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+
+\item{collapseAtomic}{*** Whether to collapse the data into single \code{character} string.***
+
+Defaults to \code{TRUE}.
+
+Must be \code{Logical}; must be length \code{1}.
+
+If \code{TRUE}, data is collapsed into a single \code{character} string. If \code{FALSE}, data is conctanated in a \code{list}.}
+
+\item{sep}{\emph{\strong{If \code{collapseAtomic == TRUE}, collapsed tokens are separated by this string.}}
+
+Defaults to \code{" "}.
+
+Must be \code{character}; must be length \code{1}.}
 }
 \description{
 \code{collapseHumdrum} allows you collapse a data field across

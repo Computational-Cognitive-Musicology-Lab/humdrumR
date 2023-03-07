@@ -12,7 +12,12 @@ to test for humdrum validity.
 This is mainly used to pass \link[=readHumdrum]{regex file-path search patterns}, but may also be used to pass
 the \code{recursive} and/or \code{contains} arguments to \code{\link[=findHumdrum]{findHumdrum()}}.}
 
-\item{errorReport.path}{(\code{character}, \code{length == 1}) A directory path where to write error report files.
+\item{errorReport.path}{\emph{\strong{A directory path where to write error report files.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{character}; must be length \code{1}.
+
 If \code{NULL} (the default), no error report files are written.}
 }
 \description{

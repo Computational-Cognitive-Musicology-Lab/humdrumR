@@ -41,24 +41,41 @@ makeHumdrumDispatcher(
 \method{print}{humdrumDispatch}(x)
 }
 \arguments{
-\item{dispatchDF}{A data.frame which describes what function should be called for
-which regex input. (See details).}
+\item{dispatchDF}{\emph{\strong{A data.frame which describes what function should be called for which regex input. (See details).}}
 
-\item{Exclusive}{Defaults to \code{NULL}. If \code{NULL}, only the regexes are used for dispatch.}
+Must be \code{data.frame}.}
 
-\item{multiDispatch}{\code{logical}, length 1. If \code{FALSE} (the default) the "best" regex/exclusive match
-is dispatched for each Exclusive segment. If \code{TRUE}, differenet functions can be dispatched
+\item{Exclusive}{\emph{\strong{Exclusive interpretations to dispatch.}}
+
+Defaults to \code{NULL}.
+
+If \code{NULL}, only the regexes are used for dispatch.}
+
+\item{multiDispatch}{\emph{\strong{Whether to use multiple dispatch function for each interpretation.}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}.
+
+If \code{FALSE} the "best" regex/exclusive match is dispatched for each Exclusive segment.
+If \code{TRUE}, differenet functions can be dispatched
 within the same input vector.}
 
 \item{...}{Arguments to pass to dispatch functions.}
 
-\item{outputClass}{Character string: the default output class which the function should return.
+\item{outputClass}{\emph{\strong{The default output class which the function should return.}}
+
+Defaults to \code{"character"}.
+
+Must be \code{character}.
 
 Generally, to make sense, all dispatched functions should return the same type, which you should explicitly
 indicate with the \code{outputClass} argument.
 Dispatch functions should also be \link[base:Vectorize]{vectorized}.}
 
-\item{str}{The input \code{character} string, on which dispatch is called.}
+\item{str}{\emph{\strong{The input \code{character} string, on which dispatch is called.}}
+
+Must be \code{character}.}
 }
 \description{
 The \link{humdrumR} \strong{regular-expression method dispatch system}

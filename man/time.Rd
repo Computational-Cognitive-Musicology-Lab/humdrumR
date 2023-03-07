@@ -44,20 +44,30 @@ dur(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+\item{x}{*** An \code{atomic} vector***
 
-\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+
+\item{...}{These arguments are passed to the \link[=rhythmParsing]{rhythm parser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "duration."}
+Defaults to \code{list()}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+Must be a \code{list}.}
+
+\item{scale}{*** A \code{numeric} or \link{rational} value which is used as the output unit of measurement ***
+
+Defaults to \code{rational(1, 1)}.
+
+Must be \code{numeric} or \link{rational}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
 }
 \description{
 These functions convert duration values to clock-time representations.
@@ -79,6 +89,22 @@ For example, if \code{minutes = FALSE}, an input of 90 seconds will return \code
 \code{minutes = TRUE}, the output will be \verb{:1:30} (one minute and thirty seconds).
 }
 
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- seconds(exampleToken)
+results
+results <- ms(exampleToken)
+results
+results <- dur(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], seconds(Token))
+results
+results <- with(exampleHumdrum[[,3:4]], ms(Token))
+results
+
+}
 \seealso{
 To better understand how this function works,
 read about the \link[=rhythmFunctions]{family of rhythm functions},

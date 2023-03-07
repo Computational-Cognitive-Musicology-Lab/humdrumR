@@ -30,29 +30,49 @@ foldStops(
 )
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
 
-\item{fold}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{from which}
-to "fold" data to another structural position and field(s).}
+Must be \code{humdrumR}.}
 
-\item{onto}{(\code{numeric}, whole number) The target structure (spine, path, etc.) \emph{to which}
-the "fold" data is moved.}
+\item{fold}{\emph{\strong{The target structure (spine, path, etc.) from which to "fold" data to another structural position and field(s).}}
 
-\item{what}{(\code{character}, \code{length == 1}) The structural field which is folded across.
-Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"NData"}.}
+Must be integer \code{numeric}.}
 
-\item{File}{(\code{NULL} or \code{numeric}, \code{length == length(onto)}, whole number) Used to specify
-specific folds for different files in the corpus (see "File-Specific Folding" section, below).}
+\item{onto}{\emph{\strong{The target structure (spine, path, etc.) to which the "fold" data is moved.}}
 
-\item{fromField}{(\code{character}, \code{length == 1}) A string (partially) matching the
-name of a data field in the \code{humdrumR}-object input. This field is the field which is
-"folded" to a new field.}
+Must be integer \code{numeric}.}
 
-\item{fillFromField}{(\code{logical}, \code{length == 1}) If the folding field is
-smaller than the \code{to} field, should the content of the \code{fromField} be copied
-into the \code{NA} sections?}
+\item{what}{\emph{\strong{The structural field which is folded across.}}
 
-\item{newFieldNames}{(\code{character}) Names to use for new fields created by the folding.}
+Defaults to \code{"Spine"}.
+
+Must be \code{character}; must be length \code{1}. Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"NData"}.}
+
+\item{File}{\emph{\strong{Used to specify specific folds for different files in the corpus (see "File-Specific Folding" section, below).}}
+
+Defaults to \code{NULL}.
+
+Must be integer \code{numeric}; must be length \code{length(onto)}.}
+
+\item{fromField}{\emph{\strong{A string (partially) matching the name of a data field in the \code{humdrumR}-object input.}}
+
+Defaults to \code{getActiveFields(humdrumR)[1]}.
+
+Must be \code{character}; must be length \code{1}.
+
+This field is the field which is "folded" to a new field.}
+
+\item{fillFromField}{\emph{\strong{If the folding field is smaller than the \code{to} field, should the content of the \code{fromField} be copied into the \code{NA} sections?}}
+
+Defaults to \code{FALSE} for \code{foldHumdrum()} and \code{foldStops()}; \code{TRUE} for \code{foldPaths()}.
+
+Must be \code{logical}; must be length \code{1}.}
+
+\item{newFieldNames}{\emph{\strong{Names to use for new fields created by the folding.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{character}.}
 }
 \description{
 Many humdrum datasets encode data across multiple spines, spine-paths, or stops.

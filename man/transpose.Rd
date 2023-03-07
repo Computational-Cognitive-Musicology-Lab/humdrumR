@@ -7,20 +7,39 @@
 transpose(x, by, Key, to, real, relative, ...)
 }
 \arguments{
-\item{x}{The input pitch(es) to transpose. A \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
+\item{x}{*** The input pitch(es) to transpose. ***
 
-\item{by}{A \code{tonalInterval} or something intepretable as a \code{tonalInterval}.
-The input \code{x} is transposed by this interval.}
+Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{Key}{A \code{diatonicSet} or something intepretable as a \code{diatonicSet}. For tonal and/or to transpositions,
-this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
+\item{by}{*** The input \code{x} is transposed by this interval.***
 
-\item{to}{A \code{diatonicSet} or something intepretable as a \code{diatonicSet}. The input \code{x} is transposed
-to this key.}
+Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{real}{A logical. If \code{TRUE} (the default), transposition is real. If \code{FALSE}, transposition is tonal.}
+\item{Key}{*** The "from" key of the transposition. ***
 
-\item{relative}{A logical. If \code{TRUE} transposition is relative. If \code{FALSE} (the default), transposition is parallel.}
+Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.
+
+For tonal and/or to transpositions, this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
+
+\item{to}{*** The input \code{x} is transposed to this key. ***
+
+Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.}
+
+\item{real}{*** Whether the transposition is real. ***
+
+Defaults to \code{TRUE}.
+
+Must be a \code{logical}.
+
+If \code{TRUE}, transposition is real. If \code{FALSE}, transposition is tonal.}
+
+\item{relative}{*** Whether the transposition is relative ***
+
+Defaults to \code{FALSE}.
+
+Must be a logical.
+
+If \code{TRUE} transposition is relative. If \code{FALSE}, transposition is parallel.}
 }
 \description{
 This function \link[=https://en.wikipedia.org/wiki/Transposition_(music)]{transposes} pitches or keys

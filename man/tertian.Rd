@@ -13,6 +13,35 @@ tertian(
   inPlace = FALSE
 )
 }
+\arguments{
+\item{x}{*** An \code{atomic} vector***
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
+
+\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{*** Whether the result is placed in place or returned ***
+
+Defaults to \code{FALSE}.
+
+Must be a \code{logical}; must be length \code{1}.}
+}
 \description{
 This functions a generic form of tertian harmony representation, commonly used in music theory.
 In this representation, the root of a chord is indicated as **kern, followed by one or more
@@ -46,3 +75,13 @@ Inversions are indicated with slash notation, with the scale degree to the right
 For example, a first-inversion A major chord would be \code{AM/3}.
 }
 
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- tertian(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], tertian(Token))
+results
+
+}

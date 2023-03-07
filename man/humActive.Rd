@@ -29,22 +29,35 @@ setActiveFields(humdrumR, fieldnames)
 \S4method{$}{humdrumR}(x, name)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
 
-\item{dataTypes}{(\code{character}, \code{length == 1}) Which types of humdrum records to include.
-Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd', }
-or any combination of these in a single string (e.g., \code{"LIM"}).
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for an explanation.).}
+Must be \code{humdrumR}.}
 
-\item{forceAtomic}{(\code{logical}, \code{length == 1}) If \code{TRUE} (default), the evaluated active field
-is forced/coerced into a atomic vector.}
+\item{dataTypes}{***Which types of humdrum records to include in the census. ***
 
-\item{sep}{(\code{character}, \code{length == 1}) Only used if \code{forceAtomic == TRUE}; if coercion involves pasting
-together lists of vectors, \code{sep} is used as a separator when \link[base:paste]{pasting}.}
+Defaults to \code{"d"}.
 
-\item{nullChar}{(\code{logical}, \code{length == 1}) Only used if \code{forceAtomic == TRUE}; if \code{nullChar == TRUE}
-and \code{NA}s in the output vector are replaced with humdrum null character tokens: \code{"."}, \code{"!"}, \code{"="},
-or \code{"*"}, depending on type.}
+Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+
+\item{forceAtomic}{\emph{\strong{Whether he evaluated active field is forced/coerced into a atomic vector.}}
+
+Defaults to \code{TRUE}.
+
+Must be \code{logical}; must be length \code{1}}
+
+\item{sep}{\emph{\strong{Only used if \code{forceAtomic == TRUE}; if coercion involves pasting together lists of vectors, \code{sep} is used as a separator when \link[base:paste]{pasting}.}}
+
+Defaults to \code{", "}.
+
+Must be \code{character}; must be length \code{1}}
+
+\item{nullChar}{\emph{\strong{Only used if \code{forceAtomic == TRUE}; if \code{nullChar == TRUE} and \code{NA}s in the output vector are replaced with humdrum null character tokens: \code{"."}, \code{"!"}, \code{"="}, or \code{"*"}, depending on type.}}
+
+Defaults to \code{FALSE}.
+
+Must be \code{logical}; must be length \code{1}}
 }
 \description{
 \link[=humdrumRclass]{humdrumR objects} contain many fields of data stored in their underlying

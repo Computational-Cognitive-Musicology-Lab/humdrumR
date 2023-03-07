@@ -35,7 +35,12 @@ metric level are identified.
 Otherwise, the \code{levels} are parsed with \code{\link[=rhythmInterval]{rhythmInterval()}}; fail to parse may lead to an error.
 The parsed levels must be levels of the given \code{\link[=meter]{meter()}}.}
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 }
