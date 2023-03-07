@@ -8,6 +8,8 @@
 \alias{rhythmInterval.NULL}
 \alias{rhythmInterval.numeric}
 \alias{rhythmInterval.character}
+\alias{rhythmInterval.factor}
+\alias{rhythmInterval.token}
 \title{Parsing rhythm information}
 \usage{
 rhythmInterval(x, ...)
@@ -21,6 +23,10 @@ rhythmInterval(x, ...)
 \method{rhythmInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
 \method{rhythmInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+
+\method{rhythmInterval}{factor}(x, Exclusive = NULL, ...)
+
+\method{rhythmInterval}{token}(x, Exclusive = NULL, ...)
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} rhythm (time duration) information:
@@ -55,6 +61,8 @@ To learn about the "deparsing" of specific representations, \link[=rhythmFunctio
 for example, call \code{?recip} to learn about \code{\link[=recip]{recip()}}.
 }
 \section{Dispatch}{
+
+
 The rhythm parser (\code{rhythmInterval()}) is a generic function, meaning it accepts a variety of inputs
 and automatically "dispatches" the appropriate method for the input.
 R's standard \code{S3} system is used to dispatch for either \code{numeric} or \code{character}-string input:
@@ -64,7 +72,9 @@ Given either a \code{character} string or a number, \code{humdrumR} then uses ei
 exclusive interpretation matching to dispatch specific parsing methods.
 }
 
-\section{Symbolic Parsing (\code{character}-string inputs)}{
+\section{Symbolic Parsing}{
+
+
 Since humdrum data is inherently string-based, all our input data ultimately starts as \code{character} strings.
 (This includes character tokens with rhythm information embedded alongside other information; Details below.)
 The rhythm parser (\code{rhythmInterval()}) uses a combination of regular-expressions and exclusive interpretations to decide how to

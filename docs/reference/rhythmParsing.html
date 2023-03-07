@@ -20,7 +20,7 @@ like recip(), dur(), or duration().'><!-- mathjax --><script src="https://cdnjs.
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,13 @@ like <code><a href="recip.html">recip()</a></code>, <code><a href="time.html">du
 <span class="fu">rhythmInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="co"># S3 method for character</span>
-<span class="fu">rhythmInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<span class="fu">rhythmInterval</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, multiDispatch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+
+<span class="co"># S3 method for factor</span>
+<span class="fu">rhythmInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
+
+<span class="co"># S3 method for token</span>
+<span class="fu">rhythmInterval</span><span class="op">(</span><span class="va">x</span>, Exclusive <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -126,7 +132,10 @@ for example, call <code><a href="recip.html">?recip</a></code> to learn about <c
     </div>
     <div class="section level2">
     <h2 id="dispatch">Dispatch<a class="anchor" aria-label="anchor" href="#dispatch"></a></h2>
-    <p>The rhythm parser (<code>rhythmInterval()</code>) is a generic function, meaning it accepts a variety of inputs
+    
+
+
+<p>The rhythm parser (<code>rhythmInterval()</code>) is a generic function, meaning it accepts a variety of inputs
 and automatically "dispatches" the appropriate method for the input.
 R's standard <code>S3</code> system is used to dispatch for either <code>numeric</code> or <code>character</code>-string input:
 Though most rhythmic representations are essentially numbers, several standard
@@ -135,8 +144,11 @@ Given either a <code>character</code> string or a number, <code>humdrumR</code> 
 exclusive interpretation matching to dispatch specific parsing methods.</p>
     </div>
     <div class="section level2">
-    <h2 id="symbolic-parsing-character-string-inputs-">Symbolic Parsing (<code>character</code>-string inputs)<a class="anchor" aria-label="anchor" href="#symbolic-parsing-character-string-inputs-"></a></h2>
-    <p>Since humdrum data is inherently string-based, all our input data ultimately starts as <code>character</code> strings.
+    <h2 id="symbolic-parsing">Symbolic Parsing<a class="anchor" aria-label="anchor" href="#symbolic-parsing"></a></h2>
+    
+
+
+<p>Since humdrum data is inherently string-based, all our input data ultimately starts as <code>character</code> strings.
 (This includes character tokens with rhythm information embedded alongside other information; Details below.)
 The rhythm parser (<code>rhythmInterval()</code>) uses a combination of regular-expressions and exclusive interpretations to decide how to
 parse an input string.

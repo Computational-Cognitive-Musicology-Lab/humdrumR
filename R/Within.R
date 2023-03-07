@@ -930,7 +930,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   
   
   doQuoTab$Quo <- Map(\(quo, used) {
-    lists <- vapply(humtab[1 , used, with = FALSE], class, FUN.VALUE = character(1)) == 'list' 
+    lists <- vapply(humtab[1 , used, with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) == 'list' 
     if (any(lists)) mapifyQuo(quo, used, depth = 1L) else quo
   }, doQuoTab$Quo, usedInExprs)
   
@@ -1605,7 +1605,9 @@ parseResult <- function(results) {
   firstResult <- results[[lastResult]][[1]][[1]]
   
   keyLengths <- lengths(unlist(results[['_rowKey_']], recursive = FALSE))
-  resultLengths <- if (length(firstResult) && !is.factor(firstResult) && is.object(firstResult)) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
+  resultLengths <- if (length(firstResult) && 
+                       (is.table(firstResult) || 
+                       (is.object(firstResult) && !is.atomic(firstResult)))) lengths(results[[lastResult]]) else sapply(results[[lastResult]], lengths) 
   
   
   
@@ -1628,19 +1630,23 @@ parseResult <- function(results) {
                       first <- result[[1]][[1]]
                       
                       humattr <- humdrumRattr(first)
-                      object <- length(first) && !is.factor(first) && is.object(first)
+                      class <- class(first)
+                      object <- length(first) && (is.table(first) || (is.object(first) && !is.atomic(first)))
                       
                       # if (is.table(result) && length(result) == 0L) result <- integer(0)
                       result <- unlist(result, recursive = FALSE)
                       
                       if (!object) {
+                        factors <- sum(sapply(result, is.factor))
+                        if (factors > 0L && factors < length(result)) result <- lapply(result, as.character)
                         result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
                         result <- unlist(result, recursive = FALSE)
                       }
                       
                       humdrumRattr(result) <- humattr
                       attr(result, 'visible') <- NULL
-                      result
+                      if (!is.null(result)) class(result) <- if (object) 'list' else class
+                      result 
                     })
   
 

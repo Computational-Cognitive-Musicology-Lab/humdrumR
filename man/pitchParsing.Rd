@@ -8,6 +8,8 @@
 \alias{tonalInterval.NULL}
 \alias{tonalInterval.numeric}
 \alias{tonalInterval.character}
+\alias{tonalInterval.factor}
+\alias{tonalInterval.token}
 \title{Parsing pitch information}
 \usage{
 tonalInterval(...)
@@ -21,6 +23,10 @@ tonalInterval(...)
 \method{tonalInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
 \method{tonalInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+
+\method{tonalInterval}{factor}(x, Exclusive = NULL, ...)
+
+\method{tonalInterval}{token}(x, Exclusive = NULL, ...)
 }
 \arguments{
 \item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}

@@ -1139,7 +1139,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
   checks(offBeats, xTF)
   checks(value, xTF)
   checks(remainderSubdivides, xTF)
-  checks(deparser, xclass('rhythmFunction'))
+  checks(deparser, xnull | xclass('rhythmFunction'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)

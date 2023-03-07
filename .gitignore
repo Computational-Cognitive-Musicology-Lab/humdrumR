@@ -3,6 +3,8 @@ tests/testthat/Rplots.pdf
 *tmp
 *.tmp.*
 *docx
-.Rproj.user
+.R*
+Notes.txt
+humdrumR.Rproj
 .Rhistory
 !.gitignore

@@ -95,7 +95,7 @@ test_that('Filtering vignette examples work', {
   
   # [[numeric]]
   
-  expect_equal(with(chorales[[1:50,]], length(Token)), 772)
+  expect_equal(with(chorales[[1:50,]], length(Token)), 776)
   expect_equal(with(chorales[[, 2]], length(Token)), 622)
   
   expect_length(chorales[[150:200, ]], 3)
@@ -112,7 +112,7 @@ test_that('Filtering vignette examples work', {
   # general subsetting
 
   expect_length(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0) ), length(chorales))
-  expect_equal(with(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0)), length(Token)), 1212)
+  expect_equal(with(subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0)), length(Token)), 1213)
   
   
   expect_length(subset(chorales, Token %~% '-'), 5)

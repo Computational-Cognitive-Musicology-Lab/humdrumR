@@ -129,7 +129,7 @@ Humdrum$_{\mathbb{R}}$ is not yet available on the standard R package repository
 To install the latest version (master branch) of humdrum$_{\mathbb{R}}$, you'll first need to install the R package [devtools](https://www.rdocumentation.org/packages/devtools/versions/2.2.1)---`devtools` is used for creating and maintaining R packages.
 Luckily, `devtools` is on CRAN, so all you have to do is open an R session on your machine and type:
 
-```{r}
+```
 
 install.packages('devtools')
 
@@ -138,7 +138,7 @@ install.packages('devtools')
 Once you have successfully installed `devtools`, you are now ready to use it to install humdrum$_{\mathbb{R}}$ straight from github.
 In an R session, type:
 
-```{r}
+```
 
 devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR", build_vignettes = TRUE)
 
@@ -163,7 +163,7 @@ Once you've done this, you can install the source on your computer using `devtoo
 Open an R session and use `setwd` to move your working directory inside the repository you just downloaded (i.e., cloned).
 Once there, type 
 
-```{r}
+```
 
 devtools::install()
 
@@ -177,7 +177,7 @@ devtools::install()
 
 Once you've completed the installation of humdrum$_{\mathbb{R}}$ you can used it by simply calling:
 
-```{r}
+```
 
 library(humdrumR)
 
@@ -212,7 +212,7 @@ section.
 Once humdrum$_{\mathbb{R}}$ is installed, you can also access documentation directly in R sessions.
 On the R command line, use the `?` operator with the name of a function or topic to see the documentation:
 
-```{r}
+```
 
 library(humdrumR)
 

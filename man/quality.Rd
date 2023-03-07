@@ -4,7 +4,14 @@
 \alias{quality}
 \title{Extract quality from pitch}
 \usage{
-quality(x, ..., Key = NULL, parseArgs = list(), inPlace = FALSE)
+quality(
+  x,
+  ...,
+  Key = NULL,
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
@@ -16,6 +23,12 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 the parser, deparser, and transposer.}
 
 \item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+
+\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+
+Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+
+Must be singleton \code{logical} value: an on/off switch.}
 
 \item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.

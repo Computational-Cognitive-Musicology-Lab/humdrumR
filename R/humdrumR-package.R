@@ -37,6 +37,7 @@
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
+#' @importFrom bit64 as.integer64 is.integer64
 #' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank
 #' @importFrom lubridate period is.period
 NULL
@@ -142,3 +143,40 @@ NULL
 #' 
 #' @name partialMatching
 NULL
+
+
+# Default settings ----
+
+oldoptions <- options()
+# options(conflicts.policy = 'depends.ok')
+
+
+.onLoad <- function(libname, pkgname) {
+  oldoptions <<- options()
+  options(prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', scipen = 4, digits = 7)
+}
+
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage('Welcome to humdrumℝ!\n', '\tYou are using humdrumℝ version ', 
+      as.character(packageVersion('humdrumR')))
+}
+
+.onUnload <- function(libpath) {
+  cat('Thanks for using humdrumℝ!\n')
+  do.call('options', oldoptions)
+}
+
+#' @export
+humdrumR_version <- as.character(packageVersion('humdrumR'))
+
+## Bootswatch flatly in plots ----
+
+flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50',
+            palette.colors(9))
+setHook('plot.new', function() {
+  par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5],
+      col.lab = flatly[5])
+  })
+
+
+

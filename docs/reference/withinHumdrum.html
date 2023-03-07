@@ -12,7 +12,7 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -505,7 +505,7 @@ In <code>with</code>/<code>within.humdrumR</code> you can use some
 <a href="https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic" class="external-link">syntactic sugar</a>
 to do just this.
 We can index any field in our call with a <code>splat</code> argument, which must be a <code>Field %in% x</code>.
-For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/pkg/bit64/man/bit64S3.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>In this call, the <code>Token</code> field will be divided into two groups, one where <code>Spine == 1</code> and the other where
 <code>Spine == 2</code>; the first group (<code>Spine == 1</code>) will be used as the first argument to <code>list</code>, and the second group

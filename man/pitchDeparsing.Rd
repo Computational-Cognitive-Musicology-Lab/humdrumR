@@ -510,6 +510,22 @@ For example, we could use a parse command like this: \code{kern("E flat 5", pars
 }
 }
 
+\section{Pitch-Gamut Levels}{
+
+
+The \code{\link[=table]{table()}} will automatically generate factor levels
+for pitch data using the \code{\link[=gamut]{gamut()}} function.
+This is makes sure tabulated data sorted in a logical order, and includes
+missing pitches.
+The \code{simple}/\code{complex} and  \code{generic}/\code{specific} arguments are automatically passed to \code{\link[=gamut]{gamut()}}; additional
+arguments can be passed to gamut using \code{gamutArgs = list(...)}, or with the syntactic sugar \code{gamut(...)}.
+(Read the \code{\link[=gamut]{gamut()}} docs for an explanation of gamut generation.)
+This feature be used to control table layout of pitch data, as well as to assure
+consistent tables when grouping data.
+
+When \code{inPlace = TRUE} no special tabulation will occur.
+}
+
 \seealso{
 All \code{humdrumR} \link[=pitchFunctions]{pitch functions} make use of the deparsing functionality.
 }

@@ -31,7 +31,7 @@ The full list of rhythm functions is:
 \item \emph{Symbolic rhythm representations}
 \itemize{
 \item \code{\link[=recip]{recip()}} (reciprocal note values)
-\item \code{\link[=noteValue]{noteValue()}} (traditional note-value symbols)
+\item \code{\link[=notehead]{notehead()}} (traditional note-value symbols)
 }
 \item \emph{Numeric rhythm representations}
 \itemize{
@@ -74,7 +74,7 @@ Underneath the hood, the full processing of each function looks like this:
 To read the details of the parsing step, read \link[=rhythmParsing]{this}.
 To read the details of the "deparsing" step, read \link[=rhythmDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
-or type \code{?func} in the R command line: for example, \code{?noteValue}.
+or type \code{?func} in the R command line: for example, \code{?notehead}.
 \subsection{Grace notes}{
 
 \verb{**recip} and \verb{**kern} data sometime include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special

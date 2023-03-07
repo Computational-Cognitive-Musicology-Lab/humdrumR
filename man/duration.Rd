@@ -34,7 +34,8 @@ read about the \link[=rhythmFunctions]{family of rhythm functions},
 or how rhythms are \link[=rhythmParsing]{parsed} and \link[=rhythmDeparsing]{deparsed}.
 
 Other {rhythm functions}: 
-\code{\link{noteValue}()},
+\code{\link{grid}()},
+\code{\link{notehead}()},
 \code{\link{recip}()}
 }
 \concept{{rhythm functions}}

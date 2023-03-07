@@ -35,7 +35,7 @@ input <- c('4.c', '8d', '4e', '2.g')
 
 duration(input)
 recip(input)
-noteValue(input)
+notehead(input)
 quarters(input)
 
 ```
@@ -50,7 +50,7 @@ input <- c('4.c', '8d', '4e', '2.g')
 
 duration(input, inPlace = TRUE)
 recip(input, inPlace = TRUE)
-noteValue(input, inPlace = TRUE)
+notehead(input, inPlace = TRUE)
 quarters(input, inPlace = TRUE)
 
 ```
